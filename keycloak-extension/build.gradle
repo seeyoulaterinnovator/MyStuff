@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+    id 'war'
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 11
+
+dependencies {
+
+    implementation (
+            project(':sso-business-logic'),
+            project(':tbapi-remote-service'),
+    )
+
+    providedCompile "org.keycloak:keycloak-core:$keycloakVersion"
+    providedCompile "org.keycloak:keycloak-services:$keycloakVersion"
+    providedCompile "org.keycloak:keycloak-server-spi:$keycloakVersion"
+    providedCompile "org.keycloak:keycloak-server-spi-private:$keycloakVersion"
+    providedCompile "org.keycloak:keycloak-model-jpa:$keycloakVersion"
+
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    testCompile group: 'org.assertj', name: 'assertj-core', version: '3.12.2'
+    testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '2.28.2'
+
+    compileOnly "org.projectlombok:lombok:$lombokVersion"
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+}
+
+test {
+    // Use junit platform for unit tests
+    useJUnitPlatform()
+    reports.junitXml.destination = new File(rootProject.projectDir, "build/test-results/" + project.name)
+}
