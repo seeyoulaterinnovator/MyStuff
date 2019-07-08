@@ -49,7 +49,7 @@ back:jar:
   except:
     - master
   script:
-    - ./gradlew :war -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
+    - ./gradlew :keycloak-extension:war -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
   cache:
     key: "$CI_COMMIT_SHA"
     paths:

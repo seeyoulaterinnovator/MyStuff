@@ -37,6 +37,11 @@ repositories {
 }
 
 dependencies {
+    
+    implementation project(':sso-business-logic')
+    implementation project(':keycloak-extension')
+    implementation project(':tbapi-remote-service')
+    
     implementation "org.keycloak:keycloak-core:$keycloakVersion"
     implementation "org.keycloak:keycloak-services:$keycloakVersion"
     implementation "org.keycloak:keycloak-server-spi:$keycloakVersion"
@@ -56,6 +61,9 @@ dependencies {
 test {
     // Use junit platform for unit tests
     useJUnitPlatform()
+    dependsOn(':sso-business-logic:test')
+    dependsOn(':keycloak-extension:test')
+    dependsOn(':tbapi-remote-service:test')
 }
 
 
