@@ -1,24 +1,26 @@
 plugins {
-    id 'java'
-    id 'idea'
     id 'com.bmuschko.docker-remote-api' version '4.10.0'
 }
 
 import com.bmuschko.gradle.docker.tasks.container.*
 import com.bmuschko.gradle.docker.tasks.image.*
 
-apply plugin: 'idea'
-
-idea {
-    module {
-        downloadJavadoc = true
-        downloadSources = true
-    }
-}
+version = '0.0.1'
 
 allprojects {
-    group = 'ru.alamics.sso'
-    version = '0.0.1'
+    apply plugin: 'java'
+    apply plugin: 'idea'
+
+    idea {
+        module {
+            downloadJavadoc = true
+            downloadSources = true
+        }
+    }
+
+    repositories {
+        jcenter()
+    }
 
     ext {
         keycloakVersion = '6.0.1'
@@ -28,44 +30,44 @@ allprojects {
 }
 
 subprojects {
+
+    version = rootProject.version + '-' + (System.getenv('CI_PIPELINE_ID') != null ? System.getenv('CI_PIPELINE_ID') : 'SNAPSHOT')
+    group = 'ru.alamics.sso'
+    sourceCompatibility = '11'
+
     buildDir = new File(rootProject.projectDir, "build/" + project.name)
-    
+
+    dependencies {
+        annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+        compileOnly "org.projectlombok:lombok:$lombokVersion"
+
+        testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+        testImplementation 'org.assertj:assertj-core:3.12.2'
+        testImplementation 'org.mockito:mockito-junit-jupiter:2.28.2'
+    }
+
+    test {
+        useJUnitPlatform()
+        reports.junitXml.destination = new File(rootProject.projectDir, "build/test-results/" + project.name)
+        reports.html.destination = new File(rootProject.projectDir, "build/test-results/" + project.name + "/reports")
+    }
+
 }
 
-repositories {
-    jcenter()
+task bundle {
+    dependsOn(':keycloak-extension:bundle')
 }
 
 dependencies {
-    
-    implementation project(':sso-business-logic')
-    implementation project(':keycloak-extension')
-    implementation project(':tbapi-remote-service')
-    
-    implementation "org.keycloak:keycloak-core:$keycloakVersion"
-    implementation "org.keycloak:keycloak-services:$keycloakVersion"
-    implementation "org.keycloak:keycloak-server-spi:$keycloakVersion"
-    implementation "org.keycloak:keycloak-server-spi-private:$keycloakVersion"
-    implementation "org.keycloak:keycloak-model-jpa:$keycloakVersion"
-
-
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
-    testCompile group: 'org.assertj', name: 'assertj-core', version: '3.12.2'
-    testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '2.28.2'
-
-    compileOnly "org.projectlombok:lombok:$lombokVersion"
-    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation (
+            project(':keycloak-extension'),
+    )
 }
 
 test {
-    // Use junit platform for unit tests
-    useJUnitPlatform()
-    dependsOn(':sso-business-logic:test')
     dependsOn(':keycloak-extension:test')
-    dependsOn(':tbapi-remote-service:test')
 }
-
 
 //////////// DOCKER
 // POSTGRES

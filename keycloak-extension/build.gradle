@@ -1,13 +1,6 @@
 plugins {
-    id 'java'
     id 'war'
 }
-
-repositories {
-    mavenCentral()
-}
-
-sourceCompatibility = 11
 
 dependencies {
 
@@ -22,18 +15,24 @@ dependencies {
     providedCompile "org.keycloak:keycloak-server-spi-private:$keycloakVersion"
     providedCompile "org.keycloak:keycloak-model-jpa:$keycloakVersion"
 
-
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
-    testCompile group: 'org.assertj', name: 'assertj-core', version: '3.12.2'
-    testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '2.28.2'
-
-    compileOnly "org.projectlombok:lombok:$lombokVersion"
-    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
 }
 
-test {
-    // Use junit platform for unit tests
-    useJUnitPlatform()
-    reports.junitXml.destination = new File(rootProject.projectDir, "build/test-results/" + project.name)
+task bundle {
+    dependsOn war
+    
+    def fname = war.getArchiveFile().orNull
+    inputs.file(file(fname))
+    outputs.dir {
+        project.file("$rootProject.buildDir/bundle")
+    }
+    
+    doLast {
+        copy {
+            from file(fname)
+            into("$rootProject.buildDir/bundle")
+            rename { String fileName ->
+                fileName = "domru-sso-${project.version}.war"
+            }
+        }
+    }
 }
