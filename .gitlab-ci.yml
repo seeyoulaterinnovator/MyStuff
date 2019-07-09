@@ -23,13 +23,13 @@ back:compile:
       - .gradle/
       - build/
 
-back:test:
+back:test:adapter:tbapi-remote-service:
   stage: test
   when: on_success
   except:
     - master
   script:
-    - ./gradlew :check -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
+    - ./gradlew :tbapi-remote-service:check -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
   cache:
     key: "$CI_COMMIT_SHA"
     paths:
@@ -39,9 +39,53 @@ back:test:
   artifacts:
     when: always
     paths:
-      - build/test-results/**/reports
+      - build/test-results/tbapi-remote-service/reports
+    name: "tbapi-remote-service-test-reports-$CI_PIPELINE_ID"
     reports:
-      junit: build/test-results/**/TEST-*.xml
+      junit: build/test-results/tbapi-remote-service/TEST-*.xml
+
+back:test:sso-business-logic:
+  stage: test
+  when: on_success
+  except:
+    - master
+  script:
+    - ./gradlew :sso-business-logic:check -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
+  cache:
+    key: "$CI_COMMIT_SHA"
+    paths:
+      - .gradle/
+      - build/
+    policy: pull
+  artifacts:
+    when: always
+    paths:
+      - build/test-results/sso-business-logic/reports
+    name: "sso-business-logic-test-reports-$CI_PIPELINE_ID"
+    reports:
+      junit: build/test-results/sso-business-logic/TEST-*.xml
+
+
+back:test:keycloak-extension:
+  stage: test
+  when: on_success
+  except:
+    - master
+  script:
+    - ./gradlew :keycloak-extension:check -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
+  cache:
+    key: "$CI_COMMIT_SHA"
+    paths:
+      - .gradle/
+      - build/
+    policy: pull
+  artifacts:
+    when: always
+    paths:
+      - build/test-results/keycloak-extension/reports
+    name: "keycloak-extension-test-reports-$CI_PIPELINE_ID"
+    reports:
+      junit: build/test-results/keycloak-extension/TEST-*.xml
 
 back:war:
   stage: bundle
@@ -80,7 +124,7 @@ back:war:
 #    key: "$CI_COMMIT_SHA"
 #    paths:
 #      - .gradle/
-#      - backend/build/
+#      - build/
 #    policy: pull
 #
 #back:dpl:test:

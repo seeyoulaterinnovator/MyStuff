@@ -17,11 +17,6 @@ dependencies {
 
 }
 
-test {
-    dependsOn(':sso-business-logic:test')
-    dependsOn(':tbapi-remote-service:test')
-}
-
 task bundle {
     dependsOn war
     
