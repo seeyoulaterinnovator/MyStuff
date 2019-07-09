@@ -5,6 +5,8 @@ plugins {
 import com.bmuschko.gradle.docker.tasks.container.*
 import com.bmuschko.gradle.docker.tasks.image.*
 
+version = '0.0.1'
+
 allprojects {
     apply plugin: 'java'
     apply plugin: 'idea'
@@ -29,8 +31,8 @@ allprojects {
 
 subprojects {
 
+    version = rootProject.version + '-' + (System.getenv('CI_PIPELINE_ID') != null ? System.getenv('CI_PIPELINE_ID') : 'SNAPSHOT')
     group = 'ru.alamics.sso'
-    version = '0.0.1-SNAPSHOT'
     sourceCompatibility = '11'
 
     buildDir = new File(rootProject.projectDir, "build/" + project.name)
