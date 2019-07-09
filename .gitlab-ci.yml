@@ -39,17 +39,17 @@ back:test:
   artifacts:
     when: always
     paths:
-      - build/reports/tests/test
+      - build/test-results/**/reports
     reports:
       junit: build/test-results/**/TEST-*.xml
 
-back:jar:
+back:war:
   stage: bundle
   when: on_success
   except:
     - master
   script:
-    - ./gradlew :keycloak-extension:war -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
+    - ./gradlew :bundle -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
   cache:
     key: "$CI_COMMIT_SHA"
     paths:
@@ -58,9 +58,8 @@ back:jar:
     policy: pull
   artifacts:
     paths:
-      - build/**/libs/*.jar
-      - build/**/libs/*.war
-    name: "sso-backend"
+      - build/bundle/*.war
+    name: "domru-sso"
     expire_in: 1 week
 
 #back:docker:
