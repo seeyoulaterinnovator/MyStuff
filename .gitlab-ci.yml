@@ -59,7 +59,7 @@ back:war:
   artifacts:
     paths:
       - build/bundle/*.war
-    name: "domru-sso"
+    name: "domru-sso-$CI_PIPELINE_ID"
     expire_in: 1 week
 
 #back:docker:
