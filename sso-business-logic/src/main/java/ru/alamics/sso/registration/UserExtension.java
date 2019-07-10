@@ -6,10 +6,13 @@ import java.util.Map;
 
 public class UserExtension {
 
-    public void extendUser(UserModel user, Map<String, String> attributes) {
-        for (Map.Entry<String, String> attributeValue :
+    public void extendUser(UserModel user, Map<String, Object> attributes) {
+        for (Map.Entry<String, Object> attributeValue :
                 attributes.entrySet()) {
-            user.setSingleAttribute(attributeValue.getKey(), attributeValue.getValue());
+            Object value = attributeValue.getValue();
+            if (value instanceof String) {
+                user.setSingleAttribute(attributeValue.getKey(), (String) value);
+            }
         }
     }
 

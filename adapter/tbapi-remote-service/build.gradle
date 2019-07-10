@@ -2,6 +2,10 @@ dependencies {
     implementation (
             project(':sso-business-logic'),
     )
-    
+
+    implementation 'org.jboss.resteasy:resteasy-jaxrs:3.6.3.Final'
+    implementation 'org.jboss.resteasy:resteasy-client:3.6.3.Final'
+    implementation 'org.jboss.resteasy:resteasy-jackson2-provider:3.6.3.Final'
+
     testImplementation 'com.github.tomakehurst:wiremock-jre8:2.23.2'
 }

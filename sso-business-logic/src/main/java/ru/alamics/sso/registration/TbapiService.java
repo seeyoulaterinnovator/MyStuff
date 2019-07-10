@@ -14,7 +14,7 @@ public class TbapiService {
         this.remoteService = remoteService;
     }
 
-    public Map<String, String> registerUser(UserModel user) {
+    public Map<String, Object> registerUser(UserModel user, String host, int port, String path, boolean secure) {
         var request = TbapiRequest.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -22,7 +22,7 @@ public class TbapiService {
                 .lastName(user.getLastName())
                 .build();
 
-        Map<String, String> result = remoteService.createLead(request);
+        Map<String, Object> result = remoteService.createLead(request, host, port, path, secure);
 
         return result;
     }
