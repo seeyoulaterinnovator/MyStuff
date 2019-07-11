@@ -6,7 +6,7 @@ variables:
 stages:
   - compile
   - test
-  - bundle
+  - build
   - deploy
 
 back:compile:
@@ -86,37 +86,38 @@ back:test:keycloak-extension:
       junit: build/test-results/keycloak-extension/TEST-*.xml
 
 back:war:
-  stage: bundle
+  stage: build
   when: on_success
   except:
     - master
   script:
-    - ./gradlew :bundle -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
+    - ./gradlew :keycloak-extension:war -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
   cache:
     key: "$CI_COMMIT_SHA"
     paths:
       - .gradle/
       - build/
-    policy: pull
   artifacts:
     paths:
-      - build/bundle/*.war
-    name: "domru-sso-$CI_PIPELINE_ID"
+      - build/**/libs/*.war
+      - build/**/libs/*.jar
+    name: "domru-sso-compile-$CI_PIPELINE_ID"
     expire_in: 1 week
 
-#back:dpl:develop:
-#  stage: deploy
-#  when: on_success
-#  environment:
-#    name: develop
-#  only:
-#    - develop
-#  cache:
-#    key: "$CI_COMMIT_SHA"
-#    paths:
-#      - .gradle/
-#      - build/
-#    policy: pull
+back:dpl:develop:
+  stage: deploy
+  when: on_success
+  environment:
+    name: develop
+  only:
+    - develop
+  cache:
+    key: "$CI_COMMIT_SHA"
+    paths:
+      - .gradle/
+      - build/
+  script:
+    - ./gradlew :deploy -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
 
 #back:dpl:stage:
 #  stage: deploy
