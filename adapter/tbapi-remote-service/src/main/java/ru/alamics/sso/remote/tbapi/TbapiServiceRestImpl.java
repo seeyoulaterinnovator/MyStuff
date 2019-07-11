@@ -35,7 +35,13 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
 
         Entity<TbapiRequest> entity = Entity.json(request);
 
-        Response post = target.request().header("Accept", MediaType.APPLICATION_JSON).post(entity);
+        Response response = target
+                .request()
+                .header("Accept", MediaType.APPLICATION_JSON)
+                .post(entity);
 
-        return post.readEntity(new GenericType<>(mapExample.getClass()));
+        Map<String, Object> responseMap = response.readEntity(new GenericType<>(mapExample.getClass()));
+
+        response.close();
+        return responseMap;
     }}
