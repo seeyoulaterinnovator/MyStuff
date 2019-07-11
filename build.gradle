@@ -86,6 +86,30 @@ task postgresCreate(type: DockerCreateContainer) {
     withEnvVar('POSTGRES_DB', 'keycloak')
 }
 
+task deploy {
+
+    dependsOn(':keycloak-extension:war')
+
+    def fname =  tasks.getByPath(':keycloak-extension:war').getArchiveFile().orNull
+    inputs.file(file(fname))
+
+    def deployDir = new File(System.getenv('KEYCLOAK_DEPLOY_DIR') != null? System.getenv('KEYCLOAK_DEPLOY_DIR') : "$rootProject.buildDir/deploy")
+
+    outputs.dir {
+        deployDir
+    }
+
+    doLast {
+        copy {
+            from file(fname)
+            into(deployDir)
+            rename { String fileName ->
+                fileName = "domru-sso.war"
+            }
+        }
+    }
+}
+
 task postgresStart(type: DockerStartContainer) {
     dependsOn postgresCreate
     targetContainerId postgresCreate.getContainerId()
