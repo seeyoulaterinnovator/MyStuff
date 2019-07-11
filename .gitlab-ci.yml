@@ -7,12 +7,10 @@ stages:
   - compile
   - test
   - bundle
-  - build
   - deploy
 
 back:compile:
   stage: compile
-#  when: manual
   except:
     - master
   script:
@@ -106,41 +104,20 @@ back:war:
     name: "domru-sso-$CI_PIPELINE_ID"
     expire_in: 1 week
 
-#back:docker:
-#  stage: build
+#back:dpl:develop:
+#  stage: deploy
 #  when: on_success
-#  script:
-#    - mkdir -p .ci_status
-#    - $BASE_DIR/scripts/build.sh
-#    - touch .ci_status/build_backend
-#  artifacts:
-#    paths:
-#      - .ci_status/
+#  environment:
+#    name: develop
 #  only:
 #    - develop
-#    - /release\/.*/
-#    - tags
 #  cache:
 #    key: "$CI_COMMIT_SHA"
 #    paths:
 #      - .gradle/
 #      - build/
 #    policy: pull
-#
-#back:dpl:test:
-#  stage: deploy
-#  when: on_success
-#  environment:
-#    name: test
-#  only:
-#    - develop
-#  script:
-#    - if [ ! -f .ci_status/build_backend ]; then exit 1; fi
-#    - $BASE_DIR/scripts/deploy.sh
-#  artifacts:
-#    paths:
-#      - .ci_status/
-#
+
 #back:dpl:stage:
 #  stage: deploy
 #  when: on_success
@@ -148,12 +125,12 @@ back:war:
 #    name: prerelease
 #  only:
 #    - /release\/.*/
-#  script:
-#    - if [ ! -f .ci_status/build_backend ]; then exit 1; fi
-#    - $BASE_DIR/scripts/deploy.sh
-#  artifacts:
+#  cache:
+#    key: "$CI_COMMIT_SHA"
 #    paths:
-#      - .ci_status/
+#      - .gradle/
+#      - build/
+#    policy: pull
 
 #back:dpl:prod:
 #  stage: deploy
@@ -162,9 +139,9 @@ back:war:
 #    name: production
 #  only:
 #    - tags
-#  script:
-#    - if [ ! -f .ci_status/build_backend ]; then exit 1; fi
-#    - $BASE_DIR/scripts/deploy.sh
-#  artifacts:
+#  cache:
+#    key: "$CI_COMMIT_SHA"
 #    paths:
-#      - .ci_status/
+#      - .gradle/
+#      - build/
+#    policy: pull
