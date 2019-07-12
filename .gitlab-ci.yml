@@ -121,7 +121,7 @@ createwar:
   script:
     - mkdir -p .ci_status
     - ./gradlew :deploy -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
-    - touch .ci_status/build_container
+    - touch .ci_status/war_built
   artifacts:
     paths:
       - .ci_status/
