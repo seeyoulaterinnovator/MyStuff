@@ -122,10 +122,7 @@
         <subsystem xmlns="urn:jboss:domain:core-management:1.0"/>
         <subsystem xmlns="urn:jboss:domain:datasources:5.0">
             <datasources>
-                <datasource jndi-name="java:jboss/datasources/KeycloakDS"
-                            pool-name="KeycloakDS"
-                            enabled="true"
-                            use-java-context="true">
+                <datasource jndi-name="java:jboss/datasources/KeycloakDS" pool-name="KeycloakDS" enabled="true" use-java-context="true">
                     <connection-url>jdbc:mariadb://mariadb/sso</connection-url>
                     <driver>mariadb</driver>
                     <security>
@@ -133,9 +130,11 @@
                         <password>Okcyetlihoaphho</password>
                     </security>
                 </datasource>
-                <driver name="mariadb" module="org.mariadb">
-                    <xa-datasource-class>org.mariadb.jdbc.Driver</xa-datasource-class>
-                </driver>
+                <drivers>
+                    <driver name="mariadb" module="org.mariadb">
+                        <xa-datasource-class>org.mariadb.jdbc.Driver</xa-datasource-class>
+                    </driver>
+                </drivers>
             </datasources>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:deployment-scanner:2.0">
