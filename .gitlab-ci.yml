@@ -119,15 +119,18 @@ createwar:
       - .gradle/
       - build/
   script:
+    - mkdir -p .ci_status
     - ./gradlew :deploy -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
+    - touch .ci_status/build_container
+  artifacts:
+    paths:
+      - .ci_status/
 
 container:
   stage: docker
   when: manual
   script:
-    - mkdir -p .ci_status
     - $BASE_DIR/scripts/build.sh
-    - touch .ci_status/build_container
   artifacts:
     paths:
       - .ci_status/
