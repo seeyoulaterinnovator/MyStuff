@@ -21,10 +21,6 @@ RUN yum update -y && yum install -y epel-release git && yum install -y jq openss
 ADD tools /opt/jboss/tools
 RUN /opt/jboss/tools/build-keycloak.sh
 
-RUN mkdir -p /opt/jboss/keycloak/modules/system/layers/keycloak/org/mariadb/jdbc/main
-ADD https://repo1.maven.org/maven2/org/mariadb/jdbc/mariadb-java-client/2.4.2/mariadb-java-client-2.4.2.jar /opt/jboss/keycloak/modules/system/layers/keycloak/org/mariadb/jdbc/main
-COPY mariadb-module.xml /opt/jboss/keycloak/modules/system/layers/keycloak/org/mariadb/jdbc/main/module.xml
-
 COPY standalone.xml /opt/jboss/keycloak/standalone/configuration
 COPY domru-sso.war /opt/jboss/keycloak/standalone/deployments
 

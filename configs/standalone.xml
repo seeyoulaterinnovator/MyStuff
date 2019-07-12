@@ -129,7 +129,7 @@
                         <max-pool-size>20</max-pool-size>
                     </pool>
                     <security>
-                        <user-name>domru-sso</user-name>
+                        <user-name>sso</user-name>
                         <password>Okcyetlihoaphho</password>
                     </security>
                 </datasource>
