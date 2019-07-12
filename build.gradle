@@ -27,6 +27,12 @@ allprojects {
         lombokVersion = '1.18.8'
         junitVersion = '5.5.0'
     }
+
+    compileJava.options.encoding = 'UTF-8'
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
 }
 
 subprojects {
