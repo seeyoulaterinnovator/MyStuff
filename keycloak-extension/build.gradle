@@ -16,23 +16,3 @@ dependencies {
     providedCompile "org.keycloak:keycloak-model-jpa:$keycloakVersion"
 
 }
-
-task bundle {
-    dependsOn war
-    
-    def fname = war.getArchiveFile().orNull
-    inputs.file(file(fname))
-    outputs.dir {
-        project.file("$rootProject.buildDir/bundle")
-    }
-    
-    doLast {
-        copy {
-            from file(fname)
-            into("$rootProject.buildDir/bundle")
-            rename { String fileName ->
-                fileName = "domru-sso-${project.version}.war"
-            }
-        }
-    }
-}
