@@ -125,13 +125,16 @@
                 <datasource jndi-name="java:jboss/datasources/KeycloakDS" pool-name="KeycloakDS" enabled="true" use-java-context="true">
                     <connection-url>jdbc:mariadb://mariadb/sso</connection-url>
                     <driver>mariadb</driver>
+                    <pool>
+                        <max-pool-size>20</max-pool-size>
+                    </pool>
                     <security>
                         <user-name>sso</user-name>
                         <password>Okcyetlihoaphho</password>
                     </security>
                 </datasource>
                 <drivers>
-                    <driver name="mariadb" module="org.mariadb">
+                    <driver name="mariadb" module="org.mariadb.jdbc">
                         <xa-datasource-class>org.mariadb.jdbc.Driver</xa-datasource-class>
                     </driver>
                 </drivers>
