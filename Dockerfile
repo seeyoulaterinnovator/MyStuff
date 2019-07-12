@@ -22,7 +22,8 @@ ADD tools /opt/jboss/tools
 RUN /opt/jboss/tools/build-keycloak.sh
 
 COPY standalone.xml /opt/jboss/keycloak/standalone/configuration
-COPY domru-sso.war /opt/jboss/keycloak/standalone/deployments
+COPY standalone/deployments/ /opt/jboss/keycloak/standalone/deployments
+COPY themes/ /opt/jboss/keycloak/themes
 
 USER 1000
 
