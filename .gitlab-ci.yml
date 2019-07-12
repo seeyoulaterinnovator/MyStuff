@@ -7,6 +7,7 @@ stages:
   - compile
   - test
   - build
+  - createwar
   - docker
   - deploy
 
@@ -105,8 +106,8 @@ back:war:
     name: "domru-sso-compile-$CI_PIPELINE_ID"
     expire_in: 1 week
 
-back:dpl:develop:
-  stage: deploy
+createwar:
+  stage: createwar
   when: on_success
   environment:
     name: develop
