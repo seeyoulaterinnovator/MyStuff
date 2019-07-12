@@ -1,5 +1,6 @@
 package ru.alamics.sso.remote.tbapi;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
@@ -14,6 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 public class TbapiServiceRestImpl implements TbapiRemoteService {
 
     private static final Map<String, Object> mapExample = Collections.unmodifiableMap(new HashMap<>());
@@ -35,13 +37,15 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
 
         Entity<TbapiRequest> entity = Entity.json(request);
 
-        Response response = target
-                .request()
-                .header("Accept", MediaType.APPLICATION_JSON)
-                .post(entity);
+        Map<String, Object> responseMap;
+        try (Response response = target.request().header("Accept", MediaType.APPLICATION_JSON).post(entity)) {
 
-        Map<String, Object> responseMap = response.readEntity(new GenericType<>(mapExample.getClass()));
+            responseMap = response.readEntity(new GenericType<>(mapExample.getClass()));
 
-        response.close();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            responseMap = Map.of();
+        }
+
         return responseMap;
     }}

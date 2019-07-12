@@ -8,8 +8,10 @@ import org.keycloak.authentication.ValidationContext;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.*;
 import org.keycloak.provider.ProviderConfigProperty;
+import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.registration.TbapiService;
 import ru.alamics.sso.registration.UserExtension;
+import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
 import java.util.List;
@@ -53,10 +55,12 @@ public class UserModelExtender implements FormAction, FormActionFactory {
     };
     private final TbapiService tbapiService;
     private final UserExtension userExtension;
+    private final UserModelUserMapper mapper;
 
     public UserModelExtender() {
         tbapiService = new TbapiService(new TbapiServiceRestImpl());
         userExtension = new UserExtension();
+        mapper = new UserModelUserMapper();
     }
 
     @Override
@@ -80,8 +84,12 @@ public class UserModelExtender implements FormAction, FormActionFactory {
         String path = config.get(PATH_PROPERTY_NAME);
         boolean secure = Boolean.parseBoolean(config.get(SCHEMA_PROPERTY_NAME));
 
-        Map<String, Object> attributes = tbapiService.registerUser(model, host, port, path, secure);
-        userExtension.extendUser(model, attributes);
+        User user = mapper.mapToUser(model);
+
+        Map<String, Object> attributes = tbapiService.registerUser(user, host, port, path, secure);
+        userExtension.extendUser(user, attributes);
+
+        mapper.mergeUserInto(user, model);
 
     }
 

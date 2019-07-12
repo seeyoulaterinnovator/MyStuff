@@ -2,10 +2,13 @@ package ru.alamics.sso.registration;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.keycloak.models.UserModel;
+import ru.alamics.sso.registration.model.User;
 
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 class UserExtensionTest {
@@ -19,7 +22,22 @@ class UserExtensionTest {
 
     @Test
     void extendUser() {
-        extension.extendUser(mock(UserModel.class), Map.of());
+
+        User user = User.builder()
+                .id(UUID.randomUUID().toString())
+                .email("test@test.test")
+                .firstName("Test")
+                .lastName("Mock")
+                .build();
+
+        extension.extendUser(user, Map.of(
+                "clientId", "someClientId",
+                "someAttribute", "someValue"
+        ));
+
+        Map<String, List<String>> attributes = user.getAttributes();
+
+        assertThat(attributes).containsKeys("clientId", "someAttribute");
 
 
     }
