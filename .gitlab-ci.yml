@@ -125,6 +125,7 @@ createwar:
   artifacts:
     paths:
       - .ci_status/
+      - build/deploy/
 
 container:
   stage: docker
@@ -134,7 +135,6 @@ container:
   artifacts:
     paths:
       - .ci_status/
-      - build/deploy/
 
 dpl:devel:
   stage: deploy
