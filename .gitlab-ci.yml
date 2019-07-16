@@ -143,3 +143,11 @@ dpl:devel:
     name: devel
   script:
     - $BASE_DIR/scripts/deploy.sh
+
+dpl:stage:
+  stage: deploy
+  when: manual
+  environment:
+    name: stage
+  script:
+    - $BASE_DIR/scripts/deploy.sh
