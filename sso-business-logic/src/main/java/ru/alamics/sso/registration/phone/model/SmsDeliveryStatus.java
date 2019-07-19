@@ -1,4 +1,4 @@
-package ru.alamics.sso.registration.phone;
+package ru.alamics.sso.registration.phone.model;
 
 public enum SmsDeliveryStatus {
 

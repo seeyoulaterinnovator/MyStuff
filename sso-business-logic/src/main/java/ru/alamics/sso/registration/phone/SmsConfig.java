@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.net.URI;
+import java.nio.charset.Charset;
 
 @Data
 @Builder
@@ -65,7 +66,7 @@ public class SmsConfig {
 
     private Encoding encoding;
 
-    private String charset;
+    private Charset charset;
 
     private Priority priority;
 

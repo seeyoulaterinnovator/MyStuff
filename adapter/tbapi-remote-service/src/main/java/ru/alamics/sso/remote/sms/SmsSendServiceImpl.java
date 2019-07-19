@@ -8,60 +8,74 @@ import ru.alamics.sso.registration.phone.SmsConfig;
 import ru.alamics.sso.registration.phone.port.SmsSendService;
 
 import javax.ejb.Stateless;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 @Slf4j
-@Stateless
+@Stateless(name = "SmsSender")
 public class SmsSendServiceImpl implements SmsSendService {
 
+    private static final String SMSC_NAME = "centerName";
+    private static final String USERNAME = "user";
+    private static final String PASSWORD = "pass";
+    private static final String SENDER_NAME = "sender";
     private final ResteasyClient client = new ResteasyClientBuilder().build();
-    private final String scheme = "https";
-    private final String host = "";
-    private final int port = 80;
-    private final String path = "";
-    private final SmsConfig smsConfig = SmsConfig.builder().build();
+    private SmsConfig smsConfig;
 
     public SmsSendServiceImpl() {
+        smsConfig = SmsConfig.builder()
+                .url(new ResteasyUriBuilder()
+                        .scheme("http")
+                        .host("smsgw.testing.ertelecom.ru")
+                        .port(13003)
+                        .path("cgi-bin/sendsms")
+                        .build())
+                .smsCenterName(SMSC_NAME)
+                .username(USERNAME)
+                .password(PASSWORD)
+                .senderName(SENDER_NAME)
+                .timeout(5)
+                .priority(SmsConfig.Priority.HIGH)
+                .reportsMask(SmsConfig.ReportsConfig.DELIVERED_TO_PHONE)
+                .encoding(SmsConfig.Encoding.UCS2)
+                .charset(StandardCharsets.UTF_8)
+                .build();
+    }
 
+    public SmsSendServiceImpl(SmsConfig smsConfig) {
+        this.smsConfig = smsConfig;
     }
 
     @Override
-    public Integer sensSms(String phone, String text) {
+    public Integer sendSms(String phone, String text) {
 
-        String path = "?smsc=" + smsConfig.getSmsCenterName() +
-                "&username=" + smsConfig.getUsername() +
-                "&password=" + smsConfig.getPassword() +
-                "&to=" + phone +
-                "&from=" + smsConfig.getSenderName() +
-                "&validity=" + smsConfig.getTimeout() +
-                "&priority=" + smsConfig.getPriority().getPriorityAsInt() +
-                "&dlr-mask=" + smsConfig.getReportsMask() +
-                "&text=" + URLEncoder.encode(text, StandardCharsets.UTF_8) +
-                "&coding=" + smsConfig.getEncoding().getPriorityAsInt() +
-                "&charset=" + smsConfig.getCharset();
+        URI uri = smsConfig.getUrl();
 
-        URI uri = new ResteasyUriBuilder()
-                .scheme(scheme)
-                .host(host)
-                .port(port)
-                .path(this.path + path)
-                .build();
+        String response = client.target(uri)
+                .queryParams(getConfigForQuery())
+                .queryParam("to", phone)
+                .queryParam("text", URLEncoder.encode(text, smsConfig.getCharset()))
+                .request()
+                .post(null, String.class);
 
-        Response response = client.target(uri).request().post(null);
+        return Integer.parseInt(response.substring(0, 1));
+    }
 
-        String responseString = response.readEntity(String.class);
-
-        int i;
-        try {
-            i = Integer.parseInt(responseString);
-        } catch (NumberFormatException e) {
-            log.warn(e.getMessage(), e);
-            i = -1;
-        }
-
-        return i;
+    private MultivaluedMap<String, Object> getConfigForQuery() {
+        return new MultivaluedHashMap<>(Map.of(
+                "smsc", smsConfig.getSmsCenterName(),
+                "username", smsConfig.getUsername(),
+                "password", smsConfig.getPassword(),
+                "from", smsConfig.getSenderName(),
+                "validity", smsConfig.getTimeout(),
+                "priority", smsConfig.getPriority().getPriorityAsInt(),
+                "dlr-mask", smsConfig.getReportsMask(),
+                "coding", smsConfig.getEncoding().getPriorityAsInt(),
+                "charset", smsConfig.getCharset()
+        ));
     }
 }

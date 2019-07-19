@@ -2,7 +2,6 @@ package ru.alamics.sso.registration.phone.model;
 
 import lombok.Builder;
 import lombok.Data;
-import ru.alamics.sso.registration.phone.SmsDeliveryStatus;
 
 import java.time.LocalDateTime;
 

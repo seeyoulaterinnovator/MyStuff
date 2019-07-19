@@ -2,8 +2,10 @@ package ru.alamics.sso.registration.phone;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.registration.phone.model.Sms;
+import ru.alamics.sso.registration.phone.model.SmsDeliveryStatus;
 import ru.alamics.sso.registration.phone.model.SmsStatus;
 import ru.alamics.sso.registration.phone.port.SmsRepository;
+import ru.alamics.sso.registration.phone.port.SmsSendService;
 import ru.alamics.sso.registration.phone.port.SmsStatusRepository;
 
 import javax.ejb.EJB;
@@ -15,11 +17,14 @@ import java.util.UUID;
 @Stateless
 public class SmsService {
 
-    @EJB
-    private SmsRepository smsRepository;
+//    @EJB
+//    private SmsRepository smsRepository;
+//
+//    @EJB
+//    private SmsStatusRepository smsStatusRepository;
 
     @EJB
-    private SmsStatusRepository smsStatusRepository;
+    private SmsSendService smsSendService;
 
     public void sendSms(String userId, String phone, String text) {
         String id = UUID.randomUUID().toString();
@@ -31,25 +36,27 @@ public class SmsService {
                 .userId(userId)
                 .build();
 
-        smsRepository.save(sms);
+//        smsRepository.save(sms);
+
+        smsSendService.sendSms(phone, text);
 
         log.info("Sent sms to phone: {}, text: {}, id: {}", phone, text, id);
     }
 
     public void saveSmsStatusUpdate(String smsId, SmsDeliveryStatus status) {
 
-        Sms sms = smsRepository.findById(smsId).orElseThrow();
-
-        String id = UUID.randomUUID().toString();
-
-        SmsStatus smsStatus = SmsStatus.builder()
-                .id(id)
-                .status(status)
-                .sms(sms)
-                .updated(LocalDateTime.now())
-                .build();
-
-        smsStatusRepository.save(smsStatus);
+//        Sms sms = smsRepository.findById(smsId).orElseThrow();
+//
+//        String id = UUID.randomUUID().toString();
+//
+//        SmsStatus smsStatus = SmsStatus.builder()
+//                .id(id)
+//                .status(status)
+//                .sms(sms)
+//                .updated(LocalDateTime.now())
+//                .build();
+//
+//        smsStatusRepository.save(smsStatus);
     }
 
 }
