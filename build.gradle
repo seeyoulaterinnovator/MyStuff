@@ -96,22 +96,27 @@ task deploy {
 
     dependsOn(':keycloak-extension:war')
 
-    def fname =  tasks.getByPath(':keycloak-extension:war').getArchiveFile().orNull
-    inputs.file(file(fname))
+    def warArchive =  tasks.getByPath(':keycloak-extension:war').getArchiveFile()
+    def themesFolder = tasks.getByPath(':keycloak-extension:processResources').getDestinationDir().getAbsolutePath() + '/themes'
 
-    def deployDir = new File(System.getenv('KEYCLOAK_DEPLOY_DIR') != null? System.getenv('KEYCLOAK_DEPLOY_DIR') : "$rootProject.buildDir/deploy")
+    def deployDir = System.getenv('KEYCLOAK_DEPLOY_DIR') != null ? System.getenv('KEYCLOAK_DEPLOY_DIR'): "$rootProject.buildDir/deploy"
+    def warTargetFolder = deployDir + '/standalone/deployments'
+    def themesTargetFolder = deployDir + '/themes'
 
-    outputs.dir {
-        deployDir
-    }
+    inputs.files(warArchive, themesFolder)
+    outputs.dirs(warTargetFolder, themesTargetFolder)
 
     doLast {
         copy {
-            from file(fname)
-            into(deployDir)
+            from file(warArchive)
+            into(warTargetFolder)
             rename { String fileName ->
                 fileName = "domru-sso.war"
             }
+        }
+        copy {
+            from file(themesFolder)
+            into(themesTargetFolder)
         }
     }
 }
