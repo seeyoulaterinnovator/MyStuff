@@ -5,3 +5,5 @@ include 'tbapi-remote-service'
 include 'keycloak-extension'
 
 project(":tbapi-remote-service").projectDir = file("adapter/tbapi-remote-service")
+include 'custom-jpa-provider'
+
