@@ -94,6 +94,7 @@ back:war:
     - master
   script:
     - ./gradlew :keycloak-extension:war -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
+    - ./gradlew :custom-jpa-provider:jar -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
   cache:
     key: "$CI_COMMIT_SHA"
     paths:

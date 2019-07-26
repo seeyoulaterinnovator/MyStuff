@@ -1,0 +1,10 @@
+dependencies {
+
+    implementation "org.keycloak:keycloak-core:$keycloakVersion"
+    implementation "org.keycloak:keycloak-services:$keycloakVersion"
+    implementation "org.keycloak:keycloak-server-spi:$keycloakVersion"
+    implementation "org.keycloak:keycloak-server-spi-private:$keycloakVersion"
+    implementation "org.keycloak:keycloak-model-jpa:$keycloakVersion"
+
+    implementation 'org.slf4j:slf4j-api:1.7.22'
+}
