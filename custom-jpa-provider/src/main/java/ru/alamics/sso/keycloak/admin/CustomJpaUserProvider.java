@@ -34,11 +34,14 @@ public class CustomJpaUserProvider extends JpaUserProvider {
                         "and (u.serviceAccountClientLink is null) " +
                         "and ( lower(u.username) like :search " +
                         "or lower(concat(u.firstName, ' ', u.lastName)) like :search " +
-                        "or u.email like :search ) " +
-                        "or attr.value like :search " +
+                        "or u.email like :search " +
+                        "or attr.value like :search ) " +
                         "order by u.username",
                 UserEntity.class);
-        query.setParameter("realmId", realm.getId());
+        if (realm.getId().equals("manager"))
+            query.setParameter("realmId", "user");
+        else
+            query.setParameter("realmId", realm.getId());
         query.setParameter("search", "%" + search.toLowerCase() + "%");
         if (firstResult != -1) {
             query.setFirstResult(firstResult);

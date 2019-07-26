@@ -248,7 +248,12 @@ module.controller('UserListCtrl', function($scope, realm, User, UserSearchState,
     };
     
     $scope.impersonate = function(userId) {
-        UserImpersonation.save({realm : realm.realm, user: userId}, function (data) {
+        var hackedRealm;
+        if (realm.realm === 'manager')
+            hackedRealm = 'user';
+        else
+            hackedRealm = realm.realm;
+        UserImpersonation.save({realm : hackedRealm, user: userId}, function (data) {
             if (data.sameRealm) {
                 window.location = data.redirect;
             } else {
