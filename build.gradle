@@ -96,23 +96,32 @@ task postgresCreate(type: DockerCreateContainer) {
 task deploy {
 
     dependsOn(':keycloak-extension:war')
+    dependsOn(':custom-jpa-provider:jar')
 
     def warArchive =  tasks.getByPath(':keycloak-extension:war').getArchiveFile()
+    def jarArchive =  tasks.getByPath(':custom-jpa-provider:jar').getArchiveFile()
     def themesFolder = tasks.getByPath(':keycloak-extension:processResources').getDestinationDir().getAbsolutePath() + '/themes'
 
     def deployDir = System.getenv('KEYCLOAK_DEPLOY_DIR') != null ? System.getenv('KEYCLOAK_DEPLOY_DIR'): "$rootProject.buildDir/deploy"
-    def warTargetFolder = deployDir + '/standalone/deployments'
+    def archiveTargetFolder = deployDir + '/standalone/deployments'
     def themesTargetFolder = deployDir + '/themes'
 
     inputs.files(warArchive, themesFolder)
-    outputs.dirs(warTargetFolder, themesTargetFolder)
+    outputs.dirs(archiveTargetFolder, themesTargetFolder)
 
     doLast {
         copy {
             from file(warArchive)
-            into(warTargetFolder)
+            into(archiveTargetFolder)
             rename { String fileName ->
                 fileName = "domru-sso.war"
+            }
+        }
+        copy {
+            from file(jarArchive)
+            into(archiveTargetFolder)
+            rename { String fileName ->
+                fileName = "custom-jpa.jar"
             }
         }
         copy {
