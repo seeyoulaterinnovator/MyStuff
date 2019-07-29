@@ -93,6 +93,7 @@ back:war:
   except:
     - master
   script:
+    # remove these two lines
     - ./gradlew :keycloak-extension:war -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
     - ./gradlew :custom-jpa-provider:jar -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
   cache:
@@ -106,6 +107,10 @@ back:war:
       - build/**/libs/*.jar
     name: "domru-sso-compile-$CI_PIPELINE_ID"
     expire_in: 1 week
+
+#
+# createwar: looks redundant in the next changeset
+#
 
 createwar:
   stage: createwar
@@ -121,6 +126,7 @@ createwar:
       - build/
   script:
     - mkdir -p .ci_status
+    # move this line into the previous task
     - ./gradlew :deploy -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
     - touch .ci_status/war_built
   artifacts:
