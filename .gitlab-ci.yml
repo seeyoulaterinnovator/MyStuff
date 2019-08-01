@@ -93,9 +93,12 @@ back:war:
   except:
     - master
   script:
+    - mkdir -p .ci_status
     # remove these two lines
-    - ./gradlew :keycloak-extension:war -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
-    - ./gradlew :custom-jpa-provider:jar -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
+    #- ./gradlew :keycloak-extension:war -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
+    #- ./gradlew :custom-jpa-provider:jar -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
+    - ./gradlew :deploy -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
+    - touch .ci_status/war_built
   cache:
     key: "$CI_COMMIT_SHA"
     paths:
@@ -103,8 +106,10 @@ back:war:
       - build/
   artifacts:
     paths:
+      - .ci_status/
       - build/**/libs/*.war
       - build/**/libs/*.jar
+      - build/deploy/
     name: "domru-sso-compile-$CI_PIPELINE_ID"
     expire_in: 1 week
 
@@ -112,27 +117,27 @@ back:war:
 # createwar: looks redundant in the next changeset
 #
 
-createwar:
-  stage: createwar
-  when: on_success
-  environment:
-    name: develop
-  only:
-    - develop
-  cache:
-    key: "$CI_COMMIT_SHA"
-    paths:
-      - .gradle/
-      - build/
-  script:
-    - mkdir -p .ci_status
-    # move this line into the previous task
-    - ./gradlew :deploy -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
-    - touch .ci_status/war_built
-  artifacts:
-    paths:
-      - .ci_status/
-      - build/deploy/
+#createwar:
+#  stage: createwar
+#  when: on_success
+#  environment:
+#    name: develop
+#  only:
+#    - develop
+#  cache:
+#    key: "$CI_COMMIT_SHA"
+#    paths:
+#      - .gradle/
+#      - build/
+#  script:
+#    - mkdir -p .ci_status
+#    # move this line into the previous task
+#    - ./gradlew :deploy -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
+#    - touch .ci_status/war_built
+#  artifacts:
+#    paths:
+#      - .ci_status/
+#      - build/deploy/
 
 container:
   stage: docker
