@@ -231,7 +231,7 @@ module.controller('UserOfflineSessionsCtrl', function($scope, $location, realm, 
 });
 
 
-module.controller('UserListCtrl', function($scope, realm, User, UserSearchState, UserImpersonation, BruteForce, Notifications, $route, Dialog, CustomUser) {
+module.controller('UserListCtrl', function($scope, realm, User, UserSearchState, UserImpersonation, BruteForce, Notifications, $route, Dialog/*, CustomUser*/) {
     
     $scope.init = function() {
         $scope.realm = realm;
@@ -294,7 +294,7 @@ module.controller('UserListCtrl', function($scope, realm, User, UserSearchState,
         // $http.get().then(function(result) {
         //     $scope.users = result;
         // })
-        console.log(CustomUser);
+        // console.log(CustomUser);
 
         $scope.users = User.query($scope.query, function() {
             $scope.searchLoaded = true;
