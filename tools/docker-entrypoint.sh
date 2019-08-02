@@ -82,7 +82,8 @@ SYS_PROPS+=" $BIND_OPTS"
 
 # If the server configuration parameter is not present, append the HA profile.
 if echo "$@" | egrep -v -- '-c |-c=|--server-config |--server-config='; then
-    SYS_PROPS+=" -c=standalone-ha.xml"
+    echo tried set HA profile
+    #SYS_PROPS+=" -c=standalone-ha.xml"
 fi
 
 ############
@@ -179,6 +180,8 @@ fi
 ##################
 # Start Keycloak #
 ##################
+
+echo "SYS_PROPS $SYS_PROPS"
 
 exec /opt/jboss/keycloak/bin/standalone.sh $SYS_PROPS $@
 exit $?
