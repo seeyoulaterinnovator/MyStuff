@@ -22,7 +22,7 @@ RUN yum update -y && yum install -y epel-release git && yum install -y jq openss
 # Remove me after debugging
 #
 
-RUN yum install -y tcpdump telnet bind-tools iproute
+RUN yum install -y tcpdump telnet bind-tools iproute net-tools psmisc sysstat
 
 ADD tools /opt/jboss/tools
 RUN /opt/jboss/tools/build-keycloak.sh
