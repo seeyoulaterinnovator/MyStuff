@@ -18,6 +18,12 @@ USER root
 
 RUN yum update -y && yum install -y epel-release git && yum install -y jq openssl which && yum clean all
 
+#
+# Remove me after debugging
+#
+
+RUN yum install -y tcpdump telnet bind-tools iproute
+
 ADD tools /opt/jboss/tools
 RUN /opt/jboss/tools/build-keycloak.sh
 
