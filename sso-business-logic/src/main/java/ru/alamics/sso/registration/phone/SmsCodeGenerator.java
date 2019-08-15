@@ -27,7 +27,9 @@ public class SmsCodeGenerator {
     }
 
     public String getCode() {
-        long generatedLong = leftLimit + (long) (Math.random() * (rightLimit - leftLimit));
+        // не дают доступ к отправке смс. приколачиваю фиксированный код и не отправляю смс
+        long generatedLong = rightLimit;
+        //long generatedLong = leftLimit + (long) (Math.random() * (rightLimit - leftLimit));
         return String.valueOf(generatedLong);
     }
 

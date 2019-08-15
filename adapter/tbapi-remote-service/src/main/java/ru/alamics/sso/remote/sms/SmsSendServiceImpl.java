@@ -53,6 +53,10 @@ public class SmsSendServiceImpl implements SmsSendService {
     @Override
     public Integer sendSms(String phone, String text) {
 
+        // не дают доступ к отправке смс. приколачиваю фиксированный код и не отправляю смс
+        if (true)
+            return 0;
+
         URI uri = smsConfig.getUrl();
 
         String response = client.target(uri)
