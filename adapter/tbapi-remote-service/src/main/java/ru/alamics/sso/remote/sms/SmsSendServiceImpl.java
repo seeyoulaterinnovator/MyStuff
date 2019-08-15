@@ -51,7 +51,7 @@ public class SmsSendServiceImpl implements SmsSendService {
     }
 
     @Override
-    public Integer sendSms(String phone, String text) {
+    public String sendSms(String phone, String text) {
 
         URI uri = smsConfig.getUrl();
 
@@ -62,7 +62,7 @@ public class SmsSendServiceImpl implements SmsSendService {
                 .request()
                 .post(null, String.class);
 
-        return Integer.parseInt(response.substring(0, 1));
+        return response;
     }
 
     private MultivaluedMap<String, Object> getConfigForQuery() {

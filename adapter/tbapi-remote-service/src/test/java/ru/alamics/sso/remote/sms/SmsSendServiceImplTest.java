@@ -79,9 +79,9 @@ class SmsSendServiceImplTest {
                 )
         );
 
-        Integer result = service.sendSms(PHONE, TEXT);
+        String result = service.sendSms(PHONE, TEXT);
 
-        assertThat(result).isEqualTo(0);
+        assertThat(result.substring(0, 1)).isEqualTo("0");
 
     }
 }
