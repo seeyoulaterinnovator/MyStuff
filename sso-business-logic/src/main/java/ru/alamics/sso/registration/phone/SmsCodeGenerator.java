@@ -21,9 +21,20 @@ public class SmsCodeGenerator {
         if (length < 1 || length > 18)
             throw new IllegalArgumentException("Length should be in bounds of [1, 18]");
 
-        this.leftLimit = (long) Math.pow(10d, length - 1d);
-        this.rightLimit = (long) (Math.pow(10d, length) - 1L);
+        this.leftLimit = pow(10, length - 1);
+        this.rightLimit = pow(10, length) - 1L;
         log.debug("Created smsCodeGenerator with range: [{},{}]", leftLimit, rightLimit);
+    }
+
+    // при length = 16 rightLimit при расчете через Math.pow имеет длину 17
+    private long pow(int a, int b) {
+
+        long res = 1;
+        for (int i = 0; i < b; i++) {
+            res = res * a;
+        }
+
+        return res;
     }
 
     public String getCode() {
