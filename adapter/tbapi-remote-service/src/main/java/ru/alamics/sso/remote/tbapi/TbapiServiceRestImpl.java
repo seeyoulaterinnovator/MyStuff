@@ -5,6 +5,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
+import ru.alamics.sso.registration.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.model.TbapiRequest;
 import ru.alamics.sso.registration.port.TbapiRemoteService;
 
@@ -23,13 +24,13 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
 
 
     @Override
-    public Map<String, Object> createLead(TbapiRequest request, String host, int port, String path, boolean secure) {
+    public Map<String, Object> createLead(TbapiRequest request, TbapiConnectConfig connectConfig) {
 
         URI uri = new ResteasyUriBuilder()
-                .scheme(secure ? "https" : "http")
-                .host(host)
-                .port(port)
-                .path(path)
+                .scheme(connectConfig.isSecure() ? "https" : "http")
+                .host(connectConfig.getHost())
+                .port(connectConfig.getPort())
+                .path(connectConfig.getPath())
                 .build();
 
         ResteasyWebTarget target = client.target(uri);
@@ -38,7 +39,10 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
         Entity<TbapiRequest> entity = Entity.json(request);
 
         Map<String, Object> responseMap;
-        try (Response response = target.request().header("Accept", MediaType.APPLICATION_JSON).post(entity)) {
+        try (Response response = target.request()
+                .header("Accept", MediaType.APPLICATION_JSON)
+                .header("Authorization", String.format("Trusted application=\"%s\", username=\"%s\"", connectConfig.getAppname(), connectConfig.getUsername()))
+                .post(entity)) {
 
             responseMap = response.readEntity(new GenericType<>(mapExample.getClass()));
 

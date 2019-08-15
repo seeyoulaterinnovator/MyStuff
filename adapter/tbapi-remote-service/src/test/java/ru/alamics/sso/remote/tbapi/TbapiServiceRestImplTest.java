@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import ru.alamics.sso.registration.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.model.TbapiRequest;
 
 import java.util.Map;
@@ -45,6 +46,15 @@ class TbapiServiceRestImplTest {
                 )
         );
 
+        TbapiConnectConfig conectConfig = new TbapiConnectConfig();
+
+        conectConfig.setHost("localhost");
+        conectConfig.setPort(server.port());
+        conectConfig.setAppname("appname");
+        conectConfig.setUsername("username");
+        conectConfig.setPath("/api/v1/leadManagement/lead");
+        conectConfig.setSecure(false);
+
         Map<String, Object> lead = service.createLead(
                 TbapiRequest.builder()
                         .id(UUID.randomUUID().toString())
@@ -52,10 +62,7 @@ class TbapiServiceRestImplTest {
                         .firstName("User")
                         .lastName("Test")
                         .build(),
-                "localhost",
-                server.port(),
-                "/api/v1/leadManagement/lead",
-                false
+                conectConfig
         );
 
         assertThat(lead).containsKeys("id", "name", "legalName", "description", "status", "identificationNumber");

@@ -1,8 +1,10 @@
 package ru.alamics.sso.registration;
 
+import ru.alamics.sso.registration.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.model.TbapiRequest;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.port.TbapiRemoteService;
+
 
 import java.util.Map;
 
@@ -14,7 +16,7 @@ public class TbapiService {
         this.remoteService = remoteService;
     }
 
-    public Map<String, Object> registerUser(User user, String host, int port, String path, boolean secure) {
+    public Map<String, Object> registerUser(User user, TbapiConnectConfig connectConfig) {
         var request = TbapiRequest.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -22,7 +24,7 @@ public class TbapiService {
                 .lastName(user.getLastName())
                 .build();
 
-        Map<String, Object> result = remoteService.createLead(request, host, port, path, secure);
+        Map<String, Object> result = remoteService.createLead(request, connectConfig);
 
         return result;
     }

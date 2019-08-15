@@ -9,8 +9,10 @@ import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.*;
 import org.keycloak.provider.ProviderConfigProperty;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
+
 import ru.alamics.sso.registration.TbapiService;
 import ru.alamics.sso.registration.UserExtension;
+import ru.alamics.sso.registration.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
@@ -29,6 +31,14 @@ public class UserModelExtender implements FormAction, FormActionFactory {
     private static final String PORT_PROPERTY_LABEL = "Порт";
     private static final String PORT_PROPERTY_HELP_TEXT = "Порт, на котором сервер слушает запросы";
 
+    private static final String AUTH_APPNAME_NAME = "authAppname";
+    private static final String AUTH_APPNAME_LABEL = "Appname";
+    private static final String AUTH_APPNAME_HELP_TEXT = "Параметр appname заголовка авторизации";
+
+    private static final String AUTH_USERNAME_NAME = "authUsername";
+    private static final String AUTH_USERNAME_LABEL = "Username";
+    private static final String AUTH_USERNAME_HELP_TEXT = "Параметр username заголовка авторизации";
+
     private static final String PATH_PROPERTY_NAME = "targetPath";
     private static final String PATH_PROPERTY_LABEL = "Путь";
     private static final String PATH_PROPERTY_HELP_TEXT = "Путь, к которому нужно выполнить запрос";
@@ -42,6 +52,10 @@ public class UserModelExtender implements FormAction, FormActionFactory {
                     ProviderConfigProperty.STRING_TYPE, "localhost"),
             new ProviderConfigProperty(PORT_PROPERTY_NAME, PORT_PROPERTY_LABEL, PORT_PROPERTY_HELP_TEXT,
                     ProviderConfigProperty.STRING_TYPE, 80),
+            new ProviderConfigProperty(AUTH_APPNAME_NAME, AUTH_APPNAME_LABEL, AUTH_APPNAME_HELP_TEXT,
+                    ProviderConfigProperty.STRING_TYPE, "appname"),
+            new ProviderConfigProperty(AUTH_USERNAME_NAME, AUTH_USERNAME_LABEL, AUTH_USERNAME_HELP_TEXT,
+                    ProviderConfigProperty.STRING_TYPE, "username"),
             new ProviderConfigProperty(PATH_PROPERTY_NAME, PATH_PROPERTY_LABEL, PATH_PROPERTY_HELP_TEXT,
                     ProviderConfigProperty.STRING_TYPE, "/api/v1/leadManagement/lead"),
             new ProviderConfigProperty(SCHEMA_PROPERTY_NAME, SCHEMA_PROPERTY_LABEL, SCHEMA_PROPERTY_HELP_TEXT,
@@ -79,14 +93,18 @@ public class UserModelExtender implements FormAction, FormActionFactory {
 
         Map<String, String> config = context.getAuthenticatorConfig().getConfig();
 
-        String host = config.get(HOSTNAME_PROPERTY_NAME);
-        int port = Integer.parseInt(config.get(PORT_PROPERTY_NAME));
-        String path = config.get(PATH_PROPERTY_NAME);
-        boolean secure = Boolean.parseBoolean(config.get(SCHEMA_PROPERTY_NAME));
+        TbapiConnectConfig conectConfig = new TbapiConnectConfig();
+
+        conectConfig.setHost(config.get(HOSTNAME_PROPERTY_NAME));
+        conectConfig.setPort(Integer.parseInt(config.get(PORT_PROPERTY_NAME)));
+        conectConfig.setAppname(config.get(AUTH_APPNAME_NAME));
+        conectConfig.setUsername(config.get(AUTH_USERNAME_NAME));
+        conectConfig.setPath(config.get(PATH_PROPERTY_NAME));
+        conectConfig.setSecure(Boolean.parseBoolean(config.get(SCHEMA_PROPERTY_NAME)));
 
         User user = mapper.mapToUser(model);
 
-        Map<String, Object> attributes = tbapiService.registerUser(user, host, port, path, secure);
+        Map<String, Object> attributes = tbapiService.registerUser(user, conectConfig);
         userExtension.extendUser(user, attributes);
 
         mapper.mergeUserInto(user, model);
