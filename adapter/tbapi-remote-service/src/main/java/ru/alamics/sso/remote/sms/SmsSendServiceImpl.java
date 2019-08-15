@@ -55,7 +55,7 @@ public class SmsSendServiceImpl implements SmsSendService {
 
         // не дают доступ к отправке смс. приколачиваю фиксированный код и не отправляю смс
         if (true)
-            return 0;
+            return "0: Accepted for delivery";
 
         URI uri = smsConfig.getUrl();
 
