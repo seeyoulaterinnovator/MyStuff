@@ -1,5 +1,7 @@
 package ru.alamics.sso.keycloak.registration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormActionFactory;
@@ -20,6 +22,11 @@ import java.util.List;
 import java.util.Map;
 
 public class UserModelExtender implements FormAction, FormActionFactory {
+
+    private static final Logger log = Logger.getLogger(UserModelExtender.class);
+
+    // jackson serialize
+    ObjectMapper jacksonMapper = new ObjectMapper();
 
     private static final String PROVIDER_ID = "registration-user-extension";
 
@@ -93,18 +100,26 @@ public class UserModelExtender implements FormAction, FormActionFactory {
 
         Map<String, String> config = context.getAuthenticatorConfig().getConfig();
 
-        TbapiConnectConfig conectConfig = new TbapiConnectConfig();
+        TbapiConnectConfig connectConfig = new TbapiConnectConfig();
 
-        conectConfig.setHost(config.get(HOSTNAME_PROPERTY_NAME));
-        conectConfig.setPort(Integer.parseInt(config.get(PORT_PROPERTY_NAME)));
-        conectConfig.setAppname(config.get(AUTH_APPNAME_NAME));
-        conectConfig.setUsername(config.get(AUTH_USERNAME_NAME));
-        conectConfig.setPath(config.get(PATH_PROPERTY_NAME));
-        conectConfig.setSecure(Boolean.parseBoolean(config.get(SCHEMA_PROPERTY_NAME)));
+        connectConfig.setHost(config.get(HOSTNAME_PROPERTY_NAME));
+        connectConfig.setPort(Integer.parseInt(config.get(PORT_PROPERTY_NAME)));
+        connectConfig.setAppname(config.get(AUTH_APPNAME_NAME));
+        connectConfig.setUsername(config.get(AUTH_USERNAME_NAME));
+        connectConfig.setPath(config.get(PATH_PROPERTY_NAME));
+        connectConfig.setSecure(Boolean.parseBoolean(config.get(SCHEMA_PROPERTY_NAME)));
 
         User user = mapper.mapToUser(model);
 
-        Map<String, Object> attributes = tbapiService.registerUser(user, conectConfig);
+        Map<String, Object> attributes = tbapiService.registerUser(user, connectConfig);
+
+        try {
+            String attrStr = jacksonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(attributes);
+            log.info(String.format("Got answer from TBAPI: %s", attrStr));
+        } catch (Exception e) {
+            log.error(e);
+        }
+
         userExtension.extendUser(user, attributes);
 
         mapper.mergeUserInto(user, model);

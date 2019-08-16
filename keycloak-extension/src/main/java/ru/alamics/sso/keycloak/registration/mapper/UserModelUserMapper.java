@@ -39,8 +39,10 @@ public class UserModelUserMapper {
             user.getAttributes().entrySet()) {
             model.setAttribute(attributeEntry.getKey(), attributeEntry.getValue());
         }
-        model.setAttribute(PHONE, List.of(user.getPhone()));
-        model.setAttribute(PHONE_VALIDATED_ON, List.of(user.getPhoneVerifiedOn().toString()));
+        if (user.getPhone() != null)
+            model.setAttribute(PHONE, List.of(user.getPhone()));
+        if (user.getPhoneVerifiedOn() != null)
+            model.setAttribute(PHONE_VALIDATED_ON, List.of(user.getPhoneVerifiedOn().toString()));
 
     }
 
