@@ -7,12 +7,18 @@ import lombok.Data;
 @Builder
 public class TbapiRequest {
 
-    private String id;
+    //private String id;
+
+    @Builder.Default
+    final private String Type = "business";
+
+    @Builder.Default
+    final private String customerCategory = "B2R";
 
     private String email;
 
-    private String firstName;
+    private String name;
 
-    private String lastName;
+    private String phoneNumber;
 
 }

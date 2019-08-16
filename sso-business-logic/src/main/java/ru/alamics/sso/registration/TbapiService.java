@@ -18,10 +18,10 @@ public class TbapiService {
 
     public Map<String, Object> registerUser(User user, TbapiConnectConfig connectConfig) {
         var request = TbapiRequest.builder()
-                .id(user.getId())
+                //.id(user.getId())
                 .email(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
+                .name(String.format("%s %s", user.getFirstName(), user.getLastName()))
+                .phoneNumber(user.getPhone())
                 .build();
 
         Map<String, Object> result = remoteService.createLead(request, connectConfig);

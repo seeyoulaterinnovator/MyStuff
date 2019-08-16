@@ -64,7 +64,7 @@ public class UserModelExtender implements FormAction, FormActionFactory {
             new ProviderConfigProperty(AUTH_USERNAME_NAME, AUTH_USERNAME_LABEL, AUTH_USERNAME_HELP_TEXT,
                     ProviderConfigProperty.STRING_TYPE, "username"),
             new ProviderConfigProperty(PATH_PROPERTY_NAME, PATH_PROPERTY_LABEL, PATH_PROPERTY_HELP_TEXT,
-                    ProviderConfigProperty.STRING_TYPE, "/api/v1/leadManagement/lead"),
+                    ProviderConfigProperty.STRING_TYPE, "/api/v1/customerManagement/customerAccount"),
             new ProviderConfigProperty(SCHEMA_PROPERTY_NAME, SCHEMA_PROPERTY_LABEL, SCHEMA_PROPERTY_HELP_TEXT,
                     ProviderConfigProperty.BOOLEAN_TYPE, false)
     );

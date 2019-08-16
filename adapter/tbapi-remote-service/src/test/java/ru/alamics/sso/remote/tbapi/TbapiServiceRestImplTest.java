@@ -57,14 +57,14 @@ class TbapiServiceRestImplTest {
 
         Map<String, Object> lead = service.createLead(
                 TbapiRequest.builder()
-                        .id(UUID.randomUUID().toString())
+                        //.id(UUID.randomUUID().toString())
                         .email("test@test.ru")
-                        .firstName("User")
-                        .lastName("Test")
+                        //.firstName("User")
+                        .name("Test")
                         .build(),
                 conectConfig
         );
 
-        assertThat(lead).containsKeys("id", "name", "legalName", "description", "status", "identificationNumber");
+        assertThat(lead).containsKeys(/*"id", */"name", /*"legalName",*/ "description", "status", "identificationNumber");
     }
 }
