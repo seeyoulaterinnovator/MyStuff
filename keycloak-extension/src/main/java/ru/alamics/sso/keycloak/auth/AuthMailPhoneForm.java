@@ -122,10 +122,13 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
 
         UserModel user = null;
         try {
+            log.info("find user casual");
             user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(), username);
 
-            if (user == null)
+            if (user == null) {
+                log.info("find user by phone");
                 user = getUserByPhone(context.getSession(), context.getRealm(), username);
+            }
 
         } catch (ModelDuplicateException mde) {
             ServicesLogger.LOGGER.modelDuplicateException(mde);
@@ -169,7 +172,7 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
         TypedQuery<UserEntity> query = em.createQuery(
 
                 "select u from UserEntity u " +
-                "join UserAttributeEntity ua on u.id = ua.user_id " +
+                "join UserAttributeEntity ua on u.id = ua.user " +
                 "where ua.name = 'phone' and ua.value like '%' || :phone || '%'"
 
                 , UserEntity.class)
