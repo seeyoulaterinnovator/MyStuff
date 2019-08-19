@@ -22,7 +22,9 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
     private static final Map<String, Object> mapExample = Collections.unmodifiableMap(new HashMap<>());
     private final ResteasyClient client = new ResteasyClientBuilder().build();
 
-
+    /**
+     *  По факту здесь создание кастомера
+     */
     @Override
     public Map<String, Object> createLead(TbapiRequest request, TbapiConnectConfig connectConfig) {
 

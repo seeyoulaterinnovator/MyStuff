@@ -8,6 +8,8 @@ import java.util.Map;
 
 public class UserExtension {
 
+    public static final int ATTR_FIELD_LEN = 255;
+
     public void extendUser(User user, Map<String, Object> attributes) {
         Map<String, List<String>> userAttributes = user.getAttributes();
         for (Map.Entry<String, Object> attributeEntry :
@@ -17,7 +19,7 @@ public class UserExtension {
             if (value instanceof String) {
                 userAttributes.compute(key, (s, strings) -> {
                     strings = strings == null ? new ArrayList<>() : strings;
-                    strings.add((String) value);
+                    strings.add(value == null? null : ((String) value).substring(0, ATTR_FIELD_LEN));
                     return strings;
                 });
             }
