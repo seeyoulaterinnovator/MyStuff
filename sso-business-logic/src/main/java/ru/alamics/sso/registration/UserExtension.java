@@ -18,8 +18,9 @@ public class UserExtension {
             Object value = attributeEntry.getValue();
             if (value instanceof String) {
                 userAttributes.compute(key, (s, strings) -> {
+                    String val = value == null? null : (String) value;
                     strings = strings == null ? new ArrayList<>() : strings;
-                    strings.add(value == null? null : ((String) value).substring(0, ATTR_FIELD_LEN));
+                    strings.add(val.substring(0, Math.min(val.length(), ATTR_FIELD_LEN)));
                     return strings;
                 });
             }
