@@ -1,6 +1,8 @@
 package ru.alamics.sso.keycloak.event.listener;
 
 import org.jboss.logging.Logger;
+import org.keycloak.authentication.actiontoken.resetcred.ResetCredentialsActionToken;
+import org.keycloak.common.util.Time;
 import org.keycloak.credential.CredentialModel;
 import org.keycloak.email.EmailException;
 import org.keycloak.email.EmailTemplateProvider;
@@ -9,14 +11,16 @@ import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.RealmProvider;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
+import org.keycloak.sessions.AuthenticationSessionCompoundId;
+import org.keycloak.sessions.AuthenticationSessionModel;
+import org.keycloak.sessions.RootAuthenticationSessionModel;
 
+import javax.ws.rs.core.UriBuilder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 public class ExtendedEventListenerProvider implements EventListenerProvider {
@@ -41,16 +45,16 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
     @Override
     public void onEvent(AdminEvent event, boolean includeRepresentation) {
 
-        if (event.getOperationType().equals(OperationType.ACTION)
+        if (event.getOperationType().equals(OperationType.CREATE)
                 && event.getResourceType().equals(ResourceType.USER)) {
 
             // need to send account data to user
-            if (event.getResourcePath() != null && event.getResourcePath().toLowerCase().contains("/reset-password")) {
+            //if (event.getResourcePath() != null && event.getResourcePath().toLowerCase().contains("/reset-password")) {
                 try {
                     String[] resPath = event.getResourcePath().split("/");
                     if (resPath.length > 1) {
 
-                        log.info("ExtendedEventListener: reset-password");
+                        log.info("ExtendedEventListener: admin create user");
 
                         RealmModel realm = model.getRealm(event.getRealmId());
                         UserModel user = session.users().getUserById(resPath[1], realm);
@@ -67,17 +71,45 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                                 attributes.put("userFirstName", user.getFirstName());
                                 attributes.put("userLastName", user.getLastName());
 
-                                if (cred != null && cred.size() > 0)
-                                    attributes.put("password", cred.get(0).getValue());
+                                /*
 
-                                attributes.put("accountLink", "http://domru-sso.alamics.ru/auth/realms/user/account/"); // TODO
+                                // нужен отдельный actionToken, для него flow и отдельная форма смены пароля
 
+                                ClientModel clientModel = session.clientStorageManager().getClientByClientId("account", realm);
+                                log.info("got client " + clientModel.toString());
+
+                                RootAuthenticationSessionModel rootAuthenticationSessionModel = session.authenticationSessions().createRootAuthenticationSession(realm);
+                                AuthenticationSessionModel authenticationSession = rootAuthenticationSessionModel.createAuthenticationSession(clientModel);
+                                log.info("got authenticationSession " + authenticationSession.toString());
+
+
+
+                                int validityInSecs = realm.getActionTokenGeneratedByUserLifespan(ResetCredentialsActionToken.TOKEN_TYPE);
+                                int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
+
+                                // We send the secret in the email in a link as a query param.
+                                String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
+                                ResetCredentialsActionToken token = new ResetCredentialsActionToken(
+                                        user.getId(), absoluteExpirationInSecs, authSessionEncodedId, authenticationSession.getClient().getClientId());
+
+                                String link = UriBuilder
+                                        .fromUri(session.getContext().getActionTokenUrl(token.serialize(session, realm, session.getContext().getUriInfo())))
+                                        .build()
+                                        .toString();
+                                long expirationInMinutes = TimeUnit.SECONDS.toMinutes(validityInSecs);
+
+
+
+                                attributes.put("accountLink", link);
+
+                                */
 
                                 emailTemplateProvider
                                     .setRealm(realm)
-                                    .setUser(user).send(subject, template, attributes);
+                                    .setUser(user)
+                                    .send(subject, template, attributes);
 
-                                log.info("ExtendedEventListener: reset-password. Account data is sent");
+                                log.info("ExtendedEventListener: admin create user. Account data is sent");
 
                             } catch (EmailException e) {
                                 log.error("Failed to send type mail", e);
@@ -88,7 +120,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                 } catch (Exception e) {
                     log.error(e);
                 }
-            }
+            //}
         }
     }
 
