@@ -1,4 +1,4 @@
-<#macro registrationLayout displayInfo=false displayMessage=true displayWide=false>
+<#macro registrationLayout displayInfo=false displayMessage=true displayWide=false environment="dev" >
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="ru" class="h-full">
   <head>
@@ -14,6 +14,11 @@
     </#if>
     <title>${msg("loginTitle",(realm.displayName!''))}</title>
     <link rel="icon" href="${url.resourcesPath}/assets/icons/1ok.png" />
+    
+    <#if environment == "stage" || environment == "production" >
+      <#include "templates/google-tag-manager-head.html">
+    </#if>    
+    
     <#if properties.styles?has_content>
       <#list properties.styles?split(' ') as style>
         <link href="${url.resourcesPath}/${style}" rel="stylesheet" />
@@ -21,6 +26,10 @@
     </#if>
   </head>
   <body class="flex flex-col h-full p-4 sm:px-6 md:py-6 lg:px-8 xl:py-8 xl:px-6">
+    <#if environment == "stage" || environment == "production" >
+      <#include "templates/google-tag-manager-body.html">
+    </#if>
+
     <#include "templates/header.html">
 
     <main id="content" class="flex-1 py-12 mx-auto md:mx-auto w-full max-w-md">
