@@ -3,6 +3,7 @@ import IMask from 'imask';
 import { createForm } from 'final-form';
 import { isEmpty, getPassword } from './helpers';
 import PASSWORD_CHARSET from '../src/constants/passwordCharset.js';
+import VALIDATION_RULES from '../src/constants/validationRules.js';
 
 export default (function() {
   const formElement = document.getElementById('registrationForm');
@@ -44,11 +45,7 @@ export default (function() {
       });
     }
 
-    if (
-      !values.password.match(
-        /^(?=.{8,16}$)(?=.*[A-z])(?=.*\d)(?=.*[\_\-\[\]\.\!\#]).*$/,
-      )
-    )
+    if (!values.password.match(VALIDATION_RULES['password_8-16']))
       errors.password = 'Пароль не подходит. Попробуйте другой';
 
     if (values['password-confirm'] !== values.password)
@@ -56,18 +53,10 @@ export default (function() {
 
     if (!values.recaptcha) errors.recaptcha = 'Подтвердите, что вы не робот';
 
-    if (
-      !phoneMask.unmaskedValue.match(
-        /(7|8)(9\d{2}|495|499|812)(\d{3})(\d{2})(\d{2})/i,
-      )
-    )
+    if (!phoneMask.unmaskedValue.match(VALIDATION_RULES.phone))
       errors.phone = 'Неверный формат номера';
 
-    if (
-      !values.email.match(
-        /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/,
-      )
-    )
+    if (!values.email.match(VALIDATION_RULES.email))
       errors.email = 'Неверный формат email';
 
     checkExistence();

@@ -1,4 +1,4 @@
-<#macro svg color="black" width=32 height=32>
+<#macro reloadButton color="black" width=32 height=32>
   <svg
     width=${width}
     height=${height}

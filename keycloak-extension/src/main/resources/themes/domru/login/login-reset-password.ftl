@@ -20,7 +20,8 @@
                 <input name="username" id="username" class="field__input" placeholder="${msg('usernameOrEmailPlaceholder')}" type="text" autofocus />
             </div>
 
-            <button id="login" class="btn btn-main w-1/2" name="login" type="submit">${msg("doSubmit")}</button>
+            <#--  <button id="submit" class="btn btn-main w-1/2" type="submit">${msg("doSubmit")}</button>  -->
+            <button id="submit" class="btn btn-main w-1/2" type="submit">Далее</button>
         </form>
     <#elseif section = "info" >
         ${msg("emailInstruction")}

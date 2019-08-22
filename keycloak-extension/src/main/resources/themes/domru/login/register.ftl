@@ -1,5 +1,4 @@
 <#import "template.ftl" as layout>
-<#import "templates/reload-button.ftl" as reloadButtonMacro>
 <#import "templates/components.ftl" as components>
 <#import "templates/blocks.ftl" as blocks>
 

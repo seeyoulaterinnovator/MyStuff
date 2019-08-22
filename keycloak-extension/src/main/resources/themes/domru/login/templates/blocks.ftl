@@ -1,5 +1,5 @@
 <#import "./components.ftl" as components>
-<#import "./reload-button.ftl" as reloadButtonMacro>
+<#import "./svg.ftl" as svg>
 
 <#macro password >
   <p class="text-black-80">Пароль должен состоять из комбинации букв, цифр, cпецсимволов и быть не менее 8 и не более 16 символов</p>
@@ -34,7 +34,7 @@
         <div class="flex justify-between items-center">
           <div id="generated-password" class="flex"></div>
           <button id="refresh-password-button" class="w-12 h-12 focus:outline-none" type="button">
-            <@reloadButtonMacro.svg color="accentBlue"></@reloadButtonMacro.svg>
+            <@svg.reloadButton color="accentBlue"></@svg.reloadButton>
           </button>
         </div>                                
       </div>
