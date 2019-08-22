@@ -13,7 +13,7 @@
       </#list>
     </#if>
     <title>${msg("loginTitle",(realm.displayName!''))}</title>
-    <link rel="icon" href="${url.resourcesPath}/assets/icons/1ok.png" />
+    <link rel="icon" href="${url.resourcesPath}/static/icons/1ok.png" />
     
     <#if environment == "stage" || environment == "production" >
       <#include "templates/google-tag-manager-head.html">

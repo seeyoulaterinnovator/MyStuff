@@ -2,8 +2,8 @@ import IMask from 'imask';
 
 import { createForm } from 'final-form';
 import { isEmpty, getPassword } from './helpers';
-import PASSWORD_CHARSET from '../src/constants/passwordCharset.js';
-import VALIDATION_RULES from '../src/constants/validationRules.js';
+import PASSWORD_CHARSET from '../constants/passwordCharset.js';
+import VALIDATION_RULES from '../constants/validationRules.js';
 
 export default (function() {
   const formElement = document.getElementById('registrationForm');

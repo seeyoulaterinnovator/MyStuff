@@ -1,5 +1,5 @@
 import IMask from 'imask';
-import VALIDATION_RULES from '../src/constants/validationRules.js';
+import VALIDATION_RULES from '../constants/validationRules.js';
 
 export default (function() {
   const formElement = document.getElementById('loginResetPasswordForm');

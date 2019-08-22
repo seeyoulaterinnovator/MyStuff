@@ -1,6 +1,6 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import PASSWORD_CHARSET from '../src/constants/passwordCharset.js';
+import PASSWORD_CHARSET from '../constants/passwordCharset.js';
 
 function getRandomInt(min, max) {
   let byteArray = new Uint8Array(1);
