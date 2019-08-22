@@ -1,0 +1,25 @@
+.scrollable-container {
+  scrollbar-width: thin;
+  scrollbar-color: #F3F3F3;
+}
+
+.scrollable-container::-webkit-scrollbar {
+  width: 2px;
+
+  background-color: #EFEFEF;
+}
+
+.scrollable-container::-webkit-scrollbar-thumb {
+  @apply .bg-extra;
+
+  width: 2px;
+
+  border-radius: 1px;
+}
+
+.border-box {
+  box-sizing: border-box;
+}
+.content-box {
+  box-sizing: content-box;
+}
