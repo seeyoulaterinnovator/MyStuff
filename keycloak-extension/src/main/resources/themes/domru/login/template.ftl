@@ -76,6 +76,7 @@
         </#list>
     </#if>
 
+    <#include "templates/domru-chat.html">
   </body>
 </html>
 </#macro>
