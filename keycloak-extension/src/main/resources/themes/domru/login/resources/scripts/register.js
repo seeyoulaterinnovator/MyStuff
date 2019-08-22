@@ -18,10 +18,10 @@ export default (function() {
   const form = createForm({
     onSubmit,
     initialValues: {
-      orgName: 'ООО "Вектор"',
-      firstName: 'Иван',
+      orgName: '',
+      firstName: '',
       lastName: '-',
-      email: 'test@test.com',
+      email: '',
       password: '',
       'password-confirm': '',
       recaptcha: false,

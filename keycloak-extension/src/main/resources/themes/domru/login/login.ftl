@@ -1,25 +1,11 @@
 <#import "template.ftl" as layout>
+<#import "templates/components.ftl" as components>
+<#import "templates/blocks.ftl" as blocks>
+
 <@layout.registrationLayout displayInfo=social.displayInfo displayWide=(realm.password && social.providers??); section>
     <#if section = "header">
         <#include "templates/required-fields.html">
-        
-        <header class="flex justify-between items-center">
-            <h1 id="page-title" class="border-extra border-b-2 md:border-b-3 xl:border-b-4">
-                <b>
-                    ${msg("doLogIn")}
-                </b>
-            </h1>
-            
-            <#if realm.password && realm.registrationAllowed && !usernameEditDisabled??>
-                <h2 class="text-main">
-                    <a href="${url.registrationUrl}">
-                        <b>
-                            ${msg("doRegister")}
-                        </b>
-                    </a>
-                </h2>
-            </#if>
-        </header>
+        <@blocks.contentHeader mainTitle="${msg('doLogIn')}" secondaryTitle="${msg('doRegister')}" secondaryHref="${url.registrationUrl}" withBorder=true />
     <#elseif section = "form">
 
         <p class="mt-3">
@@ -37,10 +23,7 @@
                     </#if>
                 </div>
 
-                <div class="field field--required mb-6 md:w-full">
-                    <label for="password" class="field__label">${msg("password")}</label>
-                    <input name="password" id="password" class="field__input" placeholder="${msg('passwordPlaceholder')}" type="password" autocomplete="off" />
-                </div>
+                <@components.field class="mb-6 md:w-full" fieldName="password" label="${msg('password')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true />
                 
                 <div class="flex justify-between w-full items-center">
                     <button id="login" class="btn btn-main w-1/2" name="login" type="submit">Войти</button>
