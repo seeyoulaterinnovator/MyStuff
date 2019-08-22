@@ -1,6 +1,6 @@
 <#macro registrationLayout displayInfo=false displayMessage=true displayWide=false environment="dev" >
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" class="h-full">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" class="h-full min-h-screen">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -25,7 +25,7 @@
       </#list>
     </#if>
   </head>
-  <body class="flex flex-col h-full p-4 sm:px-6 md:py-6 lg:px-8 xl:py-8 xl:px-6">
+  <body class="min-h-full flex flex-col p-4 sm:px-6 md:py-6 lg:px-8 xl:py-8 xl:px-6">
     <#if environment == "stage" || environment == "production" >
       <#include "templates/google-tag-manager-body.html">
     </#if>
@@ -35,6 +35,10 @@
     <main id="content" class="flex-1 py-12 mx-auto md:mx-auto w-full max-w-md">
       <#nested "header">
       
+      <#if displayInfo>
+        <#nested "info">
+      </#if>
+
       <div>
         <#if displayMessage && message?has_content>
           <div class="alert alert-${message.type}">
@@ -46,11 +50,7 @@
           </div>
         </#if>
 
-        <#nested "form">
-
-        <#if displayInfo>
-          <#nested "info">
-        </#if>
+        <#nested "form">        
       </div>
     </main>
     
