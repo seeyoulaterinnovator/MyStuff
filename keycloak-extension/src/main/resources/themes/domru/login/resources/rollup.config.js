@@ -11,7 +11,6 @@ import postcss from 'rollup-plugin-postcss';
 import babel from 'rollup-plugin-babel';
 
 const production = !process.env.ROLLUP_WATCH;
-const legacy = !!process.env.LEGACY;
 
 const onwarn = warning => {
   // Silence circular dependency warning for svelte package
@@ -30,17 +29,16 @@ export default {
     sourcemap: true,
     format: 'iife',
     name: 'app',
-    file: legacy ? 'build/bundle-legacy.min.js' : 'build/bundle.min.js',
+    file: 'build/bundle.min.js',
   },
   plugins: [
-    !legacy &&
-      copy({
-        targets: [
-          { src: 'src/assets/images/*', dest: 'build/images' },
-          { src: 'src/assets/fonts/*', dest: 'build/fonts' },
-        ],
-        copyOnce: !production,
-      }),
+    copy({
+      targets: [
+        { src: 'src/assets/images/*', dest: 'build/images' },
+        { src: 'src/assets/fonts/*', dest: 'build/fonts' },
+      ],
+      copyOnce: !production,
+    }),
 
     json({
       include: ['src/**', 'scripts/**'],
@@ -72,11 +70,11 @@ export default {
     production && strip(),
 
     // compile to good old IE11 compatible ES5
-    legacy &&
+    production &&
       babel({
         extensions: ['.js', '.mjs', '.html', '.svelte'],
         runtimeHelpers: true,
-        exclude: 'node_modules/**',
+        exclude: ['node_modules/@babel/**', 'node_modules/core-js/**'],
         presets: [
           [
             '@babel/preset-env',

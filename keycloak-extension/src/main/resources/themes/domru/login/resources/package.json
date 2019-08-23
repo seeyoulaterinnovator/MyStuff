@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "build-modern": "rollup -c",
-    "build-legacy": "rollup -c --environment LEGACY",
-    "build": "run-p build-modern build-legacy",
+    "build": "rollup -c",
     "autobuild": "rollup -c -w",
     "dev": "run-p start:dev autobuild",
     "start": "sirv public --single",

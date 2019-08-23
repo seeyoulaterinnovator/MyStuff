@@ -62,13 +62,6 @@
         <script src="${url.resourcesPath}/${script}" async></script>
       </#list>
     </#if>
-
-    <!--[if IE ]>
-      <script src="${url.resourcesPath}/build/bundle-legacy.min.js" async></script>
-    <![endif]-->
-    <!--[if !IE]>-->
-      <script src="${url.resourcesPath}/build/bundle.min.js" async></script>
-    <!--<![endif]-->
     
     <#if scripts??>
         <#list scripts as script>
