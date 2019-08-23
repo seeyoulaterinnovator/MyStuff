@@ -12,6 +12,5 @@
 
 # Frontend
 node_modules/
-build/
 .vscode
 .cache

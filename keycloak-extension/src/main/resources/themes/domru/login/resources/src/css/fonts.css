@@ -1,0 +1,49 @@
+@font-face {
+  font-weight: 500;
+  font-family: 'Fact';
+  font-style: normal;
+  src: url('./fonts/Fact-Medium.eot');
+  src: url('./fonts/Fact-Medium.eot?#iefix') format('embedded-opentype'),
+    url('./fonts/Fact-Medium.woff2') format('woff2'),
+    url('./fonts/Fact-Medium.woff') format('woff');
+}
+
+@font-face {
+  font-weight: bold;
+  font-family: 'Fact';
+  font-style: normal;
+  src: url('./fonts/Fact-Bold.eot');
+  src: url('./fonts/Fact-Bold.eot?#iefix') format('embedded-opentype'),
+    url('./fonts/Fact-Bold.woff2') format('woff2'),
+    url('./fonts/Fact-Bold.woff') format('woff');
+}
+
+@font-face {
+  font-weight: normal;
+  font-family: 'Fact';
+  font-style: normal;
+  src: url('./fonts/Fact-Regular.eot');
+  src: url('./fonts/Fact-Regular.eot?#iefix') format('embedded-opentype'),
+    url('./fonts/Fact-Regular.woff2') format('woff2'),
+    url('./fonts/Fact-Regular.woff') format('woff');
+}
+
+@font-face {
+  font-weight: 300;
+  font-family: 'Fact';
+  font-style: italic;
+  src: url('./fonts/Fact-LightItalic.eot');
+  src: url('./fonts/Fact-LightItalic.eot?#iefix') format('embedded-opentype'),
+    url('./fonts/Fact-LightItalic.woff2') format('woff2'),
+    url('./fonts/Fact-LightItalic.woff') format('woff');
+}
+
+@font-face {
+  font-weight: 300;
+  font-family: 'Fact';
+  font-style: normal;
+  src: url('./fonts/Fact-Light.eot');
+  src: url('./fonts/Fact-Light.eot?#iefix') format('embedded-opentype'),
+    url('./fonts/Fact-Light.woff2') format('woff2'),
+    url('./fonts/Fact-Light.woff') format('woff');
+}
