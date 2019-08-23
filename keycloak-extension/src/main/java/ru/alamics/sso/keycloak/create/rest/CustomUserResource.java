@@ -5,6 +5,7 @@ import org.jboss.resteasy.annotations.cache.NoCache;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.events.admin.OperationType;
+import org.keycloak.events.admin.ResourceType;
 import org.keycloak.jose.jws.JWSInput;
 import org.keycloak.jose.jws.JWSInputException;
 import org.keycloak.models.*;
@@ -47,7 +48,7 @@ public class CustomUserResource {
     @Path("")
     @NoCache
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response getCompanies(final UserRequest request, final HttpHeaders headers) {
+    public Response createUser(final UserRequest request, final HttpHeaders headers) {
 
         RealmManager realmManager = new RealmManager(session);
         RealmModel realm = realmManager.getRealmByName(request.getRealmName());
@@ -109,14 +110,19 @@ public class CustomUserResource {
 
     private Response getUserResponse(UserRequest request, RealmModel realm, AdminAuth auth) {
         try {
-            AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth, session, session.getContext().getConnection());
 
             UserModel user = session.users().addUser(realm, request.getEmail());
             Set<String> emptySet = Collections.emptySet();
 
             updateUserFromRequest(user, request, emptySet, realm, session, false);
-            adminEvent.operation(OperationType.CREATE).resourcePath(session.getContext().getUri(), user.getId())
-                    .representation(request).success();
+
+            //todo эвенты не отправляются ??
+            new AdminEventBuilder(realm, auth, session, session.getContext().getConnection())
+                    .resource(ResourceType.USER)
+                    .operation(OperationType.CREATE)
+                    .resourcePath(session.getContext().getUri(), user.getId())
+                    .representation(request)
+                    .success();
 
             if (session.getTransactionManager().isActive()) {
                 session.getTransactionManager().commit();
@@ -180,7 +186,6 @@ public class CustomUserResource {
         ClientModel client = realm.getClientByClientId(token.getIssuedFor());
         if (client == null) {
             throw new NotAuthorizedException("Could not find client for authorization");
-
         }
 
         AdminAuth auth = new AdminAuth(realm, authResult.getToken(), authResult.getUser(), client);
