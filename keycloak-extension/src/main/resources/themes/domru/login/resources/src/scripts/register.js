@@ -25,15 +25,12 @@ export default (function() {
       email: '',
       password: '',
       'password-confirm': '',
-      recaptcha: false,
     },
     validate,
     validateOnBlur: true,
   });
 
-  function onSubmit(values) {
-    console.log('onsubmit', values);
-  }
+  function onSubmit(values) {}
 
   // Валидация полей
   function validate(values) {
@@ -51,7 +48,8 @@ export default (function() {
     if (values['password-confirm'] !== values.password)
       errors['password-confirm'] = 'Пароли не совпадают';
 
-    if (!values.recaptcha) errors.recaptcha = 'Подтвердите, что вы не робот';
+    if (values.recaptcha === false)
+      errors.recaptcha = 'Подтвердите, что вы не робот';
 
     if (!phoneMask.unmaskedValue.match(VALIDATION_RULES.phone))
       errors.phone = 'Неверный формат номера';
@@ -84,7 +82,7 @@ export default (function() {
   }
   function recaptchaCallback() {
     console.info('Recaptcha Success');
-    form.getFieldState('recaptcha').change(true);
+    form.registerField('recaptcha', fieldState => fieldState.change(true));
     form.getFieldState('recaptcha').blur();
   }
   function recaptchaExpiredCallback() {
@@ -169,7 +167,6 @@ export default (function() {
 
   // Красим блоки в разные цвета согласно правилам валидации пароля
   function highlightRules() {
-    console.log('highlight');
     const password = form.getFieldState('password').value;
 
     for (let category in PASSWORD_CHARSET) {

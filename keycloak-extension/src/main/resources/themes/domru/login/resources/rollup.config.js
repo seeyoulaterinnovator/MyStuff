@@ -1,5 +1,7 @@
 import path from 'path';
 
+import copy from 'rollup-plugin-copy';
+import strip from 'rollup-plugin-strip';
 import json from 'rollup-plugin-json';
 import svelte from 'rollup-plugin-svelte';
 import resolve from 'rollup-plugin-node-resolve';
@@ -9,6 +11,7 @@ import postcss from 'rollup-plugin-postcss';
 import babel from 'rollup-plugin-babel';
 
 const production = !process.env.ROLLUP_WATCH;
+const legacy = !!process.env.LEGACY;
 
 const onwarn = warning => {
   // Silence circular dependency warning for svelte package
@@ -27,12 +30,20 @@ export default {
     sourcemap: true,
     format: 'iife',
     name: 'app',
-    file: 'build/bundle.min.js',
+    file: legacy ? 'build/bundle-legacy.min.js' : 'build/bundle.min.js',
   },
   plugins: [
+    !legacy &&
+      copy({
+        targets: [
+          { src: 'src/assets/images/*', dest: 'build/images' },
+          { src: 'src/assets/fonts/*', dest: 'build/fonts' },
+        ],
+        copyOnce: !production,
+      }),
+
     json({
       include: ['src/**', 'scripts/**'],
-      exclude: ['node_modules/foo/**', 'node_modules/bar/**'],
 
       preferConst: true,
       indent: '  ',
@@ -58,13 +69,14 @@ export default {
     }),
     commonjs(),
 
+    production && strip(),
+
     // compile to good old IE11 compatible ES5
-    // TODO: split it to 2 bundles: for old and modern browsers
-    production &&
+    legacy &&
       babel({
         extensions: ['.js', '.mjs', '.html', '.svelte'],
         runtimeHelpers: true,
-        exclude: ['node_modules/@babel/**', 'node_modules/core-js/**'],
+        exclude: 'node_modules/**',
         presets: [
           [
             '@babel/preset-env',
