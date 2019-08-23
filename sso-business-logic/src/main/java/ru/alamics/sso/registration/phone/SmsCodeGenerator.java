@@ -1,6 +1,8 @@
 package ru.alamics.sso.registration.phone;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.alamics.sso.util.EStand;
+import ru.alamics.sso.util.StandResolver;
 
 import javax.ejb.Stateless;
 
@@ -38,9 +40,15 @@ public class SmsCodeGenerator {
     }
 
     public String getCode() {
-        // не дают доступ к отправке смс. приколачиваю фиксированный код и не отправляю смс
-        long generatedLong = rightLimit;
-        //long generatedLong = leftLimit + (long) (Math.random() * (rightLimit - leftLimit));
+
+        long generatedLong = leftLimit + (long) (Math.random() * (rightLimit - leftLimit));
+
+        // локально и на дэве фиксированный код и не отправляю смс
+        if (StandResolver.ENV == EStand.LOCAL || StandResolver.ENV == EStand.DEV) {
+            generatedLong = rightLimit;
+            log.info("Stand {}, predefined code = {}", StandResolver.ENV, generatedLong);
+        }
+
         return String.valueOf(generatedLong);
     }
 

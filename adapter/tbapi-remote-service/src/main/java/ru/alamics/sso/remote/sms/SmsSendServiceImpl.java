@@ -6,6 +6,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import ru.alamics.sso.registration.phone.SmsConfig;
 import ru.alamics.sso.registration.phone.port.SmsSendService;
+import ru.alamics.sso.util.EStand;
+import ru.alamics.sso.util.StandResolver;
 
 import javax.ejb.Stateless;
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -19,10 +21,10 @@ import java.util.Map;
 @Stateless(name = "SmsSender")
 public class SmsSendServiceImpl implements SmsSendService {
 
-    private static final String SMSC_NAME = "centerName";
-    private static final String USERNAME = "user";
-    private static final String PASSWORD = "pass";
-    private static final String SENDER_NAME = "sender";
+    private static final String SMSC_NAME = "rapporto_gold";
+    private static final String USERNAME = "ertelecom";
+    private static final String PASSWORD = "P10BxzA6Z1BRM";
+    private static final String SENDER_NAME = "Domru";
     private final ResteasyClient client = new ResteasyClientBuilder().build();
     private SmsConfig smsConfig;
 
@@ -30,7 +32,7 @@ public class SmsSendServiceImpl implements SmsSendService {
         smsConfig = SmsConfig.builder()
                 .url(new ResteasyUriBuilder()
                         .scheme("http")
-                        .host("smsgw.testing.ertelecom.ru")
+                        .host("smsgw.ertelecom.ru")
                         .port(13003)
                         .path("cgi-bin/sendsms")
                         .build())
@@ -38,8 +40,8 @@ public class SmsSendServiceImpl implements SmsSendService {
                 .username(USERNAME)
                 .password(PASSWORD)
                 .senderName(SENDER_NAME)
-                .timeout(5)
-                .priority(SmsConfig.Priority.HIGH)
+                .timeout(1440)
+                .priority(SmsConfig.Priority.LOWEST)
                 .reportsMask(SmsConfig.ReportsConfig.DELIVERED_TO_PHONE)
                 .encoding(SmsConfig.Encoding.UCS2)
                 .charset(StandardCharsets.UTF_8)
@@ -53,9 +55,11 @@ public class SmsSendServiceImpl implements SmsSendService {
     @Override
     public String sendSms(String phone, String text) {
 
-        // не дают доступ к отправке смс. приколачиваю фиксированный код и не отправляю смс
-        if (true)
+        // локально и на дэве фиксированный код и не отправляю смс
+        if (StandResolver.ENV == EStand.LOCAL || StandResolver.ENV == EStand.DEV) {
+            log.info("Stand {}, do not sending sms", StandResolver.ENV);
             return "0: Accepted for delivery";
+        }
 
         URI uri = smsConfig.getUrl();
 

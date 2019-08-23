@@ -6,6 +6,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import ru.alamics.sso.registration.phone.SmsConfig;
 import ru.alamics.sso.registration.phone.port.ViberSendService;
+import ru.alamics.sso.util.EStand;
+import ru.alamics.sso.util.StandResolver;
 
 import javax.ejb.Stateless;
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -53,9 +55,11 @@ public class ViberSendServiceImpl implements ViberSendService {
     @Override
     public String sendMsg(String phone, String text) {
 
-        // не дают доступ к отправке смс. приколачиваю фиксированный код и не отправляю смс
-        if (true)
+        // локально и на дэве фиксированный код и не отправляю смс
+        if (StandResolver.ENV == EStand.LOCAL || StandResolver.ENV == EStand.DEV) {
+            log.info("Stand {}, do not sending viber msg", StandResolver.ENV);
             return "0: Accepted for delivery";
+        }
 
         URI uri = smsConfig.getUrl();
 
