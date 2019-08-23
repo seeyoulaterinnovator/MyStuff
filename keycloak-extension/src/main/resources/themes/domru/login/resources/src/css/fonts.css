@@ -47,3 +47,16 @@
     url('./fonts/Fact-Light.woff2') format('woff2'),
     url('./fonts/Fact-Light.woff') format('woff');
 }
+
+/* Фоллбэк, если не придут шрифты чата dom.ru */
+@font-face {
+  font-family: 'RobotoRegular';
+  src: url('./fonts/RobotoRegular.woff2') format('woff');
+}
+
+@font-face {
+  font-weight: 400;
+  font-family: icomoon;
+  font-style: normal;
+  src: url('./fonts/icomoon.woff') format('woff');
+}

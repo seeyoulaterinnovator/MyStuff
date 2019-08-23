@@ -1,13 +1,16 @@
 import IMask from 'imask';
+import VALIDATION_RULES from '../constants/validationRules.js';
+import { setButtonAvailability } from './helpers.js';
 
 export default (function() {
   if (!document.getElementById('loginForm')) return;
 
-  const loginElement = document.getElementById('login');
+  const submitElement = document.getElementById('submit');
   const usernameElement = document.getElementById('username');
   const passwordElement = document.getElementById('password');
+  submitElement.disabled = true;
 
-  const dynamicLoginMask = IMask(usernameElement, {
+  const dynamicMask = IMask(usernameElement, {
     mask: [
       {
         mask: '+{7} (000) 000-00-00',
@@ -19,24 +22,23 @@ export default (function() {
   });
 
   let isUsernameValid = false;
-  let isPasswordValid = false;
+  let isPasswordExists = false;
 
   usernameElement.addEventListener('input', () => {
-    if (usernameElement.value !== '') isUsernameValid = true;
-    else isUsernameValid = false;
-
-    setButtonAvailability();
+    setButtonAvailability(validate, submitElement);
   });
 
   passwordElement.addEventListener('input', () => {
-    if (passwordElement.value !== '') isPasswordValid = true;
-    else isPasswordValid = false;
-
-    setButtonAvailability();
+    setButtonAvailability(validate, submitElement);
   });
 
-  function setButtonAvailability() {
-    if (isUsernameValid && isPasswordValid) loginElement.disabled = false;
-    else loginElement.disabled = true;
+  function validate() {
+    // isPasswordExists = passwordElement.value !== '';
+    // isUsernameValid =
+    //   dynamicMask.unmaskedValue.match(VALIDATION_RULES.email) ||
+    //   dynamicMask.unmaskedValue.match(VALIDATION_RULES.phone);
+
+    // return isPasswordExists && isUsernameValid;
+    return true;
   }
 })();

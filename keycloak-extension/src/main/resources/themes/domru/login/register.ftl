@@ -7,8 +7,7 @@
         <#include "templates/required-fields.html">
         <@blocks.contentHeader mainTitle="${msg('registerTitle')}" secondaryTitle="${msg('doLogIn')}" secondaryHref="${url.loginUrl}" withBorder=true />
     <#elseif section = "form">
-        <form id="registrationForm" class="mb-4 pt-3" 
-              action="${url.registrationAction}" method="post">
+        <form id="registrationForm" action="${url.registrationAction}" method="post">
                 <@components.field class="mb-4 md:w-full" fieldName="orgName" label="Наименование организации" placeholder="Наименование организации" required=true />
                 
                 <#-- В нашем случае firstName – это полное имя -->

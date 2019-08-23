@@ -6,6 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="robots" content="noindex, nofollow">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="${url.resourcesPath}/build/images/favicon.ico" type="image/x-icon">
 
     <#if properties.meta?has_content>
       <#list properties.meta?split(' ') as meta>
@@ -38,18 +39,17 @@
         <#nested "info">
       </#if>
 
-      <div>
+      <div class="py-3">
         <#if displayMessage && message?has_content>
-          <div class="alert alert-${message.type}">
-            <#if message.type = 'success'><span class="${properties.kcFeedbackSuccessIcon!}"></span></#if>
-            <#if message.type = 'warning'><span class="${properties.kcFeedbackWarningIcon!}"></span></#if>
-            <#if message.type = 'error'><span class="${properties.kcFeedbackErrorIcon!}"></span></#if>
-            <#if message.type = 'info'><span class="${properties.kcFeedbackInfoIcon!}"></span></#if>
-            <span>${kcSanitize(message.summary)?no_esc}</span>
+          <div class="alert pb-3">
+            <#if message.type = 'info'><span class="text-black">${kcSanitize(message.summary)?no_esc}</span></#if>
+            <#if message.type = 'warning'><span class="text-extra">${kcSanitize(message.summary)?no_esc}</span></#if>
+            <#if message.type = 'success'><span class="text-accentGreen">${kcSanitize(message.summary)?no_esc}</span></#if>
+            <#if message.type = 'error'><span class="text-accentRed">${kcSanitize(message.summary)?no_esc}</span></#if>
           </div>
         </#if>
 
-        <#nested "form">        
+        <#nested "form"> 
       </div>
     </main>
     
