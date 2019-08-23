@@ -1,8 +1,9 @@
 import IMask from 'imask';
-
 import { createForm } from 'final-form';
-import { isEmpty, getPassword } from './helpers';
-import PASSWORD_CHARSET from '../constants/passwordCharset.js';
+
+import linkPasswords from './link-passwords.js';
+import { isEmpty } from './helpers';
+
 import VALIDATION_RULES from '../constants/validationRules.js';
 
 export default (function() {
@@ -17,7 +18,7 @@ export default (function() {
   // Создаем объект формы с помощью final-form
   const registered = {};
   const form = createForm({
-    onSubmit,
+    onSubmit: () => {},
     initialValues: {
       orgName: '',
       firstName: '',
@@ -29,8 +30,6 @@ export default (function() {
     validate,
     validateOnBlur: true,
   });
-
-  function onSubmit(values) {}
 
   // Валидация полей
   function validate(values) {
@@ -165,62 +164,13 @@ export default (function() {
     },
   );
 
-  // Красим блоки в разные цвета согласно правилам валидации пароля
-  function highlightRules() {
-    const password = form.getFieldState('password').value;
-
-    for (let category in PASSWORD_CHARSET) {
-      const ruleElement = document.getElementById(`${category}-password`);
-
-      if (
-        ![...password].some(character =>
-          [...PASSWORD_CHARSET[category]].includes(character),
-        )
-      ) {
-        ruleElement.classList.remove('text-accentGreen');
-        ruleElement.classList.add('text-accentRed');
-      } else {
-        ruleElement.classList.remove('text-accentRed');
-        ruleElement.classList.add('text-accentGreen');
-      }
-    }
+  function getPassword() {
+    return form.getFieldState('password').value;
   }
-  document.getElementById('password').addEventListener('input', highlightRules);
-
-  // Генерация пароля
-  const generatePasswordButton = document.getElementById(
-    'generate-password-button',
-  );
-  const refreshPasswordButton = document.getElementById(
-    'refresh-password-button',
-  );
-  const generatedPasswordContainer = document.getElementById(
-    'generated-password-container',
-  );
-  const generatedPassword = document.getElementById('generated-password');
-
-  function generatePassword() {
-    getPassword().then(data => {
-      const password = data.password;
-      generatedPassword.textContent = password;
-      form.getFieldState('password').change(password);
-      form.getFieldState('password-confirm').change(password);
-      form.getFieldState('password-confirm').blur();
-      highlightRules();
-    });
+  function setPassword(password) {
+    form.getFieldState('password').change(password);
+    form.getFieldState('password-confirm').change(password);
+    form.getFieldState('password-confirm').blur();
   }
-
-  generatePasswordButton.addEventListener('click', () => {
-    generatePassword();
-    generatedPasswordContainer.classList.remove('hidden');
-    generatePasswordButton.classList.add('hidden');
-  });
-
-  refreshPasswordButton.addEventListener('click', () => {
-    generatePassword();
-    refreshPasswordButton.classList.add('rotate');
-    setTimeout(() => {
-      refreshPasswordButton.classList.remove('rotate');
-    }, 500);
-  });
+  linkPasswords(getPassword, setPassword, document.getElementById('password'));
 })();

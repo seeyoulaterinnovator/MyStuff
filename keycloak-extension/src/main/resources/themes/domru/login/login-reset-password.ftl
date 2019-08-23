@@ -4,9 +4,10 @@
 <@layout.registrationLayout displayInfo=true; section>
     <#if section = "header">
         <#include "templates/required-fields.html">
+        
         <@blocks.contentHeader mainTitle="${msg('emailForgotContentTitle')}" />
     <#elseif section = "form">
-        <form id="loginResetPasswordForm" class="mb-4 pt-3" action="${url.loginAction}" method="post">
+        <form id="loginResetPasswordForm" action="${url.loginAction}" method="post">
             <div class="field field--required mb-4 md:w-full">
                 <label class="field__label" for="username">
                     <#if !realm.loginWithEmailAllowed>

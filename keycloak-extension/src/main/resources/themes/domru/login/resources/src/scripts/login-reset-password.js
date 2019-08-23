@@ -1,5 +1,6 @@
 import IMask from 'imask';
 import VALIDATION_RULES from '../constants/validationRules.js';
+import { setButtonAvailability } from './helpers.js';
 
 export default (function() {
   const formElement = document.getElementById('loginResetPasswordForm');
@@ -20,23 +21,14 @@ export default (function() {
     ],
   });
 
-  let isUsernameValid = false;
-
-  usernameElement.addEventListener('input', () => validate());
+  usernameElement.addEventListener('input', () => {
+    setButtonAvailability(validate, submitElement);
+  });
 
   function validate() {
-    if (
+    return !!(
       dynamicMask.unmaskedValue.match(VALIDATION_RULES.email) ||
       dynamicMask.unmaskedValue.match(VALIDATION_RULES.phone)
-    )
-      isUsernameValid = true;
-    else isUsernameValid = false;
-
-    setButtonAvailability();
-  }
-
-  function setButtonAvailability() {
-    if (isUsernameValid) submitElement.disabled = false;
-    else submitElement.disabled = true;
+    );
   }
 })();

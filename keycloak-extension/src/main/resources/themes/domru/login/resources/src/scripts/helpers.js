@@ -35,7 +35,7 @@ function generatePassword(length = 16, charset = PASSWORD_CHARSET) {
   return result;
 }
 
-export function getPassword() {
+export function fetchPassword() {
   const mock = new MockAdapter(axios);
   const url = '/api/get-password';
 
@@ -98,4 +98,8 @@ export function isEmpty(obj) {
     return false;
   }
   return true;
+}
+
+export function setButtonAvailability(validate, submitElement) {
+  submitElement.disabled = !validate();
 }

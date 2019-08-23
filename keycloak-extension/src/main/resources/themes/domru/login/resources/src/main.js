@@ -3,6 +3,7 @@ import App from './App.svelte';
 import './scripts/login.js';
 import './scripts/register.js';
 import './scripts/login-reset-password.js';
+import './scripts/login-update-password.js';
 
 import './css/tailwind-base.css';
 import './css/tailwind-advanced.css';

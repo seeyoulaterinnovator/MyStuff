@@ -7,13 +7,10 @@
         <#include "templates/required-fields.html">
         <@blocks.contentHeader mainTitle="${msg('doLogIn')}" secondaryTitle="${msg('doRegister')}" secondaryHref="${url.registrationUrl}" withBorder=true />
     <#elseif section = "form">
-
-        <p class="mt-3">
-            Если у вас уже есть учетная запись, вы можете войти.
-        </p>
+        <p class="pb-3">Если у вас уже есть учетная запись, вы можете войти.</p>
          
         <#if realm.password>
-            <form id="loginForm" class="mb-4 md:flex md:flex-wrap md:justify-between pt-3" onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
+            <form id="loginForm" class="md:flex md:flex-wrap md:justify-between" onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
                 <div class="field field--required mb-4 md:w-full">
                     <label class="field__label" for="username"><#if !realm.registrationEmailAsUsername>${msg("username")}</#if></label>
                     <#if usernameEditDisabled??>
@@ -26,7 +23,7 @@
                 <@components.field class="mb-6 md:w-full" fieldName="password" label="${msg('password')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true />
                 
                 <div class="flex justify-between w-full items-center">
-                    <button id="login" class="btn btn-main w-1/2" name="login" type="submit">Войти</button>
+                    <button id="submit" class="btn btn-main w-1/2" type="submit">Войти</button>
                     <#if realm.resetPasswordAllowed>
                         <span class="underline opacity-50 text-right"><a href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a></span>
                     </#if>
