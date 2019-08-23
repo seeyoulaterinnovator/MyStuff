@@ -23,6 +23,8 @@ public class UserPhoneVerifier {
     private SmsService smsService;
     @EJB
     private HashProvider hashProvider;
+    @EJB
+    private ViberService viberService;
 
     public UserPhoneVerifier() {
 
