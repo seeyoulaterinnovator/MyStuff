@@ -3,6 +3,8 @@ package ru.alamics.sso.remote.sms;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.internal.ClientInvocationBuilder;
+import org.jboss.resteasy.plugins.providers.StringTextStar;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import ru.alamics.sso.registration.phone.SmsConfig;
 import ru.alamics.sso.registration.phone.port.SmsSendService;
@@ -10,8 +12,7 @@ import ru.alamics.sso.util.EStand;
 import ru.alamics.sso.util.StandResolver;
 
 import javax.ejb.Stateless;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.*;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -63,12 +64,16 @@ public class SmsSendServiceImpl implements SmsSendService {
 
         URI uri = smsConfig.getUrl();
 
-        String response = client.target(uri)
+        // TODO https://stackoverflow.com/questions/53760939/processingexception-resteasy003145-unable-to-find-a-messagebodyreader-of-conte?noredirect=1&lq=1
+        ClientInvocationBuilder builder = (ClientInvocationBuilder)client.register(StringTextStar.class)
+                .target(uri)
                 .queryParams(getConfigForQuery())
                 .queryParam("to", phone)
                 .queryParam("text", URLEncoder.encode(text, smsConfig.getCharset()))
                 .request()
-                .post(null, String.class);
+                ;
+
+        String response = builder.get(String.class);
 
         return response;
     }
