@@ -8,7 +8,6 @@ import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -37,7 +36,9 @@ public class CitiesResource {
         if (cities == null) {
             lock.lock();
             try {
-                cities = SimpleHttp.doGet(url, session).asJson();
+                if (cities == null) {
+                    cities = SimpleHttp.doGet(url, session).asJson();
+                }
             }  catch (IOException e){
                 log.error("Connect to " + url + " failed");
             } finally {
