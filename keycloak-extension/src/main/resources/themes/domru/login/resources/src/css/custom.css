@@ -23,3 +23,20 @@
 .content-box {
   box-sizing: content-box;
 }
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  margin: 0;
+
+  -webkit-appearance: none;
+}
+
+.service__item::before {
+  @apply .bg-extra !important;
+}
+
+.icon_service-question::before {
+  opacity: 0.5;
+
+  content: url('./images/Chat.svg') !important;
+}

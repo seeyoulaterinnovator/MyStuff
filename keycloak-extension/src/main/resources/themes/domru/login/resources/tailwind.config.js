@@ -1,5 +1,3 @@
-const { width, height } = require('tailwindcss/defaultTheme');
-
 module.exports = {
   theme: {
     screens: {
@@ -13,6 +11,10 @@ module.exports = {
       body: ['Fact', 'Arial', 'sans-serif'],
     },
     extend: {
+      fontSize: {
+        '4/3em': '1.33em',
+        '5/3em': '1.66em',
+      },
       flex: {
         'basis-1/2': '0 1 50%',
       },
@@ -25,6 +27,7 @@ module.exports = {
         '60px': '60px',
       },
       width: {
+        '3/7': '42.8%',
         '30px': '30px',
         '60px': '60px',
       },
@@ -37,6 +40,8 @@ module.exports = {
         '1/4': '25%',
         '1/2': '50%',
         '3/4': '75%',
+        '440px': '440px',
+        '470px': '470px',
       },
       minHeight: {
         '1/4': '25%',

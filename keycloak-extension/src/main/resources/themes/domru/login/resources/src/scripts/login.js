@@ -33,12 +33,9 @@ export default (function() {
   });
 
   function validate() {
-    // isPasswordExists = passwordElement.value !== '';
-    // isUsernameValid =
-    //   dynamicMask.unmaskedValue.match(VALIDATION_RULES.email) ||
-    //   dynamicMask.unmaskedValue.match(VALIDATION_RULES.phone);
+    isPasswordExists = passwordElement.value !== '';
+    isUsernameValid = dynamicMask.unmaskedValue !== '';
 
-    // return isPasswordExists && isUsernameValid;
-    return true;
+    return isPasswordExists && isUsernameValid;
   }
 })();

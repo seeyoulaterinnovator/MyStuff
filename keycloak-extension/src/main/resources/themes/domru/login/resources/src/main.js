@@ -4,6 +4,7 @@ import './scripts/login.js';
 import './scripts/register.js';
 import './scripts/login-reset-password.js';
 import './scripts/login-update-password.js';
+import './scripts/totp.js';
 
 import './css/tailwind-base.css';
 import './css/tailwind-advanced.css';

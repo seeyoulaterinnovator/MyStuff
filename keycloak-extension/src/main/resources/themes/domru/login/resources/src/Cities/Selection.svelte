@@ -4,8 +4,6 @@
   import Cookie from 'js-cookie';
 
   import axios from 'axios';
-  import MockAdapter from 'axios-mock-adapter';
-  import citiesDB from '../mock/cities.json';
 
   import {
     status,
@@ -43,15 +41,12 @@
   }
 
   onMount(() => {
-    const mock = new MockAdapter(axios);
-    const url = '/cities';
-
-    mock.onGet(url).reply(200, citiesDB);
+    const url = '/auth/realms/user/cities';
 
     axios
       .get(url)
       .then(response => {
-        allCities.set(response.data.cities);
+        allCities.set(response.data.results.cities);
 
         groupedCities = groupByFirstCharacter($allCities);
       })
