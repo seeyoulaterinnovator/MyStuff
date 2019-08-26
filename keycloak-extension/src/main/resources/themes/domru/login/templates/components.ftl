@@ -1,6 +1,7 @@
 <#macro field fieldName label="" placeholder="" required=false withError=true type="text" class="" extra... >
   <div 
-    class="field <#if required>field--required</#if> ${class}"
+    class="field ${class}
+    <#if required>field--required</#if>"
     <#list extra as attrName, attrVal>
       ${attrName}="${attrVal}"
     </#list>

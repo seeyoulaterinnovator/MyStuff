@@ -32,7 +32,7 @@
 
     <#include "templates/header.html">
 
-    <main id="content" class="flex-1 py-12 mx-auto md:mx-auto w-full max-w-md">
+    <main id="content" class="flex-1 py-12 mx-auto md:mx-auto w-full max-w-440px xl:max-w-470px">
       <#nested "header">
       
       <#if displayInfo>
