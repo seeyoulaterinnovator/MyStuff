@@ -1,6 +1,6 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import PASSWORD_CHARSET from '../constants/passwordCharset.js';
+import { PASSWORD_CHARSET } from '../constants/passwordCharset.js';
 
 function getRandomInt(min, max) {
   let byteArray = new Uint8Array(1);
@@ -16,15 +16,17 @@ function getRandomInt(min, max) {
 
 function generatePassword(length = 16, charset = PASSWORD_CHARSET) {
   let result = '';
-  let flags = [0, 0, 0];
-  const keys = ['letters', 'numbers', 'extraChars'];
+  const keys = Object.keys(charset); // ["lowercase", "uppercase", "numbers", "extraChars"]
 
-  while (!isEqual(flags, [1, 1, 1])) {
+  let flags = new Array(keys.length).fill(0);
+  const targetFlags = new Array(keys.length).fill(1); // [1, 1, 1, 1]
+
+  while (!isEqual(flags, targetFlags)) {
     result = '';
-    flags = [0, 0, 0];
+    flags = new Array(keys.length).fill(0); // [0, 0, 0, 0]
 
     for (let i = 0; i < length; i++) {
-      const charsetIndex = getRandomInt(0, 2);
+      const charsetIndex = getRandomInt(0, flags.length - 1);
       const currentCharset = charset[keys[charsetIndex]];
 
       result += currentCharset[getRandomInt(0, currentCharset.length - 1)];

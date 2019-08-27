@@ -1,4 +1,4 @@
-import PASSWORD_CHARSET from '../constants/passwordCharset.js';
+import { HIGHLIGHT_VALIDATION_CHARSET } from '../constants/passwordCharset.js';
 import { fetchPassword } from './helpers';
 
 // Функция нужна для того, чтобы привязать логику к блоку password-block
@@ -49,12 +49,12 @@ export default (
   function highlightRules() {
     const password = getPassword();
 
-    for (let category in PASSWORD_CHARSET) {
+    for (let category in HIGHLIGHT_VALIDATION_CHARSET) {
       const ruleElement = document.getElementById(`${category}-password`);
 
       if (
         ![...password].some(character =>
-          [...PASSWORD_CHARSET[category]].includes(character),
+          [...HIGHLIGHT_VALIDATION_CHARSET[category]].includes(character),
         )
       ) {
         ruleElement.classList.remove('text-accentGreen');
