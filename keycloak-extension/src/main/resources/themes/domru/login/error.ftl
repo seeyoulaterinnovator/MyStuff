@@ -10,9 +10,9 @@
         </#if>
 
         <#if message.summary?contains('Page not found') || message.summary?contains('Неверный параметр')  >
-            <@errorPage.code500 backHref=backHref backMessage=backMessage />
-        <#elseif message.summary?contains('500') >
             <@errorPage.code404 backHref=backHref backMessage=backMessage />
+        <#elseif message.summary?contains('500') >
+            <@errorPage.code500 backHref=backHref backMessage=backMessage />
         <#else>
             ${message.summary}
             <#if client?? && client.baseUrl?has_content>
