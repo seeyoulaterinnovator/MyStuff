@@ -67,7 +67,7 @@ public class RiasCheckProvider implements FormAction {
         if (phoneCheck) {
             formData.remove(USER_ATTRIBUTES_PHONE);
             context.getEvent().detail("Phone", user.getPhone());
-            errors.add(new FormMessage(USER_ATTRIBUTES_PHONE, "Пользователь с таким телефоном уже существкет"));
+            errors.add(new FormMessage(USER_ATTRIBUTES_PHONE, "Пользователь с таким телефоном уже существует"));
         }
 
         if (!errors.isEmpty()) {
