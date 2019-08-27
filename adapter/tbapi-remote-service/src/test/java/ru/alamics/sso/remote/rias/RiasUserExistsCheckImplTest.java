@@ -6,6 +6,7 @@ import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.alamics.sso.registration.phone.SmsConfig;
+import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.remote.sms.SmsSendServiceImpl;
 
 import java.nio.charset.StandardCharsets;
@@ -49,8 +50,13 @@ class RiasUserExistsCheckImplTest {
                 )
         );
 
-        boolean result = service.checkParam("test@test.test");
-        assertThat(result).isTrue();
+        try {
+            boolean result = service.checkParam("test@test.test");
+            assertThat(result).isTrue();
+
+        } catch (RiasCheckException e) {
+
+        }
     }
 
     @Test
@@ -63,8 +69,12 @@ class RiasUserExistsCheckImplTest {
                 )
         );
 
-        boolean result = service.checkParam("test@test.test");
-        assertThat(result).isFalse();
+        try {
+            boolean result = service.checkParam("test@test.test");
+            assertThat(result).isFalse();
+        } catch (RiasCheckException e) {
+
+        }
     }
 
     @Test
@@ -77,7 +87,7 @@ class RiasUserExistsCheckImplTest {
                 )
         );
 
-        assertThatThrownBy(() -> service.checkParam("test@test.test")).isInstanceOf(RuntimeException.class).hasMessageContaining("SECRET_ERROR");
+        assertThatThrownBy(() -> service.checkParam("test@test.test")).isInstanceOf(RiasCheckException.class).hasMessageContaining("SECRET_ERROR");
     }
 
     @Test
@@ -90,7 +100,7 @@ class RiasUserExistsCheckImplTest {
                 )
         );
 
-        assertThatThrownBy(() -> service.checkParam("test@test.test")).isInstanceOf(RuntimeException.class).hasMessageContaining("empty");
+        assertThatThrownBy(() -> service.checkParam("test@test.test")).isInstanceOf(RiasCheckException.class).hasMessageContaining("empty");
     }
 
     @Test
@@ -103,7 +113,7 @@ class RiasUserExistsCheckImplTest {
                 )
         );
 
-        assertThatThrownBy(() -> service.checkParam("test@test.test")).isInstanceOf(RuntimeException.class).hasMessageContaining("invalid");
+        assertThatThrownBy(() -> service.checkParam("test@test.test")).isInstanceOf(RiasCheckException.class).hasMessageContaining("invalid");
     }
 
 
