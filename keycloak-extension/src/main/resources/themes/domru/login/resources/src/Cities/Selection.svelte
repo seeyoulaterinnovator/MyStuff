@@ -62,14 +62,16 @@
 </script>
 
 <ul
-  class="flex flex-col overflow-x-hidden overflow-y-auto scrollable-container
-  w-full h-full">
+  class="flex md:flex-wrap flex-col overflow-x-hidden overflow-y-auto
+  scrollable-container w-full h-full">
   {#each groupedCities as group}
     <li class="flex flex-col sm:flex-row mb-4 px-2">
-      <h2 class="text-extra mr-2">{group.firstCharacter}</h2>
-      <ul>
+      <h2 class="text-extra mr-2 capitalize text-center leading-none w-5">
+        {group.firstCharacter}
+      </h2>
+      <ul class="w-full pt-1 sm:pt-0">
         {#each group.cities as city}
-          <li class="mb-2 px-2">
+          <li class="mb-2 sm:px-2 hover:bg-extra">
             <button on:click={() => handleClick(city)}>{city}</button>
           </li>
         {:else}
