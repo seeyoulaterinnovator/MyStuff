@@ -6,9 +6,10 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
-import ru.alamics.sso.registration.model.TbapiConnectConfig;
-import ru.alamics.sso.registration.model.TbapiRequest;
-import ru.alamics.sso.registration.port.TbapiRemoteService;
+import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
+import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
+import ru.alamics.sso.registration.tbapi.model.TbapiRequest;
+import ru.alamics.sso.registration.tbapi.port.TbapiRemoteService;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.*;
@@ -23,11 +24,9 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
     private static final Map<String, Object> mapExample = Collections.unmodifiableMap(new HashMap<>());
     private final ResteasyClient client = new ResteasyClientBuilder().build();
 
-    /**
-     *  По факту здесь создание кастомера
-     */
     @Override
-    public Map<String, Object> createCustomer(TbapiRequest request, TbapiConnectConfig connectConfig) {
+    public Map<String, Object> createCustomer(TbapiRequest request, TbapiConnectConfig connectConfig) throws TbapiRegisterException
+    {
 
         URI uri = new ResteasyUriBuilder()
                 .scheme(connectConfig.isSecure() ? "https" : "http")
@@ -53,8 +52,10 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            responseMap = Map.of();
+            //responseMap = Map.of();
+            throw new TbapiRegisterException(e);
         }
 
         return responseMap;
-    }}
+    }
+}

@@ -86,7 +86,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                     }
 
                 } catch (Exception e) {
-                    log.error(e);
+                    log.error("", e);
                 }
             }
         }

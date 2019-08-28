@@ -1,4 +1,7 @@
 dependencies {
+
+    implementation 'org.jboss.resteasy:resteasy-jackson2-provider:3.6.3.Final'
+    
     implementation 'org.slf4j:slf4j-api:1.7.22'
     implementation group: 'javax.ejb', name: 'ejb-api', version: '3.0'
 }

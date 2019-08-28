@@ -4,11 +4,10 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import ru.alamics.sso.registration.model.TbapiConnectConfig;
-import ru.alamics.sso.registration.model.TbapiRequest;
+import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
+import ru.alamics.sso.registration.tbapi.model.TbapiRequest;
 
 import java.util.Map;
-import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;

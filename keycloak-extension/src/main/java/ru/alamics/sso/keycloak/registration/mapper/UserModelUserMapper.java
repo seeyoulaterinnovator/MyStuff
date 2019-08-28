@@ -17,8 +17,7 @@ public class UserModelUserMapper {
         return User.builder()
                 .id(model.getId())
                 .email(model.getEmail())
-                .firstName(model.getFirstName())
-                .lastName(model.getLastName())
+                .name(model.getFirstName())
                 .phone(model.getFirstAttribute(PHONE))
                 .phoneVerifiedOn(model.getFirstAttribute(PHONE_VALIDATED_ON) != null ? LocalDateTime.parse(model.getFirstAttribute(PHONE_VALIDATED_ON)) : null)
                 .attributes(model
@@ -33,8 +32,7 @@ public class UserModelUserMapper {
     public void mergeUserInto(User user, UserModel model) {
 
         model.setEmail(user.getEmail());
-        model.setFirstName(user.getFirstName());
-        model.setLastName(user.getLastName());
+        model.setFirstName(user.getName());
         for (Map.Entry<String, List<String>> attributeEntry:
             user.getAttributes().entrySet()) {
             model.setAttribute(attributeEntry.getKey(), attributeEntry.getValue());

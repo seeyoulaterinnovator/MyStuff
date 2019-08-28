@@ -22,9 +22,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static ru.alamics.sso.registration.model.FormConstants.*;
+import static ru.alamics.sso.registration.model.UserConstants.*;
+
 public class RiasCheckProvider implements FormAction {
 
-    public static final String USER_ATTRIBUTES_PHONE = "user.attributes.phone";
     private final RiasService riasService;
     private final UserModelUserMapper mapper;
 
@@ -50,7 +52,7 @@ public class RiasCheckProvider implements FormAction {
 
 //        User user = mapper.mapToUser(context.getUser());
         User user = User.builder()
-                .email(formData.getFirst(RegistrationPage.FIELD_EMAIL))
+                .email(formData.getFirst(FIELD_EMAIL))
                 .phone(formData.getFirst(USER_ATTRIBUTES_PHONE))
                 .build();
 
@@ -59,9 +61,9 @@ public class RiasCheckProvider implements FormAction {
         boolean phoneCheck = riasService.checkPhone(user);
 
         if (emailCheck) {
-            formData.remove(Validation.FIELD_EMAIL);
+            formData.remove(FIELD_EMAIL);
             context.getEvent().detail(Details.EMAIL, user.getEmail());
-            errors.add(new FormMessage(RegistrationPage.FIELD_EMAIL, Messages.EMAIL_EXISTS));
+            errors.add(new FormMessage(FIELD_EMAIL, Messages.EMAIL_EXISTS));
         }
 
         if (phoneCheck) {
@@ -82,7 +84,7 @@ public class RiasCheckProvider implements FormAction {
     public void success(FormContext context) {
         UserModel user = context.getUser();
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
-        user.setAttribute("phone", Collections.singletonList(formData.getFirst(USER_ATTRIBUTES_PHONE)));
+        user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(formData.getFirst(USER_ATTRIBUTES_PHONE)));
     }
 
     @Override

@@ -7,23 +7,35 @@ import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormActionFactory;
 import org.keycloak.authentication.FormContext;
 import org.keycloak.authentication.ValidationContext;
+import org.keycloak.events.Details;
+import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.*;
+import org.keycloak.models.utils.FormMessage;
 import org.keycloak.provider.ProviderConfigProperty;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 
-import ru.alamics.sso.registration.TbapiService;
+import ru.alamics.sso.registration.tbapi.TbapiService;
 import ru.alamics.sso.registration.UserExtension;
-import ru.alamics.sso.registration.model.TbapiConnectConfig;
+import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
+import javax.ws.rs.core.MultivaluedMap;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import static ru.alamics.sso.registration.model.FormConstants.*;
+import static ru.alamics.sso.registration.model.UserConstants.ATTR_ORG_NAME;
 
 public class UserModelExtender implements FormAction, FormActionFactory {
 
     private static final Logger log = Logger.getLogger(UserModelExtender.class);
+
+    private static final String TBAPI_CHECK_DATA = "tbapi_check_data";
 
     // jackson serialize
     ObjectMapper jacksonMapper = new ObjectMapper();
@@ -91,39 +103,87 @@ public class UserModelExtender implements FormAction, FormActionFactory {
 
     @Override
     public void validate(ValidationContext context) {
-        context.success();
+
+        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
+        List<FormMessage> errors = new ArrayList<>();
+        String eventError = Errors.INVALID_REGISTRATION;
+
+        try {
+            context.getEvent().detail(Details.REGISTER_METHOD, "form");
+
+
+            Map<String, String> config = context.getAuthenticatorConfig().getConfig();
+
+            TbapiConnectConfig connectConfig = new TbapiConnectConfig();
+
+            connectConfig.setHost(config.get(HOSTNAME_PROPERTY_NAME));
+            connectConfig.setPort(Integer.parseInt(config.get(PORT_PROPERTY_NAME)));
+            connectConfig.setAppname(config.get(AUTH_APPNAME_NAME));
+            connectConfig.setUsername(config.get(AUTH_USERNAME_NAME));
+            connectConfig.setPath(config.get(PATH_PROPERTY_NAME));
+            connectConfig.setSecure(Boolean.parseBoolean(config.get(SCHEMA_PROPERTY_NAME)));
+
+
+            User user = User.builder()
+                    .name(formData.getFirst(FIELD_FIRST_NAME))
+                    .email(formData.getFirst(FIELD_EMAIL))
+                    .phone(formData.getFirst(USER_ATTRIBUTES_PHONE))
+                    .build();
+
+            String orgName = formData.getFirst(FIELD_ORG_NAME);
+            // TODO на стандартной верстке нет поля организации
+            if (orgName == null) {
+                orgName = formData.getFirst(FIELD_LAST_NAME);
+            }
+            user.getAttributes().put(ATTR_ORG_NAME, Collections.singletonList(orgName));
+
+
+            Map<String, Object> attributes = tbapiService.registerUser(user, connectConfig);
+
+            userExtension.extendUser(user, attributes);
+
+
+            String userStr = null;
+            try {
+                userStr = jacksonMapper.writer().writeValueAsString(user);
+                log.info(String.format("serialized: %s", userStr));
+            } catch (Exception e) {
+                log.error("", e);
+            }
+
+            if (userStr != null)
+                context.getAuthenticationSession().setAuthNote(TBAPI_CHECK_DATA, userStr);
+
+        } catch (Exception e) {
+            log.error("", e);
+            errors.add(new FormMessage("Регистрация временно недоступна, попробуйте повторить попытку позже"));
+        }
+
+        if (!errors.isEmpty()) {
+            context.error(eventError);
+            context.validationError(formData, errors);
+
+        } else {
+            context.success();
+        }
     }
 
     @Override
     public void success(FormContext context) {
+
         UserModel model = context.getUser();
 
-        Map<String, String> config = context.getAuthenticatorConfig().getConfig();
+        String userStr = context.getAuthenticationSession().getAuthNote(TBAPI_CHECK_DATA);
 
-        TbapiConnectConfig connectConfig = new TbapiConnectConfig();
-
-        connectConfig.setHost(config.get(HOSTNAME_PROPERTY_NAME));
-        connectConfig.setPort(Integer.parseInt(config.get(PORT_PROPERTY_NAME)));
-        connectConfig.setAppname(config.get(AUTH_APPNAME_NAME));
-        connectConfig.setUsername(config.get(AUTH_USERNAME_NAME));
-        connectConfig.setPath(config.get(PATH_PROPERTY_NAME));
-        connectConfig.setSecure(Boolean.parseBoolean(config.get(SCHEMA_PROPERTY_NAME)));
-
-        User user = mapper.mapToUser(model);
-
-        Map<String, Object> attributes = tbapiService.registerUser(user, connectConfig);
-
+        User userNewData = null;
         try {
-            String attrStr = jacksonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(attributes);
-            log.info(String.format("Got answer from TBAPI: %s", attrStr));
-        } catch (Exception e) {
-            log.error(e);
+            userNewData = jacksonMapper.readValue(userStr, User.class);
+        } catch (IOException e) {
+            log.error("Error while serializing", e);
         }
 
-        userExtension.extendUser(user, attributes);
-
-        mapper.mergeUserInto(user, model);
-
+        if (userNewData != null)
+            mapper.mergeUserInto(userNewData, model);
     }
 
     @Override

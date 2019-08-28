@@ -19,9 +19,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static ru.alamics.sso.registration.model.FormConstants.FIELD_EMAIL;
+import static ru.alamics.sso.registration.model.FormConstants.USER_ATTRIBUTES_PHONE;
+import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
+
 public class PhoneCheckProvider implements FormAction {
 
-    public static final String USER_ATTRIBUTES_PHONE = "user.attributes.phone";
     private final EntityManager em;
 
     public PhoneCheckProvider(EntityManager em) {
@@ -44,7 +47,7 @@ public class PhoneCheckProvider implements FormAction {
 
 
         User user = User.builder()
-                .email(formData.getFirst(RegistrationPage.FIELD_EMAIL))
+                .email(formData.getFirst(FIELD_EMAIL))
                 .phone(formData.getFirst(USER_ATTRIBUTES_PHONE))
                 .build();
 
@@ -77,7 +80,7 @@ public class PhoneCheckProvider implements FormAction {
     public void success(FormContext context) {
         UserModel user = context.getUser();
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
-        user.setAttribute("phone", Collections.singletonList(formData.getFirst(USER_ATTRIBUTES_PHONE)));
+        user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(formData.getFirst(USER_ATTRIBUTES_PHONE)));
     }
 
     @Override
