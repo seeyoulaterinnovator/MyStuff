@@ -4,11 +4,11 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import ru.alamics.sso.registration.model.TbapiConnectConfig;
-import ru.alamics.sso.registration.model.TbapiRequest;
+import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
+import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
+import ru.alamics.sso.registration.tbapi.model.TbapiRequest;
 
 import java.util.Map;
-import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -35,7 +35,8 @@ class TbapiServiceRestImplTest {
     }
 
     @Test
-    void createLead() {
+    void createCustomer() throws TbapiRegisterException
+    {
 
         server.stubFor(post(urlEqualTo("/api/v1/leadManagement/lead"))
                 .withHeader("Accept", equalTo("application/json"))
@@ -55,13 +56,14 @@ class TbapiServiceRestImplTest {
         conectConfig.setPath("/api/v1/leadManagement/lead");
         conectConfig.setSecure(false);
 
-        Map<String, Object> lead = service.createLead(
-                TbapiRequest.builder()
-                        //.id(UUID.randomUUID().toString())
-                        .email("test@test.ru")
-                        //.firstName("User")
-                        .name("Test")
-                        .build(),
+        TbapiRequest req = new TbapiRequest();
+        //.id(UUID.randomUUID().toString())
+        req.setEmail("test@test.ru");
+        //.firstName("User")
+        req.setName("Test");
+
+        Map<String, Object> lead = service.createCustomer(
+                req,
                 conectConfig
         );
 

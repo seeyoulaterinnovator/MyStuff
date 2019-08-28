@@ -1,4 +1,4 @@
-package ru.alamics.sso.registration.model;
+package ru.alamics.sso.registration.tbapi.model;
 
 import lombok.Data;
 
