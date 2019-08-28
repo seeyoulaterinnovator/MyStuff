@@ -17,14 +17,15 @@ public class TbapiService {
     }
 
     public Map<String, Object> registerUser(User user, TbapiConnectConfig connectConfig) {
-        var request = TbapiRequest.builder()
-                //.id(user.getId())
-                .email(user.getEmail())
-                .name(String.format("%s %s", user.getFirstName(), user.getLastName()))
-                .phoneNumber(user.getPhone())
-                .build();
 
-        Map<String, Object> result = remoteService.createLead(request, connectConfig);
+        TbapiRequest request = new TbapiRequest();
+        //.id(user.getId())
+        request.setEmail(user.getEmail());
+        request.setName(user.getFirstName());
+        request.setPhoneNumber(user.getPhone());
+        request.setLegalName(user.getFirstName()); // TODO attribute orgName
+
+        Map<String, Object> result = remoteService.createCustomer(request, connectConfig);
 
         return result;
     }

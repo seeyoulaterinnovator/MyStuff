@@ -4,16 +4,11 @@ import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder
 public class TbapiRequest {
 
-    //private String id;
+    final private CustomerCategory customerCategory = new CustomerCategory();
 
-    @Builder.Default
-    final private String Type = "business";
-
-    @Builder.Default
-    final private String customerCategory = "B2R";
+    final private LegalAddress legalAddress = new LegalAddress();
 
     private String email;
 
@@ -21,4 +16,19 @@ public class TbapiRequest {
 
     private String phoneNumber;
 
+    private String legalName;
+
+    @Data
+    private class LegalAddress {
+
+        final private String id = "9153062588613043803";
+    }
+
+    @Data
+    private class CustomerCategory {
+
+        final private String id = "9149000490413788409";
+
+        final private String name = "B2R";
+    }
 }
