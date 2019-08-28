@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.tbapi.model.TbapiRequest;
 
@@ -34,7 +35,8 @@ class TbapiServiceRestImplTest {
     }
 
     @Test
-    void createCustomer() {
+    void createCustomer() throws TbapiRegisterException
+    {
 
         server.stubFor(post(urlEqualTo("/api/v1/leadManagement/lead"))
                 .withHeader("Accept", equalTo("application/json"))
