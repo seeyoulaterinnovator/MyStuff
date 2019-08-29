@@ -1,9 +1,9 @@
 import IMask from 'imask';
-import VALIDATION_RULES from '../constants/validationRules.js';
 import { setButtonAvailability } from './helpers.js';
 
 export default (function() {
-  if (!document.getElementById('loginForm')) return;
+  const formElement = document.getElementById('loginForm');
+  if (!formElement) return;
 
   const submitElement = document.getElementById('submit');
   const usernameElement = document.getElementById('username');
@@ -30,6 +30,13 @@ export default (function() {
 
   passwordElement.addEventListener('input', () => {
     setButtonAvailability(validate, submitElement);
+  });
+
+  // Отправляем на сервер значение телефона без маски
+  // Нужно так делать на каждой форме, где есть imask
+  formElement.addEventListener('submit', () => {
+    usernameElement.value = dynamicMask.unmaskedValue;
+    return true;
   });
 
   function validate() {
