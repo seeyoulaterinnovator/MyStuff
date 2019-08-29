@@ -33,10 +33,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
+
 @Slf4j
 public class CustomUserResource {
-
-    private static final String PHONE_ATTR = "phone";
 
     protected KeycloakSession session;
 
@@ -69,9 +69,10 @@ public class CustomUserResource {
             return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
         } else {
             List<UserEntity> users = getEM().createQuery("select u from UserAttributeEntity atr join atr.user u " +
-                    "where atr.name = 'phone' and " +
-                    " atr.value like '%' || :phone || '%' and" +
+                    "where atr.name = :ph_attr_name and " +
+                    " atr.value like '%' || :phone || '%' and" + // TODO =
                     " u.realmId = :realId ", UserEntity.class)
+                    .setParameter("ph_attr_name", ATTR_PHONE_NAME)
                     .setParameter("phone", request.getPhone())
                     .setParameter("realId", realm.getId())
                     .getResultList();
@@ -231,7 +232,7 @@ public class CustomUserResource {
             }
         }
 
-        user.setAttribute(PHONE_ATTR, Collections.singletonList(request.getPhone()));
+        user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(request.getPhone()));
 
     }
 }

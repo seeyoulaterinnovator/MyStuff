@@ -3,7 +3,6 @@ package ru.alamics.sso.keycloak.registration.rias;
 import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormContext;
 import org.keycloak.authentication.ValidationContext;
-import org.keycloak.authentication.forms.RegistrationPage;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
@@ -12,7 +11,6 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.services.messages.Messages;
-import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.rias.RiasService;
@@ -53,7 +51,7 @@ public class RiasCheckProvider implements FormAction {
 //        User user = mapper.mapToUser(context.getUser());
         User user = User.builder()
                 .email(formData.getFirst(FIELD_EMAIL))
-                .phone(formData.getFirst(USER_ATTRIBUTES_PHONE))
+                .phone(formData.getFirst(FIELD_PHONE))
                 .build();
 
         boolean emailCheck = riasService.checkEmail(user);
@@ -67,9 +65,9 @@ public class RiasCheckProvider implements FormAction {
         }
 
         if (phoneCheck) {
-            formData.remove(USER_ATTRIBUTES_PHONE);
+            formData.remove(FIELD_PHONE);
             context.getEvent().detail("Phone", user.getPhone());
-            errors.add(new FormMessage(USER_ATTRIBUTES_PHONE, "Пользователь с таким телефоном уже существует"));
+            errors.add(new FormMessage(FIELD_PHONE, "Пользователь с таким телефоном уже существует"));
         }
 
         if (!errors.isEmpty()) {
@@ -84,7 +82,7 @@ public class RiasCheckProvider implements FormAction {
     public void success(FormContext context) {
         UserModel user = context.getUser();
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
-        user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(formData.getFirst(USER_ATTRIBUTES_PHONE)));
+        user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(formData.getFirst(FIELD_PHONE)));
     }
 
     @Override

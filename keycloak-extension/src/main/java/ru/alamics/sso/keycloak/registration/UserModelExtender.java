@@ -127,7 +127,7 @@ public class UserModelExtender implements FormAction, FormActionFactory {
             User user = User.builder()
                     .name(formData.getFirst(FIELD_FIRST_NAME))
                     .email(formData.getFirst(FIELD_EMAIL))
-                    .phone(formData.getFirst(USER_ATTRIBUTES_PHONE))
+                    .phone(formData.getFirst(FIELD_PHONE))
                     .build();
 
             String orgName = formData.getFirst(FIELD_ORG_NAME);

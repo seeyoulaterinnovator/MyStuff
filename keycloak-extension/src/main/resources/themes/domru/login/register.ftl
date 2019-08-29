@@ -64,11 +64,11 @@
 
             <div class="${properties.kcFormGroupClass!}">
                 <div class="${properties.kcLabelWrapperClass!}">
-                    <label for="user.attributes.phone" class="${properties.kcLabelClass!}">Телефон</label>
+                    <label for="phone" class="${properties.kcLabelClass!}">Телефон</label>
                 </div>
 
                 <div class="${properties.kcInputWrapperClass!}">
-                    <input type="text" class="${properties.kcInputClass!}"  id="user.attributes.phone" name="user.attributes.phone"/>
+                    <input type="text" class="${properties.kcInputClass!}"  id="phone" name="phone"/>
                 </div>
             </div>
 
