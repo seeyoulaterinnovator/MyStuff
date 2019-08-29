@@ -8,23 +8,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class UserModelUserMapper {
+import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
+import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_VALIDATED_ON;
 
-    private static final String PHONE = "phone";
-    private static final String PHONE_VALIDATED_ON = "phone_validated_on";
+public class UserModelUserMapper {
 
     public User mapToUser(UserModel model) {
         return User.builder()
                 .id(model.getId())
                 .email(model.getEmail())
                 .name(model.getFirstName())
-                .phone(model.getFirstAttribute(PHONE))
-                .phoneVerifiedOn(model.getFirstAttribute(PHONE_VALIDATED_ON) != null ? LocalDateTime.parse(model.getFirstAttribute(PHONE_VALIDATED_ON)) : null)
+                .phone(model.getFirstAttribute(ATTR_PHONE_NAME))
+                .phoneVerifiedOn(model.getFirstAttribute(ATTR_PHONE_VALIDATED_ON) != null ? LocalDateTime.parse(model.getFirstAttribute(ATTR_PHONE_VALIDATED_ON)) : null)
                 .attributes(model
                         .getAttributes()
                         .entrySet()
                         .stream()
-                        .filter(stringListEntry -> !(stringListEntry.getKey().equals(PHONE) || stringListEntry.getKey().equals(PHONE_VALIDATED_ON)))
+                        .filter(stringListEntry -> !(stringListEntry.getKey().equals(ATTR_PHONE_NAME) || stringListEntry.getKey().equals(ATTR_PHONE_VALIDATED_ON)))
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
                 .build();
     }
@@ -38,9 +38,9 @@ public class UserModelUserMapper {
             model.setAttribute(attributeEntry.getKey(), attributeEntry.getValue());
         }
         if (user.getPhone() != null)
-            model.setAttribute(PHONE, List.of(user.getPhone()));
+            model.setAttribute(ATTR_PHONE_NAME, List.of(user.getPhone()));
         if (user.getPhoneVerifiedOn() != null)
-            model.setAttribute(PHONE_VALIDATED_ON, List.of(user.getPhoneVerifiedOn().toString()));
+            model.setAttribute(ATTR_PHONE_VALIDATED_ON, List.of(user.getPhoneVerifiedOn().toString()));
 
     }
 

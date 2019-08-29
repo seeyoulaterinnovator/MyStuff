@@ -119,7 +119,7 @@ public class ResetCredEmailRias implements Authenticator, AuthenticatorFactory {
         /*
         User user = User.builder()
                 .email(formData.getFirst(RegistrationPage.FIELD_EMAIL))
-                .phone(formData.getFirst(USER_ATTRIBUTES_PHONE))
+                .phone(formData.getFirst(FIELD_PHONE))
                 .build();
         */
         // boolean emailCheck = riasService.checkEmail(user);

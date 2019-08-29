@@ -27,6 +27,8 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
+import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
+
 @Slf4j
 public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator implements Authenticator {
 
@@ -173,9 +175,9 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
 
                 "select u from UserEntity u " +
                 "join UserAttributeEntity ua on u.id = ua.user " +
-                "where ua.name = 'phone' and ua.value like '%' || :phone || '%'"
-
+                "where ua.name = :ph_attr_name and ua.value like '%' || :phone || '%'" // TODO =
                 , UserEntity.class)
+                .setParameter("ph_attr_name", ATTR_PHONE_NAME)
                 .setParameter("phone", str);
 
         //TypedQuery<UserEntity> query = em.createNamedQuery("getRealmUserByEmail", UserEntity.class);

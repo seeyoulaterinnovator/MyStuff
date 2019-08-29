@@ -2,7 +2,7 @@ package ru.alamics.sso.registration.model;
 
 public class FormConstants {
 
-    public static final String USER_ATTRIBUTES_PHONE = "user.attributes.phone";
+    public static final String FIELD_PHONE = "phone";
 
     public static final String FIELD_PASSWORD_CONFIRM = "password-confirm";
     public static final String FIELD_PASSWORD = "password";
