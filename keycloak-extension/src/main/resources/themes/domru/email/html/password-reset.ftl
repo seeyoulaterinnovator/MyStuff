@@ -4,6 +4,6 @@
   <#if section = "style">
     <#include 'styles/content-style--default.html' >
   <#elseif section = "body">
-    ${kcSanitize(msg("emailAccountDataBodyHtml", userName, userFirstName, userLastName, password, accountLink))?no_esc}
+    ${kcSanitize(msg("passwordResetBodyHtml",link, linkExpiration, realmName, linkExpirationFormatter(linkExpiration)))?no_esc}
   </#if>
 </@template.layout>
