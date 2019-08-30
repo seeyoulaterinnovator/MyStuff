@@ -1,7 +1,7 @@
 import { HIGHLIGHT_VALIDATION_CHARSET } from '../constants/passwordCharset.js';
 import { fetchPassword } from './helpers';
 
-// Функция нужна для того, чтобы привязать логику к блоку password-block
+// Привязывает логику к блоку 'password-block'
 export default (
   getPassword,
   setPassword,

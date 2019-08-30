@@ -46,7 +46,7 @@
     axios
       .get(url)
       .then(response => {
-        allCities.set(response.data.results.cities);
+        allCities.set(response.data.results.cities || []);
 
         groupedCities = groupByFirstCharacter($allCities);
       })
