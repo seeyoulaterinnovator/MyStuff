@@ -16,8 +16,8 @@ public abstract class DataMapper {
         return UserDto.builder()
                 .id(toString(tuple.get("user_id")))
                 .username(toString(tuple.get("username")))
-                .fName(toString(tuple.get("first_name")))
-                .lName(toString(tuple.get("last_name")))
+                .firstName(toString(tuple.get("first_name")))
+                .lastName(toString(tuple.get("last_name")))
                 .email(toString(tuple.get("email")))
                 .phone(toString(tuple.get("phone")))
                 .accessId(toString(tuple.get("access_id")))
@@ -25,6 +25,8 @@ public abstract class DataMapper {
                 .tomsId(toString(tuple.get("toms_id")))
                 .roleId(toString(tuple.get("role_id")))
                 .roleName(toString(tuple.get("role_name")))
+                .clientRoleId(toString(tuple.get("client_role_id")))
+                .clientRoleName(toString(tuple.get("client_role_name")))
                 .build();
     }
 

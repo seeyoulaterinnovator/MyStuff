@@ -44,7 +44,11 @@ public class SearchResource {
 
     private List<UserDto> getUsers(String search, String searchUser, String searchToms) {
         List<Tuple> tuples = getEM().createNativeQuery(
-                "select users.user_id,\n" +
+                "select info_pos.*,\n" +
+                        "       kr.id as client_role_id,\n" +
+                        "       kr.NAME as client_role_name\n" +
+                        "from\n" +
+                        "(select users.user_id,\n" +
                         "       users.USERNAME,\n" +
                         "       users.FIRST_NAME,\n" +
                         "       users.LAST_NAME,\n" +
@@ -87,6 +91,10 @@ public class SearchResource {
                         "      ) as access on users.user_id = access.userId\n" +
                         "join USER_ROLE_MAPPING urm on access.access_id = urm.USER_ID\n" +
                         "join KEYCLOAK_ROLE kr on urm.ROLE_ID = kr.ID\n" +
+                        "WHERE kr.NAME LIKE '%_pos') as info_pos\n" +
+                        "join USER_ROLE_MAPPING urm on info_pos.access_id = urm.USER_ID\n" +
+                        "join KEYCLOAK_ROLE kr on urm.ROLE_ID = kr.ID\n" +
+                        "WHERE kr.NAME LIKE '%_access'\n" +
                         "ORDER BY FIRST_NAME, EMAIL", Tuple.class)
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
