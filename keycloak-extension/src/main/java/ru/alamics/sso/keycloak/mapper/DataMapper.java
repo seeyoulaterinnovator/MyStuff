@@ -13,19 +13,19 @@ public abstract class DataMapper {
             return null;
         }
 
-        UserDto userDto = new UserDto();
-        userDto.setId(toString(tuple.get("user_id")));
-        userDto.setUsername(toString(tuple.get("USERNAME")));
-        userDto.setfName(toString(tuple.get("FIRST_NAME")));
-        userDto.setlName(toString(tuple.get("LAST_NAME")));
-        userDto.setEmail(toString(tuple.get("EMAIL")));
-        userDto.setPhone(toString(tuple.get("phone")));
-        userDto.setAccessName(toString(tuple.get("access_name")));
-        userDto.setAccessId(toString(tuple.get("access_id")));
-        userDto.setTomsId(toString(tuple.get("toms_id")));
-        userDto.setRoleId(toString(tuple.get("ROLE_ID")));
-        userDto.setRoleName(toString(tuple.get("role_name")));
-        return userDto;
+        return UserDto.builder()
+                .id(toString(tuple.get("user_id")))
+                .username(toString(tuple.get("username")))
+                .fName(toString(tuple.get("first_name")))
+                .lName(toString(tuple.get("last_name")))
+                .email(toString(tuple.get("email")))
+                .phone(toString(tuple.get("phone")))
+                .accessId(toString(tuple.get("access_id")))
+                .accessName(toString(tuple.get("access_name")))
+                .tomsId(toString(tuple.get("toms_id")))
+                .roleId(toString(tuple.get("role_id")))
+                .roleName(toString(tuple.get("role_name")))
+                .build();
     }
 
     public static List<UserDto> toUserDtoList(List<Tuple> tuples){
