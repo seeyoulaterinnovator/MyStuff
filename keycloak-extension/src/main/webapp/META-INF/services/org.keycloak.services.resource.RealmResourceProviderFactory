@@ -1,2 +1,3 @@
 ru.alamics.sso.keycloak.create.rest.CustomUserRealmResourceProviderFactory
 ru.alamics.sso.keycloak.cities.CitiesRealmResourceProviderFactory
+ru.alamics.sso.keycloak.search.rest.SearchRealmResourceProviderFactory
