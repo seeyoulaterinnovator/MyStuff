@@ -13,8 +13,8 @@ public class UserDto implements Serializable {
 
     private String id;
     private String username;
-    private String fName;
-    private String lName;
+    private String firstName;
+    private String lastName;
     private String email;
     private String phone;
     private String accessName;
@@ -22,6 +22,8 @@ public class UserDto implements Serializable {
     private String tomsId;
     private String roleId;
     private String roleName;
+    private String clientRoleId;
+    private String clientRoleName;
 
     @JsonPOJOBuilder(withPrefix = "")
     public static class UserDtoBuilder {
