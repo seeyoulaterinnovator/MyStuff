@@ -28,12 +28,9 @@ import javax.persistence.EntityManager;
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
+import static ru.alamics.sso.registration.model.UserConstants.*;
 
 @Slf4j
 public class CustomUserResource {
@@ -54,7 +51,7 @@ public class CustomUserResource {
         RealmModel realm = realmManager.getRealmByName(request.getRealmName());
         if (realm == null) throw new NotFoundException("Realm not found.");
 
-        AdminAuth auth = authenticateRealmAdminRequest(realm);
+        AdminAuth auth = authenticateRealmAdminRequest(session.getContext().getRealm());
 
         Response response = checkOnExistUser(request, realm);
         if (response != null) {
@@ -67,6 +64,8 @@ public class CustomUserResource {
     private Response checkOnExistUser(UserRequest request, RealmModel realm) {
         if (request.getPhone() == null || request.getPhone().isBlank()) {
             return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
+        } else if (request.getCAID().isBlank()) {
+            return ErrorResponse.error("CAID is required attribute", Response.Status.BAD_REQUEST);
         } else {
             List<UserEntity> users = getEM().createQuery("select u from UserAttributeEntity atr join atr.user u " +
                     "where atr.name = :ph_attr_name and " +
@@ -111,11 +110,11 @@ public class CustomUserResource {
 
     private Response getUserResponse(UserRequest request, RealmModel realm, AdminAuth auth) {
         try {
-
             UserModel user = session.users().addUser(realm, request.getEmail());
             Set<String> emptySet = Collections.emptySet();
 
             updateUserFromRequest(user, request, emptySet, realm, session, false);
+            addAccessUser(user, request);
 
             //todo эвенты не отправляются ??
             new AdminEventBuilder(realm, auth, session, session.getContext().getConnection())
@@ -234,5 +233,15 @@ public class CustomUserResource {
 
         user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(request.getPhone()));
 
+    }
+
+    private void addAccessUser(UserModel userModel, UserRequest request) {
+        RealmModel realm = new RealmManager(session).getRealmByName(ACCESS_REALM);
+
+        UserModel accessUser = session.users().addUser(realm, UUID.randomUUID().toString());
+        accessUser.setSingleAttribute(ATTR_USER_ID_NAME, userModel.getId());
+        accessUser.setSingleAttribute(ATTR_TOMS_NAME, request.getCAID());
+        RoleModel roleModel = realm.getRole(DEFAULT_ROLE_ACCESS_REALM);
+        accessUser.grantRole(roleModel);
     }
 }
