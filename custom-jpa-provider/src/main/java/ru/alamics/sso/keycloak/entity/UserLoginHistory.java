@@ -1,0 +1,27 @@
+package ru.alamics.sso.keycloak.entity;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.keycloak.models.jpa.entities.UserEntity;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "user_login_history")
+@Getter
+@Setter
+public class UserLoginHistory implements Serializable {
+    private static final long serialVersionUID = 7152913924799778036L;
+
+    @Id
+    private String id;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
+
+    @Column(name = "logined_at")
+    private LocalDateTime loginedAt;
+}
