@@ -29,4 +29,11 @@
             </column>
         </createTable>
     </changeSet>
+    <changeSet author="strukov-av" id="3">
+        <createTable tableName="ACCESS">
+            <column name="ID" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
