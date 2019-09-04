@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.keycloak.models.jpa.entities.UserEntity;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @Table(name = "user_login_history")
 @Getter
 @Setter
+@Builder
 public class UserLoginHistory implements Serializable {
     private static final long serialVersionUID = 7152913924799778036L;
 
