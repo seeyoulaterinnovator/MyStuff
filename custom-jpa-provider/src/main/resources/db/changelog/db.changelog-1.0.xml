@@ -29,6 +29,7 @@
             </column>
         </createTable>
     </changeSet>
+
     <changeSet author="strukov-av" id="3">
         <createTable tableName="POST">
             <column name="ID" type="bigint">

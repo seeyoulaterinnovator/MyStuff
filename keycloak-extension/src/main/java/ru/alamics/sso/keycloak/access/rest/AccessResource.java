@@ -2,26 +2,17 @@ package ru.alamics.sso.keycloak.access.rest;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
-import org.jboss.resteasy.annotations.jaxrs.PathParam;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
-import org.keycloak.jose.jws.JWSInput;
-import org.keycloak.jose.jws.JWSInputException;
-import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.representations.AccessToken;
-import org.keycloak.services.ForbiddenException;
-import org.keycloak.services.managers.AppAuthManager;
-import org.keycloak.services.managers.AuthenticationManager;
-import org.keycloak.services.managers.RealmManager;
-import org.keycloak.services.resources.admin.AdminAuth;
-import org.keycloak.services.resources.admin.permissions.AdminPermissions;
-import ru.alamics.sso.keycloak.access.entity.Access;
-import ru.alamics.sso.keycloak.access.service.AccessService;
 import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.registration.dto.UserPostDto;
+import ru.alamics.sso.registration.service.UserPostService;
 
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -31,7 +22,7 @@ public class AccessResource {
 
 
     protected KeycloakSession session;
-    private AccessService accessService = new AccessService();
+    private UserPostService accessService = new UserPostService();
 
     public AccessResource(KeycloakSession session) { this.session = session;    }
 
@@ -43,13 +34,14 @@ public class AccessResource {
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response create(Access access, HttpHeaders headers) {
-        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
+    public Response create(UserPostDto userPostDto, HttpHeaders headers) {
+        //authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
         return JsonResponse.success()
-                .addResult("access", accessService.save(access))
+                .addResult("access", accessService.save(userPostDto))
                 .build();
     }
 
+    /*
     @POST
     @Path("/edit")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
@@ -136,5 +128,5 @@ public class AccessResource {
         }
 
         return auth;
-    }
+    }*/
 }
