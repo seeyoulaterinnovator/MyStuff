@@ -30,9 +30,51 @@
         </createTable>
     </changeSet>
     <changeSet author="strukov-av" id="3">
-        <createTable tableName="ACCESS">
+        <createTable tableName="POST">
+            <column name="ID" type="bigint">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="NAME" type="varchar(256)">
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="strukov-av" id="4">
+        <createTable tableName="USER_POST">
             <column name="ID" type="varchar(36)">
                 <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="USER_ID" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="FK_USER_USER_POST" references="USER_ENTITY(id)"/>
+            </column>
+            <column name="TOMS_ID" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DMP_ID" type="varchar">
+            </column>
+            <column name="POST_ID" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_POST_USER_POST" references="POST(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="strukov-av" id="5">
+    <createTable tableName="SYSTEM">
+        <column name="ID" type="bigint">
+            <constraints nullable="false" primaryKey="true"/>
+        </column>
+        <column name="NAME" type="varchar(256)">
+        </column>
+    </createTable>
+    </changeSet>
+    <changeSet author="strukov-av" id="6">
+        <createTable tableName="USER_POST_SYSTEM">
+            <column name="ID" type="bigint">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="USER_POST_ID" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="FK_USER_POST_USER_POST_SYSTEM" references="USER_POST(id)"/>
+            </column>
+            <column name="SYSTEM_ID" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_SYSTEM_USER_POST" references="SYSTEM(id)"/>
             </column>
         </createTable>
     </changeSet>
