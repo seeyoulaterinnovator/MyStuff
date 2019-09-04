@@ -1,0 +1,30 @@
+<persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.2"
+             xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
+
+    <persistence-unit name="keycloak" transaction-type="JTA">
+
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <jta-data-source>java:jboss/datasources/KeycloakDS</jta-data-source>
+        <class>org.keycloak.models.jpa.entities.UserEntity</class>
+        <class>org.keycloak.models.jpa.entities.UserAttributeEntity</class>
+        <class>org.keycloak.models.jpa.entities.UserRequiredActionEntity</class>
+        <class>org.keycloak.models.jpa.entities.CredentialEntity</class>
+        <class>org.keycloak.models.jpa.entities.CredentialAttributeEntity</class>
+<!--        <class>ru.alamics.sso.keycloak.access.entity.Access</class>-->
+        <properties>
+            <!-- http://docs.jboss.org/hibernate/orm/4.3/javadocs/constant-values.html -->
+            <property name="javax.persistence.jdbc.driver" value="org.h2.Driver" />
+            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+
+            <!--			<property name="javax.persistence.database-product-name" value="PostgreSQL"/>-->
+            <!--			<property name="javax.persistence.database-major-version" value="9"/>-->
+            <!--			<property name="javax.persistence.database-minor-version" value="5"/>-->
+
+            <!--			<property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>-->
+            <!--			<property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL95Dialect"/>-->
+            <!--			<property name="javax.persistence.schema-generation.database.action" value="none"/>-->
+            <!--			<property name="hibernate.show_sql" value="true"/>-->
+        </properties>
+    </persistence-unit>
+</persistence>
