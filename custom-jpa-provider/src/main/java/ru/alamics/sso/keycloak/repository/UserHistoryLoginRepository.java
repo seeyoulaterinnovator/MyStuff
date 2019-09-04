@@ -24,10 +24,10 @@ public class UserHistoryLoginRepository {
         log.debug("{}:", DEBUG_STR);
         LocalDate now = LocalDate.now();
 
-        List<UserEntity> ret = em.createQuery("select distinct user from UserLoginHistory ul join ul.user user order by ul.loginedAt desc", UserEntity.class)
+        List<UserLoginHistory> ret = em.createQuery("select distinct ul from UserLoginHistory ul join ul.user user order by ul.loginedAt desc", UserLoginHistory.class)
                 .getResultList();
 
-        return ret;
+        return null;
     }
 
     public UserLoginHistory save(UserLoginHistory history) {

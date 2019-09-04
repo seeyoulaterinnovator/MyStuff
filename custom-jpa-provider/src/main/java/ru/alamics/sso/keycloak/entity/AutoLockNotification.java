@@ -21,7 +21,7 @@ public class AutoLockNotification implements Serializable {
     @Id
     private String id;
 
-    @ManyToOne
+    @ManyToOne(targetEntity = UserEntity.class)
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
