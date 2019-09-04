@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet author="tretyakov-da" id="1">
+        <createTable tableName="USER_LOGIN_HISTORY">
+            <column name="ID" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="USER_ID" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="FK_USER_LOGIN_HISTORY" references="USER_ENTITY(id)"/>
+            </column>
+            <column name="LOGINED_AT" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="tretyakov-da" id="2">
+        <createTable tableName="AUTO_LOCK_NOTIFICATION">
+            <column name="ID" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="USER_ID" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="FK_USER_AUTO_LOCK_NOTIF" references="USER_ENTITY(id)"/>
+            </column>
+            <column name="SENDED_AT" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TYPE" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="strukov-av" id="3">
+        <createTable tableName="POST">
+            <column name="ID" type="bigint">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="NAME" type="varchar(256)">
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="strukov-av" id="4">
+        <createTable tableName="USER_POST">
+            <column name="ID" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="USER_ID" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="FK_USER_USER_POST" references="USER_ENTITY(id)"/>
+            </column>
+            <column name="TOMS_ID" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DMP_ID" type="varchar">
+            </column>
+            <column name="POST_ID" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_POST_USER_POST" references="POST(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="strukov-av" id="5">
+    <createTable tableName="SYSTEM">
+        <column name="ID" type="bigint">
+            <constraints nullable="false" primaryKey="true"/>
+        </column>
+        <column name="NAME" type="varchar(256)">
+        </column>
+    </createTable>
+    </changeSet>
+    <changeSet author="strukov-av" id="6">
+        <createTable tableName="USER_POST_SYSTEM">
+            <column name="ID" type="bigint">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="USER_POST_ID" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="FK_USER_POST_USER_POST_SYSTEM" references="USER_POST(id)"/>
+            </column>
+            <column name="SYSTEM_ID" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_SYSTEM_USER_POST" references="SYSTEM(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
