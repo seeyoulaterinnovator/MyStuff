@@ -1,2 +1,3 @@
 ru.alamics.sso.keycloak.auth.AuthMailPhoneFormFactory
 ru.alamics.sso.keycloak.resetcred.ResetCredEmailRias
+ru.alamics.sso.keycloak.auth.form.AttributesFormFactory
