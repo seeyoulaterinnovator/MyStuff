@@ -10,6 +10,7 @@ import javax.persistence.PersistenceContext;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Stateless
@@ -24,10 +25,12 @@ public class UserHistoryLoginRepository {
         log.debug("{}:", DEBUG_STR);
         LocalDate now = LocalDate.now();
 
-        List<UserLoginHistory> ret = em.createQuery("select distinct ul from UserLoginHistory ul join ul.user user order by ul.loginedAt desc", UserLoginHistory.class)
-                .getResultList();
+        List<UserEntity> ret = em.createQuery("select distinct ul from UserLoginHistory ul join ul.user user order by ul.loginedAt desc", UserLoginHistory.class)
+                .getResultStream()
+                .map(UserLoginHistory::getUser)
+                .collect(Collectors.toList());
 
-        return null;
+        return ret;
     }
 
     public UserLoginHistory save(UserLoginHistory history) {
