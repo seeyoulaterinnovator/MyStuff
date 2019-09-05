@@ -11,7 +11,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_login_history")
+@Table(name = "USER_LOGIN_HISTORY")
 @Getter
 @Setter
 @NoArgsConstructor

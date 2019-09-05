@@ -38,12 +38,11 @@ public class UserPostRepository {
     public void remove(String id) {
         UserPost userPost = em.find(UserPost.class, id);
         em.remove(userPost);
-        em.flush();
+//        em.flush();
     }
 
     public UserPost getUserPost(String id) {
         UserPost access = em.find(UserPost.class, id);
-        em.flush();
         return access;
     }
 

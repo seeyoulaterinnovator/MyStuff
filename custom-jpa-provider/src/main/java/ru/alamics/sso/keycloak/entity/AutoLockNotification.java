@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "auto_lock_notification")
+@Table(name = "AUTO_LOCK_NOTIFICATION")
 @Getter
 @Setter
 @NoArgsConstructor
