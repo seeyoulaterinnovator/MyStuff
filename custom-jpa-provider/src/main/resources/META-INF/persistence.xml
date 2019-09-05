@@ -82,9 +82,9 @@
 			<!-- http://docs.jboss.org/hibernate/orm/4.3/javadocs/constant-values.html -->
 
 			<property name="javax.persistence.jdbc.driver" value="org.mariadb.jdbc.Driver" />
-<!--			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>-->
+			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
 
-			<!--			<property name="javax.persistence.jdbc.driver" value="org.h2.Driver" />-->
+<!--			<property name="javax.persistence.jdbc.driver" value="org.h2.Driver" />-->
 <!--			<property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>-->
 <!--			<property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>-->
 
