@@ -2,6 +2,7 @@ package ru.alamics.sso.keycloak.entity;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.entity.common.NotificationType;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
 public class AutoLockNotification implements Serializable {
     private static final long serialVersionUID = -5664166927419170550L;
 
