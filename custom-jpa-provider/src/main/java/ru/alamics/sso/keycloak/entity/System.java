@@ -17,8 +17,8 @@ public class System {
     private Long id;
     @Column(name = "name")
     private String name;
-    @ManyToMany(mappedBy = "systems")
-    private Set<UserPost> userPosts;
+//    @ManyToMany(mappedBy = "systems")
+//    private Set<UserPost> userPosts;
 
     @Override
     public boolean equals(Object o) {

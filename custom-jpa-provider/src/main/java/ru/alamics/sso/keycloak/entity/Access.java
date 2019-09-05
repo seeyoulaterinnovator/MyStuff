@@ -17,6 +17,6 @@ public class Access {
     private Long id;
     @Column(name = "name")
     private String name;
-    @ManyToMany(mappedBy = "access")
-    private Set<UserPost> userPosts;
+//    @ManyToMany(mappedBy = "access")
+//    private Set<UserPost> userPosts;
 }
