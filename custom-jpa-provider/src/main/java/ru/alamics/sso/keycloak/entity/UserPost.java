@@ -30,16 +30,16 @@ public class UserPost {
 //            joinColumns = @JoinColumn(name = "user_post_id"),
 //            inverseJoinColumns = @JoinColumn(name = "system_id")
 //    )
-    @Transient
-    private Set<System> systems;
+//    @Transient
+//    private Set<System> systems;
 //    @ManyToMany
 //    @JoinTable(
 //            name = "USERPOST_SYSTEM_ACCESS",
 //            joinColumns = @JoinColumn(name = "user_post_id"),
 //            inverseJoinColumns = @JoinColumn(name = "access_id")
 //    )
-    @Transient
-    private Set<Access> access;
+//    @Transient
+//    private Set<Access> access;
 
     @Override
     public String toString() {

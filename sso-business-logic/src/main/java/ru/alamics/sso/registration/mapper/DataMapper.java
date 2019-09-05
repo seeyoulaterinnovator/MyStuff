@@ -63,12 +63,12 @@ public class DataMapper {
         userPostDto.setRmsId(userPost.getDmpId());
         userPostDto.setRoleId(userPost.getRole().getId());
 
-        if (userPost.getSystems() != null) {
-            Set<Long> systemsId = new HashSet<>();
-            userPost.getSystems()
-                    .forEach(o -> systemsId.add(o.getId()));
-            userPostDto.setSystemsId(systemsId);
-        }
+//        if (userPost.getSystems() != null) {
+//            Set<Long> systemsId = new HashSet<>();
+//            userPost.getSystems()
+//                    .forEach(o -> systemsId.add(o.getId()));
+//            userPostDto.setSystemsId(systemsId);
+//        }
         return userPostDto;
     }
 
