@@ -91,4 +91,12 @@
         <addPrimaryKey tableName="USERPOST_SYSTEM_ACCESS" columnNames="USER_POST_ID, SYSTEM_ID, ACCESS_ID"
                        constraintName="pk_upsa"/>
     </changeSet>
+    <changeSet id="tretyakov-da" author="7">
+        <sql>
+            INSERT INTO USER_POST_ROLE (ID, NAME) VALUES (1, 'LPR');
+            INSERT INTO USER_POST_ROLE (ID, NAME) VALUES (2, 'BUH');
+            INSERT INTO USER_POST_ROLE (ID, NAME) VALUES (3, 'TECH');
+            INSERT INTO USER_POST_ROLE (ID, NAME) VALUES (4, 'GUEST');
+        </sql>
+    </changeSet>
 </databaseChangeLog>
