@@ -2,8 +2,11 @@ package ru.alamics.sso.registration.mapper;
 
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.entity.Post;
+import ru.alamics.sso.keycloak.entity.System;
 import ru.alamics.sso.keycloak.entity.UserPost;
 import ru.alamics.sso.registration.dto.UserPostDto;
+
+import java.util.*;
 
 public class DataMapper {
 
@@ -15,13 +18,24 @@ public class DataMapper {
         UserPost userPost = new UserPost();
 
         UserEntity userEntity = new UserEntity();
-        userEntity.setId(userPostDto.getId());
+        userEntity.setId(userPostDto.getUserId());
         userPost.setUser(userEntity);
         userPost.setId( userPostDto.getId() );
         userPost.setTomsId( userPostDto.getTomsId() );
         Post post = new Post();
         post.setId(userPostDto.getRoleId());
         userPost.setRole(post);
+
+        if (userPostDto.getSystemsId() != null){
+            Set<System> systems = new HashSet<>();
+            userPostDto.getSystemsId()
+                    .forEach(o -> {
+                        System system = new System();
+                        system.setId(o);
+                        systems.add(system);
+                    });
+            userPost.setSystems(systems);
+        }
 
         return userPost;
     }
@@ -36,6 +50,13 @@ public class DataMapper {
         userPostDto.setTomsId(userPost.getTomsId());
         userPostDto.setRmsId(userPost.getDmpId());
         userPostDto.setRoleId(userPost.getRole().getId());
+
+        if (userPost.getSystems() != null) {
+            Set<Long> systemsId = new HashSet<>();
+            userPost.getSystems().stream()
+                    .forEach(o -> systemsId.add(o.getId()));
+            userPostDto.setSystemsId(systemsId);
+        }
         return userPostDto;
     }
 

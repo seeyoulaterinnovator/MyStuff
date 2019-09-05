@@ -68,9 +68,6 @@
     </changeSet>
     <changeSet author="strukov-av" id="6">
         <createTable tableName="USER_POST_SYSTEM">
-            <column name="ID" type="bigint">
-                <constraints nullable="false" primaryKey="true"/>
-            </column>
             <column name="USER_POST_ID" type="varchar(36)">
                 <constraints nullable="false" foreignKeyName="FK_USER_POST_USER_POST_SYSTEM" references="USER_POST(id)"/>
             </column>
@@ -78,5 +75,6 @@
                 <constraints nullable="false" foreignKeyName="FK_SYSTEM_USER_POST" references="SYSTEM(id)"/>
             </column>
         </createTable>
+        <addPrimaryKey tableName="USER_POST_SYSTEM" columnNames="USER_POST_ID, SYSTEM_ID" constraintName="pk_ups"/>
     </changeSet>
 </databaseChangeLog>

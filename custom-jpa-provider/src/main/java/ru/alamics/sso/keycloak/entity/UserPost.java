@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import org.keycloak.models.jpa.entities.UserEntity;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -23,4 +24,46 @@ public class UserPost {
     @ManyToOne(targetEntity = Post.class)
     @JoinColumn(name = "post_id")
     private Post role;
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "user_post_system",
+            joinColumns = @JoinColumn(name = "user_post_id"),
+            inverseJoinColumns = @JoinColumn(name = "system_id")
+    )
+    private Set<System> systems;
+
+    @Override
+    public String toString() {
+        return "UserPost{" +
+                "id='" + id + '\'' +
+                ", user=" + user +
+                ", tomsId='" + tomsId + '\'' +
+                ", dmpId='" + dmpId + '\'' +
+                ", role=" + role +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UserPost userPost = (UserPost) o;
+
+        if (id != null ? !id.equals(userPost.id) : userPost.id != null) return false;
+        if (user != null ? !user.equals(userPost.user) : userPost.user != null) return false;
+        if (tomsId != null ? !tomsId.equals(userPost.tomsId) : userPost.tomsId != null) return false;
+        if (dmpId != null ? !dmpId.equals(userPost.dmpId) : userPost.dmpId != null) return false;
+        return role != null ? role.equals(userPost.role) : userPost.role == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (user != null ? user.hashCode() : 0);
+        result = 31 * result + (tomsId != null ? tomsId.hashCode() : 0);
+        result = 31 * result + (dmpId != null ? dmpId.hashCode() : 0);
+        result = 31 * result + (role != null ? role.hashCode() : 0);
+        return result;
+    }
 }

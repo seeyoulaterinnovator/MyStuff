@@ -1,6 +1,7 @@
 package ru.alamics.sso.keycloak.repository;
 
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.entity.UserPost;
 
 import javax.ejb.LocalBean;
@@ -18,7 +19,7 @@ public class UserPostRepository {
     private EntityManager em;
 
     public UserPost save(UserPost userPost) {
-        if (userPost.getId().isBlank()){
+        if (userPost.getId() == null ||  userPost.getId().isBlank()) {
             userPost.setId(UUID.randomUUID().toString());
         }
         em.persist(userPost);
@@ -26,17 +27,15 @@ public class UserPostRepository {
         return userPost;
     }
 
-    public UserPost update(UserPost access) {
-        if (access.getId().isBlank()){
-            access.setId(UUID.randomUUID().toString());
-        }
-        em.merge(access);
+    public UserPost update(UserPost userPost) {
+        em.merge(userPost);
         em.flush();
-        return access;
+        return userPost;
     }
 
-    public void remove(UserPost access) {
-        em.remove(access);
+    public void remove(String id) {
+        UserPost userPost = em.find(UserPost.class, id);
+        em.remove(userPost);
         em.flush();
     }
 
@@ -47,14 +46,20 @@ public class UserPostRepository {
     }
 
     public UserPost getUserPost(String userId, String tomsId) {
-        UserPost access = em.createQuery(
-                "select ac " +
-                        "from UserPost ac " +
-                        "where ac.toms_id = :toms_id and ac.user_id = :user_id", UserPost.class)
-                .setParameter("user_id", userId)
-                .setParameter("toms_id", tomsId)
-                .getSingleResult();
-        em.flush();
-        return access;
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId(userId);
+        UserPost access = null;
+        try {
+            access = em.createQuery(
+                    "select ac " +
+                            "from UserPost ac " +
+                            "where ac.tomsId = :toms_id and ac.user = :user", UserPost.class)
+                    .setParameter("user", userEntity)
+                    .setParameter("toms_id", tomsId)
+                    .getSingleResult();
+        } finally {
+            em.flush();
+            return access;
+        }
     }
 }
