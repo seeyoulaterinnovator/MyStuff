@@ -91,4 +91,7 @@
         <addPrimaryKey tableName="USERPOST_SYSTEM_ACCESS" columnNames="USER_POST_ID, SYSTEM_ID, ACCESS_ID"
                        constraintName="pk_upsa"/>
     </changeSet>
+    <changeSet id="tretyakov-da" author="7">
+
+    </changeSet>
 </databaseChangeLog>
