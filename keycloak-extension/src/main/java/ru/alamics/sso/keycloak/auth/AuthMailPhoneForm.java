@@ -28,11 +28,10 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
+import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 
 @Slf4j
 public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator implements Authenticator {
-
-    public static final String AUTH_FORM_SUCCESS = "AUTH_FORM_SUCCESS";
 
     private final EntityManager em;
 
