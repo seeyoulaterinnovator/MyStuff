@@ -92,6 +92,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             } catch (WrongSmsCode wrongSmsCode) {
                 log.warn("Wrong sms code");
                 Response challenge = context.form()
+                        .setAttribute("error", "Пароль введен не верно. Проверьте правильность введенных данных")
                         .setError("Введен некорректный код смс")
                         .createForm(VERIFY_PHONE_FTL);
                 context.challenge(challenge);
