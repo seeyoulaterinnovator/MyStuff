@@ -24,7 +24,7 @@ public class UserPost {
     @ManyToOne(targetEntity = Post.class)
     @JoinColumn(name = "post_id")
     private Post role;
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
     @JoinTable(
             name = "user_post_system",
             joinColumns = @JoinColumn(name = "user_post_id"),

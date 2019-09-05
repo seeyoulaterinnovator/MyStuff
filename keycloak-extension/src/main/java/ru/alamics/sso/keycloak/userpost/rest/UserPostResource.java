@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.access.rest;
+package ru.alamics.sso.keycloak.userpost.rest;
 
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -30,12 +30,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @Slf4j
-public class AccessResource {
+public class UserPostResource {
 
     protected KeycloakSession session;
     private UserPostService userPostService;
 
-    public AccessResource(KeycloakSession session) {
+    public UserPostResource(KeycloakSession session) {
         try {
             this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
         } catch (NamingException e) {
@@ -104,16 +104,23 @@ public class AccessResource {
                     .build();
         }
     }
-/*
+
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response get(@PathParam("id") String id) {
-        return JsonResponse.success()
-                .addResult("users-info", null)
-                .build();
+        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
+        try {
+            return JsonResponse.success()
+                    .addResult("user-post", userPostService.get(id))
+                    .build();
+        } catch (NotFoundException e) {
+            return JsonResponse.fail()
+                    .message(e.getMessage())
+                    .build();
+        }
     }
 
     @GET
@@ -122,10 +129,11 @@ public class AccessResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response getAll() {
+        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
         return JsonResponse.success()
-                .addResult("users-info", null)
+                .addResult("user-posts", userPostService.getAll())
                 .build();
-    }*/
+    }
 
     private AdminAuth authenticateRealmAdminRequest(RealmModel realm) {
         String tokenString = new AppAuthManager().extractAuthorizationHeaderToken(session.getContext().getRequestHeaders());

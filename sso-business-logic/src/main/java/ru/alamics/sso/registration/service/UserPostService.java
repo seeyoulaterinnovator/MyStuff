@@ -9,33 +9,46 @@ import ru.alamics.sso.registration.mapper.DataMapper;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import java.util.List;
 
 @Stateless
 public class UserPostService {
 
     @EJB
-    private UserPostRepository accessRepository;
+    private UserPostRepository userPostRepository;
 
     public UserPostDto save(UserPostDto userPostDto) throws FoundUserPostException {
-        if (accessRepository.getUserPost(userPostDto.getUserId(), userPostDto.getTomsId()) != null) {
+        if (userPostRepository.getUserPost(userPostDto.getUserId(), userPostDto.getTomsId()) != null) {
             throw new FoundUserPostException();
         }
         UserPost userPost = DataMapper.toUserPost(userPostDto);
-        return DataMapper.toUserPostDto(accessRepository.save(userPost));
+        return DataMapper.toUserPostDto(userPostRepository.save(userPost));
     }
 
     public UserPostDto edit(UserPostDto userPostDto) throws NotFoundException {
-        UserPost userPost = accessRepository.getUserPost(userPostDto.getId());
+        UserPost userPost = userPostRepository.getUserPost(userPostDto.getId());
         if (userPost == null) {
             throw new NotFoundException("UserPost is not exist");
         }
-        return DataMapper.toUserPostDto(accessRepository.update(DataMapper.toUserPost(userPostDto)));
+        return DataMapper.toUserPostDto(userPostRepository.update(DataMapper.toUserPost(userPostDto)));
     }
 
     public void remove(String id) throws NotFoundException {
-        if (accessRepository.getUserPost(id) == null) {
+        if (userPostRepository.getUserPost(id) == null) {
             throw new NotFoundException("UserPost is not exist");
         }
-        accessRepository.remove(id);
+        userPostRepository.remove(id);
+    }
+
+    public UserPostDto get(String id) throws NotFoundException{
+        UserPost userPost = userPostRepository.getUserPost(id);
+        if (userPost == null) {
+            throw new NotFoundException("UserPost is not exist");
+        }
+        return DataMapper.toUserPostDto(userPost);
+    }
+
+    public List<UserPostDto> getAll() {
+        return DataMapper.toUserPostDtoList(userPostRepository.getAllUserPost());
     }
 }

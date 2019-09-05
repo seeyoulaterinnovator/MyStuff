@@ -8,6 +8,7 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -19,7 +20,7 @@ public class UserPostRepository {
     private EntityManager em;
 
     public UserPost save(UserPost userPost) {
-        if (userPost.getId() == null ||  userPost.getId().isBlank()) {
+        if (userPost.getId() == null || userPost.getId().isBlank()) {
             userPost.setId(UUID.randomUUID().toString());
         }
         em.persist(userPost);
@@ -61,5 +62,12 @@ public class UserPostRepository {
             em.flush();
             return access;
         }
+    }
+
+    public List<UserPost> getAllUserPost() {
+        return em.createQuery(
+                "select ac " +
+                        "from UserPost ac ")
+                .getResultList();
     }
 }

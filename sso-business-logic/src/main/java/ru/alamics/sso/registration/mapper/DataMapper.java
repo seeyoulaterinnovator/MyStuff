@@ -60,4 +60,14 @@ public class DataMapper {
         return userPostDto;
     }
 
+    public static List<UserPostDto> toUserPostDtoList(List<UserPost> userPostList){
+        if (userPostList == null) {
+            return null;
+        }
+        List<UserPostDto> userPostDtos = new LinkedList<>();
+        userPostList.stream()
+                .forEach(o -> userPostDtos.add(toUserPostDto(o)));
+        return userPostDtos;
+    }
+
 }
