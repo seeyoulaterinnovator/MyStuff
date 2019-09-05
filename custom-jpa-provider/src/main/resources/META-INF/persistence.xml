@@ -15,8 +15,9 @@
 		<class>ru.alamics.sso.keycloak.entity.UserLoginHistory</class>
 		<class>ru.alamics.sso.keycloak.entity.AutoLockNotification</class>
 		<class>ru.alamics.sso.keycloak.entity.UserPost</class>
-		<class>ru.alamics.sso.keycloak.entity.Post</class>
+		<class>ru.alamics.sso.keycloak.entity.UserPostRole</class>
 		<class>ru.alamics.sso.keycloak.entity.System</class>
+		<class>ru.alamics.sso.keycloak.entity.Access</class>
 		<properties>
 			<!-- http://docs.jboss.org/hibernate/orm/4.3/javadocs/constant-values.html -->
 			<property name="javax.persistence.jdbc.driver" value="org.h2.Driver" />

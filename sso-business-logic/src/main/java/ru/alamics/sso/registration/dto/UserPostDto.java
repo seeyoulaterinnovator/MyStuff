@@ -14,6 +14,7 @@ public class UserPostDto {
     private String rmsId;
     private Long roleId;
     private Set<Long> systemsId;
+    private Set<Long> accessId;
 
     @Override
     public String toString() {

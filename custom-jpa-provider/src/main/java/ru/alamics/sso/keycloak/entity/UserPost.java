@@ -21,16 +21,23 @@ public class UserPost {
     private String tomsId;
     @Column(name = "dmp_id")
     private String dmpId;
-    @ManyToOne(targetEntity = Post.class)
-    @JoinColumn(name = "post_id")
-    private Post role;
+    @ManyToOne(targetEntity = UserPostRole.class)
+    @JoinColumn(name = "role_id")
+    private UserPostRole role;
     @ManyToMany
     @JoinTable(
-            name = "user_post_system",
+            name = "userpost_system_access",
             joinColumns = @JoinColumn(name = "user_post_id"),
             inverseJoinColumns = @JoinColumn(name = "system_id")
     )
     private Set<System> systems;
+    @ManyToMany
+    @JoinTable(
+            name = "userpost_system_access",
+            joinColumns = @JoinColumn(name = "user_post_id"),
+            inverseJoinColumns = @JoinColumn(name = "access_id")
+    )
+    private Set<Access> access;
 
     @Override
     public String toString() {

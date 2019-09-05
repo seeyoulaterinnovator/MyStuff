@@ -9,7 +9,7 @@ import java.util.Set;
 
 @Entity
 @Immutable
-@Table(name = "system")
+@Table(name = "system_name")
 @Data
 @NoArgsConstructor
 public class System {

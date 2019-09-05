@@ -1,7 +1,8 @@
 package ru.alamics.sso.registration.mapper;
 
 import org.keycloak.models.jpa.entities.UserEntity;
-import ru.alamics.sso.keycloak.entity.Post;
+import ru.alamics.sso.keycloak.entity.Access;
+import ru.alamics.sso.keycloak.entity.UserPostRole;
 import ru.alamics.sso.keycloak.entity.System;
 import ru.alamics.sso.keycloak.entity.UserPost;
 import ru.alamics.sso.registration.dto.UserPostDto;
@@ -22,9 +23,9 @@ public class DataMapper {
         userPost.setUser(userEntity);
         userPost.setId( userPostDto.getId() );
         userPost.setTomsId( userPostDto.getTomsId() );
-        Post post = new Post();
-        post.setId(userPostDto.getRoleId());
-        userPost.setRole(post);
+        UserPostRole userPostRole = new UserPostRole();
+        userPostRole.setId(userPostDto.getRoleId());
+        userPost.setRole(userPostRole);
 
         if (userPostDto.getSystemsId() != null){
             Set<System> systems = new HashSet<>();
@@ -35,6 +36,16 @@ public class DataMapper {
                         systems.add(system);
                     });
             userPost.setSystems(systems);
+        }
+        if (userPostDto.getAccessId() != null){
+            Set<Access> accesss = new HashSet<>();
+            userPostDto.getSystemsId()
+                    .forEach(o -> {
+                        Access access = new Access();
+                        access.setId(o);
+                        accesss.add(access);
+                    });
+            userPost.setAccess(accesss);
         }
 
         return userPost;
