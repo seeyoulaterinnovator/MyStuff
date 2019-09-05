@@ -16,6 +16,8 @@ import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.Map;
 
+import static ru.alamics.sso.registration.model.UserConstants.*;
+
 @Slf4j
 public class AttributesForm implements Authenticator {
     private static final String FORM = "attributes.ftl";
@@ -28,18 +30,28 @@ public class AttributesForm implements Authenticator {
 
     @Override
     public void authenticate (AuthenticationFlowContext context) {
-        var session = context.getSession();
-        var searchResource = new SearchResource(session);
-        var user = context.getUser();
-        var response = searchResource.getUsersInfo( "", user.getId(), "");
-        JsonResponse body = (JsonResponse) response.getEntity();
-        var attributes = body.getResults();
-        if(attributes.get("users-info") == null) {
+        final String DEBUG_STR = "authenticate";
+        var authSession = context.getAuthenticationSession();
+        log.info("{}: frame={}", DEBUG_STR, authSession.getAuthNote(I_FRAME));
+        if(authSession.getAuthNote(AUTH_FORM_SUCCESS).equals("1") || authSession.getAuthNote(I_FRAME).equals("0")) {
             context.success();
         } else {
-            Response challenge = createForm(context, attributes);
-            context.challenge(challenge);
+            var session = context.getSession();
+            var searchResource = new SearchResource(session);
+            var user = context.getUser();
+            var response = searchResource.getUsersInfo( "", user.getId(), "");
+            JsonResponse body = (JsonResponse) response.getEntity();
+            var attributes = body.getResults();
+            if(attributes.get("users-info") == null) {
+                context.success();
+            } else {
+                Response challenge = createForm(context, attributes);
+                context.challenge(challenge);
+            }
+            authSession.setAuthNote(AUTH_FORM_SUCCESS, "0");
         }
+
+
     }
 
     private Response createForm(AuthenticationFlowContext context,  Map<String, Object> attributes) {
@@ -57,7 +69,7 @@ public class AttributesForm implements Authenticator {
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         final String tomsId = formData.get("tomsId").get(0);
         var user = context.getUser();
-        user.setAttribute("toms_id", Collections.singletonList(tomsId));
+        user.setAttribute(ATTR_TOMS_NAME, Collections.singletonList(tomsId));
         context.success();
     }
 
