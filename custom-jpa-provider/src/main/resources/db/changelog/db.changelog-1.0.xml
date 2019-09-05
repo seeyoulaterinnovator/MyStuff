@@ -49,10 +49,10 @@
             <column name="USER_ID" type="varchar(36)">
                 <constraints nullable="false" foreignKeyName="FK_USER_USER_POST" references="USER_ENTITY(id)"/>
             </column>
-            <column name="TOMS_ID" type="varchar">
+            <column name="TOMS_ID" type="varchar(1024)">
                 <constraints nullable="false"/>
             </column>
-            <column name="DMP_ID" type="varchar">
+            <column name="DMP_ID" type="varchar(1024)">
             </column>
             <column name="ROLE_ID" type="bigint">
                 <constraints nullable="false" foreignKeyName="FK_POST_USER_POST" references="USER_POST_ROLE(id)"/>
