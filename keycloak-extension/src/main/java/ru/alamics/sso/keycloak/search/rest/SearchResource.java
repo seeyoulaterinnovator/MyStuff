@@ -70,7 +70,7 @@ public class SearchResource {
                         "     (select up.*,\n" +
                         "             upr.NAME\n" +
                         "      from USER_POST up\n" +
-                        "               join USER_POST_ROLE UPR on up.ROLE_ID = UPR.ID\n" +
+                        "               join USER_POST_ROLE upr on up.ROLE_ID = upr.ID\n" +
                         "      where up.USER_ID LIKE '%' || :searchUser || '%'\n" +
                         "        and up.TOMS_ID LIKE '%' || :searchToms || '%')\n" +
                         "         as user_post\n" +
