@@ -30,6 +30,7 @@ public class UserPost {
 //            joinColumns = @JoinColumn(name = "user_post_id"),
 //            inverseJoinColumns = @JoinColumn(name = "system_id")
 //    )
+    @Transient
     private Set<System> systems;
 //    @ManyToMany
 //    @JoinTable(
@@ -37,6 +38,7 @@ public class UserPost {
 //            joinColumns = @JoinColumn(name = "user_post_id"),
 //            inverseJoinColumns = @JoinColumn(name = "access_id")
 //    )
+    @Transient
     private Set<Access> access;
 
     @Override
