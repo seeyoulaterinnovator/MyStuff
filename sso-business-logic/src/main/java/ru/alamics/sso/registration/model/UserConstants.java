@@ -12,5 +12,5 @@ public class UserConstants {
 
 
     public static final String AUTH_FORM_SUCCESS = "AUTH_FORM_SUCCESS";
-    public static final String I_FRAME = "I_FRAME";
+    public static final String I_FRAME = "iframe";
 }

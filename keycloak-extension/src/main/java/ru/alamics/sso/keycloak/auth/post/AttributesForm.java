@@ -33,9 +33,11 @@ public class AttributesForm implements Authenticator {
         final String DEBUG_STR = "authenticate";
         var authSession = context.getAuthenticationSession();
         log.info("{}: frame={}", DEBUG_STR, authSession.getAuthNote(I_FRAME));
-        if(authSession.getAuthNote(AUTH_FORM_SUCCESS).equals("1") || authSession.getAuthNote(I_FRAME).equals("0")) {
-            context.success();
-        } else {
+        var uriInfo = context.getUriInfo();
+        String frame = uriInfo.getQueryParameters().getFirst(I_FRAME);
+        boolean isAuth = "1".equals(authSession.getAuthNote(AUTH_FORM_SUCCESS));//it`s magick
+
+        if( frame != null || isAuth ) {
             var session = context.getSession();
             var searchResource = new SearchResource(session);
             var user = context.getUser();
@@ -48,7 +50,8 @@ public class AttributesForm implements Authenticator {
                 Response challenge = createForm(context, attributes);
                 context.challenge(challenge);
             }
-            authSession.setAuthNote(AUTH_FORM_SUCCESS, "0");
+        } else {
+            context.success();
         }
 
 
@@ -65,11 +68,13 @@ public class AttributesForm implements Authenticator {
 
     @Override
     public void action (AuthenticationFlowContext context) {
+        var authSession = context.getAuthenticationSession();
         role.roleSetting(context);
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         final String tomsId = formData.get("tomsId").get(0);
         var user = context.getUser();
         user.setAttribute(ATTR_TOMS_NAME, Collections.singletonList(tomsId));
+        authSession.setAuthNote(AUTH_FORM_SUCCESS, "0");
         context.success();
     }
 
