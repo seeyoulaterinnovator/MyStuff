@@ -6,6 +6,7 @@ import ru.alamics.sso.keycloak.entity.UserPostRole;
 import ru.alamics.sso.keycloak.entity.System;
 import ru.alamics.sso.keycloak.entity.UserPost;
 import ru.alamics.sso.registration.dto.UserPostDto;
+import ru.alamics.sso.registration.dto.UserPostRoleDto;
 
 import java.util.*;
 
@@ -26,7 +27,7 @@ public class DataMapper {
         UserPostRole userPostRole = new UserPostRole();
         userPostRole.setId(userPostDto.getRoleId());
         userPost.setRole(userPostRole);
-
+/*
         if (userPostDto.getSystemsId() != null){
             Set<System> systems = new HashSet<>();
             userPostDto.getSystemsId()
@@ -46,7 +47,7 @@ public class DataMapper {
                         accesss.add(access);
                     });
             userPost.setAccess(accesss);
-        }
+        }*/
 
         return userPost;
     }
@@ -79,6 +80,18 @@ public class DataMapper {
         userPostList.stream()
                 .forEach(o -> userPostDtos.add(toUserPostDto(o)));
         return userPostDtos;
+    }
+
+    public static UserPostRoleDto toUserPostRoleDto(UserPostRole userPostRole){
+        UserPostRoleDto userPostRoleDto = new UserPostRoleDto();
+        userPostRoleDto.setId(userPostRole.getId());
+        userPostRoleDto.setName(userPostRole.getName());
+        return  userPostRoleDto;
+    }
+    public static List<UserPostRoleDto> toUserPostRoleDtoList(List<UserPostRole> userPostRoleList){
+        List<UserPostRoleDto> userPostRoleDto = new LinkedList<>();
+        userPostRoleList.stream().forEach(o -> userPostRoleDto.add(toUserPostRoleDto(o)));
+        return userPostRoleDto;
     }
 
 }

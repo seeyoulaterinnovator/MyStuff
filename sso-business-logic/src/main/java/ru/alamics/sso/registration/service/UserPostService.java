@@ -5,6 +5,7 @@ import ru.alamics.sso.keycloak.entity.UserPost;
 import ru.alamics.sso.keycloak.repository.UserPostRepository;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.UserPostDto;
+import ru.alamics.sso.registration.dto.UserPostRoleDto;
 import ru.alamics.sso.registration.mapper.DataMapper;
 
 import javax.ejb.EJB;
@@ -50,5 +51,9 @@ public class UserPostService {
 
     public List<UserPostDto> getAll() {
         return DataMapper.toUserPostDtoList(userPostRepository.getAllUserPost());
+    }
+
+    public List<UserPostRoleDto> getUserPostRoleDtos(){
+        return DataMapper.toUserPostRoleDtoList(userPostRepository.getAllUserPostRoles());
     }
 }

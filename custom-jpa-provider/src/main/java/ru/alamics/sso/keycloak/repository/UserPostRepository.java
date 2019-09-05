@@ -3,6 +3,7 @@ package ru.alamics.sso.keycloak.repository;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.entity.UserPost;
+import ru.alamics.sso.keycloak.entity.UserPostRole;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -68,6 +69,13 @@ public class UserPostRepository {
         return em.createQuery(
                 "select ac " +
                         "from UserPost ac ")
+                .getResultList();
+    }
+
+    public List<UserPostRole> getAllUserPostRoles(){
+        return em.createQuery(
+                "select apr " +
+                        "from UserPostRole apr ")
                 .getResultList();
     }
 }
