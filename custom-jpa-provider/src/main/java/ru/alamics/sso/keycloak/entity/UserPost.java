@@ -10,7 +10,7 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "user_post")
+@Table(name = "USER_POST")
 public class UserPost {
     @Id
     private String id;

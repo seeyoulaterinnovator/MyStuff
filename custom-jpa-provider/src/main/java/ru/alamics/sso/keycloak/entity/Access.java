@@ -9,7 +9,7 @@ import java.util.Set;
 
 @Entity
 @Immutable
-@Table(name = "access_name")
+@Table(name = "ACCESS_NAME")
 @Data
 @NoArgsConstructor
 public class Access {
