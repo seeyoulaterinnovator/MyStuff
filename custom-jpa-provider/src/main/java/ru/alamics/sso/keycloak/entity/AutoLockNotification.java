@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @Table(name = "auto_lock_notification")
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 public class AutoLockNotification implements Serializable {
     private static final long serialVersionUID = -5664166927419170550L;
