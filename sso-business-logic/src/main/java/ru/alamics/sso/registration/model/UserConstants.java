@@ -9,4 +9,8 @@ public class UserConstants {
     public static final String ATTR_USER_ID_NAME = "userId";
     public static final String ATTR_TOMS_NAME = "tomsId";
     public static final String ATTR_DMP_NAME = "dmpId";
+
+
+    public static final String AUTH_FORM_SUCCESS = "AUTH_FORM_SUCCESS";
+    public static final String I_FRAME = "I_FRAME";
 }

@@ -65,7 +65,7 @@ public class DataMapper {
 
         if (userPost.getSystems() != null) {
             Set<Long> systemsId = new HashSet<>();
-            userPost.getSystems().stream()
+            userPost.getSystems()
                     .forEach(o -> systemsId.add(o.getId()));
             userPostDto.setSystemsId(systemsId);
         }
@@ -77,7 +77,7 @@ public class DataMapper {
             return null;
         }
         List<UserPostDto> userPostDtos = new LinkedList<>();
-        userPostList.stream()
+        userPostList
                 .forEach(o -> userPostDtos.add(toUserPostDto(o)));
         return userPostDtos;
     }
@@ -90,7 +90,7 @@ public class DataMapper {
     }
     public static List<UserPostRoleDto> toUserPostRoleDtoList(List<UserPostRole> userPostRoleList){
         List<UserPostRoleDto> userPostRoleDto = new LinkedList<>();
-        userPostRoleList.stream().forEach(o -> userPostRoleDto.add(toUserPostRoleDto(o)));
+        userPostRoleList.forEach(o -> userPostRoleDto.add(toUserPostRoleDto(o)));
         return userPostRoleDto;
     }
 

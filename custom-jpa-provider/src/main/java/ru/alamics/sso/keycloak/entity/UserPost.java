@@ -24,19 +24,19 @@ public class UserPost {
     @ManyToOne(targetEntity = UserPostRole.class)
     @JoinColumn(name = "role_id")
     private UserPostRole role;
-    @ManyToMany
-    @JoinTable(
-            name = "userpost_system_access",
-            joinColumns = @JoinColumn(name = "user_post_id"),
-            inverseJoinColumns = @JoinColumn(name = "system_id")
-    )
+//    @ManyToMany
+//    @JoinTable(
+//            name = "USERPOST_SYSTEM_ACCESS",
+//            joinColumns = @JoinColumn(name = "user_post_id"),
+//            inverseJoinColumns = @JoinColumn(name = "system_id")
+//    )
     private Set<System> systems;
-    @ManyToMany
-    @JoinTable(
-            name = "userpost_system_access",
-            joinColumns = @JoinColumn(name = "user_post_id"),
-            inverseJoinColumns = @JoinColumn(name = "access_id")
-    )
+//    @ManyToMany
+//    @JoinTable(
+//            name = "USERPOST_SYSTEM_ACCESS",
+//            joinColumns = @JoinColumn(name = "user_post_id"),
+//            inverseJoinColumns = @JoinColumn(name = "access_id")
+//    )
     private Set<Access> access;
 
     @Override
