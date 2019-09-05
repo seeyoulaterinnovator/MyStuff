@@ -1,8 +1,9 @@
 package ru.alamics.sso.keycloak.entity.provider;
 
+import ru.alamics.sso.keycloak.entity.UserPostRole;
 import ru.alamics.sso.keycloak.entity.UserLoginHistory;
+import ru.alamics.sso.keycloak.entity.UserPost;
 
-import java.util.Collections;
 import java.util.List;
 
 public class CustomJpaEntityProvider implements org.keycloak.connections.jpa.entityprovider.JpaEntityProvider {
@@ -12,7 +13,7 @@ public class CustomJpaEntityProvider implements org.keycloak.connections.jpa.ent
 
     @Override
     public List<Class<?>> getEntities () {
-        return Collections.singletonList(UserLoginHistory.class);
+        return List.of(UserLoginHistory.class, UserPostRole.class, System.class, UserPost.class);
     }
 
     @Override

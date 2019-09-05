@@ -15,18 +15,17 @@
  * limitations under the License.
  */
 
-package ru.alamics.sso.keycloak.access.rest;
+package ru.alamics.sso.keycloak.userpost.rest;
 
 import org.keycloak.Config.Scope;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.resource.RealmResourceProvider;
 import org.keycloak.services.resource.RealmResourceProviderFactory;
-import ru.alamics.sso.keycloak.search.rest.SearchRealmResourceProvider;
 
-public class AccessRealmResourceProviderFactory implements RealmResourceProviderFactory {
+public class UserPostRealmResourceProviderFactory implements RealmResourceProviderFactory {
 
-    public static final String ID = "access";
+    public static final String ID = "user-post";
 
     @Override
     public String getId() {
@@ -35,7 +34,7 @@ public class AccessRealmResourceProviderFactory implements RealmResourceProvider
 
     @Override
     public RealmResourceProvider create(KeycloakSession session) {
-        return new AccessRealmResourceProvider(session);
+        return new UserPostRealmResourceProvider(session);
     }
 
     @Override

@@ -17,4 +17,8 @@ dependencies {
     providedCompile group: 'javax', name: 'javaee-api', version: '8.0.1'
 
     providedCompile 'org.slf4j:slf4j-api:1.7.22'
+
+    // https://mvnrepository.com/artifact/javax.ejb/ejb-api
+//    providedCompile group: 'javax.ejb', name: 'ejb-api', version: '3.0'
+
 }

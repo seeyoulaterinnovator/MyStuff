@@ -44,21 +44,16 @@ public class SearchResource {
 
     private List<UserDto> getUsers(String search, String searchUser, String searchToms) {
         List<Tuple> tuples = getEM().createNativeQuery(
-                "select info_pos.*,\n" +
-                        "       kr.id as client_role_id,\n" +
-                        "       kr.NAME as client_role_name\n" +
-                        "from\n" +
-                        "(select users.user_id,\n" +
+                "select users.user_id,\n" +
                         "       users.USERNAME,\n" +
                         "       users.FIRST_NAME,\n" +
                         "       users.LAST_NAME,\n" +
                         "       users.EMAIL,\n" +
                         "       users.phone,\n" +
-                        "       access.access_name,\n" +
-                        "       access.access_id,\n" +
-                        "       access.toms_id,\n" +
-                        "       urm.ROLE_ID,\n" +
-                        "       kr.NAME as role_name\n" +
+                        "       user_post.id as access_id,\n" +
+                        "       user_post.toms_id,\n" +
+                        "       user_post.ROLE_ID,\n" +
+                        "       user_post.NAME as role_name\n" +
                         "from (select ue.id    as user_id,\n" +
                         "             ue.USERNAME,\n" +
                         "             ue.FIRST_NAME,\n" +
@@ -71,31 +66,15 @@ public class SearchResource {
                         "          OR ue.FIRST_NAME LIKE '%' || :search || '%' OR ue.LAST_NAME LIKE '%' || :search || '%'\n" +
                         "          OR ue.EMAIL LIKE '%' || :search || '%' OR ua.VALUE LIKE '%' || :search || '%'\n" +
                         "                )) as users\n" +
-                        "join (select accessUser.id       as access_id,\n" +
-                        "             accessUser.USERNAME as access_name,\n" +
-                        "             accessUser.userId,\n" +
-                        "             accessToms.toms_id\n" +
-                        "      from (select ue.id,\n" +
-                        "                   ue.USERNAME,\n" +
-                        "                   ua.value as userId\n" +
-                        "            from USER_ENTITY ue\n" +
-                        "            join USER_ATTRIBUTE ua on ue.ID = ua.USER_ID and ue.REALM_ID = 'access'\n" +
-                        "            where (ua.NAME = 'userId' and ua.VALUE LIKE '%' || :searchUser || '%')) as accessUser\n" +
-                        "            join\n" +
-                        "                (select ue.id,\n" +
-                        "                        ue.USERNAME,\n" +
-                        "                        ua.VALUE as toms_id\n" +
-                        "                from USER_ENTITY ue\n" +
-                        "                join USER_ATTRIBUTE ua on ue.ID = ua.USER_ID and ue.REALM_ID = 'access'\n" +
-                        "                where (ua.NAME = 'tomsId' and ua.VALUE LIKE '%' || :searchToms || '%')) as accessToms on accessUser.id = accessToms.id\n" +
-                        "      ) as access on users.user_id = access.userId\n" +
-                        "join USER_ROLE_MAPPING urm on access.access_id = urm.USER_ID\n" +
-                        "join KEYCLOAK_ROLE kr on urm.ROLE_ID = kr.ID\n" +
-                        "WHERE kr.NAME LIKE '%_pos') as info_pos\n" +
-                        "join USER_ROLE_MAPPING urm on info_pos.access_id = urm.USER_ID\n" +
-                        "join KEYCLOAK_ROLE kr on urm.ROLE_ID = kr.ID\n" +
-                        "WHERE kr.NAME LIKE '%_access'\n" +
-                        "ORDER BY FIRST_NAME, EMAIL", Tuple.class)
+                        "join\n" +
+                        "     (select up.*,\n" +
+                        "             upr.NAME\n" +
+                        "      from USER_POST up\n" +
+                        "               join USER_POST_ROLE UPR on up.ROLE_ID = UPR.ID\n" +
+                        "      where up.USER_ID LIKE '%' || :searchUser || '%'\n" +
+                        "        and up.TOMS_ID LIKE '%' || :searchToms || '%')\n" +
+                        "         as user_post\n" +
+                        "ORDER BY users.FIRST_NAME, users.EMAIL", Tuple.class)
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
