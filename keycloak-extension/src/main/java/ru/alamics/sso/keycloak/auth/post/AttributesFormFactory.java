@@ -1,5 +1,6 @@
-package ru.alamics.sso.keycloak.auth.form;
+package ru.alamics.sso.keycloak.auth.post;
 
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.Config;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.AuthenticatorFactory;
@@ -7,12 +8,17 @@ import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderConfigProperty;
+import ru.alamics.sso.auth.UserRole;
 
+import javax.ejb.EJB;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import java.util.List;
 
+
+@Slf4j
 public class AttributesFormFactory implements AuthenticatorFactory {
     public static final String PROVIDER_ID = "attributes-form";
-    private static final AttributesForm FORM = new AttributesForm();
 
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
@@ -55,8 +61,13 @@ public class AttributesFormFactory implements AuthenticatorFactory {
 
     @Override
     public Authenticator create (KeycloakSession session) {
-
-        return FORM;
+        UserRole role = null;
+        try {
+            role = (UserRole) new InitialContext().lookup("java:global/domru-sso/" + UserRole.class.getSimpleName());
+        } catch (NamingException e) {
+            log.error("Cannot find userRole bean, HELP!!");
+        }
+        return new AttributesForm(role);
     }
 
     @Override

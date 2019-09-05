@@ -36,10 +36,7 @@ public abstract class DataMapper {
         }
 
         LinkedList<UserDto> userDtos = new LinkedList<>();
-        tuples.stream()
-                .forEach(o -> {
-                    userDtos.add(toUserDto(o));
-                });
+        tuples.forEach(o -> userDtos.add(toUserDto(o)));
         return userDtos;
     }
 
