@@ -54,7 +54,7 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response create(UserPostDto userPostDto, HttpHeaders headers) {
-        //authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
+        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
         try {
             return JsonResponse.success()
                     .addResult("user_post", userPostService.save(userPostDto))
@@ -76,7 +76,7 @@ public class UserPostResource {
         if (userPostDto.getId() == null) {
             return ErrorResponse.error("Id is required attribute", Response.Status.BAD_REQUEST);
         }
-        //authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
+        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
         try {
             return JsonResponse.success()
                     .addResult("user_post", userPostService.edit(userPostDto))
@@ -93,7 +93,7 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response delete(@PathParam("id") String id) {
-        //authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
+        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
         try {
             userPostService.remove(id);
             return JsonResponse.success()
