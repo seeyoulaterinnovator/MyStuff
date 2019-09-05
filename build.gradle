@@ -26,6 +26,7 @@ allprojects {
         keycloakVersion = '6.0.1'
         lombokVersion = '1.18.8'
         junitVersion = '5.5.0'
+        generatedMapperSourcesDir = "${buildDir}/generated-src/mapstruct/main"
     }
 
     compileJava.options.encoding = 'UTF-8'
@@ -47,6 +48,10 @@ subprojects {
         annotationProcessor "org.projectlombok:lombok:$lombokVersion"
         compileOnly "org.projectlombok:lombok:$lombokVersion"
         implementation "org.projectlombok:lombok:$lombokVersion"
+        // https://mvnrepository.com/artifact/org.mapstruct/mapstruct
+        implementation 'org.mapstruct:mapstruct:1.3.0.Final'
+//        compileOnly 'org.mapstruct:mapstruct-processor:1.3.0.Final'
+        annotationProcessor  'org.mapstruct:mapstruct-processor:1.3.0.Final'
 
         testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
         testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"

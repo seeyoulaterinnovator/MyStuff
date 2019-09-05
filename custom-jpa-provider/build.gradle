@@ -5,6 +5,7 @@ dependencies {
     implementation "org.keycloak:keycloak-server-spi:$keycloakVersion"
     implementation "org.keycloak:keycloak-server-spi-private:$keycloakVersion"
     implementation "org.keycloak:keycloak-model-jpa:$keycloakVersion"
+    implementation group: 'javax', name: 'javaee-api', version: '8.0.1'
 
     implementation 'org.slf4j:slf4j-api:1.7.22'
 }
