@@ -11,9 +11,13 @@ import ru.alamics.sso.keycloak.search.dto.UserDto;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Tuple;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.LinkedList;
 import java.util.List;
 
 @Slf4j
@@ -36,74 +40,56 @@ public class SearchResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response getUsersInfo(@QueryParam("search") String search, @QueryParam("searchUser") String searchUser,
-                            @QueryParam("searchToms") String searchToms) {
+                                 @QueryParam("searchToms") String searchToms) {
+        if ((search == null || search.isBlank()) && (searchUser == null || searchUser.isBlank())
+                && (searchToms == null || searchToms.isBlank())) {
+            return JsonResponse.fail()
+                    .addResult("users-info", new LinkedList<>())
+                    .build();
+        }
         return JsonResponse.success()
                 .addResult("users-info", getUsers(search, searchUser, searchToms))
                 .build();
     }
 
-    @SuppressWarnings("unchecked")
     private List<UserDto> getUsers(String search, String searchUser, String searchToms) {
         List<Tuple> tuples = getEM().createNativeQuery(
-                "select UE.ID as user_id,\n" +
-                "       UE.USERNAME as username,\n" +
-                "       UE.FIRST_NAME as first_name,\n" +
-                "       UE.LAST_NAME as last_name,\n" +
-                "       UE.EMAIL as email,\n" +
-                "       UA.VALUE as phone,\n" +
-                "       up.id as access_id,\n" +
-                "       up.TOMS_ID as toms_id,\n" +
-                "       up.DMP_ID as dmp_id,\n" +
-                "       up.ROLE_ID as role_id,\n" +
-                "       upr.NAME as role_name\n" +
-                "from USER_POST up\n" +
-                "         join USER_POST_ROLE upr on up.ROLE_ID = upr.ID\n" +
-                "         join USER_ENTITY UE on up.USER_ID = UE.ID\n" +
-                "         join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone'\n" +
-                "where up.USER_ID = :searchUser\n" +
-                "   or up.TOMS_ID = :searchToms", Tuple.class)
+                "select UE.ID         as user_id,\n" +
+                        "       UE.USERNAME   as username,\n" +
+                        "       UE.FIRST_NAME as first_name,\n" +
+                        "       UE.LAST_NAME  as last_name,\n" +
+                        "       UE.EMAIL      as email,\n" +
+                        "       UA.VALUE      as phone,\n" +
+                        "       UP.id         as access_id,\n" +
+                        "       UP.TOMS_ID    as toms_id,\n" +
+                        "       UP.DMP_ID     as dmp_id,\n" +
+                        "       UP.ROLE_ID    as role_id,\n" +
+                        "       UPR.NAME      as role_name\n" +
+                        "from USER_ENTITY UE\n" +
+                        "         join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID\n" +
+                        "         join USER_POST UP on UE.ID = UP.USER_ID\n" +
+                        "         join USER_POST_ROLE UPR on UP.ROLE_ID = UPR.ID\n" +
+                        "WHERE UE.REALM_ID = 'user' AND UA.NAME = 'phone'\n" +
+                        "  AND CASE\n" +
+                        "          WHEN :search is not null and :search != '' then (\n" +
+                        "              UE.ID LIKE CONCAT('%', :search, '%') OR\n" +
+                        "              UE.EMAIL LIKE CONCAT('%', :search, '%') OR\n" +
+                        "              UE.FIRST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
+                        "              UE.LAST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
+                        "              UE.USERNAME LIKE CONCAT('%', :search, '%') OR\n" +
+                        "              UA.VALUE LIKE CONCAT('%', :search, '%')\n" +
+                        "              )\n" +
+                        "          else UE.ID LIKE '%' end\n" +
+                        "  AND CASE\n" +
+                        "          WHEN :searchUser is not null and :searchUser != '' then (UP.USER_ID = :searchUser)\n" +
+                        "          else UP.USER_ID LIKE '%' end\n" +
+                        "  AND CASE\n" +
+                        "          WHEN :searchToms is not null and :searchToms != '' then (UP.TOMS_ID = :searchToms)\n" +
+                        "          else UP.TOMS_ID LIKE '%' end", Tuple.class)
+                .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
                 .getResultList();
         return DataMapper.toUserDtoList(tuples);
     }
-//    private List<UserDto> getUsers(String search, String searchUser, String searchToms) {
-//        List<Tuple> tuples = getEM().createNativeQuery(
-//                "select users.user_id,\n" +
-//                        "       users.USERNAME,\n" +
-//                        "       users.FIRST_NAME,\n" +
-//                        "       users.LAST_NAME,\n" +
-//                        "       users.EMAIL,\n" +
-//                        "       users.phone,\n" +
-//                        "       user_post.id as access_id,\n" +
-//                        "       user_post.toms_id,\n" +
-//                        "       user_post.ROLE_ID,\n" +
-//                        "       user_post.NAME as role_name\n" +
-//                        "from (select ue.id    as user_id,\n" +
-//                        "             ue.USERNAME,\n" +
-//                        "             ue.FIRST_NAME,\n" +
-//                        "             ue.LAST_NAME,\n" +
-//                        "             ue.EMAIL,\n" +
-//                        "             ua.VALUE as phone\n" +
-//                        "      from USER_ENTITY ue\n" +
-//                        "               join USER_ATTRIBUTE ua on ue.ID = ua.USER_ID and ue.REALM_ID = 'user' and ua.NAME = 'phone'\n" +
-//                        "      where (ue.ID LIKE '%' || :search || '%' OR ue.USERNAME LIKE '%' || :search || '%'\n" +
-//                        "          OR ue.FIRST_NAME LIKE '%' || :search || '%' OR ue.LAST_NAME LIKE '%' || :search || '%'\n" +
-//                        "          OR ue.EMAIL LIKE '%' || :search || '%' OR ua.VALUE LIKE '%' || :search || '%'\n" +
-//                        "                )) as users\n" +
-//                        "join\n" +
-//                        "     (select up.*,\n" +
-//                        "             upr.NAME\n" +
-//                        "      from USER_POST up\n" +
-//                        "               join USER_POST_ROLE upr on up.ROLE_ID = upr.ID\n" +
-//                        "      where up.USER_ID LIKE '%' || :searchUser || '%'\n" +
-//                        "        and up.TOMS_ID LIKE '%' || :searchToms || '%')\n" +
-//                        "         as user_post\n" +
-//                        "ORDER BY users.FIRST_NAME, users.EMAIL", Tuple.class)
-//                .setParameter("search", search)
-//                .setParameter("searchUser", searchUser)
-//                .setParameter("searchToms", searchToms)
-//                .getResultList();
-//        return DataMapper.toUserDtoList(tuples);
-//    }
 }
