@@ -12,7 +12,7 @@ export default (function() {
 
   // Инициируем обратный отсчет таймера.
   // После него появится кнопка "Отправить еще раз"
-  const timer = new Timer(30);
+  const timer = new Timer(60 * 5);
   timer.timeElement = document.getElementById('timer-time');
   timer.callback = switchTimer;
 
