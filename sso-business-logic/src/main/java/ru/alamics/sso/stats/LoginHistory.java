@@ -17,11 +17,10 @@ public class LoginHistory {
     private UserHistoryLoginRepository repository;
 
     public void create(UserEntity user) {
-//        var history = UserLoginHistory.builder()
-//                .loginedAt(LocalDateTime.now())
-//                .user(user)
-//                .build();
-
-//        repository.save(history);
+        var history = UserLoginHistory.builder()
+                .loginedAt(LocalDateTime.now())
+                .user(user)
+                .build();
+        repository.save(history);
     }
 }
