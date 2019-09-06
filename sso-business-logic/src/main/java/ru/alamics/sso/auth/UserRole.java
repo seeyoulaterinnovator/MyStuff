@@ -3,13 +3,16 @@ package ru.alamics.sso.auth;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.models.jpa.entities.*;
+import ru.alamics.sso.keycloak.entity.UserPost;
 import ru.alamics.sso.keycloak.repository.RoleRepository;
+import ru.alamics.sso.keycloak.repository.UserPostRepository;
 import ru.alamics.sso.keycloak.repository.UserRepository;
 
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.ws.rs.core.MultivaluedMap;
+import java.util.List;
 
 @Stateless(name = "UserRole")
 @Slf4j
@@ -20,6 +23,8 @@ public class UserRole {
     private RoleRepository repository;
     @EJB
     private UserRepository userRepository;
+    @EJB
+    private UserPostRepository postRepository;
 
     public void roleSetting (AuthenticationFlowContext context) {
         final String DEBUG_STR = "roleSetting";
@@ -39,6 +44,8 @@ public class UserRole {
             roleEntity = repository.save(roleEntity);
         }
         UserEntity userEntity = userRepository.findUser(user.getId());
+        List<UserPost> userPosts = postRepository.findUserPostRole(userEntity);
+        repository.deleteUserPostRoles(userEntity, userPosts, realm.getId());
         UserRoleMappingEntity mappingEntity = new UserRoleMappingEntity();
         mappingEntity.setRoleId(roleEntity.getId());
         mappingEntity.setUser(userEntity);

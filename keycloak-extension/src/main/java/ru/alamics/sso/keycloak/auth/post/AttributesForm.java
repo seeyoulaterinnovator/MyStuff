@@ -34,6 +34,7 @@ public class AttributesForm implements Authenticator {
         var authSession = context.getAuthenticationSession();
         log.info("{}: frame={}", DEBUG_STR, authSession.getAuthNote(I_FRAME));
         var uriInfo = context.getUriInfo();
+        log.info("{}: getParams={}", DEBUG_STR, uriInfo.getQueryParameters());
         String frame = uriInfo.getQueryParameters().getFirst(I_FRAME);
         boolean isAuth = "1".equals(authSession.getAuthNote(AUTH_FORM_SUCCESS));//it`s magick
 
