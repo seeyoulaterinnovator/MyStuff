@@ -8,6 +8,7 @@ import org.keycloak.authentication.AuthenticatorFactory;
 import org.keycloak.models.*;
 import org.keycloak.provider.ProviderConfigProperty;
 import ru.alamics.sso.keycloak.auth.model.AuthType;
+import ru.alamics.sso.registration.model.UserConstants;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,7 +39,10 @@ public class TwoStepVerificationFactory implements Authenticator, AuthenticatorF
         Map<String, String> config = context.getAuthenticatorConfig().getConfig();
         String type = config.get(TWO_STEP_VERIFICATION_TYPES);
         AuthType authType = AuthType.getByString(type);
-        if (authType != null) {
+
+        String disable = context.getUser().getFirstAttribute(UserConstants.DISABLE_TWO_STEP);
+
+        if (authType != null && disable != null && !disable.isBlank() ) {
             for (String providerName : authType.getRequiredActionNames()) {
                 context.getUser().addRequiredAction(providerName);
             }

@@ -5,6 +5,8 @@ import org.keycloak.models.UserModel;
 import ru.alamics.sso.keycloak.auth.requiredactions.PhoneVerificationByIncomingCallFactory;
 import ru.alamics.sso.keycloak.auth.requiredactions.PhoneVerificationBySmsFactory;
 
+import java.util.List;
+
 @Slf4j
 public enum AuthType {
     EMAIL(
@@ -45,4 +47,10 @@ public enum AuthType {
     public String[] getRequiredActionNames() {
         return requiredActionNames;
     }
+
+    public static List<String> REQUIRED_ACTIONS = List.of(
+            UserModel.RequiredAction.VERIFY_EMAIL.toString(),
+            PhoneVerificationByIncomingCallFactory.PROVIDER_ID,
+            PhoneVerificationBySmsFactory.PROVIDER_ID
+    );
 }
