@@ -8,24 +8,18 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 @Slf4j
-@Stateless
-public class HashProvider {
+public class HashGenerator {
 
-    private MessageDigest digest;
-
-    public HashProvider() {
+    public static String getSecretHash(String s) {
         try {
-            digest = MessageDigest.getInstance("SHA-256");
+            return bytesToHex(MessageDigest.getInstance("SHA-256").digest(s.getBytes(StandardCharsets.UTF_8)));
         } catch (NoSuchAlgorithmException e) {
-            log.error("Error initializing HashProvider: " + e.getMessage() + "; will use no-op impl", e);
+            log.error("Error initializing HashGenerator: " + e.getMessage() + "; will use no-op impl", e);
         }
+        return s;
     }
 
-    public String getHash(String s) {
-        return digest != null? bytesToHex(digest.digest(s.getBytes(StandardCharsets.UTF_8))) : s;
-    }
-
-    private String bytesToHex(byte[] hash) {
+    private static String bytesToHex(byte[] hash) {
         StringBuilder hexString = new StringBuilder();
         for (byte b : hash) {
             String hex = Integer.toHexString(0xff & b);
@@ -34,6 +28,4 @@ public class HashProvider {
         }
         return hexString.toString();
     }
-
-
 }

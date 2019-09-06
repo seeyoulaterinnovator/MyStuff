@@ -28,8 +28,8 @@ public class ViberService {
                 .build();
         */
 
-        viberSendService.sendMsg(phone, text);
+        String resp = viberSendService.sendMsg(phone, text);
 
-        log.info("Sent msg to viber: {}, text: {}, id: {}", phone, text, id);
+        log.info("Sent msg to viber: {}, text: {}, id: {}, resp: {}", phone, text, id, resp);
     }
 }

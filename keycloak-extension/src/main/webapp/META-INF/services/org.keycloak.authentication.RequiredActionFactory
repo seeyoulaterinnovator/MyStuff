@@ -1,1 +1,3 @@
-ru.alamics.sso.keycloak.registration.phone.PhoneVerificationFactory
+ru.alamics.sso.keycloak.auth.requiredactions.PhoneVerificationBySmsFactory
+ru.alamics.sso.keycloak.auth.requiredactions.PhoneVerificationByIncomingCallFactory
+ru.alamics.sso.keycloak.auth.requiredactions.VerifyEmailFactory
