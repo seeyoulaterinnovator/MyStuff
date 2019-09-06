@@ -1,42 +1,41 @@
-package ru.alamics.sso.keycloak.registration.phone;
+package ru.alamics.sso.keycloak.auth.requiredactions;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.Config;
+import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.DisplayTypeRequiredActionFactory;
 import org.keycloak.authentication.RequiredActionFactory;
 import org.keycloak.authentication.RequiredActionProvider;
+import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
-import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
+import ru.alamics.sso.registration.phone.ActivationCodeType;
 import ru.alamics.sso.registration.phone.UserPhoneVerifier;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 @Slf4j
-public class PhoneVerificationFactory implements RequiredActionFactory, DisplayTypeRequiredActionFactory {
+public class PhoneVerificationBySmsFactory implements RequiredActionFactory, DisplayTypeRequiredActionFactory {
 
-    private static final String PROVIDER_ID = "phone_verificator";
+    public static final String PROVIDER_ID = "phone_verificator";
 
-    private final UserModelUserMapper mapper;
-
-    public PhoneVerificationFactory() {
-        mapper = new UserModelUserMapper();
-    }
+    public PhoneVerificationBySmsFactory() {}
 
     @Override
     public RequiredActionProvider create(KeycloakSession session) {
-        return createProvider();
+        return createProvider(session);
     }
 
     @Override
     public RequiredActionProvider createDisplay(KeycloakSession session, String displayType) {
-        if (displayType == null) return createProvider();
+        if (displayType == null) return createProvider(session);
+        if (!OAuth2Constants.DISPLAY_CONSOLE.equalsIgnoreCase(displayType)) return null;
         return null;
     }
 
-    private RequiredActionProvider createProvider() {
-        log.info("Creating PhoneVerificationProvider");
+    private RequiredActionProvider createProvider(KeycloakSession session) {
+        log.info("Creating provider for PhoneVerificationBySmsFactory");
         UserPhoneVerifier userPhoneVerifier;
         try {
             InitialContext context = new InitialContext();
@@ -48,17 +47,15 @@ public class PhoneVerificationFactory implements RequiredActionFactory, DisplayT
             throw new RuntimeException("Something wrong with context");
         }
 
-        return new PhoneVerificationProvider(mapper, userPhoneVerifier);
+        return new PhoneVerificationProvider(userPhoneVerifier, ActivationCodeType.CODE_TO_SMS, session.getProvider(EmailTemplateProvider.class));
     }
 
     @Override
     public void init(Config.Scope config) {
-
     }
 
     @Override
     public void postInit(KeycloakSessionFactory factory) {
-
     }
 
     @Override
@@ -69,12 +66,10 @@ public class PhoneVerificationFactory implements RequiredActionFactory, DisplayT
 
     @Override
     public String getDisplayText() {
-        return "Phone Verification";
+        return "Phone Verification (sms)";
     }
 
     @Override
     public void close() {
-
     }
-
 }

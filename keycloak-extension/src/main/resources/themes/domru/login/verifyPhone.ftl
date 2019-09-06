@@ -3,11 +3,15 @@
 
 <@layout.registrationLayout displayMessage=false; section>
     <#if section = "header">
+        <#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон -->
         <@blocks.contentHeader mainTitle="Вам выслан одноразовый пароль на номер:" />
     <#elseif section = "form">
-        <p class="pb-6">+7 999 00 000 00</p>
-       
+        <#if userPhone??>
+            <p class="pb-6">${userPhone}</p>
+        </#if>
+
         <form id="totpForm" action="${url.loginAction}" method="POST">
+        <#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон -->
         <p class="pb-6 text-accentRed"> ${error!}<p>
             <div class="flex justify-between w-full pb-6">
                 <#list 1..6 as x>
