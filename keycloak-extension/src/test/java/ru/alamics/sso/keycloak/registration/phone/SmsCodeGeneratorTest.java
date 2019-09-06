@@ -13,12 +13,11 @@ class SmsCodeGeneratorTest {
     @Test
     void getCode() {
         IntStream.range(1, 18).forEach(length -> {
-            SmsCodeGenerator generator = new SmsCodeGenerator(length);
-            assertThat(generator.getCode()).hasSize(length);
+            assertThat(SmsCodeGenerator.getCode(length)).hasSize(length);
         });
 
-        assertThatThrownBy(() -> new SmsCodeGenerator(0)).isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> new SmsCodeGenerator(-1)).isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> new SmsCodeGenerator(19)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> SmsCodeGenerator.getCode(0)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> SmsCodeGenerator.getCode(-1)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> SmsCodeGenerator.getCode(19)).isInstanceOf(IllegalArgumentException.class);
     }
 }

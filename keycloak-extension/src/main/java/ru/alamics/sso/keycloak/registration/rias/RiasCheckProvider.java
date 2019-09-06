@@ -17,20 +17,17 @@ import ru.alamics.sso.registration.rias.RiasService;
 
 import javax.ws.rs.core.MultivaluedMap;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import static ru.alamics.sso.registration.model.FormConstants.*;
-import static ru.alamics.sso.registration.model.UserConstants.*;
+import static ru.alamics.sso.registration.model.FormConstants.FIELD_EMAIL;
+import static ru.alamics.sso.registration.model.FormConstants.FIELD_PHONE;
 
 public class RiasCheckProvider implements FormAction {
 
     private final RiasService riasService;
-    private final UserModelUserMapper mapper;
 
-    public RiasCheckProvider(RiasService riasService, UserModelUserMapper mapper) {
+    public RiasCheckProvider(RiasService riasService) {
         this.riasService = riasService;
-        this.mapper = mapper;
     }
 
     @Override
@@ -80,9 +77,7 @@ public class RiasCheckProvider implements FormAction {
 
     @Override
     public void success(FormContext context) {
-        UserModel user = context.getUser();
-        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
-        user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(formData.getFirst(FIELD_PHONE)));
+        UserModelUserMapper.fillAttributesFromContext(context.getUser(), context.getHttpRequest());
     }
 
     @Override

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
+import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.port.RiasApiService;
 import ru.alamics.sso.remote.rias.model.RiasData;
@@ -15,8 +16,6 @@ import javax.ws.rs.core.MediaType;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -27,16 +26,9 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
     private final ResteasyClient client = new ResteasyClientBuilder()
             .build();
 
-    private MessageDigest digest;
-
     private final URI uri;
 
     public RiasUserExistsCheckImpl() {
-        try {
-            digest = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            log.error(e.getMessage(), e);
-        }
         uri = new ResteasyUriBuilder()
                 .scheme("https")
                 .host("hq-dev.db.ertelecom.ru")
@@ -46,11 +38,6 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
     }
 
     public RiasUserExistsCheckImpl(URI uri) {
-        try {
-            digest = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            log.error(e.getMessage(), e);
-        }
         this.uri = uri;
     }
 
@@ -65,9 +52,7 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
 
         String clientSecret = param + timestamp + CLIENT_NAME + CLIENT_SALT;
 
-        byte[] hash = this.digest.digest(clientSecret.getBytes(StandardCharsets.UTF_8));
-
-        String secretHash = bytesToHex(hash);
+        String secretHash = HashGenerator.getSecretHash(clientSecret);
 
         String paramsV = "check_profile_data";
         String namesV = URLEncoder.encode("data_for_check$c,timestamp,client,client_secret", StandardCharsets.UTF_8);
@@ -109,19 +94,4 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
         else throw new RiasCheckException("Bad response status: status = " + response.getStatus());
 
     }
-
-
-
-    private String bytesToHex(byte[] hash) {
-        StringBuilder hexString = new StringBuilder();
-        for (byte b : hash) {
-            String hex = Integer.toHexString(0xff & b);
-            if (hex.length() == 1) hexString.append('0');
-            hexString.append(hex);
-        }
-        return hexString.toString();
-    }
-
-
-
 }
