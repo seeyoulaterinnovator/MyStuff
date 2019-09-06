@@ -41,12 +41,6 @@ public class SearchResource {
     @NoCache
     public Response getUsersInfo(@QueryParam("search") String search, @QueryParam("searchUser") String searchUser,
                                  @QueryParam("searchToms") String searchToms) {
-        if ((search == null || search.isBlank()) && (searchUser == null || searchUser.isBlank())
-                && (searchToms == null || searchToms.isBlank())) {
-            return JsonResponse.fail()
-                    .addResult("users-info", new LinkedList<>())
-                    .build();
-        }
         return JsonResponse.success()
                 .addResult("users-info", getUsers(search, searchUser, searchToms))
                 .build();
