@@ -59,7 +59,7 @@ public class UserPostRepository {
                     .setParameter("toms_id", tomsId)
                     .getSingleResult();
         } finally {
-            em.flush();
+//            em.flush();
             return access;
         }
     }
@@ -67,14 +67,24 @@ public class UserPostRepository {
     public List<UserPost> getAllUserPost() {
         return em.createQuery(
                 "select ac " +
-                        "from UserPost ac ")
+                        "from UserPost ac", UserPost.class)
                 .getResultList();
     }
 
     public List<UserPostRole> getAllUserPostRoles(){
         return em.createQuery(
                 "select apr " +
-                        "from UserPostRole apr ")
+                        "from UserPostRole apr", UserPostRole.class)
                 .getResultList();
+    }
+
+    public List<UserPost> findUserPostRole(final UserEntity user) {
+        final String DEBUG_STR = "findUserPostRole";
+        log.info("{}: user={}", DEBUG_STR, user.getId());
+
+        List<UserPost> ret = em.createQuery("select up from UserPost up where up.user =:user", UserPost.class)
+                .setParameter("user", user)
+                .getResultList();
+        return ret;
     }
 }
