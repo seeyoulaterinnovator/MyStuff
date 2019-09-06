@@ -18,7 +18,7 @@ import javax.naming.NamingException;
 @Slf4j
 public class PhoneVerificationBySmsFactory implements RequiredActionFactory, DisplayTypeRequiredActionFactory {
 
-    public static final String PROVIDER_ID = "phone_verificator";
+    public static final String PROVIDER_ID = "phone_verificator_sms";
 
     public PhoneVerificationBySmsFactory() {}
 
