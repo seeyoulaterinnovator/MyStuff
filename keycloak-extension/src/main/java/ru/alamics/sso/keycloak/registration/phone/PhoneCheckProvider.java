@@ -10,12 +10,12 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
+import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.registration.model.User;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static ru.alamics.sso.registration.model.FormConstants.FIELD_EMAIL;
@@ -78,9 +78,7 @@ public class PhoneCheckProvider implements FormAction {
 
     @Override
     public void success(FormContext context) {
-        UserModel user = context.getUser();
-        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
-        user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(formData.getFirst(FIELD_PHONE)));
+        UserModelUserMapper.fillAttributesFromContext(context.getUser(), context.getHttpRequest());
     }
 
     @Override

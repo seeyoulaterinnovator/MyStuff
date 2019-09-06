@@ -88,12 +88,10 @@ public class UserModelExtender implements FormAction, FormActionFactory {
     };
     private final TbapiService tbapiService;
     private final UserExtension userExtension;
-    private final UserModelUserMapper mapper;
 
     public UserModelExtender() {
         tbapiService = new TbapiService(new TbapiServiceRestImpl());
         userExtension = new UserExtension();
-        mapper = new UserModelUserMapper();
     }
 
     @Override
@@ -183,7 +181,7 @@ public class UserModelExtender implements FormAction, FormActionFactory {
         }
 
         if (userNewData != null)
-            mapper.mergeUserInto(userNewData, model);
+            UserModelUserMapper.mergeUserInto(userNewData, model);
     }
 
     @Override

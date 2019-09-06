@@ -8,7 +8,6 @@ import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderConfigProperty;
-import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.registration.rias.RiasService;
 
 import javax.naming.InitialContext;
@@ -25,11 +24,8 @@ public class RiasCheckFactory implements FormActionFactory {
             AuthenticationExecutionModel.Requirement.DISABLED
     };
 
-    private final UserModelUserMapper mapper;
 
-    public RiasCheckFactory() {
-        mapper = new UserModelUserMapper();
-    }
+    public RiasCheckFactory(){}
 
     @Override
     public String getDisplayType() {
@@ -81,7 +77,7 @@ public class RiasCheckFactory implements FormActionFactory {
             throw new RuntimeException("Something wrong with context");
         }
 
-        return new RiasCheckProvider(riasService, mapper);
+        return new RiasCheckProvider(riasService);
 
     }
 

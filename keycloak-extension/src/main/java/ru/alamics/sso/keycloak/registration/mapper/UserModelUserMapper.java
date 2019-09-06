@@ -1,19 +1,21 @@
 package ru.alamics.sso.keycloak.registration.mapper;
 
+import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.registration.model.User;
 
+import javax.ws.rs.core.MultivaluedMap;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static ru.alamics.sso.registration.model.FormConstants.FIELD_PHONE;
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_VALIDATED_ON;
 
 public class UserModelUserMapper {
 
-    public User mapToUser(UserModel model) {
+    public static User mapToUser(UserModel model) {
         return User.builder()
                 .id(model.getId())
                 .email(model.getEmail())
@@ -29,12 +31,11 @@ public class UserModelUserMapper {
                 .build();
     }
 
-    public void mergeUserInto(User user, UserModel model) {
-
+    public static void mergeUserInto(User user, UserModel model) {
         model.setEmail(user.getEmail());
         model.setFirstName(user.getName());
-        for (Map.Entry<String, List<String>> attributeEntry:
-            user.getAttributes().entrySet()) {
+        for (Map.Entry<String, List<String>> attributeEntry :
+                user.getAttributes().entrySet()) {
             model.setAttribute(attributeEntry.getKey(), attributeEntry.getValue());
         }
         if (user.getPhone() != null)
@@ -44,6 +45,14 @@ public class UserModelUserMapper {
 
     }
 
+    public static void fillAttributesFromContext(UserModel user, HttpRequest httpRequest) {
+        MultivaluedMap<String, String> formData = httpRequest.getDecodedFormParameters();
+        if (formData.getFirst(FIELD_PHONE) != null) {
+            user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(formData.getFirst(FIELD_PHONE)));
+        }
 
-
+        if (formData.getFirst(ATTR_PHONE_VALIDATED_ON) != null) {
+            user.setAttribute(ATTR_PHONE_VALIDATED_ON, Collections.singletonList(formData.getFirst(ATTR_PHONE_VALIDATED_ON)));
+        }
+    }
 }
