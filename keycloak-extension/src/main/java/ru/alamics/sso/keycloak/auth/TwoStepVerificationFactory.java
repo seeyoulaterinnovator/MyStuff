@@ -40,9 +40,10 @@ public class TwoStepVerificationFactory implements Authenticator, AuthenticatorF
         String type = config.get(TWO_STEP_VERIFICATION_TYPES);
         AuthType authType = AuthType.getByString(type);
 
-        String disable = context.getUser().getFirstAttribute(UserConstants.DISABLE_TWO_STEP);
+        AuthType.REQUIRED_ACTIONS.forEach(x -> context.getUser().removeRequiredAction(x));
 
-        if (authType != null && disable != null && !disable.isBlank() ) {
+        String disable = context.getUser().getFirstAttribute(UserConstants.DISABLE_TWO_STEP_AUTH);
+        if (authType != null && (disable == null || disable.isBlank())) {
             for (String providerName : authType.getRequiredActionNames()) {
                 context.getUser().addRequiredAction(providerName);
             }
