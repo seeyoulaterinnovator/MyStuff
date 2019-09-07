@@ -14,5 +14,5 @@ public class UserConstants {
     public static final String AUTH_FORM_SUCCESS = "AUTH_FORM_SUCCESS";
     public static final String I_FRAME = "iframe";
 
-    public static final String DISABLE_TWO_STEP = "disable_two_step";
+    public static final String DISABLE_TWO_STEP_AUTH = "disable_two_step_auth";
 }
