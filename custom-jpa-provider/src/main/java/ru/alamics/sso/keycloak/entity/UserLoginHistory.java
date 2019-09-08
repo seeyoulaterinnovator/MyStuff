@@ -3,6 +3,7 @@ package ru.alamics.sso.keycloak.entity;
 import lombok.*;
 import org.keycloak.models.jpa.entities.UserEntity;
 
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
