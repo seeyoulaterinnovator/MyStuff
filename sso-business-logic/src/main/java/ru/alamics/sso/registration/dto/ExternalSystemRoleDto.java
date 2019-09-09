@@ -15,7 +15,6 @@ public class ExternalSystemRoleDto {
     private Long id;
     private String name;
     private ExternalSystemDto externalSystem;
-    private Set<UserPost> userPosts;
 
     @JsonPOJOBuilder(withPrefix = "")
     public static class ExternalSystemRoleDtoBuilder {

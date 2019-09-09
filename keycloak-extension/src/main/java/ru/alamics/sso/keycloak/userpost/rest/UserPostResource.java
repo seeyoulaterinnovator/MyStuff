@@ -171,7 +171,7 @@ public class UserPostResource {
                 .build();
     }
 
-    @GET
+    @POST
     @Path("/add-system-role")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -189,7 +189,7 @@ public class UserPostResource {
         }
     }
 
-    @GET
+    @POST
     @Path("/remove-system-role")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON)

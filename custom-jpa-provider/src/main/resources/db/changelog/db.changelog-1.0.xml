@@ -105,18 +105,4 @@
             INSERT INTO USER_POST_ROLE (ID, NAME) VALUES (4, 'GUEST');
         </sql>
     </changeSet>
-
-    <changeSet id="strukov-av" author="8">
-        <sql>
-            INSERT INTO EXTERNAL_SYSTEM (ID, NAME) VALUES (1, 'SYSTEM1');
-            INSERT INTO EXTERNAL_SYSTEM (ID, NAME) VALUES (2, 'SYSTEM2');
-            INSERT INTO EXTERNAL_SYSTEM (ID, NAME) VALUES (3, 'SYSTEM3');
-            INSERT INTO EXTERNAL_SYSTEM (ID, NAME) VALUES (4, 'SYSTEM4');
-
-            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID) VALUES (1, 'ROLE_1_SYS_1', 1);
-            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID) VALUES (2, 'ROLE_2_SYS_1', 1);
-            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID) VALUES (3, 'ROLE_1_SYS_2', 2);
-            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID) VALUES (4, 'ROLE_4_SYS_3', 3);
-        </sql>
-    </changeSet>
 </databaseChangeLog>
