@@ -18,6 +18,7 @@ import './css/components/field.css';
 import './css/components/link.css';
 import './css/components/logo.css';
 import './css/components/reference.css';
+import './css/components/email-sent.css';
 
 const app = new App({
   target: document.body,

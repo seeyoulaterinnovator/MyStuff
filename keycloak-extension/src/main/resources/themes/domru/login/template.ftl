@@ -1,3 +1,5 @@
+<#import "templates/email-sent.ftl" as emailSent>
+
 <#macro registrationLayout displayInfo=false displayMessage=true displayWide=false environment="dev" >
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="ru" class="h-full min-h-screen">
@@ -33,24 +35,32 @@
     <#include "templates/header.html">
 
     <main id="content" class="flex-1 py-12 mx-auto md:mx-auto w-full max-w-440px xl:max-w-470px">
-      <#nested "header">
-      
-      <#if displayInfo>
-        <#nested "info">
-      </#if>
+      <#if displayMessage && message?has_content && message.summary == msg('emailSentMessage')>
+        <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}"></@emailSent.defaultTemplate>
+      <#else>
 
-      <div class="py-3">
-        <#if displayMessage && message?has_content>
-          <div class="alert pb-3">
-            <#if message.type = 'info'><span class="text-black">${kcSanitize(message.summary)?no_esc}</span></#if>
-            <#if message.type = 'warning'><span class="text-extra">${kcSanitize(message.summary)?no_esc}</span></#if>
-            <#if message.type = 'success'><span class="text-accentGreen">${kcSanitize(message.summary)?no_esc}</span></#if>
-            <#if message.type = 'error'><span class="text-accentRed">${kcSanitize(message.summary)?no_esc}</span></#if>
-          </div>
+        <#nested "header">
+      
+        <#if displayInfo>
+          <#nested "info">
         </#if>
 
-        <#nested "form"> 
-      </div>
+          <div class="py-3">
+            <#if displayMessage && message?has_content>
+              <div class="alert pb-3">
+                <#if message.type = 'info'><span class="text-black">${kcSanitize(message.summary)?no_esc}</span></#if>
+                <#if message.type = 'warning'><span class="text-extra">${kcSanitize(message.summary)?no_esc}</span></#if>
+                <#if message.type = 'success' && message.summary != msg('emailSentMessage')>
+                    <span class="text-accentGreen">${kcSanitize(message.summary)?no_esc}</span>
+                </#if>
+                <#if message.type = 'error'><span class="text-accentRed">${kcSanitize(message.summary)?no_esc}</span></#if>
+              </div>
+            </#if>
+
+            <#nested "form">
+          </div>
+
+        </#if>
     </main>
     
     <#include "templates/footer-copyright.html">
