@@ -1,5 +1,6 @@
 package ru.alamics.sso.registration.mapper;
 
+import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.entity.Access;
 import ru.alamics.sso.keycloak.entity.UserPostRole;
@@ -93,5 +94,4 @@ public class DataMapper {
         userPostRoleList.forEach(o -> userPostRoleDto.add(toUserPostRoleDto(o)));
         return userPostRoleDto;
     }
-
 }

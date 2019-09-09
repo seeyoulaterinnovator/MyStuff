@@ -61,7 +61,7 @@ public class UserPostResource {
                     .build();
         } catch (FoundUserPostException e) {
             return JsonResponse.fail()
-                    .message("UserPost is exist")
+                    .message("UserPost with the same userId and tomsId already exists")
                     .build();
         }
 

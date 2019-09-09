@@ -22,8 +22,14 @@ import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.permissions.AdminPermissions;
 import org.keycloak.utils.MediaType;
 import ru.alamics.sso.keycloak.create.model.UserRequest;
+import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.registration.FoundUserPostException;
+import ru.alamics.sso.registration.dto.UserPostDto;
+import ru.alamics.sso.registration.service.UserPostService;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
@@ -36,8 +42,15 @@ import static ru.alamics.sso.registration.model.UserConstants.*;
 public class CustomUserResource {
 
     protected KeycloakSession session;
+    private UserPostService userPostService;
 
     public CustomUserResource(KeycloakSession session) {
+        try {
+            this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
+        } catch (NamingException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Something wrong with context");
+        }
         this.session = session;
     }
 
@@ -114,7 +127,7 @@ public class CustomUserResource {
             Set<String> emptySet = Collections.emptySet();
 
             updateUserFromRequest(user, request, emptySet, realm, session, false);
-            addAccessUser(user, request);
+            addUserPost(user, request);
 
             //todo эвенты не отправляются ??
             new AdminEventBuilder(realm, auth, session, session.getContext().getConnection())
@@ -133,21 +146,23 @@ public class CustomUserResource {
                     .build();
 
         } catch (ModelDuplicateException e) {
-            if (session.getTransactionManager().isActive()) {
-                session.getTransactionManager().setRollbackOnly();
-            }
             return JsonResponse.error(Response.Status.CONFLICT)
                     .message("User exists with same username or email or phone")
                     .build();
 
         } catch (ModelException me) {
-            if (session.getTransactionManager().isActive()) {
-                session.getTransactionManager().setRollbackOnly();
-            }
             log.warn("Could not create user", me);
             return JsonResponse.error(Response.Status.INTERNAL_SERVER_ERROR)
                     .message("Could not create user")
                     .build();
+        } catch (FoundUserPostException e){
+            return JsonResponse.error(Response.Status.CONFLICT)
+                    .message("User post with the same userId and tomsId already exists")
+                    .build();
+        } finally {
+            if (session.getTransactionManager().isActive()) {
+                session.getTransactionManager().setRollbackOnly();
+            }
         }
     }
 
@@ -235,13 +250,9 @@ public class CustomUserResource {
 
     }
 
-    private void addAccessUser(UserModel userModel, UserRequest request) {
-        RealmModel realm = new RealmManager(session).getRealmByName(ACCESS_REALM);
-
-        UserModel accessUser = session.users().addUser(realm, UUID.randomUUID().toString());
-        accessUser.setSingleAttribute(ATTR_USER_ID_NAME, userModel.getId());
-        accessUser.setSingleAttribute(ATTR_TOMS_NAME, request.getCAID());
-        RoleModel roleModel = realm.getRole(DEFAULT_ROLE_ACCESS_REALM);
-        accessUser.grantRole(roleModel);
+    private void addUserPost(UserModel userModel, UserRequest request) throws FoundUserPostException {
+        UserPostDto userPostDto = DataMapper.toUserPostDto(userModel, request);
+        userPostDto.setRoleId(1L);
+        userPostService.save(userPostDto);
     }
 }
