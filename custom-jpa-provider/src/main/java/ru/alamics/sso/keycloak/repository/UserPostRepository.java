@@ -108,4 +108,10 @@ public class UserPostRepository {
         update(userPost);
         return userPost;
     }
+
+    public UserPost removeSystemRole(UserPost userPost, Long extSystemRoleId){
+        userPost.getSystemRoles().remove(em.find(ExternalSystemRole.class, extSystemRoleId));
+        update(userPost);
+        return userPost;
+    }
 }
