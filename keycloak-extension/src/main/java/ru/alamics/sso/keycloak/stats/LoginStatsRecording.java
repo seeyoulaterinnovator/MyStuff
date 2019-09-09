@@ -45,7 +45,7 @@ public class LoginStatsRecording implements RequiredActionProvider  {
     private void recordRecentLogin(UserModel model) {
         UserEntity entity = new UserEntity();
         entity.setId(model.getId());
-//        loginHistoryService.create(entity);
+        loginHistoryService.create(entity);
     }
 
 }

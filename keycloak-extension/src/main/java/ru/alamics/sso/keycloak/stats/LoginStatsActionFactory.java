@@ -6,9 +6,8 @@ import org.keycloak.authentication.RequiredActionFactory;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.stats.LoginHistory;
-
-import javax.inject.Inject;
 
 @Slf4j
 public class LoginStatsActionFactory implements RequiredActionFactory {
@@ -22,7 +21,7 @@ public class LoginStatsActionFactory implements RequiredActionFactory {
 
     @Override
     public RequiredActionProvider create(KeycloakSession session) {
-        LoginHistory login = new LoginHistory(session);
+        LoginHistory login = (LoginHistory) Lookup.lookup(LoginHistory.class);
         return new LoginStatsRecording(login);
     }
 

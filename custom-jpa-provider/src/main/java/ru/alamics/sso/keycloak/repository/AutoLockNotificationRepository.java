@@ -5,7 +5,9 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.entity.AutoLockNotification;
 import ru.alamics.sso.keycloak.entity.common.NotificationType;
 
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -13,8 +15,10 @@ import java.util.List;
 import java.util.UUID;
 
 @Slf4j
+@Stateless
 public class AutoLockNotificationRepository {
 
+    @PersistenceContext
     private EntityManager entityManager;
 
     public void save(List<AutoLockNotification> autoLockNotifications) {

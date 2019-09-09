@@ -1,25 +1,32 @@
 package ru.alamics.sso.property;
 
+import lombok.extern.slf4j.Slf4j;
+
 import javax.annotation.PostConstruct;
+
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+@Slf4j
 public class PropertyProducer {
     private Properties properties;
 
     @Property
     @Produces
     public String produceString(final InjectionPoint ip) {
-        return this.properties.getProperty(getKey(ip));
+        String key = getKey(ip);
+        log.info("key={}", key);
+        return this.properties.getProperty(key);
     }
 
     @Property
     @Produces
-    public int produceInt(final InjectionPoint ip) {
-        return Integer.parseInt(this.properties.getProperty(getKey(ip)));
+    public Integer produceInt(final InjectionPoint ip) {
+        String key = getKey(ip);
+        return Integer.parseInt(this.properties.getProperty(key));
     }
 
     @Property
@@ -33,8 +40,10 @@ public class PropertyProducer {
                 !ip.getAnnotated().getAnnotation(Property.class).value().isEmpty()) ? ip.getAnnotated()
                 .getAnnotation(Property.class).value() : ip.getMember().getName();
     }
+
     @PostConstruct
     public void init() {
+        log.info("---------------------------------------------------------------------------------------------------------------------");
         this.properties = new Properties();
         final InputStream stream = PropertyProducer.class
                 .getResourceAsStream("/application.properties");
