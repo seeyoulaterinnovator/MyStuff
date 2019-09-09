@@ -8,7 +8,6 @@ export default (function() {
   const submitElement = document.getElementById('accept');
   const resendElement = document.getElementById('resend');
   submitElement.disabled = true;
-  resendElement.disabled = true;
 
   // Инициируем обратный отсчет таймера.
   // После него появится кнопка "Отправить еще раз"
