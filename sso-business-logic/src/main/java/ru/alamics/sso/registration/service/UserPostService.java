@@ -71,4 +71,17 @@ public class UserPostService {
         }
         return DataMapper.toUserPostResponse(userPostRepository.addSystemRole(userPost, extSystemRoleId));
     }
+
+    public UserPostResponse removeSystemRole(String userPostId, Long extSystemRoleId) throws NotFoundException {
+        UserPost userPost = userPostRepository.getUserPost(userPostId);
+        if (userPost == null) {
+            throw new NotFoundException("UserPost is not exist");
+        }
+        if (userPost.getSystemRoles() == null || userPost.getSystemRoles().isEmpty() ||
+                !userPost.getSystemRoles().stream().anyMatch(o ->
+                        o.getId().equals(extSystemRoleId))) {
+            throw new NotFoundException("SystemRole is not exist in this UserPost");
+        }
+        return DataMapper.toUserPostResponse(userPostRepository.removeSystemRole(userPost, extSystemRoleId));
+    }
 }

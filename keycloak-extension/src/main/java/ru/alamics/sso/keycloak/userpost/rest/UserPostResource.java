@@ -189,6 +189,24 @@ public class UserPostResource {
         }
     }
 
+    @GET
+    @Path("/remove-system-role")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response removeSystemRole(@QueryParam("userPostId") String userPostId, @QueryParam("systemRoleId") Long systemRoleId) {
+        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
+        try {
+            return JsonResponse.success()
+                    .addResult("user-post", userPostService.removeSystemRole(userPostId, systemRoleId))
+                    .build();
+        } catch (NotFoundException e) {
+            return JsonResponse.fail()
+                    .message(e.getMessage())
+                    .build();
+        }
+    }
+
 
     private AdminAuth authenticateRealmAdminRequest(RealmModel realm) {
         String tokenString = new AppAuthManager().extractAuthorizationHeaderToken(session.getContext().getRequestHeaders());
