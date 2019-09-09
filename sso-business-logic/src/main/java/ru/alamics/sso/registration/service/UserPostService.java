@@ -1,9 +1,13 @@
 package ru.alamics.sso.registration.service;
 
 import javassist.NotFoundException;
+import ru.alamics.sso.keycloak.entity.ExternalSystem;
+import ru.alamics.sso.keycloak.entity.ExternalSystemRole;
 import ru.alamics.sso.keycloak.entity.UserPost;
 import ru.alamics.sso.keycloak.repository.UserPostRepository;
 import ru.alamics.sso.registration.FoundUserPostException;
+import ru.alamics.sso.registration.dto.ExternalSystemDto;
+import ru.alamics.sso.registration.dto.ExternalSystemRoleDto;
 import ru.alamics.sso.registration.dto.UserPostDto;
 import ru.alamics.sso.registration.dto.UserPostRoleDto;
 import ru.alamics.sso.registration.mapper.DataMapper;
@@ -55,5 +59,13 @@ public class UserPostService {
 
     public List<UserPostRoleDto> getUserPostRoleDtos(){
         return DataMapper.toUserPostRoleDtoList(userPostRepository.getAllUserPostRoles());
+    }
+
+    public List<ExternalSystemRoleDto> getExternalSystemRoles(){
+        return DataMapper.toExternalSystemRoleDtos(userPostRepository.getAllExternalSystemRole());
+    }
+
+    public List<ExternalSystemDto> getExternalSystems(){
+        return DataMapper.toExternalSystemDtos(userPostRepository.getAllExternalSystem());
     }
 }

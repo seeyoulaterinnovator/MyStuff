@@ -147,6 +147,30 @@ public class UserPostResource {
                 .build();
     }
 
+    @GET
+    @Path("/system-roles")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response getAllSystemRoles() {
+        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
+        return JsonResponse.success()
+                .addResult("system-roles", userPostService.getExternalSystemRoles())
+                .build();
+    }
+
+    @GET
+    @Path("/systems")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response getAllSystems() {
+        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
+        return JsonResponse.success()
+                .addResult("systems", userPostService.getExternalSystems())
+                .build();
+    }
+
     private AdminAuth authenticateRealmAdminRequest(RealmModel realm) {
         String tokenString = new AppAuthManager().extractAuthorizationHeaderToken(session.getContext().getRequestHeaders());
         if (tokenString == null) throw new NotAuthorizedException("Bearer");

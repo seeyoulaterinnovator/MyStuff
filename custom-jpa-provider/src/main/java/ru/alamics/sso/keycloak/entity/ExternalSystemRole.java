@@ -2,21 +2,22 @@ package ru.alamics.sso.keycloak.entity;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Immutable;
 
 import javax.persistence.*;
 import java.util.Set;
 
 @Entity
-@Immutable
-@Table(name = "ACCESS_NAME")
+@Table(name = "EXT_SYSTEM_ROLE")
 @Data
 @NoArgsConstructor
-public class Access {
+public class ExternalSystemRole {
     @Id
     private Long id;
     @Column(name = "name")
     private String name;
-//    @ManyToMany(mappedBy = "access")
-//    private Set<UserPost> userPosts;
+    @ManyToOne
+    @JoinColumn(name = "system_id")
+    private ExternalSystem externalSystem;
+    @ManyToMany
+    private Set<UserPost> userPosts;
 }
