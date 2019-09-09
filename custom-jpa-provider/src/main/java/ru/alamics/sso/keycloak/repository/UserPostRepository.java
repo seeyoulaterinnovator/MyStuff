@@ -103,4 +103,10 @@ public class UserPostRepository {
                         "from ExternalSystemRole role", ExternalSystemRole.class)
                 .getResultList();
     }
+
+    public UserPost addSystemRole(UserPost userPost, Long extSystemRoleId){
+        userPost.getSystemRoles().add(em.find(ExternalSystemRole.class, extSystemRoleId));
+        update(userPost);
+        return userPost;
+    }
 }

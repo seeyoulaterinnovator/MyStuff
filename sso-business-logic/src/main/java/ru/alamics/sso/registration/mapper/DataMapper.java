@@ -5,112 +5,86 @@ import ru.alamics.sso.keycloak.entity.ExternalSystem;
 import ru.alamics.sso.keycloak.entity.ExternalSystemRole;
 import ru.alamics.sso.keycloak.entity.UserPostRole;
 import ru.alamics.sso.keycloak.entity.UserPost;
-import ru.alamics.sso.registration.dto.ExternalSystemDto;
-import ru.alamics.sso.registration.dto.ExternalSystemRoleDto;
-import ru.alamics.sso.registration.dto.UserPostDto;
-import ru.alamics.sso.registration.dto.UserPostRoleDto;
+import ru.alamics.sso.registration.dto.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DataMapper {
 
-    public static UserPost toUserPost(UserPostDto userPostDto){
-        if ( userPostDto == null ) {
+    public static UserPost toUserPost(UserPost userPost, UserPostRequest userPostRequest) {
+        if (userPostRequest == null) {
             return null;
         }
 
-        UserPost userPost = new UserPost();
-
         UserEntity userEntity = new UserEntity();
-        userEntity.setId(userPostDto.getUserId());
+        userEntity.setId(userPostRequest.getUserId());
         userPost.setUser(userEntity);
-        userPost.setId( userPostDto.getId() );
-        userPost.setTomsId( userPostDto.getTomsId() );
+        userPost.setId(userPostRequest.getId());
+        userPost.setTomsId(userPostRequest.getTomsId());
+        userPost.setDmpId(userPostRequest.getDmpId());
         UserPostRole userPostRole = new UserPostRole();
-        userPostRole.setId(userPostDto.getRoleId());
+        userPostRole.setId(userPostRequest.getRoleId());
         userPost.setRole(userPostRole);
-/*
-        if (userPostDto.getSystemsId() != null){
-            Set<System> systems = new HashSet<>();
-            userPostDto.getSystemsId()
-                    .forEach(o -> {
-                        System system = new System();
-                        system.setId(o);
-                        systems.add(system);
-                    });
-            userPost.setSystems(systems);
-        }
-        if (userPostDto.getAccessId() != null){
-            Set<Access> accesss = new HashSet<>();
-            userPostDto.getSystemsId()
-                    .forEach(o -> {
-                        Access access = new Access();
-                        access.setId(o);
-                        accesss.add(access);
-                    });
-            userPost.setAccess(accesss);
-        }*/
 
         return userPost;
     }
 
-    public static UserPostDto toUserPostDto(UserPost userPost){
-        if ( userPost == null ) {
+    public static UserPostResponse toUserPostResponse(UserPost userPost) {
+        if (userPost == null) {
             return null;
         }
-        UserPostDto userPostDto = new UserPostDto();
-        userPostDto.setId(userPost.getId());
-        userPostDto.setUserId(userPost.getId());
-        userPostDto.setTomsId(userPost.getTomsId());
-        userPostDto.setRmsId(userPost.getDmpId());
-        userPostDto.setRoleId(userPost.getRole().getId());
-
-//        if (userPost.getSystems() != null) {
-//            Set<Long> systemsId = new HashSet<>();
-//            userPost.getSystems()
-//                    .forEach(o -> systemsId.add(o.getId()));
-//            userPostDto.setSystemsId(systemsId);
-//        }
-        return userPostDto;
+        Set<ExternalSystemRole> externalSystemRole = userPost.getSystemRoles();
+        List<ExternalSystemRole> externalSystemRoles = null;
+        if (externalSystemRole != null){
+            externalSystemRoles = externalSystemRole.stream().collect(Collectors.toList());
+        }
+        return UserPostResponse.builder()
+                .id(userPost.getId())
+                .userId(userPost.getUser().getId())
+                .userRole(toUserPostRoleDto(userPost.getRole()))
+                .dmpId(userPost.getDmpId())
+                .systemRoles(toExternalSystemRoleDtos(externalSystemRoles))
+                .build();
     }
 
-    public static List<UserPostDto> toUserPostDtoList(List<UserPost> userPostList){
+    public static List<UserPostResponse> toUserPostResponseList(List<UserPost> userPostList) {
         if (userPostList == null) {
             return null;
         }
-        List<UserPostDto> userPostDtos = new LinkedList<>();
+        List<UserPostResponse> userPostDtos = new LinkedList<>();
         userPostList
-                .forEach(o -> userPostDtos.add(toUserPostDto(o)));
+                .forEach(o -> userPostDtos.add(toUserPostResponse(o)));
         return userPostDtos;
     }
 
-    public static UserPostRoleDto toUserPostRoleDto(UserPostRole userPostRole){
+    public static UserPostRoleDto toUserPostRoleDto(UserPostRole userPostRole) {
         UserPostRoleDto userPostRoleDto = new UserPostRoleDto();
         userPostRoleDto.setId(userPostRole.getId());
         userPostRoleDto.setName(userPostRole.getName());
-        return  userPostRoleDto;
+        return userPostRoleDto;
     }
 
-    public static List<UserPostRoleDto> toUserPostRoleDtoList(List<UserPostRole> userPostRoleList){
+    public static List<UserPostRoleDto> toUserPostRoleDtoList(List<UserPostRole> userPostRoleList) {
         List<UserPostRoleDto> userPostRoleDto = new LinkedList<>();
         userPostRoleList.forEach(o -> userPostRoleDto.add(toUserPostRoleDto(o)));
         return userPostRoleDto;
     }
 
-    public static ExternalSystemDto toExternalSystemDto(ExternalSystem externalSystem){
+    public static ExternalSystemDto toExternalSystemDto(ExternalSystem externalSystem) {
         return ExternalSystemDto.builder()
                 .id(externalSystem.getId())
                 .name(externalSystem.getName())
                 .build();
     }
 
-    public static List<ExternalSystemDto> toExternalSystemDtos(List<ExternalSystem> externalSystems){
+    public static List<ExternalSystemDto> toExternalSystemDtos(List<ExternalSystem> externalSystems) {
         List<ExternalSystemDto> externalSystemDtos = new LinkedList<>();
         externalSystems.forEach(o -> externalSystemDtos.add(toExternalSystemDto(o)));
         return externalSystemDtos;
     }
 
-    public static ExternalSystemRoleDto toExternalSystemRoleDto(ExternalSystemRole externalSystemRole){
+    public static ExternalSystemRoleDto toExternalSystemRoleDto(ExternalSystemRole externalSystemRole) {
         return ExternalSystemRoleDto.builder()
                 .id(externalSystemRole.getId())
                 .name(externalSystemRole.getName())
@@ -118,7 +92,10 @@ public class DataMapper {
                 .build();
     }
 
-    public static List<ExternalSystemRoleDto> toExternalSystemRoleDtos(List<ExternalSystemRole> externalSystemRoles){
+    public static List<ExternalSystemRoleDto> toExternalSystemRoleDtos(List<ExternalSystemRole> externalSystemRoles) {
+        if (externalSystemRoles == null || externalSystemRoles.isEmpty()){
+            return null;
+        }
         List<ExternalSystemRoleDto> externalSystemDtos = new LinkedList<>();
         externalSystemRoles.forEach(o -> externalSystemDtos.add(toExternalSystemRoleDto(o)));
         return externalSystemDtos;
