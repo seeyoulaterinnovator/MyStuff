@@ -28,6 +28,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
+import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 
 @Slf4j
 public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator implements Authenticator {
@@ -48,6 +49,7 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
         if (!validateForm(context, formData)) {
             return;
         }
+        context.getAuthenticationSession().setAuthNote(AUTH_FORM_SUCCESS, "1");
         context.success();
     }
 
