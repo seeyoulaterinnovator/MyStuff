@@ -54,7 +54,7 @@
                     <span class="text-accentGreen">${kcSanitize(message.summary)?no_esc}</span>
                 </#if>
                 <#if message.type = 'error'><span class="text-accentRed">${kcSanitize(message.summary)?no_esc}</span></#if>
-              </div>
+                </div>
             </#if>
 
             <#nested "form">
