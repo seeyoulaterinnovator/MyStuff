@@ -42,7 +42,7 @@ public class InactiveBlockSchedule {
 //    @Property(value = "user.absence.blocking.days")
     private Integer absenceDaysBlock;
 
-    @Schedule(hour = "*", second = "*/10", minute = "*", persistent = false)
+    @Schedule(hour = "*/3", persistent = false)
     public void block () {
         final String DEBUG_STR = "block";
         log.info("start:{}", DEBUG_STR);
