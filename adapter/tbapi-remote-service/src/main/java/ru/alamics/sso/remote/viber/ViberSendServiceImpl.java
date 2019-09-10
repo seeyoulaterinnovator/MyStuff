@@ -61,6 +61,8 @@ public class ViberSendServiceImpl implements ViberSendService {
             return "0: Accepted for delivery";
         }
 
+        phone = phone.replaceAll("[^0-9]+", "");
+
         URI uri = smsConfig.getUrl();
 
         String response = client.target(uri)
