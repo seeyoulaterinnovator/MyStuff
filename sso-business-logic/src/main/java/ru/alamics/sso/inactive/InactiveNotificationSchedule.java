@@ -53,7 +53,7 @@ public class InactiveNotificationSchedule {
     private Integer absenceDaysNotification;
     private Integer absenceDaysBlock;
 
-    @Schedule(hour = "*/3", persistent = false)
+//    @Schedule(hour = "*/3", persistent = false)
     public void notificationInactiveUsers () {
         final String DEBUG_STR = "findInactiveUsers";
         log.info("start:{}", DEBUG_STR);
