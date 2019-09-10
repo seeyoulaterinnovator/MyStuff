@@ -24,10 +24,14 @@
             <div class="flex justify-between w-full items-center">
                 <button class="btn btn-main w-3/7 mr-4" name="accept" id="accept" type="submit">Подтвердить</button>
                 
+                <#if error?has_content>
+                <button class="border-b border-dashed text-black-50 text-right" name="resend" id="resend" type="submit" >Отправить еще раз</button>
+                <#else>
                 <div id="timer" class="text-main-600 text-right text-sm flex items-center">
                     Пароль действует <span id="timer-time" class="px-1 text-black text-5/3em"></span> мин
                 </div>
                 <button class="hidden border-b border-dashed text-black-50 text-right" name="resend" id="resend" type="submit" >Отправить еще раз</button>
+                </#if>
             </div>
         </form>
     </#if>
