@@ -62,6 +62,8 @@ public class SmsSendServiceImpl implements SmsSendService {
             return "0: Accepted for delivery";
         }
 
+        phone = phone.replaceAll("[^0-9]+", "");
+
         URI uri = smsConfig.getUrl();
 
         // TODO https://stackoverflow.com/questions/53760939/processingexception-resteasy003145-unable-to-find-a-messagebodyreader-of-conte?noredirect=1&lq=1

@@ -6,10 +6,11 @@ import ru.alamics.sso.keycloak.entity.UserPost;
 
 import java.util.List;
 
+import static ru.alamics.sso.keycloak.entity.provider.factory.CustomJpaProviderFactory.ID;
+
 public class CustomJpaEntityProvider implements org.keycloak.connections.jpa.entityprovider.JpaEntityProvider {
     private static final String CHANGE_LOG = "db/changelog/db.changelog-master.xml";
 
-    private static final String ID = "customJpaEntityProvider";
 
     @Override
     public List<Class<?>> getEntities () {
