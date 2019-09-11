@@ -3,7 +3,6 @@ package ru.alamics.sso.keycloak.registration.rias;
 import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormContext;
 import org.keycloak.authentication.ValidationContext;
-import org.keycloak.authentication.forms.RegistrationPage;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
@@ -12,25 +11,23 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.services.messages.Messages;
-import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.rias.RiasService;
 
 import javax.ws.rs.core.MultivaluedMap;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+
+import static ru.alamics.sso.registration.model.FormConstants.FIELD_EMAIL;
+import static ru.alamics.sso.registration.model.FormConstants.FIELD_PHONE;
 
 public class RiasCheckProvider implements FormAction {
 
-    public static final String USER_ATTRIBUTES_PHONE = "user.attributes.phone";
     private final RiasService riasService;
-    private final UserModelUserMapper mapper;
 
-    public RiasCheckProvider(RiasService riasService, UserModelUserMapper mapper) {
+    public RiasCheckProvider(RiasService riasService) {
         this.riasService = riasService;
-        this.mapper = mapper;
     }
 
     @Override
@@ -50,8 +47,8 @@ public class RiasCheckProvider implements FormAction {
 
 //        User user = mapper.mapToUser(context.getUser());
         User user = User.builder()
-                .email(formData.getFirst(RegistrationPage.FIELD_EMAIL))
-                .phone(formData.getFirst(USER_ATTRIBUTES_PHONE))
+                .email(formData.getFirst(FIELD_EMAIL))
+                .phone(formData.getFirst(FIELD_PHONE))
                 .build();
 
         boolean emailCheck = riasService.checkEmail(user);
@@ -59,15 +56,15 @@ public class RiasCheckProvider implements FormAction {
         boolean phoneCheck = riasService.checkPhone(user);
 
         if (emailCheck) {
-            formData.remove(Validation.FIELD_EMAIL);
+            formData.remove(FIELD_EMAIL);
             context.getEvent().detail(Details.EMAIL, user.getEmail());
-            errors.add(new FormMessage(RegistrationPage.FIELD_EMAIL, Messages.EMAIL_EXISTS));
+            errors.add(new FormMessage(FIELD_EMAIL, Messages.EMAIL_EXISTS));
         }
 
         if (phoneCheck) {
-            formData.remove(USER_ATTRIBUTES_PHONE);
+            formData.remove(FIELD_PHONE);
             context.getEvent().detail("Phone", user.getPhone());
-            errors.add(new FormMessage(USER_ATTRIBUTES_PHONE, "Пользователь с таким телефоном уже существкет"));
+            errors.add(new FormMessage(FIELD_PHONE, "Пользователь с таким телефоном уже существует"));
         }
 
         if (!errors.isEmpty()) {
@@ -80,9 +77,7 @@ public class RiasCheckProvider implements FormAction {
 
     @Override
     public void success(FormContext context) {
-        UserModel user = context.getUser();
-        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
-        user.setAttribute("phone", Collections.singletonList(formData.getFirst(USER_ATTRIBUTES_PHONE)));
+        UserModelUserMapper.fillAttributesFromContext(context.getUser(), context.getHttpRequest());
     }
 
     @Override

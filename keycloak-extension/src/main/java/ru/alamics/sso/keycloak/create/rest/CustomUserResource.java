@@ -5,6 +5,7 @@ import org.jboss.resteasy.annotations.cache.NoCache;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.events.admin.OperationType;
+import org.keycloak.events.admin.ResourceType;
 import org.keycloak.jose.jws.JWSInput;
 import org.keycloak.jose.jws.JWSInputException;
 import org.keycloak.models.*;
@@ -32,10 +33,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
+
 @Slf4j
 public class CustomUserResource {
-
-    private static final String PHONE_ATTR = "phone";
 
     protected KeycloakSession session;
 
@@ -47,7 +48,7 @@ public class CustomUserResource {
     @Path("")
     @NoCache
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response getCompanies(final UserRequest request, final HttpHeaders headers) {
+    public Response createUser(final UserRequest request, final HttpHeaders headers) {
 
         RealmManager realmManager = new RealmManager(session);
         RealmModel realm = realmManager.getRealmByName(request.getRealmName());
@@ -68,9 +69,10 @@ public class CustomUserResource {
             return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
         } else {
             List<UserEntity> users = getEM().createQuery("select u from UserAttributeEntity atr join atr.user u " +
-                    "where atr.name = 'phone' and " +
-                    " atr.value like '%' || :phone || '%' and" +
+                    "where atr.name = :ph_attr_name and " +
+                    " atr.value like '%' || :phone || '%' and" + // TODO =
                     " u.realmId = :realId ", UserEntity.class)
+                    .setParameter("ph_attr_name", ATTR_PHONE_NAME)
                     .setParameter("phone", request.getPhone())
                     .setParameter("realId", realm.getId())
                     .getResultList();
@@ -109,14 +111,19 @@ public class CustomUserResource {
 
     private Response getUserResponse(UserRequest request, RealmModel realm, AdminAuth auth) {
         try {
-            AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth, session, session.getContext().getConnection());
 
             UserModel user = session.users().addUser(realm, request.getEmail());
             Set<String> emptySet = Collections.emptySet();
 
             updateUserFromRequest(user, request, emptySet, realm, session, false);
-            adminEvent.operation(OperationType.CREATE).resourcePath(session.getContext().getUri(), user.getId())
-                    .representation(request).success();
+
+            //todo эвенты не отправляются ??
+            new AdminEventBuilder(realm, auth, session, session.getContext().getConnection())
+                    .resource(ResourceType.USER)
+                    .operation(OperationType.CREATE)
+                    .resourcePath(session.getContext().getUri(), user.getId())
+                    .representation(request)
+                    .success();
 
             if (session.getTransactionManager().isActive()) {
                 session.getTransactionManager().commit();
@@ -180,7 +187,6 @@ public class CustomUserResource {
         ClientModel client = realm.getClientByClientId(token.getIssuedFor());
         if (client == null) {
             throw new NotAuthorizedException("Could not find client for authorization");
-
         }
 
         AdminAuth auth = new AdminAuth(realm, authResult.getToken(), authResult.getUser(), client);
@@ -226,7 +232,7 @@ public class CustomUserResource {
             }
         }
 
-        user.setAttribute(PHONE_ATTR, Collections.singletonList(request.getPhone()));
+        user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(request.getPhone()));
 
     }
 }
