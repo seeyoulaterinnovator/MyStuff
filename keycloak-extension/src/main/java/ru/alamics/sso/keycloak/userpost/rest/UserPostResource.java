@@ -17,7 +17,7 @@ import org.keycloak.services.managers.RealmManager;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.permissions.AdminPermissions;
 import ru.alamics.sso.keycloak.response.JsonResponse;
-import ru.alamics.sso.registration.FoundUserPostException;
+import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.dto.UserPostDto;
 import ru.alamics.sso.registration.service.UserPostService;
 
@@ -59,7 +59,7 @@ public class UserPostResource {
             return JsonResponse.success()
                     .addResult("user_post", userPostService.save(userPostDto))
                     .build();
-        } catch (FoundUserPostException e) {
+        } catch (FoundException e) {
             return JsonResponse.fail()
                     .message("UserPost is exist")
                     .build();

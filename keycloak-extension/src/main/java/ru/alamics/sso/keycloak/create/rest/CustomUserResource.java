@@ -21,22 +21,33 @@ import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.permissions.AdminPermissions;
 import org.keycloak.utils.MediaType;
+import ru.alamics.sso.keycloak.create.FileServiceException;
 import ru.alamics.sso.keycloak.create.model.UserRequest;
+import ru.alamics.sso.keycloak.create.model.XlsxImpl;
+import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.registration.FoundException;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
 @Slf4j
 public class CustomUserResource {
+
+    private final static String EMAIL = "E-mail";
+    private final static String PHONE = "Телефон";
+    private final static String CUSTOMER = "ID customer";
+    private final static String ROLE = "Роли пользователя";
+    private final static String SYSTEM = "Целевая система";
 
     protected KeycloakSession session;
 
@@ -49,81 +60,69 @@ public class CustomUserResource {
     @NoCache
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUser(final UserRequest request, final HttpHeaders headers) {
+        if (request.getPhone() == null || request.getPhone().isBlank()) {
+            return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
+        }
 
         RealmManager realmManager = new RealmManager(session);
         RealmModel realm = realmManager.getRealmByName(request.getRealmName());
         if (realm == null) throw new NotFoundException("Realm not found.");
 
-        AdminAuth auth = authenticateRealmAdminRequest(realm);
-
-        Response response = checkOnExistUser(request, realm);
-        if (response != null) {
-            return response;
-        }
-
+        AdminAuth auth = authenticateRealmAdminRequest(session.getContext().getRealm());
         return getUserResponse(request, realm, auth);
     }
 
-    private Response checkOnExistUser(UserRequest request, RealmModel realm) {
-        if (request.getPhone() == null || request.getPhone().isBlank()) {
-            return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
-        } else {
-            List<UserEntity> users = getEM().createQuery("select u from UserAttributeEntity atr join atr.user u " +
-                    "where atr.name = :ph_attr_name and " +
-                    " atr.value like '%' || :phone || '%' and" + // TODO =
-                    " u.realmId = :realId ", UserEntity.class)
-                    .setParameter("ph_attr_name", ATTR_PHONE_NAME)
-                    .setParameter("phone", request.getPhone())
-                    .setParameter("realId", realm.getId())
-                    .getResultList();
+    @POST
+    @Path("/uploadUsers")
+    @Consumes("multipart/form-data")
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response uploadUsers(@FormParam("file") File file) throws IOException, FileServiceException {
+        InputStream inputStream = new FileInputStream("C:\\work\\domru-sso\\keycloak-extension\\src\\main\\resources\\template_test.xlsx");
+        return importUsers(inputStream, "");
+    }
 
-            if (users != null && !users.isEmpty()) {
-                log.error("User exists with same phone {}", request.getPhone());
-                return JsonResponse.error(Response.Status.CONFLICT)
-                        .message("User exists with same phone")
-                        .addResult("user_id", users.get(0).getId())
-                        .build();
-            }
+    private void checkOnExistUser(UserRequest request, RealmModel realm) throws FoundException {
+        List<UserEntity> users = getEM().createQuery("select u from UserAttributeEntity atr join atr.user u " +
+                "where atr.name = :ph_attr_name and " +
+                " atr.value like '%' || :phone || '%' and" + // TODO =
+                " u.realmId = :realId ", UserEntity.class)
+                .setParameter("ph_attr_name", ATTR_PHONE_NAME)
+                .setParameter("phone", request.getPhone())
+                .setParameter("realId", realm.getId())
+                .getResultList();
+
+        if (users != null && !users.isEmpty()) {
+            log.error("User exists with same phone {}", request.getPhone());
+            throw new FoundException("User exists with same phone");
         }
 
         // Double-check duplicated username and email here due to federation
         UserModel userModel = session.users().getUserByUsername(request.getEmail(), realm);
         if (userModel != null) {
             log.error("User exists with same username {}", request.getEmail());
-            return JsonResponse.error(Response.Status.CONFLICT)
-                    .message("User exists with same username")
-                    .addResult("user_id", userModel.getId())
-                    .build();
+            throw new FoundException("User exists with same username");
         }
 
         if (request.getEmail() != null && !realm.isDuplicateEmailsAllowed()) {
             userModel = session.users().getUserByEmail(request.getEmail(), realm);
             if (userModel != null) {
                 log.error("User exists with same email {}", request.getEmail());
-                return JsonResponse.error(Response.Status.CONFLICT)
-                        .message("User exists with same email")
-                        .addResult("user_id", userModel.getId())
-                        .build();
+                throw new FoundException("User exists with same email");
             }
         }
-        return null;
+    }
+
+
+    private void commit() {
+        if (session.getTransactionManager().isActive()) {
+            session.getTransactionManager().commit();
+        }
     }
 
     private Response getUserResponse(UserRequest request, RealmModel realm, AdminAuth auth) {
         try {
-
-            UserModel user = session.users().addUser(realm, request.getEmail());
-            Set<String> emptySet = Collections.emptySet();
-
-            updateUserFromRequest(user, request, emptySet, realm, session, false);
-
-            //todo эвенты не отправляются ??
-            new AdminEventBuilder(realm, auth, session, session.getContext().getConnection())
-                    .resource(ResourceType.USER)
-                    .operation(OperationType.CREATE)
-                    .resourcePath(session.getContext().getUri(), user.getId())
-                    .representation(request)
-                    .success();
+            UserModel user = createUser(request, realm, auth);
 
             if (session.getTransactionManager().isActive()) {
                 session.getTransactionManager().commit();
@@ -148,6 +147,11 @@ public class CustomUserResource {
             log.warn("Could not create user", me);
             return JsonResponse.error(Response.Status.INTERNAL_SERVER_ERROR)
                     .message("Could not create user")
+                    .build();
+        } catch (FoundException e) {
+            return JsonResponse
+                    .error(Response.Status.CONFLICT)
+                    .message(e.getMessage())
                     .build();
         }
     }
@@ -233,6 +237,92 @@ public class CustomUserResource {
         }
 
         user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(request.getPhone()));
+    }
 
+    private Response importUsers(InputStream inputStream, String type) throws IOException {
+        XlsxImpl xls = new XlsxImpl(inputStream);
+        LinkedList<String> headers = xls.getHeaders();
+        try {
+            checkStructure(headers);
+        } catch (FileServiceException e) {
+            return JsonResponse.fail()
+                    .message(e.getMessage())
+                    .build();
+        }
+        List<List<String>> rows = xls.getRows();
+        rows.remove(0);
+        List<UserRequest> userRequests = DataMapper.toUserRequestList(rows);
+        if (userRequests == null || userRequests.isEmpty()) {
+            JsonResponse.fail()
+                    .message("File Structure is empty!")
+                    .build();
+        }
+        int countClones = getCountClones(userRequests);
+        return JsonResponse.success()
+                .addResult("count clones", countClones)
+                .addResult("create users", createUsers(userRequests))
+                .build();
+    }
+
+    private void checkStructure(LinkedList<String> headers) throws FileServiceException {
+        for (String head : headers) {
+            if (!head.equalsIgnoreCase(EMAIL) && !head.equalsIgnoreCase(PHONE) && !head.equalsIgnoreCase(CUSTOMER)
+                    && !head.equalsIgnoreCase(ROLE) && !head.equalsIgnoreCase(SYSTEM) || headers.size() != 5) {
+                throw new FileServiceException("File Structure is not valid!");
+            }
+        }
+    }
+
+    private int getCountClones(List<UserRequest> userRequests) {
+        int countClones = 0;
+        List<UserRequest> userRequestMain = new LinkedList<>();
+        userRequests.stream().forEach(o -> userRequestMain.add(o));
+        for (int i = 0; i < userRequests.size(); i++) {
+            for (int j = i + 1; j < userRequests.size(); j++) {
+                if (userRequests.get(i).getEmail().equals(userRequests.get(j).getEmail()) ||
+                        userRequests.get(i).getPhone().equals(userRequests.get(j).getPhone())) {
+                    userRequests.remove(j);
+                    j--;
+                    countClones++;
+                }
+            }
+        }
+        return countClones;
+    }
+
+    private JsonResponse createUsers(List<UserRequest> userRequests) {
+        RealmManager realmManager = new RealmManager(session);
+        RealmModel realm = realmManager.getRealmByName("user");
+        AdminAuth auth = authenticateRealmAdminRequest(session.getContext().getRealm());
+        List<String> successResponse = new LinkedList<>();
+        List<String> errorResponse = new LinkedList<>();
+        userRequests.stream().forEach(o -> {
+            try {
+                successResponse.add("userId : " + createUser(o, realm, auth).getId());
+            } catch (FoundException e) {
+                errorResponse.add("userName : " + o.getName());
+            }
+        });
+        if (session.getTransactionManager().isActive()) {
+            session.getTransactionManager().commit();
+        }
+        JsonResponse jsonResponse = new JsonResponse();
+        jsonResponse.addResult("success", successResponse);
+        jsonResponse.addResult("error", errorResponse);
+        return jsonResponse;
+    }
+
+    private UserModel createUser(UserRequest userRequest, RealmModel realm, AdminAuth auth) throws FoundException {
+        checkOnExistUser(userRequest, realm);
+        UserModel user = session.users().addUser(realm, userRequest.getEmail());
+        Set<String> emptySet = Collections.emptySet();
+        updateUserFromRequest(user, userRequest, emptySet, realm, session, false);
+        new AdminEventBuilder(realm, auth, session, session.getContext().getConnection())
+                .resource(ResourceType.USER)
+                .operation(OperationType.CREATE)
+                .resourcePath(session.getContext().getUri(), user.getId())
+                .representation(userRequest)
+                .success();
+        return user;
     }
 }

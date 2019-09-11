@@ -3,7 +3,7 @@ package ru.alamics.sso.registration.service;
 import javassist.NotFoundException;
 import ru.alamics.sso.keycloak.entity.UserPost;
 import ru.alamics.sso.keycloak.repository.UserPostRepository;
-import ru.alamics.sso.registration.FoundUserPostException;
+import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.dto.UserPostDto;
 import ru.alamics.sso.registration.dto.UserPostRoleDto;
 import ru.alamics.sso.registration.mapper.DataMapper;
@@ -18,9 +18,9 @@ public class UserPostService {
     @EJB
     private UserPostRepository userPostRepository;
 
-    public UserPostDto save(UserPostDto userPostDto) throws FoundUserPostException {
+    public UserPostDto save(UserPostDto userPostDto) throws FoundException {
         if (userPostRepository.getUserPost(userPostDto.getUserId(), userPostDto.getTomsId()) != null) {
-            throw new FoundUserPostException();
+            throw new FoundException();
         }
         UserPost userPost = DataMapper.toUserPost(userPostDto);
         return DataMapper.toUserPostDto(userPostRepository.save(userPost));
