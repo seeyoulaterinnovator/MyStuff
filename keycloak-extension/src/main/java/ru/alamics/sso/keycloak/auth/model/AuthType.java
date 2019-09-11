@@ -44,6 +44,10 @@ public enum AuthType {
         }
     }
 
+    public String getDescription() {
+        return description;
+    }
+
     public String[] getRequiredActionNames() {
         return requiredActionNames;
     }

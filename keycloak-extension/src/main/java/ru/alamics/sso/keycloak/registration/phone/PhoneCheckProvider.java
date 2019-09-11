@@ -64,7 +64,7 @@ public class PhoneCheckProvider implements FormAction {
             if (count > 0) {
                 formData.remove(FIELD_PHONE);
                 context.getEvent().detail("Phone", user.getPhone());
-                errors.add(new FormMessage(FIELD_PHONE, "Пользователь с таким телефоном уже существует"));
+                errors.add(new FormMessage(FIELD_PHONE, "Номер мобильного телефона уже используется в другой учетной записи. Если вы уже регистрировались, попробуйте войти в свою учетную запись, либо укажите другой номер телефона."));
             }
         }
 

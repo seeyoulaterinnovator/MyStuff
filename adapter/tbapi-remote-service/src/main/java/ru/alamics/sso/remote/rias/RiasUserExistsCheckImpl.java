@@ -44,7 +44,7 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
     private static final String CLIENT_NAME = "SSO";
     private static final String CLIENT_SALT = "W2NHAYTWrfEG9fDw2MAt2TuuM7VK2K7H";
 
-    public boolean checkParam(String param)
+    public boolean checkParam(String param) throws RiasCheckException
     {
         LocalDateTime dateTime = LocalDateTime.now();
 

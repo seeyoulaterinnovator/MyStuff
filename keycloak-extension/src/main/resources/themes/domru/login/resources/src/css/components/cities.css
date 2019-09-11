@@ -1,0 +1,27 @@
+.cities-container {
+  max-height: 100%;
+  height: auto;
+}
+
+.cities-column {
+  width: 25%;
+  justify-content: space-between;
+}
+
+.city {
+  text-align: start;
+}
+
+@media screen and (max-width: 959px){
+  .cities-column {
+    width: 50%;
+  }
+
+  .cities-column:nth-child(2) {
+    order: 3;
+  }
+
+  .cities-column:nth-child(4) {
+    order: 4;
+  }
+}

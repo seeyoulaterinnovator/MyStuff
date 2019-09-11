@@ -1,0 +1,15 @@
+<#import "template.ftl" as layout>
+<#import "templates/email-sent.ftl" as emailSent>
+
+<@layout.registrationLayout  displayMessage=false ; section>
+    <#if section = "form">
+    <@emailSent.defaultTemplate email="${mail!}" buttonExist=false; section>
+        <#if section = "header">
+        Подтверждение данных
+        <#elseif section = "description">
+        Отправлены инструкция авторизации
+        </#if>
+    </@emailSent.defaultTemplate>
+    </#if>
+    
+</@layout.registrationLayout>
