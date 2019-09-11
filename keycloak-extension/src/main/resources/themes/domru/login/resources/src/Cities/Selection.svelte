@@ -80,24 +80,26 @@
   });
 </script>
 
-<ul
-  class="flex md:flex-wrap flex-row cities-container w-full">
+<ul class="flex flex-wrap flex-row cities-container w-full
+  scrollable-container overflow-x-hidden overflow-y-auto">
     {#each groupedCities as groupPart}
       <ul class="flex flex-col cities-column">
       {#each groupPart as group}
 
-        <ul class="flex flex-col mb-4 px-2 capital">
+        <ul class="flex flex-row mb-4 px-2 capital">
           <h2 class="text-extra mr-2 capitalize text-center leading-none w-5 ">
             {group.firstCharacter}
           </h2>
 
+            <ul class="flex flex-col">
            {#each group.cities as city}
                     <li class="mb-2 sm:px-2 hover:bg-extra city">
-                      <button on:click={() => handleClick(city)}>{city}</button>
+                      <button class="city" on:click={() => handleClick(city)}>{city}</button>
                     </li>
                   {:else}
                     <div />
                   {/each}
+                  </ul>
         </ul>
 
 

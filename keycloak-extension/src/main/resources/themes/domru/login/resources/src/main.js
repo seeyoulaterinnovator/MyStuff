@@ -19,6 +19,8 @@ import './css/components/link.css';
 import './css/components/logo.css';
 import './css/components/reference.css';
 import './css/components/email-sent.css';
+import './css/components/cities.css';
+import './css/components/confirmation.css';
 
 const app = new App({
   target: document.body,
