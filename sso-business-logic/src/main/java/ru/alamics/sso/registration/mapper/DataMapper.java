@@ -58,7 +58,7 @@ public class DataMapper {
         }
         UserPostDto userPostDto = new UserPostDto();
         userPostDto.setId(userPost.getId());
-        userPostDto.setUserId(userPost.getId());
+        userPostDto.setUserId(userPost.getUser().getId());
         userPostDto.setTomsId(userPost.getTomsId());
         userPostDto.setRmsId(userPost.getDmpId());
         userPostDto.setRoleId(userPost.getRole().getId());
