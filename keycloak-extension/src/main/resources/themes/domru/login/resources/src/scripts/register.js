@@ -7,6 +7,33 @@ import { isEmpty } from './helpers';
 import VALIDATION_RULES from '../constants/validationRules.js';
 
 export default (function() {
+  const setVisiblePass = field => e => {
+    const active = field.classList.contains('active');
+    const open = field.querySelector('.open');
+    const close = field.querySelector('.close');
+
+    const inputId = field.getAttribute('target');
+    const input = document.getElementById(inputId);
+
+    if (active) {
+      field.classList.remove('active');
+      open.classList.add('hidden');
+      close.classList.remove('hidden');
+      input.setAttribute('type', 'password');
+    } else {
+      field.classList.add('active');
+      open.classList.remove('hidden');
+      close.classList.add('hidden');
+      input.setAttribute('type', 'input');
+    }
+  };
+
+  document
+    .querySelectorAll('.field__open')
+    .forEach(eye => eye.addEventListener('click', setVisiblePass(eye), false));
+
+  // @todo
+
   const formElement = document.getElementById('registrationForm');
   if (!formElement) return;
 
@@ -168,9 +195,10 @@ export default (function() {
     return form.getFieldState('password').value;
   }
   function setPassword(password) {
-    form.getFieldState('password').change(password);
-    form.getFieldState('password-confirm').change(password);
-    form.getFieldState('password-confirm').blur();
+    // form.getFieldState('password').change(password);
+    // form.getFieldState('password-confirm').change(password);
+    // form.getFieldState('password-confirm').blur();
   }
   linkPasswords(getPassword, setPassword, document.getElementById('password'));
+  console.log(document.querySelectorAll('.field__open'));
 })();
