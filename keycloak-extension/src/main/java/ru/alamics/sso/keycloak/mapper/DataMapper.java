@@ -20,7 +20,7 @@ public abstract class DataMapper {
                 .lastName(toString(tuple.get("last_name")))
                 .email(toString(tuple.get("email")))
                 .phone(toString(tuple.get("phone")))
-                .accessId(toString(tuple.get("access_id")))
+                .userPostId(toString(tuple.get("user_post_id")))
                 //.accessName(toString(tuple.get("access_name")))
                 .tomsId(toString(tuple.get("toms_id")))
                 .roleId(toString(tuple.get("role_id")))
