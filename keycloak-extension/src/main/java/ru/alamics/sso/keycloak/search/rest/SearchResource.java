@@ -54,7 +54,7 @@ public class SearchResource {
                         "       UE.LAST_NAME  as last_name,\n" +
                         "       UE.EMAIL      as email,\n" +
                         "       UA.VALUE      as phone,\n" +
-                        "       UP.id         as access_id,\n" +
+                        "       UP.id         as user_post_id,\n" +
                         "       UP.TOMS_ID    as toms_id,\n" +
                         "       UP.DMP_ID     as dmp_id,\n" +
                         "       UP.ROLE_ID    as role_id,\n" +

@@ -2,15 +2,18 @@ package ru.alamics.sso.util;
 
 public enum EStand {
 
-    LOCAL("local"),
-    DEV("dev"),
-    STAGE("stage"),
-    PROD("prod");
+    LOCAL("local", false),
+    DEV("dev", false),
+    TEST("dev", false),
+    STAGE("stage", true),
+    PROD("prod", true);
 
     String val;
+    boolean battle;
 
-    EStand(String val) {
+    EStand(String val, boolean battle) {
         this.val = val;
+        this.battle = battle;
     }
 
     public static EStand get(String val) {
@@ -23,5 +26,9 @@ public enum EStand {
         }
 
         return null;
+    }
+
+    public boolean isBattle() {
+        return battle;
     }
 }

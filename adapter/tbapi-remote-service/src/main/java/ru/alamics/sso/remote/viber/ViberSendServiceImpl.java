@@ -56,10 +56,12 @@ public class ViberSendServiceImpl implements ViberSendService {
     public String sendMsg(String phone, String text) {
 
         // локально и на дэве фиксированный код и не отправляю смс
-        if (StandResolver.ENV == EStand.LOCAL || StandResolver.ENV == EStand.DEV) {
+        if (!StandResolver.ENV.isBattle()) {
             log.info("Stand {}, do not sending viber msg", StandResolver.ENV);
             return "0: Accepted for delivery";
         }
+
+        phone = phone.replaceAll("[^0-9]+", "");
 
         URI uri = smsConfig.getUrl();
 

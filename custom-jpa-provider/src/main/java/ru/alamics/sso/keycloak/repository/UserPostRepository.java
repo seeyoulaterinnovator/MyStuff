@@ -61,7 +61,6 @@ public class UserPostRepository {
                     .setParameter("toms_id", tomsId)
                     .getSingleResult();
         } finally {
-//            em.flush();
             return access;
         }
     }
