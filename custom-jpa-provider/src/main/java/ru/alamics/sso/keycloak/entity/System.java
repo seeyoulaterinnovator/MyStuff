@@ -9,23 +9,23 @@ import java.util.Set;
 
 @Entity
 @Immutable
-@Table(name = "EXTERNAL_SYSTEM")
+@Table(name = "SYSTEM_NAME")
 @Data
 @NoArgsConstructor
-public class ExternalSystem {
+public class System {
     @Id
     private Long id;
     @Column(name = "name")
     private String name;
-    @OneToMany(mappedBy = "externalSystem")
-    private Set<ExternalSystemRole> systemRoles;
+//    @ManyToMany(mappedBy = "systems")
+//    private Set<UserPost> userPosts;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ExternalSystem system = (ExternalSystem) o;
+        System system = (System) o;
 
         if (id != null ? !id.equals(system.id) : system.id != null) return false;
         return name != null ? name.equals(system.name) : system.name == null;
