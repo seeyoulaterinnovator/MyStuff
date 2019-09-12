@@ -1,0 +1,28 @@
+.logo {
+  &--domru {
+    background-image: url('./images/domru-logo.svg');
+  }
+
+  /* Пример */
+  &--github {
+    background-image: url('./images/social/GU.svg');
+  }
+
+  &--facebook {
+    background-image: url('./images/social/FB.svg');
+  }
+
+  &--google {
+    background-image: url('./images/social/GO.svg');
+  }
+
+  /* Нет такого провайдера */
+  &--gu {
+    background-image: url('./images/social/GU.svg');
+  }
+
+  /* Нет такого провайдера */
+  &--vk {
+    background-image: url('./images/social/VK.svg');
+  }
+}

@@ -133,6 +133,16 @@ dpl:devel:
   when: manual
   environment:
     name: devel
+    url: http://domru-sso.alamics.ru
+  script:
+    - $BASE_DIR/scripts/deploy.sh
+
+dpl:test:
+  stage: deploy
+  when: manual
+  environment:
+    name: test
+    url: http://domru-sso-test.alamics.ru
   script:
     - $BASE_DIR/scripts/deploy.sh
 
@@ -141,5 +151,6 @@ dpl:stage:
   when: manual
   environment:
     name: stage
+    url: http://domru-sso-stage.alamics.ru
   script:
     - $BASE_DIR/scripts/deploy.sh

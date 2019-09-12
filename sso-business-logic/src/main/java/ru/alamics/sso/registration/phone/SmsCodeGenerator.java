@@ -30,7 +30,7 @@ public class SmsCodeGenerator {
         long generatedLong = leftLimit + (long) (Math.random() * (rightLimit - leftLimit));
 
         // локально и на дэве фиксированный код и не отправляю смс
-        if (StandResolver.ENV == EStand.LOCAL || StandResolver.ENV == EStand.DEV) {
+        if (!StandResolver.ENV.isBattle()) {
             generatedLong = rightLimit;
             log.info("Stand {}, predefined code = {}", StandResolver.ENV, generatedLong);
         }
