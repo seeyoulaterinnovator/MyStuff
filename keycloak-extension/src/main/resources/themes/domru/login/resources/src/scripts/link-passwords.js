@@ -52,16 +52,23 @@ export default (
     for (let category in HIGHLIGHT_VALIDATION_CHARSET) {
       const ruleElement = document.getElementById(`${category}-password`);
 
-      if (
-        ![...password].some(character =>
-          [...HIGHLIGHT_VALIDATION_CHARSET[category]].includes(character),
-        )
-      ) {
-        ruleElement.classList.remove('text-accentGreen');
-        ruleElement.classList.add('text-accentRed');
-      } else {
+      let ruleAccepted = typeof HIGHLIGHT_VALIDATION_CHARSET[category] === 'string'
+        && [...password].some(character => [...HIGHLIGHT_VALIDATION_CHARSET[category]].includes(character));
+
+      if (typeof HIGHLIGHT_VALIDATION_CHARSET[category] !== 'string' ){
+        ruleAccepted = true;
+
+        Object.values(HIGHLIGHT_VALIDATION_CHARSET[category]).map(rule => {
+          if (![...password].some(character => [...rule].includes(character))) ruleAccepted = false;
+        })
+      }
+
+      if (ruleAccepted) {
         ruleElement.classList.remove('text-accentRed');
         ruleElement.classList.add('text-accentGreen');
+      } else {
+        ruleElement.classList.remove('text-accentGreen');
+        ruleElement.classList.add('text-accentRed');
       }
     }
   }
