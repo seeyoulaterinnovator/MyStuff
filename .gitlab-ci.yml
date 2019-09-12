@@ -93,6 +93,11 @@ back:war:
   except:
     - master
   script:
+    - currentdir=`pwd`
+    - cd keycloak-extension/src/main/resources/themes/domru/login/resources
+    - npm install
+    - npm run build
+    - cd $currentdir
     - mkdir -p .ci_status
     - ./gradlew :deploy -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
     - touch .ci_status/war_built
