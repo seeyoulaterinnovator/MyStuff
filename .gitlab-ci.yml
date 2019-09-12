@@ -151,6 +151,15 @@ dpl:test:
   script:
     - $BASE_DIR/scripts/deploy.sh
 
+dpl:test:battle:
+  stage: deploy
+  when: manual
+  environment:
+    name: test
+    url: http://domru-sso-test.alamics.ru
+  script:
+    - $BASE_DIR/scripts/deploy.sh
+
 dpl:stage:
   stage: deploy
   when: manual
