@@ -94,8 +94,6 @@
                        constraintName="pk_upsa"/>
     </changeSet>
 
-
-
     <changeSet id="tretyakov-da" author="7">
         <sql>
             INSERT INTO USER_POST_ROLE (ID, NAME) VALUES (1, 'LPR');
@@ -105,13 +103,22 @@
         </sql>
     </changeSet>
 
-    <changeSet id="strukov-av" author="8">
-        <dropTable tableName="SYSTEM_NAME"/>
-        <dropTable tableName="ACCESS_NAME"/>
-        <dropTable tableName="USERPOST_SYSTEM_ACCESS"/>
+    <changeSet id="8" author="tretyakov-da">
+        <addColumn tableName="AUTO_LOCK_NOTIFICATION">
+            <column name="STATUS" type="varchar(32)"/>
+        </addColumn>
+        <addColumn tableName="USER_LOGIN_HISTORY">
+            <column name="locked" type="boolean"/>
+        </addColumn>
     </changeSet>
 
-    <changeSet author="strukov-av" id="9">
+    <changeSet id="9" author="strukov-av">
+        <dropTable tableName="USERPOST_SYSTEM_ACCESS"/>
+        <dropTable tableName="SYSTEM_NAME"/>
+        <dropTable tableName="ACCESS_NAME"/>
+    </changeSet>
+
+    <changeSet author="strukov-av" id="10">
         <createTable tableName="EXTERNAL_SYSTEM">
             <column name="ID" type="bigint">
                 <constraints nullable="false" primaryKey="true"/>
@@ -133,7 +140,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="strukov-av" id="10">
+    <changeSet author="strukov-av" id="11">
         <createTable tableName="USERPOST_EXT_SYSTEM_ROLE">
             <column name="USER_POST_ID" type="varchar(36)">
                 <constraints nullable="false" foreignKeyName="FK_USER_POST_USER_POST_SYSTEM"
