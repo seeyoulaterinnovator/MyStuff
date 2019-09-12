@@ -31,7 +31,10 @@ import ru.alamics.sso.registration.service.UserPostService;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.util.Collections;
@@ -67,12 +70,8 @@ public class CustomUserResource {
         } else if (request.getTomsId() == null || request.getTomsId().isBlank()) {
             return ErrorResponse.error("TomsId is required attribute", Response.Status.BAD_REQUEST);
         }
-
-        RealmManager realmManager = new RealmManager(session);
-        RealmModel realm = realmManager.getRealmByName(request.getRealmName());
-        if (realm == null) throw new NotFoundException("Realm not found.");
-
-        AdminAuth auth = authenticateRealmAdminRequest(session.getContext().getRealm());
+        RealmModel realm = session.getContext().getRealm();
+        AdminAuth auth = authenticateRealmAdminRequest(realm);
 
         Response response = checkOnExistUser(request, realm);
         if (response != null) {
@@ -131,12 +130,12 @@ public class CustomUserResource {
             updateUserFromRequest(user, request, emptySet, realm, session, false);
             addUserPost(user, request);
 
-            //todo эвенты не отправляются ??
             new AdminEventBuilder(realm, auth, session, session.getContext().getConnection())
+                    .realm(realm)
+                    .resource(ResourceType.REALM)
                     .resource(ResourceType.USER)
                     .operation(OperationType.CREATE)
                     .resourcePath(session.getContext().getUri(), user.getId())
-                    .representation(request)
                     .success();
 
             if (session.getTransactionManager().isActive()) {
@@ -253,8 +252,8 @@ public class CustomUserResource {
     }
 
     private void addUserPost(UserModel userModel, UserRequest request) throws FoundUserPostException {
-        UserPostRequest userPostDto = DataMapper.toUserPostRequest(userModel, request);
-        userPostDto.setRoleId(1L);
-        userPostService.save(userPostDto);
+        UserPostRequest userPostRequest = DataMapper.toUserPostRequest(userModel, request);
+        userPostRequest.setRoleId(1L);
+        userPostService.save(userPostRequest);
     }
 }

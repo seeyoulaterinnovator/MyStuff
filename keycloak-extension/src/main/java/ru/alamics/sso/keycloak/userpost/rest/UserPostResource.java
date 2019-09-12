@@ -54,7 +54,7 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response create(UserPostRequest userPostRequest, HttpHeaders headers) {
-        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
+        authenticateRealmAdminRequest(session.getContext().getRealm());
         try {
             return JsonResponse.success()
                     .addResult("user_post", userPostService.save(userPostRequest))
@@ -76,7 +76,7 @@ public class UserPostResource {
         if (userPostRequest.getId() == null) {
             return ErrorResponse.error("Id is required attribute", Response.Status.BAD_REQUEST);
         }
-        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
+        authenticateRealmAdminRequest(session.getContext().getRealm());
         try {
             return JsonResponse.success()
                     .addResult("user_post", userPostService.edit(userPostRequest))
@@ -93,7 +93,7 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response delete(@PathParam("id") String id) {
-        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
+        authenticateRealmAdminRequest(session.getContext().getRealm());
         try {
             userPostService.remove(id);
             return JsonResponse.success()
@@ -111,7 +111,7 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response get(@PathParam("id") String id) {
-        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
+        authenticateRealmAdminRequest(session.getContext().getRealm());
         try {
             return JsonResponse.success()
                     .addResult("user-post", userPostService.get(id))
@@ -129,7 +129,7 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response getAll() {
-        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
+        authenticateRealmAdminRequest(session.getContext().getRealm());
         return JsonResponse.success()
                 .addResult("user-posts", userPostService.getAll())
                 .build();
@@ -141,7 +141,7 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response getAllRoles() {
-        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
+        authenticateRealmAdminRequest(session.getContext().getRealm());
         return JsonResponse.success()
                 .addResult("roles", userPostService.getUserPostRoleDtos())
                 .build();
@@ -153,7 +153,7 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response getAllSystemRoles() {
-        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
+        authenticateRealmAdminRequest(session.getContext().getRealm());
         return JsonResponse.success()
                 .addResult("system-roles", userPostService.getExternalSystemRoles())
                 .build();
@@ -165,7 +165,7 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response getAllSystems() {
-        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
+        authenticateRealmAdminRequest(session.getContext().getRealm());
         return JsonResponse.success()
                 .addResult("systems", userPostService.getExternalSystems())
                 .build();
@@ -177,7 +177,7 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response addSystemRole(@QueryParam("userPostId") String userPostId, @QueryParam("systemRoleId") Long systemRoleId) {
-        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
+        authenticateRealmAdminRequest(session.getContext().getRealm());
         try {
             return JsonResponse.success()
                     .addResult("user-post", userPostService.addSystemRole(userPostId, systemRoleId))
@@ -195,7 +195,7 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response removeSystemRole(@QueryParam("userPostId") String userPostId, @QueryParam("systemRoleId") Long systemRoleId) {
-        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
+        authenticateRealmAdminRequest(session.getContext().getRealm());
         try {
             return JsonResponse.success()
                     .addResult("user-post", userPostService.removeSystemRole(userPostId, systemRoleId))

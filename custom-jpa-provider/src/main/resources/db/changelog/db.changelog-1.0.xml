@@ -153,4 +153,18 @@
         <addPrimaryKey tableName="USERPOST_EXT_SYSTEM_ROLE" columnNames="USER_POST_ID, EXT_SYSTEM_ROLE_ID"
                        constraintName="pk_upsa"/>
     </changeSet>
+
+    <changeSet author="strukov-av" id="12">
+       <sql>
+           ALTER TABLE USER_POST
+           DROP CONSTRAINT FK_USER_USER_POST
+       </sql>
+        <sql>
+           ALTER TABLE USER_POST
+           ADD CONSTRAINT FK_USER_USER_POST
+           FOREIGN KEY (USER_ID)
+           REFERENCES USER_ENTITY (ID)
+           ON DELETE CASCADE
+       </sql>
+    </changeSet>
 </databaseChangeLog>
