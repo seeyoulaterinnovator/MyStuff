@@ -56,7 +56,7 @@ public class ViberSendServiceImpl implements ViberSendService {
     public String sendMsg(String phone, String text) {
 
         // локально и на дэве фиксированный код и не отправляю смс
-        if (!StandResolver.ENV.isBattle()) {
+        if (!StandResolver.isBattle()) {
             log.info("Stand {}, do not sending viber msg", StandResolver.ENV);
             return "0: Accepted for delivery";
         }
