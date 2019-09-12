@@ -1,6 +1,8 @@
 package ru.alamics.sso.registration.model;
 
 public class UserConstants {
+    private UserConstants () {
+    }
 
     public static final String ATTR_PHONE_NAME = "phone";
     public static final String ATTR_ORG_NAME = "orgName";
@@ -13,6 +15,8 @@ public class UserConstants {
 
     public static final String AUTH_FORM_SUCCESS = "AUTH_FORM_SUCCESS";
     public static final String I_FRAME = "iframe";
+    public static final String HIDDEN_HEADER = "hiddenHeader";
+    public static final String CITY = "city";
 
     public static final String DISABLE_TWO_STEP_AUTH = "disable_two_step_auth";
 }
