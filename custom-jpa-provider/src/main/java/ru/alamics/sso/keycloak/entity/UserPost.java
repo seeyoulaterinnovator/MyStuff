@@ -24,22 +24,13 @@ public class UserPost {
     @ManyToOne(targetEntity = UserPostRole.class)
     @JoinColumn(name = "role_id")
     private UserPostRole role;
-//    @ManyToMany
-//    @JoinTable(
-//            name = "USERPOST_SYSTEM_ACCESS",
-//            joinColumns = @JoinColumn(name = "user_post_id"),
-//            inverseJoinColumns = @JoinColumn(name = "system_id")
-//    )
-//    @Transient
-//    private Set<System> systems;
-//    @ManyToMany
-//    @JoinTable(
-//            name = "USERPOST_SYSTEM_ACCESS",
-//            joinColumns = @JoinColumn(name = "user_post_id"),
-//            inverseJoinColumns = @JoinColumn(name = "access_id")
-//    )
-//    @Transient
-//    private Set<Access> access;
+    @ManyToMany
+    @JoinTable(
+            name = "USERPOST_EXT_SYSTEM_ROLE",
+            joinColumns = @JoinColumn(name = "user_post_id"),
+            inverseJoinColumns = @JoinColumn(name = "ext_system_role_id")
+    )
+    private Set<ExternalSystemRole> systemRoles;
 
     @Override
     public String toString() {
