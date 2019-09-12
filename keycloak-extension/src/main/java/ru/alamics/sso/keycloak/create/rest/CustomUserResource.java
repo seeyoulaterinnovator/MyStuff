@@ -25,7 +25,7 @@ import ru.alamics.sso.keycloak.create.model.UserRequest;
 import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundUserPostException;
-import ru.alamics.sso.registration.dto.UserPostDto;
+import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.service.UserPostService;
 
 import javax.naming.InitialContext;
@@ -34,9 +34,12 @@ import javax.persistence.EntityManager;
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import static ru.alamics.sso.registration.model.UserConstants.*;
+import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
 @Slf4j
 public class CustomUserResource {
@@ -59,6 +62,11 @@ public class CustomUserResource {
     @NoCache
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUser(final UserRequest request, final HttpHeaders headers) {
+        if (request.getPhone() == null || request.getPhone().isBlank()) {
+            return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
+        } else if (request.getTomsId() == null || request.getTomsId().isBlank()) {
+            return ErrorResponse.error("TomsId is required attribute", Response.Status.BAD_REQUEST);
+        }
 
         RealmManager realmManager = new RealmManager(session);
         RealmModel realm = realmManager.getRealmByName(request.getRealmName());
@@ -75,27 +83,21 @@ public class CustomUserResource {
     }
 
     private Response checkOnExistUser(UserRequest request, RealmModel realm) {
-        if (request.getPhone() == null || request.getPhone().isBlank()) {
-            return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
-        } else if (request.getCAID().isBlank()) {
-            return ErrorResponse.error("CAID is required attribute", Response.Status.BAD_REQUEST);
-        } else {
-            List<UserEntity> users = getEM().createQuery("select u from UserAttributeEntity atr join atr.user u " +
-                    "where atr.name = :ph_attr_name and " +
-                    " atr.value like '%' || :phone || '%' and" + // TODO =
-                    " u.realmId = :realId ", UserEntity.class)
-                    .setParameter("ph_attr_name", ATTR_PHONE_NAME)
-                    .setParameter("phone", request.getPhone())
-                    .setParameter("realId", realm.getId())
-                    .getResultList();
+        List<UserEntity> users = getEM().createQuery("select u from UserAttributeEntity atr join atr.user u " +
+                "where atr.name = :ph_attr_name and " +
+                " atr.value like '%' || :phone || '%' and" + // TODO =
+                " u.realmId = :realId ", UserEntity.class)
+                .setParameter("ph_attr_name", ATTR_PHONE_NAME)
+                .setParameter("phone", request.getPhone())
+                .setParameter("realId", realm.getId())
+                .getResultList();
 
-            if (users != null && !users.isEmpty()) {
-                log.error("User exists with same phone {}", request.getPhone());
-                return JsonResponse.error(Response.Status.CONFLICT)
-                        .message("User exists with same phone")
-                        .addResult("user_id", users.get(0).getId())
-                        .build();
-            }
+        if (users != null && !users.isEmpty()) {
+            log.error("User exists with same phone {}", request.getPhone());
+            return JsonResponse.error(Response.Status.CONFLICT)
+                    .message("User exists with same phone")
+                    .addResult("user_id", users.get(0).getId())
+                    .build();
         }
 
         // Double-check duplicated username and email here due to federation
@@ -155,7 +157,7 @@ public class CustomUserResource {
             return JsonResponse.error(Response.Status.INTERNAL_SERVER_ERROR)
                     .message("Could not create user")
                     .build();
-        } catch (FoundUserPostException e){
+        } catch (FoundUserPostException e) {
             return JsonResponse.error(Response.Status.CONFLICT)
                     .message("User post with the same userId and tomsId already exists")
                     .build();
@@ -251,7 +253,7 @@ public class CustomUserResource {
     }
 
     private void addUserPost(UserModel userModel, UserRequest request) throws FoundUserPostException {
-        UserPostDto userPostDto = DataMapper.toUserPostDto(userModel, request);
+        UserPostRequest userPostDto = DataMapper.toUserPostRequest(userModel, request);
         userPostDto.setRoleId(1L);
         userPostService.save(userPostDto);
     }

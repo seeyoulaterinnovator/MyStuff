@@ -13,6 +13,6 @@ public class UserRequest implements Serializable {
     private String email;
     private String phone;
     private String name;
-    private String UUID; // #DMP ID
-    private String CAID; // #Customer Account number
+    private String dmpId;
+    private String tomsId;
 }
