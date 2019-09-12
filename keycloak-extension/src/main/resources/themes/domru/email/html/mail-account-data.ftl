@@ -1,5 +1,5 @@
 <html>
 <body>
-${kcSanitize(msg("emailAccountDataBodyHtml", userName, userFirstName, userLastName, password, accountLink))?no_esc}
+${kcSanitize(msg("emailAccountDataBodyHtml", userName, userFirstName, userLastName, accountLink))?no_esc}
 </body>
 </html>
