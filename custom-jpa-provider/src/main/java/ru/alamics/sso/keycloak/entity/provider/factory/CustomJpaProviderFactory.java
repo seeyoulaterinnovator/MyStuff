@@ -7,7 +7,7 @@ import org.keycloak.models.KeycloakSessionFactory;
 import ru.alamics.sso.keycloak.entity.provider.CustomJpaEntityProvider;
 
 public class CustomJpaProviderFactory  implements org.keycloak.connections.jpa.entityprovider.JpaEntityProviderFactory {
-    private static final String ID = "customJpaEntityProviderFactory";
+    public static final String ID = "customJpaEntityProviderFactory";
 
     @Override
     public JpaEntityProvider create (KeycloakSession session) {

@@ -2,6 +2,8 @@ package ru.alamics.sso.keycloak.repository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.jpa.entities.UserEntity;
+import ru.alamics.sso.keycloak.entity.ExternalSystem;
+import ru.alamics.sso.keycloak.entity.ExternalSystemRole;
 import ru.alamics.sso.keycloak.entity.UserPost;
 import ru.alamics.sso.keycloak.entity.UserPostRole;
 
@@ -59,7 +61,6 @@ public class UserPostRepository {
                     .setParameter("toms_id", tomsId)
                     .getSingleResult();
         } finally {
-//            em.flush();
             return access;
         }
     }
@@ -86,5 +87,31 @@ public class UserPostRepository {
                 .setParameter("user", user)
                 .getResultList();
         return ret;
+    }
+
+    public List<ExternalSystem> getAllExternalSystem(){
+        return em.createQuery(
+                "select sys " +
+                        "from ExternalSystem sys", ExternalSystem.class)
+                .getResultList();
+    }
+
+    public List<ExternalSystemRole> getAllExternalSystemRole(){
+        return em.createQuery(
+                "select role " +
+                        "from ExternalSystemRole role", ExternalSystemRole.class)
+                .getResultList();
+    }
+
+    public UserPost addSystemRole(UserPost userPost, Long extSystemRoleId){
+        userPost.getSystemRoles().add(em.find(ExternalSystemRole.class, extSystemRoleId));
+        update(userPost);
+        return userPost;
+    }
+
+    public UserPost removeSystemRole(UserPost userPost, Long extSystemRoleId){
+        userPost.getSystemRoles().remove(em.find(ExternalSystemRole.class, extSystemRoleId));
+        update(userPost);
+        return userPost;
     }
 }
