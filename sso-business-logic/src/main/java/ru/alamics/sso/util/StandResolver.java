@@ -23,6 +23,6 @@ public class StandResolver {
     }
 
     public static boolean isBattle() {
-        return true;//BATTLE;
+        return BATTLE;
     }
 }
