@@ -26,8 +26,7 @@ class UserExtensionTest {
         User user = User.builder()
                 .id(UUID.randomUUID().toString())
                 .email("test@test.test")
-                .firstName("Test")
-                .lastName("Mock")
+                .name("Test")
                 .build();
 
         extension.extendUser(user, Map.of(

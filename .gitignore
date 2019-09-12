@@ -9,3 +9,8 @@
 *.iml
 *.ipr
 /out/
+
+# Frontend
+node_modules/
+.vscode
+.cache

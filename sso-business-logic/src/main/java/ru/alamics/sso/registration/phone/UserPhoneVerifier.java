@@ -3,9 +3,10 @@ package ru.alamics.sso.registration.phone;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.User;
-import ru.alamics.sso.registration.phone.exception.UserPhoneAlreadyVerified;
+import ru.alamics.sso.registration.phone.exception.PhoneCallException;
 import ru.alamics.sso.registration.phone.exception.UserPhoneEmpty;
 import ru.alamics.sso.registration.phone.exception.WrongSmsCode;
+import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -15,61 +16,76 @@ import java.time.LocalDateTime;
 @Stateless
 public class UserPhoneVerifier {
 
-    private static final String PHONE_KEY_HASH = "phone_key_hash";
+    public static final String PHONE_KEY_HASH = "phone_key_hash";
+    public static final String EXPIRATION_TIME = "expiration_time";
+    public static final String COUNT_REPEAT = "count_repeat";
 
-    @EJB
-    private SmsCodeGenerator smsCodeGenerator;
     @EJB
     private SmsService smsService;
     @EJB
-    private HashProvider hashProvider;
+    private ViberService viberService;
+    @EJB
+    private PhoneCallerRemoteService phoneCallerService;
 
     public UserPhoneVerifier() {
-
     }
 
-    public UserPhoneVerifier(SmsCodeGenerator smsCodeGenerator, SmsService smsService, HashProvider hashProvider) {
-        this.smsCodeGenerator = smsCodeGenerator;
+    public UserPhoneVerifier(SmsService smsService) {
         this.smsService = smsService;
-        this.hashProvider = hashProvider;
     }
 
-    public AuthContext sendValidationSms(User user, AuthContext context) throws UserPhoneEmpty, UserPhoneAlreadyVerified {
+    public AuthContext sendValidationSms(User user,
+                                         AuthContext context,
+                                         ActivationCodeType codeType) throws UserPhoneEmpty, PhoneCallException {
         if (user.getPhone() == null || user.getPhone().isBlank())
             throw new UserPhoneEmpty();
-        if (user.getPhoneVerifiedOn() != null)
-            throw new UserPhoneAlreadyVerified();
 
 //        Если в контексте нет хэша - надо отправить смс
-        if (context.getProperties().get(PHONE_KEY_HASH) == null) {
-            String code = smsCodeGenerator.getCode();
+        if (context.getHashProperty() == null || !context.getExpirationTime().isAfter(LocalDateTime.now())) {
+            log.info("Нет хэша для кода. Повторить получение кода");
 
-            smsService.sendSms(user.getId(), user.getPhone(), code);
+            String code = generateCode(user, codeType, context);
 
-            String hash = hashProvider.getHash(code);
-
-            AuthContext.AuthContextBuilder builder = AuthContext.builder();
-
-            context.getProperties().forEach(builder::property);
-            builder.property(PHONE_KEY_HASH, hash);
-
-            return builder.build();
+            if (code != null) {
+                return AuthContext.builder()
+                        .expirationTime(context.getExpirationTime())
+                        .activationCodeType(codeType)
+                        .counter(context.getCounter() + 1)
+                        .hashProperty(HashGenerator.getSecretHash(code))
+                        .build();
+            }
         }
         return context;
     }
 
-    public void verifyPhone(User user, AuthContext authContext, String smsCode) throws WrongSmsCode {
+    private String generateCode(User user, ActivationCodeType codeType, AuthContext context) throws PhoneCallException {
+        if (codeType == ActivationCodeType.CODE_TO_SMS) {
+            String code = SmsCodeGenerator.getCode(codeType.getLengthCode());
 
-        String savedHash = authContext.getProperties().get(PHONE_KEY_HASH);
+            viberService.sendMsg(user.getId(), user.getPhone(), code);
 
-        String codeHash = hashProvider.getHash(smsCode);
+            smsService.sendSms(user.getId(), user.getPhone(), code);
 
-        if (codeHash.equals(savedHash)) {
+            return code;
+        } else if (codeType == ActivationCodeType.CODE_BY_PHONE_NUMBER) {
+            return phoneCallerService.call(user.getPhone(), context.getCounter());
+        }
+        return null;
+    }
+
+    public void verifyPhone(User user, AuthContext authContext, String smsCode, ActivationCodeType activationCodeType) throws WrongSmsCode {
+        String savedHash = authContext.getHashProperty();
+        LocalDateTime expirationDate = authContext.getExpirationTime();
+
+        String codeHash = HashGenerator.getSecretHash(smsCode);
+
+        if (codeHash.equals(savedHash) && expirationDate.isAfter(LocalDateTime.now())) {
             log.info("Correct sms code");
-            user.setPhoneVerifiedOn(LocalDateTime.now());
+            if (!ActivationCodeType.CODE_TO_EMAIL.equals(activationCodeType)) {
+                user.setPhoneVerifiedOn(LocalDateTime.now());
+            }
         } else {
             throw new WrongSmsCode();
         }
-
     }
 }

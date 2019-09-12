@@ -1,4 +1,13 @@
 dependencies {
+
+    implementation (
+            project(':custom-jpa-provider'),
+    )
+    implementation 'org.jboss.resteasy:resteasy-jackson2-provider:3.6.3.Final'
     implementation 'org.slf4j:slf4j-api:1.7.22'
-    implementation group: 'javax.ejb', name: 'ejb-api', version: '3.0'
+//    implementation group: 'javax.ejb', name: 'ejb-api', version: '3.0'
+//    implementation group: 'org.jboss.spec.javax.ejb', name: 'jboss-ejb-api_3.2_spec', version: '1.0.2.Final'
+    implementation group: 'javax', name: 'javaee-api', version: '8.0.1'
+    implementation "org.keycloak:keycloak-model-jpa:$keycloakVersion"
+    implementation group: 'org.freemarker', name: 'freemarker', version: '2.3.26-incubating'
 }

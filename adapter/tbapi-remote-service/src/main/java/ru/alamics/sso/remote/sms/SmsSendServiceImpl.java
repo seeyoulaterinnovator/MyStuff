@@ -3,13 +3,16 @@ package ru.alamics.sso.remote.sms;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.internal.ClientInvocationBuilder;
+import org.jboss.resteasy.plugins.providers.StringTextStar;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import ru.alamics.sso.registration.phone.SmsConfig;
 import ru.alamics.sso.registration.phone.port.SmsSendService;
+import ru.alamics.sso.util.EStand;
+import ru.alamics.sso.util.StandResolver;
 
 import javax.ejb.Stateless;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.*;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -19,10 +22,10 @@ import java.util.Map;
 @Stateless(name = "SmsSender")
 public class SmsSendServiceImpl implements SmsSendService {
 
-    private static final String SMSC_NAME = "centerName";
-    private static final String USERNAME = "user";
-    private static final String PASSWORD = "pass";
-    private static final String SENDER_NAME = "sender";
+    private static final String SMSC_NAME = "rapporto_gold";
+    private static final String USERNAME = "ertelecom";
+    private static final String PASSWORD = "P10BxzA6Z1BRM";
+    private static final String SENDER_NAME = "Domru";
     private final ResteasyClient client = new ResteasyClientBuilder().build();
     private SmsConfig smsConfig;
 
@@ -30,7 +33,7 @@ public class SmsSendServiceImpl implements SmsSendService {
         smsConfig = SmsConfig.builder()
                 .url(new ResteasyUriBuilder()
                         .scheme("http")
-                        .host("smsgw.testing.ertelecom.ru")
+                        .host("smsgw.ertelecom.ru")
                         .port(13003)
                         .path("cgi-bin/sendsms")
                         .build())
@@ -38,8 +41,8 @@ public class SmsSendServiceImpl implements SmsSendService {
                 .username(USERNAME)
                 .password(PASSWORD)
                 .senderName(SENDER_NAME)
-                .timeout(5)
-                .priority(SmsConfig.Priority.HIGH)
+                .timeout(1440)
+                .priority(SmsConfig.Priority.LOWEST)
                 .reportsMask(SmsConfig.ReportsConfig.DELIVERED_TO_PHONE)
                 .encoding(SmsConfig.Encoding.UCS2)
                 .charset(StandardCharsets.UTF_8)
@@ -53,18 +56,26 @@ public class SmsSendServiceImpl implements SmsSendService {
     @Override
     public String sendSms(String phone, String text) {
 
-        // не дают доступ к отправке смс. приколачиваю фиксированный код и не отправляю смс
-        if (true)
+        // локально и на дэве фиксированный код и не отправляю смс
+        if (!StandResolver.ENV.isBattle()) {
+            log.info("Stand {}, do not sending sms", StandResolver.ENV);
             return "0: Accepted for delivery";
+        }
+
+        phone = phone.replaceAll("[^0-9]+", "");
 
         URI uri = smsConfig.getUrl();
 
-        String response = client.target(uri)
+        // TODO https://stackoverflow.com/questions/53760939/processingexception-resteasy003145-unable-to-find-a-messagebodyreader-of-conte?noredirect=1&lq=1
+        ClientInvocationBuilder builder = (ClientInvocationBuilder)client.register(StringTextStar.class)
+                .target(uri)
                 .queryParams(getConfigForQuery())
                 .queryParam("to", phone)
                 .queryParam("text", URLEncoder.encode(text, smsConfig.getCharset()))
                 .request()
-                .post(null, String.class);
+                ;
+
+        String response = builder.get(String.class);
 
         return response;
     }
