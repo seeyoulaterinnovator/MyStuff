@@ -107,4 +107,45 @@
             <column name="locked" type="boolean"/>
         </addColumn>
     </changeSet>
+    <changeSet id="strukov-av" author="9">
+        <dropTable tableName="SYSTEM_NAME"/>
+        <dropTable tableName="ACCESS_NAME"/>
+        <dropTable tableName="USERPOST_SYSTEM_ACCESS"/>
+    </changeSet>
+
+    <changeSet author="strukov-av" id="10">
+        <createTable tableName="EXTERNAL_SYSTEM">
+            <column name="ID" type="bigint">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="NAME" type="varchar(256)">
+            </column>
+        </createTable>
+
+        <createTable tableName="EXT_SYSTEM_ROLE">
+            <column name="ID" type="bigint">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="NAME" type="varchar(256)">
+            </column>
+            <column name="SYSTEM_ID" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_EXTERNAL_SYSTEM_ACCESS_ROLE"
+                             references="EXTERNAL_SYSTEM(ID)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="strukov-av" id="11">
+        <createTable tableName="USERPOST_EXT_SYSTEM_ROLE">
+            <column name="USER_POST_ID" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="FK_USER_POST_USER_POST_SYSTEM"
+                             references="USER_POST(ID)"/>
+            </column>
+            <column name="EXT_SYSTEM_ROLE_ID" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_EXT_SYSTEM_ROLE_USER_POST" references="EXT_SYSTEM_ROLE(ID)"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="USERPOST_EXT_SYSTEM_ROLE" columnNames="USER_POST_ID, EXT_SYSTEM_ROLE_ID"
+                       constraintName="pk_upsa"/>
+    </changeSet>
 </databaseChangeLog>
