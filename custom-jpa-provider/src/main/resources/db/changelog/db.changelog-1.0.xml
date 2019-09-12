@@ -41,7 +41,6 @@
             </column>
         </createTable>
     </changeSet>
-
     <changeSet author="strukov-av" id="4">
         <createTable tableName="USER_POST">
             <column name="ID" type="varchar(36)">
@@ -60,7 +59,6 @@
             </column>
         </createTable>
     </changeSet>
-
     <changeSet author="strukov-av" id="5">
         <createTable tableName="SYSTEM_NAME">
             <column name="ID" type="bigint">
@@ -93,9 +91,6 @@
         <addPrimaryKey tableName="USERPOST_SYSTEM_ACCESS" columnNames="USER_POST_ID, SYSTEM_ID, ACCESS_ID"
                        constraintName="pk_upsa"/>
     </changeSet>
-
-
-
     <changeSet id="tretyakov-da" author="7">
         <sql>
             INSERT INTO USER_POST_ROLE (ID, NAME) VALUES (1, 'LPR');
@@ -104,14 +99,21 @@
             INSERT INTO USER_POST_ROLE (ID, NAME) VALUES (4, 'GUEST');
         </sql>
     </changeSet>
-
-    <changeSet id="strukov-av" author="8">
+    <changeSet id="8" author="tretyakov-da">
+        <addColumn tableName="AUTO_LOCK_NOTIFICATION">
+            <column name="STATUS" type="varchar(32)"/>
+        </addColumn>
+        <addColumn tableName="USER_LOGIN_HISTORY">
+            <column name="locked" type="boolean"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="strukov-av" author="9">
         <dropTable tableName="SYSTEM_NAME"/>
         <dropTable tableName="ACCESS_NAME"/>
         <dropTable tableName="USERPOST_SYSTEM_ACCESS"/>
     </changeSet>
 
-    <changeSet author="strukov-av" id="9">
+    <changeSet author="strukov-av" id="10">
         <createTable tableName="EXTERNAL_SYSTEM">
             <column name="ID" type="bigint">
                 <constraints nullable="false" primaryKey="true"/>
@@ -133,7 +135,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="strukov-av" id="10">
+    <changeSet author="strukov-av" id="11">
         <createTable tableName="USERPOST_EXT_SYSTEM_ROLE">
             <column name="USER_POST_ID" type="varchar(36)">
                 <constraints nullable="false" foreignKeyName="FK_USER_POST_USER_POST_SYSTEM"
