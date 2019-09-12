@@ -72,8 +72,6 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                                 attributes.put("userFirstName", user.getFirstName());
                                 attributes.put("userLastName", user.getLastName());
 
-                                // нужен отдельный actionToken, для него flow и отдельная форма смены пароля
-
                                 ClientModel clientModel = session.clientStorageManager().getClientByClientId("account", realm);
                                 log.info("got client " + clientModel.toString());
 
