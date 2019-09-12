@@ -94,8 +94,6 @@
                        constraintName="pk_upsa"/>
     </changeSet>
 
-
-
     <changeSet id="tretyakov-da" author="7">
         <sql>
             INSERT INTO USER_POST_ROLE (ID, NAME) VALUES (1, 'LPR');
@@ -104,6 +102,7 @@
             INSERT INTO USER_POST_ROLE (ID, NAME) VALUES (4, 'GUEST');
         </sql>
     </changeSet>
+
     <changeSet id="8" author="tretyakov-da">
         <addColumn tableName="AUTO_LOCK_NOTIFICATION">
             <column name="STATUS" type="varchar(32)"/>
@@ -114,9 +113,9 @@
     </changeSet>
 
     <changeSet id="9" author="strukov-av">
+        <dropTable tableName="USERPOST_SYSTEM_ACCESS"/>
         <dropTable tableName="SYSTEM_NAME"/>
         <dropTable tableName="ACCESS_NAME"/>
-        <dropTable tableName="USERPOST_SYSTEM_ACCESS"/>
     </changeSet>
 
     <changeSet author="strukov-av" id="10">
