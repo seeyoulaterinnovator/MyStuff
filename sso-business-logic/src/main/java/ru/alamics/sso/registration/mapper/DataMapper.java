@@ -5,7 +5,7 @@ import ru.alamics.sso.keycloak.entity.ExternalSystem;
 import ru.alamics.sso.keycloak.entity.ExternalSystemRole;
 import ru.alamics.sso.keycloak.entity.UserPost;
 import ru.alamics.sso.keycloak.entity.UserPostRole;
-import ru.alamics.sso.registration.dto.UserPostRoleDto;
+import ru.alamics.sso.registration.dto.*;
 
 import java.util.LinkedList;
 import java.util.List;
