@@ -9,17 +9,14 @@ import java.util.Set;
 
 @Entity
 @Immutable
-@Table(name = "EXT_SYSTEM_ROLE")
+@Table(name = "ACCESS_NAME")
 @Data
 @NoArgsConstructor
-public class ExternalSystemRole {
+public class Access {
     @Id
     private Long id;
     @Column(name = "name")
     private String name;
-    @ManyToOne
-    @JoinColumn(name = "system_id")
-    private ExternalSystem externalSystem;
-    @ManyToMany(mappedBy = "systemRoles")
-    private Set<UserPost> userPosts;
+//    @ManyToMany(mappedBy = "access")
+//    private Set<UserPost> userPosts;
 }
