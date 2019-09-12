@@ -46,7 +46,7 @@ public class SearchResource {
                 .build();
     }
 
-    private List<UserDto> getUsers(String search, String searchUser, String searchToms) {
+    public List<UserDto> getUsers(String search, String searchUser, String searchToms) {
         List<Tuple> tuples = getEM().createNativeQuery(
                 "select UE.ID         as user_id,\n" +
                         "       UE.USERNAME   as username,\n" +

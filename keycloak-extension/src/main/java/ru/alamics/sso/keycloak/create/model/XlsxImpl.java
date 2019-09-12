@@ -3,10 +3,10 @@ package ru.alamics.sso.keycloak.create.model;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 
 public class XlsxImpl implements FileModel {
@@ -18,15 +18,34 @@ public class XlsxImpl implements FileModel {
         workbook = new XSSFWorkbook(inputStream);
     }
 
+    public XlsxImpl() {
+        workbook = new XSSFWorkbook();
+        workbook.createSheet();
+    }
+
     @Override
-    public LinkedList<String> getHeaders() {
+    public String[] getHeaders() {
         Row row = workbook.getSheetAt(0).getRow(0);
         Iterator<Cell> iterCell = row.cellIterator();
         LinkedList<String> result = new LinkedList<String>();
         while (iterCell.hasNext()) {
             result.add(getValueCell(iterCell.next()));
         }
-        return result;
+        return result.toArray(new String[result.size()]);
+    }
+
+    public void addRow(List<String> cells) {
+        Sheet sheet = workbook.getSheetAt(0);
+        int rowNum = sheet.getLastRowNum();
+        if (sheet.getRow(rowNum) != null) {
+            rowNum++;
+        }
+        Row row = sheet.createRow(rowNum);
+        int i = 0;
+        for (String cell : cells) {
+            row.createCell(i).setCellValue(cell);
+            i++;
+        }
     }
 
     private String getValueCell(Cell cell) {
@@ -40,9 +59,10 @@ public class XlsxImpl implements FileModel {
         return "";
     }
 
-    public List<List<String>> getRows() {
+    @Override
+    public List<String[]> getRows() {
         Iterator<Row> iter = workbook.getSheetAt(0).rowIterator();
-        LinkedList<List<String>> rows = new LinkedList<List<String>>();
+        List<String[]> rows = new LinkedList<String[]>();
 
         while (iter.hasNext()) {
             Row row = iter.next();
@@ -60,32 +80,14 @@ public class XlsxImpl implements FileModel {
                         break;
                 }
             }
-            rows.add(cells);
+            rows.add(cells.toArray(new String[cells.size()]));
         }
         return rows;
     }
-/*
-    public void addRows(LinkedList<String[]> values) {
-        HSSFSheet sheet = workbook.getSheetAt(0);
-        int i = 0;
-        for (String[] cells : values) {
-            HSSFRow row = sheet.createRow(i);
-            int j = 0;
-            for (String cell : cells) {
-                row.createCell(j).setCellValue(cell);
-                j++;
-            }
-            i++;
-        }
-    }
 
-    public void addRow(String[] values) {
-        HSSFSheet sheet = workbook.getSheetAt(0);
-        HSSFRow row = sheet.createRow(sheet.getLastRowNum() + 1);
-        int j = 0;
-        for (String cell : values) {
-            row.createCell(j).setCellValue(cell);
-            j++;
-        }
-    }*/
+    public OutputStream save() throws IOException {
+        OutputStream outputStream = new FileOutputStream("test.xlsx");
+        workbook.write(outputStream);
+        return outputStream;
+    }
 }

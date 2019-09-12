@@ -1,7 +1,11 @@
 package ru.alamics.sso.keycloak.create.model;
 
+import java.io.IOException;
 import java.util.LinkedList;
+import java.util.List;
 
 public interface FileModel {
-    LinkedList<String> getHeaders();
+    String[] getHeaders() throws IOException;
+
+    List<String[]> getRows() throws IOException;
 }

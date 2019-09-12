@@ -20,22 +20,21 @@ import org.keycloak.services.managers.RealmManager;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.permissions.AdminPermissions;
-import org.keycloak.utils.MediaType;
 import ru.alamics.sso.keycloak.create.FileServiceException;
+import ru.alamics.sso.keycloak.create.model.CsvImpl;
 import ru.alamics.sso.keycloak.create.model.UserRequest;
 import ru.alamics.sso.keycloak.create.model.XlsxImpl;
-import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.keycloak.search.dto.UserDto;
+import ru.alamics.sso.keycloak.search.rest.SearchResource;
 import ru.alamics.sso.registration.FoundException;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
@@ -78,8 +77,19 @@ public class CustomUserResource {
     @Produces(MediaType.APPLICATION_JSON)
     @NoCache
     public Response uploadUsers(@FormParam("file") File file) throws IOException, FileServiceException {
-        InputStream inputStream = new FileInputStream("C:\\work\\domru-sso\\keycloak-extension\\src\\main\\resources\\template_test.xlsx");
+        InputStream inputStream = new FileInputStream("C:\\work\\domru-sso\\keycloak-extension\\src\\main\\resources\\template_test.csv");
         return importUsers(inputStream, "");
+    }
+
+    @GET
+    @Path("/downloadUsers")
+    @Consumes("multipart/form-data")
+    //@Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @NoCache
+    public Response downloadUsers(@FormParam("file") File file) throws IOException, FileServiceException {
+        Response.ResponseBuilder response = Response.ok(exportUsers());
+        response.header("Content-Disposition", "attachment; filename=test.xlsx");
+        return response.build();
     }
 
     private void checkOnExistUser(UserRequest request, RealmModel realm) throws FoundException {
@@ -239,7 +249,21 @@ public class CustomUserResource {
         user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(request.getPhone()));
     }
 
+    private OutputStream exportUsers() throws IOException{
+        XlsxImpl xlsx = new XlsxImpl();
+        xlsx.addRow(List.of(EMAIL, PHONE, CUSTOMER, ROLE, SYSTEM));
+        List<UserDto> userDto = new SearchResource(session).getUsers("","","");
+        if (userDto == null || userDto.isEmpty()){
+            return null;
+        }
+        userDto.stream().forEach(o -> xlsx.addRow(List.of(o.getEmail(), o.getPhone(), o.getTomsId(), o.getRoleId(), o.getAccessId())));
+        return xlsx.save();
+    }
+
     private Response importUsers(InputStream inputStream, String type) throws IOException {
+        new CsvImpl(inputStream).getHeaders();
+        return null;
+                /*
         XlsxImpl xls = new XlsxImpl(inputStream);
         LinkedList<String> headers = xls.getHeaders();
         try {
@@ -261,7 +285,7 @@ public class CustomUserResource {
         return JsonResponse.success()
                 .addResult("count clones", countClones)
                 .addResult("create users", createUsers(userRequests))
-                .build();
+                .build();*/
     }
 
     private void checkStructure(LinkedList<String> headers) throws FileServiceException {
