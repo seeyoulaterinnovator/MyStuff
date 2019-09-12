@@ -99,7 +99,6 @@
             INSERT INTO USER_POST_ROLE (ID, NAME) VALUES (4, 'GUEST');
         </sql>
     </changeSet>
-
     <changeSet id="8" author="tretyakov-da">
         <addColumn tableName="AUTO_LOCK_NOTIFICATION">
             <column name="STATUS" type="varchar(32)"/>
