@@ -167,4 +167,18 @@
            ON DELETE CASCADE
        </sql>
     </changeSet>
+
+    <changeSet author="strukov-av" id="13">
+        <sql>
+            ALTER TABLE USERPOST_EXT_SYSTEM_ROLE
+            DROP CONSTRAINT FK_USER_POST_USER_POST_SYSTEM
+        </sql>
+        <sql>
+            ALTER TABLE USERPOST_EXT_SYSTEM_ROLE
+            ADD CONSTRAINT FK_USER_POST_USER_POST_SYSTEM
+            FOREIGN KEY (USER_POST_ID)
+            REFERENCES USER_POST (ID)
+            ON DELETE CASCADE
+        </sql>
+    </changeSet>
 </databaseChangeLog>
