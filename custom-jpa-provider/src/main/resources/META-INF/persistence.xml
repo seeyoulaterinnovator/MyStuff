@@ -76,8 +76,8 @@
 		<class>ru.alamics.sso.keycloak.entity.AutoLockNotification</class>
 		<class>ru.alamics.sso.keycloak.entity.UserPost</class>
 		<class>ru.alamics.sso.keycloak.entity.UserPostRole</class>
-		<class>ru.alamics.sso.keycloak.entity.System</class>
-		<class>ru.alamics.sso.keycloak.entity.Access</class>
+		<class>ru.alamics.sso.keycloak.entity.ExternalSystem</class>
+		<class>ru.alamics.sso.keycloak.entity.ExternalSystemRole</class>
 		<properties>
 			<!-- http://docs.jboss.org/hibernate/orm/4.3/javadocs/constant-values.html -->
 

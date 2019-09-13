@@ -57,7 +57,7 @@ public class SmsSendServiceImpl implements SmsSendService {
     public String sendSms(String phone, String text) {
 
         // локально и на дэве фиксированный код и не отправляю смс
-        if (!StandResolver.ENV.isBattle()) {
+        if (!StandResolver.isBattle()) {
             log.info("Stand {}, do not sending sms", StandResolver.ENV);
             return "0: Accepted for delivery";
         }
