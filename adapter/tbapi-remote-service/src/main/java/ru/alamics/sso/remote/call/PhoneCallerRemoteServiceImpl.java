@@ -49,19 +49,23 @@ public class PhoneCallerRemoteServiceImpl implements PhoneCallerRemoteService {
         String response = null;
         phone = phone.replaceAll("[^\\d]", "");
         try {
-            response = getCode(uriVoronezh, phone, count);
-            if (isNull(response)) {
+            // TODO почему то не звонил воронеж
+            //response = getCode(uriVoronezh, phone, count);
+            //if (isNull(response)) {
                 response = getCode(uriPerm, phone, count);
-            }
+            //}
         } catch (BadRequestException e) {
+            log.error("Error", e);
             if (HttpStatus.SC_BAD_REQUEST == e.getResponse().getStatus()) {
                 throw new PhoneCallException("Incorrect phone number", e);
             }
         } catch (ProcessingException | WebApplicationException wae) {
+            log.error("Error", wae);
             throw new PhoneCallException("Ошибка при выполнении звонка", wae);
         }
 
         if (isNull(response)) {
+            log.error("Empty response");
             throw new PhoneCallException("Невозможно выполнить звонок");
         }
         return response;
@@ -69,7 +73,7 @@ public class PhoneCallerRemoteServiceImpl implements PhoneCallerRemoteService {
 
     private String getCode(URI uri, String phone, int count) {
 
-        log.info(String.format("call to number: %s, count: %d", phone, count));
+        log.info(String.format("Api %s, call to number: %s, count: %d", uri.getHost(), phone, count));
 
         ClientInvocationBuilder builder = (ClientInvocationBuilder) client.register(StringTextStar.class)
                 .target(uri)
@@ -78,7 +82,11 @@ public class PhoneCallerRemoteServiceImpl implements PhoneCallerRemoteService {
                 .request();
 
         String code = builder.get(String.class);
-        return code != null ? code.replaceAll("\\n", "") : "";
+        code = code != null ? code.replaceAll("\\n", "") : "";
+
+        log.info(String.format("Api %s, code %s", uri.getHost(), code));
+
+        return code;
     }
 
     private boolean isNull(String field) {
