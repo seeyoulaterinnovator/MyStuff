@@ -2,7 +2,7 @@
 <#import "templates/components.ftl" as components>
 <#import "templates/blocks.ftl" as blocks>
 
-<@layout.registrationLayout displayInfo=true; section>
+<@layout.registrationLayout displayInfo=true displayCity=false; section >
     <#if section = "header">
         <#include "templates/required-fields.html">
         <@blocks.contentHeader mainTitle="${msg('registerTitle')}" secondaryTitle="${msg('doLogIn')}" secondaryHref="${url.loginUrl}" withBorder=true />

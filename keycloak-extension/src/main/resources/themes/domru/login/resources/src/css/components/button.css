@@ -38,3 +38,14 @@
     @apply .bg-accentBlue-700-hover;
   }
 }
+
+@media screen and (max-width: 479px) {
+  .btn.w-1\/2 {
+    width: 100%;
+  }
+
+  .btn.btn-enter {
+    max-width: 136px;
+    box-sizing: border-box;
+  }
+}
