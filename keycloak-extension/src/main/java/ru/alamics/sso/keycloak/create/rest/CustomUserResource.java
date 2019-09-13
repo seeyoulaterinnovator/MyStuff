@@ -21,9 +21,8 @@ import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.permissions.AdminPermissions;
 import ru.alamics.sso.keycloak.create.FileServiceException;
-import ru.alamics.sso.keycloak.create.model.CsvImpl;
-import ru.alamics.sso.keycloak.create.model.UserRequest;
-import ru.alamics.sso.keycloak.create.model.XlsxImpl;
+import ru.alamics.sso.keycloak.create.model.*;
+import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.keycloak.search.dto.UserDto;
 import ru.alamics.sso.keycloak.search.rest.SearchResource;
@@ -78,7 +77,7 @@ public class CustomUserResource {
     @NoCache
     public Response uploadUsers(@FormParam("file") File file) throws IOException, FileServiceException {
         InputStream inputStream = new FileInputStream("C:\\work\\domru-sso\\keycloak-extension\\src\\main\\resources\\template_test.csv");
-        return importUsers(inputStream, "");
+        return importUsers(inputStream, ".csv");
     }
 
     @GET
@@ -261,11 +260,9 @@ public class CustomUserResource {
     }
 
     private Response importUsers(InputStream inputStream, String type) throws IOException {
-        new CsvImpl(inputStream).getHeaders();
-        return null;
-                /*
-        XlsxImpl xls = new XlsxImpl(inputStream);
-        LinkedList<String> headers = xls.getHeaders();
+        FileModel file = FileFactory.createFileModel(inputStream, type);
+
+        String[] headers = file.getHeaders();
         try {
             checkStructure(headers);
         } catch (FileServiceException e) {
@@ -273,7 +270,7 @@ public class CustomUserResource {
                     .message(e.getMessage())
                     .build();
         }
-        List<List<String>> rows = xls.getRows();
+        List<String[]> rows = file.getRows();
         rows.remove(0);
         List<UserRequest> userRequests = DataMapper.toUserRequestList(rows);
         if (userRequests == null || userRequests.isEmpty()) {
@@ -285,13 +282,14 @@ public class CustomUserResource {
         return JsonResponse.success()
                 .addResult("count clones", countClones)
                 .addResult("create users", createUsers(userRequests))
-                .build();*/
+                .build();
     }
 
-    private void checkStructure(LinkedList<String> headers) throws FileServiceException {
-        for (String head : headers) {
+    private void checkStructure(String[] headers) throws FileServiceException {
+
+        for (String head : Arrays.asList(headers)) {
             if (!head.equalsIgnoreCase(EMAIL) && !head.equalsIgnoreCase(PHONE) && !head.equalsIgnoreCase(CUSTOMER)
-                    && !head.equalsIgnoreCase(ROLE) && !head.equalsIgnoreCase(SYSTEM) || headers.size() != 5) {
+                    && !head.equalsIgnoreCase(ROLE) && !head.equalsIgnoreCase(SYSTEM) || headers.length != 5) {
                 throw new FileServiceException("File Structure is not valid!");
             }
         }
@@ -349,4 +347,5 @@ public class CustomUserResource {
                 .success();
         return user;
     }
+
 }

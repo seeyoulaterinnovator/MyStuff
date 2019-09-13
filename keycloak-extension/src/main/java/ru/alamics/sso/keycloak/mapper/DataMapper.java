@@ -48,16 +48,16 @@ public abstract class DataMapper {
         return object.toString();
     }
 
-    public static UserRequest toUserRequest(List<String> row){
+    public static UserRequest toUserRequest(String[] row){
         UserRequest userRequest = new UserRequest();
-        userRequest.setEmail(row.get(0));
-        userRequest.setName(row.get(0));
-        userRequest.setPhone(row.get(1));
+        userRequest.setEmail(row[0]);
+        userRequest.setName(row[0]);
+        userRequest.setPhone(row[1]);
         userRequest.setRealmName("user");
         return userRequest;
     }
 
-    public static List<UserRequest> toUserRequestList(List<List<String>> rows){
+    public static List<UserRequest> toUserRequestList(List<String[]> rows){
         if (rows == null || rows.isEmpty()){
             return null;
         }
