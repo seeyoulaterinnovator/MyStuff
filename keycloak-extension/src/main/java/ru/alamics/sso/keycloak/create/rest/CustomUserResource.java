@@ -1,7 +1,10 @@
 package ru.alamics.sso.keycloak.create.rest;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.jboss.resteasy.annotations.cache.NoCache;
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.events.admin.OperationType;
@@ -21,7 +24,10 @@ import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.permissions.AdminPermissions;
 import ru.alamics.sso.keycloak.create.FileServiceException;
-import ru.alamics.sso.keycloak.create.model.*;
+import ru.alamics.sso.keycloak.create.model.FileFactory;
+import ru.alamics.sso.keycloak.create.model.FileModel;
+import ru.alamics.sso.keycloak.create.model.UserRequest;
+import ru.alamics.sso.keycloak.create.model.XlsxImpl;
 import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.keycloak.search.dto.UserDto;
@@ -32,8 +38,12 @@ import javax.persistence.EntityManager;
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.*;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
@@ -48,9 +58,13 @@ public class CustomUserResource {
     private final static String SYSTEM = "Целевая система";
 
     protected KeycloakSession session;
+    private AdminAuth auth;
+    private RealmModel realm;
 
     public CustomUserResource(KeycloakSession session) {
         this.session = session;
+        auth = authenticateRealmAdminRequest(session.getContext().getRealm());
+        realm = session.getContext().getRealm();
     }
 
     @POST
@@ -62,22 +76,19 @@ public class CustomUserResource {
             return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
         }
 
-        RealmManager realmManager = new RealmManager(session);
-        RealmModel realm = realmManager.getRealmByName(request.getRealmName());
-        if (realm == null) throw new NotFoundException("Realm not found.");
-
-        AdminAuth auth = authenticateRealmAdminRequest(session.getContext().getRealm());
-        return getUserResponse(request, realm, auth);
+        return getUserResponse(request);
     }
 
     @POST
     @Path("/uploadUsers")
     @Consumes("multipart/form-data")
-    @Produces(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response uploadUsers(@FormParam("file") File file) throws IOException, FileServiceException {
-        InputStream inputStream = new FileInputStream("C:\\work\\domru-sso\\keycloak-extension\\src\\main\\resources\\template_test.csv");
-        return importUsers(inputStream, ".csv");
+    public Response uploadUsers(MultipartFormDataInput file) throws IOException {
+        List<InputPart> inputParts = file.getFormDataMap().get("file");
+        if (inputParts == null || inputParts.isEmpty()) {
+            return JsonResponse.error(Response.Status.BAD_REQUEST).build();
+        }
+        return importUsers(inputParts.get(0).getBody(InputStream.class, null), getFileExtension(inputParts.get(0).getHeaders()));
     }
 
     @GET
@@ -129,9 +140,9 @@ public class CustomUserResource {
         }
     }
 
-    private Response getUserResponse(UserRequest request, RealmModel realm, AdminAuth auth) {
+    private Response getUserResponse(UserRequest request) {
         try {
-            UserModel user = createUser(request, realm, auth);
+            UserModel user = createUser(request);
 
             if (session.getTransactionManager().isActive()) {
                 session.getTransactionManager().commit();
@@ -248,11 +259,11 @@ public class CustomUserResource {
         user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(request.getPhone()));
     }
 
-    private OutputStream exportUsers() throws IOException{
+    private OutputStream exportUsers() throws IOException {
         XlsxImpl xlsx = new XlsxImpl();
         xlsx.addRow(List.of(EMAIL, PHONE, CUSTOMER, ROLE, SYSTEM));
-        List<UserDto> userDto = new SearchResource(session).getUsers("","","");
-        if (userDto == null || userDto.isEmpty()){
+        List<UserDto> userDto = new SearchResource(session).getUsers("", "", "");
+        if (userDto == null || userDto.isEmpty()) {
             return null;
         }
         userDto.stream().forEach(o -> xlsx.addRow(List.of(o.getEmail(), o.getPhone(), o.getTomsId(), o.getRoleId(), o.getAccessId())));
@@ -261,6 +272,9 @@ public class CustomUserResource {
 
     private Response importUsers(InputStream inputStream, String type) throws IOException {
         FileModel file = FileFactory.createFileModel(inputStream, type);
+        if (file == null){
+            return JsonResponse.fail().message("Unsupported file format!").build();
+        }
 
         String[] headers = file.getHeaders();
         try {
@@ -313,14 +327,11 @@ public class CustomUserResource {
     }
 
     private JsonResponse createUsers(List<UserRequest> userRequests) {
-        RealmManager realmManager = new RealmManager(session);
-        RealmModel realm = realmManager.getRealmByName("user");
-        AdminAuth auth = authenticateRealmAdminRequest(session.getContext().getRealm());
         List<String> successResponse = new LinkedList<>();
         List<String> errorResponse = new LinkedList<>();
         userRequests.stream().forEach(o -> {
             try {
-                successResponse.add("userId : " + createUser(o, realm, auth).getId());
+                successResponse.add("userId : " + createUser(o).getId());
             } catch (FoundException e) {
                 errorResponse.add("userName : " + o.getName());
             }
@@ -334,7 +345,7 @@ public class CustomUserResource {
         return jsonResponse;
     }
 
-    private UserModel createUser(UserRequest userRequest, RealmModel realm, AdminAuth auth) throws FoundException {
+    private UserModel createUser(UserRequest userRequest) throws FoundException {
         checkOnExistUser(userRequest, realm);
         UserModel user = session.users().addUser(realm, userRequest.getEmail());
         Set<String> emptySet = Collections.emptySet();
@@ -348,4 +359,20 @@ public class CustomUserResource {
         return user;
     }
 
+    private String getFileExtension(MultivaluedMap<String, String> header) {
+
+        String[] contentDisposition = header.getFirst("Content-Disposition").split(";");
+
+        for (String filename : contentDisposition) {
+            if ((filename.trim().startsWith("filename"))) {
+
+                String[] name = filename.split("=");
+
+                String finalFileName = name[1].trim().replaceAll("\"", "");
+
+                return finalFileName.substring(finalFileName.lastIndexOf('.') + 1);
+            }
+        }
+        return "unknown";
+    }
 }
