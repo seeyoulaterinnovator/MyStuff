@@ -5,17 +5,23 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import ru.alamics.sso.registration.phone.SmsConfig;
+import ru.alamics.sso.registration.phone.exception.ViberSendException;
 import ru.alamics.sso.registration.phone.port.ViberSendService;
 import ru.alamics.sso.util.EStand;
 import ru.alamics.sso.util.StandResolver;
 
 import javax.ejb.Stateless;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Stateless(name = "ViberSender")
@@ -25,8 +31,13 @@ public class ViberSendServiceImpl implements ViberSendService {
     private static final String USERNAME = "user";
     private static final String PASSWORD = "pass";
     private static final String SENDER_NAME = "sender";
-    private final ResteasyClient client = new ResteasyClientBuilder().build();
-    private SmsConfig smsConfig;
+
+    private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
+            .connectTimeout(3, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS);
+
+    private static final ResteasyClient client = clientBuilder.build();
+    private static SmsConfig smsConfig;
 
     public ViberSendServiceImpl() {
         smsConfig = SmsConfig.builder()
@@ -48,12 +59,13 @@ public class ViberSendServiceImpl implements ViberSendService {
                 .build();
     }
 
-    public ViberSendServiceImpl(SmsConfig smsConfig) {
-        this.smsConfig = smsConfig;
+    public ViberSendServiceImpl(SmsConfig config) {
+        smsConfig = config;
     }
 
     @Override
-    public String sendMsg(String phone, String text) {
+    public String sendMsg(String phone, String text) throws ViberSendException
+    {
 
         // локально и на дэве фиксированный код и не отправляю смс
         if (!StandResolver.isBattle()) {
@@ -65,14 +77,21 @@ public class ViberSendServiceImpl implements ViberSendService {
 
         URI uri = smsConfig.getUrl();
 
-        String response = client.target(uri)
-                .queryParams(getConfigForQuery())
-                .queryParam("to", phone)
-                .queryParam("text", URLEncoder.encode(text, smsConfig.getCharset()))
-                .request()
-                .post(null, String.class);
+        try {
+            String response = client.target(uri)
+                    .queryParams(getConfigForQuery())
+                    .queryParam("to", phone)
+                    .queryParam("text", URLEncoder.encode(text, smsConfig.getCharset()))
+                    .request()
+                    .post(null, String.class);
 
-        return response;
+            return response;
+
+        } catch (ProcessingException | WebApplicationException wae) {
+            log.error(wae.getMessage(), wae);
+
+            throw new ViberSendException(wae);
+        }
     }
 
     private MultivaluedMap<String, Object> getConfigForQuery() {
