@@ -67,9 +67,9 @@ public class SearchResource {
                         "         join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID\n" +
                         "         join USER_POST UP on UE.ID = UP.USER_ID\n" +
                         "         join USER_POST_ROLE UPR on UP.ROLE_ID = UPR.ID\n" +
-                        "         join USERPOST_EXT_SYSTEM_ROLE UESR on UP.ID = UESR.USER_POST_ID\n" +
-                        "         join EXT_SYSTEM_ROLE ESR on UESR.EXT_SYSTEM_ROLE_ID = ESR.ID\n" +
-                        "         join EXTERNAL_SYSTEM ES on ESR.SYSTEM_ID = ES.ID\n" +
+                        "         left outer join USERPOST_EXT_SYSTEM_ROLE UESR on UP.ID = UESR.USER_POST_ID\n" +
+                        "         left outer join EXT_SYSTEM_ROLE ESR on UESR.EXT_SYSTEM_ROLE_ID = ESR.ID\n" +
+                        "         left outer join EXTERNAL_SYSTEM ES on ESR.SYSTEM_ID = ES.ID\n" +
                         "WHERE UE.REALM_ID = 'user' AND UA.NAME = 'phone'\n" +
                         "  AND CASE\n" +
                         "          WHEN :search is not null and :search != '' then (\n" +
