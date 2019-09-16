@@ -53,9 +53,16 @@ public class SearchResource {
                         "       UE.FIRST_NAME as first_name,\n" +
                         "       UE.LAST_NAME  as last_name,\n" +
                         "       UE.EMAIL      as email,\n" +
-                        "       UA.VALUE      as phone\n" +
+                        "       UA.VALUE      as phone,\n" +
+                        "       UP.id         as user_post_id,\n" +
+                        "       UP.TOMS_ID    as toms_id,\n" +
+                        "       UP.DMP_ID     as dmp_id,\n" +
+                        "       UP.ROLE_ID    as role_id,\n" +
+                        "       UPR.NAME      as role_name\n" +
                         "from USER_ENTITY UE\n" +
                         "         join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID\n" +
+                        "         join USER_POST UP on UE.ID = UP.USER_ID\n" +
+                        "         join USER_POST_ROLE UPR on UP.ROLE_ID = UPR.ID\n" +
                         "WHERE UE.REALM_ID = 'user' AND UA.NAME = 'phone'\n" +
                         "  AND CASE\n" +
                         "          WHEN :search is not null and :search != '' then (\n" +
@@ -66,8 +73,16 @@ public class SearchResource {
                         "              UE.USERNAME LIKE CONCAT('%', :search, '%') OR\n" +
                         "              UA.VALUE LIKE CONCAT('%', :search, '%')\n" +
                         "              )\n" +
-                        "          else UE.ID LIKE '%' end", Tuple.class)
+                        "          else UE.ID LIKE '%' end\n" +
+                        "  AND CASE\n" +
+                        "          WHEN :searchUser is not null and :searchUser != '' then (UP.USER_ID = :searchUser)\n" +
+                        "          else UP.USER_ID LIKE '%' end\n" +
+                        "  AND CASE\n" +
+                        "          WHEN :searchToms is not null and :searchToms != '' then (UP.TOMS_ID = :searchToms)\n" +
+                        "          else UP.TOMS_ID LIKE '%' end", Tuple.class)
                 .setParameter("search", search)
+                .setParameter("searchUser", searchUser)
+                .setParameter("searchToms", searchToms)
                 .getResultList();
         return DataMapper.toUserDtoList(tuples);
     }

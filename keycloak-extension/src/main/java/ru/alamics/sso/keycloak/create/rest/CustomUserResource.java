@@ -22,10 +22,12 @@ import ru.alamics.sso.keycloak.create.model.DownloadUserRequest;
 import ru.alamics.sso.keycloak.create.model.UserParameter;
 import ru.alamics.sso.keycloak.create.model.UserRequest;
 import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.registration.service.UserPostService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,6 +52,9 @@ public class CustomUserResource {
         if (request.getPhone() == null || request.getPhone().isBlank()) {
             return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
         }
+        if (request.getTomsId() == null || request.getTomsId().isBlank()) {
+            return ErrorResponse.error("TomsId is required attribute", Response.Status.BAD_REQUEST);
+        }
 
         return userService.getUserResponse(request);
     }
@@ -73,7 +78,8 @@ public class CustomUserResource {
         if (inputParts == null || inputParts.isEmpty()) {
             return JsonResponse.error(Response.Status.BAD_REQUEST).build();
         }
-        return userService.importUsers(inputParts.get(0).getBody(InputStream.class, null), userService.getFileExtension(inputParts.get(0).getHeaders()));
+        return userService.importUsers(inputParts.get(0).getBody(InputStream.class, null),
+                getFileExtension(inputParts.get(0).getHeaders()));
     }
 
     @GET
@@ -135,5 +141,20 @@ public class CustomUserResource {
         }
 
         return auth;
+    }
+
+    private String getFileExtension(MultivaluedMap<String, String> header) {
+        String[] contentDisposition = header.getFirst("Content-Disposition").split(";");
+        for (String filename : contentDisposition) {
+            if ((filename.trim().startsWith("filename"))) {
+
+                String[] name = filename.split("=");
+
+                String finalFileName = name[1].trim().replaceAll("\"", "");
+
+                return finalFileName.substring(finalFileName.lastIndexOf('.') + 1);
+            }
+        }
+        return "unknown";
     }
 }

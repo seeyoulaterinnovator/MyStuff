@@ -1,6 +1,6 @@
 package ru.alamics.sso.registration.rias.exception;
 
-public class RiasCheckException extends RuntimeException {
+public class RiasCheckException extends Exception {
 
     public RiasCheckException() {
     }

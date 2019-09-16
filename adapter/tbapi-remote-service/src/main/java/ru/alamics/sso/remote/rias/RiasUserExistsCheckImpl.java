@@ -18,13 +18,17 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Stateless(name = "RiasApiService")
 public class RiasUserExistsCheckImpl implements RiasApiService {
 
-    private final ResteasyClient client = new ResteasyClientBuilder()
-            .build();
+    private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
+            .connectTimeout(3, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS);
+
+    private static final ResteasyClient client = clientBuilder.build();
 
     private final URI uri;
 
@@ -44,7 +48,7 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
     private static final String CLIENT_NAME = "SSO";
     private static final String CLIENT_SALT = "W2NHAYTWrfEG9fDw2MAt2TuuM7VK2K7H";
 
-    public boolean checkParam(String param)
+    public boolean checkParam(String param) throws RiasCheckException
     {
         LocalDateTime dateTime = LocalDateTime.now();
 
@@ -58,6 +62,8 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
         String namesV = URLEncoder.encode("data_for_check$c,timestamp,client,client_secret", StandardCharsets.UTF_8);
         String valuesV = URLEncoder.encode(param + "," + timestamp + "," + CLIENT_NAME + "," + secretHash, StandardCharsets.UTF_8);
 
+
+        // TODO Entity<RiasData> => response.close() ?
         RiasData response;
 
         try {

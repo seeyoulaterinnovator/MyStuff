@@ -9,3 +9,9 @@
 *.iml
 *.ipr
 /out/
+
+# Frontend
+node_modules/
+.vscode
+.cache
+/keycloak-extension/src/main/resources/themes/domru/login/resources/build/

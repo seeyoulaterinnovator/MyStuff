@@ -1,96 +1,55 @@
 <#import "template.ftl" as layout>
-<@layout.registrationLayout; section>
+<#import "templates/components.ftl" as components>
+<#import "templates/blocks.ftl" as blocks>
+
+<@layout.registrationLayout displayInfo=true; section>
     <#if section = "header">
-        ${msg("registerTitle")}
+        <#include "templates/required-fields.html">
+        <@blocks.contentHeader mainTitle="${msg('registerTitle')}" secondaryTitle="${msg('doLogIn')}" secondaryHref="${url.loginUrl}" withBorder=true />
     <#elseif section = "form">
-        <form id="kc-register-form" class="${properties.kcFormClass!}" action="${url.registrationAction}" method="userPostRole">
-            <div class="${properties.kcFormGroupClass!} ${messagesPerField.printIfExists('firstName',properties.kcFormGroupErrorClass!)}">
-                <div class="${properties.kcLabelWrapperClass!}">
-                    <label for="firstName" class="${properties.kcLabelClass!}">${msg("firstName")}</label>
-                </div>
-                <div class="${properties.kcInputWrapperClass!}">
-                    <input type="text" id="firstName" class="${properties.kcInputClass!}" name="firstName" value="${(register.formData.firstName!'')}" />
-                </div>
-            </div>
+        <form id="registrationForm" action="${url.registrationAction}" method="post">
+                <@components.field class="mb-4 md:w-full" fieldName="orgName" label="Наименование организации" placeholder="Наименование организации" required=true />
+                
+                <#-- В нашем случае firstName – это полное имя -->
+                <@components.field class="mb-4 md:w-full" fieldName="firstName" label="Как к вам обращаться?" placeholder="Как к вам обращаться?" required=true />
 
-            <div class="${properties.kcFormGroupClass!} ${messagesPerField.printIfExists('lastName',properties.kcFormGroupErrorClass!)}">
-                <div class="${properties.kcLabelWrapperClass!}">
-                    <label for="lastName" class="${properties.kcLabelClass!}">${msg("lastName")}</label>
-                </div>
-                <div class="${properties.kcInputWrapperClass!}">
-                    <input type="text" id="lastName" class="${properties.kcInputClass!}" name="lastName" value="${(register.formData.lastName!'')}" />
-                </div>
-            </div>
+                <#-- Пока бэк не уберет необходимость фамилии, скрою поле и отправлю дефис -->
+                <@components.field class="mb-4 md:w-full" fieldName="lastName" label="Фамилия" placeholder="Фамилия" required=true style="display: none" />
 
-            <div class="${properties.kcFormGroupClass!} ${messagesPerField.printIfExists('email',properties.kcFormGroupErrorClass!)}">
-                <div class="${properties.kcLabelWrapperClass!}">
-                    <label for="email" class="${properties.kcLabelClass!}">${msg("email")}</label>
-                </div>
-                <div class="${properties.kcInputWrapperClass!}">
-                    <input type="text" id="email" class="${properties.kcInputClass!}" name="email" value="${(register.formData.email!'')}" autocomplete="email" />
-                </div>
-            </div>
+                <@components.field class="mb-4 md:w-full" fieldName="email" label="Эл. почта" placeholder="Ваш адрес эл.почты" required=true type="email" />
+                
+                <#if !realm.registrationEmailAsUsername>
+                    <@components.field class="mb-4 md:w-full" fieldName="username" label="Имя пользователя" placeholder="Имя пользователя" required=true />
+                </#if>
 
-          <#if !realm.registrationEmailAsUsername>
-            <div class="${properties.kcFormGroupClass!} ${messagesPerField.printIfExists('username',properties.kcFormGroupErrorClass!)}">
-                <div class="${properties.kcLabelWrapperClass!}">
-                    <label for="username" class="${properties.kcLabelClass!}">${msg("username")}</label>
-                </div>
-                <div class="${properties.kcInputWrapperClass!}">
-                    <input type="text" id="username" class="${properties.kcInputClass!}" name="username" value="${(register.formData.username!'')}" autocomplete="username" />
-                </div>
-            </div>
-          </#if>
+                <@components.field class="mb-4 md:w-full" fieldName="phone" label="Ваш телефон" placeholder="+7 (XXX) XXX - XX - XX" required=true />
 
-            <#if passwordRequired>
-            <div class="${properties.kcFormGroupClass!} ${messagesPerField.printIfExists('password',properties.kcFormGroupErrorClass!)}">
-                <div class="${properties.kcLabelWrapperClass!}">
-                    <label for="password" class="${properties.kcLabelClass!}">${msg("password")}</label>
-                </div>
-                <div class="${properties.kcInputWrapperClass!}">
-                    <input type="password" id="password" class="${properties.kcInputClass!}" name="password" autocomplete="new-password"/>
-                </div>
-            </div>
+                
+                <#if passwordRequired>
+                    <h3 class="py-4 text-black-80">Придумайте пароль</h3>
+                    
+                    <@blocks.password />
+                </#if>
 
-            <div class="${properties.kcFormGroupClass!} ${messagesPerField.printIfExists('password-confirm',properties.kcFormGroupErrorClass!)}">
-                <div class="${properties.kcLabelWrapperClass!}">
-                    <label for="password-confirm" class="${properties.kcLabelClass!}">${msg("passwordConfirm")}</label>
-                </div>
-                <div class="${properties.kcInputWrapperClass!}">
-                    <input type="password" id="password-confirm" class="${properties.kcInputClass!}" name="password-confirm" />
-                </div>
-            </div>
-            </#if>
-
-            <div class="${properties.kcFormGroupClass!}">
-                <div class="${properties.kcLabelWrapperClass!}">
-                    <label for="phone" class="${properties.kcLabelClass!}">Телефон</label>
-                </div>
-
-                <div class="${properties.kcInputWrapperClass!}">
-                    <input type="text" class="${properties.kcInputClass!}"  id="phone" name="phone"/>
-                </div>
-            </div>
-
-            <#if recaptchaRequired??>
-            <div class="form-group">
-                <div class="${properties.kcInputWrapperClass!}">
-                    <div class="g-recaptcha" data-size="compact" data-sitekey="${recaptchaSiteKey}"></div>
-                </div>
-            </div>
-            </#if>
-
-            <div class="${properties.kcFormGroupClass!}">
-                <div id="kc-form-options" class="${properties.kcFormOptionsClass!}">
-                    <div class="${properties.kcFormOptionsWrapperClass!}">
-                        <span><a href="${url.loginUrl}">${kcSanitize(msg("backToLogin"))?no_esc}</a></span>
+                <#if recaptchaRequired??>
+                    <div class="g-recaptcha w-full"
+                        data-size="compact" 
+                        data-sitekey="${recaptchaSiteKey}"
+                        data-callback="recaptchaCallback" 
+                        data-expired-callback="recaptchaExpiredCallback"
+                        data-error-callback="recaptchaErrorCallback"
+                        >
                     </div>
-                </div>
+                </#if>
 
-                <div id="kc-form-buttons" class="${properties.kcFormButtonsClass!}">
-                    <input class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!}" type="submit" value="${msg("doRegister")}"/>
+                <div class="flex justify-between">
+                    <div class="flex flex-basis-1/2 items-center">
+                        <button id="submit" class="btn btn-main w-full" type="submit">${msg('doRegister')}</button>    
+                    </div>                       
+                    <span class="flex-basis-1/2 ml-5 text-sm">Нажимая кнопку, вы соглашаетесь <a class="reference" href="https://domru.ru/policy.pdf" target="_blink">с политикой обработки данных</a></span>
                 </div>
-            </div>
         </form>
+    <#elseif section = "info" >
+        <p>На указанный номер телефона будет выслано СМС с одноразовым паролем</p>
     </#if>
 </@layout.registrationLayout>

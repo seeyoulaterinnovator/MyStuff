@@ -16,11 +16,14 @@ import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.keycloak.search.dto.UserDto;
 import ru.alamics.sso.keycloak.search.rest.SearchResource;
 import ru.alamics.sso.registration.FoundException;
+import ru.alamics.sso.registration.dto.UserPostRequest;
+import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.registration.tbapi.TbapiService;
 import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.persistence.EntityManager;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,12 +38,20 @@ public class UserService {
     private AdminAuth auth;
     private RealmModel realm;
     private TbapiService tbapiService;
+    private UserPostService userPostService;
 
     public UserService(KeycloakSession session, AdminAuth auth) {
         this.auth = auth;
         this.session = session;
         realm = session.getContext().getRealm();
         tbapiService = new TbapiService(new TbapiServiceRestImpl());
+
+        try {
+            this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
+        } catch (NamingException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Something wrong with context");
+        }
     }
 
     private void commit() {
@@ -86,7 +97,7 @@ public class UserService {
                     parameters.add(userDto.getTomsId());
                     break;
                 case SYSTEM:
-                    parameters.add(userDto.getAccessId());
+                    parameters.add("");
                     break;
             }
         }
@@ -174,32 +185,8 @@ public class UserService {
         UserModel user = session.users().addUser(realm, userRequest.getEmail());
         Set<String> emptySet = Collections.emptySet();
         updateUserFromRequest(user, userRequest, emptySet, realm, session, false);
-        new AdminEventBuilder(realm, auth, session, session.getContext().getConnection())
-                .resource(ResourceType.USER)
-                .operation(OperationType.CREATE)
-                .resourcePath(session.getContext().getUri(), user.getId())
-                .representation(userRequest)
-                .success();
         return user;
     }
-
-    public String getFileExtension(MultivaluedMap<String, String> header) {
-
-        String[] contentDisposition = header.getFirst("Content-Disposition").split(";");
-
-        for (String filename : contentDisposition) {
-            if ((filename.trim().startsWith("filename"))) {
-
-                String[] name = filename.split("=");
-
-                String finalFileName = name[1].trim().replaceAll("\"", "");
-
-                return finalFileName.substring(finalFileName.lastIndexOf('.') + 1);
-            }
-        }
-        return "unknown";
-    }
-
 
     private static void updateUserFromRequest(UserModel user, UserRequest request, Set<String> attrsToRemove, RealmModel realm, KeycloakSession session, boolean removeMissingRequiredActions) {
         if (request.getEmail() != null && realm.isEditUsernameAllowed()) {
@@ -237,10 +224,11 @@ public class UserService {
     public Response getUserResponse(UserRequest request) {
         try {
             UserModel user = createUser(request);
+            addUserPost(user, request);
 
-            if (session.getTransactionManager().isActive()) {
-                session.getTransactionManager().commit();
-            }
+            createAdminEvent(OperationType.CREATE, user);
+            commit();
+
             return JsonResponse.success()
                     .httpStatus(Response.Status.CREATED)
                     .addResult("user_id", user.getId())
@@ -303,5 +291,21 @@ public class UserService {
 
     private EntityManager getEM() {
         return session.getProvider(JpaConnectionProvider.class).getEntityManager();
+    }
+
+    private void createAdminEvent(OperationType operationType, UserModel user) {
+        new AdminEventBuilder(realm, auth, session, session.getContext().getConnection())
+                .realm(realm)
+                .resource(ResourceType.REALM)
+                .resource(ResourceType.USER)
+                .operation(operationType)
+                .resourcePath(session.getContext().getUri(), user.getId())
+                .success();
+    }
+
+    private void addUserPost(UserModel userModel, UserRequest request) throws FoundException {
+        UserPostRequest userPostRequest = DataMapper.toUserPostRequest(userModel, request);
+        userPostRequest.setRoleId(1L);
+        userPostService.save(userPostRequest);
     }
 }
