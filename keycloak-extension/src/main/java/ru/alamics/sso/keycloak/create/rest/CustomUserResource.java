@@ -2,9 +2,13 @@ package ru.alamics.sso.keycloak.create.rest;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.poi.util.IOUtils;
+import org.bouncycastle.asn1.ocsp.ResponseBytes;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
+import org.jboss.resteasy.specimpl.BuiltResponse;
+import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.events.admin.OperationType;
@@ -24,26 +28,23 @@ import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.permissions.AdminPermissions;
 import ru.alamics.sso.keycloak.create.FileServiceException;
-import ru.alamics.sso.keycloak.create.model.FileFactory;
-import ru.alamics.sso.keycloak.create.model.FileModel;
-import ru.alamics.sso.keycloak.create.model.UserRequest;
-import ru.alamics.sso.keycloak.create.model.XlsxImpl;
+import ru.alamics.sso.keycloak.create.model.*;
 import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.keycloak.response.ResponseBuilder;
 import ru.alamics.sso.keycloak.search.dto.UserDto;
 import ru.alamics.sso.keycloak.search.rest.SearchResource;
 import ru.alamics.sso.registration.FoundException;
 
 import javax.persistence.EntityManager;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.*;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
@@ -79,6 +80,16 @@ public class CustomUserResource {
         return getUserResponse(request);
     }
 
+    @GET
+    @Path("/user-parameters")
+    @NoCache
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUserParameters() {
+        return JsonResponse.success()
+                .addResult("user-parameters", UserParameter.values())
+                .build();
+    }
+
     @POST
     @Path("/uploadUsers")
     @Consumes("multipart/form-data")
@@ -93,12 +104,12 @@ public class CustomUserResource {
 
     @GET
     @Path("/downloadUsers")
-    @Consumes("multipart/form-data")
-    //@Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @Produces(MediaType.MULTIPART_FORM_DATA)
     @NoCache
-    public Response downloadUsers(@FormParam("file") File file) throws IOException, FileServiceException {
-        Response.ResponseBuilder response = Response.ok(exportUsers());
-        response.header("Content-Disposition", "attachment; filename=test.xlsx");
+    public Response downloadUsers(DownloadUserRequest downloadUserRequest) throws IOException {
+        byte[] bytes = ((ByteArrayOutputStream) exportUsers(downloadUserRequest)).toByteArray();
+        Response.ResponseBuilder response = Response.ok((Object) bytes);
+        response.header("Content-Disposition", "attachment; filename=\"users_info.xlsx\"");
         return response.build();
     }
 
@@ -232,7 +243,7 @@ public class CustomUserResource {
         }
         if (request.getEmail() != null) {
             user.setEmail(request.getEmail());
-            if ("".equals(request.getEmail())) {
+            if ("" .equals(request.getEmail())) {
                 user.setEmail(null);
             }
         }
@@ -259,20 +270,53 @@ public class CustomUserResource {
         user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(request.getPhone()));
     }
 
-    private OutputStream exportUsers() throws IOException {
-        XlsxImpl xlsx = new XlsxImpl();
-        xlsx.addRow(List.of(EMAIL, PHONE, CUSTOMER, ROLE, SYSTEM));
+    private OutputStream exportUsers(DownloadUserRequest userRequest) throws IOException {
+        FileModel file = FileFactory.createFileModel(userRequest.getType());
+
         List<UserDto> userDto = new SearchResource(session).getUsers("", "", "");
         if (userDto == null || userDto.isEmpty()) {
             return null;
         }
-        userDto.stream().forEach(o -> xlsx.addRow(List.of(o.getEmail(), o.getPhone(), o.getTomsId(), o.getRoleId(), o.getAccessId())));
-        return xlsx.save();
+        file.addRow(getUserParameterNames(userRequest.getUserParameters()));
+        userDto.stream().forEach(o -> file.addRow(getUserParameters(o, userRequest.getUserParameters())));
+        return file.save();
+    }
+
+    private List<String> getUserParameterNames(UserParameter[] userParameters) {
+        List<String> names = new LinkedList<>();
+        for (UserParameter userParameter : userParameters) {
+            names.add(userParameter.getName());
+        }
+        return names;
+    }
+
+    private List<String> getUserParameters(UserDto userDto, UserParameter[] userParameters) {
+        List<String> parameters = new LinkedList<>();
+        for (UserParameter userParameter : userParameters) {
+            switch (userParameter) {
+                case EMAIL:
+                    parameters.add(userDto.getEmail());
+                    break;
+                case PHONE:
+                    parameters.add(userDto.getPhone());
+                    break;
+                case ROLE:
+                    parameters.add(userDto.getRoleId());
+                    break;
+                case CUSTOMER:
+                    parameters.add(userDto.getTomsId());
+                    break;
+                case SYSTEM:
+                    parameters.add(userDto.getAccessId());
+                    break;
+            }
+        }
+        return parameters;
     }
 
     private Response importUsers(InputStream inputStream, String type) throws IOException {
         FileModel file = FileFactory.createFileModel(inputStream, type);
-        if (file == null){
+        if (file == null) {
             return JsonResponse.fail().message("Unsupported file format!").build();
         }
 

@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import javax.ws.rs.FormParam;
 import java.io.*;
 import java.util.*;
 
@@ -34,6 +35,7 @@ public class XlsxImpl implements FileModel {
         return result.toArray(new String[result.size()]);
     }
 
+    @Override
     public void addRow(List<String> cells) {
         Sheet sheet = workbook.getSheetAt(0);
         int rowNum = sheet.getLastRowNum();
@@ -85,8 +87,9 @@ public class XlsxImpl implements FileModel {
         return rows;
     }
 
+    @Override
     public OutputStream save() throws IOException {
-        OutputStream outputStream = new FileOutputStream("test.xlsx");
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         workbook.write(outputStream);
         return outputStream;
     }

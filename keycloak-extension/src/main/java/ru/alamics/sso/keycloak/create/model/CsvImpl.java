@@ -8,6 +8,7 @@ import com.opencsv.CSVReaderBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.List;
 
 public class CsvImpl implements FileModel{
@@ -33,7 +34,17 @@ public class CsvImpl implements FileModel{
     }
 
     @Override
-    public List<String[]> getRows() throws IOException {
+    public List<String[]> getRows() {
         return rows;
+    }
+
+    @Override
+    public void addRow(List<String> cells) {
+
+    }
+
+    @Override
+    public OutputStream save() throws IOException {
+        return null;
     }
 }
