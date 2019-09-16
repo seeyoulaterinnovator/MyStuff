@@ -3,7 +3,7 @@ package ru.alamics.sso.keycloak.create.model;
 public enum UserParameter {
     EMAIL("E-mail"),
     PHONE("Телефон"),
-    CUSTOMER("ID customer"),
+    ORGANIZATION("Организация"),
     ROLE("Роли пользователя"),
     SYSTEM("Целевая система");
 

@@ -93,4 +93,9 @@ public class XlsxImpl implements FileModel {
         workbook.write(outputStream);
         return outputStream.toByteArray();
     }
+
+    @Override
+    public int getCountRows() {
+        return workbook.getSheetAt(0).getLastRowNum();
+    }
 }

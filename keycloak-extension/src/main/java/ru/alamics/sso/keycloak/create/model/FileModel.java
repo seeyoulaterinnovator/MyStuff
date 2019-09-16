@@ -13,4 +13,6 @@ public interface FileModel {
     void addRow(List<String> cells);
 
     byte[] save() throws IOException;
+
+    int getCountRows();
 }

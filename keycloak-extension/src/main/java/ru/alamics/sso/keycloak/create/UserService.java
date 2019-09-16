@@ -26,10 +26,10 @@ import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
+import javax.activation.UnsupportedDataTypeException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -101,7 +101,7 @@ public class UserService {
                 case ROLE:
                     parameters.add(userDto.getRoleId());
                     break;
-                case CUSTOMER:
+                case ORGANIZATION:
                     parameters.add(userDto.getTomsId());
                     break;
                 case SYSTEM:
@@ -112,55 +112,43 @@ public class UserService {
         return parameters;
     }
 
-    public Response importUsers(InputStream inputStream, String type) throws IOException {
+    public ImportResponse importUsers(InputStream inputStream, String type) throws IOException, FileServiceException {
         FileModel file = FileFactory.createFileModel(inputStream, type);
         if (file == null) {
-            return JsonResponse.fail().message("Unsupported file format!").build();
+            throw new UnsupportedDataTypeException("Unsupported file format!");
         }
+        checkStructure(file);
 
-        String[] headers = file.getHeaders();
-        try {
-            checkStructure(headers);
-        } catch (FileServiceException e) {
-            return JsonResponse.fail()
-                    .message(e.getMessage())
-                    .build();
-        }
         List<String[]> rows = file.getRows();
         rows.remove(0);
-        List<UserRequest> userRequests = DataMapper.toUserRequestList(rows);
-        if (userRequests == null || userRequests.isEmpty()) {
-            JsonResponse.fail()
-                    .message("File Structure is empty!")
-                    .build();
-        }
-        int countClones = getCountClones(userRequests);
-        return JsonResponse.success()
-                .addResult("count clones", countClones)
-                .addResult("create users", createUsers(userRequests))
-                .build();
+        List<UserImport> userImports = DataMapper.toUserRequestList(rows);
+
+        ImportResponse importResponse = new ImportResponse();
+        importResponse.setCountClones(getCountAndRemoveClones(userImports));
+        createImportUsers(importResponse, userImports);
+        return importResponse;
     }
 
-    private void checkStructure(String[] headers) throws FileServiceException {
-
+    private void checkStructure(FileModel file) throws FileServiceException {
+        String[] headers = file.getHeaders();
         for (String head : Arrays.asList(headers)) {
             if (!head.equalsIgnoreCase(UserParameter.EMAIL.getName()) && !head.equalsIgnoreCase(UserParameter.PHONE.getName()) &&
-                    !head.equalsIgnoreCase(UserParameter.CUSTOMER.getName()) && !head.equalsIgnoreCase(UserParameter.ROLE.getName()) &&
-                    !head.equalsIgnoreCase(UserParameter.SYSTEM.getName()) || headers.length != 5) {
+                    !head.equalsIgnoreCase(UserParameter.ORGANIZATION.getName()) && !head.equalsIgnoreCase(UserParameter.ROLE.getName()) &&
+                    !head.equalsIgnoreCase(UserParameter.SYSTEM.getName()) || headers.length != 5 || file.getCountRows() < 2) {
                 throw new FileServiceException("File Structure is not valid!");
             }
         }
     }
 
-    private int getCountClones(List<UserRequest> userRequests) {
+    private int getCountAndRemoveClones(List<UserImport> userImports) {
         int countClones = 0;
-        List<UserRequest> userRequestMain = new LinkedList<>();
-        userRequests.stream().forEach(o -> userRequestMain.add(o));
-        for (int i = 0; i < userRequests.size(); i++) {
-            for (int j = i + 1; j < userRequests.size(); j++) {
-                if (userRequests.get(i).getEmail().equals(userRequests.get(j).getEmail()) ||
-                        userRequests.get(i).getPhone().equals(userRequests.get(j).getPhone())) {
-                    userRequests.remove(j);
+        List<UserImport> userRequestMain = new LinkedList<>();
+        userImports.stream().forEach(o -> userRequestMain.add(o));
+        for (int i = 0; i < userImports.size(); i++) {
+            for (int j = i + 1; j < userImports.size(); j++) {
+                if (userImports.get(i).getUserRequest().getEmail().equals(userImports.get(j).getUserRequest().getEmail()) ||
+                        userImports.get(i).getUserRequest().getPhone().equals(userImports.get(j).getUserRequest().getPhone())) {
+                    userImports.remove(j);
                     j--;
                     countClones++;
                 }
@@ -169,43 +157,35 @@ public class UserService {
         return countClones;
     }
 
-    private JsonResponse createUsers(List<UserRequest> userRequests) {
-        List<String> successResponse = new LinkedList<>();
-        List<String> errorResponse = new LinkedList<>();
+    private void createImportUsers(ImportResponse importResponse, List<UserImport> userImports) {
         AtomicInteger tbapiErrors = new AtomicInteger();
         AtomicInteger tbapiSuccess = new AtomicInteger();
-        userRequests.stream().forEach(o -> {
+        userImports.stream().forEach(o -> {
             try {
-                UserModel user = createUser(o);
+                UserModel user = createUser(o.getUserRequest());
                 createAdminEvent(OperationType.CREATE, user);
-                successResponse.add("userId : " + user.getId());
+                importResponse.addCreatedUserIds("userId", user.getId());
 
                 Map<String, Object> tbapiResponse = tbapiService.registerUser(DataMapper.toUser(o), tbapiConnectConfig);
                 if (tbapiResponse.get(UserConstants.ATTR_TOMS_NAME) == null){
                    throw new TbapiRegisterException();
                 }
                 if (tbapiResponse.get(UserConstants.ATTR_DMP_NAME) != null){
-                    o.setTomsId(tbapiResponse.get(UserConstants.ATTR_DMP_NAME).toString());
+                    o.getUserRequest().setTomsId(tbapiResponse.get(UserConstants.ATTR_DMP_NAME).toString());
                 }
-                o.setTomsId(tbapiResponse.get(UserConstants.ATTR_TOMS_NAME).toString());
-                addUserPost(user, o);
+                o.getUserRequest().setTomsId(tbapiResponse.get(UserConstants.ATTR_TOMS_NAME).toString());
+                addUserPost(user, o.getUserRequest());
 
                 tbapiSuccess.getAndIncrement();
             } catch (FoundException e) {
-                errorResponse.add("userName : " + o.getName());
+                importResponse.addNotCreatedUsers("userName", o.getUserRequest().getName());
             } catch (TbapiRegisterException e) {
                 tbapiErrors.getAndIncrement();
             }
         });
-        if (session.getTransactionManager().isActive()) {
-            session.getTransactionManager().commit();
-        }
-        JsonResponse jsonResponse = new JsonResponse();
-        jsonResponse.addResult("success", successResponse);
-        jsonResponse.addResult("error", errorResponse);
-        jsonResponse.addResult("tbapiSuccess", tbapiSuccess);
-        jsonResponse.addResult("tbapiErrors", tbapiErrors);
-        return jsonResponse;
+        importResponse.setTbapiSuccess(tbapiSuccess);
+        importResponse.setTbapiErrors(tbapiErrors);
+        commit();
     }
 
     private UserModel createUser(UserRequest userRequest) throws FoundException {

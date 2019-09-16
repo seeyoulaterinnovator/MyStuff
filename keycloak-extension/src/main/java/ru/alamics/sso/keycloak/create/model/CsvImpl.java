@@ -46,4 +46,9 @@ public class CsvImpl implements FileModel {
         csvWriter.flush();
         return byteArrayOutputStream.toByteArray();
     }
+
+    @Override
+    public int getCountRows() {
+        return rows.size();
+    }
 }

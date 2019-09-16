@@ -15,6 +15,7 @@ import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.managers.RealmManager;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.permissions.AdminPermissions;
+import ru.alamics.sso.keycloak.create.FileServiceException;
 import ru.alamics.sso.keycloak.create.UserService;
 import ru.alamics.sso.keycloak.create.model.DownloadUserRequest;
 import ru.alamics.sso.keycloak.create.model.UserParameter;
@@ -22,6 +23,7 @@ import ru.alamics.sso.keycloak.create.model.UserRequest;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundException;
 
+import javax.activation.UnsupportedDataTypeException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -100,8 +102,17 @@ public class CustomUserResource {
         if (inputParts == null || inputParts.isEmpty()) {
             return JsonResponse.error(Response.Status.BAD_REQUEST).build();
         }
-        return userService.importUsers(inputParts.get(0).getBody(InputStream.class, null),
-                getFileExtension(inputParts.get(0).getHeaders()));
+        try {
+            return JsonResponse.success()
+                    .addResult("import-report",
+                            userService.importUsers(inputParts.get(0).getBody(InputStream.class, null),
+                            getFileExtension(inputParts.get(0).getHeaders())))
+                    .build();
+        } catch (UnsupportedDataTypeException | FileServiceException e) {
+            return JsonResponse.fail()
+                    .message(e.getMessage())
+                    .build();
+        }
     }
 
     @GET

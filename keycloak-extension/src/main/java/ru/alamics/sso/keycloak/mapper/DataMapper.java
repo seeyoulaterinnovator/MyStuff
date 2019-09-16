@@ -1,26 +1,24 @@
 package ru.alamics.sso.keycloak.mapper;
 
 import org.keycloak.models.UserModel;
-import ru.alamics.sso.keycloak.create.model.UserRequest;
+import ru.alamics.sso.keycloak.create.model.UserImport;
 import ru.alamics.sso.keycloak.create.model.UserRequest;
 import ru.alamics.sso.keycloak.search.dto.UserDto;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.model.User;
 
-import javax.ejb.Singleton;
 import javax.persistence.Tuple;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static ru.alamics.sso.registration.model.FormConstants.*;
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_ORG_NAME;
 
 public abstract class DataMapper {
 
-    public static UserDto toUserDto(Tuple tuple){
-        if (tuple == null){
+    public static UserDto toUserDto(Tuple tuple) {
+        if (tuple == null) {
             return null;
         }
 
@@ -41,8 +39,8 @@ public abstract class DataMapper {
                 .build();
     }
 
-    public static List<UserDto> toUserDtoList(List<Tuple> tuples){
-        if (tuples.isEmpty()){
+    public static List<UserDto> toUserDtoList(List<Tuple> tuples) {
+        if (tuples.isEmpty()) {
             return null;
         }
 
@@ -52,7 +50,7 @@ public abstract class DataMapper {
     }
 
     public static UserPostRequest toUserPostRequest(UserModel userModel, UserRequest request) {
-        if (userModel == null || request == null){
+        if (userModel == null || request == null) {
             return null;
         }
         UserPostRequest userPostDto = new UserPostRequest();
@@ -63,38 +61,53 @@ public abstract class DataMapper {
     }
 
 
-    private static String toString(Object object){
-        if (object == null){
+    private static String toString(Object object) {
+        if (object == null) {
             return null;
         }
         return object.toString();
     }
 
-    public static UserRequest toUserRequest(String[] row){
+    public static UserImport toUserImport(String[] row) {
         UserRequest userRequest = new UserRequest();
-        userRequest.setEmail(row[0]);
-        userRequest.setName(row[0]);
-        userRequest.setPhone(row[1]);
-        userRequest.setRealmName("user");
-        return userRequest;
+        UserImport userImport = new UserImport();
+        for (int i = 0; i < row.length; i++) {
+            switch (i) {
+                case 0:
+                    userRequest.setEmail(row[0]);
+                    userRequest.setName(row[0]);
+                    break;
+                case 1:
+                    userRequest.setPhone(row[1]);
+                    break;
+                case 2:
+                    userImport.setOrg(row[2]);
+                    break;
+                case 3:
+                    userImport.setOrg(row[3]);
+                    break;
+            }
+        }
+        userImport.setUserRequest(userRequest);
+        return userImport;
     }
 
-    public static List<UserRequest> toUserRequestList(List<String[]> rows){
-        if (rows == null || rows.isEmpty()){
+    public static List<UserImport> toUserRequestList(List<String[]> rows) {
+        if (rows == null || rows.isEmpty()) {
             return null;
         }
-        List<UserRequest> userRequests = new LinkedList<>();
-        rows.stream().forEach(o -> userRequests.add(toUserRequest(o)));
-        return userRequests;
+        List<UserImport> userImports = new LinkedList<>();
+        rows.stream().forEach(o -> userImports.add(toUserImport(o)));
+        return userImports;
     }
 
-    public static User toUser(UserRequest userRequest){
+    public static User toUser(UserImport userImport) {
         Map<String, List<String>> attr = new HashMap<String, List<String>>();
-        attr.put(ATTR_ORG_NAME, List.of("TEST_LEGAL"));
+        attr.put(ATTR_ORG_NAME, List.of(userImport.getOrg()));
         return User.builder()
-                .name(userRequest.getName())
-                .email(userRequest.getEmail())
-                .phone(userRequest.getPhone())
+                .name(userImport.getUserRequest().getName())
+                .email(userImport.getUserRequest().getEmail())
+                .phone(userImport.getUserRequest().getPhone())
                 .attributes(attr)
                 .build();
     }

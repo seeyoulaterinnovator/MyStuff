@@ -8,8 +8,6 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 public class UserRequest implements Serializable {
-
-    private String realmName;
     private String email;
     private String phone;
     private String name;
