@@ -1,6 +1,9 @@
 package ru.alamics.sso.keycloak.mapper;
 
+import org.keycloak.models.UserModel;
+import ru.alamics.sso.keycloak.create.model.UserRequest;
 import ru.alamics.sso.keycloak.search.dto.UserDto;
+import ru.alamics.sso.registration.dto.UserPostRequest;
 
 import javax.persistence.Tuple;
 import java.util.LinkedList;
@@ -40,11 +43,22 @@ public abstract class DataMapper {
         return userDtos;
     }
 
+    public static UserPostRequest toUserPostRequest(UserModel userModel, UserRequest request) {
+        if (userModel == null || request == null){
+            return null;
+        }
+        UserPostRequest userPostDto = new UserPostRequest();
+        userPostDto.setUserId(userModel.getId());
+        userPostDto.setTomsId(request.getTomsId());
+        userPostDto.setDmpId(request.getDmpId());
+        return userPostDto;
+    }
+
+
     private static String toString(Object object){
         if (object == null){
             return null;
         }
         return object.toString();
     }
-
 }

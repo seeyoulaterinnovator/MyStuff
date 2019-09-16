@@ -17,12 +17,18 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class TbapiServiceRestImpl implements TbapiRemoteService {
 
     private static final Map<String, Object> mapExample = Collections.unmodifiableMap(new HashMap<>());
-    private final ResteasyClient client = new ResteasyClientBuilder().build();
+
+    private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
+            .connectTimeout(3, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS);
+
+    private static final ResteasyClient client = clientBuilder.build();
 
     @Override
     public Map<String, Object> createCustomer(TbapiRequest request, TbapiConnectConfig connectConfig) throws TbapiRegisterException
