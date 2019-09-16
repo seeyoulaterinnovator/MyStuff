@@ -31,10 +31,7 @@ import ru.alamics.sso.registration.service.UserPostService;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.util.Collections;
@@ -64,12 +61,14 @@ public class CustomUserResource {
     @Path("")
     @NoCache
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createUser(final UserRequest request, final HttpHeaders headers) {
+    public Response createUser(@QueryParam("bss") boolean bss, final UserRequest request, final HttpHeaders headers) {
         if (request.getPhone() == null || request.getPhone().isBlank()) {
             return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
-        } else if (request.getTomsId() == null || request.getTomsId().isBlank()) {
+        }
+        if (!bss && request.getTomsId() == null || request.getTomsId().isBlank()) {
             return ErrorResponse.error("TomsId is required attribute", Response.Status.BAD_REQUEST);
         }
+
         RealmModel realm = session.getContext().getRealm();
         AdminAuth auth = authenticateRealmAdminRequest(realm);
 
@@ -78,7 +77,7 @@ public class CustomUserResource {
             return response;
         }
 
-        return getUserResponse(request, realm, auth);
+        return getUserResponse(request, realm, auth, bss);
     }
 
     private Response checkOnExistUser(UserRequest request, RealmModel realm) {
@@ -122,13 +121,15 @@ public class CustomUserResource {
         return null;
     }
 
-    private Response getUserResponse(UserRequest request, RealmModel realm, AdminAuth auth) {
+    private Response getUserResponse(UserRequest request, RealmModel realm, AdminAuth auth, boolean bss) {
         try {
             UserModel user = session.users().addUser(realm, request.getEmail());
             Set<String> emptySet = Collections.emptySet();
 
             updateUserFromRequest(user, request, emptySet, realm, session, false);
-            addUserPost(user, request);
+            if (!bss) {
+                addUserPost(user, request);
+            }
 
             new AdminEventBuilder(realm, auth, session, session.getContext().getConnection())
                     .realm(realm)
