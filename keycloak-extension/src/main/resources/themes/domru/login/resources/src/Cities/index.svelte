@@ -103,7 +103,7 @@
       </div>
     </header>
 
-    <div class="flex flex-1 items-center justify-center content-box h-full">
+    <div class="flex flex-1 {$status === STATUS.INITIAL ? 'items-center' : ''} justify-center content-box h-full">
       {#if $status === STATUS.INITIAL}
         <Confirmation />
       {:else if $status === STATUS.SELECTING}
