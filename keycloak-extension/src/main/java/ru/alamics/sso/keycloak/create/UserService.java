@@ -5,7 +5,9 @@ import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
-import org.keycloak.models.*;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.provider.ProviderFactory;
 import org.keycloak.services.resources.admin.AdminAuth;
@@ -17,8 +19,11 @@ import ru.alamics.sso.keycloak.search.dto.UserDto;
 import ru.alamics.sso.keycloak.search.rest.SearchResource;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
+import ru.alamics.sso.registration.model.UserConstants;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.registration.tbapi.TbapiService;
+import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
+import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
 import javax.naming.InitialContext;
@@ -28,6 +33,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
@@ -39,12 +45,14 @@ public class UserService {
     private RealmModel realm;
     private TbapiService tbapiService;
     private UserPostService userPostService;
+    private TbapiConnectConfig tbapiConnectConfig;
 
     public UserService(KeycloakSession session, AdminAuth auth) {
         this.auth = auth;
         this.session = session;
         realm = session.getContext().getRealm();
         tbapiService = new TbapiService(new TbapiServiceRestImpl());
+        createTbapiConnectConfig();
 
         try {
             this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
@@ -164,11 +172,29 @@ public class UserService {
     private JsonResponse createUsers(List<UserRequest> userRequests) {
         List<String> successResponse = new LinkedList<>();
         List<String> errorResponse = new LinkedList<>();
+        AtomicInteger tbapiErrors = new AtomicInteger();
+        AtomicInteger tbapiSuccess = new AtomicInteger();
         userRequests.stream().forEach(o -> {
             try {
-                successResponse.add("userId : " + createUser(o).getId());
+                UserModel user = createUser(o);
+                createAdminEvent(OperationType.CREATE, user);
+                successResponse.add("userId : " + user.getId());
+
+                Map<String, Object> tbapiResponse = tbapiService.registerUser(DataMapper.toUser(o), tbapiConnectConfig);
+                if (tbapiResponse.get(UserConstants.ATTR_TOMS_NAME) == null){
+                   throw new TbapiRegisterException();
+                }
+                if (tbapiResponse.get(UserConstants.ATTR_DMP_NAME) != null){
+                    o.setTomsId(tbapiResponse.get(UserConstants.ATTR_DMP_NAME).toString());
+                }
+                o.setTomsId(tbapiResponse.get(UserConstants.ATTR_TOMS_NAME).toString());
+                addUserPost(user, o);
+
+                tbapiSuccess.getAndIncrement();
             } catch (FoundException e) {
                 errorResponse.add("userName : " + o.getName());
+            } catch (TbapiRegisterException e) {
+                tbapiErrors.getAndIncrement();
             }
         });
         if (session.getTransactionManager().isActive()) {
@@ -177,6 +203,8 @@ public class UserService {
         JsonResponse jsonResponse = new JsonResponse();
         jsonResponse.addResult("success", successResponse);
         jsonResponse.addResult("error", errorResponse);
+        jsonResponse.addResult("tbapiSuccess", tbapiSuccess);
+        jsonResponse.addResult("tbapiErrors", tbapiErrors);
         return jsonResponse;
     }
 
@@ -221,41 +249,14 @@ public class UserService {
         user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(request.getPhone()));
     }
 
-    public Response getUserResponse(UserRequest request) {
-        try {
-            UserModel user = createUser(request);
+    public UserModel createUser(UserRequest request, boolean bss) throws FoundException {
+        UserModel user = createUser(request);
+        if (!bss) {
             addUserPost(user, request);
-
-            createAdminEvent(OperationType.CREATE, user);
-            commit();
-
-            return JsonResponse.success()
-                    .httpStatus(Response.Status.CREATED)
-                    .addResult("user_id", user.getId())
-                    .build();
-
-        } catch (ModelDuplicateException e) {
-            if (session.getTransactionManager().isActive()) {
-                session.getTransactionManager().setRollbackOnly();
-            }
-            return JsonResponse.error(Response.Status.CONFLICT)
-                    .message("User exists with same username or email or phone")
-                    .build();
-
-        } catch (ModelException me) {
-            if (session.getTransactionManager().isActive()) {
-                session.getTransactionManager().setRollbackOnly();
-            }
-            log.warn("Could not create user", me);
-            return JsonResponse.error(Response.Status.INTERNAL_SERVER_ERROR)
-                    .message("Could not create user")
-                    .build();
-        } catch (FoundException e) {
-            return JsonResponse
-                    .error(Response.Status.CONFLICT)
-                    .message(e.getMessage())
-                    .build();
         }
+        createAdminEvent(OperationType.CREATE, user);
+        commit();
+        return user;
     }
 
     private void checkOnExistUser(UserRequest request, RealmModel realm) throws FoundException {
@@ -307,5 +308,17 @@ public class UserService {
         UserPostRequest userPostRequest = DataMapper.toUserPostRequest(userModel, request);
         userPostRequest.setRoleId(1L);
         userPostService.save(userPostRequest);
+    }
+
+    private void createTbapiConnectConfig() {
+        TbapiConnectConfig connectConfig = new TbapiConnectConfig();
+
+        connectConfig.setHost("tb-app01.int.bss.loc");
+        connectConfig.setPort(26300);
+        connectConfig.setAppname("SSP");
+        connectConfig.setUsername("anonymous");
+        connectConfig.setPath("/api/v1/customerManagement/customerAccount");
+        connectConfig.setSecure(false);
+        this.tbapiConnectConfig = connectConfig;
     }
 }

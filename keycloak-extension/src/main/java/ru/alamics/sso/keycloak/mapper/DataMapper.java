@@ -5,10 +5,17 @@ import ru.alamics.sso.keycloak.create.model.UserRequest;
 import ru.alamics.sso.keycloak.create.model.UserRequest;
 import ru.alamics.sso.keycloak.search.dto.UserDto;
 import ru.alamics.sso.registration.dto.UserPostRequest;
+import ru.alamics.sso.registration.model.User;
 
+import javax.ejb.Singleton;
 import javax.persistence.Tuple;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
+import static ru.alamics.sso.registration.model.FormConstants.*;
+import static ru.alamics.sso.registration.model.UserConstants.ATTR_ORG_NAME;
 
 public abstract class DataMapper {
 
@@ -79,5 +86,16 @@ public abstract class DataMapper {
         List<UserRequest> userRequests = new LinkedList<>();
         rows.stream().forEach(o -> userRequests.add(toUserRequest(o)));
         return userRequests;
+    }
+
+    public static User toUser(UserRequest userRequest){
+        Map<String, List<String>> attr = new HashMap<String, List<String>>();
+        attr.put(ATTR_ORG_NAME, List.of("TEST_LEGAL"));
+        return User.builder()
+                .name(userRequest.getName())
+                .email(userRequest.getEmail())
+                .phone(userRequest.getPhone())
+                .attributes(attr)
+                .build();
     }
 }

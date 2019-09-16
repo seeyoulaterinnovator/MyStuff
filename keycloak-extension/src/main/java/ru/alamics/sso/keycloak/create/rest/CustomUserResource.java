@@ -6,9 +6,7 @@ import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.keycloak.jose.jws.JWSInput;
 import org.keycloak.jose.jws.JWSInputException;
-import org.keycloak.models.ClientModel;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
+import org.keycloak.models.*;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.ForbiddenException;
@@ -22,7 +20,7 @@ import ru.alamics.sso.keycloak.create.model.DownloadUserRequest;
 import ru.alamics.sso.keycloak.create.model.UserParameter;
 import ru.alamics.sso.keycloak.create.model.UserRequest;
 import ru.alamics.sso.keycloak.response.JsonResponse;
-import ru.alamics.sso.registration.service.UserPostService;
+import ru.alamics.sso.registration.FoundException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
@@ -55,8 +53,32 @@ public class CustomUserResource {
         if (request.getTomsId() == null || request.getTomsId().isBlank()) {
             return ErrorResponse.error("TomsId is required attribute", Response.Status.BAD_REQUEST);
         }
+        try {
+            return JsonResponse.success()
+                    .addResult("userId", userService.createUser(request, false))
+                    .build();
+        } catch (ModelDuplicateException e) {
+            if (session.getTransactionManager().isActive()) {
+                session.getTransactionManager().setRollbackOnly();
+            }
+            return JsonResponse.error(Response.Status.CONFLICT)
+                    .message("User exists with same username or email or phone")
+                    .build();
 
-        return userService.getUserResponse(request);
+        } catch (ModelException me) {
+            if (session.getTransactionManager().isActive()) {
+                session.getTransactionManager().setRollbackOnly();
+            }
+            log.warn("Could not create user", me);
+            return JsonResponse.error(Response.Status.INTERNAL_SERVER_ERROR)
+                    .message("Could not create user")
+                    .build();
+        } catch (FoundException e) {
+            return JsonResponse
+                    .error(Response.Status.CONFLICT)
+                    .message(e.getMessage())
+                    .build();
+        }
     }
 
     @GET
