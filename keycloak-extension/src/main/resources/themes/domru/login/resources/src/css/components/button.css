@@ -42,6 +42,7 @@
 .btn__choose {
   width: 203px;
   box-sizing: border-box;
+  height: 48px;
 
   @media screen and (max-width: 959px) {
     width: 96px;

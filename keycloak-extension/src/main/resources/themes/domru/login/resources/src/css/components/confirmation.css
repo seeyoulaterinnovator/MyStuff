@@ -5,6 +5,10 @@
   font-weight: bold;
 }
 
+.confirm__btns {
+  margin-top: 43px;
+}
+
 .confirm__btn {
   width: 203px;
   box-sizing: border-box;
@@ -14,10 +18,17 @@
   margin-right: 46px;
 }
 
+@media screen and (max-width: 1199px){
+  .confirm__btns {
+    margin-top: 32px;
+  }
+}
+
 @media screen and (max-width: 959px){
   .confirm__btns {
     flex-direction: column;
     align-items: center;
+    margin-top: 44px;
   }
 
   .confirm__btn:first-child {
@@ -34,6 +45,7 @@
 @media screen and (max-width: 639px){
   .confirm__btns {
     flex-direction: row;
+    margin-top: 28px;
   }
 
   .confirm__btn:first-child {
