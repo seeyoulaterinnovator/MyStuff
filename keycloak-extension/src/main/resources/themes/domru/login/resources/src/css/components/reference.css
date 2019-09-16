@@ -8,9 +8,17 @@
   padding-top: 30px;
 }
 
+.generated-password {
+  margin-left: 44px;
+}
+
 @media screen and (max-width: 1199px){
   .generate-btn {
     margin-left: 74px;
+  }
+
+  .generated-password {
+    margin-left: 24px;
   }
 }
 
