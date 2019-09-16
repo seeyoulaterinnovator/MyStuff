@@ -1,14 +1,9 @@
 package ru.alamics.sso.keycloak.create.rest;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.poi.util.IOUtils;
-import org.bouncycastle.asn1.ocsp.ResponseBytes;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
-import org.jboss.resteasy.specimpl.BuiltResponse;
-import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.events.admin.OperationType;
@@ -31,33 +26,24 @@ import ru.alamics.sso.keycloak.create.FileServiceException;
 import ru.alamics.sso.keycloak.create.model.*;
 import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
-import ru.alamics.sso.keycloak.response.ResponseBuilder;
 import ru.alamics.sso.keycloak.search.dto.UserDto;
 import ru.alamics.sso.keycloak.search.rest.SearchResource;
 import ru.alamics.sso.registration.FoundException;
 
 import javax.persistence.EntityManager;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
 @Slf4j
 public class CustomUserResource {
-
-    private final static String EMAIL = "E-mail";
-    private final static String PHONE = "Телефон";
-    private final static String CUSTOMER = "ID customer";
-    private final static String ROLE = "Роли пользователя";
-    private final static String SYSTEM = "Целевая система";
-
     protected KeycloakSession session;
     private AdminAuth auth;
     private RealmModel realm;
@@ -109,10 +95,10 @@ public class CustomUserResource {
     @NoCache
     public Response downloadUsers(DownloadUserRequest downloadUserRequest) throws IOException {
         byte[] bytes = exportUsers(downloadUserRequest);
-        if (bytes == null){
+        if (bytes == null) {
             return JsonResponse
-            .error(Response.Status.NOT_FOUND)
-            .build();
+                    .error(Response.Status.NOT_FOUND)
+                    .build();
         }
 
         Response.ResponseBuilder response = Response.ok((Object) bytes);
@@ -353,8 +339,9 @@ public class CustomUserResource {
     private void checkStructure(String[] headers) throws FileServiceException {
 
         for (String head : Arrays.asList(headers)) {
-            if (!head.equalsIgnoreCase(EMAIL) && !head.equalsIgnoreCase(PHONE) && !head.equalsIgnoreCase(CUSTOMER)
-                    && !head.equalsIgnoreCase(ROLE) && !head.equalsIgnoreCase(SYSTEM) || headers.length != 5) {
+            if (!head.equalsIgnoreCase(UserParameter.EMAIL.getName()) && !head.equalsIgnoreCase(UserParameter.PHONE.getName()) &&
+                    !head.equalsIgnoreCase(UserParameter.CUSTOMER.getName()) && !head.equalsIgnoreCase(UserParameter.ROLE.getName()) &&
+                    !head.equalsIgnoreCase(UserParameter.SYSTEM.getName()) || headers.length != 5) {
                 throw new FileServiceException("File Structure is not valid!");
             }
         }
