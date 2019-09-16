@@ -49,17 +49,13 @@ public enum AuthType {
         if(types == null) return null;
         try {
             if(!types.isEmpty()) {
-             if(types.size() == 1) {
-                 return AuthType.valueOf(types.get(0).toUpperCase());
-             } else {
-                 List<AuthType> authTypeList = List.of(EMAIL_AND_PHONE_CODE);
-                 return authTypeList.stream()
-                         .filter(authType -> {
-                             List<String> requiredActionNames1 = Arrays.asList(authType.getRequiredActionNames());
-                             return requiredActionNames1.containsAll(types);
-                         }).findFirst()
-                         .orElse(null);
-             }
+                List<AuthType> authTypeList = List.of(EMAIL, EMAIL_AND_PHONE_CODE, INCOMING_CALL, PHONE_CODE);
+                return authTypeList.stream()
+                        .filter(authType -> {
+                            List<String> requiredActionNames1 = Arrays.asList(authType.getRequiredActionNames());
+                            return types.containsAll(requiredActionNames1) && types.size() == requiredActionNames1.size();
+                        }).findFirst()
+                        .orElse(null);
             } else {
                 return null;
             }

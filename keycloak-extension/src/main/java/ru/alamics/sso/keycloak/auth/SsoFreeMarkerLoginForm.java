@@ -86,16 +86,12 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     @Override
     public Response createRegistration () {
         var realm = this.session.getContext().getRealm();
-        String twoStepAuth = null;
-        for(AuthenticatorConfigModel model : realm.getAuthenticatorConfigs()) {
-            var config = model.getConfig();
-            var tmpType = config.get(TwoStepVerificationFactory.TWO_STEP_VERIFICATION_TYPES);
-            if(tmpType != null) {
-                twoStepAuth = tmpType;
-                break;
-            }
-        }
-        var authType = AuthType.getByString(twoStepAuth);
+        var requiredActionsProvider = realm.getRequiredActionProviders();
+        var twoStepAuth = requiredActionsProvider.stream()
+                .filter(RequiredActionProviderModel::isDefaultAction)
+                .map(RequiredActionProviderModel::getAlias)
+                .collect(Collectors.toList());
+        var authType = AuthType.getByList(twoStepAuth);
         if(authType != null) {
             this.attributes.put("twoStepAuthType", authType.getDescription());
         } else {
