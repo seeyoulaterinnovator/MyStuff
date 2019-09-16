@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.auth;
 
-import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.forms.login.freemarker.FreeMarkerLoginFormsProvider;
