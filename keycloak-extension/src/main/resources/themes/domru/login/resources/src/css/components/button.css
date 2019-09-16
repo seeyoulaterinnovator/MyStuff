@@ -38,3 +38,20 @@
     @apply .bg-accentBlue-700-hover;
   }
 }
+
+.btn__choose {
+  width: 203px;
+  box-sizing: border-box;
+
+  @media screen and (max-width: 959px) {
+    width: 96px;
+  }
+
+  @media screen and (max-width: 639px) {
+    width: 88px;
+  }
+
+  @media screen and (max-width: 479px) {
+    display: none;
+  }
+}

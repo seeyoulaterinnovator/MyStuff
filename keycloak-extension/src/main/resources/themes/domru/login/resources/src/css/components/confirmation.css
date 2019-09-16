@@ -2,6 +2,7 @@
   font-size: 36px;
   line-height: 45px;
   opacity: 0.8;
+  font-weight: bold;
 }
 
 .confirm__btn {
@@ -23,6 +24,11 @@
     margin-right: 0;
     margin-bottom: 24px;
   }
+
+  .confirm__title {
+    max-width: 400px;
+    margin: 0 auto;
+  }
 }
 
 @media screen and (max-width: 639px){
@@ -38,15 +44,12 @@
     font-size: 27px;
     line-height: 32px;
     opacity: 0.8;
+    max-width: 300px;
   }
 
 }
 
 @media screen and (max-width: 479px){
-  .btn__choose {
-    display: none;
-  }
-
   .confirm__btns {
     flex-direction: column;
   }
