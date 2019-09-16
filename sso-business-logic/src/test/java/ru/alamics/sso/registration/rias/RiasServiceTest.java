@@ -3,6 +3,7 @@ package ru.alamics.sso.registration.rias;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.alamics.sso.registration.model.User;
+import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.port.RiasApiService;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,7 +26,8 @@ class RiasServiceTest {
     }
 
     @Test
-    void checkUserEmailExists() {
+    void checkUserEmailExists() throws RiasCheckException
+    {
         when(riasApiService.checkParam(eq(EMAIL))).thenReturn(true);
 
         User user = User.builder()
@@ -39,7 +41,8 @@ class RiasServiceTest {
     }
 
     @Test
-    void checkUserPhoneExists() {
+    void checkUserPhoneExists() throws RiasCheckException
+    {
         when(riasApiService.checkParam(eq(PHONE))).thenReturn(true);
 
         User user = User.builder()
@@ -53,7 +56,8 @@ class RiasServiceTest {
     }
 
     @Test
-    void checkUserNotExists() {
+    void checkUserNotExists() throws RiasCheckException
+    {
         when(riasApiService.checkParam(eq(EMAIL))).thenReturn(false);
         when(riasApiService.checkParam(eq(PHONE))).thenReturn(false);
 

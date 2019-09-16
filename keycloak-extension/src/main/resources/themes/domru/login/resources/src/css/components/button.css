@@ -1,0 +1,40 @@
+.btn {
+  @apply .block .uppercase .tracking-wider .p-4 .rounded-lg .shadow;
+
+  transition: box-shadow 0.1s ease-in;
+
+  &:disabled {
+    @apply .opacity-40 .cursor-not-allowed;
+  }
+
+  &:active {
+    @apply .shadow-inner;
+  }
+
+  &:hover,
+  &:focus {
+    @apply .shadow-md;
+  }
+
+  &:focus {
+    @apply .outline-none;
+  }
+}
+
+.btn-main {
+  @apply .bg-extra .text-black;
+
+  &:hover,
+  &:focus {
+    @apply .bg-extra-700-hover;
+  }
+}
+
+.btn-sell {
+  @apply .bg-accentBlue .text-white;
+
+  &:hover,
+  &:focus {
+    @apply .bg-accentBlue-700-hover;
+  }
+}

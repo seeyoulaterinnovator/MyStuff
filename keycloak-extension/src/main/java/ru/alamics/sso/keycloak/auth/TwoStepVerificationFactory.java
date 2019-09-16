@@ -8,6 +8,7 @@ import org.keycloak.authentication.AuthenticatorFactory;
 import org.keycloak.models.*;
 import org.keycloak.provider.ProviderConfigProperty;
 import ru.alamics.sso.keycloak.auth.model.AuthType;
+import ru.alamics.sso.registration.model.UserConstants;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +18,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class TwoStepVerificationFactory implements Authenticator, AuthenticatorFactory {
     public static final String VERIFY_PHONE_FTL = "verifyPhone.ftl";
+
+    public static final String NOTE_AUTH_TYPE_NAME = "note_auth_type_name";
+    public static final String NOTE_AUTH_TYPE_DESC = "note_auth_type_DESC";
 
     private static final String TWO_STEP_VERIFICATION_TYPES = "two.step.verification.types" ;
     private static final String PROVIDER_ID = "two-step-verification";
@@ -38,11 +42,18 @@ public class TwoStepVerificationFactory implements Authenticator, AuthenticatorF
         Map<String, String> config = context.getAuthenticatorConfig().getConfig();
         String type = config.get(TWO_STEP_VERIFICATION_TYPES);
         AuthType authType = AuthType.getByString(type);
-        if (authType != null) {
+
+        AuthType.REQUIRED_ACTIONS.forEach(x -> context.getUser().removeRequiredAction(x));
+
+        String disable = context.getUser().getFirstAttribute(UserConstants.DISABLE_TWO_STEP_AUTH);
+        if (authType != null && (disable == null || disable.isBlank())) {
             for (String providerName : authType.getRequiredActionNames()) {
                 context.getUser().addRequiredAction(providerName);
             }
         }
+        context.getAuthenticationSession().setAuthNote(NOTE_AUTH_TYPE_NAME, authType.name());
+        context.getAuthenticationSession().setAuthNote(NOTE_AUTH_TYPE_DESC, authType.getDescription());
+
         context.success();
     }
 

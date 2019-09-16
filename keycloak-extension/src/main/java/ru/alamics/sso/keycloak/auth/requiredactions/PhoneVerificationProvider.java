@@ -15,6 +15,7 @@ import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.phone.SmsCodeGenerator;
 import ru.alamics.sso.registration.phone.UserPhoneVerifier;
 import ru.alamics.sso.registration.phone.exception.PhoneCallException;
+import ru.alamics.sso.registration.phone.exception.SmsSendException;
 import ru.alamics.sso.registration.phone.exception.UserPhoneEmpty;
 import ru.alamics.sso.registration.phone.exception.WrongSmsCode;
 
@@ -30,7 +31,7 @@ import static ru.alamics.sso.registration.phone.UserPhoneVerifier.*;
 @Slf4j
 public class PhoneVerificationProvider implements RequiredActionProvider {
 
-    private static final String AUTH_CODE_TYPE = "AUTH_CODE_TYPE";
+    private static final String NEED_SEND_EMAIL_CODE = "NEED_SEND_EMAIL_CODE";
     private static final String subject = "emailVerificationAuthSubject";
     private static final String template = "mail-verify-auth.ftl";
 
@@ -63,7 +64,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 .build();
 
         try {
-            if (authSession.getAuthNote(AUTH_CODE_TYPE) != null) {
+            if (authSession.getAuthNote(NEED_SEND_EMAIL_CODE) != null) {
                 authContext = AuthContext.builder()
                         .activationCodeType(ActivationCodeType.CODE_TO_EMAIL)
                         .expirationTime(LocalDateTime.now().plusSeconds(ActivationCodeType.CODE_TO_EMAIL.getExpiredSeconds()))
@@ -74,11 +75,12 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 authContext = userPhoneVerifier.sendValidationSms(user, authContext, activationCodeType);
             }
 
-            authSession.removeAuthNote(AUTH_CODE_TYPE);
             authSession.setAuthNote(PHONE_KEY_HASH, authContext.getHashProperty());
             authSession.setAuthNote(EXPIRATION_TIME, authContext.getExpirationTime().format(DateTimeFormatter.ISO_DATE_TIME));
             authSession.setAuthNote(COUNT_REPEAT, authContext.getCounter().toString());
 
+            //возможно тут надо добавить признак, чтобы фронт понимал что это не первая попытка отправить
+            // для скрытия возможности повторного звонка
             Response challenge = context.form()
                     .setAttribute("userPhone", user.getPhone())
                     .setAttribute("expirationSeconds", authContext.getActivationCodeType().getExpiredSeconds())
@@ -93,6 +95,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             log.info("ignore... PhoneCallException " + e.getMessage());
         } catch (EmailException e) {
             log.info("ignore... EmailException " + e.getMessage());
+        } catch (SmsSendException se) {
+            log.info("ignore... SmsSendException " + se.getMessage());
         }
     }
 
@@ -114,10 +118,14 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         log.info("PhoneProcessAction");
 
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
-
+        /*
+        форма принимает код для ввода кода из смс(6 симоволов), 4 цифры номер телефона,
+        4 цифры из email
+         */
         if (context.getHttpRequest().getDecodedFormParameters().containsKey("sendEmailCode")) {
 
             authSession.removeAuthNote(PHONE_KEY_HASH);
+            authSession.setAuthNote(NEED_SEND_EMAIL_CODE, NEED_SEND_EMAIL_CODE);
 
             requiredActionChallenge(context);
 
@@ -145,7 +153,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 userPhoneVerifier.verifyPhone(user, authContext, code, activationCodeType);
 
                 UserModelUserMapper.mergeUserInto(user, model);
-                authSession.removeAuthNote(AUTH_CODE_TYPE);
+                authSession.removeAuthNote(NEED_SEND_EMAIL_CODE);
                 authSession.removeAuthNote(PHONE_KEY_HASH);
                 authSession.removeAuthNote(EXPIRATION_TIME);
                 authSession.removeAuthNote(COUNT_REPEAT);
@@ -153,9 +161,11 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             } catch (WrongSmsCode wrongSmsCode) {
                 log.warn("Wrong sms code");
                 Response challenge = context.form()
+                        .setAttribute("error", "Пароль введен не верно. Проверьте правильность введенных данных")
                         .setError("Введен некорректный код смс или его срок его действия истек")
                         .setAttribute("expirationSeconds", activationCodeType.getExpiredSeconds())
                         .setAttribute("lengthCode", activationCodeType.getLengthCode())
+                        .setAttribute("userPhone", user.getPhone())
                         .createForm(VERIFY_PHONE_FTL);
                 context.challenge(challenge);
             }
