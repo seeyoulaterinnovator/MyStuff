@@ -83,3 +83,18 @@
   line-height: 13px;
   text-align: right;
 }
+
+.pass-fields {
+  min-width: 225px;
+  max-width: 225px;
+
+  @media (max-width: 1199px) {
+    min-width: 210px;
+    max-width: 210px;
+  }
+
+  @media (max-width: 479px) {
+    width: 100%;
+    max-width: unset;
+  }
+}

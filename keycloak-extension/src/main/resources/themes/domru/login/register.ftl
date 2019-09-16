@@ -44,7 +44,7 @@
 
                 <div class="flex justify-between">
                     <div class="flex flex-basis-1/2 items-center">
-                        <button id="submit" class="btn btn-main w-full" type="submit">${msg('doRegister')}</button>    
+                        <button id="submit" class="btn btn-main pass-fields" type="submit">${msg('doRegister')}</button>
                     </div>                       
                     <span class="flex-basis-1/2 ml-5 text-sm">Нажимая кнопку, вы соглашаетесь <a class="reference" href="https://domru.ru/policy.pdf" target="_blink">с политикой обработки данных</a></span>
                 </div>

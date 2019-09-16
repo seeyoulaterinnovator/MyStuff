@@ -20,7 +20,7 @@
     </div>
 
     <div class="flex flex-col-reverse sm:flex-row">
-      <div class="sm:max-w-1/2">
+      <div class="pass-fields">
         <@components.field class="mb-4" fieldName="${firstFieldName}" label="${msg('password')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true />
         
         <@components.field class="mb-4" fieldName="${secondFieldName}" label="${msg('passwordConfirm')}" placeholder="${msg('passwordConfirmPlaceholder')}" type="password" required=true />
