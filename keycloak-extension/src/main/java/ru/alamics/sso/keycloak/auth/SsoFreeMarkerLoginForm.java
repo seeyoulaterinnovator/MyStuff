@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.auth;
 
-import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.forms.login.freemarker.FreeMarkerLoginFormsProvider;
@@ -87,10 +86,16 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     public Response createRegistration () {
         var realm = this.session.getContext().getRealm();
         var requiredActionsProvider = realm.getRequiredActionProviders();
-        var twoStepAuth = requiredActionsProvider.stream().filter(RequiredActionProviderModel::isDefaultAction)
+        var twoStepAuth = requiredActionsProvider.stream()
+                .filter(RequiredActionProviderModel::isDefaultAction)
                 .map(RequiredActionProviderModel::getAlias)
                 .collect(Collectors.toList());
-        this.attributes.put("twoStepAuthType", AuthType.getByList(twoStepAuth).getDescription());
+        var authType = AuthType.getByList(twoStepAuth);
+        if(authType != null) {
+            this.attributes.put("twoStepAuthType", authType.getDescription());
+        } else {
+            this.attributes.put("twoStepAuthType", "");
+        }
         return super.createRegistration();
     }
 }
