@@ -104,12 +104,19 @@ public class CustomUserResource {
 
     @GET
     @Path("/downloadUsers")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.MULTIPART_FORM_DATA)
     @NoCache
     public Response downloadUsers(DownloadUserRequest downloadUserRequest) throws IOException {
-        byte[] bytes = ((ByteArrayOutputStream) exportUsers(downloadUserRequest)).toByteArray();
+        byte[] bytes = exportUsers(downloadUserRequest);
+        if (bytes == null){
+            return JsonResponse
+            .error(Response.Status.NOT_FOUND)
+            .build();
+        }
+
         Response.ResponseBuilder response = Response.ok((Object) bytes);
-        response.header("Content-Disposition", "attachment; filename=\"users_info.xlsx\"");
+        response.header("Content-Disposition", "attachment; filename=\"users_info." + downloadUserRequest.getType() + "\"");
         return response.build();
     }
 
@@ -270,7 +277,7 @@ public class CustomUserResource {
         user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(request.getPhone()));
     }
 
-    private OutputStream exportUsers(DownloadUserRequest userRequest) throws IOException {
+    private byte[] exportUsers(DownloadUserRequest userRequest) throws IOException {
         FileModel file = FileFactory.createFileModel(userRequest.getType());
 
         List<UserDto> userDto = new SearchResource(session).getUsers("", "", "");

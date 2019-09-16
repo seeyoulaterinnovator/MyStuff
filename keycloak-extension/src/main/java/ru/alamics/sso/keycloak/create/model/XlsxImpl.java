@@ -88,9 +88,9 @@ public class XlsxImpl implements FileModel {
     }
 
     @Override
-    public OutputStream save() throws IOException {
+    public byte[] save() throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         workbook.write(outputStream);
-        return outputStream;
+        return outputStream.toByteArray();
     }
 }

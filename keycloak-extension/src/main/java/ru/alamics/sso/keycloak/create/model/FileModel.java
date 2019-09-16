@@ -12,5 +12,5 @@ public interface FileModel {
 
     void addRow(List<String> cells);
 
-    OutputStream save() throws IOException;
+    byte[] save() throws IOException;
 }
