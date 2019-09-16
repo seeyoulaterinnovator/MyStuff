@@ -56,7 +56,7 @@
             <#if displayMessage && message?has_content>
               <div class="alert pb-3">
                 <#if message.type = 'info'><span class="text-black">${kcSanitize(message.summary)?no_esc}</span></#if>
-                <#if message.type = 'warning'><span class="text-extra">${kcSanitize(message.summary)?no_esc}</span></#if>
+                <#if message.type = 'warning' && message.summary != msg('resetPasswordMessage')><span class="text-extra">${kcSanitize(message.summary)?no_esc}</span></#if>
                 <#if message.type = 'success' && message.summary != msg('emailSentMessage')>
                     <span class="text-accentGreen">${kcSanitize(message.summary)?no_esc}</span>
                 </#if>
