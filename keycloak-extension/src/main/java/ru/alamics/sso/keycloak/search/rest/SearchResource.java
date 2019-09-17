@@ -41,13 +41,13 @@ public class SearchResource {
     @NoCache
     public Response getUsersInfo(@QueryParam("search") String search, @QueryParam("searchUser") String searchUser,
                                  @QueryParam("searchToms") String searchToms, @QueryParam("sortField") String sortField,
-                                 @QueryParam("defaultSorting") boolean defaultSorting) {
+                                 @QueryParam("sortAsc") boolean sortAsc) {
         return JsonResponse.success()
-                .addResult("users-info", getUsers(search, searchUser, searchToms, sortField, defaultSorting))
+                .addResult("users-info", getUsers(search, searchUser, searchToms, sortField, sortAsc))
                 .build();
     }
 
-    private List<UserDto> getUsers(String search, String searchUser, String searchToms, String sortField, boolean defaultSorting) {
+    private List<UserDto> getUsers(String search, String searchUser, String searchToms, String sortField, boolean sortAsc) {
         List<Tuple> tuples = getEM().createNativeQuery(
                 "select UE.ID         as user_id,\n" +
                         "       UE.USERNAME   as username,\n" +
@@ -89,7 +89,7 @@ public class SearchResource {
                         "  AND CASE\n" +
                         "          WHEN :searchToms is not null and :searchToms != '' then (UP.TOMS_ID = :searchToms)\n" +
                         "          else UP.TOMS_ID LIKE '%' OR UP.TOMS_ID is null end\n" +
-                        getSort(sortField, defaultSorting) , Tuple.class)
+                        getSort(sortField, sortAsc) , Tuple.class)
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
@@ -97,7 +97,7 @@ public class SearchResource {
         return DataMapper.toUserDtoList(tuples);
     }
 
-    private String getSort(String sortField, boolean defaultSorting) {
+    private String getSort(String sortField, boolean sortAsc) {
         String sort = "";
         if (sortField.equalsIgnoreCase(SORT_FIELD_NAME)) {
             sort += "ORDER BY first_name";
@@ -107,7 +107,7 @@ public class SearchResource {
         if (sort.isBlank()) {
             return sort;
         }
-        if (!defaultSorting){
+        if (!sortAsc){
             sort += " DESC";
         }
         return sort;
