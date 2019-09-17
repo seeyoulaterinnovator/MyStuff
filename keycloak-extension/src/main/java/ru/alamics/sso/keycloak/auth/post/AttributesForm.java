@@ -44,7 +44,7 @@ public class AttributesForm implements Authenticator {
             var session = context.getSession();
             var searchResource = new SearchResource(session);
             var user = context.getUser();
-            var response = searchResource.getUsersInfo( "", user.getId(), "");
+            var response = searchResource.getUsersInfo( "", user.getId(), "", "", true);
             JsonResponse body = (JsonResponse) response.getEntity();
             var attributes = body.getResults();
             if(attributes.get("users-info") == null) {
