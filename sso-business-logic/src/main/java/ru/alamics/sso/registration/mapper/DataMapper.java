@@ -3,11 +3,13 @@ package ru.alamics.sso.registration.mapper;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.entity.ExternalSystem;
 import ru.alamics.sso.keycloak.entity.ExternalSystemRole;
-import ru.alamics.sso.keycloak.entity.UserPostRole;
 import ru.alamics.sso.keycloak.entity.UserPost;
+import ru.alamics.sso.keycloak.entity.UserPostRole;
 import ru.alamics.sso.registration.dto.*;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DataMapper {

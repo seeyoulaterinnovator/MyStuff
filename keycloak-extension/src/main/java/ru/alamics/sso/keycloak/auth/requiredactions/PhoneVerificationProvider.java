@@ -15,6 +15,7 @@ import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.phone.SmsCodeGenerator;
 import ru.alamics.sso.registration.phone.UserPhoneVerifier;
 import ru.alamics.sso.registration.phone.exception.PhoneCallException;
+import ru.alamics.sso.registration.phone.exception.SmsSendException;
 import ru.alamics.sso.registration.phone.exception.UserPhoneEmpty;
 import ru.alamics.sso.registration.phone.exception.WrongSmsCode;
 
@@ -94,6 +95,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             log.info("ignore... PhoneCallException " + e.getMessage());
         } catch (EmailException e) {
             log.info("ignore... EmailException " + e.getMessage());
+        } catch (SmsSendException se) {
+            log.info("ignore... SmsSendException " + se.getMessage());
         }
     }
 

@@ -3,6 +3,7 @@ package ru.alamics.sso.keycloak.entity;
 import lombok.*;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.entity.common.NotificationType;
+import ru.alamics.sso.keycloak.entity.common.NotificationStatus;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -30,5 +31,9 @@ public class AutoLockNotification implements Serializable {
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
     private NotificationType type;
+
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private NotificationStatus status;
 
 }
