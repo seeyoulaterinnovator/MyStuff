@@ -103,15 +103,11 @@ public class UserPostRepository {
                 .getResultList();
     }
 
-    public UserPost addSystemRole(UserPost userPost, Long extSystemRoleId){
-        userPost.getSystemRoles().add(em.find(ExternalSystemRole.class, extSystemRoleId));
-        update(userPost);
-        return userPost;
+    public UserPostRole findUserPostRole(Long id){
+        return em.find(UserPostRole.class, id);
     }
 
-    public UserPost removeSystemRole(UserPost userPost, Long extSystemRoleId){
-        userPost.getSystemRoles().remove(em.find(ExternalSystemRole.class, extSystemRoleId));
-        update(userPost);
-        return userPost;
+    public ExternalSystemRole findExternalSystemRole(Long id){
+        return em.find(ExternalSystemRole.class, id);
     }
 }

@@ -22,11 +22,21 @@ public class DataMapper {
         UserEntity userEntity = new UserEntity();
         userEntity.setId(userPostRequest.getUserId());
         userPost.setUser(userEntity);
-        userPost.setId(userPostRequest.getId());
         userPost.setTomsId(userPostRequest.getTomsId());
         userPost.setDmpId(userPostRequest.getDmpId());
         UserPostRole userPostRole = new UserPostRole();
         userPostRole.setId(userPostRequest.getRoleId());
+        userPost.setRole(userPostRole);
+
+        return userPost;
+    }
+
+    public static UserPost toUserPost(UserPost userPost, UserPostEditRequest userPostEditRequest) {
+        if (userPostEditRequest == null) {
+            return null;
+        }
+        UserPostRole userPostRole = new UserPostRole();
+        userPostRole.setId(userPostEditRequest.getRoleId());
         userPost.setRole(userPostRole);
 
         return userPost;
