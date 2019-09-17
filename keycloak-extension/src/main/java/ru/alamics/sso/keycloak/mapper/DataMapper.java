@@ -30,12 +30,13 @@ public abstract class DataMapper {
                 .email(toString(tuple.get("email")))
                 .phone(toString(tuple.get("phone")))
                 .userPostId(toString(tuple.get("user_post_id")))
-                //.accessName(toString(tuple.get("access_name")))
                 .tomsId(toString(tuple.get("toms_id")))
                 .roleId(toString(tuple.get("role_id")))
                 .roleName(toString(tuple.get("role_name")))
-                //.clientRoleId(toString(tuple.get("client_role_id")))
-                //.clientRoleName(toString(tuple.get("client_role_name")))
+                .systemRoleId(toString(tuple.get("system_role_id")))
+                .systemRoleName(toString(tuple.get("system_role")))
+                .systemId(toString(tuple.get("system_id")))
+                .systemName(toString(tuple.get("system_name")))
                 .build();
     }
 

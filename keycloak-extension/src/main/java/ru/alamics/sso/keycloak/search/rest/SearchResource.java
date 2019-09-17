@@ -58,28 +58,36 @@ public class SearchResource {
                         "       UP.TOMS_ID    as toms_id,\n" +
                         "       UP.DMP_ID     as dmp_id,\n" +
                         "       UP.ROLE_ID    as role_id,\n" +
-                        "       UPR.NAME      as role_name\n" +
+                        "       UPR.NAME      as role_name,\n" +
+                        "       ESR.ID        as system_role_id,\n" +
+                        "       ESR.NAME      as system_role,\n" +
+                        "       ES.ID         as system_id,\n" +
+                        "       ES.NAME       as system_name\n" +
                         "from USER_ENTITY UE\n" +
                         "         join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID\n" +
-                        "         join USER_POST UP on UE.ID = UP.USER_ID\n" +
-                        "         join USER_POST_ROLE UPR on UP.ROLE_ID = UPR.ID\n" +
-                        "WHERE UE.REALM_ID = 'user' AND UA.NAME = 'phone'\n" +
+                        "         left outer join USER_POST UP on UE.ID = UP.USER_ID\n" +
+                        "         left outer join USER_POST_ROLE UPR on UP.ROLE_ID = UPR.ID\n" +
+                        "         left outer join USERPOST_EXT_SYSTEM_ROLE UESR on UP.ID = UESR.USER_POST_ID\n" +
+                        "         left outer join EXT_SYSTEM_ROLE ESR on UESR.EXT_SYSTEM_ROLE_ID = ESR.ID\n" +
+                        "         left outer join EXTERNAL_SYSTEM ES on ESR.SYSTEM_ID = ES.ID\n" +
+                        "WHERE UE.REALM_ID = 'user'\n" +
+                        "  AND UA.NAME = 'phone'\n" +
                         "  AND CASE\n" +
                         "          WHEN :search is not null and :search != '' then (\n" +
-                        "              UE.ID LIKE CONCAT('%', :search, '%') OR\n" +
-                        "              UE.EMAIL LIKE CONCAT('%', :search, '%') OR\n" +
-                        "              UE.FIRST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
-                        "              UE.LAST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
-                        "              UE.USERNAME LIKE CONCAT('%', :search, '%') OR\n" +
-                        "              UA.VALUE LIKE CONCAT('%', :search, '%')\n" +
+                        "                  UE.ID LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                  UE.EMAIL LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                  UE.FIRST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                  UE.LAST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                  UE.USERNAME LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                  UA.VALUE LIKE CONCAT('%', :search, '%')\n" +
                         "              )\n" +
                         "          else UE.ID LIKE '%' end\n" +
                         "  AND CASE\n" +
                         "          WHEN :searchUser is not null and :searchUser != '' then (UP.USER_ID = :searchUser)\n" +
-                        "          else UP.USER_ID LIKE '%' end\n" +
+                        "          else UP.USER_ID LIKE '%' OR UP.USER_ID is null end\n" +
                         "  AND CASE\n" +
                         "          WHEN :searchToms is not null and :searchToms != '' then (UP.TOMS_ID = :searchToms)\n" +
-                        "          else UP.TOMS_ID LIKE '%' end", Tuple.class)
+                        "          else UP.TOMS_ID LIKE '%' OR UP.TOMS_ID is null end", Tuple.class)
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
