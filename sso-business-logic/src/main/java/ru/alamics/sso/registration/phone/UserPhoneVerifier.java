@@ -3,9 +3,7 @@ package ru.alamics.sso.registration.phone;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.User;
-import ru.alamics.sso.registration.phone.exception.PhoneCallException;
-import ru.alamics.sso.registration.phone.exception.UserPhoneEmpty;
-import ru.alamics.sso.registration.phone.exception.WrongSmsCode;
+import ru.alamics.sso.registration.phone.exception.*;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 
 import javax.ejb.EJB;
@@ -36,7 +34,7 @@ public class UserPhoneVerifier {
 
     public AuthContext sendValidationSms(User user,
                                          AuthContext context,
-                                         ActivationCodeType codeType) throws UserPhoneEmpty, PhoneCallException {
+                                         ActivationCodeType codeType) throws UserPhoneEmpty, PhoneCallException, SmsSendException {
         if (user.getPhone() == null || user.getPhone().isBlank())
             throw new UserPhoneEmpty();
 
@@ -58,13 +56,18 @@ public class UserPhoneVerifier {
         return context;
     }
 
-    private String generateCode(User user, ActivationCodeType codeType, AuthContext context) throws PhoneCallException {
+    private String generateCode(User user, ActivationCodeType codeType, AuthContext context)
+            throws PhoneCallException, SmsSendException
+    {
         if (codeType == ActivationCodeType.CODE_TO_SMS) {
             String code = SmsCodeGenerator.getCode(codeType.getLengthCode());
 
-            viberService.sendMsg(user.getId(), user.getPhone(), code);
+            try {
+                viberService.sendMsg(user.getId(), user.getPhone(), code);
+            } catch (ViberSendException e) {
 
-            smsService.sendSms(user.getId(), user.getPhone(), code);
+                smsService.sendSms(user.getId(), user.getPhone(), code);
+            }
 
             return code;
         } else if (codeType == ActivationCodeType.CODE_BY_PHONE_NUMBER) {
@@ -73,7 +76,9 @@ public class UserPhoneVerifier {
         return null;
     }
 
-    public void verifyPhone(User user, AuthContext authContext, String smsCode, ActivationCodeType activationCodeType) throws WrongSmsCode {
+    public void verifyPhone(User user, AuthContext authContext, String smsCode, ActivationCodeType activationCodeType)
+            throws WrongSmsCode
+    {
         String savedHash = authContext.getHashProperty();
         LocalDateTime expirationDate = authContext.getExpirationTime();
 

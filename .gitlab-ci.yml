@@ -164,7 +164,7 @@ dpl:stage:
   stage: deploy
   when: manual
   only:
-    - /^tag.*/
+    - tags
   environment:
     name: stage
     url: http://domru-sso-stage.alamics.ru

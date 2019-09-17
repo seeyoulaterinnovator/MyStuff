@@ -38,8 +38,14 @@ public class UserModelUserMapper {
                 user.getAttributes().entrySet()) {
             model.setAttribute(attributeEntry.getKey(), attributeEntry.getValue());
         }
-        if (user.getPhone() != null)
-            model.setAttribute(ATTR_PHONE_NAME, List.of(user.getPhone()));
+        if (user.getPhone() != null) {
+
+            String phone = user.getPhone();
+            if (phone != null)
+                phone = phone.replaceAll("[^0-9]+", "");
+
+            model.setAttribute(ATTR_PHONE_NAME, List.of(phone));
+        }
         if (user.getPhoneVerifiedOn() != null)
             model.setAttribute(ATTR_PHONE_VALIDATED_ON, List.of(user.getPhoneVerifiedOn().toString()));
 
@@ -48,7 +54,12 @@ public class UserModelUserMapper {
     public static void fillAttributesFromContext(UserModel user, HttpRequest httpRequest) {
         MultivaluedMap<String, String> formData = httpRequest.getDecodedFormParameters();
         if (formData.getFirst(FIELD_PHONE) != null) {
-            user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(formData.getFirst(FIELD_PHONE)));
+
+            String phone = formData.getFirst(FIELD_PHONE);
+            if (phone != null)
+                phone = phone.replaceAll("[^0-9]+", "");
+
+            user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(phone));
         }
 
         if (formData.getFirst(ATTR_PHONE_VALIDATED_ON) != null) {

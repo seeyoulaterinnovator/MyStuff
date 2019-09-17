@@ -42,6 +42,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static ru.alamics.sso.registration.model.FormConstants.FIELD_PHONE;
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
 @Slf4j
@@ -247,7 +248,11 @@ public class CustomUserResource {
             }
         }
 
-        user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(request.getPhone()));
+        String phone = request.getPhone();
+        if (phone != null)
+            phone = phone.replaceAll("[^0-9]+", "");
+
+        user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(phone));
 
     }
 
