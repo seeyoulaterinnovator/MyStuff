@@ -1,6 +1,7 @@
 package ru.alamics.sso.registration.phone;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.alamics.sso.registration.phone.exception.SmsSendException;
 import ru.alamics.sso.registration.phone.model.Sms;
 import ru.alamics.sso.registration.phone.model.SmsDeliveryStatus;
 import ru.alamics.sso.registration.phone.model.SmsStatus;
@@ -26,21 +27,27 @@ public class SmsService {
     @EJB
     private SmsSendService smsSendService;
 
-    public void sendSms(String userId, String phone, String text) {
+    public void sendSms(String userId, String phone, String text) throws SmsSendException {
         String id = UUID.randomUUID().toString();
 
+        /*
         Sms sms = Sms.builder()
                 .id(id)
                 .phone(phone)
                 .sendTime(LocalDateTime.now())
                 .userId(userId)
                 .build();
+        */
 
 //        smsRepository.save(sms);
 
-        smsSendService.sendSms(phone, text);
+        String response = null;
 
-        log.info("Sent sms to phone: {}, text: {}, id: {}", phone, text, id);
+        try {
+            response = smsSendService.sendSms(phone, text);
+        } finally {
+            log.info("Sent sms to phone: {}, text: {}, id: {}, resp: {}", phone, text, id, response);
+        }
     }
 
     public void saveSmsStatusUpdate(String smsId, SmsDeliveryStatus status) {

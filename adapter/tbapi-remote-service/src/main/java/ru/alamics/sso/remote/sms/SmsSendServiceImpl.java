@@ -7,16 +7,20 @@ import org.jboss.resteasy.client.jaxrs.internal.ClientInvocationBuilder;
 import org.jboss.resteasy.plugins.providers.StringTextStar;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import ru.alamics.sso.registration.phone.SmsConfig;
+import ru.alamics.sso.registration.phone.exception.SmsSendException;
 import ru.alamics.sso.registration.phone.port.SmsSendService;
 import ru.alamics.sso.util.EStand;
 import ru.alamics.sso.util.StandResolver;
 
 import javax.ejb.Stateless;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Stateless(name = "SmsSender")
@@ -26,8 +30,14 @@ public class SmsSendServiceImpl implements SmsSendService {
     private static final String USERNAME = "ertelecom";
     private static final String PASSWORD = "P10BxzA6Z1BRM";
     private static final String SENDER_NAME = "Domru";
-    private final ResteasyClient client = new ResteasyClientBuilder().build();
-    private SmsConfig smsConfig;
+
+    private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
+            .connectTimeout(3, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS);
+
+    private static final ResteasyClient client = clientBuilder.build();
+
+    private static SmsConfig smsConfig;
 
     public SmsSendServiceImpl() {
         smsConfig = SmsConfig.builder()
@@ -54,10 +64,10 @@ public class SmsSendServiceImpl implements SmsSendService {
     }
 
     @Override
-    public String sendSms(String phone, String text) {
+    public String sendSms(String phone, String text) throws SmsSendException {
 
         // локально и на дэве фиксированный код и не отправляю смс
-        if (!StandResolver.ENV.isBattle()) {
+        if (!StandResolver.isBattle()) {
             log.info("Stand {}, do not sending sms", StandResolver.ENV);
             return "0: Accepted for delivery";
         }
@@ -74,10 +84,14 @@ public class SmsSendServiceImpl implements SmsSendService {
                 .queryParam("text", URLEncoder.encode(text, smsConfig.getCharset()))
                 .request()
                 ;
+        try {
+            return builder.get(String.class);
 
-        String response = builder.get(String.class);
+        } catch (ProcessingException | WebApplicationException wae) {
+            log.error(wae.getMessage(), wae);
 
-        return response;
+            throw new SmsSendException(wae);
+        }
     }
 
     private MultivaluedMap<String, Object> getConfigForQuery() {

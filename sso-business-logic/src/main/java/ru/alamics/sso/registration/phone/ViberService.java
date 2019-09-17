@@ -1,6 +1,7 @@
 package ru.alamics.sso.registration.phone;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.alamics.sso.registration.phone.exception.ViberSendException;
 import ru.alamics.sso.registration.phone.port.ViberSendService;
 
 import javax.ejb.EJB;
@@ -15,7 +16,7 @@ public class ViberService {
     @EJB
     private ViberSendService viberSendService;
 
-    public void sendMsg(String userId, String phone, String text) {
+    public void sendMsg(String userId, String phone, String text) throws ViberSendException {
 
         String id = UUID.randomUUID().toString();
 
@@ -28,8 +29,11 @@ public class ViberService {
                 .build();
         */
 
-        String resp = viberSendService.sendMsg(phone, text);
-
-        log.info("Sent msg to viber: {}, text: {}, id: {}, resp: {}", phone, text, id, resp);
+        String resp = null;
+        try {
+            resp = viberSendService.sendMsg(phone, text);
+        } finally {
+            log.info("Sent msg to viber: {}, text: {}, id: {}, resp: {}", phone, text, id, resp);
+        }
     }
 }
