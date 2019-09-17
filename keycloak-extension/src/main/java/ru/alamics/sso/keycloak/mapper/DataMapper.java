@@ -84,7 +84,10 @@ public abstract class DataMapper {
                     userImport.setOrg(row[2]);
                     break;
                 case 3:
-                    userImport.setOrg(row[3]);
+                    userImport.setRoleName(row[3]);
+                    break;
+                case 4:
+                    userImport.setSystemName(row[4]);
                     break;
             }
         }

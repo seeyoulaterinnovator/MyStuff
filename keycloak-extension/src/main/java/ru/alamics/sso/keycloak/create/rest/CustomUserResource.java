@@ -57,7 +57,7 @@ public class CustomUserResource {
         }
         try {
             return JsonResponse.success()
-                    .addResult("userId", userService.createUser(request, false))
+                    .addResult("userId", userService.createUser(request, false).getId())
                     .build();
         } catch (ModelDuplicateException e) {
             if (session.getTransactionManager().isActive()) {

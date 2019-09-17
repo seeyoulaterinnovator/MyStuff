@@ -1,7 +1,9 @@
 package ru.alamics.sso.registration.service;
 
 import javassist.NotFoundException;
+import ru.alamics.sso.keycloak.entity.ExternalSystemRole;
 import ru.alamics.sso.keycloak.entity.UserPost;
+import ru.alamics.sso.keycloak.entity.UserPostRole;
 import ru.alamics.sso.keycloak.repository.UserPostRepository;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.dto.*;
@@ -40,7 +42,7 @@ public class UserPostService {
         userPostRepository.remove(id);
     }
 
-    public UserPostResponse get(String id) throws NotFoundException{
+    public UserPostResponse get(String id) throws NotFoundException {
         UserPost userPost = userPostRepository.getUserPost(id);
         if (userPost == null) {
             throw new NotFoundException("UserPost is not exist");
@@ -52,15 +54,15 @@ public class UserPostService {
         return DataMapper.toUserPostResponseList(userPostRepository.getAllUserPost());
     }
 
-    public List<UserPostRoleDto> getUserPostRoleDtos(){
+    public List<UserPostRoleDto> getUserPostRoleDtos() {
         return DataMapper.toUserPostRoleDtoList(userPostRepository.getAllUserPostRoles());
     }
 
-    public List<ExternalSystemRoleDto> getExternalSystemRoles(){
+    public List<ExternalSystemRoleDto> getExternalSystemRoles() {
         return DataMapper.toExternalSystemRoleDtos(userPostRepository.getAllExternalSystemRole());
     }
 
-    public List<ExternalSystemDto> getExternalSystems(){
+    public List<ExternalSystemDto> getExternalSystems() {
         return DataMapper.toExternalSystemDtos(userPostRepository.getAllExternalSystem());
     }
 
@@ -83,5 +85,21 @@ public class UserPostService {
             throw new NotFoundException("SystemRole is not exist in this UserPost");
         }
         return DataMapper.toUserPostResponse(userPostRepository.removeSystemRole(userPost, extSystemRoleId));
+    }
+
+    public Long getUserPostRole(String name) throws NotFoundException {
+        UserPostRole userPostRole = userPostRepository.getUserPostRole(name);
+        if (userPostRole == null){
+            throw new NotFoundException("UserPostRole is not exist");
+        }
+        return userPostRepository.getUserPostRole(name).getId();
+    }
+
+    public Long getExternalSystemRoleId(String sysName) throws NotFoundException {
+        ExternalSystemRole externalSystemRole = userPostRepository.getExternalSystemRole(sysName);
+        if (externalSystemRole == null){
+            throw new NotFoundException("ExternalSystemRole is not exist");
+        }
+        return externalSystemRole.getId();
     }
 }

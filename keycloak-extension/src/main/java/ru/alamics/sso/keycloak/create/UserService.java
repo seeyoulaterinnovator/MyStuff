@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.create;
 
+import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
@@ -14,11 +15,11 @@ import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import ru.alamics.sso.keycloak.create.model.*;
 import ru.alamics.sso.keycloak.mapper.DataMapper;
-import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.keycloak.search.dto.UserDto;
 import ru.alamics.sso.keycloak.search.rest.SearchResource;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
+import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.model.UserConstants;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.registration.tbapi.TbapiService;
@@ -174,11 +175,14 @@ public class UserService {
                     o.getUserRequest().setTomsId(tbapiResponse.get(UserConstants.ATTR_DMP_NAME).toString());
                 }
                 o.getUserRequest().setTomsId(tbapiResponse.get(UserConstants.ATTR_TOMS_NAME).toString());
-                addUserPost(user, o.getUserRequest());
+                addUserPost(user, o);
 
                 tbapiSuccess.getAndIncrement();
-            } catch (FoundException e) {
-                importResponse.addNotCreatedUsers("userName", o.getUserRequest().getName());
+            } catch (FoundException | NotFoundException e) {
+                Map<String, Object> error = new HashMap<>();
+                error.put("error", e.getMessage());
+                error.put("userName", o.getUserRequest().getName());
+                importResponse.setErrors(List.of(error));
             } catch (TbapiRegisterException e) {
                 tbapiErrors.getAndIncrement();
             }
@@ -288,6 +292,13 @@ public class UserService {
         UserPostRequest userPostRequest = DataMapper.toUserPostRequest(userModel, request);
         userPostRequest.setRoleId(1L);
         userPostService.save(userPostRequest);
+    }
+
+    private void addUserPost(UserModel userModel, UserImport userImport) throws FoundException, NotFoundException {
+        UserPostRequest userPostRequest = DataMapper.toUserPostRequest(userModel, userImport.getUserRequest());
+        userPostRequest.setRoleId(userPostService.getUserPostRole(userImport.getRoleName()));
+        UserPostResponse userPostResponse = userPostService.save(userPostRequest);
+        userPostService.addSystemRole(userPostResponse.getId(), userPostService.getExternalSystemRoleId(userImport.getSystemName()));
     }
 
     private void createTbapiConnectConfig() {

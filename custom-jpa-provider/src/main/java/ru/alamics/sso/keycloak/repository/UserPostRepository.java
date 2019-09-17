@@ -11,6 +11,7 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -72,12 +73,27 @@ public class UserPostRepository {
                 .getResultList();
     }
 
-    public List<UserPostRole> getAllUserPostRoles(){
+    public List<UserPostRole> getAllUserPostRoles() {
         return em.createQuery(
                 "select apr " +
                         "from UserPostRole apr", UserPostRole.class)
                 .getResultList();
     }
+
+    public UserPostRole getUserPostRole(String name) {
+        UserPostRole userPostRole = null;
+        try {
+            userPostRole = em.createQuery(
+                    "select apr " +
+                            "from UserPostRole apr \n" +
+                            "where apr.name = :name", UserPostRole.class)
+                    .setParameter("name", name)
+                    .getSingleResult();
+        } finally {
+            return userPostRole;
+        }
+    }
+
 
     public List<UserPost> findUserPostRole(final UserEntity user) {
         final String DEBUG_STR = "findUserPostRole";
@@ -89,27 +105,46 @@ public class UserPostRepository {
         return ret;
     }
 
-    public List<ExternalSystem> getAllExternalSystem(){
+    public List<ExternalSystem> getAllExternalSystem() {
         return em.createQuery(
                 "select sys " +
                         "from ExternalSystem sys", ExternalSystem.class)
                 .getResultList();
     }
 
-    public List<ExternalSystemRole> getAllExternalSystemRole(){
+    public List<ExternalSystemRole> getAllExternalSystemRole() {
         return em.createQuery(
                 "select role " +
                         "from ExternalSystemRole role", ExternalSystemRole.class)
                 .getResultList();
     }
 
-    public UserPost addSystemRole(UserPost userPost, Long extSystemRoleId){
+    public ExternalSystemRole getExternalSystemRole(String sysName) {
+        ExternalSystemRole externalSystemRole = null;
+        try {
+            externalSystemRole = em.createQuery(
+                    "select role " +
+                            "from ExternalSystemRole role \n" +
+                            "join ExternalSystem sys on role.externalSystem = sys.id \n" +
+                            "where sys.name = :sysName", ExternalSystemRole.class)
+                    .setParameter("sysName", sysName)
+                    .getResultList()
+                    .get(0);
+        } finally {
+            return externalSystemRole;
+        }
+    }
+
+    public UserPost addSystemRole(UserPost userPost, Long extSystemRoleId) {
+        if (userPost.getSystemRoles() == null){
+            userPost.setSystemRoles(new HashSet<ExternalSystemRole>());
+        }
         userPost.getSystemRoles().add(em.find(ExternalSystemRole.class, extSystemRoleId));
         update(userPost);
         return userPost;
     }
 
-    public UserPost removeSystemRole(UserPost userPost, Long extSystemRoleId){
+    public UserPost removeSystemRole(UserPost userPost, Long extSystemRoleId) {
         userPost.getSystemRoles().remove(em.find(ExternalSystemRole.class, extSystemRoleId));
         update(userPost);
         return userPost;

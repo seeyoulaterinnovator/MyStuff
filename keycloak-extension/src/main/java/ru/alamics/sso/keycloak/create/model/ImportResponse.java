@@ -16,7 +16,7 @@ public class ImportResponse {
     private AtomicInteger tbapiErrors;
     private AtomicInteger tbapiSuccess;
     private List<Map<String, Object>> createdUserIds;
-    private List<Map<String, Object>> notCreatedUsers;
+    private List<Map<String, Object>> errors;
 
     public void addCreatedUserIds(String key, Object value){
         if (createdUserIds == null){
@@ -27,12 +27,12 @@ public class ImportResponse {
         createdUserIds.add(map);
     }
 
-    public void addNotCreatedUsers(String key, Object value){
-        if (notCreatedUsers == null){
-            notCreatedUsers = new LinkedList<>();
+    public void addErrors(String key, Object value){
+        if (errors == null){
+            errors = new LinkedList<>();
         }
         Map<String, Object> map = new HashMap<>();
         map.put(key,value);
-        notCreatedUsers.add(map);
+        errors.add(map);
     }
 }
