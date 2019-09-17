@@ -31,7 +31,7 @@
           <span class="reference border-accentBlue text-accentBlue">Сгенерировать</span> 
         </button>
         <div id="generated-password-container" class=" hidden">
-          Не забудьте записать пароль
+          <p class="generated-password-text">Не забудьте записать пароль</p>
           <div class="flex justify-between items-center">
             <div id="generated-password" class="flex"></div>
             <button id="refresh-password-button" class="w-12 h-12 focus:outline-none" type="button">

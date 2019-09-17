@@ -83,3 +83,15 @@
   line-height: 13px;
   text-align: right;
 }
+
+.generated-password-text {
+  font-size: 15px;
+  line-height: 19px;
+  white-space: nowrap;
+  opacity: 0.5;
+
+  @media (max-width: 1199px) {
+    font-size: 14px;
+    line-height: 18px;
+  }
+}
