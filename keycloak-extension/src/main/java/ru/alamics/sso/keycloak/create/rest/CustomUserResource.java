@@ -39,12 +39,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static ru.alamics.sso.registration.model.FormConstants.FIELD_PHONE;
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
 @Slf4j
 public class CustomUserResource {
 
+    private final static Long DEFAULT_ROLE_ID = 1L;   //Соответствует роли LPR
     protected KeycloakSession session;
     private UserPostService userPostService;
 
@@ -59,14 +59,34 @@ public class CustomUserResource {
     }
 
     @POST
-    @Path("")
+    @Path("/bss")
     @NoCache
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createUser(@QueryParam("bss") boolean bss, final UserRequest request, final HttpHeaders headers) {
+    public Response createUserBss(final UserRequest request, final HttpHeaders headers) {
         if (request.getPhone() == null || request.getPhone().isBlank()) {
             return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
         }
-        if (!bss && request.getTomsId() == null || request.getTomsId().isBlank()) {
+
+        RealmModel realm = session.getContext().getRealm();
+        AdminAuth auth = authenticateRealmAdminRequest(realm);
+
+        Response response = checkOnExistUser(request, realm);
+        if (response != null) {
+            return response;
+        }
+
+        return getUserResponse(request, realm, auth, true);
+    }
+
+    @POST
+    @Path("")
+    @NoCache
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response createUser(final UserRequest request, final HttpHeaders headers) {
+        if (request.getPhone() == null || request.getPhone().isBlank()) {
+            return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
+        }
+        if (request.getTomsId() == null || request.getTomsId().isBlank()) {
             return ErrorResponse.error("TomsId is required attribute", Response.Status.BAD_REQUEST);
         }
 
@@ -78,7 +98,7 @@ public class CustomUserResource {
             return response;
         }
 
-        return getUserResponse(request, realm, auth, bss);
+        return getUserResponse(request, realm, auth, false);
     }
 
     private Response checkOnExistUser(UserRequest request, RealmModel realm) {
@@ -259,7 +279,7 @@ public class CustomUserResource {
 
     private void addUserPost(UserModel userModel, UserRequest request) throws FoundUserPostException {
         UserPostRequest userPostRequest = DataMapper.toUserPostRequest(userModel, request);
-        userPostRequest.setRoleId(1L);
+        userPostRequest.setRoleId(DEFAULT_ROLE_ID);
         userPostService.save(userPostRequest);
     }
 }
