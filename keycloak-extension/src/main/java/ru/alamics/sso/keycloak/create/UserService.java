@@ -105,7 +105,7 @@ public class UserService {
                     parameters.add(userDto.getRoleName());
                     break;
                 case SYSTEM:
-                    parameters.add(userDto.getClientRoleName());
+                    parameters.add(userDto.getSystemName());
                     break;
             }
         }
