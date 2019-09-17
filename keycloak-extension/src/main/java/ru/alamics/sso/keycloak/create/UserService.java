@@ -71,7 +71,9 @@ public class UserService {
 
     public byte[] exportUsers(DownloadUserRequest userRequest) throws IOException {
         FileModel file = FileFactory.createFileModel(userRequest.getType());
-
+        if (file == null) {
+            throw new UnsupportedDataTypeException("Unsupported file format!");
+        }
         List<UserDto> userDto = new SearchResource(session).getUsers("", "", "");
         if (userDto == null || userDto.isEmpty()) {
             return null;
@@ -100,13 +102,10 @@ public class UserService {
                     parameters.add(userDto.getPhone());
                     break;
                 case ROLE:
-                    parameters.add(userDto.getRoleId());
-                    break;
-                case ORGANIZATION:
-                    parameters.add(userDto.getTomsId());
+                    parameters.add(userDto.getRoleName());
                     break;
                 case SYSTEM:
-                    parameters.add("");
+                    parameters.add(userDto.getClientRoleName());
                     break;
             }
         }

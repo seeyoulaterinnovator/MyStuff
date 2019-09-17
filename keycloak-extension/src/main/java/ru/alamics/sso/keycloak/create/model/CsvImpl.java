@@ -20,7 +20,10 @@ public class CsvImpl implements FileModel {
 
     public CsvImpl() {
         byteArrayOutputStream = new ByteArrayOutputStream();
-        csvWriter = new CSVWriter(new OutputStreamWriter(byteArrayOutputStream));
+        csvWriter = new CSVWriter(new OutputStreamWriter(byteArrayOutputStream),';',
+                CSVWriter.NO_QUOTE_CHARACTER,
+                CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+                CSVWriter.DEFAULT_LINE_END);
     }
 
     @Override

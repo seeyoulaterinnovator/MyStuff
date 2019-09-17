@@ -106,7 +106,7 @@ public class CustomUserResource {
             return JsonResponse.success()
                     .addResult("import-report",
                             userService.importUsers(inputParts.get(0).getBody(InputStream.class, null),
-                            getFileExtension(inputParts.get(0).getHeaders())))
+                                    getFileExtension(inputParts.get(0).getHeaders())))
                     .build();
         } catch (UnsupportedDataTypeException | FileServiceException e) {
             return JsonResponse.fail()
@@ -121,16 +121,23 @@ public class CustomUserResource {
     @Produces(MediaType.MULTIPART_FORM_DATA)
     @NoCache
     public Response downloadUsers(DownloadUserRequest downloadUserRequest) throws IOException {
-        byte[] bytes = userService.exportUsers(downloadUserRequest);
-        if (bytes == null) {
+        try {
+            byte[] bytes = userService.exportUsers(downloadUserRequest);
+            if (bytes == null) {
+                return JsonResponse
+                        .fail()
+                        .message("Users not found. Maybe database is empty")
+                        .build();
+            }
+            Response.ResponseBuilder response = Response.ok((Object) bytes);
+            response.header("Content-Disposition", "attachment; filename=\"users_info." + downloadUserRequest.getType() + "\"");
+            return response.build();
+        } catch (UnsupportedDataTypeException e) {
             return JsonResponse
-                    .error(Response.Status.NOT_FOUND)
+                    .error(Response.Status.BAD_REQUEST)
+                    .message(e.getMessage())
                     .build();
         }
-
-        Response.ResponseBuilder response = Response.ok((Object) bytes);
-        response.header("Content-Disposition", "attachment; filename=\"users_info." + downloadUserRequest.getType() + "\"");
-        return response.build();
     }
 
     private AdminAuth authenticateRealmAdminRequest(RealmModel realm) {
