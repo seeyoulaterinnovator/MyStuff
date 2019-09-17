@@ -27,6 +27,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -37,11 +38,10 @@ public class UserPostResource {
 
     protected KeycloakSession session;
     private UserPostService userPostService;
-    private AdminAuth auth;
 
     public UserPostResource(KeycloakSession session) {
         this.session = session;
-        auth = authenticateRealmAdminRequest(session.getContext().getRealm());
+        authenticateRealmAdminRequest(session.getContext().getRealm());
         try {
             this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
         } catch (NamingException e) {
@@ -50,15 +50,11 @@ public class UserPostResource {
         }
     }
 
-    private EntityManager getEM() {
-        return session.getProvider(JpaConnectionProvider.class).getEntityManager();
-    }
-
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response create(UserPostRequest userPostRequest, HttpHeaders headers) {
+    public Response create(@Valid UserPostRequest userPostRequest, HttpHeaders headers) {
         try {
             return JsonResponse.success()
                     .addResult("user_post", userPostService.save(userPostRequest))
@@ -75,7 +71,7 @@ public class UserPostResource {
     @Path("/edit")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response edit(UserPostEditRequest userPostEditRequest, HttpHeaders headers) {
+    public Response edit(@Valid UserPostEditRequest userPostEditRequest, HttpHeaders headers) {
         try {
             return JsonResponse.success()
                     .addResult("user_post", userPostService.edit(userPostEditRequest))
@@ -91,7 +87,7 @@ public class UserPostResource {
     @Path("/delete/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response delete(@PathParam("id") String id) {
+    public Response delete(@NotNull @PathParam("id") String id) {
         try {
             userPostService.remove(id);
             return JsonResponse.success()
@@ -108,7 +104,7 @@ public class UserPostResource {
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response get(@PathParam("id") String id) {
+    public Response get(@NotNull @PathParam("id") String id) {
         try {
             return JsonResponse.success()
                     .addResult("user-post", userPostService.get(id))
@@ -169,7 +165,7 @@ public class UserPostResource {
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response addSystemRole(ExternalSystemRoleRequest externalSystemRoleRequest) {
+    public Response addSystemRole(@Valid ExternalSystemRoleRequest externalSystemRoleRequest) {
         try {
             return JsonResponse.success()
                     .addResult("user-post", userPostService.addSystemRole(externalSystemRoleRequest))
@@ -186,7 +182,7 @@ public class UserPostResource {
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response removeSystemRole(ExternalSystemRoleRequest externalSystemRoleRequest) {
+    public Response removeSystemRole(@Valid ExternalSystemRoleRequest externalSystemRoleRequest) {
         try {
             return JsonResponse.success()
                     .addResult("user-post", userPostService.removeSystemRole(externalSystemRoleRequest))

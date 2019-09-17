@@ -8,6 +8,8 @@ import javax.validation.constraints.NotNull;
 @Data
 @NoArgsConstructor
 public class UserPostEditRequest {
+    @NotNull
     private String id;
+    @NotNull
     private Long roleId;
 }
