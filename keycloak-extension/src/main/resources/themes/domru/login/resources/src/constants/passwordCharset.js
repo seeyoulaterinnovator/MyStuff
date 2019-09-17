@@ -1,0 +1,15 @@
+export const PASSWORD_CHARSET = {
+  lowercase: 'abcdefghijklmnopqrstuvwxyz',
+  uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  numbers: '0123456789',
+  extraChars: '_-[].!#',
+};
+
+export const HIGHLIGHT_VALIDATION_CHARSET = {
+  letters: {
+    lowercase: PASSWORD_CHARSET.lowercase,
+    uppercase: PASSWORD_CHARSET.uppercase,
+  },
+  numbers: PASSWORD_CHARSET.numbers,
+  extraChars: PASSWORD_CHARSET.extraChars,
+};

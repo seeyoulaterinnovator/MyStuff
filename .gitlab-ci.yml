@@ -93,6 +93,11 @@ back:war:
   except:
     - master
   script:
+    - currentdir=`pwd`
+    - cd keycloak-extension/src/main/resources/themes/domru/login/resources
+    - npm install
+    - npm run build
+    - cd $currentdir
     - mkdir -p .ci_status
     - ./gradlew :deploy -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
     - touch .ci_status/war_built
@@ -133,13 +138,35 @@ dpl:devel:
   when: manual
   environment:
     name: devel
+    url: http://domru-sso.alamics.ru
+  script:
+    - $BASE_DIR/scripts/deploy.sh
+
+dpl:test:
+  stage: deploy
+  when: manual
+  environment:
+    name: test
+    url: http://domru-sso-test.alamics.ru
+  script:
+    - $BASE_DIR/scripts/deploy.sh
+
+dpl:test:battle:
+  stage: deploy
+  when: manual
+  environment:
+    name: test
+    url: http://domru-sso-test.alamics.ru
   script:
     - $BASE_DIR/scripts/deploy.sh
 
 dpl:stage:
   stage: deploy
   when: manual
+  only:
+    - /^tag.*/
   environment:
     name: stage
+    url: http://domru-sso-stage.alamics.ru
   script:
     - $BASE_DIR/scripts/deploy.sh

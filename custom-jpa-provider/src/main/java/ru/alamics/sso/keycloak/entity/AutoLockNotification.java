@@ -1,11 +1,9 @@
 package ru.alamics.sso.keycloak.entity;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.entity.common.NotificationType;
+import ru.alamics.sso.keycloak.entity.common.NotificationStatus;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -13,9 +11,10 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "AUTO_LOCK_NOTIFICATION")
-@Getter
-@Setter
+@Data
+@AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class AutoLockNotification implements Serializable {
     private static final long serialVersionUID = -5664166927419170550L;
 
@@ -32,5 +31,9 @@ public class AutoLockNotification implements Serializable {
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
     private NotificationType type;
+
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private NotificationStatus status;
 
 }

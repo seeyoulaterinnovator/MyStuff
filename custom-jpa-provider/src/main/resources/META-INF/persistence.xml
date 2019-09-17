@@ -76,8 +76,8 @@
 		<class>ru.alamics.sso.keycloak.entity.AutoLockNotification</class>
 		<class>ru.alamics.sso.keycloak.entity.UserPost</class>
 		<class>ru.alamics.sso.keycloak.entity.UserPostRole</class>
-		<class>ru.alamics.sso.keycloak.entity.System</class>
-		<class>ru.alamics.sso.keycloak.entity.Access</class>
+		<class>ru.alamics.sso.keycloak.entity.ExternalSystem</class>
+		<class>ru.alamics.sso.keycloak.entity.ExternalSystemRole</class>
 		<properties>
 			<!-- http://docs.jboss.org/hibernate/orm/4.3/javadocs/constant-values.html -->
 
@@ -85,7 +85,6 @@
 			<property name="hibernate.dialect" value="org.hibernate.dialect.MariaDBDialect"/>
 
 <!--			<property name="javax.persistence.jdbc.driver" value="org.h2.Driver" />-->
-<!--			<property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>-->
 <!--			<property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>-->
 
 <!--			<property name="javax.persistence.database-product-name" value="PostgreSQL"/>-->
