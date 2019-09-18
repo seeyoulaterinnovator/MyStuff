@@ -69,14 +69,11 @@ input[type='number']::-webkit-outer-spin-button {
   .footer {
     margin-bottom: 30px;
     width: 100%;
+    position: relative;
   }
 }
 
 @media screen and (max-width: 639px){
-  .footer {
-    position: absolute;
-  }
-
   .login-title-text {
     max-width: unset;
   }
