@@ -59,10 +59,10 @@ public class CustomUserResource {
     }
 
     @POST
-    @Path("/bss")
+    @Path("")
     @NoCache
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createUserBss(final UserRequest request, final HttpHeaders headers) {
+    public Response createUser(final UserRequest request, final HttpHeaders headers) {
         if (request.getPhone() == null || request.getPhone().isBlank()) {
             return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
         }
@@ -79,10 +79,10 @@ public class CustomUserResource {
     }
 
     @POST
-    @Path("")
+    @Path("/bss")
     @NoCache
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createUser(final UserRequest request, final HttpHeaders headers) {
+    public Response createUserBss(final UserRequest request, final HttpHeaders headers) {
         if (request.getPhone() == null || request.getPhone().isBlank()) {
             return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
         }
