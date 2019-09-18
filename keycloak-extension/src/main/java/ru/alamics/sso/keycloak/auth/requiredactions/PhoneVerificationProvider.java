@@ -79,12 +79,11 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             authSession.setAuthNote(EXPIRATION_TIME, authContext.getExpirationTime().format(DateTimeFormatter.ISO_DATE_TIME));
             authSession.setAuthNote(COUNT_REPEAT, authContext.getCounter().toString());
 
-            //возможно тут надо добавить признак, чтобы фронт понимал что это не первая попытка отправить
-            // для скрытия возможности повторного звонка
             Response challenge = context.form()
                     .setAttribute("userPhone", user.getPhone())
                     .setAttribute("expirationSeconds", authContext.getActivationCodeType().getExpiredSeconds())
                     .setAttribute("lengthCode", authContext.getActivationCodeType().getLengthCode())
+                    .setAttribute("activationCodeType", authContext.getActivationCodeType().name())
                     .createForm(VERIFY_PHONE_FTL);
 
             context.challenge(challenge);
@@ -92,17 +91,17 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         } catch (UserPhoneEmpty userPhoneEmpty) {
             log.info("ignore... userPhoneEmpty");
         }  catch (PhoneCallException e) {
-            log.info("ignore... PhoneCallException " + e.getMessage());
+            log.info("ignore... PhoneCallException {}", e.getMessage());
         } catch (EmailException e) {
-            log.info("ignore... EmailException " + e.getMessage());
+            log.info("ignore... EmailException {}", e.getMessage());
         } catch (SmsSendException se) {
-            log.info("ignore... SmsSendException " + se.getMessage());
+            log.info("ignore... SmsSendException {}", se.getMessage());
         }
     }
 
     private String sendEmail(RequiredActionContext context) throws EmailException {
         String code = SmsCodeGenerator.getCode(ActivationCodeType.CODE_TO_EMAIL.getLengthCode());
-        Map<String, Object> attributes = new HashMap<String, Object>();
+        Map<String, Object> attributes = new HashMap<>();
 
         attributes.put("code", code);
         emailTemplateProvider
