@@ -252,6 +252,7 @@ public class CustomUserResource {
         if (request.getName() != null) user.setFirstName(request.getName());
 
         user.setEmailVerified(true);
+        user.setEnabled(true);
 
         List<String> reqActions = Collections.singletonList("UPDATE_PASSWORD");
 
