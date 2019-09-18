@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.create.rest;
 
+import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.keycloak.authentication.RequiredActionProvider;
@@ -178,9 +179,9 @@ public class CustomUserResource {
             return JsonResponse.error(Response.Status.INTERNAL_SERVER_ERROR)
                     .message("Could not create user")
                     .build();
-        } catch (FoundUserPostException e) {
+        } catch (NotFoundException e) {
             return JsonResponse.error(Response.Status.CONFLICT)
-                    .message("User post with the same userId and tomsId already exists")
+                    .message(e.getMessage())
                     .build();
         } finally {
             if (session.getTransactionManager().isActive()) {
@@ -278,7 +279,7 @@ public class CustomUserResource {
 
     }
 
-    private void addUserPost(UserModel userModel, UserRequest request) throws FoundUserPostException {
+    private void addUserPost(UserModel userModel, UserRequest request) throws NotFoundException {
         UserPostRequest userPostRequest = DataMapper.toUserPostRequest(userModel, request);
         userPostRequest.setRoleId(DEFAULT_ROLE_ID);
         userPostService.save(userPostRequest);
