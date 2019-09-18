@@ -7,25 +7,57 @@ import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.provider.ProviderConfigProperty;
 import ru.alamics.sso.auth.UserRole;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.keycloak.search.dto.UserDto;
 import ru.alamics.sso.keycloak.search.rest.SearchResource;
+import ru.alamics.sso.property.ApplicationProperties;
+import ru.alamics.sso.registration.model.TbapiConstants;
+import ru.alamics.sso.registration.tbapi.TbapiService;
+import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 
+import javax.naming.InitialContext;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
+
+import static ru.alamics.sso.keycloak.registration.UserConfigProperties.*;
+import static ru.alamics.sso.keycloak.registration.UserConfigProperties.SCHEMA_PROPERTY_NAME;
 import static ru.alamics.sso.registration.model.UserConstants.*;
 
 @Slf4j
 public class AttributesForm implements Authenticator {
     private static final String FORM = "attributes.ftl";
-
     private final UserRole role;
+    private final TbapiService tbapiService;
 
-    public AttributesForm (UserRole role) {
+
+    //TODO Тупо копипаста, но с ней что-то можно сделать
+    private static final List<ProviderConfigProperty> CONFIG_PROPERTIES = List.of(
+            new ProviderConfigProperty(HOSTNAME_PROPERTY_NAME, HOSTNAME_PROPERTY_LABEL, HOSTNAME_PROPERTY_HELP_TEXT,
+                    ProviderConfigProperty.STRING_TYPE, "localhost"),
+            new ProviderConfigProperty(PORT_PROPERTY_NAME, PORT_PROPERTY_LABEL, PORT_PROPERTY_HELP_TEXT,
+                    ProviderConfigProperty.STRING_TYPE, 80),
+            new ProviderConfigProperty(AUTH_APPNAME_NAME, AUTH_APPNAME_LABEL, AUTH_APPNAME_HELP_TEXT,
+                    ProviderConfigProperty.STRING_TYPE, "appname"),
+            new ProviderConfigProperty(AUTH_USERNAME_NAME, AUTH_USERNAME_LABEL, AUTH_USERNAME_HELP_TEXT,
+                    ProviderConfigProperty.STRING_TYPE, "username"),
+            new ProviderConfigProperty(PATH_PROPERTY_NAME, PATH_PROPERTY_LABEL, PATH_PROPERTY_HELP_TEXT,
+                    ProviderConfigProperty.STRING_TYPE, "/api/v1/customerManagement/customerAccount/{customerIds}/names"),
+            new ProviderConfigProperty(SCHEMA_PROPERTY_NAME, SCHEMA_PROPERTY_LABEL, SCHEMA_PROPERTY_HELP_TEXT,
+                    ProviderConfigProperty.BOOLEAN_TYPE, false)
+    );
+
+
+
+    public AttributesForm (UserRole role, TbapiService tbapiService) {
         this.role = role;
+        this.tbapiService = tbapiService;
     }
 
     @Override
@@ -63,7 +95,10 @@ public class AttributesForm implements Authenticator {
     private Response createForm(AuthenticationFlowContext context,  Map<String, Object> attributes) {
         LoginFormsProvider form = context.form();
         if(attributes.size() > 0) {
-            form.setAttribute("posts", attributes.get("users-info"));
+            List<UserDto> userDtos = (List<UserDto>) attributes.get("users-info");
+            Map<String, Object> customerNames = tbapiService.customerNames(connectConfig(), userDtos.stream().map(UserDto::getTomsId).toArray(String[]::new));
+            userDtos.forEach(userDto -> userDto.setCustomerName((String) customerNames.get(userDto.getTomsId())));
+            form.setAttribute("posts", userDtos);
         }
 
         return form.createForm(FORM);
@@ -99,5 +134,21 @@ public class AttributesForm implements Authenticator {
     @Override
     public void close () {
 
+    }
+
+    private TbapiConnectConfig connectConfig() {
+        ApplicationProperties properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        TbapiConnectConfig connectConfig = new TbapiConnectConfig();
+        if(properties != null) {
+            connectConfig.setHost(properties.getProperty(TbapiConstants.HOST));
+            connectConfig.setPort(Integer.parseInt(properties.getProperty(TbapiConstants.PORT)));
+            connectConfig.setAppname(properties.getProperty(TbapiConstants.AUTH_APPNAME));
+            connectConfig.setUsername(properties.getProperty(TbapiConstants.AUTH_USERNAME));
+            connectConfig.setPath(properties.getProperty(TbapiConstants.CUSTOMER_FIND_PATH));
+            connectConfig.setSecure(Boolean.parseBoolean(TbapiConstants.SECURE));
+        }
+
+
+        return connectConfig;
     }
 }

@@ -2,6 +2,8 @@ package ru.alamics.sso.registration.tbapi;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import ru.alamics.sso.cache.TbapiCache;
+import ru.alamics.sso.cache.impl.TbapiCacheImpl;
 import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.tbapi.model.TbapiRequest;
@@ -12,6 +14,8 @@ import ru.alamics.sso.registration.tbapi.port.TbapiRemoteService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.UserConstants.*;
 
@@ -22,6 +26,7 @@ public class TbapiService {
     ObjectMapper jacksonMapper = new ObjectMapper();
 
     private final TbapiRemoteService remoteService;
+    private final TbapiCache cache = TbapiCacheImpl.getInstance();
 
     public TbapiService(TbapiRemoteService remoteService) {
         this.remoteService = remoteService;
@@ -70,11 +75,22 @@ public class TbapiService {
         return ret;
     }
 
-    public Map<String, Object> customerName(final String customerId, TbapiConnectConfig connectConfig) {
+    public Map<String, Object> customerNames(TbapiConnectConfig connectConfig, String... customerIds) {
         final String DEBUG_STR = "customerName";
-        log.info("{}: customerId={}", DEBUG_STR, customerId);
+        log.info("{}: customerId={}", DEBUG_STR, customerIds);
+        List<String> customerList = List.of(customerIds);
+        var ret = this.cache.getCustomerNamesFromCache(customerList);
+        if(ret == null) {
+            connectConfig.setPath(connectConfig.getPath().replace("{customerIds}", String.join(",", customerList)));
+            ret = remoteService.getCustomerName(connectConfig);
+            ret.forEach(this.cache::putToCache);
+        } else {
+            List<String> nullableIds = ret.entrySet().stream().filter(entry -> Objects.isNull(entry.getValue())).map(Map.Entry::getKey).collect(Collectors.toList());
+            connectConfig.setPath(connectConfig.getPath().replace("{customerIds}", String.join(",", nullableIds)));
+            var nullableNames = remoteService.getCustomerName(connectConfig);
+            nullableNames.forEach(ret::replace);
+        }
 
-        var ret = remoteService.getCustomerName(connectConfig);
         return ret;
     }
 }

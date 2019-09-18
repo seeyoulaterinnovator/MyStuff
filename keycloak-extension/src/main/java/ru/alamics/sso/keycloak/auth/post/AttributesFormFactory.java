@@ -9,8 +9,9 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderConfigProperty;
 import ru.alamics.sso.auth.UserRole;
+import ru.alamics.sso.registration.tbapi.TbapiService;
+import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
-import javax.ejb.EJB;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.util.List;
@@ -62,12 +63,13 @@ public class AttributesFormFactory implements AuthenticatorFactory {
     @Override
     public Authenticator create (KeycloakSession session) {
         UserRole role = null;
+        TbapiService tbapiService = new TbapiService(new TbapiServiceRestImpl());
         try {
             role = (UserRole) new InitialContext().lookup("java:global/domru-sso/" + UserRole.class.getSimpleName());
         } catch (NamingException e) {
             log.error("Cannot find userRole bean, HELP!!");
         }
-        return new AttributesForm(role);
+        return new AttributesForm(role, tbapiService);
     }
 
     @Override

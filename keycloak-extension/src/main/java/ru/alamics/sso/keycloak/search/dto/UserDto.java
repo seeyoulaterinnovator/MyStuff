@@ -10,6 +10,7 @@ import java.io.Serializable;
 @Data
 @Builder(builderClassName = "UserDtoBuilder", toBuilder = true)
 public class UserDto implements Serializable {
+    private static final long serialVersionUID = -5333378808486130178L;
 
     private String id;
     private String username;
@@ -24,6 +25,7 @@ public class UserDto implements Serializable {
     private String roleName;
     private String clientRoleId;
     private String clientRoleName;
+    private String customerName;
 
     @JsonPOJOBuilder(withPrefix = "")
     public static class UserDtoBuilder {
