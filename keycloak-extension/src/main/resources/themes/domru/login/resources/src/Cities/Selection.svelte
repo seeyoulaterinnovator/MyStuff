@@ -41,7 +41,6 @@
     const groupedCitiesObject = arr.reduce((acc, value, index) => {
       let firstCharacter = value.name[0];
 
-
       if (!acc[partCounter]) acc.push([]);
       if (!acc[partCounter][firstCharacter]) {
 
@@ -110,6 +109,6 @@
       {/each}
       </ul>
     {:else}
-       <p class="m-auto">Нет заданного города</p>
+      <p class="m-auto">Нет заданного города</p>
     {/each}
 </ul>

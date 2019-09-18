@@ -2,6 +2,11 @@
   font-size: 36px;
   line-height: 45px;
   opacity: 0.8;
+  font-weight: bold;
+}
+
+.confirm__btns {
+  margin-top: 43px;
 }
 
 .confirm__btn {
@@ -13,21 +18,34 @@
   margin-right: 46px;
 }
 
+@media screen and (max-width: 1199px){
+  .confirm__btns {
+    margin-top: 32px;
+  }
+}
+
 @media screen and (max-width: 959px){
   .confirm__btns {
     flex-direction: column;
     align-items: center;
+    margin-top: 44px;
   }
 
   .confirm__btn:first-child {
     margin-right: 0;
     margin-bottom: 24px;
   }
+
+  .confirm__title {
+    max-width: 400px;
+    margin: 0 auto;
+  }
 }
 
 @media screen and (max-width: 639px){
   .confirm__btns {
     flex-direction: row;
+    margin-top: 28px;
   }
 
   .confirm__btn:first-child {
@@ -38,15 +56,12 @@
     font-size: 27px;
     line-height: 32px;
     opacity: 0.8;
+    max-width: 300px;
   }
 
 }
 
 @media screen and (max-width: 479px){
-  .btn__choose {
-    display: none;
-  }
-
   .confirm__btns {
     flex-direction: column;
   }

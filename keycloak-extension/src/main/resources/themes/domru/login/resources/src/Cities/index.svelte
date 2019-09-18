@@ -61,11 +61,11 @@
             on:submit|preventDefault={handleSelectCity}>
             <fieldset>
               <div class="field field--row md:w-full items-center">
-                <label for="search-city" class="mr-4 hidden md:block">Текущий выбор:</label>
+                <label for="search-city" class="mr-4 hidden lg:block">Текущий выбор:</label>
                 <input
                   name="Поиск города"
                   id="search-city"
-                  class="field__input"
+                  class="field__input field__input--city"
                   placeholder="Выберите город"
                   bind:value={search}
                   on:input={handleInputChange} />

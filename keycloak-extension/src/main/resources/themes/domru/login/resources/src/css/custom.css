@@ -45,6 +45,10 @@ input[type='number']::-webkit-outer-spin-button {
   content: url('./images/Chat.svg') !important;
 }
 
+.login-title-text {
+  max-width: 306px;
+}
+
 .footer {
   margin: auto 0 35px;
   padding: 0;
@@ -71,6 +75,10 @@ input[type='number']::-webkit-outer-spin-button {
 @media screen and (max-width: 639px){
   .footer {
     position: absolute;
+  }
+
+  .login-title-text {
+    max-width: unset;
   }
 }
 
