@@ -98,3 +98,16 @@
     max-width: unset;
   }
 }
+
+.pass-fields--change-pass {
+  min-width: unset;
+
+  @media (max-width: 1199px) {
+    min-width: 210px;
+  }
+
+  @media (max-width: 479px) {
+    width: 100%;
+  }
+}
+

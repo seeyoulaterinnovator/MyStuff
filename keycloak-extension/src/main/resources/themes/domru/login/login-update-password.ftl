@@ -9,7 +9,7 @@
         <form id="loginUpdatePasswordForm" action="${url.loginAction}" method="post">
             <@blocks.password firstFieldName="password-new" />
 
-            <button id="submit" class="btn btn-main pass-fields mt-6" type="submit">Сменить пароль</button>
+            <button id="submit" class="btn btn-main pass-fields mt-6 pass-fields--change-pass" type="submit">Сменить пароль</button>
         </form>
     </#if>
 </@layout.registrationLayout>
