@@ -3,7 +3,7 @@ package ru.alamics.sso.auth;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.models.jpa.entities.*;
-import ru.alamics.sso.keycloak.entity.UserPost;
+import ru.alamics.sso.keycloak.entity.UserPostEntity;
 import ru.alamics.sso.keycloak.repository.RoleRepository;
 import ru.alamics.sso.keycloak.repository.UserPostRepository;
 import ru.alamics.sso.keycloak.repository.UserRepository;
@@ -44,7 +44,7 @@ public class UserRole {
             roleEntity = repository.save(roleEntity);
         }
         UserEntity userEntity = userRepository.findUser(user.getId());
-        List<UserPost> userPosts = postRepository.findUserPostRole(userEntity);
+        List<UserPostEntity> userPosts = postRepository.findUserPostRole(userEntity);
         repository.deleteUserPostRoles(userEntity, userPosts, realm.getId());
         UserRoleMappingEntity mappingEntity = new UserRoleMappingEntity();
         mappingEntity.setRoleId(roleEntity.getId());

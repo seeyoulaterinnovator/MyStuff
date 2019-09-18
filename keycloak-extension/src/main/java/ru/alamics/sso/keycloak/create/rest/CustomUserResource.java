@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.create.rest;
 
+import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.keycloak.authentication.RequiredActionProvider;
@@ -22,8 +23,14 @@ import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.permissions.AdminPermissions;
 import org.keycloak.utils.MediaType;
 import ru.alamics.sso.keycloak.create.model.UserRequest;
+import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.registration.FoundUserPostException;
+import ru.alamics.sso.registration.dto.UserPostRequest;
+import ru.alamics.sso.registration.service.UserPostService;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
@@ -38,9 +45,17 @@ import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 @Slf4j
 public class CustomUserResource {
 
+    private final static Long DEFAULT_ROLE_ID = 1L;   //Соответствует роли LPR
     protected KeycloakSession session;
+    private UserPostService userPostService;
 
     public CustomUserResource(KeycloakSession session) {
+        try {
+            this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
+        } catch (NamingException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Something wrong with context");
+        }
         this.session = session;
     }
 
@@ -49,11 +64,11 @@ public class CustomUserResource {
     @NoCache
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUser(final UserRequest request, final HttpHeaders headers) {
+        if (request.getPhone() == null || request.getPhone().isBlank()) {
+            return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
+        }
 
-        RealmManager realmManager = new RealmManager(session);
-        RealmModel realm = realmManager.getRealmByName(request.getRealmName());
-        if (realm == null) throw new NotFoundException("Realm not found.");
-
+        RealmModel realm = session.getContext().getRealm();
         AdminAuth auth = authenticateRealmAdminRequest(realm);
 
         Response response = checkOnExistUser(request, realm);
@@ -61,29 +76,48 @@ public class CustomUserResource {
             return response;
         }
 
-        return getUserResponse(request, realm, auth);
+        return getUserResponse(request, realm, auth, true);
+    }
+
+    @POST
+    @Path("/bss")
+    @NoCache
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response createUserBss(final UserRequest request, final HttpHeaders headers) {
+        if (request.getPhone() == null || request.getPhone().isBlank()) {
+            return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
+        }
+        if (request.getTomsId() == null || request.getTomsId().isBlank()) {
+            return ErrorResponse.error("TomsId is required attribute", Response.Status.BAD_REQUEST);
+        }
+
+        RealmModel realm = session.getContext().getRealm();
+        AdminAuth auth = authenticateRealmAdminRequest(realm);
+
+        Response response = checkOnExistUser(request, realm);
+        if (response != null) {
+            return response;
+        }
+
+        return getUserResponse(request, realm, auth, false);
     }
 
     private Response checkOnExistUser(UserRequest request, RealmModel realm) {
-        if (request.getPhone() == null || request.getPhone().isBlank()) {
-            return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
-        } else {
-            List<UserEntity> users = getEM().createQuery("select u from UserAttributeEntity atr join atr.user u " +
-                    "where atr.name = :ph_attr_name and " +
-                    " atr.value like '%' || :phone || '%' and" + // TODO =
-                    " u.realmId = :realId ", UserEntity.class)
-                    .setParameter("ph_attr_name", ATTR_PHONE_NAME)
-                    .setParameter("phone", request.getPhone())
-                    .setParameter("realId", realm.getId())
-                    .getResultList();
+        List<UserEntity> users = getEM().createQuery("select u from UserAttributeEntity atr join atr.user u " +
+                "where atr.name = :ph_attr_name and " +
+                " atr.value like '%' || :phone || '%' and" + // TODO =
+                " u.realmId = :realId ", UserEntity.class)
+                .setParameter("ph_attr_name", ATTR_PHONE_NAME)
+                .setParameter("phone", request.getPhone())
+                .setParameter("realId", realm.getId())
+                .getResultList();
 
-            if (users != null && !users.isEmpty()) {
-                log.error("User exists with same phone {}", request.getPhone());
-                return JsonResponse.error(Response.Status.CONFLICT)
-                        .message("User exists with same phone")
-                        .addResult("user_id", users.get(0).getId())
-                        .build();
-            }
+        if (users != null && !users.isEmpty()) {
+            log.error("User exists with same phone {}", request.getPhone());
+            return JsonResponse.error(Response.Status.CONFLICT)
+                    .message("User exists with same phone")
+                    .addResult("user_id", users.get(0).getId())
+                    .build();
         }
 
         // Double-check duplicated username and email here due to federation
@@ -109,20 +143,22 @@ public class CustomUserResource {
         return null;
     }
 
-    private Response getUserResponse(UserRequest request, RealmModel realm, AdminAuth auth) {
+    private Response getUserResponse(UserRequest request, RealmModel realm, AdminAuth auth, boolean bss) {
         try {
-
             UserModel user = session.users().addUser(realm, request.getEmail());
             Set<String> emptySet = Collections.emptySet();
 
             updateUserFromRequest(user, request, emptySet, realm, session, false);
+            if (!bss) {
+                addUserPost(user, request);
+            }
 
-            //todo эвенты не отправляются ??
             new AdminEventBuilder(realm, auth, session, session.getContext().getConnection())
+                    .realm(realm)
+                    .resource(ResourceType.REALM)
                     .resource(ResourceType.USER)
                     .operation(OperationType.CREATE)
                     .resourcePath(session.getContext().getUri(), user.getId())
-                    .representation(request)
                     .success();
 
             if (session.getTransactionManager().isActive()) {
@@ -134,21 +170,23 @@ public class CustomUserResource {
                     .build();
 
         } catch (ModelDuplicateException e) {
-            if (session.getTransactionManager().isActive()) {
-                session.getTransactionManager().setRollbackOnly();
-            }
             return JsonResponse.error(Response.Status.CONFLICT)
                     .message("User exists with same username or email or phone")
                     .build();
 
         } catch (ModelException me) {
-            if (session.getTransactionManager().isActive()) {
-                session.getTransactionManager().setRollbackOnly();
-            }
             log.warn("Could not create user", me);
             return JsonResponse.error(Response.Status.INTERNAL_SERVER_ERROR)
                     .message("Could not create user")
                     .build();
+        } catch (NotFoundException e) {
+            return JsonResponse.error(Response.Status.CONFLICT)
+                    .message(e.getMessage())
+                    .build();
+        } finally {
+            if (session.getTransactionManager().isActive()) {
+                session.getTransactionManager().setRollbackOnly();
+            }
         }
     }
 
@@ -215,6 +253,7 @@ public class CustomUserResource {
         if (request.getName() != null) user.setFirstName(request.getName());
 
         user.setEmailVerified(true);
+        user.setEnabled(true);
 
         List<String> reqActions = Collections.singletonList("UPDATE_PASSWORD");
 
@@ -232,7 +271,17 @@ public class CustomUserResource {
             }
         }
 
-        user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(request.getPhone()));
+        String phone = request.getPhone();
+        if (phone != null)
+            phone = phone.replaceAll("[^0-9]+", "");
 
+        user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(phone));
+
+    }
+
+    private void addUserPost(UserModel userModel, UserRequest request) throws NotFoundException {
+        UserPostRequest userPostRequest = DataMapper.toUserPostRequest(userModel, request);
+        userPostRequest.setRoleId(DEFAULT_ROLE_ID);
+        userPostService.save(userPostRequest);
     }
 }

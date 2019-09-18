@@ -18,12 +18,16 @@ import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.permissions.AdminPermissions;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundUserPostException;
-import ru.alamics.sso.registration.dto.UserPostDto;
+import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
+import ru.alamics.sso.registration.dto.UserPostEditRequest;
+import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.service.UserPostService;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -36,35 +40,30 @@ public class UserPostResource {
     private UserPostService userPostService;
 
     public UserPostResource(KeycloakSession session) {
+        this.session = session;
+        authenticateRealmAdminRequest(session.getContext().getRealm());
         try {
             this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
         } catch (NamingException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
         }
-        this.session = session;
-    }
-
-    private EntityManager getEM() {
-        return session.getProvider(JpaConnectionProvider.class).getEntityManager();
     }
 
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response create(UserPostDto userPostDto, HttpHeaders headers) {
-        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
+    public Response create(@NotNull @Valid UserPostRequest userPostRequest, HttpHeaders headers) {
         try {
             return JsonResponse.success()
-                    .addResult("user_post", userPostService.save(userPostDto))
+                    .addResult("user_post", userPostService.save(userPostRequest))
                     .build();
-        } catch (FoundUserPostException e) {
+        } catch (NotFoundException e) {
             return JsonResponse.fail()
-                    .message("UserPost is exist")
+                    .message(e.getMessage())
                     .build();
         }
-
     }
 
 
@@ -72,14 +71,10 @@ public class UserPostResource {
     @Path("/edit")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response edit(UserPostDto userPostDto, HttpHeaders headers) {
-        if (userPostDto.getId() == null) {
-            return ErrorResponse.error("Id is required attribute", Response.Status.BAD_REQUEST);
-        }
-        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
+    public Response edit(@Valid UserPostEditRequest userPostEditRequest, HttpHeaders headers) {
         try {
             return JsonResponse.success()
-                    .addResult("user_post", userPostService.edit(userPostDto))
+                    .addResult("user_post", userPostService.edit(userPostEditRequest))
                     .build();
         } catch (NotFoundException e) {
             return JsonResponse.fail()
@@ -93,7 +88,6 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response delete(@PathParam("id") String id) {
-        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
         try {
             userPostService.remove(id);
             return JsonResponse.success()
@@ -111,7 +105,6 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response get(@PathParam("id") String id) {
-        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
         try {
             return JsonResponse.success()
                     .addResult("user-post", userPostService.get(id))
@@ -129,7 +122,6 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response getAll() {
-        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
         return JsonResponse.success()
                 .addResult("user-posts", userPostService.getAll())
                 .build();
@@ -141,11 +133,67 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response getAllRoles() {
-        authenticateRealmAdminRequest(new RealmManager(session).getRealmByName("master"));
         return JsonResponse.success()
                 .addResult("roles", userPostService.getUserPostRoleDtos())
                 .build();
     }
+
+    @GET
+    @Path("/system-roles")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response getAllSystemRoles() {
+        return JsonResponse.success()
+                .addResult("system-roles", userPostService.getExternalSystemRoles())
+                .build();
+    }
+
+    @GET
+    @Path("/systems")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response getAllSystems() {
+        return JsonResponse.success()
+                .addResult("systems", userPostService.getExternalSystems())
+                .build();
+    }
+
+    @POST
+    @Path("/add-system-role")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response addSystemRole(@NotNull @Valid ExternalSystemRoleRequest externalSystemRoleRequest) {
+        try {
+            return JsonResponse.success()
+                    .addResult("user-post", userPostService.addSystemRole(externalSystemRoleRequest))
+                    .build();
+        } catch (NotFoundException e) {
+            return JsonResponse.fail()
+                    .message(e.getMessage())
+                    .build();
+        }
+    }
+
+    @POST
+    @Path("/remove-system-role")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response removeSystemRole(@NotNull @Valid ExternalSystemRoleRequest externalSystemRoleRequest) {
+        try {
+            return JsonResponse.success()
+                    .addResult("user-post", userPostService.removeSystemRole(externalSystemRoleRequest))
+                    .build();
+        } catch (NotFoundException e) {
+            return JsonResponse.fail()
+                    .message(e.getMessage())
+                    .build();
+        }
+    }
+
 
     private AdminAuth authenticateRealmAdminRequest(RealmModel realm) {
         String tokenString = new AppAuthManager().extractAuthorizationHeaderToken(session.getContext().getRequestHeaders());
