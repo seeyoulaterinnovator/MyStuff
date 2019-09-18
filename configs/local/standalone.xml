@@ -454,6 +454,9 @@
             <spi name="realmCache">
                 <provider name="default" enabled="true"/>
             </spi>
+            <spi name="tbapiCache">
+                <provider name="default" enabled="true"/>
+            </spi>
             <spi name="connectionsInfinispan">
                 <default-provider>default</default-provider>
                 <provider name="default" enabled="true">

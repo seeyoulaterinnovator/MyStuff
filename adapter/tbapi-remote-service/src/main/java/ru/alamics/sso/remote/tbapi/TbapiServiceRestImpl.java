@@ -64,4 +64,20 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
 
         return responseMap;
     }
+
+    @Override
+    public Map<String, Object> getCustomerName(TbapiConnectConfig connectConfig) {
+        URI uri = new ResteasyUriBuilder()
+                .scheme(connectConfig.isSecure() ? "https" : "http")
+                .host(connectConfig.getHost())
+                .port(connectConfig.getPort())
+                .path(connectConfig.getPath())
+                .build();
+
+        ResteasyWebTarget target = client.target(uri);
+        target.request(MediaType.APPLICATION_JSON);
+        Response response = target.register(ResteasyJackson2Provider.class).request().get();
+        Map<String, Object> responseMap = response.readEntity(new GenericType<>(mapExample.getClass()));
+        return responseMap;
+    }
 }

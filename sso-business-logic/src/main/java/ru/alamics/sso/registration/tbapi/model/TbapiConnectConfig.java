@@ -1,8 +1,12 @@
 package ru.alamics.sso.registration.tbapi.model;
 
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@NoArgsConstructor
 public class TbapiConnectConfig {
 
     private String host;

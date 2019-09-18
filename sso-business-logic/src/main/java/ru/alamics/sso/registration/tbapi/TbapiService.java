@@ -70,4 +70,11 @@ public class TbapiService {
         return ret;
     }
 
+    public Map<String, Object> customerName(final String customerId, TbapiConnectConfig connectConfig) {
+        final String DEBUG_STR = "customerName";
+        log.info("{}: customerId={}", DEBUG_STR, customerId);
+
+        var ret = remoteService.getCustomerName(connectConfig);
+        return ret;
+    }
 }

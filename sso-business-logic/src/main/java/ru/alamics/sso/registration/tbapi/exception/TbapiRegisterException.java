@@ -2,6 +2,8 @@ package ru.alamics.sso.registration.tbapi.exception;
 
 public class TbapiRegisterException extends Exception {
 
+    private static final long serialVersionUID = 2420566597191052941L;
+
     public TbapiRegisterException() {
     }
 
