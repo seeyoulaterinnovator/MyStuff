@@ -99,9 +99,9 @@ public class SearchResource {
 
     private String getSort(String sortField, boolean sortAsc) {
         String sort = "";
-        if (sortField.equalsIgnoreCase(SORT_FIELD_NAME)) {
+        if (SORT_FIELD_NAME.equalsIgnoreCase(sortField)) {
             sort += "ORDER BY first_name";
-        } else if (sortField.equalsIgnoreCase(SORT_FIELD_EMAIL)) {
+        } else if (SORT_FIELD_EMAIL.equalsIgnoreCase(sortField)) {
             sort += "ORDER BY email";
         }
         if (sort.isBlank()) {
