@@ -52,13 +52,22 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 
             // need to send account data to user
                 try {
-                    String[] resPath = event.getResourcePath().split("/");
-                    if (resPath.length > 1) {
+                    log.info("ExtendedEventListener: admin create user");
 
-                        log.info("ExtendedEventListener: admin create user");
+                    String[] resPath = event.getResourcePath().split("/");
+
+                    String userId = null;
+                    for (String part : resPath) {
+                        if (part.length() == 36) {
+                            userId = part;
+                            break;
+                        }
+                    }
+
+                    if (userId != null) {
 
                         RealmModel realm = model.getRealm(event.getRealmId());
-                        UserModel user = session.users().getUserById(resPath[1], realm);
+                        UserModel user = session.users().getUserById(userId, realm);
 
                         if (user != null && user.getEmail() != null) {
                             try {
@@ -125,6 +134,8 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                             } catch (EmailException e) {
                                 log.error("Failed to send type mail", e);
                             }
+                        } else {
+                            log.error(String.format("User '%s' not found or do not have email", userId));
                         }
                     }
 
