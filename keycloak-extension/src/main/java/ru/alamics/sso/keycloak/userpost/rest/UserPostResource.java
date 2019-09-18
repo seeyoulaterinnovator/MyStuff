@@ -54,7 +54,7 @@ public class UserPostResource {
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response create(@Valid UserPostRequest userPostRequest, HttpHeaders headers) {
+    public Response create(@NotNull @Valid UserPostRequest userPostRequest, HttpHeaders headers) {
         try {
             return JsonResponse.success()
                     .addResult("user_post", userPostService.save(userPostRequest))
@@ -87,7 +87,7 @@ public class UserPostResource {
     @Path("/delete/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response delete(@NotNull @PathParam("id") String id) {
+    public Response delete(@PathParam("id") String id) {
         try {
             userPostService.remove(id);
             return JsonResponse.success()
@@ -104,7 +104,7 @@ public class UserPostResource {
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response get(@NotNull @PathParam("id") String id) {
+    public Response get(@PathParam("id") String id) {
         try {
             return JsonResponse.success()
                     .addResult("user-post", userPostService.get(id))
@@ -165,7 +165,7 @@ public class UserPostResource {
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response addSystemRole(@Valid ExternalSystemRoleRequest externalSystemRoleRequest) {
+    public Response addSystemRole(@NotNull @Valid ExternalSystemRoleRequest externalSystemRoleRequest) {
         try {
             return JsonResponse.success()
                     .addResult("user-post", userPostService.addSystemRole(externalSystemRoleRequest))
@@ -182,7 +182,7 @@ public class UserPostResource {
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response removeSystemRole(@Valid ExternalSystemRoleRequest externalSystemRoleRequest) {
+    public Response removeSystemRole(@NotNull @Valid ExternalSystemRoleRequest externalSystemRoleRequest) {
         try {
             return JsonResponse.success()
                     .addResult("user-post", userPostService.removeSystemRole(externalSystemRoleRequest))
