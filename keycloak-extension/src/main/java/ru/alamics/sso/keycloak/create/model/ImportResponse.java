@@ -27,12 +27,10 @@ public class ImportResponse {
         createdUserIds.add(map);
     }
 
-    public void addErrors(String key, Object value){
+    public void addError(Map<String, Object> error){
         if (errors == null){
             errors = new LinkedList<>();
         }
-        Map<String, Object> map = new HashMap<>();
-        map.put(key,value);
-        errors.add(map);
+        errors.add(error);
     }
 }

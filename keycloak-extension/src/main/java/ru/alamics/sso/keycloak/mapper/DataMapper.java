@@ -4,6 +4,7 @@ import org.keycloak.models.UserModel;
 import ru.alamics.sso.keycloak.create.model.UserImport;
 import ru.alamics.sso.keycloak.create.model.UserRequest;
 import ru.alamics.sso.keycloak.search.dto.UserDto;
+import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.model.User;
 
@@ -114,5 +115,15 @@ public abstract class DataMapper {
                 .phone(userImport.getUserRequest().getPhone())
                 .attributes(attr)
                 .build();
+    }
+
+    public static ExternalSystemRoleRequest toExternalSystemRoleRequest(String id, Long sysId){
+        if (id == null || sysId == null){
+            return null;
+        }
+        ExternalSystemRoleRequest externalSystemRoleRequest = new ExternalSystemRoleRequest();
+        externalSystemRoleRequest.setUserPostId(id);
+        externalSystemRoleRequest.setSystemRoleId(sysId);
+        return externalSystemRoleRequest;
     }
 }

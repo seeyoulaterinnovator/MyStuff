@@ -79,19 +79,34 @@ public class UserPostRepository {
                 .getResultList();
     }
 
-    public ExternalSystemRole getExternalSystemRole(String sysName) {
-        ExternalSystemRole externalSystemRole = null;
+    public ExternalSystemRoleEntity getExternalSystemRole(String sysName) {
+        ExternalSystemRoleEntity externalSystemRole = null;
         try {
             externalSystemRole = em.createQuery(
                     "select role " +
-                            "from ExternalSystemRole role \n" +
-                            "join ExternalSystem sys on role.externalSystem = sys.id \n" +
-                            "where sys.name = :sysName", ExternalSystemRole.class)
+                            "from ExternalSystemRoleEntity role \n" +
+                            "join ExternalSystemEntity sys on role.externalSystem = sys.id \n" +
+                            "where sys.name = :sysName", ExternalSystemRoleEntity.class)
                     .setParameter("sysName", sysName)
                     .getResultList()
                     .get(0);
         } finally {
             return externalSystemRole;
+        }
+    }
+
+    public UserPostRoleEntity getUserPostRole(String name) {
+        UserPostRoleEntity userPostRoleEntity = null;
+        try {
+            userPostRoleEntity = em.createQuery(
+                    "select role " +
+                            "from UserPostRoleEntity role \n" +
+                            "where role.name = :name", UserPostRoleEntity.class)
+                    .setParameter("name", name)
+                    .getResultList()
+                    .get(0);
+        } finally {
+            return userPostRoleEntity;
         }
     }
 
@@ -125,21 +140,5 @@ public class UserPostRepository {
 
     public ExternalSystemRoleEntity findExternalSystemRole(Long id){
         return em.find(ExternalSystemRoleEntity.class, id);
-    }
-
-    public ExternalSystemRole getExternalSystemRole(String sysName) {
-        ExternalSystemRole externalSystemRole = null;
-        try {
-            externalSystemRole = em.createQuery(
-                    "select role " +
-                            "from ExternalSystemRole role \n" +
-                            "join ExternalSystem sys on role.externalSystem = sys.id \n" +
-                            "where sys.name = :sysName", ExternalSystemRole.class)
-                    .setParameter("sysName", sysName)
-                    .getResultList()
-                    .get(0);
-        } finally {
-            return externalSystemRole;
-        }
     }
 }

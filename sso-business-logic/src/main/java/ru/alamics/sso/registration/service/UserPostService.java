@@ -1,11 +1,9 @@
 package ru.alamics.sso.registration.service;
 
 import javassist.NotFoundException;
-import ru.alamics.sso.keycloak.entity.ExternalSystemRole;
-import ru.alamics.sso.keycloak.entity.UserPost;
-import ru.alamics.sso.keycloak.entity.UserPostRole;
 import ru.alamics.sso.keycloak.entity.ExternalSystemRoleEntity;
 import ru.alamics.sso.keycloak.entity.UserPostEntity;
+import ru.alamics.sso.keycloak.entity.UserPostRoleEntity;
 import ru.alamics.sso.keycloak.repository.UserPostRepository;
 import ru.alamics.sso.keycloak.repository.UserRepository;
 import ru.alamics.sso.registration.dto.*;
@@ -104,7 +102,7 @@ public class UserPostService {
     }
 
     public Long getUserPostRole(String name) throws NotFoundException {
-        UserPostRole userPostRole = userPostRepository.getUserPostRole(name);
+        UserPostRoleEntity userPostRole = userPostRepository.getUserPostRole(name);
         if (userPostRole == null){
             throw new NotFoundException("UserPostRole is not exist");
         }
@@ -112,7 +110,7 @@ public class UserPostService {
     }
 
     public Long getExternalSystemRoleId(String sysName) throws NotFoundException {
-        ExternalSystemRole externalSystemRole = userPostRepository.getExternalSystemRole(sysName);
+        ExternalSystemRoleEntity externalSystemRole = userPostRepository.getExternalSystemRole(sysName);
         if (externalSystemRole == null){
             throw new NotFoundException("ExternalSystemRole is not exist");
         }

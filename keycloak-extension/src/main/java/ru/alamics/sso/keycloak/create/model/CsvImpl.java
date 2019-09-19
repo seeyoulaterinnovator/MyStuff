@@ -18,9 +18,9 @@ public class CsvImpl implements FileModel {
         rows = csvReader.readAll();
     }
 
-    public CsvImpl() {
+    public CsvImpl() throws UnsupportedEncodingException {
         byteArrayOutputStream = new ByteArrayOutputStream();
-        csvWriter = new CSVWriter(new OutputStreamWriter(byteArrayOutputStream),';',
+        csvWriter = new CSVWriter(new OutputStreamWriter(byteArrayOutputStream, "UTF-8"),';',
                 CSVWriter.NO_QUOTE_CHARACTER,
                 CSVWriter.DEFAULT_ESCAPE_CHARACTER,
                 CSVWriter.DEFAULT_LINE_END);

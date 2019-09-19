@@ -40,7 +40,7 @@ import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
 @Slf4j
 public class UserService {
-
+    private final static Long DEFAULT_ROLE_ID = 1L;   //Соответствует роли LPR
     protected KeycloakSession session;
     private AdminAuth auth;
     private RealmModel realm;
@@ -74,7 +74,7 @@ public class UserService {
         if (file == null) {
             throw new UnsupportedDataTypeException("Unsupported file format!");
         }
-        List<UserDto> userDto = new SearchResource(session).getUsers("", "", "");
+        List<UserDto> userDto = new SearchResource(session).getUsers(null, null, null, null, true);
         if (userDto == null || userDto.isEmpty()) {
             return null;
         }
@@ -167,21 +167,26 @@ public class UserService {
                 importResponse.addCreatedUserIds("userId", user.getId());
 
                 Map<String, Object> tbapiResponse = tbapiService.registerUser(DataMapper.toUser(o), tbapiConnectConfig);
-                if (tbapiResponse.get(UserConstants.ATTR_TOMS_NAME) == null){
-                   throw new TbapiRegisterException();
+                if (tbapiResponse.get(UserConstants.ATTR_TOMS_NAME) == null) {
+                    throw new TbapiRegisterException();
                 }
-                if (tbapiResponse.get(UserConstants.ATTR_DMP_NAME) != null){
+                if (tbapiResponse.get(UserConstants.ATTR_DMP_NAME) != null) {
                     o.getUserRequest().setTomsId(tbapiResponse.get(UserConstants.ATTR_DMP_NAME).toString());
                 }
                 o.getUserRequest().setTomsId(tbapiResponse.get(UserConstants.ATTR_TOMS_NAME).toString());
                 addUserPost(user, o);
 
                 tbapiSuccess.getAndIncrement();
-            } catch (FoundException | NotFoundException e) {
+            } catch (FoundException e) {
+                Map<String, Object> error = new HashMap<>();
+                error.put(e.getMessage(), e.getResult());
+                error.put("userName", o.getUserRequest().getName());
+                importResponse.addError(error);
+            } catch (NotFoundException e) {
                 Map<String, Object> error = new HashMap<>();
                 error.put("error", e.getMessage());
                 error.put("userName", o.getUserRequest().getName());
-                importResponse.setErrors(List.of(error));
+                importResponse.addError(error);
             } catch (TbapiRegisterException e) {
                 tbapiErrors.getAndIncrement();
             }
@@ -192,26 +197,33 @@ public class UserService {
     }
 
     private UserModel createUser(UserRequest userRequest) throws FoundException {
-        checkOnExistUser(userRequest, realm);
-        UserModel user = session.users().addUser(realm, userRequest.getEmail());
-        Set<String> emptySet = Collections.emptySet();
-        updateUserFromRequest(user, userRequest, emptySet, realm, session, false);
-        return user;
+        try {
+            checkOnExistUser(userRequest, realm);
+            UserModel user = session.users().addUser(realm, userRequest.getEmail());
+            updateUserFromRequest(user, userRequest, realm, session, false);
+            return user;
+        } finally {
+            if (session.getTransactionManager().isActive()) {
+                session.getTransactionManager().setRollbackOnly();
+            }
+        }
     }
 
-    private static void updateUserFromRequest(UserModel user, UserRequest request, Set<String> attrsToRemove, RealmModel realm, KeycloakSession session, boolean removeMissingRequiredActions) {
+    private static void updateUserFromRequest(UserModel user, UserRequest
+            request, RealmModel realm, KeycloakSession session, boolean removeMissingRequiredActions) {
         if (request.getEmail() != null && realm.isEditUsernameAllowed()) {
             user.setUsername(request.getEmail());
         }
         if (request.getEmail() != null) {
             user.setEmail(request.getEmail());
-            if ("" .equals(request.getEmail())) {
+            if ("".equals(request.getEmail())) {
                 user.setEmail(null);
             }
         }
         if (request.getName() != null) user.setFirstName(request.getName());
 
         user.setEmailVerified(true);
+        user.setEnabled(true);
 
         List<String> reqActions = Collections.singletonList("UPDATE_PASSWORD");
 
@@ -232,9 +244,9 @@ public class UserService {
         user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(request.getPhone()));
     }
 
-    public UserModel createUser(UserRequest request, boolean bss) throws FoundException {
+    public UserModel createUser(UserRequest request, boolean bss) throws FoundException, NotFoundException {
         UserModel user = createUser(request);
-        if (!bss) {
+        if (bss) {
             addUserPost(user, request);
         }
         createAdminEvent(OperationType.CREATE, user);
@@ -254,21 +266,21 @@ public class UserService {
 
         if (users != null && !users.isEmpty()) {
             log.error("User exists with same phone {}", request.getPhone());
-            throw new FoundException("User exists with same phone");
+            throw new FoundException("User exists with same phone").addResult("userId", users.get(0).getId());
         }
 
         // Double-check duplicated username and email here due to federation
         UserModel userModel = session.users().getUserByUsername(request.getEmail(), realm);
         if (userModel != null) {
             log.error("User exists with same username {}", request.getEmail());
-            throw new FoundException("User exists with same username");
+            throw new FoundException("User exists with same username").addResult("userId", userModel.getId());
         }
 
         if (request.getEmail() != null && !realm.isDuplicateEmailsAllowed()) {
             userModel = session.users().getUserByEmail(request.getEmail(), realm);
             if (userModel != null) {
                 log.error("User exists with same email {}", request.getEmail());
-                throw new FoundException("User exists with same email");
+                throw new FoundException("User exists with same email").addResult("userId", userModel.getId());
             }
         }
     }
@@ -287,17 +299,18 @@ public class UserService {
                 .success();
     }
 
-    private void addUserPost(UserModel userModel, UserRequest request) throws FoundException {
+    private void addUserPost(UserModel userModel, UserRequest request) throws NotFoundException {
         UserPostRequest userPostRequest = DataMapper.toUserPostRequest(userModel, request);
-        userPostRequest.setRoleId(1L);
+        userPostRequest.setRoleId(DEFAULT_ROLE_ID);
         userPostService.save(userPostRequest);
     }
 
-    private void addUserPost(UserModel userModel, UserImport userImport) throws FoundException, NotFoundException {
+    private void addUserPost(UserModel userModel, UserImport userImport) throws NotFoundException {
         UserPostRequest userPostRequest = DataMapper.toUserPostRequest(userModel, userImport.getUserRequest());
         userPostRequest.setRoleId(userPostService.getUserPostRole(userImport.getRoleName()));
         UserPostResponse userPostResponse = userPostService.save(userPostRequest);
-        userPostService.addSystemRole(userPostResponse.getId(), userPostService.getExternalSystemRoleId(userImport.getSystemName()));
+        userPostService.addSystemRole(DataMapper.toExternalSystemRoleRequest(userPostResponse.getId(),
+                userPostService.getExternalSystemRoleId(userImport.getSystemName())));
     }
 
     private void createTbapiConnectConfig() {
