@@ -17,13 +17,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.LinkedList;
 import java.util.List;
 
 @Slf4j
 public class SearchResource {
 
-
+    private final static String SORT_FIELD_NAME = "firstName";
+    private final static String SORT_FIELD_EMAIL = "email";
     protected KeycloakSession session;
 
     public SearchResource(KeycloakSession session) {
@@ -40,13 +40,14 @@ public class SearchResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response getUsersInfo(@QueryParam("search") String search, @QueryParam("searchUser") String searchUser,
-                                 @QueryParam("searchToms") String searchToms) {
+                                 @QueryParam("searchToms") String searchToms, @QueryParam("sortField") String sortField,
+                                 @QueryParam("sortAsc") boolean sortAsc) {
         return JsonResponse.success()
-                .addResult("users-info", getUsers(search, searchUser, searchToms))
+                .addResult("users-info", getUsers(search, searchUser, searchToms, sortField, sortAsc))
                 .build();
     }
 
-    public List<UserDto> getUsers(String search, String searchUser, String searchToms) {
+    private List<UserDto> getUsers(String search, String searchUser, String searchToms, String sortField, boolean sortAsc) {
         List<Tuple> tuples = getEM().createNativeQuery(
                 "select UE.ID         as user_id,\n" +
                         "       UE.USERNAME   as username,\n" +
@@ -87,11 +88,28 @@ public class SearchResource {
                         "          else UP.USER_ID LIKE '%' OR UP.USER_ID is null end\n" +
                         "  AND CASE\n" +
                         "          WHEN :searchToms is not null and :searchToms != '' then (UP.TOMS_ID = :searchToms)\n" +
-                        "          else UP.TOMS_ID LIKE '%' OR UP.TOMS_ID is null end", Tuple.class)
+                        "          else UP.TOMS_ID LIKE '%' OR UP.TOMS_ID is null end\n" +
+                        getSort(sortField, sortAsc) , Tuple.class)
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
                 .getResultList();
         return DataMapper.toUserDtoList(tuples);
+    }
+
+    private String getSort(String sortField, boolean sortAsc) {
+        String sort = "";
+        if (SORT_FIELD_NAME.equalsIgnoreCase(sortField)) {
+            sort += "ORDER BY first_name";
+        } else if (SORT_FIELD_EMAIL.equalsIgnoreCase(sortField)) {
+            sort += "ORDER BY email";
+        }
+        if (sort.isBlank()) {
+            return sort;
+        }
+        if (!sortAsc){
+            sort += " DESC";
+        }
+        return sort;
     }
 }

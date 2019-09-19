@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.create.rest;
 
+import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
@@ -25,6 +26,10 @@ import ru.alamics.sso.registration.FoundException;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.ws.rs.*;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.persistence.EntityManager;
+import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -32,13 +37,24 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
+
+import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
 @Slf4j
 public class CustomUserResource {
+
+    private final static Long DEFAULT_ROLE_ID = 1L;   //Соответствует роли LPR
     protected KeycloakSession session;
-    private UserService userService;
+    private UserPostService userPostService;
 
     public CustomUserResource(KeycloakSession session) {
+        try {
+            this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
+        } catch (NamingException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Something wrong with context");
+        }
         this.session = session;
         AdminAuth auth = authenticateRealmAdminRequest(session.getContext().getRealm());
         this.userService = new UserService(session, auth);
@@ -52,34 +68,126 @@ public class CustomUserResource {
         if (request.getPhone() == null || request.getPhone().isBlank()) {
             return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
         }
+
+        RealmModel realm = session.getContext().getRealm();
+        AdminAuth auth = authenticateRealmAdminRequest(realm);
+
+        Response response = checkOnExistUser(request, realm);
+        if (response != null) {
+            return response;
+        }
+
+        return getUserResponse(request, realm, auth, true);
+    }
+
+    @POST
+    @Path("/bss")
+    @NoCache
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response createUserBss(final UserRequest request, final HttpHeaders headers) {
+        if (request.getPhone() == null || request.getPhone().isBlank()) {
+            return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
+        }
         if (request.getTomsId() == null || request.getTomsId().isBlank()) {
             return ErrorResponse.error("TomsId is required attribute", Response.Status.BAD_REQUEST);
         }
-        try {
-            return JsonResponse.success()
-                    .addResult("userId", userService.createUser(request, false).getId())
+
+        RealmModel realm = session.getContext().getRealm();
+        AdminAuth auth = authenticateRealmAdminRequest(realm);
+
+        Response response = checkOnExistUser(request, realm);
+        if (response != null) {
+            return response;
+        }
+
+        return getUserResponse(request, realm, auth, false);
+    }
+
+    private Response checkOnExistUser(UserRequest request, RealmModel realm) {
+        List<UserEntity> users = getEM().createQuery("select u from UserAttributeEntity atr join atr.user u " +
+                "where atr.name = :ph_attr_name and " +
+                " atr.value like '%' || :phone || '%' and" + // TODO =
+                " u.realmId = :realId ", UserEntity.class)
+                .setParameter("ph_attr_name", ATTR_PHONE_NAME)
+                .setParameter("phone", request.getPhone())
+                .setParameter("realId", realm.getId())
+                .getResultList();
+
+        if (users != null && !users.isEmpty()) {
+            log.error("User exists with same phone {}", request.getPhone());
+            return JsonResponse.error(Response.Status.CONFLICT)
+                    .message("User exists with same phone")
+                    .addResult("user_id", users.get(0).getId())
                     .build();
-        } catch (ModelDuplicateException e) {
-            if (session.getTransactionManager().isActive()) {
-                session.getTransactionManager().setRollbackOnly();
+        }
+
+        // Double-check duplicated username and email here due to federation
+        UserModel userModel = session.users().getUserByUsername(request.getEmail(), realm);
+        if (userModel != null) {
+            log.error("User exists with same username {}", request.getEmail());
+            return JsonResponse.error(Response.Status.CONFLICT)
+                    .message("User exists with same username")
+                    .addResult("user_id", userModel.getId())
+                    .build();
+        }
+
+        if (request.getEmail() != null && !realm.isDuplicateEmailsAllowed()) {
+            userModel = session.users().getUserByEmail(request.getEmail(), realm);
+            if (userModel != null) {
+                log.error("User exists with same email {}", request.getEmail());
+                return JsonResponse.error(Response.Status.CONFLICT)
+                        .message("User exists with same email")
+                        .addResult("user_id", userModel.getId())
+                        .build();
             }
+        }
+        return null;
+    }
+
+    private Response getUserResponse(UserRequest request, RealmModel realm, AdminAuth auth, boolean bss) {
+        try {
+            UserModel user = session.users().addUser(realm, request.getEmail());
+            Set<String> emptySet = Collections.emptySet();
+
+            updateUserFromRequest(user, request, emptySet, realm, session, false);
+            if (!bss) {
+                addUserPost(user, request);
+            }
+
+            new AdminEventBuilder(realm, auth, session, session.getContext().getConnection())
+                    .realm(realm)
+                    .resource(ResourceType.REALM)
+                    .resource(ResourceType.USER)
+                    .operation(OperationType.CREATE)
+                    .resourcePath(session.getContext().getUri(), user.getId())
+                    .success();
+
+            if (session.getTransactionManager().isActive()) {
+                session.getTransactionManager().commit();
+            }
+            return JsonResponse.success()
+                    .httpStatus(Response.Status.CREATED)
+                    .addResult("user_id", user.getId())
+                    .build();
+
+        } catch (ModelDuplicateException e) {
             return JsonResponse.error(Response.Status.CONFLICT)
                     .message("User exists with same username or email or phone")
                     .build();
 
         } catch (ModelException me) {
-            if (session.getTransactionManager().isActive()) {
-                session.getTransactionManager().setRollbackOnly();
-            }
             log.warn("Could not create user", me);
             return JsonResponse.error(Response.Status.INTERNAL_SERVER_ERROR)
                     .message("Could not create user")
                     .build();
-        } catch (FoundException e) {
-            return JsonResponse
-                    .error(Response.Status.CONFLICT)
+        } catch (NotFoundException e) {
+            return JsonResponse.error(Response.Status.CONFLICT)
                     .message(e.getMessage())
                     .build();
+        } finally {
+            if (session.getTransactionManager().isActive()) {
+                session.getTransactionManager().setRollbackOnly();
+            }
         }
     }
 
@@ -181,6 +289,52 @@ public class CustomUserResource {
         }
 
         return auth;
+    }
+
+
+    private static void updateUserFromRequest(UserModel user, UserRequest request, Set<String> attrsToRemove, RealmModel realm, KeycloakSession session, boolean removeMissingRequiredActions) {
+        if (request.getEmail() != null && realm.isEditUsernameAllowed()) {
+            user.setUsername(request.getEmail());
+        }
+        if (request.getEmail() != null) {
+            user.setEmail(request.getEmail());
+            if ("".equals(request.getEmail())) {
+                user.setEmail(null);
+            }
+        }
+        if (request.getName() != null) user.setFirstName(request.getName());
+
+        user.setEmailVerified(true);
+        user.setEnabled(true);
+
+        List<String> reqActions = Collections.singletonList("UPDATE_PASSWORD");
+
+        if (reqActions != null) {
+            Set<String> allActions = new HashSet<>();
+            for (ProviderFactory factory : session.getKeycloakSessionFactory().getProviderFactories(RequiredActionProvider.class)) {
+                allActions.add(factory.getId());
+            }
+            for (String action : allActions) {
+                if (reqActions.contains(action)) {
+                    user.addRequiredAction(action);
+                } else if (removeMissingRequiredActions) {
+                    user.removeRequiredAction(action);
+                }
+            }
+        }
+
+        String phone = request.getPhone();
+        if (phone != null)
+            phone = phone.replaceAll("[^0-9]+", "");
+
+        user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(phone));
+
+    }
+
+    private void addUserPost(UserModel userModel, UserRequest request) throws NotFoundException {
+        UserPostRequest userPostRequest = DataMapper.toUserPostRequest(userModel, request);
+        userPostRequest.setRoleId(DEFAULT_ROLE_ID);
+        userPostService.save(userPostRequest);
     }
 
     private String getFileExtension(MultivaluedMap<String, String> header) {
