@@ -15,7 +15,7 @@
   class="flex focus:outline-none mr-10 h-6 items-center"
   title="Выбор города">
   <svg
-    class="h-8 w-auto mr-1 outline-none"
+    class="h-8 w-auto mr-1 outline-none city-icon"
     width="16"
     height="16"
     viewBox="0 0 16 16"
