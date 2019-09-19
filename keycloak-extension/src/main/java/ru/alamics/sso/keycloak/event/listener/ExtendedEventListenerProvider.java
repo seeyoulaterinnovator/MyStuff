@@ -62,7 +62,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                                 String subject = "emailAccountDataSubject";
                                 String template = "mail-account-data.ftl";
 
-                                Map<String, Object> attributes = new HashMap<String, Object>();
+                                Map<String, Object> attributes = new HashMap<>();
                                 attributes.put("userName", user.getUsername());
                                 attributes.put("userFirstName", user.getFirstName());
                                 attributes.put("userLastName", user.getLastName());
