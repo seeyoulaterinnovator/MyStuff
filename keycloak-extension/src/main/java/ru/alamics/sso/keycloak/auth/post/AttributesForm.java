@@ -36,25 +36,6 @@ public class AttributesForm implements Authenticator {
     private final UserRole role;
     private final TbapiService tbapiService;
 
-
-    //TODO Тупо копипаста, но с ней что-то можно сделать
-    private static final List<ProviderConfigProperty> CONFIG_PROPERTIES = List.of(
-            new ProviderConfigProperty(HOSTNAME_PROPERTY_NAME, HOSTNAME_PROPERTY_LABEL, HOSTNAME_PROPERTY_HELP_TEXT,
-                    ProviderConfigProperty.STRING_TYPE, "localhost"),
-            new ProviderConfigProperty(PORT_PROPERTY_NAME, PORT_PROPERTY_LABEL, PORT_PROPERTY_HELP_TEXT,
-                    ProviderConfigProperty.STRING_TYPE, 80),
-            new ProviderConfigProperty(AUTH_APPNAME_NAME, AUTH_APPNAME_LABEL, AUTH_APPNAME_HELP_TEXT,
-                    ProviderConfigProperty.STRING_TYPE, "appname"),
-            new ProviderConfigProperty(AUTH_USERNAME_NAME, AUTH_USERNAME_LABEL, AUTH_USERNAME_HELP_TEXT,
-                    ProviderConfigProperty.STRING_TYPE, "username"),
-            new ProviderConfigProperty(PATH_PROPERTY_NAME, PATH_PROPERTY_LABEL, PATH_PROPERTY_HELP_TEXT,
-                    ProviderConfigProperty.STRING_TYPE, "/api/v1/customerManagement/customerAccount/{customerIds}/names"),
-            new ProviderConfigProperty(SCHEMA_PROPERTY_NAME, SCHEMA_PROPERTY_LABEL, SCHEMA_PROPERTY_HELP_TEXT,
-                    ProviderConfigProperty.BOOLEAN_TYPE, false)
-    );
-
-
-
     public AttributesForm (UserRole role, TbapiService tbapiService) {
         this.role = role;
         this.tbapiService = tbapiService;

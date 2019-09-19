@@ -81,13 +81,11 @@ public class TbapiService {
         List<String> customerList = List.of(customerIds);
         var ret = this.cache.getCustomerNamesFromCache(customerList);
         if(ret == null) {
-            connectConfig.setPath(connectConfig.getPath().replace("{customerIds}", String.join(",", customerList)));
-            ret = remoteService.getCustomerName(connectConfig);
+            ret = remoteService.getCustomerName(customerList, connectConfig);
             ret.forEach(this.cache::putToCache);
         } else {
             List<String> nullableIds = ret.entrySet().stream().filter(entry -> Objects.isNull(entry.getValue())).map(Map.Entry::getKey).collect(Collectors.toList());
-            connectConfig.setPath(connectConfig.getPath().replace("{customerIds}", String.join(",", nullableIds)));
-            var nullableNames = remoteService.getCustomerName(connectConfig);
+            var nullableNames = remoteService.getCustomerName(nullableIds, connectConfig);
             nullableNames.forEach(ret::replace);
         }
 
