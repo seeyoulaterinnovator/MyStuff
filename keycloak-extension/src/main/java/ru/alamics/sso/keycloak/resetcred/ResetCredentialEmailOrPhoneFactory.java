@@ -7,7 +7,7 @@ import ru.alamics.sso.keycloak.auth.AuthFactoryBaseClass;
 public class ResetCredentialEmailOrPhoneFactory extends AuthFactoryBaseClass {
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {AuthenticationExecutionModel.Requirement.REQUIRED};
     private static final String HELP_TEXT = "";
-    private static final String DISPLAY_TYPE = "Reset credential by email or phone";
+    private static final String DISPLAY_TYPE = "Reset credential by email or phone(RIAS Enabled)";
     public static final String ID = "reset-credential-email-or-phone";
 
     @Override
