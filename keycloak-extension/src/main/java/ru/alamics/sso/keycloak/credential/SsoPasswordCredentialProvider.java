@@ -9,6 +9,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +29,8 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
             String subject = "emailCredentialDisableSubject";
             String template = "credential-disable-password.ftl";
             Map<String, Object> attributes = new HashMap<>();
-            attributes.put("authHref", "http://domru-sso.alamics.ru/auth"); // TODO
+            URI baseUri = session.getContext().getUri().getBaseUri();
+            attributes.put("authHref", baseUri.toString());
             try {
                 emailTemplateProvider.setRealm(realm)
                         .setUser(user)
