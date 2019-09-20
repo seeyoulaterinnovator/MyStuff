@@ -12,7 +12,6 @@ import java.util.*;
 
 public class XlsxImpl implements FileModel {
 
-    private byte[] arrayBytes;
     private XSSFWorkbook workbook;
 
     public XlsxImpl(InputStream inputStream) throws IOException {

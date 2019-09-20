@@ -5,14 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
-import org.keycloak.authentication.RequiredActionProvider;
-import org.keycloak.events.admin.OperationType;
-import org.keycloak.events.admin.ResourceType;
 import org.keycloak.jose.jws.JWSInput;
 import org.keycloak.jose.jws.JWSInputException;
 import org.keycloak.models.*;
-import org.keycloak.models.jpa.entities.UserEntity;
-import org.keycloak.provider.ProviderFactory;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.ForbiddenException;
@@ -20,24 +15,18 @@ import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.managers.RealmManager;
 import org.keycloak.services.resources.admin.AdminAuth;
-import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.permissions.AdminPermissions;
 import ru.alamics.sso.keycloak.create.FileServiceException;
 import ru.alamics.sso.keycloak.create.UserService;
 import ru.alamics.sso.keycloak.create.model.DownloadUserRequest;
 import ru.alamics.sso.keycloak.create.model.UserParameter;
 import ru.alamics.sso.keycloak.create.model.UserRequest;
-import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundException;
-import ru.alamics.sso.registration.dto.UserPostRequest;
-import ru.alamics.sso.registration.service.UserPostService;
 
 import javax.activation.UnsupportedDataTypeException;
-import javax.ws.rs.*;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.persistence.EntityManager;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -45,12 +34,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
 @Slf4j
 public class CustomUserResource {
@@ -131,7 +115,7 @@ public class CustomUserResource {
     @Path("/uploadUsers")
     @Consumes("multipart/form-data")
     @NoCache
-    public Response uploadUsers(MultipartFormDataInput file) throws IOException {
+    public Response uploadUsers(MultipartFormDataInput file) {
         List<InputPart> inputParts = file.getFormDataMap().get("file");
         if (inputParts == null || inputParts.isEmpty()) {
             return JsonResponse.error(Response.Status.BAD_REQUEST).build();
@@ -146,6 +130,10 @@ public class CustomUserResource {
             return JsonResponse.fail()
                     .message(e.getMessage())
                     .build();
+        } catch (IOException e) {
+            return JsonResponse.fail()
+                    .message("Error reading file")
+                    .build();
         }
     }
 
@@ -154,7 +142,7 @@ public class CustomUserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.MULTIPART_FORM_DATA)
     @NoCache
-    public Response downloadUsers(DownloadUserRequest downloadUserRequest) throws IOException {
+    public Response downloadUsers(@NotNull @Valid DownloadUserRequest downloadUserRequest) {
         try {
             byte[] bytes = userService.exportUsers(downloadUserRequest);
             if (bytes == null) {
@@ -170,6 +158,10 @@ public class CustomUserResource {
             return JsonResponse
                     .error(Response.Status.BAD_REQUEST)
                     .message(e.getMessage())
+                    .build();
+        } catch (IOException e) {
+            return JsonResponse.fail()
+                    .message("Error writing file")
                     .build();
         }
     }
