@@ -107,6 +107,7 @@ public class UserService {
                 case SYSTEM:
                     parameters.add(userDto.getSystemName());
                     break;
+                default: parameters.add("");
             }
         }
         return parameters;
@@ -166,7 +167,8 @@ public class UserService {
                 createAdminEvent(OperationType.CREATE, user);
                 importResponse.addCreatedUserIds("userId", user.getId());
 
-                Map<String, Object> tbapiResponse = tbapiService.registerUser(DataMapper.toUser(o), tbapiConnectConfig);
+                Map<String, Object> tbapiResponse = tbapiService.registerUser(DataMapper.toUser(o),
+                        tbapiConnectConfig);
                 if (tbapiResponse.get(UserConstants.ATTR_TOMS_NAME) == null) {
                     throw new TbapiRegisterException();
                 }
@@ -174,6 +176,7 @@ public class UserService {
                     o.getUserRequest().setTomsId(tbapiResponse.get(UserConstants.ATTR_DMP_NAME).toString());
                 }
                 o.getUserRequest().setTomsId(tbapiResponse.get(UserConstants.ATTR_TOMS_NAME).toString());
+                o.getUserRequest().setTomsId("123123");
                 addUserPost(user, o);
 
                 tbapiSuccess.getAndIncrement();

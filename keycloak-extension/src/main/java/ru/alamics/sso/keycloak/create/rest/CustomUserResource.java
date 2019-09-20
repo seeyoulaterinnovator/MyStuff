@@ -134,6 +134,10 @@ public class CustomUserResource {
             return JsonResponse.fail()
                     .message("Error reading file")
                     .build();
+        } catch (Throwable e){
+            return JsonResponse.fail()
+                    .addResult("error", e)
+                    .build();
         }
     }
 
