@@ -14,7 +14,7 @@ public class CsvImpl implements FileModel {
 
     public CsvImpl(InputStream inputStream) throws IOException {
         CSVParser parser = new CSVParserBuilder().withSeparator(';').withIgnoreLeadingWhiteSpace(true).build();
-        csvReader = new CSVReaderBuilder(new InputStreamReader(inputStream)).withCSVParser(parser).build();
+        csvReader = new CSVReaderBuilder(new InputStreamReader(inputStream, "UTF-8")).withCSVParser(parser).build();
         rows = csvReader.readAll();
     }
 

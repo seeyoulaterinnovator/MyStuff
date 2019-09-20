@@ -11,7 +11,9 @@ import ru.alamics.sso.registration.mapper.DataMapper;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Stateless
 public class UserPostService {
@@ -81,7 +83,12 @@ public class UserPostService {
         if (externalSystemRole == null) {
             throw new NotFoundException("SystemRole with this systemRoleId is not exist!");
         }
-        userPost.getSystemRoles().add(externalSystemRole);
+        Set<ExternalSystemRoleEntity> systemRoles = userPost.getSystemRoles();
+        if (systemRoles == null){
+            systemRoles = new HashSet<>();
+        }
+        systemRoles.add(externalSystemRole);
+        userPost.setSystemRoles(systemRoles);
         return DataMapper.toUserPostResponse(userPostRepository.update(userPost));
     }
 

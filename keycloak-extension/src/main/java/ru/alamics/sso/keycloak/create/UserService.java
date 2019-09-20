@@ -136,7 +136,8 @@ public class UserService {
             if (!head.equalsIgnoreCase(UserParameter.EMAIL.getName()) && !head.equalsIgnoreCase(UserParameter.PHONE.getName()) &&
                     !head.equalsIgnoreCase(UserParameter.ORGANIZATION.getName()) && !head.equalsIgnoreCase(UserParameter.ROLE.getName()) &&
                     !head.equalsIgnoreCase(UserParameter.SYSTEM.getName()) || headers.length != 5 || file.getCountRows() < 2) {
-                throw new FileServiceException("File Structure is not valid!");
+                throw new FileServiceException("File Structure is not valid " +
+                        "or 'csv' file encoding must be in UTF-8!");
             }
         }
     }
