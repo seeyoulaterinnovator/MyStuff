@@ -48,3 +48,21 @@
     </#if>
 
 </@layout.registrationLayout>
+
+<script>
+
+    window.addEventListener('message', function(event) {
+        if (~event.origin) {
+            iframeInit();
+        } else {
+            return;
+        }
+    });
+    function iframeInit() {
+        console.log("iframe");
+        var loginForm = document.getElementById('loginForm');
+        var actionAttribute = loginForm.getAttribute("action") + "&iframe=1";
+        loginForm.setAttribute("action", actionAttribute);
+    }
+    
+</script>

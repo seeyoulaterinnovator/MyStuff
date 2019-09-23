@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Table(name = "USER_POST_ROLE")
 @Data
 @NoArgsConstructor
-public class UserPostRole {
+public class UserPostRoleEntity {
     @Id
     private Long id;
     @Column(name = "name")
