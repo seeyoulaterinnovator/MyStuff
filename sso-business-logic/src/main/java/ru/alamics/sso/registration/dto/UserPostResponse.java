@@ -3,11 +3,8 @@ package ru.alamics.sso.registration.dto;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import ru.alamics.sso.keycloak.entity.UserPostRole;
 
 import java.util.List;
-import java.util.Set;
 
 @Data
 @Builder(builderClassName = "UserPostResponseBuilder", toBuilder = true)

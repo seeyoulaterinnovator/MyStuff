@@ -11,6 +11,7 @@
     showModal,
     editingStarted,
     allCities,
+    quarter,
   } from './stores.js';
   import { STATUS } from './constants.js';
 
@@ -29,13 +30,16 @@
   }
 
   function groupByFirstCharacter(arr) {
-    const quarter = Math.floor(arr.length / 4);
+    let quarterStore = 0;
+    const unsubscribe = quarter.subscribe(value => {
+      quarterStore = value;
+    });
+    if (quarterStore  < 1) quarter.set(Math.floor(arr.length / 4));
     let partCounter = 0;
-    let currentQuarter = quarter;
+    let currentQuarter = quarterStore;
 
     const groupedCitiesObject = arr.reduce((acc, value, index) => {
       let firstCharacter = value.name[0];
-
 
       if (!acc[partCounter]) acc.push([]);
       if (!acc[partCounter][firstCharacter]) {
@@ -43,7 +47,7 @@
         if ( index >= currentQuarter && partCounter < 3) {
           partCounter++;
           // acc.push([]);
-          currentQuarter = currentQuarter + quarter;
+          currentQuarter = currentQuarter + quarterStore;
         }
         if (!acc[partCounter]) acc.push([]);
         acc[partCounter][firstCharacter] = { firstCharacter, cities: [value.name] };
@@ -91,22 +95,20 @@
             {group.firstCharacter}
           </h2>
 
-            <ul class="flex flex-col">
-           {#each group.cities as city}
-                    <li class="mb-2 sm:px-2 hover:bg-extra city">
-                      <button class="city" on:click={() => handleClick(city)}>{city}</button>
-                    </li>
-                  {:else}
-                    <div />
-                  {/each}
-                  </ul>
+          <ul class="flex flex-col">
+          {#each group.cities as city}
+            <li class="mb-2 sm:px-2 hover:bg-extra city">
+              <button class="city" on:click={() => handleClick(city)}>{city}</button>
+            </li>
+          {:else}
+            <div />
+          {/each}
+          </ul>
         </ul>
-
-
 
       {/each}
       </ul>
     {:else}
-       <p class="m-auto">Нет заданного города</p>
+      <p class="m-auto">Нет заданного города</p>
     {/each}
 </ul>

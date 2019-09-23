@@ -9,7 +9,7 @@
 }
 
 .city {
-  text-align: start;
+  text-align: start !important;
 }
 
 @media screen and (max-width: 959px){

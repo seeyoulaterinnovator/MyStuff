@@ -84,6 +84,27 @@
   text-align: right;
 }
 
+.field__input--city {
+  width: 384px;
+  height: 48px;
+
+  @media (max-width: 1199px) {
+    width: 280px;
+  }
+
+  @media (max-width: 959px) {
+    width: 288px;
+  }
+
+  @media (max-width: 639px) {
+    width: 231px;
+  }
+
+  @media (max-width: 479px) {
+    width: 240px;
+  }
+}
+
 .generated-password-text {
   font-size: 15px;
   line-height: 19px;

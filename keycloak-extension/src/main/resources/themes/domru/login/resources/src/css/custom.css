@@ -36,6 +36,50 @@ input[type='number']::-webkit-outer-spin-button {
 
 .icon_service-question::before {
   opacity: 0.5;
-
+  position: absolute;
+  width: 32px;
+  height: 34px;
+  top: 0;
+  left: 15px;
   content: url('./images/Chat.svg') !important;
+}
+
+.login-title-text {
+  max-width: 306px;
+}
+
+.footer {
+  margin: auto 0 35px;
+  padding: 0;
+  max-width: calc(100% - 75px);
+}
+
+@media screen and (max-width: 1199px){
+  .footer {
+    width: 206px;
+  }
+
+  .service__item_main-active {
+    width: 60px;
+  }
+}
+
+@media screen and (max-width: 959px){
+  .footer {
+    margin-bottom: 30px;
+    width: 100%;
+    position: relative;
+  }
+}
+
+@media screen and (max-width: 639px){
+  .login-title-text {
+    max-width: unset;
+  }
+}
+
+@media screen and (max-width: 479px){
+  .footer {
+    margin-bottom: 16px;
+  }
 }

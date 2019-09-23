@@ -7,12 +7,9 @@ import javax.validation.constraints.NotNull;
 
 @Data
 @NoArgsConstructor
-public class UserPostRequest {
+public class ExternalSystemRoleRequest {
     @NotNull
-    private String userId;
+    private String userPostId;
     @NotNull
-    private String tomsId;
-    private String dmpId;
-    @NotNull
-    private Long roleId;
+    private Long systemRoleId;
 }
