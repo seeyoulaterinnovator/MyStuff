@@ -12,14 +12,14 @@ import java.util.Set;
 @Table(name = "EXT_SYSTEM_ROLE")
 @Data
 @NoArgsConstructor
-public class ExternalSystemRole {
+public class ExternalSystemRoleEntity {
     @Id
     private Long id;
     @Column(name = "name")
     private String name;
     @ManyToOne
     @JoinColumn(name = "system_id")
-    private ExternalSystem externalSystem;
+    private ExternalSystemEntity externalSystem;
     @ManyToMany(mappedBy = "systemRoles")
-    private Set<UserPost> userPosts;
+    private Set<UserPostEntity> userPosts;
 }

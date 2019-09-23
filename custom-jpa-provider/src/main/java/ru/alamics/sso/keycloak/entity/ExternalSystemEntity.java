@@ -12,20 +12,20 @@ import java.util.Set;
 @Table(name = "EXTERNAL_SYSTEM")
 @Data
 @NoArgsConstructor
-public class ExternalSystem {
+public class ExternalSystemEntity {
     @Id
     private Long id;
     @Column(name = "name")
     private String name;
     @OneToMany(mappedBy = "externalSystem")
-    private Set<ExternalSystemRole> systemRoles;
+    private Set<ExternalSystemRoleEntity> systemRoles;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ExternalSystem system = (ExternalSystem) o;
+        ExternalSystemEntity system = (ExternalSystemEntity) o;
 
         if (id != null ? !id.equals(system.id) : system.id != null) return false;
         return name != null ? name.equals(system.name) : system.name == null;

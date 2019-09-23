@@ -22,7 +22,7 @@ public class TwoStepVerificationFactory implements Authenticator, AuthenticatorF
     public static final String NOTE_AUTH_TYPE_NAME = "note_auth_type_name";
     public static final String NOTE_AUTH_TYPE_DESC = "note_auth_type_DESC";
 
-    private static final String TWO_STEP_VERIFICATION_TYPES = "two.step.verification.types" ;
+    public static final String TWO_STEP_VERIFICATION_TYPES = "two.step.verification.types" ;
     private static final String PROVIDER_ID = "two-step-verification";
 
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {

@@ -9,7 +9,7 @@
 }
 
 .city {
-  text-align: start;
+  text-align: start !important;
 }
 
 .phone-call-center {

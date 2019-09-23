@@ -18,3 +18,5 @@ export const status = writable(
 export const showModal = writable(isFirstVisit);
 export const editingStarted = writable(false);
 export const allCities = writable([]);
+
+export const quarter = writable(0);

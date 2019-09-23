@@ -7,12 +7,9 @@ import javax.validation.constraints.NotNull;
 
 @Data
 @NoArgsConstructor
-public class UserPostRequest {
+public class UserPostEditRequest {
     @NotNull
-    private String userId;
-    @NotNull
-    private String tomsId;
-    private String dmpId;
+    private String id;
     @NotNull
     private Long roleId;
 }
