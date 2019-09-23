@@ -7,11 +7,14 @@ export default (function() {
 
   const submitElement = document.getElementById('accept');
   const resendElement = document.getElementById('resend');
+
+  const codeNumbers = document.getElementById('codeNumbers');
+  const expirationSeconds = document.getElementById('expirationSeconds');
   submitElement.disabled = true;
 
   // Инициируем обратный отсчет таймера.
   // После него появится кнопка "Отправить еще раз"
-  const timer = new Timer(60 * 5);
+  const timer = new Timer(expirationSeconds.value || 60 * 5);
   timer.timeElement = document.getElementById('timer-time');
   timer.callback = switchTimer;
 
@@ -25,9 +28,9 @@ export default (function() {
   }
 
   // Обрабатываем события на каждом инпуте
-  const inputs = [1, 2, 3, 4, 5, 6].map(index =>
-    document.getElementById(`smscode-${index}`),
-  );
+  const inputs = [1, 2, 3, 4, 5, 6]
+    .slice(0, codeNumbers.value || 6)
+    .map(index => document.getElementById(`smscode-${index}`));
 
   inputs.forEach(input => {
     input.addEventListener('input', () => {
