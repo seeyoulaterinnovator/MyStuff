@@ -12,7 +12,7 @@
         <a href="tel:88005500479" class=${withCity ? string("phone--hidden-small phone-call-center", "phone-call-center")}>
           <div class="flex h-6 items-center">
             <svg
-              class="h-8 w-auto mr-1"
+              class="h-8 w-auto mr-1 phone-icon"
               width="32"
               height="32"
               viewBox="0 0 32 32"
