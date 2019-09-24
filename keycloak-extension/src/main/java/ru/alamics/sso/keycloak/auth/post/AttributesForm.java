@@ -77,7 +77,7 @@ public class AttributesForm implements Authenticator {
         var authSession = context.getAuthenticationSession();
         role.roleSetting(context);
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
-        final String tomsId = formData.get("tomsId").get(0);
+        final String tomsId = formData.getFirst("tomsId");
         var user = context.getUser();
         user.setAttribute(ATTR_TOMS_NAME, Collections.singletonList(tomsId));
         authSession.setAuthNote(AUTH_FORM_SUCCESS, "0");
@@ -106,12 +106,13 @@ public class AttributesForm implements Authenticator {
 
     private Map<String, String> extractQueryParamsFromRedirectUri(String redirectUri) {
         Map<String, String> queryParameters = new HashMap<>();
-        if(redirectUri != null) {
+        if(redirectUri != null && redirectUri.indexOf('?') >= 0) {
             redirectUri = redirectUri.substring(redirectUri.indexOf('?') + 1);
             String[] pairs = redirectUri.split("&");
             for (String pair : pairs) {
                 int idx = pair.indexOf('=');
-                queryParameters.put(URLDecoder.decode(pair.substring(0, idx), StandardCharsets.UTF_8), URLDecoder.decode(pair.substring(idx + 1), StandardCharsets.UTF_8));
+                if (idx >= 0)
+                    queryParameters.put(URLDecoder.decode(pair.substring(0, idx), StandardCharsets.UTF_8), URLDecoder.decode(pair.substring(idx + 1), StandardCharsets.UTF_8));
             }
         }
         return queryParameters;
