@@ -1,6 +1,7 @@
 package ru.alamics.sso.keycloak.credential;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.resteasy.util.URLUtils;
 import org.keycloak.credential.CredentialModel;
 import org.keycloak.credential.PasswordCredentialProvider;
 import org.keycloak.email.EmailException;
@@ -30,7 +31,12 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
             String template = "credential-disable-password.ftl";
             Map<String, Object> attributes = new HashMap<>();
             URI baseUri = session.getContext().getUri().getBaseUri();
-            attributes.put("authHref", baseUri.toString());
+            String port = baseUri.getPort() == -1 ? "" : ":" + baseUri.getPort();
+            attributes.put("authHref", String.format("%s://%s%s/auth/realms/%s/protocol/openid-connect/auth?client_id=account&response_type=code",
+                    baseUri.getScheme(),
+                    baseUri.getHost(),
+                    port,
+                    realm.getId()));
             try {
                 emailTemplateProvider.setRealm(realm)
                         .setUser(user)
