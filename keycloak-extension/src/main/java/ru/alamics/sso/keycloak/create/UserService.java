@@ -107,6 +107,15 @@ public class UserService {
                 case SYSTEM:
                     parameters.add(userDto.getSystemName());
                     break;
+                case USER_ID:
+                    parameters.add(userDto.getId());
+                    break;
+                case FIRST_NAME:
+                    parameters.add(userDto.getFirstName());
+                    break;
+                case ENABLED:
+                    parameters.add(userDto.getEnabled().toString());
+                    break;
                 default: parameters.add("");
             }
         }

@@ -30,6 +30,7 @@ public abstract class DataMapper {
                 .lastName(toString(tuple.get("last_name")))
                 .email(toString(tuple.get("email")))
                 .phone(toString(tuple.get("phone")))
+                .enabled(toBoolean(tuple.get("enabled")))
                 .userPostId(toString(tuple.get("user_post_id")))
                 .tomsId(toString(tuple.get("toms_id")))
                 .roleId(toString(tuple.get("role_id")))
@@ -68,6 +69,13 @@ public abstract class DataMapper {
             return null;
         }
         return object.toString();
+    }
+
+    private static boolean toBoolean(Object object) {
+        if (object == null) {
+            return false;
+        }
+        return Boolean.valueOf(object.toString());
     }
 
     public static UserImport toUserImport(String[] row) {

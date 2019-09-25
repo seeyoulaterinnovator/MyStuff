@@ -17,6 +17,7 @@ public class UserDto implements Serializable {
     private String lastName;
     private String email;
     private String phone;
+    private Boolean enabled;
     private String userPostId;
     private String tomsId;
     private String roleId;
