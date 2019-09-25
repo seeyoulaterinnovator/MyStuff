@@ -78,6 +78,7 @@ public class UserService {
         if (userDto == null || userDto.isEmpty()) {
             return null;
         }
+        userDto = DataMapper.toGroupUserDtos(userDto);
         file.addRow(getUserParameterNames(userRequest.getUserParameters()));
         userDto.stream().forEach(o -> file.addRow(getUserParameters(o, userRequest.getUserParameters())));
         return file.save();
@@ -115,6 +116,9 @@ public class UserService {
                     break;
                 case ENABLED:
                     parameters.add(userDto.getEnabled().toString());
+                    break;
+                case CUSTOMER:
+                    parameters.add(userDto.getTomsId());
                     break;
                 default: parameters.add("");
             }

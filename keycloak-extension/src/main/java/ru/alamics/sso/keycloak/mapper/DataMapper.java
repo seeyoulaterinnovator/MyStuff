@@ -134,4 +134,23 @@ public abstract class DataMapper {
         externalSystemRoleRequest.setSystemRoleId(sysId);
         return externalSystemRoleRequest;
     }
+
+    public static List<UserDto> toGroupUserDtos(List<UserDto> userDtos) {
+        List<UserDto> result = new LinkedList<>();
+        for (int i = 0; i < userDtos.size(); i++) {
+            UserDto userDto = userDtos.get(i);
+            String systemNames = userDto.getSystemName();
+            for (int j = i + 1; j < userDtos.size(); j++) {
+                UserDto userDtoJ = userDtos.get(j);
+                if (userDto.getId().equals(userDtoJ.getId())) {
+                    systemNames += ", " + userDtoJ.getSystemName();
+                    userDtos.remove(j);
+                    j--;
+                }
+            }
+            userDto.setSystemName(systemNames);
+            result.add(userDto);
+        }
+        return result;
+    }
 }
