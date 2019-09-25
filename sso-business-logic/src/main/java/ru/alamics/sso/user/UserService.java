@@ -28,20 +28,26 @@ public class UserService {
 
     public UserModel createAttributes (final String userId, final List<AttributeRequest> attributes) {
         var user = getUser(userId);
-        attributes.forEach(attribute -> user.setAttribute(attribute.getName(), Collections.singletonList(attribute.getValue())));
+        if(attributes != null) {
+            attributes.forEach(attribute -> user.setAttribute(attribute.getName(), Collections.singletonList(attribute.getValue())));
+        }
         return user;
     }
 
     public UserModel patchAttributes (final String userId, final List<AttributeRequest> attributeRequests) {
         var user = getUser(userId);
-        attributeRequests.forEach(attributeRequest -> user.setAttribute(attributeRequest.getName(), Collections.singletonList(attributeRequest.getValue())));
+        if(attributeRequests != null) {
+            attributeRequests.forEach(attributeRequest -> user.setAttribute(attributeRequest.getName(), Collections.singletonList(attributeRequest.getValue())));
+        }
         return user;
     }
 
 
     public UserModel deleteAttributes (final String userId, final List<String> attributeNames) {
         var user = getUser(userId);
-        attributeNames.forEach(user::removeAttribute);
+        if(attributeNames != null) {
+            attributeNames.forEach(user::removeAttribute);
+        }
         return user;
     }
 
