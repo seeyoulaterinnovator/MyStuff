@@ -182,7 +182,7 @@ public class UserService {
         userImports.stream().forEach(o -> {
             try {
                 UserModel user = createUser(o.getUserRequest());
-                user.setEnabled(false);
+                user.setEmailVerified(false);
                 createAdminEvent(OperationType.CREATE, user);
                 importResponse.addCreatedUserIds("userId", user.getId());
 
