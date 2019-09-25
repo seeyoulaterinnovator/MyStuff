@@ -9,10 +9,14 @@ import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.yaml.snakeyaml.util.UriEncoder;
 
 import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
@@ -32,11 +36,14 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
             Map<String, Object> attributes = new HashMap<>();
             URI baseUri = session.getContext().getUri().getBaseUri();
             String port = baseUri.getPort() == -1 ? "" : ":" + baseUri.getPort();
-            attributes.put("authHref", String.format("%s://%s%s/auth/realms/%s/protocol/openid-connect/auth?client_id=account&response_type=code",
+            String state = "0/" + UUID.randomUUID();
+            String auth = String.format("%s://%s%s/auth/realms/%s/protocol/openid-connect/auth?client_id=account",
                     baseUri.getScheme(),
                     baseUri.getHost(),
                     port,
-                    realm.getId()));
+                    realm.getId());
+            String redirectUri = String.format("%s://%s%s/auth/realms/%s/account/login-redirect", baseUri.getScheme(), baseUri.getHost(), port, realm.getId());
+            attributes.put("authHref", String.format("%s&redirect_uri=%s&state=%s&response_type=code", auth, URLEncoder.encode(redirectUri, StandardCharsets.UTF_8), state));
             try {
                 emailTemplateProvider.setRealm(realm)
                         .setUser(user)
