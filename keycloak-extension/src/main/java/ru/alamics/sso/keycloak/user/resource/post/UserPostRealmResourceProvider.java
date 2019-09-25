@@ -15,37 +15,27 @@
  * limitations under the License.
  */
 
-package ru.alamics.sso.keycloak.userpost.rest;
+package ru.alamics.sso.keycloak.user.resource.post;
 
-import org.keycloak.Config.Scope;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.resource.RealmResourceProvider;
-import org.keycloak.services.resource.RealmResourceProviderFactory;
 
-public class UserPostRealmResourceProviderFactory implements RealmResourceProviderFactory {
 
-    public static final String ID = "user-post";
+public class UserPostRealmResourceProvider implements RealmResourceProvider {
 
-    @Override
-    public String getId() {
-        return ID;
+    private KeycloakSession session;
+
+    public UserPostRealmResourceProvider(KeycloakSession session) {
+        this.session = session;
     }
 
     @Override
-    public RealmResourceProvider create(KeycloakSession session) {
-        return new UserPostRealmResourceProvider(session);
-    }
-
-    @Override
-    public void init(Scope config) {
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
+    public Object getResource() {
+        return new UserPostRestResource(session);
     }
 
     @Override
     public void close() {
     }
+
 }

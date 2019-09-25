@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.userpost.rest;
+package ru.alamics.sso.keycloak.user.resource.post;
 
 import org.keycloak.models.KeycloakSession;
 
