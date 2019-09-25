@@ -81,19 +81,22 @@ public class CustomUserResource {
                     .addResult("user_id", user.getId())
                     .build();
         } catch (ModelDuplicateException e) {
+            log.error("Could not create user", e);
             return JsonResponse.error(Response.Status.CONFLICT)
                     .message("User exists with same username or email or phone")
                     .build();
         } catch (ModelException me) {
-            log.warn("Could not create user", me);
+            log.error("Could not create user", me);
             return JsonResponse.error(Response.Status.INTERNAL_SERVER_ERROR)
                     .message("Could not create user")
                     .build();
         } catch (NotFoundException e) {
+            log.error("Could not create user", e);
             return JsonResponse.error(Response.Status.FOUND)
                     .message(e.getMessage())
                     .build();
         } catch (FoundException e) {
+            log.error("Could not create user", e);
             return JsonResponse.error(Response.Status.CONFLICT)
                     .message(e.getMessage())
                     .addResult("info", e.getResult())
@@ -127,16 +130,14 @@ public class CustomUserResource {
                                     getFileExtension(inputParts.get(0).getHeaders())))
                     .build();
         } catch (UnsupportedDataTypeException | FileServiceException e) {
+            log.error("Could not upload users", e);
             return JsonResponse.fail()
                     .message(e.getMessage())
                     .build();
         } catch (IOException e) {
+            log.error("Could not upload users", e);
             return JsonResponse.fail()
                     .message("Error reading file")
-                    .build();
-        } catch (Throwable e){
-            return JsonResponse.fail()
-                    .addResult("error", e)
                     .build();
         }
     }
@@ -148,8 +149,10 @@ public class CustomUserResource {
     @NoCache
     public Response downloadUsers(@NotNull @Valid DownloadUserRequest downloadUserRequest) {
         try {
+            log.info("Start download users");
             byte[] bytes = userService.exportUsers(downloadUserRequest);
             if (bytes == null) {
+                log.warn("Users not found. Maybe database is empty");
                 return JsonResponse
                         .fail()
                         .message("Users not found. Maybe database is empty")
@@ -157,13 +160,16 @@ public class CustomUserResource {
             }
             Response.ResponseBuilder response = Response.ok((Object) bytes);
             response.header("Content-Disposition", "attachment; filename=\"users_info." + downloadUserRequest.getType() + "\"");
+            log.info("Download users success!", "filename = users_info." + downloadUserRequest.getType());
             return response.build();
         } catch (UnsupportedDataTypeException e) {
+            log.error("Could not download users", e);
             return JsonResponse
                     .error(Response.Status.BAD_REQUEST)
                     .message(e.getMessage())
                     .build();
         } catch (IOException e) {
+            log.error("Could not download users", e);
             return JsonResponse.fail()
                     .message("Error writing file")
                     .build();

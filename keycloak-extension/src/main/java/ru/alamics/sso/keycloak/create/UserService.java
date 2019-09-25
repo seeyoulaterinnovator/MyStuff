@@ -120,13 +120,15 @@ public class UserService {
                 case CUSTOMER:
                     parameters.add(userDto.getTomsId());
                     break;
-                default: parameters.add("");
+                default:
+                    parameters.add("");
             }
         }
         return parameters;
     }
 
     public ImportResponse importUsers(InputStream inputStream, String type) throws IOException, FileServiceException {
+        log.info("Start upload users");
         FileModel file = FileFactory.createFileModel(inputStream, type);
         if (file == null) {
             throw new UnsupportedDataTypeException("Unsupported file format!");
@@ -140,15 +142,17 @@ public class UserService {
         ImportResponse importResponse = new ImportResponse();
         importResponse.setCountClones(getCountAndRemoveClones(userImports));
         createImportUsers(importResponse, userImports);
+        log.info("Upload users success!", importResponse);
         return importResponse;
     }
 
     private void checkStructure(FileModel file) throws FileServiceException {
         String[] headers = file.getHeaders();
         for (String head : Arrays.asList(headers)) {
-            if (!head.equalsIgnoreCase(UserParameter.EMAIL.getName()) && !head.equalsIgnoreCase(UserParameter.PHONE.getName()) &&
-                    !head.equalsIgnoreCase(UserParameter.ORGANIZATION.getName()) && !head.equalsIgnoreCase(UserParameter.ROLE.getName()) &&
-                    !head.equalsIgnoreCase(UserParameter.SYSTEM.getName()) || headers.length != 5 || file.getCountRows() < 2) {
+            if (!head.equalsIgnoreCase(UserParameter.FIRST_NAME.getName()) && !head.equalsIgnoreCase(UserParameter.EMAIL.getName()) &&
+                    !head.equalsIgnoreCase(UserParameter.PHONE.getName()) && !head.equalsIgnoreCase(UserParameter.ORGANIZATION.getName()) &&
+                    !head.equalsIgnoreCase(UserParameter.ROLE.getName()) && !head.equalsIgnoreCase(UserParameter.SYSTEM.getName()) ||
+                    headers.length != 6 || file.getCountRows() < 2) {
                 throw new FileServiceException("File Structure is not valid " +
                         "or 'csv' file encoding must be in UTF-8!");
             }
@@ -178,6 +182,7 @@ public class UserService {
         userImports.stream().forEach(o -> {
             try {
                 UserModel user = createUser(o.getUserRequest());
+                user.setEnabled(false);
                 createAdminEvent(OperationType.CREATE, user);
                 importResponse.addCreatedUserIds("userId", user.getId());
 
@@ -190,7 +195,6 @@ public class UserService {
                     o.getUserRequest().setTomsId(tbapiResponse.get(UserConstants.ATTR_DMP_NAME).toString());
                 }
                 o.getUserRequest().setTomsId(tbapiResponse.get(UserConstants.ATTR_TOMS_NAME).toString());
-                o.getUserRequest().setTomsId("123123");
                 addUserPost(user, o);
 
                 tbapiSuccess.getAndIncrement();
@@ -326,8 +330,12 @@ public class UserService {
         UserPostRequest userPostRequest = DataMapper.toUserPostRequest(userModel, userImport.getUserRequest());
         userPostRequest.setRoleId(userPostService.getUserPostRole(userImport.getRoleName()));
         UserPostResponse userPostResponse = userPostService.save(userPostRequest);
-        userPostService.addSystemRole(DataMapper.toExternalSystemRoleRequest(userPostResponse.getId(),
-                userPostService.getExternalSystemRoleId(userImport.getSystemName())));
+        if (userImport.getSystemNames() != null && !userImport.getSystemNames().isEmpty()) {
+            for (String sysName : userImport.getSystemNames()) {
+                userPostService.addSystemRole(DataMapper.toExternalSystemRoleRequest(userPostResponse.getId(),
+                        userPostService.getExternalSystemRoleId(sysName)));
+            }
+        }
     }
 
     private void createTbapiConnectConfig() {

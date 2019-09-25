@@ -84,20 +84,22 @@ public abstract class DataMapper {
         for (int i = 0; i < row.length; i++) {
             switch (i) {
                 case 0:
-                    userRequest.setEmail(row[0]);
-                    userRequest.setName(row[0]);
+                    userRequest.setName(row[i]);
                     break;
                 case 1:
-                    userRequest.setPhone(row[1]);
+                    userRequest.setEmail(row[i]);
                     break;
                 case 2:
-                    userImport.setOrg(row[2]);
+                    userRequest.setPhone(row[i]);
                     break;
                 case 3:
-                    userImport.setRoleName(row[3]);
+                    userImport.setOrg(row[i]);
                     break;
                 case 4:
-                    userImport.setSystemName(row[4]);
+                    userImport.setRoleName(row[i]);
+                    break;
+                case 5:
+                    userImport.setSystemNames(List.of(row[i].replaceAll("\\s","").split(",")));
                     break;
             }
         }
