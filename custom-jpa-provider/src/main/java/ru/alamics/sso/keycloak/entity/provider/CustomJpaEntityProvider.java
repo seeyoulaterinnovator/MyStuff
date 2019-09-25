@@ -1,8 +1,6 @@
 package ru.alamics.sso.keycloak.entity.provider;
 
-import ru.alamics.sso.keycloak.entity.UserPostRoleEntity;
-import ru.alamics.sso.keycloak.entity.UserLoginHistory;
-import ru.alamics.sso.keycloak.entity.UserPostEntity;
+import ru.alamics.sso.keycloak.entity.*;
 
 import java.util.List;
 
@@ -14,7 +12,12 @@ public class CustomJpaEntityProvider implements org.keycloak.connections.jpa.ent
 
     @Override
     public List<Class<?>> getEntities () {
-        return List.of(UserLoginHistory.class, UserPostRoleEntity.class, System.class, UserPostEntity.class);
+        return List.of(UserLoginHistory.class,
+                UserPostRoleEntity.class,
+                AutoLockNotification.class,
+                UserPostEntity.class,
+                ExternalSystemEntity.class,
+                ExternalSystemRoleEntity.class);
     }
 
     @Override
