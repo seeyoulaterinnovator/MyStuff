@@ -1,7 +1,6 @@
 package ru.alamics.sso.keycloak.credential;
 
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.util.URLUtils;
 import org.keycloak.credential.CredentialModel;
 import org.keycloak.credential.PasswordCredentialProvider;
 import org.keycloak.email.EmailException;
@@ -9,7 +8,6 @@ import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.yaml.snakeyaml.util.UriEncoder;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -31,6 +29,7 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
         var emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
 
         if(CredentialModel.PASSWORD.equals(credentialType)) {
+            user.addRequiredAction(UserModel.RequiredAction.UPDATE_PASSWORD);
             String subject = "emailCredentialDisableSubject";
             String template = "credential-disable-password.ftl";
             Map<String, Object> attributes = new HashMap<>();
