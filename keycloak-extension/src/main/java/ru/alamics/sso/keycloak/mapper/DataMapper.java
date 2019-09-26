@@ -4,8 +4,10 @@ import org.keycloak.models.UserModel;
 import ru.alamics.sso.keycloak.create.model.UserRequest;
 import ru.alamics.sso.keycloak.search.dto.UserDto;
 import ru.alamics.sso.registration.dto.UserPostRequest;
+import ru.alamics.sso.registration.model.FormConstants;
 
 import javax.persistence.Tuple;
+import javax.ws.rs.core.MultivaluedMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -61,5 +63,16 @@ public abstract class DataMapper {
             return null;
         }
         return object.toString();
+    }
+
+    public static UserPostRequest toUserPostRequest(MultivaluedMap<String, String> formData){
+        if (formData == null || formData.isEmpty()){
+            return null;
+        }
+        UserPostRequest userPostRequest = new UserPostRequest();
+        userPostRequest.setUserId(formData.getFirst(FormConstants.FIELD_USER_ID));
+        userPostRequest.setTomsId(formData.getFirst(FormConstants.FIELD_TOMS_ID));
+        userPostRequest.setDmpId(formData.getFirst(FormConstants.FIELD_DMP_ID));
+        return userPostRequest;
     }
 }
