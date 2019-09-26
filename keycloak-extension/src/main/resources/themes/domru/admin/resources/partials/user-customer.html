@@ -11,6 +11,7 @@
             <thead>
             <tr>
                 <th>toms</th>
+                <th>dmp</th>
                 <th>role</th>
                 <th>system</th>
                 <th>{{:: 'actions' | translate}}</th>
@@ -19,6 +20,7 @@
             <tbody>
             <tr ng-repeat="userPost in userPosts ">
                 <td>{{userPost.tomsId}}</td>
+                <td>{{userPost.dmpId}}</td>
                 <td>
 <!--                    selected="{{userPost.userRole.id == customerRole.id}}"-->
                     <select name="customerRole" ng-model="userPost.userRole.id">
@@ -52,6 +54,7 @@
             </tr>
             <tr>
                 <td><input class="form-control" id="newTomsId" ng-model="newAccess.tomsId" type="text"/></td>
+                <td><input class="form-control" id="newDmpId" ng-model="newAccess.dmpId" type="text"/></td>
                 <td><select ng-model="newAccess.customerRole" ng-options="y.name for (x, y) in customerRoles"> </select>
                     <!--                    {{newAccess.customerRole}}-->
                 </td>

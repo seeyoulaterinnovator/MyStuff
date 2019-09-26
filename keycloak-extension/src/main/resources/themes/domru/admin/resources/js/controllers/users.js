@@ -1756,7 +1756,8 @@ module.controller('UserCustomerCtrl', function($scope, realm, user, $location, $
     //удаление строки
     $scope.removeUserPost = function(userPostId) {
         $http.post(authUrl + '/realms/' + 'master' + '/user-post/delete/' + userPostId).then(function() {
-            console.info('removeUserPost')
+            console.info('removeUserPost');
+            window.location.reload();
         });
     };
 
@@ -1780,10 +1781,12 @@ module.controller('UserCustomerCtrl', function($scope, realm, user, $location, $
 
     //добавление нового доступа
     $scope.addUserPost = function() {
-        var addMap = {userId: user.id, tomsId: $scope.newAccess.tomsId, roleId : $scope.newAccess.customerRole.id};
+        var addMap = {userId: user.id, tomsId: $scope.newAccess.tomsId, roleId : $scope.newAccess.customerRole.id, dmpId: $scope.newAccess.dmpId};
         $http.post(authUrl + '/realms/' + 'master' + '/user-post/create', addMap).then(function(response) {
             console.info('addUserPost');
-            $scope.addSystemRole(angular.fromJson(response).data.results['user_post'].id, $scope.newAccess.systemRole.id )
+            if($scope.newAccess.systemRole) {
+                $scope.addSystemRole(angular.fromJson(response).data.results['user_post'].id, $scope.newAccess.systemRole.id );
+            }
             window.location.reload();
         });
     };
