@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static ru.alamics.sso.registration.model.FormConstants.*;
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
+import static ru.alamics.sso.registration.model.UserConstants.*;
 
 @Slf4j
 public class UserPostCheckProvider implements FormAction {
@@ -58,9 +58,8 @@ public class UserPostCheckProvider implements FormAction {
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         List<FormMessage> errors = new ArrayList<>();
 
-        context.getEvent().detail(Details.REGISTER_METHOD, "form");
+        UserPostRequest userPostRequest = DataMapper.toUserPostRequest(context);
 
-        UserPostRequest userPostRequest = DataMapper.toUserPostRequest(formData);
         if (userPostRequest.getUserId() == null || userPostRequest.getUserId().isBlank()) {
             formData.remove(FIELD_USER_ID);
             errors.add(new FormMessage(FIELD_USER_ID, "Уникальный номер пользователя должен быть заполнен"));
@@ -81,7 +80,7 @@ public class UserPostCheckProvider implements FormAction {
     @Override
     public void success(FormContext context) {
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
-        UserPostRequest userPostRequest = DataMapper.toUserPostRequest(formData);
+        UserPostRequest userPostRequest = DataMapper.toUserPostRequest(context);
         userPostRequest.setRoleId(ROLE_ID);
         try {
             UserPostResponse userPost = userPostService.save(userPostRequest);
