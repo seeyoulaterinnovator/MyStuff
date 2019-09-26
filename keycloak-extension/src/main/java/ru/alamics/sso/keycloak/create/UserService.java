@@ -177,6 +177,7 @@ public class UserService {
     }
 
     private void createImportUsers(ImportResponse importResponse, List<UserImport> userImports) {
+        AtomicInteger createdUsers = new AtomicInteger();
         AtomicInteger tbapiErrors = new AtomicInteger();
         AtomicInteger tbapiSuccess = new AtomicInteger();
         userImports.stream().forEach(o -> {
@@ -184,10 +185,13 @@ public class UserService {
                 UserModel user = createUser(o.getUserRequest());
                 user.setEmailVerified(false);
                 createAdminEvent(OperationType.CREATE, user);
+                createdUsers.getAndIncrement();
                 importResponse.addCreatedUserIds("userId", user.getId());
 
                 Map<String, Object> tbapiResponse = tbapiService.registerUser(DataMapper.toUser(o),
                         tbapiConnectConfig);
+                tbapiSuccess.getAndIncrement();
+
                 if (tbapiResponse.get(UserConstants.ATTR_TOMS_NAME) == null) {
                     throw new TbapiRegisterException();
                 }
@@ -196,8 +200,6 @@ public class UserService {
                 }
                 o.getUserRequest().setTomsId(tbapiResponse.get(UserConstants.ATTR_TOMS_NAME).toString());
                 addUserPost(user, o);
-
-                tbapiSuccess.getAndIncrement();
             } catch (FoundException e) {
                 Map<String, Object> error = new HashMap<>();
                 error.put(e.getMessage(), e.getResult());
@@ -214,6 +216,7 @@ public class UserService {
         });
         importResponse.setTbapiSuccess(tbapiSuccess);
         importResponse.setTbapiErrors(tbapiErrors);
+        importResponse.setCreatedUsers(createdUsers);
         commit();
     }
 

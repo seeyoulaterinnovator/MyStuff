@@ -15,6 +15,7 @@ public class ImportResponse {
     private int countClones;
     private AtomicInteger tbapiErrors;
     private AtomicInteger tbapiSuccess;
+    private AtomicInteger createdUsers;
     private List<Map<String, Object>> createdUserIds;
     private List<Map<String, Object>> errors;
 
