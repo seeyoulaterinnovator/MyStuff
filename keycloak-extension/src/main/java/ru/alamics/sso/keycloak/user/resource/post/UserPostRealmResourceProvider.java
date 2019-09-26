@@ -31,7 +31,7 @@ public class UserPostRealmResourceProvider implements RealmResourceProvider {
 
     @Override
     public Object getResource() {
-        return new UserPostRestResource(session);
+        return new UserPostResource(session);
     }
 
     @Override

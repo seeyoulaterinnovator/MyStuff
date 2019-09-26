@@ -3,12 +3,14 @@ package ru.alamics.sso.keycloak.user.resource.post;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
+import org.keycloak.Config;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.jose.jws.JWSInput;
 import org.keycloak.jose.jws.JWSInputException;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.managers.AppAuthManager;
@@ -29,6 +31,7 @@ import javax.persistence.EntityManager;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -41,7 +44,8 @@ public class UserPostResource {
 
     public UserPostResource(KeycloakSession session) {
         this.session = session;
-        authenticateRealmAdminRequest(session.getContext().getRealm());
+//        this.authManager = new AppAuthManager();
+//        authenticateRealmAdminRequest(session.getContext().getRealm());
         try {
             this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
         } catch (NamingException e) {
@@ -115,6 +119,25 @@ public class UserPostResource {
                     .build();
         }
     }
+
+
+    @GET
+    @Path("/users/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response getUserPost(@PathParam("id") String userId) {
+        try {
+            return JsonResponse.success()
+                    .addResult("user_post", userPostService.getUserPost(userId))
+                    .build();
+        } catch (NotFoundException e) {
+            return JsonResponse.fail()
+                    .message(e.getMessage())
+                    .build();
+        }
+    }
+
 
     @GET
     @Path("")

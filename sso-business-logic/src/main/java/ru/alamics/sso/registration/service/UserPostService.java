@@ -59,6 +59,10 @@ public class UserPostService {
         return DataMapper.toUserPostResponseList(userPostRepository.getAllUserPost());
     }
 
+    public List<UserPostResponse> getUserPost(String userId) throws NotFoundException {
+        return DataMapper.toUserPostResponseList(userPostRepository.findUserPostRoleByUserId(userId));
+    }
+
     public List<UserPostRoleDto> getUserPostRoleDtos() {
         return DataMapper.toUserPostRoleDtoList(userPostRepository.getAllUserPostRoles());
     }

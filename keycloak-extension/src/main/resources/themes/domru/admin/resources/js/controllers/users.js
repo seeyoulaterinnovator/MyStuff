@@ -1730,6 +1730,71 @@ module.controller('LDAPMapperCreateCtrl', function($scope, realm, provider, mapp
 
 });
 
+module.controller('UserCustomerCtrl', function($scope, realm, user, $location, $http) {
+
+    $scope.realm = realm;
+    $scope.user = user;
+    $scope.userPosts = [];
+    $scope.customerRoles = [];
+    $scope.systemRoles = [];
+
+    $http.get(authUrl + '/realms/' + realm.realm + '/user-post/users/' + user.id).then(function(data) {
+        $scope.userPosts =  angular.fromJson(data).data.results.user_post;
+    });
+
+    $http.get(authUrl + '/realms/' + realm.realm + '/user-post/roles').then(function(data) {
+        $scope.customerRoles =  angular.fromJson(data).data.results.roles;
+    });
+
+    $http.get(authUrl + '/realms/' + realm.realm + '/user-post/system-roles').then(function(data) {
+        $scope.systemRoles =  angular.fromJson(data).data.results['system-roles'];
+    });
+
+    //удаление строки
+    $scope.removeUserPost = function(userPostId) {
+        $http.post(authUrl + '/realms/' + realm.realm + '/user-post/delete/' + userPostId).then(function() {
+            console.info('removeUserPost')
+        });
+    };
+
+    //удаление одной системы
+    $scope.removeSystemRole = function(userPostId, systemRoleId) {
+        var mapDelete = {userPostId:  userPostId, systemRoleId : systemRoleId };
+        $http.post(authUrl + '/realms/' + realm.realm + '/user-post/remove-system-role', mapDelete).then(function() {
+            console.info('removeSystemRole sdf')
+        });
+    };
+
+    //добавление одной роли
+    $scope.addSystemRole = function(userPostId, systemRoleId) {
+        var addMap = {userPostId: userPostId, systemRoleId : systemRoleId};
+        $http.post(authUrl + '/realms/' + realm.realm + '/user-post/add-system-role', addMap).then(function() {
+            console.info('addSystemRole')
+        });
+    };
+
+    //добавление нового доступа
+    $scope.addUserPost = function() {
+        var addMap = {userId: user.id, tomsId: $scope.newAccess.tomsId, roleId : $scope.newAccess.customerRole.id};
+        $http.post(authUrl + '/realms/' + realm.realm + '/user-post/create', addMap).then(function(response) {
+            console.info('addUserPost');
+            $scope.addSystemRole(angular.fromJson(response).data.results['user_post'].id, $scope.newAccess.systemRole.id )
+        });
+    };
+
+    //редактирование роли
+    $scope.editUserPost = function(userPostId, systemRoleId) {
+        var addMap = {id: userPostId, roleId : systemRoleId};
+        $http.post(authUrl + '/realms/' + realm.realm + '/user-post/edit', addMap).then(function() {
+            console.info('editUserPost')
+        });
+    };
+});
+
+
+module.controller('CustomTabCtrl', function($scope, realm, $location) {
+    $scope.realm = realm;
+});
 
 
 
