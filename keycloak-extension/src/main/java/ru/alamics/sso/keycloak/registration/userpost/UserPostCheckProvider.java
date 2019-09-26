@@ -58,15 +58,16 @@ public class UserPostCheckProvider implements FormAction {
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         List<FormMessage> errors = new ArrayList<>();
 
-        UserPostRequest userPostRequest = DataMapper.toUserPostRequest(context);
-
-        if (userPostRequest.getUserId() == null || userPostRequest.getUserId().isBlank()) {
-            formData.remove(FIELD_USER_ID);
-            errors.add(new FormMessage(FIELD_USER_ID, "Уникальный номер пользователя должен быть заполнен"));
+        if (context.getUser() == null) {
+            context.error(Errors.INVALID_REGISTRATION);
+            context.validationError(formData,
+                    List.of(new FormMessage("Регистрация временно недоступна, попробуйте повторить попытку позже")));
+            return;
         }
-        if (userPostRequest.getTomsId() == null || userPostRequest.getTomsId().isBlank()) {
-            formData.remove(FIELD_TOMS_ID);
-            errors.add(new FormMessage(FIELD_TOMS_ID, "Уникальный номер кастомера должен быть заполнен"));
+        UserPostRequest userPostRequest = DataMapper.toUserPostRequest(context);
+        if (userPostRequest.getUserId() == null || userPostRequest.getUserId().isBlank() ||
+                userPostRequest.getTomsId() == null || userPostRequest.getTomsId().isBlank()) {
+            errors.add(new FormMessage("Регистрация временно недоступна, попробуйте повторить попытку позже"));
         }
 
         if (!errors.isEmpty()) {
@@ -79,7 +80,6 @@ public class UserPostCheckProvider implements FormAction {
 
     @Override
     public void success(FormContext context) {
-        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         UserPostRequest userPostRequest = DataMapper.toUserPostRequest(context);
         userPostRequest.setRoleId(ROLE_ID);
         try {
