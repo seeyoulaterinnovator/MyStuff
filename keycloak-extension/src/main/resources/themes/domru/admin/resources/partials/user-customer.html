@@ -6,11 +6,11 @@
 
     <kc-tabs-user></kc-tabs-user>
 
-    <form class="form-horizontal" name="realmForm" novalidate kc-read-only="!user.access.manage">
+    <form class="form-horizontal" kc-read-only="!user.access.manage" name="realmForm" novalidate>
         <table class="table table-striped table-bordered">
             <thead>
             <tr>
-                <th>tomsId</th>
+                <th>toms</th>
                 <th>role</th>
                 <th>system</th>
                 <th>{{:: 'actions' | translate}}</th>
@@ -19,28 +19,44 @@
             <tbody>
             <tr ng-repeat="userPost in userPosts ">
                 <td>{{userPost.tomsId}}</td>
-                <td>{{userPost.userRole.name}}
-                    <select ng-model="selectedCustomerRole[$index]" ng-options="y.name for (x, y) in customerRoles"> </select>
-                    <div data-ng-click="editUserPost(userPost.id, selectedCustomerRole[$index].id)"style="color: #6688c9">change</div></td>
                 <td>
-                    <div ng-repeat="roleExt in userPost.systemRoles">
-                        {{roleExt.name}} <div data-ng-click="removeSystemRole(userPost.id, roleExt.id)" style="color: #6688c9">delete</div>
+<!--                    selected="{{userPost.userRole.id == customerRole.id}}"-->
+                    <select name="customerRole" ng-model="userPost.userRole.id">
+                        <option ng-repeat="customerRole in customerRoles" ng-value="{{customerRole.id}}">
+                            {{customerRole.name}}
+                        </option>
+                    </select>
+                    <button data-ng-click="editUserPost(userPost.id, userPost.userRole.id)" style="color: #6688c9">change</button>
+                </td>
+                <td>
+                    <div class="form-horizontal">
+                        <div class="form-inline">
+                            <select formControlName="customerControl" name="customerRole" ng-model="selectedExternalRole">
+                                <option ng-repeat="roleExt in userPost.systemRoles" ng-value="{{roleExt.id}}">
+                                    <div class="container">
+                                        <span>{{roleExt.name}}</span>
+                                    </div>
+                                </option>
+                            </select>
+                            <button data-ng-click="removeSystemRole(userPost.id, selectedExternalRole)" style="color: #6688c9">delete</button>
+                        </div>
+                        <div class="form-inline">
+                            <select ng-model="selectedSystemRole[$index]"
+                                    ng-options="y.name for (x, y) in systemRoles"> </select>
+                            <button data-ng-click="addSystemRole(userPost.id, selectedSystemRole[$index].id)" style="color: #6688c9">add</button>
+                        </div>
                     </div>
 
-                    <select ng-model="selectedSystemRole[$index]"
-                            ng-options="y.name for (x, y) in systemRoles"> </select>
-
-                    <div data-ng-click="addSystemRole(userPost.id, selectedSystemRole[$index].id)" style="color: #6688c9">add</div>
                 </td>
                 <td class="kc-action-cell" data-ng-click="removeUserPost(userPost.id)">{{:: 'delete' | translate}}</td>
             </tr>
             <tr>
-                <td><input ng-model="newAccess.tomsId" class="form-control" type="text" id="newTomsId"/></td>
+                <td><input class="form-control" id="newTomsId" ng-model="newAccess.tomsId" type="text"/></td>
                 <td><select ng-model="newAccess.customerRole" ng-options="y.name for (x, y) in customerRoles"> </select>
-                    {{newAccess.customerRole}}
+                    <!--                    {{newAccess.customerRole}}-->
                 </td>
                 <td><select ng-model="newAccess.systemRole" ng-options="y.name for (x, y) in systemRoles"></select>
-                    {{newAccess.systemRole}}
+                    <!--                    {{newAccess.systemRole}}-->
                 </td>
                 <td class="kc-action-cell" data-ng-click="addUserPost()"
                     data-ng-disabled="!newAccess.key.length || !newAttribute.value.length">{{:: 'add' | translate}}

@@ -1738,17 +1738,20 @@ module.controller('UserCustomerCtrl', function($scope, realm, user, $location, $
     $scope.customerRoles = [];
     $scope.systemRoles = [];
 
-    $http.get(authUrl + '/realms/' + 'master' + '/user-post/users/' + user.id).then(function(data) {
-        $scope.userPosts =  angular.fromJson(data).data.results.user_post;
-    });
 
-    $http.get(authUrl + '/realms/' + 'master' + '/user-post/roles').then(function(data) {
-        $scope.customerRoles =  angular.fromJson(data).data.results.roles;
-    });
+    $scope.init = function() {
+        $http.get(authUrl + '/realms/' + 'master' + '/user-post/users/' + user.id).then(function(data) {
+            $scope.userPosts =  angular.fromJson(data).data.results.user_post;
+        });
 
-    $http.get(authUrl + '/realms/' + 'master' + '/user-post/system-roles').then(function(data) {
-        $scope.systemRoles =  angular.fromJson(data).data.results['system-roles'];
-    });
+        $http.get(authUrl + '/realms/' + 'master' + '/user-post/roles').then(function(data) {
+            $scope.customerRoles =  angular.fromJson(data).data.results.roles;
+        });
+
+        $http.get(authUrl + '/realms/' + 'master' + '/user-post/system-roles').then(function(data) {
+            $scope.systemRoles =  angular.fromJson(data).data.results['system-roles'];
+        });
+    };
 
     //удаление строки
     $scope.removeUserPost = function(userPostId) {
@@ -1761,7 +1764,8 @@ module.controller('UserCustomerCtrl', function($scope, realm, user, $location, $
     $scope.removeSystemRole = function(userPostId, systemRoleId) {
         var mapDelete = {userPostId:  userPostId, systemRoleId : systemRoleId };
         $http.post(authUrl + '/realms/' + 'master' + '/user-post/remove-system-role', mapDelete).then(function() {
-            console.info('removeSystemRole sdf')
+            console.info('removeSystemRole sdf');
+            $scope.init();
         });
     };
 
@@ -1769,7 +1773,8 @@ module.controller('UserCustomerCtrl', function($scope, realm, user, $location, $
     $scope.addSystemRole = function(userPostId, systemRoleId) {
         var addMap = {userPostId: userPostId, systemRoleId : systemRoleId};
         $http.post(authUrl + '/realms/' + 'master' + '/user-post/add-system-role', addMap).then(function() {
-            console.info('addSystemRole')
+            console.info('addSystemRole');
+            $scope.init();
         });
     };
 
@@ -1779,6 +1784,7 @@ module.controller('UserCustomerCtrl', function($scope, realm, user, $location, $
         $http.post(authUrl + '/realms/' + 'master' + '/user-post/create', addMap).then(function(response) {
             console.info('addUserPost');
             $scope.addSystemRole(angular.fromJson(response).data.results['user_post'].id, $scope.newAccess.systemRole.id )
+            window.location.reload();
         });
     };
 
@@ -1789,6 +1795,8 @@ module.controller('UserCustomerCtrl', function($scope, realm, user, $location, $
             console.info('editUserPost')
         });
     };
+
+    $scope.init();
 });
 
 
