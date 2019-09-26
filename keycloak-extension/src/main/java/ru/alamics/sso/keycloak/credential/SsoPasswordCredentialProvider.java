@@ -29,7 +29,6 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
         var emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
 
         if(CredentialModel.PASSWORD.equals(credentialType)) {
-            user.addRequiredAction(UserModel.RequiredAction.UPDATE_PASSWORD);
             String subject = "emailCredentialDisableSubject";
             String template = "credential-disable-password.ftl";
             Map<String, Object> attributes = new HashMap<>();
