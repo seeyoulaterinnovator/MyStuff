@@ -18,10 +18,10 @@
 package ru.alamics.sso.keycloak.user.resource.post;
 
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.services.resource.RealmResourceProvider;
+import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
 
 
-public class UserPostRealmResourceProvider implements RealmResourceProvider {
+public class UserPostRealmResourceProvider implements BaseResourceProvider<UserPostResource> {
 
     private KeycloakSession session;
 
@@ -30,12 +30,12 @@ public class UserPostRealmResourceProvider implements RealmResourceProvider {
     }
 
     @Override
-    public Object getResource() {
+    public UserPostResource getResource() {
+        initAuth(this.session);
         return new UserPostResource(session);
     }
 
     @Override
     public void close() {
     }
-
 }
