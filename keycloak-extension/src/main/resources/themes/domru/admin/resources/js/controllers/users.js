@@ -1749,7 +1749,9 @@ module.controller('UserCustomerCtrl', function($scope, realm, user, $location, $
         });
 
         $http.get(authUrl + '/realms/' + 'master' + '/user-post/system-roles').then(function(data) {
-            $scope.systemRoles =  angular.fromJson(data).data.results['system-roles'];
+            let roles = angular.fromJson(data).data.results['system-roles'];
+            roles = roles.filter(role => role.name === 'access_granted').filter((role, index, self) => self.indexOf(role) === index);
+            $scope.systemRoles = roles;
         });
     };
 
