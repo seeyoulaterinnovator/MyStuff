@@ -230,8 +230,7 @@ module.controller('UserOfflineSessionsCtrl', function($scope, $location, realm, 
     };
 });
 
-
-module.controller('UserListCtrl', function($scope, realm, User, UserSearchState, UserImpersonation, BruteForce, Notifications, $route, Dialog/*, CustomUser*/) {
+module.controller('UserListCtrl', function($scope, realm, User, UserSearchState, UserImpersonation, BruteForce, Notifications, $route, Dialog/*, CustomUser*/ , $http) {
     
     $scope.init = function() {
         $scope.realm = realm;
@@ -263,16 +262,31 @@ module.controller('UserListCtrl', function($scope, realm, User, UserSearchState,
     };
 
     $scope.unlockUsers = function() {
-        BruteForce.delete({realm: realm.realm}, function(data) {
-            Notifications.success("Any temporarily locked users are now unlocked.");
-        });
-    }
+        let userForUnlock = $scope.users.filter(user => user.active).map(user => user.id);
+        $http.post(`${authUrl}/realms/${realm.realm}/users/unlock`, userForUnlock).then(response => {
+            Notifications.success("Selected users has been unlocked");
+        })
+    };
 
+    $scope.selectAll = function() {
+        if($scope.selectedAll) {
+            $scope.users.forEach(user => user.active = true);
+        } else {
+            $scope.users.forEach(user => user.active = false);
+        }
+    };
 
     $scope.firstPage = function() {
         $scope.query.first = 0;
         $scope.searchQuery();
-    }
+    };
+
+    $scope.selectedResetPassword = function() {
+        let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
+        $http.post(`${authUrl}/realms/${realm.realm}/users/credential/reset`, userForResetPassword).then(response => {
+            Notifications.success("Password Reset");
+        })
+    };
 
     $scope.previousPage = function() {
         $scope.query.first -= parseInt($scope.query.max);
@@ -280,28 +294,130 @@ module.controller('UserListCtrl', function($scope, realm, User, UserSearchState,
             $scope.query.first = 0;
         }
         $scope.searchQuery();
-    }
+    };
+
+
+    $scope.importFileCSV = function(file) {
+        let form = new FormData();
+        form.append('file', file[0]);
+        $http.post(`${authUrl}/realms/${realm.realm}/users-toms/uploadUsers`, form, {
+            headers: {'Content-Type': 'multipart/form-data'}
+        })
+    };
+
+    $scope.exportXlsx = function() {
+        let payload = {
+            type: 'xlsx',
+            userParameters: [
+                "EMAIL",
+                "PHONE",
+                "ORGANIZATION",
+                "ROLE",
+                "SYSTEM"
+            ]
+        };
+        $http.get(`${authUrl}/realms/${realm.realm}/users-toms/downloadUsers`, payload)
+    };
+
+    $scope.exportCSV = function() {
+        let payload = {
+            type: 'csv',
+            userParameters : [
+                "EMAIL",
+                "PHONE",
+                "ORGANIZATION",
+                "ROLE",
+                "SYSTEM"
+            ]
+        };
+        $http.get(`${authUrl}/realms/${realm.realm}/users-toms/downloadUsers`, payload)
+    };
 
     $scope.nextPage = function() {
         $scope.query.first += parseInt($scope.query.max);
         $scope.searchQuery();
-    }
+    };
 
     $scope.searchQuery = function() {
         console.log("query.search: " + $scope.query.search);
-        $scope.searchLoaded = false;
-
-        // $http.get().then(function(result) {
-        //     $scope.users = result;
-        // })
-        // console.log(CustomUser);
-
-        $scope.users = User.query($scope.query, function() {
+        $http.get(`${authUrl}/realms/user/users-info`).then(function(data) {
+            $scope.users =  $scope.groupByUser(angular.fromJson(data).data.results['users-info']);
             $scope.searchLoaded = true;
             $scope.lastSearch = $scope.query.search;
             UserSearchState.isFirstSearch = false;
         });
     };
+
+    $scope.searchByUserId = function() {
+        $scope.query.first = 0;
+        $http.get(`${authUrl}/realms/user/users-info?search=&searchUser=${$scope.query.searchByUserId}&searchToms=`).then(function(data) {
+            $scope.users =  $scope.groupByUser(angular.fromJson(data).data.results['users-info']);
+            $scope.searchLoaded = true;
+            $scope.lastSearch = $scope.query.search;
+            UserSearchState.isFirstSearch = false;
+        });
+    };
+
+    $scope.groupByUser = function(data) {
+        let ret = [];
+        data.map(user => {
+            let findGroupedUser = $scope.findById(ret, user.id);
+            if(!findGroupedUser) {
+                findGroupedUser = {
+                    id: user.id,
+                    username: user.username,
+                    email: user.email,
+                    phone: user.phone,
+                    enabled: user.enabled,
+                    tomsId: user.tomsId,
+                    active: false,
+                    systems: [
+                        {
+                            id: user.systemId,
+                            name: user.systemName
+                        }
+                    ],
+                    roles: [
+                        {
+                            id: user.roleId,
+                            name: user.roleName
+                        }
+                    ],
+                };
+
+                ret.push(findGroupedUser);
+            } else {
+                let role = {
+                    id: user.roleId,
+                    name: user.roleName
+                };
+                let system = {
+                    id: user.systemId,
+                    name: user.systemName
+                };
+                findGroupedUser.roles.push(role);
+                findGroupedUser.systems.push(system);
+            }
+        });
+
+        return ret;
+    };
+
+    $scope.findById = function(users, userId) {
+        return users.filter(user => user.id === userId)[0];
+    };
+
+    $scope.searchByTomsId = function() {
+        $scope.query.first = 0;
+        $http.get(`${authUrl}/realms/user/users-info?search=&searchUser=&searchToms=${$scope.query.searchByTomsId}`).then(function(data) {
+            $scope.users =  $scope.groupByUser(angular.fromJson(data).data.results['users-info']);
+            $scope.searchLoaded = true;
+            $scope.lastSearch = $scope.query.search;
+            UserSearchState.isFirstSearch = false;
+        });
+    };
+
+
 
     $scope.removeUser = function(user) {
         Dialog.confirmDelete(user.id, 'user', function() {
@@ -325,10 +441,7 @@ module.controller('UserListCtrl', function($scope, realm, User, UserSearchState,
     console.log('Called Constructor');
 
 
-
-
 });
-
 
 module.controller('UserTabCtrl', function($scope, $location, Dialog, Notifications, Current) {
     $scope.removeUser = function() {
@@ -937,7 +1050,6 @@ module.controller('GenericUserStorageCtrl', function($scope, $location, Notifica
     };
 
 });
-
 
 function removeGroupMember(groups, member) {
     for (var j = 0; j < groups.length; j++) {
@@ -1572,7 +1684,6 @@ module.controller('LDAPTabCtrl', function(Dialog, $scope, Current, Notifications
     };
 });
 
-
 module.controller('LDAPMapperListCtrl', function($scope, $location, Notifications, $route, Dialog, realm, provider, mappers) {
     console.log('LDAPMapperListCtrl');
 
@@ -1803,7 +1914,6 @@ module.controller('UserCustomerCtrl', function($scope, realm, user, $location, $
 
     $scope.init();
 });
-
 
 module.controller('CustomTabCtrl', function($scope, realm, $location) {
     $scope.realm = realm;
