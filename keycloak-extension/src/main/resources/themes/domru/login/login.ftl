@@ -23,7 +23,7 @@
                 <@components.field class="mb-6 md:w-full" fieldName="password" label="${msg('password')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true />
                 
                 <div class="flex justify-between w-full items-center">
-                    <button id="submit" class="btn btn-main w-1/2" type="submit">Войти</button>
+                    <button id="submit" class="btn btn-main w-1/2 btn-enter" type="submit">Войти</button>
                     <#if realm.resetPasswordAllowed>
                         <span class="underline opacity-50 text-right"><a href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a></span>
                     </#if>
