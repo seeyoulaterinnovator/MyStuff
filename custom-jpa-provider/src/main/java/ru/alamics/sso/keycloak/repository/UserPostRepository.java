@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.repository;
 
+import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.entity.ExternalSystemEntity;
@@ -87,6 +88,19 @@ public class UserPostRepository {
                 .setParameter("user", user)
                 .getResultList();
         return ret;
+    }
+
+    public List<UserPostEntity> findUserPostRoleByUserId(final String userId) throws NotFoundException {
+        final String DEBUG_STR = "findUserPostRole";
+        log.info("{}: userId={}", DEBUG_STR, userId);
+
+        UserEntity userEntity = em.find(UserEntity.class, userId);
+        if (userEntity != null) {
+            return findUserPostRole(userEntity);
+        } else {
+            log.info("User not found by id={}", userId);
+            throw new NotFoundException("User not found");
+        }
     }
 
     public List<ExternalSystemEntity> getAllExternalSystem(){
