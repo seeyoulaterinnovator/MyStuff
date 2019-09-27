@@ -69,7 +69,12 @@
     axios
       .get(url)
       .then(response => {
-        allCities.set(citiesJson.results.cities || []);
+        const respCities  = response.data.results.cities || []; //citiesJson.results.cities || [];
+        const replacedCities = respCities.map(city => city.name === 'Холдинг' ? {
+            ...city,
+            name: 'Федеральный Клиент',
+        } : city);
+        allCities.set(replacedCities);
 
         groupedCities = groupByFirstCharacter($allCities);
       })
