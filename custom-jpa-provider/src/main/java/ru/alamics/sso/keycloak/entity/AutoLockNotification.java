@@ -15,9 +15,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@NamedQuery(name = "deleteFromAutoLockNotif", query = "delete from AutoLockNotification aln where aln.user = :user")
 public class AutoLockNotification implements Serializable {
-    private static final long serialVersionUID = -5664166927419170550L;
+    public static final String DELETE_BY_USER_SQL = "delete from AUTO_LOCK_NOTIFICATION where USER_ID =:user";
 
+    private static final long serialVersionUID = -5664166927419170550L;
     @Id
     private String id;
 

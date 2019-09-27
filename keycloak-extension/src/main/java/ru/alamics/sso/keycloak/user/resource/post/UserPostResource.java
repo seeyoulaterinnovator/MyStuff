@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.userpost.rest;
+package ru.alamics.sso.keycloak.user.resource.post;
 
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
