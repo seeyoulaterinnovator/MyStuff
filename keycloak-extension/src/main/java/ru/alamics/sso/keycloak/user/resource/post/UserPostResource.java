@@ -22,6 +22,7 @@ import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostEditRequest;
+import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.service.UserPostService;
 
@@ -67,7 +68,6 @@ public class UserPostResource {
                     .build();
         }
     }
-
 
     @POST
     @Path("/edit")
