@@ -4,8 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.jpa.entities.RoleEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.jpa.entities.UserRoleMappingEntity;
-import ru.alamics.sso.keycloak.entity.UserPost;
-import ru.alamics.sso.keycloak.entity.UserPostRole;
+import ru.alamics.sso.keycloak.entity.UserPostEntity;
+import ru.alamics.sso.keycloak.entity.UserPostRoleEntity;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -71,10 +71,10 @@ public class RoleRepository {
         return ret;
     }
 
-    public void deleteUserPostRoles(final UserEntity user, final List<UserPost> posts, final String realmId) {
+    public void deleteUserPostRoles(final UserEntity user, final List<UserPostEntity> posts, final String realmId) {
         final String DEBUG_STR = "deleteUserPostRoles";
         log.debug("{}: user={}, realmId={}", DEBUG_STR, user.getId(), realmId);
-        final List<String> names = posts.stream().map(UserPost::getRole).map(UserPostRole::getName).collect(Collectors.toList());
+        final List<String> names = posts.stream().map(UserPostEntity::getRole).map(UserPostRoleEntity::getName).collect(Collectors.toList());
         List<RoleEntity> roles = findRolesByNames(names, realmId);
         List<String> roleIds = roles.stream().map(RoleEntity::getId).collect(Collectors.toList());
 

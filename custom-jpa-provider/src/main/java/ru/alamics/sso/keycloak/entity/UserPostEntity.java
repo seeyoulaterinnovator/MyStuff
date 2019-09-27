@@ -11,7 +11,11 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "USER_POST")
-public class UserPost {
+@NamedQuery(name = "deleteFromUserPost", query = "delete from UserPostEntity up where up.user = :user")
+public class UserPostEntity {
+    public static final String DELETE_BY_USER_SQL = "delete from USER_POST where USER_ID =:user";
+
+
     @Id
     private String id;
     @ManyToOne(targetEntity = UserEntity.class)
@@ -21,16 +25,16 @@ public class UserPost {
     private String tomsId;
     @Column(name = "dmp_id")
     private String dmpId;
-    @ManyToOne(targetEntity = UserPostRole.class)
+    @ManyToOne(targetEntity = UserPostRoleEntity.class)
     @JoinColumn(name = "role_id")
-    private UserPostRole role;
+    private UserPostRoleEntity role;
     @ManyToMany
     @JoinTable(
             name = "USERPOST_EXT_SYSTEM_ROLE",
             joinColumns = @JoinColumn(name = "user_post_id"),
             inverseJoinColumns = @JoinColumn(name = "ext_system_role_id")
     )
-    private Set<ExternalSystemRole> systemRoles;
+    private Set<ExternalSystemRoleEntity> systemRoles;
 
     @Override
     public String toString() {
@@ -48,7 +52,7 @@ public class UserPost {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        UserPost userPost = (UserPost) o;
+        UserPostEntity userPost = (UserPostEntity) o;
 
         if (id != null ? !id.equals(userPost.id) : userPost.id != null) return false;
         if (user != null ? !user.equals(userPost.user) : userPost.user != null) return false;

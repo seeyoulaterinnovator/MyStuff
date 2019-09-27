@@ -32,10 +32,13 @@
   }
 
   function handleSelectCity() {
-    if (!$allCities.map(obj => obj.name).includes(search)) return;
+    const indexOfChosenCity = $allCities.map(obj => obj.name.toLowerCase()).indexOf(search.toLowerCase());
+    if (indexOfChosenCity === - 1) return;
 
-    city.set(search);
-    Cookie.set('CITY', search);
+    const chosenCity = $allCities[indexOfChosenCity].name;
+
+    city.set(chosenCity);
+    Cookie.set('CITY', chosenCity);
     status.set(STATUS.CONFIRMED);
     showModal.set(false);
     editingStarted.set(false);
@@ -103,7 +106,7 @@
       </div>
     </header>
 
-    <div class="flex flex-1 justify-center content-box h-full">
+    <div class="flex flex-1 {$status === STATUS.INITIAL ? 'items-center' : ''} justify-center content-box h-full">
       {#if $status === STATUS.INITIAL}
         <Confirmation />
       {:else if $status === STATUS.SELECTING}
