@@ -144,8 +144,12 @@ public abstract class DataMapper {
             String systemNames = userDto.getSystemName();
             for (int j = i + 1; j < userDtos.size(); j++) {
                 UserDto userDtoJ = userDtos.get(j);
-                if (userDto.getId().equals(userDtoJ.getId())) {
-                    systemNames += ", " + userDtoJ.getSystemName();
+                if (userDto.getId().equals(userDtoJ.getId()) && userDtoJ.getSystemName() != null && !userDtoJ.getSystemName().isBlank()) {
+                    if (systemNames == null || systemNames.isBlank()){
+                        systemNames = userDtoJ.getSystemName();
+                    } else {
+                        systemNames += ", " + userDtoJ.getSystemName();
+                    }
                     userDtos.remove(j);
                     j--;
                 }
