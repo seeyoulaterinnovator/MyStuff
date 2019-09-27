@@ -7,12 +7,14 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
-import ru.alamics.sso.remote.rias.model.RiasData;
+import ru.alamics.sso.registration.rias.model.RiasLogin;
+import ru.alamics.sso.registration.rias.port.RiasLoginService;
 
 import javax.ejb.Stateless;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -20,9 +22,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
 
-//@Slf4j
-//@Stateless(name = "RiasLoginService")
-public class RiasUserLoginImpl {
+@Slf4j
+@Stateless(name = "RiasLoginService")
+public class RiasUserLoginImpl implements RiasLoginService {
 
     private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
             .connectTimeout(3, TimeUnit.SECONDS)
@@ -35,7 +37,7 @@ public class RiasUserLoginImpl {
     public RiasUserLoginImpl() {
         uri = new ResteasyUriBuilder()
                 .scheme("https")
-                .host("testing2.db.ertelecom.ru")
+                .host("perm-dev.db.ertelecom.ru")
                 .port(443)
                 .path("/cgi-bin/ppo/es_webface/open_auth.authorize_password")
                 .build();
@@ -50,29 +52,22 @@ public class RiasUserLoginImpl {
 
     private static final String GRANT_TYPE = "password";
 
-    public static boolean loginUser(String username, String password) throws RiasCheckException
+    public RiasLogin loginUser(String username, String password) throws RiasCheckException
     {
-        System.out.println("qwer");
-
-        LocalDateTime dateTime = LocalDateTime.now();
-
-        String timestamp = dateTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
 
         String clientSecret = CLIENT_NAME + GRANT_TYPE + username + password + timestamp + CLIENT_SALT;
-
         String secretHash = HashGenerator.getSecretHashMD5(clientSecret);
 
         String usernameV = URLEncoder.encode(username, StandardCharsets.UTF_8);
 
-        // TODO Entity<RiasData> => response.close() ?
-        String response;
+        Response response = null;
+        RiasLogin result = null;
 
-        URI uri = new ResteasyUriBuilder()
-                .scheme("https")
-                .host("perm-dev.db.ertelecom.ru")
-                .port(443)
-                .path("/cgi-bin/ppo/es_webface/open_auth.authorize_password")
-                .build();
+        // {"refresh_token":"0000022d-703b1793-cea5-8e2a-e053-4794c26df2c1", "access_token":"m6qj36yhmrmm3xu6p067fu9h0aw8h2"}
+        // {"error":"INVALID_CLIENT", "error_description":"Не найден договор"}
+        // {"error":"INVALID_CLIENT", "error_description":"Пожалуйста, проверьте правильность введенных данных: логина, пароля и города"}
+        // {"error":"UNAUTHORIZED_CLIENT", "error_description":"Данный тип авторизации не поддерживается для заданного клиента."}
 
         try {
             ResteasyWebTarget wt = client.target(uri)
@@ -85,46 +80,27 @@ public class RiasUserLoginImpl {
             System.out.println(wt.getUri());
 
             response = wt.request(MediaType.APPLICATION_XML)
-                    .get(String.class);
+                    .get();
+
+            result = response.readEntity(RiasLogin.class);
 
         } catch (ProcessingException | WebApplicationException wae) {
             throw new RiasCheckException(wae);
+        } finally {
+            if (response != null)
+                response.close();
         }
 
         //log.info("login response: " + response);
-        System.out.println("login response: " + response);
+        System.out.println("login response: " + result);
 
-        /*
-        if (response.getStatus() == 0)
-            throw new RiasCheckException(response.getMessages().getCode() + ": " + response.getMessages().getText());
-
-        else if (response.getStatus() == 1)
-            if (response.getResult().getCheckProfileData() == 0)
-                return false;
-
-            else if (response.getResult().getCheckProfileData() == 1)
-                return true;
-
-            else if (response.getResult().getCheckProfileData() == -1)
-                throw new RiasCheckException("Checked data is empty: check_profile_data = " + response.getResult().getCheckProfileData());
-
-            else if (response.getResult().getCheckProfileData() == -2)
-                throw new RiasCheckException("Checked data is invalid: check_profile_data = " + response.getResult().getCheckProfileData());
-
-            else
-                throw new RiasCheckException("Bad response data: check_profile_data = " + response.getResult().getCheckProfileData());
-
-        else throw new RiasCheckException("Bad response status: status = " + response.getStatus());
-        */
-
-
-        return false;
+        return result;
     }
 
     public static void main(String[] args) {
 
         try {
-            loginUser("70000004129", "4129");
+            new RiasUserLoginImpl().loginUser("4129@example.com", "4129");
         } catch (RiasCheckException e) {
             e.printStackTrace();
         }
