@@ -22,7 +22,7 @@
   }
 
   /* Нет такого провайдера */
-  &--vk {
+  &--vkontakte {
     background-image: url('./images/social/VK.svg');
   }
 }

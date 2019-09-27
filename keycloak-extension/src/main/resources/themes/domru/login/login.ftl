@@ -34,9 +34,9 @@
         <#if realm.password && social.providers??>
             <div class="flex items-center mt-8">
                 <div class="mr-4">Войти через: </div>
-                <ul>
+                <ul class="flex">
                     <#list social.providers as p>
-                        <li class="w-8 h-8">
+                        <li class="w-8 h-8 mr-3">
                             <a href="${p.loginUrl}">
                                 <div class="w-full h-full bg-contain bg-no-repeat logo logo--${p.providerId}"></div>
                             </a>
