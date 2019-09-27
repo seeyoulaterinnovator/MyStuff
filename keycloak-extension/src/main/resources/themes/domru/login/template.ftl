@@ -30,12 +30,13 @@
   <body class="min-h-full flex flex-col p-4 sm:px-6 md:py-6 lg:px-8 xl:py-8 xl:px-6">
     <#if displayMessage && message?has_content && message.summary == 'Регистрация временно недоступна, попробуйте повторить попытку позже'>
       <#include "templates/header.html">
+      <#include "templates/sth-went-wrong.html">
     <#else>
       <#if environment == "stage" || environment == "production" >
         <#include "templates/google-tag-manager-body.html">
       </#if>
 
-      <#include "templates/sth-went-wrong.html">
+      <#include "templates/header.html">
 
       <main id="content" class="flex-1 py-12 mx-auto md:mx-auto w-full max-w-440px xl:max-w-470px">
         <#if displayMessage && message?has_content && message.summary == msg('emailSentMessage')>
