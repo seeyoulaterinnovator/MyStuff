@@ -1,3 +1,12 @@
+<style>
+    li.role-list {
+        list-style-type: none; /* Убираем маркеры */
+    }
+    ul {
+        margin-left: 0; /* Отступ слева в браузере IE и Opera */
+        padding-left: 0; /* Отступ слева в браузере Firefox, Safari, Chrome */
+    }
+</style>
 <div class="col-sm-9 col-md-10 col-sm-push-3 col-md-push-2">
     <ol class="breadcrumb">
         <li><a href="#/realms/{{realm.realm}}/users">{{:: 'users' | translate}}</a></li>
@@ -33,18 +42,16 @@
                 <td>
                     <div class="form-horizontal">
                         <div class="form-inline">
-                            <select formControlName="customerControl" name="customerRole" ng-model="selectedExternalRole">
-                                <option ng-repeat="roleExt in userPost.systemRoles" ng-value="{{roleExt.id}}">
-                                    <div class="container">
-                                        <span>{{roleExt.name}}</span>
-                                    </div>
-                                </option>
-                            </select>
-                            <button data-ng-click="removeSystemRole(userPost.id, selectedExternalRole)" style="color: #6688c9">delete</button>
+                            <ul>
+                                <li ng-repeat="roleExt in userPost.systemRoles" class="role-list">
+                                    <span>{{roleExt.externalSystem.name}}</span>
+                                    <button data-ng-click="removeSystemRole(userPost.id, roleExt.id)" style="color: #6688c9">delete</button>
+                                </li>
+                            </ul>
                         </div>
                         <div class="form-inline">
                             <select ng-model="selectedSystemRole[$index]"
-                                    ng-options="y.name for (x, y) in systemRoles"> </select>
+                                    ng-options="y.externalSystem.name for (x, y) in systemRoles"> </select>
                             <button data-ng-click="addSystemRole(userPost.id, selectedSystemRole[$index].id)" style="color: #6688c9">add</button>
                         </div>
                     </div>
