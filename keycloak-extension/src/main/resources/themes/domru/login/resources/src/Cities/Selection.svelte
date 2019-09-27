@@ -22,11 +22,15 @@
   export let search;
 
   function handleClick(currentCity) {
-    city.set(currentCity);
-    Cookie.set('CITY', currentCity);
-    status.set(STATUS.CONFIRMED);
-    showModal.set(false);
-    editingStarted.set(false);
+    if (currentCity.domain) {
+      window.open(`https://lkb2b.domru.ru/login?citydomain=${currentCity.domain}`);
+    } else {
+      city.set(currentCity.name);
+      Cookie.set('CITY', currentCity.name);
+      status.set(STATUS.CONFIRMED);
+      showModal.set(false);
+      editingStarted.set(false);
+    }
   }
 
   function groupByFirstCharacter(arr) {
@@ -46,14 +50,16 @@
 
         if ( index >= currentQuarter && partCounter < 3) {
           partCounter++;
-          // acc.push([]);
-          currentQuarter = currentQuarter + quarterStore;
+          currentQuarter = currentQuarter + quarter;
         }
         if (!acc[partCounter]) acc.push([]);
-        acc[partCounter][firstCharacter] = { firstCharacter, cities: [value.name] };
+        acc[partCounter][firstCharacter] = {
+            firstCharacter,
+            cities: [{ name: value.name, domain: !value.bss && value.city }]
+        };
       }
       else {
-        acc[partCounter][firstCharacter].cities.push(value.name);
+        acc[partCounter][firstCharacter].cities.push({ name: value.name, domain: !value.bss && value.city });
       }
 
       return acc;
@@ -100,15 +106,16 @@
             {group.firstCharacter}
           </h2>
 
-          <ul class="flex flex-col">
-          {#each group.cities as city}
-            <li class="mb-2 sm:px-2 hover:bg-extra city">
-              <button class="city" on:click={() => handleClick(city)}>{city}</button>
-            </li>
-          {:else}
-            <div />
-          {/each}
-          </ul>
+           <ul class="flex flex-col">
+           {#each group.cities as city}
+              <li class="mb-2 sm:px-2 hover:bg-extra city">
+                <button class="city" on:click={() => handleClick(city)}>{city.name}</button>
+              </li>
+            {:else}
+              <div />
+            {/each}
+            </ul>
+
         </ul>
 
       {/each}
