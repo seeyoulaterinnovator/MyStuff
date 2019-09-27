@@ -13,6 +13,7 @@
             <form id="loginForm" class="md:flex md:flex-wrap md:justify-between" onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
                 <div class="field field--required mb-4 md:w-full">
                     <label class="field__label" for="username"><#if !realm.registrationEmailAsUsername>${msg("username")}</#if></label>
+                    <input class="hidden w-0 h-0" id="domain-login" name="city">
                     <#if usernameEditDisabled??>
                         <input name="username" id="username" class="field__input" placeholder="${msg('usernameOrEmailPlaceholder')}" value="${(login.username!)}" type="text" disabled />
                     <#else>

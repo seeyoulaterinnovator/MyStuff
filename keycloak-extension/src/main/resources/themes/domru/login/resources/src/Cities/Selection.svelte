@@ -27,6 +27,7 @@
     } else {
       city.set(currentCity.name);
       Cookie.set('CITY', currentCity.name);
+      Cookie.set('city-domain', currentCity.domain);
       status.set(STATUS.CONFIRMED);
       showModal.set(false);
       editingStarted.set(false);
