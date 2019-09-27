@@ -54,28 +54,7 @@ public class UserPostCheckProvider implements FormAction {
 
     @Override
     public void validate(ValidationContext context) {
-
-        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
-        List<FormMessage> errors = new ArrayList<>();
-
-        if (context.getUser() == null) {
-            context.error(Errors.INVALID_REGISTRATION);
-            context.validationError(formData,
-                    List.of(new FormMessage("Регистрация временно недоступна, попробуйте повторить попытку позже")));
-            return;
-        }
-        UserPostRequest userPostRequest = DataMapper.toUserPostRequest(context);
-        if (userPostRequest.getUserId() == null || userPostRequest.getUserId().isBlank() ||
-                userPostRequest.getTomsId() == null || userPostRequest.getTomsId().isBlank()) {
-            errors.add(new FormMessage("Регистрация временно недоступна, попробуйте повторить попытку позже"));
-        }
-
-        if (!errors.isEmpty()) {
-            context.error(Errors.INVALID_REGISTRATION);
-            context.validationError(formData, errors);
-        } else {
-            context.success();
-        }
+        context.success();
     }
 
     @Override
@@ -93,6 +72,7 @@ public class UserPostCheckProvider implements FormAction {
         } catch (NotFoundException e) {
             log.error(e.getMessage(), e);
         }
+
     }
 
     @Override

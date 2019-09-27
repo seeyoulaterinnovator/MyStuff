@@ -12,8 +12,4 @@ public class FormConstants {
     public static final String FIELD_FIRST_NAME = "firstName";
 
     public static final String FIELD_ORG_NAME = "orgName";
-
-    public static final String FIELD_USER_ID = "userId";
-    public static final String FIELD_TOMS_ID = "tomsId";
-    public static final String FIELD_DMP_ID = "dmpId";
 }
