@@ -7,6 +7,7 @@ export default (function() {
 
   const submitElement = document.getElementById('accept');
   const resendElement = document.getElementById('resend');
+  const sentCode = document.getElementById('sentCode');
 
   const codeNumbers = document.getElementById('codeNumbers');
   const expirationSeconds = document.getElementById('expirationSeconds');
@@ -23,6 +24,10 @@ export default (function() {
 
     timerElement.classList.remove('flex');
     timerElement.classList.add('hidden');
+
+    sentCode.classList.remove('hidden');
+    sentCode.disabled = false;
+    
     resendElement.classList.remove('hidden');
     resendElement.disabled = false;
   }

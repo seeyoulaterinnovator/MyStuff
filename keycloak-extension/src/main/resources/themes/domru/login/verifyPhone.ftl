@@ -29,7 +29,7 @@
             <input id="smscode" name="smscode" class="hidden" />
             
             <#if lengthCode==4>
-                <button class="border-b border-dashed text-black-50 text-right mb-6" form="totpe" type="submit">Отправить на email</button>
+                <button class="border-b border-dashed text-black-50 text-right mb-6" form="totpe" id="sentCode" type="submit">Отправить на email</button>
             </#if>
            
             <div class="flex justify-between w-full items-center">
