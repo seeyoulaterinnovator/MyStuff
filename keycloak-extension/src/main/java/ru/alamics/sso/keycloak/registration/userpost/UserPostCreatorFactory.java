@@ -4,20 +4,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.Config;
 import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormActionFactory;
-import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderConfigProperty;
-import ru.alamics.sso.keycloak.registration.phone.PhoneCheckProvider;
 
-import javax.persistence.EntityManager;
 import java.util.List;
 
 @Slf4j
-public class UserPostCheckerFactory implements FormActionFactory {
+public class UserPostCreatorFactory implements FormActionFactory {
 
-    private static final String PROVIDER_ID = "user_post_checker";
+    private static final String PROVIDER_ID = "user_post_creator";
 
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
@@ -26,7 +23,7 @@ public class UserPostCheckerFactory implements FormActionFactory {
 
     @Override
     public String getDisplayType() {
-        return "Registration UserPost checker";
+        return "Registration UserPost Creator";
     }
 
     @Override
@@ -61,7 +58,7 @@ public class UserPostCheckerFactory implements FormActionFactory {
 
     @Override
     public FormAction create(KeycloakSession session) {
-        return new UserPostCheckProvider();
+        return new UserPostCreatorProvider();
     }
 
     @Override

@@ -34,11 +34,11 @@ import static ru.alamics.sso.registration.model.FormConstants.*;
 import static ru.alamics.sso.registration.model.UserConstants.*;
 
 @Slf4j
-public class UserPostCheckProvider implements FormAction {
+public class UserPostCreatorProvider implements FormAction {
     private static final Long ROLE_ID = 1L;     //Соотаветсвует ЛПР
     private UserPostService userPostService;
 
-    public UserPostCheckProvider() {
+    public UserPostCreatorProvider() {
         try {
             this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
         } catch (NamingException e) {
