@@ -13,7 +13,7 @@
         <#if userPhone??>
             <p class="pb-6">${userPhone}</p>
         </#if>
-        <form id="totpe" action="/dsfdsf" method="POST">
+        <form id="totpe" action="${url.loginAction}" method="POST">
          </form>
         <form id="totpForm" action="${url.loginAction}" method="POST">
         <#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон -->
@@ -29,7 +29,7 @@
             <input id="smscode" name="smscode" class="hidden" />
             
             <#if lengthCode==4>
-                <button class="border-b border-dashed text-black-50 text-right mb-6" form="totpe" id="sentCode" type="submit">Отправить на email</button>
+                <button class="border-b border-dashed text-black-50 text-right mb-6 hidden" form="totpe" id="sentCode" name="sendEmailCode" type="submit">Отправить на email</button>
             </#if>
            
             <div class="flex justify-between w-full items-center">
