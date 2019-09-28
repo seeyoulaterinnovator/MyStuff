@@ -142,10 +142,10 @@ public class CustomUserResource {
         }
     }
 
-    @GET
+    @POST
     @Path("/downloadUsers")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @NoCache
     public Response downloadUsers(@NotNull @Valid DownloadUserRequest downloadUserRequest) {
         try {

@@ -397,26 +397,25 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             ]
         };
         var linkElement = document.createElement('a');
-        $http.get(`${authUrl}/realms/master/users-toms/downloadUsers`, payload, {
-            headers: {'Accept': 'multipart/form-data'}
+        $http.post(`${authUrl}/realms/master/users-toms/downloadUsers`, payload, {
+            headers: {'Accept': 'application/octet-stream', 'Content-Type': 'application/json'}
+        }).then((response) => {
+            var headers = response.headers();
+            var filename = 'users_info.xlsx';
+            var contentType = headers['content-type'];
+            var blob = new Blob([response], {type: contentType});
+            var url = window.URL.createObjectURL(blob);
+
+            linkElement.setAttribute('href', url);
+            linkElement.setAttribute("download", filename);
+
+            var clickEvent = new MouseEvent("click", {
+                "view": window,
+                "bubbles": true,
+                "cancelable": false
+            });
+            linkElement.dispatchEvent(clickEvent);
         })
-            .then((response, status, headers) => {
-                headers = headers();
-                var filename = headers['x-filename'];
-                var contentType = headers['content-type'];
-                var blob = new Blob([response], {type: contentType});
-                var url = window.URL.createObjectURL(blob);
-
-                linkElement.setAttribute('href', url);
-                linkElement.setAttribute("download", filename);
-
-                var clickEvent = new MouseEvent("click", {
-                    "view": window,
-                    "bubbles": true,
-                    "cancelable": false
-                });
-                linkElement.dispatchEvent(clickEvent);
-            })
     };
 
     $scope.exportCSV = function () {
@@ -431,25 +430,25 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             ]
         };
         var linkElement = document.createElement('a');
-        $http.get(`${authUrl}/realms/master/users-toms/downloadUsers`, payload, {
-            headers: {'Accept': 'multipart/form-data'}
-        }).then((response, status, headers) => {
-                headers = headers();
-                var filename = headers['x-filename'];
-                var contentType = headers['content-type'];
-                var blob = new Blob([response], {type: contentType});
-                var url = window.URL.createObjectURL(blob);
+        $http.post(`${authUrl}/realms/master/users-toms/downloadUsers`, payload, {
+            headers: {'Accept': 'application/octet-stream', 'Content-Type': 'application/json'}
+        }).then((response) => {
+            var headers = response.headers();
+            var filename = 'users_info.csv';
+            var contentType = headers['content-type'];
+            var blob = new Blob([response], {type: contentType});
+            var url = window.URL.createObjectURL(blob);
 
-                linkElement.setAttribute('href', url);
-                linkElement.setAttribute("download", filename);
+            linkElement.setAttribute('href', url);
+            linkElement.setAttribute("download", filename);
 
-                var clickEvent = new MouseEvent("click", {
-                    "view": window,
-                    "bubbles": true,
-                    "cancelable": false
-                });
-                linkElement.dispatchEvent(clickEvent);
-            })
+            var clickEvent = new MouseEvent("click", {
+                "view": window,
+                "bubbles": true,
+                "cancelable": false
+            });
+            linkElement.dispatchEvent(clickEvent);
+        })
     };
 
     $scope.nextPage = function () {
