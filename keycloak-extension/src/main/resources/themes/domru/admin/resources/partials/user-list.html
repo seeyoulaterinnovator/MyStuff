@@ -55,20 +55,18 @@
                         <input id="import-file-csv" type="file" class="hidden"
                                kc-on-read-file="importFileCSV($fileContent)">
 
-<!--                        <label for="import-file-xlsx" class="btn btn-default ng-binding">Import CSV<i-->
-<!--                                class="pficon pficon-import"></i></label>-->
-<!--                        <input id="import-file-xlsx" type="file" class="hidden"-->
-<!--                               kc-on-read-file="importFileCSV($fileContent)">-->
+                        <label for="import-file-xlsx" class="btn btn-default ng-binding">Import Xlsx<i
+                                class="pficon pficon-import"></i></label>
+                        <input id="import-file-xlsx" type="file" class="hidden"
+                               kc-on-read-file="importFileExcel($fileContent)">
 
                         <button data-ng-click="exportCSV()" class="btn btn-default">Export CSV</button>
                         <button data-ng-click="exportXlsx()" class="btn btn-default">Export Excel</button>
 
                         <button data-ng-click="selectedResetPassword()" class="btn btn-default">Reset Password</button>
-                        <button data-ng-click="unlockUsers()" class="btn btn-default">{{:: 'unlock-users' |
-                            translate}}
-                        </button>
-                        <a id="createUser" class="btn btn-default" href="#/create/user/{{realm.realm}}">{{:: 'add-user'
-                            | translate}}</a>
+                        <button data-ng-click="selectedBlockUsers()" class="btn btn-default">Block Users</button>
+                        <button data-ng-click="unlockUsers()" class="btn btn-default">{{:: 'unlock-users' | translate}}</button>
+                        <a id="createUser" class="btn btn-default" href="#/create/user/{{realm.realm}}">{{:: 'add-user' | translate}}</a>
                     </div>
                 </div>
             </th>
@@ -87,8 +85,7 @@
             <th class="w-15">Toms Id</th>
             <th class="w-15">Roles</th>
             <th class="w-15">Systems</th>
-            <th rowspan="2"
-                colspan="{{serverInfo.featureEnabled('IMPERSONATION') && access.impersonation == true ? '3' : '2'}}">
+            <th colspan="{{serverInfo.featureEnabled('IMPERSONATION') && access.impersonation == true ? '3' : '2'}}">
                 {{:: 'actions' | translate}}
             </th>
         </tr>
@@ -98,13 +95,13 @@
             <td class="clip" style="width: 5%">
                 <input type="checkbox" data-ng-model="user.active"/>
             </td>
-            <td rowspan="{{user.access.length}}" class="clip"><a href="#/realms/{{realm.realm}}/users/{{user.id}}">{{user.id}}</a>
+            <td class="clip"><a href="#/realms/{{realm.realm}}/users/{{user.id}}">{{user.id}}</a>
             </td>
-            <td rowspan="{{user.access.length}}" class="clip">{{user.username}}</td>
-            <td rowspan="{{user.access.length}}" class="clip">{{user.email}}</td>
-            <td rowspan="{{user.access.length}}" class="clip">{{user.firstName}}</td>
-            <td rowspan="{{user.access.length}}" class="clip">{{user.phone}}</td>
-            <td rowspan="{{user.access.length}}" class="clip">
+            <td class="clip">{{user.username}}</td>
+            <td class="clip">{{user.email}}</td>
+            <td class="clip">{{user.firstName}}</td>
+            <td class="clip">{{user.phone}}</td>
+            <td class="clip">
                 <input type="checkbox" data-ng-model="user.enabled" disabled/>
             </td>
             <td class="clip">

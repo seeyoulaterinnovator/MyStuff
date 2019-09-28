@@ -323,12 +323,6 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         });
     };
 
-    $scope.unlockUsers = function () {
-        let userForUnlock = $scope.users.filter(user => user.active).map(user => user.id);
-        $http.post(`${authUrl}/realms/${realm.realm}/users/unlock`, userForUnlock).then(response => {
-            Notifications.success("Selected users has been unlocked");
-        })
-    };
 
     $scope.selectAll = function () {
         if ($scope.selectedAll) {
@@ -343,12 +337,28 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         $scope.searchQuery();
     };
 
+
+    $scope.unlockUsers = function () {
+        let userForUnlock = $scope.users.filter(user => user.active).map(user => user.id);
+        $http.post(`${authUrl}/realms/${realm.realm}/users/unlock`, userForUnlock).then(response => {
+            Notifications.success("Selected users has been unlocked");
+        })
+    };
+
     $scope.selectedResetPassword = function () {
         let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
         $http.post(`${authUrl}/realms/${realm.realm}/users/credential/reset`, userForResetPassword).then(response => {
             Notifications.success("Password Reset");
         })
     };
+
+    $scope.selectedBlockUsers = function () {
+        let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
+        $http.post(`${authUrl}/realms/${realm.realm}/users/block`, userForResetPassword).then(response => {
+            Notifications.success("Users has been blocking");
+        })
+    };
+
 
     $scope.previousPage = function () {
         $scope.query.first -= parseInt($scope.query.max);
@@ -360,6 +370,14 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
 
     $scope.importFileCSV = function (file) {
+        let form = new FormData();
+        form.append('file', file[0]);
+        $http.post(`${authUrl}/realms/${realm.realm}/users-toms/uploadUsers`, form, {
+            headers: {'Content-Type': 'multipart/form-data'}
+        })
+    };
+
+    $scope.importFileExcel = function (file) {
         let form = new FormData();
         form.append('file', file[0]);
         $http.post(`${authUrl}/realms/${realm.realm}/users-toms/uploadUsers`, form, {
@@ -474,7 +492,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                             systemId: user.systemId,
                             systemName: user.systemName,
                             roleId: user.roleId,
-                            name: user.roleName,
+                            roleName: user.roleName,
                             tomsId: user.tomsId
                         }
                     ]
@@ -487,7 +505,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                     systemId: user.systemId,
                     systemName: user.systemName,
                     roleId: user.roleId,
-                    name: user.roleName,
+                    roleName: user.roleName,
                     tomsId: user.tomsId
                 };
 
