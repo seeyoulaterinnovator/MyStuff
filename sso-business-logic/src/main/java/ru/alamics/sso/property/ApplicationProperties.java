@@ -28,17 +28,23 @@ public class ApplicationProperties {
         if(settings != null) {
             ret = settings.getValue();
         } else {
-            String envProperty = System.getenv(keyName);
-            String vmOpts = System.getProperty(keyName);
-            if(envProperty != null) {
-                ret = envProperty;
-            } else if(vmOpts != null) {
-                ret = vmOpts;
-            } else {
-                ret = this.properties.getProperty(keyName);
-            }
+            ret = getProperty(keyName);
         }
 
+        return ret;
+    }
+
+    public String getProperty(final String name) {
+        String envProperty = System.getenv(name);
+        String vmOpts = System.getProperty(name);
+        String ret;
+        if(envProperty != null) {
+            ret = envProperty;
+        } else if(vmOpts != null) {
+            ret = vmOpts;
+        } else {
+            ret = this.properties.getProperty(name);
+        }
         return ret;
     }
 
