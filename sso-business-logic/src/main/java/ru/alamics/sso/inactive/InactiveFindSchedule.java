@@ -6,6 +6,7 @@ import ru.alamics.sso.keycloak.repository.AutoLockNotificationRepository;
 import ru.alamics.sso.keycloak.repository.RealmRepository;
 import ru.alamics.sso.keycloak.repository.UserHistoryLoginRepository;
 import ru.alamics.sso.property.ApplicationProperties;
+import ru.alamics.sso.property.PropertyConstants;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
@@ -32,13 +33,15 @@ public class InactiveFindSchedule {
     public void notificationInactiveUsers () {
         final String DEBUG_STR = "findNotifications";
         log.info("start:{}", DEBUG_STR);
-        userHistoryLoginRepository.findInactiveUsers(absenceDaysNotification);
+        if(absenceDaysNotification > -1) {
+            userHistoryLoginRepository.findInactiveUsers(absenceDaysNotification);
+        }
         log.info("stop:{}", DEBUG_STR);
     }
 
 
     @PostConstruct
     public void init() {
-        this.absenceDaysNotification = Integer.parseInt(properties.getProperty("user.absence.notifications.days"));
+        this.absenceDaysNotification = Integer.parseInt(properties.getProperty(PropertyConstants.ABSENCE_NOTIFICATION_DAYS, "user"));
     }
 }

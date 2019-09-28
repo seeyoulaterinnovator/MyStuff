@@ -15,6 +15,7 @@ import ru.alamics.sso.keycloak.repository.AutoLockNotificationRepository;
 import ru.alamics.sso.keycloak.repository.RealmRepository;
 import ru.alamics.sso.keycloak.repository.UserRepository;
 import ru.alamics.sso.property.ApplicationProperties;
+import ru.alamics.sso.property.PropertyConstants;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
@@ -96,6 +97,6 @@ public class InactiveNotificationSchedule {
 
     @PostConstruct
     public void init() {
-        this.absenceDaysBlock = Integer.parseInt(properties.getProperty("user.absence.blocking.days"));
+        this.absenceDaysBlock = Integer.parseInt(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user"));
     }
 }

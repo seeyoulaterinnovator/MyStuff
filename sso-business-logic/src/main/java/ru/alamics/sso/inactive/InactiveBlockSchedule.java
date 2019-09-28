@@ -3,6 +3,7 @@ package ru.alamics.sso.inactive;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.keycloak.repository.AutoLockNotificationRepository;
 import ru.alamics.sso.property.ApplicationProperties;
+import ru.alamics.sso.property.PropertyConstants;
 
 
 import javax.annotation.PostConstruct;
@@ -28,15 +29,15 @@ public class InactiveBlockSchedule {
     public void block () {
         final String DEBUG_STR = "block";
         log.info("start:{}", DEBUG_STR);
-
-      autoLockNotificationRepository.findUsersToBlock(absenceDaysBlock);
-
+        if(absenceDaysBlock > -1) {
+            autoLockNotificationRepository.findUsersToBlock(absenceDaysBlock);
+        }
         log.info("stop:{}", DEBUG_STR);
     }
 
 
     @PostConstruct
     public void init() {
-        this.absenceDaysBlock = Integer.parseInt(properties.getProperty("user.absence.blocking.days"));
+        this.absenceDaysBlock = Integer.parseInt(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user"));
     }
 }

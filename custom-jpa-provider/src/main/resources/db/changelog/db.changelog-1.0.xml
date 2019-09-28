@@ -180,4 +180,22 @@
             ON DELETE CASCADE
         </sql>
     </changeSet>
+
+    <changeSet id="14" author="denisqq">
+        <createTable tableName="SETTINGS">
+            <column name="ID" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="EXT_ID" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="VALUE" type="TEXT"/>
+            <column name="DESC" type="TEXT"/>
+            <column name="REALM_ID" type="varchar(256)"/>
+        </createTable>
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('7b2e4a18-32ce-43e9-b2dd-680bbb61a78d', 'user.absence.blocking.days', '15', null, 'user');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('df4fa86e-ec19-4f63-b274-4ee25086c20f', 'user.absence.notifications.days', '15', null, 'user');
+        </sql>
+    </changeSet>
 </databaseChangeLog>

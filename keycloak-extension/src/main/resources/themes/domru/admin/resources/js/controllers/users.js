@@ -1805,10 +1805,10 @@ module.controller('UserCustomerCtrl', function($scope, realm, user, $location, $
 });
 
 
-module.controller('CustomTabCtrl', function($scope, realm, $location) {
-    $scope.realm = realm;
-});
-
-
-
+// module.controller('CustomTabCtrl', function($scope, realm, $location) {
+//     $scope.realm = realm;
+// });
+//
+//
+//
 

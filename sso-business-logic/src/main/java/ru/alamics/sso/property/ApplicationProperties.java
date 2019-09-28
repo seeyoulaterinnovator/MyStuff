@@ -1,6 +1,10 @@
 package ru.alamics.sso.property;
 
+import ru.alamics.sso.keycloak.entity.Settings;
+import ru.alamics.sso.keycloak.repository.SettingsRepository;
+
 import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import java.io.IOException;
@@ -13,16 +17,29 @@ import java.util.Properties;
 public class ApplicationProperties {
     private Properties properties;
 
-    public String getProperty(final String name) {
-        String envProperty = System.getenv(name);
-        String vmOpts = System.getProperty(name);
-        if(envProperty != null) {
-            return envProperty;
-        } else if(vmOpts != null) {
-            return vmOpts;
+    @EJB
+    private SettingsRepository repository;
+
+
+    public String getProperty(final PropertyConstants property, final String realmId) {
+        final String keyName = property.getKey();
+        Settings settings = repository.getSettings(keyName, realmId);
+        String ret;
+        if(settings != null) {
+            ret = settings.getValue();
         } else {
-           return this.properties.getProperty(name);
+            String envProperty = System.getenv(keyName);
+            String vmOpts = System.getProperty(keyName);
+            if(envProperty != null) {
+                ret = envProperty;
+            } else if(vmOpts != null) {
+                ret = vmOpts;
+            } else {
+                ret = this.properties.getProperty(keyName);
+            }
         }
+
+        return ret;
     }
 
     @PostConstruct
