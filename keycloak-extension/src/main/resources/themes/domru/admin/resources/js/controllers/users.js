@@ -397,7 +397,9 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             ]
         };
         var linkElement = document.createElement('a');
-        $http.get(`${authUrl}/realms/master/users-toms/downloadUsers`, payload)
+        $http.get(`${authUrl}/realms/master/users-toms/downloadUsers`, payload, {
+            headers: {'Content-Type': 'multipart/form-data'}
+        })
             .then((response, status, headers) => {
                 headers = headers();
                 var filename = headers['x-filename'];
@@ -429,8 +431,9 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             ]
         };
         var linkElement = document.createElement('a');
-        $http.get(`${authUrl}/realms/master/users-toms/downloadUsers`, payload)
-            .then((response, status, headers) => {
+        $http.get(`${authUrl}/realms/master/users-toms/downloadUsers`, payload, {
+            headers: {'Content-Type': 'multipart/form-data'}
+        }).then((response, status, headers) => {
                 headers = headers();
                 var filename = headers['x-filename'];
                 var contentType = headers['content-type'];
