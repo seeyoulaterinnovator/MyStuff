@@ -372,7 +372,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     $scope.importFileCSV = function (file) {
         let form = new FormData();
         form.append('file', file[0]);
-        $http.post(`${authUrl}/realms/${realm.realm}/users-toms/uploadUsers`, form, {
+        $http.post(`${authUrl}/realms/mster/users-toms/uploadUsers`, form, {
             headers: {'Content-Type': 'multipart/form-data'}
         })
     };
@@ -380,7 +380,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     $scope.importFileExcel = function (file) {
         let form = new FormData();
         form.append('file', file[0]);
-        $http.post(`${authUrl}/realms/${realm.realm}/users-toms/uploadUsers`, form, {
+        $http.post(`${authUrl}/realms/master/users-toms/uploadUsers`, form, {
             headers: {'Content-Type': 'multipart/form-data'}
         })
     };
@@ -397,7 +397,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             ]
         };
         var linkElement = document.createElement('a');
-        $http.get(`${authUrl}/realms/${realm.realm}/users-toms/downloadUsers`, payload)
+        $http.get(`${authUrl}/realms/master/users-toms/downloadUsers`, payload)
             .then((response, status, headers) => {
                 headers = headers();
                 var filename = headers['x-filename'];
@@ -429,7 +429,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             ]
         };
         var linkElement = document.createElement('a');
-        $http.get(`${authUrl}/realms/${realm.realm}/users-toms/downloadUsers`, payload)
+        $http.get(`${authUrl}/realms/master/users-toms/downloadUsers`, payload)
             .then((response, status, headers) => {
                 headers = headers();
                 var filename = headers['x-filename'];
