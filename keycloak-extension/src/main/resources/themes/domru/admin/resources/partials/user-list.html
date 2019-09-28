@@ -1,7 +1,9 @@
 <style>
     li.role-list {
         list-style-type: none; /* Убираем маркеры */
+        /*line-height: 1.5px;*/
     }
+
     ul {
         margin-left: 0; /* Отступ слева в браузере IE и Opera */
         padding-left: 0; /* Отступ слева в браузере Firefox, Safari, Chrome */
@@ -20,35 +22,53 @@
                     <div class="form-group form-inline">
                         <div class="form-group">
                             <div class="input-group-addon">
-                                <input type="text" placeholder="{{:: 'search.placeholder' | translate}}" data-ng-model="query.search" class="form-control search" onkeydown="if (event.keyCode == 13) document.getElementById('userSearch').click()">
+                                <input type="text" placeholder="{{:: 'search.placeholder' | translate}}"
+                                       data-ng-model="query.search" class="form-control search"
+                                       onkeydown="if (event.keyCode == 13) document.getElementById('userSearch').click()">
                                 <i class="fa fa-search" id="userSearch" data-ng-click="firstPage()"></i>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="input-group-addon">
-                                <input type="text" placeholder="Search by user id" data-ng-model="query.searchByUserId" class="form-control search" onkeydown="if (event.keyCode == 13) document.getElementById('userSearchById').click()">
+                                <input type="text" placeholder="Search by user id" data-ng-model="query.searchByUserId"
+                                       class="form-control search"
+                                       onkeydown="if (event.keyCode == 13) document.getElementById('userSearchById').click()">
                                 <i class="fa fa-search" id="userSearchById" data-ng-click="searchByUserId()"></i>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="input-group-addon">
-                                <input type="text" placeholder="Search by toms id" data-ng-model="query.searchByTomsId" class="form-control search" onkeydown="if (event.keyCode == 13) document.getElementById('userSearchByTomsId').click()">
+                                <input type="text" placeholder="Search by toms id" data-ng-model="query.searchByTomsId"
+                                       class="form-control search"
+                                       onkeydown="if (event.keyCode == 13) document.getElementById('userSearchByTomsId').click()">
                                 <i class="fa fa-search" id="userSearchByTomsId" data-ng-click="searchByTomsId()"></i>
                             </div>
                         </div>
                     </div>
-                    <button id="viewAllUsers" class="btn btn-default" ng-click="query.search = null; firstPage()">{{:: 'view-all-users' | translate}}</button>
+                    <button id="viewAllUsers" class="btn btn-default" ng-click="query.search = null; firstPage()">{{::
+                        'view-all-users' | translate}}
+                    </button>
 
                     <div class="pull-right" data-ng-show="access.manageUsers">
-                        <label for="import-file" class="btn btn-default ng-binding">Import CSV<i class="pficon pficon-import"></i></label>
-                        <input id="import-file" type="file" class="hidden" kc-on-read-file="importFileCSV($fileContent)">
+                        <label for="import-file-csv" class="btn btn-default ng-binding">Import CSV<i
+                                class="pficon pficon-import"></i></label>
+                        <input id="import-file-csv" type="file" class="hidden"
+                               kc-on-read-file="importFileCSV($fileContent)">
+
+<!--                        <label for="import-file-xlsx" class="btn btn-default ng-binding">Import CSV<i-->
+<!--                                class="pficon pficon-import"></i></label>-->
+<!--                        <input id="import-file-xlsx" type="file" class="hidden"-->
+<!--                               kc-on-read-file="importFileCSV($fileContent)">-->
 
                         <button data-ng-click="exportCSV()" class="btn btn-default">Export CSV</button>
                         <button data-ng-click="exportXlsx()" class="btn btn-default">Export Excel</button>
 
                         <button data-ng-click="selectedResetPassword()" class="btn btn-default">Reset Password</button>
-                        <button data-ng-click="unlockUsers()" class="btn btn-default">{{:: 'unlock-users' | translate}}</button>
-                        <a id="createUser" class="btn btn-default" href="#/create/user/{{realm.realm}}">{{:: 'add-user' | translate}}</a>
+                        <button data-ng-click="unlockUsers()" class="btn btn-default">{{:: 'unlock-users' |
+                            translate}}
+                        </button>
+                        <a id="createUser" class="btn btn-default" href="#/create/user/{{realm.realm}}">{{:: 'add-user'
+                            | translate}}</a>
                     </div>
                 </div>
             </th>
@@ -62,12 +82,15 @@
             <th class="w-15">{{:: 'username' | translate}}</th>
             <th class="w-15">{{:: 'email' | translate}}</th>
             <th class="w-15">{{:: 'first-name' | translate}}</th>
-            <th class="w-15">Toms Id</th>
             <th class="w-15">Phone</th>
             <th class="w-15">Enabled</th>
+            <th class="w-15">Toms Id</th>
             <th class="w-15">Roles</th>
             <th class="w-15">Systems</th>
-            <th colspan="{{serverInfo.featureEnabled('IMPERSONATION') && access.impersonation == true ? '3' : '2'}}">{{:: 'actions' | translate}}</th>
+            <th rowspan="2"
+                colspan="{{serverInfo.featureEnabled('IMPERSONATION') && access.impersonation == true ? '3' : '2'}}">
+                {{:: 'actions' | translate}}
+            </th>
         </tr>
         </thead>
         <tbody>
@@ -75,32 +98,42 @@
             <td class="clip" style="width: 5%">
                 <input type="checkbox" data-ng-model="user.active"/>
             </td>
-            <td class="clip"><a href="#/realms/{{realm.realm}}/users/{{user.id}}">{{user.id}}</a></td>
-            <td class="clip">{{user.username}}</td>
-            <td class="clip">{{user.email}}</td>
-            <td class="clip">{{user.firstName}}</td>
-            <td class="clip">{{user.tomsId}}</td>
-            <td class="clip">{{user.phone}}</td>
-            <td class="clip">
-                <input type="radio" data-ng-model="user.enabled" disabled/>
+            <td rowspan="{{user.access.length}}" class="clip"><a href="#/realms/{{realm.realm}}/users/{{user.id}}">{{user.id}}</a>
+            </td>
+            <td rowspan="{{user.access.length}}" class="clip">{{user.username}}</td>
+            <td rowspan="{{user.access.length}}" class="clip">{{user.email}}</td>
+            <td rowspan="{{user.access.length}}" class="clip">{{user.firstName}}</td>
+            <td rowspan="{{user.access.length}}" class="clip">{{user.phone}}</td>
+            <td rowspan="{{user.access.length}}" class="clip">
+                <input type="checkbox" data-ng-model="user.enabled" disabled/>
             </td>
             <td class="clip">
-                <li ng-repeat="role in user.roles" class="role-list">
-                    <span>{{role.name}}</span>
+                <li ng-repeat="access in user.access" class="role-list">
+                    <span>{{access.tomsId}}</span>
                 </li>
             </td>
             <td class="clip">
-                <li ng-repeat="system in user.systems" class="role-list">
-                    <span>{{system.name}}</span>
+                <li ng-repeat="access in user.access" class="role-list">
+                    <span>{{access.roleName}}</span>
                 </li>
             </td>
-            <td class="kc-action-cell" kc-open="/realms/{{realm.realm}}/users/{{user.id}}">{{:: 'edit' | translate}}</td>
+            <td class="clip">
+                <li ng-repeat="access in user.access" class="role-list">
+                    <span>{{access.systemName}}</span>
+                </li>
+            </td>
+            <td class="kc-action-cell" kc-open="/realms/{{realm.realm}}/users/{{user.id}}">{{:: 'edit' | translate}}
+            </td>
             <td class="kc-action-cell" data-ng-click="removeUser(user)">{{:: 'delete' | translate}}</td>
         </tr>
         <tr data-ng-show="!users || users.length == 0">
             <td class="text-muted" data-ng-show="!users">{{:: 'users.instruction' | translate}}</td>
-            <td class="text-muted" data-ng-show="searchLoaded && users.length == 0 && lastSearch != null">{{:: 'no-results' | translate}}</td>
-            <td class="text-muted" data-ng-show="searchLoaded && users.length == 0 && lastSearch == null">{{:: 'no-users-available' | translate}}</td>
+            <td class="text-muted" data-ng-show="searchLoaded && users.length == 0 && lastSearch != null">{{::
+                'no-results' | translate}}
+            </td>
+            <td class="text-muted" data-ng-show="searchLoaded && users.length == 0 && lastSearch == null">{{::
+                'no-users-available' | translate}}
+            </td>
         </tr>
         </tbody>
     </table>
