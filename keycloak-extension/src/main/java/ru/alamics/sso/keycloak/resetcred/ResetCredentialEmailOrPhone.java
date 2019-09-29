@@ -83,10 +83,13 @@ public class ResetCredentialEmailOrPhone extends AuthBaseClass {
         String username = authenticationSession.getAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME);
 
         try {
+            if (username == null)
+                return false;
+
             if (username.startsWith("+7")) {
                 username = username.replaceAll("\\D", "");
             }
-            if (username == null || !riasApiService.checkParam(username)) {
+            if (!riasApiService.checkParam(username)) {
                 return false;
             }
         } catch (RiasCheckException rce) {
