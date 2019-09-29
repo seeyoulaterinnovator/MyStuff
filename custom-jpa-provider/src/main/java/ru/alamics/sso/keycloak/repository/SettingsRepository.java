@@ -8,6 +8,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
+import java.util.UUID;
 
 @Stateless
 @LocalBean
@@ -52,9 +53,13 @@ public class SettingsRepository {
     public Settings save(Settings settings) {
         if(settings != null) {
             if(settings.getId() == null) {
+                settings.setId(UUID.randomUUID().toString());
                 em.persist(settings);
             } else {
-                em.merge(settings);
+                em.createQuery("update Settings s set s.value =:val where s.id=:settingId")
+                        .setParameter("val", settings.getValue())
+                        .setParameter("settingId", settings.getId())
+                        .executeUpdate();
             }
 
             em.flush();
