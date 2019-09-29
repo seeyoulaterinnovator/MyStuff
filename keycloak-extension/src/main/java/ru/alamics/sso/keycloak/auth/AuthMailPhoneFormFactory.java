@@ -13,7 +13,10 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.UserCredentialModel;
 import org.keycloak.provider.ProviderConfigProperty;
+import ru.alamics.sso.registration.rias.RiasService;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import java.util.List;
 
@@ -28,8 +31,21 @@ public class AuthMailPhoneFormFactory implements AuthenticatorFactory, DisplayTy
     public Authenticator create(KeycloakSession session) {
 
         EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
+
+        log.info("Get RiasAuthProvider");
+        RiasService riasService;
+        try {
+            InitialContext context = new InitialContext();
+
+            riasService = (RiasService) context.lookup("java:global/domru-sso/" + RiasService.class.getSimpleName());
+            log.info("Got riasService from context");
+        } catch (NamingException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Something wrong with context");
+        }
+
         log.info("Creating AuthMailPhoneForm");
-        SINGLETON = new AuthMailPhoneForm(em);
+        SINGLETON = new AuthMailPhoneForm(em, riasService);
 
         return SINGLETON;
     }

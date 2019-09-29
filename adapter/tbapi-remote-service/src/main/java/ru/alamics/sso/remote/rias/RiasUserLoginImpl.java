@@ -77,7 +77,7 @@ public class RiasUserLoginImpl implements RiasLoginService {
                     .queryParam("timestamp$c", timestamp)
                     .queryParam("client_secret", secretHash);
 
-            System.out.println(wt.getUri());
+            //System.out.println(wt.getUri());
 
             response = wt.request(MediaType.APPLICATION_XML)
                     .get();
@@ -91,18 +91,9 @@ public class RiasUserLoginImpl implements RiasLoginService {
                 response.close();
         }
 
-        //log.info("login response: " + response);
-        System.out.println("login response: " + result);
+        log.info("login response: " + response);
+        //System.out.println("login response: " + result);
 
         return result;
-    }
-
-    public static void main(String[] args) {
-
-        try {
-            new RiasUserLoginImpl().loginUser("4129@example.com", "4129");
-        } catch (RiasCheckException e) {
-            e.printStackTrace();
-        }
     }
 }
