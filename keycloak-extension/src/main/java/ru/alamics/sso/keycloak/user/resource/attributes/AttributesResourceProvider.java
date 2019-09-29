@@ -21,22 +21,8 @@ public class AttributesResourceProvider implements BaseResourceProvider<Attribut
 
     @Override
     public AttributesResource getResource () {
-        var evaluator = initAuth();
+        var evaluator = initAuth(session);
         var service = new UserService(this.session, evaluator);
         return new AttributesResource(service);
     }
-
-    private AdminPermissionEvaluator initAuth() {
-        var context = this.session.getContext();
-        var requestHeaders = context.getRequestHeaders();
-        String tokenString = new AppAuthManager().extractAuthorizationHeaderToken(requestHeaders);
-        Util.validateToken(tokenString, session);
-        var realm = context.getRealm();
-        AuthenticationManager.AuthResult authResult = new AppAuthManager()
-                .authenticateBearerToken(session, realm, session.getContext().getUri(), session.getContext().getConnection(), requestHeaders);
-        var client = context.getClient();
-        var auth = new AdminAuth(realm, authResult.getToken(), authResult.getUser(), client);
-        return AdminPermissions.evaluator(session, realm, auth);
-    }
-
 }

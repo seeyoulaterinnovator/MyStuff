@@ -1,6 +1,7 @@
 <#import "templates/email-sent.ftl" as emailSent>
+<#import "templates/header.ftl" as header>
 
-<#macro registrationLayout displayInfo=false displayMessage=true displayWide=false environment="dev" >
+<#macro registrationLayout displayInfo=false displayMessage=true displayWarningMessage=true displayWide=false environment="dev" displayCity=true>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="ru" class="h-full min-h-screen">
   <head>
@@ -32,7 +33,7 @@
       <#include "templates/google-tag-manager-body.html">
     </#if>
 
-    <#include "templates/header.html">
+    <@header.defaultTemplate withCity=displayCity></@header.defaultTemplate>
 
     <main id="content" class="flex-1 py-12 mx-auto md:mx-auto w-full max-w-440px xl:max-w-470px">
       <#if displayMessage && message?has_content && message.summary == msg('emailSentMessage')>
@@ -55,7 +56,7 @@
             <#if displayMessage && message?has_content>
               <div class="alert pb-3">
                 <#if message.type = 'info'><span class="text-black">${kcSanitize(message.summary)?no_esc}</span></#if>
-                <#if message.type = 'warning'><span class="text-extra">${kcSanitize(message.summary)?no_esc}</span></#if>
+                <#if message.type = 'warning' && displayWarningMessage><span class="text-extra">${kcSanitize(message.summary)?no_esc}</span></#if>
                 <#if message.type = 'success' && message.summary != msg('emailSentMessage')>
                     <span class="text-accentGreen">${kcSanitize(message.summary)?no_esc}</span>
                 </#if>
