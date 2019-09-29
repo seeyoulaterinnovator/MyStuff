@@ -1,16 +1,13 @@
 package ru.alamics.sso.keycloak.create.rest;
 
+import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
-import org.keycloak.authentication.RequiredActionProvider;
-import org.keycloak.connections.jpa.JpaConnectionProvider;
-import org.keycloak.events.admin.OperationType;
-import org.keycloak.events.admin.ResourceType;
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.keycloak.jose.jws.JWSInput;
 import org.keycloak.jose.jws.JWSInputException;
 import org.keycloak.models.*;
-import org.keycloak.models.jpa.entities.UserEntity;
-import org.keycloak.provider.ProviderFactory;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.ForbiddenException;
@@ -18,47 +15,36 @@ import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.managers.RealmManager;
 import org.keycloak.services.resources.admin.AdminAuth;
-import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.permissions.AdminPermissions;
-import org.keycloak.utils.MediaType;
+import ru.alamics.sso.keycloak.create.FileServiceException;
+import ru.alamics.sso.keycloak.create.UserService;
+import ru.alamics.sso.keycloak.create.model.DownloadUserRequest;
+import ru.alamics.sso.keycloak.create.model.UserParameter;
 import ru.alamics.sso.keycloak.create.model.UserRequest;
-import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
-import ru.alamics.sso.registration.FoundUserPostException;
-import ru.alamics.sso.registration.dto.UserPostRequest;
-import ru.alamics.sso.registration.service.UserPostService;
+import ru.alamics.sso.registration.FoundException;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.persistence.EntityManager;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
+import javax.activation.UnsupportedDataTypeException;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import java.util.Collections;
-import java.util.HashSet;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
-import java.util.Set;
-
-import static ru.alamics.sso.registration.model.FormConstants.FIELD_PHONE;
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
 @Slf4j
 public class CustomUserResource {
-
     protected KeycloakSession session;
-    private UserPostService userPostService;
+    private UserService userService;
 
     public CustomUserResource(KeycloakSession session) {
-        try {
-            this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context");
-        }
         this.session = session;
+        AdminAuth auth = authenticateRealmAdminRequest(session.getContext().getRealm());
+        this.userService = new UserService(session, auth);
     }
 
     @POST
@@ -68,113 +54,129 @@ public class CustomUserResource {
     public Response createUser(final UserRequest request, final HttpHeaders headers) {
         if (request.getPhone() == null || request.getPhone().isBlank()) {
             return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
-        } else if (request.getTomsId() == null || request.getTomsId().isBlank()) {
+        }
+        return getUserResponse(request, false);
+    }
+
+    @POST
+    @Path("/bss")
+    @NoCache
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response createUserBss(final UserRequest request, final HttpHeaders headers) {
+        if (request.getPhone() == null || request.getPhone().isBlank()) {
+            return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
+        }
+        if (request.getTomsId() == null || request.getTomsId().isBlank()) {
             return ErrorResponse.error("TomsId is required attribute", Response.Status.BAD_REQUEST);
         }
-        RealmModel realm = session.getContext().getRealm();
-        AdminAuth auth = authenticateRealmAdminRequest(realm);
 
-        Response response = checkOnExistUser(request, realm);
-        if (response != null) {
-            return response;
-        }
-
-        return getUserResponse(request, realm, auth);
+        return getUserResponse(request, true);
     }
 
-    private Response checkOnExistUser(UserRequest request, RealmModel realm) {
-        List<UserEntity> users = getEM().createQuery("select u from UserAttributeEntity atr join atr.user u " +
-                "where atr.name = :ph_attr_name and " +
-                " atr.value like '%' || :phone || '%' and" + // TODO =
-                " u.realmId = :realId ", UserEntity.class)
-                .setParameter("ph_attr_name", ATTR_PHONE_NAME)
-                .setParameter("phone", request.getPhone())
-                .setParameter("realId", realm.getId())
-                .getResultList();
-
-        if (users != null && !users.isEmpty()) {
-            log.error("User exists with same phone {}", request.getPhone());
-            return JsonResponse.error(Response.Status.CONFLICT)
-                    .message("User exists with same phone")
-                    .addResult("user_id", users.get(0).getId())
-                    .build();
-        }
-
-        // Double-check duplicated username and email here due to federation
-        UserModel userModel = session.users().getUserByUsername(request.getEmail(), realm);
-        if (userModel != null) {
-            log.error("User exists with same username {}", request.getEmail());
-            return JsonResponse.error(Response.Status.CONFLICT)
-                    .message("User exists with same username")
-                    .addResult("user_id", userModel.getId())
-                    .build();
-        }
-
-        if (request.getEmail() != null && !realm.isDuplicateEmailsAllowed()) {
-            userModel = session.users().getUserByEmail(request.getEmail(), realm);
-            if (userModel != null) {
-                log.error("User exists with same email {}", request.getEmail());
-                return JsonResponse.error(Response.Status.CONFLICT)
-                        .message("User exists with same email")
-                        .addResult("user_id", userModel.getId())
-                        .build();
-            }
-        }
-        return null;
-    }
-
-    private Response getUserResponse(UserRequest request, RealmModel realm, AdminAuth auth) {
+    private Response getUserResponse(UserRequest request, boolean bss) {
         try {
-            UserModel user = session.users().addUser(realm, request.getEmail());
-            Set<String> emptySet = Collections.emptySet();
-
-            updateUserFromRequest(user, request, emptySet, realm, session, false);
-            addUserPost(user, request);
-
-            new AdminEventBuilder(realm, auth, session, session.getContext().getConnection())
-                    .realm(realm)
-                    .resource(ResourceType.REALM)
-                    .resource(ResourceType.USER)
-                    .operation(OperationType.CREATE)
-                    .resourcePath(session.getContext().getUri(), user.getId())
-                    .success();
-
-            if (session.getTransactionManager().isActive()) {
-                session.getTransactionManager().commit();
-            }
+            UserModel user = userService.createUser(request, bss);
             return JsonResponse.success()
                     .httpStatus(Response.Status.CREATED)
                     .addResult("user_id", user.getId())
                     .build();
-
         } catch (ModelDuplicateException e) {
+            log.error("Could not create user", e);
             return JsonResponse.error(Response.Status.CONFLICT)
                     .message("User exists with same username or email or phone")
                     .build();
-
         } catch (ModelException me) {
-            log.warn("Could not create user", me);
+            log.error("Could not create user", me);
             return JsonResponse.error(Response.Status.INTERNAL_SERVER_ERROR)
                     .message("Could not create user")
                     .build();
-        } catch (FoundUserPostException e) {
-            return JsonResponse.error(Response.Status.CONFLICT)
-                    .message("User post with the same userId and tomsId already exists")
+        } catch (NotFoundException e) {
+            log.error("Could not create user", e);
+            return JsonResponse.error(Response.Status.FOUND)
+                    .message(e.getMessage())
                     .build();
-        } finally {
-            if (session.getTransactionManager().isActive()) {
-                session.getTransactionManager().setRollbackOnly();
-            }
+        } catch (FoundException e) {
+            log.error("Could not create user", e);
+            return JsonResponse.error(Response.Status.CONFLICT)
+                    .message(e.getMessage())
+                    .addResult("info", e.getResult())
+                    .build();
         }
     }
 
-    private EntityManager getEM() {
-        return session.getProvider(JpaConnectionProvider.class).getEntityManager();
+    @GET
+    @Path("/user-parameters")
+    @NoCache
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUserParameters() {
+        return JsonResponse.success()
+                .addResult("user-parameters", UserParameter.values())
+                .build();
     }
 
+    @POST
+    @Path("/uploadUsers")
+    @Consumes("multipart/form-data")
+    @NoCache
+    public Response uploadUsers(MultipartFormDataInput file) {
+        List<InputPart> inputParts = file.getFormDataMap().get("file");
+        if (inputParts == null || inputParts.isEmpty()) {
+            return JsonResponse.error(Response.Status.BAD_REQUEST).build();
+        }
+        try {
+            return JsonResponse.success()
+                    .addResult("import-report",
+                            userService.importUsers(inputParts.get(0).getBody(InputStream.class, null),
+                                    getFileExtension(inputParts.get(0).getHeaders())))
+                    .build();
+        } catch (UnsupportedDataTypeException | FileServiceException e) {
+            log.error("Could not upload users", e);
+            return JsonResponse.fail()
+                    .message(e.getMessage())
+                    .build();
+        } catch (IOException e) {
+            log.error("Could not upload users", e);
+            return JsonResponse.fail()
+                    .message("Error reading file")
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("/downloadUsers")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.MULTIPART_FORM_DATA)
+    @NoCache
+    public Response downloadUsers(@NotNull @Valid DownloadUserRequest downloadUserRequest) {
+        try {
+            log.info("Start download users");
+            byte[] bytes = userService.exportUsers(downloadUserRequest);
+            if (bytes == null) {
+                log.warn("Users not found. Maybe database is empty");
+                return JsonResponse
+                        .fail()
+                        .message("Users not found. Maybe database is empty")
+                        .build();
+            }
+            Response.ResponseBuilder response = Response.ok((Object) bytes);
+            response.header("Content-Disposition", "attachment; filename=\"users_info." + downloadUserRequest.getType() + "\"");
+            log.info("Download users success!", "filename = users_info." + downloadUserRequest.getType());
+            return response.build();
+        } catch (UnsupportedDataTypeException e) {
+            log.error("Could not download users", e);
+            return JsonResponse
+                    .error(Response.Status.BAD_REQUEST)
+                    .message(e.getMessage())
+                    .build();
+        } catch (IOException e) {
+            log.error("Could not download users", e);
+            return JsonResponse.fail()
+                    .message("Error writing file")
+                    .build();
+        }
+    }
 
     private AdminAuth authenticateRealmAdminRequest(RealmModel realm) {
-
         String tokenString = new AppAuthManager().extractAuthorizationHeaderToken(session.getContext().getRequestHeaders());
         if (tokenString == null) throw new NotAuthorizedException("Bearer");
         AccessToken token;
@@ -217,48 +219,18 @@ public class CustomUserResource {
         return auth;
     }
 
+    private String getFileExtension(MultivaluedMap<String, String> header) {
+        String[] contentDisposition = header.getFirst("Content-Disposition").split(";");
+        for (String filename : contentDisposition) {
+            if ((filename.trim().startsWith("filename"))) {
 
-    private static void updateUserFromRequest(UserModel user, UserRequest request, Set<String> attrsToRemove, RealmModel realm, KeycloakSession session, boolean removeMissingRequiredActions) {
-        if (request.getEmail() != null && realm.isEditUsernameAllowed()) {
-            user.setUsername(request.getEmail());
-        }
-        if (request.getEmail() != null) {
-            user.setEmail(request.getEmail());
-            if ("".equals(request.getEmail())) {
-                user.setEmail(null);
+                String[] name = filename.split("=");
+
+                String finalFileName = name[1].trim().replaceAll("\"", "");
+
+                return finalFileName.substring(finalFileName.lastIndexOf('.') + 1);
             }
         }
-        if (request.getName() != null) user.setFirstName(request.getName());
-
-        user.setEmailVerified(true);
-
-        List<String> reqActions = Collections.singletonList("UPDATE_PASSWORD");
-
-        if (reqActions != null) {
-            Set<String> allActions = new HashSet<>();
-            for (ProviderFactory factory : session.getKeycloakSessionFactory().getProviderFactories(RequiredActionProvider.class)) {
-                allActions.add(factory.getId());
-            }
-            for (String action : allActions) {
-                if (reqActions.contains(action)) {
-                    user.addRequiredAction(action);
-                } else if (removeMissingRequiredActions) {
-                    user.removeRequiredAction(action);
-                }
-            }
-        }
-
-        String phone = request.getPhone();
-        if (phone != null)
-            phone = phone.replaceAll("[^0-9]+", "");
-
-        user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(phone));
-
-    }
-
-    private void addUserPost(UserModel userModel, UserRequest request) throws FoundUserPostException {
-        UserPostRequest userPostRequest = DataMapper.toUserPostRequest(userModel, request);
-        userPostRequest.setRoleId(1L);
-        userPostService.save(userPostRequest);
+        return "unknown";
     }
 }

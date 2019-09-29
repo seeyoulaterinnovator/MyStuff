@@ -26,7 +26,6 @@ export default (
     fetchPassword().then(data => {
       const password = data.password;
       generatedPassword.textContent = password;
-      setPassword(password);
       highlightRules();
     });
   }
