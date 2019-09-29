@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.repository;
 
+import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.entity.ExternalSystemEntity;
@@ -79,6 +80,37 @@ public class UserPostRepository {
                 .getResultList();
     }
 
+    public ExternalSystemRoleEntity getExternalSystemRole(String sysName) {
+        ExternalSystemRoleEntity externalSystemRole = null;
+        try {
+            externalSystemRole = em.createQuery(
+                    "select role " +
+                            "from ExternalSystemRoleEntity role \n" +
+                            "join ExternalSystemEntity sys on role.externalSystem = sys.id \n" +
+                            "where sys.name = :sysName", ExternalSystemRoleEntity.class)
+                    .setParameter("sysName", sysName)
+                    .getResultList()
+                    .get(0);
+        } finally {
+            return externalSystemRole;
+        }
+    }
+
+    public UserPostRoleEntity getUserPostRole(String name) {
+        UserPostRoleEntity userPostRoleEntity = null;
+        try {
+            userPostRoleEntity = em.createQuery(
+                    "select role " +
+                            "from UserPostRoleEntity role \n" +
+                            "where role.name = :name", UserPostRoleEntity.class)
+                    .setParameter("name", name)
+                    .getResultList()
+                    .get(0);
+        } finally {
+            return userPostRoleEntity;
+        }
+    }
+
     public List<UserPostEntity> findUserPostRole(final UserEntity user) {
         final String DEBUG_STR = "findUserPostRole";
         log.info("{}: user={}", DEBUG_STR, user.getId());
@@ -87,6 +119,19 @@ public class UserPostRepository {
                 .setParameter("user", user)
                 .getResultList();
         return ret;
+    }
+
+    public List<UserPostEntity> findUserPostRoleByUserId(final String userId) throws NotFoundException {
+        final String DEBUG_STR = "findUserPostRole";
+        log.info("{}: userId={}", DEBUG_STR, userId);
+
+        UserEntity userEntity = em.find(UserEntity.class, userId);
+        if (userEntity != null) {
+            return findUserPostRole(userEntity);
+        } else {
+            log.info("User not found by id={}", userId);
+            throw new NotFoundException("User not found");
+        }
     }
 
     public List<ExternalSystemEntity> getAllExternalSystem(){

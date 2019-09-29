@@ -17,6 +17,7 @@ import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.sessions.RootAuthenticationSessionModel;
+import org.keycloak.theme.Theme;
 
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -70,6 +71,11 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                         UserModel user = session.users().getUserById(userId, realm);
 
                         if (user != null && user.getEmail() != null) {
+
+                            log.info(String.format("realm id %s, %s, %s", event.getRealmId(), realm.getId(), realm.getName()));
+                            log.info(String.format("user %s, locale %s", user.getId(), session.getContext().resolveLocale(user).toLanguageTag()));
+                            log.info(String.format("theme %s", session.theme().getTheme(Theme.Type.EMAIL).getName()));
+
                             try {
                                 log.info("send to " + user.getEmail());
 
