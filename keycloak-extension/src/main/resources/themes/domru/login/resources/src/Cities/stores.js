@@ -6,7 +6,7 @@ import { STATUS } from './constants.js';
 export const city = writable(
   document.getElementById('cities-button').dataset.city ||
     Cookie.get('CITY') ||
-    'Москва',
+    'Пермь',
 );
 
 const isFirstVisit =
@@ -18,3 +18,5 @@ export const status = writable(
 export const showModal = writable(isFirstVisit);
 export const editingStarted = writable(false);
 export const allCities = writable([]);
+
+export const quarter = writable(0);

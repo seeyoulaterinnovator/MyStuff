@@ -2,12 +2,14 @@ package ru.alamics.sso.keycloak.auth.post;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
+import org.keycloak.authentication.AuthenticationProcessor;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.auth.UserRole;
+import ru.alamics.sso.keycloak.auth.SsoFreeMarkerLoginForm;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.keycloak.search.rest.SearchResource;
 
@@ -65,7 +67,6 @@ public class AttributesForm implements Authenticator {
         if(attributes.size() > 0) {
             form.setAttribute("posts", attributes.get("users-info"));
         }
-
         return form.createForm(FORM);
     }
 

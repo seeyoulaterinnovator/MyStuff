@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package ru.alamics.sso.keycloak.userpost.rest;
+package ru.alamics.sso.keycloak.user.resource.post;
 
 import org.keycloak.Config.Scope;
 import org.keycloak.models.KeycloakSession;
