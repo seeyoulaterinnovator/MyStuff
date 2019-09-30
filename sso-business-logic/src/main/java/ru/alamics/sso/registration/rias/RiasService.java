@@ -52,8 +52,7 @@ public class RiasService {
             return false;
 
         try {
-            phone = phone.replaceAll("[^0-9]+", "");
-            return riasApiService.checkParam(phone);
+            return riasApiService.checkParam(Util.getCleanUserPhone(phone));
 
         } catch (RiasCheckException rce) {
             log.error("RIAS check service", rce);

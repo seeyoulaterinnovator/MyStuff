@@ -23,6 +23,7 @@ import ru.alamics.sso.keycloak.create.model.UserParameter;
 import ru.alamics.sso.keycloak.create.model.UserRequest;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundException;
+import ru.alamics.sso.registration.service.UserFindService;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.validation.Valid;
@@ -41,10 +42,10 @@ public class CustomUserResource {
     protected KeycloakSession session;
     private UserService userService;
 
-    public CustomUserResource(KeycloakSession session) {
+    public CustomUserResource(KeycloakSession session, UserFindService userFindService) {
         this.session = session;
         AdminAuth auth = authenticateRealmAdminRequest(session.getContext().getRealm());
-        this.userService = new UserService(session, auth);
+        this.userService = new UserService(session, auth, userFindService);
     }
 
     @POST
