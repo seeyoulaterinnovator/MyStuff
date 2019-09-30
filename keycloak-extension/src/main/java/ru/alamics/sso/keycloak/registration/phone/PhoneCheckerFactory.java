@@ -4,13 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.Config;
 import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormActionFactory;
-import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderConfigProperty;
+import ru.alamics.sso.registration.service.UserFindService;
 
-import javax.persistence.EntityManager;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import java.util.List;
 
 @Slf4j
@@ -22,6 +23,7 @@ public class PhoneCheckerFactory implements FormActionFactory {
             AuthenticationExecutionModel.Requirement.REQUIRED,
             AuthenticationExecutionModel.Requirement.DISABLED
     };
+    private UserFindService userFindService;
 
     @Override
     public String getDisplayType() {
@@ -60,9 +62,15 @@ public class PhoneCheckerFactory implements FormActionFactory {
 
     @Override
     public FormAction create(KeycloakSession session) {
-        EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
+        try {
+            this.userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
+        } catch (NamingException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Something wrong with context");
+        }
+
         log.info("Creating PhoneCheckProvider");
-        return new PhoneCheckProvider(em);
+        return new PhoneCheckProvider(userFindService);
 
     }
 

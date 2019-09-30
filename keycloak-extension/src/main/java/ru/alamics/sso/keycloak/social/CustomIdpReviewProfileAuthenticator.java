@@ -26,6 +26,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
 import org.keycloak.services.ServicesLogger;
+import org.keycloak.services.messages.Messages;
 import org.keycloak.services.resources.AttributeFormDataProcessor;
 import org.keycloak.services.validation.Validation;
 import org.keycloak.util.JsonSerialization;
@@ -52,19 +53,17 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
 
     private static final String SITE_KEY = "6LfQG68UAAAAAOowA30NhSf4_VjiuH_KeT8bN3_B";
     private static final String SITE_SECRET_VAL = "6LfQG68UAAAAAH8quIVwZ_8Cizgwi6CqjPIP5a3w";
-    private static final String TBAPI_CHECK_DATA = "tbapi_check_data";
 
-    private static final String ORG_NAME = "user.attributes.orgName"; //orgname
-    private static final String PHONE = "user.attributes.phone"; //orgname
+    private static final String ORG_NAME = "user.attributes.orgName";
+    private static final String PHONE = "user.attributes.phone";
 
     private final TbapiService tbapiService;
     private final UserExtension userExtension;
-    private ObjectMapper jacksonMapper = new ObjectMapper();
-
 
     public CustomIdpReviewProfileAuthenticator() {
         tbapiService = new TbapiService(new TbapiServiceRestImpl());
         userExtension = new UserExtension();
+
     }
 
     @Override
@@ -115,22 +114,10 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
 
         RealmModel realm = context.getRealm();
 
-        List<FormMessage> errors = Validation.validateUpdateProfileForm(realm, formData);
-        if (Validation.isBlank(formData.getFirst(ORG_NAME))) {
-            errors.add(new FormMessage(ORG_NAME,  "missingOrgNameMessage"));
-        }
-        if (Validation.isBlank(formData.getFirst(PHONE))) {
-            errors.add(new FormMessage(PHONE, "missingPhoneNumberMessage"));
-        }
-
-        String captcha = formData.getFirst(G_RECAPTCHA_RESPONSE);
-
-//        if (Validation.isBlank(captcha) || !validateRecaptcha(context, captcha, SITE_SECRET_VAL)) {
-//            errors.add(new FormMessage(null, Messages.RECAPTCHA_FAILED));
-//            formData.remove(G_RECAPTCHA_RESPONSE);
-//        }
-
-        if (!tbApiRegisterValid(formData, userCtx)) {
+        List<FormMessage> errors = getValidationErrorList(context, realm, formData);
+        try {
+            fillUserContextFromTbApi(formData, userCtx);
+        } catch (TbapiRegisterException e) {
             errors.add(new FormMessage("Регистрация временно недоступна, попробуйте повторить попытку позже"));
         }
 
@@ -166,54 +153,35 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
 
         userCtx.saveToAuthenticationSession(context.getAuthenticationSession(), BROKERED_CONTEXT_NOTE);
 
-        log.debug("Profile updated successfully after first authentication with identity provider '%s' for broker user '%s'.", brokerContext.getIdpConfig().getAlias(), userCtx.getUsername());
+        log.debug("Profile updated successfully after first authentication with identity provider {} for broker user {}.", brokerContext.getIdpConfig().getAlias(), userCtx.getUsername());
 
         event.detail(Details.UPDATED_EMAIL, email);
         context.success();
     }
 
-    private boolean tbApiRegisterValid(MultivaluedMap<String, String> formData, SerializedBrokeredIdentityContext userCtx) {
-        try {
-            TbapiConnectConfig connectConfig = new TbapiConnectConfig();
-
-            connectConfig.setHost("tb-app01.int.bss.loc");
-            connectConfig.setPort(26300);
-            connectConfig.setAppname("SSP");
-            connectConfig.setUsername("anonymous");
-            connectConfig.setPath("/api/v1/customerManagement/customerAccount");
-            connectConfig.setSecure(false);
-
-            User user = User.builder()
-                    .name(formData.getFirst(FormConstants.FIELD_FIRST_NAME))
-                    .email(formData.getFirst(FormConstants.FIELD_EMAIL))
-                    .phone(formData.getFirst(PHONE))
-                    .build();
-
-            String orgName = formData.getFirst(ORG_NAME);
-            // TODO на стандартной верстке нет поля организации
-            if (orgName == null) {
-                orgName = formData.getFirst(FormConstants.FIELD_LAST_NAME);
-            }
-            user.getAttributes().put(ATTR_ORG_NAME, Collections.singletonList(orgName));
-
-
-            Map<String, Object> attributes = tbapiService.registerUser(user, connectConfig);
-
-            userExtension.extendUser(user, attributes);
-
-            user.getAttributes().forEach(userCtx::setAttribute);
-
-        } catch (TbapiRegisterException  e) {
-            return false;
+    private List<FormMessage> getValidationErrorList(AuthenticationFlowContext context, RealmModel realm, MultivaluedMap<String, String> formData) {
+        List<FormMessage> errors = Validation.validateUpdateProfileForm(realm, formData);
+        if (Validation.isBlank(formData.getFirst(ORG_NAME))) {
+            errors.add(new FormMessage(ORG_NAME, "missingOrgNameMessage"));
         }
-        return true;
+        if (Validation.isBlank(formData.getFirst(PHONE))) {
+            errors.add(new FormMessage(PHONE, "missingPhoneNumberMessage"));
+        }
+
+        String captcha = formData.getFirst(G_RECAPTCHA_RESPONSE);
+        if (Validation.isBlank(captcha) || !validateRecaptcha(context, captcha)) {
+            errors.add(new FormMessage(null, Messages.RECAPTCHA_FAILED));
+            formData.remove(G_RECAPTCHA_RESPONSE);
+        }
+
+        return errors;
     }
 
-    private boolean validateRecaptcha(AuthenticationFlowContext context, String captcha, String secret) {
+    private boolean validateRecaptcha(AuthenticationFlowContext context, String captcha) {
         HttpClient httpClient = context.getSession().getProvider(HttpClientProvider.class).getHttpClient();
         HttpPost post = new HttpPost("https://www.google.com/recaptcha/api/siteverify");
         List<NameValuePair> formparams = new LinkedList<>();
-        formparams.add(new BasicNameValuePair("secret", secret));
+        formparams.add(new BasicNameValuePair("secret", SITE_SECRET_VAL));
         formparams.add(new BasicNameValuePair("response", captcha));
         formparams.add(new BasicNameValuePair("remoteip", context.getConnection().getRemoteAddr()));
         try {
@@ -232,5 +200,32 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
             ServicesLogger.LOGGER.recaptchaFailed(e);
         }
         return false;
+    }
+
+    private void fillUserContextFromTbApi(MultivaluedMap<String, String> formData, SerializedBrokeredIdentityContext userCtx) throws TbapiRegisterException {
+        var user = getTbApiUser(formData);
+        user.getAttributes().forEach(userCtx::setAttribute);
+    }
+
+    private User getTbApiUser(MultivaluedMap<String, String> formData) throws TbapiRegisterException {
+        User user = User.builder()
+                .name(formData.getFirst(FormConstants.FIELD_FIRST_NAME))
+                .email(formData.getFirst(FormConstants.FIELD_EMAIL))
+                .phone(formData.getFirst(PHONE))
+                .build();
+
+        String orgName = formData.getFirst(ORG_NAME);
+
+        if (orgName == null) {
+            orgName = formData.getFirst(FormConstants.FIELD_LAST_NAME);
+        }
+        user.getAttributes().put(ATTR_ORG_NAME, Collections.singletonList(orgName));
+
+
+        Map<String, Object> attributes = tbapiService.registerUser(user, TbapiConnectConfig.getStaticConfig());
+
+        userExtension.extendUser(user, attributes);
+
+        return user;
     }
 }
