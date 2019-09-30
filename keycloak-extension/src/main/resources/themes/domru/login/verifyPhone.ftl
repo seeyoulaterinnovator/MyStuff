@@ -20,7 +20,7 @@
         <p class="pb-6 text-accentRed"> ${error!}<p>
             <div class="flex justify-between w-full pb-6">
                 <#list 1..lengthCode as x>
-                    <input placeholder="-" type="number" maxlength="1" id="smscode-${x}" name="smscode-${x}" class="text-center align-middle text-3xl w-10 h-10 sm:w-16 sm:h-16 border rounded-lg focus:border-extra outline-none" autocomplete="off" />
+                    <input placeholder="-" maxlength="1" id="smscode-${x}" name="smscode-${x}" class="text-center align-middle text-3xl w-10 h-10 sm:w-16 sm:h-16 border rounded-lg focus:border-extra outline-none" autocomplete="off" />
                 </#list>
             </div>
             <input id="codeNumbers" name="codeNumbers" class="hidden" value="${lengthCode}" />
