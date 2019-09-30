@@ -28,9 +28,7 @@ public class InactiveBlockSchedule {
     public void block () {
         final String DEBUG_STR = "block";
         log.info("start:{}", DEBUG_STR);
-
-      autoLockNotificationRepository.findUsersToBlock(absenceDaysBlock);
-
+        autoLockNotificationRepository.findUsersToBlock(absenceDaysBlock);
         log.info("stop:{}", DEBUG_STR);
     }
 

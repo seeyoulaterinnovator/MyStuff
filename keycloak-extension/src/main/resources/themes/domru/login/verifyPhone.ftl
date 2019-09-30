@@ -1,7 +1,7 @@
 <#import "template.ftl" as layout>
 <#import "templates/blocks.ftl" as blocks>
 
-<@layout.registrationLayout displayMessage=false; section>
+<@layout.registrationLayout displayMessage=false displayCity=false; section>
     <#if section = "header">
         <#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон -->
         <#if lengthCode==6>
