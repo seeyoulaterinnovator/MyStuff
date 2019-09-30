@@ -2,7 +2,7 @@
 <#import "templates/components.ftl" as components>
 <#import "templates/blocks.ftl" as blocks>
 
-<@layout.registrationLayout displayInfo=true; section>
+<@layout.registrationLayout displayInfo=true displayCity=false; section >
     <#if section = "header">
         <#include "templates/required-fields.html">
         <@blocks.contentHeader mainTitle="${msg('registerTitle')}" secondaryTitle="${msg('doLogIn')}" secondaryHref="${url.loginUrl}" withBorder=true />
@@ -42,14 +42,15 @@
                     </div>
                 </#if>
 
-                <div class="flex justify-between">
-                    <div class="flex flex-basis-1/2 items-center">
-                        <button id="submit" class="btn btn-main w-full" type="submit">${msg('doRegister')}</button>    
-                    </div>                       
-                    <span class="flex-basis-1/2 ml-5 text-sm">Нажимая кнопку, вы соглашаетесь <a class="reference" href="https://domru.ru/policy.pdf" target="_blink">с политикой обработки данных</a></span>
+                <div class="flex flex-col-reverse justify-between sm:flex-row">
+                  <div class="flex flex-basis-1/2 items-center">
+                    <button id="submit" class="btn btn-main pass-fields" type="submit">${msg('doRegister')}</button>
+                  </div>
+                  <span class="flex-basis-1/2 ml-0 mb-6 text-sm sm:ml-5 sm:mb-0">Нажимая кнопку, вы соглашаетесь <a class="reference" href="https://domru.ru/policy.pdf" target="_blink">с политикой обработки данных</a></span>
                 </div>
         </form>
     <#elseif section = "info" >
-        <p>На указанный номер телефона будет выслано СМС с одноразовым паролем</p>
+        <p>${twoStepAuthType}</p>
+<#--        <p>На указанный номер телефона будет выслано СМС с одноразовым паролем</p>-->
     </#if>
 </@layout.registrationLayout>

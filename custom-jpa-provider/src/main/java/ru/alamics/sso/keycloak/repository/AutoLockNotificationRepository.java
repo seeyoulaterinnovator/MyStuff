@@ -36,13 +36,13 @@ public class AutoLockNotificationRepository {
         log.debug("{}: absenceDaysBlock={}", DEBUG_STR, absenceDaysBlock);
         LocalDate now = LocalDate.now();
         LocalDate absence = now.minusDays(absenceDaysBlock);
-        entityManager.createNativeQuery("insert into auto_lock_notification(id, user_id, sended_at, type, status)\n" +
+        entityManager.createNativeQuery("insert into AUTO_LOCK_NOTIFICATION(id, user_id, sended_at, type, status)\n" +
                 "select uuid(), aln.USER_ID, null, 'ABSENCE_BLOCKING', 'PREPARE'\n" +
-                "from auto_lock_notification aln\n" +
-                "         join user_entity ue on aln.USER_ID = ue.ID\n" +
+                "from AUTO_LOCK_NOTIFICATION aln\n" +
+                "         join USER_ENTITY ue on aln.USER_ID = ue.ID\n" +
                 "where ue.ENABLED = true\n" +
                 "and aln.TYPE ='ABSENCE_NOTIFICATION' and aln.SENDED_AT <= :date\n" +
-                "and not exists(select 1 from auto_lock_notification aln2 where aln2.TYPE = 'ABSENCE_BLOCKING' and aln.USER_ID = aln2.USER_ID)\n" +
+                "and not exists(select 1 from AUTO_LOCK_NOTIFICATION aln2 where aln2.TYPE = 'ABSENCE_BLOCKING' and aln.USER_ID = aln2.USER_ID)\n" +
                 "for update")
                 .setParameter("date", absence)
                 .executeUpdate();
