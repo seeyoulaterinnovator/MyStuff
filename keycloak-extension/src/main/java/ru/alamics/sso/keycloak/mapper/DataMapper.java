@@ -1,20 +1,26 @@
 package ru.alamics.sso.keycloak.mapper;
 
+import org.keycloak.authentication.FormContext;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.keycloak.create.model.UserImport;
 import ru.alamics.sso.keycloak.create.model.UserRequest;
 import ru.alamics.sso.keycloak.search.dto.UserDto;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
+import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.registration.model.User;
 
 import javax.persistence.Tuple;
+import javax.ws.rs.core.MultivaluedMap;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_ORG_NAME;
+
+import static ru.alamics.sso.registration.model.UserConstants.ATTR_DMP_NAME;
+import static ru.alamics.sso.registration.model.UserConstants.ATTR_TOMS_NAME;
 
 public abstract class DataMapper {
 
@@ -69,6 +75,22 @@ public abstract class DataMapper {
             return null;
         }
         return object.toString();
+    }
+
+    public static UserPostRequest toUserPostRequest(FormContext context){
+        if (context.getUser() == null){
+            return null;
+        }
+        UserModel userModel = context.getUser();
+        UserPostRequest userPostRequest = new UserPostRequest();
+        userPostRequest.setUserId(userModel.getId());
+        if (!userModel.getAttribute(ATTR_TOMS_NAME).isEmpty()){
+            userPostRequest.setTomsId(userModel.getAttribute(ATTR_TOMS_NAME).get(0));
+        }
+        if (!userModel.getAttribute(ATTR_DMP_NAME).isEmpty()) {
+            userPostRequest.setDmpId(userModel.getAttribute(ATTR_DMP_NAME).get(0));
+        }
+        return userPostRequest;
     }
 
     private static boolean toBoolean(Object object) {
