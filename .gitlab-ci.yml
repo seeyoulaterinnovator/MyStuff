@@ -16,7 +16,7 @@ back:compile:
   except:
     - master
   script:
-    - ./gradlew :classes -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
+    - ./gradlew :classes --stacktrace -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
   cache:
     key: "$CI_COMMIT_SHA"
     paths:
