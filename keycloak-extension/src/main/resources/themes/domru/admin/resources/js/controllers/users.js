@@ -496,6 +496,16 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         data.map(user => {
             let findGroupedUser = $scope.findById(ret, user.id);
             if (!findGroupedUser) {
+                var access = [];
+                if(user.systemId || user.roleId || user.tomsId) {
+                    access.push({
+                        systemId: user.systemId,
+                        systemName: user.systemName,
+                        roleId: user.roleId,
+                        roleName: user.roleName,
+                        tomsId: user.tomsId
+                    })
+                };
                 findGroupedUser = {
                     id: user.id,
                     username: user.username,
@@ -503,15 +513,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                     phone: user.phone,
                     enabled: user.enabled,
                     active: false,
-                    access: [
-                        {
-                            systemId: user.systemId,
-                            systemName: user.systemName,
-                            roleId: user.roleId,
-                            roleName: user.roleName,
-                            tomsId: user.tomsId
-                        }
-                    ]
+                    access: access
                 };
 
                 ret.push(findGroupedUser);
@@ -565,17 +567,49 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         return values.filter((val, index) => values.indexOf(val) === index);
     };
 
-    $scope.getTomsId = function (val) {
-        return val.map(access => access.tomsId)
-    };
+    $scope.getEqualTomsId = function (userAccess, tomsId) {
+        return userAccess.filter(access => access.tomsId === tomsId).length
+    }
 
-    $scope.getRoleName = function (val) {
-        return val.map(access => access.roleName)
-    };
+    $scope.isFirstTomsId = function (userAccess, tomsId, access) {
+        var equalToms = userAccess.filter(access => access.tomsId === tomsId);
+        var index = equalToms.indexOf(access);
+        if(index === 0) {
+            return access.tomsId;
+        } else {
+            return '';//Gavno
+        }
+    }
 
-    $scope.getSystemName = function (val) {
-        return val.map(access => access.systemName)
-    };
+    $scope.getEqualRoleName = function (userAccess, roleName) {
+        return userAccess.filter(access => access.roleName === roleName).length
+    }
+
+    $scope.isFirstRoleName = function (userAccess, roleName, access) {
+        var equalToms = userAccess.filter(access => access.roleName === roleName);
+        var index = equalToms.indexOf(access);
+        if(index === 0) {
+            return access.roleName;
+        } else {
+            return '';//Gavno
+        }
+    }
+
+    $scope.getEqualSystemName = function (userAccess, systemName) {
+        return userAccess.filter(access => access.systemName === systemName).length
+    }
+
+    $scope.isFirstSystemName = function (userAccess, systemName, access) {
+        var equalToms = userAccess.filter(access => access.systemName === systemName);
+        var index = equalToms.indexOf(access);
+        if(index === 0) {
+            return access.systemName;
+        } else {
+            return '';//Gavno
+        }
+    }
+
+
 });
 
 module.controller('UserTabCtrl', function ($scope, $location, Dialog, Notifications, Current) {

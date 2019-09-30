@@ -62,12 +62,12 @@
             <tr>
                 <td><input class="form-control" id="newTomsId" ng-model="newAccess.tomsId" type="text"/></td>
                 <td><input class="form-control" id="newDmpId" ng-model="newAccess.dmpId" type="text"/></td>
-                <td><select ng-model="newAccess.customerRole" ng-options="y.name for (x, y) in customerRoles"> </select>
+<!--                <td><select ng-model="newAccess.customerRole" ng-options="y.name for (x, y) in customerRoles"> </select>-->
                     <!--                    {{newAccess.customerRole}}-->
-                </td>
-                <td><select ng-model="newAccess.systemRole" ng-options="y.name for (x, y) in systemRoles"></select>
+<!--                </td>-->
+<!--                <td><select ng-model="newAccess.systemRole" ng-options="y.externalSystem.name for (x, y) in systemRoles"></select>-->
                     <!--                    {{newAccess.systemRole}}-->
-                </td>
+<!--                </td>-->
                 <td class="kc-action-cell" data-ng-click="addUserPost()"
                     data-ng-disabled="!newAccess.key.length || !newAttribute.value.length">{{:: 'add' | translate}}
                 </td>

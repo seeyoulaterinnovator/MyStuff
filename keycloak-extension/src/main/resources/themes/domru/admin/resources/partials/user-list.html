@@ -8,6 +8,19 @@
         margin-left: 0; /* Отступ слева в браузере IE и Opera */
         padding-left: 0; /* Отступ слева в браузере Firefox, Safari, Chrome */
     }
+
+    .w-full {
+        width: 100%;
+    }
+
+    .inner-table__cell {
+        text-align: center;
+    }
+
+    .nullable__margin {
+        margin: 0 0 0 0;
+    }
+
 </style>
 <div class="col-sm-9 col-md-10 col-sm-push-3 col-md-push-2" ng-init="init()">
 
@@ -73,18 +86,18 @@
         </tr>
         <tr>
         <tr data-ng-show="searchLoaded && users.length > 0">
-            <th class="w-15">
+            <th class="w-1">
                 <input type="checkbox" data-ng-click="selectAll()" data-ng-model="selectedAll"> Select
             </th>
-            <th class="w-15">{{:: 'id' | translate}}</th>
-            <th class="w-15">{{:: 'username' | translate}}</th>
-            <th class="w-15">{{:: 'email' | translate}}</th>
-            <th class="w-15">{{:: 'first-name' | translate}}</th>
-            <th class="w-15">Phone</th>
-            <th class="w-15">Enabled</th>
-            <th class="w-15">Toms Id</th>
-            <th class="w-15">Roles</th>
-            <th class="w-15">Systems</th>
+            <th class="w-12">{{:: 'id' | translate}}</th>
+            <th class="w-12">{{:: 'username' | translate}}</th>
+            <th class="w-12">{{:: 'email' | translate}}</th>
+            <th class="w-12">{{:: 'first-name' | translate}}</th>
+            <th class="w-1">Enabled</th>
+            <th class="w-12">Phone</th>
+            <th class="w-12">Toms Id</th>
+            <th class="w-12">Roles</th>
+            <th class="w-12">Systems</th>
             <th colspan="{{serverInfo.featureEnabled('IMPERSONATION') && access.impersonation == true ? '3' : '2'}}">
                 {{:: 'actions' | translate}}
             </th>
@@ -97,27 +110,32 @@
             </td>
             <td class="clip"><a href="#/realms/{{realm.realm}}/users/{{user.id}}">{{user.id}}</a>
             </td>
-            <td class="clip">{{user.username}}</td>
+            <td class="clip" rowspan="">{{user.username}}</td>
             <td class="clip">{{user.email}}</td>
             <td class="clip">{{user.firstName}}</td>
-            <td class="clip">{{user.phone}}</td>
             <td class="clip">
                 <input type="checkbox" data-ng-model="user.enabled" disabled/>
             </td>
-            <td class="clip">
-                <li ng-repeat="tomsId in uniqueVal(getTomsId(user.access))" class="role-list">
-                    <span>{{tomsId}}</span>
-                </li>
-            </td>
-            <td class="clip">
-                <li ng-repeat="roleName in uniqueVal(getRoleName(user.access))" class="role-list">
-                    <span>{{roleName}}</span>
-                </li>
-            </td>
-            <td class="clip">
-                <li ng-repeat="systemName in uniqueVal(getSystemName(user.access))" class="role-list">
-                    <span>{{systemName}}</span>
-                </li>
+            <td class="clip">{{user.phone}}</td>
+
+            <td class="clip" colspan="3" style="padding: 0 0 0 0">
+                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.access.length > 0">
+
+                    <tr data-ng-repeat="access in user.access" >
+                        <td class="clip inner-table__cell" rowspan="{{getEqualTomsId(user.access, access.tomsId)}}"
+                            data-ng-if="isFirstTomsId(user.access, access.tomsId, access) != ''">
+                            {{isFirstTomsId(user.access, access.tomsId, access)}}
+                        </td>
+                        <td class="clip inner-table__cell" rowspan="{{getEqualRoleName(user.access, access.roleName)}}"
+                            data-ng-if="isFirstRoleName(user.access, access.roleName, access) != ''">
+                            {{isFirstRoleName(user.access, access.roleName, access)}}
+                        </td>
+                        <td class="clip inner-table__cell" data-ng-if="isFirstSystemName(user.access, access.systemName, access) != ''">
+                            {{isFirstSystemName(user.access, access.systemName, access)}}
+                        </td>
+
+                    </tr>
+                </table>
             </td>
             <td class="kc-action-cell" kc-open="/realms/{{realm.realm}}/users/{{user.id}}">{{:: 'edit' | translate}}
             </td>
