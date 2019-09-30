@@ -17,7 +17,11 @@ export default (function() {
   // После него появится кнопка "Отправить еще раз"
   const timer = new Timer(expirationSeconds.value || 60 * 5);
   timer.timeElement = document.getElementById('timer-time');
-  timer.callback = switchTimer;
+  if (expirationSeconds.value == 0) {
+    switchTimer();
+  } else {
+    timer.callback = switchTimer;
+  }
 
   function switchTimer() {
     const timerElement = document.getElementById('timer');
@@ -27,7 +31,7 @@ export default (function() {
 
     sentCode.classList.remove('hidden');
     sentCode.disabled = false;
-    
+
     resendElement.classList.remove('hidden');
     resendElement.disabled = false;
   }

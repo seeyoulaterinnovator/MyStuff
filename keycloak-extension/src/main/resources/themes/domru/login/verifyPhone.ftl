@@ -24,7 +24,12 @@
                 </#list>
             </div>
             <input id="codeNumbers" name="codeNumbers" class="hidden" value="${lengthCode}" />
-            <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds}" />
+            <#if error?has_content>
+                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="0" />
+            <#else>
+                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds}" />
+            </#if>
+            
             
             <input id="smscode" name="smscode" class="hidden" />
             
