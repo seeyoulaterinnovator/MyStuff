@@ -17,11 +17,9 @@ public class UserService {
     private final KeycloakSession session;
     private final KeycloakContext context;
     private final RealmModel realm;
-    private final AdminPermissionEvaluator evaluator;
 
-    public UserService (KeycloakSession session, AdminPermissionEvaluator evaluator) {
+    public UserService (KeycloakSession session) {
         this.session = session;
-        this.evaluator = evaluator;
         this.context = session.getContext();
         this.realm = context.getRealm();
     }

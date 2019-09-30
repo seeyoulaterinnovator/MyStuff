@@ -25,7 +25,7 @@
                                 <input type="text" placeholder="{{:: 'search.placeholder' | translate}}"
                                        data-ng-model="query.search" class="form-control search"
                                        onkeydown="if (event.keyCode == 13) document.getElementById('userSearch').click()">
-                                <i class="fa fa-search" id="userSearch" data-ng-click="firstPage()"></i>
+                                <i class="fa fa-search" id="userSearch" data-ng-click="search()"></i>
                             </div>
                         </div>
                         <div class="form-group">
@@ -45,7 +45,7 @@
                             </div>
                         </div>
                     </div>
-                    <button id="viewAllUsers" class="btn btn-default" ng-click="query.search = null; firstPage()">{{::
+                    <button id="viewAllUsers" class="btn btn-default" ng-click="query.search = ''; firstPage()">{{::
                         'view-all-users' | translate}}
                     </button>
 

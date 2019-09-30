@@ -340,22 +340,24 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
     $scope.unlockUsers = function () {
         let userForUnlock = $scope.users.filter(user => user.active).map(user => user.id);
-        $http.post(`${authUrl}/realms/${realm.realm}/users/unlock`, userForUnlock).then(response => {
+        $http.post(`${authUrl}/realms/${realm.realm}/manage/unlock`, userForUnlock).then(response => {
             Notifications.success("Selected users has been unlocked");
+            $scope.users.filter(user => user.active).forEach(user => user.enabled = true)
         })
     };
 
     $scope.selectedResetPassword = function () {
         let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
-        $http.post(`${authUrl}/realms/${realm.realm}/users/credential/reset`, userForResetPassword).then(response => {
+        $http.post(`${authUrl}/realms/${realm.realm}/manage/credential/reset`, userForResetPassword).then(response => {
             Notifications.success("Password Reset");
         })
     };
 
     $scope.selectedBlockUsers = function () {
         let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
-        $http.post(`${authUrl}/realms/${realm.realm}/users/block`, userForResetPassword).then(response => {
+        $http.post(`${authUrl}/realms/${realm.realm}/manage/block`, userForResetPassword).then(response => {
             Notifications.success("Users has been blocking");
+            $scope.users.filter(user => user.active).forEach(user => user.enabled = false)
         })
     };
 
@@ -398,14 +400,17 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         };
         var linkElement = document.createElement('a');
         $http.post(`${authUrl}/realms/master/users-toms/downloadUsers`, payload, {
-            headers: {'Accept': 'application/octet-stream', 'Content-Type': 'application/json'}
+            headers: {'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8', 'Content-Type': 'application/json'},
+            responseType: 'arraybuffer'
         }).then((response) => {
             var headers = response.headers();
             var filename = 'users_info.xlsx';
             var contentType = headers['content-type'];
-            var blob = new Blob([response], {type: contentType});
-            var url = window.URL.createObjectURL(blob);
-
+            var blob = new Blob([response.data], {type: contentType});
+            var url = window.URL.createObjectURL(blob, {
+                type: 'data:attachment/xlsx'
+            });
+            window.open(url);
             linkElement.setAttribute('href', url);
             linkElement.setAttribute("download", filename);
 
@@ -431,12 +436,12 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         };
         var linkElement = document.createElement('a');
         $http.post(`${authUrl}/realms/master/users-toms/downloadUsers`, payload, {
-            headers: {'Accept': 'application/octet-stream', 'Content-Type': 'application/json'}
+            headers: {'Accept': 'application/octet-stream;charset=UTF-8', 'Content-Type': 'application/json'}
         }).then((response) => {
             var headers = response.headers();
             var filename = 'users_info.csv';
             var contentType = headers['content-type'];
-            var blob = new Blob([response], {type: contentType});
+            var blob = new Blob(["\ufeff", response.data], {type: contentType});
             var url = window.URL.createObjectURL(blob);
 
             linkElement.setAttribute('href', url);
@@ -466,6 +471,16 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         });
     };
 
+    $scope.search = function () {
+        console.log("query.search: " + $scope.query.search);
+        $http.get(`${authUrl}/realms/user/users-info?search=${$scope.query.search}`).then(function (data) {
+            $scope.users = $scope.groupByUser(angular.fromJson(data).data.results['users-info']);
+            $scope.searchLoaded = true;
+            $scope.lastSearch = $scope.query.search;
+            UserSearchState.isFirstSearch = false;
+        });
+    };
+
     $scope.searchByUserId = function () {
         $scope.query.first = 0;
         $http.get(`${authUrl}/realms/user/users-info?search=&searchUser=${$scope.query.searchByUserId}&searchToms=`).then(function (data) {
@@ -487,7 +502,6 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                     email: user.email,
                     phone: user.phone,
                     enabled: user.enabled,
-                    // tomsId: user.tomsId,
                     active: false,
                     access: [
                         {
@@ -510,18 +524,6 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                     roleName: user.roleName,
                     tomsId: user.tomsId
                 };
-
-
-                // let role = {
-                //     id: user.roleId,
-                //     name: user.roleName
-                // };
-                // let system = {
-                //     id: user.systemId,
-                //     name: user.systemName
-                // };
-                // findGroupedUser.roles.push(role);
-                // findGroupedUser.systems.push(system);
 
                 findGroupedUser.access.push(access);
             }
@@ -547,20 +549,13 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
     $scope.removeUser = function (user) {
         Dialog.confirmDelete(user.id, 'user', function () {
-            user.$remove({
-                realm: realm.realm,
-                userId: user.id
-            }, function () {
-                $route.reload();
-
-                if ($scope.users.length === 1 && $scope.query.first > 0) {
-                    $scope.previousPage();
-                }
-
-                Notifications.success("The user has been deleted.");
-            }, function () {
+            $http.delete(`${authUrl}/admin/realms/${realm.realm}/users/${user.id}`)
+                .then(() => {
+                    Notifications.success("The user has been deleted.");
+                    $route.reload();
+                }).catch((error) => {
                 Notifications.error("User couldn't be deleted");
-            });
+            })
         });
     };
 

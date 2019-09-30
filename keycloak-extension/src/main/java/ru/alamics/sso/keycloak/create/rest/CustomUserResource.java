@@ -145,7 +145,6 @@ public class CustomUserResource {
     @POST
     @Path("/downloadUsers")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @NoCache
     public Response downloadUsers(@NotNull @Valid DownloadUserRequest downloadUserRequest) {
         try {
@@ -160,6 +159,11 @@ public class CustomUserResource {
             }
             Response.ResponseBuilder response = Response.ok((Object) bytes);
             response.header("Content-Disposition", "attachment; filename=\"users_info." + downloadUserRequest.getType() + "\"");
+            if(downloadUserRequest.getType().equals("xlsx")) {
+                response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
+            } else {
+                response.header("Content-Type", MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8");
+            }
             log.info("Download users success!", "filename = users_info." + downloadUserRequest.getType());
             return response.build();
         } catch (UnsupportedDataTypeException e) {
