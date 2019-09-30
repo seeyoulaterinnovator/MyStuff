@@ -18,16 +18,16 @@
                 <#list posts as post>
                         <#assign firstRow = post?index == 0>
                         <div class="${firstRow?then('selected', '')} trow titems">
-                            <div id="tomsId-${post?index}" class="org-cell">${post?tomsId}</div>
-                            <div id="roleName-${post?index}" class="role-cell">${post?roleName}</div>
+                            <div id="tomsId-${post?index}" class="org-cell">${post.tomsId!}</div>
+                            <div id="roleName-${post?index}" class="role-cell">${post.roleName!}</div>
                         </div>
                 </#list>
             </div>
         </div>
 
         <form class="form-actions" action="${url.loginAction}" method="POST">
-            <input style="visibility:hidden" type="text" name="roleName" id="roleName" value="${posts[0].roleName}"/>
-            <input style="visibility:hidden" type="text" name="tomsId" id="tomsId" value="${posts[0].tomsId}"/>
+            <input style="visibility:hidden" type="text" name="roleName" id="roleName" value="${posts[0].roleName!}"/>
+            <input style="visibility:hidden" type="text" name="tomsId" id="tomsId" value="${posts[0].tomsId!}"/>
             <input style="visibility:hidden" name="accept" id="kc-accept" type="submit" value="Отправить"/>
         </form>
 
