@@ -105,18 +105,18 @@
                 <input type="checkbox" data-ng-model="user.enabled" disabled/>
             </td>
             <td class="clip">
-                <li ng-repeat="access in user.access" class="role-list">
-                    <span>{{access.tomsId}}</span>
+                <li ng-repeat="tomsId in uniqueVal(getTomsId(user.access))" class="role-list">
+                    <span>{{tomsId}}</span>
                 </li>
             </td>
             <td class="clip">
-                <li ng-repeat="access in user.access" class="role-list">
-                    <span>{{access.roleName}}</span>
+                <li ng-repeat="roleName in uniqueVal(getRoleName(user.access))" class="role-list">
+                    <span>{{roleName}}</span>
                 </li>
             </td>
             <td class="clip">
-                <li ng-repeat="access in user.access" class="role-list">
-                    <span>{{access.systemName}}</span>
+                <li ng-repeat="systemName in uniqueVal(getSystemName(user.access))" class="role-list">
+                    <span>{{systemName}}</span>
                 </li>
             </td>
             <td class="kc-action-cell" kc-open="/realms/{{realm.realm}}/users/{{user.id}}">{{:: 'edit' | translate}}

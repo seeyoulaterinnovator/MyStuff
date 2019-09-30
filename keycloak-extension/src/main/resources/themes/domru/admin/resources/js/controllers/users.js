@@ -546,7 +546,6 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         });
     };
 
-
     $scope.removeUser = function (user) {
         Dialog.confirmDelete(user.id, 'user', function () {
             $http.delete(`${authUrl}/admin/realms/${realm.realm}/users/${user.id}`)
@@ -560,8 +559,23 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
     console.log('Called Constructor');
+    $scope.uniqueVal = function (values) {
+        if(!values) return ;
 
+        return values.filter((val, index) => values.indexOf(val) === index);
+    };
 
+    $scope.getTomsId = function (val) {
+        return val.map(access => access.tomsId)
+    };
+
+    $scope.getRoleName = function (val) {
+        return val.map(access => access.tomsId)
+    };
+
+    $scope.getSystemName = function (val) {
+        return val.map(access => access.tomsId)
+    };
 });
 
 module.controller('UserTabCtrl', function ($scope, $location, Dialog, Notifications, Current) {
