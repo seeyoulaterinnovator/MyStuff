@@ -570,11 +570,11 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
     $scope.getRoleName = function (val) {
-        return val.map(access => access.tomsId)
+        return val.map(access => access.roleName)
     };
 
     $scope.getSystemName = function (val) {
-        return val.map(access => access.tomsId)
+        return val.map(access => access.systemName)
     };
 });
 
