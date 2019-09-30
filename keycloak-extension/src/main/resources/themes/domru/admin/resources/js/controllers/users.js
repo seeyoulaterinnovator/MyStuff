@@ -396,7 +396,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 "ORGANIZATION",
                 "ROLE",
                 "SYSTEM"
-            ]
+            ],
+            userIds: $scope.users.filter(user => user.active).map(user => user.id)
         };
         var linkElement = document.createElement('a');
         $http.post(`${authUrl}/realms/master/users-toms/downloadUsers`, payload, {
@@ -432,7 +433,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 "ORGANIZATION",
                 "ROLE",
                 "SYSTEM"
-            ]
+            ],
+            userIds: $scope.users.filter(user => user.active).map(user => user.id)
         };
         var linkElement = document.createElement('a');
         $http.post(`${authUrl}/realms/master/users-toms/downloadUsers`, payload, {
