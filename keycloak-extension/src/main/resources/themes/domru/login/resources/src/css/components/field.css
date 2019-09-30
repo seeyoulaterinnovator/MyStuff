@@ -83,3 +83,64 @@
   line-height: 13px;
   text-align: right;
 }
+
+.pass-fields {
+  min-width: 225px;
+  max-width: 225px;
+
+  @media (max-width: 1199px) {
+    min-width: 210px;
+    max-width: 210px;
+  }
+
+  @media (max-width: 479px) {
+    width: 100%;
+    max-width: unset;
+  }
+}
+
+.pass-fields--change-pass {
+  min-width: unset;
+
+  @media (max-width: 1199px) {
+    min-width: 210px;
+  }
+
+  @media (max-width: 479px) {
+    width: 100%;
+  }
+}
+
+
+.field__input--city {
+  width: 384px;
+  height: 48px;
+
+  @media (max-width: 1199px) {
+    width: 280px;
+  }
+
+  @media (max-width: 959px) {
+    width: 288px;
+  }
+
+  @media (max-width: 639px) {
+    width: 231px;
+  }
+
+  @media (max-width: 479px) {
+    width: 240px;
+  }
+}
+
+.generated-password-text {
+  font-size: 15px;
+  line-height: 19px;
+  white-space: nowrap;
+  opacity: 0.5;
+
+  @media (max-width: 1199px) {
+    font-size: 14px;
+    line-height: 18px;
+  }
+}

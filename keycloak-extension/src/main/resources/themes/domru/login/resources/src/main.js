@@ -1,6 +1,7 @@
 import App from './App.svelte';
 
 import './scripts/login.js';
+import './scripts/login-iframe.js';
 import './scripts/register.js';
 import './scripts/login-reset-password.js';
 import './scripts/login-update-password.js';
@@ -21,6 +22,7 @@ import './css/components/reference.css';
 import './css/components/email-sent.css';
 import './css/components/cities.css';
 import './css/components/confirmation.css';
+import './css/components/customers.css';
 
 const app = new App({
   target: document.body,

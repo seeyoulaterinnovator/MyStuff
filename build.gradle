@@ -5,7 +5,7 @@ plugins {
 import com.bmuschko.gradle.docker.tasks.container.*
 import com.bmuschko.gradle.docker.tasks.image.*
 
-// временная ветка layout для верстки 
+// test branch
 
 version = '0.0.1'
 

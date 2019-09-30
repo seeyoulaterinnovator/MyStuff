@@ -1,37 +1,46 @@
 package ru.alamics.sso.registration.service;
 
 import javassist.NotFoundException;
-import ru.alamics.sso.keycloak.entity.UserPost;
+import ru.alamics.sso.keycloak.entity.ExternalSystemRoleEntity;
+import ru.alamics.sso.keycloak.entity.UserPostEntity;
+import ru.alamics.sso.keycloak.entity.UserPostRoleEntity;
 import ru.alamics.sso.keycloak.repository.UserPostRepository;
-import ru.alamics.sso.registration.FoundUserPostException;
-import ru.alamics.sso.registration.dto.UserPostDto;
-import ru.alamics.sso.registration.dto.UserPostRoleDto;
+import ru.alamics.sso.keycloak.repository.UserRepository;
+import ru.alamics.sso.registration.dto.*;
 import ru.alamics.sso.registration.mapper.DataMapper;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Stateless
 public class UserPostService {
 
     @EJB
     private UserPostRepository userPostRepository;
+    @EJB
+    private UserRepository userRepository;
 
-    public UserPostDto save(UserPostDto userPostDto) throws FoundUserPostException {
-        if (userPostRepository.getUserPost(userPostDto.getUserId(), userPostDto.getTomsId()) != null) {
-            throw new FoundUserPostException();
+    public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException {
+        if (userRepository.findUser(userPostRequest.getUserId()) == null) {
+            throw new NotFoundException("User with this userId is not exist!");
+        } else if (userPostRepository.findUserPostRole(userPostRequest.getRoleId()) == null) {
+            throw new NotFoundException("UserPostRole with this roleId is not exist!");
         }
-        UserPost userPost = DataMapper.toUserPost(userPostDto);
-        return DataMapper.toUserPostDto(userPostRepository.save(userPost));
+        UserPostEntity userPost = DataMapper.toUserPost(new UserPostEntity(), userPostRequest);
+        return DataMapper.toUserPostResponse(userPostRepository.save(userPost));
     }
 
-    public UserPostDto edit(UserPostDto userPostDto) throws NotFoundException {
-        UserPost userPost = userPostRepository.getUserPost(userPostDto.getId());
+    public UserPostResponse edit(UserPostEditRequest userPostEditRequest) throws NotFoundException {
+        UserPostEntity userPost = userPostRepository.getUserPost(userPostEditRequest.getId());
         if (userPost == null) {
             throw new NotFoundException("UserPost is not exist");
+        } else if (userPostRepository.findUserPostRole(userPostEditRequest.getRoleId()) == null) {
+            throw new NotFoundException("UserPostRole with this roleId is not exist!");
         }
-        return DataMapper.toUserPostDto(userPostRepository.update(DataMapper.toUserPost(userPostDto)));
+        return DataMapper.toUserPostResponse(userPostRepository.update(DataMapper.toUserPost(userPost, userPostEditRequest)));
     }
 
     public void remove(String id) throws NotFoundException {
@@ -41,19 +50,81 @@ public class UserPostService {
         userPostRepository.remove(id);
     }
 
-    public UserPostDto get(String id) throws NotFoundException{
-        UserPost userPost = userPostRepository.getUserPost(id);
+    public UserPostResponse get(String id) throws NotFoundException {
+        UserPostEntity userPost = userPostRepository.getUserPost(id);
         if (userPost == null) {
             throw new NotFoundException("UserPost is not exist");
         }
-        return DataMapper.toUserPostDto(userPost);
+        return DataMapper.toUserPostResponse(userPost);
     }
 
-    public List<UserPostDto> getAll() {
-        return DataMapper.toUserPostDtoList(userPostRepository.getAllUserPost());
+    public List<UserPostResponse> getAll() {
+        return DataMapper.toUserPostResponseList(userPostRepository.getAllUserPost());
     }
 
-    public List<UserPostRoleDto> getUserPostRoleDtos(){
+    public List<UserPostResponse> getUserPost(String userId) throws NotFoundException {
+        return DataMapper.toUserPostResponseList(userPostRepository.findUserPostRoleByUserId(userId));
+    }
+
+    public List<UserPostRoleDto> getUserPostRoleDtos() {
         return DataMapper.toUserPostRoleDtoList(userPostRepository.getAllUserPostRoles());
+    }
+
+    public List<ExternalSystemRoleDto> getExternalSystemRoles() {
+        return DataMapper.toExternalSystemRoleDtos(userPostRepository.getAllExternalSystemRole());
+    }
+
+    public List<ExternalSystemDto> getExternalSystems() {
+        return DataMapper.toExternalSystemDtos(userPostRepository.getAllExternalSystem());
+    }
+
+    public UserPostResponse addSystemRole(ExternalSystemRoleRequest externalSystemRoleRequest) throws NotFoundException {
+        UserPostEntity userPost = userPostRepository.getUserPost(externalSystemRoleRequest.getUserPostId());
+        if (userPost == null) {
+            throw new NotFoundException("UserPost is not exist");
+        }
+        ExternalSystemRoleEntity externalSystemRole = userPostRepository.findExternalSystemRole(externalSystemRoleRequest.getSystemRoleId());
+        if (externalSystemRole == null) {
+            throw new NotFoundException("SystemRole with this systemRoleId is not exist!");
+        }
+        Set<ExternalSystemRoleEntity> systemRoles = userPost.getSystemRoles();
+        if (systemRoles == null){
+            systemRoles = new HashSet<>();
+        }
+        systemRoles.add(externalSystemRole);
+        userPost.setSystemRoles(systemRoles);
+        return DataMapper.toUserPostResponse(userPostRepository.update(userPost));
+    }
+
+    public UserPostResponse removeSystemRole(ExternalSystemRoleRequest externalSystemRoleRequest) throws NotFoundException {
+        UserPostEntity userPost = userPostRepository.getUserPost(externalSystemRoleRequest.getUserPostId());
+        if (userPost == null) {
+            throw new NotFoundException("UserPost is not exist");
+        }
+        if (userPost.getSystemRoles() == null || userPost.getSystemRoles().isEmpty() ||
+                !userPost.getSystemRoles().stream().anyMatch(o ->
+                        o.getId().equals(externalSystemRoleRequest.getSystemRoleId()))) {
+            throw new NotFoundException("SystemRole is not exist in this UserPost");
+        }
+        userPost.getSystemRoles().remove(userPost.getSystemRoles().stream()
+                .filter(o -> o.getId().equals(externalSystemRoleRequest.getSystemRoleId()))
+                .findFirst().get());
+        return DataMapper.toUserPostResponse(userPostRepository.update(userPost));
+    }
+
+    public Long getUserPostRole(String name) throws NotFoundException {
+        UserPostRoleEntity userPostRole = userPostRepository.getUserPostRole(name);
+        if (userPostRole == null){
+            throw new NotFoundException("UserPostRole is not exist");
+        }
+        return userPostRepository.getUserPostRole(name).getId();
+    }
+
+    public Long getExternalSystemRoleId(String sysName) throws NotFoundException {
+        ExternalSystemRoleEntity externalSystemRole = userPostRepository.getExternalSystemRole(sysName);
+        if (externalSystemRole == null){
+            throw new NotFoundException("ExternalSystemRole is not exist");
+        }
+        return externalSystemRole.getId();
     }
 }

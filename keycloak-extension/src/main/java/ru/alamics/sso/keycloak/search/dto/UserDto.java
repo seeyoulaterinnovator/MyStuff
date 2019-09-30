@@ -17,13 +17,15 @@ public class UserDto implements Serializable {
     private String lastName;
     private String email;
     private String phone;
-    private String userPostName;
+    private Boolean enabled;
     private String userPostId;
     private String tomsId;
     private String roleId;
     private String roleName;
-    private String clientRoleId;
-    private String clientRoleName;
+    private String systemRoleId;
+    private String systemRoleName;
+    private String systemId;
+    private String systemName;
 
     @JsonPOJOBuilder(withPrefix = "")
     public static class UserDtoBuilder {

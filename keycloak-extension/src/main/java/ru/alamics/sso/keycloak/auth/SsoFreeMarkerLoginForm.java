@@ -3,9 +3,12 @@ package ru.alamics.sso.keycloak.auth;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.forms.login.freemarker.FreeMarkerLoginFormsProvider;
+import org.keycloak.models.AuthenticatorConfigModel;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RequiredActionProviderModel;
 import org.keycloak.theme.FreeMarkerUtil;
 import org.keycloak.theme.Theme;
+import ru.alamics.sso.keycloak.auth.model.AuthType;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -13,6 +16,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.UserConstants.*;
 
@@ -77,5 +81,22 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             });
         }
         return builder;
+    }
+
+    @Override
+    public Response createRegistration () {
+        var realm = this.session.getContext().getRealm();
+        var requiredActionsProvider = realm.getRequiredActionProviders();
+        var twoStepAuth = requiredActionsProvider.stream()
+                .filter(RequiredActionProviderModel::isDefaultAction)
+                .map(RequiredActionProviderModel::getAlias)
+                .collect(Collectors.toList());
+        var authType = AuthType.getByList(twoStepAuth);
+        if(authType != null) {
+            this.attributes.put("twoStepAuthType", authType.getDescription());
+        } else {
+            this.attributes.put("twoStepAuthType", "");
+        }
+        return super.createRegistration();
     }
 }

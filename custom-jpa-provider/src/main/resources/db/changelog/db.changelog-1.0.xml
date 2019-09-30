@@ -41,6 +41,7 @@
             </column>
         </createTable>
     </changeSet>
+
     <changeSet author="strukov-av" id="4">
         <createTable tableName="USER_POST">
             <column name="ID" type="varchar(36)">
@@ -59,6 +60,7 @@
             </column>
         </createTable>
     </changeSet>
+
     <changeSet author="strukov-av" id="5">
         <createTable tableName="SYSTEM_NAME">
             <column name="ID" type="bigint">
@@ -91,12 +93,91 @@
         <addPrimaryKey tableName="USERPOST_SYSTEM_ACCESS" columnNames="USER_POST_ID, SYSTEM_ID, ACCESS_ID"
                        constraintName="pk_upsa"/>
     </changeSet>
+
     <changeSet id="tretyakov-da" author="7">
         <sql>
             INSERT INTO USER_POST_ROLE (ID, NAME) VALUES (1, 'LPR');
             INSERT INTO USER_POST_ROLE (ID, NAME) VALUES (2, 'BUH');
             INSERT INTO USER_POST_ROLE (ID, NAME) VALUES (3, 'TECH');
             INSERT INTO USER_POST_ROLE (ID, NAME) VALUES (4, 'GUEST');
+        </sql>
+    </changeSet>
+    <changeSet id="8" author="tretyakov-da">
+        <addColumn tableName="AUTO_LOCK_NOTIFICATION">
+            <column name="STATUS" type="varchar(32)"/>
+        </addColumn>
+        <addColumn tableName="USER_LOGIN_HISTORY">
+            <column name="locked" type="boolean"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="9" author="strukov-av">
+        <dropTable tableName="USERPOST_SYSTEM_ACCESS"/>
+        <dropTable tableName="SYSTEM_NAME"/>
+        <dropTable tableName="ACCESS_NAME"/>
+    </changeSet>
+
+    <changeSet author="strukov-av" id="10">
+        <createTable tableName="EXTERNAL_SYSTEM">
+            <column name="ID" type="bigint">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="NAME" type="varchar(256)">
+            </column>
+        </createTable>
+
+        <createTable tableName="EXT_SYSTEM_ROLE">
+            <column name="ID" type="bigint">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="NAME" type="varchar(256)">
+            </column>
+            <column name="SYSTEM_ID" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_EXTERNAL_SYSTEM_ACCESS_ROLE"
+                             references="EXTERNAL_SYSTEM(ID)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="strukov-av" id="11">
+        <createTable tableName="USERPOST_EXT_SYSTEM_ROLE">
+            <column name="USER_POST_ID" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="FK_USER_POST_USER_POST_SYSTEM"
+                             references="USER_POST(ID)"/>
+            </column>
+            <column name="EXT_SYSTEM_ROLE_ID" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_EXT_SYSTEM_ROLE_USER_POST" references="EXT_SYSTEM_ROLE(ID)"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="USERPOST_EXT_SYSTEM_ROLE" columnNames="USER_POST_ID, EXT_SYSTEM_ROLE_ID"
+                       constraintName="pk_upsa"/>
+    </changeSet>
+
+    <changeSet author="strukov-av" id="12">
+       <sql>
+           ALTER TABLE USER_POST
+           DROP CONSTRAINT FK_USER_USER_POST
+       </sql>
+        <sql>
+           ALTER TABLE USER_POST
+           ADD CONSTRAINT FK_USER_USER_POST
+           FOREIGN KEY (USER_ID)
+           REFERENCES USER_ENTITY (ID)
+           ON DELETE CASCADE
+       </sql>
+    </changeSet>
+
+    <changeSet author="strukov-av" id="13">
+        <sql>
+            ALTER TABLE USERPOST_EXT_SYSTEM_ROLE
+            DROP CONSTRAINT FK_USER_POST_USER_POST_SYSTEM
+        </sql>
+        <sql>
+            ALTER TABLE USERPOST_EXT_SYSTEM_ROLE
+            ADD CONSTRAINT FK_USER_POST_USER_POST_SYSTEM
+            FOREIGN KEY (USER_POST_ID)
+            REFERENCES USER_POST (ID)
+            ON DELETE CASCADE
         </sql>
     </changeSet>
 </databaseChangeLog>
