@@ -8,6 +8,8 @@ import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.models.UserModel;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
+import ru.alamics.sso.property.ApplicationProperties;
+import ru.alamics.sso.property.PropertyConstants;
 import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.phone.ActivationCodeType;
@@ -19,6 +21,8 @@ import ru.alamics.sso.registration.phone.exception.SmsSendException;
 import ru.alamics.sso.registration.phone.exception.UserPhoneEmpty;
 import ru.alamics.sso.registration.phone.exception.WrongSmsCode;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -43,6 +47,26 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         this.userPhoneVerifier = userPhoneVerifier;
         this.activationCodeType = activationCodeType;
         this.emailTemplateProvider = emailTemplateProvider;
+        ApplicationProperties applicationProperties;
+        try {
+            InitialContext context = new InitialContext();
+            applicationProperties = (ApplicationProperties) context.lookup("java:global/domru-sso/" + ApplicationProperties.class.getSimpleName());
+            log.info("Got userPhoneVerifier1 from context");
+        } catch (NamingException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Something wrong with context");
+        }
+        activationCodeType.setExpiredSeconds(Integer.parseInt(applicationProperties.getProperty(getPropertyConstants(activationCodeType), "user")));
+        ActivationCodeType.CODE_TO_EMAIL.setExpiredSeconds(Integer.parseInt(applicationProperties.getProperty(PropertyConstants.EXPIRE_INCOMING_CALL_EMAIL_CODE, "user")));
+    }
+
+    private PropertyConstants getPropertyConstants(ActivationCodeType activationCodeType){
+        switch (activationCodeType){
+            case CODE_BY_PHONE_NUMBER: return PropertyConstants.EXPIRE_INCOMING_CALL_CODE;
+            case CODE_TO_SMS: return PropertyConstants.EXPIRE_SMS_VIBER_CODE;
+            case CODE_TO_EMAIL:return PropertyConstants.EXPIRE_INCOMING_CALL_EMAIL_CODE;
+        }
+        return null;
     }
 
     @Override

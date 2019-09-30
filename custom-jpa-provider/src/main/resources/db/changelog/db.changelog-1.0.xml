@@ -198,4 +198,11 @@
             INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('df4fa86e-ec19-4f63-b274-4ee25086c20f', 'user.absence.notifications.days', '15', null, 'user');
         </sql>
     </changeSet>
+    <changeSet id="15" author="strukov-av">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('bc5a3cd8-aecf-4f84-8f5f-caf5d44dc5a5', 'user.expire.sms-viber.code', '300', null, 'user');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('52b6892e-d950-45ff-843f-a564321545de', 'user.expire.incoming.call.code', '20', null, 'user');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('95047368-931d-4b1b-82be-077c6eb10d6d', 'user.expire.incoming.call.email.code', '300', null, 'user');
+        </sql>
+    </changeSet>
 </databaseChangeLog>

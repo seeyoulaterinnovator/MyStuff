@@ -45,7 +45,7 @@ public class SettingsResource {
 
     @Path("/{settingId}")
     @PUT
-    public Response deleteSetting(@PathParam("settingId") final String settingId, final SettingsDto setting) {
+    public Response saveSetting(@PathParam("settingId") final String settingId, final SettingsDto setting) {
         setting.setId(settingId);
         return JsonResponse.success()
                 .addResult("setting", service.save(setting))

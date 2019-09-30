@@ -9,7 +9,7 @@ public enum  ActivationCodeType {
     CODE_TO_SMS(6, 300L);
 
     private final int lengthCode;
-    private final long expiredSeconds;
+    private long expiredSeconds;
 
     ActivationCodeType(int lengthCode, long expiredSeconds) {
         this.lengthCode = lengthCode;
@@ -33,5 +33,9 @@ public enum  ActivationCodeType {
 
     public long getExpiredSeconds() {
         return expiredSeconds;
+    }
+
+    public void setExpiredSeconds(long expiredSeconds) {
+        this.expiredSeconds = expiredSeconds;
     }
 }
