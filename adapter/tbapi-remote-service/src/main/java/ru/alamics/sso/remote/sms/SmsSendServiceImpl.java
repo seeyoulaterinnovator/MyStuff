@@ -11,6 +11,7 @@ import ru.alamics.sso.registration.phone.exception.SmsSendException;
 import ru.alamics.sso.registration.phone.port.SmsSendService;
 import ru.alamics.sso.util.EStand;
 import ru.alamics.sso.util.StandResolver;
+import ru.alamics.sso.util.Util;
 
 import javax.ejb.Stateless;
 import javax.ws.rs.ProcessingException;
@@ -72,15 +73,13 @@ public class SmsSendServiceImpl implements SmsSendService {
             return "0: Accepted for delivery";
         }
 
-        phone = phone.replaceAll("[^0-9]+", "");
-
         URI uri = smsConfig.getUrl();
 
         // TODO https://stackoverflow.com/questions/53760939/processingexception-resteasy003145-unable-to-find-a-messagebodyreader-of-conte?noredirect=1&lq=1
         ClientInvocationBuilder builder = (ClientInvocationBuilder)client.register(StringTextStar.class)
                 .target(uri)
                 .queryParams(getConfigForQuery())
-                .queryParam("to", phone)
+                .queryParam("to", Util.getCleanUserPhone(phone))
                 .queryParam("text", URLEncoder.encode(text, smsConfig.getCharset()))
                 .request()
                 ;
