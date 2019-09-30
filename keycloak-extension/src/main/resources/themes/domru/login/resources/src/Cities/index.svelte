@@ -32,10 +32,15 @@
   }
 
   function handleSelectCity() {
-    if (!$allCities.map(obj => obj.name).includes(search)) return;
+    const indexOfChosenCity = $allCities.map(obj => obj.name.toLowerCase()).indexOf(search.toLowerCase());
+    if (indexOfChosenCity === - 1) return;
 
-    city.set(search);
-    Cookie.set('CITY', search);
+    const chosenCity = $allCities[indexOfChosenCity].name;
+    const chosenDomain = $allCities[indexOfChosenCity].domain;
+
+    city.set(chosenCity);
+    Cookie.set('CITY', chosenCity);
+    Cookie.set('city-domain', chosenDomain);
     status.set(STATUS.CONFIRMED);
     showModal.set(false);
     editingStarted.set(false);

@@ -20,11 +20,16 @@ import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.messages.Messages;
+import ru.alamics.sso.registration.model.FormConstants;
+import ru.alamics.sso.registration.rias.RiasService;
+import ru.alamics.sso.registration.rias.model.RiasLogin;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+import java.net.URI;
 import java.util.List;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
@@ -34,9 +39,11 @@ import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator implements Authenticator {
 
     private final EntityManager em;
+    private final RiasService riasService;
 
-    public AuthMailPhoneForm(EntityManager em) {
+    public AuthMailPhoneForm(EntityManager em, RiasService riasService) {
         this.em = em;
+        this.riasService = riasService;
     }
 
     @Override
@@ -108,6 +115,36 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
 
     // -------------
 
+    private boolean checkAuthRias(AuthenticationFlowContext context) {
+
+        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
+
+        String username = formData.getFirst(FormConstants.FIELD_USERNAME);
+        String password = formData.getFirst(FormConstants.FIELD_PASSWORD);
+
+        RiasLogin riasLogin = riasService.loginUser(username, password);
+        if (riasLogin != null) {
+
+            if (riasLogin.getAccess_token() != null) {
+
+                String location = "https://lkb2b.domru.ru/login";
+
+                URI uriLoc = UriBuilder.fromPath(location).build();
+
+                Response response = Response.seeOther(uriLoc)
+                        .header("btoken", riasLogin.getAccess_token())
+                        .build();
+
+                log.debug("Redirecting to {}", location);
+                context.forceChallenge(response);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @Override
     public boolean validateUserAndPassword(AuthenticationFlowContext context, MultivaluedMap<String, String> inputData) {
         String username = inputData.getFirst(AuthenticationManager.FORM_USERNAME);
@@ -131,7 +168,14 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
 
             if (user == null) {
                 log.info("find user by phone");
-                user = getUserByPhone(context.getSession(), context.getRealm(), username);
+                UserFind userFind = new UserFind(context.getSession());
+                user = userFind.getUserByPhone(username);
+            }
+
+            if (user == null) {
+                log.info("check auth RIAS");
+                if (checkAuthRias(context))
+                    return false;
             }
 
         } catch (ModelDuplicateException mde) {
@@ -171,27 +215,5 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
         return true;
     }
 
-    public UserModel getUserByPhone(KeycloakSession session, RealmModel realm, String str) {
 
-        TypedQuery<UserEntity> query = em.createQuery(
-
-                "select u from UserEntity u " +
-                "join UserAttributeEntity ua on u.id = ua.user " +
-                "where ua.name = :ph_attr_name and ua.value like '%' || :phone || '%'" // TODO =
-                , UserEntity.class)
-                .setParameter("ph_attr_name", ATTR_PHONE_NAME)
-                .setParameter("phone", str);
-
-        //TypedQuery<UserEntity> query = em.createNamedQuery("getRealmUserByEmail", UserEntity.class);
-        //query.setParameter("email", str.toLowerCase());
-        //query.setParameter("realmId", realm.getId());
-
-        List<UserEntity> results = query.getResultList();
-
-        if (results.isEmpty()) return null;
-
-        // ensureEmailConstraint(results, realm); ?
-
-        return new UserAdapter(session, realm, em, results.get(0));
-    }
 }

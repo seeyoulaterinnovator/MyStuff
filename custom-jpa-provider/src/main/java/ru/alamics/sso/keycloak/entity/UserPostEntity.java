@@ -11,7 +11,11 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "USER_POST")
+@NamedQuery(name = "deleteFromUserPost", query = "delete from UserPostEntity up where up.user = :user")
 public class UserPostEntity {
+    public static final String DELETE_BY_USER_SQL = "delete from USER_POST where USER_ID =:user";
+
+
     @Id
     private String id;
     @ManyToOne(targetEntity = UserEntity.class)
