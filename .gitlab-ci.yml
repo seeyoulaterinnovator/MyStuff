@@ -20,7 +20,6 @@ back:compile:
   cache:
     key: "$CI_COMMIT_SHA"
     paths:
-      - .gradle/
       - build/
 
 back:test:adapter:tbapi-remote-service:
