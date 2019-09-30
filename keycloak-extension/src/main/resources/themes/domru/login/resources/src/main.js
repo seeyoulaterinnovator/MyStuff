@@ -1,6 +1,7 @@
 import App from './App.svelte';
 
 import './scripts/login.js';
+import './scripts/login-iframe.js';
 import './scripts/register.js';
 import './scripts/login-reset-password.js';
 import './scripts/login-update-password.js';
@@ -12,6 +13,7 @@ import './css/fonts.css';
 import './css/typography.css';
 import './css/animation.css';
 import './css/custom.css';
+import './css/sth-went-wrong.css';
 
 import './css/components/button.css';
 import './css/components/field.css';

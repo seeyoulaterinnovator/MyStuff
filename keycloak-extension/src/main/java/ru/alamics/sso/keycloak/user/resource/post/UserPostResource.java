@@ -3,12 +3,14 @@ package ru.alamics.sso.keycloak.user.resource.post;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
+import org.keycloak.Config;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.jose.jws.JWSInput;
 import org.keycloak.jose.jws.JWSInputException;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.managers.AppAuthManager;
@@ -20,6 +22,7 @@ import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostEditRequest;
+import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.service.UserPostService;
 
@@ -29,6 +32,7 @@ import javax.persistence.EntityManager;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -41,7 +45,6 @@ public class UserPostResource {
 
     public UserPostResource(KeycloakSession session) {
         this.session = session;
-        authenticateRealmAdminRequest(session.getContext().getRealm());
         try {
             this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
         } catch (NamingException e) {
@@ -65,7 +68,6 @@ public class UserPostResource {
                     .build();
         }
     }
-
 
     @POST
     @Path("/edit")
@@ -115,6 +117,25 @@ public class UserPostResource {
                     .build();
         }
     }
+
+
+    @GET
+    @Path("/users/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response getUserPost(@PathParam("id") String userId) {
+        try {
+            return JsonResponse.success()
+                    .addResult("user_post", userPostService.getUserPost(userId))
+                    .build();
+        } catch (NotFoundException e) {
+            return JsonResponse.fail()
+                    .message(e.getMessage())
+                    .build();
+        }
+    }
+
 
     @GET
     @Path("")
@@ -192,49 +213,5 @@ public class UserPostResource {
                     .message(e.getMessage())
                     .build();
         }
-    }
-
-
-    private AdminAuth authenticateRealmAdminRequest(RealmModel realm) {
-        String tokenString = new AppAuthManager().extractAuthorizationHeaderToken(session.getContext().getRequestHeaders());
-        if (tokenString == null) throw new NotAuthorizedException("Bearer");
-        AccessToken token;
-        try {
-            JWSInput input = new JWSInput(tokenString);
-            token = input.readJsonContent(AccessToken.class);
-        } catch (JWSInputException e) {
-            throw new NotAuthorizedException("Bearer token format error");
-        }
-
-        String realmName = token.getIssuer().substring(token.getIssuer().lastIndexOf('/') + 1);
-        RealmManager realmManager = new RealmManager(session);
-        RealmModel realmFromToken = realmManager.getRealmByName(realmName);
-        if (realmFromToken == null) {
-            throw new NotAuthorizedException("Unknown realm in token");
-        }
-
-        session.getContext().setRealm(realm);
-        AuthenticationManager.AuthResult authResult = new AppAuthManager()
-                .authenticateBearerToken(session, realm, session.getContext().getUri(), session.getContext().getConnection(), session.getContext().getRequestHeaders());
-        if (authResult == null) {
-            log.debug("Token not valid");
-            throw new NotAuthorizedException("Bearer");
-        }
-
-        ClientModel client = realm.getClientByClientId(token.getIssuedFor());
-        if (client == null) {
-            throw new NotAuthorizedException("Could not find client for authorization");
-        }
-
-        AdminAuth auth = new AdminAuth(realm, authResult.getToken(), authResult.getUser(), client);
-
-        AdminPermissions.evaluator(session, realm, auth).users().requireManage();
-
-        if (!auth.getRealm().equals(realmManager.getKeycloakAdminstrationRealm())
-                && !auth.getRealm().equals(realm)) {
-            throw new ForbiddenException();
-        }
-
-        return auth;
     }
 }
