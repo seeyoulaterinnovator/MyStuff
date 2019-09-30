@@ -18,33 +18,33 @@
                 <#list posts as post>
                         <#assign firstRow = post?index == 0>
                         <div class="${firstRow?then('selected', '')} trow titems">
-                            <div id="tomsId-${post?index}" class="org-cell">${post.tomsId}</div>
-                            <div id="roleName-${post?index}" class="role-cell">${post.roleName}</div>
+                            <div id="tomsId-${post?index}" class="org-cell">${post?tomsId}</div>
+                            <div id="roleName-${post?index}" class="role-cell">${post?roleName}</div>
                         </div>
                 </#list>
             </div>
         </div>
 
         <form class="form-actions" action="${url.loginAction}" method="POST">
-            <input style="visibility:hidden" type="text" name="roleName" id="roleName" value="${posts[0].roleName}">
-            <input style="visibility:hidden" type="text" name="tomsId" id="tomsId" value="${posts[0].tomsId}">
+            <input style="visibility:hidden" type="text" name="roleName" id="roleName" value="${posts[0].roleName}"/>
+            <input style="visibility:hidden" type="text" name="tomsId" id="tomsId" value="${posts[0].tomsId}"/>
             <input style="visibility:hidden" name="accept" id="kc-accept" type="submit" value="Отправить"/>
         </form>
 
         <div class="clearfix"></div>
     </#if>
+
+    <script>
+        var table = document.getElementById('post');
+        Array.from(document.getElementsByClassName('titems')).forEach(function (el, index) {
+            var roleName = document.getElementById("roleName-" + index).textContent;
+            var tomsId = document.getElementById("tomsId-" + index).textContent;
+            el.addEventListener('click', function () {
+                document.getElementById('roleName').value = roleName;
+                document.getElementById('tomsId').value = tomsId;
+                document.getElementById('kc-accept').click();
+            })
+        });
+
+    </script>
 </@layout.registrationLayout>
-
-<script>
-    var table = document.getElementById('post');
-    Array.from(document.getElementsByClassName('titems')).forEach(function (el, index) {
-        var roleName = document.getElementById("roleName-" + index).textContent;
-        var tomsId = document.getElementById("tomsId-" + index).textContent;
-        el.addEventListener('click', function () {
-            document.getElementById('roleName').value = roleName;
-            document.getElementById('tomsId').value = tomsId;
-            document.getElementById('kc-accept').click();
-        })
-    });
-
-</script>
