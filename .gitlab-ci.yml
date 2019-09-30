@@ -18,7 +18,7 @@ back:compile:
   script:
     - ./gradlew :classes --stacktrace -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
   cache:
-    key: "$CI_COMMIT_SHA"
+    key: "${CI_COMMIT_SHA}_reworked"
     paths:
       - build/
 
