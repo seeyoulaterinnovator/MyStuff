@@ -33,14 +33,14 @@ public class EmailSender {
 
     protected EmailTemplate processTemplate(List<Object> subjectAttributes, String template, Map<String, Object> attributes) throws EmailException {
         try {
-            String textTemplate = String.format("templates/mail/text/%s", template);
+            String textTemplate = String.format("/text/%s", template);
             String textBody;
             try {
                 textBody = FreeMarkerUtil.processTemplate(attributes, textTemplate);
             } catch (final FreeMarkerException e) {
                 textBody = null;
             }
-            String htmlTemplate = String.format("templates/mail/html/%s", template);
+            String htmlTemplate = String.format("/html/%s", template);
             String htmlBody;
             try {
                 htmlBody = FreeMarkerUtil.processTemplate(attributes, htmlTemplate);
