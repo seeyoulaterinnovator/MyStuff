@@ -78,10 +78,26 @@ public class UserService {
         if (userDto == null || userDto.isEmpty()) {
             return null;
         }
+        if (userRequest.getUserIds() != null && userRequest.getUserIds().length != 0) {
+            userDto = searchUsersById(userDto, userRequest.getUserIds());
+        }
         userDto = DataMapper.toGroupUserDtos(userDto);
         file.addRow(getUserParameterNames(userRequest.getUserParameters()));
         userDto.stream().forEach(o -> file.addRow(getUserParameters(o, userRequest.getUserParameters())));
         return file.save();
+    }
+
+    private List<UserDto> searchUsersById(List<UserDto> userDtos, String[] userIds) {
+        List<UserDto> result = new LinkedList<>();
+        userDtos.stream()
+                .forEach(o -> {
+                    for (String userId : userIds) {
+                        if (o.getId().equals(userId)) {
+                            result.add(o);
+                        }
+                    }
+                });
+        return result;
     }
 
     private List<String> getUserParameterNames(UserParameter[] userParameters) {
