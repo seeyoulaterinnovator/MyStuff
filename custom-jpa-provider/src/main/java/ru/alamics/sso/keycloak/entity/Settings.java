@@ -23,6 +23,9 @@ public class Settings implements Serializable {
     @Id
     private String id;
 
+    @Column(name = "name")
+    private String name;
+
     @Column(name = "ext_id")
     private String extId;
 

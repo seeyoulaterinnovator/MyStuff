@@ -15,6 +15,7 @@ import java.io.Serializable;
 public class SettingsDto implements Serializable {
 
     private static final long serialVersionUID = -3769044840267241943L;
+    private String name;
     private String id;
     private String extId;
     private String value;
