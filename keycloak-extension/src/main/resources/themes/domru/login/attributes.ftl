@@ -2,7 +2,7 @@
 <@layout.registrationLayout; section>
     <#if section = "header">
 <#--        ${msg("termsTitle")}-->
-    <#elseif section = "form">
+    <#elseIf section = "form">
         <div id="kc-terms-text">
 <#--            ${kcSanitize(msg("termsText"))?no_esc}-->
         </div>
