@@ -1,8 +1,5 @@
 package ru.alamics.sso.registration.phone;
 
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-
 public enum  ActivationCodeType {
     CODE_TO_EMAIL(4, 300L),
     CODE_BY_PHONE_NUMBER(4, 20L),

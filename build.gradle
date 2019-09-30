@@ -135,10 +135,10 @@ task deploy {
             from file(themesFolder)
             into(themesTargetFolder)
         }
-        copy {
-            from file('/configs/local/standalone.xml')
-            into(deployDir + '/standalone/configuration')
-        }
+//        copy {
+//            from file('/configs/local/standalone.xml')
+//            into(deployDir + '/standalone/configuration')
+//        }
     }
 }
 

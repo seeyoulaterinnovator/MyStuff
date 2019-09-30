@@ -19,11 +19,10 @@ import ru.alamics.sso.property.PropertyConstants;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -43,14 +42,13 @@ public class InactiveNotificationSchedule {
     private ApplicationProperties properties;
 
     private Integer absenceDaysBlock;
+    private String host;
 
-    @Schedule(hour = "*/3", persistent = false)
+    @Schedule(hour = "*/2", persistent = false)
     public void sendEmails() throws EmailException {
         final String DEBUG_STR = "sendEmails";
         log.info("start={}", DEBUG_STR);
 
-        var bockNotification = bockNotification();
-        var prepareBlockNotification = prepareBlockNotification();
         var autoLockNotifications = autoLockNotificationRepository.findNotifications();
         var usersToBlock = new ArrayList<UserEntity>();
         for(AutoLockNotification notification : autoLockNotifications) {
@@ -58,15 +56,22 @@ public class InactiveNotificationSchedule {
             RealmModel realm = realmRepository.findRealmById(user.getRealmId());
             UserModel userModel = new UserAdapter(null, realm, null, user);
             if(notification.getType() == NotificationType.ABSENCE_NOTIFICATION) {
+                var prepareBlockNotification = prepareBlockNotification();
                 prepareBlockNotification.realmModel(realm)
                         .user(userModel);
                 sender.send(prepareBlockNotification.build());
             } else if(notification.getType() == NotificationType.ABSENCE_BLOCKING) {
+                var bockNotification = bockNotification();
                 bockNotification.realmModel(realm)
                         .user(userModel);
                 sender.send(bockNotification.build());
                 user.setEnabled(false);
                 usersToBlock.add(user);
+            } else if(notification.getType() == NotificationType.PASSWORD_EXPIRED) {
+                var passwordExpired = passwordExpired();
+                passwordExpired.realmModel(realm)
+                        .user(userModel);
+                sender.send(passwordExpired.build());
             }
         }
         userRepository.save(usersToBlock);
@@ -95,8 +100,24 @@ public class InactiveNotificationSchedule {
                 .bodyTemplate(template);
     }
 
+    private EmailModel.EmailModelBuilder passwordExpired() {
+        final String subject = "Истек срок жизни пароля";
+        final String template = "password-expires.ftl";
+        Map<String, Object> body = new HashMap<>();
+        String state = "0/" + UUID.randomUUID();
+        String auth = String.format("%s/auth/realms/user/protocol/openid-connect/auth?client_id=account", host);
+        String redirectUri = String.format("%s/auth/realms/user/account/login-redirect", host);
+        body.put("link", String.format("%s&redirect_uri=%s&state=%s&response_type=code", auth, URLEncoder.encode(redirectUri, StandardCharsets.UTF_8), state));
+
+        return EmailModel.builder()
+                .bodyAttributes(body)
+                .subject(subject)
+                .bodyTemplate(template);
+    }
+
     @PostConstruct
     public void init() {
         this.absenceDaysBlock = Integer.parseInt(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user"));
+        this.host = properties.getProperty("application.host");
     }
 }
