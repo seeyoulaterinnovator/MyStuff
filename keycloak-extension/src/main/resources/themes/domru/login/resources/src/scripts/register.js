@@ -200,5 +200,4 @@ export default (function() {
     // form.getFieldState('password-confirm').blur();
   }
   linkPasswords(getPassword, setPassword, document.getElementById('password'));
-  console.log(document.querySelectorAll('.field__open'));
 })();

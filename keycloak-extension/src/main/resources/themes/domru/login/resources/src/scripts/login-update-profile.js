@@ -1,40 +1,13 @@
 import IMask from 'imask';
 import { createForm } from 'final-form';
 
-import linkPasswords from './link-passwords.js';
 import { isEmpty } from './helpers';
 
 import VALIDATION_RULES from '../constants/validationRules.js';
 
 export default (function() {
-  const setVisiblePass = field => e => {
-    const active = field.classList.contains('active');
-    const open = field.querySelector('.open');
-    const close = field.querySelector('.close');
-
-    const inputId = field.getAttribute('target');
-    const input = document.getElementById(inputId);
-
-    if (active) {
-      field.classList.remove('active');
-      open.classList.add('hidden');
-      close.classList.remove('hidden');
-      input.setAttribute('type', 'password');
-    } else {
-      field.classList.add('active');
-      open.classList.remove('hidden');
-      close.classList.add('hidden');
-      input.setAttribute('type', 'input');
-    }
-  };
-
-  document
-    .querySelectorAll('.field__open')
-    .forEach(eye => eye.addEventListener('click', setVisiblePass(eye), false));
-
-  // @todo
-
   const formElement = document.getElementById('kc-update-profile-form');
+  console.log(111);
   if (!formElement) return;
 
   // Маска для поля ввода телефона
@@ -43,10 +16,14 @@ export default (function() {
   });
 
   // Создаем объект формы с помощью final-form
-  const updater = {};
+  const registered = {};
   const form = createForm({
     onSubmit: () => {},
     initialValues: {
+      'user-attributes-orgName': '',
+      firstName: '',
+      lastName: '-',
+      email: '',
     },
     validate,
     validateOnBlur: true,
@@ -57,10 +34,7 @@ export default (function() {
     const errors = {};
 
     function checkExistence() {
-
-      Object.keys(updater).forEach(name => {
-        console.info('meeee:' +  'name' + name, values[name]);
-
+      Object.keys(registered).forEach(name => {
         if (name && !values[name]) errors[name] = 'Обязательное поле';
       });
     }
@@ -71,6 +45,9 @@ export default (function() {
     if (!phoneMask.unmaskedValue.match(VALIDATION_RULES.phone))
       errors.phone = 'Неверный формат номера';
 
+    if (!values.email.match(VALIDATION_RULES.email))
+      errors.email = 'Неверный формат email';
+
     checkExistence();
 
     return errors;
@@ -80,23 +57,23 @@ export default (function() {
   [...formElement]
     .filter(elem => elem.tagName === 'INPUT')
     .forEach(input => {
-      updaterField(input);
+    registerField(input);
     });
 
   // Делаем то же и для капчи, которая загружается после всех остальных скриптов
   function onloadRecaptchaCallback() {
     const name = 'recaptcha';
-    form.updaterField(
+    form.registerField(
       name,
       fieldState => {
-        if (!updater[name]) updater[name] = true;
+        if (!registered[name]) registered[name] = true;
       },
       { value: true, error: true },
     );
   }
   function recaptchaCallback() {
     console.info('Recaptcha Success');
-    form.updaterField('recaptcha', fieldState => fieldState.change(true));
+    form.registerField('recaptcha', fieldState => fieldState.change(true));
     form.getFieldState('recaptcha').blur();
   }
   function recaptchaExpiredCallback() {
@@ -111,16 +88,16 @@ export default (function() {
   window.recaptchaExpiredCallback = recaptchaExpiredCallback;
   window.recaptchaErrorCallback = recaptchaErrorCallback;
 
-  function updaterField(input) {
+  function registerField(input) {
     const { name } = input;
 
-    form.updaterField(
+    form.registerField(
       name,
       fieldState => {
         const { blur, change, error, focus, touched, value } = fieldState;
         const errorElement = document.getElementById(`${name}-error-message`);
 
-        if (!updater[name]) {
+        if (!registered[name]) {
           // first time, register event listeners
           input.addEventListener('blur', () => blur());
           input.addEventListener('input', event =>
@@ -131,7 +108,7 @@ export default (function() {
             ),
           );
           input.addEventListener('focus', () => focus());
-          updater[name] = true;
+          registered[name] = true;
         }
 
         // update value
@@ -178,15 +155,4 @@ export default (function() {
       errors: true,
     },
   );
-
-  // function getPassword() {
-  //   return form.getFieldState('password').value;
-  // }
-  // function setPassword(password) {
-  //   // form.getFieldState('password').change(password);
-  //   // form.getFieldState('password-confirm').change(password);
-  //   // form.getFieldState('password-confirm').blur();
-  // }
-  // linkPasswords(getPassword, setPassword, document.getElementById('password'));
-  console.log(document.querySelectorAll('.field__open'));
 })();

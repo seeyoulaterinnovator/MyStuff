@@ -66,7 +66,6 @@
       return acc;
     }, []);
 
-    console.log(Object.values(groupedCitiesObject.map(part => Object.values(part))));
     return Object.values(groupedCitiesObject.map(part => Object.values(part)));
   }
 
