@@ -11,7 +11,8 @@
         </#if>
     <#elseif section = "form">
         <#if userPhone??>
-            <p class="pb-6">${userPhone}</p>
+            <p class="pb-6">${userPhone?replace('([0-9]{1})([0-9]{3})([0-9]{3})([0-9]{2})([0-9]{2})',
+                '+$1 ($2) $3-$4-$5', 'ri')}</p>
         </#if>
         <form id="totpe" action="${url.loginAction}" method="POST">
          </form>
