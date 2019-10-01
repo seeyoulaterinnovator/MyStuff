@@ -11,15 +11,15 @@ import org.keycloak.models.UserModel;
 import ru.alamics.sso.auth.UserRole;
 import ru.alamics.sso.keycloak.auth.SsoFreeMarkerLoginForm;
 import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.keycloak.search.dto.UserDto;
 import ru.alamics.sso.keycloak.search.rest.SearchResource;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.UserConstants.*;
 
@@ -52,8 +52,16 @@ public class AttributesForm implements Authenticator {
             var user = context.getUser();
             var response = searchResource.getUsersInfo( "", user.getId(), "", "", true);
             JsonResponse body = (JsonResponse) response.getEntity();
-            var attributes = body.getResults();
-            if(attributes.get("users-info") == null) {
+            var results = body.getResults();
+            List<UserDto> attributes = (List<UserDto>) results.get("users-info");
+            if(attributes != null) {
+                attributes = attributes.stream()
+                        .filter(attribute -> Objects.nonNull(attribute.getTomsId()) && Objects.nonNull(attribute.getSystemId()) && Objects.nonNull(attribute.getRoleId()))
+                        .collect(Collectors.toList());
+            } else {
+                attributes = Collections.emptyList();
+            }
+            if(attributes.isEmpty()) {
                 context.success();
             } else {
                 Response challenge = createForm(context, attributes);
@@ -66,10 +74,17 @@ public class AttributesForm implements Authenticator {
 
     }
 
-    private Response createForm(AuthenticationFlowContext context,  Map<String, Object> attributes) {
+    private Response createForm(AuthenticationFlowContext context, List<UserDto> attributes) {
         LoginFormsProvider form = context.form();
-        if(attributes.size() > 0) {
-            form.setAttribute("posts", attributes.get("users-info"));
+        if(!attributes.isEmpty()) {
+            Set<AttributesModel> models = attributes.stream()
+                    .map(attribute -> AttributesModel.builder()
+                            .roleName(attribute.getRoleName())
+                            .tomsId(attribute.getTomsId())
+                            .build()
+                    ).collect(Collectors.toSet());
+
+            form.setAttribute("posts", models);
         }
         return form.createForm(FORM);
     }
