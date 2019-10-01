@@ -180,4 +180,15 @@
             ON DELETE CASCADE
         </sql>
     </changeSet>
+
+    <changeSet id="17" author="tretyakov-da">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mysql" />
+        </preConditions>
+        <sql>
+            alter table ADMIN_EVENT_ENTITY change `REPRESENTATION` `REPRESENTATION` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            alter table SETTINGS change `DESC` `DESC` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            alter table SETTINGS change VALUE VALUE TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
 </databaseChangeLog>
