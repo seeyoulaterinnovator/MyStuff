@@ -21,7 +21,7 @@ public class InactiveBlockSchedule {
     @EJB
     private ApplicationProperties properties;
 
-    @Schedule(hour = "*", minute = "*", second = "*/10", persistent = false)
+    @Schedule(hour = "*", minute = "*/5", persistent = false)
     public void block () {
         final String DEBUG_STR = "block";
         log.info("start:{}", DEBUG_STR);
