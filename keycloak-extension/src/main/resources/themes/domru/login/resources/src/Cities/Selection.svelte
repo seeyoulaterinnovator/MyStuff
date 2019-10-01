@@ -35,6 +35,7 @@
   }
 
   function groupByFirstCharacter(arr) {
+    if (!arr || !arr.length) return [];
     let quarterStore = 0;
     const unsubscribe = quarter.subscribe(value => {
       quarterStore = value;
@@ -51,15 +52,14 @@
 
         if ( index >= currentQuarter && partCounter < 3) {
           partCounter++;
-          currentQuarter = currentQuarter + quarter;
+          currentQuarter = currentQuarter + quarterStore;
         }
         if (!acc[partCounter]) acc.push([]);
         acc[partCounter][firstCharacter] = {
             firstCharacter,
             cities: [{ name: value.name, domain: !value.bss && value.city }]
         };
-      }
-      else {
+      } else {
         acc[partCounter][firstCharacter].cities.push({ name: value.name, domain: !value.bss && value.city });
       }
 
@@ -67,7 +67,7 @@
     }, []);
 
     console.log(Object.values(groupedCitiesObject.map(part => Object.values(part))));
-    return Object.values(groupedCitiesObject.map(part => Object.values(part)));
+    return groupedCitiesObject.map(part => Object.values(part));
   }
 
   onMount(() => {
