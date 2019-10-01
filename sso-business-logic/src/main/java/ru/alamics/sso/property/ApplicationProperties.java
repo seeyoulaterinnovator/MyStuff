@@ -9,7 +9,9 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 
 @Singleton
@@ -26,7 +28,7 @@ public class ApplicationProperties {
         Settings settings = repository.getSettings(keyName, realmId);
         String ret;
         if(settings != null) {
-            ret = settings.getValue();
+            ret = String.valueOf(TimeUnit.SECONDS.convert(Long.parseLong(settings.getValue()), settings.getUnit()));
         } else {
             ret = getProperty(keyName);
         }
