@@ -41,7 +41,7 @@ public class InactiveNotificationSchedule {
 
     private String host;
 
-    @Schedule(hour = "*/2", persistent = false)
+    @Schedule(hour = "*", minute = "*/5", persistent = false)
     public void sendEmails() throws EmailException {
         final String DEBUG_STR = "sendEmails";
         log.info("start={}", DEBUG_STR);
