@@ -21,23 +21,14 @@ public class InactiveBlockSchedule {
     @EJB
     private ApplicationProperties properties;
 
-//    @Inject
-//    @Property(value = "user.absence.blocking.days")
-    private Long absenceTimeBlock;
-
-    @Schedule(hour = "*", minute = "*/5", persistent = false)
+    @Schedule(hour = "*", minute = "*", second = "*/10", persistent = false)
     public void block () {
         final String DEBUG_STR = "block";
         log.info("start:{}", DEBUG_STR);
+        Long absenceTimeBlock = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user"));
         if(absenceTimeBlock > -1) {
             autoLockNotificationRepository.findUsersToBlock(absenceTimeBlock);
         }
         log.info("stop:{}", DEBUG_STR);
-    }
-
-
-    @PostConstruct
-    public void init() {
-        this.absenceTimeBlock = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user"));
     }
 }
