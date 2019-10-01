@@ -205,4 +205,17 @@
             INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('95047368-931d-4b1b-82be-077c6eb10d6d', 'user.expire.incoming.call.email.code', '300', null, 'user');
         </sql>
     </changeSet>
+    <changeSet id="16" author="tretyakov-da">
+        <addColumn tableName="SETTINGS">
+            <column name="NAME" type="varchar(2048)"/>
+        </addColumn>
+        <sql>
+            update SETTINGS set NAME = 'Expire sms/ Viber code' where EXT_ID = 'user.expire.sms-viber.code';
+            update SETTINGS set NAME = 'Expire incomig call code' where EXT_ID = 'user.expire.incoming.call.code';
+            update SETTINGS set NAME = 'Expire incoming call email code' where EXT_ID = 'user.expire.incoming.call.email.code';
+            update SETTINGS set NAME = 'Inactive Block timeout' where EXT_ID = 'user.absence.blocking.days';
+            update SETTINGS set NAME = 'Inactive notification timeout' where EXT_ID = 'user.absence.notifications.days';
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

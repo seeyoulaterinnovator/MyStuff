@@ -33,6 +33,7 @@ public class SettingsService {
     public SettingsDto save(final SettingsDto settings) {
         var settingsToSave = Settings.builder()
                 .desc(settings.getDesc())
+                .name(settings.getName())
                 .id(settings.getId())
                 .value(settings.getValue())
                 .extId(settings.getExtId())
@@ -47,6 +48,7 @@ public class SettingsService {
                 .desc(settings.getDesc())
                 .extId(settings.getExtId())
                 .id(settings.getId())
+                .name(settings.getName())
                 .value(settings.getValue())
                 .realmId(settings.getRealmId())
                 .build();
