@@ -33,21 +33,27 @@ public class AuthLinkResource {
     }
 
     @GET
-    @Path("/{id}")
+    @Path("/{id}/{client}")
     @NoCache
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-    public Response getLink(@PathParam("id") String userId, final HttpHeaders headers) {
+    public Response getLink(@PathParam("id") String userId, @PathParam("client") String clientId) {
 
         RealmManager realmManager = new RealmManager(session);
         RealmModel realm = realmManager.getRealmByName("user");
-        if (realm == null) throw new NotFoundException("Realm not found.");
+        if (realm == null)
+            throw new NotFoundException("Realm not found.");
 
-        ClientModel clientModel = session.clientStorageManager().getClientByClientId("account", realm);
-        log.info("got client " + clientModel.toString());
+        ClientModel clientModel = session.clientStorageManager().getClientByClientId(clientId, realm);
+        if (clientModel == null)
+            throw new NotFoundException("Client not found.");
+
+        log.info("Request for auth link, user " + userId + ", client " + clientId);
+
+        //log.info("got client " + clientModel.getId() + " " + clientModel.getName() + " " + clientModel.getClientId());
 
         RootAuthenticationSessionModel rootAuthenticationSessionModel = session.authenticationSessions().createRootAuthenticationSession(realm);
         AuthenticationSessionModel authenticationSession = rootAuthenticationSessionModel.createAuthenticationSession(clientModel);
-        log.info("got authenticationSession " + authenticationSession.toString());
+        //log.info("got authenticationSession " + authenticationSession.toString());
 
 
 
@@ -58,18 +64,12 @@ public class AuthLinkResource {
         String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
 
         AuthLinkActionToken token = new AuthLinkActionToken(userId, absoluteExpirationInSecs, authSessionEncodedId);
-
-        //ResetCredentialsActionToken token = new ResetCredentialsActionToken(
-        //        userId, absoluteExpirationInSecs, authSessionEncodedId, authenticationSession.getClient().getClientId());
-
-
+        token.issuedFor(clientModel.getClientId());
 
         UriInfo uriInfo = session.getContext().getUri();
 
         UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
                 clientModel.getClientId(), authenticationSession.getTabId())
-                //.queryParam(Constants.EXECUTION, "9e422707-10ad-4758-96d2-c8ad8942e34c"); // auth link
-                //.queryParam(Constants.EXECUTION, "a1d0c9d7-fdd5-4049-849a-112ae14a3411");
         ;
 
         String link = builder.build(realm.getName()).toString();

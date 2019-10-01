@@ -13,6 +13,7 @@ import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.sessions.AuthenticationSessionModel;
 
 @Slf4j
+@Deprecated
 public class AuthLinkAuthenticator implements Authenticator {
 
     @Override

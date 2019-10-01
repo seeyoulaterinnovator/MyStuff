@@ -9,6 +9,8 @@ import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluato
 import org.keycloak.services.resources.admin.permissions.AdminPermissions;
 import ru.alamics.sso.util.Util;
 
+import javax.ws.rs.NotAuthorizedException;
+
 public interface BaseResourceProvider<T> extends RealmResourceProvider {
 
     @Override
@@ -25,6 +27,11 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
         var realm = context.getRealm();
         AuthenticationManager.AuthResult authResult = new AppAuthManager()
                 .authenticateBearerToken(session, realm, session.getContext().getUri(), session.getContext().getConnection(), requestHeaders);
+
+        if (authResult == null) {
+            throw new NotAuthorizedException("Bearer token required");
+        }
+
         var client = context.getClient();
         var auth = new AdminAuth(realm, authResult.getToken(), authResult.getUser(), client);
         return AdminPermissions.evaluator(session, realm, auth);

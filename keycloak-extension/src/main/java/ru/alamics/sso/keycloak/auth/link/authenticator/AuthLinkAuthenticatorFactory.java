@@ -11,6 +11,7 @@ import org.keycloak.provider.ProviderConfigProperty;
 import java.util.Collections;
 import java.util.List;
 
+@Deprecated
 public class AuthLinkAuthenticatorFactory implements AuthenticatorFactory {
 
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
