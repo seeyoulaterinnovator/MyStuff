@@ -371,19 +371,31 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
 
-    $scope.importFileCSV = function (file) {
-        let form = new FormData();
-        form.append('file', file[0]);
-        $http.post(`${authUrl}/realms/mster/users-toms/uploadUsers`, form, {
-            headers: {'Content-Type': 'multipart/form-data'}
+    $scope.importFileCSV = function (files) {
+        var formData = new FormData();
+        var file = files[0];
+        formData.append('file', file);
+        $http.post(`${authUrl}/realms/master/users-toms/uploadUsers`, formData, {
+            headers: {
+                'Content-Type': `multipart/form-data; charset=utf-8; boundary=${formData.boundary}`,
+                'Content-Disposition': `form-data; name="file"; filename="${file.name}"`
+            },
+            params: {
+                formData
+            },
+            responseType: "arraybuffer"
         })
     };
 
-    $scope.importFileExcel = function (file) {
-        let form = new FormData();
-        form.append('file', file[0]);
-        $http.post(`${authUrl}/realms/master/users-toms/uploadUsers`, form, {
-            headers: {'Content-Type': 'multipart/form-data'}
+    $scope.importFileExcel = function (files) {
+        var formData = new FormData();
+        var file = files[0];
+        formData.append('file', file);
+        $http.post(`${authUrl}/realms/master/users-toms/uploadUsers`, formData, {
+            headers: {
+                'Content-Type': `multipart/form-data; charset=utf-8; boundary=${formData.boundary}`,
+                'Content-Disposition': `form-data; name="file"; filename="${file.name}"`
+            }
         })
     };
 
@@ -511,6 +523,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 findGroupedUser = {
                     id: user.id,
                     username: user.username,
+                    firstName: user.firstName,
                     email: user.email,
                     phone: user.phone,
                     enabled: user.enabled,
