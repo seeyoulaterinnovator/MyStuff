@@ -39,10 +39,9 @@ public class InactiveNotificationSchedule {
     @EJB
     private ApplicationProperties properties;
 
-    private Long absenceTimeBlock;
     private String host;
 
-    @Schedule(hour = "*/2", persistent = false)
+    @Schedule(hour = "*", minute = "*/5", persistent = false)
     public void sendEmails() throws EmailException {
         final String DEBUG_STR = "sendEmails";
         log.info("start={}", DEBUG_STR);
@@ -89,6 +88,7 @@ public class InactiveNotificationSchedule {
     private EmailModel.EmailModelBuilder prepareBlockNotification() {
         final String subject = "Предупреждение о блокирование аккаунта";
         final String template = "block-prepare-notification.ftl";
+        Long absenceTimeBlock = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user"));
         Map<String, Object> body = new HashMap<>();
         body.put("absence", absenceTimeBlock);
 
@@ -115,7 +115,6 @@ public class InactiveNotificationSchedule {
 
     @PostConstruct
     public void init() {
-        this.absenceTimeBlock = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user"));
         this.host = properties.getProperty("application.host");
     }
 }

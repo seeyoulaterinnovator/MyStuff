@@ -20,25 +20,14 @@ public class InactiveFindSchedule {
     @EJB
     private ApplicationProperties properties;
 
-
-    //TODO довести до ума inject пропертей
-//    @Inject
-//    @Property(value = "user.absence.notifications.days")
-    private Long absenceTimeNotification;
-
     @Schedule(hour = "*", minute = "*/5", persistent = false)
     public void notificationInactiveUsers () {
         final String DEBUG_STR = "findNotifications";
         log.info("start:{}", DEBUG_STR);
+        Long absenceTimeNotification = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_NOTIFICATION_DAYS, "user"));
         if(absenceTimeNotification > -1) {
             userHistoryLoginRepository.findInactiveUsers(absenceTimeNotification);
         }
         log.info("stop:{}", DEBUG_STR);
-    }
-
-
-    @PostConstruct
-    public void init() {
-        this.absenceTimeNotification = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_NOTIFICATION_DAYS, "user"));
     }
 }
