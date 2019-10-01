@@ -217,6 +217,7 @@
             update SETTINGS set NAME = 'Inactive notification timeout' where EXT_ID = 'user.absence.notifications.days';
         </sql>
     </changeSet>
+
     <changeSet id="17" author="tretyakov-da">
         <preConditions onFail="MARK_RAN">
             <dbms type="mysql" />
