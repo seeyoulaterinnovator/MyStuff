@@ -10,6 +10,12 @@
 
   &--facebook {
     background-image: url('./images/social/FB.svg');
+
+    :hover {
+      background-image: url('./images/social/FB-hover.svg');
+      background-color: #1D45A1;
+      border-radius: 8px;
+    }
   }
 
   &--google {
@@ -21,8 +27,13 @@
     background-image: url('./images/social/GU.svg');
   }
 
-  /* Нет такого провайдера */
-  &--vk {
+  &--vkontakte {
     background-image: url('./images/social/VK.svg');
+
+    :hover {
+      background-image: url('./images/social/VK-hover.svg');
+      background-color: #0F6DDB;
+      border-radius: 8px;
+    }
   }
 }
