@@ -1,16 +1,10 @@
 package ru.alamics.sso.keycloak.user.resource.attributes;
 
 import lombok.Data;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.services.managers.AppAuthManager;
-import org.keycloak.services.managers.AuthenticationManager;
-import org.keycloak.services.resources.admin.AdminAuth;
-import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
-import org.keycloak.services.resources.admin.permissions.AdminPermissions;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.user.web.AttributeRequest;
-import ru.alamics.sso.user.UserService;
+import ru.alamics.sso.user.UserAttributeService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -21,9 +15,9 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class AttributesResource {
 
-    private final UserService service;
+    private final UserAttributeService service;
 
-    public AttributesResource (UserService service) {
+    public AttributesResource (UserAttributeService service) {
         this.service = service;
     }
 

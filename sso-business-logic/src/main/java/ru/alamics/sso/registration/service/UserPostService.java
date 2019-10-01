@@ -1,6 +1,7 @@
 package ru.alamics.sso.registration.service;
 
 import javassist.NotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.keycloak.entity.ExternalSystemRoleEntity;
 import ru.alamics.sso.keycloak.entity.UserPostEntity;
 import ru.alamics.sso.keycloak.entity.UserPostRoleEntity;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 @Stateless
+@Slf4j
 public class UserPostService {
 
     @EJB
@@ -126,5 +128,19 @@ public class UserPostService {
             throw new NotFoundException("ExternalSystemRole is not exist");
         }
         return externalSystemRole.getId();
+    }
+
+    public void addUserPostAndSystemRole(UserPostRequest userPostRequest) {
+        try {
+            UserPostResponse userPost = save(userPostRequest);
+            for (ExternalSystemRoleDto systemRoleDto : getExternalSystemRoles()) {
+                ExternalSystemRoleRequest systemRole = new ExternalSystemRoleRequest();
+                systemRole.setUserPostId(userPost.getId());
+                systemRole.setSystemRoleId(systemRoleDto.getId());
+                addSystemRole(systemRole);
+            }
+        } catch (NotFoundException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 }

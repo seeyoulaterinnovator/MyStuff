@@ -17,15 +17,24 @@
 
 package ru.alamics.sso.keycloak.create.rest;
 
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.Config.Scope;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.resource.RealmResourceProvider;
 import org.keycloak.services.resource.RealmResourceProviderFactory;
+import ru.alamics.sso.registration.service.UserFindService;
 
-public class CustomUserRealmResourceProviderFactory implements RealmResourceProviderFactory {
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
+@Slf4j
+public class CustomUserRealmResourceProviderFactory implements RealmResourceProvider, RealmResourceProviderFactory {
 
     public static final String ID = "users-toms";
+
+    private KeycloakSession session;
+    private UserFindService userFindService;
 
     @Override
     public String getId() {
@@ -34,8 +43,19 @@ public class CustomUserRealmResourceProviderFactory implements RealmResourceProv
 
     @Override
     public RealmResourceProvider create(KeycloakSession session) {
+        this.session = session;
+        try {
+            this.userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
+        } catch (NamingException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Something wrong with context");
+        }
+        return this;
+    }
 
-        return new CustomUserRealmResourceProvider(session);
+    @Override
+    public Object getResource() {
+        return new CustomRestResource(session, userFindService);
     }
 
     @Override

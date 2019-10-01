@@ -28,7 +28,7 @@ public class InactiveFindSchedule {
 //    @Property(value = "user.absence.notifications.days")
     private Integer absenceDaysNotification;
 
-    @Schedule(hour = "*/2", persistent = false)
+    @Schedule(hour = "*/3", persistent = false)
     public void notificationInactiveUsers () {
         final String DEBUG_STR = "findNotifications";
         log.info("start:{}", DEBUG_STR);

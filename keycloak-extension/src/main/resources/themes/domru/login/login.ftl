@@ -65,5 +65,5 @@
         var actionAttribute = loginForm.getAttribute("action") + "&iframe=1";
         loginForm.setAttribute("action", actionAttribute);
     }
-    
+
 </script>

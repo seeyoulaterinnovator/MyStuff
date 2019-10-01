@@ -12,4 +12,5 @@ public class DownloadUserRequest {
     private String type;
     @NotNull
     private UserParameter[] userParameters;
+    private String[] userIds;
 }

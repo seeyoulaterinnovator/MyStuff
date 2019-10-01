@@ -19,6 +19,15 @@ public class HashGenerator {
         return s;
     }
 
+    public static String getSecretHashMD5(String s) {
+        try {
+            return bytesToHex(MessageDigest.getInstance("MD5").digest(s.getBytes(StandardCharsets.UTF_8)));
+        } catch (NoSuchAlgorithmException e) {
+            log.error("Error initializing HashGenerator: " + e.getMessage() + "; will use no-op impl", e);
+        }
+        return s;
+    }
+
     private static String bytesToHex(byte[] hash) {
         StringBuilder hexString = new StringBuilder();
         for (byte b : hash) {

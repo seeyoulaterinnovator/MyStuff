@@ -15,7 +15,10 @@ import ru.alamics.sso.keycloak.search.rest.SearchResource;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import static ru.alamics.sso.registration.model.UserConstants.*;
@@ -38,11 +41,12 @@ public class AttributesForm implements Authenticator {
         var uriInfo = context.getUriInfo();
         var queryParams = uriInfo.getQueryParameters();
         queryParams.forEach((key, value) -> log.info("{}: key={} value={}", DEBUG_STR, key, value));
-
         String frame = uriInfo.getQueryParameters().getFirst(I_FRAME);
+        var redirectUriQueryParams = extractQueryParamsFromRedirectUri(queryParams.getFirst(REDIRECT_URI));
+        String redirectIframe = redirectUriQueryParams.get(I_FRAME);
         boolean isAuth = "1".equals(authSession.getAuthNote(AUTH_FORM_SUCCESS));//it`s magick
 
-        if( frame != null || isAuth ) {
+        if( frame != null || isAuth || redirectIframe != null) {
             var session = context.getSession();
             var searchResource = new SearchResource(session);
             var user = context.getUser();
@@ -75,7 +79,7 @@ public class AttributesForm implements Authenticator {
         var authSession = context.getAuthenticationSession();
         role.roleSetting(context);
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
-        final String tomsId = formData.get("tomsId").get(0);
+        final String tomsId = formData.getFirst("tomsId");
         var user = context.getUser();
         user.setAttribute(ATTR_TOMS_NAME, Collections.singletonList(tomsId));
         authSession.setAuthNote(AUTH_FORM_SUCCESS, "0");
@@ -100,5 +104,19 @@ public class AttributesForm implements Authenticator {
     @Override
     public void close () {
 
+    }
+
+    private Map<String, String> extractQueryParamsFromRedirectUri(String redirectUri) {
+        Map<String, String> queryParameters = new HashMap<>();
+        if(redirectUri != null && redirectUri.indexOf('?') >= 0) {
+            redirectUri = redirectUri.substring(redirectUri.indexOf('?') + 1);
+            String[] pairs = redirectUri.split("&");
+            for (String pair : pairs) {
+                int idx = pair.indexOf('=');
+                if (idx >= 0)
+                    queryParameters.put(URLDecoder.decode(pair.substring(0, idx), StandardCharsets.UTF_8), URLDecoder.decode(pair.substring(idx + 1), StandardCharsets.UTF_8));
+            }
+        }
+        return queryParameters;
     }
 }

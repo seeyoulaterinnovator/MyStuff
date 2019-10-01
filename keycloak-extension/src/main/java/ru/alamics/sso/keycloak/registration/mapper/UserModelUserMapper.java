@@ -3,6 +3,7 @@ package ru.alamics.sso.keycloak.registration.mapper;
 import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.registration.model.User;
+import ru.alamics.sso.util.Util;
 
 import javax.ws.rs.core.MultivaluedMap;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ public class UserModelUserMapper {
 
             String phone = user.getPhone();
             if (phone != null)
-                phone = phone.replaceAll("[^0-9]+", "");
+                phone = Util.getCleanUserPhone(phone);
 
             model.setAttribute(ATTR_PHONE_NAME, List.of(phone));
         }
@@ -57,7 +58,7 @@ public class UserModelUserMapper {
 
             String phone = formData.getFirst(FIELD_PHONE);
             if (phone != null)
-                phone = phone.replaceAll("[^0-9]+", "");
+                phone = Util.getCleanUserPhone(phone);
 
             user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(phone));
         }
