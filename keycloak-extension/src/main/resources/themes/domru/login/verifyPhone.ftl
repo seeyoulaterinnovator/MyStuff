@@ -24,11 +24,11 @@
                     <input placeholder="-" maxlength="1" id="smscode-${x}" name="smscode-${x}" class="text-center align-middle text-3xl w-10 h-10 sm:w-16 sm:h-16 border rounded-lg focus:border-extra outline-none" autocomplete="off" />
                 </#list>
             </div>
-            <input id="codeNumbers" name="codeNumbers" class="hidden" value="${lengthCode}" />
+            <input id="codeNumbers" name="codeNumbers" class="hidden" value="${lengthCode!}" />
             <#if error?has_content>
                 <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="0" />
             <#else>
-                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds}" />
+                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds!}" />
             </#if>
             
             
@@ -46,7 +46,7 @@
                 </div>
                 <#if lengthCode==6>
                     <button class="hidden border-b border-dashed text-black-50 text-right" name="resend" id="resend" type="submit" >Отправить еще раз</button>
-                <#elseif enableRepeatCall>
+                <#elseif enableRepeatCall?? && enableRepeatCall!>
                     <button class="hidden border-b border-dashed text-black-50 text-right" name="resend" id="resend" type="submit" >Позвонить еще раз</button>
                 </#if>
                 
