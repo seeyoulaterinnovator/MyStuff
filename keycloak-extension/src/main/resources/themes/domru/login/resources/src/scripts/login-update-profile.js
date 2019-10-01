@@ -11,7 +11,7 @@ export default (function() {
   if (!formElement) return;
 
   // Маска для поля ввода телефона
-  const phoneMask = IMask(document.getElementById('user.attributes.phone'), {
+  const phoneMask = IMask(document.getElementById('phoneUP'), {
     mask: '+{7} (000) 000-00-00',
   });
 
@@ -20,11 +20,11 @@ export default (function() {
   const form = createForm({
     onSubmit: () => {},
     initialValues: {
-      'orgName': '',
+      'orgName1': '',
       // firstName: '',
       // lastName: '-',
       // email: '',
-      phone: '',
+      phoneUP: '',
     },
     validate,
     validateOnBlur: true,
