@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.social;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -53,9 +52,6 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
 
     private static final String SITE_KEY = "6LfQG68UAAAAAOowA30NhSf4_VjiuH_KeT8bN3_B";
     private static final String SITE_SECRET_VAL = "6LfQG68UAAAAAH8quIVwZ_8Cizgwi6CqjPIP5a3w";
-
-    private static final String ORG_NAME = "orgName";
-    private static final String PHONE = "phone";
 
     private final TbapiService tbapiService;
     private final UserExtension userExtension;
@@ -139,8 +135,8 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
         userCtx.setUsername(username);
         userCtx.setFirstName(formData.getFirst(UserModel.FIRST_NAME));
         userCtx.setLastName(formData.getFirst(UserModel.LAST_NAME));
-        userCtx.setAttribute(FormConstants.FIELD_PHONE, Collections.singletonList(formData.getFirst(PHONE)));
-        userCtx.setAttribute(FormConstants.FIELD_ORG_NAME, Collections.singletonList(formData.getFirst(ORG_NAME)));
+        userCtx.setAttribute(FormConstants.FIELD_PHONE, Collections.singletonList(formData.getFirst(FormConstants.FIELD_PHONE)));
+        userCtx.setAttribute(FormConstants.FIELD_ORG_NAME, Collections.singletonList(formData.getFirst(FormConstants.FIELD_ORG_NAME)));
 
         String email = formData.getFirst(FormConstants.FIELD_EMAIL);
         if (!ObjectUtil.isEqualOrBothNull(email, userCtx.getEmail())) {
@@ -161,18 +157,18 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
 
     private List<FormMessage> getValidationErrorList(AuthenticationFlowContext context, RealmModel realm, MultivaluedMap<String, String> formData) {
         List<FormMessage> errors = Validation.validateUpdateProfileForm(realm, formData);
-        if (Validation.isBlank(formData.getFirst(ORG_NAME))) {
-            errors.add(new FormMessage(ORG_NAME, "missingOrgNameMessage"));
+        if (Validation.isBlank(formData.getFirst(FormConstants.FIELD_ORG_NAME))) {
+            errors.add(new FormMessage(FormConstants.FIELD_ORG_NAME, "missingOrgNameMessage"));
         }
-        if (Validation.isBlank(formData.getFirst(PHONE))) {
-            errors.add(new FormMessage(PHONE, "missingPhoneNumberMessage"));
+        if (Validation.isBlank(formData.getFirst(FormConstants.FIELD_PHONE))) {
+            errors.add(new FormMessage(FormConstants.FIELD_PHONE, "missingPhoneNumberMessage"));
         }
 
-//        String captcha = formData.getFirst(G_RECAPTCHA_RESPONSE);
-//        if (Validation.isBlank(captcha) || !validateRecaptcha(context, captcha)) {
-//            errors.add(new FormMessage(null, Messages.RECAPTCHA_FAILED));
-//            formData.remove(G_RECAPTCHA_RESPONSE);
-//        }
+        String captcha = formData.getFirst(G_RECAPTCHA_RESPONSE);
+        if (Validation.isBlank(captcha) || !validateRecaptcha(context, captcha)) {
+            errors.add(new FormMessage(null, Messages.RECAPTCHA_FAILED));
+            formData.remove(G_RECAPTCHA_RESPONSE);
+        }
 
         return errors;
     }
@@ -211,10 +207,10 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
         User user = User.builder()
                 .name(formData.getFirst(FormConstants.FIELD_FIRST_NAME))
                 .email(formData.getFirst(FormConstants.FIELD_EMAIL))
-                .phone(formData.getFirst(PHONE))
+                .phone(formData.getFirst(FormConstants.FIELD_PHONE))
                 .build();
 
-        String orgName = formData.getFirst(ORG_NAME);
+        String orgName = formData.getFirst(FormConstants.FIELD_ORG_NAME);
 
         if (orgName == null) {
             orgName = formData.getFirst(FormConstants.FIELD_LAST_NAME);
