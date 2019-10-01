@@ -82,6 +82,10 @@ public abstract class DataMapper {
             return null;
         }
         UserModel userModel = context.getUser();
+        return toUserPostRequest(userModel);
+    }
+
+    public static UserPostRequest toUserPostRequest(UserModel userModel) {
         UserPostRequest userPostRequest = new UserPostRequest();
         userPostRequest.setUserId(userModel.getId());
         if (!userModel.getAttribute(ATTR_TOMS_NAME).isEmpty()){

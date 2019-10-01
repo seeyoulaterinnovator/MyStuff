@@ -89,6 +89,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 .build();
 
         try {
+            boolean enableRepeatCall = true;
             if (authSession.getAuthNote(NEED_SEND_EMAIL_CODE) != null) {
                 authContext = AuthContext.builder()
                         .activationCodeType(ActivationCodeType.CODE_TO_EMAIL)
@@ -96,6 +97,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                         .hashProperty(HashGenerator.getSecretHash(sendEmail(context)))
                         .counter(getCount(authSession.getAuthNote(COUNT_REPEAT)))
                         .build();
+                enableRepeatCall = false;
             } else {
                 authContext = userPhoneVerifier.sendValidationSms(user, authContext, activationCodeType);
             }
@@ -109,6 +111,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     .setAttribute("expirationSeconds", authContext.getActivationCodeType().getExpiredSeconds())
                     .setAttribute("lengthCode", authContext.getActivationCodeType().getLengthCode())
                     .setAttribute("activationCodeType", authContext.getActivationCodeType().name())
+                    .setAttribute("enableRepeatCall", enableRepeatCall)
                     .createForm(VERIFY_PHONE_FTL);
 
             context.challenge(challenge);

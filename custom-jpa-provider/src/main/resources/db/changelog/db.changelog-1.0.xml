@@ -217,7 +217,17 @@
             update SETTINGS set NAME = 'Inactive notification timeout' where EXT_ID = 'user.absence.notifications.days';
         </sql>
     </changeSet>
-    <changeSet id="17" author="strukov-av">
+    <changeSet id="17" author="tretyakov-da">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mysql" />
+        </preConditions>
+        <sql>
+            alter table ADMIN_EVENT_ENTITY change `REPRESENTATION` `REPRESENTATION` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            alter table SETTINGS change `DESC` `DESC` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            alter table SETTINGS change VALUE VALUE TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
+    <changeSet id="18" author="strukov-av">
         <addColumn tableName="SETTINGS">
             <column name="UNIT" type="varchar(8)"/>
         </addColumn>
@@ -229,5 +239,4 @@
             update SETTINGS set UNIT = 'Days' where EXT_ID = 'user.absence.notifications.days';
         </sql>
     </changeSet>
-
 </databaseChangeLog>

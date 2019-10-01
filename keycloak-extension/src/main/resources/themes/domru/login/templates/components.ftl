@@ -1,5 +1,5 @@
-<#macro field fieldName label="" placeholder="" required=false withError=true type="text" class="" extra... >
-  <div 
+<#macro field fieldName value="" label="" placeholder="" required=false withError=true type="text" class="" extra... >
+  <div
     class="field ${class}
     <#if required>field--required</#if>"
     <#list extra as attrName, attrVal>
@@ -20,6 +20,7 @@
         id="${fieldName}"
         placeholder="${placeholder}"
         type="${type}"
+        value="${value}"
       />
       <#if type == 'password'>
       <div class="field__open" target="${fieldName}">

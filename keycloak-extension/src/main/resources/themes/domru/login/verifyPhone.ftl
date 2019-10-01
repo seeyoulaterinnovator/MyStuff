@@ -45,7 +45,7 @@
                 </div>
                 <#if lengthCode==6>
                     <button class="hidden border-b border-dashed text-black-50 text-right" name="resend" id="resend" type="submit" >Отправить еще раз</button>
-                <#else>
+                <#elseif enableRepeatCall>
                     <button class="hidden border-b border-dashed text-black-50 text-right" name="resend" id="resend" type="submit" >Позвонить еще раз</button>
                 </#if>
                 

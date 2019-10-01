@@ -3,6 +3,7 @@ import App from './App.svelte';
 import './scripts/login.js';
 import './scripts/login-iframe.js';
 import './scripts/register.js';
+import './scripts/login-update-profile.js';
 import './scripts/login-reset-password.js';
 import './scripts/login-update-password.js';
 import './scripts/totp.js';

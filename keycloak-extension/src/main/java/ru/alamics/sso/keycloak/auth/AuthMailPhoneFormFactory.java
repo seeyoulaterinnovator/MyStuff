@@ -14,6 +14,7 @@ import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.UserCredentialModel;
 import org.keycloak.provider.ProviderConfigProperty;
 import ru.alamics.sso.registration.rias.RiasService;
+import ru.alamics.sso.registration.service.UserFindService;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -34,10 +35,12 @@ public class AuthMailPhoneFormFactory implements AuthenticatorFactory, DisplayTy
 
         log.info("Get RiasAuthProvider");
         RiasService riasService;
+        UserFindService userFindService;
         try {
             InitialContext context = new InitialContext();
 
             riasService = (RiasService) context.lookup("java:global/domru-sso/" + RiasService.class.getSimpleName());
+            userFindService = (UserFindService) context.lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
             log.info("Got riasService from context");
         } catch (NamingException e) {
             log.error(e.getMessage(), e);
@@ -45,7 +48,7 @@ public class AuthMailPhoneFormFactory implements AuthenticatorFactory, DisplayTy
         }
 
         log.info("Creating AuthMailPhoneForm");
-        SINGLETON = new AuthMailPhoneForm(em, riasService);
+        SINGLETON = new AuthMailPhoneForm(em, riasService, userFindService);
 
         return SINGLETON;
     }
