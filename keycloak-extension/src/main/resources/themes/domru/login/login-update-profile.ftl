@@ -8,21 +8,17 @@
     <#elseif section = "form">
 
         <form id="kc-update-profile-form" class="${properties.kcFormClass!}" action="${url.loginAction}" method="post">
-        <@components.field class="mb-4 md:w-full" fieldName="orgName1" value="${(orgName1!'')}" label="Наименование организации" placeholder="Наименование организации" required=true />
+        <@components.field class="mb-4 md:w-full" fieldName="orgNameUP" label="Наименование организации" placeholder="Наименование организации" required=true />
 
     <#-- В нашем случае firstName – это полное имя -->
-        <@components.field class="mb-4 md:w-full" fieldName="firstName"value="${(user.firstName!'')}" label="Как к вам обращаться?" placeholder="Как к вам обращаться?" required=true />
+        <@components.field class="mb-4 md:w-full" fieldName="firstNameUP"value="${(user.firstName!'')}" label="Как к вам обращаться?" placeholder="Как к вам обращаться?" required=true />
 
     <#-- Пока бэк не уберет необходимость фамилии, скрою поле и отправлю дефис -->
-        <@components.field class="mb-4 md:w-full" fieldName="lastName" value="${(user.lastName!'')}" label="Фамилия" placeholder="Фамилия" required=true style="display: none" />
+        <@components.field class="mb-4 md:w-full" fieldName="lastNameUP" value="${(user.lastNameUP!'')}" label="Фамилия" placeholder="Фамилия" required=true style="display: none" />
 
-        <@components.field class="mb-4 md:w-full" fieldName="email" value="${(user.email!'')}" label="Эл. почта" placeholder="Ваш адрес эл.почты" required=true type="email" />
+        <@components.field class="mb-4 md:w-full" fieldName="emailUP" value="${(user.email!'')}" label="Эл. почта" placeholder="Ваш адрес эл.почты" required=true type="email" />
 
-        <#if !realm.registrationEmailAsUsername>
-            <@components.field class="mb-4 md:w-full" fieldName="username" value="${(user.username!'')}" label="Имя пользователя" placeholder="Имя пользователя" required=true />
-        </#if>
-
-        <@components.field class="mb-4 md:w-full" fieldName="phoneUP" value="${(user.phoneUP!'')}" label="Ваш телефон" placeholder="+7 (XXX) XXX - XX - XX" required=true />
+        <@components.field class="mb-4 md:w-full" fieldName="phoneUP" label="Ваш телефон" placeholder="+7 (XXX) XXX - XX - XX" required=true />
 
 
             <#if recaptchaRequired??>

@@ -20,9 +20,9 @@ export default (function() {
   const form = createForm({
     onSubmit: () => {},
     initialValues: {
-      'orgName1': '',
+      orgNameUP: '',
       // firstName: '',
-      // lastName: '-',
+      lastNameUP: '-',
       // email: '',
       phoneUP: '',
     },
@@ -36,6 +36,7 @@ export default (function() {
 
     function checkExistence() {
       Object.keys(registered).forEach(name => {
+        console.log('meeew', name, value[name])
         if (name && !values[name]) errors[name] = 'Обязательное поле';
       });
     }
