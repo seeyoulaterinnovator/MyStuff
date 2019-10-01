@@ -47,8 +47,8 @@ export default (function() {
     if (!phoneMask.unmaskedValue.match(VALIDATION_RULES.phone))
       errors.phone = 'Неверный формат номера';
 
-    if (!values.email.match(VALIDATION_RULES.email))
-      errors.email = 'Неверный формат email';
+    if (!values.emailUP.match(VALIDATION_RULES.email))
+      errors.emailUP = 'Неверный формат email';
 
     checkExistence();
 
