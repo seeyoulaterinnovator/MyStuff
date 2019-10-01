@@ -9,6 +9,7 @@ import ru.alamics.sso.registration.phone.exception.ViberSendException;
 import ru.alamics.sso.registration.phone.port.ViberSendService;
 import ru.alamics.sso.util.EStand;
 import ru.alamics.sso.util.StandResolver;
+import ru.alamics.sso.util.Util;
 
 import javax.ejb.Stateless;
 import javax.ws.rs.ProcessingException;
@@ -73,14 +74,12 @@ public class ViberSendServiceImpl implements ViberSendService {
             return "0: Accepted for delivery";
         }
 
-        phone = phone.replaceAll("[^0-9]+", "");
-
         URI uri = smsConfig.getUrl();
 
         try {
             String response = client.target(uri)
                     .queryParams(getConfigForQuery())
-                    .queryParam("to", phone)
+                    .queryParam("to", Util.getCleanUserPhone(phone))
                     .queryParam("text", URLEncoder.encode(text, smsConfig.getCharset()))
                     .request()
                     .post(null, String.class);

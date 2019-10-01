@@ -37,13 +37,21 @@ public class AutoLockNotificationRepository {
         LocalDate now = LocalDate.now();
         LocalDate absence = now.minusDays(absenceDaysBlock);
         entityManager.createNativeQuery("insert into AUTO_LOCK_NOTIFICATION(id, user_id, sended_at, type, status)\n" +
-                "select uuid(), aln.USER_ID, null, 'ABSENCE_BLOCKING', 'PREPARE'\n" +
-                "from AUTO_LOCK_NOTIFICATION aln\n" +
-                "         join USER_ENTITY ue on aln.USER_ID = ue.ID\n" +
-                "where ue.ENABLED = true\n" +
-                "and aln.TYPE ='ABSENCE_NOTIFICATION' and aln.SENDED_AT <= :date\n" +
-                "and not exists(select 1 from AUTO_LOCK_NOTIFICATION aln2 where aln2.TYPE = 'ABSENCE_BLOCKING' and aln.USER_ID = aln2.USER_ID)\n" +
-                "for update")
+                "select uuid(), t.USER_ID, null, 'ABSENCE_BLOCKING', 'PREPARE'\n" +
+                "from (select aln.USER_ID, max(aln.SENDED_AT) over (PARTITION BY aln.USER_ID) date\n" +
+                "      from AUTO_LOCK_NOTIFICATION aln\n" +
+                "               join USER_ENTITY ue on aln.USER_ID = ue.ID\n" +
+                "      where ue.ENABLED = true\n" +
+                "        and aln.TYPE = 'ABSENCE_NOTIFICATION'\n" +
+                "        and aln.SENDED_AT <= :date) t\n" +
+                "where not exists(\n" +
+                "        select 1 from AUTO_LOCK_NOTIFICATION aln where aln.TYPE = 'ABSENCE_BLOCKING' and t.USER_ID = aln.USER_ID)\n" +
+                "   or t.date > (select max(aln.SENDED_AT) over (PARTITION BY aln.USER_ID)\n" +
+                "                from AUTO_LOCK_NOTIFICATION aln\n" +
+                "                where aln.USER_ID = t.USER_ID\n" +
+                "                  and aln.TYPE = 'ABSENCE_BLOCKING'\n" +
+                "                  and aln.STATUS = 'SENT')\n" +
+                "    for update")
                 .setParameter("date", absence)
                 .executeUpdate();
     }

@@ -47,7 +47,7 @@ public class SearchResource {
                 .build();
     }
 
-    private List<UserDto> getUsers(String search, String searchUser, String searchToms, String sortField, boolean sortAsc) {
+    public List<UserDto> getUsers(String search, String searchUser, String searchToms, String sortField, boolean sortAsc) {
         List<Tuple> tuples = getEM().createNativeQuery(
                 "select UE.ID         as user_id,\n" +
                         "       UE.USERNAME   as username,\n" +
@@ -55,6 +55,7 @@ public class SearchResource {
                         "       UE.LAST_NAME  as last_name,\n" +
                         "       UE.EMAIL      as email,\n" +
                         "       UA.VALUE      as phone,\n" +
+                        "       UE.ENABLED    as enabled,\n" +
                         "       UP.id         as user_post_id,\n" +
                         "       UP.TOMS_ID    as toms_id,\n" +
                         "       UP.DMP_ID     as dmp_id,\n" +
@@ -65,27 +66,25 @@ public class SearchResource {
                         "       ES.ID         as system_id,\n" +
                         "       ES.NAME       as system_name\n" +
                         "from USER_ENTITY UE\n" +
-                        "         join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID\n" +
-                        "         left outer join USER_POST UP on UE.ID = UP.USER_ID\n" +
-                        "         left outer join USER_POST_ROLE UPR on UP.ROLE_ID = UPR.ID\n" +
-                        "         left outer join USERPOST_EXT_SYSTEM_ROLE UESR on UP.ID = UESR.USER_POST_ID\n" +
-                        "         left outer join EXT_SYSTEM_ROLE ESR on UESR.EXT_SYSTEM_ROLE_ID = ESR.ID\n" +
-                        "         left outer join EXTERNAL_SYSTEM ES on ESR.SYSTEM_ID = ES.ID\n" +
+                        "         left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone'\n" +
+                        "         left join USER_POST UP on UE.ID = UP.USER_ID\n" +
+                        "         left join USER_POST_ROLE UPR on UP.ROLE_ID = UPR.ID\n" +
+                        "         left join USERPOST_EXT_SYSTEM_ROLE UESR on UP.ID = UESR.USER_POST_ID\n" +
+                        "         left join EXT_SYSTEM_ROLE ESR on UESR.EXT_SYSTEM_ROLE_ID = ESR.ID\n" +
+                        "         left join EXTERNAL_SYSTEM ES on ESR.SYSTEM_ID = ES.ID\n" +
                         "WHERE UE.REALM_ID = 'user'\n" +
-                        "  AND UA.NAME = 'phone'\n" +
                         "  AND CASE\n" +
                         "          WHEN :search is not null and :search != '' then (\n" +
-                        "                  UE.ID LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                  UE.EMAIL LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                  UE.FIRST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                  UE.LAST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                  UE.USERNAME LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                  UA.VALUE LIKE CONCAT('%', :search, '%')\n" +
+                        "                      UE.EMAIL LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                      UE.FIRST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                      UE.LAST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                      UE.USERNAME LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                      UA.VALUE LIKE CONCAT('%', :search, '%')\n" +
                         "              )\n" +
                         "          else UE.ID LIKE '%' end\n" +
                         "  AND CASE\n" +
-                        "          WHEN :searchUser is not null and :searchUser != '' then (UP.USER_ID = :searchUser)\n" +
-                        "          else UP.USER_ID LIKE '%' OR UP.USER_ID is null end\n" +
+                        "          WHEN :searchUser is not null and :searchUser != '' then (UE.ID = :searchUser)\n" +
+                        "          else UE.ID LIKE '%' OR  UE.ID is null end\n" +
                         "  AND CASE\n" +
                         "          WHEN :searchToms is not null and :searchToms != '' then (UP.TOMS_ID = :searchToms)\n" +
                         "          else UP.TOMS_ID LIKE '%' OR UP.TOMS_ID is null end\n" +
