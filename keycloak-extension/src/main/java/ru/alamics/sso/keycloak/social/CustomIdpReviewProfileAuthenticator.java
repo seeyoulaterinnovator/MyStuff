@@ -54,8 +54,8 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
     private static final String SITE_KEY = "6LfQG68UAAAAAOowA30NhSf4_VjiuH_KeT8bN3_B";
     private static final String SITE_SECRET_VAL = "6LfQG68UAAAAAH8quIVwZ_8Cizgwi6CqjPIP5a3w";
 
-    private static final String ORG_NAME = "user.attributes.orgName";
-    private static final String PHONE = "user.attributes.phone";
+    private static final String ORG_NAME = "orgName";
+    private static final String PHONE = "phone";
 
     private final TbapiService tbapiService;
     private final UserExtension userExtension;
@@ -168,11 +168,11 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
             errors.add(new FormMessage(PHONE, "missingPhoneNumberMessage"));
         }
 
-        String captcha = formData.getFirst(G_RECAPTCHA_RESPONSE);
-        if (Validation.isBlank(captcha) || !validateRecaptcha(context, captcha)) {
-            errors.add(new FormMessage(null, Messages.RECAPTCHA_FAILED));
-            formData.remove(G_RECAPTCHA_RESPONSE);
-        }
+//        String captcha = formData.getFirst(G_RECAPTCHA_RESPONSE);
+//        if (Validation.isBlank(captcha) || !validateRecaptcha(context, captcha)) {
+//            errors.add(new FormMessage(null, Messages.RECAPTCHA_FAILED));
+//            formData.remove(G_RECAPTCHA_RESPONSE);
+//        }
 
         return errors;
     }

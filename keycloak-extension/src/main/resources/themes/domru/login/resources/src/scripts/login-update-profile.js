@@ -20,10 +20,11 @@ export default (function() {
   const form = createForm({
     onSubmit: () => {},
     initialValues: {
-      'user-attributes-orgName': '',
-      firstName: '',
-      lastName: '-',
-      email: '',
+      'orgName': '',
+      // firstName: '',
+      // lastName: '-',
+      // email: '',
+      phone: '',
     },
     validate,
     validateOnBlur: true,

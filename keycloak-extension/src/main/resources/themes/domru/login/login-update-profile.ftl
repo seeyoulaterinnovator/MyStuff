@@ -8,7 +8,7 @@
     <#elseif section = "form">
 
         <form id="kc-update-profile-form" class="${properties.kcFormClass!}" action="${url.loginAction}" method="post">
-        <@components.field class="mb-4 md:w-full" fieldName="user-attributes-orgName" value="${(user.attributes.orgName!'')}" label="Наименование организации" placeholder="Наименование организации" required=true />
+        <@components.field class="mb-4 md:w-full" fieldName="orgName" value="${(user.attributes.orgName!'')}" label="Наименование организации" placeholder="Наименование организации" required=true />
 
     <#-- В нашем случае firstName – это полное имя -->
         <@components.field class="mb-4 md:w-full" fieldName="firstName"value="${(user.firstName!'')}" label="Как к вам обращаться?" placeholder="Как к вам обращаться?" required=true />
@@ -22,7 +22,7 @@
             <@components.field class="mb-4 md:w-full" fieldName="username" value="${(user.username!'')}" label="Имя пользователя" placeholder="Имя пользователя" required=true />
         </#if>
 
-        <@components.field class="mb-4 md:w-full" fieldName="user.attributes.phone" value="${(user.attributes.phone!'')}" label="Ваш телефон" placeholder="+7 (XXX) XXX - XX - XX" required=true />
+        <@components.field class="mb-4 md:w-full" fieldName="phone" value="${(user.attributes.phone!'')}" label="Ваш телефон" placeholder="+7 (XXX) XXX - XX - XX" required=true />
 
 
             <#if recaptchaRequired??>
