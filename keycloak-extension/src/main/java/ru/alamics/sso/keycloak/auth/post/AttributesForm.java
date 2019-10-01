@@ -76,8 +76,15 @@ public class AttributesForm implements Authenticator {
 
     private Response createForm(AuthenticationFlowContext context, List<UserDto> attributes) {
         LoginFormsProvider form = context.form();
-        if(attributes.size() > 0) {
-            form.setAttribute("posts", attributes);
+        if(!attributes.isEmpty()) {
+            Set<AttributesModel> models = attributes.stream()
+                    .map(attribute -> AttributesModel.builder()
+                            .roleName(attribute.getRoleName())
+                            .tomsId(attribute.getTomsId())
+                            .build()
+                    ).collect(Collectors.toSet());
+
+            form.setAttribute("posts", models);
         }
         return form.createForm(FORM);
     }
