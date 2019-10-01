@@ -23,14 +23,14 @@ public class InactiveBlockSchedule {
 
 //    @Inject
 //    @Property(value = "user.absence.blocking.days")
-    private Integer absenceDaysBlock;
+    private Long absenceTimeBlock;
 
     @Schedule(hour = "*/3", persistent = false)
     public void block () {
         final String DEBUG_STR = "block";
         log.info("start:{}", DEBUG_STR);
-        if(absenceDaysBlock > -1) {
-            autoLockNotificationRepository.findUsersToBlock(absenceDaysBlock);
+        if(absenceTimeBlock > -1) {
+            autoLockNotificationRepository.findUsersToBlock(absenceTimeBlock);
         }
         log.info("stop:{}", DEBUG_STR);
     }
@@ -38,6 +38,6 @@ public class InactiveBlockSchedule {
 
     @PostConstruct
     public void init() {
-        this.absenceDaysBlock = Integer.parseInt(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user"));
+        this.absenceTimeBlock = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user"));
     }
 }

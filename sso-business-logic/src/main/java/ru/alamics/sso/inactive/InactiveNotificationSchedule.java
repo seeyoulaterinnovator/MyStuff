@@ -21,9 +21,7 @@ import javax.annotation.PostConstruct;
 import javax.ejb.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Singleton
@@ -41,7 +39,7 @@ public class InactiveNotificationSchedule {
     @EJB
     private ApplicationProperties properties;
 
-    private Integer absenceDaysBlock;
+    private Long absenceTimeBlock;
     private String host;
 
     @Schedule(hour = "*/2", persistent = false)
@@ -92,7 +90,7 @@ public class InactiveNotificationSchedule {
         final String subject = "Предупреждение о блокирование аккаунта";
         final String template = "block-prepare-notification.ftl";
         Map<String, Object> body = new HashMap<>();
-        body.put("absence", absenceDaysBlock);
+        body.put("absence", absenceTimeBlock);
 
         return EmailModel.builder()
                 .bodyAttributes(body)
@@ -117,7 +115,7 @@ public class InactiveNotificationSchedule {
 
     @PostConstruct
     public void init() {
-        this.absenceDaysBlock = Integer.parseInt(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user"));
+        this.absenceTimeBlock = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user"));
         this.host = properties.getProperty("application.host");
     }
 }

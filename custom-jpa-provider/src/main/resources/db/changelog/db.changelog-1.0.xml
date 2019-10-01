@@ -232,11 +232,11 @@
             <column name="UNIT" type="varchar(8)"/>
         </addColumn>
         <sql>
-            update SETTINGS set UNIT = 'Minutes' where EXT_ID = 'user.expire.sms-viber.code';
-            update SETTINGS set UNIT = 'Seconds' where EXT_ID = 'user.expire.incoming.call.code';
-            update SETTINGS set UNIT = 'Minutes' where EXT_ID = 'user.expire.incoming.call.email.code';
-            update SETTINGS set UNIT = 'Days' where EXT_ID = 'user.absence.blocking.days';
-            update SETTINGS set UNIT = 'Days' where EXT_ID = 'user.absence.notifications.days';
+            update SETTINGS set UNIT = 'MINUTES' where EXT_ID = 'user.expire.sms-viber.code';
+            update SETTINGS set UNIT = 'SECONDS' where EXT_ID = 'user.expire.incoming.call.code';
+            update SETTINGS set UNIT = 'MINUTES' where EXT_ID = 'user.expire.incoming.call.email.code';
+            update SETTINGS set UNIT = 'DAYS' where EXT_ID = 'user.absence.blocking.days';
+            update SETTINGS set UNIT = 'DAYS' where EXT_ID = 'user.absence.notifications.days';
         </sql>
     </changeSet>
 </databaseChangeLog>

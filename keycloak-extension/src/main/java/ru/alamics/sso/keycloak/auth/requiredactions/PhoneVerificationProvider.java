@@ -56,8 +56,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
         }
-        activationCodeType.setExpiredSeconds(Integer.parseInt(applicationProperties.getProperty(getPropertyConstants(activationCodeType), "user")));
-        ActivationCodeType.CODE_TO_EMAIL.setExpiredSeconds(Integer.parseInt(applicationProperties.getProperty(PropertyConstants.EXPIRE_INCOMING_CALL_EMAIL_CODE, "user")));
+        activationCodeType.setExpiredSeconds(Long.parseLong(applicationProperties.getProperty(getPropertyConstants(activationCodeType), "user")));
+        ActivationCodeType.CODE_TO_EMAIL.setExpiredSeconds(Long.parseLong(applicationProperties.getProperty(PropertyConstants.EXPIRE_INCOMING_CALL_EMAIL_CODE, "user")));
     }
 
     private PropertyConstants getPropertyConstants(ActivationCodeType activationCodeType){
