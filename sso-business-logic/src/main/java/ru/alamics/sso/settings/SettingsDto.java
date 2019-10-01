@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.concurrent.TimeUnit;
 
 @Data
 @Builder
@@ -21,4 +22,5 @@ public class SettingsDto implements Serializable {
     private String value;
     private String desc;
     private String realmId;
+    private TimeUnit unit;
 }

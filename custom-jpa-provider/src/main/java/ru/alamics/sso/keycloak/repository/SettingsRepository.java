@@ -60,6 +60,10 @@ public class SettingsRepository {
                         .setParameter("val", settings.getValue())
                         .setParameter("settingId", settings.getId())
                         .executeUpdate();
+                em.createQuery("update Settings s set s.unit =:unit where s.id=:settingId")
+                        .setParameter("unit", settings.getUnit())
+                        .setParameter("settingId", settings.getId())
+                        .executeUpdate();
             }
 
             em.flush();

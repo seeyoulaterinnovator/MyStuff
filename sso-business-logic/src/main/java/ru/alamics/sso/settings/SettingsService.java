@@ -38,6 +38,7 @@ public class SettingsService {
                 .value(settings.getValue())
                 .extId(settings.getExtId())
                 .realmId(settings.getRealmId())
+                .unit(settings.getUnit())
                 .build();
 
         return toDto(repository.save(settingsToSave));
@@ -51,6 +52,7 @@ public class SettingsService {
                 .name(settings.getName())
                 .value(settings.getValue())
                 .realmId(settings.getRealmId())
+                .unit(settings.getUnit())
                 .build();
     }
 }

@@ -7,6 +7,7 @@
             <tr>
                 <th>Name</th>
                 <th>Value</th>
+                <th>Unit</th>
                 <th>Description</th>
                 <th colspan="2">{{:: 'actions' | translate}}</th>
             </tr>
@@ -16,6 +17,14 @@
                     <td class="clip">{{setting.name}}</td>
                     <td class="clip">
                         <input class="form-control" type="text" ng-model="setting.value" name="setting-value"/>
+                    </td>
+                    <td class="clip">
+                        <select class="form-control" name="TimeoutUnit" data-ng-model="setting.unit">
+                            <option value="SECONDS">{{:: 'seconds' | translate}}</option>
+                            <option value="MINUTES">{{:: 'minutes' | translate}}</option>
+                            <option value="HOURS">{{:: 'hours' | translate}}</option>
+                            <option value="DAYS">{{:: 'days' | translate}}</option>
+                        </select>
                     </td>
                     <td class="clip">{{setting.desc}}</td>
                     <td class="kc-action-cell" data-ng-click="updateSetting(setting)">{{:: 'save' | translate}}</td>

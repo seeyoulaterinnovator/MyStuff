@@ -5,11 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
+import java.util.concurrent.TimeUnit;
 
 @Entity
 @Data
@@ -37,4 +35,8 @@ public class Settings implements Serializable {
 
     @Column(name = "realm_id")
     private String realmId;
+
+    @Column(name = "unit")
+    @Enumerated(EnumType.STRING)
+    private TimeUnit unit;
 }

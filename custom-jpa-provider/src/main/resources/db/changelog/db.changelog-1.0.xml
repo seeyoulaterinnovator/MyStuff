@@ -217,5 +217,17 @@
             update SETTINGS set NAME = 'Inactive notification timeout' where EXT_ID = 'user.absence.notifications.days';
         </sql>
     </changeSet>
+    <changeSet id="17" author="strukov-av">
+        <addColumn tableName="SETTINGS">
+            <column name="UNIT" type="varchar(8)"/>
+        </addColumn>
+        <sql>
+            update SETTINGS set UNIT = 'Minutes' where EXT_ID = 'user.expire.sms-viber.code';
+            update SETTINGS set UNIT = 'Seconds' where EXT_ID = 'user.expire.incoming.call.code';
+            update SETTINGS set UNIT = 'Minutes' where EXT_ID = 'user.expire.incoming.call.email.code';
+            update SETTINGS set UNIT = 'Days' where EXT_ID = 'user.absence.blocking.days';
+            update SETTINGS set UNIT = 'Days' where EXT_ID = 'user.absence.notifications.days';
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>
