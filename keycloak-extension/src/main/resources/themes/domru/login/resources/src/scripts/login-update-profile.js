@@ -7,33 +7,6 @@ import { isEmpty } from './helpers';
 import VALIDATION_RULES from '../constants/validationRules.js';
 
 export default (function() {
-  const setVisiblePass = field => e => {
-    const active = field.classList.contains('active');
-    const open = field.querySelector('.open');
-    const close = field.querySelector('.close');
-
-    const inputId = field.getAttribute('target');
-    const input = document.getElementById(inputId);
-
-    if (active) {
-      field.classList.remove('active');
-      open.classList.add('hidden');
-      close.classList.remove('hidden');
-      input.setAttribute('type', 'password');
-    } else {
-      field.classList.add('active');
-      open.classList.remove('hidden');
-      close.classList.add('hidden');
-      input.setAttribute('type', 'input');
-    }
-  };
-
-  document
-    .querySelectorAll('.field__open')
-    .forEach(eye => eye.addEventListener('click', setVisiblePass(eye), false));
-
-  // @todo
-
   const formElement = document.getElementById('kc-update-profile-form');
   if (!formElement) return;
 
