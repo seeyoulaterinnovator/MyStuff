@@ -4,3 +4,5 @@ ru.alamics.sso.keycloak.search.rest.SearchRealmResourceProviderFactory
 ru.alamics.sso.keycloak.user.resource.post.UserPostRealmResourceProviderFactory
 ru.alamics.sso.keycloak.user.resource.attributes.AttributesProviderFactory
 ru.alamics.sso.keycloak.auth.link.rest.AuthLinkRealmResourceProviderFactory
+ru.alamics.sso.keycloak.settings.SettingsProviderFactory
+ru.alamics.sso.keycloak.user.resource.manage.UserManageProviderFactory

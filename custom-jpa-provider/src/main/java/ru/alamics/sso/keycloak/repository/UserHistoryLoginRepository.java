@@ -7,6 +7,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Slf4j
@@ -16,23 +17,29 @@ public class UserHistoryLoginRepository {
     @PersistenceContext
     private EntityManager em;
 
-    public void findInactiveUsers (final long absenceDays) {
+    public void findInactiveUsers (final long absenceTime) {
         final String DEBUG_STR = "findInactiveUsers";
         log.debug("{}:", DEBUG_STR);
-        LocalDate now = LocalDate.now();
-        LocalDate absence = now.minusDays(absenceDays);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime absence = now.minusSeconds(absenceTime);
 
         em.createNativeQuery("insert into AUTO_LOCK_NOTIFICATION(id, user_id, sended_at, type, status)\n" +
                 "select uuid(), ll.USER_ID, null, 'ABSENCE_NOTIFICATION', 'PREPARE'\n" +
-                "from (select ul.*, max(ul.LOGINED_AT) over (PARTITION BY ul.USER_ID) date\n" +
-                "      from USER_LOGIN_HISTORY ul\n" +
-                "      where NOT exists(select 1\n" +
+                "from (select *\n" +
+                "      from (select ul.*, max(ul.LOGINED_AT) over (PARTITION BY ul.USER_ID) date\n" +
+                "            from USER_LOGIN_HISTORY ul\n" +
+                "            group by ul.USER_ID\n" +
+                "           ) ll\n" +
+                "      where not exists(select 1\n" +
                 "                       from AUTO_LOCK_NOTIFICATION aln\n" +
-                "                       where aln.USER_ID = ul.USER_ID\n" +
+                "                       where aln.USER_ID = ll.USER_ID\n" +
                 "                         and aln.TYPE = 'ABSENCE_NOTIFICATION')\n" +
-                "\n" +
-                "      group by ul.USER_ID\n" +
-                "      FOR UPDATE) ll\n" +
+                "         or ll.date > (select max(aln.SENDED_AT) over (PARTITION BY aln.USER_ID)\n" +
+                "                       from AUTO_LOCK_NOTIFICATION aln\n" +
+                "                       where aln.USER_ID = ll.USER_ID\n" +
+                "                         and aln.TYPE = 'ABSENCE_NOTIFICATION'\n" +
+                "                         and aln.STATUS = 'SENT')\n" +
+                "          FOR UPDATE) ll\n" +
                 "         join USER_ENTITY user on user.ID = ll.USER_ID\n" +
                 "where ll.date <= :date\n" +
                 "  and user.ENABLED = true")

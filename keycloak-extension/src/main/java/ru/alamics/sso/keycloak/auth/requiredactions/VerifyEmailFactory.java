@@ -89,6 +89,6 @@ public class VerifyEmailFactory extends VerifyEmail {
             event.error(Errors.EMAIL_SEND_FAILED);
         }
 
-        return forms.createResponse(UserModel.RequiredAction.VERIFY_EMAIL);
+        return forms.setAttribute("mail", user.getEmail()).createResponse(UserModel.RequiredAction.VERIFY_EMAIL);
     }
 }

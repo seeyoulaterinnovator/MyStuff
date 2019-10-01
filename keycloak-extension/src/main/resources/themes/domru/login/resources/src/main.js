@@ -3,6 +3,7 @@ import App from './App.svelte';
 import './scripts/login.js';
 import './scripts/login-iframe.js';
 import './scripts/register.js';
+import './scripts/login-update-profile.js';
 import './scripts/login-reset-password.js';
 import './scripts/login-update-password.js';
 import './scripts/totp.js';
@@ -13,6 +14,7 @@ import './css/fonts.css';
 import './css/typography.css';
 import './css/animation.css';
 import './css/custom.css';
+import './css/sth-went-wrong.css';
 
 import './css/components/button.css';
 import './css/components/field.css';
@@ -22,6 +24,7 @@ import './css/components/reference.css';
 import './css/components/email-sent.css';
 import './css/components/cities.css';
 import './css/components/confirmation.css';
+import './css/components/customers.css';
 
 const app = new App({
   target: document.body,

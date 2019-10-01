@@ -21,6 +21,7 @@ import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.model.UserConstants;
+import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.registration.tbapi.TbapiService;
 import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
@@ -47,13 +48,15 @@ public class UserService {
     private TbapiService tbapiService;
     private UserPostService userPostService;
     private TbapiConnectConfig tbapiConnectConfig;
+    private UserFindService userFindService;
 
-    public UserService(KeycloakSession session, AdminAuth auth) {
+    public UserService(KeycloakSession session, AdminAuth auth, UserFindService userFindService) {
         this.auth = auth;
         this.session = session;
+        this.userFindService = userFindService;
         realm = session.getContext().getRealm();
         tbapiService = new TbapiService(new TbapiServiceRestImpl());
-        createTbapiConnectConfig();
+        this.tbapiConnectConfig = TbapiConnectConfig.getStaticConfig();
 
         try {
             this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
@@ -78,10 +81,26 @@ public class UserService {
         if (userDto == null || userDto.isEmpty()) {
             return null;
         }
+        if (userRequest.getUserIds() != null && userRequest.getUserIds().length != 0) {
+            userDto = searchUsersById(userDto, userRequest.getUserIds());
+        }
         userDto = DataMapper.toGroupUserDtos(userDto);
         file.addRow(getUserParameterNames(userRequest.getUserParameters()));
         userDto.stream().forEach(o -> file.addRow(getUserParameters(o, userRequest.getUserParameters())));
         return file.save();
+    }
+
+    private List<UserDto> searchUsersById(List<UserDto> userDtos, String[] userIds) {
+        List<UserDto> result = new LinkedList<>();
+        userDtos.stream()
+                .forEach(o -> {
+                    for (String userId : userIds) {
+                        if (o.getId().equals(userId)) {
+                            result.add(o);
+                        }
+                    }
+                });
+        return result;
     }
 
     private List<String> getUserParameterNames(UserParameter[] userParameters) {
@@ -279,18 +298,11 @@ public class UserService {
     }
 
     private void checkOnExistUser(UserRequest request, RealmModel realm) throws FoundException {
-        List<UserEntity> users = getEM().createQuery("select u from UserAttributeEntity atr join atr.user u " +
-                "where atr.name = :ph_attr_name and " +
-                " atr.value like '%' || :phone || '%' and" + // TODO =
-                " u.realmId = :realId ", UserEntity.class)
-                .setParameter("ph_attr_name", ATTR_PHONE_NAME)
-                .setParameter("phone", request.getPhone())
-                .setParameter("realId", realm.getId())
-                .getResultList();
+        UserEntity user = userFindService.getUserByPhone(request.getPhone());
 
-        if (users != null && !users.isEmpty()) {
+        if (user != null ) {
             log.error("User exists with same phone {}", request.getPhone());
-            throw new FoundException("User exists with same phone").addResult("userId", users.get(0).getId());
+            throw new FoundException("User exists with same phone").addResult("userId", user.getId());
         }
 
         // Double-check duplicated username and email here due to federation
@@ -339,17 +351,5 @@ public class UserService {
                         userPostService.getExternalSystemRoleId(sysName)));
             }
         }
-    }
-
-    private void createTbapiConnectConfig() {
-        TbapiConnectConfig connectConfig = new TbapiConnectConfig();
-
-        connectConfig.setHost("tb-app01.int.bss.loc");
-        connectConfig.setPort(26300);
-        connectConfig.setAppname("SSP");
-        connectConfig.setUsername("anonymous");
-        connectConfig.setPath("/api/v1/customerManagement/customerAccount");
-        connectConfig.setSecure(false);
-        this.tbapiConnectConfig = connectConfig;
     }
 }

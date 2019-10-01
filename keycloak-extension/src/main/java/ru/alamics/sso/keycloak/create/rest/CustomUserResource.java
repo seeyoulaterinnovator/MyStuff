@@ -23,6 +23,7 @@ import ru.alamics.sso.keycloak.create.model.UserParameter;
 import ru.alamics.sso.keycloak.create.model.UserRequest;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundException;
+import ru.alamics.sso.registration.service.UserFindService;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.validation.Valid;
@@ -41,10 +42,10 @@ public class CustomUserResource {
     protected KeycloakSession session;
     private UserService userService;
 
-    public CustomUserResource(KeycloakSession session) {
+    public CustomUserResource(KeycloakSession session, UserFindService userFindService) {
         this.session = session;
         AdminAuth auth = authenticateRealmAdminRequest(session.getContext().getRealm());
-        this.userService = new UserService(session, auth);
+        this.userService = new UserService(session, auth, userFindService);
     }
 
     @POST
@@ -142,10 +143,9 @@ public class CustomUserResource {
         }
     }
 
-    @GET
+    @POST
     @Path("/downloadUsers")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.MULTIPART_FORM_DATA)
     @NoCache
     public Response downloadUsers(@NotNull @Valid DownloadUserRequest downloadUserRequest) {
         try {
@@ -160,6 +160,11 @@ public class CustomUserResource {
             }
             Response.ResponseBuilder response = Response.ok((Object) bytes);
             response.header("Content-Disposition", "attachment; filename=\"users_info." + downloadUserRequest.getType() + "\"");
+            if(downloadUserRequest.getType().equals("xlsx")) {
+                response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
+            } else {
+                response.header("Content-Type", MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8");
+            }
             log.info("Download users success!", "filename = users_info." + downloadUserRequest.getType());
             return response.build();
         } catch (UnsupportedDataTypeException e) {
