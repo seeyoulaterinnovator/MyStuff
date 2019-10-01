@@ -66,12 +66,12 @@
                         <label for="import-file-csv" class="btn btn-default ng-binding">Import CSV<i
                                 class="pficon pficon-import"></i></label>
                         <input id="import-file-csv" type="file" class="hidden"
-                               kc-on-read-file="importFileCSV($fileContent)">
+                               onchange="angular.element(this).scope().importFileCSV(this.files)">
 
                         <label for="import-file-xlsx" class="btn btn-default ng-binding">Import Xlsx<i
                                 class="pficon pficon-import"></i></label>
                         <input id="import-file-xlsx" type="file" class="hidden"
-                               kc-on-read-file="importFileExcel($fileContent)">
+                               onchange="angular.element(this).scope().importFileExcel(this.files)">
 
                         <button data-ng-click="exportCSV()" class="btn btn-default">Export CSV</button>
                         <button data-ng-click="exportXlsx()" class="btn btn-default">Export Excel</button>

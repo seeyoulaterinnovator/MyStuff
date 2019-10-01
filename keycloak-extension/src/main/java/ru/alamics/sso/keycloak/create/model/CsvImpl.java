@@ -3,9 +3,16 @@ package ru.alamics.sso.keycloak.create.model;
 import com.opencsv.*;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class CsvImpl implements FileModel {
+
+    public static final String UTF8_BOM = "\uFEFF";
 
     private List<String[]> rows;
     private CSVReader csvReader;
@@ -14,13 +21,18 @@ public class CsvImpl implements FileModel {
 
     public CsvImpl(InputStream inputStream) throws IOException {
         CSVParser parser = new CSVParserBuilder().withSeparator(';').withIgnoreLeadingWhiteSpace(true).build();
-        csvReader = new CSVReaderBuilder(new InputStreamReader(inputStream, "UTF-8")).withCSVParser(parser).build();
-        rows = csvReader.readAll();
+        csvReader = new CSVReaderBuilder(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).withCSVParser(parser).build();
+        this.rows = csvReader.readAll();
+
+        Optional.ofNullable(this.rows).orElseGet(Collections::emptyList)
+                .forEach(row -> IntStream.range(0, row.length)
+                        .forEach(index -> row[index] = removeUTF8BOM(row[index]))
+                );
     }
 
-    public CsvImpl() throws UnsupportedEncodingException {
+    public CsvImpl() {
         byteArrayOutputStream = new ByteArrayOutputStream();
-        csvWriter = new CSVWriter(new OutputStreamWriter(byteArrayOutputStream, "UTF-8"),';',
+        csvWriter = new CSVWriter(new OutputStreamWriter(byteArrayOutputStream, StandardCharsets.UTF_8),';',
                 CSVWriter.NO_QUOTE_CHARACTER,
                 CSVWriter.DEFAULT_ESCAPE_CHARACTER,
                 CSVWriter.DEFAULT_LINE_END);
@@ -53,5 +65,13 @@ public class CsvImpl implements FileModel {
     @Override
     public int getCountRows() {
         return rows.size();
+    }
+
+
+    private static String removeUTF8BOM(String s) {
+        if (s.startsWith(UTF8_BOM)) {
+            s = s.substring(1);
+        }
+        return s;
     }
 }
