@@ -50,8 +50,8 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
         log.info("Mocked TBAPI sending");
 
         Map<String, Object> result = new HashMap<>();
-        result.put(ATTR_TOMS_NAME, SmsCodeGenerator.getCode(10));
-        result.put(ATTR_DMP_NAME, SmsCodeGenerator.getCode(8));
+        result.put("id", SmsCodeGenerator.getCode(10));
+        result.put("dmpCustomerId", SmsCodeGenerator.getCode(8));
 
         return result;
     }
