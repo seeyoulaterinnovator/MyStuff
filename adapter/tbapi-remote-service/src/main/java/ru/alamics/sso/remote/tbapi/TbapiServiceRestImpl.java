@@ -38,7 +38,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
     public Map<String, Object> createCustomer(TbapiRequest request, TbapiConnectConfig connectConfig) throws TbapiRegisterException
     {
         // TODO ? StandResolver.isMock()
-        if (true) {
+        if (true && !"localhost".equalsIgnoreCase(connectConfig.getHost())) {
             return createCustomerMOCK(request);
         } else {
             return createCustomerBattle(request, connectConfig);
