@@ -18,6 +18,7 @@ import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.messages.Messages;
+import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.registration.rias.RiasService;
 import ru.alamics.sso.registration.rias.model.RiasLogin;
@@ -28,7 +29,6 @@ import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import java.net.URI;
 
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 
@@ -121,20 +121,24 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
         String username = formData.getFirst(FormConstants.FIELD_USERNAME);
         String password = formData.getFirst(FormConstants.FIELD_PASSWORD);
 
+
         RiasLogin riasLogin = riasService.loginUser(username, password);
         if (riasLogin != null) {
 
             if (riasLogin.getAccess_token() != null) {
 
-                String location = "https://lkb2b.domru.ru/login";
+                var uriLoc = UriBuilder.fromPath("https://lkb2b.domru.ru/login");
+                var city = formData.getFirst(FormConstants.FIELD_CITY);
 
-                URI uriLoc = UriBuilder.fromPath(location).build();
+                if (!Validation.isBlank(city)) {
+                    uriLoc.queryParam("citydomain", city);
+                }
 
-                Response response = Response.seeOther(uriLoc)
+                Response response = Response.seeOther(uriLoc.build())
                         .header("btoken", riasLogin.getAccess_token())
                         .build();
 
-                log.debug("Redirecting to {}", location);
+                log.debug("Redirecting to {}", uriLoc.build());
                 context.forceChallenge(response);
 
                 return true;
