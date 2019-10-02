@@ -25,7 +25,7 @@ public class InactiveBlockSchedule {
     public void block () {
         final String DEBUG_STR = "block";
         log.info("start:{}", DEBUG_STR);
-        Long absenceTimeBlock = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user"));
+        long absenceTimeBlock = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user"));
         if(absenceTimeBlock > -1) {
             autoLockNotificationRepository.findUsersToBlock(absenceTimeBlock);
         }
