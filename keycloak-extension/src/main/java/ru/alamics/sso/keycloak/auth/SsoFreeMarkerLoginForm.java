@@ -1,20 +1,33 @@
 package ru.alamics.sso.keycloak.auth;
 
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.events.Errors;
+import org.keycloak.forms.login.LoginFormsPages;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.forms.login.freemarker.FreeMarkerLoginFormsProvider;
+import org.keycloak.forms.login.freemarker.Templates;
 import org.keycloak.models.AuthenticatorConfigModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RequiredActionProviderModel;
+import org.keycloak.services.ErrorPage;
+import org.keycloak.services.messages.Messages;
+import org.keycloak.theme.BrowserSecurityHeaderSetup;
+import org.keycloak.theme.FreeMarkerException;
 import org.keycloak.theme.FreeMarkerUtil;
 import org.keycloak.theme.Theme;
+import org.keycloak.utils.MediaType;
 import ru.alamics.sso.keycloak.auth.model.AuthType;
 
+import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpResponse;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -59,6 +72,42 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         createCommonAttributes(theme, locale, messagesBundle, uriBuilder, null);
 
         return processTemplate(theme, form, locale);
+    }
+
+    @Override
+    protected Response processTemplate(Theme theme, String templateName, Locale locale) {
+        try {
+            String result = freeMarker.processTemplate(attributes, templateName, theme);
+            javax.ws.rs.core.MediaType mediaType = contentType == null ? MediaType.TEXT_HTML_UTF_8_TYPE : contentType;
+            Response.ResponseBuilder builder = Response.status(status == null ? Response.Status.OK : status).type(mediaType).language(locale).entity(result);
+            BrowserSecurityHeaderSetup.headers(builder, realm);
+            for (Map.Entry<String, String> entry : httpResponseHeaders.entrySet()) {
+                builder.header(entry.getKey(), entry.getValue());
+            }
+            return builder.build();
+        } catch (FreeMarkerException e) {
+            log.error("Failed to process template", e);
+            /*String content = "";
+            try {
+                BufferedReader in = new BufferedReader(new FileReader("C:\\work\\domru-sso\\keycloak-extension\\src\\main\\resources\\themes\\domru\\login\\templates\\sth-went-wrong.html"));
+                String str;
+                while ((str = in.readLine()) != null) {
+                    content +=str;
+                }
+                in.close();
+            } catch (IOException ee) {
+            }
+            javax.ws.rs.core.MediaType mediaType = contentType == null ? MediaType.TEXT_HTML_UTF_8_TYPE : contentType;
+            Response.ResponseBuilder builder = Response.status(status == null ? Response.Status.OK : status).type(mediaType).language(locale).entity(content);
+            BrowserSecurityHeaderSetup.headers(builder, realm);
+            for (Map.Entry<String, String> entry : httpResponseHeaders.entrySet()) {
+                builder.header(entry.getKey(), entry.getValue());
+            }
+            return builder.build();*/
+            //event.error(Errors.INVALID_USER_CREDENTIALS);
+            return ErrorPage.error(session, authenticationSession, Response.Status.INTERNAL_SERVER_ERROR, Messages.INTERNAL_SERVER_ERROR);
+            //throw new RuntimeException("MyError");
+        }
     }
 
     private URI addQueryParams(URI src) {
