@@ -1,8 +1,10 @@
 package ru.alamics.sso.keycloak.auth;
 
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.forms.login.LoginFormsPages;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.forms.login.freemarker.FreeMarkerLoginFormsProvider;
+import org.keycloak.forms.login.freemarker.Templates;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RequiredActionProviderModel;
 import org.keycloak.services.ErrorPage;
@@ -78,6 +80,9 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             return builder.build();
         } catch (FreeMarkerException e) {
             log.error("Failed to process template", e);
+            if (templateName.equals(Templates.getTemplate(LoginFormsPages.ERROR))){
+                return Response.serverError().build();
+            }
             return ErrorPage.error(session, authenticationSession, Response.Status.INTERNAL_SERVER_ERROR, "500");
         }
     }
