@@ -3,8 +3,8 @@
     <#if section = "header">
     <#elseif section = "form">
         <#assign email=realm.displayName>
-        <#if user?? && user.email??>
-            <#assign email= user.email>
+        <#if brokerContext?? && brokerContext.email??>
+            <#assign email= brokerContext.email>
         </#if>
 
       <p id="instruction1" class="instruction">
