@@ -146,8 +146,10 @@ public class UserService {
         return parameters;
     }
 
-    public ImportResponse importUsers(InputStream inputStream, String type) throws IOException, FileServiceException {
+    public ImportResponse importUsers(InputStream inputStream, String type, RealmModel realm) throws IOException, FileServiceException {
         log.info("Start upload users");
+        this.realm = realm;
+
         FileModel file = FileFactory.createFileModel(inputStream, type);
         if (file == null) {
             throw new UnsupportedDataTypeException("Unsupported file format!");
@@ -319,10 +321,6 @@ public class UserService {
                 throw new FoundException("User exists with same email").addResult("userId", userModel.getId());
             }
         }
-    }
-
-    private EntityManager getEM() {
-        return session.getProvider(JpaConnectionProvider.class).getEntityManager();
     }
 
     private void createAdminEvent(OperationType operationType, UserModel user) {

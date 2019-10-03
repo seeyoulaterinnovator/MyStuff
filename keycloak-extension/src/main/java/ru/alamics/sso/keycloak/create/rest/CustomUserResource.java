@@ -121,15 +121,16 @@ public class CustomUserResource {
     @Path("/uploadUsers")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @NoCache
-    public Response uploadUsers(@MultipartForm FileDto file, @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content) {
+    public Response uploadUsers(@MultipartForm FileDto file, @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content,
+                                @HeaderParam("realm") String realm) {
 
-        if (file == null) {
+        if (file == null || realm == null || realm.isBlank() || session.realms().getRealmByName(realm) == null) {
             return JsonResponse.error(Response.Status.BAD_REQUEST).build();
         }
         try(InputStream bas = new ByteArrayInputStream(file.getFileData()) ) {
             return JsonResponse.success()
                     .addResult("import-report",
-                            userService.importUsers(bas, getFileExtension(content)))
+                            userService.importUsers(bas, getFileExtension(content), session.realms().getRealmByName(realm)))
                     .build();
         } catch (UnsupportedDataTypeException | FileServiceException e) {
             log.error("Could not upload users", e);
