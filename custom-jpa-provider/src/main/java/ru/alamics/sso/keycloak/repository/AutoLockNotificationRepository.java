@@ -31,11 +31,11 @@ public class AutoLockNotificationRepository {
         entityManager.flush();
     }
 
-    public void findUsersToBlock(final int absenceDaysBlock) {
+    public void findUsersToBlock(final long absenceTimeBlock) {
         final String DEBUG_STR = "findNonBlockingUsers";
-        log.debug("{}: absenceDaysBlock={}", DEBUG_STR, absenceDaysBlock);
-        LocalDate now = LocalDate.now();
-        LocalDate absence = now.minusDays(absenceDaysBlock);
+        log.debug("{}: absenceDaysBlock={}", DEBUG_STR, absenceTimeBlock);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime absence = now.minusSeconds(absenceTimeBlock);
         entityManager.createNativeQuery("insert into AUTO_LOCK_NOTIFICATION(id, user_id, sended_at, type, status)\n" +
                 "select uuid(), t.USER_ID, null, 'ABSENCE_BLOCKING', 'PREPARE'\n" +
                 "from (select aln.USER_ID, max(aln.SENDED_AT) over (PARTITION BY aln.USER_ID) date\n" +

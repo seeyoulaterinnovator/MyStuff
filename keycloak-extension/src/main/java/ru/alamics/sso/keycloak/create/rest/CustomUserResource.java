@@ -3,6 +3,7 @@ package ru.alamics.sso.keycloak.create.rest;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
+import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.keycloak.jose.jws.JWSInput;
@@ -33,6 +34,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -117,18 +119,17 @@ public class CustomUserResource {
 
     @POST
     @Path("/uploadUsers")
-    @Consumes("multipart/form-data")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
     @NoCache
-    public Response uploadUsers(MultipartFormDataInput file) {
-        List<InputPart> inputParts = file.getFormDataMap().get("file");
-        if (inputParts == null || inputParts.isEmpty()) {
+    public Response uploadUsers(@MultipartForm FileDto file, @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content) {
+
+        if (file == null) {
             return JsonResponse.error(Response.Status.BAD_REQUEST).build();
         }
-        try {
+        try(InputStream bas = new ByteArrayInputStream(file.getFileData()) ) {
             return JsonResponse.success()
                     .addResult("import-report",
-                            userService.importUsers(inputParts.get(0).getBody(InputStream.class, null),
-                                    getFileExtension(inputParts.get(0).getHeaders())))
+                            userService.importUsers(bas, getFileExtension(content)))
                     .build();
         } catch (UnsupportedDataTypeException | FileServiceException e) {
             log.error("Could not upload users", e);
@@ -143,10 +144,9 @@ public class CustomUserResource {
         }
     }
 
-    @GET
+    @POST
     @Path("/downloadUsers")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.MULTIPART_FORM_DATA)
     @NoCache
     public Response downloadUsers(@NotNull @Valid DownloadUserRequest downloadUserRequest) {
         try {
@@ -161,6 +161,11 @@ public class CustomUserResource {
             }
             Response.ResponseBuilder response = Response.ok((Object) bytes);
             response.header("Content-Disposition", "attachment; filename=\"users_info." + downloadUserRequest.getType() + "\"");
+            if(downloadUserRequest.getType().equals("xlsx")) {
+                response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
+            } else {
+                response.header("Content-Type", MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8");
+            }
             log.info("Download users success!", "filename = users_info." + downloadUserRequest.getType());
             return response.build();
         } catch (UnsupportedDataTypeException e) {
@@ -220,8 +225,8 @@ public class CustomUserResource {
         return auth;
     }
 
-    private String getFileExtension(MultivaluedMap<String, String> header) {
-        String[] contentDisposition = header.getFirst("Content-Disposition").split(";");
+    private String getFileExtension(String content) {
+        String[] contentDisposition = content.split(";");
         for (String filename : contentDisposition) {
             if ((filename.trim().startsWith("filename"))) {
 

@@ -7,6 +7,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Slf4j
@@ -16,11 +17,11 @@ public class UserHistoryLoginRepository {
     @PersistenceContext
     private EntityManager em;
 
-    public void findInactiveUsers (final long absenceDays) {
+    public void findInactiveUsers (final long absenceTime) {
         final String DEBUG_STR = "findInactiveUsers";
         log.debug("{}:", DEBUG_STR);
-        LocalDate now = LocalDate.now();
-        LocalDate absence = now.minusDays(absenceDays);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime absence = now.minusSeconds(absenceTime);
 
         em.createNativeQuery("insert into AUTO_LOCK_NOTIFICATION(id, user_id, sended_at, type, status)\n" +
                 "select uuid(), ll.USER_ID, null, 'ABSENCE_NOTIFICATION', 'PREPARE'\n" +

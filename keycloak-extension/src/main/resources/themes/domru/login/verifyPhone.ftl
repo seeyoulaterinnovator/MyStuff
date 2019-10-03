@@ -11,7 +11,8 @@
         </#if>
     <#elseif section = "form">
         <#if userPhone??>
-            <p class="pb-6">${userPhone}</p>
+            <p class="pb-6">${userPhone?replace('([0-9]{1})([0-9]{3})([0-9]{3})([0-9]{2})([0-9]{2})',
+                '+$1 ($2) $3-$4-$5', 'ri')}</p>
         </#if>
         <form id="totpe" action="${url.loginAction}" method="POST">
          </form>
@@ -23,11 +24,11 @@
                     <input placeholder="-" maxlength="1" id="smscode-${x}" name="smscode-${x}" class="text-center align-middle text-3xl w-10 h-10 sm:w-16 sm:h-16 border rounded-lg focus:border-extra outline-none" autocomplete="off" />
                 </#list>
             </div>
-            <input id="codeNumbers" name="codeNumbers" class="hidden" value="${lengthCode}" />
+            <input id="codeNumbers" name="codeNumbers" class="hidden" value="${lengthCode!}" />
             <#if error?has_content>
                 <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="0" />
             <#else>
-                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds}" />
+                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds!}" />
             </#if>
             
             
@@ -45,7 +46,7 @@
                 </div>
                 <#if lengthCode==6>
                     <button class="hidden border-b border-dashed text-black-50 text-right" name="resend" id="resend" type="submit" >Отправить еще раз</button>
-                <#else>
+                <#elseif enableRepeatCall?? && enableRepeatCall!>
                     <button class="hidden border-b border-dashed text-black-50 text-right" name="resend" id="resend" type="submit" >Позвонить еще раз</button>
                 </#if>
                 

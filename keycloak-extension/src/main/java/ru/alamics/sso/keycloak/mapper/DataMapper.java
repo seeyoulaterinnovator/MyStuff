@@ -138,7 +138,7 @@ public abstract class DataMapper {
             return null;
         }
         List<UserImport> userImports = new LinkedList<>();
-        rows.stream().forEach(o -> userImports.add(toUserImport(o)));
+        rows.forEach(o -> userImports.add(toUserImport(o)));
         return userImports;
     }
 

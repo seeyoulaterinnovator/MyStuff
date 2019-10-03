@@ -17,7 +17,9 @@ public class CustomJpaEntityProvider implements org.keycloak.connections.jpa.ent
                 AutoLockNotification.class,
                 UserPostEntity.class,
                 ExternalSystemEntity.class,
-                ExternalSystemRoleEntity.class);
+                ExternalSystemRoleEntity.class,
+                Settings.class
+        );
     }
 
     @Override
