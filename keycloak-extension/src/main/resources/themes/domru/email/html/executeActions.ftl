@@ -16,6 +16,12 @@
   <#if section = "style">
     <#include 'styles/content-style--default.html' >
   <#elseif section = "body">
-    ${kcSanitize(msg("executeActionsBodyHtml",link, linkExpiration, realmName, requiredActionsText, linkExpirationFormatter(linkExpiration)))?no_esc}
+
+  <#assign email=realmName>
+  <#if user?? && user.getEmail??>
+  <#assign email= user.getEmail()>
+  </#if>
+ 
+    ${kcSanitize(msg("executeActionsBodyHtml",link, linkExpiration, email, requiredActionsText, linkExpirationFormatter(linkExpiration)))?no_esc}
   </#if>
 </@template.layout>

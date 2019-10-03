@@ -6,6 +6,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
+import ru.alamics.sso.registration.phone.SmsCodeGenerator;
 import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.tbapi.model.TbapiRequest;
@@ -18,6 +19,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static ru.alamics.sso.registration.model.UserConstants.ATTR_DMP_NAME;
+import static ru.alamics.sso.registration.model.UserConstants.ATTR_TOMS_NAME;
 
 @Slf4j
 public class TbapiServiceRestImpl implements TbapiRemoteService {
@@ -32,6 +36,27 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
 
     @Override
     public Map<String, Object> createCustomer(TbapiRequest request, TbapiConnectConfig connectConfig) throws TbapiRegisterException
+    {
+        // TODO ? StandResolver.isMock()
+        if (true && !"localhost".equalsIgnoreCase(connectConfig.getHost())) {
+            return createCustomerMOCK(request);
+        } else {
+            return createCustomerBattle(request, connectConfig);
+        }
+    }
+
+    private Map<String, Object> createCustomerMOCK(TbapiRequest request) throws TbapiRegisterException
+    {
+        log.info("Mocked TBAPI sending");
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("id", SmsCodeGenerator.getCode(10));
+        result.put("dmpCustomerId", SmsCodeGenerator.getCode(8));
+
+        return result;
+    }
+
+    private Map<String, Object> createCustomerBattle(TbapiRequest request, TbapiConnectConfig connectConfig) throws TbapiRegisterException
     {
 
         URI uri = new ResteasyUriBuilder()

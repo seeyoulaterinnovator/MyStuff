@@ -56,7 +56,7 @@ public class AttributesForm implements Authenticator {
             List<UserDto> attributes = (List<UserDto>) results.get("users-info");
             if(attributes != null) {
                 attributes = attributes.stream()
-                        .filter(attribute -> Objects.nonNull(attribute.getTomsId()) && Objects.nonNull(attribute.getSystemId()) && Objects.nonNull(attribute.getRoleId()))
+                        .filter(attribute -> Objects.nonNull(attribute.getTomsId()) && Objects.nonNull(attribute.getRoleId()))
                         .collect(Collectors.toList());
             } else {
                 attributes = Collections.emptyList();
