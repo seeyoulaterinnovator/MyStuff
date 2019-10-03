@@ -16,6 +16,7 @@ import ru.alamics.sso.keycloak.repository.RealmRepository;
 import ru.alamics.sso.keycloak.repository.UserRepository;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.property.PropertyConstants;
+import ru.alamics.sso.settings.SettingsDto;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
@@ -88,9 +89,10 @@ public class InactiveNotificationSchedule {
     private EmailModel.EmailModelBuilder prepareBlockNotification() {
         final String subject = "Предупреждение о блокирование аккаунта";
         final String template = "block-prepare-notification.ftl";
-        Long absenceTimeBlock = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user"));
+        SettingsDto setting = properties.getSetting(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user");
         Map<String, Object> body = new HashMap<>();
-        body.put("absence", absenceTimeBlock);
+        body.put("absence", setting.getValue());
+        body.put("unit", setting.getUnit().toString());
 
         return EmailModel.builder()
                 .bodyAttributes(body)

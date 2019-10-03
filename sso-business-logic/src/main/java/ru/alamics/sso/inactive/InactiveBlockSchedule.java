@@ -8,6 +8,7 @@ import ru.alamics.sso.property.PropertyConstants;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
+import java.util.concurrent.TimeUnit;
 
 
 @Slf4j
@@ -25,7 +26,7 @@ public class InactiveBlockSchedule {
     public void block () {
         final String DEBUG_STR = "block";
         log.info("start:{}", DEBUG_STR);
-        Long absenceTimeBlock = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user"));
+        Long absenceTimeBlock = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user", true));
         if(absenceTimeBlock > -1) {
             autoLockNotificationRepository.findUsersToBlock(absenceTimeBlock);
         }
