@@ -371,19 +371,35 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
 
-    $scope.importFileCSV = function (file) {
-        let form = new FormData();
-        form.append('file', file[0]);
-        $http.post(`${authUrl}/realms/mster/users-toms/uploadUsers`, form, {
-            headers: {'Content-Type': 'multipart/form-data'}
+    $scope.importFileCSV = function (files) {
+        var formData = new FormData();
+        var file = files[0];
+        formData.append('file', file);
+        $http.post(`${authUrl}/realms/master/users-toms/uploadUsers`, formData, {
+            transformRequest: angular.identity,
+            headers: {
+                'Content-Type': undefined,
+                'Content-Disposition': `form-data; name="file"; filename="import.csv"`
+            }
+        }).then(response => {
+            Notifications.success("Users has been imported");
+            location.reload();
         })
     };
 
-    $scope.importFileExcel = function (file) {
-        let form = new FormData();
-        form.append('file', file[0]);
-        $http.post(`${authUrl}/realms/master/users-toms/uploadUsers`, form, {
-            headers: {'Content-Type': 'multipart/form-data'}
+    $scope.importFileExcel = function (files) {
+        var formData = new FormData();
+        var file = files[0];
+        formData.append('file', file);
+        $http.post(`${authUrl}/realms/master/users-toms/uploadUsers`, formData, {
+            transformRequest: angular.identity,
+            headers: {
+                'Content-Type': undefined,
+                'Content-Disposition': `form-data; name="file"; filename="import.xlsx"`
+            }
+        }).then(response => {
+            Notifications.success("Users has been imported");
+            location.reload();
         })
     };
 
@@ -391,11 +407,15 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         let payload = {
             type: 'xlsx',
             userParameters: [
+                "USER_ID",
+                "FIRST_NAME",
                 "EMAIL",
                 "PHONE",
                 "ORGANIZATION",
                 "ROLE",
-                "SYSTEM"
+                "SYSTEM",
+                "ENABLED",
+                "CUSTOMER"
             ],
             userIds: $scope.users.filter(user => user.active).map(user => user.id)
         };
@@ -428,11 +448,15 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         let payload = {
             type: 'csv',
             userParameters: [
+                "USER_ID",
+                "FIRST_NAME",
                 "EMAIL",
                 "PHONE",
                 "ORGANIZATION",
                 "ROLE",
-                "SYSTEM"
+                "SYSTEM",
+                "ENABLED",
+                "CUSTOMER"
             ],
             userIds: $scope.users.filter(user => user.active).map(user => user.id)
         };
@@ -511,6 +535,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 findGroupedUser = {
                     id: user.id,
                     username: user.username,
+                    firstName: user.firstName,
                     email: user.email,
                     phone: user.phone,
                     enabled: user.enabled,

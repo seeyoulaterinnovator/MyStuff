@@ -8,7 +8,6 @@ import ru.alamics.sso.property.PropertyConstants;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
-import java.util.concurrent.TimeUnit;
 
 
 @Slf4j
