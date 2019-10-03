@@ -4,25 +4,27 @@
 
 <@layout.registrationLayout; section>
     <#if section = "header">
-        ${msg("loginProfileTitle")}
+        <#include "templates/required-fields.html">
+        <@blocks.contentHeader mainTitle="${msg('loginProfileTitle')}"/>
+
     <#elseif section = "form">
 
         <form id="kc-update-profile-form" class="${properties.kcFormClass!}" action="${url.loginAction}" method="post">
-        <@components.field class="mb-4 md:w-full" fieldName="orgNameUP" label="Наименование организации" placeholder="Наименование организации" required=true />
+        <@components.field class="mb-4 md:w-full" fieldName="orgName" label="Наименование организации" placeholder="Наименование организации" required=true />
 
     <#-- В нашем случае firstName – это полное имя -->
-        <@components.field class="mb-4 md:w-full" fieldName="firstNameUP"value="${(user.firstName!'')}" label="Как к вам обращаться?" placeholder="Как к вам обращаться?" required=true />
+        <@components.field class="mb-4 md:w-full" fieldName="firstName"value="${(user.firstName!'')}" label="Как к вам обращаться?" placeholder="Как к вам обращаться?" required=true />
 
     <#-- Пока бэк не уберет необходимость фамилии, скрою поле и отправлю дефис -->
-        <@components.field class="mb-4 md:w-full" fieldName="lastNameUP" value="${(user.lastNameUP!'')}" label="Фамилия" placeholder="Фамилия" required=true style="display: none" />
+        <@components.field class="mb-4 md:w-full" fieldName="lastName" label="Фамилия" placeholder="Фамилия" required=true style="display: none" />
 
-        <@components.field class="mb-4 md:w-full" fieldName="emailUP" value="${(user.email!'')}" label="Эл. почта" placeholder="Ваш адрес эл.почты" required=true type="email" />
+        <@components.field class="mb-4 md:w-full" fieldName="email" value="${(user.email!'')}" label="Эл. почта" placeholder="Ваш адрес эл.почты" required=true type="email" />
 
-        <@components.field class="mb-4 md:w-full" fieldName="phoneUP" label="Ваш телефон" placeholder="+7 (XXX) XXX - XX - XX" required=true />
+        <@components.field class="mb-4 md:w-full" fieldName="phone" label="Ваш телефон" placeholder="+7 (XXX) XXX - XX - XX" required=true />
 
 
             <#if recaptchaRequired??>
-                <div class="g-recaptcha w-full"
+                <div class="g-recaptcha w-full mb-4"
                 data-size="compact"
                 data-sitekey="${recaptchaSiteKey}"
                 data-callback="recaptchaCallback"
@@ -40,10 +42,10 @@
 
                 <div id="kc-form-buttons" class="${properties.kcFormButtonsClass!}">
                     <#if isAppInitiatedAction??>
-                    <input class="btn btn-main w-full" type="submit" value="${msg('doRegister')}" />
+                    <input class="btn btn-main w-full mb-2" id="update-profile-submit" type="submit" value="${msg('doRegister')}" />
                     <button class="btn btn-main w-full" type="submit" name="cancel-aia" value="true" />${msg("doCancel")}</button>
                     <#else>
-                    <input class="btn btn-main w-full" type="submit" value="${msg('doRegister')}" />
+                        <button class="btn btn-main pass-fields" type="submit" id="update-profile-submit" />${msg("doRegister")}</button>
                     </#if>
                 </div>
             </div>

@@ -11,7 +11,7 @@ export default (function() {
   if (!formElement) return;
 
   // Маска для поля ввода телефона
-  const phoneMask = IMask(document.getElementById('phoneUP'), {
+  const phoneMask = IMask(document.getElementById('phone'), {
     mask: '+{7} (000) 000-00-00',
   });
 
@@ -20,11 +20,11 @@ export default (function() {
   const form = createForm({
     onSubmit: () => {},
     initialValues: {
-      orgNameUP: '',
-      // firstName: '',
-      lastNameUP: '-',
-      // email: '',
-      phoneUP: '',
+      orgName: '',
+      phone: '',
+      firstName: document.getElementById('firstName') && document.getElementById('firstName').value || '',
+      lastName: '-',
+      email: document.getElementById('email') && document.getElementById('email').value || '',
     },
     validate,
     validateOnBlur: true,
@@ -36,7 +36,6 @@ export default (function() {
 
     function checkExistence() {
       Object.keys(registered).forEach(name => {
-        console.log('meeew', name, value[name])
         if (name && !values[name]) errors[name] = 'Обязательное поле';
       });
     }
@@ -47,8 +46,8 @@ export default (function() {
     if (!phoneMask.unmaskedValue.match(VALIDATION_RULES.phone))
       errors.phone = 'Неверный формат номера';
 
-    if (!values.emailUP.match(VALIDATION_RULES.email))
-      errors.emailUP = 'Неверный формат email';
+    if (values.email && !values.email.match(VALIDATION_RULES.email))
+      errors.email = 'Неверный формат email';
 
     checkExistence();
 
@@ -145,9 +144,7 @@ export default (function() {
     formState => {
       const { values, errors } = formState;
 
-      const submitButton = document.getElementById('submit');
-
-      console.log(values, errors);
+      const submitButton = document.getElementById('update-profile-submit');
 
       if (!isEmpty(errors)) submitButton.disabled = true;
       else submitButton.disabled = false;
