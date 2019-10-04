@@ -2,14 +2,12 @@ package ru.alamics.sso.keycloak.auth.post;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
-import org.keycloak.authentication.AuthenticationProcessor;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.auth.UserRole;
-import ru.alamics.sso.keycloak.auth.SsoFreeMarkerLoginForm;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.keycloak.search.dto.UserDto;
 import ru.alamics.sso.keycloak.search.rest.SearchResource;
@@ -92,11 +90,7 @@ public class AttributesForm implements Authenticator {
     @Override
     public void action (AuthenticationFlowContext context) {
         var authSession = context.getAuthenticationSession();
-        role.roleSetting(context);
-        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
-        final String tomsId = formData.getFirst("tomsId");
-        var user = context.getUser();
-        user.setAttribute(ATTR_TOMS_NAME, Collections.singletonList(tomsId));
+        role.setUserPost(context);
         authSession.setAuthNote(AUTH_FORM_SUCCESS, "0");
         context.success();
     }
