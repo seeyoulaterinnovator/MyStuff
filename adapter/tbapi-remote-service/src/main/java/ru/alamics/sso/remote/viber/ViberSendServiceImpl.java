@@ -28,10 +28,10 @@ import java.util.concurrent.TimeUnit;
 @Stateless(name = "ViberSender")
 public class ViberSendServiceImpl implements ViberSendService {
 
-    private static final String SMSC_NAME = "centerName";
-    private static final String USERNAME = "user";
-    private static final String PASSWORD = "pass";
-    private static final String SENDER_NAME = "sender";
+    private static final String SMSC_NAME = "rapporto_viber";
+    private static final String USERNAME = "ertelecom";
+    private static final String PASSWORD = "P10BxzA6Z1BRM";
+    private static final String SENDER_NAME = "Domru";
 
     private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
             .connectTimeout(3, TimeUnit.SECONDS)
