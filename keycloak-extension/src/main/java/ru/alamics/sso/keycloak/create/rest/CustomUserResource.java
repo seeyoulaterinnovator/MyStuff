@@ -44,9 +44,9 @@ public class CustomUserResource {
     protected KeycloakSession session;
     private UserService userService;
 
-    public CustomUserResource(KeycloakSession session, UserFindService userFindService) {
+    public CustomUserResource(KeycloakSession session, AdminAuth auth,  UserFindService userFindService) {
         this.session = session;
-        AdminAuth auth = authenticateRealmAdminRequest(session.getContext().getRealm());
+//        AdminAuth auth = authenticateRealmAdminRequest(session.getContext().getRealm());
         this.userService = new UserService(session, auth, userFindService);
     }
 
@@ -182,48 +182,48 @@ public class CustomUserResource {
         }
     }
 
-    private AdminAuth authenticateRealmAdminRequest(RealmModel realm) {
-        String tokenString = new AppAuthManager().extractAuthorizationHeaderToken(session.getContext().getRequestHeaders());
-        if (tokenString == null) throw new NotAuthorizedException("Bearer");
-        AccessToken token;
-        try {
-            JWSInput input = new JWSInput(tokenString);
-            token = input.readJsonContent(AccessToken.class);
-        } catch (JWSInputException e) {
-            throw new NotAuthorizedException("Bearer token format error");
-        }
-
-        String realmName = token.getIssuer().substring(token.getIssuer().lastIndexOf('/') + 1);
-        RealmManager realmManager = new RealmManager(session);
-        RealmModel realmFromToken = realmManager.getRealmByName(realmName);
-        if (realmFromToken == null) {
-            throw new NotAuthorizedException("Unknown realm in token");
-        }
-
-        session.getContext().setRealm(realm);
-        AuthenticationManager.AuthResult authResult = new AppAuthManager()
-                .authenticateBearerToken(session, realm, session.getContext().getUri(), session.getContext().getConnection(), session.getContext().getRequestHeaders());
-        if (authResult == null) {
-            log.debug("Token not valid");
-            throw new NotAuthorizedException("Bearer");
-        }
-
-        ClientModel client = realm.getClientByClientId(token.getIssuedFor());
-        if (client == null) {
-            throw new NotAuthorizedException("Could not find client for authorization");
-        }
-
-        AdminAuth auth = new AdminAuth(realm, authResult.getToken(), authResult.getUser(), client);
-
-        AdminPermissions.evaluator(session, realm, auth).users().requireManage();
-
-        if (!auth.getRealm().equals(realmManager.getKeycloakAdminstrationRealm())
-                && !auth.getRealm().equals(realm)) {
-            throw new ForbiddenException();
-        }
-
-        return auth;
-    }
+//    private AdminAuth authenticateRealmAdminRequest(RealmModel realm) {
+//        String tokenString = new AppAuthManager().extractAuthorizationHeaderToken(session.getContext().getRequestHeaders());
+//        if (tokenString == null) throw new NotAuthorizedException("Bearer");
+//        AccessToken token;
+//        try {
+//            JWSInput input = new JWSInput(tokenString);
+//            token = input.readJsonContent(AccessToken.class);
+//        } catch (JWSInputException e) {
+//            throw new NotAuthorizedException("Bearer token format error");
+//        }
+//
+//        String realmName = token.getIssuer().substring(token.getIssuer().lastIndexOf('/') + 1);
+//        RealmManager realmManager = new RealmManager(session);
+//        RealmModel realmFromToken = realmManager.getRealmByName(realmName);
+//        if (realmFromToken == null) {
+//            throw new NotAuthorizedException("Unknown realm in token");
+//        }
+//
+//        session.getContext().setRealm(realm);
+//        AuthenticationManager.AuthResult authResult = new AppAuthManager()
+//                .authenticateBearerToken(session, realm, session.getContext().getUri(), session.getContext().getConnection(), session.getContext().getRequestHeaders());
+//        if (authResult == null) {
+//            log.debug("Token not valid");
+//            throw new NotAuthorizedException("Bearer");
+//        }
+//
+//        ClientModel client = realm.getClientByClientId(token.getIssuedFor());
+//        if (client == null) {
+//            throw new NotAuthorizedException("Could not find client for authorization");
+//        }
+//
+//        AdminAuth auth = new AdminAuth(realm, authResult.getToken(), authResult.getUser(), client);
+//
+//        AdminPermissions.evaluator(session, realm, auth).users().requireManage();
+//
+//        if (!auth.getRealm().equals(realmManager.getKeycloakAdminstrationRealm())
+//                && !auth.getRealm().equals(realm)) {
+//            throw new ForbiddenException();
+//        }
+//
+//        return auth;
+//    }
 
     private String getFileExtension(String content) {
         String[] contentDisposition = content.split(";");
