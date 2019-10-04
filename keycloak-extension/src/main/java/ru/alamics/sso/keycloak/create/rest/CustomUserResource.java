@@ -124,7 +124,9 @@ public class CustomUserResource {
     public Response uploadUsers(@MultipartForm FileDto file, @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content,
                                 @HeaderParam("realm") String realm) {
 
-        if (file == null || realm == null || realm.isBlank() || session.realms().getRealmByName(realm) == null) {
+        if (file == null ||
+                content == null || content.isBlank() ||
+                realm == null || realm.isBlank() || session.realms().getRealmByName(realm) == null) {
             return JsonResponse.error(Response.Status.BAD_REQUEST).build();
         }
         try(InputStream bas = new ByteArrayInputStream(file.getFileData()) ) {
