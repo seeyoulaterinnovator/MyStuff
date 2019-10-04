@@ -5,7 +5,7 @@ export const PASSWORD_CHARSET = {
   extraChars: '_-[].!#',
 };
 
-export const WRONG_PASS_REG = /([^A-z0-9_\-\[\].!#])/g;
+export const WRONG_PASS_REG = /([^A-Za-z0-9_\-\[\].!#]+)/g;
 
 export const HIGHLIGHT_VALIDATION_CHARSET = {
   letters: {
