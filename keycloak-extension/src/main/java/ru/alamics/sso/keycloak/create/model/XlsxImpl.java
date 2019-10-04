@@ -1,14 +1,15 @@
 package ru.alamics.sso.keycloak.create.model;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import javax.ws.rs.FormParam;
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 public class XlsxImpl implements FileModel {
 
@@ -28,8 +29,9 @@ public class XlsxImpl implements FileModel {
         Row row = workbook.getSheetAt(0).getRow(0);
         Iterator<Cell> iterCell = row.cellIterator();
         LinkedList<String> result = new LinkedList<String>();
+        DataFormatter formatter = new DataFormatter();
         while (iterCell.hasNext()) {
-            result.add(getValueCell(iterCell.next()));
+            result.add(formatter.formatCellValue(iterCell.next()));
         }
         return result.toArray(new String[result.size()]);
     }
@@ -64,22 +66,13 @@ public class XlsxImpl implements FileModel {
     public List<String[]> getRows() {
         Iterator<Row> iter = workbook.getSheetAt(0).rowIterator();
         List<String[]> rows = new LinkedList<String[]>();
-
+        DataFormatter formatter = new DataFormatter();
         while (iter.hasNext()) {
             Row row = iter.next();
             Iterator<Cell> iterCell = row.cellIterator();
             List<String> cells = new ArrayList<>();
             while (iterCell.hasNext()) {
-                Cell cell = iterCell.next();
-                CellType type = cell.getCellType();
-                switch (type.toString()) {
-                    case "NUMERIC":
-                        cells.add(Integer.toString((int) cell.getNumericCellValue()));
-                        break;
-                    case "STRING":
-                        cells.add(cell.getStringCellValue());
-                        break;
-                }
+                cells.add(formatter.formatCellValue(iterCell.next()));
             }
             rows.add(cells.toArray(new String[cells.size()]));
         }
