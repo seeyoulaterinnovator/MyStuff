@@ -65,12 +65,12 @@
                     <div class="pull-right" data-ng-show="access.manageUsers">
                         <label for="import-file-csv" class="btn btn-default ng-binding">Import CSV<i
                                 class="pficon pficon-import"></i></label>
-                        <input id="import-file-csv" type="file" class="hidden"
+                        <input id="import-file-csv" type="file" class="hidden" accept=".csv"
                                onchange="angular.element(this).scope().importFileCSV(this.files)">
 
                         <label for="import-file-xlsx" class="btn btn-default ng-binding">Import Xlsx<i
                                 class="pficon pficon-import"></i></label>
-                        <input id="import-file-xlsx" type="file" class="hidden"
+                        <input id="import-file-xlsx" type="file" class="hidden" accept=".xlsx"
                                onchange="angular.element(this).scope().importFileExcel(this.files)">
 
                         <button data-ng-click="exportCSV()" class="btn btn-default">Export CSV</button>
