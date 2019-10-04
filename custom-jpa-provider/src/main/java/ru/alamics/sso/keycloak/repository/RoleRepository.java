@@ -102,7 +102,7 @@ public class RoleRepository {
 
     public RoleEntity findClientRoleEntity(final String roleName, final String realmId, final ClientEntity clientEntity) {
 
-        List<RoleEntity> ret = em.createQuery("select re from RoleEntity re where re.name =:roleName and re.realm.id =:realmId and re.client =:client", RoleEntity.class)
+        List<RoleEntity> ret = em.createQuery("select re from RoleEntity re where re.name =:roleName and re.realmId =:realmId and re.client =:client", RoleEntity.class)
                 .setParameter("roleName", roleName)
                 .setParameter("realmId", realmId)
                 .setParameter("client", clientEntity)
