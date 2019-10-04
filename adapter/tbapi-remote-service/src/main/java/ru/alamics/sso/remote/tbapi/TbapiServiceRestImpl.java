@@ -37,6 +37,12 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
     @Override
     public Map<String, Object> createCustomer(TbapiRequest request, TbapiConnectConfig connectConfig) throws TbapiRegisterException
     {
+        // нужно кидать exception для показа страницы с ошибкой
+        if (request != null && request.getLegalName() != null && request.getLegalName().equalsIgnoreCase("ПВФ Сейлор Мун")) {
+            log.info("Во имя луны!");
+            throw new TbapiRegisterException();
+        }
+
         // TODO ? StandResolver.isMock()
         if (true && !"localhost".equalsIgnoreCase(connectConfig.getHost())) {
             return createCustomerMOCK(request);

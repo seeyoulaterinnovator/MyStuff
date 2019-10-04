@@ -49,11 +49,10 @@ public class PhoneCallerRemoteServiceImpl implements PhoneCallerRemoteService {
 
         String response = null;
         try {
-            // TODO почему то не звонил воронеж
-            //response = getCode(uriVoronezh, phone, count);
-            //if (isNull(response)) {
-                response = getCode(uriPerm, Util.getCleanUserPhone(phone), count);
-            //}
+            response = getCode(uriPerm, phone, count);
+            if (isNull(response)) {
+                response = getCode(uriVoronezh, Util.getCleanUserPhone(phone), count);
+            }
         } catch (BadRequestException e) {
             log.error("Error", e);
             if (HttpStatus.SC_BAD_REQUEST == e.getResponse().getStatus()) {
