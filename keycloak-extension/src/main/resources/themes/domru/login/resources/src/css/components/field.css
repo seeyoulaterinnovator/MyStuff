@@ -32,7 +32,7 @@
 
 .field__container {
   display: flex;
-  flex-flow: column;
+  flex-flow: column-reverse;
   position: relative;
 }
 
@@ -41,7 +41,7 @@
   position: absolute;
   right: 10px;
   transform: translateY(-50%);
-  top: 50%;
+  top: 66%;
 }
 
 .field__input {
@@ -59,11 +59,16 @@
   }
 }
 
+.field__input:placeholder-shown + .field__label {
+  color: transparent;
+}
+
 .field__label {
   @apply .text-main;
 
   display: flex;
   align-items: center;
+  transition: color .3s ease-in-out;
 
   margin-bottom: 7px;
 

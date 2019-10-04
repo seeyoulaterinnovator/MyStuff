@@ -22,7 +22,7 @@
                     <@components.field class="mb-4 md:w-full" fieldName="username" label="Имя пользователя" placeholder="Имя пользователя" required=true />
                 </#if>
 
-                <@components.field class="mb-4 md:w-full" fieldName="phone" label="Ваш телефон" placeholder="+7 (XXX) XXX - XX - XX" required=true />
+                <@components.field class="mb-4 md:w-full" fieldName="phone" label="Телефон" placeholder="+7 (XXX) XXX - XX - XX" required=true />
 
                 
                 <#if passwordRequired>
