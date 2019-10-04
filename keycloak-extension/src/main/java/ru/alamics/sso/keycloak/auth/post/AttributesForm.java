@@ -42,7 +42,7 @@ public class AttributesForm implements Authenticator {
         String frame = uriInfo.getQueryParameters().getFirst(I_FRAME);
         var redirectUriQueryParams = extractQueryParamsFromRedirectUri(queryParams.getFirst(REDIRECT_URI));
         String redirectIframe = redirectUriQueryParams.get(I_FRAME);
-        boolean isAuth = "1".equals(authSession.getAuthNote(AUTH_FORM_SUCCESS));//it`s magick
+        boolean isAuth = !"1".equals(authSession.getAuthNote(AUTH_FORM_SUCCESS));//it`s magick
 
         if( frame != null || isAuth || redirectIframe != null) {
             var session = context.getSession();

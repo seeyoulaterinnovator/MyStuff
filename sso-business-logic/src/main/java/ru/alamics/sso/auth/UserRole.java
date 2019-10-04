@@ -60,7 +60,7 @@ public class UserRole {
         repository.deleteUserPostRoles(userEntity, userPosts, realm.getId());
 
         Set<ExternalSystemRoleEntity> externalSystemRoleEntities = postRepository.findSystemByUser(userEntity);
-        repository.deleteUserSystemPostRoles(userEntity, externalSystemRoleEntities, realm.getId());
+        repository.deleteUserSystemPostClientRoles(userEntity, externalSystemRoleEntities, realm.getId());
 
         UserRoleMappingEntity mappingEntity = new UserRoleMappingEntity();
         mappingEntity.setRoleId(roleEntity.getId());
@@ -70,22 +70,28 @@ public class UserRole {
         //FIXME Добавить роли пользователя по его системам, сделать можно лучше
         List<ExternalSystemRoleEntity> systems = postRepository.findSystemsByUserPost(userPost);
         systems.forEach(system -> {
-            var role = repository.findRoleEntity(system.getName(), realm.getId());
-            if(role == null) {
-                var realmEntity = new RealmEntity();
-                realmEntity.setId(realm.getId());
-                role = new RoleEntity();
-                role.setName(system.getName());
-                role.setRealm(realmEntity);
-                role.setRealmId(realm.getId());
-                role.setClientRole(false);
-                role = repository.save(role);
-            }
+            var externalSystem = system.getExternalSystem();
+            var client = repository.findClientByName(externalSystem.getName(), realm.getId());
+            if(client != null) {
+                var role = repository.findClientRoleEntity(system.getName(), realm.getId(), client);
+                if(role == null) {
+                    var realmEntity = new RealmEntity();
+                    realmEntity.setId(realm.getId());
+                    role = new RoleEntity();
+                    role.setName(system.getName());
+                    role.setRealm(realmEntity);
+                    role.setRealmId(realm.getId());
+                    role.setClientRole(true);
+                    role.setClient(client);
+                    role.setClientRealmConstraint(client.getId());
+                    role = repository.save(role);
+                }
 
-            UserRoleMappingEntity roleMapping = new UserRoleMappingEntity();
-            roleMapping.setRoleId(role.getId());
-            roleMapping.setUser(userEntity);
-            repository.save(roleMapping);
+                UserRoleMappingEntity roleMapping = new UserRoleMappingEntity();
+                roleMapping.setRoleId(role.getId());
+                roleMapping.setUser(userEntity);
+                repository.save(roleMapping);
+            }
         });
 
         user.setAttribute(ATTR_TOMS_NAME, Collections.singletonList(userPost.getTomsId()));

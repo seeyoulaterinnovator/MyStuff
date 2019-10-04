@@ -1,9 +1,7 @@
 package ru.alamics.sso.keycloak.repository;
 
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.models.jpa.entities.RoleEntity;
-import org.keycloak.models.jpa.entities.UserEntity;
-import org.keycloak.models.jpa.entities.UserRoleMappingEntity;
+import org.keycloak.models.jpa.entities.*;
 import ru.alamics.sso.keycloak.entity.ExternalSystemEntity;
 import ru.alamics.sso.keycloak.entity.ExternalSystemRoleEntity;
 import ru.alamics.sso.keycloak.entity.UserPostEntity;
@@ -88,7 +86,7 @@ public class RoleRepository {
         }
     }
 
-    public void deleteUserSystemPostRoles(final UserEntity user, final Set<ExternalSystemRoleEntity> sustems, final String realmId) {
+    public void deleteUserSystemPostClientRoles (final UserEntity user, final Set<ExternalSystemRoleEntity> sustems, final String realmId) {
         final String DEBUG_STR = "deleteUserSystemPostRoles";
         log.debug("{}: user={}, realmId={}", DEBUG_STR, user.getId(), realmId);
         final List<String> names = sustems.stream().map(ExternalSystemRoleEntity::getName).collect(Collectors.toList());
@@ -100,5 +98,26 @@ public class RoleRepository {
                     .setParameter("roles", roleIds)
                     .executeUpdate();
         }
+    }
+
+    public RoleEntity findClientRoleEntity(final String roleName, final String realmId, final ClientEntity clientEntity) {
+
+        List<RoleEntity> ret = em.createQuery("select re from RoleEntity re where re.name =:roleName and re.realm.id =:realmId and re.client =:client", RoleEntity.class)
+                .setParameter("roleName", roleName)
+                .setParameter("realmId", realmId)
+                .setParameter("client", clientEntity)
+                .getResultList();
+
+
+        return ret.isEmpty() ? null : ret.get(0);
+    }
+
+    public ClientEntity findClientByName(final String name, final String realmId) {
+        List<ClientEntity> ret = em.createQuery("select c from ClientEntity c where c.clientId =:name and c.realm.id =:realmId", ClientEntity.class)
+                .setParameter("name", name)
+                .setParameter("realmId", realmId)
+                .getResultList();
+        return ret.isEmpty() ? null : ret.get(0);
+
     }
 }
