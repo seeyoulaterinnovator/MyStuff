@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.jpa.entities.RoleEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.jpa.entities.UserRoleMappingEntity;
+import ru.alamics.sso.keycloak.entity.ExternalSystemEntity;
+import ru.alamics.sso.keycloak.entity.ExternalSystemRoleEntity;
 import ru.alamics.sso.keycloak.entity.UserPostEntity;
 import ru.alamics.sso.keycloak.entity.UserPostRoleEntity;
 
@@ -14,6 +16,7 @@ import javax.persistence.PersistenceContext;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -71,17 +74,31 @@ public class RoleRepository {
         return ret;
     }
 
-    public void deleteUserPostRoles(final UserEntity user, final List<UserPostEntity> posts, final String realmId) {
+    public void deleteUserPostRoles(final UserEntity user, final Set<UserPostEntity> posts, final String realmId) {
         final String DEBUG_STR = "deleteUserPostRoles";
         log.debug("{}: user={}, realmId={}", DEBUG_STR, user.getId(), realmId);
         final List<String> names = posts.stream().map(UserPostEntity::getRole).map(UserPostRoleEntity::getName).collect(Collectors.toList());
         List<RoleEntity> roles = findRolesByNames(names, realmId);
         List<String> roleIds = roles.stream().map(RoleEntity::getId).collect(Collectors.toList());
+        if(!roleIds.isEmpty()) {
+            em.createQuery("delete from UserRoleMappingEntity where user =:user and roleId in :roles")
+                    .setParameter("user", user)
+                    .setParameter("roles", roleIds)
+                    .executeUpdate();
+        }
+    }
 
-        em.createQuery("delete from UserRoleMappingEntity where user =:user and roleId in :roles")
-                .setParameter("user", user)
-                .setParameter("roles", roleIds)
-                .executeUpdate();
-
+    public void deleteUserSystemPostRoles(final UserEntity user, final Set<ExternalSystemRoleEntity> sustems, final String realmId) {
+        final String DEBUG_STR = "deleteUserSystemPostRoles";
+        log.debug("{}: user={}, realmId={}", DEBUG_STR, user.getId(), realmId);
+        final List<String> names = sustems.stream().map(ExternalSystemRoleEntity::getName).collect(Collectors.toList());
+        List<RoleEntity> roles = findRolesByNames(names, realmId);
+        List<String> roleIds = roles.stream().map(RoleEntity::getId).collect(Collectors.toList());
+        if(!roleIds.isEmpty()) {
+            em.createQuery("delete from UserRoleMappingEntity where user =:user and roleId in :roles")
+                    .setParameter("user", user)
+                    .setParameter("roles", roleIds)
+                    .executeUpdate();
+        }
     }
 }
