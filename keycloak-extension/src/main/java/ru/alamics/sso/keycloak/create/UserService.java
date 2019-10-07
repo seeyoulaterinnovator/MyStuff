@@ -180,6 +180,7 @@ public class UserService {
     }
 
     private int getCountAndRemoveClones(List<UserImport> userImports) {
+        log.info("findClonesFrom: {}", userImports);
         int countClones = 0;
         List<UserImport> userRequestMain = new LinkedList<>();
         userImports.stream().forEach(o -> userRequestMain.add(o));
