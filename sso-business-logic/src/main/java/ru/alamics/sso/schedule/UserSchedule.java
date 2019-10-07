@@ -2,13 +2,20 @@ package ru.alamics.sso.schedule;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.common.util.Time;
 import org.keycloak.email.EmailException;
+import org.keycloak.events.admin.AdminEvent;
+import org.keycloak.events.admin.OperationType;
+import org.keycloak.events.admin.ResourceType;
+import org.keycloak.events.jpa.AdminEventEntity;
 import org.keycloak.models.*;
 import org.keycloak.models.jpa.RealmAdapter;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.services.DefaultKeycloakContext;
 import org.keycloak.services.resources.KeycloakApplication;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
+import org.keycloak.util.JsonSerialization;
 import ru.alamics.sso.emailer.EmailModel;
 import ru.alamics.sso.emailer.EmailSender;
 import ru.alamics.sso.keycloak.entity.AutoLockNotification;
@@ -21,8 +28,10 @@ import ru.alamics.sso.settings.SettingsDto;
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
 import javax.ws.rs.core.Context;
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -45,6 +54,8 @@ public class UserSchedule {
     @EJB
     private RealmRepository realmRepository;
     @EJB
+    private AdminEventRepository adminEventRepository;
+    @EJB
     private ApplicationProperties properties;
 
     private String host;
@@ -60,7 +71,7 @@ public class UserSchedule {
     private void notificationInactiveUsers() {
         final String DEBUG_STR = "findNotifications";
         log.info("start:{}", DEBUG_STR);
-        long absenceTimeNotification = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_NOTIFICATION_DAYS, "user"));
+        long absenceTimeNotification = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_NOTIFICATION_DAYS, "user", true));
         if (absenceTimeNotification > -1) {
             userHistoryLoginRepository.findInactiveUsers(absenceTimeNotification);
         }
@@ -70,7 +81,7 @@ public class UserSchedule {
     private void block() {
         final String DEBUG_STR = "block";
         log.info("start:{}", DEBUG_STR);
-        long absenceTimeBlock = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user"));
+        long absenceTimeBlock = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user", true));
         if (absenceTimeBlock > -1) {
             autoLockNotificationRepository.findUsersToBlock(absenceTimeBlock);
         }
@@ -118,6 +129,7 @@ public class UserSchedule {
                         .user(userModel);
                 sender.send(bockNotification.build());
                 user.setEnabled(false);
+                createAdminEvent(OperationType.UPDATE, userModel, realm);
             } else if (notification.getType() == NotificationType.PASSWORD_EXPIRED) {
                 var passwordExpired = passwordExpired();
                 passwordExpired.realmModel(realm)
@@ -142,8 +154,7 @@ public class UserSchedule {
         final String template = "block-prepare-notification.ftl";
         SettingsDto setting = properties.getSetting(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user");
         Map<String, Object> body = new HashMap<>();
-        body.put("absence", setting.getValue());
-        body.put("unit", setting.getUnit().toString());
+        body.put("absence", setting.getValue() + " " + getRusTranslateTimeUnit(setting.getUnit()));
 
         return EmailModel.builder()
                 .bodyAttributes(body)
@@ -164,6 +175,32 @@ public class UserSchedule {
                 .bodyAttributes(body)
                 .subject(subject)
                 .bodyTemplate(template);
+    }
+
+    private String getRusTranslateTimeUnit(TimeUnit unit){
+        switch (unit){
+            case DAYS: return "дней";
+            case HOURS: return "часов";
+            case MINUTES: return "минут";
+            case SECONDS: return "секунд";
+            default: return "";
+        }
+    }
+
+    private void createAdminEvent(OperationType operationType, UserModel user, RealmModel realm) {
+        AdminEventEntity adminEvent = new AdminEventEntity();
+        adminEvent.setTime(Time.toMillis(Time.currentTime()));
+        adminEvent.setRealmId(realm.getName());
+        adminEvent.setOperationType(operationType.name());
+        adminEvent.setAuthRealmId(realm.getName());
+        adminEvent.setResourcePath("autoblock");
+        try {
+            adminEvent.setRepresentation(JsonSerialization.writeValueAsString(user));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        adminEvent.setResourceType("USER");
+        adminEventRepository.save(adminEvent);
     }
 
     @PostConstruct
