@@ -151,6 +151,7 @@ export default (function() {
           input.checked = value;
         } else {
           input.value = value === undefined ? '' : value;
+          input
         }
 
         // show/hide errors
