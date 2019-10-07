@@ -3,8 +3,6 @@
   import { status, city, showModal } from './stores.js';
   import { STATUS } from './constants.js';
 
-  console.log('Confirmation');
-
   function handleConfirm() {
     Cookie.set('VISITED', '1');
     showModal.set(false);
