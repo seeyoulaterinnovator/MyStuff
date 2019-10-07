@@ -1,39 +1,46 @@
-package ru.alamics.sso.inactive;
+package ru.alamics.sso.schedule;
 
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.email.EmailException;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
+import org.keycloak.models.jpa.RealmAdapter;
 import org.keycloak.models.jpa.UserAdapter;
-import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.services.DefaultKeycloakContext;
+import org.keycloak.services.resources.KeycloakApplication;
 import ru.alamics.sso.emailer.EmailModel;
 import ru.alamics.sso.emailer.EmailSender;
 import ru.alamics.sso.keycloak.entity.AutoLockNotification;
 import ru.alamics.sso.keycloak.entity.common.NotificationType;
-import ru.alamics.sso.keycloak.repository.AutoLockNotificationRepository;
-import ru.alamics.sso.keycloak.repository.RealmRepository;
-import ru.alamics.sso.keycloak.repository.UserRepository;
+import ru.alamics.sso.keycloak.repository.*;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.property.PropertyConstants;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
+import javax.ws.rs.core.Context;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Singleton
 @Startup
 @DependsOn("ApplicationProperties")
-public class InactiveNotificationSchedule {
+public class UserSchedule {
     @EJB
     private EmailSender sender;
     @EJB
-    private UserRepository userRepository;
+    private PolicyRepository policyRepository;
     @EJB
     private AutoLockNotificationRepository autoLockNotificationRepository;
+    @EJB
+    private UserHistoryLoginRepository userHistoryLoginRepository;
     @EJB
     private RealmRepository realmRepository;
     @EJB
@@ -41,38 +48,82 @@ public class InactiveNotificationSchedule {
 
     private String host;
 
-    @Schedule(hour = "*", minute = "*/5", persistent = false)
-    public void sendEmails() throws EmailException {
+    @Schedule(hour = "*", minute = "*/1", persistent = false)
+    public void schedule() throws EmailException {
+        findExpiredPassword();
+        notificationInactiveUsers();
+        block();
+        sendEmails();
+    }
+
+    private void notificationInactiveUsers() {
+        final String DEBUG_STR = "findNotifications";
+        log.info("start:{}", DEBUG_STR);
+        long absenceTimeNotification = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_NOTIFICATION_DAYS, "user"));
+        if (absenceTimeNotification > -1) {
+            userHistoryLoginRepository.findInactiveUsers(absenceTimeNotification);
+        }
+        log.info("stop:{}", DEBUG_STR);
+    }
+
+    private void block() {
+        final String DEBUG_STR = "block";
+        log.info("start:{}", DEBUG_STR);
+        long absenceTimeBlock = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user"));
+        if (absenceTimeBlock > -1) {
+            autoLockNotificationRepository.findUsersToBlock(absenceTimeBlock);
+        }
+        log.info("stop:{}", DEBUG_STR);
+    }
+
+    private void findExpiredPassword () {
+        final String DEBUG_STR = "findExpiredPassword";
+        log.info("start: {}", DEBUG_STR);
+        var realms = policyRepository.findRealmWithPolicy(PasswordPolicy.FORCE_EXPIRED_ID);
+
+        realms.forEach(realm -> {
+            String passwordPolicy = realm.getPasswordPolicy();
+            if(Objects.nonNull(passwordPolicy)) {
+                var charNumbs = PasswordPolicy.FORCE_EXPIRED_ID.length() + 3;
+                var index = passwordPolicy.indexOf(PasswordPolicy.FORCE_EXPIRED_ID);
+                var expirePolicy = passwordPolicy.substring(index, index + charNumbs);
+                int expiresDays = Integer.parseInt(expirePolicy.substring(expirePolicy.indexOf('(') + 1, expirePolicy.lastIndexOf(')')));
+                if ( expiresDays != -1 ) {
+                    long timeToExpire = TimeUnit.DAYS.toMillis(expiresDays);
+                    policyRepository.findExpiredPasswords(realm.getId(), timeToExpire);
+                }
+            }
+        });
+        log.info("stop: {}", DEBUG_STR);
+    }
+
+    private void sendEmails() throws EmailException {
         final String DEBUG_STR = "sendEmails";
         log.info("start={}", DEBUG_STR);
 
         var autoLockNotifications = autoLockNotificationRepository.findNotifications();
-        var usersToBlock = new ArrayList<UserEntity>();
-        for(AutoLockNotification notification : autoLockNotifications) {
+        for (AutoLockNotification notification : autoLockNotifications) {
             var user = notification.getUser();
             RealmModel realm = realmRepository.findRealmById(user.getRealmId());
             UserModel userModel = new UserAdapter(null, realm, null, user);
-            if(notification.getType() == NotificationType.ABSENCE_NOTIFICATION) {
+            if (notification.getType() == NotificationType.ABSENCE_NOTIFICATION) {
                 var prepareBlockNotification = prepareBlockNotification();
                 prepareBlockNotification.realmModel(realm)
                         .user(userModel);
                 sender.send(prepareBlockNotification.build());
-            } else if(notification.getType() == NotificationType.ABSENCE_BLOCKING) {
+            } else if (notification.getType() == NotificationType.ABSENCE_BLOCKING) {
                 var bockNotification = bockNotification();
                 bockNotification.realmModel(realm)
                         .user(userModel);
                 sender.send(bockNotification.build());
                 user.setEnabled(false);
-                usersToBlock.add(user);
-            } else if(notification.getType() == NotificationType.PASSWORD_EXPIRED) {
+            } else if (notification.getType() == NotificationType.PASSWORD_EXPIRED) {
                 var passwordExpired = passwordExpired();
                 passwordExpired.realmModel(realm)
                         .user(userModel);
                 sender.send(passwordExpired.build());
             }
         }
-        userRepository.save(usersToBlock);
-
         log.info("stop={}", DEBUG_STR);
     }
 
