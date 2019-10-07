@@ -224,7 +224,7 @@ public class UserService {
                 addUserPost(user, o);
             } catch (FoundException e) {
                 Map<String, Object> error = new HashMap<>();
-                error.put(e.getMessage(), e.getResult());
+                error.put("error", e.getMessage());
                 error.put("importUserName", o.getUserRequest().getName());
                 importResponse.addError(error);
             } catch (NotFoundException | ValidationException e) {
