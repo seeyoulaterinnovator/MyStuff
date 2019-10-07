@@ -379,7 +379,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             transformRequest: angular.identity,
             headers: {
                 'Content-Type': undefined,
-                'Content-Disposition': `form-data; name="file"; filename="import.csv"`
+                'Content-Disposition': `form-data; name="file"; filename="import.csv"`,
+                'realm':'user'
             }
         }).then(response => {
             Notifications.success("Users has been imported");
@@ -395,7 +396,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             transformRequest: angular.identity,
             headers: {
                 'Content-Type': undefined,
-                'Content-Disposition': `form-data; name="file"; filename="import.xlsx"`
+                'Content-Disposition': `form-data; name="file"; filename="import.xlsx"`,
+                'realm':'user'
             }
         }).then(response => {
             Notifications.success("Users has been imported");
