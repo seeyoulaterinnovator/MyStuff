@@ -1,7 +1,7 @@
 <#import "template.ftl" as layout>
 <#import "templates/blocks.ftl" as blocks>
 
-<@layout.registrationLayout displayInfo=true; section>
+<@layout.registrationLayout displayInfo=true displayCity=true; section>
     <#if section = "header">
         <#include "templates/required-fields.html">
         
