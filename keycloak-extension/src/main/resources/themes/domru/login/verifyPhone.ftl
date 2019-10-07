@@ -7,7 +7,7 @@
         <@blocks.contentHeader mainTitle="Вам выслан одноразовый пароль на номер:" />
     <#elseif section = "form">
         <#if userPhone??>
-            <p class="pb-6">${userPhone}</p>
+            <p class="pb-6" x-ms-format-detection="none">${userPhone}</p>
         </#if>
 
         <form id="totpForm" action="${url.loginAction}" method="POST">
@@ -21,13 +21,13 @@
 
             <input id="smscode" name="smscode" class="hidden" />
 
-            <div class="flex justify-between w-full items-center">
+            <div class="sm:block md:flex justify-between w-full items-center">
                 <button class="btn btn-main w-3/7 mr-4" name="accept" id="accept" type="submit">Подтвердить</button>
                 
                 <#if error?has_content>
                 <button class="border-b border-dashed text-black-50 text-right" name="resend" id="resend" type="submit" >Отправить еще раз</button>
                 <#else>
-                <div id="timer" class="text-main-600 text-right text-sm flex items-center">
+                <div id="timer" class="text-main-600 text-right text-sm flex items-center my-3">
                     Пароль действует <span id="timer-time" class="px-1 text-black text-5/3em"></span> мин
                 </div>
                 <button class="hidden border-b border-dashed text-black-50 text-right" name="resend" id="resend" type="submit" >Отправить еще раз</button>
