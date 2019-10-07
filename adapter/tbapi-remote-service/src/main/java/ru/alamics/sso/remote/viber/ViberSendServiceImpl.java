@@ -3,6 +3,7 @@ package ru.alamics.sso.remote.viber;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import ru.alamics.sso.registration.phone.SmsConfig;
 import ru.alamics.sso.registration.phone.exception.ViberSendException;
@@ -77,12 +78,18 @@ public class ViberSendServiceImpl implements ViberSendService {
         URI uri = smsConfig.getUrl();
 
         try {
-            String response = client.target(uri)
+            ResteasyWebTarget webTarget = client.target(uri)
                     .queryParams(getConfigForQuery())
                     .queryParam("to", Util.getCleanUserPhone(phone))
-                    .queryParam("text", URLEncoder.encode(text, smsConfig.getCharset()))
+                    .queryParam("text", URLEncoder.encode(text, smsConfig.getCharset()));
+
+            //System.out.println(webTarget.getUri());
+
+            String response = webTarget
                     .request()
-                    .post(null, String.class);
+                    .get(String.class);
+
+            //System.out.println(response);
 
             return response;
 
