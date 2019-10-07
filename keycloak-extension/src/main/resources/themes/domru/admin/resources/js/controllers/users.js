@@ -382,8 +382,14 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 'Content-Disposition': `form-data; name="file"; filename="import.csv"`
             }
         }).then(response => {
-            Notifications.success("Users has been imported");
-            location.reload();
+            var resp = angular.fromJson(response).data.results['import-report'];
+            this.importMsg(resp)
+        }).catch(error => {
+            if(error.status === 400) {
+                Notifications.error(error.data.message);
+            } else {
+                Notifications.error(error.statusText);
+            }
         })
     };
 
@@ -398,9 +404,33 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 'Content-Disposition': `form-data; name="file"; filename="import.xlsx"`
             }
         }).then(response => {
-            Notifications.success("Users has been imported");
-            location.reload();
+            var resp = angular.fromJson(response).data.results['import-report'];
+            this.importMsg(resp)
+        }).catch(error => {
+            if(error.status === 400) {
+                Notifications.error(error.data.message);
+            } else {
+                Notifications.error(error.statusText);
+            }
         })
+    };
+
+    function onlyUnique(value, index, self) {
+        return self.indexOf(value) === index;
+    }
+
+    $scope.importMsg = function(resp) {
+        var errors = resp.errors.map(error => error.error).filter(onlyUnique );
+        var msg = `
+            Количество записей, для которых найдены дубли: ${resp.countClones}
+            Количество созданых пользоватлей: ${resp.createdUsers}
+            Количество записей, для которых не было положительного ответа от TBAPI: ${resp.tbapiSuccess}
+            Количество записей, для которых был положительный ответ от TBAPI: ${resp.tbapiSuccess}
+            Информация об ошибках: ${errors.join(",")}`;
+
+        Dialog.message('Информация', msg, () => location.reload());
+
+        return msg;
     };
 
     $scope.exportXlsx = function () {
