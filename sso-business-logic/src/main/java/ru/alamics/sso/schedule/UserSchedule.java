@@ -11,6 +11,7 @@ import org.keycloak.events.jpa.AdminEventEntity;
 import org.keycloak.models.*;
 import org.keycloak.models.jpa.RealmAdapter;
 import org.keycloak.models.jpa.UserAdapter;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.services.DefaultKeycloakContext;
 import org.keycloak.services.resources.KeycloakApplication;
@@ -23,6 +24,7 @@ import ru.alamics.sso.keycloak.entity.common.NotificationType;
 import ru.alamics.sso.keycloak.repository.*;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.property.PropertyConstants;
+import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.settings.SettingsDto;
 
 import javax.annotation.PostConstruct;
@@ -129,7 +131,7 @@ public class UserSchedule {
                         .user(userModel);
                 sender.send(bockNotification.build());
                 user.setEnabled(false);
-                createAdminEvent(OperationType.UPDATE, userModel, realm);
+                createAdminEvent(OperationType.UPDATE, user, realm);
             } else if (notification.getType() == NotificationType.PASSWORD_EXPIRED) {
                 var passwordExpired = passwordExpired();
                 passwordExpired.realmModel(realm)
@@ -187,7 +189,7 @@ public class UserSchedule {
         }
     }
 
-    private void createAdminEvent(OperationType operationType, UserModel user, RealmModel realm) {
+    private void createAdminEvent(OperationType operationType, UserEntity userEntity, RealmModel realm) {
         AdminEventEntity adminEvent = new AdminEventEntity();
         adminEvent.setTime(Time.toMillis(Time.currentTime()));
         adminEvent.setRealmId(realm.getName());
@@ -195,7 +197,7 @@ public class UserSchedule {
         adminEvent.setAuthRealmId(realm.getName());
         adminEvent.setResourcePath("autoblock");
         try {
-            adminEvent.setRepresentation(JsonSerialization.writeValueAsString(user));
+            adminEvent.setRepresentation(JsonSerialization.writeValueAsString(DataMapper.toUserEntityRepresentation(userEntity)));
         } catch (IOException e) {
             e.printStackTrace();
         }
