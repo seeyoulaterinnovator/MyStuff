@@ -181,8 +181,6 @@ export default (function() {
 
       const submitButton = document.getElementById('submit');
 
-      console.log(values, errors);
-
       if (!isEmpty(errors)) submitButton.disabled = true;
       else submitButton.disabled = false;
     },
