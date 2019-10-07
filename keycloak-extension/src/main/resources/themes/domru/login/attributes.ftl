@@ -43,7 +43,8 @@
                 document.getElementById('roleName').value = roleName;
                 document.getElementById('tomsId').value = tomsId;
                 document.getElementById('kc-accept').click();
-            })
+                window.parent.postMessage('post-selected', '*');
+            });
         });
 
     </script>
