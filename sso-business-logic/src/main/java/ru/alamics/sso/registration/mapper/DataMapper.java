@@ -1,11 +1,9 @@
 package ru.alamics.sso.registration.mapper;
 
 import org.keycloak.models.jpa.entities.UserEntity;
-import ru.alamics.sso.keycloak.entity.ExternalSystemEntity;
-import ru.alamics.sso.keycloak.entity.ExternalSystemRoleEntity;
-import ru.alamics.sso.keycloak.entity.UserPostEntity;
-import ru.alamics.sso.keycloak.entity.UserPostRoleEntity;
+import ru.alamics.sso.keycloak.entity.*;
 import ru.alamics.sso.registration.dto.*;
+import ru.alamics.sso.settings.SettingsDto;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -112,5 +110,21 @@ public class DataMapper {
         List<ExternalSystemRoleDto> externalSystemDtos = new LinkedList<>();
         externalSystemRoles.forEach(o -> externalSystemDtos.add(toExternalSystemRoleDto(o)));
         return externalSystemDtos;
+    }
+
+
+    public static SettingsDto toDto(Settings settings) {
+        if (settings == null){
+            return null;
+        }
+        return SettingsDto.builder()
+                .desc(settings.getDesc())
+                .extId(settings.getExtId())
+                .id(settings.getId())
+                .name(settings.getName())
+                .value(settings.getValue())
+                .realmId(settings.getRealmId())
+                .unit(settings.getUnit())
+                .build();
     }
 }
