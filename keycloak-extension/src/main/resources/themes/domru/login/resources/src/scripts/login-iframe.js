@@ -1,6 +1,4 @@
 export default (function() {
-  console.log("here");
-  console.log(location);
   const isIframe = (location.search.indexOf('hiddenHeader%3Dtrue') > 0) || (location.search.indexOf('hiddenHeader=true') > 0);
 
   if (isIframe) {
