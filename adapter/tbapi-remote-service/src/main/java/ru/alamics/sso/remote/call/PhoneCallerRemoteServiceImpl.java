@@ -9,6 +9,7 @@ import org.jboss.resteasy.plugins.providers.StringTextStar;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import ru.alamics.sso.registration.phone.exception.PhoneCallException;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
+import ru.alamics.sso.util.Util;
 
 import javax.ejb.Stateless;
 import javax.ws.rs.BadRequestException;
@@ -47,13 +48,11 @@ public class PhoneCallerRemoteServiceImpl implements PhoneCallerRemoteService {
     public String call(String phone, int count) throws PhoneCallException {
 
         String response = null;
-        phone = phone.replaceAll("[^\\d]", "");
         try {
-            // TODO почему то не звонил воронеж
-            //response = getCode(uriVoronezh, phone, count);
-            //if (isNull(response)) {
-                response = getCode(uriPerm, phone, count);
-            //}
+            response = getCode(uriPerm, phone, count);
+            if (isNull(response)) {
+                response = getCode(uriVoronezh, Util.getCleanUserPhone(phone), count);
+            }
         } catch (BadRequestException e) {
             log.error("Error", e);
             if (HttpStatus.SC_BAD_REQUEST == e.getResponse().getStatus()) {

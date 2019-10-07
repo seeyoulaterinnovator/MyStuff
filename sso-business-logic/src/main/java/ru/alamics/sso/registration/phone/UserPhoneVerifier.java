@@ -59,7 +59,7 @@ public class UserPhoneVerifier {
     private String generateCode(User user, ActivationCodeType codeType, AuthContext context)
             throws PhoneCallException, SmsSendException
     {
-        if (codeType == ActivationCodeType.CODE_TO_SMS) {
+        if ( ActivationCodeType.CODE_TO_SMS.equals(codeType)) {
             String code = SmsCodeGenerator.getCode(codeType.getLengthCode());
 
             try {
@@ -70,7 +70,7 @@ public class UserPhoneVerifier {
             }
 
             return code;
-        } else if (codeType == ActivationCodeType.CODE_BY_PHONE_NUMBER) {
+        } else if (ActivationCodeType.CODE_BY_PHONE_NUMBER.equals(codeType)) {
             return phoneCallerService.call(user.getPhone(), context.getCounter());
         }
         return null;

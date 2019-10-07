@@ -24,6 +24,9 @@ public class JsonResponse implements ResponseBuilder, Serializable {
     @JsonIgnore
     private Response.Status httpStatus;
 
+    public JsonResponse(){
+    }
+
     private JsonResponse(ResponseStatus status, Response.Status httpStatus) {
         this.status = status;
         this.httpStatus = httpStatus;
@@ -60,6 +63,13 @@ public class JsonResponse implements ResponseBuilder, Serializable {
     public Response build() {
         return Response.status(httpStatus)
                 .entity(this)
+                .type(MediaType.APPLICATION_JSON)
+                .build();
+    }
+
+    public Response buildResult() {
+        return Response.status(httpStatus)
+                .entity(results)
                 .type(MediaType.APPLICATION_JSON)
                 .build();
     }
