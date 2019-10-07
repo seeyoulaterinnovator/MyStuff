@@ -56,7 +56,7 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
         var pathParameters = uri.getPathParameters();
         var realmFromRequestName = pathParameters.getFirst("realm");
         var realmFromRequest = Optional.ofNullable(realmManager.getRealmByName(realmFromRequestName))
-                .orElseThrow(() -> new NotAuthorizedException("Unknown realm in token"));
+                .orElseThrow(() -> new NotAuthorizedException("Unknown realm in path param"));
 
         AdminPermissions.evaluator(session, realmFromRequest, auth).users().requireManage();//Проверяем права пользователя на редактирование реалма в которй он сделал запрос
 
@@ -64,6 +64,8 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
                 && !auth.getRealm().equals(realmFromToken)) {
             throw new ForbiddenException();
         }
+
+        session.getContext().setRealm(realmFromRequest);//FIXME Ставим контексте в реалме, тот в котором работает пользователь
 
         return auth;
     }
