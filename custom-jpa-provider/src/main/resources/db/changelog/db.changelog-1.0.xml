@@ -180,4 +180,64 @@
             ON DELETE CASCADE
         </sql>
     </changeSet>
+
+    <changeSet id="14" author="denisqq">
+        <createTable tableName="SETTINGS">
+            <column name="ID" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="EXT_ID" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="VALUE" type="TEXT"/>
+            <column name="DESC" type="TEXT"/>
+            <column name="REALM_ID" type="varchar(256)"/>
+        </createTable>
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('7b2e4a18-32ce-43e9-b2dd-680bbb61a78d', 'user.absence.blocking.days', '15', null, 'user');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('df4fa86e-ec19-4f63-b274-4ee25086c20f', 'user.absence.notifications.days', '15', null, 'user');
+        </sql>
+    </changeSet>
+    <changeSet id="15" author="strukov-av">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('bc5a3cd8-aecf-4f84-8f5f-caf5d44dc5a5', 'user.expire.sms-viber.code', '300', null, 'user');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('52b6892e-d950-45ff-843f-a564321545de', 'user.expire.incoming.call.code', '20', null, 'user');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('95047368-931d-4b1b-82be-077c6eb10d6d', 'user.expire.incoming.call.email.code', '300', null, 'user');
+        </sql>
+    </changeSet>
+    <changeSet id="16" author="tretyakov-da">
+        <addColumn tableName="SETTINGS">
+            <column name="NAME" type="varchar(2048)"/>
+        </addColumn>
+        <sql>
+            update SETTINGS set NAME = 'Expire sms/ Viber code' where EXT_ID = 'user.expire.sms-viber.code';
+            update SETTINGS set NAME = 'Expire incomig call code' where EXT_ID = 'user.expire.incoming.call.code';
+            update SETTINGS set NAME = 'Expire incoming call email code' where EXT_ID = 'user.expire.incoming.call.email.code';
+            update SETTINGS set NAME = 'Inactive Block timeout' where EXT_ID = 'user.absence.blocking.days';
+            update SETTINGS set NAME = 'Inactive notification timeout' where EXT_ID = 'user.absence.notifications.days';
+        </sql>
+    </changeSet>
+
+    <changeSet id="17" author="tretyakov-da">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mysql" />
+        </preConditions>
+        <sql>
+            alter table ADMIN_EVENT_ENTITY change `REPRESENTATION` `REPRESENTATION` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            alter table SETTINGS change `DESC` `DESC` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            alter table SETTINGS change VALUE VALUE TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
+    <changeSet id="18" author="strukov-av">
+        <addColumn tableName="SETTINGS">
+            <column name="UNIT" type="varchar(8)"/>
+        </addColumn>
+        <sql>
+            update SETTINGS set UNIT = 'MINUTES' where EXT_ID = 'user.expire.sms-viber.code';
+            update SETTINGS set UNIT = 'SECONDS' where EXT_ID = 'user.expire.incoming.call.code';
+            update SETTINGS set UNIT = 'MINUTES' where EXT_ID = 'user.expire.incoming.call.email.code';
+            update SETTINGS set UNIT = 'DAYS' where EXT_ID = 'user.absence.blocking.days';
+            update SETTINGS set UNIT = 'DAYS' where EXT_ID = 'user.absence.notifications.days';
+        </sql>
+    </changeSet>
 </databaseChangeLog>

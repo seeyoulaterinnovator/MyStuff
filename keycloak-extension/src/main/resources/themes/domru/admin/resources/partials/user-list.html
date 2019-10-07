@@ -1,0 +1,157 @@
+<style>
+    li.role-list {
+        list-style-type: none; /* Убираем маркеры */
+        /*line-height: 1.5px;*/
+    }
+
+    ul {
+        margin-left: 0; /* Отступ слева в браузере IE и Opera */
+        padding-left: 0; /* Отступ слева в браузере Firefox, Safari, Chrome */
+    }
+
+    .w-full {
+        width: 100%;
+    }
+
+    .inner-table__cell {
+        text-align: center;
+    }
+
+    .nullable__margin {
+        margin: 0 0 0 0;
+    }
+
+</style>
+<div class="col-sm-9 col-md-10 col-sm-push-3 col-md-push-2" ng-init="init()">
+
+    <kc-tabs-users></kc-tabs-users>
+
+    <table class="table table-striped table-bordered" id="user-table">
+        <caption data-ng-show="users" class="hidden">{{:: 'table-of-realm-users' | translate}}</caption>
+        <thead>
+        <tr>
+            <th colspan="13">
+                <div class="form-inline">
+                    <div class="form-group form-inline">
+                        <div class="form-group">
+                            <div class="input-group-addon">
+                                <input type="text" placeholder="{{:: 'search.placeholder' | translate}}"
+                                       data-ng-model="query.search" class="form-control search"
+                                       onkeydown="if (event.keyCode == 13) document.getElementById('userSearch').click()">
+                                <i class="fa fa-search" id="userSearch" data-ng-click="search()"></i>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="input-group-addon">
+                                <input type="text" placeholder="Search by user id" data-ng-model="query.searchByUserId"
+                                       class="form-control search"
+                                       onkeydown="if (event.keyCode == 13) document.getElementById('userSearchById').click()">
+                                <i class="fa fa-search" id="userSearchById" data-ng-click="searchByUserId()"></i>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="input-group-addon">
+                                <input type="text" placeholder="Search by toms id" data-ng-model="query.searchByTomsId"
+                                       class="form-control search"
+                                       onkeydown="if (event.keyCode == 13) document.getElementById('userSearchByTomsId').click()">
+                                <i class="fa fa-search" id="userSearchByTomsId" data-ng-click="searchByTomsId()"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="viewAllUsers" class="btn btn-default" ng-click="query.search = ''; firstPage()">{{::
+                        'view-all-users' | translate}}
+                    </button>
+
+                    <div class="pull-right" data-ng-show="access.manageUsers">
+                        <label for="import-file-csv" class="btn btn-default ng-binding">Import CSV<i
+                                class="pficon pficon-import"></i></label>
+                        <input id="import-file-csv" type="file" class="hidden"
+                               onchange="angular.element(this).scope().importFileCSV(this.files)">
+
+                        <label for="import-file-xlsx" class="btn btn-default ng-binding">Import Xlsx<i
+                                class="pficon pficon-import"></i></label>
+                        <input id="import-file-xlsx" type="file" class="hidden"
+                               onchange="angular.element(this).scope().importFileExcel(this.files)">
+
+                        <button data-ng-click="exportCSV()" class="btn btn-default">Export CSV</button>
+                        <button data-ng-click="exportXlsx()" class="btn btn-default">Export Excel</button>
+
+                        <button data-ng-click="selectedResetPassword()" class="btn btn-default">Reset Password</button>
+                        <button data-ng-click="selectedBlockUsers()" class="btn btn-default">Block Users</button>
+                        <button data-ng-click="unlockUsers()" class="btn btn-default">{{:: 'unlock-users' | translate}}</button>
+                        <a id="createUser" class="btn btn-default" href="#/create/user/{{realm.realm}}">{{:: 'add-user' | translate}}</a>
+                    </div>
+                </div>
+            </th>
+        </tr>
+        <tr>
+        <tr data-ng-show="searchLoaded && users.length > 0">
+            <th class="w-1">
+                <input type="checkbox" data-ng-click="selectAll()" data-ng-model="selectedAll"> Select
+            </th>
+            <th class="w-12">{{:: 'id' | translate}}</th>
+            <th class="w-12">{{:: 'username' | translate}}</th>
+            <th class="w-12">{{:: 'email' | translate}}</th>
+            <th class="w-12">{{:: 'first-name' | translate}}</th>
+            <th class="w-1">Enabled</th>
+            <th class="w-12">Phone</th>
+            <th class="w-12">Toms Id</th>
+            <th class="w-12">Roles</th>
+            <th class="w-12">Systems</th>
+            <th colspan="{{serverInfo.featureEnabled('IMPERSONATION') && access.impersonation == true ? '3' : '2'}}">
+                {{:: 'actions' | translate}}
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="user in users">
+            <td class="clip" style="width: 5%">
+                <input type="checkbox" data-ng-model="user.active"/>
+            </td>
+            <td class="clip"><a href="#/realms/{{realm.realm}}/users/{{user.id}}">{{user.id}}</a>
+            </td>
+            <td class="clip" rowspan="">{{user.username}}</td>
+            <td class="clip">{{user.email}}</td>
+            <td class="clip">{{user.firstName}}</td>
+            <td class="clip">
+                <input type="checkbox" data-ng-model="user.enabled" disabled/>
+            </td>
+            <td class="clip">{{user.phone}}</td>
+
+            <td class="clip" colspan="3" style="padding: 0 0 0 0">
+                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.access.length > 0">
+
+                    <tr data-ng-repeat="access in user.access" >
+                        <td class="clip inner-table__cell" rowspan="{{getEqualTomsId(user.access, access.tomsId)}}"
+                            data-ng-if="isFirstTomsId(user.access, access.tomsId, access) != ''">
+                            {{isFirstTomsId(user.access, access.tomsId, access)}}
+                        </td>
+                        <td class="clip inner-table__cell" rowspan="{{getEqualRoleName(user.access, access.roleName)}}"
+                            data-ng-if="isFirstRoleName(user.access, access.roleName, access) != ''">
+                            {{isFirstRoleName(user.access, access.roleName, access)}}
+                        </td>
+                        <td class="clip inner-table__cell" data-ng-if="isFirstSystemName(user.access, access.systemName, access) != ''">
+                            {{isFirstSystemName(user.access, access.systemName, access)}}
+                        </td>
+
+                    </tr>
+                </table>
+            </td>
+            <td class="kc-action-cell" kc-open="/realms/{{realm.realm}}/users/{{user.id}}">{{:: 'edit' | translate}}
+            </td>
+            <td class="kc-action-cell" data-ng-click="removeUser(user)">{{:: 'delete' | translate}}</td>
+        </tr>
+        <tr data-ng-show="!users || users.length == 0">
+            <td class="text-muted" data-ng-show="!users">{{:: 'users.instruction' | translate}}</td>
+            <td class="text-muted" data-ng-show="searchLoaded && users.length == 0 && lastSearch != null">{{::
+                'no-results' | translate}}
+            </td>
+            <td class="text-muted" data-ng-show="searchLoaded && users.length == 0 && lastSearch == null">{{::
+                'no-users-available' | translate}}
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<kc-menu></kc-menu>

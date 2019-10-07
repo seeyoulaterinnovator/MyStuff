@@ -3,7 +3,9 @@ package ru.alamics.sso.registration.rias;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
+import ru.alamics.sso.registration.rias.model.RiasLogin;
 import ru.alamics.sso.registration.rias.port.RiasApiService;
+import ru.alamics.sso.registration.rias.port.RiasLoginService;
 import ru.alamics.sso.util.Util;
 
 import javax.ejb.EJB;
@@ -15,6 +17,9 @@ public class RiasService {
 
     @EJB
     private RiasApiService riasApiService;
+
+    @EJB
+    private RiasLoginService riasLoginService;
 
     public RiasService(RiasApiService riasApiService) {
         this.riasApiService = riasApiService;
@@ -47,14 +52,25 @@ public class RiasService {
             return false;
 
         try {
-            phone = phone.replaceAll("[^0-9]+", "");
-            return riasApiService.checkParam(phone);
+            return riasApiService.checkParam(Util.getCleanUserPhone(phone));
 
         } catch (RiasCheckException rce) {
             log.error("RIAS check service", rce);
         }
 
         return false;
+    }
+
+    public RiasLogin loginUser(String login, String password) {
+
+        try {
+            return riasLoginService.loginUser(login, password);
+
+        } catch (RiasCheckException e) {
+            log.error("RIAS login service", e);
+        }
+
+        return null;
     }
 
 }

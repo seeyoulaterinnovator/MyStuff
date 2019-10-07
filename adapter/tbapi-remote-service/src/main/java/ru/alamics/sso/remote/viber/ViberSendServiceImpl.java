@@ -9,6 +9,7 @@ import ru.alamics.sso.registration.phone.exception.ViberSendException;
 import ru.alamics.sso.registration.phone.port.ViberSendService;
 import ru.alamics.sso.util.EStand;
 import ru.alamics.sso.util.StandResolver;
+import ru.alamics.sso.util.Util;
 
 import javax.ejb.Stateless;
 import javax.ws.rs.ProcessingException;
@@ -27,10 +28,10 @@ import java.util.concurrent.TimeUnit;
 @Stateless(name = "ViberSender")
 public class ViberSendServiceImpl implements ViberSendService {
 
-    private static final String SMSC_NAME = "centerName";
-    private static final String USERNAME = "user";
-    private static final String PASSWORD = "pass";
-    private static final String SENDER_NAME = "sender";
+    private static final String SMSC_NAME = "rapporto_viber";
+    private static final String USERNAME = "ertelecom";
+    private static final String PASSWORD = "P10BxzA6Z1BRM";
+    private static final String SENDER_NAME = "Domru";
 
     private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
             .connectTimeout(3, TimeUnit.SECONDS)
@@ -73,14 +74,12 @@ public class ViberSendServiceImpl implements ViberSendService {
             return "0: Accepted for delivery";
         }
 
-        phone = phone.replaceAll("[^0-9]+", "");
-
         URI uri = smsConfig.getUrl();
 
         try {
             String response = client.target(uri)
                     .queryParams(getConfigForQuery())
-                    .queryParam("to", phone)
+                    .queryParam("to", Util.getCleanUserPhone(phone))
                     .queryParam("text", URLEncoder.encode(text, smsConfig.getCharset()))
                     .request()
                     .post(null, String.class);
