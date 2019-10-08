@@ -120,15 +120,16 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
 
         String username = formData.getFirst(FormConstants.FIELD_USERNAME);
         String password = formData.getFirst(FormConstants.FIELD_PASSWORD);
+        var city = formData.getFirst(FormConstants.FIELD_CITY);
 
+        String domain = city; // TODO
 
-        RiasLogin riasLogin = riasService.loginUser(username, password);
+        RiasLogin riasLogin = riasService.loginUser(domain, username, password);
         if (riasLogin != null) {
 
             if (riasLogin.getAccess_token() != null) {
 
                 var uriLoc = UriBuilder.fromPath("https://lkb2b.domru.ru/login");
-                var city = formData.getFirst(FormConstants.FIELD_CITY);
 
                 if (!Validation.isBlank(city)) {
                     uriLoc.queryParam("citydomain", city);

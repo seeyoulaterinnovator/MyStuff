@@ -5,5 +5,5 @@ import ru.alamics.sso.registration.rias.model.RiasLogin;
 
 public interface RiasLoginService {
 
-    RiasLogin loginUser(String username, String password) throws RiasCheckException;
+    RiasLogin loginUser(String domain, String username, String password) throws RiasCheckException;
 }

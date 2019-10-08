@@ -32,27 +32,20 @@ public class RiasUserLoginImpl implements RiasLoginService {
 
     private static final ResteasyClient client = clientBuilder.build();
 
-    private final URI uri;
+    private static final String AUTH_SCHEME = "https";
+    private static final String AUTH_DEF_CITY = "perm-dev";
+    private static final String AUTH_DOMAIN = "db.ertelecom.ru";
+    private static final int AUTH_PORT = 443;
+    private static final String AUTH_PATH = "/cgi-bin/ppo/es_webface/open_auth.authorize_password";
 
-    public RiasUserLoginImpl() {
-        uri = new ResteasyUriBuilder()
-                .scheme("https")
-                .host("perm-dev.db.ertelecom.ru")
-                .port(443)
-                .path("/cgi-bin/ppo/es_webface/open_auth.authorize_password")
-                .build();
-    }
-
-    public RiasUserLoginImpl(URI uri) {
-        this.uri = uri;
-    }
+    public RiasUserLoginImpl() {}
 
     private static final String CLIENT_NAME = "SSO";
     private static final String CLIENT_SALT = "W2NHAYTWrfEG9fDw2MAt2TuuM7VK2K7H";
 
     private static final String GRANT_TYPE = "password";
 
-    public RiasLogin loginUser(String username, String password) throws RiasCheckException
+    public RiasLogin loginUser(String domain, String username, String password) throws RiasCheckException
     {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
 
@@ -70,6 +63,14 @@ public class RiasUserLoginImpl implements RiasLoginService {
         // {"error":"UNAUTHORIZED_CLIENT", "error_description":"Данный тип авторизации не поддерживается для заданного клиента."}
 
         try {
+
+            URI uri = new ResteasyUriBuilder()
+                    .scheme(AUTH_SCHEME)
+                    .host(String.format("%s.%s", domain == null? AUTH_DEF_CITY : domain, AUTH_DOMAIN))
+                    .port(AUTH_PORT)
+                    .path(AUTH_PATH)
+                    .build();
+
             ResteasyWebTarget wt = client.target(uri)
                     .queryParam("client_id", CLIENT_NAME)
                     .queryParam("grant_type", GRANT_TYPE)
