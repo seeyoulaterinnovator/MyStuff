@@ -19,6 +19,8 @@ import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
+import ru.alamics.sso.keycloak.cities.CitiesResource;
+import ru.alamics.sso.keycloak.cities.model.CityMigration;
 import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.registration.rias.RiasService;
 import ru.alamics.sso.registration.rias.model.RiasLogin;
@@ -122,7 +124,11 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
         String password = formData.getFirst(FormConstants.FIELD_PASSWORD);
         var city = formData.getFirst(FormConstants.FIELD_CITY);
 
-        String domain = city; // TODO
+        String domain = null;
+        CityMigration cm = CitiesResource.getCityMigrationByCity(city);
+        if (cm != null) {
+            domain = cm.getDomain();
+        }
 
         RiasLogin riasLogin = riasService.loginUser(domain, username, password);
         if (riasLogin != null) {
