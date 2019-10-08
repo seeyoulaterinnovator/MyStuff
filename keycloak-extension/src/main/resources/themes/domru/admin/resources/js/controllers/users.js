@@ -420,7 +420,10 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     }
 
     $scope.importMsg = function(resp) {
-        var errors = resp.errors.map(error => error.error).filter(onlyUnique );
+        var errors = [];
+        if(resp.errors) {
+        errors = resp.errors.map(error => error.error).filter(onlyUnique );
+        }
         var msg = `
             Количество записей, для которых найдены дубли: ${resp.countClones}
             Количество созданых пользоватлей: ${resp.createdUsers}
