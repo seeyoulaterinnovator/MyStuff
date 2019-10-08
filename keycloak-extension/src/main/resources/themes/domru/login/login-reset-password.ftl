@@ -21,8 +21,16 @@
                 </label>
             </div>
 
-            <#--  <button id="submit" class="btn btn-main w-1/2" type="submit">${msg("doSubmit")}</button>  -->
-            <button id="submit" class="btn btn-main w-1/2 mt-10" type="submit">Далее</button>
+            <div class="flex flex-col justify-between sm:flex-row mt-10">
+                <div class="flex-basis-1/2 mb-4 sm:mb-0">
+                    <#--  <button id="submit" class="btn btn-main w-full" type="submit">${msg("doSubmit")}</button>  -->
+                    <button id="submit" class="btn btn-main w-full" type="submit">Далее</button>
+                </div>
+                <div class="flex-basis-1/2 ml-0 text-sm sm:ml-6">
+                    <#--  <button id="cancel" class="btn w-full" type="button">${msg("doDecline")}</button>  -->
+                    <button id="cancel" class="btn w-full" type="button">Назад</button>
+                </div>
+            </div>
         </form>
     <#elseif section = "info" >
         ${msg("emailInstruction")}
