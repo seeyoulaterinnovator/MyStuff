@@ -18,6 +18,9 @@ import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.messages.Messages;
+import org.keycloak.services.validation.Validation;
+import ru.alamics.sso.keycloak.cities.CitiesResource;
+import ru.alamics.sso.keycloak.cities.model.CityMigration;
 import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.registration.rias.RiasService;
 import ru.alamics.sso.registration.rias.model.RiasLogin;
@@ -28,7 +31,6 @@ import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import java.net.URI;
 
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 
@@ -120,21 +122,30 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
 
         String username = formData.getFirst(FormConstants.FIELD_USERNAME);
         String password = formData.getFirst(FormConstants.FIELD_PASSWORD);
+        var city = formData.getFirst(FormConstants.FIELD_CITY);
 
-        RiasLogin riasLogin = riasService.loginUser(username, password);
+        String domain = null;
+        CityMigration cm = CitiesResource.getCityMigrationByCity(city);
+        if (cm != null) {
+            domain = cm.getDomain();
+        }
+
+        RiasLogin riasLogin = riasService.loginUser(domain, username, password);
         if (riasLogin != null) {
 
             if (riasLogin.getAccess_token() != null) {
 
-                String location = "https://lkb2b.domru.ru/login";
+                var uriLoc = UriBuilder.fromPath("https://lkb2b.domru.ru/login");
 
-                URI uriLoc = UriBuilder.fromPath(location).build();
+                if (!Validation.isBlank(city)) {
+                    uriLoc.queryParam("citydomain", city);
+                }
 
-                Response response = Response.seeOther(uriLoc)
+                Response response = Response.seeOther(uriLoc.build())
                         .header("btoken", riasLogin.getAccess_token())
                         .build();
 
-                log.debug("Redirecting to {}", location);
+                log.debug("Redirecting to {}", uriLoc.build());
                 context.forceChallenge(response);
 
                 return true;
