@@ -57,12 +57,12 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
     @Override
     public void onEvent(AdminEvent event, boolean includeRepresentation) {
 
-        if (event.getOperationType().equals(OperationType.CREATE)
+        if (event.getOperationType() == OperationType.CREATE
                 && event.getResourceType().equals(ResourceType.USER)) {
             onEventCreate(event);
         }
 
-        if (event.getOperationType().equals(OperationType.UPDATE)
+        if (event.getOperationType() == OperationType.UPDATE
                 && event.getResourceType().equals(ResourceType.USER)) {
             onEventUpdate(event);
         }
@@ -91,7 +91,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
             if (!userNow.isEnabled()){
                 return;
             }
-            String userId = getUserId(event);
+            String userId = userNow.getId();
             if (userId == null) {
                 return;
             }
