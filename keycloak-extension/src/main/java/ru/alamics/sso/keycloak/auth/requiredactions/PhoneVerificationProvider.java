@@ -47,17 +47,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         this.userPhoneVerifier = userPhoneVerifier;
         this.activationCodeType = activationCodeType;
         this.emailTemplateProvider = emailTemplateProvider;
-        ApplicationProperties applicationProperties;
-        try {
-            InitialContext context = new InitialContext();
-            applicationProperties = (ApplicationProperties) context.lookup("java:global/domru-sso/" + ApplicationProperties.class.getSimpleName());
-            log.info("Got userPhoneVerifier1 from context");
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context");
-        }
-        activationCodeType.setExpiredSeconds(Long.parseLong(applicationProperties.getProperty(activationCodeType.getPropertyConstant(), "user", true)));
-        ActivationCodeType.CODE_TO_EMAIL.setExpiredSeconds(Long.parseLong(applicationProperties.getProperty(PropertyConstants.EXPIRE_INCOMING_CALL_EMAIL_CODE, "user", true)));
+        ActivationCodeType.init();
     }
 
     @Override

@@ -110,8 +110,8 @@ public class DataMapper {
         if (externalSystemRoles == null || externalSystemRoles.isEmpty()) {
             return null;
         }
-        List<ExternalSystemRoleDto> externalSystemDtos = new LinkedList<>();
-        externalSystemRoles.forEach(o -> externalSystemDtos.add(toExternalSystemRoleDto(o)));
+        List<ExternalSystemRoleDto> externalSystemDtos = externalSystemRoles.stream()
+                .map(DataMapper::toExternalSystemRoleDto).collect(Collectors.toList());
         return externalSystemDtos;
     }
 
