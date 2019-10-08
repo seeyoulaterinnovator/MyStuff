@@ -26,9 +26,9 @@
                     <#--  <button id="submit" class="btn btn-main w-full" type="submit">${msg("doSubmit")}</button>  -->
                     <button id="submit" class="btn btn-main w-full" type="submit">Далее</button>
                 </div>
-                <div class="flex-basis-1/2 ml-0 text-sm sm:ml-6">
+                <div class="text-center flex-basis-1/2 ml-0 text-sm sm:ml-6">
                     <#--  <button id="cancel" class="btn w-full" type="button">${msg("doDecline")}</button>  -->
-                    <button id="cancel" class="btn w-full" type="button">Назад</button>
+                    <a id="cancel" href="${url.loginUrl}" class="btn w-full">Назад</a>
                 </div>
             </div>
         </form>
