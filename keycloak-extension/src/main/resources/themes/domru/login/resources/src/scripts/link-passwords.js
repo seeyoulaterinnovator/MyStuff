@@ -1,4 +1,4 @@
-import { HIGHLIGHT_VALIDATION_CHARSET } from '../constants/passwordCharset.js';
+import { HIGHLIGHT_VALIDATION_CHARSET, WRONG_PASS_REG } from '../constants/passwordCharset.js';
 import { fetchPassword } from './helpers';
 
 // Привязывает логику к блоку 'password-block'
@@ -69,6 +69,11 @@ export default (
         ruleElement.classList.remove('text-accentGreen');
         ruleElement.classList.add('text-accentRed');
       }
+    }
+
+    const regExp = new RegExp(WRONG_PASS_REG);
+    if (regExp.test(password)) {
+      passwordElement.value = (password.replace(WRONG_PASS_REG, ''))
     }
   }
   passwordElement.addEventListener('input', highlightRules);

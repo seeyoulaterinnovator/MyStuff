@@ -160,7 +160,6 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 userPhoneVerifier.verifyPhone(user, authContext, code, activationCodeType);
 
                 UserModelUserMapper.mergeUserInto(user, model);
-                authSession.removeAuthNote(NEED_SEND_EMAIL_CODE);
                 authSession.removeAuthNote(PHONE_KEY_HASH);
                 authSession.removeAuthNote(EXPIRATION_TIME);
                 authSession.removeAuthNote(COUNT_REPEAT);
@@ -173,6 +172,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                         .setAttribute("expirationSeconds", activationCodeType.getExpiredSeconds())
                         .setAttribute("lengthCode", activationCodeType.getLengthCode())
                         .setAttribute("userPhone", user.getPhone())
+                        .setAttribute("enableRepeatCall", authSession.getAuthNote(NEED_SEND_EMAIL_CODE) == null)
                         .createForm(VERIFY_PHONE_FTL);
                 context.challenge(challenge);
             }
