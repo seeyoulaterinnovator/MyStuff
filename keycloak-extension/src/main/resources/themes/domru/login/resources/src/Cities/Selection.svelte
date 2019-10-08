@@ -22,16 +22,16 @@
   export let search;
 
   function handleClick(currentCity) {
-    if (currentCity.domain) {
-      window.open(`https://lkb2b.domru.ru/login?citydomain=${currentCity.domain}`);
-    } else {
-      city.set(currentCity.name);
-      Cookie.set('CITY', currentCity.name);
-      Cookie.set('city-domain', currentCity.domain);
-      status.set(STATUS.CONFIRMED);
-      showModal.set(false);
-      editingStarted.set(false);
-    }
+      if (currentCity.domain) {
+          window.open(`https://lkb2b.domru.ru/login?citydomain=${currentCity.domain}`);
+      } else {
+          city.set(currentCity.name);
+          Cookie.set('CITY', currentCity.name);
+          Cookie.set('city-domain', currentCity.domain);
+          status.set(STATUS.CONFIRMED);
+          showModal.set(false);
+          editingStarted.set(false);
+      }
   }
 
   function groupByFirstCharacter(arr) {

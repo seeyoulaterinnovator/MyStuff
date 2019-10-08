@@ -38,12 +38,16 @@
     const chosenCity = $allCities[indexOfChosenCity].name;
     const chosenDomain = $allCities[indexOfChosenCity].domain;
 
-    city.set(chosenCity);
-    Cookie.set('CITY', chosenCity);
-    Cookie.set('city-domain', chosenDomain);
-    status.set(STATUS.CONFIRMED);
-    showModal.set(false);
-    editingStarted.set(false);
+    if (chosenDomain) {
+        window.open(`https://lkb2b.domru.ru/login?citydomain=${chosenDomain}`);
+    } else {
+        city.set(chosenCity);
+        Cookie.set('CITY', chosenCity);
+        Cookie.set('city-domain', chosenDomain);
+        status.set(STATUS.CONFIRMED);
+        showModal.set(false);
+        editingStarted.set(false);
+    }
   }
 </script>
 
