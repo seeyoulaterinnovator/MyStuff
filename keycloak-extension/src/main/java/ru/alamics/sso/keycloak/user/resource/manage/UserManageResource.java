@@ -19,7 +19,7 @@ public class UserManageResource {
     private final AdminEventBuilder eventBuilder;
 
 
-    public UserManageResource (KeycloakSession session, AdminEventBuilder eventBuilder) {
+    UserManageResource (KeycloakSession session, AdminEventBuilder eventBuilder) {
         this.session = session;
         KeycloakContext context = session.getContext();
         this.eventBuilder = eventBuilder.resource(ResourceType.USER);
@@ -37,7 +37,11 @@ public class UserManageResource {
                 if(user != null) {
                     user.setEnabled(false);
                     var rep = ModelToRepresentation.toRepresentation(session, realm, user);
-                    eventBuilder.operation(OperationType.UPDATE).resourcePath(session.getContext().getUri()).representation(rep).success();
+                    eventBuilder.operation(OperationType.UPDATE)
+                            .resourcePath(session.getContext().getUri())
+                            .representation(rep)
+                            .realm(realm)
+                            .success();
                 }
             });
         }
@@ -56,7 +60,11 @@ public class UserManageResource {
                 if(user != null) {
                     user.setEnabled(true);
                     var rep = ModelToRepresentation.toRepresentation(session, realm, user);
-                    eventBuilder.operation(OperationType.UPDATE).resourcePath(session.getContext().getUri()).representation(rep).success();
+                    eventBuilder.operation(OperationType.UPDATE)
+                            .resourcePath(session.getContext().getUri())
+                            .representation(rep)
+                            .realm(realm)
+                            .success();
                 }
             });
         }
