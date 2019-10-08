@@ -156,7 +156,7 @@ public class UserSchedule {
         final String template = "block-prepare-notification.ftl";
         SettingsDto setting = properties.getSetting(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user");
         Map<String, Object> body = new HashMap<>();
-        body.put("absence", setting.getValue() + " " + getRusTranslateTimeUnit(setting.getUnit()));
+        body.put("absence", setting.getValue() + " " + Translator.getRusTranslateTimeUnit(setting.getValue(), setting.getUnit()));
 
         return EmailModel.builder()
                 .bodyAttributes(body)
@@ -177,16 +177,6 @@ public class UserSchedule {
                 .bodyAttributes(body)
                 .subject(subject)
                 .bodyTemplate(template);
-    }
-
-    private String getRusTranslateTimeUnit(TimeUnit unit){
-        switch (unit){
-            case DAYS: return "дней";
-            case HOURS: return "часов";
-            case MINUTES: return "минут";
-            case SECONDS: return "секунд";
-            default: return "";
-        }
     }
 
     private void createAdminEvent(OperationType operationType, UserEntity userEntity, RealmModel realm) {
