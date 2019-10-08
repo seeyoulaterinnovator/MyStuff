@@ -63,6 +63,9 @@
                     </button>
 
                     <div class="pull-right" data-ng-show="access.manageUsers">
+                        <button data-ng-click="downloadTemplateCSV()" class="btn btn-default">Download Template CSV</button>
+                        <button data-ng-click="downloadTemplateXlsx()" class="btn btn-default">Download Template Excel</button>
+
                         <label for="import-file-csv" class="btn btn-default ng-binding">Import CSV<i
                                 class="pficon pficon-import"></i></label>
                         <input id="import-file-csv" type="file" class="hidden" accept=".csv"
