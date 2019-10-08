@@ -50,7 +50,7 @@ public class AutoLockNotificationRepository {
                 "                from AUTO_LOCK_NOTIFICATION aln\n" +
                 "                where aln.USER_ID = t.USER_ID\n" +
                 "                  and aln.TYPE = 'ABSENCE_BLOCKING'\n" +
-                "                  and aln.STATUS = 'SENT')\n" +
+                "                  and aln.STATUS = 'SENT' group by aln.USER_ID)\n" +
                 "    for update")
                 .setParameter("date", absence)
                 .executeUpdate();

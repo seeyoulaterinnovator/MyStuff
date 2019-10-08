@@ -38,7 +38,7 @@ public class UserHistoryLoginRepository {
                 "                       from AUTO_LOCK_NOTIFICATION aln\n" +
                 "                       where aln.USER_ID = ll.USER_ID\n" +
                 "                         and aln.TYPE = 'ABSENCE_NOTIFICATION'\n" +
-                "                         and aln.STATUS = 'SENT')\n" +
+                "                         and aln.STATUS = 'SENT' group by aln.USER_ID)\n" +
                 "          FOR UPDATE) ll\n" +
                 "         join USER_ENTITY user on user.ID = ll.USER_ID\n" +
                 "where ll.date <= :date\n" +
