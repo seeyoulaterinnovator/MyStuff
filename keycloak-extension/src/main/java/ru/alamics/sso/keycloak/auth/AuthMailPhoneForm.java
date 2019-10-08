@@ -167,7 +167,7 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
 
             if (user == null) {
                 log.info("find user by phone");
-                user = Util.getUserAdapter(context.getSession(), userFindService.getUserByPhone(username));
+                user = Util.getUserAdapter(context.getSession(), userFindService.getUserByPhone(context.getRealm(), username));
             }
 
             if (user == null) {

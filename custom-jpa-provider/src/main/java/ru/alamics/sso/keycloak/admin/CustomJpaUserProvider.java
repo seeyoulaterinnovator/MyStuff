@@ -1,20 +1,22 @@
 package ru.alamics.sso.keycloak.admin;
 
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.JpaUserProvider;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.provider.ProviderFactory;
+import org.keycloak.representations.idm.UserRepresentation;
 import ru.alamics.sso.keycloak.entity.AutoLockNotification;
 import ru.alamics.sso.keycloak.entity.UserLoginHistory;
 import ru.alamics.sso.keycloak.entity.UserPostEntity;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 public class CustomJpaUserProvider extends JpaUserProvider {

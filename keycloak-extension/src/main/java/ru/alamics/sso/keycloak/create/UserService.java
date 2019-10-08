@@ -315,7 +315,7 @@ public class UserService {
     }
 
     private void checkOnExistUser(UserRequest request, RealmModel realm) throws FoundException {
-        UserEntity user = userFindService.getUserByPhone(request.getPhone());
+        UserEntity user = userFindService.getUserByPhone(realm, request.getPhone());
 
         if (user != null) {
             log.error("User exists with same phone {}", request.getPhone());
