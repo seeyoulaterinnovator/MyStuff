@@ -3,7 +3,6 @@ package ru.alamics.sso.keycloak.create;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.RequiredActionProvider;
-import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.KeycloakSession;
@@ -31,7 +30,7 @@ import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 import javax.activation.UnsupportedDataTypeException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.persistence.EntityManager;
+import javax.validation.ValidationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -146,8 +145,10 @@ public class UserService {
         return parameters;
     }
 
-    public ImportResponse importUsers(InputStream inputStream, String type) throws IOException, FileServiceException {
+    public ImportResponse importUsers(InputStream inputStream, String type, RealmModel realm) throws IOException, FileServiceException {
         log.info("Start upload users");
+        this.realm = realm;
+
         FileModel file = FileFactory.createFileModel(inputStream, type);
         if (file == null) {
             throw new UnsupportedDataTypeException("Unsupported file format!");
@@ -179,6 +180,7 @@ public class UserService {
     }
 
     private int getCountAndRemoveClones(List<UserImport> userImports) {
+        log.info("findClonesFrom: {}", userImports);
         int countClones = 0;
         List<UserImport> userRequestMain = new LinkedList<>();
         userImports.stream().forEach(o -> userRequestMain.add(o));
@@ -201,6 +203,7 @@ public class UserService {
         AtomicInteger tbapiSuccess = new AtomicInteger();
         userImports.stream().forEach(o -> {
             try {
+                validateUserPhoneAndEmail(o.getUserRequest());
                 UserModel user = createUser(o.getUserRequest());
                 user.setEmailVerified(false);
                 createAdminEvent(OperationType.CREATE, user);
@@ -221,13 +224,13 @@ public class UserService {
                 addUserPost(user, o);
             } catch (FoundException e) {
                 Map<String, Object> error = new HashMap<>();
-                error.put(e.getMessage(), e.getResult());
-                error.put("userName", o.getUserRequest().getName());
+                error.put("error", e.getMessage());
+                error.put("importUserName", o.getUserRequest().getName());
                 importResponse.addError(error);
-            } catch (NotFoundException e) {
+            } catch (NotFoundException | ValidationException e) {
                 Map<String, Object> error = new HashMap<>();
                 error.put("error", e.getMessage());
-                error.put("userName", o.getUserRequest().getName());
+                error.put("importUserName", o.getUserRequest().getName());
                 importResponse.addError(error);
             } catch (TbapiRegisterException e) {
                 tbapiErrors.getAndIncrement();
@@ -297,10 +300,24 @@ public class UserService {
         return user;
     }
 
-    private void checkOnExistUser(UserRequest request, RealmModel realm) throws FoundException {
-        UserEntity user = userFindService.getUserByPhone(request.getPhone());
+    private void validateUserPhoneAndEmail(UserRequest userRequest) {
+        String phone = userRequest.getPhone();
+        String email = userRequest.getEmail();
+        if (phone == null || !phone.matches("[\\d]+") || !phone.startsWith("7") || phone.length() != 11) {
+            throw new ValidationException("Phone is not valid");
+        }
 
-        if (user != null ) {
+        if (email == null || !email.contains("@") || !email.substring(0, 1).matches("([\\w[\\s]])+")
+                || email.substring(0, 1).matches("[\\d]+") || email.contains(" ") ||
+                !email.substring(email.indexOf("@") + 1, email.indexOf("@") + 2).matches("([\\w[\\s]])+")) {
+            throw new ValidationException("Email is not valid");
+        }
+    }
+
+    private void checkOnExistUser(UserRequest request, RealmModel realm) throws FoundException {
+        UserEntity user = userFindService.getUserByPhone(realm, request.getPhone());
+
+        if (user != null) {
             log.error("User exists with same phone {}", request.getPhone());
             throw new FoundException("User exists with same phone").addResult("userId", user.getId());
         }
@@ -319,10 +336,6 @@ public class UserService {
             log.error("User exists with same username {}", request.getEmail());
             throw new FoundException("User exists with same username").addResult("userId", userModel.getId());
         }
-    }
-
-    private EntityManager getEM() {
-        return session.getProvider(JpaConnectionProvider.class).getEntityManager();
     }
 
     private void createAdminEvent(OperationType operationType, UserModel user) {
