@@ -11,6 +11,7 @@ import java.util.Set;
 public class ExternalSystemDto {
     private Long id;
     private String name;
+    private String label;
     private Set<ExternalSystemRoleDto> systemRoles;
 
     @JsonPOJOBuilder(withPrefix = "")
