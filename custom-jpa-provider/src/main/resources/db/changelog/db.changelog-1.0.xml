@@ -240,4 +240,13 @@
             update SETTINGS set UNIT = 'DAYS' where EXT_ID = 'user.absence.notifications.days';
         </sql>
     </changeSet>
+    <changeSet id="19" author="strukov-av">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('301724b8-12a5-4ba7-b6d1-dd67c98b5b65', 'user.expire.sms-viber.code', '300', null, 'manager', 'Expire sms/ Viber code', 'SECONDS');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('87c1b7a2-641d-4267-8822-40999c6a876c', 'user.expire.incoming.call.code', '20', null, 'manager', 'Expire incomig call code', 'SECONDS');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('e70625e2-190c-4fed-84e2-390b35d7ee6c', 'user.expire.incoming.call.email.code', '300', null, 'manager', 'Expire incoming call email code', 'SECONDS');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('a55bbe18-7943-405d-a611-6ac576c6834d', 'user.absence.notifications.days', '15', null, 'manager', 'Inactive notification timeout', 'DAYS');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('268c9896-cade-48e5-8fd5-ae2ea5824068', 'user.absence.blocking.days', '15', null, 'manager', 'Inactive Block timeout', 'DAYS');
+        </sql>
+    </changeSet>
 </databaseChangeLog>
