@@ -8,15 +8,17 @@ import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.keycloak.search.dto.UserDto;
+import ru.alamics.sso.registration.service.UserFindService;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.Tuple;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.net.HttpURLConnection;
 import java.util.List;
 
 @Slf4j
@@ -25,9 +27,16 @@ public class SearchResource {
     private final static String SORT_FIELD_NAME = "firstName";
     private final static String SORT_FIELD_EMAIL = "email";
     protected KeycloakSession session;
+    private UserFindService userFindService;
 
     public SearchResource(KeycloakSession session) {
         this.session = session;
+        try {
+            this.userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
+        } catch (NamingException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Something wrong with context");
+        }
     }
 
     private EntityManager getEM() {
@@ -88,7 +97,7 @@ public class SearchResource {
                         "  AND CASE\n" +
                         "          WHEN :searchToms is not null and :searchToms != '' then (UP.TOMS_ID = :searchToms)\n" +
                         "          else UP.TOMS_ID LIKE '%' OR UP.TOMS_ID is null end\n" +
-                        getSort(sortField, sortAsc) , Tuple.class)
+                        getSort(sortField, sortAsc), Tuple.class)
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
@@ -106,9 +115,34 @@ public class SearchResource {
         if (sort.isBlank()) {
             return sort;
         }
-        if (!sortAsc){
+        if (!sortAsc) {
             sort += " DESC";
         }
         return sort;
+    }
+
+    @GET
+    @Path("/attribute")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response findUserByAttribute(@QueryParam("phone") String phone, @QueryParam("excludeUserId") String excludeUserId) {
+        if (phone == null) {
+            throw new WebApplicationException(
+                    Response.status(HttpURLConnection.HTTP_BAD_REQUEST)
+                            .entity("phone parameter is mandatory")
+                            .build()
+            );
+        }
+
+        if (excludeUserId == null) {
+            throw new WebApplicationException(
+                    Response.status(HttpURLConnection.HTTP_BAD_REQUEST)
+                            .entity("excludeUserId parameter is mandatory")
+                            .build()
+            );
+        }
+        var user = userFindService.getUserByPhoneAndExcludedUserId(session.getContext().getRealm(), phone, excludeUserId);
+        return JsonResponse.success().addResult("foundUserId", user == null ? null : user.getId()).build();
     }
 }

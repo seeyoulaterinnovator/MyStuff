@@ -23,18 +23,23 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.resource.RealmResourceProvider;
 import org.keycloak.services.resource.RealmResourceProviderFactory;
+import org.keycloak.services.resources.admin.AdminAuth;
+import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
+import ru.alamics.sso.keycloak.rest.BaseResourceProviderFactory;
 import ru.alamics.sso.registration.service.UserFindService;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 @Slf4j
-public class CustomUserRealmResourceProviderFactory implements RealmResourceProvider, RealmResourceProviderFactory {
+public class CustomUserRealmResourceProviderFactory implements BaseResourceProviderFactory, BaseResourceProvider {
 
     public static final String ID = "users-toms";
 
     private KeycloakSession session;
     private UserFindService userFindService;
+    private AdminAuth auth;
 
     @Override
     public String getId() {
@@ -43,19 +48,15 @@ public class CustomUserRealmResourceProviderFactory implements RealmResourceProv
 
     @Override
     public RealmResourceProvider create(KeycloakSession session) {
+        this.auth = this.initAuth(session);
         this.session = session;
-        try {
-            this.userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context");
-        }
+        this.userFindService = (UserFindService) Lookup.lookup(UserFindService.class);
         return this;
     }
 
     @Override
     public Object getResource() {
-        return new CustomRestResource(session, userFindService);
+        return new CustomRestResource(session, userFindService, this.auth);
     }
 
     @Override
