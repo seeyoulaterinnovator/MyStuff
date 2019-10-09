@@ -306,18 +306,18 @@ public class UserService {
         }
 
         // Double-check duplicated username and email here due to federation
-        UserModel userModel = session.users().getUserByUsername(request.getEmail(), realm);
-        if (userModel != null) {
-            log.error("User exists with same username {}", request.getEmail());
-            throw new FoundException("User exists with same username").addResult("userId", userModel.getId());
-        }
-
         if (request.getEmail() != null && !realm.isDuplicateEmailsAllowed()) {
-            userModel = session.users().getUserByEmail(request.getEmail(), realm);
+            UserModel userModel = session.users().getUserByEmail(request.getEmail(), realm);
             if (userModel != null) {
                 log.error("User exists with same email {}", request.getEmail());
                 throw new FoundException("User exists with same email").addResult("userId", userModel.getId());
             }
+        }
+
+        UserModel userModel = session.users().getUserByUsername(request.getEmail(), realm);
+        if (userModel != null) {
+            log.error("User exists with same username {}", request.getEmail());
+            throw new FoundException("User exists with same username").addResult("userId", userModel.getId());
         }
     }
 

@@ -425,8 +425,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             errors = resp.errors.map(error => error.error).filter(onlyUnique );
         }
         var msg = `
-            Количество записей, для которых найдены дубли: ${resp.countClones}
-            Количество созданых пользоватлей: ${resp.createdUsers}
+            Количество дублирующихся записей в файле импорта: ${resp.countClones}
+            Количество созданых пользователей: ${resp.createdUsers}
             Количество записей, для которых не было положительного ответа от TBAPI: ${resp.tbapiSuccess}
             Количество записей, для которых был положительный ответ от TBAPI: ${resp.tbapiSuccess}
             Информация об ошибках: ${errors.join(",")}`;
