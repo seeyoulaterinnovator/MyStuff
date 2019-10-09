@@ -240,4 +240,11 @@
             update SETTINGS set UNIT = 'DAYS' where EXT_ID = 'user.absence.notifications.days';
         </sql>
     </changeSet>
+
+    <changeSet id="19" author="plyusnin-da">
+        <addColumn tableName="EXTERNAL_SYSTEM">
+            <column name="LABEL" type="varchar(100)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

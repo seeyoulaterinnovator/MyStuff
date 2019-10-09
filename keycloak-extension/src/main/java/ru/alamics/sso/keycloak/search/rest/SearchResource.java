@@ -73,7 +73,8 @@ public class SearchResource {
                         "       ESR.ID        as system_role_id,\n" +
                         "       ESR.NAME      as system_role,\n" +
                         "       ES.ID         as system_id,\n" +
-                        "       ES.NAME       as system_name\n" +
+                        "       ES.NAME       as system_name,\n" +
+                        "       ES.LABEL      as system_label\n" +
                         "from USER_ENTITY UE\n" +
                         "         left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone'\n" +
                         "         left join USER_POST UP on UE.ID = UP.USER_ID\n" +
