@@ -230,8 +230,8 @@ public class UserService {
                     error.put("error", v);
                     error.put("importUserName", o.getUserRequest().getName());
                     importResponse.addError(error);
-                    countClones.getAndIncrement();
                 });
+                countClones.getAndIncrement();
             } catch (NotFoundException | ValidationException e) {
                 Map<String, Object> error = new HashMap<>();
                 error.put("error", e.getMessage());
