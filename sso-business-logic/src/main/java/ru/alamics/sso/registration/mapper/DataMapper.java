@@ -89,6 +89,7 @@ public class DataMapper {
         return ExternalSystemDto.builder()
                 .id(externalSystem.getId())
                 .name(externalSystem.getName())
+                .label(externalSystem.getLabel())
                 .build();
     }
 
