@@ -45,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 @Startup
 @DependsOn("ApplicationProperties")
 public class UserSchedule {
+    private final static String[] SETTINGS_REALM_NAMES_SCHEDULE = {"user, manager"};
     @EJB
     private EmailSender sender;
     @EJB
@@ -62,28 +63,30 @@ public class UserSchedule {
 
     private String host;
 
-    @Schedule(hour = "*", minute = "*/1", persistent = false)
+    @Schedule(hour = "*", minute = "*/5", persistent = false)
     public void schedule() throws EmailException {
         findExpiredPassword();
-        notificationInactiveUsers();
-        block();
+        for (String realm : SETTINGS_REALM_NAMES_SCHEDULE) {
+            notificationInactiveUsers(realm);
+            block(realm);
+        }
         sendEmails();
     }
 
-    private void notificationInactiveUsers() {
+    private void notificationInactiveUsers(String realm) {
         final String DEBUG_STR = "findNotifications";
         log.info("start:{}", DEBUG_STR);
-        long absenceTimeNotification = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_NOTIFICATION_DAYS, "user", true));
+        long absenceTimeNotification = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_NOTIFICATION_DAYS, realm, true));
         if (absenceTimeNotification > -1) {
             userHistoryLoginRepository.findInactiveUsers(absenceTimeNotification);
         }
         log.info("stop:{}", DEBUG_STR);
     }
 
-    private void block() {
+    private void block(String realm) {
         final String DEBUG_STR = "block";
         log.info("start:{}", DEBUG_STR);
-        long absenceTimeBlock = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user", true));
+        long absenceTimeBlock = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, realm, true));
         if (absenceTimeBlock > -1) {
             autoLockNotificationRepository.findUsersToBlock(absenceTimeBlock);
         }
