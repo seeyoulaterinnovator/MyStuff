@@ -247,4 +247,13 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="20" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mysql" />
+        </preConditions>
+        <sql>
+            ALTER TABLE EXTERNAL_SYSTEM CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
