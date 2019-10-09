@@ -24,13 +24,9 @@ export function setSelectedCity(selectedCity, selectedDomain) {
 export function selectCity(selectedCity) {
   const selectedDomain = selectedCity.domain;
   const selectedCityName = selectedCity.name;
-  if (selectedDomain) {
-    if (selectedCity.bss) {
-      window.open(`https://lkb2b.domru.ru/login?citydomain=${selectedDomain}`);
-    } else {
+  if (selectedDomain && !selectedCity.bss) {
       window.location = `https://lkb2b.domru.ru/login?citydomain=${selectedDomain}`;
-    }
-  } else {
-    setSelectedCity(selectedCityName, selectedDomain)
   }
+  setSelectedCity(selectedCityName, selectedDomain);
+  setAllSelected();
 }
