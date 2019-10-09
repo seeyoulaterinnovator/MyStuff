@@ -7,6 +7,7 @@ import org.keycloak.authentication.requiredactions.VerifyEmail;
 import org.keycloak.common.util.Time;
 import org.keycloak.email.EmailException;
 import org.keycloak.email.EmailTemplateProvider;
+import org.keycloak.email.freemarker.beans.ProfileBean;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.events.EventBuilder;
@@ -20,11 +21,16 @@ import org.keycloak.services.Urls;
 import org.keycloak.services.validation.Validation;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import org.keycloak.theme.beans.LinkExpirationFormatterMethod;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriBuilderException;
 import javax.ws.rs.core.UriInfo;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -51,7 +57,7 @@ public class VerifyEmailFactory extends VerifyEmail {
         Response challenge;
 
         // Do not allow resending e-mail by simple page refresh, i.e. when e-mail sent, it should be resent properly via email-verification endpoint
-        if (! Objects.equals(authSession.getAuthNote(Constants.VERIFY_EMAIL_KEY), email)) {
+        if (!Objects.equals(authSession.getAuthNote(Constants.VERIFY_EMAIL_KEY), email)) {
             authSession.setAuthNote(Constants.VERIFY_EMAIL_KEY, email);
             EventBuilder event = context.getEvent().clone().event(EventType.SEND_VERIFY_EMAIL).detail(Details.EMAIL, email);
             challenge = sendVerifyEmail(context.getSession(), loginFormsProvider, context.getUser(), context.getAuthenticationSession(), event);
@@ -77,12 +83,17 @@ public class VerifyEmailFactory extends VerifyEmail {
         long expirationInMinutes = TimeUnit.SECONDS.toMinutes(validityInSecs);
 
         try {
-            session
-                    .getProvider(EmailTemplateProvider.class)
+            EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class)
                     .setAuthenticationSession(authSession)
                     .setRealm(realm)
-                    .setUser(user)
-                    .sendVerifyEmail(link, expirationInMinutes);
+                    .setUser(user);
+            if (user.isEmailVerified()) {
+                Map<String, Object> attributes = new HashMap<String, Object>();
+                emailTemplateProvider.send("emailVerificationSubject",
+                        "email-verification.ftl", attributes);
+            } else {
+                emailTemplateProvider.sendVerifyEmail(link, expirationInMinutes);
+            }
             event.success();
         } catch (EmailException e) {
             log.error("Failed to send verification email", e);
