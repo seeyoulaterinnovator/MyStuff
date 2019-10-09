@@ -21,6 +21,7 @@ import org.keycloak.services.Urls;
 import org.keycloak.services.validation.Validation;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import org.keycloak.theme.Theme;
 import org.keycloak.theme.beans.LinkExpirationFormatterMethod;
 
 import javax.ws.rs.core.Response;
@@ -88,9 +89,7 @@ public class VerifyEmailFactory extends VerifyEmail {
                     .setRealm(realm)
                     .setUser(user);
             if (user.isEmailVerified()) {
-                Map<String, Object> attributes = new HashMap<String, Object>();
-                emailTemplateProvider.send("emailVerificationSubject",
-                        "email-verification.ftl", attributes);
+                sendAuthorizationEmail(emailTemplateProvider, user, link, expirationInMinutes, session);
             } else {
                 emailTemplateProvider.sendVerifyEmail(link, expirationInMinutes);
             }
@@ -101,5 +100,22 @@ public class VerifyEmailFactory extends VerifyEmail {
         }
 
         return forms.setAttribute("mail", user.getEmail()).createResponse(UserModel.RequiredAction.VERIFY_EMAIL);
+    }
+
+    private void sendAuthorizationEmail(EmailTemplateProvider emailTemplateProvider, UserModel user, String link,
+                                        long expirationInMinutes, KeycloakSession session) throws EmailException {
+        Map<String, Object> attributes = new HashMap<String, Object>();
+        attributes.put("user", new ProfileBean(user));
+        attributes.put("link", link);
+        attributes.put("linkExpiration", expirationInMinutes);
+        try {
+            Locale locale = session.getContext().resolveLocale(user);
+            attributes.put("linkExpirationFormatter",
+                    new LinkExpirationFormatterMethod(session.theme().getTheme(Theme.Type.EMAIL).getMessages(locale), locale));
+        } catch (IOException e) {
+            throw new EmailException("Failed to template email", e);
+        }
+        emailTemplateProvider.send("emailVerificationSubject",
+                "email-verification-login.ftl", attributes);
     }
 }
