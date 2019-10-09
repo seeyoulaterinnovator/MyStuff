@@ -75,7 +75,7 @@ export default (function() {
       errors['password-confirm'] = 'Пароли не совпадают';
 
     if (values.recaptcha === false)
-      errors.recaptcha = 'Подтвердите, что вы не робот';
+      errors.recaptcha = 'Подтвердите, что Вы не робот';
 
     if (!phoneMask.unmaskedValue.match(VALIDATION_RULES.phone))
       errors.phone = 'Неверный формат номера';

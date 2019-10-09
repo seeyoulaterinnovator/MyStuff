@@ -7,7 +7,7 @@
         <#include "templates/required-fields.html">
         <@blocks.contentHeader mainTitle="${msg('doLogIn')}" secondaryTitle="${msg('registerTitle')}" secondaryHref="${url.registrationUrl}" withBorder=true />
     <#elseif section = "form">
-        <p class="pb-3 login-title-text">Если у вас уже есть учетная запись, вы можете войти</p>
+        <p class="pb-3 login-title-text">Если у Вас уже есть учетная запись, Вы можете войти</p>
          
         <#if realm.password>
             <form id="loginForm" class="md:flex md:flex-wrap md:justify-between" onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
