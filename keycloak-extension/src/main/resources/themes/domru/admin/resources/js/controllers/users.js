@@ -426,7 +426,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         if(resp.errors) {
             errors = resp.errors.map(error => error.error).filter(onlyUnique );
         }
-        var errorMsg = errors.length === 0 ? "Ошибок нет" : errors.join(",\n\t\t\t\t\t\t\t");
+        var errorMsg = errors.length === 0 ? "Ошибок нет" : errors.join(",\n\t\t\t\t\t\t\t   ");
         var msg = `
             Количество записей, для которых найдены дубли: ${resp.countClones}
             Количество созданых пользователей: ${resp.createdUsers}
