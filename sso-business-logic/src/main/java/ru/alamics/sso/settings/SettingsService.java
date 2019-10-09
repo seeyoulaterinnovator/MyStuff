@@ -2,6 +2,7 @@ package ru.alamics.sso.settings;
 
 import ru.alamics.sso.keycloak.entity.Settings;
 import ru.alamics.sso.keycloak.repository.SettingsRepository;
+import ru.alamics.sso.registration.mapper.DataMapper;
 
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
@@ -21,7 +22,7 @@ public class SettingsService {
 
         List<SettingsDto> ret = repository.findRealmSettings(realmId)
                 .stream()
-                .map(this::toDto)
+                .map(DataMapper::toDto)
                 .collect(Collectors.toList());
         return ret;
     }
@@ -41,18 +42,6 @@ public class SettingsService {
                 .unit(settings.getUnit())
                 .build();
 
-        return toDto(repository.save(settingsToSave));
-    }
-
-    private SettingsDto toDto(Settings settings) {
-        return SettingsDto.builder()
-                .desc(settings.getDesc())
-                .extId(settings.getExtId())
-                .id(settings.getId())
-                .name(settings.getName())
-                .value(settings.getValue())
-                .realmId(settings.getRealmId())
-                .unit(settings.getUnit())
-                .build();
+        return DataMapper.toDto(repository.save(settingsToSave));
     }
 }
