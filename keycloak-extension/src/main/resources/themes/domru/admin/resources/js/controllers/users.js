@@ -426,12 +426,13 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         if(resp.errors) {
             errors = resp.errors.map(error => error.error).filter(onlyUnique );
         }
+        var errorMsg = errors.length === 0 ? "Ошибок нет" : errors.join(",");
         var msg = `
-            Количество дублирующихся записей в файле импорта: ${resp.countClones}
+            Количество записей, для которых найдены дубли: ${resp.countClones}
             Количество созданых пользователей: ${resp.createdUsers}
-            Количество записей, для которых не было положительного ответа от TBAPI: ${resp.tbapiSuccess}
+            Количество записей, для которых не было положительного ответа от TBAPI: ${resp.tbapiErrors}
             Количество записей, для которых был положительный ответ от TBAPI: ${resp.tbapiSuccess}
-            Информация об ошибках: ${errors.join(",")}`;
+            Информация об ошибках: ${errorMsg}`;
 
         Dialog.message('Информация', msg, () => location.reload());
 
