@@ -22,29 +22,29 @@ public class UserHistoryLoginRepository {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime absence = now.minusSeconds(absenceTime);
 
-        em.createNativeQuery("" +
+        em.createNativeQuery(
                 "insert into AUTO_LOCK_NOTIFICATION(id, user_id, sended_at, type, status)\n" +
-                "select uuid(), user_info.ID, null, 'ABSENCE_NOTIFICATION', 'PREPARE'\n" +
-                "from (select ue.ID,\n" +
-                "             ue.REALM_ID,\n" +
-                "             ue.ENABLED,\n" +
-                "             ulh.date,\n" +
-                "             aln.max_date as notif,\n" +
-                "             ab.max_date as block\n" +
-                "      from USER_ENTITY ue\n" +
-                "      left join\n" +
-                "           (select ul.*, max(ul.LOGINED_AT) over (PARTITION BY ul.USER_ID) date\n" +
-                "            from USER_LOGIN_HISTORY ul\n" +
-                "            group by ul.USER_ID) ulh on ue.ID = ulh.USER_ID\n" +
-                "      left join (select ab.*, max(ab.SENDED_AT) max_date\n" +
-                "                 from AUTO_LOCK_NOTIFICATION ab where ab.TYPE = 'ABSENCE_BLOCKING' and ab.STATUS = 'SENT' group by ab.USER_ID) ab on ue.ID = ab.USER_ID\n" +
-                "      left join (select aln.*, max(aln.SENDED_AT) max_date\n" +
-                "                 from AUTO_LOCK_NOTIFICATION aln where aln.TYPE = 'ABSENCE_NOTIFICATION' group by aln.USER_ID) aln on ue.ID = aln.USER_ID\n" +
-                "      FOR UPDATE) user_info\n" +
-                "where (user_info.date <= :date or user_info.date is null)\n" +
-                "  and user_info.ENABLED = true\n" +
-                "  and ((user_info.block <= :date and user_info.block >= user_info.notif) or user_info.notif is null)\n" +
-                "  and user_info.REALM_ID = :realm_id")
+                        "select uuid(), ue.ID, null, 'ABSENCE_NOTIFICATION', 'PREPARE'\n" +
+                        "from USER_ENTITY ue\n" +
+                        "         left join (select ul.*,\n" +
+                        "                           max(ul.LOGINED_AT) over (PARTITION BY ul.USER_ID) date\n" +
+                        "                    from USER_LOGIN_HISTORY ul\n" +
+                        "                    group by ul.USER_ID) ulh on ue.ID = ulh.USER_ID\n" +
+                        "         left join (select ab.*,\n" +
+                        "                           max(ab.SENDED_AT) block\n" +
+                        "                    from AUTO_LOCK_NOTIFICATION ab\n" +
+                        "                    where ab.TYPE = 'ABSENCE_BLOCKING'\n" +
+                        "                      and ab.STATUS = 'SENT'\n" +
+                        "                    group by ab.USER_ID) ab on ue.ID = ab.USER_ID\n" +
+                        "         left join (select aln.*,\n" +
+                        "                           max(aln.SENDED_AT) notif\n" +
+                        "                    from AUTO_LOCK_NOTIFICATION aln\n" +
+                        "                    where aln.TYPE = 'ABSENCE_NOTIFICATION'\n" +
+                        "                    group by aln.USER_ID) aln on ue.ID = aln.USER_ID\n" +
+                        "where ue.ENABLED = true\n" +
+                        "  and ue.REALM_ID = :realm_id\n" +
+                        "  and (ulh.date <= :date or ulh.date is null)\n" +
+                        "  and ((ab.block <= :date and ab.block >= aln.notif) or aln.notif is null)")
                 .setParameter("date", absence)
                 .setParameter("realm_id", realmId)
                 .executeUpdate();
