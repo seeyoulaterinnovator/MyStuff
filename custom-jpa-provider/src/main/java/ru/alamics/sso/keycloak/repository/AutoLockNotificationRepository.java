@@ -31,7 +31,7 @@ public class AutoLockNotificationRepository {
         entityManager.flush();
     }
 
-    public void findUsersToBlock(final long absenceTimeBlock) {
+    public void findUsersToBlock(final long absenceTimeBlock, final String realmId) {
         final String DEBUG_STR = "findNonBlockingUsers";
         log.debug("{}: absenceDaysBlock={}", DEBUG_STR, absenceTimeBlock);
         LocalDateTime now = LocalDateTime.now();
@@ -40,7 +40,7 @@ public class AutoLockNotificationRepository {
                 "select uuid(), t.USER_ID, null, 'ABSENCE_BLOCKING', 'PREPARE'\n" +
                 "from (select aln.USER_ID, max(aln.SENDED_AT) over (PARTITION BY aln.USER_ID) date\n" +
                 "      from AUTO_LOCK_NOTIFICATION aln\n" +
-                "               join USER_ENTITY ue on aln.USER_ID = ue.ID\n" +
+                "               join USER_ENTITY ue on aln.USER_ID = ue.ID\n and ue.REALM_ID = :realm_id" +
                 "      where ue.ENABLED = true\n" +
                 "        and aln.TYPE = 'ABSENCE_NOTIFICATION'\n" +
                 "        and aln.SENDED_AT <= :date) t\n" +
@@ -53,6 +53,7 @@ public class AutoLockNotificationRepository {
                 "                  and aln.STATUS = 'SENT')\n" +
                 "    for update")
                 .setParameter("date", absence)
+                .setParameter("realm_id", realmId)
                 .executeUpdate();
     }
 
