@@ -86,7 +86,8 @@ public class UserSchedule {
     private void block(String realm) {
         final String DEBUG_STR = "block";
         log.info("start:{}", DEBUG_STR);
-        long absenceTimeBlock = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, realm, true));
+        long absenceTimeBlock = Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_BLOCKING_DAYS, realm, true)) -
+                Long.parseLong(properties.getProperty(PropertyConstants.ABSENCE_NOTIFICATION_DAYS, realm, true));
         if (absenceTimeBlock > -1) {
             autoLockNotificationRepository.findUsersToBlock(absenceTimeBlock, realm);
         }
@@ -165,9 +166,10 @@ public class UserSchedule {
         SettingsDto notificationSetting = properties.getSetting(PropertyConstants.ABSENCE_NOTIFICATION_DAYS, realm);
         long inactiveBlockTimeout = TimeUnit.SECONDS.convert(Long.parseLong(blockSetting.getValue()), blockSetting.getUnit());
         long inactiveNotificationTimeout = TimeUnit.SECONDS.convert(Long.parseLong(notificationSetting.getValue()), notificationSetting.getUnit());
-        //String timeToBlock = blockSetting.getUnit().inactiveBlockTimeout - inactiveNotificationTimeout;
+        String timeToBlock = String.valueOf(
+                blockSetting.getUnit().convert(inactiveBlockTimeout - inactiveNotificationTimeout, TimeUnit.SECONDS));
         Map<String, Object> body = new HashMap<>();
-        body.put("absence", blockSetting.getValue() + " " + Translator.getRusTranslateTimeUnit(blockSetting.getValue(), blockSetting.getUnit()));
+        body.put("absence", timeToBlock + " " + Translator.getRusTranslateTimeUnit(timeToBlock, blockSetting.getUnit()));
 
         return EmailModel.builder()
                 .bodyAttributes(body)
