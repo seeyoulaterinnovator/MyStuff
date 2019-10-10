@@ -45,12 +45,13 @@
                     Пароль действует <span id="timer-time" class="px-1 text-black text-5/3em"></span> мин
                 </div>
 
-
+                <#if lengthCode==6>
+                    <button class="hidden border-b border-dashed text-black-50 text-center md:text-right my-6 md:my-0" name="resend" id="resend" type="submit" >Отправить еще раз</button>
+                <#elseif enableRepeatCall?? && enableRepeatCall!>
                     <button class="hidden border-b border-dashed text-black-50 text-center md:text-right my-6 md:my-0" name="resend" id="resend" type="submit" >Позвонить еще раз</button>
+                </#if>
 
-
-                
             </div>
         </form>
-    </#if>
+    </#if>git push
 </@layout.registrationLayout>
