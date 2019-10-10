@@ -8,6 +8,28 @@
   justify-content: space-between;
 }
 
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .cities-column {
+    width: calc((100vw - 4.9rem) /4);
+    height: 100vh;
+  }
+}
+@media (max-width: 1199px) and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .cities-column {
+    width: calc((100vw - 5.4rem) /4);
+  }
+}
+@media (max-width: 959px) and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .cities-column {
+    width: calc((100vw - 4.4rem) /2);
+  }
+}
+@media (max-width: 479px) and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .cities-column {
+    width: 100vw;
+  }
+}
+
 .city {
   text-align: start !important;
 }

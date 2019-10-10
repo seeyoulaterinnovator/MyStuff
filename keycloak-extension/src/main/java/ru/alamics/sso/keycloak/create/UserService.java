@@ -160,7 +160,7 @@ public class UserService {
         List<UserImport> userImports = DataMapper.toUserRequestList(rows);
 
         ImportResponse importResponse = new ImportResponse();
-        importResponse.setCountClones(getCountAndRemoveClones(userImports));
+        //importResponse.setCountClones(getCountAndRemoveClones(userImports));
         createImportUsers(importResponse, userImports);
         log.info("Upload users success!", importResponse);
         return importResponse;
@@ -201,10 +201,12 @@ public class UserService {
         AtomicInteger createdUsers = new AtomicInteger();
         AtomicInteger tbapiErrors = new AtomicInteger();
         AtomicInteger tbapiSuccess = new AtomicInteger();
+        AtomicInteger countClones = new AtomicInteger();
         userImports.stream().forEach(o -> {
             try {
-                validateUserPhoneAndEmail(o.getUserRequest());
-                UserModel user = createUser(o.getUserRequest());
+                UserRequest userRequest = o.getUserRequest();
+                checkImportUser(userRequest);
+                UserModel user = createUser(userRequest);
                 user.setEmailVerified(false);
                 createAdminEvent(OperationType.CREATE, user);
                 createdUsers.getAndIncrement();
@@ -218,15 +220,18 @@ public class UserService {
                     throw new TbapiRegisterException();
                 }
                 if (tbapiResponse.get(UserConstants.ATTR_DMP_NAME) != null) {
-                    o.getUserRequest().setTomsId(tbapiResponse.get(UserConstants.ATTR_DMP_NAME).toString());
+                    userRequest.setTomsId(tbapiResponse.get(UserConstants.ATTR_DMP_NAME).toString());
                 }
-                o.getUserRequest().setTomsId(tbapiResponse.get(UserConstants.ATTR_TOMS_NAME).toString());
+                userRequest.setTomsId(tbapiResponse.get(UserConstants.ATTR_TOMS_NAME).toString());
                 addUserPost(user, o);
             } catch (FoundException e) {
-                Map<String, Object> error = new HashMap<>();
-                error.put("error", e.getMessage());
-                error.put("importUserName", o.getUserRequest().getName());
-                importResponse.addError(error);
+                e.getResult().forEach((k, v) -> {
+                    Map<String, Object> error = new HashMap<>();
+                    error.put("error", v);
+                    error.put("importUserName", o.getUserRequest().getName());
+                    importResponse.addError(error);
+                });
+                countClones.getAndIncrement();
             } catch (NotFoundException | ValidationException e) {
                 Map<String, Object> error = new HashMap<>();
                 error.put("error", e.getMessage());
@@ -239,12 +244,32 @@ public class UserService {
         importResponse.setTbapiSuccess(tbapiSuccess);
         importResponse.setTbapiErrors(tbapiErrors);
         importResponse.setCreatedUsers(createdUsers);
+        importResponse.setCountClones(countClones);
         commit();
     }
 
-    private UserModel createUser(UserRequest userRequest) throws FoundException {
+    private void checkImportUser(UserRequest userRequest) throws FoundException{
+        validateUserPhoneAndEmail(userRequest);
+
+        FoundException foundException = new FoundException();
         try {
-            checkOnExistUser(userRequest, realm);
+            checkOnExistUserByPhone(userRequest, realm);
+        } catch (FoundException e){
+            foundException.addResult("error1", e.getMessage());
+        }
+        try {
+            checkOnExistUserByEmailAndUsername(userRequest, realm);
+        } catch (FoundException e){
+            foundException.addResult("error2", e.getMessage());
+        }
+
+        if (foundException.getResult() != null){
+            throw foundException;
+        }
+    }
+
+    private UserModel createUser(UserRequest userRequest) {
+        try {
             UserModel user = session.users().addUser(realm, userRequest.getEmail());
             updateUserFromRequest(user, userRequest, realm, session, false);
             return user;
@@ -291,6 +316,7 @@ public class UserService {
     }
 
     public UserModel createUser(UserRequest request, boolean bss) throws FoundException, NotFoundException {
+        checkOnExistUser(request, realm);
         UserModel user = createUser(request);
         if (bss) {
             addUserPost(user, request);
@@ -315,26 +341,33 @@ public class UserService {
     }
 
     private void checkOnExistUser(UserRequest request, RealmModel realm) throws FoundException {
+         checkOnExistUserByPhone(request, realm);
+         checkOnExistUserByEmailAndUsername(request, realm);
+    }
+
+    private void checkOnExistUserByPhone(UserRequest request, RealmModel realm) throws FoundException {
         UserEntity user = userFindService.getUserByPhone(realm, request.getPhone());
 
         if (user != null) {
             log.error("User exists with same phone {}", request.getPhone());
             throw new FoundException("User exists with same phone").addResult("userId", user.getId());
         }
+    }
 
+    private void checkOnExistUserByEmailAndUsername(UserRequest request, RealmModel realm) throws FoundException {
         // Double-check duplicated username and email here due to federation
-        UserModel userModel = session.users().getUserByUsername(request.getEmail(), realm);
-        if (userModel != null) {
-            log.error("User exists with same username {}", request.getEmail());
-            throw new FoundException("User exists with same username").addResult("userId", userModel.getId());
-        }
-
         if (request.getEmail() != null && !realm.isDuplicateEmailsAllowed()) {
-            userModel = session.users().getUserByEmail(request.getEmail(), realm);
+            UserModel userModel = session.users().getUserByEmail(request.getEmail(), realm);
             if (userModel != null) {
                 log.error("User exists with same email {}", request.getEmail());
                 throw new FoundException("User exists with same email").addResult("userId", userModel.getId());
             }
+        }
+
+        UserModel userModel = session.users().getUserByUsername(request.getEmail(), realm);
+        if (userModel != null) {
+            log.error("User exists with same username {}", request.getEmail());
+            throw new FoundException("User exists with same username").addResult("userId", userModel.getId());
         }
     }
 
