@@ -5,6 +5,7 @@
             <module name="org.keycloak.keycloak-services"/>
             <module name="org.keycloak.keycloak-server-spi"/>
             <module name="org.keycloak.keycloak-server-spi-private"/>
+            <module name="org.bouncycastle"/>
         </dependencies>
     </deployment>
 </jboss-deployment-structure>
