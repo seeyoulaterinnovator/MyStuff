@@ -44,7 +44,8 @@ public class UserHistoryLoginRepository {
                         "where ue.ENABLED = true\n" +
                         "  and ue.REALM_ID = :realm_id\n" +
                         "  and (ulh.date <= :date or ulh.date is null)\n" +
-                        "  and ((ab.block <= :date and ab.block >= aln.notif) or aln.notif is null)")
+                        "  and ((ab.block <= :date and ab.block >= aln.notif) or aln.notif is null)\n" +
+                        "  and ue.SERVICE_ACCOUNT_CLIENT_LINK is null")
                 .setParameter("date", absence)
                 .setParameter("realm_id", realmId)
                 .executeUpdate();
