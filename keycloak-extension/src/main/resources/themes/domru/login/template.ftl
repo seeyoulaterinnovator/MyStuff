@@ -1,6 +1,7 @@
 <#import "templates/email-sent.ftl" as emailSent>
+<#import "templates/header.ftl" as header>
 
-<#macro registrationLayout displayInfo=false displayMessage=true displayWide=false environment="dev" >
+<#macro registrationLayout displayInfo=false displayMessage=true displayWarningMessage=true displayWide=false environment="dev" displayCity=true>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="ru" class="h-full min-h-screen">
   <head>
@@ -28,34 +29,38 @@
     </#if>
   </head>
   <body class="min-h-full flex flex-col p-4 sm:px-6 md:py-6 lg:px-8 xl:py-8 xl:px-6">
-    <#if environment == "stage" || environment == "production" >
-      <#include "templates/google-tag-manager-body.html">
-    </#if>
+    <#if displayMessage && message?has_content && message.summary == 'Регистрация временно недоступна, попробуйте повторить попытку позже'>
+        <@header.defaultTemplate withCity=displayCity></@header.defaultTemplate>
+      <#include "templates/sth-went-wrong.html">
+    <#else>
+      <#if environment == "stage" || environment == "production" >
+        <#include "templates/google-tag-manager-body.html">
+      </#if>
 
-    <#include "templates/header.html">
+    <@header.defaultTemplate withCity=displayCity></@header.defaultTemplate>
 
-    <main id="content" class="flex-1 py-12 mx-auto md:mx-auto w-full max-w-440px xl:max-w-470px">
-      <#if displayMessage && message?has_content && message.summary == msg('emailSentMessage')>
-        <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}"; section>
-          <#if section = "header">
-            Восстановление пароля
-          <#elseif section = "description">
-            Отправлены инструкции для восстановления пароля
+      <main id="content" class="flex-1 py-12 mx-auto md:mx-auto w-full max-w-440px xl:max-w-470px">
+        <#if displayMessage && message?has_content && message.summary == msg('emailSentMessage')>
+          <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}"; section>
+            <#if section = "header">
+              Восстановление пароля
+            <#elseif section = "description">
+              Отправлены инструкции для восстановления пароля
+            </#if>
+          </@emailSent.defaultTemplate>
+        <#else>
+
+          <#nested "header">
+
+          <#if displayInfo>
+            <#nested "info">
           </#if>
-        </@emailSent.defaultTemplate>
-      <#else>
-
-        <#nested "header">
-      
-        <#if displayInfo>
-          <#nested "info">
-        </#if>
 
           <div class="py-3">
             <#if displayMessage && message?has_content>
               <div class="alert pb-3">
                 <#if message.type = 'info'><span class="text-black">${kcSanitize(message.summary)?no_esc}</span></#if>
-                <#if message.type = 'warning'><span class="text-extra">${kcSanitize(message.summary)?no_esc}</span></#if>
+                <#if message.type = 'warning' && displayWarningMessage><span class="text-extra">${kcSanitize(message.summary)?no_esc}</span></#if>
                 <#if message.type = 'success' && message.summary != msg('emailSentMessage')>
                     <span class="text-accentGreen">${kcSanitize(message.summary)?no_esc}</span>
                 </#if>
@@ -63,15 +68,16 @@
                 </div>
             </#if>
 
-            <#nested "form">
-          </div>
+              <#nested "form">
+            </div>
 
-        </#if>
-    </main>
-    
-    <#include "templates/footer-copyright.html">
+          </#if>
+      </main>
 
-    <div id="cities-modal"></div>
+      <#include "templates/footer-copyright.html">
+
+      <div id="cities-modal"></div>
+    </#if>
 
     <#if properties.scripts?has_content>
       <#list properties.scripts?split(' ') as script>

@@ -9,26 +9,26 @@ import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.FormMessage;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.model.User;
+import ru.alamics.sso.registration.service.UserFindService;
 
-import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 import java.util.ArrayList;
 import java.util.List;
 
 import static ru.alamics.sso.registration.model.FormConstants.FIELD_EMAIL;
 import static ru.alamics.sso.registration.model.FormConstants.FIELD_PHONE;
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
 public class PhoneCheckProvider implements FormAction {
 
-    private final EntityManager em;
+    private final UserFindService userFindService;
 
-    public PhoneCheckProvider(EntityManager em) {
-        this.em = em;
+    public PhoneCheckProvider(UserFindService userFindService) {
+        this.userFindService = userFindService;
     }
 
     @Override
@@ -56,13 +56,9 @@ public class PhoneCheckProvider implements FormAction {
             context.getEvent().detail("Phone", user.getPhone());
             errors.add(new FormMessage(FIELD_PHONE, "Телефон должен быть заполнен"));
         } else {
-            Long count = em.createQuery("select count(u.id) from UserAttributeEntity u " +
-                    "where u.name = :ph_attr_name and u.value like '%' || :phone || '%'", Long.class) // TODO =
-                    .setParameter("ph_attr_name", ATTR_PHONE_NAME)
-                    .setParameter("phone", user.getPhone())
-                    .getSingleResult();
+            UserEntity userEntity = userFindService.getUserByPhone(context.getRealm(), user.getPhone());
 
-            if (count > 0) {
+            if (userEntity != null) {
                 formData.remove(FIELD_PHONE);
                 context.getEvent().detail("Phone", user.getPhone());
                 errors.add(new FormMessage(FIELD_PHONE, MessageConstants.PHONE_EXISTS));

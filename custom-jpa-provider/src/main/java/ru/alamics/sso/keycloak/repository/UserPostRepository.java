@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.repository;
 
+import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.entity.ExternalSystemEntity;
@@ -11,8 +12,8 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Stateless
@@ -79,14 +80,59 @@ public class UserPostRepository {
                 .getResultList();
     }
 
-    public List<UserPostEntity> findUserPostRole(final UserEntity user) {
+    public ExternalSystemRoleEntity getExternalSystemRole(String sysName) {
+        ExternalSystemRoleEntity externalSystemRole = null;
+        try {
+            externalSystemRole = em.createQuery(
+                    "select role " +
+                            "from ExternalSystemRoleEntity role \n" +
+                            "join ExternalSystemEntity sys on role.externalSystem = sys.id \n" +
+                            "where sys.name = :sysName", ExternalSystemRoleEntity.class)
+                    .setParameter("sysName", sysName)
+                    .getResultList()
+                    .get(0);
+        } finally {
+            return externalSystemRole;
+        }
+    }
+
+    public UserPostRoleEntity getUserPostRole(String name) {
+        UserPostRoleEntity userPostRoleEntity = null;
+        try {
+            userPostRoleEntity = em.createQuery(
+                    "select role " +
+                            "from UserPostRoleEntity role \n" +
+                            "where role.name = :name", UserPostRoleEntity.class)
+                    .setParameter("name", name)
+                    .getResultList()
+                    .get(0);
+        } finally {
+            return userPostRoleEntity;
+        }
+    }
+
+    public Set<UserPostEntity> findUserPostRole(final UserEntity user) {
         final String DEBUG_STR = "findUserPostRole";
         log.info("{}: user={}", DEBUG_STR, user.getId());
 
-        List<UserPostEntity> ret = em.createQuery("select up from UserPostEntity up where up.user =:user", UserPostEntity.class)
+        Set<UserPostEntity> ret = em.createQuery("select up from UserPostEntity up where up.user =:user", UserPostEntity.class)
                 .setParameter("user", user)
-                .getResultList();
+                .getResultStream()
+                .collect(Collectors.toSet());
         return ret;
+    }
+
+    public List<UserPostEntity> findUserPostRoleByUserId(final String userId) throws NotFoundException {
+        final String DEBUG_STR = "findUserPostRole";
+        log.info("{}: userId={}", DEBUG_STR, userId);
+
+        UserEntity userEntity = em.find(UserEntity.class, userId);
+        if (userEntity != null) {
+            return new ArrayList<>(findUserPostRole(userEntity));
+        } else {
+            log.info("User not found by id={}", userId);
+            throw new NotFoundException("User not found");
+        }
     }
 
     public List<ExternalSystemEntity> getAllExternalSystem(){
@@ -109,5 +155,34 @@ public class UserPostRepository {
 
     public ExternalSystemRoleEntity findExternalSystemRole(Long id){
         return em.find(ExternalSystemRoleEntity.class, id);
+    }
+
+    public UserPostEntity findByTomsId(final String tomsId, final String roleName) {
+
+        List<UserPostEntity> ret = em.createQuery("select upe from UserPostEntity upe where upe.tomsId =:toms and upe.role.name =:role", UserPostEntity.class)
+                .setParameter("toms", tomsId)
+                .setParameter("role", roleName)
+                .getResultList();
+
+        return Optional.of(ret.get(0)).orElseThrow(() -> new IllegalArgumentException("Cannot find user post with"));
+    }
+
+    public List<ExternalSystemRoleEntity> findSystemsByUserPost(final UserPostEntity post) {
+
+        List<ExternalSystemRoleEntity> ret = em.createQuery("select ext from ExternalSystemRoleEntity ext left join ext.userPosts post where post.id =:postId", ExternalSystemRoleEntity.class)
+                .setParameter("postId", post.getId())
+                .getResultList();
+
+        return ret;
+    }
+
+    public Set<ExternalSystemRoleEntity> findSystemByUser(final UserEntity user) {
+
+        Set<ExternalSystemRoleEntity> ret = em.createQuery("select ext from ExternalSystemRoleEntity ext join ext.userPosts post where post.user =:user", ExternalSystemRoleEntity.class)
+                .setParameter("user", user)
+                .getResultStream()
+                .collect(Collectors.toSet());
+
+        return ret;
     }
 }

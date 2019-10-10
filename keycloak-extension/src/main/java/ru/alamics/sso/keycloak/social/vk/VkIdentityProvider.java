@@ -1,6 +1,7 @@
 package ru.alamics.sso.keycloak.social.vk;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.broker.oidc.AbstractOAuth2IdentityProvider;
 import org.keycloak.broker.oidc.OAuth2IdentityProviderConfig;
 import org.keycloak.broker.oidc.mappers.AbstractJsonUserAttributeMapper;
@@ -14,6 +15,7 @@ import org.keycloak.models.RealmModel;
 
 import java.util.Objects;
 
+@Slf4j
 public class VkIdentityProvider extends AbstractOAuth2IdentityProvider implements SocialIdentityProvider {
     private static final String OAUTH2_PARAMETER_EMAIL = "email";
     private static final String AUTH_URL = "https://oauth.vk.com/authorize";
@@ -30,6 +32,7 @@ public class VkIdentityProvider extends AbstractOAuth2IdentityProvider implement
     }
 
     public BrokeredIdentityContext getFederatedIdentity(String response) {
+        log.info("start vk provider login");
         String accessToken = extractTokenFromResponse(response, OAUTH2_PARAMETER_ACCESS_TOKEN);
         String email = extractTokenFromResponse(response, OAUTH2_PARAMETER_EMAIL);
         if (accessToken == null) {

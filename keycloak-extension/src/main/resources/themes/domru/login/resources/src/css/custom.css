@@ -86,3 +86,13 @@ input[type="number"] {
     margin-bottom: 16px;
   }
 }
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  body {
+    display: table !important;
+    width: 100%;
+  }
+  .footer {
+    display: table-footer-group;
+  }
+}

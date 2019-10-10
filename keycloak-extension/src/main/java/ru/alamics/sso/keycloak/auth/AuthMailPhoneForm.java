@@ -13,30 +13,38 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ModelDuplicateException;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.models.jpa.UserAdapter;
-import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.messages.Messages;
+import org.keycloak.services.validation.Validation;
+import ru.alamics.sso.keycloak.cities.CitiesResource;
+import ru.alamics.sso.keycloak.cities.model.CityMigration;
+import ru.alamics.sso.registration.model.FormConstants;
+import ru.alamics.sso.registration.rias.RiasService;
+import ru.alamics.sso.registration.rias.model.RiasLogin;
+import ru.alamics.sso.registration.service.UserFindService;
+import ru.alamics.sso.util.Util;
 
 import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import java.util.List;
+import javax.ws.rs.core.UriBuilder;
 
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 
 @Slf4j
 public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator implements Authenticator {
 
     private final EntityManager em;
+    private final RiasService riasService;
+    private final UserFindService userFindService;
 
-    public AuthMailPhoneForm(EntityManager em) {
+    public AuthMailPhoneForm(EntityManager em, RiasService riasService, UserFindService userFindService) {
         this.em = em;
+        this.riasService = riasService;
+        this.userFindService = userFindService;
     }
 
     @Override
@@ -108,6 +116,45 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
 
     // -------------
 
+    private boolean checkAuthRias(AuthenticationFlowContext context) {
+
+        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
+
+        String username = formData.getFirst(FormConstants.FIELD_USERNAME);
+        String password = formData.getFirst(FormConstants.FIELD_PASSWORD);
+        var city = formData.getFirst(FormConstants.FIELD_CITY);
+
+        String domain = null;
+        CityMigration cm = CitiesResource.getCityMigrationByCity(city);
+        if (cm != null) {
+            domain = cm.getDomain();
+        }
+
+        RiasLogin riasLogin = riasService.loginUser(domain, username, password);
+        if (riasLogin != null) {
+
+            if (riasLogin.getAccess_token() != null) {
+
+                var uriLoc = UriBuilder.fromPath("https://lkb2b.domru.ru/login");
+
+                if (!Validation.isBlank(city)) {
+                    uriLoc.queryParam("citydomain", city);
+                }
+
+                Response response = Response.seeOther(uriLoc.build())
+                        .header("btoken", riasLogin.getAccess_token())
+                        .build();
+
+                log.debug("Redirecting to {}", uriLoc.build());
+                context.forceChallenge(response);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @Override
     public boolean validateUserAndPassword(AuthenticationFlowContext context, MultivaluedMap<String, String> inputData) {
         String username = inputData.getFirst(AuthenticationManager.FORM_USERNAME);
@@ -131,8 +178,13 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
 
             if (user == null) {
                 log.info("find user by phone");
-                UserFind userFind = new UserFind(context.getSession());
-                user = userFind.getUserByPhone(username);
+                user = Util.getUserAdapter(context.getSession(), userFindService.getUserByPhone(context.getRealm(), username));
+            }
+
+            if (user == null) {
+                log.info("check auth RIAS");
+                if (checkAuthRias(context))
+                    return false;
             }
 
         } catch (ModelDuplicateException mde) {

@@ -12,4 +12,5 @@ public class FormConstants {
     public static final String FIELD_FIRST_NAME = "firstName";
 
     public static final String FIELD_ORG_NAME = "orgName";
+    public static final String FIELD_CITY = "city";
 }
