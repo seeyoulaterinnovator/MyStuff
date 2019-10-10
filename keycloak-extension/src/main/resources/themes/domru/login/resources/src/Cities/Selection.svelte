@@ -15,23 +15,17 @@
   } from './stores.js';
   import { STATUS } from './constants.js';
 
+  import './selection';
+
   import * as citiesJson  from '../mock/cities.json'
+  import {selectCity} from "./selection";
 
   let groupedCities = [];
 
   export let search;
 
   function handleClick(currentCity) {
-    if (currentCity.domain) {
-      window.open(`https://lkb2b.domru.ru/login?citydomain=${currentCity.domain}`);
-    } else {
-      city.set(currentCity.name);
-      Cookie.set('CITY', currentCity.name);
-      Cookie.set('city-domain', currentCity.domain);
-      status.set(STATUS.CONFIRMED);
-      showModal.set(false);
-      editingStarted.set(false);
-    }
+      selectCity($allCities.find(obj => obj.name === currentCity.name));
   }
 
   function groupByFirstCharacter(arr) {
