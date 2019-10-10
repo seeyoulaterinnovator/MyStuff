@@ -68,7 +68,7 @@ public class UserSchedule {
         findExpiredPassword();
         for (String realm : SETTINGS_REALM_NAMES_SCHEDULE) {
             notificationInactiveUsers(realm);
-            //block(realm);
+            block(realm);
         }
         sendEmails();
     }
@@ -125,7 +125,7 @@ public class UserSchedule {
             UserModel userModel = new UserAdapter(null, realm, null, user);
             try {
                 if (notification.getType() == NotificationType.ABSENCE_NOTIFICATION) {
-                    var prepareBlockNotification = prepareBlockNotification();
+                    var prepareBlockNotification = prepareBlockNotification(realm.getName());
                     prepareBlockNotification.realmModel(realm)
                             .user(userModel);
                     sender.send(prepareBlockNotification.build());
@@ -158,12 +158,16 @@ public class UserSchedule {
                 .bodyTemplate(template);
     }
 
-    private EmailModel.EmailModelBuilder prepareBlockNotification() {
+    private EmailModel.EmailModelBuilder prepareBlockNotification(String realm) {
         final String subject = "Предупреждение о блокирование аккаунта";
         final String template = "block-prepare-notification.ftl";
-        SettingsDto setting = properties.getSetting(PropertyConstants.ABSENCE_BLOCKING_DAYS, "user");
+        SettingsDto blockSetting = properties.getSetting(PropertyConstants.ABSENCE_BLOCKING_DAYS, realm);
+        SettingsDto notificationSetting = properties.getSetting(PropertyConstants.ABSENCE_NOTIFICATION_DAYS, realm);
+        long inactiveBlockTimeout = TimeUnit.SECONDS.convert(Long.parseLong(blockSetting.getValue()), blockSetting.getUnit());
+        long inactiveNotificationTimeout = TimeUnit.SECONDS.convert(Long.parseLong(notificationSetting.getValue()), notificationSetting.getUnit());
+        //String timeToBlock = blockSetting.getUnit().inactiveBlockTimeout - inactiveNotificationTimeout;
         Map<String, Object> body = new HashMap<>();
-        body.put("absence", setting.getValue() + " " + Translator.getRusTranslateTimeUnit(setting.getValue(), setting.getUnit()));
+        body.put("absence", blockSetting.getValue() + " " + Translator.getRusTranslateTimeUnit(blockSetting.getValue(), blockSetting.getUnit()));
 
         return EmailModel.builder()
                 .bodyAttributes(body)

@@ -18,7 +18,7 @@ public class UserHistoryLoginRepository {
     private EntityManager em;
 
     public void findInactiveUsers (final long absenceTime, final String realmId) {
-        log.info("findInactiveUsers: time={}, realmId={}", absenceTime, realmId);
+        log.info("findInactiveUsers: realmId={}, absenceTime={}", realmId, absenceTime);
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime absence = now.minusSeconds(absenceTime);
 
@@ -41,9 +41,9 @@ public class UserHistoryLoginRepository {
                 "      left join (select aln.*, max(aln.SENDED_AT) max_date\n" +
                 "                 from AUTO_LOCK_NOTIFICATION aln where aln.TYPE = 'ABSENCE_NOTIFICATION' group by aln.USER_ID) aln on ue.ID = aln.USER_ID\n" +
                 "      FOR UPDATE) user_info\n" +
-                "where (user_info.date < :date or user_info.date is null)\n" +
+                "where (user_info.date <= :date or user_info.date is null)\n" +
                 "  and user_info.ENABLED = true\n" +
-                "  and ((user_info.block < :date and user_info.block > user_info.notif) or user_info.notif is null)\n" +
+                "  and ((user_info.block <= :date and user_info.block >= user_info.notif) or user_info.notif is null)\n" +
                 "  and user_info.REALM_ID = :realm_id")
                 .setParameter("date", absence)
                 .setParameter("realm_id", realmId)
