@@ -77,6 +77,7 @@
         allCities.set(replacedCities);
 
         groupedCities = groupByFirstCharacter($allCities);
+        editingStarted.set(false);
 
       })
       .catch(error => console.error('Error:', error));

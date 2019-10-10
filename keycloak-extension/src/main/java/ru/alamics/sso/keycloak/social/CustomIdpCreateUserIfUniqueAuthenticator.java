@@ -49,7 +49,7 @@ public class CustomIdpCreateUserIfUniqueAuthenticator extends IdpCreateUserIfUni
 
         final String phone = serializedCtx.getFirstAttribute(FormConstants.FIELD_PHONE);
         if (!Validation.isBlank(phone)) {
-            var userEntity = userFindService.getUserByPhone(phone);
+            var userEntity = userFindService.getUserByPhone(context.getRealm(), phone);
             if (userEntity != null) {
                 return new ExistingUserInfo(userEntity.getId(), FormConstants.FIELD_PHONE, phone);
             }
