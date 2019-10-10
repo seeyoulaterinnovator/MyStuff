@@ -16,7 +16,7 @@
                     <#elseif !realm.registrationEmailAsUsername>
                         ${msg("usernameOrEmail")}
                     <#else>
-                        ${msg("email")}
+                        ${msg("phoneOrEmail")}
                     </#if>
                 </label>
             </div>
