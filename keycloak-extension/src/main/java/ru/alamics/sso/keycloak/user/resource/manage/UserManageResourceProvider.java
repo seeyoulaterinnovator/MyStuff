@@ -14,7 +14,7 @@ public class UserManageResourceProvider implements BaseResourceProvider<UserMana
 
     @Override
     public UserManageResource getResource () {
-        var adminAuth = this.initAuth(session);
+        var adminAuth = this.initAuthByWorkingRealm(session);
         var context = session.getContext();
         var adminEventBuilder = new AdminEventBuilder(context.getRealm(), adminAuth, session, context.getConnection());
 

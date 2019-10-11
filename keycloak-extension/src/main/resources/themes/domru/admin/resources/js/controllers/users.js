@@ -292,7 +292,7 @@ module.controller('UserOfflineSessionsCtrl', function ($scope, $location, realm,
     };
 });
 
-module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState, UserImpersonation, BruteForce, Notifications, $route, Dialog/*, CustomUser*/, $http) {
+module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState, UserImpersonation, BruteForce, Notifications, $route, Dialog/*, CustomUser*/, $http, $window) {
 
     $scope.userRealms = [];
     $scope.selectedRealm = '';
@@ -314,8 +314,9 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         } else if (!UserSearchState.isFirstSearch) $scope.searchQuery();
     };
 
-    $scope.setRealm = (realmsSelect) => {
-        $scope.selectedRealm = realmsSelect;
+    $scope.getHrefAddUser = function () {
+        $scope.initRealm();
+        $window.location.href = `#/create/user/${$scope.selectedRealm}`;
     };
 
     $scope.impersonate = function (userId) {
@@ -381,15 +382,15 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
 
     $scope.importFileCSV = function (files) {
+        $scope.initRealm();
         var formData = new FormData();
         var file = files[0];
         formData.append('file', file);
-        $http.post(`${authUrl}/realms/master/users-toms/uploadUsers`, formData, {
+        $http.post(`${authUrl}/realms/${$scope.selectedRealm}/users-toms/uploadUsers`, formData, {
             transformRequest: angular.identity,
             headers: {
                 'Content-Type': undefined,
-                'Content-Disposition': `form-data; name="file"; filename="import.csv"`,
-                'realm':'user'
+                'Content-Disposition': `form-data; name="file"; filename="import.csv"`
             }
         }).then(response => {
             var resp = angular.fromJson(response).data.results['import-report'];
@@ -404,15 +405,15 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
     $scope.importFileExcel = function (files) {
+        $scope.initRealm();
         var formData = new FormData();
         var file = files[0];
         formData.append('file', file);
-        $http.post(`${authUrl}/realms/master/users-toms/uploadUsers`, formData, {
+        $http.post(`${authUrl}/realms/${$scope.selectedRealm}/users-toms/uploadUsers`, formData, {
             transformRequest: angular.identity,
             headers: {
                 'Content-Type': undefined,
-                'Content-Disposition': `form-data; name="file"; filename="import.xlsx"`,
-                'realm':'user'
+                'Content-Disposition': `form-data; name="file"; filename="import.xlsx"`
             }
         }).then(response => {
             var resp = angular.fromJson(response).data.results['import-report'];
@@ -449,6 +450,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
     $scope.exportXlsx = function () {
+        $scope.initRealm();
         let payload = {
             type: 'xlsx',
             userParameters: [
@@ -465,7 +467,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             userIds: $scope.users.filter(user => user.active).map(user => user.id)
         };
         var linkElement = document.createElement('a');
-        $http.post(`${authUrl}/realms/master/users-toms/downloadUsers`, payload, {
+        $http.post(`${authUrl}/realms/${$scope.selectedRealm}/users-toms/downloadUsers`, payload, {
             headers: {
                 'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8',
                 'Content-Type': 'application/json'
@@ -493,6 +495,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
     $scope.exportCSV = function () {
+        $scope.initRealm();
         let payload = {
             type: 'csv',
             userParameters: [
@@ -509,7 +512,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             userIds: $scope.users.filter(user => user.active).map(user => user.id)
         };
         var linkElement = document.createElement('a');
-        $http.post(`${authUrl}/realms/master/users-toms/downloadUsers`, payload, {
+        $http.post(`${authUrl}/realms/${$scope.selectedRealm}/users-toms/downloadUsers`, payload, {
             headers: {'Accept': 'application/octet-stream;charset=UTF-8', 'Content-Type': 'application/json'}
         }).then((response) => {
             var headers = response.headers();

@@ -41,52 +41,15 @@ public class SearchResource {
     private final static String SORT_FIELD_EMAIL = "email";
     protected KeycloakSession session;
     private UserFindService userFindService;
-    private AdminPermissionEvaluator auth;
 
     public SearchResource(KeycloakSession session) {
         this.session = session;
-        this.auth = initAuth(session);
-        auth.users().requireView();
         try {
             this.userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
         } catch (NamingException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
         }
-    }
-
-    private AdminPermissionEvaluator initAuth(KeycloakSession session) {
-        KeycloakContext context = session.getContext();
-        AppAuthManager appAuthManager = new AppAuthManager();
-        String tokenString = Optional.ofNullable(appAuthManager.extractAuthorizationHeaderToken(context.getRequestHeaders())).orElseThrow(() -> new NotAuthorizedException("Bearer"));
-
-        AccessToken token;
-        try {
-            JWSInput input = new JWSInput(tokenString);
-            token = input.readJsonContent(AccessToken.class);
-        } catch (JWSInputException e) {
-            throw new NotAuthorizedException("Bearer token format error");
-        }
-
-        String issuer = Optional.ofNullable(token.getIssuer()).orElseThrow(() -> new RuntimeException("empty issuer"));
-        String realmName = issuer.substring(issuer.lastIndexOf('/') + 1);
-
-        RealmManager realmManager = new RealmManager(session);
-        RealmModel realmFromToken = Optional.ofNullable(realmManager.getRealmByName(realmName))
-                .orElseThrow(() -> new NotAuthorizedException("Unknown realm in token"));
-
-        session.getContext().setRealm(realmFromToken);//FIXME Подставляем реалм из его токена и валидируем относительно его реалма, иначе authResult кинет NPE, мб возможно сделать аккауратней
-
-        AuthenticationManager.AuthResult authResult = Optional.ofNullable(appAuthManager.authenticateBearerToken(session, realmFromToken))
-                .orElseThrow(() -> new NotAuthorizedException("Bearer"));
-
-        ClientModel client = Optional.ofNullable(realmFromToken.getClientByClientId(token.getIssuedFor()))
-                .orElseThrow(() -> new NotAuthorizedException("Could not find client for authorization"));
-
-        AdminAuth auth = new AdminAuth(realmFromToken, authResult.getToken(), authResult.getUser(), client);
-
-        AdminPermissionEvaluator realmAuth = AdminPermissions.evaluator(session, realmFromToken, auth);
-        return realmAuth;
     }
 
     private EntityManager getEM() {
@@ -227,41 +190,5 @@ public class SearchResource {
                 })
                 .map(RealmModel::getName)
                 .collect(Collectors.toList());
-    }
-
-    private AdminAuth authenticateRealmAdminRequest(RealmModel realm) {
-        String tokenString = new AppAuthManager().extractAuthorizationHeaderToken(session.getContext().getRequestHeaders());
-        if (tokenString == null) throw new NotAuthorizedException("Bearer");
-        AccessToken token;
-        try {
-            JWSInput input = new JWSInput(tokenString);
-            token = input.readJsonContent(AccessToken.class);
-        } catch (JWSInputException e) {
-            throw new NotAuthorizedException("Bearer token format error");
-        }
-
-        String realmName = token.getIssuer().substring(token.getIssuer().lastIndexOf('/') + 1);
-        RealmManager realmManager = new RealmManager(session);
-        RealmModel realmFromToken = realmManager.getRealmByName(realmName);
-        if (realmFromToken == null) {
-            throw new NotAuthorizedException("Unknown realm in token");
-        }
-
-        session.getContext().setRealm(realm);
-        AuthenticationManager.AuthResult authResult = new AppAuthManager()
-                .authenticateBearerToken(session, realm, session.getContext().getUri(), session.getContext().getConnection(), session.getContext().getRequestHeaders());
-        if (authResult == null) {
-            log.debug("Token not valid");
-            throw new NotAuthorizedException("Bearer");
-        }
-
-        ClientModel client = realm.getClientByClientId(token.getIssuedFor());
-        if (client == null) {
-            throw new NotAuthorizedException("Could not find client for authorization");
-        }
-
-        AdminAuth auth = new AdminAuth(realm, authResult.getToken(), authResult.getUser(), client);
-
-        return auth;
     }
 }

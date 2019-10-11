@@ -33,6 +33,7 @@ public class SearchRealmResourceProvider implements RealmResourceProvider, BaseR
 
     @Override
     public Object getResource() {
+        initAuth(session).users().requireView();
         return new SearchRestResource(session);
     }
 

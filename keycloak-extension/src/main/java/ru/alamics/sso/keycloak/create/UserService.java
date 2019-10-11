@@ -145,9 +145,8 @@ public class UserService {
         return parameters;
     }
 
-    public ImportResponse importUsers(InputStream inputStream, String type, RealmModel realm) throws IOException, FileServiceException {
+    public ImportResponse importUsers(InputStream inputStream, String type) throws IOException, FileServiceException {
         log.info("Start upload users");
-        this.realm = realm;
 
         FileModel file = FileFactory.createFileModel(inputStream, type);
         if (file == null) {
