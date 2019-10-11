@@ -1,7 +1,7 @@
 <div class="form-group">
-    <label class="col-md-2 control-label" for="esiaDomainUrl">{{:: 'esiaDomainUrl' | translate}}</label>
+    <label class="col-md-2 control-label" for="esiaDomainUrl"><span class="required">*</span>{{:: 'esiaDomainUrl' | translate}}</label>
     <div class="col-md-6">
         <input ng-model="identityProvider.config.esiaDomainUrl" id="esiaDomainUrl" class="form-control" required/>
     </div>
-    <kc-tooltip>{{:: 'identity-provider.google-esiaDomainUrl.tooltip' | translate}}</kc-tooltip>
+    <kc-tooltip>{{:: 'identity-provider.esia-esiaDomainUrl.tooltip' | translate}} (example: https://esia-portal1.test.gosuslugi.ru)</kc-tooltip>
 </div>
