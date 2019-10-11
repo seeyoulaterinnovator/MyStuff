@@ -198,5 +198,8 @@ export default (function() {
     // form.getFieldState('password-confirm').change(password);
     // form.getFieldState('password-confirm').blur();
   }
-  linkPasswords(getPassword, setPassword, document.getElementById('password'));
+  function getConfirmation() {
+    return form.getFieldState('password-confirm').value;
+  }
+  linkPasswords(getPassword, setPassword, getConfirmation, document.getElementById('password'), document.getElementById('password-confirm'));
 })();

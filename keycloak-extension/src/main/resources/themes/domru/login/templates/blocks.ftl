@@ -33,7 +33,7 @@
         <div id="generated-password-container" class=" hidden">
           <p class="generated-password-text">Не забудьте записать пароль</p>
           <div class="flex justify-between items-center">
-            <div id="generated-password" class="flex"></div>
+            <div id="generated-password" class="flex text-base"></div>
             <button id="refresh-password-button" class="w-12 h-12 focus:outline-none" type="button">
               <@svg.reloadButton color="accentBlue"></@svg.reloadButton>
             </button>

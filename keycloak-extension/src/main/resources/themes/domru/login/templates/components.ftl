@@ -8,7 +8,13 @@
   >
 
   <div class="field__container">
-      <input 
+    <#if type == 'password'>
+      <div class="passw_ok hidden"><svg width="14" height="11" viewBox="0 0 14 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M5.16361 7.18734L2.3947 4.41833L0.980469 5.83256L5.22293 10.075L13.0606 2.35629L11.5871 0.882812L5.16361 7.18734Z" fill="#69BE28"/>
+        </svg></div>
+    </#if>
+
+    <input
         class="field__input" 
         name="${fieldName}" 
         id="${fieldName}"
