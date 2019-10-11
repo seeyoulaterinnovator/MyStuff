@@ -149,3 +149,13 @@
     line-height: 18px;
   }
 }
+
+.passw_ok {
+  position: absolute;
+  right: 0;
+  top: 3px;
+}
+
+.field-good {
+  @apply .border-accentGreen-700;
+}
