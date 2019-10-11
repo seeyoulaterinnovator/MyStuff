@@ -1,7 +1,7 @@
 <#import "template.ftl" as layout>
 <#import "templates/blocks.ftl" as blocks>
 
-<@layout.registrationLayout displayInfo=true displayCity=false displayWarningMessage=false; section>
+<@layout.registrationLayout displayInfo=true displayCity=true displayWarningMessage=false; section>
     <#if section = "header">
         <#include "templates/required-fields.html">
         <@blocks.contentHeader mainTitle="${msg('emailForgotContentTitle')}" />
@@ -14,7 +14,7 @@
                     <button id="submit" class="btn btn-main w-full pass-fields pass-fields--change-pass" type="submit">Сменить пароль</button>
                 </div>
                 <div class="text-center flex-basis-1/2 ml-0 text-sm sm:ml-6">
-                    <a id="cancel" href="https://lkb2b.domru.ru/" class="btn w-full">${msg("doCancel")}</a>
+                    <a id="cancel" href="https://master.frontend2.b2bweb.t2.ertelecom.ru" class="btn w-full">${msg("doCancel")}</a>
                 </div>
             </div>
         </form>
