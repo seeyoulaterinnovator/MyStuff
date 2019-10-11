@@ -256,4 +256,12 @@
         </sql>
     </changeSet>
 
+    <changeSet id="22" author="dautova-lr">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mysql" />
+        </preConditions>
+        <sql>
+            alter table EVENT_ENTITY change DETAILS_JSON DETAILS_JSON varchar(2550) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
 </databaseChangeLog>

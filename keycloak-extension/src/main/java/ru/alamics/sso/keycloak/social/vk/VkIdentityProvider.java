@@ -79,6 +79,8 @@ public class VkIdentityProvider extends AbstractOAuth2IdentityProvider implement
         user.setName(firstName + lastName);
         user.setIdpConfig(getConfig());
         user.setIdp(this);
+        user.getContextData().put("firstName", firstName + " " + lastName);
+
         AbstractJsonUserAttributeMapper.storeUserProfileForMapper(user, profile, getConfig().getAlias());
         return user;
     }

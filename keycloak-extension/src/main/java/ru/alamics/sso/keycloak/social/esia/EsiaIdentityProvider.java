@@ -244,7 +244,6 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
             username += " " + middleName;
         }
         user.setName(firstName + lastName);
-
         user.setFirstName(username);
         user.setLastName("-");
         user.setUsername(username);
