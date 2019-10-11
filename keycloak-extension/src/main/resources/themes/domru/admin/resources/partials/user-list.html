@@ -65,6 +65,12 @@
                     <button id="viewAllUsers" class="btn btn-default" ng-click="query.search = ''; firstPage()">{{::
                         'view-all-users' | translate}}
                     </button>
+                    <select class="form-control" name="TimeoutUnit" data-ng-model="setting.unit">
+                        <option value="SECONDS">{{:: 'seconds' | translate}}</option>
+                        <option value="MINUTES">{{:: 'minutes' | translate}}</option>
+                        <option value="HOURS">{{:: 'hours' | translate}}</option>
+                        <option value="DAYS">{{:: 'days' | translate}}</option>
+                    </select>
 
                     <div class="pull-right" data-ng-show="access.manageUsers">
                         <label for="import-file-csv" class="btn btn-default ng-binding">Import CSV<i

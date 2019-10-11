@@ -19,19 +19,23 @@ package ru.alamics.sso.keycloak.search.rest;
 
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.resource.RealmResourceProvider;
+import org.keycloak.services.resources.admin.AdminAuth;
+import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
 
 
-public class SearchRealmResourceProvider implements RealmResourceProvider {
+public class SearchRealmResourceProvider implements RealmResourceProvider, BaseResourceProvider {
 
     private KeycloakSession session;
+    private AdminAuth auth;
 
     public SearchRealmResourceProvider(KeycloakSession session) {
+        auth = this.initAuth(session);
         this.session = session;
     }
 
     @Override
     public Object getResource() {
-        return new SearchRestResource(session);
+        return new SearchRestResource(session, auth);
     }
 
     @Override

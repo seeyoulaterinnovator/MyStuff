@@ -76,7 +76,7 @@ public class UserService {
         if (file == null) {
             throw new UnsupportedDataTypeException("Unsupported file format!");
         }
-        List<UserDto> userDto = new SearchResource(session).getUsers(null, null, null, null, true);
+        List<UserDto> userDto = new SearchResource(session).getUsers(realm.getName(), null, null, null, null, true);
         if (userDto == null || userDto.isEmpty()) {
             return null;
         }

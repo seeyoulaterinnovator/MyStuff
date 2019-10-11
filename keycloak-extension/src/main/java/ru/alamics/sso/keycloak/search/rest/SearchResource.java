@@ -5,8 +5,10 @@ import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.annotations.jaxrs.QueryParam;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.services.resources.admin.AdminAuth;
 import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
 import ru.alamics.sso.keycloak.search.dto.UserDto;
 import ru.alamics.sso.registration.service.UserFindService;
 
@@ -31,6 +33,7 @@ public class SearchResource {
 
     public SearchResource(KeycloakSession session) {
         this.session = session;
+
         try {
             this.userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
         } catch (NamingException e) {
@@ -52,11 +55,25 @@ public class SearchResource {
                                  @QueryParam("searchToms") String searchToms, @QueryParam("sortField") String sortField,
                                  @QueryParam("sortAsc") boolean sortAsc) {
         return JsonResponse.success()
-                .addResult("users-info", getUsers(search, searchUser, searchToms, sortField, sortAsc))
+                .addResult("users-info", getUsers("user", search, searchUser, searchToms, sortField, sortAsc))
                 .build();
     }
 
-    public List<UserDto> getUsers(String search, String searchUser, String searchToms, String sortField, boolean sortAsc) {
+    @GET
+    @Path("/realm")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response getUsersInfoByRealm(@QueryParam("realm") String realm,
+                                        @QueryParam("search") String search, @QueryParam("searchUser") String searchUser,
+                                        @QueryParam("searchToms") String searchToms, @QueryParam("sortField") String sortField,
+                                        @QueryParam("sortAsc") boolean sortAsc) {
+        return JsonResponse.success()
+                .addResult("users-info", getUsers(realm, search, searchUser, searchToms, sortField, sortAsc))
+                .build();
+    }
+
+    public List<UserDto> getUsers(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc) {
         List<Tuple> tuples = getEM().createNativeQuery(
                 "select UE.ID         as user_id,\n" +
                         "       UE.USERNAME   as username,\n" +
@@ -82,7 +99,7 @@ public class SearchResource {
                         "         left join USERPOST_EXT_SYSTEM_ROLE UESR on UP.ID = UESR.USER_POST_ID\n" +
                         "         left join EXT_SYSTEM_ROLE ESR on UESR.EXT_SYSTEM_ROLE_ID = ESR.ID\n" +
                         "         left join EXTERNAL_SYSTEM ES on ESR.SYSTEM_ID = ES.ID\n" +
-                        "WHERE UE.REALM_ID = 'user'\n" +
+                        "WHERE UE.REALM_ID = :realm\n" +
                         "  AND CASE\n" +
                         "          WHEN :search is not null and :search != '' then (\n" +
                         "                      UE.EMAIL LIKE CONCAT('%', :search, '%') OR\n" +
@@ -102,6 +119,7 @@ public class SearchResource {
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
+                .setParameter("realm", realm)
                 .getResultList();
         return DataMapper.toUserDtoList(tuples);
     }
