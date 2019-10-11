@@ -178,7 +178,7 @@
     }
     .swr-background #small_cat {
         width: 190%;
-        left: -50px;
+        left: 0px;
         bottom: -40px;
     }
 }
