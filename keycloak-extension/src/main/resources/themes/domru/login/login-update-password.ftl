@@ -1,7 +1,7 @@
 <#import "template.ftl" as layout>
 <#import "templates/blocks.ftl" as blocks>
 
-<@layout.registrationLayout displayInfo=true displayCity=false displayWarningMessage=false; section>
+<@layout.registrationLayout displayInfo=true displayCity=true displayWarningMessage=false; section>
     <#if section = "header">
         <#include "templates/required-fields.html">
         <@blocks.contentHeader mainTitle="${msg('emailForgotContentTitle')}" />
