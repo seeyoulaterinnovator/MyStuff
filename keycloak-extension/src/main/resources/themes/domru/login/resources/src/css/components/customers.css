@@ -113,13 +113,13 @@
     padding-right: 25px;
   }
   .org-cell {
-    width: 100%;
+    width: 430px;
     font-size: 14px;
     text-overflow: initial;
     color: #000000;
   }
   .role-cell {
-    width: 100%;
+    width: 430px;
     font-size: 10px;
     line-height: 13px;
     letter-spacing: 0.5px;
@@ -134,5 +134,11 @@
   .trow div {
     padding-left: 15px;
     padding-right: 15px;
+  }пше
+  .org-cell {
+    width: 290px;
+  }
+  .role-cell {
+    width: 290px;
   }
 }
