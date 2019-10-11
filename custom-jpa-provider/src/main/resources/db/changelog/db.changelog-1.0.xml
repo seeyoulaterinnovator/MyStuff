@@ -240,4 +240,20 @@
             update SETTINGS set UNIT = 'DAYS' where EXT_ID = 'user.absence.notifications.days';
         </sql>
     </changeSet>
+
+    <changeSet id="19" author="plyusnin-da">
+        <addColumn tableName="EXTERNAL_SYSTEM">
+            <column name="LABEL" type="varchar(100)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mysql" />
+        </preConditions>
+        <sql>
+            ALTER TABLE EXTERNAL_SYSTEM CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

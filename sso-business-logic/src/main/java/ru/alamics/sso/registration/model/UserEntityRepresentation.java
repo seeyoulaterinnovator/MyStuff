@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.event.listener.model;
+package ru.alamics.sso.registration.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;

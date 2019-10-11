@@ -11,7 +11,7 @@
                 <@components.field class="mb-4 md:w-full" fieldName="orgName" label="Наименование организации" placeholder="Наименование организации" required=true />
                 
                 <#-- В нашем случае firstName – это полное имя -->
-                <@components.field class="mb-4 md:w-full" fieldName="firstName" label="Как к вам обращаться?" placeholder="Как к вам обращаться?" required=true />
+                <@components.field class="mb-4 md:w-full" fieldName="firstName" label="Как к Вам обращаться?" placeholder="Как к Вам обращаться?" required=true />
 
                 <#-- Пока бэк не уберет необходимость фамилии, скрою поле и отправлю дефис -->
                 <@components.field class="mb-4 md:w-full" fieldName="lastName" label="Фамилия" placeholder="Фамилия" required=true style="display: none" />
@@ -46,7 +46,7 @@
                   <div class="flex flex-basis-1/2 items-center">
                     <button id="submit" class="btn btn-main pass-fields" type="submit">${msg('doRegister')}</button>
                   </div>
-                  <span class="flex-basis-1/2 ml-0 mb-6 text-sm sm:ml-5 sm:mb-0">Нажимая кнопку, вы соглашаетесь <a class="reference" href="https://domru.ru/policy.pdf" target="_blink">с политикой обработки данных</a></span>
+                  <span class="flex-basis-1/2 ml-0 mb-6 text-sm sm:ml-5 sm:mb-0">Нажимая кнопку, Вы соглашаетесь <a class="reference" href="https://domru.ru/policy.pdf" target="_blink">с политикой обработки данных</a></span>
                 </div>
         </form>
     <#elseif section = "info" >

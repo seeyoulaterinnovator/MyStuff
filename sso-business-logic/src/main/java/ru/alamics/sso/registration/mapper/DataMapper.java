@@ -1,11 +1,12 @@
 package ru.alamics.sso.registration.mapper;
 
+import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
-import ru.alamics.sso.keycloak.entity.ExternalSystemEntity;
-import ru.alamics.sso.keycloak.entity.ExternalSystemRoleEntity;
-import ru.alamics.sso.keycloak.entity.UserPostEntity;
-import ru.alamics.sso.keycloak.entity.UserPostRoleEntity;
+import org.keycloak.representations.account.UserRepresentation;
+import ru.alamics.sso.keycloak.entity.*;
 import ru.alamics.sso.registration.dto.*;
+import ru.alamics.sso.registration.model.UserEntityRepresentation;
+import ru.alamics.sso.settings.SettingsDto;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -48,7 +49,7 @@ public class DataMapper {
         }
         Set<ExternalSystemRoleEntity> externalSystemRole = userPost.getSystemRoles();
         List<ExternalSystemRoleEntity> externalSystemRoles = null;
-        if (externalSystemRole != null){
+        if (externalSystemRole != null) {
             externalSystemRoles = externalSystemRole.stream().collect(Collectors.toList());
         }
         return UserPostResponse.builder()
@@ -88,6 +89,7 @@ public class DataMapper {
         return ExternalSystemDto.builder()
                 .id(externalSystem.getId())
                 .name(externalSystem.getName())
+                .label(externalSystem.getLabel())
                 .build();
     }
 
@@ -106,11 +108,39 @@ public class DataMapper {
     }
 
     public static List<ExternalSystemRoleDto> toExternalSystemRoleDtos(List<ExternalSystemRoleEntity> externalSystemRoles) {
-        if (externalSystemRoles == null || externalSystemRoles.isEmpty()){
+        if (externalSystemRoles == null || externalSystemRoles.isEmpty()) {
             return null;
         }
-        List<ExternalSystemRoleDto> externalSystemDtos = new LinkedList<>();
-        externalSystemRoles.forEach(o -> externalSystemDtos.add(toExternalSystemRoleDto(o)));
+        List<ExternalSystemRoleDto> externalSystemDtos = externalSystemRoles.stream()
+                .map(DataMapper::toExternalSystemRoleDto).collect(Collectors.toList());
         return externalSystemDtos;
+    }
+
+
+    public static SettingsDto toDto(Settings settings) {
+        if (settings == null) {
+            return null;
+        }
+        return SettingsDto.builder()
+                .desc(settings.getDesc())
+                .extId(settings.getExtId())
+                .id(settings.getId())
+                .name(settings.getName())
+                .value(settings.getValue())
+                .realmId(settings.getRealmId())
+                .unit(settings.getUnit())
+                .build();
+    }
+
+    public static UserEntityRepresentation toUserEntityRepresentation(UserEntity user) {
+        if (user == null) {
+            return null;
+        }
+        UserEntityRepresentation userEntityRepresentation = new UserEntityRepresentation();
+        userEntityRepresentation.setId(user.getId());
+        userEntityRepresentation.setCreatedTimestamp(user.getCreatedTimestamp());
+        userEntityRepresentation.setEmail(user.getEmail());
+        userEntityRepresentation.setEnabled(user.isEnabled());
+        return userEntityRepresentation;
     }
 }

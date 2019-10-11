@@ -26,6 +26,7 @@ public class UserDto implements Serializable {
     private String systemRoleName;
     private String systemId;
     private String systemName;
+    private String systemLabel;
 
     @JsonPOJOBuilder(withPrefix = "")
     public static class UserDtoBuilder {
