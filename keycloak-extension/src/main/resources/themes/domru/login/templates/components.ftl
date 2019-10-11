@@ -6,13 +6,7 @@
       ${attrName}="${attrVal}"
     </#list>
   >
-    <#if label??>
-      <label 
-        class="field__label" 
-        for="${fieldName}">
-          ${label}
-      </label>
-    </#if>
+
   <div class="field__container">
       <input 
         class="field__input" 
@@ -22,6 +16,13 @@
         type="${type}"
         value="${value}"
       />
+      <#if label??>
+        <label
+                class="field__label"
+                for="${fieldName}">
+            ${label}
+        </label>
+      </#if>
       <#if type == 'password'>
       <div class="field__open" target="${fieldName}">
         <svg class="close" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">

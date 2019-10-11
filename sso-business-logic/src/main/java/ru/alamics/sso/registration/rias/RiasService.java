@@ -61,10 +61,10 @@ public class RiasService {
         return false;
     }
 
-    public RiasLogin loginUser(String login, String password) {
+    public RiasLogin loginUser(String domain, String login, String password) {
 
         try {
-            return riasLoginService.loginUser(login, password);
+            return riasLoginService.loginUser(domain, login, password);
 
         } catch (RiasCheckException e) {
             log.error("RIAS login service", e);

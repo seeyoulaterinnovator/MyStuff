@@ -75,7 +75,7 @@ export default (function() {
       errors['password-confirm'] = 'Пароли не совпадают';
 
     if (values.recaptcha === false)
-      errors.recaptcha = 'Подтвердите, что вы не робот';
+      errors.recaptcha = 'Подтвердите, что Вы не робот';
 
     if (!phoneMask.unmaskedValue.match(VALIDATION_RULES.phone))
       errors.phone = 'Неверный формат номера';
@@ -151,6 +151,7 @@ export default (function() {
           input.checked = value;
         } else {
           input.value = value === undefined ? '' : value;
+          input
         }
 
         // show/hide errors
@@ -180,8 +181,6 @@ export default (function() {
 
       const submitButton = document.getElementById('submit');
 
-      console.log(values, errors);
-
       if (!isEmpty(errors)) submitButton.disabled = true;
       else submitButton.disabled = false;
     },
@@ -200,5 +199,4 @@ export default (function() {
     // form.getFieldState('password-confirm').blur();
   }
   linkPasswords(getPassword, setPassword, document.getElementById('password'));
-  console.log(document.querySelectorAll('.field__open'));
 })();

@@ -42,8 +42,9 @@
             el.addEventListener('click', function () {
                 document.getElementById('roleName').value = roleName;
                 document.getElementById('tomsId').value = tomsId;
+                window.parent.postMessage('post-selected', '*');
                 document.getElementById('kc-accept').click();
-            })
+            });
         });
 
     </script>
