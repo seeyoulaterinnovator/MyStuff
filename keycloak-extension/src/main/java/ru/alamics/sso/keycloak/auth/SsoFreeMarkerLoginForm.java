@@ -30,18 +30,18 @@ import static ru.alamics.sso.registration.model.UserConstants.*;
 @Slf4j
 public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
-    public SsoFreeMarkerLoginForm (KeycloakSession session, FreeMarkerUtil freeMarker) {
+    public SsoFreeMarkerLoginForm(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
     }
 
     @Override
-    protected UriBuilder prepareBaseUriBuilder (boolean resetRequestUriParams) {
+    protected UriBuilder prepareBaseUriBuilder(boolean resetRequestUriParams) {
         var ret = super.prepareBaseUriBuilder(resetRequestUriParams);
         return addQueryParamToBuilder(ret);
     }
 
     @Override
-    public LoginFormsProvider setActionUri (URI actionUri) {
+    public LoginFormsProvider setActionUri(URI actionUri) {
         var uri = addQueryParams(actionUri);
         var ret = super.setActionUri(uri);
         return ret;
@@ -74,15 +74,15 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         return builder.build();
     }
 
-    private UriBuilder addQueryParamToBuilder (UriBuilder builder) {
+    private UriBuilder addQueryParamToBuilder(UriBuilder builder) {
         var queryParameters = this.session.getContext().getUri().getQueryParameters();
-        if(queryParameters != null) {
+        if (queryParameters != null) {
             queryParameters.forEach((k, v) -> {
-                if(k.equals(HIDDEN_HEADER)) {
+                if (k.equals(HIDDEN_HEADER)) {
                     builder.queryParam(HIDDEN_HEADER, v.get(0));
-                } else if(k.equals(I_FRAME)) {
+                } else if (k.equals(I_FRAME)) {
                     builder.queryParam(I_FRAME, v.get(0));
-                } else if(k.equals(CITY)) {
+                } else if (k.equals(CITY)) {
                     builder.queryParam(CITY, v.get(0));
                 }
             });
@@ -91,7 +91,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     }
 
     @Override
-    public Response createRegistration () {
+    public Response createRegistration() {
         var realm = this.session.getContext().getRealm();
         var requiredActionsProvider = realm.getRequiredActionProviders();
         var twoStepAuth = requiredActionsProvider.stream()
@@ -99,11 +99,19 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                 .map(RequiredActionProviderModel::getAlias)
                 .collect(Collectors.toList());
         var authType = AuthType.getByList(twoStepAuth);
-        if(authType != null) {
+        if (authType != null) {
             this.attributes.put("twoStepAuthType", authType.getDescription());
         } else {
             this.attributes.put("twoStepAuthType", "");
         }
+        if (formData != null) {
+            this.attributes.put(FormConstants.FIELD_ORG_NAME, formData.getFirst(FormConstants.FIELD_ORG_NAME));
+            this.attributes.put(FormConstants.FIELD_EMAIL, formData.getFirst(FormConstants.FIELD_EMAIL));
+            this.attributes.put(FormConstants.FIELD_FIRST_NAME, formData.getFirst(FormConstants.FIELD_FIRST_NAME));
+            this.attributes.put(FormConstants.FIELD_USERNAME, formData.getFirst(FormConstants.FIELD_USERNAME));
+            this.attributes.put(FormConstants.FIELD_PHONE, formData.getFirst(FormConstants.FIELD_PHONE));
+        }
+        log.info("create form attr = {}", attributes);
         return super.createRegistration();
     }
 
