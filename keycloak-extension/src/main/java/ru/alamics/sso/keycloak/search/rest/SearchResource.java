@@ -53,21 +53,10 @@ public class SearchResource {
     @NoCache
     public Response getUsersInfo(@QueryParam("search") String search, @QueryParam("searchUser") String searchUser,
                                  @QueryParam("searchToms") String searchToms, @QueryParam("sortField") String sortField,
-                                 @QueryParam("sortAsc") boolean sortAsc) {
-        return JsonResponse.success()
-                .addResult("users-info", getUsers("user", search, searchUser, searchToms, sortField, sortAsc))
-                .build();
-    }
-
-    @GET
-    @Path("/realm")
-    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @NoCache
-    public Response getUsersInfoByRealm(@QueryParam("realm") String realm,
-                                        @QueryParam("search") String search, @QueryParam("searchUser") String searchUser,
-                                        @QueryParam("searchToms") String searchToms, @QueryParam("sortField") String sortField,
-                                        @QueryParam("sortAsc") boolean sortAsc) {
+                                 @QueryParam("sortAsc") boolean sortAsc, @QueryParam("realm") String realm) {
+        if (realm == null || realm.isBlank()){
+            realm = "user";
+        }
         return JsonResponse.success()
                 .addResult("users-info", getUsers(realm, search, searchUser, searchToms, sortField, sortAsc))
                 .build();
