@@ -4,11 +4,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.annotations.jaxrs.QueryParam;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
+import org.keycloak.jose.jws.JWSInput;
+import org.keycloak.jose.jws.JWSInputException;
+import org.keycloak.models.ClientModel;
+import org.keycloak.models.KeycloakContext;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.representations.AccessToken;
+import org.keycloak.services.managers.AppAuthManager;
+import org.keycloak.services.managers.AuthenticationManager;
+import org.keycloak.services.managers.RealmManager;
 import org.keycloak.services.resources.admin.AdminAuth;
+import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
+import org.keycloak.services.resources.admin.permissions.AdminPermissions;
 import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
-import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
 import ru.alamics.sso.keycloak.search.dto.UserDto;
 import ru.alamics.sso.registration.service.UserFindService;
 
@@ -17,11 +27,12 @@ import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.Tuple;
 import javax.ws.rs.*;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class SearchResource {
@@ -30,16 +41,52 @@ public class SearchResource {
     private final static String SORT_FIELD_EMAIL = "email";
     protected KeycloakSession session;
     private UserFindService userFindService;
+    private AdminPermissionEvaluator auth;
 
     public SearchResource(KeycloakSession session) {
         this.session = session;
-
+        this.auth = initAuth(session);
+        auth.users().requireView();
         try {
             this.userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
         } catch (NamingException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
         }
+    }
+
+    private AdminPermissionEvaluator initAuth(KeycloakSession session) {
+        KeycloakContext context = session.getContext();
+        AppAuthManager appAuthManager = new AppAuthManager();
+        String tokenString = Optional.ofNullable(appAuthManager.extractAuthorizationHeaderToken(context.getRequestHeaders())).orElseThrow(() -> new NotAuthorizedException("Bearer"));
+
+        AccessToken token;
+        try {
+            JWSInput input = new JWSInput(tokenString);
+            token = input.readJsonContent(AccessToken.class);
+        } catch (JWSInputException e) {
+            throw new NotAuthorizedException("Bearer token format error");
+        }
+
+        String issuer = Optional.ofNullable(token.getIssuer()).orElseThrow(() -> new RuntimeException("empty issuer"));
+        String realmName = issuer.substring(issuer.lastIndexOf('/') + 1);
+
+        RealmManager realmManager = new RealmManager(session);
+        RealmModel realmFromToken = Optional.ofNullable(realmManager.getRealmByName(realmName))
+                .orElseThrow(() -> new NotAuthorizedException("Unknown realm in token"));
+
+        session.getContext().setRealm(realmFromToken);//FIXME Подставляем реалм из его токена и валидируем относительно его реалма, иначе authResult кинет NPE, мб возможно сделать аккауратней
+
+        AuthenticationManager.AuthResult authResult = Optional.ofNullable(appAuthManager.authenticateBearerToken(session, realmFromToken))
+                .orElseThrow(() -> new NotAuthorizedException("Bearer"));
+
+        ClientModel client = Optional.ofNullable(realmFromToken.getClientByClientId(token.getIssuedFor()))
+                .orElseThrow(() -> new NotAuthorizedException("Could not find client for authorization"));
+
+        AdminAuth auth = new AdminAuth(realmFromToken, authResult.getToken(), authResult.getUser(), client);
+
+        AdminPermissionEvaluator realmAuth = AdminPermissions.evaluator(session, realmFromToken, auth);
+        return realmAuth;
     }
 
     private EntityManager getEM() {
@@ -54,7 +101,7 @@ public class SearchResource {
     public Response getUsersInfo(@QueryParam("search") String search, @QueryParam("searchUser") String searchUser,
                                  @QueryParam("searchToms") String searchToms, @QueryParam("sortField") String sortField,
                                  @QueryParam("sortAsc") boolean sortAsc, @QueryParam("realm") String realm) {
-        if (realm == null || realm.isBlank()){
+        if (realm == null || realm.isBlank()) {
             realm = "user";
         }
         return JsonResponse.success()
@@ -152,5 +199,69 @@ public class SearchResource {
         }
         var user = userFindService.getUserByPhoneAndExcludedUserId(session.getContext().getRealm(), phone, excludeUserId);
         return JsonResponse.success().addResult("foundUserId", user == null ? null : user.getId()).build();
+    }
+
+    @GET
+    @Path("/accessible-realms")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @NoCache
+    public List<String> getAccessibleRealms() {
+        return session.realms().getRealms().stream()
+                .filter(o -> {
+                    switch (session.getContext().getRealm().getName()) {
+                        case "master":
+                            return true;
+                        case "user":
+                            if (o.getName().equalsIgnoreCase("user")) {
+                                return true;
+                            }
+                            return false;
+                        case "manager":
+                            if (o.getName().equalsIgnoreCase("master")) {
+                                return false;
+                            }
+                            return true;
+                    }
+                    return false;
+                })
+                .map(RealmModel::getName)
+                .collect(Collectors.toList());
+    }
+
+    private AdminAuth authenticateRealmAdminRequest(RealmModel realm) {
+        String tokenString = new AppAuthManager().extractAuthorizationHeaderToken(session.getContext().getRequestHeaders());
+        if (tokenString == null) throw new NotAuthorizedException("Bearer");
+        AccessToken token;
+        try {
+            JWSInput input = new JWSInput(tokenString);
+            token = input.readJsonContent(AccessToken.class);
+        } catch (JWSInputException e) {
+            throw new NotAuthorizedException("Bearer token format error");
+        }
+
+        String realmName = token.getIssuer().substring(token.getIssuer().lastIndexOf('/') + 1);
+        RealmManager realmManager = new RealmManager(session);
+        RealmModel realmFromToken = realmManager.getRealmByName(realmName);
+        if (realmFromToken == null) {
+            throw new NotAuthorizedException("Unknown realm in token");
+        }
+
+        session.getContext().setRealm(realm);
+        AuthenticationManager.AuthResult authResult = new AppAuthManager()
+                .authenticateBearerToken(session, realm, session.getContext().getUri(), session.getContext().getConnection(), session.getContext().getRequestHeaders());
+        if (authResult == null) {
+            log.debug("Token not valid");
+            throw new NotAuthorizedException("Bearer");
+        }
+
+        ClientModel client = realm.getClientByClientId(token.getIssuedFor());
+        if (client == null) {
+            throw new NotAuthorizedException("Could not find client for authorization");
+        }
+
+        AdminAuth auth = new AdminAuth(realm, authResult.getToken(), authResult.getUser(), client);
+
+        return auth;
     }
 }

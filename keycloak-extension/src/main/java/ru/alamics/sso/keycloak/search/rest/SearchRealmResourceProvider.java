@@ -26,16 +26,14 @@ import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
 public class SearchRealmResourceProvider implements RealmResourceProvider, BaseResourceProvider {
 
     private KeycloakSession session;
-    private AdminAuth auth;
 
     public SearchRealmResourceProvider(KeycloakSession session) {
-        auth = this.initAuth(session);
         this.session = session;
     }
 
     @Override
     public Object getResource() {
-        return new SearchRestResource(session, auth);
+        return new SearchRestResource(session);
     }
 
     @Override

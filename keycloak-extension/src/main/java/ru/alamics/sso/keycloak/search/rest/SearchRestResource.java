@@ -8,11 +8,9 @@ import javax.ws.rs.Path;
 public class SearchRestResource {
 
     private KeycloakSession session;
-    private AdminAuth auth;
 
-    public SearchRestResource(KeycloakSession session, AdminAuth auth) {
+    public SearchRestResource(KeycloakSession session) {
         this.session = session;
-        this.auth = auth;
     }
 
     @Path("")

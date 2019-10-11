@@ -294,8 +294,14 @@ module.controller('UserOfflineSessionsCtrl', function ($scope, $location, realm,
 
 module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState, UserImpersonation, BruteForce, Notifications, $route, Dialog/*, CustomUser*/, $http) {
 
+    $scope.userRealms = [];
+    $scope.selectedRealm = '';
+
     $scope.init = function () {
         $scope.realm = realm;
+        $http.get(authUrl + '/realms/' + realm.realm + '/users-info/accessible-realms').then(function (data) {
+            $scope.userRealms = angular.fromJson(data).data;
+        });
 
         UserSearchState.query.realm = realm.realm;
         $scope.query = UserSearchState.query;
@@ -304,8 +310,12 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         var search = $route.current.params.search;
         if (search !== undefined) {
             $scope.query.search = search;
-            $scope.firstPage();
+            $scope.firstPage($scope.realm.realm);
         } else if (!UserSearchState.isFirstSearch) $scope.searchQuery();
+    };
+
+    $scope.setRealm = (realmsSelect) => {
+        $scope.selectedRealm = realmsSelect;
     };
 
     $scope.impersonate = function (userId) {
@@ -336,7 +346,6 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         $scope.query.first = 0;
         $scope.searchQuery();
     };
-
 
     $scope.unlockUsers = function () {
         let userForUnlock = $scope.users.filter(user => user.active).map(user => user.id);
@@ -526,9 +535,17 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         $scope.searchQuery();
     };
 
+    $scope.initRealm = function (){
+        $scope.selectedRealm = $scope.realm.realm;
+        if ($scope.realmsSelect != undefined){
+            $scope.selectedRealm = $scope.realmsSelect;
+        }
+    }
+
     $scope.searchQuery = function () {
+        $scope.initRealm();
         console.log("query.search: " + $scope.query.search);
-        $http.get(`${authUrl}/realms/user/users-info?realm=${$scope.realm.realm}`).then(function (data) {
+        $http.get(`${authUrl}/realms/user/users-info?realm=${$scope.selectedRealm}`).then(function (data) {
             $scope.users = $scope.groupByUser(angular.fromJson(data).data.results['users-info']);
             $scope.searchLoaded = true;
             $scope.lastSearch = $scope.query.search;
@@ -537,8 +554,9 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
     $scope.search = function () {
+        $scope.initRealm();
         console.log("query.search: " + $scope.query.search);
-        $http.get(`${authUrl}/realms/user/users-info?realm=${$scope.realm.realm}&search=${$scope.query.search}`).then(function (data) {
+        $http.get(`${authUrl}/realms/user/users-info?realm=${$scope.selectedRealm}&search=${$scope.query.search}`).then(function (data) {
             $scope.users = $scope.groupByUser(angular.fromJson(data).data.results['users-info']);
             $scope.searchLoaded = true;
             $scope.lastSearch = $scope.query.search;
@@ -547,8 +565,9 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
     $scope.searchByUserId = function () {
+        $scope.initRealm();
         $scope.query.first = 0;
-        $http.get(`${authUrl}/realms/user/users-info?realm=${$scope.realm.realm}&search=&searchUser=${$scope.query.searchByUserId}&searchToms=`).then(function (data) {
+        $http.get(`${authUrl}/realms/user/users-info?realm=${$scope.selectedRealm}&search=&searchUser=${$scope.query.searchByUserId}&searchToms=`).then(function (data) {
             $scope.users = $scope.groupByUser(angular.fromJson(data).data.results['users-info']);
             $scope.searchLoaded = true;
             $scope.lastSearch = $scope.query.search;
@@ -606,8 +625,9 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
     $scope.searchByTomsId = function () {
+        $scope.initRealm();
         $scope.query.first = 0;
-        $http.get(`${authUrl}/realms/user/users-info?realm=${$scope.realm.realm}&search=&searchUser=&searchToms=${$scope.query.searchByTomsId}`).then(function (data) {
+        $http.get(`${authUrl}/realms/user/users-info?realm=${$scope.selectedRealm}&search=&searchUser=&searchToms=${$scope.query.searchByTomsId}`).then(function (data) {
             $scope.users = $scope.groupByUser(angular.fromJson(data).data.results['users-info']);
             $scope.searchLoaded = true;
             $scope.lastSearch = $scope.query.search;
