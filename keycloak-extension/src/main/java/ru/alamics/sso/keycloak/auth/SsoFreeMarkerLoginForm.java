@@ -1,14 +1,21 @@
 package ru.alamics.sso.keycloak.auth;
 
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
+import org.keycloak.broker.provider.BrokeredIdentityContext;
+import org.keycloak.common.util.ObjectUtil;
+import org.keycloak.forms.login.LoginFormsPages;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.forms.login.freemarker.FreeMarkerLoginFormsProvider;
-import org.keycloak.models.AuthenticatorConfigModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RequiredActionProviderModel;
+import org.keycloak.models.UserModel;
+import org.keycloak.services.messages.Messages;
 import org.keycloak.theme.FreeMarkerUtil;
 import org.keycloak.theme.Theme;
+import org.keycloak.theme.beans.MessageType;
 import ru.alamics.sso.keycloak.auth.model.AuthType;
+import ru.alamics.sso.registration.model.FormConstants;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -98,5 +105,19 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             this.attributes.put("twoStepAuthType", "");
         }
         return super.createRegistration();
+    }
+
+    @Override
+    public Response createIdpLinkEmailPage() {
+        BrokeredIdentityContext brokerContext = (BrokeredIdentityContext) this.attributes.get(IDENTITY_PROVIDER_BROKER_CONTEXT);
+        String idpAlias = brokerContext.getIdpConfig().getAlias();
+        idpAlias = ObjectUtil.capitalize(idpAlias);
+        setMessage(MessageType.WARNING, Messages.LINK_IDP, idpAlias);
+
+        UserModel existingUser = AbstractIdpAuthenticator.getExistingUser(session, session.getContext().getRealm(), brokerContext.getAuthenticationSession());
+        if (existingUser != null ) {
+            attributes.put(FormConstants.EXISTING_USER_EMAIL, existingUser.getEmail());
+        }
+        return createResponse(LoginFormsPages.LOGIN_IDP_LINK_EMAIL);
     }
 }
