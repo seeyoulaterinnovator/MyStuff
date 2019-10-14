@@ -17,6 +17,12 @@
   border-radius: 1px;
 }
 
+.border-b.border-dashed {
+  &:hover {
+    border: none;
+  }
+}
+
 .border-box {
   box-sizing: border-box;
 }
