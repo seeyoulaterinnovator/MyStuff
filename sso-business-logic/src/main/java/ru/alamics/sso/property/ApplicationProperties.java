@@ -26,19 +26,13 @@ public class ApplicationProperties {
     private SettingsRepository repository;
 
 
-    public String getProperty(final PropertyConstants property, final String realmId, final boolean isConvertToSeconds) {
+    public long getSettingsValue(final PropertyConstants property, final String realmId) {
         final String keyName = property.getKey();
         Settings settings = repository.getSettings(keyName, realmId);
-        String ret;
+        long ret = -1;
         if(settings != null) {
-            ret = settings.getValue();
-            if (isConvertToSeconds) {
-                ret = String.valueOf(TimeUnit.SECONDS.convert(Long.parseLong(ret), settings.getUnit()));
-            }
-        } else {
-            ret = getProperty(keyName);
+            ret = TimeUnit.SECONDS.convert(Long.parseLong(settings.getValue()), settings.getUnit());
         }
-
         return ret;
     }
 
