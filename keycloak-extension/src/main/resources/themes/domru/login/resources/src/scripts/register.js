@@ -47,10 +47,11 @@ export default (function() {
   const form = createForm({
     onSubmit: () => {},
     initialValues: {
-      orgName: '',
-      firstName: '',
+      orgName: document.getElementById('orgName') && document.getElementById('orgName').value || '',
+      firstName: document.getElementById('firstName') && document.getElementById('firstName').value || '',
       lastName: '-',
-      email: '',
+      email: document.getElementById('email') && document.getElementById('email').value || '',
+      phone: document.getElementById('phone') && document.getElementById('phone').value || '',
       password: '',
       'password-confirm': '',
     },
