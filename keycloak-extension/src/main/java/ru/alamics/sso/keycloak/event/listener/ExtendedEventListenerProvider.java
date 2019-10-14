@@ -21,8 +21,7 @@ import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.sessions.RootAuthenticationSessionModel;
 import org.keycloak.theme.Theme;
-import ru.alamics.sso.keycloak.event.listener.model.UserEntityRepresentation;
-import ru.alamics.sso.keycloak.search.dto.UserDto;
+import ru.alamics.sso.registration.model.UserEntityRepresentation;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.UriBuilder;
@@ -31,7 +30,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 
 public class ExtendedEventListenerProvider implements EventListenerProvider {
@@ -57,12 +55,12 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
     @Override
     public void onEvent(AdminEvent event, boolean includeRepresentation) {
 
-        if (event.getOperationType().equals(OperationType.CREATE)
+        if (event.getOperationType() == OperationType.CREATE
                 && event.getResourceType().equals(ResourceType.USER)) {
             onEventCreate(event);
         }
 
-        if (event.getOperationType().equals(OperationType.UPDATE)
+        if (event.getOperationType() == OperationType.UPDATE
                 && event.getResourceType().equals(ResourceType.USER)) {
             onEventUpdate(event);
         }
@@ -91,7 +89,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
             if (!userNow.isEnabled()){
                 return;
             }
-            String userId = getUserId(event);
+            String userId = userNow.getId();
             if (userId == null) {
                 return;
             }
