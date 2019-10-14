@@ -49,9 +49,13 @@
 
   transition: border-color 0.1s ease-in;
 
-  &:hover,
-  &:focus {
+  &:hover
+  {
     @apply .border-accentBlue-700;
+  }
+  &:focus
+  {
+    @apply .border-extra-700;
   }
 
   &::placeholder {

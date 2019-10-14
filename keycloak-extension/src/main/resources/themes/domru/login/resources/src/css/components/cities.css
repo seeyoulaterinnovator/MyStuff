@@ -14,15 +14,15 @@
   }
   button {
     opacity: .5;
-  }
-}
-#cities-button button:hover {
-  opacity: 1;
-  span {
-    color: black;
-  }
-  .border-dashed {
-    border-color: #FFDD00;
+    &:hover {
+      opacity: 1;
+      span {
+        color: black;
+      }
+      .border-dashed {
+        @apply .border-extra-700;
+      }
+    }
   }
 }
 
