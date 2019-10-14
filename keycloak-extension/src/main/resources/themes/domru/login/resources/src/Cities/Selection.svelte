@@ -91,8 +91,7 @@
   });
 </script>
 
-<ul class="flex flex-wrap flex-row cities-container w-full
-  scrollable-container overflow-x-hidden overflow-y-auto px-4">
+<ul class="flex flex-wrap flex-row cities-container w-full px-4">
     {#each groupedCities as groupPart}
       <ul class="flex flex-col cities-column">
       {#each groupPart as group}

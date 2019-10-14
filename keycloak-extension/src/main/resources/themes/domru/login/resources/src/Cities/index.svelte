@@ -42,7 +42,7 @@
 
 {#if $showModal}
   <div
-    class="flex flex-col fixed w-screen h-screen bg-white inset-0 py-4 md:py-6 xl:py-8 {$status === STATUS.INITIAL && 'opacity-90'}"
+    class="flex flex-col fixed w-screen h-screen bg-white inset-0 py-4 md:py-6 xl:py-8 {$status === STATUS.INITIAL && 'opacity-90'} scrollable-container overflow-x-hidden overflow-y-auto"
     id="location-selection-window">
     <header id="cities-header" class="flex items-center pb-4 px-4 sm:px-6 lg:px-8 xl:px-6">
       <div class="w-full flex justify-between items-center">
@@ -73,7 +73,7 @@
             </fieldset>
           </form>
 
-          <button class="mr-4 lg:mr-6" on:click={handleClose}>
+          <button on:click={handleClose}>
             <svg
               width="32"
               height="32"
@@ -100,7 +100,7 @@
       </div>
     </header>
 
-    <div class="flex flex-1 {$status === STATUS.INITIAL ? 'items-center' : ''} justify-center content-box h-full scrollable-container overflow-x-hidden overflow-y-auto mt-4 md:mt-16 lg:mt-20 xl:mt-24">
+    <div class="flex flex-1 {$status === STATUS.INITIAL ? 'items-center' : ''} justify-center content-box h-full mt-4 md:mt-16 lg:mt-20 xl:mt-24">
       {#if $status === STATUS.INITIAL}
         <Confirmation />
       {:else if $status === STATUS.SELECTING}
