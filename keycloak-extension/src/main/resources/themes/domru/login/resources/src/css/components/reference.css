@@ -1,6 +1,10 @@
 .reference {
+  transition: 0.2s ease-in-out;
   border-bottom-width: 1px;
   border-bottom-style: dashed;
+  &:hover {
+     border: none;
+  }
 }
 
 .generate-btn {
