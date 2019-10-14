@@ -17,7 +17,7 @@
   border-radius: 1px;
 }
 
-.border-b.border-dashed {
+button.border-b.border-dashed {
   &:hover {
     border: none;
   }
