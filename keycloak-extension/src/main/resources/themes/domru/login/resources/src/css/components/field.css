@@ -159,3 +159,7 @@
 .field-good {
   @apply .border-accentGreen-700;
 }
+
+.timer_minutes {
+  color: rgba(0, 0, 0, 0.5);
+}
