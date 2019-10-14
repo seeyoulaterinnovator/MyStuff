@@ -1,19 +1,27 @@
 .btn {
   @apply .block .uppercase .tracking-wider .p-4 .rounded-lg .shadow;
 
-  transition: box-shadow 0.1s ease-in;
+  transition: 0.2s ease-in-out;
 
   &:disabled {
     @apply .opacity-40 .cursor-not-allowed;
+    &:hover {
+       transform: none;
+       @apply .shadow;
+    }
   }
 
   &:active {
     @apply .shadow-inner;
   }
 
-  &:hover,
   &:focus {
     @apply .shadow-md;
+  }
+
+  &:hover {
+    transform: translate(1px, -1px);
+    @apply .shadow-lg;
   }
 
   &:focus {
