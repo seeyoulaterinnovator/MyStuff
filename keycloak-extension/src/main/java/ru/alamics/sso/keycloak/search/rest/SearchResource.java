@@ -63,12 +63,12 @@ public class SearchResource {
     @NoCache
     public Response getUsersInfo(@QueryParam("search") String search, @QueryParam("searchUser") String searchUser,
                                  @QueryParam("searchToms") String searchToms, @QueryParam("sortField") String sortField,
-                                 @QueryParam("sortAsc") boolean sortAsc, @QueryParam("realm") String realm) {
-        if (realm == null || realm.isBlank()) {
-            realm = "user";
+                                 @QueryParam("sortAsc") boolean sortAsc, @QueryParam("searchRealm") String searchRealm) {
+        if (searchRealm == null || searchRealm.isBlank()) {
+            searchRealm = "user";
         }
         return JsonResponse.success()
-                .addResult("users-info", getUsers(realm, search, searchUser, searchToms, sortField, sortAsc))
+                .addResult("users-info", getUsers(searchRealm, search, searchUser, searchToms, sortField, sortAsc))
                 .build();
     }
 
