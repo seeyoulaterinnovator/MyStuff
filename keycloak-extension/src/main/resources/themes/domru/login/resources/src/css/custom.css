@@ -51,6 +51,13 @@ input[type="number"] {
   max-width: 306px;
 }
 
+.text-secondary-title {
+  transition: 0.2s ease-in-out;
+}
+.text-secondary-title:hover {
+  color: black;
+}
+
 .footer {
   margin: auto 0 35px;
   padding: 0;
