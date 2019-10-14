@@ -471,6 +471,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             ],
             userIds: ["XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"]
     };
+        $scope.tempRealm = $scope.query.searchRealm;
+        $scope.query.searchRealm = $scope.realm.realm;
         $scope.exportTemplateXlsx(payload)
     };
 
@@ -519,6 +521,10 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             "cancelable": false
         });
         linkElement.dispatchEvent(clickEvent);
+
+        if ($scope.tempRealm !== undefined){
+            $scope.query.searchRealm = $scope.tempRealm;
+        }
     })
     };
 
@@ -535,6 +541,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             ],
             userIds: ["XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"]
         };
+        $scope.tempRealm = $scope.query.searchRealm;
+        $scope.query.searchRealm = $scope.realm.realm;
         $scope.exportTemplateCSV(payload)
     };
 
@@ -577,6 +585,10 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             "cancelable": false
         });
         linkElement.dispatchEvent(clickEvent);
+
+        if ($scope.tempRealm !== undefined){
+            $scope.query.searchRealm = $scope.tempRealm;
+        }
     })
     };
 
