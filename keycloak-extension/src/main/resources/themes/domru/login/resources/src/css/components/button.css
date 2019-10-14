@@ -11,21 +11,18 @@
     }
   }
 
-  &:active {
-    @apply .shadow-inner;
-  }
-
-  &:focus {
-    @apply .shadow-md;
-  }
-
   &:hover {
     transform: translate(1px, -1px);
-    @apply .shadow-lg;
+    @apply .shadow-md;
   }
 
   &:focus {
     @apply .outline-none;
+  }
+
+  &:active {
+    transform: translate(0, 0);
+    @apply .shadow-inner;
   }
 }
 
@@ -33,7 +30,7 @@
   @apply .bg-extra .text-black;
 
   &:hover,
-  &:focus {
+  &:active {
     @apply .bg-extra-700-hover;
   }
 }
@@ -42,7 +39,7 @@
   @apply .bg-accentBlue .text-white;
 
   &:hover,
-  &:focus {
+  &:active {
     @apply .bg-accentBlue-700-hover;
   }
 }
