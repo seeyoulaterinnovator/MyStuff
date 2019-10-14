@@ -300,23 +300,23 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         $scope.realm = realm;
         $http.get(authUrl + '/realms/' + realm.realm + '/users-info/accessible-realms').then(function (data) {
             $scope.userRealms = angular.fromJson(data).data;
+
+            UserSearchState.query.realm = realm.realm;
+            $scope.query = UserSearchState.query;
+            $scope.query.briefRepresentation = 'false';
+
+            $scope.query.search = $scope.getSearchParameter($route.current.params.search);
+            $scope.query.searchByUserId = $scope.getSearchParameter($route.current.params.searchByUserId);
+            $scope.query.searchByTomsId = $scope.getSearchParameter($route.current.params.searchByTomsId);
+            $scope.query.searchRealm = $scope.getSearchParameter($route.current.params.searchRealm);
+
+            if ($scope.query.searchRealm === '' || ! $scope.userRealms.some(function (realm) {return realm === $scope.query.searchRealm}) ){
+                $scope.query.searchRealm = realm.realm;
+            }
+
+            if (!UserSearchState.isFirstSearch) $scope.searchQuery();
+            else $scope.firstPage($scope.realm.realm);
         });
-
-        UserSearchState.query.realm = realm.realm;
-        $scope.query = UserSearchState.query;
-        $scope.query.briefRepresentation = 'false';
-
-        $scope.query.search = $scope.getSearchParameter($route.current.params.search);
-        $scope.query.searchByUserId = $scope.getSearchParameter($route.current.params.searchByUserId);
-        $scope.query.searchByTomsId = $scope.getSearchParameter($route.current.params.searchByTomsId);
-        $scope.query.searchRealm = $scope.getSearchParameter($route.current.params.searchRealm);
-
-        if ($scope.query.searchRealm === '' || ! $scope.userRealms.contains($scope.query.searchRealm) ){
-            $scope.query.searchRealm = realm.realm;
-        }
-
-        if (!UserSearchState.isFirstSearch) $scope.searchQuery();
-        else $scope.firstPage($scope.realm.realm);
     };
 
     $scope.getSearchParameter = function (param){
