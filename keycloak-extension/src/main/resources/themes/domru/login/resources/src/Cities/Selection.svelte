@@ -92,7 +92,7 @@
 </script>
 
 <ul class="flex flex-wrap flex-row cities-container w-full
-  scrollable-container overflow-x-hidden overflow-y-auto">
+  scrollable-container overflow-x-hidden overflow-y-auto px-4">
     {#each groupedCities as groupPart}
       <ul class="flex flex-col cities-column">
       {#each groupPart as group}
@@ -105,7 +105,7 @@
            <ul class="flex flex-col">
            {#each group.cities as city}
               <li class="mb-2 sm:px-2 hover:bg-extra city">
-                <button class="city" on:click={() => handleClick(city)}>{city.name}</button>
+                <button class="city text-left" on:click={() => handleClick(city)}>{city.name}</button>
               </li>
             {:else}
               <div />

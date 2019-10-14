@@ -42,10 +42,9 @@
 
 {#if $showModal}
   <div
-    class="flex flex-col fixed w-screen h-screen bg-white inset-0 p-4 sm:px-6
-    md:py-6 lg:px-8 xl:py-8 xl:px-6 {$status === STATUS.INITIAL && 'opacity-90'}"
+    class="flex flex-col fixed w-screen h-screen bg-white inset-0 py-4 md:py-6 xl:py-8 {$status === STATUS.INITIAL && 'opacity-90'}"
     id="location-selection-window">
-    <header id="cities-header" class="flex items-center pb-4">
+    <header id="cities-header" class="flex items-center pb-4 px-4 sm:px-6 lg:px-8 xl:px-6">
       <div class="w-full flex justify-between items-center">
         <a href="https://b2b.domru.ru/" class={$status === STATUS.SELECTING && 'hidden sm:block'}>
           <div
@@ -74,7 +73,7 @@
             </fieldset>
           </form>
 
-          <button on:click={handleClose}>
+          <button class="mr-4 lg:mr-6" on:click={handleClose}>
             <svg
               width="32"
               height="32"
