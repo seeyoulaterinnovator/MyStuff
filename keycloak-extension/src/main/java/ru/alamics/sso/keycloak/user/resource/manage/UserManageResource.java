@@ -1,6 +1,10 @@
 package ru.alamics.sso.keycloak.user.resource.manage;
 
+import org.keycloak.events.admin.OperationType;
+import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.*;
+import org.keycloak.models.utils.ModelToRepresentation;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 
 import javax.ws.rs.POST;
@@ -10,14 +14,15 @@ import java.util.List;
 
 public class UserManageResource {
 
-    private KeycloakSession session;
-    private KeycloakContext context;
-    private RealmModel realm;
+    private final KeycloakSession session;
+    private final RealmModel realm;
+    private final AdminEventBuilder eventBuilder;
 
 
-    public UserManageResource (KeycloakSession session) {
+    UserManageResource (KeycloakSession session, AdminEventBuilder eventBuilder) {
         this.session = session;
-        this.context = session.getContext();
+        KeycloakContext context = session.getContext();
+        this.eventBuilder = eventBuilder.resource(ResourceType.USER);
         this.realm = context.getRealm();
     }
 
@@ -31,6 +36,12 @@ public class UserManageResource {
                 var user = userProvider.getUserById(id, realm);
                 if(user != null) {
                     user.setEnabled(false);
+                    var rep = ModelToRepresentation.toRepresentation(session, realm, user);
+                    eventBuilder.operation(OperationType.UPDATE)
+                            .resourcePath(session.getContext().getUri())
+                            .representation(rep)
+                            .realm(realm)
+                            .success();
                 }
             });
         }
@@ -48,9 +59,17 @@ public class UserManageResource {
                 var user = userProvider.getUserById(id, realm);
                 if(user != null) {
                     user.setEnabled(true);
+                    var rep = ModelToRepresentation.toRepresentation(session, realm, user);
+                    eventBuilder.operation(OperationType.UPDATE)
+                            .resourcePath(session.getContext().getUri())
+                            .representation(rep)
+                            .realm(realm)
+                            .success();
                 }
             });
         }
+
+
         return JsonResponse.success()
                 .httpStatus(Response.Status.NO_CONTENT)
                 .build();

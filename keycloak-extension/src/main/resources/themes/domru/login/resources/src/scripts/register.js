@@ -47,10 +47,11 @@ export default (function() {
   const form = createForm({
     onSubmit: () => {},
     initialValues: {
-      orgName: '',
-      firstName: '',
+      orgName: document.getElementById('orgName') && document.getElementById('orgName').value || '',
+      firstName: document.getElementById('firstName') && document.getElementById('firstName').value || '',
       lastName: '-',
-      email: '',
+      email: document.getElementById('email') && document.getElementById('email').value || '',
+      phone: document.getElementById('phone') && document.getElementById('phone').value || '',
       password: '',
       'password-confirm': '',
     },
@@ -75,7 +76,7 @@ export default (function() {
       errors['password-confirm'] = 'Пароли не совпадают';
 
     if (values.recaptcha === false)
-      errors.recaptcha = 'Подтвердите, что вы не робот';
+      errors.recaptcha = 'Подтвердите, что Вы не робот';
 
     if (!phoneMask.unmaskedValue.match(VALIDATION_RULES.phone))
       errors.phone = 'Неверный формат номера';
@@ -198,5 +199,8 @@ export default (function() {
     // form.getFieldState('password-confirm').change(password);
     // form.getFieldState('password-confirm').blur();
   }
-  linkPasswords(getPassword, setPassword, document.getElementById('password'));
+  function getConfirmation() {
+    return form.getFieldState('password-confirm').value;
+  }
+  linkPasswords(getPassword, setPassword, getConfirmation, document.getElementById('password'), document.getElementById('password-confirm'));
 })();

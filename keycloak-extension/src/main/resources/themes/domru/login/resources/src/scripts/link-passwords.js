@@ -5,7 +5,9 @@ import { fetchPassword } from './helpers';
 export default (
   getPassword,
   setPassword,
+  getConfirmation,
   passwordElement = document.getElementById('password'),
+  passwordConfirmElement = document.getElementById('password-confirm'),
 ) => {
   const passwordBlock = document.getElementById('password-block');
   if (!passwordBlock) return;
@@ -77,4 +79,25 @@ export default (
     }
   }
   passwordElement.addEventListener('input', highlightRules);
+  function checkPasswordConfirmation() {
+    const password = getPassword();
+    const confirmation = getConfirmation();
+    const ok = document.querySelectorAll('.passw_ok');
+    console.log(passwordElement);
+    console.log(passwordConfirmElement);
+    console.log(password);
+    console.log(confirmation);
+
+    if (confirmation === password) {
+      passwordElement.classList.add('field-good');
+      passwordConfirmElement.classList.add('field-good');
+      ok.forEach((img_block) => img_block.classList.remove('hidden'));
+    }
+    else {
+      passwordElement.classList.remove('field-good');
+      passwordConfirmElement.classList.remove('field-good');
+      ok.forEach((img_block) => img_block.classList.add('hidden'));
+    }
+  }
+  passwordConfirmElement.addEventListener('input', checkPasswordConfirmation);
 };

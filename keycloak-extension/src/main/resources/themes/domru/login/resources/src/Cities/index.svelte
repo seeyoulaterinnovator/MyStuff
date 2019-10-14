@@ -14,6 +14,9 @@
   import Selection from './Selection.svelte';
   import PhoneButton from './PhoneButton.svelte';
 
+  import './selection';
+  import {selectCity, setAllSelected, setSelectedCity} from "./selection";
+
   let search;
 
   const unsubscribeCity = city.subscribe(value => {
@@ -22,9 +25,7 @@
   });
 
   function handleClose() {
-    status.set(STATUS.CONFIRMED);
-    showModal.set(false);
-    editingStarted.set(false);
+    setAllSelected();
   }
 
   function handleInputChange() {
@@ -35,15 +36,7 @@
     const indexOfChosenCity = $allCities.map(obj => obj.name.toLowerCase()).indexOf(search.toLowerCase());
     if (indexOfChosenCity === - 1) return;
 
-    const chosenCity = $allCities[indexOfChosenCity].name;
-    const chosenDomain = $allCities[indexOfChosenCity].domain;
-
-    city.set(chosenCity);
-    Cookie.set('CITY', chosenCity);
-    Cookie.set('city-domain', chosenDomain);
-    status.set(STATUS.CONFIRMED);
-    showModal.set(false);
-    editingStarted.set(false);
+    selectCity($allCities[indexOfChosenCity]);
   }
 </script>
 
@@ -108,7 +101,7 @@
       </div>
     </header>
 
-    <div class="flex flex-1 {$status === STATUS.INITIAL ? 'items-center' : ''} justify-center content-box h-full scrollable-container overflow-x-hidden overflow-y-auto mt-4 md:mt-16 lg:mt-20 xl:mt-24">
+    <div class="flex flex-1 {$status === STATUS.INITIAL ? 'items-center' : ''} justify-center content-box h-full scrollable-container overflow-x-hidden overflow-y-auto mt-4 xl:mt-20">
       {#if $status === STATUS.INITIAL}
         <Confirmation />
       {:else if $status === STATUS.SELECTING}

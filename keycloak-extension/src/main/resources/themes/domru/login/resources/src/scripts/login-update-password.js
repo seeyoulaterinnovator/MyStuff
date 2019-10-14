@@ -30,7 +30,10 @@ export default (function() {
     // passwordConfirmElement.value = password;
     // setButtonAvailability(validate, submitElement);
   }
-  linkPasswords(getPassword, setPassword, passwordElement);
+  function getConfirmation() {
+    return passwordConfirmElement.value;
+  }
+  linkPasswords(getPassword, setPassword, getConfirmation, passwordElement, passwordConfirmElement);
 
   function validate() {
     isPasswordExists = passwordElement.value !== '';

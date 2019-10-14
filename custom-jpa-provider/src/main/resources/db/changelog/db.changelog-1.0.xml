@@ -262,4 +262,22 @@
             INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('268c9896-cade-48e5-8fd5-ae2ea5824068', 'user.absence.blocking.days', '15', null, 'manager', 'Inactive Block timeout', 'DAYS');
         </sql>
     </changeSet>
+    <changeSet id="22" author="dautova-lr">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mysql" />
+        </preConditions>
+        <sql>
+            alter table EVENT_ENTITY change DETAILS_JSON DETAILS_JSON varchar(2550) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
+
+    <changeSet id="23" author="dautova-lr">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mysql" />
+        </preConditions>
+        <sql>
+            ALTER TABLE FEDERATED_IDENTITY CHANGE FEDERATED_USERNAME FEDERATED_USERNAME varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            ALTER TABLE FEDERATED_IDENTITY CHANGE FEDERATED_USER_ID FEDERATED_USER_ID varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
 </databaseChangeLog>

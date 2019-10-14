@@ -13,7 +13,7 @@
         <@components.field class="mb-4 md:w-full" fieldName="orgName" label="Наименование организации" placeholder="Наименование организации" required=true />
 
     <#-- В нашем случае firstName – это полное имя -->
-        <@components.field class="mb-4 md:w-full" fieldName="firstName"value="${(user.firstName!'')}" label="Как к вам обращаться?" placeholder="Как к вам обращаться?" required=true />
+        <@components.field class="mb-4 md:w-full" fieldName="firstName"value="${(user.firstName!'')}" label="Как к Вам обращаться?" placeholder="Как к Вам обращаться?" required=true />
 
     <#-- Пока бэк не уберет необходимость фамилии, скрою поле и отправлю дефис -->
         <@components.field class="mb-4 md:w-full" fieldName="lastName" label="Фамилия" placeholder="Фамилия" required=true style="display: none" />
