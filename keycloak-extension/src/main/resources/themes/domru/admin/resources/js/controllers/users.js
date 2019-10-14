@@ -311,7 +311,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         $scope.query.searchByTomsId = $scope.getSearchParameter($route.current.params.searchByTomsId);
         $scope.query.searchRealm = $scope.getSearchParameter($route.current.params.searchRealm);
 
-        if ($scope.query.searchRealm === ''){
+        if ($scope.query.searchRealm === '' || ! $scope.userRealms.contains($scope.query.searchRealm) ){
             $scope.query.searchRealm = realm.realm;
         }
 
