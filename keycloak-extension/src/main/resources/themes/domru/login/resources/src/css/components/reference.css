@@ -1,6 +1,14 @@
 .reference {
   border-bottom-width: 1px;
   border-bottom-style: dashed;
+  &__generate-password {
+    border-bottom-width: 1px;
+    border-bottom-style: dashed;
+    font-size: 16px;
+    @media screen and (min-width: 1199px) {
+      font-size: 18px;
+    }
+  }
 }
 
 .generate-btn {

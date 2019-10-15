@@ -6,15 +6,15 @@
     <p class="text-black-80">Пароль должен состоять из комбинации букв, цифр, cпецсимволов и быть не менее 8 и не более 16 символов</p>
     <div class="flex text-black-50 py-6">
       <div id="letters-password" class="flex flex-1 flex-col mr-4">
-        <span class="text-xl">A-z</span>
+        <span class="text-symbols">A-z</span>
         <span class="text-sm hidden sm:block">Латинские символы с верхним и нижним регистром</span>
       </div>
       <div id="numbers-password" class="flex flex-1 flex-col mr-4">
-        <span class="text-xl">0–9</span>
+        <span class="text-symbols">0–9</span>
         <span class="text-sm hidden sm:block">Цифра или несколько цифр</span>
       </div>
       <div id="extraChars-password" class="flex flex-1 flex-col">
-        <span class="text-xl">_ ] [ - . ! #</span>
+        <span class="text-symbols">_ ] [ - . ! #</span>
         <span class="text-sm hidden sm:block">Возможные спецсимволы </span>
       </div>
     </div>
@@ -28,7 +28,7 @@
 
       <div class="mx-auto generated-password">
         <button id="generate-password-button" type="button" class="generate-btn">
-          <span class="reference border-accentBlue text-accentBlue">Сгенерировать</span> 
+          <span class="reference__generate-password border-accentBlue text-accentBlue">Сгенерировать</span>
         </button>
         <div id="generated-password-container" class=" hidden">
           <p class="generated-password-text">Не забудьте записать пароль</p>

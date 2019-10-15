@@ -46,7 +46,7 @@
                   <div class="flex flex-basis-1/2 items-center">
                     <button id="submit" class="btn btn-main pass-fields" type="submit">${msg('doRegister')}</button>
                   </div>
-                  <span class="flex-basis-1/2 ml-0 mb-6 text-sm sm:ml-5 sm:mb-0">Нажимая кнопку, Вы соглашаетесь <a class="reference" href="https://domru.ru/policy.pdf" target="_blink">с политикой обработки данных</a></span>
+                  <span class="flex-basis-1/2 ml-0 mb-6 sm:text-sm text-xs opacity-50 sm:ml-5 sm:mb-0">Нажимая кнопку, Вы соглашаетесь <a class="reference" href="https://domru.ru/policy.pdf" target="_blink">с политикой обработки данных</a></span>
                 </div>
         </form>
     <#elseif section = "info" >
