@@ -98,27 +98,11 @@ input[type="number"] {
 }
 
 .g-recaptcha {
-  transform: scale(0.74);
   transform-origin: 0 0;
 }
 @media (max-width: 1199px) {
   .g-recaptcha {
-    transform: scale(0.69);
-  }
-}
-@media (max-width: 959px) {
-  .g-recaptcha {
-    transform: scale(0.69);
-  }
-}
-@media (max-width: 479px) {
-  .g-recaptcha {
-    transform: none;
     padding-bottom: 1rem;
   }
 }
-@media (max-width: 340px) {
-  .g-recaptcha {
-    transform: scale(0.8);
-  }
-}
+
