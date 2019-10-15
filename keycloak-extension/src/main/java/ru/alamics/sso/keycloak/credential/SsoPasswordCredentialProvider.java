@@ -28,6 +28,7 @@ import java.util.Map;
 @Slf4j
 public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
     private final static String CLIENT_ID = "lkb2b";
+    private final static int VALIDITY_IN_SECS = 259200;
 
     public SsoPasswordCredentialProvider (KeycloakSession session) {
         super(session);
@@ -44,8 +45,7 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
     }
 
     private void sendDisableCredentialEmail(RealmModel realm, UserModel user){
-        int validityInSecs = 259200;
-        int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
+        int absoluteExpirationInSecs = Time.currentTime() + VALIDITY_IN_SECS;
 
         ClientModel clientModel = session.clientStorageManager().getClientByClientId(CLIENT_ID, realm);
         clientModel.setAttribute(OIDCConfigAttributes.EXCLUDE_SESSION_STATE_FROM_AUTH_RESPONSE, "true");
