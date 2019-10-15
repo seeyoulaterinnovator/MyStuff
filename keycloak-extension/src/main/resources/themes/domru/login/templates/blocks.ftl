@@ -28,7 +28,7 @@
 
       <div class="mx-auto generated-password">
         <button id="generate-password-button" type="button" class="generate-btn">
-          <span class="reference__generate-password border-accentBlue text-accentBlue">Сгенерировать</span>
+          <span class="reference reference-generate-password border-accentBlue text-accentBlue">Сгенерировать</span>
         </button>
         <div id="generated-password-container" class=" hidden">
           <p class="generated-password-text">Не забудьте записать пароль</p>
