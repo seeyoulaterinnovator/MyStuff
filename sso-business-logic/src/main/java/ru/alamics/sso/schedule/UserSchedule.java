@@ -6,8 +6,11 @@ import org.keycloak.common.util.Time;
 import org.keycloak.email.EmailException;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.jpa.AdminEventEntity;
-import org.keycloak.models.*;
+import org.keycloak.models.PasswordPolicy;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.UserAdapter;
+import org.keycloak.models.jpa.entities.ClientEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.util.JsonSerialization;
 import ru.alamics.sso.emailer.EmailModel;
@@ -37,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 @DependsOn("ApplicationProperties")
 public class UserSchedule {
     private final static String[] SETTINGS_REALM_NAMES_SCHEDULE = {"user", "manager"};
+    private final static String CLIENT_ID = "lknewb2b";
     @EJB
     private EmailSender sender;
     @EJB
@@ -47,6 +51,8 @@ public class UserSchedule {
     private UserHistoryLoginRepository userHistoryLoginRepository;
     @EJB
     private RealmRepository realmRepository;
+    @EJB
+    private ClientRepository clientRepository;
     @EJB
     private AdminEventRepository adminEventRepository;
     @EJB
@@ -111,13 +117,14 @@ public class UserSchedule {
         log.info("start={}", DEBUG_STR);
 
         var autoLockNotifications = autoLockNotificationRepository.findNotifications();
+        ClientEntity client = clientRepository.findClientById(CLIENT_ID);
         for (AutoLockNotification notification : autoLockNotifications) {
             var user = notification.getUser();
             RealmModel realm = realmRepository.findRealmById(user.getRealmId());
             UserModel userModel = new UserAdapter(null, realm, null, user);
             try {
                 if (notification.getType() == NotificationType.ABSENCE_NOTIFICATION) {
-                    var prepareBlockNotification = prepareBlockNotification(realm.getName());
+                    var prepareBlockNotification = prepareBlockNotification(realm.getName(), client);
                     prepareBlockNotification.realmModel(realm)
                             .user(userModel);
                     sender.send(prepareBlockNotification.build());
@@ -150,7 +157,7 @@ public class UserSchedule {
                 .bodyTemplate(template);
     }
 
-    private EmailModel.EmailModelBuilder prepareBlockNotification(String realm) {
+    private EmailModel.EmailModelBuilder prepareBlockNotification(String realm, ClientEntity client) {
         final String subject = "Предупреждение о блокирование аккаунта";
         final String template = "block-prepare-notification.ftl";
         SettingsDto blockSetting = properties.getSetting(PropertyConstants.ABSENCE_BLOCKING_DAYS, realm);
@@ -160,6 +167,10 @@ public class UserSchedule {
                 blockSetting.getUnit().convert(inactiveBlockTimeout - inactiveNotificationTimeout, TimeUnit.SECONDS));
         Map<String, Object> body = new HashMap<>();
         body.put("absence", timeToBlock + " " + Translator.getRusTranslateTimeUnit(timeToBlock, blockSetting.getUnit()));
+        body.put("link", "");
+        if (client != null) {
+            body.put("link", client.getRedirectUris().stream().findFirst().get());
+        }
 
         return EmailModel.builder()
                 .bodyAttributes(body)

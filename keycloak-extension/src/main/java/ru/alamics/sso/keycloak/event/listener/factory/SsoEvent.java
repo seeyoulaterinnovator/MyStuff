@@ -48,6 +48,10 @@ public abstract class SsoEvent {
             log.info("send to " + user.getEmail());
             var emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
             ClientModel clientModel = session.clientStorageManager().getClientByClientId(CLIENT_ID, realm);
+            if (clientModel == null){
+                log.error("Failed to send email: {}", "not client=\"" + CLIENT_ID + "\" to redirect!");
+                return;
+            }
             log.info("got client " + clientModel.toString());
 
             AuthenticationSessionModel authenticationSession = createAuthenticationSessionForClient(realm, clientModel);
