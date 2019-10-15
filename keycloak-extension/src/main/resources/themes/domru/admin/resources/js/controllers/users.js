@@ -306,16 +306,16 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             $scope.query.briefRepresentation = 'false';
 
             $scope.query.search = $scope.getSearchParameter($route.current.params.search);
-            $scope.query.searchByUserId = $scope.getSearchParameter($route.current.params.searchByUserId);
-            $scope.query.searchByTomsId = $scope.getSearchParameter($route.current.params.searchByTomsId);
+            $scope.query.searchByUserId = $scope.getSearchParameter($route.current.params.searchUser);
+            $scope.query.searchByTomsId = $scope.getSearchParameter($route.current.params.searchToms);
             $scope.query.searchRealm = $scope.getSearchParameter($route.current.params.searchRealm);
 
             if ($scope.query.searchRealm === '' || ! $scope.userRealms.some(function (realm) {return realm === $scope.query.searchRealm}) ){
                 $scope.query.searchRealm = realm.realm;
             }
 
-            if (!UserSearchState.isFirstSearch) $scope.searchQuery();
-            else $scope.firstPage($scope.realm.realm);
+            if (!UserSearchState.isFirstSearch) $scope.search();
+            else $scope.firstPage();
         });
     };
 
@@ -356,7 +356,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
     $scope.firstPage = function () {
         $scope.query.first = 0;
-        $scope.searchQuery();
+        $scope.search();
     };
 
     $scope.unlockUsers = function () {

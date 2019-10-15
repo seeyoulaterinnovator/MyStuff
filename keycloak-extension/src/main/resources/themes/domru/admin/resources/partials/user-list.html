@@ -60,7 +60,7 @@
                         </div>
                     </div>
                     <button id="searchUsers" class="btn btn-default" ng-click="search()">Search users</button>
-                    <button id="viewAllUsers" class="btn btn-default" ng-click="query.search = ''; firstPage()">{{::
+                    <button id="viewAllUsers" class="btn btn-default" ng-click="query.search = ''; query.searchByUserId = ''; query.searchByTomsId = ''; firstPage()">{{::
                         'view-all-users' | translate}}
                     </button>
                     <select class="form-control" name="realmsSelect" ng-model="query.searchRealm" ng-click="query.search = ''; firstPage()"
