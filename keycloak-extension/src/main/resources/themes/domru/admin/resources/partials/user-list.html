@@ -63,7 +63,7 @@
                     <button id="viewAllUsers" class="btn btn-default" ng-click="query.search = ''; query.searchByUserId = ''; query.searchByTomsId = ''; firstPage()">{{::
                         'view-all-users' | translate}}
                     </button>
-                    <select class="form-control" name="realmsSelect" ng-model="query.searchRealm" ng-click="query.search = ''; firstPage()"
+                    <select class="form-control" name="realmsSelect" ng-model="query.searchRealm" ng-change="query.search = ''; firstPage()"
                             ng-options="x for x in userRealms">
                     </select>
 
