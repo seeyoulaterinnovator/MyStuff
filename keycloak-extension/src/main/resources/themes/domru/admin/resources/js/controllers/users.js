@@ -383,8 +383,14 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 'realm':'user'
             }
         }).then(response => {
-            Notifications.success("Users has been imported");
-            location.reload();
+            var resp = angular.fromJson(response).data.results['import-report'];
+            this.importMsg(resp)
+        }).catch(error => {
+            if(error.status === 400) {
+                Notifications.error(error.data.message);
+            } else {
+                Notifications.error(error.statusText);
+            }
         })
     };
 
@@ -400,9 +406,53 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 'realm':'user'
             }
         }).then(response => {
-            Notifications.success("Users has been imported");
-            location.reload();
+            var resp = angular.fromJson(response).data.results['import-report'];
+            this.importMsg(resp)
+        }).catch(error => {
+            if(error.status === 400) {
+                Notifications.error(error.data.message);
+            } else {
+                Notifications.error(error.statusText);
+            }
         })
+    };
+
+    function onlyUnique(value, index, self) {
+        return self.indexOf(value) === index;
+    }
+
+    $scope.importMsg = function(resp) {
+        var errors = [];
+        if(resp.errors) {
+            errors = resp.errors.map(error => error.error).filter(onlyUnique );
+        }
+        var errorMsg = errors.length === 0 ? "Ошибок нет" : errors.join(",\n\t\t\t\t\t\t\t   ");
+        var msg = `
+            Количество записей, для которых найдены дубли: ${resp.countClones}
+            Количество созданых пользователей: ${resp.createdUsers}
+            Количество записей, для которых не было положительного ответа от TBAPI: ${resp.tbapiErrors}
+            Количество записей, для которых был положительный ответ от TBAPI: ${resp.tbapiSuccess}
+            Информация об ошибках: ${errorMsg}`;
+
+        Dialog.message('Информация', msg, () => location.reload());
+
+        return msg;
+    };
+
+    $scope.downloadTemplateXlsx = function () {
+        let payload = {
+            type: 'xlsx',
+            userParameters: [
+                "FIRST_NAME",
+                "EMAIL",
+                "PHONE",
+                "ORGANIZATION",
+                "ROLE",
+                "SYSTEM"
+            ],
+            userIds: ["XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"]
+    };
+        $scope.exportTemplateXlsx(payload)
     };
 
     $scope.exportXlsx = function () {
@@ -421,29 +471,52 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             ],
             userIds: $scope.users.filter(user => user.active).map(user => user.id)
         };
+        $scope.exportTemplateXlsx(payload)
+    };
+
+    $scope.exportTemplateXlsx = function (payload) {
         var linkElement = document.createElement('a');
         $http.post(`${authUrl}/realms/master/users-toms/downloadUsers`, payload, {
-            headers: {'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8', 'Content-Type': 'application/json'},
+            headers: {
+                'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8',
+                'Content-Type': 'application/json'
+            },
             responseType: 'arraybuffer'
         }).then((response) => {
             var headers = response.headers();
-            var filename = 'users_info.xlsx';
-            var contentType = headers['content-type'];
-            var blob = new Blob([response.data], {type: contentType});
-            var url = window.URL.createObjectURL(blob, {
-                type: 'data:attachment/xlsx'
-            });
-            window.open(url);
-            linkElement.setAttribute('href', url);
-            linkElement.setAttribute("download", filename);
+        var filename = 'users_info.xlsx';
+        var contentType = headers['content-type'];
+        var blob = new Blob([response.data], {type: contentType});
+        var url = window.URL.createObjectURL(blob, {
+            type: 'data:attachment/xlsx'
+        });
 
-            var clickEvent = new MouseEvent("click", {
-                "view": window,
-                "bubbles": true,
-                "cancelable": false
-            });
-            linkElement.dispatchEvent(clickEvent);
-        })
+        linkElement.setAttribute('href', url);
+        linkElement.setAttribute("download", filename);
+
+        var clickEvent = new MouseEvent("click", {
+            "view": window,
+            "bubbles": true,
+            "cancelable": false
+        });
+        linkElement.dispatchEvent(clickEvent);
+    })
+    };
+
+    $scope.downloadTemplateCSV = function () {
+        let payload = {
+            type: 'csv',
+            userParameters: [
+                "FIRST_NAME",
+                "EMAIL",
+                "PHONE",
+                "ORGANIZATION",
+                "ROLE",
+                "SYSTEM"
+            ],
+            userIds: ["XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"]
+        };
+        $scope.exportTemplateCSV(payload)
     };
 
     $scope.exportCSV = function () {
@@ -462,26 +535,30 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             ],
             userIds: $scope.users.filter(user => user.active).map(user => user.id)
         };
+        $scope.exportTemplateCSV(payload)
+    };
+
+    $scope.exportTemplateCSV = function (payload) {
         var linkElement = document.createElement('a');
         $http.post(`${authUrl}/realms/master/users-toms/downloadUsers`, payload, {
             headers: {'Accept': 'application/octet-stream;charset=UTF-8', 'Content-Type': 'application/json'}
         }).then((response) => {
             var headers = response.headers();
-            var filename = 'users_info.csv';
-            var contentType = headers['content-type'];
-            var blob = new Blob(["\ufeff", response.data], {type: contentType});
-            var url = window.URL.createObjectURL(blob);
+        var filename = 'users_info.csv';
+        var contentType = headers['content-type'];
+        var blob = new Blob(["\ufeff", response.data], {type: contentType});
+        var url = window.URL.createObjectURL(blob);
 
-            linkElement.setAttribute('href', url);
-            linkElement.setAttribute("download", filename);
+        linkElement.setAttribute('href', url);
+        linkElement.setAttribute("download", filename);
 
-            var clickEvent = new MouseEvent("click", {
-                "view": window,
-                "bubbles": true,
-                "cancelable": false
-            });
-            linkElement.dispatchEvent(clickEvent);
-        })
+        var clickEvent = new MouseEvent("click", {
+            "view": window,
+            "bubbles": true,
+            "cancelable": false
+        });
+        linkElement.dispatchEvent(clickEvent);
+    })
     };
 
     $scope.nextPage = function () {
@@ -525,7 +602,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             let findGroupedUser = $scope.findById(ret, user.id);
             if (!findGroupedUser) {
                 var access = [];
-                if(user.systemId || user.roleId || user.tomsId) {
+                if (user.systemId || user.roleId || user.tomsId) {
                     access.push({
                         systemId: user.systemId,
                         systemName: user.systemName,
@@ -533,7 +610,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                         roleName: user.roleName,
                         tomsId: user.tomsId
                     })
-                };
+                }
+                ;
                 findGroupedUser = {
                     id: user.id,
                     username: user.username,
@@ -591,7 +669,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
     console.log('Called Constructor');
     $scope.uniqueVal = function (values) {
-        if(!values) return ;
+        if (!values) return;
 
         return values.filter((val, index) => values.indexOf(val) === index);
     };
@@ -603,7 +681,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     $scope.isFirstTomsId = function (userAccess, tomsId, access) {
         var equalToms = userAccess.filter(access => access.tomsId === tomsId);
         var index = equalToms.indexOf(access);
-        if(index === 0) {
+        if (index === 0) {
             return access.tomsId;
         } else {
             return '';//Gavno
@@ -617,7 +695,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     $scope.isFirstRoleName = function (userAccess, roleName, access) {
         var equalToms = userAccess.filter(access => access.roleName === roleName);
         var index = equalToms.indexOf(access);
-        if(index === 0) {
+        if (index === 0) {
             return access.roleName;
         } else {
             return '';//Gavno
@@ -631,7 +709,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     $scope.isFirstSystemName = function (userAccess, systemName, access) {
         var equalToms = userAccess.filter(access => access.systemName === systemName);
         var index = equalToms.indexOf(access);
-        if(index === 0) {
+        if (index === 0) {
             return access.systemName;
         } else {
             return '';//Gavno
@@ -770,37 +848,62 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
         }
     }, true);
 
+    $scope.GetPhoneCheckerResult = function () {
+        var phone = '';
+        var attrs = $scope.user.attributes;
+        for (var attribute in attrs) {
+            if (attribute === 'phone') {
+                phone = attrs[attribute];
+            }
+        }
+
+        return $http.get(authUrl + '/realms/' + realm.realm + '/users-info/attribute?phone=' + phone + '&excludeUserId=' + $scope.user.id)
+            .then(function (response) {
+                console.info('recponse from get = ' + response);
+                console.info('recponse from fromJson = ' + angular.fromJson(response).data.results['foundUserId']);
+
+                return angular.fromJson(response).data.results['foundUserId'];
+            });
+    };
+
     $scope.save = function () {
         convertAttributeValuesToLists();
+        var responseChecker = $scope.GetPhoneCheckerResult();
 
-        if ($scope.create) {
-            User.save({
-                realm: realm.realm
-            }, $scope.user, function (data, headers) {
-                $scope.changed = false;
-                convertAttributeValuesToString($scope.user);
-                user = angular.copy($scope.user);
-                var l = headers().location;
+        responseChecker.then(function (result) {
+            if (result != null) {
+                Notifications.error("The user phone not unique");
+                return;
+            }
+            if ($scope.create) {
+                User.save({
+                    realm: realm.realm
+                }, $scope.user, function (data, headers) {
+                    $scope.changed = false;
+                    convertAttributeValuesToString($scope.user);
+                    user = angular.copy($scope.user);
+                    var l = headers().location;
 
-                console.debug("Location == " + l);
+                    console.debug("Location == " + l);
 
-                var id = l.substring(l.lastIndexOf("/") + 1);
+                    var id = l.substring(l.lastIndexOf("/") + 1);
 
 
-                $location.url("/realms/" + realm.realm + "/users/" + id);
-                Notifications.success("The user has been created.");
-            });
-        } else {
-            User.update({
-                realm: realm.realm,
-                userId: $scope.user.id
-            }, $scope.user, function () {
-                $scope.changed = false;
-                convertAttributeValuesToString($scope.user);
-                user = angular.copy($scope.user);
-                Notifications.success("Your changes have been saved to the user.");
-            });
-        }
+                    $location.url("/realms/" + realm.realm + "/users/" + id);
+                    Notifications.success("The user has been created.");
+                });
+            } else {
+                User.update({
+                    realm: realm.realm,
+                    userId: $scope.user.id
+                }, $scope.user, function () {
+                    $scope.changed = false;
+                    convertAttributeValuesToString($scope.user);
+                    user = angular.copy($scope.user);
+                    Notifications.success("Your changes have been saved to the user.");
+                });
+            }
+        });
     };
 
     function convertAttributeValuesToLists() {
@@ -2090,7 +2193,7 @@ module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, 
     $scope.userPosts = [];
     $scope.customerRoles = [];
     $scope.systemRoles = [];
-
+    $scope.duplicatedPhone = false;
 
     $scope.init = function () {
         $http.get(authUrl + '/realms/' + 'master' + '/user-post/users/' + user.id).then(function (data) {
@@ -2161,11 +2264,3 @@ module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, 
 
     $scope.init();
 });
-
-module.controller('CustomTabCtrl', function ($scope, realm, $location) {
-    $scope.realm = realm;
-});
-
-
-
-

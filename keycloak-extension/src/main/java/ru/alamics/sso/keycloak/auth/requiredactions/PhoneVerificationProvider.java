@@ -47,26 +47,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         this.userPhoneVerifier = userPhoneVerifier;
         this.activationCodeType = activationCodeType;
         this.emailTemplateProvider = emailTemplateProvider;
-        ApplicationProperties applicationProperties;
-        try {
-            InitialContext context = new InitialContext();
-            applicationProperties = (ApplicationProperties) context.lookup("java:global/domru-sso/" + ApplicationProperties.class.getSimpleName());
-            log.info("Got userPhoneVerifier1 from context");
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context");
-        }
-        activationCodeType.setExpiredSeconds(Long.parseLong(applicationProperties.getProperty(getPropertyConstants(activationCodeType), "user")));
-        ActivationCodeType.CODE_TO_EMAIL.setExpiredSeconds(Long.parseLong(applicationProperties.getProperty(PropertyConstants.EXPIRE_INCOMING_CALL_EMAIL_CODE, "user")));
-    }
-
-    private PropertyConstants getPropertyConstants(ActivationCodeType activationCodeType){
-        switch (activationCodeType){
-            case CODE_BY_PHONE_NUMBER: return PropertyConstants.EXPIRE_INCOMING_CALL_CODE;
-            case CODE_TO_SMS: return PropertyConstants.EXPIRE_SMS_VIBER_CODE;
-            case CODE_TO_EMAIL:return PropertyConstants.EXPIRE_INCOMING_CALL_EMAIL_CODE;
-        }
-        return null;
+        ActivationCodeType.init();
     }
 
     @Override
@@ -107,7 +88,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
             Response challenge = context.form()
                     .setAttribute("userPhone", user.getPhone())
-                    .setAttribute("expirationSeconds", authContext.getActivationCodeType().getExpiredSeconds())
+                    .setAttribute("expirationSeconds", String.valueOf(authContext.getActivationCodeType().getExpiredSeconds()))
                     .setAttribute("lengthCode", authContext.getActivationCodeType().getLengthCode())
                     .setAttribute("activationCodeType", authContext.getActivationCodeType().name())
                     .setAttribute("enableRepeatCall", enableRepeatCall)

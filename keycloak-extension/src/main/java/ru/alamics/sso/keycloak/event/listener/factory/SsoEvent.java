@@ -19,7 +19,7 @@ import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.sessions.RootAuthenticationSessionModel;
-import ru.alamics.sso.keycloak.event.listener.model.UserEntityRepresentation;
+import ru.alamics.sso.registration.model.UserEntityRepresentation;
 
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;

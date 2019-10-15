@@ -9,8 +9,8 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
-import ru.alamics.sso.keycloak.event.listener.model.UserEntityRepresentation;
 import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.registration.model.UserEntityRepresentation;
 import ru.alamics.sso.stats.LoginHistory;
 
 import javax.persistence.EntityManager;
