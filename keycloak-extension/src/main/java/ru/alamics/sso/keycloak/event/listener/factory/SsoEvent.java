@@ -33,6 +33,8 @@ import java.util.Map;
 
 @Slf4j
 public abstract class SsoEvent {
+    private final static String CLIENT_ID = "lknewb2b";
+
     private final KeycloakSession session;
 
     public SsoEvent (KeycloakSession session) {
@@ -45,7 +47,7 @@ public abstract class SsoEvent {
         try {
             log.info("send to " + user.getEmail());
             var emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
-            ClientModel clientModel = session.clientStorageManager().getClientByClientId("account", realm);
+            ClientModel clientModel = session.clientStorageManager().getClientByClientId(CLIENT_ID, realm);
             log.info("got client " + clientModel.toString());
 
             AuthenticationSessionModel authenticationSession = createAuthenticationSessionForClient(realm, clientModel);
@@ -62,7 +64,7 @@ public abstract class SsoEvent {
             UriInfo uriInfo = session.getContext().getUri();
 
             UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
-                    "account", "");
+                    clientModel.getClientId(), authenticationSession.getTabId());
             String link = builder.build(realm.getName()).toString();
             attributes.put("accountLink", link);
 
