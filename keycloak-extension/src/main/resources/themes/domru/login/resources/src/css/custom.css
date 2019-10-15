@@ -96,3 +96,12 @@ input[type="number"] {
     display: table-footer-group;
   }
 }
+
+.g-recaptcha {
+  transform-origin: 0 0;
+}
+@media (max-width: 1199px) {
+  .g-recaptcha {
+    padding-bottom: 1rem;
+  }
+}
