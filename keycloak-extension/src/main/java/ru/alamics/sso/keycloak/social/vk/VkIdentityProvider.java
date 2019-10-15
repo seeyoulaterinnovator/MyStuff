@@ -16,7 +16,7 @@ import org.keycloak.models.RealmModel;
 import java.util.Objects;
 
 @Slf4j
-public class VkIdentityProvider extends AbstractOAuth2IdentityProvider implements SocialIdentityProvider {
+public class VkIdentityProvider extends AbstractOAuth2IdentityProvider<OAuth2IdentityProviderConfig> implements SocialIdentityProvider<OAuth2IdentityProviderConfig> {
     private static final String OAUTH2_PARAMETER_EMAIL = "email";
     private static final String AUTH_URL = "https://oauth.vk.com/authorize";
     private static final String TOKEN_URL = "https://oauth.vk.com/access_token";
@@ -79,6 +79,8 @@ public class VkIdentityProvider extends AbstractOAuth2IdentityProvider implement
         user.setName(firstName + lastName);
         user.setIdpConfig(getConfig());
         user.setIdp(this);
+        user.getContextData().put("firstName", firstName + " " + lastName);
+
         AbstractJsonUserAttributeMapper.storeUserProfileForMapper(user, profile, getConfig().getAlias());
         return user;
     }
