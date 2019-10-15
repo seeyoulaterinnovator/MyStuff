@@ -43,11 +43,11 @@
   transform: translateY(-50%);
   top: 66%;
 }
-.field__open span {
-  opacity: .2;
+.eye {
+  opacity: 0.2;
 }
-.field__open span:hover {
-  opacity: .5;
+.field__open:hover .eye {
+  opacity: 0.5;
 }
 
 .field__input {
