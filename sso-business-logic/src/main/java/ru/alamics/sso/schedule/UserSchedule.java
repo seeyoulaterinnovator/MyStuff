@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 @DependsOn("ApplicationProperties")
 public class UserSchedule {
     private final static String[] SETTINGS_REALM_NAMES_SCHEDULE = {"user", "manager"};
-    private final static String CLIENT_ID = "lknewb2b";
+    private final static String CLIENT_ID = "lkb2b";
     @EJB
     private EmailSender sender;
     @EJB

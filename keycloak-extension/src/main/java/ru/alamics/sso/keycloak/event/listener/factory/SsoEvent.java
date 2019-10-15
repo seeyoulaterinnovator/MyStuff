@@ -33,7 +33,7 @@ import java.util.Map;
 
 @Slf4j
 public abstract class SsoEvent {
-    private final static String CLIENT_ID = "lknewb2b";
+    private final static String CLIENT_ID = "lkb2b";
 
     private final KeycloakSession session;
 
