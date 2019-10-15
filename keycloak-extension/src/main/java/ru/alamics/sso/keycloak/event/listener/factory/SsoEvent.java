@@ -2,6 +2,7 @@ package ru.alamics.sso.keycloak.event.listener.factory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.actiontoken.resetcred.ResetCredentialsActionToken;
 import org.keycloak.common.util.Time;
 import org.keycloak.email.EmailException;
@@ -13,7 +14,9 @@ import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.Urls;
+import org.keycloak.services.managers.AuthenticationSessionManager;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
@@ -22,6 +25,7 @@ import org.keycloak.sessions.RootAuthenticationSessionModel;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
 
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriBuilderException;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.util.HashMap;
@@ -44,8 +48,7 @@ public abstract class SsoEvent {
             ClientModel clientModel = session.clientStorageManager().getClientByClientId("account", realm);
             log.info("got client " + clientModel.toString());
 
-            RootAuthenticationSessionModel rootAuthenticationSessionModel = session.authenticationSessions().createRootAuthenticationSession(realm);
-            AuthenticationSessionModel authenticationSession = rootAuthenticationSessionModel.createAuthenticationSession(clientModel);
+            AuthenticationSessionModel authenticationSession = createAuthenticationSessionForClient(realm, clientModel);
             log.info("got authenticationSession " + authenticationSession.toString());
 
             int validityInSecs = realm.getActionTokenGeneratedByUserLifespan(ResetCredentialsActionToken.TOKEN_TYPE);
@@ -108,5 +111,22 @@ public abstract class SsoEvent {
             }
         }
         return userId;
+    }
+
+    public AuthenticationSessionModel createAuthenticationSessionForClient(RealmModel realm, ClientModel client)
+            throws UriBuilderException, IllegalArgumentException {
+        AuthenticationSessionModel authSession;
+
+        RootAuthenticationSessionModel rootAuthSession = new AuthenticationSessionManager(session).createAuthenticationSession(realm, true);
+        authSession = rootAuthSession.createAuthenticationSession(client);
+
+        authSession.setAction(AuthenticationSessionModel.Action.AUTHENTICATE.name());
+        authSession.setProtocol(OIDCLoginProtocol.LOGIN_PROTOCOL);
+        String redirectUri = client.getRedirectUris().stream().findFirst().get();
+        authSession.setRedirectUri(redirectUri);
+        authSession.setClientNote(OIDCLoginProtocol.REDIRECT_URI_PARAM, redirectUri);
+        authSession.setClientNote(OIDCLoginProtocol.RESPONSE_TYPE_PARAM, OAuth2Constants.CODE);
+        authSession.setClientNote(OIDCLoginProtocol.ISSUER, Urls.realmIssuer(session.getContext().getUri().getBaseUri(), realm.getName()));
+        return authSession;
     }
 }
