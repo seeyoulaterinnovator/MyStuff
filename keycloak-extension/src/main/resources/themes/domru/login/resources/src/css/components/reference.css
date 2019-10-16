@@ -9,7 +9,7 @@
   padding-top: 30px;
   &:hover {
     .reference {
-      border: none;
+      border-bottom-color: transparent;
     }
   }
 }
