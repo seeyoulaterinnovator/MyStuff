@@ -40,13 +40,13 @@ public class AttributesForm implements Authenticator {
     private final UserRole role;
     private final TbapiService tbapiService;
 
-    public AttributesForm (UserRole role, TbapiService tbapiService) {
+    public AttributesForm(UserRole role, TbapiService tbapiService) {
         this.role = role;
         this.tbapiService = tbapiService;
     }
 
     @Override
-    public void authenticate (AuthenticationFlowContext context) {
+    public void authenticate(AuthenticationFlowContext context) {
         final String DEBUG_STR = "authenticate";
         var authSession = context.getAuthenticationSession();
         log.info("{}: frame={}", DEBUG_STR, authSession.getAuthNote(I_FRAME));
@@ -58,22 +58,22 @@ public class AttributesForm implements Authenticator {
         String redirectIframe = redirectUriQueryParams.get(I_FRAME);
         boolean isAuth = "1".equals(authSession.getAuthNote(AUTH_FORM_SUCCESS));//it`s magick
 
-        if( frame != null || isAuth || redirectIframe != null) {
+        if (frame != null || isAuth || redirectIframe != null) {
             var session = context.getSession();
             var searchResource = new SearchResource(session);
             var user = context.getUser();
-            var response = searchResource.getUsersInfo( "", user.getId(), "", "", true);
+            var response = searchResource.getUsersInfo("", user.getId(), "", "", true);
             JsonResponse body = (JsonResponse) response.getEntity();
             var results = body.getResults();
             List<UserDto> attributes = (List<UserDto>) results.get("users-info");
-            if(attributes != null) {
+            if (attributes != null) {
                 attributes = attributes.stream()
                         .filter(attribute -> Objects.nonNull(attribute.getTomsId()) && Objects.nonNull(attribute.getRoleId()))
                         .collect(Collectors.toList());
             } else {
                 attributes = Collections.emptyList();
             }
-            if(attributes.isEmpty()) {
+            if (attributes.isEmpty()) {
                 context.success();
             } else {
                 Response challenge = createForm(context, attributes);
@@ -88,28 +88,23 @@ public class AttributesForm implements Authenticator {
 
     private Response createForm(AuthenticationFlowContext context, List<UserDto> attributes) {
         LoginFormsProvider form = context.form();
-        if(!attributes.isEmpty()) {
+        Map<String, Object> customerNames = tbapiService.customerNames(connectConfig(), attributes.stream().map(UserDto::getTomsId).toArray(String[]::new));
+        if (!attributes.isEmpty()) {
             Set<AttributesModel> models = attributes.stream()
                     .map(attribute -> AttributesModel.builder()
                             .roleName(attribute.getRoleName())
                             .tomsId(attribute.getTomsId())
+                            .tomsName((String) customerNames.get(attribute.getTomsId()))
                             .build()
                     ).collect(Collectors.toSet());
 
             form.setAttribute("posts", models);
         }
-
-        if(attributes.size() > 0) {
-            List<UserDto> userDtos = (List<UserDto>) attributes.get("users-info");
-            Map<String, Object> customerNames = tbapiService.customerNames(connectConfig(), userDtos.stream().map(UserDto::getTomsId).toArray(String[]::new));
-            userDtos.forEach(userDto -> userDto.setCustomerName((String) customerNames.get(userDto.getTomsId())));
-            form.setAttribute("posts", userDtos);
-        }
         return form.createForm(FORM);
     }
 
     @Override
-    public void action (AuthenticationFlowContext context) {
+    public void action(AuthenticationFlowContext context) {
         var authSession = context.getAuthenticationSession();
         role.setUserPost(context);
         authSession.setAuthNote(AUTH_FORM_SUCCESS, "0");
@@ -117,28 +112,28 @@ public class AttributesForm implements Authenticator {
     }
 
     @Override
-    public boolean requiresUser () {
+    public boolean requiresUser() {
         return false;
     }
 
     @Override
-    public boolean configuredFor (KeycloakSession session, RealmModel realm, UserModel user) {
+    public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user) {
         return false;
     }
 
     @Override
-    public void setRequiredActions (KeycloakSession session, RealmModel realm, UserModel user) {
+    public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user) {
 
     }
 
     @Override
-    public void close () {
+    public void close() {
 
     }
 
     private Map<String, String> extractQueryParamsFromRedirectUri(String redirectUri) {
         Map<String, String> queryParameters = new HashMap<>();
-        if(redirectUri != null && redirectUri.indexOf('?') >= 0) {
+        if (redirectUri != null && redirectUri.indexOf('?') >= 0) {
             redirectUri = redirectUri.substring(redirectUri.indexOf('?') + 1);
             String[] pairs = redirectUri.split("&");
             for (String pair : pairs) {
@@ -153,7 +148,7 @@ public class AttributesForm implements Authenticator {
     private TbapiConnectConfig connectConfig() {
         ApplicationProperties properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
         TbapiConnectConfig connectConfig = new TbapiConnectConfig();
-        if(properties != null) {
+        if (properties != null) {
             connectConfig.setHost(properties.getProperty(TbapiConstants.HOST));
             connectConfig.setPort(Integer.parseInt(properties.getProperty(TbapiConstants.PORT)));
             connectConfig.setAppname(properties.getProperty(TbapiConstants.AUTH_APPNAME));
