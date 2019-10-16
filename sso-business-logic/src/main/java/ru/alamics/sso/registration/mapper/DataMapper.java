@@ -1,11 +1,12 @@
 package ru.alamics.sso.registration.mapper;
 
+import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
-import ru.alamics.sso.keycloak.entity.ExternalSystem;
-import ru.alamics.sso.keycloak.entity.ExternalSystemRole;
-import ru.alamics.sso.keycloak.entity.UserPost;
-import ru.alamics.sso.keycloak.entity.UserPostRole;
+import org.keycloak.representations.account.UserRepresentation;
+import ru.alamics.sso.keycloak.entity.*;
 import ru.alamics.sso.registration.dto.*;
+import ru.alamics.sso.registration.model.UserEntityRepresentation;
+import ru.alamics.sso.settings.SettingsDto;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class DataMapper {
 
-    public static UserPost toUserPost(UserPost userPost, UserPostRequest userPostRequest) {
+    public static UserPostEntity toUserPost(UserPostEntity userPost, UserPostRequest userPostRequest) {
         if (userPostRequest == null) {
             return null;
         }
@@ -22,35 +23,46 @@ public class DataMapper {
         UserEntity userEntity = new UserEntity();
         userEntity.setId(userPostRequest.getUserId());
         userPost.setUser(userEntity);
-        userPost.setId(userPostRequest.getId());
         userPost.setTomsId(userPostRequest.getTomsId());
         userPost.setDmpId(userPostRequest.getDmpId());
-        UserPostRole userPostRole = new UserPostRole();
+        UserPostRoleEntity userPostRole = new UserPostRoleEntity();
         userPostRole.setId(userPostRequest.getRoleId());
         userPost.setRole(userPostRole);
 
         return userPost;
     }
 
-    public static UserPostResponse toUserPostResponse(UserPost userPost) {
+    public static UserPostEntity toUserPost(UserPostEntity userPost, UserPostEditRequest userPostEditRequest) {
+        if (userPostEditRequest == null) {
+            return null;
+        }
+        UserPostRoleEntity userPostRole = new UserPostRoleEntity();
+        userPostRole.setId(userPostEditRequest.getRoleId());
+        userPost.setRole(userPostRole);
+
+        return userPost;
+    }
+
+    public static UserPostResponse toUserPostResponse(UserPostEntity userPost) {
         if (userPost == null) {
             return null;
         }
-        Set<ExternalSystemRole> externalSystemRole = userPost.getSystemRoles();
-        List<ExternalSystemRole> externalSystemRoles = null;
-        if (externalSystemRole != null){
+        Set<ExternalSystemRoleEntity> externalSystemRole = userPost.getSystemRoles();
+        List<ExternalSystemRoleEntity> externalSystemRoles = null;
+        if (externalSystemRole != null) {
             externalSystemRoles = externalSystemRole.stream().collect(Collectors.toList());
         }
         return UserPostResponse.builder()
                 .id(userPost.getId())
                 .userId(userPost.getUser().getId())
                 .userRole(toUserPostRoleDto(userPost.getRole()))
+                .tomsId(userPost.getTomsId())
                 .dmpId(userPost.getDmpId())
                 .systemRoles(toExternalSystemRoleDtos(externalSystemRoles))
                 .build();
     }
 
-    public static List<UserPostResponse> toUserPostResponseList(List<UserPost> userPostList) {
+    public static List<UserPostResponse> toUserPostResponseList(List<UserPostEntity> userPostList) {
         if (userPostList == null) {
             return null;
         }
@@ -60,33 +72,34 @@ public class DataMapper {
         return userPostDtos;
     }
 
-    public static UserPostRoleDto toUserPostRoleDto(UserPostRole userPostRole) {
+    public static UserPostRoleDto toUserPostRoleDto(UserPostRoleEntity userPostRole) {
         UserPostRoleDto userPostRoleDto = new UserPostRoleDto();
         userPostRoleDto.setId(userPostRole.getId());
         userPostRoleDto.setName(userPostRole.getName());
         return userPostRoleDto;
     }
 
-    public static List<UserPostRoleDto> toUserPostRoleDtoList(List<UserPostRole> userPostRoleList) {
+    public static List<UserPostRoleDto> toUserPostRoleDtoList(List<UserPostRoleEntity> userPostRoleList) {
         List<UserPostRoleDto> userPostRoleDto = new LinkedList<>();
         userPostRoleList.forEach(o -> userPostRoleDto.add(toUserPostRoleDto(o)));
         return userPostRoleDto;
     }
 
-    public static ExternalSystemDto toExternalSystemDto(ExternalSystem externalSystem) {
+    public static ExternalSystemDto toExternalSystemDto(ExternalSystemEntity externalSystem) {
         return ExternalSystemDto.builder()
                 .id(externalSystem.getId())
                 .name(externalSystem.getName())
+                .label(externalSystem.getLabel())
                 .build();
     }
 
-    public static List<ExternalSystemDto> toExternalSystemDtos(List<ExternalSystem> externalSystems) {
+    public static List<ExternalSystemDto> toExternalSystemDtos(List<ExternalSystemEntity> externalSystems) {
         List<ExternalSystemDto> externalSystemDtos = new LinkedList<>();
         externalSystems.forEach(o -> externalSystemDtos.add(toExternalSystemDto(o)));
         return externalSystemDtos;
     }
 
-    public static ExternalSystemRoleDto toExternalSystemRoleDto(ExternalSystemRole externalSystemRole) {
+    public static ExternalSystemRoleDto toExternalSystemRoleDto(ExternalSystemRoleEntity externalSystemRole) {
         return ExternalSystemRoleDto.builder()
                 .id(externalSystemRole.getId())
                 .name(externalSystemRole.getName())
@@ -94,12 +107,40 @@ public class DataMapper {
                 .build();
     }
 
-    public static List<ExternalSystemRoleDto> toExternalSystemRoleDtos(List<ExternalSystemRole> externalSystemRoles) {
-        if (externalSystemRoles == null || externalSystemRoles.isEmpty()){
+    public static List<ExternalSystemRoleDto> toExternalSystemRoleDtos(List<ExternalSystemRoleEntity> externalSystemRoles) {
+        if (externalSystemRoles == null || externalSystemRoles.isEmpty()) {
             return null;
         }
-        List<ExternalSystemRoleDto> externalSystemDtos = new LinkedList<>();
-        externalSystemRoles.forEach(o -> externalSystemDtos.add(toExternalSystemRoleDto(o)));
+        List<ExternalSystemRoleDto> externalSystemDtos = externalSystemRoles.stream()
+                .map(DataMapper::toExternalSystemRoleDto).collect(Collectors.toList());
         return externalSystemDtos;
+    }
+
+
+    public static SettingsDto toDto(Settings settings) {
+        if (settings == null) {
+            return null;
+        }
+        return SettingsDto.builder()
+                .desc(settings.getDesc())
+                .extId(settings.getExtId())
+                .id(settings.getId())
+                .name(settings.getName())
+                .value(settings.getValue())
+                .realmId(settings.getRealmId())
+                .unit(settings.getUnit())
+                .build();
+    }
+
+    public static UserEntityRepresentation toUserEntityRepresentation(UserEntity user) {
+        if (user == null) {
+            return null;
+        }
+        UserEntityRepresentation userEntityRepresentation = new UserEntityRepresentation();
+        userEntityRepresentation.setId(user.getId());
+        userEntityRepresentation.setCreatedTimestamp(user.getCreatedTimestamp());
+        userEntityRepresentation.setEmail(user.getEmail());
+        userEntityRepresentation.setEnabled(user.isEnabled());
+        return userEntityRepresentation;
     }
 }

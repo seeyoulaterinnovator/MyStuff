@@ -21,6 +21,9 @@ public class EmailSender {
     private EmailSenderProvider emailSenderProvider;
 
     public void send(EmailModel emailTemplate) throws EmailException {
+        if (emailTemplate.getUser().getEmail() == null){
+            return;
+        }
         var realm = emailTemplate.getRealmModel();
         EmailTemplate template = processTemplate(emailTemplate.getSubjectAttributes(), emailTemplate.getBodyTemplate(), emailTemplate.getBodyAttributes());
         emailSenderProvider.send(realm.getSmtpConfig(), emailTemplate.getUser(), emailTemplate.getSubject(), template.getTextBody(), template.getHtmlBody());
@@ -33,14 +36,14 @@ public class EmailSender {
 
     protected EmailTemplate processTemplate(List<Object> subjectAttributes, String template, Map<String, Object> attributes) throws EmailException {
         try {
-            String textTemplate = String.format("templates/mail/text/%s", template);
+            String textTemplate = String.format("/text/%s", template);
             String textBody;
             try {
                 textBody = FreeMarkerUtil.processTemplate(attributes, textTemplate);
             } catch (final FreeMarkerException e) {
                 textBody = null;
             }
-            String htmlTemplate = String.format("templates/mail/html/%s", template);
+            String htmlTemplate = String.format("/html/%s", template);
             String htmlBody;
             try {
                 htmlBody = FreeMarkerUtil.processTemplate(attributes, htmlTemplate);

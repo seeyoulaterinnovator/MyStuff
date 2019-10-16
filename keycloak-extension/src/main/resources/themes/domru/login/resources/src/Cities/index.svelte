@@ -14,6 +14,9 @@
   import Selection from './Selection.svelte';
   import PhoneButton from './PhoneButton.svelte';
 
+  import './selection';
+  import {selectCity, setAllSelected, setSelectedCity} from "./selection";
+
   let search;
 
   const unsubscribeCity = city.subscribe(value => {
@@ -22,9 +25,7 @@
   });
 
   function handleClose() {
-    status.set(STATUS.CONFIRMED);
-    showModal.set(false);
-    editingStarted.set(false);
+    setAllSelected();
   }
 
   function handleInputChange() {
@@ -32,13 +33,10 @@
   }
 
   function handleSelectCity() {
-    if (!$allCities.map(obj => obj.name).includes(search)) return;
+    const indexOfChosenCity = $allCities.map(obj => obj.name.toLowerCase()).indexOf(search.toLowerCase());
+    if (indexOfChosenCity === - 1) return;
 
-    city.set(search);
-    Cookie.set('CITY', search);
-    status.set(STATUS.CONFIRMED);
-    showModal.set(false);
-    editingStarted.set(false);
+    selectCity($allCities[indexOfChosenCity]);
   }
 </script>
 
@@ -49,9 +47,9 @@
     id="location-selection-window">
     <header id="cities-header" class="flex items-center pb-4">
       <div class="w-full flex justify-between items-center">
-        <a href="/auth" class={$status === STATUS.SELECTING && 'hidden sm:block'}>
+        <a href="https://b2b.domru.ru/" class={$status === STATUS.SELECTING && 'hidden sm:block'}>
           <div
-            class="h-30px w-60px md:h-10 md:w-20 xl:h-16 xl:w-32 bg-contain
+            class="h-30px w-60px md:h-10 md:w-20 xl:h-12 xl:w-24 bg-contain
             bg-no-repeat logo logo--domru" />
         </a>
 
@@ -61,11 +59,11 @@
             on:submit|preventDefault={handleSelectCity}>
             <fieldset>
               <div class="field field--row md:w-full items-center">
-                <label for="search-city" class="mr-4 hidden md:block">Текущий выбор:</label>
+                <label for="search-city" class="mr-4 hidden lg:block">Текущий выбор:</label>
                 <input
                   name="Поиск города"
                   id="search-city"
-                  class="field__input"
+                  class="field__input field__input--city"
                   placeholder="Выберите город"
                   bind:value={search}
                   on:input={handleInputChange} />
@@ -103,7 +101,7 @@
       </div>
     </header>
 
-    <div class="flex flex-1 items-center justify-center content-box h-full">
+    <div class="flex flex-1 {$status === STATUS.INITIAL ? 'items-center' : ''} justify-center content-box h-full scrollable-container overflow-x-hidden overflow-y-auto mt-4 xl:mt-20">
       {#if $status === STATUS.INITIAL}
         <Confirmation />
       {:else if $status === STATUS.SELECTING}

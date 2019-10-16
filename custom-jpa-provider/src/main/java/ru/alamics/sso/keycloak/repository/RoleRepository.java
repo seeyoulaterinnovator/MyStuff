@@ -1,11 +1,11 @@
 package ru.alamics.sso.keycloak.repository;
 
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.models.jpa.entities.RoleEntity;
-import org.keycloak.models.jpa.entities.UserEntity;
-import org.keycloak.models.jpa.entities.UserRoleMappingEntity;
-import ru.alamics.sso.keycloak.entity.UserPost;
-import ru.alamics.sso.keycloak.entity.UserPostRole;
+import org.keycloak.models.jpa.entities.*;
+import ru.alamics.sso.keycloak.entity.ExternalSystemEntity;
+import ru.alamics.sso.keycloak.entity.ExternalSystemRoleEntity;
+import ru.alamics.sso.keycloak.entity.UserPostEntity;
+import ru.alamics.sso.keycloak.entity.UserPostRoleEntity;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -14,6 +14,7 @@ import javax.persistence.PersistenceContext;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -62,7 +63,7 @@ public class RoleRepository {
             return Collections.emptyList();
         }
 
-        List<RoleEntity> ret = em.createQuery("select re from RoleEntity re where re.name in :roleNames and re.realm.id =:realmId", RoleEntity.class)
+        List<RoleEntity> ret = em.createQuery("select re from RoleEntity re where re.name in :roleNames and re.realmId =:realmId", RoleEntity.class)
                 .setParameter("roleNames", names)
                 .setParameter("realmId", realmId)
                 .getResultList();
@@ -71,17 +72,52 @@ public class RoleRepository {
         return ret;
     }
 
-    public void deleteUserPostRoles(final UserEntity user, final List<UserPost> posts, final String realmId) {
+    public void deleteUserPostRoles(final UserEntity user, final Set<UserPostEntity> posts, final String realmId) {
         final String DEBUG_STR = "deleteUserPostRoles";
         log.debug("{}: user={}, realmId={}", DEBUG_STR, user.getId(), realmId);
-        final List<String> names = posts.stream().map(UserPost::getRole).map(UserPostRole::getName).collect(Collectors.toList());
+        final List<String> names = posts.stream().map(UserPostEntity::getRole).map(UserPostRoleEntity::getName).collect(Collectors.toList());
         List<RoleEntity> roles = findRolesByNames(names, realmId);
         List<String> roleIds = roles.stream().map(RoleEntity::getId).collect(Collectors.toList());
+        if(!roleIds.isEmpty()) {
+            em.createQuery("delete from UserRoleMappingEntity where user =:user and roleId in :roles")
+                    .setParameter("user", user)
+                    .setParameter("roles", roleIds)
+                    .executeUpdate();
+        }
+    }
 
-        em.createQuery("delete from UserRoleMappingEntity where user =:user and roleId in :roles")
-                .setParameter("user", user)
-                .setParameter("roles", roleIds)
-                .executeUpdate();
+    public void deleteUserSystemPostClientRoles (final UserEntity user, final Set<ExternalSystemRoleEntity> sustems, final String realmId) {
+        final String DEBUG_STR = "deleteUserSystemPostRoles";
+        log.debug("{}: user={}, realmId={}", DEBUG_STR, user.getId(), realmId);
+        final List<String> names = sustems.stream().map(ExternalSystemRoleEntity::getName).collect(Collectors.toList());
+        List<RoleEntity> roles = findRolesByNames(names, realmId);
+        List<String> roleIds = roles.stream().map(RoleEntity::getId).collect(Collectors.toList());
+        if(!roleIds.isEmpty()) {
+            em.createQuery("delete from UserRoleMappingEntity where user =:user and roleId in :roles")
+                    .setParameter("user", user)
+                    .setParameter("roles", roleIds)
+                    .executeUpdate();
+        }
+    }
+
+    public RoleEntity findClientRoleEntity(final String roleName, final String realmId, final ClientEntity clientEntity) {
+
+        List<RoleEntity> ret = em.createQuery("select re from RoleEntity re where re.name =:roleName and re.realmId =:realmId and re.client =:client", RoleEntity.class)
+                .setParameter("roleName", roleName)
+                .setParameter("realmId", realmId)
+                .setParameter("client", clientEntity)
+                .getResultList();
+
+
+        return ret.isEmpty() ? null : ret.get(0);
+    }
+
+    public ClientEntity findClientByName(final String name, final String realmId) {
+        List<ClientEntity> ret = em.createQuery("select c from ClientEntity c where c.clientId =:name and c.realm.id =:realmId", ClientEntity.class)
+                .setParameter("name", name)
+                .setParameter("realmId", realmId)
+                .getResultList();
+        return ret.isEmpty() ? null : ret.get(0);
 
     }
 }

@@ -1,4 +1,40 @@
 <style>
+    .content {
+        color: #000000cc;
+        font-size: 18px;
+        line-height: normal;
+        margin: 0;
+    }
+
+    .content__heading {
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .content__additional {
+        color: #505050cc;
+        font-size: 12px;
+        line-height: 14px;
+        font-style: italic;
+    }
+
+    .content p {
+        padding-top: 20px;
+    }
+
+    .content a {
+        display: block;
+        overflow: hidden;
+        text-decoration-line: underline;
+        text-overflow: ellipsis;
+        font-size: 20px;
+        color: #6688c9;
+
+        /* not working in Yandex Mail */
+        overflow-wrap: normal;
+        word-wrap: initial;
+    }
+
   * {
     margin: 0;
   }
@@ -24,6 +60,7 @@
   .mail-container__header {
     width: 100%;
     padding-bottom: 64px;
+    vertical-align: center;
   }
 
   .logos {
@@ -31,8 +68,8 @@
   }
 
   .logo {
-    width: 96px;
-    height: 48px;
+    width: 100%;
+    max-width: 128px;
   }
 
   .contacts {
@@ -42,16 +79,11 @@
   }
 
   .contacts__img {
-    width: 29px;
-    height: 29px;
-    opacity: 0.5;
-    vertical-align: middle;
+    width: 50%;
   }
 
   .contact__number {
-    display: inline-block;
-    vertical-align: middle;
-    font-size: 20px;
+    font-size: 112%;
     line-height: 20px;
     letter-spacing: -1px;
     opacity: 0.5;
@@ -87,4 +119,5 @@
     font-size: 12px;
     line-height: 25px;
   }
+    
 </style>

@@ -1,16 +1,18 @@
 package ru.alamics.sso.registration.dto;
 
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import lombok.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.Set;
+import javax.validation.constraints.NotNull;
 
 @Data
 @NoArgsConstructor
 public class UserPostRequest {
-    private String id;
+    @NotNull
     private String userId;
+    @NotNull
     private String tomsId;
     private String dmpId;
+    @NotNull
     private Long roleId;
 }

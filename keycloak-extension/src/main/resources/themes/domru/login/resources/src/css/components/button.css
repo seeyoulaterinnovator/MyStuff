@@ -38,3 +38,47 @@
     @apply .bg-accentBlue-700-hover;
   }
 }
+
+.btn__choose {
+  width: 203px;
+  box-sizing: border-box;
+  height: 48px;
+
+  @media screen and (max-width: 959px) {
+    width: 96px;
+  }
+
+  @media screen and (max-width: 639px) {
+    width: 88px;
+  }
+
+  @media screen and (max-width: 479px) {
+    display: none;
+  }
+}
+
+.phone-icon {
+  width: 29px;
+  height: 29px;
+
+  @media screen and (max-width: 639px) {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.city-icon {
+  width: 23px;
+  height: 23px;
+}
+
+@media screen and (max-width: 479px) {
+  .btn.w-1\/2 {
+    width: 100%;
+  }
+
+  .btn.btn-enter {
+    max-width: 136px;
+    box-sizing: border-box;
+  }
+}

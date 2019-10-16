@@ -5,6 +5,7 @@ import org.keycloak.models.UserModel;
 import ru.alamics.sso.keycloak.auth.requiredactions.PhoneVerificationByIncomingCallFactory;
 import ru.alamics.sso.keycloak.auth.requiredactions.PhoneVerificationBySmsFactory;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -38,6 +39,26 @@ public enum AuthType {
         if (type == null || type.isBlank()) return null;
         try {
             return AuthType.valueOf(type.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            log.info("AuthType.getByString " + e);
+            return null;
+        }
+    }
+
+    public static AuthType getByList(List<String> types) {
+        if(types == null) return null;
+        try {
+            if(!types.isEmpty()) {
+                List<AuthType> authTypeList = List.of(EMAIL, EMAIL_AND_PHONE_CODE, INCOMING_CALL, PHONE_CODE);
+                return authTypeList.stream()
+                        .filter(authType -> {
+                            List<String> requiredActionNames1 = Arrays.asList(authType.getRequiredActionNames());
+                            return types.containsAll(requiredActionNames1) && types.size() == requiredActionNames1.size();
+                        }).findFirst()
+                        .orElse(null);
+            } else {
+                return null;
+            }
         } catch (IllegalArgumentException e) {
             log.info("AuthType.getByString " + e);
             return null;

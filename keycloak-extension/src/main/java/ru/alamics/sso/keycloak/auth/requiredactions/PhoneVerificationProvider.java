@@ -8,6 +8,8 @@ import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.models.UserModel;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
+import ru.alamics.sso.property.ApplicationProperties;
+import ru.alamics.sso.property.PropertyConstants;
 import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.phone.ActivationCodeType;
@@ -19,6 +21,8 @@ import ru.alamics.sso.registration.phone.exception.SmsSendException;
 import ru.alamics.sso.registration.phone.exception.UserPhoneEmpty;
 import ru.alamics.sso.registration.phone.exception.WrongSmsCode;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -43,6 +47,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         this.userPhoneVerifier = userPhoneVerifier;
         this.activationCodeType = activationCodeType;
         this.emailTemplateProvider = emailTemplateProvider;
+        ActivationCodeType.init();
     }
 
     @Override
@@ -64,6 +69,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 .build();
 
         try {
+            boolean enableRepeatCall = true;
             if (authSession.getAuthNote(NEED_SEND_EMAIL_CODE) != null) {
                 authContext = AuthContext.builder()
                         .activationCodeType(ActivationCodeType.CODE_TO_EMAIL)
@@ -71,6 +77,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                         .hashProperty(HashGenerator.getSecretHash(sendEmail(context)))
                         .counter(getCount(authSession.getAuthNote(COUNT_REPEAT)))
                         .build();
+                enableRepeatCall = false;
             } else {
                 authContext = userPhoneVerifier.sendValidationSms(user, authContext, activationCodeType);
             }
@@ -79,12 +86,12 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             authSession.setAuthNote(EXPIRATION_TIME, authContext.getExpirationTime().format(DateTimeFormatter.ISO_DATE_TIME));
             authSession.setAuthNote(COUNT_REPEAT, authContext.getCounter().toString());
 
-            //возможно тут надо добавить признак, чтобы фронт понимал что это не первая попытка отправить
-            // для скрытия возможности повторного звонка
             Response challenge = context.form()
                     .setAttribute("userPhone", user.getPhone())
-                    .setAttribute("expirationSeconds", authContext.getActivationCodeType().getExpiredSeconds())
+                    .setAttribute("expirationSeconds", String.valueOf(authContext.getActivationCodeType().getExpiredSeconds()))
                     .setAttribute("lengthCode", authContext.getActivationCodeType().getLengthCode())
+                    .setAttribute("activationCodeType", authContext.getActivationCodeType().name())
+                    .setAttribute("enableRepeatCall", enableRepeatCall)
                     .createForm(VERIFY_PHONE_FTL);
 
             context.challenge(challenge);
@@ -92,17 +99,17 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         } catch (UserPhoneEmpty userPhoneEmpty) {
             log.info("ignore... userPhoneEmpty");
         }  catch (PhoneCallException e) {
-            log.info("ignore... PhoneCallException " + e.getMessage());
+            log.info("ignore... PhoneCallException {}", e.getMessage());
         } catch (EmailException e) {
-            log.info("ignore... EmailException " + e.getMessage());
+            log.info("ignore... EmailException {}", e.getMessage());
         } catch (SmsSendException se) {
-            log.info("ignore... SmsSendException " + se.getMessage());
+            log.info("ignore... SmsSendException {}", se.getMessage());
         }
     }
 
     private String sendEmail(RequiredActionContext context) throws EmailException {
         String code = SmsCodeGenerator.getCode(ActivationCodeType.CODE_TO_EMAIL.getLengthCode());
-        Map<String, Object> attributes = new HashMap<String, Object>();
+        Map<String, Object> attributes = new HashMap<>();
 
         attributes.put("code", code);
         emailTemplateProvider
@@ -153,7 +160,6 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 userPhoneVerifier.verifyPhone(user, authContext, code, activationCodeType);
 
                 UserModelUserMapper.mergeUserInto(user, model);
-                authSession.removeAuthNote(NEED_SEND_EMAIL_CODE);
                 authSession.removeAuthNote(PHONE_KEY_HASH);
                 authSession.removeAuthNote(EXPIRATION_TIME);
                 authSession.removeAuthNote(COUNT_REPEAT);
@@ -166,6 +172,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                         .setAttribute("expirationSeconds", activationCodeType.getExpiredSeconds())
                         .setAttribute("lengthCode", activationCodeType.getLengthCode())
                         .setAttribute("userPhone", user.getPhone())
+                        .setAttribute("enableRepeatCall", authSession.getAuthNote(NEED_SEND_EMAIL_CODE) == null)
                         .createForm(VERIFY_PHONE_FTL);
                 context.challenge(challenge);
             }

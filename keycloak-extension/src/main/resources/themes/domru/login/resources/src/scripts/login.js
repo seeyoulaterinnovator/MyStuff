@@ -1,5 +1,6 @@
 import IMask from 'imask';
 import { setButtonAvailability } from './helpers.js';
+import Cookie from 'js-cookie';
 
 export default (function() {
   const formElement = document.getElementById('loginForm');
@@ -8,6 +9,7 @@ export default (function() {
   const submitElement = document.getElementById('submit');
   const usernameElement = document.getElementById('username');
   const passwordElement = document.getElementById('password');
+  const cityElement = document.getElementById('domain-login');
   submitElement.disabled = true;
 
   const dynamicMask = IMask(usernameElement, {
@@ -36,6 +38,7 @@ export default (function() {
   // Нужно так делать на каждой форме, где есть imask
   formElement.addEventListener('submit', () => {
     usernameElement.value = dynamicMask.unmaskedValue;
+    cityElement.value = Cookie.get('city-domain') || 'perm';
     return true;
   });
 

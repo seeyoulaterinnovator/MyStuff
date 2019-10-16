@@ -20,20 +20,20 @@
     </div>
 
     <div class="flex flex-col-reverse sm:flex-row">
-      <div class="sm:max-w-1/2">
+      <div class="pass-fields">
         <@components.field class="mb-4" fieldName="${firstFieldName}" label="${msg('password')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true />
         
         <@components.field class="mb-4" fieldName="${secondFieldName}" label="${msg('passwordConfirm')}" placeholder="${msg('passwordConfirmPlaceholder')}" type="password" required=true />
       </div>
 
-      <div class="mx-auto sm:ml-5">
-        <button id="generate-password-button" type="button">
+      <div class="mx-auto generated-password">
+        <button id="generate-password-button" type="button" class="generate-btn">
           <span class="reference border-accentBlue text-accentBlue">Сгенерировать</span> 
         </button>
         <div id="generated-password-container" class=" hidden">
-          Не забудьте записать пароль
+          <p class="generated-password-text">Не забудьте записать пароль</p>
           <div class="flex justify-between items-center">
-            <div id="generated-password" class="flex"></div>
+            <div id="generated-password" class="flex text-base"></div>
             <button id="refresh-password-button" class="w-12 h-12 focus:outline-none" type="button">
               <@svg.reloadButton color="accentBlue"></@svg.reloadButton>
             </button>
@@ -56,7 +56,7 @@
     </h1>
 
     <#if secondaryTitle != "">
-      <h2 class="text-main">
+      <h2 class="text-main text-3xl">
         <a href="${secondaryHref}">
           <b>
             ${secondaryTitle}

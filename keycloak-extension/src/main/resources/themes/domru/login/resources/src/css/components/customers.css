@@ -1,0 +1,144 @@
+.py-3 {
+  height: 100%;
+}
+
+.table-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
+.title {
+  font-size: 36px;
+  line-height: 42px;
+  text-align: center;
+  letter-spacing: -1px;
+  color: rgba(0, 0, 0, 0.8);
+  margin-bottom: 30px;
+}
+
+.table {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.trow {
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+}
+.trow div {
+  padding-left: 10px;
+}
+.theader {
+  font-size: 13px;
+  line-height: 17px;
+  color: rgba(0, 0, 0, 0.3);
+}
+.titems:hover {
+  background-color: #ffdd00;
+  cursor: pointer;
+}
+
+.org-cell {
+  width: 450px;
+  text-overflow: ellipsis;
+  font-size: 17px;
+  line-height: 22px;
+  letter-spacing: -0.5px;
+  color: rgba(0, 0, 0, 0.8);
+}
+.role-cell {
+  width: 180px;
+  font-size: 13px;
+  line-height: 17px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 960px) {
+  .org-cell {
+    width: 430px;
+    font-size: 15px;
+    line-height: 19px;
+    letter-spacing: -0.35px;
+  }
+  .role-cell {
+    width: 190px;
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+@media (max-width: 640px) {
+  .title {
+    font-size: 32px;
+    line-height: 38px;
+    margin-bottom: 30px;
+  }
+  .trow {
+    height: 48px;
+  }
+  .trow div {
+    padding-left: 15px;
+  }
+  .org-cell {
+    width: 425px;
+  }
+  .role-cell {
+    width: 125px;
+    line-height: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 27px;
+    line-height: 32px;
+    margin-bottom: 20px;
+  }
+  .theader {
+    display: none;
+  }
+  .trow {
+    border-radius: 0;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .trow div {
+    padding-left: 25px;
+    padding-right: 25px;
+  }
+  .org-cell {
+    width: 430px;
+    font-size: 14px;
+    text-overflow: initial;
+    color: #000000;
+  }
+  .role-cell {
+    width: 430px;
+    font-size: 10px;
+    line-height: 13px;
+    letter-spacing: 0.5px;
+    color: rgba(0, 0, 0, 0.5);
+  }
+}
+
+@media (max-width: 320px) {
+  .trow {
+    height: 68px;
+  }
+  .trow div {
+    padding-left: 15px;
+    padding-right: 15px;
+  }пше
+  .org-cell {
+    width: 290px;
+  }
+  .role-cell {
+    width: 290px;
+  }
+}

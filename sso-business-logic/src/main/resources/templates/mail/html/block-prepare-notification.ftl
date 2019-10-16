@@ -1,12 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>DOM.RU</title>
-</head>
-<body>
-<p>
-    Ваша учетная запись для входа в Личный Кабинет «Дом.ru Бизнес» будет заблокирована через ${absence} дней.
-</p>
-</body>
-</html>
+<#import "template.ftl" as template>
+
+<@template.layout ; section>
+    <#if section = "style">
+        <#include 'styles/content-style--default.html' >
+    <#elseif section = "body">
+        <p>Ваша учетная запись для входа в Личный Кабинет «Дом.ru Бизнес» будет заблокирована через ${absence}.</p>
+        <p>Для предотвращения блокировки УЗ, просим Вас войти в Личный кабинет "Дом.ru Бизнес" до истечения указанного срока.</p>
+    </#if>
+</@template.layout>

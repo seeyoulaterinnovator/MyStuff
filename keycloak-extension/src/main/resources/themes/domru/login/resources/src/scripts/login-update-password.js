@@ -26,11 +26,14 @@ export default (function() {
     return passwordElement.value;
   }
   function setPassword(password) {
-    passwordElement.value = password;
-    passwordConfirmElement.value = password;
-    setButtonAvailability(validate, submitElement);
+    // passwordElement.value = password;
+    // passwordConfirmElement.value = password;
+    // setButtonAvailability(validate, submitElement);
   }
-  linkPasswords(getPassword, setPassword, passwordElement);
+  function getConfirmation() {
+    return passwordConfirmElement.value;
+  }
+  linkPasswords(getPassword, setPassword, getConfirmation, passwordElement, passwordConfirmElement);
 
   function validate() {
     isPasswordExists = passwordElement.value !== '';

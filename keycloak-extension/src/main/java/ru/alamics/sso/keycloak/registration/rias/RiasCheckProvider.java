@@ -12,6 +12,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.services.messages.Messages;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
+import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.rias.RiasService;
 
@@ -64,7 +65,7 @@ public class RiasCheckProvider implements FormAction {
         if (phoneCheck) {
             formData.remove(FIELD_PHONE);
             context.getEvent().detail("Phone", user.getPhone());
-            errors.add(new FormMessage(FIELD_PHONE, "Пользователь с таким телефоном уже существует"));
+            errors.add(new FormMessage(FIELD_PHONE, MessageConstants.PHONE_EXISTS));
         }
 
         if (!errors.isEmpty()) {
