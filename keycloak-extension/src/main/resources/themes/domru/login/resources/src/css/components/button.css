@@ -1,7 +1,13 @@
 .btn {
   @apply .block .uppercase .tracking-wider .p-4 .rounded-lg .shadow;
 
+  height: 40px;
+  padding: 0;
   transition: box-shadow 0.1s ease-in;
+
+  @media (min-width: 1199px) {
+    height: 48px;
+  }
 
   &:disabled {
     @apply .opacity-40 .cursor-not-allowed;
@@ -42,7 +48,6 @@
 .btn__choose {
   width: 203px;
   box-sizing: border-box;
-  height: 48px;
 
   @media screen and (max-width: 959px) {
     width: 96px;
@@ -70,6 +75,12 @@
 .city-icon {
   width: 23px;
   height: 23px;
+}
+
+a.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @media screen and (max-width: 479px) {
