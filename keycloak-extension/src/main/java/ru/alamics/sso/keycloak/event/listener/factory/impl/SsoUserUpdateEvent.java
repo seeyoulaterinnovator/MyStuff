@@ -42,13 +42,16 @@ public class SsoUserUpdateEvent extends SsoEvent {
             }
 
             AdminEventEntity adminEventEntity = findAdminEvent(userId);
-            if (adminEventEntity == null) {
+            if (userNow.isEnabled() && adminEventEntity == null) {
                 return;
             }
 
-            UserEntityRepresentation userLast = this.getUserEntityRepresentation(adminEventEntity.getRepresentation());
+            UserEntityRepresentation userLast = null;
+            if (adminEventEntity != null){
+                userLast = getUserEntityRepresentation(adminEventEntity.getRepresentation());
+            }
 
-            if ((userNow.isEnabled() == userLast.isEnabled())) {
+            if (userLast != null && userNow.isEnabled() == userLast.isEnabled()) {
                 return;
             }
 
