@@ -22,15 +22,11 @@ import org.keycloak.Config.Scope;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.resource.RealmResourceProvider;
-import org.keycloak.services.resource.RealmResourceProviderFactory;
 import org.keycloak.services.resources.admin.AdminAuth;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
 import ru.alamics.sso.keycloak.rest.BaseResourceProviderFactory;
 import ru.alamics.sso.registration.service.UserFindService;
-
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 @Slf4j
 public class CustomUserRealmResourceProviderFactory implements BaseResourceProviderFactory, BaseResourceProvider {
@@ -48,7 +44,7 @@ public class CustomUserRealmResourceProviderFactory implements BaseResourceProvi
 
     @Override
     public RealmResourceProvider create(KeycloakSession session) {
-        this.auth = this.initAuth(session);
+        this.auth = this.initAuthByWorkingRealm(session);
         this.session = session;
         this.userFindService = (UserFindService) Lookup.lookup(UserFindService.class);
         return this;
