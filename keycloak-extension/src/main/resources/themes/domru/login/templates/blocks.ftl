@@ -33,7 +33,7 @@
         <div id="generated-password-container" class=" hidden">
           <p class="generated-password-text">Не забудьте записать пароль</p>
           <div class="flex justify-between items-center">
-            <div id="generated-password" class="flex"></div>
+            <div id="generated-password" class="flex text-base"></div>
             <button id="refresh-password-button" class="w-12 h-12 focus:outline-none" type="button">
               <@svg.reloadButton color="accentBlue"></@svg.reloadButton>
             </button>
@@ -56,7 +56,7 @@
     </h1>
 
     <#if secondaryTitle != "">
-      <h2 class="text-main">
+      <h2 class="text-main text-3xl">
         <a href="${secondaryHref}">
           <b>
             ${secondaryTitle}

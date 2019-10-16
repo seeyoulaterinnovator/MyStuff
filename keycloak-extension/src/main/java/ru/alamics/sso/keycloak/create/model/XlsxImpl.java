@@ -88,6 +88,6 @@ public class XlsxImpl implements FileModel {
 
     @Override
     public int getCountRows() {
-        return workbook.getSheetAt(0).getLastRowNum();
+        return workbook.getSheetAt(0).getLastRowNum() + 1;
     }
 }

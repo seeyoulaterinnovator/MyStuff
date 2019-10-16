@@ -29,6 +29,9 @@ input[type='number']::-webkit-outer-spin-button {
   margin: 0;
   -webkit-appearance: none;
 }
+input[type="number"] {
+  -moz-appearance: textfield;
+}
 
 .service__item::before {
   @apply .bg-extra !important;
@@ -81,5 +84,24 @@ input[type='number']::-webkit-outer-spin-button {
 @media screen and (max-width: 479px){
   .footer {
     margin-bottom: 16px;
+  }
+}
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  body {
+    display: table !important;
+    width: 100%;
+  }
+  .footer {
+    display: table-footer-group;
+  }
+}
+
+.g-recaptcha {
+  transform-origin: 0 0;
+}
+@media (max-width: 1199px) {
+  .g-recaptcha {
+    padding-bottom: 1rem;
   }
 }

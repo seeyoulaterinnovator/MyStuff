@@ -383,8 +383,14 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 'realm':'user'
             }
         }).then(response => {
-            Notifications.success("Users has been imported");
-            location.reload();
+            var resp = angular.fromJson(response).data.results['import-report'];
+            this.importMsg(resp)
+        }).catch(error => {
+            if(error.status === 400) {
+                Notifications.error(error.data.message);
+            } else {
+                Notifications.error(error.statusText);
+            }
         })
     };
 
@@ -400,9 +406,53 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 'realm':'user'
             }
         }).then(response => {
-            Notifications.success("Users has been imported");
-            location.reload();
+            var resp = angular.fromJson(response).data.results['import-report'];
+            this.importMsg(resp)
+        }).catch(error => {
+            if(error.status === 400) {
+                Notifications.error(error.data.message);
+            } else {
+                Notifications.error(error.statusText);
+            }
         })
+    };
+
+    function onlyUnique(value, index, self) {
+        return self.indexOf(value) === index;
+    }
+
+    $scope.importMsg = function(resp) {
+        var errors = [];
+        if(resp.errors) {
+            errors = resp.errors.map(error => error.error).filter(onlyUnique );
+        }
+        var errorMsg = errors.length === 0 ? "Ошибок нет" : errors.join(",\n\t\t\t\t\t\t\t   ");
+        var msg = `
+            Количество записей, для которых найдены дубли: ${resp.countClones}
+            Количество созданых пользователей: ${resp.createdUsers}
+            Количество записей, для которых не было положительного ответа от TBAPI: ${resp.tbapiErrors}
+            Количество записей, для которых был положительный ответ от TBAPI: ${resp.tbapiSuccess}
+            Информация об ошибках: ${errorMsg}`;
+
+        Dialog.message('Информация', msg, () => location.reload());
+
+        return msg;
+    };
+
+    $scope.downloadTemplateXlsx = function () {
+        let payload = {
+            type: 'xlsx',
+            userParameters: [
+                "FIRST_NAME",
+                "EMAIL",
+                "PHONE",
+                "ORGANIZATION",
+                "ROLE",
+                "SYSTEM"
+            ],
+            userIds: ["XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"]
+    };
+        $scope.exportTemplateXlsx(payload)
     };
 
     $scope.exportXlsx = function () {
@@ -421,6 +471,10 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             ],
             userIds: $scope.users.filter(user => user.active).map(user => user.id)
         };
+        $scope.exportTemplateXlsx(payload)
+    };
+
+    $scope.exportTemplateXlsx = function (payload) {
         var linkElement = document.createElement('a');
         $http.post(`${authUrl}/realms/master/users-toms/downloadUsers`, payload, {
             headers: {
@@ -430,23 +484,39 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             responseType: 'arraybuffer'
         }).then((response) => {
             var headers = response.headers();
-            var filename = 'users_info.xlsx';
-            var contentType = headers['content-type'];
-            var blob = new Blob([response.data], {type: contentType});
-            var url = window.URL.createObjectURL(blob, {
-                type: 'data:attachment/xlsx'
-            });
-            window.open(url);
-            linkElement.setAttribute('href', url);
-            linkElement.setAttribute("download", filename);
+        var filename = 'users_info.xlsx';
+        var contentType = headers['content-type'];
+        var blob = new Blob([response.data], {type: contentType});
+        var url = window.URL.createObjectURL(blob, {
+            type: 'data:attachment/xlsx'
+        });
 
-            var clickEvent = new MouseEvent("click", {
-                "view": window,
-                "bubbles": true,
-                "cancelable": false
-            });
-            linkElement.dispatchEvent(clickEvent);
-        })
+        linkElement.setAttribute('href', url);
+        linkElement.setAttribute("download", filename);
+
+        var clickEvent = new MouseEvent("click", {
+            "view": window,
+            "bubbles": true,
+            "cancelable": false
+        });
+        linkElement.dispatchEvent(clickEvent);
+    })
+    };
+
+    $scope.downloadTemplateCSV = function () {
+        let payload = {
+            type: 'csv',
+            userParameters: [
+                "FIRST_NAME",
+                "EMAIL",
+                "PHONE",
+                "ORGANIZATION",
+                "ROLE",
+                "SYSTEM"
+            ],
+            userIds: ["XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"]
+        };
+        $scope.exportTemplateCSV(payload)
     };
 
     $scope.exportCSV = function () {
@@ -465,26 +535,30 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             ],
             userIds: $scope.users.filter(user => user.active).map(user => user.id)
         };
+        $scope.exportTemplateCSV(payload)
+    };
+
+    $scope.exportTemplateCSV = function (payload) {
         var linkElement = document.createElement('a');
         $http.post(`${authUrl}/realms/master/users-toms/downloadUsers`, payload, {
             headers: {'Accept': 'application/octet-stream;charset=UTF-8', 'Content-Type': 'application/json'}
         }).then((response) => {
             var headers = response.headers();
-            var filename = 'users_info.csv';
-            var contentType = headers['content-type'];
-            var blob = new Blob(["\ufeff", response.data], {type: contentType});
-            var url = window.URL.createObjectURL(blob);
+        var filename = 'users_info.csv';
+        var contentType = headers['content-type'];
+        var blob = new Blob(["\ufeff", response.data], {type: contentType});
+        var url = window.URL.createObjectURL(blob);
 
-            linkElement.setAttribute('href', url);
-            linkElement.setAttribute("download", filename);
+        linkElement.setAttribute('href', url);
+        linkElement.setAttribute("download", filename);
 
-            var clickEvent = new MouseEvent("click", {
-                "view": window,
-                "bubbles": true,
-                "cancelable": false
-            });
-            linkElement.dispatchEvent(clickEvent);
-        })
+        var clickEvent = new MouseEvent("click", {
+            "view": window,
+            "bubbles": true,
+            "cancelable": false
+        });
+        linkElement.dispatchEvent(clickEvent);
+    })
     };
 
     $scope.nextPage = function () {

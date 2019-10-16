@@ -5,8 +5,10 @@
     <#if section = "header">
     <#elseif section = "form">
         <#assign email=realm.displayName>
-        <#if brokerContext?? && brokerContext.email??>
-            <#assign email= brokerContext.email>
+        <#if existingUserEmail??>
+            <#assign email= existingUserEmail>
+        <#elseif brokerContext?? && brokerContext.email??>
+                <#assign email= brokerContext.email>
         </#if>
         <@emailSent.defaultTemplate email="${email!}" buttonExist=false; section>
             <#if section = "header">

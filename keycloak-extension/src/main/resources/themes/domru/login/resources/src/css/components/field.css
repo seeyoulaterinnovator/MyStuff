@@ -43,6 +43,12 @@
   transform: translateY(-50%);
   top: 66%;
 }
+.eye {
+  opacity: 0.2;
+}
+.field__open:hover .eye {
+  opacity: 0.5;
+}
 
 .field__input {
   @apply .border .border-accentBlue-700-20 .rounded-lg .pt-2 .pb-3 .px-3 .text-black .outline-none;
@@ -83,8 +89,8 @@
 
 .field__error-message {
   @apply .text-accentRed;
-
-  font-size: 10px;
+  height: 0;
+  font-size: 13px;
   line-height: 13px;
   text-align: right;
 }
@@ -148,4 +154,18 @@
     font-size: 14px;
     line-height: 18px;
   }
+}
+
+.passw_ok {
+  position: absolute;
+  right: 0;
+  top: 3px;
+}
+
+.field-good {
+  @apply .border-accentGreen-700;
+}
+
+.timer_minutes {
+  color: rgba(0, 0, 0, 0.5);
 }
