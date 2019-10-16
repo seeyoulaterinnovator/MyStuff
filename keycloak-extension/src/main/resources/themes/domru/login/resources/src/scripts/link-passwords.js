@@ -1,4 +1,4 @@
-import { HIGHLIGHT_VALIDATION_CHARSET, WRONG_PASS_REG } from '../constants/passwordCharset.js';
+import { HIGHLIGHT_VALIDATION_CHARSET, WRONG_PASS_REG, REQUIRED_PASSWORD } from '../constants/passwordCharset.js';
 import { fetchPassword } from './helpers';
 
 // Привязывает логику к блоку 'password-block'
@@ -80,15 +80,16 @@ export default (
   }
   passwordElement.addEventListener('input', highlightRules);
   function checkPasswordConfirmation() {
+    let checkPassword = (password) => REQUIRED_PASSWORD.test(password)
     const password = getPassword();
     const confirmation = getConfirmation();
     const ok = document.querySelectorAll('.passw_ok');
-    console.log(passwordElement);
-    console.log(passwordConfirmElement);
-    console.log(password);
-    console.log(confirmation);
+    // console.log(passwordElement);
+    // console.log(passwordConfirmElement);
+    // console.log(password);
+    // console.log(confirmation);
 
-    if (confirmation === password) {
+    if (checkPassword(password) && confirmation === password) {
       passwordElement.classList.add('field-good');
       passwordConfirmElement.classList.add('field-good');
       ok.forEach((img_block) => img_block.classList.remove('hidden'));
@@ -99,5 +100,6 @@ export default (
       ok.forEach((img_block) => img_block.classList.add('hidden'));
     }
   }
+  passwordElement.addEventListener('input', checkPasswordConfirmation);
   passwordConfirmElement.addEventListener('input', checkPasswordConfirmation);
 };
