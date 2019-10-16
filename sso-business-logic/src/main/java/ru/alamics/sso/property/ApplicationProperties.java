@@ -2,6 +2,8 @@ package ru.alamics.sso.property;
 
 import ru.alamics.sso.keycloak.entity.Settings;
 import ru.alamics.sso.keycloak.repository.SettingsRepository;
+import ru.alamics.sso.registration.mapper.DataMapper;
+import ru.alamics.sso.settings.SettingsDto;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -11,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 
@@ -23,16 +26,13 @@ public class ApplicationProperties {
     private SettingsRepository repository;
 
 
-    public String getProperty(final PropertyConstants property, final String realmId) {
+    public long getSettingsValue(final PropertyConstants property, final String realmId) {
         final String keyName = property.getKey();
         Settings settings = repository.getSettings(keyName, realmId);
-        String ret;
+        long ret = -1;
         if(settings != null) {
-            ret = String.valueOf(TimeUnit.SECONDS.convert(Long.parseLong(settings.getValue()), settings.getUnit()));
-        } else {
-            ret = getProperty(keyName);
+            ret = TimeUnit.SECONDS.convert(Long.parseLong(settings.getValue()), settings.getUnit());
         }
-
         return ret;
     }
 
@@ -48,6 +48,11 @@ public class ApplicationProperties {
             ret = this.properties.getProperty(name);
         }
         return ret;
+    }
+
+    public SettingsDto getSetting(final PropertyConstants property, final String realmId){
+        final String keyName = property.getKey();
+        return DataMapper.toDto(repository.getSettings(keyName, realmId));
     }
 
     @PostConstruct

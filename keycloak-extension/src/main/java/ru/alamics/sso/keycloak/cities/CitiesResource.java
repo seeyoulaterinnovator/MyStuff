@@ -5,12 +5,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.keycloak.broker.provider.util.SimpleHttp;
 import org.keycloak.models.KeycloakSession;
+import ru.alamics.sso.keycloak.cities.model.CityMigration;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
@@ -21,7 +28,7 @@ public class CitiesResource {
 
     private static ReentrantLock lock = new ReentrantLock();
 
-    private static JsonNode cities;
+    private static List<CityMigration> cityList = new ArrayList<>();
 
     protected KeycloakSession session;
 
@@ -32,12 +39,13 @@ public class CitiesResource {
     @GET
     @Path("")
     @NoCache
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     public Response getCities() {
-        if (cities == null) {
+        if (cityList.isEmpty()) {
             lock.lock();
             try {
-                if (cities == null) {
-                    cities = SimpleHttp.doGet(url, session).asJson();
+                if (cityList.isEmpty()) {
+                    cityList = SimpleHttp.doGet(url, session).asJson(cityList.getClass());
                 }
             }  catch (IOException e){
                 log.error("Connect to " + url + " failed");
@@ -45,8 +53,38 @@ public class CitiesResource {
                 lock.unlock();
             }
         }
-        return  JsonResponse.success()
-                .addResult("cities", cities)
+        return JsonResponse.success()
+                .addResult("cities", cityList)
                 .build();
+    }
+
+    public static List<CityMigration> getCityList() {
+        return cityList;
+    }
+
+    public static CityMigration getCityMigrationByCity(String city) {
+
+        if (city == null)
+            return null;
+
+        for (CityMigration cm : cityList) {
+            if (city.equalsIgnoreCase(cm.getCity()))
+                return cm;
+        }
+
+        return null;
+    }
+
+    public static CityMigration getCityMigrationByDomain(String domain) {
+
+        if (domain == null)
+            return null;
+
+        for (CityMigration cm : cityList) {
+            if (domain.equalsIgnoreCase(cm.getDomain()))
+                return cm;
+        }
+
+        return null;
     }
 }

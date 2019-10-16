@@ -1,6 +1,7 @@
 package ru.alamics.sso.keycloak.user.resource.manage;
 
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
 import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
 
 public class UserManageResourceProvider implements BaseResourceProvider<UserManageResource> {
@@ -13,7 +14,10 @@ public class UserManageResourceProvider implements BaseResourceProvider<UserMana
 
     @Override
     public UserManageResource getResource () {
-        this.initAuth(session);
-        return new UserManageResource(session);
+        var adminAuth = this.initAuthByWorkingRealm(session);
+        var context = session.getContext();
+        var adminEventBuilder = new AdminEventBuilder(context.getRealm(), adminAuth, session, context.getConnection());
+
+        return new UserManageResource(session, adminEventBuilder);
     }
 }

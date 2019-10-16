@@ -42,7 +42,7 @@ public class UserPostCreatorProvider implements FormAction {
     @Override
     public void success(FormContext context) {
         UserPostRequest userPostRequest = DataMapper.toUserPostRequest(context);
-        if (userPostRequest != null) {
+        if (userPostRequest != null && userPostRequest.getTomsId() != null) {
             userPostRequest.setRoleId(ROLE_ID);
             userPostService.addUserPostAndSystemRole(userPostRequest);
         }

@@ -63,7 +63,7 @@ public class RoleRepository {
             return Collections.emptyList();
         }
 
-        List<RoleEntity> ret = em.createQuery("select re from RoleEntity re where re.name in :roleNames and re.realm.id =:realmId", RoleEntity.class)
+        List<RoleEntity> ret = em.createQuery("select re from RoleEntity re where re.name in :roleNames and re.realmId =:realmId", RoleEntity.class)
                 .setParameter("roleNames", names)
                 .setParameter("realmId", realmId)
                 .getResultList();

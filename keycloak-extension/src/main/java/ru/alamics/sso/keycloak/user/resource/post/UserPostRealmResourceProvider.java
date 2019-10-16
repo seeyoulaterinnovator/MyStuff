@@ -31,7 +31,7 @@ public class UserPostRealmResourceProvider implements BaseResourceProvider<UserP
 
     @Override
     public UserPostResource getResource() {
-        initAuth(this.session);
+        initAuthByWorkingRealm(this.session);
         return new UserPostResource(session);
     }
 
