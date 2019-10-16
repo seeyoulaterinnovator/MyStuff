@@ -47,10 +47,11 @@ export default (function() {
   const form = createForm({
     onSubmit: () => {},
     initialValues: {
-      orgName: '',
-      firstName: '',
+      orgName: document.getElementById('orgName') && document.getElementById('orgName').value || '',
+      firstName: document.getElementById('firstName') && document.getElementById('firstName').value || '',
       lastName: '-',
-      email: '',
+      email: document.getElementById('email') && document.getElementById('email').value || '',
+      phone: document.getElementById('phone') && document.getElementById('phone').value || '',
       password: '',
       'password-confirm': '',
     },
@@ -122,6 +123,23 @@ export default (function() {
   window.recaptchaCallback = recaptchaCallback;
   window.recaptchaExpiredCallback = recaptchaExpiredCallback;
   window.recaptchaErrorCallback = recaptchaErrorCallback;
+
+  // resizing ReCaptcha function
+  function scaleCaptcha() {
+    const reCaptcha = document.querySelector(".g-recaptcha");
+    const reCaptchaWidth = 304;
+    const containerWidth = document.getElementById('password').offsetWidth;
+    if(reCaptchaWidth !== containerWidth) {
+      const captchaScale = containerWidth / reCaptchaWidth;
+      reCaptcha.style.transform = 'scale('+captchaScale+')';
+    }
+  }
+  // resizing ReCaptcha initial
+  scaleCaptcha();
+  // resizing ReCaptcha on window resize
+  window.addEventListener('resize', function(){
+    scaleCaptcha();
+  });
 
   function registerField(input) {
     const { name } = input;
@@ -198,5 +216,8 @@ export default (function() {
     // form.getFieldState('password-confirm').change(password);
     // form.getFieldState('password-confirm').blur();
   }
-  linkPasswords(getPassword, setPassword, document.getElementById('password'));
+  function getConfirmation() {
+    return form.getFieldState('password-confirm').value;
+  }
+  linkPasswords(getPassword, setPassword, getConfirmation, document.getElementById('password'), document.getElementById('password-confirm'));
 })();

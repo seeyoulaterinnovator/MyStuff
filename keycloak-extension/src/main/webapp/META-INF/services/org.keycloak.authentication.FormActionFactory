@@ -2,3 +2,4 @@ ru.alamics.sso.keycloak.registration.UserModelExtender
 ru.alamics.sso.keycloak.registration.rias.RiasCheckFactory
 ru.alamics.sso.keycloak.registration.phone.PhoneCheckerFactory
 ru.alamics.sso.keycloak.registration.userpost.UserPostCreatorFactory
+ru.alamics.sso.keycloak.registration.sendEmail.LetterSenderFactory
