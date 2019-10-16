@@ -73,6 +73,10 @@
 }
 
 @media screen and (max-width: 479px) {
+  .btn {
+    font-size: 13px;
+  }
+
   .btn.w-1\/2 {
     width: 100%;
   }
