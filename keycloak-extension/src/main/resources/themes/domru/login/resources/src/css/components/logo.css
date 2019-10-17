@@ -43,8 +43,7 @@
      }
   }
 
-  /* Нет такого провайдера */
-  &--gu {
+  &--esia {
     background-image: url('./images/social/GU.svg');
 
     &:hover {
