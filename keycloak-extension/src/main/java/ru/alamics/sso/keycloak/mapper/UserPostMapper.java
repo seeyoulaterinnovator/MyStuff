@@ -31,9 +31,11 @@ import ru.alamics.sso.registration.service.UserPostService;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Mappings UserModel property (the property name of a getter method) to an ID Token claim.  Token claim name can be a full qualified nested object name,
@@ -53,9 +55,16 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
         property = new ProviderConfigProperty();
         property.setName(ProtocolMapperUtils.USER_ATTRIBUTE);
         property.setLabel(ProtocolMapperUtils.USER_MODEL_PROPERTY_LABEL);
-        property.setType(ProviderConfigProperty.STRING_TYPE);
+        property.setType(ProviderConfigProperty.LIST_TYPE);
+        property.setOptions(Arrays.stream(UserPostPropertyType.values()).map(Enum::toString).collect(Collectors.toList()));
         property.setHelpText(ProtocolMapperUtils.USER_MODEL_PROPERTY_HELP_TEXT);
         configProperties.add(property);
+        ProviderConfigProperty multiValued = new ProviderConfigProperty();
+        multiValued.setName(ProtocolMapperUtils.MULTIVALUED);
+        multiValued.setLabel(ProtocolMapperUtils.MULTIVALUED_LABEL);
+        multiValued.setHelpText(ProtocolMapperUtils.MULTIVALUED_HELP_TEXT);
+        multiValued.setType(ProviderConfigProperty.BOOLEAN_TYPE);
+        configProperties.add(multiValued);
         OIDCAttributeMapperHelper.addAttributeConfig(configProperties, UserPropertyMapper.class);
     }
 
@@ -89,10 +98,10 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
     protected void setClaim(IDToken token, ProtocolMapperModel mappingModel, UserSessionModel userSession) {
         UserModel user = userSession.getUser();
         String propertyName = mappingModel.getConfig().get(ProtocolMapperUtils.USER_ATTRIBUTE);
-        List<UserPostResponse> userPosts = getUserPost(user);
-        if (propertyName == null || propertyName.trim().isEmpty() || userPosts == null || userPosts.isEmpty()) return;
+        UserPostResponse userPost = getUserPost(user);
+        if (propertyName == null || propertyName.trim().isEmpty() || userPost == null) return;
 
-        String propertyValue = getUserModelValue(getUserPost(user).get(0), propertyName);
+        Object propertyValue = getUserModelValue(userPost, propertyName);
         OIDCAttributeMapperHelper.mapClaim(token, mappingModel, propertyValue);
     }
 
@@ -106,7 +115,7 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
                 PROVIDER_ID);
     }
 
-    private List<UserPostResponse> getUserPost(UserModel user){
+    private UserPostResponse getUserPost(UserModel user){
         List<UserPostResponse> userPost;
         try {
             this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
@@ -115,17 +124,19 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
             log.error(e.getMessage(), e);
             return null;
         }
-        return userPost;
+        return Optional.of(userPost.stream().filter(o -> o.isSelected()).findFirst().get())
+                .orElseThrow(() -> null);
     }
 
-    public static String getUserModelValue(UserPostResponse userPost, String propertyName) {
-        String methodName = "get" + Character.toUpperCase(propertyName.charAt(0)) + propertyName.substring(1);
-        try {
-            Method method = UserPostResponse.class.getMethod(methodName);
-            Object val = method.invoke(userPost);
-            if (val != null) return val.toString();
-        } catch (Exception ignore) {
+    public static Object getUserModelValue(UserPostResponse userPost, String propertyName) {
+        switch (UserPostPropertyType.valueOf(propertyName)){
+            case TOMS_ID : return userPost.getTomsId();
+            case DMP_ID : return userPost.getDmpId();
+            case ROLE : return userPost.getUserRole().getName();
+            case SYSTEMS : return userPost.getSystemRoles().stream()
+                    .map(o -> o.getExternalSystem().getName())
+                    .collect(Collectors.toList());
         }
-        return null;
+        return "";
     }
 }

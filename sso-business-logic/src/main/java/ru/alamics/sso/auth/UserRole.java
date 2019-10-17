@@ -43,7 +43,6 @@ public class UserRole {
                                 !o.getId().equals(userPost.getId()))
                 .forEach(o -> {
                     o.setSelected(false);
-                    postRepository.update(o);
                 });
 
 
@@ -99,7 +98,7 @@ public class UserRole {
 //                repository.save(roleMapping);
 //            }
 //        });
-
-        user.setAttribute(ATTR_TOMS_NAME, Collections.singletonList(userPost.getTomsId()));
+//
+//        user.setAttribute(ATTR_TOMS_NAME, Collections.singletonList(userPost.getTomsId()));
     }
 }
