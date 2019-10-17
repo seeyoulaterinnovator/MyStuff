@@ -862,7 +862,10 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
         }
     }, true);
 
-    $scope.GetPhoneCheckerResult = function () {
+    /**
+     * @return {string}
+     */
+    $scope.GetPhoneAttr = function () {
         var phone = '';
         var attrs = $scope.user.attributes;
         for (var attribute in attrs) {
@@ -870,43 +873,37 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
                 phone = attrs[attribute];
             }
         }
+        return phone;
+    };
 
-        return $http.get(authUrl + '/realms/' + realm.realm + '/users-info/attribute?phone=' + phone + '&excludeUserId=' + $scope.user.id)
+    $scope.GetPhoneCheckerResult = function () {
+        return $http.get(authUrl + '/realms/' + realm.realm + '/users-info/attribute?phone=' + $scope.GetPhoneAttr() + '&excludedUserId=' + $scope.user.id)
             .then(function (response) {
-                console.info('recponse from get = ' + response);
-                console.info('recponse from fromJson = ' + angular.fromJson(response).data.results['foundUserId']);
-
                 return angular.fromJson(response).data.results['foundUserId'];
             });
     };
 
     $scope.save = function () {
         convertAttributeValuesToLists();
-        var responseChecker = $scope.GetPhoneCheckerResult();
 
-        responseChecker.then(function (result) {
-            if (result != null) {
-                Notifications.error("The user phone not unique");
-                return;
-            }
-            if ($scope.create) {
-                User.save({
-                    realm: realm.realm
-                }, $scope.user, function (data, headers) {
-                    $scope.changed = false;
-                    convertAttributeValuesToString($scope.user);
-                    user = angular.copy($scope.user);
-                    var l = headers().location;
+        if ($scope.create) {
+            User.save({
+                realm: realm.realm
+            }, $scope.user, function (data, headers) {
+                $scope.changed = false;
+                convertAttributeValuesToString($scope.user);
+                user = angular.copy($scope.user);
+                var l = headers().location;
 
-                    console.debug("Location == " + l);
+                console.debug("Location == " + l);
 
-                    var id = l.substring(l.lastIndexOf("/") + 1);
+                var id = l.substring(l.lastIndexOf("/") + 1);
 
-
-                    $location.url("/realms/" + realm.realm + "/users/" + id);
-                    Notifications.success("The user has been created.");
-                });
-            } else {
+                $location.url("/realms/" + realm.realm + "/users/" + id);
+                Notifications.success("The user has been created.");
+            });
+        } else {
+            if ($scope.GetPhoneAttr() === '') {
                 User.update({
                     realm: realm.realm,
                     userId: $scope.user.id
@@ -916,8 +913,24 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
                     user = angular.copy($scope.user);
                     Notifications.success("Your changes have been saved to the user.");
                 });
+            } else {
+                $scope.GetPhoneCheckerResult().then(function (result) {
+                    if (result != null) {
+                        Notifications.error("The user phone number not unique");
+                        return;
+                    }
+                    User.update({
+                        realm: realm.realm,
+                        userId: $scope.user.id
+                    }, $scope.user, function () {
+                        $scope.changed = false;
+                        convertAttributeValuesToString($scope.user);
+                        user = angular.copy($scope.user);
+                        Notifications.success("Your changes have been saved to the user.");
+                    });
+                });
             }
-        });
+        }
     };
 
     function convertAttributeValuesToLists() {
