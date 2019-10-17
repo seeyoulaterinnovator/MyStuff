@@ -12,6 +12,7 @@ import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.registration.userpost.UserPostCreatorProvider;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.model.FormConstants;
+import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.registration.service.UserPostService;
 
@@ -51,7 +52,7 @@ public class CustomIdpCreateUserIfUniqueAuthenticator extends IdpCreateUserIfUni
         if (!Validation.isBlank(phone)) {
             var userEntity = userFindService.getUserByPhone(context.getRealm(), phone);
             if (userEntity != null) {
-                return new ExistingUserInfo(userEntity.getId(), FormConstants.FIELD_PHONE, phone);
+                return new ExistingUserInfo(userEntity.getId(), MessageConstants.PHONE, phone);
             }
         }
 

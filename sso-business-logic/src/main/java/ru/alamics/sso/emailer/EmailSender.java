@@ -21,6 +21,9 @@ public class EmailSender {
     private EmailSenderProvider emailSenderProvider;
 
     public void send(EmailModel emailTemplate) throws EmailException {
+        if (emailTemplate.getUser().getEmail() == null){
+            return;
+        }
         var realm = emailTemplate.getRealmModel();
         EmailTemplate template = processTemplate(emailTemplate.getSubjectAttributes(), emailTemplate.getBodyTemplate(), emailTemplate.getBodyAttributes());
         emailSenderProvider.send(realm.getSmtpConfig(), emailTemplate.getUser(), emailTemplate.getSubject(), template.getTextBody(), template.getHtmlBody());

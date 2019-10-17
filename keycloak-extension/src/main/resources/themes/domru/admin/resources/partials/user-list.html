@@ -42,31 +42,35 @@
                                 <input type="text" placeholder="{{:: 'search.placeholder' | translate}}"
                                        data-ng-model="query.search" class="form-control search"
                                        onkeydown="if (event.keyCode == 13) document.getElementById('userSearch').click()">
-                                <i class="fa fa-search" id="userSearch" data-ng-click="search()"></i>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="input-group-addon">
-                                <input type="text" placeholder="Search by user id" data-ng-model="query.searchByUserId"
-                                       class="form-control search"
+                                <input type="text" placeholder="Search by User Id..."
+                                       data-ng-model="query.searchByUserId" class="form-control search"
                                        onkeydown="if (event.keyCode == 13) document.getElementById('userSearchById').click()">
-                                <i class="fa fa-search" id="userSearchById" data-ng-click="searchByUserId()"></i>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="input-group-addon">
-                                <input type="text" placeholder="Search by toms id" data-ng-model="query.searchByTomsId"
-                                       class="form-control search"
+                                <input type="text" placeholder="Search by Toms Id..."
+                                       data-ng-model="query.searchByTomsId" class="form-control search"
                                        onkeydown="if (event.keyCode == 13) document.getElementById('userSearchByTomsId').click()">
-                                <i class="fa fa-search" id="userSearchByTomsId" data-ng-click="searchByTomsId()"></i>
                             </div>
                         </div>
                     </div>
-                    <button id="viewAllUsers" class="btn btn-default" ng-click="query.search = ''; firstPage()">{{::
+                    <button id="searchUsers" class="btn btn-default" ng-click="search()">Search users</button>
+                    <button id="viewAllUsers" class="btn btn-default" ng-click="query.search = ''; query.searchByUserId = ''; query.searchByTomsId = ''; firstPage()">{{::
                         'view-all-users' | translate}}
                     </button>
+                    <select class="form-control" name="realmsSelect" ng-model="query.searchRealm" ng-change="query.search = ''; firstPage()"
+                            ng-options="x for x in userRealms">
+                    </select>
 
                     <div class="pull-right" data-ng-show="access.manageUsers">
+                        <button data-ng-click="downloadTemplateCSV()" class="btn btn-default">Download Template CSV</button>
+                        <button data-ng-click="downloadTemplateXlsx()" class="btn btn-default">Download Template Excel</button>
+
                         <label for="import-file-csv" class="btn btn-default ng-binding">Import CSV<i
                                 class="pficon pficon-import"></i></label>
                         <input id="import-file-csv" type="file" class="hidden" accept=".csv"
@@ -83,7 +87,7 @@
                         <button data-ng-click="selectedResetPassword()" class="btn btn-default">Reset Password</button>
                         <button data-ng-click="selectedBlockUsers()" class="btn btn-default">Block Users</button>
                         <button data-ng-click="unlockUsers()" class="btn btn-default">{{:: 'unlock-users' | translate}}</button>
-                        <a id="createUser" class="btn btn-default" href="#/create/user/{{realm.realm}}">{{:: 'add-user' | translate}}</a>
+                        <a id="createUser" class="btn btn-default" ng-click="getHrefAddUser()" =>{{:: 'add-user' | translate}}</a>
                     </div>
                 </div>
             </th>

@@ -48,8 +48,7 @@
       <div class="w-full flex justify-between items-center">
         <a href="https://b2b.domru.ru/" class={$status === STATUS.SELECTING && 'hidden sm:block'}>
           <div
-            class="h-30px w-60px md:h-10 md:w-20 xl:h-12 xl:w-24 bg-contain
-            bg-no-repeat logo logo--domru" />
+            class="h-30px w-60px md:h-10 md:w-20 xl:h-16 xl:w-32 bg-contain bg-no-repeat logo logo--domru" />
         </a>
 
         {#if $status === STATUS.SELECTING}
@@ -100,7 +99,7 @@
       </div>
     </header>
 
-    <div class="flex flex-1 {$status === STATUS.INITIAL ? 'items-center' : ''} justify-center content-box h-full mt-4 md:mt-16 lg:mt-20 xl:mt-24">
+    <div class="flex flex-1 {$status === STATUS.INITIAL ? 'items-center' : ''} justify-center content-box h-full scrollable-container overflow-x-hidden overflow-y-auto mt-4 xl:mt-20">
       {#if $status === STATUS.INITIAL}
         <Confirmation />
       {:else if $status === STATUS.SELECTING}
