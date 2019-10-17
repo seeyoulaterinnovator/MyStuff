@@ -280,4 +280,9 @@
             ALTER TABLE FEDERATED_IDENTITY CHANGE FEDERATED_USER_ID FEDERATED_USER_ID varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
         </sql>
     </changeSet>
+    <changeSet id="24" author="strukov-av">
+        <sql>
+            ALTER TABLE USER_POST ADD SELECTED BIT DEFAULT B'0'
+        </sql>
+    </changeSet>
 </databaseChangeLog>
