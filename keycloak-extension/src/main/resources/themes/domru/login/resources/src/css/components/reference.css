@@ -1,4 +1,5 @@
 .reference {
+  transition: 0.2s ease-in-out;
   border-bottom-width: 1px;
   border-bottom-style: dashed;
   &-generate-password {
@@ -12,6 +13,11 @@
 .generate-btn {
   margin-left: 62px;
   padding-top: 30px;
+  &:hover {
+    .reference {
+      border-bottom-color: transparent;
+    }
+  }
 }
 
 .generated-password {

@@ -26,7 +26,7 @@
                 <div class="flex justify-between w-full items-center">
                     <button id="submit" class="btn btn-main w-1/2 btn-enter" type="submit">Войти</button>
                     <#if realm.resetPasswordAllowed>
-                        <span class="underline opacity-50 text-right"><a href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a></span>
+                        <span class="reset-password text-right"><a href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a></span>
                     </#if>
                 </div>
                 
@@ -35,11 +35,11 @@
         <#if realm.password && social.providers??>
             <div class="flex items-center mt-8">
                 <div class="mr-4">Войти через: </div>
-                <ul class="flex">
+                <ul class="logo-social-providers">
                     <#list social.providers as p>
-                        <li class="w-8 h-8 mr-3">
+                        <li class="mr-4">
                             <a href="${p.loginUrl}">
-                                <div class="w-full h-full bg-contain bg-no-repeat logo logo--${p.providerId}"></div>
+                                <div class="logo logo--${p.providerId}"></div>
                             </a>
                         </li>
                     </#list>

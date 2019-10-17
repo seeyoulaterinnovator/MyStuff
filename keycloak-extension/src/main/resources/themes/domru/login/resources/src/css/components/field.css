@@ -59,9 +59,13 @@
     height: 48px;
   }
 
-  &:hover,
-  &:focus {
+  &:hover
+  {
     @apply .border-accentBlue-700;
+  }
+  &:focus
+  {
+    @apply .border-extra-700;
   }
 
   &::placeholder {
