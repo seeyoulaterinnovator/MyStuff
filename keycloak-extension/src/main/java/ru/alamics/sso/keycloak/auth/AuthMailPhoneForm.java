@@ -37,6 +37,7 @@ import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 @Slf4j
 public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator implements Authenticator {
 
+    private final static String CLIENT_ID = "lkb2b";
     private final EntityManager em;
     private final RiasService riasService;
     private final UserFindService userFindService;
@@ -117,6 +118,7 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
     // -------------
 
     private boolean checkAuthRias(AuthenticationFlowContext context) {
+        log.info("check auth RIAS");
 
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
 
@@ -181,9 +183,8 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
                 user = Util.getUserAdapter(context.getSession(), userFindService.getUserByPhone(context.getRealm(), username));
             }
 
-            if (user == null) {
-                log.info("check auth RIAS");
-                if (checkAuthRias(context))
+            if (user == null && context.getAuthenticationSession().getClient() != null &&
+                    CLIENT_ID.equals(context.getAuthenticationSession().getClient().getClientId()) && checkAuthRias(context)) {
                     return false;
             }
 

@@ -43,11 +43,21 @@
   transform: translateY(-50%);
   top: 66%;
 }
+.eye {
+  opacity: 0.2;
+}
+.field__open:hover .eye {
+  opacity: 0.5;
+}
 
 .field__input {
   @apply .border .border-accentBlue-700-20 .rounded-lg .pt-2 .pb-3 .px-3 .text-black .outline-none;
 
+  height: 40px;
   transition: border-color 0.1s ease-in;
+  @media (min-width: 1199px) {
+    height: 48px;
+  }
 
   &:hover
   {
@@ -59,7 +69,12 @@
   }
 
   &::placeholder {
-    @apply .text-main-500;
+    font-size: 16px;
+    color: black ;
+    opacity: 0.5;
+    @media (min-width: 1200px) {
+      font-size: 17px;
+    }
   }
 }
 
@@ -123,7 +138,6 @@
 
 .field__input--city {
   width: 384px;
-  height: 48px;
 
   @media (max-width: 1199px) {
     width: 280px;
@@ -162,4 +176,8 @@
 
 .field-good {
   @apply .border-accentGreen-700;
+}
+
+.timer_minutes {
+  color: rgba(0, 0, 0, 0.5);
 }

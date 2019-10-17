@@ -2,6 +2,12 @@
   transition: 0.2s ease-in-out;
   border-bottom-width: 1px;
   border-bottom-style: dashed;
+  &-generate-password {
+    font-size: 16px;
+    @media screen and (min-width: 1199px) {
+      font-size: 18px;
+    }
+  }
 }
 
 .generate-btn {

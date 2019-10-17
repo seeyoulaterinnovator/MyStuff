@@ -34,7 +34,7 @@ export default class Timer {
 
   updateDOM() {
     if (this._timeElement)
-      this._timeElement.textContent = `${this.minutes}:${this.seconds}`;
+      this._timeElement.innerHTML = `${this.minutes}<span class="timer_minutes">:${this.seconds}</span>`;
   }
 
   stopTimer() {

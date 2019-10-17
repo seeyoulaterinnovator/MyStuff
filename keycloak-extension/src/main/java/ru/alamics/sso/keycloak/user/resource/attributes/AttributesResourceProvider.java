@@ -13,7 +13,7 @@ public class AttributesResourceProvider implements BaseResourceProvider<Attribut
 
     @Override
     public AttributesResource getResource () {
-        initAuth(session);
+        initAuthByWorkingRealm(session);
         var service = new UserAttributeService(this.session);
         return new AttributesResource(service);
     }

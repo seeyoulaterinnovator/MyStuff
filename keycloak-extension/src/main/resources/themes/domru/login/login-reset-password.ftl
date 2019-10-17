@@ -26,7 +26,7 @@
                     <#--  <button id="submit" class="btn btn-main w-full" type="submit">${msg("doSubmit")}</button>  -->
                     <button id="submit" class="btn btn-main w-full" type="submit">Далее</button>
                 </div>
-                <div class="text-center flex-basis-1/2 ml-0 text-sm sm:ml-6">
+                <div class="flex-basis-1/2 ml-0 text-sm sm:ml-6">
                     <#--  <button id="cancel" class="btn w-full" type="button">${msg("doCancel")}</button>  -->
                     <a id="cancel" href="https://master.frontend2.b2bweb.t2.ertelecom.ru" class="btn w-full">${msg("doCancel")}</a>
                 </div>

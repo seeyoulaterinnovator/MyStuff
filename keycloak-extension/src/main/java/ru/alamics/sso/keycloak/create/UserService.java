@@ -76,7 +76,7 @@ public class UserService {
         if (file == null) {
             throw new UnsupportedDataTypeException("Unsupported file format!");
         }
-        List<UserDto> userDto = new SearchResource(session).getUsers(null, null, null, null, true);
+        List<UserDto> userDto = new SearchResource(session).getUsers(realm.getName(), null, null, null, null, true);
         if (userDto == null || userDto.isEmpty()) {
             return null;
         }
@@ -145,9 +145,8 @@ public class UserService {
         return parameters;
     }
 
-    public ImportResponse importUsers(InputStream inputStream, String type, RealmModel realm) throws IOException, FileServiceException {
+    public ImportResponse importUsers(InputStream inputStream, String type) throws IOException, FileServiceException {
         log.info("Start upload users");
-        this.realm = realm;
 
         FileModel file = FileFactory.createFileModel(inputStream, type);
         if (file == null) {
