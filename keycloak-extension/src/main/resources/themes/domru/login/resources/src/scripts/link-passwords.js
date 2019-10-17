@@ -80,14 +80,10 @@ export default (
   }
   passwordElement.addEventListener('input', highlightRules);
   function checkPasswordConfirmation() {
-    let checkPassword = (password) => REQUIRED_PASSWORD.test(password)
+    let checkPassword = (password) => REQUIRED_PASSWORD.test(password);
     const password = getPassword();
     const confirmation = getConfirmation();
     const ok = document.querySelectorAll('.passw_ok');
-    // console.log(passwordElement);
-    // console.log(passwordConfirmElement);
-    // console.log(password);
-    // console.log(confirmation);
 
     if (checkPassword(password) && confirmation === password) {
       passwordElement.classList.add('field-good');
