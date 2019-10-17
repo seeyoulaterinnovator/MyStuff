@@ -324,10 +324,20 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             return '';
         }
         return param;
-    }
+    };
 
     $scope.getHrefAddUser = function () {
         $window.location.href = `#/create/user/${$scope.query.searchRealm}`;
+    };
+
+    $scope.changeSearchRealm = function () {
+        $scope.query.search = '';
+        $scope.query.searchByUserId = '';
+        $scope.query.searchByTomsId = '';
+
+        $scope.firstPage();
+
+        //$window.location.href = '?searchRealm=' + $scope.query.searchRealm + '#/realms/' + $scope.realm + '/users';
     };
 
     $scope.impersonate = function (userId) {
@@ -734,6 +744,21 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 });
 
 module.controller('UserTabCtrl', function ($scope, $location, Dialog, Notifications, Current) {
+
+    $scope.init = function () {
+
+        //$scope.realm = realm;
+
+        console.log('UserTabCtrl');
+        console.log($location.search());
+        $scope.query = {};
+        $scope.query.searchRealm = $location.search().searchRealm;//$scope.getSearchParameter($route.current.params.searchRealm);
+
+        //if ($scope.query.searchRealm === '' || ! $scope.userRealms.some(function (realm) {return realm === $scope.query.searchRealm}) ){
+        //    $scope.query.searchRealm = realm.realm;
+        //}
+    };
+
     $scope.removeUser = function () {
         Dialog.confirmDelete($scope.user.id, 'user', function () {
             $scope.user.$remove({
@@ -766,10 +791,28 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
         }
         convertAttributeValuesToString(user);
 
+        console.log('UserDetailCtrl');
+        console.log($location.search());
+        $scope.query = {};
+        $scope.query.searchRealm = $location.search().searchRealm;
+        //if ($scope.query.searchRealm === '' || ! $scope.userRealms.some(function (realm) {return realm === $scope.query.searchRealm}) ){
+        //    $scope.query.searchRealm = realm.realm;
+        //}
 
         $scope.user = angular.copy(user);
         $scope.impersonate = function () {
-            UserImpersonation.save({realm: realm.realm, user: $scope.user.id}, function (data) {
+
+            var hackedRealm = realm.realm;
+            if ($scope.query && $scope.query.searchRealm) {
+                hackedRealm = $scope.query.searchRealm;
+            }
+
+            console.log('user detail impersonate');
+            console.log('real ' + realm.realm);
+            console.log('searched ' + $scope.query.searchRealm);
+
+            UserImpersonation.save({realm: hackedRealm, user: $scope.user.id}, function (data) {
+
                 if (data.sameRealm) {
                     window.location = data.redirect;
                 } else {

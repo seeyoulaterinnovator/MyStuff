@@ -41,21 +41,21 @@
                             <div class="input-group-addon">
                                 <input type="text" placeholder="{{:: 'search.placeholder' | translate}}"
                                        data-ng-model="query.search" class="form-control search"
-                                       onkeydown="if (event.keyCode == 13) document.getElementById('userSearch').click()">
+                                       onkeydown="if (event.keyCode == 13) document.getElementById('searchUsers').click()">
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="input-group-addon">
                                 <input type="text" placeholder="Search by User Id..."
                                        data-ng-model="query.searchByUserId" class="form-control search"
-                                       onkeydown="if (event.keyCode == 13) document.getElementById('userSearchById').click()">
+                                       onkeydown="if (event.keyCode == 13) document.getElementById('searchUsers').click()">
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="input-group-addon">
                                 <input type="text" placeholder="Search by Toms Id..."
                                        data-ng-model="query.searchByTomsId" class="form-control search"
-                                       onkeydown="if (event.keyCode == 13) document.getElementById('userSearchByTomsId').click()">
+                                       onkeydown="if (event.keyCode == 13) document.getElementById('searchUsers').click()">
                             </div>
                         </div>
                     </div>
@@ -63,7 +63,7 @@
                     <button id="viewAllUsers" class="btn btn-default" ng-click="query.search = ''; query.searchByUserId = ''; query.searchByTomsId = ''; firstPage()">{{::
                         'view-all-users' | translate}}
                     </button>
-                    <select class="form-control" name="realmsSelect" ng-model="query.searchRealm" ng-change="query.search = ''; firstPage()"
+                    <select class="form-control" name="realmsSelect" ng-model="query.searchRealm" ng-change="changeSearchRealm()"
                             ng-options="x for x in userRealms">
                     </select>
 
@@ -95,7 +95,7 @@
         <tr>
         <tr data-ng-show="searchLoaded && users.length > 0">
             <th class="w-1">
-                <input type="checkbox" data-ng-click="selectAll()" data-ng-model="selectedAll"> Select
+                <input type="checkbox" data-ng-click="selectAll()" data-ng-model="selectedAll">
             </th>
             <th class="w-12">{{:: 'id' | translate}}</th>
             <th class="w-12">{{:: 'username' | translate}}</th>
@@ -116,7 +116,7 @@
             <td class="clip" style="width: 5%">
                 <input type="checkbox" data-ng-model="user.active"/>
             </td>
-            <td class="clip"><a href="#/realms/{{realm.realm}}/users/{{user.id}}">{{user.id}}</a>
+            <td class="clip"><a href="#/realms/{{realm.realm}}/users/{{user.id}}?searchRealm={{query.searchRealm}}">{{user.id}}</a>
             </td>
             <td class="clip" rowspan="">{{user.username}}</td>
             <td class="clip">{{user.email}}</td>
@@ -145,7 +145,7 @@
                     </tr>
                 </table>
             </td>
-            <td class="kc-action-cell" kc-open="/realms/{{realm.realm}}/users/{{user.id}}">{{:: 'edit' | translate}}
+            <td class="kc-action-cell" kc-open="/realms/{{realm.realm}}/users/{{user.id}}?searchRealm={{query.searchRealm}}">{{:: 'edit' | translate}}
             </td>
             <td class="kc-action-cell" data-ng-click="removeUser(user)">{{:: 'delete' | translate}}</td>
         </tr>
