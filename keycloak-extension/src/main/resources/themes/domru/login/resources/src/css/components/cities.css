@@ -67,6 +67,7 @@
 .custom-scroll {
   scrollbar-color: #ffdd00 #efefef;
   scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
 }
 
 .custom-scroll::-webkit-scrollbar {
