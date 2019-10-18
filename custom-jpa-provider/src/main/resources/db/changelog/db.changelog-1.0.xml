@@ -280,9 +280,25 @@
             ALTER TABLE FEDERATED_IDENTITY CHANGE FEDERATED_USER_ID FEDERATED_USER_ID varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
         </sql>
     </changeSet>
-    <changeSet id="24" author="strukov-av">
+
+    <changeSet id="24_1" author="strukov-av" dbms="mssql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_POST" />
+            <not><columnExists tableName="USER_POST" columnName="SELECTED" /></not>
+        </preConditions>
         <sql>
             ALTER TABLE USER_POST ADD SELECTED BIT DEFAULT B'0'
         </sql>
     </changeSet>
+
+    <changeSet id="24_2" author="strukov-av" dbms="h2">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_POST" />
+            <not><columnExists tableName="USER_POST" columnName="SELECTED" /></not>
+        </preConditions>
+        <sql>
+            alter table USER_POST add SELECTED boolean default false;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
