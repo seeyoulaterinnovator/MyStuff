@@ -19,7 +19,7 @@
         <form id="totpForm" action="${url.loginAction}" method="POST">
         <#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон -->
         <p class="pb-6 text-accentRed"> ${error!}<p>
-            <div class="flex justify-between w-full xl:pb-111 md:pb-10 sm:pb-8 pb-6">
+            <div class="flex justify-between w-full xl:pb-37px md:pb-5 sm:pb-4 pb-3">
                 <#list 1..lengthCode as x>
                     <input placeholder="-" maxlength="1" id="smscode-${x}" name="smscode-${x}" class="text-center align-middle text-3xl w-10 h-10 sm:w-16 sm:h-16 border rounded-lg focus:border-extra outline-none" autocomplete="off" />
                 </#list>
@@ -33,11 +33,12 @@
             
             
             <input id="smscode" name="smscode" class="hidden" />
-            
-            <#if lengthCode==4>
-                <button class="border-b border-hoverable border-dashed text-black-50 text-right mb-6 hidden" form="totpe" id="sentCode" name="sendEmailCode" type="submit">Отправить на email</button>
-            </#if>
-           
+
+            <div class="flex justify-between w-full items-center text-center md:text-right xl:pb-55px md:pb-5 sm:pb-4 pb-3 ">
+                <#if lengthCode==4>
+                    <button class="border-b border-hoverable border-dashed text-black-50 text-right hidden" form="totpe" id="sentCode" name="sendEmailCode" type="submit">Отправить на email</button>
+                </#if>
+            </div>
             <div class="sm:block md:flex justify-between w-full items-center text-center md:text-left">
                 <button class="btn btn-main w-full md:w-3/7 mr-0 md:mr-4" name="accept" id="accept" type="submit">Подтвердить</button>
                 
