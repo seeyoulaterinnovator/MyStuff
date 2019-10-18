@@ -292,20 +292,42 @@ module.controller('UserOfflineSessionsCtrl', function ($scope, $location, realm,
     };
 });
 
-module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState, UserImpersonation, BruteForce, Notifications, $route, Dialog/*, CustomUser*/, $http) {
+module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState, UserImpersonation, BruteForce, Notifications, $route, Dialog/*, CustomUser*/, $http, $window) {
+
+    $scope.userRealms = [];
 
     $scope.init = function () {
         $scope.realm = realm;
+        $http.get(authUrl + '/realms/' + realm.realm + '/users-info/accessible-realms').then(function (data) {
+            $scope.userRealms = angular.fromJson(data).data;
 
-        UserSearchState.query.realm = realm.realm;
-        $scope.query = UserSearchState.query;
-        $scope.query.briefRepresentation = 'false';
+            UserSearchState.query.realm = realm.realm;
+            $scope.query = UserSearchState.query;
+            $scope.query.briefRepresentation = 'false';
 
-        var search = $route.current.params.search;
-        if (search !== undefined) {
-            $scope.query.search = search;
-            $scope.firstPage();
-        } else if (!UserSearchState.isFirstSearch) $scope.searchQuery();
+            $scope.query.search = $scope.getSearchParameter($route.current.params.search);
+            $scope.query.searchByUserId = $scope.getSearchParameter($route.current.params.searchUser);
+            $scope.query.searchByTomsId = $scope.getSearchParameter($route.current.params.searchToms);
+            $scope.query.searchRealm = $scope.getSearchParameter($route.current.params.searchRealm);
+
+            if ($scope.query.searchRealm === '' || ! $scope.userRealms.some(function (realm) {return realm === $scope.query.searchRealm}) ){
+                $scope.query.searchRealm = realm.realm;
+            }
+
+            if (!UserSearchState.isFirstSearch) $scope.search();
+            else $scope.firstPage();
+        });
+    };
+
+    $scope.getSearchParameter = function (param){
+        if (param === undefined) {
+            return '';
+        }
+        return param;
+    }
+
+    $scope.getHrefAddUser = function () {
+        $window.location.href = `#/create/user/${$scope.query.searchRealm}`;
     };
 
     $scope.impersonate = function (userId) {
@@ -334,9 +356,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
     $scope.firstPage = function () {
         $scope.query.first = 0;
-        $scope.searchQuery();
+        $scope.search();
     };
-
 
     $scope.unlockUsers = function () {
         let userForUnlock = $scope.users.filter(user => user.active).map(user => user.id);
@@ -375,12 +396,11 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         var formData = new FormData();
         var file = files[0];
         formData.append('file', file);
-        $http.post(`${authUrl}/realms/master/users-toms/uploadUsers`, formData, {
+        $http.post(`${authUrl}/realms/${$scope.query.searchRealm}/users-toms/uploadUsers`, formData, {
             transformRequest: angular.identity,
             headers: {
                 'Content-Type': undefined,
-                'Content-Disposition': `form-data; name="file"; filename="import.csv"`,
-                'realm':'user'
+                'Content-Disposition': `form-data; name="file"; filename="import.csv"`
             }
         }).then(response => {
             var resp = angular.fromJson(response).data.results['import-report'];
@@ -398,12 +418,11 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         var formData = new FormData();
         var file = files[0];
         formData.append('file', file);
-        $http.post(`${authUrl}/realms/master/users-toms/uploadUsers`, formData, {
+        $http.post(`${authUrl}/realms/${$scope.query.searchRealm}/users-toms/uploadUsers`, formData, {
             transformRequest: angular.identity,
             headers: {
                 'Content-Type': undefined,
-                'Content-Disposition': `form-data; name="file"; filename="import.xlsx"`,
-                'realm':'user'
+                'Content-Disposition': `form-data; name="file"; filename="import.xlsx"`
             }
         }).then(response => {
             var resp = angular.fromJson(response).data.results['import-report'];
@@ -452,6 +471,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             ],
             userIds: ["XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"]
     };
+        $scope.tempRealm = $scope.query.searchRealm;
+        $scope.query.searchRealm = $scope.realm.realm;
         $scope.exportTemplateXlsx(payload)
     };
 
@@ -476,7 +497,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
     $scope.exportTemplateXlsx = function (payload) {
         var linkElement = document.createElement('a');
-        $http.post(`${authUrl}/realms/master/users-toms/downloadUsers`, payload, {
+        $http.post(`${authUrl}/realms/${$scope.query.searchRealm}/users-toms/downloadUsers`, payload, {
             headers: {
                 'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8',
                 'Content-Type': 'application/json'
@@ -500,6 +521,10 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             "cancelable": false
         });
         linkElement.dispatchEvent(clickEvent);
+
+        if ($scope.tempRealm !== undefined){
+            $scope.query.searchRealm = $scope.tempRealm;
+        }
     })
     };
 
@@ -516,6 +541,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             ],
             userIds: ["XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"]
         };
+        $scope.tempRealm = $scope.query.searchRealm;
+        $scope.query.searchRealm = $scope.realm.realm;
         $scope.exportTemplateCSV(payload)
     };
 
@@ -540,7 +567,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
     $scope.exportTemplateCSV = function (payload) {
         var linkElement = document.createElement('a');
-        $http.post(`${authUrl}/realms/master/users-toms/downloadUsers`, payload, {
+        $http.post(`${authUrl}/realms/${$scope.query.searchRealm}/users-toms/downloadUsers`, payload, {
             headers: {'Accept': 'application/octet-stream;charset=UTF-8', 'Content-Type': 'application/json'}
         }).then((response) => {
             var headers = response.headers();
@@ -558,6 +585,10 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             "cancelable": false
         });
         linkElement.dispatchEvent(clickEvent);
+
+        if ($scope.tempRealm !== undefined){
+            $scope.query.searchRealm = $scope.tempRealm;
+        }
     })
     };
 
@@ -568,7 +599,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
     $scope.searchQuery = function () {
         console.log("query.search: " + $scope.query.search);
-        $http.get(`${authUrl}/realms/user/users-info`).then(function (data) {
+        $http.get(`${authUrl}/realms/user/users-info?searchRealm=${$scope.query.searchRealm}`).then(function (data) {
             $scope.users = $scope.groupByUser(angular.fromJson(data).data.results['users-info']);
             $scope.searchLoaded = true;
             $scope.lastSearch = $scope.query.search;
@@ -578,17 +609,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
     $scope.search = function () {
         console.log("query.search: " + $scope.query.search);
-        $http.get(`${authUrl}/realms/user/users-info?search=${$scope.query.search}`).then(function (data) {
-            $scope.users = $scope.groupByUser(angular.fromJson(data).data.results['users-info']);
-            $scope.searchLoaded = true;
-            $scope.lastSearch = $scope.query.search;
-            UserSearchState.isFirstSearch = false;
-        });
-    };
-
-    $scope.searchByUserId = function () {
-        $scope.query.first = 0;
-        $http.get(`${authUrl}/realms/user/users-info?search=&searchUser=${$scope.query.searchByUserId}&searchToms=`).then(function (data) {
+        $http.get(`${authUrl}/realms/user/users-info?searchRealm=${$scope.query.searchRealm}&search=${$scope.query.search}&searchUser=${$scope.query.searchByUserId}&searchToms=${$scope.query.searchByTomsId}`).then(function (data) {
             $scope.users = $scope.groupByUser(angular.fromJson(data).data.results['users-info']);
             $scope.searchLoaded = true;
             $scope.lastSearch = $scope.query.search;
@@ -598,6 +619,9 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
     $scope.groupByUser = function (data) {
         let ret = [];
+        if (data === null){
+            return ret;
+        }
         data.map(user => {
             let findGroupedUser = $scope.findById(ret, user.id);
             if (!findGroupedUser) {
@@ -643,16 +667,6 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
     $scope.findById = function (users, userId) {
         return users.filter(user => user.id === userId)[0];
-    };
-
-    $scope.searchByTomsId = function () {
-        $scope.query.first = 0;
-        $http.get(`${authUrl}/realms/user/users-info?search=&searchUser=&searchToms=${$scope.query.searchByTomsId}`).then(function (data) {
-            $scope.users = $scope.groupByUser(angular.fromJson(data).data.results['users-info']);
-            $scope.searchLoaded = true;
-            $scope.lastSearch = $scope.query.search;
-            UserSearchState.isFirstSearch = false;
-        });
     };
 
     $scope.removeUser = function (user) {
@@ -848,7 +862,10 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
         }
     }, true);
 
-    $scope.GetPhoneCheckerResult = function () {
+    /**
+     * @return {string}
+     */
+    $scope.GetPhoneAttr = function () {
         var phone = '';
         var attrs = $scope.user.attributes;
         for (var attribute in attrs) {
@@ -856,43 +873,37 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
                 phone = attrs[attribute];
             }
         }
+        return phone;
+    };
 
-        return $http.get(authUrl + '/realms/' + realm.realm + '/users-info/attribute?phone=' + phone + '&excludeUserId=' + $scope.user.id)
+    $scope.GetPhoneCheckerResult = function () {
+        return $http.get(authUrl + '/realms/' + realm.realm + '/users-info/attribute?phone=' + $scope.GetPhoneAttr() + '&excludedUserId=' + $scope.user.id)
             .then(function (response) {
-                console.info('recponse from get = ' + response);
-                console.info('recponse from fromJson = ' + angular.fromJson(response).data.results['foundUserId']);
-
                 return angular.fromJson(response).data.results['foundUserId'];
             });
     };
 
     $scope.save = function () {
         convertAttributeValuesToLists();
-        var responseChecker = $scope.GetPhoneCheckerResult();
 
-        responseChecker.then(function (result) {
-            if (result != null) {
-                Notifications.error("The user phone not unique");
-                return;
-            }
-            if ($scope.create) {
-                User.save({
-                    realm: realm.realm
-                }, $scope.user, function (data, headers) {
-                    $scope.changed = false;
-                    convertAttributeValuesToString($scope.user);
-                    user = angular.copy($scope.user);
-                    var l = headers().location;
+        if ($scope.create) {
+            User.save({
+                realm: realm.realm
+            }, $scope.user, function (data, headers) {
+                $scope.changed = false;
+                convertAttributeValuesToString($scope.user);
+                user = angular.copy($scope.user);
+                var l = headers().location;
 
-                    console.debug("Location == " + l);
+                console.debug("Location == " + l);
 
-                    var id = l.substring(l.lastIndexOf("/") + 1);
+                var id = l.substring(l.lastIndexOf("/") + 1);
 
-
-                    $location.url("/realms/" + realm.realm + "/users/" + id);
-                    Notifications.success("The user has been created.");
-                });
-            } else {
+                $location.url("/realms/" + realm.realm + "/users/" + id);
+                Notifications.success("The user has been created.");
+            });
+        } else {
+            if ($scope.GetPhoneAttr() === '') {
                 User.update({
                     realm: realm.realm,
                     userId: $scope.user.id
@@ -902,8 +913,24 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
                     user = angular.copy($scope.user);
                     Notifications.success("Your changes have been saved to the user.");
                 });
+            } else {
+                $scope.GetPhoneCheckerResult().then(function (result) {
+                    if (result != null) {
+                        Notifications.error("The user phone number not unique");
+                        return;
+                    }
+                    User.update({
+                        realm: realm.realm,
+                        userId: $scope.user.id
+                    }, $scope.user, function () {
+                        $scope.changed = false;
+                        convertAttributeValuesToString($scope.user);
+                        user = angular.copy($scope.user);
+                        Notifications.success("Your changes have been saved to the user.");
+                    });
+                });
             }
-        });
+        }
     };
 
     function convertAttributeValuesToLists() {

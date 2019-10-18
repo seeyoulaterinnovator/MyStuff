@@ -1,23 +1,34 @@
 .btn {
   @apply .block .uppercase .tracking-wider .p-4 .rounded-lg .shadow;
 
-  transition: box-shadow 0.1s ease-in;
+  height: 40px;
+  padding: 0;
+  transition: 0.2s ease-in-out;
+
+  @media (min-width: 1199px) {
+    height: 48px;
+  }
 
   &:disabled {
     @apply .opacity-40 .cursor-not-allowed;
+    &:hover {
+       transform: none;
+       @apply .shadow;
+    }
   }
 
-  &:active {
-    @apply .shadow-inner;
-  }
-
-  &:hover,
-  &:focus {
+  &:hover {
+    transform: translate(1px, -1px);
     @apply .shadow-md;
   }
 
   &:focus {
     @apply .outline-none;
+  }
+
+  &:active {
+    transform: translate(0, 0);
+    @apply .shadow-inner;
   }
 }
 
@@ -25,7 +36,7 @@
   @apply .bg-extra .text-black;
 
   &:hover,
-  &:focus {
+  &:active {
     @apply .bg-extra-700-hover;
   }
 }
@@ -34,7 +45,7 @@
   @apply .bg-accentBlue .text-white;
 
   &:hover,
-  &:focus {
+  &:active {
     @apply .bg-accentBlue-700-hover;
   }
 }
@@ -42,7 +53,6 @@
 .btn__choose {
   width: 203px;
   box-sizing: border-box;
-  height: 48px;
 
   @media screen and (max-width: 959px) {
     width: 96px;
@@ -72,7 +82,17 @@
   height: 23px;
 }
 
+a.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 @media screen and (max-width: 479px) {
+  .btn {
+    font-size: 13px;
+  }
+
   .btn.w-1\/2 {
     width: 100%;
   }
