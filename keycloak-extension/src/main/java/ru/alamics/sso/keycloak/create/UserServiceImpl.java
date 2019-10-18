@@ -131,7 +131,7 @@ public class UserServiceImpl implements UserService {
                     parameters.add(userDto.getTomsId());
                     break;
                 case DMP_ID:
-                    parameters.add(userDto.getTomsId());
+                    parameters.add(userDto.getDmpId());
                     break;
                 default:
                     parameters.add("");
@@ -216,6 +216,9 @@ public class UserServiceImpl implements UserService {
                 createdUsers.getAndIncrement();
                 importResponse.addCreatedUserIds("userId", user.getId());
 
+                if (userRequest.getTomsId() == null || userRequest.getTomsId().isBlank()){
+                    throw new NotFoundException("TomsId is not exist");
+                }
                 addUserPost(user, o);
             } catch (FoundException e) {
                 e.getResult().forEach((k, v) -> {

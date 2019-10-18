@@ -76,13 +76,21 @@ public class XlsxImpl implements FileModel {
             while (iterCell.hasNext()) {
                 XSSFCell cell = (XSSFCell) iterCell.next();
                 if (cell.getColumnIndex() != currentColumn){
-                     cells.addAll(List.of(new String[cell.getColumnIndex() - currentColumn]));
+                     fillEmptyCells(cells, cell.getColumnIndex() - currentColumn);
+                     currentColumn += cell.getColumnIndex() - currentColumn;
                 }
                 cells.add(formatter.formatCellValue(cell));
+                currentColumn ++;
             }
             rows.add(cells.toArray(new String[cells.size()]));
         }
         return rows;
+    }
+
+    private void fillEmptyCells(List<String> cells, int count){
+        for (int i = 0; i < count; i++) {
+            cells.add(null);
+        }
     }
 
     @Override

@@ -39,6 +39,7 @@ public abstract class DataMapper {
                 .enabled(toBoolean(tuple.get("enabled")))
                 .userPostId(toString(tuple.get("user_post_id")))
                 .tomsId(toString(tuple.get("toms_id")))
+                .dmpId(toString(tuple.get("dmp_id")))
                 .roleId(toString(tuple.get("role_id")))
                 .roleName(toString(tuple.get("role_name")))
                 .systemRoleId(toString(tuple.get("system_role_id")))
