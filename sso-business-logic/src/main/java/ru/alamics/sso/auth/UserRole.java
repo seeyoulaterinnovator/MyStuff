@@ -34,7 +34,7 @@ public class UserRole {
     @EJB
     private UserPostRepository postRepository;
 
-    public void setUserPost (AuthenticationFlowContext context) {
+    public void setUserPost(AuthenticationFlowContext context) {
         final String DEBUG_STR = "setUserPost";
         log.debug("{}: user={}", DEBUG_STR, context.getUser().getId());
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
@@ -42,17 +42,11 @@ public class UserRole {
         final String roleName = formData.get("roleName").get(0);
 
         var user = context.getUser();
-        var userPost = postRepository.find(user.getId(), tomsId, roleName);
-        userPost.setSelected(true);
-        postRepository.getAllUserPost()
-                .stream()
-                .filter(o ->
-                        o.getUser().getId().equals(userPost.getUser().getId()) &&
-                                !o.getId().equals(userPost.getId()))
-                .forEach(o -> {
-                    o.setSelected(false);
-                });
 
+        var userPosts = postRepository.getAllUserPostByUserId(user.getId());
+        userPosts.forEach(o -> {
+            o.setSelected(o.getTomsId().equals(tomsId) && o.getRole().getName().equals(roleName));
+        });
 
         var realm = context.getRealm();
         var roleEntity = repository.findRoleEntity(roleName, realm.getId());
@@ -69,7 +63,6 @@ public class UserRole {
         }
 
         UserEntity userEntity = userRepository.findUser(user.getId());
-        Set<UserPostEntity> userPosts = postRepository.findUserPostRole(userEntity);
         repository.deleteUserPostRoles(userEntity, userPosts, realm.getId());
 
         Set<ExternalSystemRoleEntity> externalSystemRoleEntities = postRepository.findSystemByUser(userEntity);
@@ -80,14 +73,15 @@ public class UserRole {
         mappingEntity.setUser(userEntity);
         repository.save(mappingEntity);
 
+        var activePost = userPosts.stream().filter(UserPostEntity::isSelected).findFirst().get();
         //FIXME Добавить роли пользователя по его системам, сделать можно лучше
-        List<ExternalSystemRoleEntity> systems = postRepository.findSystemsByUserPost(userPost);
+        List<ExternalSystemRoleEntity> systems = postRepository.findSystemsByUserPost(activePost);
         systems.forEach(system -> {
             var externalSystem = system.getExternalSystem();
             var client = repository.findClientByName(externalSystem.getName(), realm.getId());
-            if(client != null) {
+            if (client != null) {
                 var role = repository.findClientRoleEntity(system.getName(), realm.getId(), client);
-                if(role == null) {
+                if (role == null) {
                     var realmEntity = new RealmEntity();
                     realmEntity.setId(realm.getId());
                     role = new RoleEntity();
@@ -107,6 +101,6 @@ public class UserRole {
             }
         });
 
-        user.setAttribute(ATTR_TOMS_NAME, Collections.singletonList(userPost.getTomsId()));
+        user.setAttribute(ATTR_TOMS_NAME, Collections.singletonList(activePost.getTomsId()));
     }
 }

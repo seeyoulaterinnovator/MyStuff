@@ -72,7 +72,7 @@ public class RoleRepository {
         return ret;
     }
 
-    public void deleteUserPostRoles(final UserEntity user, final Set<UserPostEntity> posts, final String realmId) {
+    public void deleteUserPostRoles(final UserEntity user, final List<UserPostEntity> posts, final String realmId) {
         final String DEBUG_STR = "deleteUserPostRoles";
         log.debug("{}: user={}, realmId={}", DEBUG_STR, user.getId(), realmId);
         final List<String> names = posts.stream().map(UserPostEntity::getRole).map(UserPostRoleEntity::getName).collect(Collectors.toList());
