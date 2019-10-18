@@ -71,8 +71,7 @@ public abstract class DataMapper {
                 .map(UserDto::getTomsId).toArray(String[]::new));
         userDtos.stream()
                 .filter(o -> o.getTomsId() != null)
-//                .forEach(o -> o.setOrganization((String) customerNames.get(o.getTomsId())));
-                .forEach(o -> o.setOrganization("testOrg"));   //fixme заглушка пока не работает апи
+                .forEach(o -> o.setOrganization((String) customerNames.get(o.getTomsId())));
         return userDtos;
     }
 

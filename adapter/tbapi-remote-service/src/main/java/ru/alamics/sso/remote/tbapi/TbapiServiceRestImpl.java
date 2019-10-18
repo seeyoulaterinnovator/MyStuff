@@ -121,6 +121,9 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
             responseMap = response.readEntity(new GenericType<>(mapExample.getClass()));
         } catch (Exception e){
             log.error("tbapi error post request : {}", e);
+            for (String temp : id) {                //fixme заглушка для неработающего апи
+                responseMap.put(temp, "org" + temp);
+            }
         } finally {
             return responseMap;
         }
