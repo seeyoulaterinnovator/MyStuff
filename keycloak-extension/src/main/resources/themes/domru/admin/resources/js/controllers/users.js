@@ -626,13 +626,14 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             let findGroupedUser = $scope.findById(ret, user.id);
             if (!findGroupedUser) {
                 var access = [];
-                if (user.systemId || user.roleId || user.tomsId) {
+                if (user.systemId || user.roleId || user.tomsId || user.organization) {
                     access.push({
                         systemId: user.systemId,
                         systemName: user.systemName,
                         roleId: user.roleId,
                         roleName: user.roleName,
-                        tomsId: user.tomsId
+                        tomsId: user.tomsId,
+                        organization: user.organization
                     })
                 }
                 ;
@@ -655,7 +656,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                     systemName: user.systemName,
                     roleId: user.roleId,
                     roleName: user.roleName,
-                    tomsId: user.tomsId
+                    tomsId: user.tomsId,
+                    organization: user.organization
                 };
 
                 findGroupedUser.access.push(access);
@@ -700,6 +702,20 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         } else {
             return '';//Gavno
         }
+    }
+
+    $scope.isFirstOrg = function (userAccess, org, access) {
+        var equalToms = userAccess.filter(access => access.organization === org);
+        var index = equalToms.indexOf(access);
+        if (index === 0) {
+            return access.organization;
+        } else {
+            return '';//Gavno
+        }
+    }
+
+    $scope.getEqualOrg = function (userAccess, org) {
+        return userAccess.filter(access => access.organization === org).length
     }
 
     $scope.getEqualRoleName = function (userAccess, roleName) {

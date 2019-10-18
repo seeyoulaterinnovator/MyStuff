@@ -4,11 +4,17 @@ import org.keycloak.authentication.FormContext;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.keycloak.create.model.UserImport;
 import ru.alamics.sso.keycloak.create.model.UserRequest;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.search.dto.UserDto;
+import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.model.FormConstants;
+import ru.alamics.sso.registration.model.TbapiConstants;
 import ru.alamics.sso.registration.model.User;
+import ru.alamics.sso.registration.tbapi.TbapiService;
+import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
+import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
 import javax.persistence.Tuple;
 import javax.ws.rs.core.MultivaluedMap;
@@ -23,6 +29,8 @@ import static ru.alamics.sso.registration.model.UserConstants.ATTR_DMP_NAME;
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_TOMS_NAME;
 
 public abstract class DataMapper {
+
+    private static TbapiService tbapiService = new TbapiService(new TbapiServiceRestImpl());
 
     public static UserDto toUserDto(Tuple tuple) {
         if (tuple == null) {
@@ -53,10 +61,34 @@ public abstract class DataMapper {
         if (tuples.isEmpty()) {
             return null;
         }
-
         LinkedList<UserDto> userDtos = new LinkedList<>();
         tuples.forEach(o -> userDtos.add(toUserDto(o)));
+
+        tbapiService = new TbapiService(new TbapiServiceRestImpl());
+        Map<String, Object> customerNames = tbapiService.customerNames(connectConfig(),
+                userDtos.stream()
+                .filter(o -> o.getTomsId() != null)
+                .map(UserDto::getTomsId).toArray(String[]::new));
+        userDtos.stream()
+                .filter(o -> o.getTomsId() != null)
+//                .forEach(o -> o.setOrganization((String) customerNames.get(o.getTomsId())));
+                .forEach(o -> o.setOrganization("testOrg"));   //fixme заглушка пока не работает апи
         return userDtos;
+    }
+
+    private static TbapiConnectConfig connectConfig() {
+        ApplicationProperties properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        TbapiConnectConfig connectConfig = new TbapiConnectConfig();
+        if (properties != null) {
+            connectConfig.setHost(properties.getProperty(TbapiConstants.HOST));
+            connectConfig.setPort(Integer.parseInt(properties.getProperty(TbapiConstants.PORT)));
+            connectConfig.setAppname(properties.getProperty(TbapiConstants.AUTH_APPNAME));
+            connectConfig.setUsername(properties.getProperty(TbapiConstants.AUTH_USERNAME));
+            connectConfig.setPath(properties.getProperty(TbapiConstants.CUSTOMER_FIND_PATH));
+            connectConfig.setSecure(Boolean.parseBoolean(TbapiConstants.SECURE));
+        }
+
+        return connectConfig;
     }
 
     public static UserPostRequest toUserPostRequest(UserModel userModel, UserRequest request) {
@@ -78,8 +110,8 @@ public abstract class DataMapper {
         return object.toString();
     }
 
-    public static UserPostRequest toUserPostRequest(FormContext context){
-        if (context.getUser() == null){
+    public static UserPostRequest toUserPostRequest(FormContext context) {
+        if (context.getUser() == null) {
             return null;
         }
         UserModel userModel = context.getUser();
@@ -89,7 +121,7 @@ public abstract class DataMapper {
     public static UserPostRequest toUserPostRequest(UserModel userModel) {
         UserPostRequest userPostRequest = new UserPostRequest();
         userPostRequest.setUserId(userModel.getId());
-        if (!userModel.getAttribute(ATTR_TOMS_NAME).isEmpty()){
+        if (!userModel.getAttribute(ATTR_TOMS_NAME).isEmpty()) {
             userPostRequest.setTomsId(userModel.getAttribute(ATTR_TOMS_NAME).get(0));
         }
         if (!userModel.getAttribute(ATTR_DMP_NAME).isEmpty()) {
@@ -126,7 +158,7 @@ public abstract class DataMapper {
                     userImport.setRoleName(row[i]);
                     break;
                 case 5:
-                    userImport.setSystemNames(List.of(row[i].replaceAll("\\s","").split(",")));
+                    userImport.setSystemNames(List.of(row[i].replaceAll("\\s", "").split(",")));
                     break;
             }
         }
@@ -154,8 +186,8 @@ public abstract class DataMapper {
                 .build();
     }
 
-    public static ExternalSystemRoleRequest toExternalSystemRoleRequest(String id, Long sysId){
-        if (id == null || sysId == null){
+    public static ExternalSystemRoleRequest toExternalSystemRoleRequest(String id, Long sysId) {
+        if (id == null || sysId == null) {
             return null;
         }
         ExternalSystemRoleRequest externalSystemRoleRequest = new ExternalSystemRoleRequest();
@@ -172,7 +204,7 @@ public abstract class DataMapper {
             for (int j = i + 1; j < userDtos.size(); j++) {
                 UserDto userDtoJ = userDtos.get(j);
                 if (userDto.getId().equals(userDtoJ.getId()) && userDtoJ.getSystemName() != null && !userDtoJ.getSystemName().isBlank()) {
-                    if (systemNames == null || systemNames.isBlank()){
+                    if (systemNames == null || systemNames.isBlank()) {
                         systemNames = userDtoJ.getSystemName();
                     } else {
                         systemNames += ", " + userDtoJ.getSystemName();

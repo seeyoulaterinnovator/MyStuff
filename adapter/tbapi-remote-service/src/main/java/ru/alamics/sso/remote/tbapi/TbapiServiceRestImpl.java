@@ -99,24 +99,30 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
 
     @Override
     public Map<String, Object> getCustomerName(List<String> id, TbapiConnectConfig connectConfig) {
-        URI uri = new ResteasyUriBuilder()
-                .scheme(connectConfig.isSecure() ? "https" : "http")
-                .host(connectConfig.getHost())
-                .port(connectConfig.getPort())
-                .path(connectConfig.getPath())
-                .build();
+        Map<String, Object> responseMap = new HashMap<>();
+        try {
+            URI uri = new ResteasyUriBuilder()
+                    .scheme(connectConfig.isSecure() ? "https" : "http")
+                    .host(connectConfig.getHost())
+                    .port(connectConfig.getPort())
+                    .path(connectConfig.getPath())
+                    .build();
 
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("id", id);
-        Entity<Map<String, Object>> entity = Entity.json(requestBody);
-        ResteasyWebTarget target = client.target(uri);
-        target.request(MediaType.APPLICATION_JSON);
-        Response response = target.register(ResteasyJackson2Provider.class).request()
-                .header("Accept", MediaType.APPLICATION_JSON)
-                .header("Authorization", String.format("Trusted application=\"%s\", username=\"%s\"", connectConfig.getAppname(), connectConfig.getUsername()))
-                .post(entity);
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("id", id);
+            Entity<Map<String, Object>> entity = Entity.json(requestBody);
+            ResteasyWebTarget target = client.target(uri);
+            target.request(MediaType.APPLICATION_JSON);
+            Response response = target.register(ResteasyJackson2Provider.class).request()
+                    .header("Accept", MediaType.APPLICATION_JSON)
+                    .header("Authorization", String.format("Trusted application=\"%s\", username=\"%s\"", connectConfig.getAppname(), connectConfig.getUsername()))
+                    .post(entity);
 
-        Map<String, Object> responseMap = response.readEntity(new GenericType<>(mapExample.getClass()));
-        return responseMap;
+            responseMap = response.readEntity(new GenericType<>(mapExample.getClass()));
+        } catch (Exception e){
+            log.error("tbapi error post request : {}", e);
+        } finally {
+            return responseMap;
+        }
     }
 }

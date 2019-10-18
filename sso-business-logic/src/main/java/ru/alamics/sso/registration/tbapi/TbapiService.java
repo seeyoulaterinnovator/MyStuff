@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.cache.TbapiCache;
 import ru.alamics.sso.cache.impl.TbapiCacheImpl;
+import ru.alamics.sso.registration.model.TbapiConstants;
+import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.tbapi.model.TbapiRequest;
-import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.tbapi.port.TbapiRemoteService;
-
 
 import java.util.HashMap;
 import java.util.List;
@@ -32,8 +32,7 @@ public class TbapiService {
         this.remoteService = remoteService;
     }
 
-    public Map<String, Object> registerUser(User user, TbapiConnectConfig connectConfig) throws TbapiRegisterException
-    {
+    public Map<String, Object> registerUser(User user, TbapiConnectConfig connectConfig) throws TbapiRegisterException {
 
         TbapiRequest request = new TbapiRequest();
         //.id(user.getId())
@@ -80,7 +79,7 @@ public class TbapiService {
         log.info("{}: customerId={}", DEBUG_STR, customerIds);
         List<String> customerList = List.of(customerIds);
         var ret = this.cache.getCustomerNamesFromCache(customerList);
-        if(ret == null) {
+        if (ret == null) {
             ret = remoteService.getCustomerName(customerList, connectConfig);
             ret.forEach(this.cache::putToCache);
         } else {

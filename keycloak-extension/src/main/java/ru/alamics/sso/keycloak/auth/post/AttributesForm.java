@@ -66,6 +66,12 @@ public class AttributesForm implements Authenticator {
             if (attributes != null) {
                 attributes = attributes.stream()
                         .filter(attribute -> Objects.nonNull(attribute.getTomsId()) && Objects.nonNull(attribute.getRoleId()))
+                        .map(o -> {
+                            if (o.getOrganization() == null){
+                                o.setOrganization("");
+                            }
+                            return o;
+                        })
                         .collect(Collectors.toList());
             } else {
                 attributes = Collections.emptyList();
@@ -85,13 +91,12 @@ public class AttributesForm implements Authenticator {
 
     private Response createForm(AuthenticationFlowContext context, List<UserDto> attributes) {
         LoginFormsProvider form = context.form();
-        Map<String, Object> customerNames = tbapiService.customerNames(connectConfig(), attributes.stream().map(UserDto::getTomsId).toArray(String[]::new));
         if (!attributes.isEmpty()) {
             Set<AttributesModel> models = attributes.stream()
                     .map(attribute -> AttributesModel.builder()
                             .roleName(attribute.getRoleName())
                             .tomsId(attribute.getTomsId())
-                            .tomsName((String) customerNames.get(attribute.getTomsId()))
+                            .tomsName(attribute.getOrganization())
                             .build()
                     ).collect(Collectors.toSet());
 
@@ -140,21 +145,5 @@ public class AttributesForm implements Authenticator {
             }
         }
         return queryParameters;
-    }
-
-    private TbapiConnectConfig connectConfig() {
-        ApplicationProperties properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
-        TbapiConnectConfig connectConfig = new TbapiConnectConfig();
-        if (properties != null) {
-            connectConfig.setHost(properties.getProperty(TbapiConstants.HOST));
-            connectConfig.setPort(Integer.parseInt(properties.getProperty(TbapiConstants.PORT)));
-            connectConfig.setAppname(properties.getProperty(TbapiConstants.AUTH_APPNAME));
-            connectConfig.setUsername(properties.getProperty(TbapiConstants.AUTH_USERNAME));
-            connectConfig.setPath(properties.getProperty(TbapiConstants.CUSTOMER_FIND_PATH));
-            connectConfig.setSecure(Boolean.parseBoolean(TbapiConstants.SECURE));
-        }
-
-
-        return connectConfig;
     }
 }

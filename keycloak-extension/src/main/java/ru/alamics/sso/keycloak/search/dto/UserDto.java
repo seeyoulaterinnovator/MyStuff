@@ -20,6 +20,7 @@ public class UserDto implements Serializable {
     private Boolean enabled;
     private String userPostId;
     private String tomsId;
+    private String organization;
     private String roleId;
     private String roleName;
     private String systemRoleId;

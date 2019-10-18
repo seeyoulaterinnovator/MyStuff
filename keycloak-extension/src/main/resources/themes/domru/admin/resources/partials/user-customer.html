@@ -19,6 +19,7 @@
         <table class="table table-striped table-bordered">
             <thead>
             <tr>
+                <th>organization</th>
                 <th>toms</th>
                 <th>dmp</th>
                 <th>role</th>
@@ -28,6 +29,7 @@
             </thead>
             <tbody>
             <tr ng-repeat="userPost in userPosts ">
+                <td>{{userPost.organization}}</td>
                 <td>{{userPost.tomsId}}</td>
                 <td>{{userPost.dmpId}}</td>
                 <td>
