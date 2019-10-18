@@ -18,6 +18,7 @@ import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.managers.RealmManager;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.permissions.AdminPermissions;
+import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
@@ -127,7 +128,7 @@ public class UserPostResource {
     public Response getUserPost(@PathParam("id") String userId) {
         try {
             return JsonResponse.success()
-                    .addResult("user_post", userPostService.getUserPost(userId))
+                    .addResult("user_post", DataMapper.getUserPostResponsesWithOrganizations(userPostService.getUserPost(userId)))
                     .build();
         } catch (NotFoundException e) {
             return JsonResponse.fail()

@@ -9,6 +9,7 @@ import ru.alamics.sso.keycloak.search.dto.UserDto;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
+import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.registration.model.TbapiConstants;
 import ru.alamics.sso.registration.model.User;
@@ -67,12 +68,24 @@ public abstract class DataMapper {
         tbapiService = new TbapiService(new TbapiServiceRestImpl());
         Map<String, Object> customerNames = tbapiService.customerNames(connectConfig(),
                 userDtos.stream()
-                .filter(o -> o.getTomsId() != null)
-                .map(UserDto::getTomsId).toArray(String[]::new));
+                        .filter(o -> o.getTomsId() != null)
+                        .map(UserDto::getTomsId).toArray(String[]::new));
         userDtos.stream()
                 .filter(o -> o.getTomsId() != null)
                 .forEach(o -> o.setOrganization((String) customerNames.get(o.getTomsId())));
         return userDtos;
+    }
+
+    public static List<UserPostResponse> getUserPostResponsesWithOrganizations(List<UserPostResponse> userPostResponses) {
+        tbapiService = new TbapiService(new TbapiServiceRestImpl());
+        Map<String, Object> customerNames = tbapiService.customerNames(connectConfig(),
+                userPostResponses.stream()
+                        .filter(o -> o.getTomsId() != null)
+                        .map(UserPostResponse::getTomsId).toArray(String[]::new));
+        userPostResponses.stream()
+                .filter(o -> o.getTomsId() != null)
+                .forEach(o -> o.setOrganization((String) customerNames.get(o.getTomsId())));
+        return userPostResponses;
     }
 
     private static TbapiConnectConfig connectConfig() {

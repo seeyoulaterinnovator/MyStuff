@@ -86,6 +86,7 @@ public class TbapiService {
             List<String> nullableIds = ret.entrySet().stream().filter(entry -> Objects.isNull(entry.getValue())).map(Map.Entry::getKey).collect(Collectors.toList());
             var nullableNames = remoteService.getCustomerName(nullableIds, connectConfig);
             nullableNames.forEach(ret::replace);
+            ret.forEach(this.cache::putToCache);
         }
 
         return ret;
