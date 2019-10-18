@@ -62,10 +62,7 @@ public class AttributesForm implements Authenticator {
             var session = context.getSession();
             var searchResource = new SearchResource(session);
             var user = context.getUser();
-            var response = searchResource.getUsersInfo( "", user.getId(), "", "", true, null);
-            JsonResponse body = (JsonResponse) response.getEntity();
-            var results = body.getResults();
-            List<UserDto> attributes = (List<UserDto>) results.get("users-info");
+            List<UserDto> attributes = searchResource.getUsers( "user", null, user.getId(), null, null, true);
             if (attributes != null) {
                 attributes = attributes.stream()
                         .filter(attribute -> Objects.nonNull(attribute.getTomsId()) && Objects.nonNull(attribute.getRoleId()))
