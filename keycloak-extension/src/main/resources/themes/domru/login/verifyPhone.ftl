@@ -19,7 +19,7 @@
         <form id="totpForm" action="${url.loginAction}" method="POST">
         <#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон -->
         <p class="pb-6 text-accentRed"> ${error!}<p>
-            <div class="flex justify-between w-full pb-6">
+            <div class="flex justify-between w-full xl:pb-111 md:pb-10 sm:pb-8 pb-6">
                 <#list 1..lengthCode as x>
                     <input placeholder="-" maxlength="1" id="smscode-${x}" name="smscode-${x}" class="text-center align-middle text-3xl w-10 h-10 sm:w-16 sm:h-16 border rounded-lg focus:border-extra outline-none" autocomplete="off" />
                 </#list>
@@ -41,7 +41,7 @@
             <div class="sm:block md:flex justify-between w-full items-center text-center md:text-left">
                 <button class="btn btn-main w-full md:w-3/7 mr-0 md:mr-4" name="accept" id="accept" type="submit">Подтвердить</button>
                 
-                <div id="timer" class="text-main-600 text-center md:text-right text-sm flex items-center my-6 md:my-3 justify-center md:justify-start">
+                <div id="timer" class="text-main-600 text-center md:text-right text-sm flex items-center my-6 md:my-0 justify-center md:justify-start">
                     Пароль действует <span id="timer-time" class="px-1 text-black text-5/3em"></span> мин
                 </div>
 
