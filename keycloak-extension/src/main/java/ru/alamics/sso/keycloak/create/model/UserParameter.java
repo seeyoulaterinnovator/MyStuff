@@ -5,11 +5,11 @@ public enum UserParameter {
     FIRST_NAME("Имя пользователя"),
     EMAIL("E-mail"),
     PHONE("Телефон"),
-    ORGANIZATION("Организация"),
+    TOMS_ID("TOMS ID"),
+    DMP_ID("DMP ID"),
     ROLE("Роли пользователя"),
     SYSTEM("Целевая система"),
-    ENABLED("Активность"),
-    CUSTOMER("CUSTOMER");
+    ENABLED("Активность");
 
     private final String name;
 

@@ -9,7 +9,6 @@ import java.util.List;
 @NoArgsConstructor
 public class UserImport {
     private UserRequest userRequest;
-    private String org;
     private List<String> systemNames;
     private String roleName;
 }
