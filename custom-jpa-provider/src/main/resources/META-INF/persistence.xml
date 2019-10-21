@@ -80,7 +80,7 @@
 		<class>ru.alamics.sso.keycloak.entity.ExternalSystemRoleEntity</class>
 		<class>ru.alamics.sso.keycloak.entity.Settings</class>
 		<class>ru.alamics.sso.keycloak.entity.ImportUserHistoryEntity</class>
-		<class>ru.alamics.sso.keycloak.entity.ImportReportDataEntity</class>
+		<class>ru.alamics.sso.keycloak.entity.ImportUserDataEntity</class>
 		<properties>
 			<!-- http://docs.jboss.org/hibernate/orm/4.3/javadocs/constant-values.html -->
 

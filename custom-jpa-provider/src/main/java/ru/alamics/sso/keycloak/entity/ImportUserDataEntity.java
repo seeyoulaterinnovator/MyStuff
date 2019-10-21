@@ -9,7 +9,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "IMPORT_USER_DATA")
-public class ImportReportDataEntity {
+public class ImportUserDataEntity {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private String id;

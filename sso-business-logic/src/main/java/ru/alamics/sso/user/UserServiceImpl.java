@@ -12,6 +12,7 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.provider.ProviderFactory;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
+import ru.alamics.sso.keycloak.entity.ImportUserDataEntity;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
@@ -155,7 +156,7 @@ public class UserServiceImpl implements UserService {
 
         List<String[]> rows = file.getRows();
         rows.remove(0);
-        List<UserImport> userImports = UserMapper.toUserRequestList(rows);
+        List<ImportUserDataEntity> userImports = UserMapper.toUserRequestList(rows);
 
         ImportResponse importResponse = createImportUsers(userImports);
         log.info("Upload users success!", importResponse);
@@ -204,14 +205,14 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private ImportResponse createImportUsers(List<UserImport> userImports) {
+    private ImportResponse createImportUsers(List<ImportUserDataEntity> userImports) {
         ImportResponse importResponse = new ImportResponse();
 
         AtomicInteger createdUsers = new AtomicInteger();
         AtomicInteger countClones = new AtomicInteger();
         userImports.stream().forEach(o -> {
             try {
-                UserRequest userRequest = o.getUserRequest();
+                UserRequest userRequest = UserMapper.toUserRequest(o);
                 checkImportUser(userRequest);
                 UserModel user = createUser(userRequest);
                 user.setEmailVerified(false);
@@ -222,19 +223,19 @@ public class UserServiceImpl implements UserService {
                 if (userRequest.getTomsId() == null || userRequest.getTomsId().isBlank()) {
                     throw new NotFoundException("TomsId is not exist");
                 }
-                addUserPost(user, o);
+                addUserPost(user, o, userRequest);
             } catch (FoundException e) {
                 e.getResult().forEach((k, v) -> {
                     Map<String, Object> error = new HashMap<>();
                     error.put("error", v);
-                    error.put("importUserName", o.getUserRequest().getName());
+                    error.put("importUserName", o.getFirstName());
                     importResponse.addError(error);
                 });
                 countClones.getAndIncrement();
             } catch (NotFoundException | ValidationException e) {
                 Map<String, Object> error = new HashMap<>();
                 error.put("error", e.getMessage());
-                error.put("importUserName", o.getUserRequest().getName());
+                error.put("importUserName", o.getFirstName());
                 importResponse.addError(error);
             }
         });
@@ -385,13 +386,19 @@ public class UserServiceImpl implements UserService {
         userPostService.save(userPostRequest);
     }
 
-    private void addUserPost(UserModel userModel, UserImport userImport) throws NotFoundException {
-        UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, userImport.getUserRequest());
-        userPostRequest.setRoleId(userPostService.getUserPostRole(userImport.getRoleName()));
+    private void addUserPost(UserModel userModel, ImportUserDataEntity userImport, UserRequest userRequest) throws NotFoundException {
+        UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, userRequest);
+        userPostRequest.setRoleId(userPostService.getUserPostRole(userImport.getRole()));
         UserPostResponse userPostResponse = userPostService.save(userPostRequest);
-        if (userImport.getSystemNames() != null && !userImport.getSystemNames().isEmpty()) {
-            for (String sysName : userImport.getSystemNames()) {
-                userPostService.addSystemRole(UserMapper.toExternalSystemRoleRequest(userPostResponse.getId(),
+
+        addSystemRoles(userImport, userPostResponse.getId());
+    }
+
+    private void addSystemRoles(ImportUserDataEntity userImport, String userPostId) throws NotFoundException {
+        List<String> systems = List.of(userImport.getSystems().replaceAll("\\s", "").split(","));
+        if (systems != null && !systems.isEmpty()) {
+            for (String sysName : systems) {
+                userPostService.addSystemRole(UserMapper.toExternalSystemRoleRequest(userPostId,
                         userPostService.getExternalSystemRoleId(sysName)));
             }
         }

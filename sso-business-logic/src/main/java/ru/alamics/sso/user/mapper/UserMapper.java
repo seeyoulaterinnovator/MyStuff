@@ -2,9 +2,9 @@ package ru.alamics.sso.user.mapper;
 
 import org.keycloak.authentication.FormContext;
 import org.keycloak.models.UserModel;
+import ru.alamics.sso.keycloak.entity.ImportUserDataEntity;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
-import ru.alamics.sso.user.model.UserImport;
 import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.user.web.UserDto;
 import ru.alamics.sso.user.web.UserSearchDto;
@@ -102,43 +102,42 @@ public class UserMapper {
         return result;
     }
 
-    public static UserImport toUserImport(String[] row) {
-        UserRequest userRequest = new UserRequest();
-        UserImport userImport = new UserImport();
+    public static ImportUserDataEntity toUserImport(String[] row) {
+        ImportUserDataEntity userImport = new ImportUserDataEntity();
         for (int i = 0; i < row.length; i++) {
             switch (i) {
                 case 0:
-                    userRequest.setName(row[i]);
+                    userImport.setFirstName(row[i]);
                     break;
                 case 1:
-                    userRequest.setEmail(row[i]);
+                    userImport.setEmail(row[i]);
                     break;
                 case 2:
-                    userRequest.setPhone(row[i]);
+                    userImport.setPhone(row[i]);
                     break;
                 case 3:
-                    userRequest.setTomsId(row[i]);
+                    userImport.setTomsId(row[i]);
                     break;
                 case 4:
-                    userRequest.setDmpId(row[i]);
+                    userImport.setDmpId(row[i]);
                     break;
                 case 5:
-                    userImport.setRoleName(row[i]);
+                    userImport.setRole(row[i]);
                     break;
                 case 6:
-                    userImport.setSystemNames(List.of(row[i].replaceAll("\\s", "").split(",")));
+                    //userImport.setSystemNames(List.of(row[i].replaceAll("\\s", "").split(",")));
+                    userImport.setSystems(row[i]);
                     break;
             }
         }
-        userImport.setUserRequest(userRequest);
         return userImport;
     }
 
-    public static List<UserImport> toUserRequestList(List<String[]> rows) {
+    public static List<ImportUserDataEntity> toUserRequestList(List<String[]> rows) {
         if (rows == null || rows.isEmpty()) {
             return null;
         }
-        List<UserImport> userImports = new LinkedList<>();
+        List<ImportUserDataEntity> userImports = new LinkedList<>();
         rows.forEach(o -> userImports.add(toUserImport(o)));
         return userImports;
     }
@@ -182,5 +181,18 @@ public class UserMapper {
         externalSystemRoleRequest.setUserPostId(id);
         externalSystemRoleRequest.setSystemRoleId(sysId);
         return externalSystemRoleRequest;
+    }
+
+    public static UserRequest toUserRequest(ImportUserDataEntity importUserDataEntity){
+        if (importUserDataEntity == null){
+            return null;
+        }
+        UserRequest userRequest = new UserRequest();
+        userRequest.setEmail(importUserDataEntity.getEmail());
+        userRequest.setName(importUserDataEntity.getFirstName());
+        userRequest.setPhone(importUserDataEntity.getPhone());
+        userRequest.setTomsId(importUserDataEntity.getTomsId());
+        userRequest.setDmpId(importUserDataEntity.getDmpId());
+        return userRequest;
     }
 }

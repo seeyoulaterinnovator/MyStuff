@@ -33,5 +33,5 @@ public class ImportUserHistoryEntity {
     @Column(name = "errors")
     private String errors;
     @OneToMany(mappedBy = "importUserHistory")
-    private List<ImportReportDataEntity> importUserData;
+    private List<ImportUserDataEntity> importUserData;
 }
