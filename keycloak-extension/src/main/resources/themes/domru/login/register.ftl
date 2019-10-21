@@ -33,7 +33,6 @@
 
                 <#if recaptchaRequired??>
                     <div class="g-recaptcha w-full"
-                        data-size="compact" 
                         data-sitekey="${recaptchaSiteKey}"
                         data-callback="recaptchaCallback" 
                         data-expired-callback="recaptchaExpiredCallback"
@@ -42,11 +41,11 @@
                     </div>
                 </#if>
 
-                <div class="flex flex-col-reverse justify-between sm:flex-row">
+                <div class="flex flex-col-reverse justify-between sm:flex-row mt-0 xl:mt-4">
                   <div class="flex flex-basis-1/2 items-center">
                     <button id="submit" class="btn btn-main pass-fields" type="submit">${msg('doRegister')}</button>
                   </div>
-                  <span class="flex-basis-1/2 ml-0 mb-6 text-sm sm:ml-5 sm:mb-0">Нажимая кнопку, Вы соглашаетесь <a class="reference" href="https://domru.ru/policy.pdf" target="_blink">с политикой обработки данных</a></span>
+                  <span class="flex-basis-1/2 ml-0 mb-6 sm:text-sm text-xs opacity-50 sm:ml-5 sm:mb-0">Нажимая кнопку, Вы соглашаетесь <a class="reference" href="https://domru.ru/policy.pdf" target="_blink">с политикой обработки данных</a></span>
                 </div>
         </form>
     <#elseif section = "info" >

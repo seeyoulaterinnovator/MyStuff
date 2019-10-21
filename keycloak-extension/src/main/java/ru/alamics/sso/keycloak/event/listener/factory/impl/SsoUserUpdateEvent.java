@@ -24,20 +24,17 @@ public class SsoUserUpdateEvent extends SsoEvent {
 
     private final AdminEvent event;
 
-    SsoUserUpdateEvent (AdminEvent event, KeycloakSession session) {
+    SsoUserUpdateEvent(AdminEvent event, KeycloakSession session) {
         super(session);
         this.event = event;
     }
 
     @Override
-    public void execute () {
+    public void execute() {
         try {
             var session = this.getSession();
             var model = session.realms();
             UserEntityRepresentation userNow = this.getUserEntityRepresentation(event.getRepresentation());
-            if (!userNow.isEnabled()){
-                return;
-            }
 
             String userId = userNow.getId();
             if (userId == null) {
@@ -45,13 +42,16 @@ public class SsoUserUpdateEvent extends SsoEvent {
             }
 
             AdminEventEntity adminEventEntity = findAdminEvent(userId);
-            if (adminEventEntity == null){
+            if (userNow.isEnabled() && adminEventEntity == null) {
                 return;
             }
 
-            UserEntityRepresentation userLast = this.getUserEntityRepresentation(adminEventEntity.getRepresentation());
+            UserEntityRepresentation userLast = null;
+            if (adminEventEntity != null){
+                userLast = getUserEntityRepresentation(adminEventEntity.getRepresentation());
+            }
 
-            if ((userNow.isEnabled() == userLast.isEnabled())){
+            if (userLast != null && userNow.isEnabled() == userLast.isEnabled()) {
                 return;
             }
 
@@ -69,10 +69,13 @@ public class SsoUserUpdateEvent extends SsoEvent {
             attributes.put("userName", user.getUsername());
             attributes.put("userFirstName", user.getFirstName());
             attributes.put("userLastName", user.getLastName());
-            this.sendEmail(user, realm, "emailEnabledAccountSubject", "mail-enabled-account.ftl", attributes);
-            if(userNow.isEnabled()) {
+
+            if (userNow.isEnabled()) {
+                this.sendEmail(user, realm, "emailEnabledAccountSubject", "mail-enabled-account.ftl", attributes);
                 this.recordLoginUser(userId);//При разблокировании юзера, логиним его
+                return;
             }
+            this.sendEmail(user, realm, "emailDisabledAccountSubject", "mail-disabled-account.ftl", attributes);
         } catch (Exception e) {
             log.error("Error ", e);
         }
@@ -88,7 +91,7 @@ public class SsoUserUpdateEvent extends SsoEvent {
                 "order by ae.time DESC ", AdminEventEntity.class)
                 .setParameter("userId", userId)
                 .getResultList();
-        if (adminEventEntities == null || adminEventEntities.isEmpty() || adminEventEntities.size() == 1){
+        if (adminEventEntities == null || adminEventEntities.isEmpty() || adminEventEntities.size() == 1) {
             return null;
         }
         return adminEventEntities.get(1);
