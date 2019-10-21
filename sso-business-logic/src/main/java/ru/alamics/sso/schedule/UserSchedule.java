@@ -117,10 +117,10 @@ public class UserSchedule {
         log.info("start={}", DEBUG_STR);
 
         var autoLockNotifications = autoLockNotificationRepository.findNotifications();
-        ClientEntity client = clientRepository.findClientById(CLIENT_ID);
         for (AutoLockNotification notification : autoLockNotifications) {
             var user = notification.getUser();
             RealmModel realm = realmRepository.findRealmById(user.getRealmId());
+            ClientEntity client = clientRepository.findClientById(CLIENT_ID, realm.getName());
             UserModel userModel = new UserAdapter(null, realm, null, user);
             try {
                 if (notification.getType() == NotificationType.ABSENCE_NOTIFICATION) {
