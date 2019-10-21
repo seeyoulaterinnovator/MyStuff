@@ -44,7 +44,7 @@ public class UserFindService {
     }
 
     public List<UserSearchDto> getUsersByParameters(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc) {
-        return UserMapper.toUserDtoList(userRepository.getTupleUsersByParameters(realm, search, searchUser, searchToms, sortField, sortAsc, getSort(sortField, sortAsc)));
+        return UserMapper.toUserDtoList(userRepository.getTupleUsersByParameters(realm, search, searchUser, searchToms, getSort(sortField, sortAsc)));
     }
 
     private String getSort(String sortField, boolean sortAsc) {
