@@ -39,6 +39,7 @@ public abstract class DataMapper {
                 .enabled(toBoolean(tuple.get("enabled")))
                 .userPostId(toString(tuple.get("user_post_id")))
                 .tomsId(toString(tuple.get("toms_id")))
+                .dmpId(toString(tuple.get("dmp_id")))
                 .roleId(toString(tuple.get("role_id")))
                 .roleName(toString(tuple.get("role_name")))
                 .systemRoleId(toString(tuple.get("system_role_id")))
@@ -120,12 +121,15 @@ public abstract class DataMapper {
                     userRequest.setPhone(row[i]);
                     break;
                 case 3:
-                    userImport.setOrg(row[i]);
+                    userRequest.setTomsId(row[i]);
                     break;
                 case 4:
-                    userImport.setRoleName(row[i]);
+                    userRequest.setDmpId(row[i]);
                     break;
                 case 5:
+                    userImport.setRoleName(row[i]);
+                    break;
+                case 6:
                     userImport.setSystemNames(List.of(row[i].replaceAll("\\s","").split(",")));
                     break;
             }
@@ -141,17 +145,6 @@ public abstract class DataMapper {
         List<UserImport> userImports = new LinkedList<>();
         rows.forEach(o -> userImports.add(toUserImport(o)));
         return userImports;
-    }
-
-    public static User toUser(UserImport userImport) {
-        Map<String, List<String>> attr = new HashMap<String, List<String>>();
-        attr.put(ATTR_ORG_NAME, List.of(userImport.getOrg()));
-        return User.builder()
-                .name(userImport.getUserRequest().getName())
-                .email(userImport.getUserRequest().getEmail())
-                .phone(userImport.getUserRequest().getPhone())
-                .attributes(attr)
-                .build();
     }
 
     public static ExternalSystemRoleRequest toExternalSystemRoleRequest(String id, Long sysId){

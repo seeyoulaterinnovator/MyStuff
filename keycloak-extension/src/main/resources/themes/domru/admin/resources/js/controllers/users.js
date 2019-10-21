@@ -449,8 +449,6 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         var msg = `
             Количество записей, для которых найдены дубли: ${resp.countClones}
             Количество созданых пользователей: ${resp.createdUsers}
-            Количество записей, для которых не было положительного ответа от TBAPI: ${resp.tbapiErrors}
-            Количество записей, для которых был положительный ответ от TBAPI: ${resp.tbapiSuccess}
             Информация об ошибках: ${errorMsg}`;
 
         Dialog.message('Информация', msg, () => location.reload());
@@ -465,7 +463,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 "FIRST_NAME",
                 "EMAIL",
                 "PHONE",
-                "ORGANIZATION",
+                "TOMS_ID",
+                "DMP_ID",
                 "ROLE",
                 "SYSTEM"
             ],
@@ -484,11 +483,11 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 "FIRST_NAME",
                 "EMAIL",
                 "PHONE",
-                "ORGANIZATION",
+                "TOMS_ID",
+                "DMP_ID",
                 "ROLE",
                 "SYSTEM",
-                "ENABLED",
-                "CUSTOMER"
+                "ENABLED"
             ],
             userIds: $scope.users.filter(user => user.active).map(user => user.id)
         };
@@ -535,7 +534,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 "FIRST_NAME",
                 "EMAIL",
                 "PHONE",
-                "ORGANIZATION",
+                "TOMS_ID",
+                "DMP_ID",
                 "ROLE",
                 "SYSTEM"
             ],
@@ -554,11 +554,11 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 "FIRST_NAME",
                 "EMAIL",
                 "PHONE",
-                "ORGANIZATION",
+                "TOMS_ID",
+                "DMP_ID",
                 "ROLE",
                 "SYSTEM",
-                "ENABLED",
-                "CUSTOMER"
+                "ENABLED"
             ],
             userIds: $scope.users.filter(user => user.active).map(user => user.id)
         };
