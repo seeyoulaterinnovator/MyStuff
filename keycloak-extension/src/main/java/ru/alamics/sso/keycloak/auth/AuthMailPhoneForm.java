@@ -9,10 +9,7 @@ import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAu
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.ModelDuplicateException;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ServicesLogger;
@@ -37,7 +34,10 @@ import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 @Slf4j
 public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator implements Authenticator {
 
-    private final static String CLIENT_ID = "lkb2b";
+    // TODO
+    private final static String LKB2B_ID = "lkb2b";
+    private final static String CONSOLE_ID = "security-admin-console";
+
     private final EntityManager em;
     private final RiasService riasService;
     private final UserFindService userFindService;
@@ -126,6 +126,8 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
         String password = formData.getFirst(FormConstants.FIELD_PASSWORD);
         var city = formData.getFirst(FormConstants.FIELD_CITY);
 
+        log.info("RIAS auth, got city " + city);
+
         String domain = null;
         CityMigration cm = CitiesResource.getCityMigrationByCity(city);
         if (cm != null) {
@@ -183,9 +185,13 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
                 user = Util.getUserAdapter(context.getSession(), userFindService.getUserByPhone(context.getRealm(), username));
             }
 
-            if (user == null && context.getAuthenticationSession().getClient() != null &&
-                    CLIENT_ID.equals(context.getAuthenticationSession().getClient().getClientId()) && checkAuthRias(context)) {
+            if (user == null) {
+
+                ClientModel cm = context.getAuthenticationSession().getClient();
+
+                if (cm != null && (LKB2B_ID.equals(cm.getClientId()) || CONSOLE_ID.equals(cm.getClientId())) && checkAuthRias(context)) {
                     return false;
+                }
             }
 
         } catch (ModelDuplicateException mde) {
