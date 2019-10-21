@@ -283,11 +283,14 @@
 
     <changeSet id="25" author="strukov-av">
         <preConditions onFail="MARK_RAN">
-            <not> <tableExists tableName="IMPORT_REPORT"></tableExists> </not>
+            <not> <tableExists tableName="IMPORT_USER_HISTORY"></tableExists> </not>
         </preConditions>
-        <createTable tableName="IMPORT_REPORT">
+        <createTable tableName="IMPORT_USER_HISTORY">
             <column name="id" type="varchar(36)">
                 <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="realm_id" type="varchar(255)">
+                <constraints nullable="false"/>
             </column>
             <column name="name" type="varchar(255)">
                 <constraints nullable="false"/>
@@ -311,14 +314,14 @@
 
     <changeSet id="26" author="strukov-av">
         <preConditions onFail="MARK_RAN">
-            <not> <tableExists tableName="IMPORT_REPORT_DATA"></tableExists> </not>
+            <not> <tableExists tableName="IMPORT_USER_DATA"></tableExists> </not>
         </preConditions>
-        <createTable tableName="IMPORT_REPORT_DATA">
+        <createTable tableName="IMPORT_USER_DATA">
             <column name="id" type="varchar(36)">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="import_id" type="varchar(36)">
-                <constraints nullable="false" foreignKeyName="FK_IMPORT_DATA_REPORT" references="IMPORT_REPORT(id)"/>
+                <constraints nullable="false" foreignKeyName="FK_IMPORT_DATA_IMPORT_HISTORY" references="IMPORT_USER_HISTORY(id)"/>
             </column>
             <column name="first_name" type="varchar(255)"></column>
             <column name="email" type="varchar(255)"></column>
