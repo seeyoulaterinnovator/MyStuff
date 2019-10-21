@@ -280,4 +280,54 @@
             ALTER TABLE FEDERATED_IDENTITY CHANGE FEDERATED_USER_ID FEDERATED_USER_ID varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
         </sql>
     </changeSet>
+
+    <changeSet id="25" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <not> <tableExists tableName="IMPORT_REPORT"></tableExists> </not>
+        </preConditions>
+        <createTable tableName="IMPORT_REPORT">
+            <column name="id" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="import_date" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="count_import_users" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="count_created_users" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="count_clones" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="errors" type="varchar(2048)">
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="26" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <not> <tableExists tableName="IMPORT_REPORT_DATA"></tableExists> </not>
+        </preConditions>
+        <createTable tableName="IMPORT_REPORT_DATA">
+            <column name="id" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="import_id" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="FK_IMPORT_DATA_REPORT" references="IMPORT_REPORT(id)"/>
+            </column>
+            <column name="first_name" type="varchar(255)"></column>
+            <column name="email" type="varchar(255)"></column>
+            <column name="phone" type="varchar(255)"></column>
+            <column name="toms_id" type="varchar(20)"></column>
+            <column name="dmp_id" type="varchar(20)"></column>
+            <column name="role" type="varchar(20)"></column>
+            <column name="systems" type="varchar(255)"></column>
+            <column name="is_created" type="BOOLEAN"></column>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
