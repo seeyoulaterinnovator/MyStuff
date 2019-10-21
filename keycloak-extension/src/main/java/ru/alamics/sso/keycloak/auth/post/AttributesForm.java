@@ -9,10 +9,9 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.auth.UserRole;
 import ru.alamics.sso.keycloak.response.JsonResponse;
-import ru.alamics.sso.keycloak.search.dto.UserDto;
+import ru.alamics.sso.user.web.UserSearchDto;
 import ru.alamics.sso.keycloak.search.rest.SearchResource;
 
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -51,7 +50,7 @@ public class AttributesForm implements Authenticator {
             var response = searchResource.getUsersInfo( "", user.getId(), "", "", true, null);
             JsonResponse body = (JsonResponse) response.getEntity();
             var results = body.getResults();
-            List<UserDto> attributes = (List<UserDto>) results.get("users-info");
+            List<UserSearchDto> attributes = (List<UserSearchDto>) results.get("users-info");
             if(attributes != null) {
                 attributes = attributes.stream()
                         .filter(attribute -> Objects.nonNull(attribute.getTomsId()) && Objects.nonNull(attribute.getRoleId()))
@@ -72,7 +71,7 @@ public class AttributesForm implements Authenticator {
 
     }
 
-    private Response createForm(AuthenticationFlowContext context, List<UserDto> attributes) {
+    private Response createForm(AuthenticationFlowContext context, List<UserSearchDto> attributes) {
         LoginFormsProvider form = context.form();
         if(!attributes.isEmpty()) {
             Set<AttributesModel> models = attributes.stream()

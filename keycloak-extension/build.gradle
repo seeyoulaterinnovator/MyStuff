@@ -18,19 +18,12 @@ dependencies {
 
     providedCompile 'org.slf4j:slf4j-api:1.7.22'
 
-    // https://mvnrepository.com/artifact/org.apache.poi/poi
-    implementation group: 'org.apache.poi', name: 'poi', version: '4.1.0'
-    // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
-    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.0'
     // https://mvnrepository.com/artifact/org.jboss.resteasy/resteasy-jaxrs
     implementation group: 'org.jboss.resteasy', name: 'resteasy-jaxrs', version: '3.9.0.Final'
-    // https://mvnrepository.com/artifact/com.opencsv/opencsv
-    implementation group: 'com.opencsv', name: 'opencsv', version: '4.0'
 
     // https://mvnrepository.com/artifact/javax.ejb/ejb-api
 //    providedCompile group: 'javax.ejb', name: 'ejb-api', version: '3.0'
 
-    providedCompile  group: 'org.apache.xmlbeans', name: 'xmlbeans', version: '3.0.0'
     providedCompile  group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.60'
     providedCompile  group: 'org.bouncycastle', name: 'bcmail-jdk15on', version: '1.60'
 }

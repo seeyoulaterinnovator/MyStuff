@@ -9,14 +9,8 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.Collections;
+import javax.persistence.Tuple;
 import java.util.List;
-import java.util.Optional;
 
 @LocalBean
 @Stateless
@@ -75,5 +69,57 @@ public class UserRepository {
             return users.get(0);
         }
         return null;
+    }
+
+    public List<Tuple> getTupleUsersByParameters(String realm, String search, String searchUser, String searchToms, String sortField,
+                                boolean sortAsc, String orderBy) {
+        List<Tuple> tuples = em.createNativeQuery(
+                "select UE.ID         as user_id,\n" +
+                        "       UE.USERNAME   as username,\n" +
+                        "       UE.FIRST_NAME as first_name,\n" +
+                        "       UE.LAST_NAME  as last_name,\n" +
+                        "       UE.EMAIL      as email,\n" +
+                        "       UA.VALUE      as phone,\n" +
+                        "       UE.ENABLED    as enabled,\n" +
+                        "       UP.id         as user_post_id,\n" +
+                        "       UP.TOMS_ID    as toms_id,\n" +
+                        "       UP.DMP_ID     as dmp_id,\n" +
+                        "       UP.ROLE_ID    as role_id,\n" +
+                        "       UPR.NAME      as role_name,\n" +
+                        "       ESR.ID        as system_role_id,\n" +
+                        "       ESR.NAME      as system_role,\n" +
+                        "       ES.ID         as system_id,\n" +
+                        "       ES.NAME       as system_name,\n" +
+                        "       ES.LABEL      as system_label\n" +
+                        "from USER_ENTITY UE\n" +
+                        "         left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone'\n" +
+                        "         left join USER_POST UP on UE.ID = UP.USER_ID\n" +
+                        "         left join USER_POST_ROLE UPR on UP.ROLE_ID = UPR.ID\n" +
+                        "         left join USERPOST_EXT_SYSTEM_ROLE UESR on UP.ID = UESR.USER_POST_ID\n" +
+                        "         left join EXT_SYSTEM_ROLE ESR on UESR.EXT_SYSTEM_ROLE_ID = ESR.ID\n" +
+                        "         left join EXTERNAL_SYSTEM ES on ESR.SYSTEM_ID = ES.ID\n" +
+                        "WHERE UE.REALM_ID = :realm\n" +
+                        "  AND CASE\n" +
+                        "          WHEN :search is not null and :search != '' then (\n" +
+                        "                      UE.EMAIL LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                      UE.FIRST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                      UE.LAST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                      UE.USERNAME LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                      UA.VALUE LIKE CONCAT('%', :search, '%')\n" +
+                        "              )\n" +
+                        "          else UE.ID LIKE '%' end\n" +
+                        "  AND CASE\n" +
+                        "          WHEN :searchUser is not null and :searchUser != '' then (UE.ID = :searchUser)\n" +
+                        "          else UE.ID LIKE '%' OR  UE.ID is null end\n" +
+                        "  AND CASE\n" +
+                        "          WHEN :searchToms is not null and :searchToms != '' then (UP.TOMS_ID = :searchToms)\n" +
+                        "          else UP.TOMS_ID LIKE '%' OR UP.TOMS_ID is null end\n" +
+                        orderBy , Tuple.class)
+                .setParameter("search", search)
+                .setParameter("searchUser", searchUser)
+                .setParameter("searchToms", searchToms)
+                .setParameter("realm", realm)
+                .getResultList();
+        return tuples;
     }
 }

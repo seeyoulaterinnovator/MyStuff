@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.search.dto;
+package ru.alamics.sso.user.web;
 
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 @Data
 @Builder(builderClassName = "UserDtoBuilder", toBuilder = true)
-public class UserDto implements Serializable {
+public class UserSearchDto implements Serializable {
 
     private String id;
     private String username;

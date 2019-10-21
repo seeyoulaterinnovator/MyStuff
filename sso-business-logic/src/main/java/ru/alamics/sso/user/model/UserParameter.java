@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.create.model;
+package ru.alamics.sso.user.model;
 
 public enum UserParameter {
     USER_ID("USER ID"),

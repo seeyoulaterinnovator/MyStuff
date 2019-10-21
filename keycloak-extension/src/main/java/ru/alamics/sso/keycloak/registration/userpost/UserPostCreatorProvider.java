@@ -8,9 +8,9 @@ import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.service.UserPostService;
+import ru.alamics.sso.user.mapper.UserMapper;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -41,7 +41,7 @@ public class UserPostCreatorProvider implements FormAction {
 
     @Override
     public void success(FormContext context) {
-        UserPostRequest userPostRequest = DataMapper.toUserPostRequest(context);
+        UserPostRequest userPostRequest = UserMapper.toUserPostRequest(context);
         if (userPostRequest != null && userPostRequest.getTomsId() != null) {
             userPostRequest.setRoleId(ROLE_ID);
             userPostService.addUserPostAndSystemRole(userPostRequest);

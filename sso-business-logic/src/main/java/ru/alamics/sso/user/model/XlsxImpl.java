@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.create.model;
+package ru.alamics.sso.user.model;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCell;

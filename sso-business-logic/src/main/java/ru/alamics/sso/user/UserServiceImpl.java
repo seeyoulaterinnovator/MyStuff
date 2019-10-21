@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.create;
+package ru.alamics.sso.user;
 
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -12,15 +12,14 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.provider.ProviderFactory;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
-import ru.alamics.sso.keycloak.create.model.*;
-import ru.alamics.sso.keycloak.mapper.DataMapper;
-import ru.alamics.sso.keycloak.search.dto.UserDto;
-import ru.alamics.sso.keycloak.search.rest.SearchResource;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.registration.service.UserPostService;
+import ru.alamics.sso.user.mapper.UserMapper;
+import ru.alamics.sso.user.model.*;
+import ru.alamics.sso.user.web.UserSearchDto;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.naming.InitialContext;
@@ -31,8 +30,8 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static ru.alamics.sso.keycloak.create.model.UserParameter.*;
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
+import static ru.alamics.sso.user.model.UserParameter.*;
 
 @Slf4j
 public class UserServiceImpl implements UserService {
@@ -68,21 +67,21 @@ public class UserServiceImpl implements UserService {
         if (file == null) {
             throw new UnsupportedDataTypeException("Unsupported file format!");
         }
-        List<UserDto> userDto = new SearchResource(session).getUsers(realm.getName(), null, null, null, null, true);
+        List<UserSearchDto> userDto = userFindService.getUsersByParameters(realm.getName(), null, null, null, null, true);
         if (userDto == null || userDto.isEmpty()) {
             return null;
         }
         if (userRequest.getUserIds() != null && userRequest.getUserIds().length != 0) {
             userDto = searchUsersById(userDto, userRequest.getUserIds());
         }
-        userDto = DataMapper.toGroupUserDtos(userDto);
+        userDto = UserMapper.toGroupUserDtos(userDto);
         file.addRow(getUserParameterNames(userRequest.getUserParameters()));
         userDto.stream().forEach(o -> file.addRow(getUserParameters(o, userRequest.getUserParameters())));
         return file.save();
     }
 
-    private List<UserDto> searchUsersById(List<UserDto> userDtos, String[] userIds) {
-        List<UserDto> result = new LinkedList<>();
+    private List<UserSearchDto> searchUsersById(List<UserSearchDto> userDtos, String[] userIds) {
+        List<UserSearchDto> result = new LinkedList<>();
         userDtos.stream()
                 .forEach(o -> {
                     for (String userId : userIds) {
@@ -102,7 +101,7 @@ public class UserServiceImpl implements UserService {
         return names;
     }
 
-    private List<String> getUserParameters(UserDto userDto, UserParameter[] userParameters) {
+    private List<String> getUserParameters(UserSearchDto userDto, UserParameter[] userParameters) {
         List<String> parameters = new LinkedList<>();
         for (UserParameter userParameter : userParameters) {
             switch (userParameter) {
@@ -152,7 +151,7 @@ public class UserServiceImpl implements UserService {
 
         List<String[]> rows = file.getRows();
         rows.remove(0);
-        List<UserImport> userImports = DataMapper.toUserRequestList(rows);
+        List<UserImport> userImports = UserMapper.toUserRequestList(rows);
 
         ImportResponse importResponse = createImportUsers(userImports);
         log.info("Upload users success!", importResponse);
@@ -216,7 +215,7 @@ public class UserServiceImpl implements UserService {
                 createdUsers.getAndIncrement();
                 importResponse.addCreatedUserIds("userId", user.getId());
 
-                if (userRequest.getTomsId() == null || userRequest.getTomsId().isBlank()){
+                if (userRequest.getTomsId() == null || userRequest.getTomsId().isBlank()) {
                     throw new NotFoundException("TomsId is not exist");
                 }
                 addUserPost(user, o);
@@ -377,18 +376,18 @@ public class UserServiceImpl implements UserService {
     }
 
     private void addUserPost(UserModel userModel, UserRequest request) throws NotFoundException {
-        UserPostRequest userPostRequest = DataMapper.toUserPostRequest(userModel, request);
+        UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, request);
         userPostRequest.setRoleId(DEFAULT_ROLE_ID);
         userPostService.save(userPostRequest);
     }
 
     private void addUserPost(UserModel userModel, UserImport userImport) throws NotFoundException {
-        UserPostRequest userPostRequest = DataMapper.toUserPostRequest(userModel, userImport.getUserRequest());
+        UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, userImport.getUserRequest());
         userPostRequest.setRoleId(userPostService.getUserPostRole(userImport.getRoleName()));
         UserPostResponse userPostResponse = userPostService.save(userPostRequest);
         if (userImport.getSystemNames() != null && !userImport.getSystemNames().isEmpty()) {
             for (String sysName : userImport.getSystemNames()) {
-                userPostService.addSystemRole(DataMapper.toExternalSystemRoleRequest(userPostResponse.getId(),
+                userPostService.addSystemRole(UserMapper.toExternalSystemRoleRequest(userPostResponse.getId(),
                         userPostService.getExternalSystemRoleId(sysName)));
             }
         }

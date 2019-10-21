@@ -1,10 +1,10 @@
-package ru.alamics.sso.keycloak.create;
+package ru.alamics.sso.user;
 
 import javassist.NotFoundException;
 import org.keycloak.models.UserModel;
-import ru.alamics.sso.keycloak.create.model.DownloadUserRequest;
-import ru.alamics.sso.keycloak.create.model.ImportResponse;
-import ru.alamics.sso.keycloak.create.model.UserRequest;
+import ru.alamics.sso.user.model.DownloadUserRequest;
+import ru.alamics.sso.user.model.ImportResponse;
+import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.registration.FoundException;
 
 import java.io.IOException;
