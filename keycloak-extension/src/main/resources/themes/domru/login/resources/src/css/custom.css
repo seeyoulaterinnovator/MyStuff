@@ -64,6 +64,10 @@ input[type="number"] {
   }
 }
 
+.text-no-wrap {
+  white-space: nowrap;
+}
+
 .reset-password {
   position: relative;
   transition: 0.2s ease-in-out;
