@@ -1,4 +1,4 @@
-package ru.alamics.sso.report;
+package ru.alamics.sso.user;
 
 import ru.alamics.sso.keycloak.repository.ImportUserHistoryRepository;
 
@@ -8,7 +8,7 @@ import javax.ejb.Stateless;
 
 @Stateless
 @LocalBean
-public class ImportReportService {
+public class ImportUserHistoryService {
     @EJB
     private ImportUserHistoryRepository importUserHistoryRepository;
 }

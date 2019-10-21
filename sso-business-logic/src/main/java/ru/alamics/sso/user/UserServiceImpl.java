@@ -22,6 +22,8 @@ import ru.alamics.sso.user.model.*;
 import ru.alamics.sso.user.web.UserSearchDto;
 
 import javax.activation.UnsupportedDataTypeException;
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.validation.ValidationException;
@@ -41,14 +43,16 @@ public class UserServiceImpl implements UserService {
     private RealmModel realm;
     private UserPostService userPostService;
     private UserFindService userFindService;
+    private ImportUserHistoryService importUserHistoryService;
 
-    public UserServiceImpl(KeycloakSession session, AdminAuth auth, UserFindService userFindService) {
+    public UserServiceImpl(KeycloakSession session, AdminAuth auth) {
         this.auth = auth;
         this.session = session;
-        this.userFindService = userFindService;
         realm = session.getContext().getRealm();
         try {
+            this.userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
             this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
+            this.importUserHistoryService = (ImportUserHistoryService) new InitialContext().lookup("java:global/domru-sso/" + ImportUserHistoryService.class.getSimpleName());
         } catch (NamingException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");

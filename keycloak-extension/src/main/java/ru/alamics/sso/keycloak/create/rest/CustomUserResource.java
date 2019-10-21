@@ -33,10 +33,10 @@ public class CustomUserResource {
     protected KeycloakSession session;
     private UserService userService;
 
-    public CustomUserResource(KeycloakSession session, AdminAuth auth,  UserFindService userFindService) {
+    public CustomUserResource(KeycloakSession session, AdminAuth auth) {
         this.session = session;
 //        AdminAuth auth = authenticateRealmAdminRequest(session.getContext().getRealm());
-        this.userService = new UserServiceImpl(session, auth, userFindService);
+        this.userService = new UserServiceImpl(session, auth);
     }
 
     @POST
