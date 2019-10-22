@@ -17,24 +17,19 @@ import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.user.mapper.UserMapper;
-import ru.alamics.sso.user.model.ImportResponse;
 import ru.alamics.sso.util.Util;
 
-import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
-import javax.ejb.Schedule;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
+import javax.ejb.Stateless;
 import javax.validation.ValidationException;
 import java.io.IOException;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
-@Singleton
-@Startup
+@Stateless
 public class ImportSchedule {
     @EJB
     private ImportUserHistoryRepository importUserHistoryRepository;
@@ -49,13 +44,14 @@ public class ImportSchedule {
     @EJB
     private UserPostService userPostService;
 
-    @Schedule(hour = "*", minute = "*", second = "*/30", persistent = false)
     public void schedule() {
+        log.info("Start import users by schedule");
         importUserHistoryRepository.findAllImportUserHistoryEntities()
                 .stream()
                 .filter(o -> o.getImportUserData() != null && !o.getImportUserData().isEmpty())
                 .filter(o -> !o.isDone())
                 .forEach(o -> createImportUsers(o));
+        log.info("End import users by schedule");
     }
 
     private void createImportUsers(ImportUserHistoryEntity importUserHistory) {
@@ -144,9 +140,7 @@ public class ImportSchedule {
         user.setRealmId(realmId);
         user.setEmailVerified(false);
         user.setEnabled(true);
-        System.out.println("123");
         user = userRepository.save(user);
-        System.out.println("123");
 
         RealmEntity realm = realmRepository.findRealmEntityById(realmId);
         if (realm.getDefaultRoles() != null && !realm.getDefaultRoles().isEmpty()) {

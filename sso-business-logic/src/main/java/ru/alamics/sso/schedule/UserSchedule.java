@@ -43,7 +43,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Singleton
-@Startup
 @DependsOn("ApplicationProperties")
 public class UserSchedule {
     private final static String[] SETTINGS_REALM_NAMES_SCHEDULE = {"user", "manager"};
@@ -65,14 +64,13 @@ public class UserSchedule {
     @EJB
     private ApplicationProperties properties;
     @EJB
-    private ImportUserHistoryRepository importUserHistoryRepository;
-    @EJB
-    private UserRepository userRepository;
+    private ImportSchedule importSchedule;
 
     private String host;
 
     @Schedule(hour = "*", minute = "*/1", persistent = false)
     public void schedule() {
+        importSchedule.schedule();
         findExpiredPassword();
         for (String realm : SETTINGS_REALM_NAMES_SCHEDULE) {
             notificationInactiveUsers(realm);
