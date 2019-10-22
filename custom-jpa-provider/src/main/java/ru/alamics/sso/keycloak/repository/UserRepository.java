@@ -27,7 +27,7 @@ public class UserRepository {
 
     public List<UserEntity> save(List<UserEntity> entities) {
         entities.forEach(entity -> {
-            if(entity.getId() == null) {
+            if (entity.getId() == null) {
                 entity.setId(KeycloakModelUtils.generateId());
                 em.persist(entity);
             } else {
@@ -39,8 +39,19 @@ public class UserRepository {
         return entities;
     }
 
+    public UserEntity save(UserEntity user) {
+        if (user.getId() == null) {
+            user.setId(KeycloakModelUtils.generateId());
+            em.persist(user);
+        } else {
+            em.merge(user);
+        }
+        em.flush();
+        return user;
+    }
+
     public UserEntity getFirstUserByPhoneNumber(RealmModel realmModel, String phone, String excludedUserId) {
-        var users =  em.createQuery("select u from UserEntity u join u.attributes attr \n" +
+        var users = em.createQuery("select u from UserEntity u join u.attributes attr \n" +
                 "  where u.realmId = :realmId " +
                 "       and attr.name = :name " +
                 "       and (:excludedUserId is null or u.id <> :excludedUserId) " +
@@ -57,7 +68,7 @@ public class UserRepository {
     }
 
     public UserEntity getFirstUserByPhoneNumber(String phone, String excludedUserId) {
-        var users =  em.createQuery("select u from UserEntity u join u.attributes attr \n" +
+        var users = em.createQuery("select u from UserEntity u join u.attributes attr \n" +
                 "  where attr.name = :name " +
                 "       and (:excludedUserId is null or u.id <> :excludedUserId) " +
                 "       and attr.value = :phoneNmbr", UserEntity.class)
@@ -70,6 +81,48 @@ public class UserRepository {
         }
         return null;
     }
+
+    public UserEntity getFirstUserByPhone(String realmId, String phone) {
+        var users = em.createQuery(
+                "select u from UserEntity u " +
+                        "join u.attributes attr \n" +
+                        "  where u.realmId = :realmId " +
+                        "       and attr.name = :name " +
+                        "       and attr.value = :phoneNmbr", UserEntity.class)
+                .setParameter("name", "phone")
+                .setParameter("phoneNmbr", phone)
+                .setParameter("realmId", realmId)
+                .getResultList();
+        if (users != null && users.size() > 0) {
+            return users.get(0);
+        }
+        return null;
+    }
+
+    public UserEntity getFirstUserByEmail(String realmId, String email) {
+        var users = em.createQuery("select u from UserEntity u \n" +
+                "  where u.realmId = :realmId and u.email = :email ", UserEntity.class)
+                .setParameter("realmId", realmId)
+                .setParameter("email", email)
+                .getResultList();
+        if (users != null && users.size() > 0) {
+            return users.get(0);
+        }
+        return null;
+    }
+
+    public UserEntity getFirstUserByUsername(String realmId, String username) {
+        var users = em.createQuery("select u from UserEntity u \n" +
+                "  where u.realmId = :realmId and u.username = :username ", UserEntity.class)
+                .setParameter("realmId", realmId)
+                .setParameter("username", username)
+                .getResultList();
+        if (users != null && users.size() > 0) {
+            return users.get(0);
+        }
+        return null;
+    }
+
 
     public List<Tuple> getTupleUsersByParameters(String realm, String search, String searchUser, String searchToms, String orderBy) {
         List<Tuple> tuples = em.createNativeQuery(
@@ -113,7 +166,7 @@ public class UserRepository {
                         "  AND CASE\n" +
                         "          WHEN :searchToms is not null and :searchToms != '' then (UP.TOMS_ID = :searchToms)\n" +
                         "          else UP.TOMS_ID LIKE '%' OR UP.TOMS_ID is null end\n" +
-                        orderBy , Tuple.class)
+                        orderBy, Tuple.class)
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)

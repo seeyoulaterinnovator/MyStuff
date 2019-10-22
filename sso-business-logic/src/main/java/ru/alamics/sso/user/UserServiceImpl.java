@@ -22,6 +22,7 @@ import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.user.model.*;
 import ru.alamics.sso.user.web.UserSearchDto;
+import ru.alamics.sso.util.Util;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.ejb.EJB;
@@ -285,7 +286,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkImportUser(UserRequest userRequest) throws FoundException {
-        validateUserPhoneAndEmail(userRequest);
+        Util.validateUserPhoneAndEmail(userRequest.getEmail(), userRequest.getPhone());
 
         FoundException foundException = new FoundException();
         try {
@@ -361,20 +362,6 @@ public class UserServiceImpl implements UserService {
         createAdminEvent(OperationType.CREATE, user);
         commit();
         return user;
-    }
-
-    private void validateUserPhoneAndEmail(UserRequest userRequest) {
-        String phone = userRequest.getPhone();
-        String email = userRequest.getEmail();
-        if (phone == null || !phone.matches("[\\d]+") || !phone.startsWith("7") || phone.length() != 11) {
-            throw new ValidationException("Phone is not valid");
-        }
-
-        if (email == null || !email.contains("@") || !email.substring(0, 1).matches("([\\w[\\s]])+")
-                || email.substring(0, 1).matches("[\\d]+") || email.contains(" ") ||
-                !email.substring(email.indexOf("@") + 1, email.indexOf("@") + 2).matches("([\\w[\\s]])+")) {
-            throw new ValidationException("Email is not valid");
-        }
     }
 
     private void checkOnExistUser(UserRequest request, RealmModel realm) throws FoundException {

@@ -28,6 +28,13 @@ public class ImportUserHistoryRepository {
                 .getResultList();
     }
 
+    public List<ImportUserHistoryEntity> findAllImportUserHistoryEntitiesIsDone() {
+        return em.createQuery(
+                "select ire " +
+                        "from ImportUserHistoryEntity ire where ire.isDone = true ", ImportUserHistoryEntity.class)
+                .getResultList();
+    }
+
     public ImportUserHistoryEntity saveImportUserHistory(ImportUserHistoryEntity importUserHistoryEntity) {
         em.persist(importUserHistoryEntity);
         em.flush();
