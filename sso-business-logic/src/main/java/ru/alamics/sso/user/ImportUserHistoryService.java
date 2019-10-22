@@ -2,10 +2,13 @@ package ru.alamics.sso.user;
 
 import ru.alamics.sso.keycloak.entity.ImportUserHistoryEntity;
 import ru.alamics.sso.keycloak.repository.ImportUserHistoryRepository;
+import ru.alamics.sso.user.mapper.UserMapper;
+import ru.alamics.sso.user.web.ImportUserHistoryDto;
 
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import java.util.List;
 
 @Stateless
 @LocalBean
@@ -20,10 +23,11 @@ public class ImportUserHistoryService {
         importUserHistoryRepository.saveImportUserHistory(importUserHistoryEntity);
     }
 
-    public void getImportUserHistory(ImportUserHistoryEntity importUserHistoryEntity) {
-        if (importUserHistoryEntity == null) {
-            return;
-        }
-        importUserHistoryRepository.saveImportUserHistory(importUserHistoryEntity);
+    public List<ImportUserHistoryDto> getImportUserHistories(String realmId) {
+        return UserMapper.toImportUserHistoryDtos(importUserHistoryRepository.findAllImportUserHistoryEntities(realmId));
+    }
+
+    public ImportUserHistoryDto getImportUserHistory(String importId) {
+        return UserMapper.toImportUserHistoryDto(importUserHistoryRepository.findImportUserHistory(importId));
     }
 }

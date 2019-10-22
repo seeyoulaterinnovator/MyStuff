@@ -8,6 +8,7 @@ import org.keycloak.models.*;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.resources.admin.AdminAuth;
 import ru.alamics.sso.user.FileServiceException;
+import ru.alamics.sso.user.ImportUserHistoryService;
 import ru.alamics.sso.user.UserService;
 import ru.alamics.sso.user.UserServiceImpl;
 import ru.alamics.sso.user.model.DownloadUserRequest;
@@ -18,6 +19,8 @@ import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.service.UserFindService;
 
 import javax.activation.UnsupportedDataTypeException;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
@@ -32,11 +35,18 @@ import java.io.InputStream;
 public class CustomUserResource {
     protected KeycloakSession session;
     private UserService userService;
+    private ImportUserHistoryService importUserHistoryService;
 
     public CustomUserResource(KeycloakSession session, AdminAuth auth) {
         this.session = session;
 //        AdminAuth auth = authenticateRealmAdminRequest(session.getContext().getRealm());
         this.userService = new UserServiceImpl(session, auth);
+        try {
+            this.importUserHistoryService = (ImportUserHistoryService) new InitialContext().lookup("java:global/domru-sso/" + ImportUserHistoryService.class.getSimpleName());
+        } catch (NamingException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Something wrong with context");
+        }
     }
 
     @POST
@@ -116,10 +126,35 @@ public class CustomUserResource {
                 content == null || content.isBlank()) {
             return JsonResponse.error(Response.Status.BAD_REQUEST).build();
         }
-        try(InputStream bas = new ByteArrayInputStream(file.getFileData()) ) {
+        try (InputStream bas = new ByteArrayInputStream(file.getFileData())) {
             return JsonResponse.success()
                     .addResult("import-report",
                             userService.importUsers(bas, content))
+                    .build();
+        } catch (UnsupportedDataTypeException | FileServiceException e) {
+            log.error("Could not upload users", e);
+            return JsonResponse.fail()
+                    .message(e.getMessage())
+                    .build();
+        } catch (IOException e) {
+            log.error("Could not upload users", e);
+            return JsonResponse.fail()
+                    .message("Error reading file")
+                    .build();
+        }
+    }
+
+    @POST
+    @Path("/deferredUploadUsers")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @NoCache
+    public Response deferredUploadUsers(@MultipartForm FileDto file, @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content) {
+        if (file == null || content == null || content.isBlank()) {
+            return JsonResponse.error(Response.Status.BAD_REQUEST).build();
+        }
+        try (InputStream bas = new ByteArrayInputStream(file.getFileData())) {
+            userService.deferredImportUsers(bas, content);
+            return JsonResponse.success()
                     .build();
         } catch (UnsupportedDataTypeException | FileServiceException e) {
             log.error("Could not upload users", e);
@@ -151,7 +186,7 @@ public class CustomUserResource {
             }
             Response.ResponseBuilder response = Response.ok((Object) bytes);
             response.header("Content-Disposition", "attachment; filename=\"users_info." + downloadUserRequest.getType() + "\"");
-            if(downloadUserRequest.getType().equals("xlsx")) {
+            if (downloadUserRequest.getType().equals("xlsx")) {
                 response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
             } else {
                 response.header("Content-Type", MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8");
@@ -170,5 +205,28 @@ public class CustomUserResource {
                     .message("Error writing file")
                     .build();
         }
+    }
+
+    @GET
+    @Path("/importUserHistory")
+    @NoCache
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getImportUserHistoriesByRealm(@QueryParam("realm") String realmId) {
+        if (realmId == null || realmId.isBlank()){
+            return ErrorResponse.error("realm is required attribute", Response.Status.BAD_REQUEST);
+        }
+        return JsonResponse.success()
+                .addResult("importUserHistories", importUserHistoryService.getImportUserHistories(realmId))
+                .build();
+    }
+
+    @GET
+    @Path("/importUserHistory/{id}")
+    @NoCache
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getImportUserHistoryById(@PathParam("id") String importId) {
+        return JsonResponse.success()
+                .addResult("importUserHistories", importUserHistoryService.getImportUserHistory(importId))
+                .build();
     }
 }

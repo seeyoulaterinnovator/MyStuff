@@ -165,6 +165,25 @@ public class UserServiceImpl implements UserService {
         return importResponse;
     }
 
+    @Override
+    public void deferredImportUsers(InputStream inputStream, String content) throws IOException, FileServiceException {
+        log.info("Start deferred upload users");
+
+        FileModel file = FileFactory.createFileModel(inputStream, getFileExtension(content));
+        if (file == null) {
+            throw new UnsupportedDataTypeException("Unsupported file format!");
+        }
+        checkStructure(file);
+
+        List<String[]> rows = file.getRows();
+        rows.remove(0);
+        ImportUserHistoryEntity importUserHistory = UserMapper.toImportUserHistoryEntity(realm.getName(), getFileName(content), UserMapper.toUserRequestList(rows));
+        importUserHistory.setDone(false);
+        importUserHistoryService.saveImportUserHistory(importUserHistory);
+
+        log.info("Upload deferred users success!");
+    }
+
     private String getFileExtension(String content) {
         String finalFileName = getFileName(content);
         return finalFileName.substring(finalFileName.lastIndexOf('.') + 1);

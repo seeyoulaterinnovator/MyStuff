@@ -16,14 +16,14 @@ public class ImportUserHistoryRepository {
     @PersistenceContext
     private EntityManager em;
 
-    public ImportUserHistoryEntity findImportReport(final String importId) {
+    public ImportUserHistoryEntity findImportUserHistory(final String importId) {
         return em.find(ImportUserHistoryEntity.class, importId);
     }
 
-    public List<ImportUserHistoryEntity> findAllImportReports(String realmId) {
+    public List<ImportUserHistoryEntity> findAllImportUserHistoryEntities(String realmId) {
         return em.createQuery(
                 "select ire " +
-                "from ImportReportEntity ire where ire.realmId = :realmId ", ImportUserHistoryEntity.class)
+                "from ImportUserHistoryEntity ire where ire.realmId = :realmId ", ImportUserHistoryEntity.class)
                 .setParameter("realmId", realmId)
                 .getResultList();
     }

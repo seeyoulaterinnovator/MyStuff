@@ -8,6 +8,7 @@ import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.user.model.ImportResponse;
 import ru.alamics.sso.user.model.UserRequest;
+import ru.alamics.sso.user.web.ImportUserHistoryDto;
 import ru.alamics.sso.user.web.UserDto;
 import ru.alamics.sso.user.web.UserSearchDto;
 
@@ -158,8 +159,8 @@ public class UserMapper {
         return userPostDto;
     }
 
-    public static UserPostRequest toUserPostRequest(FormContext context){
-        if (context.getUser() == null){
+    public static UserPostRequest toUserPostRequest(FormContext context) {
+        if (context.getUser() == null) {
             return null;
         }
         UserModel userModel = context.getUser();
@@ -169,7 +170,7 @@ public class UserMapper {
     public static UserPostRequest toUserPostRequest(UserModel userModel) {
         UserPostRequest userPostRequest = new UserPostRequest();
         userPostRequest.setUserId(userModel.getId());
-        if (!userModel.getAttribute(ATTR_TOMS_NAME).isEmpty()){
+        if (!userModel.getAttribute(ATTR_TOMS_NAME).isEmpty()) {
             userPostRequest.setTomsId(userModel.getAttribute(ATTR_TOMS_NAME).get(0));
         }
         if (!userModel.getAttribute(ATTR_DMP_NAME).isEmpty()) {
@@ -178,8 +179,8 @@ public class UserMapper {
         return userPostRequest;
     }
 
-    public static ExternalSystemRoleRequest toExternalSystemRoleRequest(String id, Long sysId){
-        if (id == null || sysId == null){
+    public static ExternalSystemRoleRequest toExternalSystemRoleRequest(String id, Long sysId) {
+        if (id == null || sysId == null) {
             return null;
         }
         ExternalSystemRoleRequest externalSystemRoleRequest = new ExternalSystemRoleRequest();
@@ -188,8 +189,8 @@ public class UserMapper {
         return externalSystemRoleRequest;
     }
 
-    public static UserRequest toUserRequest(ImportUserDataEntity importUserDataEntity){
-        if (importUserDataEntity == null){
+    public static UserRequest toUserRequest(ImportUserDataEntity importUserDataEntity) {
+        if (importUserDataEntity == null) {
             return null;
         }
         UserRequest userRequest = new UserRequest();
@@ -201,8 +202,8 @@ public class UserMapper {
         return userRequest;
     }
 
-    public static ImportUserHistoryEntity toImportUserHistoryEntity(String realmId, String name, List<ImportUserDataEntity> importUserDataEntities, ImportResponse importResponse){
-        if (importUserDataEntities == null){
+    public static ImportUserHistoryEntity toImportUserHistoryEntity(String realmId, String name, List<ImportUserDataEntity> importUserDataEntities, ImportResponse importResponse) {
+        if (importUserDataEntities == null) {
             return null;
         }
         ImportUserHistoryEntity importUserHistory = new ImportUserHistoryEntity();
@@ -215,5 +216,43 @@ public class UserMapper {
         importUserDataEntities.forEach(o -> o.setImportUserHistory(importUserHistory));
         importUserHistory.setImportUserData(importUserDataEntities);
         return importUserHistory;
+    }
+
+    public static ImportUserHistoryEntity toImportUserHistoryEntity(String realmId, String name, List<ImportUserDataEntity> importUserDataEntities) {
+        if (importUserDataEntities == null) {
+            return null;
+        }
+        ImportUserHistoryEntity importUserHistory = new ImportUserHistoryEntity();
+        importUserHistory.setName(name);
+        importUserHistory.setCountImportUsers(importUserDataEntities.size());
+        importUserHistory.setRealmId(realmId);
+        importUserDataEntities.forEach(o -> o.setImportUserHistory(importUserHistory));
+        importUserHistory.setImportUserData(importUserDataEntities);
+        return importUserHistory;
+    }
+
+    public static ImportUserHistoryDto toImportUserHistoryDto(ImportUserHistoryEntity importUserHistoryEntity) {
+        if (importUserHistoryEntity == null) {
+            return null;
+        }
+        return ImportUserHistoryDto.builder()
+                .id(importUserHistoryEntity.getId())
+                .realmId(importUserHistoryEntity.getRealmId())
+                .name(importUserHistoryEntity.getName())
+                .importDate(importUserHistoryEntity.getImportDate())
+                .countClones(importUserHistoryEntity.getCountClones())
+                .countCreatedUsers(importUserHistoryEntity.getCountCreatedUsers())
+                .countImportUsers(importUserHistoryEntity.getCountImportUsers())
+                .isDone(importUserHistoryEntity.isDone())
+                .build();
+    }
+
+    public static List<ImportUserHistoryDto> toImportUserHistoryDtos(List<ImportUserHistoryEntity> importUserHistoryEntities) {
+        if (importUserHistoryEntities == null || importUserHistoryEntities.isEmpty()) {
+            return null;
+        }
+        return importUserHistoryEntities.stream()
+                .map(UserMapper::toImportUserHistoryDto)
+                .collect(Collectors.toList());
     }
 }
