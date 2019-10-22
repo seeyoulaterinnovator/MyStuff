@@ -307,7 +307,7 @@
             <column name="count_clones" type="int" defaultValueNumeric="0">
                 <constraints nullable="false"/>
             </column>
-            <column name="errors" type="varchar(2048)">
+            <column name="is_done" type="BOOLEAN" defaultValueBoolean="false">
             </column>
         </createTable>
     </changeSet>
@@ -331,6 +331,7 @@
             <column name="role" type="varchar(20)"></column>
             <column name="systems" type="varchar(255)"></column>
             <column name="is_created" type="BOOLEAN"></column>
+            <column name="errors" type="varchar(2048)"></column>
         </createTable>
     </changeSet>
 </databaseChangeLog>

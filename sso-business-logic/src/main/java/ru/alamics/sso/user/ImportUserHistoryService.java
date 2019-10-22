@@ -19,4 +19,11 @@ public class ImportUserHistoryService {
         }
         importUserHistoryRepository.saveImportUserHistory(importUserHistoryEntity);
     }
+
+    public void getImportUserHistory(ImportUserHistoryEntity importUserHistoryEntity) {
+        if (importUserHistoryEntity == null) {
+            return;
+        }
+        importUserHistoryRepository.saveImportUserHistory(importUserHistoryEntity);
+    }
 }

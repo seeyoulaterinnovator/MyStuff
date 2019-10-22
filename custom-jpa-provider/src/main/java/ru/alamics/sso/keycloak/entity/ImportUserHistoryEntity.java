@@ -32,8 +32,8 @@ public class ImportUserHistoryEntity {
     private int countCreatedUsers;
     @Column(name = "count_clones")
     private int countClones;
-    @Column(name = "errors")
-    private String errors;
+    @Column(name = "is_done")
+    private boolean isDone;
     @OneToMany(mappedBy = "importUserHistory", cascade = CascadeType.ALL)
     private List<ImportUserDataEntity> importUserData;
 }

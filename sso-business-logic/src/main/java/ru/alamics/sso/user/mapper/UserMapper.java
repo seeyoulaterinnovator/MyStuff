@@ -210,8 +210,8 @@ public class UserMapper {
         importUserHistory.setCountImportUsers(importUserDataEntities.size());
         importUserHistory.setCountCreatedUsers(importResponse.getCreatedUsers().intValue());
         importUserHistory.setCountClones(importResponse.getCountClones().intValue());
-        importUserHistory.setErrors(importResponse.getErrors().stream().map(Map::values).toString());
         importUserHistory.setRealmId(realmId);
+        importUserHistory.setDone(true);
         importUserDataEntities.forEach(o -> o.setImportUserHistory(importUserHistory));
         importUserHistory.setImportUserData(importUserDataEntities);
         return importUserHistory;
