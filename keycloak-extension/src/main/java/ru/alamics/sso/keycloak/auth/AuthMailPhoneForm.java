@@ -126,7 +126,11 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
         String password = formData.getFirst(FormConstants.FIELD_PASSWORD);
         var city = formData.getFirst(FormConstants.FIELD_CITY);
 
-        log.info("RIAS auth, got city " + city);
+        log.info("RIAS auth, got city = " + city);
+
+        if (Validation.isBlank(city)) {
+            city = "perm-dev"; // TODO с фронта не приходит город
+        }
 
         String domain = null;
         CityMigration cm = CitiesResource.getCityMigrationByCity(city);
@@ -139,7 +143,7 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
 
             if (riasLogin.getAccess_token() != null) {
 
-                var uriLoc = UriBuilder.fromPath("https://lkb2b.domru.ru/login");
+                var uriLoc = UriBuilder.fromPath("https://master.b2b-lk.web.t2.ertelecom.ru/login"); //"https://lkb2b.domru.ru/login");
 
                 if (!Validation.isBlank(city)) {
                     uriLoc.queryParam("citydomain", city);
@@ -185,9 +189,15 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
                 user = Util.getUserAdapter(context.getSession(), userFindService.getUserByPhone(context.getRealm(), username));
             }
 
+            log.info("user is " + user);
+            if (user != null) {
+                log.info(user.getId());
+            }
             if (user == null) {
 
                 ClientModel cm = context.getAuthenticationSession().getClient();
+
+                log.info("find user by rias: " + cm.getClientId());
 
                 if (cm != null && (LKB2B_ID.equals(cm.getClientId()) || CONSOLE_ID.equals(cm.getClientId())) && checkAuthRias(context)) {
                     return false;
