@@ -3,8 +3,10 @@ package ru.alamics.sso.user.mapper;
 import org.keycloak.authentication.FormContext;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.keycloak.entity.ImportUserDataEntity;
+import ru.alamics.sso.keycloak.entity.ImportUserHistoryEntity;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
+import ru.alamics.sso.user.model.ImportResponse;
 import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.user.web.UserDto;
 import ru.alamics.sso.user.web.UserSearchDto;
@@ -12,6 +14,8 @@ import ru.alamics.sso.user.web.UserSearchDto;
 import javax.persistence.Tuple;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_DMP_NAME;
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_TOMS_NAME;
@@ -130,6 +134,7 @@ public class UserMapper {
                     break;
             }
         }
+        userImport.setCreated(false);
         return userImport;
     }
 
@@ -194,5 +199,21 @@ public class UserMapper {
         userRequest.setTomsId(importUserDataEntity.getTomsId());
         userRequest.setDmpId(importUserDataEntity.getDmpId());
         return userRequest;
+    }
+
+    public static ImportUserHistoryEntity toImportUserHistoryEntity(String realmId, String name, List<ImportUserDataEntity> importUserDataEntities, ImportResponse importResponse){
+        if (importUserDataEntities == null){
+            return null;
+        }
+        ImportUserHistoryEntity importUserHistory = new ImportUserHistoryEntity();
+        importUserHistory.setName(name);
+        importUserHistory.setCountImportUsers(importUserDataEntities.size());
+        importUserHistory.setCountCreatedUsers(importResponse.getCreatedUsers().intValue());
+        importUserHistory.setCountClones(importResponse.getCountClones().intValue());
+        importUserHistory.setErrors(importResponse.getErrors().stream().map(Map::values).toString());
+        importUserHistory.setRealmId(realmId);
+        importUserDataEntities.forEach(o -> o.setImportUserHistory(importUserHistory));
+        importUserHistory.setImportUserData(importUserDataEntities);
+        return importUserHistory;
     }
 }

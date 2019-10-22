@@ -13,6 +13,7 @@ import org.keycloak.provider.ProviderFactory;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import ru.alamics.sso.keycloak.entity.ImportUserDataEntity;
+import ru.alamics.sso.keycloak.entity.ImportUserHistoryEntity;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
@@ -145,10 +146,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ImportResponse importUsers(InputStream inputStream, String type) throws IOException, FileServiceException {
+    public ImportResponse importUsers(InputStream inputStream, String content) throws IOException, FileServiceException {
         log.info("Start upload users");
 
-        FileModel file = FileFactory.createFileModel(inputStream, type);
+        FileModel file = FileFactory.createFileModel(inputStream, getFileExtension(content));
         if (file == null) {
             throw new UnsupportedDataTypeException("Unsupported file format!");
         }
@@ -157,10 +158,27 @@ public class UserServiceImpl implements UserService {
         List<String[]> rows = file.getRows();
         rows.remove(0);
         List<ImportUserDataEntity> userImports = UserMapper.toUserRequestList(rows);
-
         ImportResponse importResponse = createImportUsers(userImports);
+        importUserHistoryService.saveImportUserHistory(UserMapper.toImportUserHistoryEntity(realm.getName(), getFileName(content), userImports, importResponse));
+
         log.info("Upload users success!", importResponse);
         return importResponse;
+    }
+
+    private String getFileExtension(String content) {
+        String finalFileName = getFileName(content);
+        return finalFileName.substring(finalFileName.lastIndexOf('.') + 1);
+    }
+
+    private String getFileName(String content) {
+        String[] contentDisposition = content.split(";");
+        for (String filename : contentDisposition) {
+            if ((filename.trim().startsWith("filename"))) {
+                String[] name = filename.split("=");
+                return name[1].trim().replaceAll("\"", "");
+            }
+        }
+        return "unknown";
     }
 
     private void checkStructure(FileModel file) throws FileServiceException {
@@ -218,6 +236,7 @@ public class UserServiceImpl implements UserService {
                 user.setEmailVerified(false);
                 createAdminEvent(OperationType.CREATE, user);
                 createdUsers.getAndIncrement();
+                o.setCreated(true);
                 importResponse.addCreatedUserIds("userId", user.getId());
 
                 if (userRequest.getTomsId() == null || userRequest.getTomsId().isBlank()) {

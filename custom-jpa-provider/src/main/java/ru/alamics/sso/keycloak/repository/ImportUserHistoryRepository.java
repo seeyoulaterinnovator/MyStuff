@@ -6,6 +6,7 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.Date;
 import java.util.List;
 
 @LocalBean
@@ -27,7 +28,7 @@ public class ImportUserHistoryRepository {
                 .getResultList();
     }
 
-    public ImportUserHistoryEntity saveImportReport(ImportUserHistoryEntity importUserHistoryEntity) {
+    public ImportUserHistoryEntity saveImportUserHistory(ImportUserHistoryEntity importUserHistoryEntity) {
         em.persist(importUserHistoryEntity);
         em.flush();
         return importUserHistoryEntity;

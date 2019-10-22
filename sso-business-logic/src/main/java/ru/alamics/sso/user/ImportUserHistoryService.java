@@ -1,5 +1,6 @@
 package ru.alamics.sso.user;
 
+import ru.alamics.sso.keycloak.entity.ImportUserHistoryEntity;
 import ru.alamics.sso.keycloak.repository.ImportUserHistoryRepository;
 
 import javax.ejb.EJB;
@@ -11,4 +12,11 @@ import javax.ejb.Stateless;
 public class ImportUserHistoryService {
     @EJB
     private ImportUserHistoryRepository importUserHistoryRepository;
+
+    public void saveImportUserHistory(ImportUserHistoryEntity importUserHistoryEntity) {
+        if (importUserHistoryEntity == null) {
+            return;
+        }
+        importUserHistoryRepository.saveImportUserHistory(importUserHistoryEntity);
+    }
 }

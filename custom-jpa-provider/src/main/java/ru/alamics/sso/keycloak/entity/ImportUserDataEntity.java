@@ -2,6 +2,7 @@ package ru.alamics.sso.keycloak.entity;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 
@@ -11,9 +12,10 @@ import javax.persistence.*;
 @Table(name = "IMPORT_USER_DATA")
 public class ImportUserDataEntity {
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(generator = "system-uuid")
+    @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String id;
-    @ManyToOne(targetEntity = ImportUserHistoryEntity.class)
+    @ManyToOne(targetEntity = ImportUserHistoryEntity.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "import_id")
     private ImportUserHistoryEntity importUserHistory;
     @Column(name = "first_name")
@@ -31,5 +33,5 @@ public class ImportUserDataEntity {
     @Column(name = "systems")
     private String systems;
     @Column(name = "is_created")
-    private String isCreated;
+    private boolean isCreated;
 }

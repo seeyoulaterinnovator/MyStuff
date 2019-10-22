@@ -3,6 +3,7 @@ package ru.alamics.sso.keycloak.entity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -14,7 +15,8 @@ import java.util.List;
 @Table(name = "IMPORT_USER_HISTORY")
 public class ImportUserHistoryEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(generator = "system-uuid")
+    @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String id;
     @Column(name = "name")
     private String name;
@@ -32,6 +34,6 @@ public class ImportUserHistoryEntity {
     private int countClones;
     @Column(name = "errors")
     private String errors;
-    @OneToMany(mappedBy = "importUserHistory")
+    @OneToMany(mappedBy = "importUserHistory", cascade = CascadeType.ALL)
     private List<ImportUserDataEntity> importUserData;
 }

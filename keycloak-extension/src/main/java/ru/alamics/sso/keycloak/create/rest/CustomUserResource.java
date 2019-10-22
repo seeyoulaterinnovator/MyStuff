@@ -119,7 +119,7 @@ public class CustomUserResource {
         try(InputStream bas = new ByteArrayInputStream(file.getFileData()) ) {
             return JsonResponse.success()
                     .addResult("import-report",
-                            userService.importUsers(bas, getFileExtension(content)))
+                            userService.importUsers(bas, content))
                     .build();
         } catch (UnsupportedDataTypeException | FileServiceException e) {
             log.error("Could not upload users", e);
@@ -170,20 +170,5 @@ public class CustomUserResource {
                     .message("Error writing file")
                     .build();
         }
-    }
-
-    private String getFileExtension(String content) {
-        String[] contentDisposition = content.split(";");
-        for (String filename : contentDisposition) {
-            if ((filename.trim().startsWith("filename"))) {
-
-                String[] name = filename.split("=");
-
-                String finalFileName = name[1].trim().replaceAll("\"", "");
-
-                return finalFileName.substring(finalFileName.lastIndexOf('.') + 1);
-            }
-        }
-        return "unknown";
     }
 }
