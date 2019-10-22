@@ -1,25 +1,39 @@
 package ru.alamics.sso.schedule;
 
 
+import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.models.*;
-import org.keycloak.models.jpa.UserAdapter;
+import org.keycloak.common.util.Time;
+import org.keycloak.events.admin.OperationType;
+import org.keycloak.events.jpa.AdminEventEntity;
 import org.keycloak.models.jpa.entities.*;
-import org.keycloak.models.utils.DefaultRoles;
+import org.keycloak.util.JsonSerialization;
 import ru.alamics.sso.keycloak.entity.ImportUserDataEntity;
 import ru.alamics.sso.keycloak.entity.ImportUserHistoryEntity;
 import ru.alamics.sso.keycloak.repository.*;
 import ru.alamics.sso.registration.FoundException;
+import ru.alamics.sso.registration.dto.UserPostRequest;
+import ru.alamics.sso.registration.dto.UserPostResponse;
+import ru.alamics.sso.registration.mapper.DataMapper;
+import ru.alamics.sso.registration.service.UserPostService;
+import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.user.model.ImportResponse;
 import ru.alamics.sso.util.Util;
 
-import javax.ejb.*;
+import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
+import javax.ejb.Schedule;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.validation.ValidationException;
-import javax.ws.rs.core.Context;
-import java.util.*;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
 @Slf4j
 @Singleton
@@ -35,8 +49,10 @@ public class ImportSchedule {
     private RoleRepository roleRepository;
     @EJB
     private UserAttributeRepository userAttributeRepository;
-    @Context
-    private KeycloakSession session;
+    @EJB
+    private AdminEventRepository adminEventRepository;
+    @EJB
+    private UserPostService userPostService;
 
     @Schedule(hour = "*", minute = "*/1", persistent = false)
     public void schedule() {
@@ -56,15 +72,13 @@ public class ImportSchedule {
                     try {
                         checkImportUser(importUserHistory.getRealmId(), o.getEmail(), o.getPhone());
                         UserEntity user = createUser(importUserHistory.getRealmId(), o);
-//                        createAdminEvent(OperationType.CREATE, user);
-//                        createdUsers.getAndIncrement();
-//                        o.setCreated(true);
-//                        importResponse.addCreatedUserIds("userId", user.getId());
-//
-//                        if (userRequest.getTomsId() == null || userRequest.getTomsId().isBlank()) {
-//                            throw new NotFoundException("TomsId is not exist");
-//                        }
-//                        addUserPost(user, o, userRequest);
+                        createAdminEvent(OperationType.CREATE, user, importUserHistory.getRealmId());
+                        createdUsers.getAndIncrement();
+                        o.setCreated(true);
+                        if (o.getTomsId() == null || o.getTomsId().isBlank()) {
+                            throw new NotFoundException("TomsId is not exist");
+                        }
+                        addUserPost(user, o);
                     } catch (FoundException e) {
                         e.getResult().forEach((k, v) -> {
                             Map<String, Object> error = new HashMap<>();
@@ -73,7 +87,7 @@ public class ImportSchedule {
                             importResponse.addError(error);
                         });
                         countClones.getAndIncrement();
-                    } catch (ValidationException e) {
+                    } catch (NotFoundException | ValidationException e) {
                         Map<String, Object> error = new HashMap<>();
                         error.put("error", e.getMessage());
                         error.put("importUserName", o.getFirstName());
@@ -164,5 +178,43 @@ public class ImportSchedule {
         attributeEntity.setValue(importUserData.getPhone());
         userAttributeRepository.save(attributeEntity);
         return user;
+    }
+
+    private void createAdminEvent(OperationType operationType, UserEntity userEntity, String realmId) {
+        AdminEventEntity adminEvent = new AdminEventEntity();
+        adminEvent.setTime(Time.toMillis(Time.currentTime()));
+        adminEvent.setRealmId(realmId);
+        adminEvent.setOperationType(operationType.name());
+        adminEvent.setAuthRealmId(realmId);
+        adminEvent.setResourcePath("schedule/importUsers");
+        try {
+            adminEvent.setRepresentation(JsonSerialization.writeValueAsString(DataMapper.toUserEntityRepresentation(userEntity)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        adminEvent.setResourceType("USER");
+        adminEventRepository.save(adminEvent);
+    }
+
+    private void addUserPost(UserEntity user, ImportUserDataEntity userImport) throws javassist.NotFoundException {
+        UserPostRequest userPostRequest = new UserPostRequest();
+        userPostRequest.setUserId(user.getId());
+        userPostRequest.setTomsId(userImport.getTomsId());
+        userPostRequest.setDmpId(userImport.getDmpId());
+
+        userPostRequest.setRoleId(userPostService.getUserPostRole(userImport.getRole()));
+        UserPostResponse userPostResponse = userPostService.save(userPostRequest);
+
+        addSystemRoles(userImport, userPostResponse.getId());
+    }
+
+    private void addSystemRoles(ImportUserDataEntity userImport, String userPostId) throws javassist.NotFoundException {
+        List<String> systems = List.of(userImport.getSystems().replaceAll("\\s", "").split(","));
+        if (systems != null && !systems.isEmpty()) {
+            for (String sysName : systems) {
+                userPostService.addSystemRole(UserMapper.toExternalSystemRoleRequest(userPostId,
+                        userPostService.getExternalSystemRoleId(sysName)));
+            }
+        }
     }
 }
