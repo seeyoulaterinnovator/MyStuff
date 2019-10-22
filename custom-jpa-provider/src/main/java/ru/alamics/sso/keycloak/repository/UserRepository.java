@@ -1,6 +1,7 @@
 package ru.alamics.sso.keycloak.repository;
 
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.jpa.entities.UserAttributeEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.services.validation.Validation;
@@ -50,6 +51,17 @@ public class UserRepository {
         return user;
     }
 
+    public UserAttributeEntity saveAttributes(UserAttributeEntity attr) {
+        if (attr.getId() == null) {
+            attr.setId(KeycloakModelUtils.generateId());
+            em.persist(attr);
+        } else {
+            em.merge(attr);
+        }
+        em.flush();
+        return attr;
+    }
+
     public UserEntity getFirstUserByPhoneNumber(RealmModel realmModel, String phone, String excludedUserId) {
         var users = em.createQuery("select u from UserEntity u join u.attributes attr \n" +
                 "  where u.realmId = :realmId " +
@@ -82,16 +94,14 @@ public class UserRepository {
         return null;
     }
 
-    public UserEntity getFirstUserByPhone(String realmId, String phone) {
+    public UserEntity getFirstUserByPhone(String phone) {
         var users = em.createQuery(
                 "select u from UserEntity u " +
                         "join u.attributes attr \n" +
-                        "  where u.realmId = :realmId " +
-                        "       and attr.name = :name " +
+                        "  where attr.name = :name " +
                         "       and attr.value = :phoneNmbr", UserEntity.class)
                 .setParameter("name", "phone")
                 .setParameter("phoneNmbr", phone)
-                .setParameter("realmId", realmId)
                 .getResultList();
         if (users != null && users.size() > 0) {
             return users.get(0);

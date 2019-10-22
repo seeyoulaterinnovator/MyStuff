@@ -28,15 +28,21 @@ public class ImportUserHistoryRepository {
                 .getResultList();
     }
 
-    public List<ImportUserHistoryEntity> findAllImportUserHistoryEntitiesIsDone() {
+    public List<ImportUserHistoryEntity> findAllImportUserHistoryEntities() {
         return em.createQuery(
                 "select ire " +
-                        "from ImportUserHistoryEntity ire where ire.isDone = true ", ImportUserHistoryEntity.class)
+                        "from ImportUserHistoryEntity ire ", ImportUserHistoryEntity.class)
                 .getResultList();
     }
 
     public ImportUserHistoryEntity saveImportUserHistory(ImportUserHistoryEntity importUserHistoryEntity) {
         em.persist(importUserHistoryEntity);
+        em.flush();
+        return importUserHistoryEntity;
+    }
+
+    public ImportUserHistoryEntity updateImportUserHistory(ImportUserHistoryEntity importUserHistoryEntity) {
+        em.merge(importUserHistoryEntity);
         em.flush();
         return importUserHistoryEntity;
     }

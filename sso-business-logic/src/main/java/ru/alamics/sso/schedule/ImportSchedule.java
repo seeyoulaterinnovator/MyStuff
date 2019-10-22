@@ -29,10 +29,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.validation.ValidationException;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
@@ -48,28 +45,26 @@ public class ImportSchedule {
     @EJB
     private RoleRepository roleRepository;
     @EJB
-    private UserAttributeRepository userAttributeRepository;
-    @EJB
     private AdminEventRepository adminEventRepository;
     @EJB
     private UserPostService userPostService;
 
-    @Schedule(hour = "*", minute = "*/1", persistent = false)
+    @Schedule(hour = "*", minute = "*", second = "*/30", persistent = false)
     public void schedule() {
-        importUserHistoryRepository.findAllImportUserHistoryEntitiesIsDone()
+        importUserHistoryRepository.findAllImportUserHistoryEntities()
                 .stream()
                 .filter(o -> o.getImportUserData() != null && !o.getImportUserData().isEmpty())
+                .filter(o -> !o.isDone())
                 .forEach(o -> createImportUsers(o));
     }
 
     private void createImportUsers(ImportUserHistoryEntity importUserHistory) {
-        ImportResponse importResponse = new ImportResponse();
-
         AtomicInteger createdUsers = new AtomicInteger();
         AtomicInteger countClones = new AtomicInteger();
         importUserHistory.getImportUserData().stream()
                 .forEach(o -> {
                     try {
+                        o.setErrors(null);
                         checkImportUser(importUserHistory.getRealmId(), o.getEmail(), o.getPhone());
                         UserEntity user = createUser(importUserHistory.getRealmId(), o);
                         createAdminEvent(OperationType.CREATE, user, importUserHistory.getRealmId());
@@ -80,22 +75,20 @@ public class ImportSchedule {
                         }
                         addUserPost(user, o);
                     } catch (FoundException e) {
+                        List<Object> errors = new LinkedList<>();
                         e.getResult().forEach((k, v) -> {
-                            Map<String, Object> error = new HashMap<>();
-                            error.put("error", v);
-                            error.put("importUserName", o.getFirstName());
-                            importResponse.addError(error);
+                            errors.add(v);
                         });
+                        o.setErrors(errors.toString());
                         countClones.getAndIncrement();
                     } catch (NotFoundException | ValidationException e) {
-                        Map<String, Object> error = new HashMap<>();
-                        error.put("error", e.getMessage());
-                        error.put("importUserName", o.getFirstName());
-                        importResponse.addError(error);
+                        o.setErrors(e.getMessage());
                     }
                 });
-        importResponse.setCreatedUsers(createdUsers);
-        importResponse.setCountClones(countClones);
+        importUserHistory.setCountClones(countClones.intValue());
+        importUserHistory.setCountCreatedUsers(createdUsers.intValue());
+        importUserHistory.setDone(true);
+        importUserHistoryRepository.updateImportUserHistory(importUserHistory);
     }
 
     private void checkImportUser(String realmId, String email, String phone) throws FoundException {
@@ -103,7 +96,7 @@ public class ImportSchedule {
 
         FoundException foundException = new FoundException();
         try {
-            checkOnExistUserByPhone(phone, realmId);
+            checkOnExistUserByPhone(phone);
         } catch (FoundException e) {
             foundException.addResult("error1", e.getMessage());
         }
@@ -118,8 +111,8 @@ public class ImportSchedule {
         }
     }
 
-    private void checkOnExistUserByPhone(String phone, String realm) throws FoundException {
-        UserEntity user = userRepository.getFirstUserByPhone(realm, phone);
+    private void checkOnExistUserByPhone(String phone) throws FoundException {
+        UserEntity user = userRepository.getFirstUserByPhone(phone);
 
         if (user != null) {
             log.error("User exists with same phone {}", phone);
@@ -151,7 +144,9 @@ public class ImportSchedule {
         user.setRealmId(realmId);
         user.setEmailVerified(false);
         user.setEnabled(true);
+        System.out.println("123");
         user = userRepository.save(user);
+        System.out.println("123");
 
         RealmEntity realm = realmRepository.findRealmEntityById(realmId);
         if (realm.getDefaultRoles() != null && !realm.getDefaultRoles().isEmpty()) {
@@ -176,7 +171,7 @@ public class ImportSchedule {
         attributeEntity.setName("phone");
         attributeEntity.setUser(user);
         attributeEntity.setValue(importUserData.getPhone());
-        userAttributeRepository.save(attributeEntity);
+        userRepository.saveAttributes(attributeEntity);
         return user;
     }
 
