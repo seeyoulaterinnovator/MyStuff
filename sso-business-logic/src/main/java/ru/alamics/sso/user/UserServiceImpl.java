@@ -88,8 +88,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public FileModel downloadUsersByImportReportId(String importId) throws IOException {
-        ImportUsersReportEntity importUserHistory = importUsersReportService.findImportUsersReportByImportId(importId);
-        FileModel file = FileFactory.createFileModel(importUserHistory.getName().substring(importUserHistory.getName().lastIndexOf(".")+1));
+        ImportUsersReportEntity importUsersReport = importUsersReportService.findImportUsersReportByImportId(importId);
+        FileModel file = FileFactory.createFileModel(importUsersReport.getName().substring(importUsersReport.getName().lastIndexOf(".")+1));
         if (file == null) {
             throw new UnsupportedDataTypeException("Unsupported file format!");
         }
@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
         List<String> finishParameterNames = userParameterNames.stream().skip(1).limit(userParameterNames.size()-2).collect(Collectors.toList());
         finishParameterNames.addAll(List.of("Статус пользователя", "Ошибки"));
         file.addRow(finishParameterNames);
-        importUserHistory.getImportUserData().stream()
+        importUsersReport.getImportUserData().stream()
                 .forEach(o -> {
                     List<String> list = new LinkedList<>();
                     list.add(o.getFirstName());
@@ -187,7 +187,7 @@ public class UserServiceImpl implements UserService {
         rows.remove(0);
         List<ImportUsersDataEntity> userImports = UserMapper.toUserRequestList(rows);
         ImportResponse importResponse = createImportUsers(userImports);
-        importUsersReportService.saveImportUsersReport(UserMapper.toImportUserHistoryEntity(realm.getName(), getFileName(content), userImports, importResponse));
+        importUsersReportService.saveImportUsersReport(UserMapper.toImportUsersReportEntity(realm.getName(), getFileName(content), userImports, importResponse));
 
         log.info("Upload users success!", importResponse);
         return importResponse;
@@ -205,9 +205,9 @@ public class UserServiceImpl implements UserService {
 
         List<String[]> rows = file.getRows();
         rows.remove(0);
-        ImportUsersReportEntity importUserHistory = UserMapper.toImportUserHistoryEntity(realm.getName(), getFileName(content), UserMapper.toUserRequestList(rows));
-        importUserHistory.setDone(false);
-        importUsersReportService.saveImportUsersReport(importUserHistory);
+        ImportUsersReportEntity importUsersReport = UserMapper.toImportUsersReportEntity(realm.getName(), getFileName(content), UserMapper.toUserRequestList(rows));
+        importUsersReport.setDone(false);
+        importUsersReportService.saveImportUsersReport(importUsersReport);
 
         log.info("Upload import users file success");
     }

@@ -56,20 +56,19 @@ public class UserSchedule {
     private AdminEventRepository adminEventRepository;
     @EJB
     private ApplicationProperties properties;
-    @EJB
-    private ImportSchedule importSchedule;
 
     private String host;
 
     @Schedule(hour = "*", minute = "*/1", persistent = false)
     public void schedule() {
-        importSchedule.schedule();
+        log.info("start UserSchedule");
         findExpiredPassword();
         for (String realm : SETTINGS_REALM_NAMES_SCHEDULE) {
             notificationInactiveUsers(realm);
             block(realm);
         }
         sendEmails();
+        log.info("end UserSchedule");
     }
 
     private void notificationInactiveUsers(String realm) {

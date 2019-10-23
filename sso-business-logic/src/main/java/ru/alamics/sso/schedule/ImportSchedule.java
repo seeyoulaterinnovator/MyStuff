@@ -20,7 +20,8 @@ import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.util.Util;
 
 import javax.ejb.EJB;
-import javax.ejb.Stateless;
+import javax.ejb.Schedule;
+import javax.ejb.Singleton;
 import javax.validation.ValidationException;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -29,7 +30,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
-@Stateless
+@Singleton
 public class ImportSchedule {
     @EJB
     private ImportUsersReportRepository importUsersReportRepository;
@@ -44,6 +45,7 @@ public class ImportSchedule {
     @EJB
     private UserPostService userPostService;
 
+    @Schedule(hour = "*", minute = "*/1", persistent = false)
     public void schedule() {
         log.info("Start import users by schedule");
         importUsersReportRepository.findAllImportUsersReports()
@@ -54,16 +56,16 @@ public class ImportSchedule {
         log.info("End import users by schedule");
     }
 
-    private void createImportUsers(ImportUsersReportEntity importUserHistory) {
+    private void createImportUsers(ImportUsersReportEntity importUsersReport) {
         AtomicInteger createdUsers = new AtomicInteger();
         AtomicInteger countClones = new AtomicInteger();
-        importUserHistory.getImportUserData().stream()
+        importUsersReport.getImportUserData().stream()
                 .forEach(o -> {
                     try {
                         o.setErrors(null);
-                        checkImportUser(importUserHistory.getRealmId(), o.getEmail(), o.getPhone());
-                        UserEntity user = createUser(importUserHistory.getRealmId(), o);
-                        createAdminEvent(OperationType.CREATE, user, importUserHistory.getRealmId());
+                        checkImportUser(importUsersReport.getRealmId(), o.getEmail(), o.getPhone());
+                        UserEntity user = createUser(importUsersReport.getRealmId(), o);
+                        createAdminEvent(OperationType.CREATE, user, importUsersReport.getRealmId());
                         createdUsers.getAndIncrement();
                         o.setCreated(true);
                         if (o.getTomsId() == null || o.getTomsId().isBlank()) {
@@ -81,10 +83,10 @@ public class ImportSchedule {
                         o.setErrors(e.getMessage());
                     }
                 });
-        importUserHistory.setCountClones(countClones.intValue());
-        importUserHistory.setCountCreatedUsers(createdUsers.intValue());
-        importUserHistory.setDone(true);
-        importUsersReportRepository.updateImportUsersReport(importUserHistory);
+        importUsersReport.setCountClones(countClones.intValue());
+        importUsersReport.setCountCreatedUsers(createdUsers.intValue());
+        importUsersReport.setDone(true);
+        importUsersReportRepository.updateImportUsersReport(importUsersReport);
     }
 
     private void checkImportUser(String realmId, String email, String phone) throws FoundException {

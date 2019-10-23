@@ -201,7 +201,7 @@ public class UserMapper {
         return userRequest;
     }
 
-    public static ImportUsersReportEntity toImportUserHistoryEntity(String realmId, String name, List<ImportUsersDataEntity> importUserDataEntities, ImportResponse importResponse) {
+    public static ImportUsersReportEntity toImportUsersReportEntity(String realmId, String name, List<ImportUsersDataEntity> importUserDataEntities, ImportResponse importResponse) {
         if (importUserDataEntities == null) {
             return null;
         }
@@ -217,7 +217,7 @@ public class UserMapper {
         return importUserReport;
     }
 
-    public static ImportUsersReportEntity toImportUserHistoryEntity(String realmId, String name, List<ImportUsersDataEntity> importUserDataEntities) {
+    public static ImportUsersReportEntity toImportUsersReportEntity(String realmId, String name, List<ImportUsersDataEntity> importUserDataEntities) {
         if (importUserDataEntities == null) {
             return null;
         }
