@@ -9,15 +9,15 @@ import javax.persistence.*;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "IMPORT_USER_DATA")
-public class ImportUserDataEntity {
+@Table(name = "IMPORT_USERS_DATA")
+public class ImportUsersDataEntity {
     @Id
     @GeneratedValue(generator = "system-uuid")
     @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String id;
-    @ManyToOne(targetEntity = ImportUserHistoryEntity.class, fetch = FetchType.LAZY)
+    @ManyToOne(targetEntity = ImportUsersReportEntity.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "import_id")
-    private ImportUserHistoryEntity importUserHistory;
+    private ImportUsersReportEntity importUsersReport;
     @Column(name = "first_name")
     private String firstName;
     @Column(name = "email")

@@ -8,8 +8,8 @@ import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.jpa.AdminEventEntity;
 import org.keycloak.models.jpa.entities.*;
 import org.keycloak.util.JsonSerialization;
-import ru.alamics.sso.keycloak.entity.ImportUserDataEntity;
-import ru.alamics.sso.keycloak.entity.ImportUserHistoryEntity;
+import ru.alamics.sso.keycloak.entity.ImportUsersDataEntity;
+import ru.alamics.sso.keycloak.entity.ImportUsersReportEntity;
 import ru.alamics.sso.keycloak.repository.*;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Stateless
 public class ImportSchedule {
     @EJB
-    private ImportUserHistoryRepository importUserHistoryRepository;
+    private ImportUsersReportRepository importUsersReportRepository;
     @EJB
     private UserRepository userRepository;
     @EJB
@@ -46,7 +46,7 @@ public class ImportSchedule {
 
     public void schedule() {
         log.info("Start import users by schedule");
-        importUserHistoryRepository.findAllImportUserHistoryEntities()
+        importUsersReportRepository.findAllImportUsersReports()
                 .stream()
                 .filter(o -> o.getImportUserData() != null && !o.getImportUserData().isEmpty())
                 .filter(o -> !o.isDone())
@@ -54,7 +54,7 @@ public class ImportSchedule {
         log.info("End import users by schedule");
     }
 
-    private void createImportUsers(ImportUserHistoryEntity importUserHistory) {
+    private void createImportUsers(ImportUsersReportEntity importUserHistory) {
         AtomicInteger createdUsers = new AtomicInteger();
         AtomicInteger countClones = new AtomicInteger();
         importUserHistory.getImportUserData().stream()
@@ -84,7 +84,7 @@ public class ImportSchedule {
         importUserHistory.setCountClones(countClones.intValue());
         importUserHistory.setCountCreatedUsers(createdUsers.intValue());
         importUserHistory.setDone(true);
-        importUserHistoryRepository.updateImportUserHistory(importUserHistory);
+        importUsersReportRepository.updateImportUsersReport(importUserHistory);
     }
 
     private void checkImportUser(String realmId, String email, String phone) throws FoundException {
@@ -131,7 +131,7 @@ public class ImportSchedule {
         }
     }
 
-    private UserEntity createUser(String realmId, ImportUserDataEntity importUserData) {
+    private UserEntity createUser(String realmId, ImportUsersDataEntity importUserData) {
         UserEntity user = new UserEntity();
         user.setCreatedTimestamp(System.currentTimeMillis());
         user.setUsername(importUserData.getEmail().toLowerCase());
@@ -185,7 +185,7 @@ public class ImportSchedule {
         adminEventRepository.save(adminEvent);
     }
 
-    private void addUserPost(UserEntity user, ImportUserDataEntity userImport) throws javassist.NotFoundException {
+    private void addUserPost(UserEntity user, ImportUsersDataEntity userImport) throws javassist.NotFoundException {
         UserPostRequest userPostRequest = new UserPostRequest();
         userPostRequest.setUserId(user.getId());
         userPostRequest.setTomsId(userImport.getTomsId());
@@ -197,7 +197,7 @@ public class ImportSchedule {
         addSystemRoles(userImport, userPostResponse.getId());
     }
 
-    private void addSystemRoles(ImportUserDataEntity userImport, String userPostId) throws javassist.NotFoundException {
+    private void addSystemRoles(ImportUsersDataEntity userImport, String userPostId) throws javassist.NotFoundException {
         List<String> systems = List.of(userImport.getSystems().replaceAll("\\s", "").split(","));
         if (systems != null && !systems.isEmpty()) {
             for (String sysName : systems) {

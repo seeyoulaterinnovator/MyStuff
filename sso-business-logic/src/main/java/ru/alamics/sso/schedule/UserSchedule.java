@@ -16,21 +16,15 @@ import org.keycloak.util.JsonSerialization;
 import ru.alamics.sso.emailer.EmailModel;
 import ru.alamics.sso.emailer.EmailSender;
 import ru.alamics.sso.keycloak.entity.AutoLockNotification;
-import ru.alamics.sso.keycloak.entity.ImportUserDataEntity;
-import ru.alamics.sso.keycloak.entity.ImportUserHistoryEntity;
 import ru.alamics.sso.keycloak.entity.common.NotificationType;
 import ru.alamics.sso.keycloak.repository.*;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.property.PropertyConstants;
-import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.settings.SettingsDto;
-import ru.alamics.sso.user.model.ImportResponse;
-import ru.alamics.sso.util.Util;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
-import javax.validation.ValidationException;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -39,7 +33,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Singleton

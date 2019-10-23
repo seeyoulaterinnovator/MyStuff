@@ -2305,8 +2305,8 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
     $scope.ImportReports = [];
 
     $scope.init = function () {
-        $http.get(authUrl + '/realms/' + realm.realm + '/users-toms/importUserHistory').then(function (data) {
-            $scope.ImportReports = angular.fromJson(data).data.results['importUserHistories'];
+        $http.get(authUrl + '/realms/' + realm.realm + '/users-toms/importUsersReports').then(function (data) {
+            $scope.ImportReports = angular.fromJson(data).data.results['importUsersReports'];
         });
     };
 
@@ -2322,7 +2322,7 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
             }
         }).then(response => {
             if (response.status === 200){
-                Notifications.success("Upload import users file success!");
+                Notifications.success("Upload import users file success! Please, refresh 'import users' page");
             }
         }).catch(error => {
             if (error.status === 400) {

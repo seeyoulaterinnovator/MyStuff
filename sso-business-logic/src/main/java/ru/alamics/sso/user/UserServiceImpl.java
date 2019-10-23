@@ -12,8 +12,8 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.provider.ProviderFactory;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
-import ru.alamics.sso.keycloak.entity.ImportUserDataEntity;
-import ru.alamics.sso.keycloak.entity.ImportUserHistoryEntity;
+import ru.alamics.sso.keycloak.entity.ImportUsersDataEntity;
+import ru.alamics.sso.keycloak.entity.ImportUsersReportEntity;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
@@ -21,7 +21,6 @@ import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.user.model.*;
-import ru.alamics.sso.user.web.ImportUserHistoryDto;
 import ru.alamics.sso.user.web.UserSearchDto;
 import ru.alamics.sso.util.Util;
 
@@ -29,8 +28,6 @@ import javax.activation.UnsupportedDataTypeException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.validation.ValidationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -48,7 +45,7 @@ public class UserServiceImpl implements UserService {
     private RealmModel realm;
     private UserPostService userPostService;
     private UserFindService userFindService;
-    private ImportUserHistoryService importUserHistoryService;
+    private ImportUsersReportService importUsersReportService;
 
     public UserServiceImpl(KeycloakSession session, AdminAuth auth) {
         this.auth = auth;
@@ -57,7 +54,7 @@ public class UserServiceImpl implements UserService {
         try {
             this.userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
             this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
-            this.importUserHistoryService = (ImportUserHistoryService) new InitialContext().lookup("java:global/domru-sso/" + ImportUserHistoryService.class.getSimpleName());
+            this.importUsersReportService = (ImportUsersReportService) new InitialContext().lookup("java:global/domru-sso/" + ImportUsersReportService.class.getSimpleName());
         } catch (NamingException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
@@ -91,7 +88,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public FileModel downloadUsersByImportReportId(String importId) throws IOException {
-        ImportUserHistoryEntity importUserHistory = importUserHistoryService.getImportUserHistory(importId);
+        ImportUsersReportEntity importUserHistory = importUsersReportService.findImportUsersReportByImportId(importId);
         FileModel file = FileFactory.createFileModel(importUserHistory.getName().substring(importUserHistory.getName().lastIndexOf(".")+1));
         if (file == null) {
             throw new UnsupportedDataTypeException("Unsupported file format!");
@@ -188,9 +185,9 @@ public class UserServiceImpl implements UserService {
 
         List<String[]> rows = file.getRows();
         rows.remove(0);
-        List<ImportUserDataEntity> userImports = UserMapper.toUserRequestList(rows);
+        List<ImportUsersDataEntity> userImports = UserMapper.toUserRequestList(rows);
         ImportResponse importResponse = createImportUsers(userImports);
-        importUserHistoryService.saveImportUserHistory(UserMapper.toImportUserHistoryEntity(realm.getName(), getFileName(content), userImports, importResponse));
+        importUsersReportService.saveImportUsersReport(UserMapper.toImportUserHistoryEntity(realm.getName(), getFileName(content), userImports, importResponse));
 
         log.info("Upload users success!", importResponse);
         return importResponse;
@@ -198,7 +195,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void uploadImportUsersFile(InputStream inputStream, String content) throws IOException, FileServiceException {
-        log.info("Start deferred upload users");
+        log.info("Start upload import users file");
 
         FileModel file = FileFactory.createFileModel(inputStream, getFileExtension(content));
         if (file == null) {
@@ -208,11 +205,11 @@ public class UserServiceImpl implements UserService {
 
         List<String[]> rows = file.getRows();
         rows.remove(0);
-        ImportUserHistoryEntity importUserHistory = UserMapper.toImportUserHistoryEntity(realm.getName(), getFileName(content), UserMapper.toUserRequestList(rows));
+        ImportUsersReportEntity importUserHistory = UserMapper.toImportUserHistoryEntity(realm.getName(), getFileName(content), UserMapper.toUserRequestList(rows));
         importUserHistory.setDone(false);
-        importUserHistoryService.saveImportUserHistory(importUserHistory);
+        importUsersReportService.saveImportUsersReport(importUserHistory);
 
-        log.info("Upload deferred users success!");
+        log.info("Upload import users file success");
     }
 
     private String getFileExtension(String content) {
@@ -273,7 +270,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private ImportResponse createImportUsers(List<ImportUserDataEntity> userImports) {
+    private ImportResponse createImportUsers(List<ImportUsersDataEntity> userImports) {
         ImportResponse importResponse = new ImportResponse();
 
         AtomicInteger createdUsers = new AtomicInteger();
@@ -441,7 +438,7 @@ public class UserServiceImpl implements UserService {
         userPostService.save(userPostRequest);
     }
 
-    private void addUserPost(UserModel userModel, ImportUserDataEntity userImport, UserRequest userRequest) throws NotFoundException {
+    private void addUserPost(UserModel userModel, ImportUsersDataEntity userImport, UserRequest userRequest) throws NotFoundException {
         UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, userRequest);
         userPostRequest.setRoleId(userPostService.getUserPostRole(userImport.getRole()));
         UserPostResponse userPostResponse = userPostService.save(userPostRequest);
@@ -449,7 +446,7 @@ public class UserServiceImpl implements UserService {
         addSystemRoles(userImport, userPostResponse.getId());
     }
 
-    private void addSystemRoles(ImportUserDataEntity userImport, String userPostId) throws NotFoundException {
+    private void addSystemRoles(ImportUsersDataEntity userImport, String userPostId) throws NotFoundException {
         List<String> systems = List.of(userImport.getSystems().replaceAll("\\s", "").split(","));
         if (systems != null && !systems.isEmpty()) {
             for (String sysName : systems) {

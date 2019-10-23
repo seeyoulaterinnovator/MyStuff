@@ -8,7 +8,7 @@ import org.keycloak.models.*;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.resources.admin.AdminAuth;
 import ru.alamics.sso.user.FileServiceException;
-import ru.alamics.sso.user.ImportUserHistoryService;
+import ru.alamics.sso.user.ImportUsersReportService;
 import ru.alamics.sso.user.UserService;
 import ru.alamics.sso.user.UserServiceImpl;
 import ru.alamics.sso.user.model.*;
@@ -30,14 +30,14 @@ import java.io.*;
 public class CustomUserResource {
     protected KeycloakSession session;
     private UserService userService;
-    private ImportUserHistoryService importUserHistoryService;
+    private ImportUsersReportService importUsersReportService;
 
     public CustomUserResource(KeycloakSession session, AdminAuth auth) {
         this.session = session;
 //        AdminAuth auth = authenticateRealmAdminRequest(session.getContext().getRealm());
         this.userService = new UserServiceImpl(session, auth);
         try {
-            this.importUserHistoryService = (ImportUserHistoryService) new InitialContext().lookup("java:global/domru-sso/" + ImportUserHistoryService.class.getSimpleName());
+            this.importUsersReportService = (ImportUsersReportService) new InitialContext().lookup("java:global/domru-sso/" + ImportUsersReportService.class.getSimpleName());
         } catch (NamingException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
@@ -140,31 +140,6 @@ public class CustomUserResource {
     }
 
     @POST
-    @Path("/uploadImportUsersFile")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @NoCache
-    public Response uploadImportUsersFile(@MultipartForm FileDto file, @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content) {
-        if (file == null || content == null || content.isBlank()) {
-            return JsonResponse.error(Response.Status.BAD_REQUEST).build();
-        }
-        try (InputStream bas = new ByteArrayInputStream(file.getFileData())) {
-            userService.uploadImportUsersFile(bas, content);
-            return JsonResponse.success()
-                    .build();
-        } catch (UnsupportedDataTypeException | FileServiceException e) {
-            log.error("Could not upload users", e);
-            return JsonResponse.fail()
-                    .message(e.getMessage())
-                    .build();
-        } catch (IOException e) {
-            log.error("Could not upload users", e);
-            return JsonResponse.fail()
-                    .message("Error reading file")
-                    .build();
-        }
-    }
-
-    @POST
     @Path("/downloadUsers")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
@@ -203,13 +178,39 @@ public class CustomUserResource {
     }
 
     @GET
-    @Path("/importUserHistory")
+    @Path("/importUsersReports")
     @NoCache
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getImportUserHistoriesByRealm() {
+    public Response getImportUsersReports() {
         return JsonResponse.success()
-                .addResult("importUserHistories", importUserHistoryService.getImportUserHistories(session.getContext().getRealm().getName()))
+                .addResult("importUsersReports", importUsersReportService.findImportUsersReportsByRealmId(session.getContext().getRealm().getName()))
                 .build();
+    }
+
+
+    @POST
+    @Path("/uploadImportUsersFile")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @NoCache
+    public Response uploadImportUsersFile(@MultipartForm FileDto file, @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content) {
+        if (file == null || content == null || content.isBlank()) {
+            return JsonResponse.error(Response.Status.BAD_REQUEST).build();
+        }
+        try (InputStream bas = new ByteArrayInputStream(file.getFileData())) {
+            userService.uploadImportUsersFile(bas, content);
+            return JsonResponse.success()
+                    .build();
+        } catch (UnsupportedDataTypeException | FileServiceException e) {
+            log.error("Could not upload users", e);
+            return JsonResponse.fail()
+                    .message(e.getMessage())
+                    .build();
+        } catch (IOException e) {
+            log.error("Could not upload users", e);
+            return JsonResponse.fail()
+                    .message("Error reading file")
+                    .build();
+        }
     }
 
     @POST

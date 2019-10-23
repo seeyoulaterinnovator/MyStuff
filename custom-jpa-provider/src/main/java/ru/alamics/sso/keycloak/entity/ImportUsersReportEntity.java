@@ -12,8 +12,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "IMPORT_USER_HISTORY")
-public class ImportUserHistoryEntity {
+@Table(name = "IMPORT_USERS_REPORT")
+public class ImportUsersReportEntity {
     @Id
     @GeneratedValue(generator = "system-uuid")
     @GenericGenerator(name="system-uuid", strategy = "uuid")
@@ -34,6 +34,6 @@ public class ImportUserHistoryEntity {
     private int countClones;
     @Column(name = "is_done")
     private boolean isDone;
-    @OneToMany(mappedBy = "importUserHistory", cascade = CascadeType.ALL)
-    private List<ImportUserDataEntity> importUserData;
+    @OneToMany(mappedBy = "importUsersReport", cascade = CascadeType.ALL)
+    private List<ImportUsersDataEntity> importUserData;
 }
