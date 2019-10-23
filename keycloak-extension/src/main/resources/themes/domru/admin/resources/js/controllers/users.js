@@ -2333,16 +2333,16 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
 
     $scope.downloadImportUsersReport = function (importReport) {
         var linkElement = document.createElement('a');
-        $http.post(`${authUrl}/realms/${$scope.realm.realm}/users-toms/downloadImportUsersReport/${importReport.id}`,
-            {
-                headers: {
+        $http.post(`${authUrl}/realms/${$scope.realm.realm}/users-toms/downloadImportUsersReport/${importReport.id}`, null,
+            { headers: {
                     'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8',
                     'Content-Type': 'application/json'
                 },
-                responseType: 'arraybuffer'})
+                responseType: 'arraybuffer'
+            })
             .then((response) => {
                 var headers = response.headers();
-                var filename = 'users_info.xlsx';
+                var filename = headers['filename'];
                 var contentType = headers['content-type'];
                 var blob = new Blob([response.data], {type: contentType});
                 var url = window.URL.createObjectURL(blob)
@@ -2356,7 +2356,6 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
                     "cancelable": false
                 });
                 linkElement.dispatchEvent(clickEvent);
-
             });
     };
 
