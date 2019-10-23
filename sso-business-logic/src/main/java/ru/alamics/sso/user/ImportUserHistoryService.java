@@ -27,7 +27,7 @@ public class ImportUserHistoryService {
         return UserMapper.toImportUserHistoryDtos(importUserHistoryRepository.findAllImportUserHistoryEntities(realmId));
     }
 
-    public ImportUserHistoryDto getImportUserHistory(String importId) {
-        return UserMapper.toImportUserHistoryDto(importUserHistoryRepository.findImportUserHistory(importId));
+    public ImportUserHistoryEntity getImportUserHistory(String importId) {
+        return importUserHistoryRepository.findImportUserHistory(importId);
     }
 }

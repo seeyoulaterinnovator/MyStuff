@@ -310,7 +310,9 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             $scope.query.searchByTomsId = $scope.getSearchParameter($route.current.params.searchToms);
             $scope.query.searchRealm = $scope.getSearchParameter($route.current.params.searchRealm);
 
-            if ($scope.query.searchRealm === '' || ! $scope.userRealms.some(function (realm) {return realm === $scope.query.searchRealm}) ){
+            if ($scope.query.searchRealm === '' || !$scope.userRealms.some(function (realm) {
+                return realm === $scope.query.searchRealm
+            })) {
                 $scope.query.searchRealm = realm.realm;
             }
 
@@ -319,7 +321,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         });
     };
 
-    $scope.getSearchParameter = function (param){
+    $scope.getSearchParameter = function (param) {
         if (param === undefined) {
             return '';
         }
@@ -406,7 +408,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             var resp = angular.fromJson(response).data.results['import-report'];
             this.importMsg(resp)
         }).catch(error => {
-            if(error.status === 400) {
+            if (error.status === 400) {
                 Notifications.error(error.data.message);
             } else {
                 Notifications.error(error.statusText);
@@ -428,7 +430,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             var resp = angular.fromJson(response).data.results['import-report'];
             this.importMsg(resp)
         }).catch(error => {
-            if(error.status === 400) {
+            if (error.status === 400) {
                 Notifications.error(error.data.message);
             } else {
                 Notifications.error(error.statusText);
@@ -440,10 +442,10 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         return self.indexOf(value) === index;
     }
 
-    $scope.importMsg = function(resp) {
+    $scope.importMsg = function (resp) {
         var errors = [];
-        if(resp.errors) {
-            errors = resp.errors.map(error => error.error).filter(onlyUnique );
+        if (resp.errors) {
+            errors = resp.errors.map(error => error.error).filter(onlyUnique);
         }
         var errorMsg = errors.length === 0 ? "Ошибок нет" : errors.join(",\n\t\t\t\t\t\t\t   ");
         var msg = `
@@ -469,7 +471,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 "SYSTEM"
             ],
             userIds: ["XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"]
-    };
+        };
         $scope.tempRealm = $scope.query.searchRealm;
         $scope.query.searchRealm = $scope.realm.realm;
         $scope.exportTemplateXlsx(payload)
@@ -504,27 +506,27 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             responseType: 'arraybuffer'
         }).then((response) => {
             var headers = response.headers();
-        var filename = 'users_info.xlsx';
-        var contentType = headers['content-type'];
-        var blob = new Blob([response.data], {type: contentType});
-        var url = window.URL.createObjectURL(blob, {
-            type: 'data:attachment/xlsx'
-        });
+            var filename = 'users_info.xlsx';
+            var contentType = headers['content-type'];
+            var blob = new Blob([response.data], {type: contentType});
+            var url = window.URL.createObjectURL(blob, {
+                type: 'data:attachment/xlsx'
+            });
 
-        linkElement.setAttribute('href', url);
-        linkElement.setAttribute("download", filename);
+            linkElement.setAttribute('href', url);
+            linkElement.setAttribute("download", filename);
 
-        var clickEvent = new MouseEvent("click", {
-            "view": window,
-            "bubbles": true,
-            "cancelable": false
-        });
-        linkElement.dispatchEvent(clickEvent);
+            var clickEvent = new MouseEvent("click", {
+                "view": window,
+                "bubbles": true,
+                "cancelable": false
+            });
+            linkElement.dispatchEvent(clickEvent);
 
-        if ($scope.tempRealm !== undefined){
-            $scope.query.searchRealm = $scope.tempRealm;
-        }
-    })
+            if ($scope.tempRealm !== undefined) {
+                $scope.query.searchRealm = $scope.tempRealm;
+            }
+        })
     };
 
     $scope.downloadTemplateCSV = function () {
@@ -571,25 +573,25 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             headers: {'Accept': 'application/octet-stream;charset=UTF-8', 'Content-Type': 'application/json'}
         }).then((response) => {
             var headers = response.headers();
-        var filename = 'users_info.csv';
-        var contentType = headers['content-type'];
-        var blob = new Blob(["\ufeff", response.data], {type: contentType});
-        var url = window.URL.createObjectURL(blob);
+            var filename = 'users_info.csv';
+            var contentType = headers['content-type'];
+            var blob = new Blob(["\ufeff", response.data], {type: contentType});
+            var url = window.URL.createObjectURL(blob);
 
-        linkElement.setAttribute('href', url);
-        linkElement.setAttribute("download", filename);
+            linkElement.setAttribute('href', url);
+            linkElement.setAttribute("download", filename);
 
-        var clickEvent = new MouseEvent("click", {
-            "view": window,
-            "bubbles": true,
-            "cancelable": false
-        });
-        linkElement.dispatchEvent(clickEvent);
+            var clickEvent = new MouseEvent("click", {
+                "view": window,
+                "bubbles": true,
+                "cancelable": false
+            });
+            linkElement.dispatchEvent(clickEvent);
 
-        if ($scope.tempRealm !== undefined){
-            $scope.query.searchRealm = $scope.tempRealm;
-        }
-    })
+            if ($scope.tempRealm !== undefined) {
+                $scope.query.searchRealm = $scope.tempRealm;
+            }
+        })
     };
 
     $scope.nextPage = function () {
@@ -619,7 +621,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
     $scope.groupByUser = function (data) {
         let ret = [];
-        if (data === null){
+        if (data === null) {
             return ret;
         }
         data.map(user => {
@@ -2320,40 +2322,42 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
             }
         }).success(
             Notifications.success("Upload import users file success!")
-    ).catch(error => {
-            if(error.status === 400) {
-            Notifications.error(error.data.message);
-        } else {
-            Notifications.error(error.statusText);
-        }
-    })
+        ).catch(error => {
+            if (error.status === 400) {
+                Notifications.error(error.data.message);
+            } else {
+                Notifications.error(error.statusText);
+            }
+        })
     };
 
     $scope.downloadImportUsersReport = function (importReport) {
         var linkElement = document.createElement('a');
-        $http.post(`${authUrl}/realms/${$scope.query.searchRealm}/users-toms/downloadImportUsersReport/${importReport.id}`, {
-            headers: {'Accept': 'application/octet-stream;charset=UTF-8', 'Content-Type': 'application/json'}
-        }).then((response) => {
-            var headers = response.headers();
-        var filename = 'users_info.csv';
-        var contentType = headers['content-type'];
-        var blob = new Blob(["\ufeff", response.data], {type: contentType});
-        var url = window.URL.createObjectURL(blob);
+        $http.post(`${authUrl}/realms/${$scope.realm.realm}/users-toms/downloadImportUsersReport/${importReport.id}`,
+            {
+                headers: {
+                    'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8',
+                    'Content-Type': 'application/json'
+                },
+                responseType: 'arraybuffer'})
+            .then((response) => {
+                var headers = response.headers();
+                var filename = 'users_info.xlsx';
+                var contentType = headers['content-type'];
+                var blob = new Blob([response.data], {type: contentType});
+                var url = window.URL.createObjectURL(blob)
 
-        linkElement.setAttribute('href', url);
-        linkElement.setAttribute("download", filename);
+                linkElement.setAttribute('href', url);
+                linkElement.setAttribute("download", filename);
 
-        var clickEvent = new MouseEvent("click", {
-            "view": window,
-            "bubbles": true,
-            "cancelable": false
-        });
-        linkElement.dispatchEvent(clickEvent);
+                var clickEvent = new MouseEvent("click", {
+                    "view": window,
+                    "bubbles": true,
+                    "cancelable": false
+                });
+                linkElement.dispatchEvent(clickEvent);
 
-        if ($scope.tempRealm !== undefined){
-            $scope.query.searchRealm = $scope.tempRealm;
-        }
-    })
+            });
     };
 
     $scope.init();

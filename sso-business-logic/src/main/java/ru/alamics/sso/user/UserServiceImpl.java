@@ -21,19 +21,21 @@ import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.user.model.*;
+import ru.alamics.sso.user.web.ImportUserHistoryDto;
 import ru.alamics.sso.user.web.UserSearchDto;
 import ru.alamics.sso.util.Util;
 
 import javax.activation.UnsupportedDataTypeException;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.validation.ValidationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 import static ru.alamics.sso.user.model.UserParameter.*;
@@ -85,6 +87,34 @@ public class UserServiceImpl implements UserService {
         file.addRow(getUserParameterNames(userRequest.getUserParameters()));
         userDto.stream().forEach(o -> file.addRow(getUserParameters(o, userRequest.getUserParameters())));
         return file.save();
+    }
+
+    @Override
+    public FileModel downloadUsersByImportReportId(String importId) throws IOException {
+        ImportUserHistoryEntity importUserHistory = importUserHistoryService.getImportUserHistory(importId);
+        FileModel file = FileFactory.createFileModel(importUserHistory.getName().substring(importUserHistory.getName().lastIndexOf(".")+1));
+        if (file == null) {
+            throw new UnsupportedDataTypeException("Unsupported file format!");
+        }
+        List<String> userParameterNames = getUserParameterNames(UserParameter.values());
+        List<String> finishParameterNames = userParameterNames.stream().skip(1).limit(userParameterNames.size()-2).collect(Collectors.toList());
+        finishParameterNames.addAll(List.of("Статус пользователя", "Ошибки"));
+        file.addRow(finishParameterNames);
+        importUserHistory.getImportUserData().stream()
+                .forEach(o -> {
+                    List<String> list = new LinkedList<>();
+                    list.add(o.getFirstName());
+                    list.add(o.getEmail());
+                    list.add(o.getPhone());
+                    list.add(o.getTomsId());
+                    list.add(o.getDmpId());
+                    list.add(o.getRole());
+                    list.add(o.getSystems());
+                    list.add(String.valueOf(o.isCreated()));
+                    list.add(o.getErrors());
+                    file.addRow(list);
+                });
+        return file;
     }
 
     private List<UserSearchDto> searchUsersById(List<UserSearchDto> userDtos, String[] userIds) {

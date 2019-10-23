@@ -11,9 +11,7 @@ import ru.alamics.sso.user.FileServiceException;
 import ru.alamics.sso.user.ImportUserHistoryService;
 import ru.alamics.sso.user.UserService;
 import ru.alamics.sso.user.UserServiceImpl;
-import ru.alamics.sso.user.model.DownloadUserRequest;
-import ru.alamics.sso.user.model.UserParameter;
-import ru.alamics.sso.user.model.UserRequest;
+import ru.alamics.sso.user.model.*;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.service.UserFindService;
@@ -27,9 +25,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 @Slf4j
 public class CustomUserResource {
@@ -212,21 +208,39 @@ public class CustomUserResource {
     @NoCache
     @Produces(MediaType.APPLICATION_JSON)
     public Response getImportUserHistoriesByRealm() {
-//        if (realmId == null || realmId.isBlank()){
-//            return ErrorResponse.error("realm is required attribute", Response.Status.BAD_REQUEST);
-//        }
         return JsonResponse.success()
                 .addResult("importUserHistories", importUserHistoryService.getImportUserHistories(session.getContext().getRealm().getName()))
                 .build();
     }
 
-    @GET
-    @Path("/importUserHistory/{id}")
+    @POST
+    @Path("/downloadImportUsersReport/{id}")
     @NoCache
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getImportUserHistoryById(@PathParam("id") String importId) {
-        return JsonResponse.success()
-                .addResult("importUserHistories", importUserHistoryService.getImportUserHistory(importId))
-                .build();
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response downloadImportUsersReport(@PathParam("id") String importId) {
+        try {
+            log.info("Start download users");
+            FileModel file = userService.downloadUsersByImportReportId(importId);
+            Response.ResponseBuilder response = Response.ok((Object) file.save());
+            if (file instanceof XlsxImpl) {
+                response.header("Content-Disposition", "attachment; filename=\"users_info." + "xlsx" + "\"");
+                response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
+            } else {
+                response.header("Content-Disposition", "attachment; filename=\"users_info." + "csv" + "\"");
+                response.header("Content-Type", MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8");
+            }
+            return response.build();
+        } catch (UnsupportedDataTypeException e) {
+            log.error("Could not download users", e);
+            return JsonResponse
+                    .error(Response.Status.BAD_REQUEST)
+                    .message(e.getMessage())
+                    .build();
+        } catch (IOException e) {
+            log.error("Could not download users", e);
+            return JsonResponse.fail()
+                    .message("Error writing file")
+                    .build();
+        }
     }
 }
