@@ -14,7 +14,6 @@ import ru.alamics.sso.user.UserServiceImpl;
 import ru.alamics.sso.user.model.*;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundException;
-import ru.alamics.sso.registration.service.UserFindService;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.naming.InitialContext;
@@ -144,12 +143,12 @@ public class CustomUserResource {
     @Path("/uploadImportUsersFile")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @NoCache
-    public Response deferredUploadUsers(@MultipartForm FileDto file, @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content) {
+    public Response uploadImportUsersFile(@MultipartForm FileDto file, @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content) {
         if (file == null || content == null || content.isBlank()) {
             return JsonResponse.error(Response.Status.BAD_REQUEST).build();
         }
         try (InputStream bas = new ByteArrayInputStream(file.getFileData())) {
-            userService.deferredImportUsers(bas, content);
+            userService.uploadImportUsersFile(bas, content);
             return JsonResponse.success()
                     .build();
         } catch (UnsupportedDataTypeException | FileServiceException e) {

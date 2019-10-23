@@ -2320,9 +2320,11 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
                 'Content-Type': undefined,
                 'Content-Disposition': `form-data; name="file"; filename=${file.name}`
             }
-        }).success(
-            Notifications.success("Upload import users file success!")
-        ).catch(error => {
+        }).then(response => {
+            if (response.status === 200){
+                Notifications.success("Upload import users file success!");
+            }
+        }).catch(error => {
             if (error.status === 400) {
                 Notifications.error(error.data.message);
             } else {
@@ -2332,6 +2334,10 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
     };
 
     $scope.downloadImportUsersReport = function (importReport) {
+        if (importReport.done === false){
+            Notifications.info("Import users report must have status 'is done'");
+            return;
+        }
         var linkElement = document.createElement('a');
         $http.post(`${authUrl}/realms/${$scope.realm.realm}/users-toms/downloadImportUsersReport/${importReport.id}`, null,
             { headers: {

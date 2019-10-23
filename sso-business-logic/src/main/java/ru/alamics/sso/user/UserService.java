@@ -15,7 +15,7 @@ import java.io.InputStream;
 public interface UserService {
     byte[] exportUsers(DownloadUserRequest userRequest) throws IOException;
     ImportResponse importUsers(InputStream inputStream, String type) throws IOException, FileServiceException;
-    void deferredImportUsers(InputStream inputStream, String content) throws IOException, FileServiceException;
+    void uploadImportUsersFile(InputStream inputStream, String content) throws IOException, FileServiceException;
     UserModel createUser(UserRequest request, boolean bss) throws FoundException, NotFoundException;
     FileModel downloadUsersByImportReportId(String importId) throws IOException;
 }

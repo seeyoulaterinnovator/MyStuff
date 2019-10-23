@@ -197,7 +197,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deferredImportUsers(InputStream inputStream, String content) throws IOException, FileServiceException {
+    public void uploadImportUsersFile(InputStream inputStream, String content) throws IOException, FileServiceException {
         log.info("Start deferred upload users");
 
         FileModel file = FileFactory.createFileModel(inputStream, getFileExtension(content));
