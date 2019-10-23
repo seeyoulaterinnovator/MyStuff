@@ -145,7 +145,7 @@ public class CustomUserResource {
     }
 
     @POST
-    @Path("/deferredUploadUsers")
+    @Path("/uploadImportUsersFile")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @NoCache
     public Response deferredUploadUsers(@MultipartForm FileDto file, @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content) {
@@ -211,12 +211,12 @@ public class CustomUserResource {
     @Path("/importUserHistory")
     @NoCache
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getImportUserHistoriesByRealm(@QueryParam("realm") String realmId) {
-        if (realmId == null || realmId.isBlank()){
-            return ErrorResponse.error("realm is required attribute", Response.Status.BAD_REQUEST);
-        }
+    public Response getImportUserHistoriesByRealm() {
+//        if (realmId == null || realmId.isBlank()){
+//            return ErrorResponse.error("realm is required attribute", Response.Status.BAD_REQUEST);
+//        }
         return JsonResponse.success()
-                .addResult("importUserHistories", importUserHistoryService.getImportUserHistories(realmId))
+                .addResult("importUserHistories", importUserHistoryService.getImportUserHistories(session.getContext().getRealm().getName()))
                 .build();
     }
 

@@ -2291,3 +2291,70 @@ module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, 
 
     $scope.init();
 });
+
+module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, Notifications) {
+
+    $scope.realm = realm;
+    $scope.userPosts = [];
+    $scope.customerRoles = [];
+    $scope.systemRoles = [];
+    $scope.duplicatedPhone = false;
+
+    $scope.ImportReports = [];
+
+    $scope.init = function () {
+        $http.get(authUrl + '/realms/' + realm.realm + '/users-toms/importUserHistory').then(function (data) {
+            $scope.ImportReports = angular.fromJson(data).data.results['importUserHistories'];
+        });
+    };
+
+    $scope.importFile = function (files) {
+        var formData = new FormData();
+        var file = files[0];
+        formData.append('file', file);
+        $http.post(`${authUrl}/realms/${$scope.realm.realm}/users-toms/uploadImportUsersFile`, formData, {
+            transformRequest: angular.identity,
+            headers: {
+                'Content-Type': undefined,
+                'Content-Disposition': `form-data; name="file"; filename=${file.name}`
+            }
+        }).success(
+            Notifications.success("Upload import users file success!")
+    ).catch(error => {
+            if(error.status === 400) {
+            Notifications.error(error.data.message);
+        } else {
+            Notifications.error(error.statusText);
+        }
+    })
+    };
+
+    $scope.downloadImportUsersReport = function (importReport) {
+        var linkElement = document.createElement('a');
+        $http.post(`${authUrl}/realms/${$scope.query.searchRealm}/users-toms/downloadImportUsersReport/${importReport.id}`, {
+            headers: {'Accept': 'application/octet-stream;charset=UTF-8', 'Content-Type': 'application/json'}
+        }).then((response) => {
+            var headers = response.headers();
+        var filename = 'users_info.csv';
+        var contentType = headers['content-type'];
+        var blob = new Blob(["\ufeff", response.data], {type: contentType});
+        var url = window.URL.createObjectURL(blob);
+
+        linkElement.setAttribute('href', url);
+        linkElement.setAttribute("download", filename);
+
+        var clickEvent = new MouseEvent("click", {
+            "view": window,
+            "bubbles": true,
+            "cancelable": false
+        });
+        linkElement.dispatchEvent(clickEvent);
+
+        if ($scope.tempRealm !== undefined){
+            $scope.query.searchRealm = $scope.tempRealm;
+        }
+    })
+    };
+
+    $scope.init();
+});

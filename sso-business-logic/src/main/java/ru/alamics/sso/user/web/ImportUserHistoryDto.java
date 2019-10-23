@@ -20,7 +20,7 @@ public class ImportUserHistoryDto {
     private String id;
     private String name;
     private String realmId;
-    private Date importDate;
+    private String importDate;
     private int countImportUsers;
     private int countCreatedUsers;
     private int countClones;

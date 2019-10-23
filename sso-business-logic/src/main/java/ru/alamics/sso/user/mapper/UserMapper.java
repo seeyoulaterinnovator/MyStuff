@@ -239,7 +239,7 @@ public class UserMapper {
                 .id(importUserHistoryEntity.getId())
                 .realmId(importUserHistoryEntity.getRealmId())
                 .name(importUserHistoryEntity.getName())
-                .importDate(importUserHistoryEntity.getImportDate())
+                .importDate(importUserHistoryEntity.getImportDate().toString())
                 .countClones(importUserHistoryEntity.getCountClones())
                 .countCreatedUsers(importUserHistoryEntity.getCountCreatedUsers())
                 .countImportUsers(importUserHistoryEntity.getCountImportUsers())

@@ -23,7 +23,8 @@ public class ImportUserHistoryRepository {
     public List<ImportUserHistoryEntity> findAllImportUserHistoryEntities(String realmId) {
         return em.createQuery(
                 "select ire " +
-                "from ImportUserHistoryEntity ire where ire.realmId = :realmId ", ImportUserHistoryEntity.class)
+                "from ImportUserHistoryEntity ire where ire.realmId = :realmId " +
+                        "order by ire.importDate desc ", ImportUserHistoryEntity.class)
                 .setParameter("realmId", realmId)
                 .getResultList();
     }
