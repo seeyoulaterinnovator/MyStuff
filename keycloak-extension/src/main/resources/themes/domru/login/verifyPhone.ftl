@@ -11,14 +11,14 @@
         </#if>
     <#elseif section = "form">
         <#if userPhone??>
-            <h3 class="pb-3 sm:pb-4" x-ms-format-detection="none">${userPhone?replace('([0-9]{1})([0-9]{3})([0-9]{3})([0-9]{2})([0-9]{2})',
+            <h3 class="pb-2 sm:pb-3 md:pb-4" x-ms-format-detection="none">${userPhone?replace('([0-9]{1})([0-9]{3})([0-9]{3})([0-9]{2})([0-9]{2})',
                 '+$1 ($2) $3-$4-$5', 'ri')}</h3>
         </#if>
         <form id="totpe" action="${url.loginAction}" method="POST">
          </form>
         <form id="totpForm" action="${url.loginAction}" method="POST">
         <#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон -->
-        <p class="pb-3 sm:pb-4 text-accentRed"> ${error!}<p>
+        <p class="pb-2 sm:pb-3 md:pb-4 text-accentRed"> ${error!}<p>
             <div class="flex justify-between w-full xl:pb-37px md:pb-10 sm:pb-8 pb-6">
                 <#list 1..lengthCode as x>
                     <input placeholder="-" maxlength="1" id="smscode-${x}" name="smscode-${x}" class="text-center align-middle text-3xl w-10 h-10 sm:w-16 sm:h-16 border rounded-lg focus:border-extra outline-none" autocomplete="off" />

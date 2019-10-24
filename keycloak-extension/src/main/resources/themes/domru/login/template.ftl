@@ -56,7 +56,7 @@
             <#nested "info">
           </#if>
 
-          <div class="py-3 sm:py-4">
+          <div class="py-2 sm:py-3 lg:py-4">
             <#if displayMessage && message?has_content>
               <div class="alert pb-4">
                 <#if message.type = 'info'><span class="text-black">${kcSanitize(message.summary)?no_esc}</span></#if>
