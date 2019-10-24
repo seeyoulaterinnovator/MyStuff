@@ -26,12 +26,9 @@ import ru.alamics.sso.settings.SettingsDto;
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -166,7 +163,7 @@ public class UserSchedule {
         String timeToBlock = String.valueOf(
                 blockSetting.getUnit().convert(inactiveBlockTimeout - inactiveNotificationTimeout, TimeUnit.SECONDS));
         Map<String, Object> body = new HashMap<>();
-        body.put("absence", timeToBlock + " " + Translator.getRusTranslateTimeUnit(timeToBlock, blockSetting.getUnit()));
+        body.put("absence", timeToBlock + " " + Translator.getRusTranslateTimeUnitBySec(timeToBlock, blockSetting.getUnit()));
         body.put("link", link);
         return EmailModel.builder()
                 .bodyAttributes(body)

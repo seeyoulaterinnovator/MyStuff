@@ -8,8 +8,29 @@ public class Translator {
     private final static String[]  DECLENSIONS_MINUTES = {"минуту", "минуты", "минут"};
     private final static String[]  DECLENSIONS_SECONDS = {"секунду", "секунды", "секунд"};
 
-    public static String getRusTranslateTimeUnit(String value, TimeUnit unit) {
+    public static String getRusTranslateTimeUnitBySec(String value, TimeUnit unit) {
         int time = Integer.parseInt(value);
+        return getRusTimeUnit(time, unit);
+    }
+
+    public static String getRusTranslateTimeUnitBySec(int time) {
+        TimeUnit unit = TimeUnit.SECONDS;
+        if (time > 0 && time % 60 == 0) {
+            unit = TimeUnit.MINUTES;
+            time = time / 60;
+            if (time % 60 == 0) {
+                unit = TimeUnit.HOURS;
+                time = time / 60;
+                if (time % 24 == 0) {
+                    unit = TimeUnit.DAYS;
+                    time = time / 24;
+                }
+            }
+        }
+        return time + " " + getRusTimeUnit(time, unit);
+    }
+
+    private static String getRusTimeUnit(int time, TimeUnit unit){
         switch (unit) {
             case DAYS:
                 return getDeclantion(time, DECLENSIONS_DAYS);
@@ -25,9 +46,9 @@ public class Translator {
     }
 
     private static String getDeclantion(int num, String[] declensions) {
-        int preLastDigit = num % 100 / 10;
+        int preLastDigit = (num % 100) / 10;
         if (preLastDigit == 1) {
-            return declensions[0];
+            return declensions[2];
         }
 
         switch (num % 10) {
