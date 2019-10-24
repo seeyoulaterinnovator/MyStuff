@@ -17,9 +17,19 @@
   border-radius: 1px;
 }
 
-.border-b.border-hoverable {
+.hoverable {
+  transition: .2s ease-in-out;
+}
+
+.border-b.hoverable {
   &:hover {
     border-bottom-color: transparent;
+  }
+}
+
+.text-black-50.hoverable {
+  &:hover {
+     color: rgba(0,0,0,.8);
   }
 }
 

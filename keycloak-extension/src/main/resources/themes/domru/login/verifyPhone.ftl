@@ -11,8 +11,8 @@
         </#if>
     <#elseif section = "form">
         <#if userPhone??>
-            <p class="pb-6" x-ms-format-detection="none">${userPhone?replace('([0-9]{1})([0-9]{3})([0-9]{3})([0-9]{2})([0-9]{2})',
-                '+$1 ($2) $3-$4-$5', 'ri')}</p>
+            <h3 class="pb-8" x-ms-format-detection="none">${userPhone?replace('([0-9]{1})([0-9]{3})([0-9]{3})([0-9]{2})([0-9]{2})',
+                '+$1 ($2) $3-$4-$5', 'ri')}</h3>
         </#if>
         <form id="totpe" action="${url.loginAction}" method="POST">
          </form>
@@ -35,7 +35,7 @@
             <input id="smscode" name="smscode" class="hidden" />
             
             <#if lengthCode==4>
-                <button class="border-b border-hoverable border-dashed text-black-50 text-right mb-6 hidden" form="totpe" id="sentCode" name="sendEmailCode" type="submit">Отправить на email</button>
+                <button class="border-b hoverable border-dashed text-black-50 text-right mb-6 hidden" form="totpe" id="sentCode" name="sendEmailCode" type="submit">Отправить на email</button>
             </#if>
            
             <div class="sm:block md:flex justify-between w-full items-center text-center md:text-left">
@@ -45,7 +45,11 @@
                     Пароль действует <span id="timer-time" class="px-1 text-black text-5/3em"></span> мин
                 </div>
 
-                <button class="hidden border-b border-hoverable border-dashed text-black-50 text-center md:text-right my-6 md:my-0" name="resend" id="resend" type="submit" >Позвонить еще раз</button>
+                <#if lengthCode==6>
+                    <button class="hidden border-b hoverable border-dashed text-black-50 text-center md:text-right my-6 md:my-0" name="resend" id="resend" type="submit" >Отправить еще раз</button>
+                <#elseif enableRepeatCall?? && enableRepeatCall!>
+                    <button class="hidden border-b hoverable border-dashed text-black-50 text-center md:text-right my-6 md:my-0" name="resend" id="resend" type="submit" >Позвонить еще раз</button>
+                </#if>
 
             </div>
         </form>
