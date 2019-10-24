@@ -326,7 +326,7 @@
             <column name="first_name" type="varchar(255)"></column>
             <column name="email" type="varchar(255)"></column>
             <column name="phone" type="varchar(255)"></column>
-            <column name="toms_id" type="varchar(20)"></column>
+            <column name="toms_id" type="varchar(255)"></column>
             <column name="dmp_id" type="varchar(20)"></column>
             <column name="role" type="varchar(20)"></column>
             <column name="systems" type="varchar(255)"></column>

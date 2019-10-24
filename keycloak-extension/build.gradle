@@ -24,6 +24,7 @@ dependencies {
     // https://mvnrepository.com/artifact/javax.ejb/ejb-api
 //    providedCompile group: 'javax.ejb', name: 'ejb-api', version: '3.0'
 
+    providedCompile  group: 'org.apache.xmlbeans', name: 'xmlbeans', version: '3.0.0'
     providedCompile  group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.60'
     providedCompile  group: 'org.bouncycastle', name: 'bcmail-jdk15on', version: '1.60'
 }

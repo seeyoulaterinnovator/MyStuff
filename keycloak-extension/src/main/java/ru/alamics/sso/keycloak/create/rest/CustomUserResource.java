@@ -223,11 +223,11 @@ public class CustomUserResource {
             FileModel file = userService.downloadUsersByImportReportId(importId);
             Response.ResponseBuilder response = Response.ok((Object) file.save());
             if (file instanceof XlsxImpl) {
-                response.header("Content-Disposition", "attachment; filename=\"users_info.xlsx" + "\"");
+                response.header("Content-Disposition", "attachment; filename=\"import_users_report.xlsx" + "\"");
                 response.header("filename", "import_users_report.xlsx");
                 response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
             } else {
-                response.header("Content-Disposition", "attachment; filename=\"users_info.csv" + "\"");
+                response.header("Content-Disposition", "attachment; filename=\"import_users_report.csv" + "\"");
                 response.header("filename", "import_users_report.csv");
                 response.header("Content-Type", MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8");
             }
