@@ -8,7 +8,7 @@ import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.user.model.ImportResponse;
 import ru.alamics.sso.user.model.UserRequest;
-import ru.alamics.sso.user.web.ImportUserHistoryDto;
+import ru.alamics.sso.user.web.ImportUsersReportDto;
 import ru.alamics.sso.user.web.UserDto;
 import ru.alamics.sso.user.web.UserSearchDto;
 
@@ -230,11 +230,11 @@ public class UserMapper {
         return importUsersReport;
     }
 
-    public static ImportUserHistoryDto toImportUserHistoryDto(ImportUsersReportEntity importUsersReportEntity) {
+    public static ImportUsersReportDto toImportUsersReportDto(ImportUsersReportEntity importUsersReportEntity) {
         if (importUsersReportEntity == null) {
             return null;
         }
-        return ImportUserHistoryDto.builder()
+        return ImportUsersReportDto.builder()
                 .id(importUsersReportEntity.getId())
                 .realmId(importUsersReportEntity.getRealmId())
                 .name(importUsersReportEntity.getName())
@@ -246,12 +246,12 @@ public class UserMapper {
                 .build();
     }
 
-    public static List<ImportUserHistoryDto> toImportUserHistoryDtos(List<ImportUsersReportEntity> importUserHistoryEntities) {
+    public static List<ImportUsersReportDto> toImportUsersReportDtos(List<ImportUsersReportEntity> importUserHistoryEntities) {
         if (importUserHistoryEntities == null || importUserHistoryEntities.isEmpty()) {
             return null;
         }
         return importUserHistoryEntities.stream()
-                .map(UserMapper::toImportUserHistoryDto)
+                .map(UserMapper::toImportUsersReportDto)
                 .collect(Collectors.toList());
     }
 }

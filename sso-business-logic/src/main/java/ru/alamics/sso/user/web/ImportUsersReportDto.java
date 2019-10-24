@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-public class ImportUserHistoryDto {
+public class ImportUsersReportDto {
     private String id;
     private String name;
     private String realmId;

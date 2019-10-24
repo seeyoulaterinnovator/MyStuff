@@ -3,7 +3,7 @@ package ru.alamics.sso.user;
 import ru.alamics.sso.keycloak.entity.ImportUsersReportEntity;
 import ru.alamics.sso.keycloak.repository.ImportUsersReportRepository;
 import ru.alamics.sso.user.mapper.UserMapper;
-import ru.alamics.sso.user.web.ImportUserHistoryDto;
+import ru.alamics.sso.user.web.ImportUsersReportDto;
 
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
@@ -23,8 +23,8 @@ public class ImportUsersReportService {
         importUsersReportRepository.saveImportUsersReport(importUsersReportEntity);
     }
 
-    public List<ImportUserHistoryDto> findImportUsersReportsByRealmId(String realmId) {
-        return UserMapper.toImportUserHistoryDtos(importUsersReportRepository.findImportUsersReports(realmId));
+    public List<ImportUsersReportDto> findImportUsersReportsByRealmId(String realmId) {
+        return UserMapper.toImportUsersReportDtos(importUsersReportRepository.findImportUsersReports(realmId));
     }
 
     public ImportUsersReportEntity findImportUsersReportByImportId(String importId) {
