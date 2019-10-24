@@ -36,7 +36,7 @@
 
             <div class="flex md:justify-start justify-center w-full items-center text-center md:text-right xl:pb-55px md:pb-10 sm:pb-8 pb-6">
                 <#if lengthCode==4>
-                    <button class="border-b border-hoverable border-dashed text-black-50 text-right hidden" form="totpe" id="sentCode" name="sendEmailCode" type="submit">Отправить на email</button>
+                    <button class="border-b hoverable border-dashed text-black-50 text-right hidden" form="totpe" id="sentCode" name="sendEmailCode" type="submit">Отправить на email</button>
                 </#if>
             </div>
             <div class="sm:block md:flex justify-between w-full items-center text-center md:text-left">
@@ -46,9 +46,9 @@
                     Пароль действует <span id="timer-time" class="px-1 text-black text-5/3em"></span> мин
                 </div>
                 <#if lengthCode==6>
-                    <button class="hidden border-b border-hoverable border-dashed text-black-50 text-center md:text-right my-6 md:my-0" name="resend" id="resend" type="submit" >Отправить еще раз</button>
+                    <button class="hidden border-b hoverable border-dashed text-black-50 text-center md:text-right my-6 md:my-0" name="resend" id="resend" type="submit" >Отправить еще раз</button>
                 <#elseif enableRepeatCall?? && enableRepeatCall!>
-                    <button class="hidden border-b border-hoverable border-dashed text-black-50 text-center md:text-right my-6 md:my-0" name="resend" id="resend" type="submit" >Позвонить еще раз</button>
+                    <button class="hidden border-b hoverable border-dashed text-black-50 text-center md:text-right my-6 md:my-0" name="resend" id="resend" type="submit" >Позвонить еще раз</button>
                 </#if>
 
             </div>
