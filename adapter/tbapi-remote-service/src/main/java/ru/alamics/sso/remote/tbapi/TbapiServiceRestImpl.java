@@ -116,11 +116,16 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
             Response response = target.register(ResteasyJackson2Provider.class).request()
                     .header("Accept", MediaType.APPLICATION_JSON)
                     .header("Authorization", String.format("Trusted application=\"%s\", username=\"%s\"", connectConfig.getAppname(), connectConfig.getUsername()))
-                    .post(entity);
+                    .build("POST", entity)
+                    .invoke();
 
             responseMap = response.readEntity(new GenericType<>(mapExample.getClass()));
+            if (responseMap.get("businessErrorCode") != null){
+                throw new Exception("error tbapi code: " +  responseMap.get("businessErrorCode").toString());
+            }
         } catch (Exception e){
             log.error("tbapi error post request: ", e);
+            responseMap = new HashMap<>(responseMap);
             for (String temp : id) {                //fixme заглушка для неработающего апи
                 responseMap.put(temp, "org" + temp);
             }

@@ -42,7 +42,7 @@ public class TbapiCacheImpl implements TbapiCache {
     @Override
     public Map<String, Object> getCustomerNamesFromCache (List<String> customers) {
         Map<String, Object> ret = new HashMap<>();
-        customers.forEach(customer -> ret.put(customer, getCustomerNameFromCache(customer)));
+        customers.forEach(customer -> ret.put(customer, getCustomerNameFromCache(getCustomerCacheName(customer))));
         return ret;
     }
 

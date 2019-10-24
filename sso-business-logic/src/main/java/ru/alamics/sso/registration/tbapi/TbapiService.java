@@ -84,11 +84,13 @@ public class TbapiService {
             ret.forEach(this.cache::putToCache);
         } else {
             List<String> nullableIds = ret.entrySet().stream().filter(entry -> Objects.isNull(entry.getValue())).map(Map.Entry::getKey).collect(Collectors.toList());
+            if (nullableIds == null || nullableIds.isEmpty()){
+                return ret;
+            }
             var nullableNames = remoteService.getCustomerName(nullableIds, connectConfig);
             nullableNames.forEach(ret::replace);
             ret.forEach(this.cache::putToCache);
         }
-
         return ret;
     }
 }
