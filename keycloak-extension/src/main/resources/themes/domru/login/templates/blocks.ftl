@@ -45,7 +45,7 @@
 </#macro>
 
 <#macro contentHeader mainTitle secondaryTitle="" secondaryHref="" withBorder=false >
-  <header class="flex justify-between items-center pb-2 sm:pb-4">
+  <header class="flex justify-between items-center pb-3 sm:pb-4">
     <h1 
       id="page-title" 
       class="<#if withBorder>border-extra border-b-2 md:border-b-3 xl:border-b-4</#if> <#if secondaryTitle != ''>text-3xl</#if>"
