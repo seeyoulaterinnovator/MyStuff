@@ -20,7 +20,6 @@ public class TbapiRequest {
 
     private String name;
 
-    @JsonIgnore
     private String phoneNumber;
 
     private String legalName;
@@ -77,6 +76,6 @@ public class TbapiRequest {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
-        getExtendedMap().getPhoneHolder().getSingleValue().setAttributeValue(phoneNumber);
+        //getExtendedMap().getPhoneHolder().getSingleValue().setAttributeValue(phoneNumber);
     }
 }
