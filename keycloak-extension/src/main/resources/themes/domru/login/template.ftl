@@ -98,7 +98,7 @@
     </#if>
 
     <#include "templates/domru-chat.html">
-    <script src="https://raw.github.com/davidjbradshaw/iframe-resizer/master/js/iframeResizer.contentWindow.min.js"></script>
+    <!--<script src="${url.resourcesPath}/build/iframeResizer.contentWindow.min.js" async></script> -->
   </body>
 </html>
 </#macro>
