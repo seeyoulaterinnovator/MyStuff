@@ -8,7 +8,7 @@ public class Translator {
     private final static String[]  DECLENSIONS_MINUTES = {"минуту", "минуты", "минут"};
     private final static String[]  DECLENSIONS_SECONDS = {"секунду", "секунды", "секунд"};
 
-    public static String getRusTranslateTimeUnitBySec(String value, TimeUnit unit) {
+    public static String getRusTranslateTimeUnit(String value, TimeUnit unit) {
         int time = Integer.parseInt(value);
         return getRusTimeUnit(time, unit);
     }

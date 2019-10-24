@@ -163,7 +163,7 @@ public class UserSchedule {
         String timeToBlock = String.valueOf(
                 blockSetting.getUnit().convert(inactiveBlockTimeout - inactiveNotificationTimeout, TimeUnit.SECONDS));
         Map<String, Object> body = new HashMap<>();
-        body.put("absence", timeToBlock + " " + Translator.getRusTranslateTimeUnitBySec(timeToBlock, blockSetting.getUnit()));
+        body.put("absence", timeToBlock + " " + Translator.getRusTranslateTimeUnit(timeToBlock, blockSetting.getUnit()));
         body.put("link", link);
         return EmailModel.builder()
                 .bodyAttributes(body)
