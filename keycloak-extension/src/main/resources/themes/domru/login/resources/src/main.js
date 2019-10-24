@@ -7,6 +7,7 @@ import './scripts/login-update-profile.js';
 import './scripts/login-reset-password.js';
 import './scripts/login-update-password.js';
 import './scripts/totp.js';
+import './scripts/iframeResizer.contentWindow.min.js';
 
 import './css/tailwind-base.css';
 import './css/tailwind-advanced.css';
