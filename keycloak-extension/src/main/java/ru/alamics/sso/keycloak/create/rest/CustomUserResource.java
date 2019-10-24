@@ -3,8 +3,7 @@ package ru.alamics.sso.keycloak.create.rest;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
-import org.jboss.resteasy.plugins.providers.multipart.InputPart;
-import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
+import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.keycloak.jose.jws.JWSInput;
 import org.keycloak.jose.jws.JWSInputException;
 import org.keycloak.models.*;
@@ -23,6 +22,7 @@ import ru.alamics.sso.keycloak.create.model.UserParameter;
 import ru.alamics.sso.keycloak.create.model.UserRequest;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundException;
+import ru.alamics.sso.registration.service.UserFindService;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.validation.Valid;
@@ -30,21 +30,20 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 @Slf4j
 public class CustomUserResource {
     protected KeycloakSession session;
     private UserService userService;
 
-    public CustomUserResource(KeycloakSession session) {
+    public CustomUserResource(KeycloakSession session, AdminAuth auth,  UserFindService userFindService) {
         this.session = session;
-        AdminAuth auth = authenticateRealmAdminRequest(session.getContext().getRealm());
-        this.userService = new UserService(session, auth);
+//        AdminAuth auth = authenticateRealmAdminRequest(session.getContext().getRealm());
+        this.userService = new UserService(session, auth, userFindService);
     }
 
     @POST
@@ -116,18 +115,18 @@ public class CustomUserResource {
 
     @POST
     @Path("/uploadUsers")
-    @Consumes("multipart/form-data")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
     @NoCache
-    public Response uploadUsers(MultipartFormDataInput file) {
-        List<InputPart> inputParts = file.getFormDataMap().get("file");
-        if (inputParts == null || inputParts.isEmpty()) {
+    public Response uploadUsers(@MultipartForm FileDto file, @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content) {
+
+        if (file == null ||
+                content == null || content.isBlank()) {
             return JsonResponse.error(Response.Status.BAD_REQUEST).build();
         }
-        try {
+        try(InputStream bas = new ByteArrayInputStream(file.getFileData()) ) {
             return JsonResponse.success()
                     .addResult("import-report",
-                            userService.importUsers(inputParts.get(0).getBody(InputStream.class, null),
-                                    getFileExtension(inputParts.get(0).getHeaders())))
+                            userService.importUsers(bas, getFileExtension(content)))
                     .build();
         } catch (UnsupportedDataTypeException | FileServiceException e) {
             log.error("Could not upload users", e);
@@ -142,10 +141,9 @@ public class CustomUserResource {
         }
     }
 
-    @GET
+    @POST
     @Path("/downloadUsers")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.MULTIPART_FORM_DATA)
     @NoCache
     public Response downloadUsers(@NotNull @Valid DownloadUserRequest downloadUserRequest) {
         try {
@@ -160,6 +158,11 @@ public class CustomUserResource {
             }
             Response.ResponseBuilder response = Response.ok((Object) bytes);
             response.header("Content-Disposition", "attachment; filename=\"users_info." + downloadUserRequest.getType() + "\"");
+            if(downloadUserRequest.getType().equals("xlsx")) {
+                response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
+            } else {
+                response.header("Content-Type", MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8");
+            }
             log.info("Download users success!", "filename = users_info." + downloadUserRequest.getType());
             return response.build();
         } catch (UnsupportedDataTypeException e) {
@@ -176,51 +179,51 @@ public class CustomUserResource {
         }
     }
 
-    private AdminAuth authenticateRealmAdminRequest(RealmModel realm) {
-        String tokenString = new AppAuthManager().extractAuthorizationHeaderToken(session.getContext().getRequestHeaders());
-        if (tokenString == null) throw new NotAuthorizedException("Bearer");
-        AccessToken token;
-        try {
-            JWSInput input = new JWSInput(tokenString);
-            token = input.readJsonContent(AccessToken.class);
-        } catch (JWSInputException e) {
-            throw new NotAuthorizedException("Bearer token format error");
-        }
+//    private AdminAuth authenticateRealmAdminRequest(RealmModel realm) {
+//        String tokenString = new AppAuthManager().extractAuthorizationHeaderToken(session.getContext().getRequestHeaders());
+//        if (tokenString == null) throw new NotAuthorizedException("Bearer");
+//        AccessToken token;
+//        try {
+//            JWSInput input = new JWSInput(tokenString);
+//            token = input.readJsonContent(AccessToken.class);
+//        } catch (JWSInputException e) {
+//            throw new NotAuthorizedException("Bearer token format error");
+//        }
+//
+//        String realmName = token.getIssuer().substring(token.getIssuer().lastIndexOf('/') + 1);
+//        RealmManager realmManager = new RealmManager(session);
+//        RealmModel realmFromToken = realmManager.getRealmByName(realmName);
+//        if (realmFromToken == null) {
+//            throw new NotAuthorizedException("Unknown realm in token");
+//        }
+//
+//        session.getContext().setRealm(realm);
+//        AuthenticationManager.AuthResult authResult = new AppAuthManager()
+//                .authenticateBearerToken(session, realm, session.getContext().getUri(), session.getContext().getConnection(), session.getContext().getRequestHeaders());
+//        if (authResult == null) {
+//            log.debug("Token not valid");
+//            throw new NotAuthorizedException("Bearer");
+//        }
+//
+//        ClientModel client = realm.getClientByClientId(token.getIssuedFor());
+//        if (client == null) {
+//            throw new NotAuthorizedException("Could not find client for authorization");
+//        }
+//
+//        AdminAuth auth = new AdminAuth(realm, authResult.getToken(), authResult.getUser(), client);
+//
+//        AdminPermissions.evaluator(session, realm, auth).users().requireManage();
+//
+//        if (!auth.getRealm().equals(realmManager.getKeycloakAdminstrationRealm())
+//                && !auth.getRealm().equals(realm)) {
+//            throw new ForbiddenException();
+//        }
+//
+//        return auth;
+//    }
 
-        String realmName = token.getIssuer().substring(token.getIssuer().lastIndexOf('/') + 1);
-        RealmManager realmManager = new RealmManager(session);
-        RealmModel realmFromToken = realmManager.getRealmByName(realmName);
-        if (realmFromToken == null) {
-            throw new NotAuthorizedException("Unknown realm in token");
-        }
-
-        session.getContext().setRealm(realm);
-        AuthenticationManager.AuthResult authResult = new AppAuthManager()
-                .authenticateBearerToken(session, realm, session.getContext().getUri(), session.getContext().getConnection(), session.getContext().getRequestHeaders());
-        if (authResult == null) {
-            log.debug("Token not valid");
-            throw new NotAuthorizedException("Bearer");
-        }
-
-        ClientModel client = realm.getClientByClientId(token.getIssuedFor());
-        if (client == null) {
-            throw new NotAuthorizedException("Could not find client for authorization");
-        }
-
-        AdminAuth auth = new AdminAuth(realm, authResult.getToken(), authResult.getUser(), client);
-
-        AdminPermissions.evaluator(session, realm, auth).users().requireManage();
-
-        if (!auth.getRealm().equals(realmManager.getKeycloakAdminstrationRealm())
-                && !auth.getRealm().equals(realm)) {
-            throw new ForbiddenException();
-        }
-
-        return auth;
-    }
-
-    private String getFileExtension(MultivaluedMap<String, String> header) {
-        String[] contentDisposition = header.getFirst("Content-Disposition").split(";");
+    private String getFileExtension(String content) {
+        String[] contentDisposition = content.split(";");
         for (String filename : contentDisposition) {
             if ((filename.trim().startsWith("filename"))) {
 

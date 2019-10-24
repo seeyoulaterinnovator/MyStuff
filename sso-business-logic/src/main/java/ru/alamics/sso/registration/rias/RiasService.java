@@ -52,8 +52,7 @@ public class RiasService {
             return false;
 
         try {
-            phone = phone.replaceAll("[^0-9]+", "");
-            return riasApiService.checkParam(phone);
+            return riasApiService.checkParam(Util.getCleanUserPhone(phone));
 
         } catch (RiasCheckException rce) {
             log.error("RIAS check service", rce);
@@ -62,10 +61,10 @@ public class RiasService {
         return false;
     }
 
-    public RiasLogin loginUser(String login, String password) {
+    public RiasLogin loginUser(String domain, String login, String password) {
 
         try {
-            return riasLoginService.loginUser(login, password);
+            return riasLoginService.loginUser(domain, login, password);
 
         } catch (RiasCheckException e) {
             log.error("RIAS login service", e);

@@ -108,13 +108,15 @@ task deploy {
     def warArchive =  tasks.getByPath(':keycloak-extension:war').getArchiveFile()
     def jarArchive =  tasks.getByPath(':custom-jpa-provider:jar').getArchiveFile()
     def themesFolder = tasks.getByPath(':keycloak-extension:processResources').getDestinationDir().getAbsolutePath() + '/themes'
+    def blacklistFolder = tasks.getByPath(':keycloak-extension:processResources').getDestinationDir().getAbsolutePath() + '/standalone'
 
     def deployDir = System.getenv('KEYCLOAK_DEPLOY_DIR') != null ? System.getenv('KEYCLOAK_DEPLOY_DIR'): "$rootProject.buildDir/deploy"
     def archiveTargetFolder = deployDir + '/standalone/deployments'
     def themesTargetFolder = deployDir + '/themes'
+    def blacklistTargetFolder = deployDir + '/standalone'
 
-    inputs.files(warArchive, themesFolder)
-    outputs.dirs(archiveTargetFolder, themesTargetFolder)
+    inputs.files(warArchive, themesFolder, blacklistFolder)
+    outputs.dirs(archiveTargetFolder, themesTargetFolder, blacklistTargetFolder)
 
     doLast {
         copy {
@@ -136,9 +138,13 @@ task deploy {
             into(themesTargetFolder)
         }
         copy {
-            from file('/configs/local/standalone.xml')
-            into(deployDir + '/standalone/configuration')
+            from file(blacklistFolder)
+            into(blacklistTargetFolder)
         }
+//        copy {
+//            from file('/configs/local/standalone.xml')
+//            into(deployDir + '/standalone/configuration')
+//        }
     }
 }
 

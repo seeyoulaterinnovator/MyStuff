@@ -4,20 +4,36 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.annotations.jaxrs.QueryParam;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
+import org.keycloak.jose.jws.JWSInput;
+import org.keycloak.jose.jws.JWSInputException;
+import org.keycloak.models.ClientModel;
+import org.keycloak.models.KeycloakContext;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.representations.AccessToken;
+import org.keycloak.services.managers.AppAuthManager;
+import org.keycloak.services.managers.AuthenticationManager;
+import org.keycloak.services.managers.RealmManager;
+import org.keycloak.services.resources.admin.AdminAuth;
+import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
+import org.keycloak.services.resources.admin.permissions.AdminPermissions;
+import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.keycloak.search.dto.UserDto;
+import ru.alamics.sso.registration.service.UserFindService;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.Tuple;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.net.HttpURLConnection;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class SearchResource {
@@ -25,9 +41,16 @@ public class SearchResource {
     private final static String SORT_FIELD_NAME = "firstName";
     private final static String SORT_FIELD_EMAIL = "email";
     protected KeycloakSession session;
+    private UserFindService userFindService;
 
     public SearchResource(KeycloakSession session) {
         this.session = session;
+        try {
+            this.userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
+        } catch (NamingException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Something wrong with context");
+        }
     }
 
     private EntityManager getEM() {
@@ -41,13 +64,16 @@ public class SearchResource {
     @NoCache
     public Response getUsersInfo(@QueryParam("search") String search, @QueryParam("searchUser") String searchUser,
                                  @QueryParam("searchToms") String searchToms, @QueryParam("sortField") String sortField,
-                                 @QueryParam("sortAsc") boolean sortAsc) {
+                                 @QueryParam("sortAsc") boolean sortAsc, @QueryParam("searchRealm") String searchRealm) {
+        if (searchRealm == null || searchRealm.isBlank()) {
+            searchRealm = "user";
+        }
         return JsonResponse.success()
-                .addResult("users-info", getUsers(search, searchUser, searchToms, sortField, sortAsc))
+                .addResult("users-info", getUsers(searchRealm, search, searchUser, searchToms, sortField, sortAsc))
                 .build();
     }
 
-    public List<UserDto> getUsers(String search, String searchUser, String searchToms, String sortField, boolean sortAsc) {
+    public List<UserDto> getUsers(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc) {
         List<Tuple> tuples = getEM().createNativeQuery(
                 "select UE.ID         as user_id,\n" +
                         "       UE.USERNAME   as username,\n" +
@@ -64,36 +90,36 @@ public class SearchResource {
                         "       ESR.ID        as system_role_id,\n" +
                         "       ESR.NAME      as system_role,\n" +
                         "       ES.ID         as system_id,\n" +
-                        "       ES.NAME       as system_name\n" +
+                        "       ES.NAME       as system_name,\n" +
+                        "       ES.LABEL      as system_label\n" +
                         "from USER_ENTITY UE\n" +
-                        "         join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID\n" +
-                        "         left outer join USER_POST UP on UE.ID = UP.USER_ID\n" +
-                        "         left outer join USER_POST_ROLE UPR on UP.ROLE_ID = UPR.ID\n" +
-                        "         left outer join USERPOST_EXT_SYSTEM_ROLE UESR on UP.ID = UESR.USER_POST_ID\n" +
-                        "         left outer join EXT_SYSTEM_ROLE ESR on UESR.EXT_SYSTEM_ROLE_ID = ESR.ID\n" +
-                        "         left outer join EXTERNAL_SYSTEM ES on ESR.SYSTEM_ID = ES.ID\n" +
-                        "WHERE UE.REALM_ID = 'user'\n" +
-                        "  AND UA.NAME = 'phone'\n" +
+                        "         left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone'\n" +
+                        "         left join USER_POST UP on UE.ID = UP.USER_ID\n" +
+                        "         left join USER_POST_ROLE UPR on UP.ROLE_ID = UPR.ID\n" +
+                        "         left join USERPOST_EXT_SYSTEM_ROLE UESR on UP.ID = UESR.USER_POST_ID\n" +
+                        "         left join EXT_SYSTEM_ROLE ESR on UESR.EXT_SYSTEM_ROLE_ID = ESR.ID\n" +
+                        "         left join EXTERNAL_SYSTEM ES on ESR.SYSTEM_ID = ES.ID\n" +
+                        "WHERE UE.REALM_ID = :realm\n" +
                         "  AND CASE\n" +
                         "          WHEN :search is not null and :search != '' then (\n" +
-                        "                  UE.ID LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                  UE.EMAIL LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                  UE.FIRST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                  UE.LAST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                  UE.USERNAME LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                  UA.VALUE LIKE CONCAT('%', :search, '%')\n" +
+                        "                      UE.EMAIL LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                      UE.FIRST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                      UE.LAST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                      UE.USERNAME LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                      UA.VALUE LIKE CONCAT('%', :search, '%')\n" +
                         "              )\n" +
                         "          else UE.ID LIKE '%' end\n" +
                         "  AND CASE\n" +
-                        "          WHEN :searchUser is not null and :searchUser != '' then (UP.USER_ID = :searchUser)\n" +
-                        "          else UP.USER_ID LIKE '%' OR UP.USER_ID is null end\n" +
+                        "          WHEN :searchUser is not null and :searchUser != '' then (UE.ID = :searchUser)\n" +
+                        "          else UE.ID LIKE '%' OR  UE.ID is null end\n" +
                         "  AND CASE\n" +
                         "          WHEN :searchToms is not null and :searchToms != '' then (UP.TOMS_ID = :searchToms)\n" +
                         "          else UP.TOMS_ID LIKE '%' OR UP.TOMS_ID is null end\n" +
-                        getSort(sortField, sortAsc) , Tuple.class)
+                        getSort(sortField, sortAsc), Tuple.class)
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
+                .setParameter("realm", realm)
                 .getResultList();
         return DataMapper.toUserDtoList(tuples);
     }
@@ -108,9 +134,59 @@ public class SearchResource {
         if (sort.isBlank()) {
             return sort;
         }
-        if (!sortAsc){
+        if (!sortAsc) {
             sort += " DESC";
         }
         return sort;
+    }
+
+    @GET
+    @Path("/attribute")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response findUserByAttribute(@QueryParam("phone") String phone, @QueryParam("excludedUserId") String excludedUserId) {
+        if (Validation.isBlank(phone)) {
+            return JsonResponse.success().addResult("foundUserId", null).build();
+        }
+
+        if (Validation.isBlank(excludedUserId)) {
+            throw new WebApplicationException(
+                    Response.status(HttpURLConnection.HTTP_BAD_REQUEST)
+                            .entity("excludeUserId parameter is mandatory")
+                            .build()
+            );
+        }
+        //fixme сквозной поиск по всем реалмам
+        var user = userFindService.getUserByPhoneAndExcludedUserId(phone, excludedUserId);
+        return JsonResponse.success().addResult("foundUserId", user == null ? null : user.getId()).build();
+    }
+
+    @GET
+    @Path("/accessible-realms")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @NoCache
+    public List<String> getAccessibleRealms() {
+        return session.realms().getRealms().stream()
+                .filter(o -> {
+                    switch (session.getContext().getRealm().getName()) {
+                        case "master":
+                            return true;
+                        case "user":
+                            if (o.getName().equalsIgnoreCase("user")) {
+                                return true;
+                            }
+                            return false;
+                        case "manager":
+                            if (o.getName().equalsIgnoreCase("master")) {
+                                return false;
+                            }
+                            return true;
+                    }
+                    return false;
+                })
+                .map(RealmModel::getName)
+                .collect(Collectors.toList());
     }
 }

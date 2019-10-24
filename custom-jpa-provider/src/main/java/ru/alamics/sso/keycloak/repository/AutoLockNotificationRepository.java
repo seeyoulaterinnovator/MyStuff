@@ -31,20 +31,28 @@ public class AutoLockNotificationRepository {
         entityManager.flush();
     }
 
-    public void findUsersToBlock(final int absenceDaysBlock) {
-        final String DEBUG_STR = "findNonBlockingUsers";
-        log.debug("{}: absenceDaysBlock={}", DEBUG_STR, absenceDaysBlock);
-        LocalDate now = LocalDate.now();
-        LocalDate absence = now.minusDays(absenceDaysBlock);
-        entityManager.createNativeQuery("insert into AUTO_LOCK_NOTIFICATION(id, user_id, sended_at, type, status)\n" +
-                "select uuid(), aln.USER_ID, null, 'ABSENCE_BLOCKING', 'PREPARE'\n" +
-                "from AUTO_LOCK_NOTIFICATION aln\n" +
-                "         join USER_ENTITY ue on aln.USER_ID = ue.ID\n" +
-                "where ue.ENABLED = true\n" +
-                "and aln.TYPE ='ABSENCE_NOTIFICATION' and aln.SENDED_AT <= :date\n" +
-                "and not exists(select 1 from AUTO_LOCK_NOTIFICATION aln2 where aln2.TYPE = 'ABSENCE_BLOCKING' and aln.USER_ID = aln2.USER_ID)\n" +
-                "for update")
+    public void findUsersToBlock(final long absenceTimeBlock, final String realmId) {
+        log.info("findBlockingUsers: realmId={}, absenceTimeBlock={}", realmId, absenceTimeBlock);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime absence = now.minusSeconds(absenceTimeBlock);
+        entityManager.createNativeQuery(
+                "insert into AUTO_LOCK_NOTIFICATION(id, user_id, sended_at, type, status)\n" +
+                        "select uuid(), ue.ID, null, 'ABSENCE_BLOCKING', 'PREPARE'\n" +
+                        "from USER_ENTITY ue\n" +
+                        "         left join (select ab.*, max(ab.SENDED_AT) block\n" +
+                        "                    from AUTO_LOCK_NOTIFICATION ab\n" +
+                        "                    where ab.TYPE = 'ABSENCE_BLOCKING'\n" +
+                        "                    group by ab.USER_ID) ab on ue.ID = ab.USER_ID\n" +
+                        "         left join (select aln.*, max(aln.SENDED_AT) notif\n" +
+                        "                    from AUTO_LOCK_NOTIFICATION aln\n" +
+                        "                    where aln.TYPE = 'ABSENCE_NOTIFICATION'\n" +
+                        "                      and aln.STATUS = 'SENT'\n" +
+                        "                    group by aln.USER_ID) aln on ue.ID = aln.USER_ID\n" +
+                        "where ue.ENABLED = true\n" +
+                        "  and ue.REALM_ID = :realm_id\n" +
+                        "  and ((aln.notif < :date and ab.block < aln.notif) or (ab.block is null and aln.notif < :date))")
                 .setParameter("date", absence)
+                .setParameter("realm_id", realmId)
                 .executeUpdate();
     }
 

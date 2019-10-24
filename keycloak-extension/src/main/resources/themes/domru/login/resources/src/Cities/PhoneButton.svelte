@@ -135,6 +135,6 @@
           fill="black" />
       </g>
     </svg>
-    <span class="">8&nbsp;800&nbsp;550&nbsp;0479</span>
+    <span class="phone-number">8&nbsp;800&nbsp;550&nbsp;0479</span>
   </div>
 </a>

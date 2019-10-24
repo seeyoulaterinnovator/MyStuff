@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Data
 @NoArgsConstructor
 public class ImportResponse {
-    private int countClones;
+    private AtomicInteger countClones;
     private AtomicInteger tbapiErrors;
     private AtomicInteger tbapiSuccess;
     private AtomicInteger createdUsers;

@@ -14,6 +14,9 @@
   import Selection from './Selection.svelte';
   import PhoneButton from './PhoneButton.svelte';
 
+  import './selection';
+  import {selectCity, setAllSelected, setSelectedCity} from "./selection";
+
   let search;
 
   const unsubscribeCity = city.subscribe(value => {
@@ -22,9 +25,7 @@
   });
 
   function handleClose() {
-    status.set(STATUS.CONFIRMED);
-    showModal.set(false);
-    editingStarted.set(false);
+    setAllSelected();
   }
 
   function handleInputChange() {
@@ -35,29 +36,19 @@
     const indexOfChosenCity = $allCities.map(obj => obj.name.toLowerCase()).indexOf(search.toLowerCase());
     if (indexOfChosenCity === - 1) return;
 
-    const chosenCity = $allCities[indexOfChosenCity].name;
-    const chosenDomain = $allCities[indexOfChosenCity].domain;
-
-    city.set(chosenCity);
-    Cookie.set('CITY', chosenCity);
-    Cookie.set('city-domain', chosenDomain);
-    status.set(STATUS.CONFIRMED);
-    showModal.set(false);
-    editingStarted.set(false);
+    selectCity($allCities[indexOfChosenCity]);
   }
 </script>
 
 {#if $showModal}
   <div
-    class="flex flex-col fixed w-screen h-screen bg-white inset-0 p-4 sm:px-6
-    md:py-6 lg:px-8 xl:py-8 xl:px-6 {$status === STATUS.INITIAL && 'opacity-90'}"
+    class="flex flex-col fixed w-screen h-screen bg-white inset-0 py-4 md:py-6 xl:py-8 {$status === STATUS.INITIAL && 'opacity-90'} scrollable-container overflow-x-hidden overflow-y-auto custom-scroll"
     id="location-selection-window">
-    <header id="cities-header" class="flex items-center pb-4">
+    <header id="cities-header" class="flex items-center pb-4 px-4 sm:px-6 lg:px-8 xl:px-6">
       <div class="w-full flex justify-between items-center">
-        <a href="/auth" class={$status === STATUS.SELECTING && 'hidden sm:block'}>
+        <a href="https://b2b.domru.ru/" class={$status === STATUS.SELECTING && 'hidden sm:block'}>
           <div
-            class="h-30px w-60px md:h-10 md:w-20 xl:h-16 xl:w-32 bg-contain
-            bg-no-repeat logo logo--domru" />
+            class="h-30px w-60px md:h-10 md:w-20 xl:h-16 xl:w-32 bg-contain bg-no-repeat logo logo--domru" />
         </a>
 
         {#if $status === STATUS.SELECTING}
@@ -108,7 +99,7 @@
       </div>
     </header>
 
-    <div class="flex flex-1 {$status === STATUS.INITIAL ? 'items-center' : ''} justify-center content-box h-full">
+    <div class="flex flex-1 {$status === STATUS.INITIAL ? 'items-center' : ''} justify-center content-box h-full scrollable-container overflow-x-hidden overflow-y-auto mt-4 xl:mt-20">
       {#if $status === STATUS.INITIAL}
         <Confirmation />
       {:else if $status === STATUS.SELECTING}

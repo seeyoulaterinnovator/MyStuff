@@ -8,12 +8,12 @@ import org.keycloak.models.utils.FormMessage;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.keycloak.auth.AuthBaseClass;
-import ru.alamics.sso.keycloak.auth.UserFind;
 import ru.alamics.sso.keycloak.resetcred.factory.ResetFactory;
 import ru.alamics.sso.keycloak.resetcred.factory.ResetFactoryImpl;
 import ru.alamics.sso.keycloak.resetcred.type.ResetType;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.port.RiasApiService;
+import ru.alamics.sso.registration.service.UserFindService;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -28,6 +28,7 @@ public class ResetCredentialEmailOrPhone extends AuthBaseClass {
 
     private KeycloakSession session;
     private RiasApiService riasApiService;
+    private UserFindService userFindService;
 
     ResetCredentialEmailOrPhone(KeycloakSession session) {
         this.session = session;
@@ -35,6 +36,9 @@ public class ResetCredentialEmailOrPhone extends AuthBaseClass {
             InitialContext context = new InitialContext();
             riasApiService = (RiasApiService) context.lookup("java:global/domru-sso/" + RiasApiService.class.getSimpleName());
             log.info("Got riasService from context");
+
+            userFindService = (UserFindService) context.lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
+            log.info("Got userFindService from context");
         } catch (NamingException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
@@ -50,12 +54,12 @@ public class ResetCredentialEmailOrPhone extends AuthBaseClass {
 
         if (user == null && username.startsWith("+7")) {
             username = username.replaceAll("\\D", "");
-            var userFind = new UserFind(this.session);
-            user = userFind.getUserByPhone(username);
-            if (user != null) {
-                username = user.getUsername();
-                authenticationSession.setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, user.getEmail());
-                context.getHttpRequest().getDecodedFormParameters().replace("username", Collections.singletonList(user.getEmail()));
+            var userFind = userFindService.getUserByPhone(context.getRealm(), username);
+            if (userFind != null) {
+                user = context.getSession().users().getUserById(userFind.getId(), context.getSession().realms().getRealm(userFind.getRealmId()));
+                username = userFind.getUsername();
+                authenticationSession.setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, userFind.getEmail());
+                context.getHttpRequest().getDecodedFormParameters().replace("username", Collections.singletonList(userFind.getEmail()));
             }
         }
 

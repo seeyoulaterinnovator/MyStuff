@@ -7,7 +7,7 @@
         <#if section = "header">
         Подтверждение данных
         <#elseif section = "description">
-        Отправлены инструкция авторизации
+        Отправлены инструкции для авторизации
         </#if>
     </@emailSent.defaultTemplate>
     </#if>

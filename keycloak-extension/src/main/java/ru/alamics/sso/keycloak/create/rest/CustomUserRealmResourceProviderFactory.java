@@ -17,15 +17,25 @@
 
 package ru.alamics.sso.keycloak.create.rest;
 
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.Config.Scope;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.resource.RealmResourceProvider;
-import org.keycloak.services.resource.RealmResourceProviderFactory;
+import org.keycloak.services.resources.admin.AdminAuth;
+import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
+import ru.alamics.sso.keycloak.rest.BaseResourceProviderFactory;
+import ru.alamics.sso.registration.service.UserFindService;
 
-public class CustomUserRealmResourceProviderFactory implements RealmResourceProviderFactory {
+@Slf4j
+public class CustomUserRealmResourceProviderFactory implements BaseResourceProviderFactory, BaseResourceProvider {
 
     public static final String ID = "users-toms";
+
+    private KeycloakSession session;
+    private UserFindService userFindService;
+    private AdminAuth auth;
 
     @Override
     public String getId() {
@@ -34,8 +44,15 @@ public class CustomUserRealmResourceProviderFactory implements RealmResourceProv
 
     @Override
     public RealmResourceProvider create(KeycloakSession session) {
+        this.auth = this.initAuthByWorkingRealm(session);
+        this.session = session;
+        this.userFindService = (UserFindService) Lookup.lookup(UserFindService.class);
+        return this;
+    }
 
-        return new CustomUserRealmResourceProvider(session);
+    @Override
+    public Object getResource() {
+        return new CustomRestResource(session, userFindService, this.auth);
     }
 
     @Override

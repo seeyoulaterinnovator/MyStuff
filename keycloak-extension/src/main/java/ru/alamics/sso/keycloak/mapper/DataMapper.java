@@ -45,6 +45,7 @@ public abstract class DataMapper {
                 .systemRoleName(toString(tuple.get("system_role")))
                 .systemId(toString(tuple.get("system_id")))
                 .systemName(toString(tuple.get("system_name")))
+                .systemLabel(toString(tuple.get("system_label")))
                 .build();
     }
 
@@ -82,6 +83,10 @@ public abstract class DataMapper {
             return null;
         }
         UserModel userModel = context.getUser();
+        return toUserPostRequest(userModel);
+    }
+
+    public static UserPostRequest toUserPostRequest(UserModel userModel) {
         UserPostRequest userPostRequest = new UserPostRequest();
         userPostRequest.setUserId(userModel.getId());
         if (!userModel.getAttribute(ATTR_TOMS_NAME).isEmpty()){
@@ -134,7 +139,7 @@ public abstract class DataMapper {
             return null;
         }
         List<UserImport> userImports = new LinkedList<>();
-        rows.stream().forEach(o -> userImports.add(toUserImport(o)));
+        rows.forEach(o -> userImports.add(toUserImport(o)));
         return userImports;
     }
 
