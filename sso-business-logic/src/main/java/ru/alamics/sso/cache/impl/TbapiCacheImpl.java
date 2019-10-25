@@ -21,6 +21,9 @@ public class TbapiCacheImpl implements TbapiCache {
 
     @Override
     public void putToCache (String customerId, Object o) {
+        if (o == null){
+            return;
+        }
         final String id = getCustomerCacheName(customerId);
         var formCache = getCustomerNameFromCache(id);
         if(formCache == null) {

@@ -78,7 +78,7 @@ public class TbapiService {
         final String DEBUG_STR = "customerName";
         log.info("{}: customerId={}", DEBUG_STR, customerIds);
         List<String> customerList = List.of(customerIds);
-        var ret = this.cache.getCustomerNamesFromCache(customerList);
+        Map<String, Object> ret = this.cache.getCustomerNamesFromCache(customerList);
         if (ret == null) {
             ret = remoteService.getCustomerName(customerList, connectConfig);
             ret.forEach(this.cache::putToCache);
@@ -87,7 +87,7 @@ public class TbapiService {
             if (nullableIds == null || nullableIds.isEmpty()){
                 return ret;
             }
-            var nullableNames = remoteService.getCustomerName(nullableIds, connectConfig);
+            Map<String, Object> nullableNames = remoteService.getCustomerName(nullableIds, connectConfig);
             nullableNames.forEach(ret::replace);
             ret.forEach(this.cache::putToCache);
         }
