@@ -6,11 +6,8 @@
 }
 
 .title {
-  font-size: 36px;
-  line-height: 42px;
-  text-align: center;
-  letter-spacing: -1px;
   color: rgba(0, 0, 0, 0.8);
+  font-weight: bold;
   margin-bottom: 30px;
 }
 
@@ -31,11 +28,6 @@
 .trow div {
   padding-left: 10px;
 }
-.theader {
-  font-size: 13px;
-  line-height: 17px;
-  color: rgba(0, 0, 0, 0.3);
-}
 .titems:hover {
   background-color: #ffdd00;
   cursor: pointer;
@@ -54,6 +46,12 @@
   font-size: 13px;
   line-height: 17px;
   color: rgba(0, 0, 0, 0.5);
+}
+
+.theader > div {
+  font-size: 13px !important;
+  line-height: 17px !important;
+  color: rgba(0, 0, 0, 0.3) !important;
 }
 
 @media (max-width: 960px) {
