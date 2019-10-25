@@ -16,41 +16,39 @@ public class TbapiCacheImpl implements TbapiCache {
     private Map<String, Object> cache = new ConcurrentHashMap<>();
     private static final String CUSTOMER_NAME_PREFIX = ".customerName";
 
-    private TbapiCacheImpl () {
+    private TbapiCacheImpl() {
     }
 
     @Override
-    public void putToCache (String customerId, Object o) {
-        if (o == null){
+    public void putToCache(String customerId, Object customerName) {
+        String customerCacheName = getCustomerCacheName(customerId);
+        this.invalidationsTime.put(customerCacheName, LocalDateTime.now().plusMinutes(45));
+        if (customerName == null){
+            this.cache.put(customerCacheName, " ");
             return;
         }
-        final String id = getCustomerCacheName(customerId);
-        var formCache = getCustomerNameFromCache(id);
-        if(formCache == null) {
-            this.cache.put(id, o);
-            this.invalidationsTime.put(id, LocalDateTime.now().plusMinutes(45));
-        }
+        this.cache.put(customerCacheName, customerName);
     }
 
     @Override
-    public void deleteFromCache (String customerId) {
+    public void deleteFromCache(String customerId) {
         this.cache.remove(getCustomerCacheName(customerId));
     }
 
     @Override
-    public Object getCustomerNameFromCache (String customerId) {
+    public Object getCustomerNameFromCache(String customerId) {
         return this.cache.get(customerId);
     }
 
     @Override
-    public Map<String, Object> getCustomerNamesFromCache (List<String> customers) {
+    public Map<String, Object> getCustomerNamesFromCache(List<String> customers) {
         Map<String, Object> ret = new HashMap<>();
         customers.forEach(customer -> ret.put(customer, getCustomerNameFromCache(getCustomerCacheName(customer))));
         return ret;
     }
 
     @Override
-    public void invalidateCache () {
+    public void invalidateCache() {
         LocalDateTime now = LocalDateTime.now();
         var invalidate = this.invalidationsTime.entrySet().stream().filter(map -> map.getValue().isBefore(now)).map(Map.Entry::getKey).collect(Collectors.toList());
         invalidate.forEach(invalidCache -> {
@@ -59,11 +57,11 @@ public class TbapiCacheImpl implements TbapiCache {
         });
     }
 
-    public static TbapiCache getInstance () {
+    public static TbapiCache getInstance() {
         return INSTANCE;
     }
 
-    private String getCustomerCacheName (final String customerId) {
+    private String getCustomerCacheName(final String customerId) {
         return customerId + CUSTOMER_NAME_PREFIX;
     }
 }
