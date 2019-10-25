@@ -115,7 +115,7 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
                 PROVIDER_ID);
     }
 
-    private UserPostResponse getUserPost(UserModel user){
+    private UserPostResponse getUserPost(UserModel user) {
         List<UserPostResponse> userPost;
         try {
             this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
@@ -124,18 +124,22 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
             log.error(e.getMessage(), e);
             return null;
         }
-        return Optional.of(userPost.stream().filter(o -> o.isSelected()).findFirst().get())
-                .orElseThrow(() -> null);
+        return userPost.stream().filter(o -> o.isSelected()).findFirst()
+                .orElse(null);
     }
 
     public static Object getUserModelValue(UserPostResponse userPost, String propertyName) {
-        switch (UserPostPropertyType.valueOf(propertyName)){
-            case TOMS_ID : return userPost.getTomsId();
-            case DMP_ID : return userPost.getDmpId();
-            case ROLE : return userPost.getUserRole().getName();
-            case SYSTEMS : return userPost.getSystemRoles().stream()
-                    .map(o -> o.getExternalSystem().getName())
-                    .collect(Collectors.toList());
+        switch (UserPostPropertyType.valueOf(propertyName)) {
+            case TOMS_ID:
+                return userPost.getTomsId();
+            case DMP_ID:
+                return userPost.getDmpId();
+            case ROLE:
+                return userPost.getUserRole().getName();
+            case SYSTEMS:
+                return userPost.getSystemRoles().stream()
+                        .map(o -> o.getExternalSystem().getName())
+                        .collect(Collectors.toList());
         }
         return "";
     }
