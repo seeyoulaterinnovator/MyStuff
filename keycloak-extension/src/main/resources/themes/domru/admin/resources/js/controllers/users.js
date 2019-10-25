@@ -778,10 +778,17 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
                                               Components,
                                               UserImpersonation, RequiredActions,
                                               UserStorageOperations,
-                                              $location, $http, Dialog, Notifications) {
+                                              $location, $http, Dialog, Notifications,
+                                              RealmClearUserCache) {
     $scope.realm = realm;
     $scope.create = !user.id;
     $scope.editUsername = $scope.create || $scope.realm.editUsernameAllowed;
+
+    $scope.clearUserCache = function() {
+        RealmClearUserCache.save({ realm: realm.realm}, function () {
+            //Notifications.success("User cache cleared");
+        });
+    }
 
     if ($scope.create) {
         $scope.user = {enabled: true, attributes: {}}
@@ -800,6 +807,7 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
         //}
 
         $scope.user = angular.copy(user);
+        $scope.clearUserCache();
         $scope.impersonate = function () {
 
             var hackedRealm = realm.realm;
