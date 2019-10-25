@@ -6,7 +6,9 @@ import ru.alamics.sso.keycloak.auth.requiredactions.PhoneVerificationByIncomingC
 import ru.alamics.sso.keycloak.auth.requiredactions.PhoneVerificationBySmsFactory;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public enum AuthType {
@@ -46,19 +48,18 @@ public enum AuthType {
     }
 
     public static AuthType getByList(List<String> types) {
-        if(types == null) return null;
+        if (types == null || types.isEmpty()) return null;
         try {
-            if(!types.isEmpty()) {
-                List<AuthType> authTypeList = List.of(EMAIL, EMAIL_AND_PHONE_CODE, INCOMING_CALL, PHONE_CODE);
-                return authTypeList.stream()
-                        .filter(authType -> {
-                            List<String> requiredActionNames1 = Arrays.asList(authType.getRequiredActionNames());
-                            return types.containsAll(requiredActionNames1) && types.size() == requiredActionNames1.size();
-                        }).findFirst()
-                        .orElse(null);
-            } else {
-                return null;
-            }
+            List<AuthType> authTypeList = List.of(EMAIL, EMAIL_AND_PHONE_CODE, INCOMING_CALL, PHONE_CODE);
+            List<String> authTypes = new LinkedList<>();
+            authTypeList.stream().forEach(o -> authTypes.addAll(List.of(o.getRequiredActionNames())));
+            List<String> filterTypes = types.stream().filter(o -> authTypes.contains(o)).collect(Collectors.toList());
+            return authTypeList.stream()
+                    .filter(authType -> {
+                        List<String> requiredActionNames1 = Arrays.asList(authType.getRequiredActionNames());
+                        return filterTypes.containsAll(requiredActionNames1) && filterTypes.size() == requiredActionNames1.size();
+                    }).findFirst()
+                    .orElse(null);
         } catch (IllegalArgumentException e) {
             log.info("AuthType.getByString " + e);
             return null;
