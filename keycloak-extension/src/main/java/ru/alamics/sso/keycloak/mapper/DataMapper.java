@@ -45,6 +45,7 @@ public abstract class DataMapper {
                 .systemRoleName(toString(tuple.get("system_role")))
                 .systemId(toString(tuple.get("system_id")))
                 .systemName(toString(tuple.get("system_name")))
+                .systemLabel(toString(tuple.get("system_label")))
                 .build();
     }
 

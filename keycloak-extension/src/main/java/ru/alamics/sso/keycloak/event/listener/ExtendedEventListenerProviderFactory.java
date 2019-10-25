@@ -10,8 +10,7 @@ public class ExtendedEventListenerProviderFactory implements EventListenerProvid
 
     @Override
     public ExtendedEventListenerProvider create(KeycloakSession session) {
-        EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
-        return new ExtendedEventListenerProvider(session, emailTemplateProvider);
+        return new ExtendedEventListenerProvider(session);
     }
 
     @Override

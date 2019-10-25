@@ -7,6 +7,10 @@ public class FoundException extends Exception {
 
     private Map<String, Object> result;
 
+    public FoundException() {
+        super();
+    }
+
     public FoundException(String message) {
         super(message);
     }

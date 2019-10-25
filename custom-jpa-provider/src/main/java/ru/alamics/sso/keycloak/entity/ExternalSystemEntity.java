@@ -17,6 +17,8 @@ public class ExternalSystemEntity {
     private Long id;
     @Column(name = "name")
     private String name;
+    @Column(name = "label")
+    private String label;
     @OneToMany(mappedBy = "externalSystem")
     private Set<ExternalSystemRoleEntity> systemRoles;
 

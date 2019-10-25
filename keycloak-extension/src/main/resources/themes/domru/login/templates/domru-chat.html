@@ -1,4 +1,11 @@
-<script
-  type="text/javascript"
-  src="//perm.b2b.domru.ru/chat/?domainUrl=//perm.b2b.domru.ru&amp;cityDomain=perm&amp;cityId=1"
-></script>
+<script type="text/javascript">
+    const isIframe = (location.search.indexOf('hiddenHeader%3Dtrue') > 0) || (location.search.indexOf('hiddenHeader=true') > 0);
+    if (!isIframe) {
+        let script = document.createElement('script');
+        script.id = "chat-script";
+        script.type = 'text/javascript';
+        script.src = "//perm.b2b.domru.ru/chat/?domainUrl=//perm.b2b.domru.ru&amp;cityDomain=perm&amp;cityId=1";
+        document.body.appendChild(script);
+    }
+</script>
+

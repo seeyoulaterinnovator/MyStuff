@@ -11,7 +11,7 @@
         </#if>
     <#elseif section = "form">
         <#if userPhone??>
-            <p class="pb-6">${userPhone?replace('([0-9]{1})([0-9]{3})([0-9]{3})([0-9]{2})([0-9]{2})',
+            <p class="pb-6" x-ms-format-detection="none">${userPhone?replace('([0-9]{1})([0-9]{3})([0-9]{3})([0-9]{2})([0-9]{2})',
                 '+$1 ($2) $3-$4-$5', 'ri')}</p>
         </#if>
         <form id="totpe" action="${url.loginAction}" method="POST">
@@ -35,21 +35,18 @@
             <input id="smscode" name="smscode" class="hidden" />
             
             <#if lengthCode==4>
-                <button class="border-b border-dashed text-black-50 text-right mb-6 hidden" form="totpe" id="sentCode" name="sendEmailCode" type="submit">Отправить на email</button>
+                <button class="border-b border-hoverable border-dashed text-black-50 text-right mb-6 hidden" form="totpe" id="sentCode" name="sendEmailCode" type="submit">Отправить на email</button>
             </#if>
            
-            <div class="flex justify-between w-full items-center">
-                <button class="btn btn-main w-3/7 mr-4" name="accept" id="accept" type="submit">Подтвердить</button>
+            <div class="sm:block md:flex justify-between w-full items-center text-center md:text-left">
+                <button class="btn btn-main w-full md:w-3/7 mr-0 md:mr-4" name="accept" id="accept" type="submit">Подтвердить</button>
                 
-                <div id="timer" class="text-main-600 text-right text-sm flex items-center">
+                <div id="timer" class="text-main-600 text-center md:text-right text-sm flex items-center my-6 md:my-3 justify-center md:justify-start">
                     Пароль действует <span id="timer-time" class="px-1 text-black text-5/3em"></span> мин
                 </div>
-                <#if lengthCode==6>
-                    <button class="hidden border-b border-dashed text-black-50 text-right" name="resend" id="resend" type="submit" >Отправить еще раз</button>
-                <#elseif enableRepeatCall?? && enableRepeatCall!>
-                    <button class="hidden border-b border-dashed text-black-50 text-right" name="resend" id="resend" type="submit" >Позвонить еще раз</button>
-                </#if>
-                
+
+                <button class="hidden border-b border-hoverable border-dashed text-black-50 text-center md:text-right my-6 md:my-0" name="resend" id="resend" type="submit" >Позвонить еще раз</button>
+
             </div>
         </form>
     </#if>

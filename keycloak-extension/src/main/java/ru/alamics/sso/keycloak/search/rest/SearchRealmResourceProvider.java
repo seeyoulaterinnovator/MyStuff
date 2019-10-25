@@ -19,9 +19,11 @@ package ru.alamics.sso.keycloak.search.rest;
 
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.resource.RealmResourceProvider;
+import org.keycloak.services.resources.admin.AdminAuth;
+import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
 
 
-public class SearchRealmResourceProvider implements RealmResourceProvider {
+public class SearchRealmResourceProvider implements RealmResourceProvider, BaseResourceProvider {
 
     private KeycloakSession session;
 
@@ -31,6 +33,7 @@ public class SearchRealmResourceProvider implements RealmResourceProvider {
 
     @Override
     public Object getResource() {
+        initAuth(session).users().requireView();
         return new SearchRestResource(session);
     }
 
