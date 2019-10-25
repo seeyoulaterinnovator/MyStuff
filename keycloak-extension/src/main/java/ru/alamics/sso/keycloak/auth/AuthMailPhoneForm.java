@@ -9,10 +9,7 @@ import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAu
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.ModelDuplicateException;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ServicesLogger;
@@ -36,6 +33,10 @@ import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 
 @Slf4j
 public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator implements Authenticator {
+
+    // TODO
+    private final static String LKB2B_ID = "lkb2b";
+    private final static String CONSOLE_ID = "security-admin-console";
 
     private final EntityManager em;
     private final RiasService riasService;
@@ -117,12 +118,19 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
     // -------------
 
     private boolean checkAuthRias(AuthenticationFlowContext context) {
+        log.info("check auth RIAS");
 
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
 
         String username = formData.getFirst(FormConstants.FIELD_USERNAME);
         String password = formData.getFirst(FormConstants.FIELD_PASSWORD);
         var city = formData.getFirst(FormConstants.FIELD_CITY);
+
+        log.info("RIAS auth, got city = " + city);
+
+        if (Validation.isBlank(city)) {
+            city = "perm-dev"; // TODO с фронта не приходит город
+        }
 
         String domain = null;
         CityMigration cm = CitiesResource.getCityMigrationByCity(city);
@@ -135,7 +143,7 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
 
             if (riasLogin.getAccess_token() != null) {
 
-                var uriLoc = UriBuilder.fromPath("https://lkb2b.domru.ru/login");
+                var uriLoc = UriBuilder.fromPath("https://master.b2b-lk.web.t2.ertelecom.ru/login"); //"https://lkb2b.domru.ru/login");
 
                 if (!Validation.isBlank(city)) {
                     uriLoc.queryParam("citydomain", city);
@@ -181,10 +189,19 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
                 user = Util.getUserAdapter(context.getSession(), userFindService.getUserByPhone(context.getRealm(), username));
             }
 
+            log.info("user is " + user);
+            if (user != null) {
+                log.info(user.getId());
+            }
             if (user == null) {
-                log.info("check auth RIAS");
-                if (checkAuthRias(context))
+
+                ClientModel cm = context.getAuthenticationSession().getClient();
+
+                log.info("find user by rias: " + cm.getClientId());
+
+                if (cm != null && (LKB2B_ID.equals(cm.getClientId()) || CONSOLE_ID.equals(cm.getClientId())) && checkAuthRias(context)) {
                     return false;
+                }
             }
 
         } catch (ModelDuplicateException mde) {

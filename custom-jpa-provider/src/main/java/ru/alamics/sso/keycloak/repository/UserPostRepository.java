@@ -111,14 +111,13 @@ public class UserPostRepository {
         }
     }
 
-    public Set<UserPostEntity> findUserPostRole(final UserEntity user) {
+    public List<UserPostEntity> findUserPostRole(final UserEntity user) {
         final String DEBUG_STR = "findUserPostRole";
         log.info("{}: user={}", DEBUG_STR, user.getId());
 
-        Set<UserPostEntity> ret = em.createQuery("select up from UserPostEntity up where up.user =:user", UserPostEntity.class)
+        List<UserPostEntity> ret = em.createQuery("select up from UserPostEntity up where up.user =:user", UserPostEntity.class)
                 .setParameter("user", user)
-                .getResultStream()
-                .collect(Collectors.toSet());
+                .getResultList();
         return ret;
     }
 
@@ -176,12 +175,11 @@ public class UserPostRepository {
         return ret;
     }
 
-    public Set<ExternalSystemRoleEntity> findSystemByUser(final UserEntity user) {
+    public List<ExternalSystemRoleEntity> findSystemByUser(final UserEntity user) {
 
-        Set<ExternalSystemRoleEntity> ret = em.createQuery("select ext from ExternalSystemRoleEntity ext join ext.userPosts post where post.user =:user", ExternalSystemRoleEntity.class)
+        List<ExternalSystemRoleEntity> ret = em.createQuery("select ext from ExternalSystemRoleEntity ext join ext.userPosts post where post.user =:user", ExternalSystemRoleEntity.class)
                 .setParameter("user", user)
-                .getResultStream()
-                .collect(Collectors.toSet());
+                .getResultList();
 
         return ret;
     }

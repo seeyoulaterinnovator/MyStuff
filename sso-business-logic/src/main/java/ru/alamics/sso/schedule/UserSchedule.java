@@ -6,8 +6,11 @@ import org.keycloak.common.util.Time;
 import org.keycloak.email.EmailException;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.jpa.AdminEventEntity;
-import org.keycloak.models.*;
+import org.keycloak.models.PasswordPolicy;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.UserAdapter;
+import org.keycloak.models.jpa.entities.ClientEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.util.JsonSerialization;
 import ru.alamics.sso.emailer.EmailModel;
@@ -23,12 +26,9 @@ import ru.alamics.sso.settings.SettingsDto;
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 @DependsOn("ApplicationProperties")
 public class UserSchedule {
     private final static String[] SETTINGS_REALM_NAMES_SCHEDULE = {"user", "manager"};
+    private final static String CLIENT_ID = "lkb2b";
     @EJB
     private EmailSender sender;
     @EJB
@@ -47,6 +48,8 @@ public class UserSchedule {
     private UserHistoryLoginRepository userHistoryLoginRepository;
     @EJB
     private RealmRepository realmRepository;
+    @EJB
+    private ClientRepository clientRepository;
     @EJB
     private AdminEventRepository adminEventRepository;
     @EJB
@@ -114,10 +117,11 @@ public class UserSchedule {
         for (AutoLockNotification notification : autoLockNotifications) {
             var user = notification.getUser();
             RealmModel realm = realmRepository.findRealmById(user.getRealmId());
+            ClientEntity client = clientRepository.findClientById(CLIENT_ID, realm.getName());
             UserModel userModel = new UserAdapter(null, realm, null, user);
             try {
                 if (notification.getType() == NotificationType.ABSENCE_NOTIFICATION) {
-                    var prepareBlockNotification = prepareBlockNotification(realm.getName());
+                    var prepareBlockNotification = prepareBlockNotification(realm.getName(), getClientLink(client));
                     prepareBlockNotification.realmModel(realm)
                             .user(userModel);
                     sender.send(prepareBlockNotification.build());
@@ -129,7 +133,7 @@ public class UserSchedule {
                     user.setEnabled(false);
                     createAdminEvent(OperationType.UPDATE, user, realm);
                 } else if (notification.getType() == NotificationType.PASSWORD_EXPIRED) {
-                    var passwordExpired = passwordExpired();
+                    var passwordExpired = passwordExpired(getClientLink(client));
                     passwordExpired.realmModel(realm)
                             .user(userModel);
                     sender.send(passwordExpired.build());
@@ -150,7 +154,7 @@ public class UserSchedule {
                 .bodyTemplate(template);
     }
 
-    private EmailModel.EmailModelBuilder prepareBlockNotification(String realm) {
+    private EmailModel.EmailModelBuilder prepareBlockNotification(String realm, String link) {
         final String subject = "Предупреждение о блокирование аккаунта";
         final String template = "block-prepare-notification.ftl";
         SettingsDto blockSetting = properties.getSetting(PropertyConstants.ABSENCE_BLOCKING_DAYS, realm);
@@ -160,26 +164,29 @@ public class UserSchedule {
                 blockSetting.getUnit().convert(inactiveBlockTimeout - inactiveNotificationTimeout, TimeUnit.SECONDS));
         Map<String, Object> body = new HashMap<>();
         body.put("absence", timeToBlock + " " + Translator.getRusTranslateTimeUnit(timeToBlock, blockSetting.getUnit()));
-
+        body.put("link", link);
         return EmailModel.builder()
                 .bodyAttributes(body)
                 .subject(subject)
                 .bodyTemplate(template);
     }
 
-    private EmailModel.EmailModelBuilder passwordExpired() {
+    private EmailModel.EmailModelBuilder passwordExpired(String link) {
         final String subject = "Истек срок жизни пароля";
         final String template = "password-expires.ftl";
         Map<String, Object> body = new HashMap<>();
-        String state = "0/" + UUID.randomUUID();
-        String auth = String.format("%s/auth/realms/user/protocol/openid-connect/auth?client_id=account", host);
-        String redirectUri = String.format("%s/auth/realms/user/account/login-redirect", host);
-        body.put("link", String.format("%s&redirect_uri=%s&state=%s&response_type=code", auth, URLEncoder.encode(redirectUri, StandardCharsets.UTF_8), state));
-
+        body.put("link", link);
         return EmailModel.builder()
                 .bodyAttributes(body)
                 .subject(subject)
                 .bodyTemplate(template);
+    }
+
+    private String getClientLink(ClientEntity client){
+        if (client != null) {
+            return client.getRedirectUris().stream().findFirst().get();
+        }
+        return "";
     }
 
     private void createAdminEvent(OperationType operationType, UserEntity userEntity, RealmModel realm) {

@@ -40,8 +40,8 @@ public class RiasUserLoginImpl implements RiasLoginService {
 
     public RiasUserLoginImpl() {}
 
-    private static final String CLIENT_NAME = "SSO";
-    private static final String CLIENT_SALT = "W2NHAYTWrfEG9fDw2MAt2TuuM7VK2K7H";
+    private static final String CLIENT_NAME = "WEB_CABINET_B2B";
+    private static final String CLIENT_SALT = "kad14duh534u2h3j2mmi8dyla9dze";
 
     private static final String GRANT_TYPE = "password";
 
@@ -92,7 +92,7 @@ public class RiasUserLoginImpl implements RiasLoginService {
                 response.close();
         }
 
-        log.info("login response: " + response);
+        log.info("login response: " + result);
         //System.out.println("login response: " + result);
 
         return result;

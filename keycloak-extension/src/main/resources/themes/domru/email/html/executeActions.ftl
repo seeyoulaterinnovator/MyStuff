@@ -22,6 +22,6 @@
   <#assign email= user.getEmail()>
   </#if>
  
-    ${kcSanitize(msg("executeActionsBodyHtml",link, linkExpiration, email, requiredActionsText, linkExpirationFormatter(linkExpiration)))?no_esc}
+    ${kcSanitize(msg("executeActionsBodyHtml",link, linkExpiration, email, requiredActionsText, linkExpirationFormatter(linkExpiration), time))?no_esc}
   </#if>
 </@template.layout>

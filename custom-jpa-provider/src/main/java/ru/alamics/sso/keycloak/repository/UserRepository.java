@@ -46,12 +46,35 @@ public class UserRepository {
     }
 
     public UserEntity getFirstUserByPhoneNumber(RealmModel realmModel, String phone, String excludedUserId) {
+
+        if (Validation.isBlank(phone))
+            return null;
+
         var users =  em.createQuery("select u from UserEntity u join u.attributes attr \n" +
                 "  where u.realmId = :realmId " +
                 "       and attr.name = :name " +
                 "       and (:excludedUserId is null or u.id <> :excludedUserId) " +
                 "       and attr.value = :phoneNmbr", UserEntity.class)
                 .setParameter("realmId", realmModel == null ? "user" : realmModel.getId())
+                .setParameter("name", "phone")
+                .setParameter("phoneNmbr", phone)
+                .setParameter("excludedUserId", Validation.isBlank(excludedUserId) ? null : excludedUserId)
+                .getResultList();
+        if (users != null && users.size() > 0) {
+            return users.get(0);
+        }
+        return null;
+    }
+
+    public UserEntity getFirstUserByPhoneNumber(String phone, String excludedUserId) {
+
+        if (Validation.isBlank(phone))
+            return null;
+
+        var users =  em.createQuery("select u from UserEntity u join u.attributes attr \n" +
+                "  where attr.name = :name " +
+                "       and (:excludedUserId is null or u.id <> :excludedUserId) " +
+                "       and attr.value = :phoneNmbr", UserEntity.class)
                 .setParameter("name", "phone")
                 .setParameter("phoneNmbr", phone)
                 .setParameter("excludedUserId", Validation.isBlank(excludedUserId) ? null : excludedUserId)

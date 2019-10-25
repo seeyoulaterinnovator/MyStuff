@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.cities;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
@@ -16,8 +17,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
@@ -45,7 +45,7 @@ public class CitiesResource {
             lock.lock();
             try {
                 if (cityList.isEmpty()) {
-                    cityList = SimpleHttp.doGet(url, session).asJson(cityList.getClass());
+                    cityList = SimpleHttp.doGet(url, session).asJson(new TypeReference<List<CityMigration>>() {});
                 }
             }  catch (IOException e){
                 log.error("Connect to " + url + " failed");

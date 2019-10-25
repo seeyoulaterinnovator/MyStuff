@@ -17,6 +17,12 @@
   border-radius: 1px;
 }
 
+.border-b.border-hoverable {
+  &:hover {
+    border-bottom-color: transparent;
+  }
+}
+
 .border-box {
   box-sizing: border-box;
 }
@@ -49,6 +55,40 @@ input[type="number"] {
 
 .login-title-text {
   max-width: 306px;
+}
+
+.text-secondary-title {
+  transition: 0.2s ease-in-out;
+  &:hover {
+    color: black;
+  }
+}
+
+.text-no-wrap {
+  white-space: nowrap;
+}
+
+.reset-password {
+  position: relative;
+  transition: 0.2s ease-in-out;
+  opacity: 0.5;
+  cursor: pointer;
+  &::after {
+    transition: 0.2s ease-in-out;
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 1.4px;
+    width: 100%;
+    @apply .bg-black-50;
+  }
+  &:hover {
+    opacity: 1;
+    &:after {
+       @apply .bg-extra;
+    }
+  }
 }
 
 .footer {
