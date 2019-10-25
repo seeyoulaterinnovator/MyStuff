@@ -23,6 +23,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.resource.RealmResourceProvider;
 import org.keycloak.services.resources.admin.AdminAuth;
+import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
 import ru.alamics.sso.keycloak.rest.BaseResourceProviderFactory;
@@ -35,7 +36,7 @@ public class CustomUserRealmResourceProviderFactory implements BaseResourceProvi
 
     private KeycloakSession session;
     private UserFindService userFindService;
-    private AdminAuth auth;
+    private AdminPermissionEvaluator auth;
 
     @Override
     public String getId() {
@@ -44,7 +45,7 @@ public class CustomUserRealmResourceProviderFactory implements BaseResourceProvi
 
     @Override
     public RealmResourceProvider create(KeycloakSession session) {
-        this.auth = this.initAuthByWorkingRealm(session);
+        this.auth = this.initAuth(session);
         this.session = session;
         this.userFindService = (UserFindService) Lookup.lookup(UserFindService.class);
         return this;

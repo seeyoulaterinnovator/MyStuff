@@ -4,17 +4,17 @@ import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
-import org.keycloak.jose.jws.JWSInput;
-import org.keycloak.jose.jws.JWSInputException;
+import org.keycloak.common.ClientConnection;
+import org.keycloak.common.Profile;
+import org.keycloak.events.Details;
+import org.keycloak.events.EventBuilder;
+import org.keycloak.events.EventType;
 import org.keycloak.models.*;
-import org.keycloak.representations.AccessToken;
 import org.keycloak.services.ErrorResponse;
-import org.keycloak.services.ForbiddenException;
-import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager;
-import org.keycloak.services.managers.RealmManager;
-import org.keycloak.services.resources.admin.AdminAuth;
-import org.keycloak.services.resources.admin.permissions.AdminPermissions;
+import org.keycloak.services.resources.account.AccountFormService;
+import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
+import org.keycloak.utils.ProfileHelper;
 import ru.alamics.sso.keycloak.create.FileServiceException;
 import ru.alamics.sso.keycloak.create.UserService;
 import ru.alamics.sso.keycloak.create.model.DownloadUserRequest;
@@ -34,16 +34,24 @@ import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.keycloak.models.ImpersonationSessionNote.IMPERSONATOR_ID;
+import static org.keycloak.models.ImpersonationSessionNote.IMPERSONATOR_USERNAME;
 
 @Slf4j
 public class CustomUserResource {
     protected KeycloakSession session;
     private UserService userService;
+    private AdminPermissionEvaluator auth;
 
-    public CustomUserResource(KeycloakSession session, AdminAuth auth,  UserFindService userFindService) {
+    public CustomUserResource(KeycloakSession session, AdminPermissionEvaluator auth,  UserFindService userFindService) {
         this.session = session;
-//        AdminAuth auth = authenticateRealmAdminRequest(session.getContext().getRealm());
-        this.userService = new UserService(session, auth, userFindService);
+        this.auth = auth;
+        auth.users().canManage();
+        this.userService = new UserService(session, auth.adminAuth(), userFindService);
     }
 
     @POST
@@ -235,5 +243,50 @@ public class CustomUserResource {
             }
         }
         return "unknown";
+    }
+
+    @Path("impersonation/{id}")
+    @POST
+    @NoCache
+    @Produces(MediaType.APPLICATION_JSON)
+    public Map<String, Object> impersonate(@PathParam("id") String id) {
+
+        ProfileHelper.requireFeature(Profile.Feature.IMPERSONATION);
+
+        auth.users().canImpersonate();
+        RealmModel realm = session.getContext().getRealm();
+        UserModel user = session.users().getUserById(id, realm);
+        // if same realm logout before impersonation
+        boolean sameRealm = false;
+        ClientConnection clientConnection = session.getContext().getConnection();
+        if (realm.getId().equals(realm.getId())) {
+            sameRealm = true;
+            UserSessionModel userSession = session.sessions().getUserSession(realm, auth.adminAuth().getToken().getSessionState());
+            AuthenticationManager.expireIdentityCookie(realm, session.getContext().getUri(), clientConnection);
+            AuthenticationManager.expireRememberMeCookie(realm, session.getContext().getUri(), clientConnection);
+            AuthenticationManager.backchannelLogout(session, realm, userSession, session.getContext().getUri(), clientConnection, session.getContext().getRequestHeaders(), true);
+        }
+        EventBuilder event = new EventBuilder(realm, session, clientConnection);
+
+        UserSessionModel userSession = session.sessions().createUserSession(realm, user, user.getUsername(), clientConnection.getRemoteAddr(), "impersonate", false, null, null);
+
+        UserModel adminUser = auth.adminAuth().getUser();
+        String impersonatorId = adminUser.getId();
+        String impersonator = adminUser.getUsername();
+        userSession.setNote(IMPERSONATOR_ID.toString(), impersonatorId);
+        userSession.setNote(IMPERSONATOR_USERNAME.toString(), impersonator);
+
+        AuthenticationManager.createLoginCookie(session, realm, userSession.getUser(), userSession, session.getContext().getUri(), clientConnection);
+        URI redirect = AccountFormService.accountServiceApplicationPage(session.getContext().getUri()).build(realm.getName());
+        Map<String, Object> result = new HashMap<>();
+        result.put("sameRealm", sameRealm);
+        result.put("redirect", redirect.toString());
+        event.event(EventType.IMPERSONATE)
+                .session(userSession)
+                .user(user)
+                .detail(Details.IMPERSONATOR_REALM, realm.getName())
+                .detail(Details.IMPERSONATOR, impersonator).success();
+
+        return result;
     }
 }

@@ -779,7 +779,8 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
                                               UserImpersonation, RequiredActions,
                                               UserStorageOperations,
                                               $location, $http, Dialog, Notifications,
-                                              RealmClearUserCache) {
+                                              RealmClearUserCache, RealmClearRealmCache,
+                                              RealmClearKeysCache) {
     $scope.realm = realm;
     $scope.create = !user.id;
     $scope.editUsername = $scope.create || $scope.realm.editUsernameAllowed;
@@ -787,6 +788,18 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
     $scope.clearUserCache = function() {
         RealmClearUserCache.save({ realm: realm.realm}, function () {
             //Notifications.success("User cache cleared");
+        });
+    }
+
+    $scope.clearRealmCache = function() {
+        RealmClearRealmCache.save({ realm: realm.realm}, function () {
+            //Notifications.success("Realm cache cleared");
+        });
+    }
+
+    $scope.clearKeysCache = function() {
+        RealmClearKeysCache.save({ realm: realm.realm}, function () {
+            //Notifications.success("Public keys cache cleared");
         });
     }
 
@@ -808,6 +821,8 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
 
         $scope.user = angular.copy(user);
         $scope.clearUserCache();
+        $scope.clearRealmCache();
+        $scope.clearKeysCache();
         $scope.impersonate = function () {
 
             var hackedRealm = realm.realm;
@@ -819,14 +834,23 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
             console.log('real ' + realm.realm);
             console.log('searched ' + $scope.query.searchRealm);
 
-            UserImpersonation.save({realm: hackedRealm, user: $scope.user.id}, function (data) {
-
-                if (data.sameRealm) {
-                    window.location = data.redirect;
+            $http.post(authUrl + '/realms/' + hackedRealm + '/users-toms/impersonation/' + $scope.user.id).then(function (data) {
+                if (data.data.sameRealm) {
+                    window.location = data.data.redirect;
                 } else {
-                    window.open(data.redirect, "_blank");
+                    window.open(data.data.redirect, "_blank");
                 }
             });
+
+            // UserImpersonation.save({realm: hackedRealm, user: $scope.user.id}, function (data) {
+            //     if (data.sameRealm) {
+            //         window.location = data.redirect;
+            //     } else {
+            //         window.open(data.redirect, "_blank");
+            //     }
+            // });
+
+
         };
         if (user.federationLink) {
             console.log("federationLink is not null. It is " + user.federationLink);
