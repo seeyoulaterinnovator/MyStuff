@@ -92,7 +92,7 @@ public class RiasUserLoginImpl implements RiasLoginService {
                 response.close();
         }
 
-        log.info("login response: " + response);
+        log.info("login response: " + result);
         //System.out.println("login response: " + result);
 
         return result;

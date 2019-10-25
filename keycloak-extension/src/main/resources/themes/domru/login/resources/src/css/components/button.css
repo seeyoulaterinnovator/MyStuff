@@ -3,7 +3,7 @@
 
   height: 40px;
   padding: 0;
-  transition: box-shadow 0.1s ease-in;
+  transition: 0.2s ease-in-out;
 
   @media (min-width: 1199px) {
     height: 48px;
@@ -11,19 +11,24 @@
 
   &:disabled {
     @apply .opacity-40 .cursor-not-allowed;
+    &:hover {
+       transform: none;
+       @apply .shadow;
+    }
   }
 
-  &:active {
-    @apply .shadow-inner;
-  }
-
-  &:hover,
-  &:focus {
+  &:hover {
+    transform: translate(1px, -1px);
     @apply .shadow-md;
   }
 
   &:focus {
     @apply .outline-none;
+  }
+
+  &:active {
+    transform: translate(0, 0);
+    @apply .shadow-inner;
   }
 }
 
@@ -31,7 +36,7 @@
   @apply .bg-extra .text-black;
 
   &:hover,
-  &:focus {
+  &:active {
     @apply .bg-extra-700-hover;
   }
 }
@@ -40,7 +45,7 @@
   @apply .bg-accentBlue .text-white;
 
   &:hover,
-  &:focus {
+  &:active {
     @apply .bg-accentBlue-700-hover;
   }
 }

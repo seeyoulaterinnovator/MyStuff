@@ -8,6 +8,24 @@
   justify-content: space-between;
 }
 
+#cities-button {
+  * {
+    transition: 0.2s ease-in-out;
+  }
+  button {
+    opacity: .5;
+    &:hover {
+      opacity: 1;
+      span {
+        color: black;
+      }
+      .border-dashed {
+        @apply .border-extra-700;
+      }
+    }
+  }
+}
+
 @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
   .cities-column {
     width: calc((100vw - 4.9rem) /4);
@@ -62,4 +80,18 @@
   .phone--hidden-small {
     display: none;
   }
+}
+
+.custom-scroll {
+  scrollbar-color: #ffdd00 #efefef;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.custom-scroll::-webkit-scrollbar {
+  width: 3px !important;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  width: 3px !important;
 }

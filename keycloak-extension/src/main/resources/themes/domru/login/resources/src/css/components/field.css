@@ -59,9 +59,13 @@
     height: 48px;
   }
 
-  &:hover,
-  &:focus {
+  &:hover
+  {
     @apply .border-accentBlue-700;
+  }
+  &:focus
+  {
+    @apply .border-extra-700;
   }
 
   &::placeholder {
@@ -75,6 +79,9 @@
 }
 
 .field__input:placeholder-shown + .field__label {
+  color: transparent;
+}
+.field__input:-ms-input-placeholder + .field__label {
   color: transparent;
 }
 

@@ -17,6 +17,7 @@ import org.keycloak.services.managers.RealmManager;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.services.resources.admin.permissions.AdminPermissions;
+import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.keycloak.search.dto.UserDto;
@@ -144,23 +145,20 @@ public class SearchResource {
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response findUserByAttribute(@QueryParam("phone") String phone, @QueryParam("excludeUserId") String excludeUserId) {
-        if (phone == null) {
-            throw new WebApplicationException(
-                    Response.status(HttpURLConnection.HTTP_BAD_REQUEST)
-                            .entity("phone parameter is mandatory")
-                            .build()
-            );
+    public Response findUserByAttribute(@QueryParam("phone") String phone, @QueryParam("excludedUserId") String excludedUserId) {
+        if (Validation.isBlank(phone)) {
+            return JsonResponse.success().addResult("foundUserId", null).build();
         }
 
-        if (excludeUserId == null) {
+        if (Validation.isBlank(excludedUserId)) {
             throw new WebApplicationException(
                     Response.status(HttpURLConnection.HTTP_BAD_REQUEST)
                             .entity("excludeUserId parameter is mandatory")
                             .build()
             );
         }
-        var user = userFindService.getUserByPhoneAndExcludedUserId(session.getContext().getRealm(), phone, excludeUserId);
+        //fixme сквозной поиск по всем реалмам
+        var user = userFindService.getUserByPhoneAndExcludedUserId(phone, excludedUserId);
         return JsonResponse.success().addResult("foundUserId", user == null ? null : user.getId()).build();
     }
 

@@ -65,7 +65,7 @@ public class UserRole {
         UserEntity userEntity = userRepository.findUser(user.getId());
         repository.deleteUserPostRoles(userEntity, userPosts, realm.getId());
 
-        Set<ExternalSystemRoleEntity> externalSystemRoleEntities = postRepository.findSystemByUser(userEntity);
+        List<ExternalSystemRoleEntity> externalSystemRoleEntities = postRepository.findSystemByUser(userEntity);
         repository.deleteUserSystemPostClientRoles(userEntity, externalSystemRoleEntities, realm.getId());
 
         UserRoleMappingEntity mappingEntity = new UserRoleMappingEntity();

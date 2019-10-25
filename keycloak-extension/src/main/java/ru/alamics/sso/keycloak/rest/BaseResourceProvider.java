@@ -64,7 +64,7 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
         RealmManager realmManager = new RealmManager(session);
         RealmModel realmFromToken = Optional.ofNullable(realmManager.getRealmByName(realmName))
                 .orElseThrow(() -> new NotAuthorizedException("Unknown realm in token"));
-        return AdminPermissions.evaluator(session, realmFromToken, auth);
+        return AdminPermissions.evaluator(session, realmFromToken, auth); //fixme нет возврата сессии обратно
     }
 
     private AdminAuth initAdminAuth(KeycloakSession session){

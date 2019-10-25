@@ -3,7 +3,7 @@
 
 <#macro registrationLayout displayInfo=false displayMessage=true displayWarningMessage=true displayWide=false environment="dev" displayCity=true>
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" class="h-full min-h-screen">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" class="h-full min-h-screen scrollable-container">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -98,7 +98,7 @@
     </#if>
 
     <#include "templates/domru-chat.html">
-    <script src="https://raw.github.com/davidjbradshaw/iframe-resizer/master/js/iframeResizer.contentWindow.min.js"></script>
+    <!--<script src="${url.resourcesPath}/build/iframeResizer.contentWindow.min.js" async></script> -->
   </body>
 </html>
 </#macro>

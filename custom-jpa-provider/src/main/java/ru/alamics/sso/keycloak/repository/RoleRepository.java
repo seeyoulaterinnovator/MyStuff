@@ -86,7 +86,7 @@ public class RoleRepository {
         }
     }
 
-    public void deleteUserSystemPostClientRoles (final UserEntity user, final Set<ExternalSystemRoleEntity> sustems, final String realmId) {
+    public void deleteUserSystemPostClientRoles (final UserEntity user, final List<ExternalSystemRoleEntity> sustems, final String realmId) {
         final String DEBUG_STR = "deleteUserSystemPostRoles";
         log.debug("{}: user={}, realmId={}", DEBUG_STR, user.getId(), realmId);
         final List<String> names = sustems.stream().map(ExternalSystemRoleEntity::getName).collect(Collectors.toList());
