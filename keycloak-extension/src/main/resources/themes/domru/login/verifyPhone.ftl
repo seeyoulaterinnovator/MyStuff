@@ -19,9 +19,9 @@
         <form id="totpForm" action="${url.loginAction}" method="POST">
         <#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон -->
         <p class="pb-2 sm:pb-3 md:pb-4 text-accentRed"> ${error!}<p>
-            <div class="flex justify-between w-full xl:pb-37px md:pb-10 sm:pb-8 pb-6">
+            <div class="flex justify-between w-full xl:pb-37px md:pb-10 sm:pb-8 pb-4">
                 <#list 1..lengthCode as x>
-                    <input placeholder="-" maxlength="1" id="smscode-${x}" name="smscode-${x}" class="text-center align-middle text-3xl w-10 h-10 sm:w-16 sm:h-16 border rounded-lg focus:border-extra outline-none" autocomplete="off" />
+                    <input placeholder="-" maxlength="1" id="smscode-${x}" name="smscode-${x}" class="text-center align-middle text-3xl w-10 h-10 sm:w-14 sm:h-14 border rounded-lg focus:border-extra outline-none" autocomplete="off" />
                 </#list>
             </div>
             <input id="codeNumbers" name="codeNumbers" class="hidden" value="${lengthCode!}" />
@@ -34,7 +34,7 @@
 
             <input id="smscode" name="smscode" class="hidden" />
 
-            <div class="flex md:justify-start justify-center w-full items-center text-center md:text-right xl:pb-55px md:pb-10 sm:pb-8 pb-6">
+            <div class="flex md:justify-start justify-center w-full items-center text-center md:text-right xl:pb-55px md:pb-10 sm:pb-8 pb-4">
                 <#if lengthCode==4>
                     <button class="border-b hoverable border-dashed text-black-50 text-right hidden" form="totpe" id="sentCode" name="sendEmailCode" type="submit">Отправить на email</button>
                 </#if>
