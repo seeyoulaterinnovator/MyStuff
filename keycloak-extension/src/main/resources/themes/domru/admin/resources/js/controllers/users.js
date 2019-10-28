@@ -628,7 +628,6 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
     $scope.searchQuery = function () {
-        $scope.clearCache();
         console.log("query.search: " + $scope.query.search);
         $http.get(`${authUrl}/realms/user/users-info?searchRealm=${$scope.query.searchRealm}`).then(function (data) {
             $scope.users = $scope.groupByUser(angular.fromJson(data).data.results['users-info']);
@@ -639,7 +638,6 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
     $scope.search = function () {
-        $scope.clearCache();
         console.log("query.search: " + $scope.query.search);
         $http.get(`${authUrl}/realms/user/users-info?searchRealm=${$scope.query.searchRealm}&search=${$scope.query.search}&searchUser=${$scope.query.searchByUserId}&searchToms=${$scope.query.searchByTomsId}`).then(function (data) {
             $scope.users = $scope.groupByUser(angular.fromJson(data).data.results['users-info']);
@@ -833,7 +831,6 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
         //if ($scope.query.searchRealm === '' || ! $scope.userRealms.some(function (realm) {return realm === $scope.query.searchRealm}) ){
         //    $scope.query.searchRealm = realm.realm;
         //}
-        $scope.clearCache();
         $scope.user = angular.copy(user);
         $scope.impersonate = function () {
 

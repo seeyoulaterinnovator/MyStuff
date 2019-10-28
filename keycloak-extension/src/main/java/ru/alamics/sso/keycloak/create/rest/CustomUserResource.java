@@ -15,19 +15,13 @@ import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.resources.account.AccountFormService;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.utils.ProfileHelper;
-import ru.alamics.sso.keycloak.create.FileServiceException;
-import ru.alamics.sso.keycloak.create.UserService;
-import ru.alamics.sso.keycloak.create.model.DownloadUserRequest;
-import ru.alamics.sso.keycloak.create.model.UserParameter;
-import ru.alamics.sso.keycloak.create.model.UserRequest;
-import org.keycloak.services.resources.admin.AdminAuth;
+import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.user.FileServiceException;
 import ru.alamics.sso.user.ImportUsersReportService;
 import ru.alamics.sso.user.UserService;
 import ru.alamics.sso.user.UserServiceImpl;
 import ru.alamics.sso.user.model.*;
-import ru.alamics.sso.keycloak.response.JsonResponse;
-import ru.alamics.sso.registration.FoundException;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.naming.InitialContext;
@@ -59,7 +53,7 @@ public class CustomUserResource {
         this.session = session;
         this.auth = auth;
         auth.users().canManage();
-        this.userService = new UserServiceImpl(session, auth);
+        this.userService = new UserServiceImpl(session, auth.adminAuth());
         try {
             this.importUsersReportService = (ImportUsersReportService) new InitialContext().lookup("java:global/domru-sso/" + ImportUsersReportService.class.getSimpleName());
         } catch (NamingException e) {
@@ -275,7 +269,7 @@ public class CustomUserResource {
     @NoCache
     @Produces(MediaType.APPLICATION_JSON)
     public Map<String, Object> impersonate(@PathParam("id") String id) {
-
+        session.userCache().clear();
         ProfileHelper.requireFeature(Profile.Feature.IMPERSONATION);
 
         auth.users().canImpersonate();
