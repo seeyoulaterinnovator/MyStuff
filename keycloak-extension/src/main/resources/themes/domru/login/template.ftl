@@ -69,8 +69,10 @@
                         <span class="text-accentRed bad_phone">${kcSanitize(message.summary)?no_esc}</span>
                     <#elseif message.summary == msg('emailExistsMessage')>
                         <span class="text-accentRed bad_email">${kcSanitize(message.summary)?no_esc}</span>
+<#--                    <#elseif message.summary == ''>-->
                     <#else>
                         <span class="text-accentRed">${kcSanitize(message.summary)?no_esc}</span>
+                        <br>${message.summary}
                     </#if>
                 </#if>
                 </div>
