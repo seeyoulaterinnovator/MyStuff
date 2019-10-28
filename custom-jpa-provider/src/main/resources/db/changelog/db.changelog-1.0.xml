@@ -334,4 +334,14 @@
             <column name="errors" type="varchar(2048)"></column>
         </createTable>
     </changeSet>
+
+    <changeSet id="27" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mysql" />
+            <tableExists tableName="IMPORT_USERS_DATA"></tableExists>
+        </preConditions>
+        <sql>
+            ALTER TABLE IMPORT_USERS_DATA CHANGE FIRST_NAME FIRST_NAME varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
 </databaseChangeLog>
