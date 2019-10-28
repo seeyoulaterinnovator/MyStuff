@@ -6,8 +6,9 @@ export default (
   getPassword,
   setPassword,
   getConfirmation,
+  setConfirmation,
   passwordElement = document.getElementById('password'),
-  passwordConfirmElement = document.getElementById('password-confirm'),
+  passwordConfirmElement = document.getElementById('password-confirm')
 ) => {
   const passwordBlock = document.getElementById('password-block');
   if (!passwordBlock) return;
@@ -72,13 +73,28 @@ export default (
         ruleElement.classList.add('text-accentRed');
       }
     }
-
-    const regExp = new RegExp(WRONG_PASS_REG);
-    if (regExp.test(password)) {
-      passwordElement.value = (password.replace(WRONG_PASS_REG, ''))
-    }
   }
   passwordElement.addEventListener('input', highlightRules);
+
+  function inputSomePass(element) {
+    const elementId = element.id;
+    const passwordRaw = elementId==='password-confirm' ? getConfirmation() : getPassword();
+    const regExp = new RegExp(WRONG_PASS_REG);
+
+    if (regExp.test(passwordRaw)) {
+      const replacePassword = passwordRaw.replace(WRONG_PASS_REG, '');
+      // element.value = replacePassword;
+      if (elementId==='password-confirm') {
+        setConfirmation(replacePassword);
+      }
+      else {
+        setPassword(replacePassword);
+      }
+    }
+  }
+  passwordElement.addEventListener('input', function() { inputSomePass(passwordElement); });
+  passwordConfirmElement.addEventListener('input', function() { inputSomePass(passwordConfirmElement); });
+
   function checkPasswordConfirmation() {
     const password = getPassword();
     const confirmation = getConfirmation();
