@@ -301,4 +301,16 @@
         </sql>
     </changeSet>
 
+    <changeSet id="29" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mysql" />
+            <tableExists tableName="IDP_MAPPER_CONFIG"></tableExists>
+            <tableExists tableName="ADMIN_EVENT_ENTITY"></tableExists>
+        </preConditions>
+        <sql>
+            ALTER TABLE IDP_MAPPER_CONFIG CHANGE VALUE VALUE longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            ALTER TABLE ADMIN_EVENT_ENTITY CHANGE RESOURCE_PATH RESOURCE_PATH varchar(2550) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
