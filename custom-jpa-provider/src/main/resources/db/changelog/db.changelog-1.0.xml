@@ -301,6 +301,16 @@
         </sql>
     </changeSet>
 
+    <changeSet id="24_3" author="plyusnin-da" dbms="mysql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_POST" />
+            <not><columnExists tableName="USER_POST" columnName="SELECTED" /></not>
+        </preConditions>
+        <sql>
+            ALTER TABLE USER_POST ADD SELECTED BIT DEFAULT B'0'
+        </sql>
+    </changeSet>
+
     <changeSet id="25" author="strukov-av">
         <preConditions onFail="MARK_RAN">
             <not> <tableExists tableName="IMPORT_USERS_REPORT"></tableExists> </not>
