@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService {
         }
         List<String> userParameterNames = getUserParameterNames(UserParameter.values());
         List<String> finishParameterNames = userParameterNames.stream().skip(1).limit(userParameterNames.size()-2).collect(Collectors.toList());
-        finishParameterNames.addAll(List.of("Статус пользователя", "Ошибки"));
+        finishParameterNames.addAll(List.of("Статус импорта", "Ошибки"));
         file.addRow(finishParameterNames);
         importUsersReport.getImportUserData().stream()
                 .forEach(o -> {

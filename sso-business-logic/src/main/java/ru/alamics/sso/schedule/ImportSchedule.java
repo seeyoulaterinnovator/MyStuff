@@ -66,36 +66,39 @@ public class ImportSchedule {
     }
 
     private void createImportUsers(ImportUsersReportEntity importUsersReport) {
+        log.info("importing users from file {} in progress", importUsersReport.getName());
         AtomicInteger createdUsers = new AtomicInteger();
         AtomicInteger countClones = new AtomicInteger();
-        importUsersReport.getImportUserData().stream()
-                .forEach(o -> {
-                    try {
-                        o.setErrors(null);
-                        checkImportUser(importUsersReport.getRealmId(), o.getEmail(), o.getPhone());
-                        UserEntity user = createUser(importUsersReport.getRealmId(), o);
-                        createAdminEvent(OperationType.CREATE, user, importUsersReport.getRealmId());
-                        createdUsers.getAndIncrement();
-                        o.setCreated(true);
-                        if (o.getTomsId() == null || o.getTomsId().isBlank()) {
-                            throw new NotFoundException("TomsId is not exist");
-                        }
-                        addUserPost(user, o);
-                    } catch (FoundException e) {
-                        List<Object> errors = new LinkedList<>();
-                        e.getResult().forEach((k, v) -> {
-                            errors.add(v);
-                        });
-                        o.setErrors(errors.toString());
-                        countClones.getAndIncrement();
-                    } catch (NotFoundException | ValidationException e) {
-                        o.setErrors(e.getMessage());
+        for (ImportUsersDataEntity o : importUsersReport.getImportUserData()) {
+                try {
+                    o.setErrors(null);
+                    checkImportUser(importUsersReport.getRealmId(), o.getEmail(), o.getPhone());
+                    UserEntity user = createUser(importUsersReport.getRealmId(), o);
+                    createAdminEvent(OperationType.CREATE, user, importUsersReport.getRealmId());
+                    createdUsers.getAndIncrement();
+                    o.setCreated(true);
+                    if (o.getTomsId() == null || o.getTomsId().isBlank()) {
+                        throw new NotFoundException("TomsId is not exist");
                     }
-                });
+                    addUserPost(user, o);
+                } catch (FoundException e) {
+                    List<Object> errors = new LinkedList<>();
+                    e.getResult().forEach((k, v) -> {
+                        errors.add(v);
+                    });
+                    o.setErrors(errors.toString().substring(1, errors.toString().length()-1));
+                    countClones.getAndIncrement();
+                } catch (NotFoundException | ValidationException e) {
+                    o.setErrors(e.getMessage());
+                }
+        }
         importUsersReport.setCountClones(countClones.intValue());
         importUsersReport.setCountCreatedUsers(createdUsers.intValue());
         importUsersReport.setStatus(ImportUsersReportStatus.DONE);
         importUsersReportRepository.updateImportUsersReport(importUsersReport);
+        log.info(String.format("importing users from file %s is done: countUsers=%s, countCreatedUsers=%s, countClones=%s ",
+                importUsersReport.getName(), importUsersReport.getCountImportUsers(), importUsersReport.getCountCreatedUsers(),
+                importUsersReport.getCountClones()));
     }
 
     private void checkImportUser(String realmId, String email, String phone) throws FoundException {
