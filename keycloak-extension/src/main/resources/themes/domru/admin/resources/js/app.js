@@ -2071,6 +2071,15 @@ module.config([ '$routeProvider', function($routeProvider) {
             },
             controller : 'CustomTabCtrl'
         })
+        .when('/realms/:realm/import-users', {
+            templateUrl : resourceUrl + '/partials/import-users.html',
+            resolve : {
+                realm: function (RealmLoader) {
+                    return RealmLoader();
+                }
+            },
+            controller : 'ImportUsersCtrl'
+        })
         .when('/realms/:realm/custom-settings-first', {
             templateUrl : resourceUrl + '/partials/custom-settings-first.html',
             resolve : {

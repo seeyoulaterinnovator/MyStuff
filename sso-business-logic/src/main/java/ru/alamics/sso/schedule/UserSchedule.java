@@ -33,7 +33,6 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Singleton
-@Startup
 @DependsOn("ApplicationProperties")
 public class UserSchedule {
     private final static String[] SETTINGS_REALM_NAMES_SCHEDULE = {"user", "manager"};
@@ -59,12 +58,14 @@ public class UserSchedule {
 
     @Schedule(hour = "*", minute = "*/1", persistent = false)
     public void schedule() {
+        log.info("start UserSchedule");
         findExpiredPassword();
         for (String realm : SETTINGS_REALM_NAMES_SCHEDULE) {
             notificationInactiveUsers(realm);
             block(realm);
         }
         sendEmails();
+        log.info("end UserSchedule");
     }
 
     private void notificationInactiveUsers(String realm) {

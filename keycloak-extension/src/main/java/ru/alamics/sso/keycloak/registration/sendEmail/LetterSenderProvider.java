@@ -10,12 +10,7 @@ import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import ru.alamics.sso.keycloak.mapper.DataMapper;
-import ru.alamics.sso.registration.dto.UserPostRequest;
-import ru.alamics.sso.registration.service.UserPostService;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import java.util.HashMap;
 import java.util.Map;
 
