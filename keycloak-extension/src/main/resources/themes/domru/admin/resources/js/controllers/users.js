@@ -700,7 +700,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         if (index === 0) {
             return access.tomsId;
         } else {
-            return '';//Gavno
+            return '';
         }
     }
 
@@ -714,7 +714,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         if (index === 0) {
             return access.roleName;
         } else {
-            return '';//Gavno
+            return '';
         }
     }
 
@@ -723,12 +723,12 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     }
 
     $scope.isFirstSystemName = function (userAccess, systemName, access) {
-        var equalToms = userAccess.filter(access => access.systemName === systemName);
+        var equalToms = userAccess.filter(ua => ua === access && ua.systemName === systemName);
         var index = equalToms.indexOf(access);
         if (index === 0) {
             return access.systemName;
         } else {
-            return '';//Gavno
+            return '';
         }
     }
 

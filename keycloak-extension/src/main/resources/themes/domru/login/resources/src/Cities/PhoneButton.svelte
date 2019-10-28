@@ -1,4 +1,4 @@
-<a href="tel:88005500479" class="hidden sm:block opacity-50">
+<a href="tel:88003339000" class="hidden sm:block opacity-50">
   <div class="flex h-6 items-center">
     <svg
       class="h-8 w-auto mr-1"
@@ -135,6 +135,6 @@
           fill="black" />
       </g>
     </svg>
-    <span class="phone-number">8&nbsp;800&nbsp;550&nbsp;0479</span>
+    <span class="phone-number">8&nbsp;800&nbsp;333&nbsp;9000</span>
   </div>
 </a>

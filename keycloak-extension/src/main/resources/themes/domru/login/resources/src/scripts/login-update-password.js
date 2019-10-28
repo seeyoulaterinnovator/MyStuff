@@ -40,7 +40,7 @@ export default (function() {
     }
 
     if (!values['password-new'].match(VALIDATION_RULES['password_8-16']))
-      errors['password-new'] = 'Пароль не подходит. Попробуйте другой';
+      errors['password-new'] = 'Пароль не подходит';
 
     if (values['password-confirm'] !== values['password-new'])
       errors['password-confirm'] = 'Пароли не совпадают';

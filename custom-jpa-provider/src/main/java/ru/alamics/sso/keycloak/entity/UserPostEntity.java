@@ -35,6 +35,8 @@ public class UserPostEntity {
             inverseJoinColumns = @JoinColumn(name = "ext_system_role_id")
     )
     private Set<ExternalSystemRoleEntity> systemRoles;
+    @Column(name = "selected")
+    private boolean selected;
 
     @Override
     public String toString() {
