@@ -9,7 +9,7 @@
       <div class="flex items-center xl:items-start">
         <div id="cities-button" class=${withCity ? string("sm:mr-10", "hidden w-0 h-0")} data-city=""></div>
 
-        <a href="tel:88005500479" class=opacity-50 ${withCity ? string("phone--hidden-small phone-call-center", "phone-call-center")}>
+        <a href="tel:88003339000" class=opacity-50 ${withCity ? string("phone--hidden-small phone-call-center", "phone-call-center")}>
           <div class="flex h-6 items-center">
             <svg
               class="h-8 w-auto mr-1 phone-icon"
