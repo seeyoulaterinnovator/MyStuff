@@ -28,7 +28,7 @@ public class UserPostService {
     public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException {
         if (userRepository.findUser(userPostRequest.getUserId()) == null) {
             throw new NotFoundException("User with this userId is not exist!");
-        } else if (userPostRepository.findUserPostRole(userPostRequest.getRoleId()) == null) {
+        } else if (userPostRepository.findUserPostsByUser(userPostRequest.getRoleId()) == null) {
             throw new NotFoundException("UserPostRole with this roleId is not exist!");
         }
         UserPostEntity userPost = DataMapper.toUserPost(new UserPostEntity(), userPostRequest);
@@ -39,7 +39,7 @@ public class UserPostService {
         UserPostEntity userPost = userPostRepository.getUserPost(userPostEditRequest.getId());
         if (userPost == null) {
             throw new NotFoundException("UserPost is not exist");
-        } else if (userPostRepository.findUserPostRole(userPostEditRequest.getRoleId()) == null) {
+        } else if (userPostRepository.findUserPostsByUser(userPostEditRequest.getRoleId()) == null) {
             throw new NotFoundException("UserPostRole with this roleId is not exist!");
         }
         return DataMapper.toUserPostResponse(userPostRepository.update(DataMapper.toUserPost(userPost, userPostEditRequest)));

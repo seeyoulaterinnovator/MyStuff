@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.create;
+package ru.alamics.sso.user;
 
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -12,20 +12,18 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.provider.ProviderFactory;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
-import ru.alamics.sso.keycloak.create.model.*;
-import ru.alamics.sso.keycloak.mapper.DataMapper;
-import ru.alamics.sso.keycloak.search.dto.UserDto;
-import ru.alamics.sso.keycloak.search.rest.SearchResource;
+import ru.alamics.sso.keycloak.entity.ImportUsersDataEntity;
+import ru.alamics.sso.keycloak.entity.ImportUsersReportEntity;
+import ru.alamics.sso.keycloak.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
-import ru.alamics.sso.registration.model.UserConstants;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.registration.service.UserPostService;
-import ru.alamics.sso.registration.tbapi.TbapiService;
-import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
-import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
-import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
+import ru.alamics.sso.user.mapper.UserMapper;
+import ru.alamics.sso.user.model.*;
+import ru.alamics.sso.user.web.UserSearchDto;
+import ru.alamics.sso.util.Util;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.naming.InitialContext;
@@ -35,30 +33,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
+import static ru.alamics.sso.user.model.UserParameter.*;
 
 @Slf4j
-public class UserService {
+public class UserServiceImpl implements UserService {
     private final static Long DEFAULT_ROLE_ID = 1L;   //Соответствует роли LPR
     protected KeycloakSession session;
     private AdminAuth auth;
     private RealmModel realm;
-    private TbapiService tbapiService;
     private UserPostService userPostService;
-    private TbapiConnectConfig tbapiConnectConfig;
     private UserFindService userFindService;
+    private ImportUsersReportService importUsersReportService;
 
-    public UserService(KeycloakSession session, AdminAuth auth, UserFindService userFindService) {
+    public UserServiceImpl(KeycloakSession session, AdminAuth auth) {
         this.auth = auth;
         this.session = session;
-        this.userFindService = userFindService;
         realm = session.getContext().getRealm();
-        tbapiService = new TbapiService(new TbapiServiceRestImpl());
-        this.tbapiConnectConfig = TbapiConnectConfig.getStaticConfig();
-
         try {
+            this.userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
             this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
+            this.importUsersReportService = (ImportUsersReportService) new InitialContext().lookup("java:global/domru-sso/" + ImportUsersReportService.class.getSimpleName());
         } catch (NamingException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
@@ -71,26 +68,55 @@ public class UserService {
         }
     }
 
+    @Override
     public byte[] exportUsers(DownloadUserRequest userRequest) throws IOException {
         FileModel file = FileFactory.createFileModel(userRequest.getType());
         if (file == null) {
             throw new UnsupportedDataTypeException("Unsupported file format!");
         }
-        List<UserDto> userDto = new SearchResource(session).getUsers(realm.getName(), null, null, null, null, true);
+        List<UserSearchDto> userDto = userFindService.getUsersByParameters(realm.getName(), null, null, null, null, true);
         if (userDto == null || userDto.isEmpty()) {
             return null;
         }
         if (userRequest.getUserIds() != null && userRequest.getUserIds().length != 0) {
             userDto = searchUsersById(userDto, userRequest.getUserIds());
         }
-        userDto = DataMapper.toGroupUserDtos(userDto);
+        userDto = UserMapper.toGroupUserDtos(userDto);
         file.addRow(getUserParameterNames(userRequest.getUserParameters()));
         userDto.stream().forEach(o -> file.addRow(getUserParameters(o, userRequest.getUserParameters())));
         return file.save();
     }
 
-    private List<UserDto> searchUsersById(List<UserDto> userDtos, String[] userIds) {
-        List<UserDto> result = new LinkedList<>();
+    @Override
+    public FileModel downloadUsersByImportReportId(String importId) throws IOException {
+        ImportUsersReportEntity importUsersReport = importUsersReportService.findImportUsersReportByImportId(importId);
+        FileModel file = FileFactory.createFileModel(importUsersReport.getName().substring(importUsersReport.getName().lastIndexOf(".")+1));
+        if (file == null) {
+            throw new UnsupportedDataTypeException("Unsupported file format!");
+        }
+        List<String> userParameterNames = getUserParameterNames(UserParameter.values());
+        List<String> finishParameterNames = userParameterNames.stream().skip(1).limit(userParameterNames.size()-2).collect(Collectors.toList());
+        finishParameterNames.addAll(List.of("Статус импорта", "Ошибки"));
+        file.addRow(finishParameterNames);
+        importUsersReport.getImportUserData().stream()
+                .forEach(o -> {
+                    List<String> list = new LinkedList<>();
+                    list.add(o.getFirstName());
+                    list.add(o.getEmail());
+                    list.add(o.getPhone());
+                    list.add(o.getTomsId());
+                    list.add(o.getDmpId());
+                    list.add(o.getRole());
+                    list.add(o.getSystems());
+                    list.add(String.valueOf(o.isCreated()));
+                    list.add(o.getErrors());
+                    file.addRow(list);
+                });
+        return file;
+    }
+
+    private List<UserSearchDto> searchUsersById(List<UserSearchDto> userDtos, String[] userIds) {
+        List<UserSearchDto> result = new LinkedList<>();
         userDtos.stream()
                 .forEach(o -> {
                     for (String userId : userIds) {
@@ -110,7 +136,7 @@ public class UserService {
         return names;
     }
 
-    private List<String> getUserParameters(UserDto userDto, UserParameter[] userParameters) {
+    private List<String> getUserParameters(UserSearchDto userDto, UserParameter[] userParameters) {
         List<String> parameters = new LinkedList<>();
         for (UserParameter userParameter : userParameters) {
             switch (userParameter) {
@@ -135,8 +161,11 @@ public class UserService {
                 case ENABLED:
                     parameters.add(userDto.getEnabled().toString());
                     break;
-                case CUSTOMER:
+                case TOMS_ID:
                     parameters.add(userDto.getTomsId());
+                    break;
+                case DMP_ID:
+                    parameters.add(userDto.getDmpId());
                     break;
                 default:
                     parameters.add("");
@@ -145,10 +174,11 @@ public class UserService {
         return parameters;
     }
 
-    public ImportResponse importUsers(InputStream inputStream, String type) throws IOException, FileServiceException {
+    @Override
+    public ImportResponse importUsers(InputStream inputStream, String content) throws IOException, FileServiceException {
         log.info("Start upload users");
 
-        FileModel file = FileFactory.createFileModel(inputStream, type);
+        FileModel file = FileFactory.createFileModel(inputStream, getFileExtension(content));
         if (file == null) {
             throw new UnsupportedDataTypeException("Unsupported file format!");
         }
@@ -156,113 +186,149 @@ public class UserService {
 
         List<String[]> rows = file.getRows();
         rows.remove(0);
-        List<UserImport> userImports = DataMapper.toUserRequestList(rows);
+        List<ImportUsersDataEntity> userImports = UserMapper.toUserRequestList(rows);
+        ImportResponse importResponse = createImportUsers(userImports);
+        importUsersReportService.saveImportUsersReport(UserMapper.toImportUsersReportEntity(realm.getName(), getFileName(content), userImports, importResponse));
 
-        ImportResponse importResponse = new ImportResponse();
-        //importResponse.setCountClones(getCountAndRemoveClones(userImports));
-        createImportUsers(importResponse, userImports);
         log.info("Upload users success!", importResponse);
         return importResponse;
     }
 
+    @Override
+    public void uploadImportUsersFile(InputStream inputStream, String content) throws IOException, FileServiceException {
+        log.info("Start upload import users file");
+
+        FileModel file = FileFactory.createFileModel(inputStream, getFileExtension(content));
+        if (file == null) {
+            throw new UnsupportedDataTypeException("Unsupported file format!");
+        }
+        checkStructure(file);
+
+        List<String[]> rows = file.getRows();
+        rows.remove(0);
+        ImportUsersReportEntity importUsersReport = UserMapper.toImportUsersReportEntity(realm.getName(), getFileName(content), UserMapper.toUserRequestList(rows));
+        importUsersReport.setStatus(ImportUsersReportStatus.AWAITING);
+        importUsersReportService.saveImportUsersReport(importUsersReport);
+
+        log.info("Upload import users file success");
+    }
+
+    private String getFileExtension(String content) {
+        String finalFileName = getFileName(content);
+        return finalFileName.substring(finalFileName.lastIndexOf('.') + 1);
+    }
+
+    private String getFileName(String content) {
+        String[] contentDisposition = content.split(";");
+        for (String filename : contentDisposition) {
+            if ((filename.trim().startsWith("filename"))) {
+                String[] name = filename.split("=");
+                return name[1].trim().replaceAll("\"", "");
+            }
+        }
+        return "unknown";
+    }
+
     private void checkStructure(FileModel file) throws FileServiceException {
         String[] headers = file.getHeaders();
-        for (String head : Arrays.asList(headers)) {
-            if (!head.equalsIgnoreCase(UserParameter.FIRST_NAME.getName()) && !head.equalsIgnoreCase(UserParameter.EMAIL.getName()) &&
-                    !head.equalsIgnoreCase(UserParameter.PHONE.getName()) && !head.equalsIgnoreCase(UserParameter.ORGANIZATION.getName()) &&
-                    !head.equalsIgnoreCase(UserParameter.ROLE.getName()) && !head.equalsIgnoreCase(UserParameter.SYSTEM.getName()) ||
-                    headers.length != 6 || file.getCountRows() < 2) {
-                throw new FileServiceException("File Structure is not valid " +
-                        "or 'csv' file encoding must be in UTF-8!");
+        if (headers.length != 7 || file.getCountRows() < 2) {
+            throw new FileServiceException("File Structure is not valid! Count columns not valid or data is empty!");
+        }
+        checkHeaders(headers);
+    }
+
+    private void checkHeaders(String[] headers) throws FileServiceException {
+        for (int i = 0; i < headers.length; i++) {
+            switch (i) {
+                case 0:
+                    checkHeader(headers[i], FIRST_NAME);
+                    break;
+                case 1:
+                    checkHeader(headers[i], EMAIL);
+                    break;
+                case 2:
+                    checkHeader(headers[i], PHONE);
+                    break;
+                case 3:
+                    checkHeader(headers[i], TOMS_ID);
+                    break;
+                case 4:
+                    checkHeader(headers[i], DMP_ID);
+                    break;
+                case 5:
+                    checkHeader(headers[i], ROLE);
+                    break;
+                case 6:
+                    checkHeader(headers[i], SYSTEM);
+                    break;
             }
         }
     }
 
-    private int getCountAndRemoveClones(List<UserImport> userImports) {
-        log.info("findClonesFrom: {}", userImports);
-        int countClones = 0;
-        List<UserImport> userRequestMain = new LinkedList<>();
-        userImports.stream().forEach(o -> userRequestMain.add(o));
-        for (int i = 0; i < userImports.size(); i++) {
-            for (int j = i + 1; j < userImports.size(); j++) {
-                if (userImports.get(i).getUserRequest().getEmail().equals(userImports.get(j).getUserRequest().getEmail()) ||
-                        userImports.get(i).getUserRequest().getPhone().equals(userImports.get(j).getUserRequest().getPhone())) {
-                    userImports.remove(j);
-                    j--;
-                    countClones++;
-                }
-            }
+    private void checkHeader(String head, UserParameter userParameter) throws FileServiceException {
+        if (!head.equalsIgnoreCase(userParameter.getName())) {
+            throw new FileServiceException("File Structure is not valid! Header is not valid");
         }
-        return countClones;
     }
 
-    private void createImportUsers(ImportResponse importResponse, List<UserImport> userImports) {
+    private ImportResponse createImportUsers(List<ImportUsersDataEntity> userImports) {
+        ImportResponse importResponse = new ImportResponse();
+
         AtomicInteger createdUsers = new AtomicInteger();
-        AtomicInteger tbapiErrors = new AtomicInteger();
-        AtomicInteger tbapiSuccess = new AtomicInteger();
         AtomicInteger countClones = new AtomicInteger();
         userImports.stream().forEach(o -> {
             try {
-                UserRequest userRequest = o.getUserRequest();
+                UserRequest userRequest = UserMapper.toUserRequest(o);
                 checkImportUser(userRequest);
                 UserModel user = createUser(userRequest);
                 user.setEmailVerified(false);
                 createAdminEvent(OperationType.CREATE, user);
                 createdUsers.getAndIncrement();
+                o.setCreated(true);
                 importResponse.addCreatedUserIds("userId", user.getId());
 
-                Map<String, Object> tbapiResponse = tbapiService.registerUser(DataMapper.toUser(o),
-                        tbapiConnectConfig);
-                tbapiSuccess.getAndIncrement();
-
-                if (tbapiResponse.get(UserConstants.ATTR_TOMS_NAME) == null) {
-                    throw new TbapiRegisterException();
+                if (userRequest.getTomsId() == null || userRequest.getTomsId().isBlank()) {
+                    throw new NotFoundException("TomsId is not exist");
                 }
-                if (tbapiResponse.get(UserConstants.ATTR_DMP_NAME) != null) {
-                    userRequest.setTomsId(tbapiResponse.get(UserConstants.ATTR_DMP_NAME).toString());
-                }
-                userRequest.setTomsId(tbapiResponse.get(UserConstants.ATTR_TOMS_NAME).toString());
-                addUserPost(user, o);
+                addUserPost(user, o, userRequest);
             } catch (FoundException e) {
                 e.getResult().forEach((k, v) -> {
                     Map<String, Object> error = new HashMap<>();
                     error.put("error", v);
-                    error.put("importUserName", o.getUserRequest().getName());
+                    error.put("importUserName", o.getFirstName());
                     importResponse.addError(error);
                 });
                 countClones.getAndIncrement();
             } catch (NotFoundException | ValidationException e) {
                 Map<String, Object> error = new HashMap<>();
                 error.put("error", e.getMessage());
-                error.put("importUserName", o.getUserRequest().getName());
+                error.put("importUserName", o.getFirstName());
                 importResponse.addError(error);
-            } catch (TbapiRegisterException e) {
-                tbapiErrors.getAndIncrement();
             }
         });
-        importResponse.setTbapiSuccess(tbapiSuccess);
-        importResponse.setTbapiErrors(tbapiErrors);
         importResponse.setCreatedUsers(createdUsers);
         importResponse.setCountClones(countClones);
         commit();
+
+        return importResponse;
     }
 
-    private void checkImportUser(UserRequest userRequest) throws FoundException{
-        validateUserPhoneAndEmail(userRequest);
+    private void checkImportUser(UserRequest userRequest) throws FoundException {
+        Util.validateUserPhoneAndEmail(userRequest.getEmail(), userRequest.getPhone());
 
         FoundException foundException = new FoundException();
         try {
             checkOnExistUserByPhone(userRequest, realm);
-        } catch (FoundException e){
+        } catch (FoundException e) {
             foundException.addResult("error1", e.getMessage());
         }
         try {
             checkOnExistUserByEmailAndUsername(userRequest, realm);
-        } catch (FoundException e){
+        } catch (FoundException e) {
             foundException.addResult("error2", e.getMessage());
         }
 
-        if (foundException.getResult() != null){
+        if (foundException.getResult() != null) {
             throw foundException;
         }
     }
@@ -314,6 +380,7 @@ public class UserService {
         user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(request.getPhone()));
     }
 
+    @Override
     public UserModel createUser(UserRequest request, boolean bss) throws FoundException, NotFoundException {
         checkOnExistUser(request, realm);
         UserModel user = createUser(request);
@@ -325,23 +392,9 @@ public class UserService {
         return user;
     }
 
-    private void validateUserPhoneAndEmail(UserRequest userRequest) {
-        String phone = userRequest.getPhone();
-        String email = userRequest.getEmail();
-        if (phone == null || !phone.matches("[\\d]+") || !phone.startsWith("7") || phone.length() != 11) {
-            throw new ValidationException("Phone is not valid");
-        }
-
-        if (email == null || !email.contains("@") || !email.substring(0, 1).matches("([\\w[\\s]])+")
-                || email.substring(0, 1).matches("[\\d]+") || email.contains(" ") ||
-                !email.substring(email.indexOf("@") + 1, email.indexOf("@") + 2).matches("([\\w[\\s]])+")) {
-            throw new ValidationException("Email is not valid");
-        }
-    }
-
     private void checkOnExistUser(UserRequest request, RealmModel realm) throws FoundException {
-         checkOnExistUserByPhone(request, realm);
-         checkOnExistUserByEmailAndUsername(request, realm);
+        checkOnExistUserByPhone(request, realm);
+        checkOnExistUserByEmailAndUsername(request, realm);
     }
 
     private void checkOnExistUserByPhone(UserRequest request, RealmModel realm) throws FoundException {
@@ -381,18 +434,24 @@ public class UserService {
     }
 
     private void addUserPost(UserModel userModel, UserRequest request) throws NotFoundException {
-        UserPostRequest userPostRequest = DataMapper.toUserPostRequest(userModel, request);
+        UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, request);
         userPostRequest.setRoleId(DEFAULT_ROLE_ID);
         userPostService.save(userPostRequest);
     }
 
-    private void addUserPost(UserModel userModel, UserImport userImport) throws NotFoundException {
-        UserPostRequest userPostRequest = DataMapper.toUserPostRequest(userModel, userImport.getUserRequest());
-        userPostRequest.setRoleId(userPostService.getUserPostRole(userImport.getRoleName()));
+    private void addUserPost(UserModel userModel, ImportUsersDataEntity userImport, UserRequest userRequest) throws NotFoundException {
+        UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, userRequest);
+        userPostRequest.setRoleId(userPostService.getUserPostRole(userImport.getRole()));
         UserPostResponse userPostResponse = userPostService.save(userPostRequest);
-        if (userImport.getSystemNames() != null && !userImport.getSystemNames().isEmpty()) {
-            for (String sysName : userImport.getSystemNames()) {
-                userPostService.addSystemRole(DataMapper.toExternalSystemRoleRequest(userPostResponse.getId(),
+
+        addSystemRoles(userImport, userPostResponse.getId());
+    }
+
+    private void addSystemRoles(ImportUsersDataEntity userImport, String userPostId) throws NotFoundException {
+        List<String> systems = List.of(userImport.getSystems().replaceAll("\\s", "").split(","));
+        if (systems != null && !systems.isEmpty()) {
+            for (String sysName : systems) {
+                userPostService.addSystemRole(UserMapper.toExternalSystemRoleRequest(userPostId,
                         userPostService.getExternalSystemRoleId(sysName)));
             }
         }

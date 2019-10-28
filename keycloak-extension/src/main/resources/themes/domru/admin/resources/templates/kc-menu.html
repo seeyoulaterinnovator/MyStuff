@@ -59,6 +59,7 @@
                     <span class="pficon pficon-user"></span> {{:: 'users' | translate}} {{showSearchRealm()}}
                 </a>
             </li>
+            <li data-ng-show="access.viewRealm" data-ng-class="(path[2] == 'import-users') && 'active'"><a href="#/realms/{{realm.realm}}/import-users"><span class="pficon pficon-import"></span> Import Users </a></li>
             <li data-ng-show="access.viewRealm" data-ng-class="(path[2] == 'sessions') && 'active'"><a href="#/realms/{{realm.realm}}/sessions/realm"><i class="fa fa-clock-o"></i> {{:: 'sessions' | translate}}</a></li>
             <li data-ng-show="access.viewEvents" data-ng-class="(path[2] == 'events' 
                         || path[2] == 'events-settings'

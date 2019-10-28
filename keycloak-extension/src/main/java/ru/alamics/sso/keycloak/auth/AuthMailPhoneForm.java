@@ -38,6 +38,8 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
     private final static String LKB2B_ID = "lkb2b";
     private final static String CONSOLE_ID = "security-admin-console";
 
+    private final static String REDIRECT_TO_RIAS_FORM = "redirect-to-rias.ftl";
+
     private final EntityManager em;
     private final RiasService riasService;
     private final UserFindService userFindService;
@@ -143,6 +145,7 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
 
             if (riasLogin.getAccess_token() != null) {
 
+                /*
                 var uriLoc = UriBuilder.fromPath("https://master.b2b-lk.web.t2.ertelecom.ru/login"); //"https://lkb2b.domru.ru/login");
 
                 if (!Validation.isBlank(city)) {
@@ -155,6 +158,20 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
 
                 log.debug("Redirecting to {}", uriLoc.build());
                 context.forceChallenge(response);
+                */
+
+                String redirectTo = "https://master.b2b-lk.web.t2.ertelecom.ru/login";
+                if (!Validation.isBlank(city)) {
+                    redirectTo += "?citydomain=" + city;
+                }
+                String redirectHeader = riasLogin.getAccess_token();
+
+                Response challenge = context.form()
+                        .setAttribute("redirectTo", redirectTo)
+                        .setAttribute("redirectHeader", redirectHeader)
+                        .createForm(REDIRECT_TO_RIAS_FORM);
+
+                context.challenge(challenge);
 
                 return true;
             }

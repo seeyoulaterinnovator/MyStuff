@@ -20,11 +20,18 @@ import ru.alamics.sso.keycloak.create.UserService;
 import ru.alamics.sso.keycloak.create.model.DownloadUserRequest;
 import ru.alamics.sso.keycloak.create.model.UserParameter;
 import ru.alamics.sso.keycloak.create.model.UserRequest;
+import org.keycloak.services.resources.admin.AdminAuth;
+import ru.alamics.sso.user.FileServiceException;
+import ru.alamics.sso.user.ImportUsersReportService;
+import ru.alamics.sso.user.UserService;
+import ru.alamics.sso.user.UserServiceImpl;
+import ru.alamics.sso.user.model.*;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundException;
-import ru.alamics.sso.registration.service.UserFindService;
 
 import javax.activation.UnsupportedDataTypeException;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
@@ -46,12 +53,19 @@ public class CustomUserResource {
     protected KeycloakSession session;
     private UserService userService;
     private AdminPermissionEvaluator auth;
+    private ImportUsersReportService importUsersReportService;
 
-    public CustomUserResource(KeycloakSession session, AdminPermissionEvaluator auth,  UserFindService userFindService) {
+    public CustomUserResource(KeycloakSession session, AdminPermissionEvaluator auth) {
         this.session = session;
         this.auth = auth;
         auth.users().canManage();
-        this.userService = new UserService(session, auth.adminAuth(), userFindService);
+        this.userService = new UserServiceImpl(session, auth);
+        try {
+            this.importUsersReportService = (ImportUsersReportService) new InitialContext().lookup("java:global/domru-sso/" + ImportUsersReportService.class.getSimpleName());
+        } catch (NamingException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Something wrong with context");
+        }
     }
 
     @POST
@@ -131,10 +145,10 @@ public class CustomUserResource {
                 content == null || content.isBlank()) {
             return JsonResponse.error(Response.Status.BAD_REQUEST).build();
         }
-        try(InputStream bas = new ByteArrayInputStream(file.getFileData()) ) {
+        try (InputStream bas = new ByteArrayInputStream(file.getFileData())) {
             return JsonResponse.success()
                     .addResult("import-report",
-                            userService.importUsers(bas, getFileExtension(content)))
+                            userService.importUsers(bas, content))
                     .build();
         } catch (UnsupportedDataTypeException | FileServiceException e) {
             log.error("Could not upload users", e);
@@ -166,7 +180,7 @@ public class CustomUserResource {
             }
             Response.ResponseBuilder response = Response.ok((Object) bytes);
             response.header("Content-Disposition", "attachment; filename=\"users_info." + downloadUserRequest.getType() + "\"");
-            if(downloadUserRequest.getType().equals("xlsx")) {
+            if (downloadUserRequest.getType().equals("xlsx")) {
                 response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
             } else {
                 response.header("Content-Type", MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8");
@@ -187,62 +201,73 @@ public class CustomUserResource {
         }
     }
 
-//    private AdminAuth authenticateRealmAdminRequest(RealmModel realm) {
-//        String tokenString = new AppAuthManager().extractAuthorizationHeaderToken(session.getContext().getRequestHeaders());
-//        if (tokenString == null) throw new NotAuthorizedException("Bearer");
-//        AccessToken token;
-//        try {
-//            JWSInput input = new JWSInput(tokenString);
-//            token = input.readJsonContent(AccessToken.class);
-//        } catch (JWSInputException e) {
-//            throw new NotAuthorizedException("Bearer token format error");
-//        }
-//
-//        String realmName = token.getIssuer().substring(token.getIssuer().lastIndexOf('/') + 1);
-//        RealmManager realmManager = new RealmManager(session);
-//        RealmModel realmFromToken = realmManager.getRealmByName(realmName);
-//        if (realmFromToken == null) {
-//            throw new NotAuthorizedException("Unknown realm in token");
-//        }
-//
-//        session.getContext().setRealm(realm);
-//        AuthenticationManager.AuthResult authResult = new AppAuthManager()
-//                .authenticateBearerToken(session, realm, session.getContext().getUri(), session.getContext().getConnection(), session.getContext().getRequestHeaders());
-//        if (authResult == null) {
-//            log.debug("Token not valid");
-//            throw new NotAuthorizedException("Bearer");
-//        }
-//
-//        ClientModel client = realm.getClientByClientId(token.getIssuedFor());
-//        if (client == null) {
-//            throw new NotAuthorizedException("Could not find client for authorization");
-//        }
-//
-//        AdminAuth auth = new AdminAuth(realm, authResult.getToken(), authResult.getUser(), client);
-//
-//        AdminPermissions.evaluator(session, realm, auth).users().requireManage();
-//
-//        if (!auth.getRealm().equals(realmManager.getKeycloakAdminstrationRealm())
-//                && !auth.getRealm().equals(realm)) {
-//            throw new ForbiddenException();
-//        }
-//
-//        return auth;
-//    }
+    @GET
+    @Path("/importUsersReports")
+    @NoCache
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getImportUsersReports() {
+        return JsonResponse.success()
+                .addResult("importUsersReports", importUsersReportService.findImportUsersReportsByRealmId(session.getContext().getRealm().getName()))
+                .build();
+    }
 
-    private String getFileExtension(String content) {
-        String[] contentDisposition = content.split(";");
-        for (String filename : contentDisposition) {
-            if ((filename.trim().startsWith("filename"))) {
 
-                String[] name = filename.split("=");
-
-                String finalFileName = name[1].trim().replaceAll("\"", "");
-
-                return finalFileName.substring(finalFileName.lastIndexOf('.') + 1);
-            }
+    @POST
+    @Path("/uploadImportUsersFile")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @NoCache
+    public Response uploadImportUsersFile(@MultipartForm FileDto file, @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content) {
+        if (file == null || content == null || content.isBlank()) {
+            return JsonResponse.error(Response.Status.BAD_REQUEST).build();
         }
-        return "unknown";
+        try (InputStream bas = new ByteArrayInputStream(file.getFileData())) {
+            userService.uploadImportUsersFile(bas, content);
+            return JsonResponse.success()
+                    .build();
+        } catch (UnsupportedDataTypeException | FileServiceException e) {
+            log.error("Could not upload users", e);
+            return JsonResponse.fail()
+                    .message(e.getMessage())
+                    .build();
+        } catch (IOException e) {
+            log.error("Could not upload users", e);
+            return JsonResponse.fail()
+                    .message("Error reading file")
+                    .build();
+        }
+    }
+
+    @POST
+    @Path("/downloadImportUsersReport/{id}")
+    @NoCache
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response downloadImportUsersReport(@PathParam("id") String importId) {
+        try {
+            log.info("Start download users");
+            FileModel file = userService.downloadUsersByImportReportId(importId);
+            Response.ResponseBuilder response = Response.ok((Object) file.save());
+            if (file instanceof XlsxImpl) {
+                response.header("Content-Disposition", "attachment; filename=\"import_users_report.xlsx" + "\"");
+                response.header("filename", "import_users_report.xlsx");
+                response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
+            } else {
+                response.header("Content-Disposition", "attachment; filename=\"import_users_report.csv" + "\"");
+                response.header("filename", "import_users_report.csv");
+                response.header("Content-Type", MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8");
+            }
+            return response.build();
+        } catch (UnsupportedDataTypeException e) {
+            log.error("Could not download users", e);
+            return JsonResponse
+                    .error(Response.Status.BAD_REQUEST)
+                    .message(e.getMessage())
+                    .build();
+        } catch (IOException e) {
+            log.error("Could not download users", e);
+            return JsonResponse.fail()
+                    .message("Error writing file")
+                    .build();
+        }
     }
 
     @Path("impersonation/{id}")

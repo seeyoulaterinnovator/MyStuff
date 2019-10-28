@@ -1,8 +1,7 @@
-package ru.alamics.sso.keycloak.create.model;
+package ru.alamics.sso.user.model;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.spi.FileTypeDetector;
 
 public class FileFactory {
     public static FileModel createFileModel(InputStream inputStream, String type) throws IOException {

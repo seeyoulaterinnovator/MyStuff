@@ -1,6 +1,7 @@
-package ru.alamics.sso.keycloak.create.model;
+package ru.alamics.sso.user.model;
 
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.ByteArrayOutputStream;
@@ -71,12 +72,25 @@ public class XlsxImpl implements FileModel {
             Row row = iter.next();
             Iterator<Cell> iterCell = row.cellIterator();
             List<String> cells = new ArrayList<>();
+            int currentColumn = 0;
             while (iterCell.hasNext()) {
-                cells.add(formatter.formatCellValue(iterCell.next()));
+                XSSFCell cell = (XSSFCell) iterCell.next();
+                if (cell.getColumnIndex() != currentColumn){
+                     fillEmptyCells(cells, cell.getColumnIndex() - currentColumn);
+                     currentColumn += cell.getColumnIndex() - currentColumn;
+                }
+                cells.add(formatter.formatCellValue(cell));
+                currentColumn ++;
             }
             rows.add(cells.toArray(new String[cells.size()]));
         }
         return rows;
+    }
+
+    private void fillEmptyCells(List<String> cells, int count){
+        for (int i = 0; i < count; i++) {
+            cells.add(null);
+        }
     }
 
     @Override

@@ -25,7 +25,6 @@
 
             <#if recaptchaRequired??>
                 <div class="g-recaptcha w-full mb-4"
-                data-size="compact"
                 data-sitekey="${recaptchaSiteKey}"
                 data-callback="recaptchaCallback"
                 data-expired-callback="recaptchaExpiredCallback"
