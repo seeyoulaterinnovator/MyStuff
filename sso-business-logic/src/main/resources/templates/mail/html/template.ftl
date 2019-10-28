@@ -35,7 +35,7 @@
                                  alt="Телефон" />
                           </td>
                           <td width="125" class="contact__number">
-                            8&nbsp;800&nbsp;550&nbsp;0479
+                            8&nbsp;800&nbsp;333&nbsp;9000
                           </td>
                         </tr>
                       </table>
