@@ -344,4 +344,21 @@
             ALTER TABLE IMPORT_USERS_DATA CHANGE FIRST_NAME FIRST_NAME varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
         </sql>
     </changeSet>
+
+    <changeSet id="28" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="IMPORT_USERS_REPORT" />
+            <columnExists tableName="IMPORT_USERS_REPORT" columnName="IS_DONE"/>
+        </preConditions>
+        <dropColumn tableName="IMPORT_USERS_REPORT" columnName="IS_DONE" />
+        <addColumn tableName="IMPORT_USERS_REPORT">
+            <column name="STATUS" type="varchar(255)" defaultValue="AWAITING">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <update tableName="IMPORT_USERS_REPORT" >
+            <column name="STATUS" value="DONE">
+            </column>
+        </update>
+    </changeSet>
 </databaseChangeLog>

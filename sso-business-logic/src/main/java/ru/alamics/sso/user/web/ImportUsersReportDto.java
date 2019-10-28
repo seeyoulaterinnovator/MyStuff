@@ -17,5 +17,5 @@ public class ImportUsersReportDto {
     private int countImportUsers;
     private int countCreatedUsers;
     private int countClones;
-    private boolean isDone;
+    private String status;
 }

@@ -10,6 +10,7 @@ import org.keycloak.models.jpa.entities.*;
 import org.keycloak.util.JsonSerialization;
 import ru.alamics.sso.keycloak.entity.ImportUsersDataEntity;
 import ru.alamics.sso.keycloak.entity.ImportUsersReportEntity;
+import ru.alamics.sso.keycloak.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.keycloak.repository.*;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
@@ -28,6 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Singleton
@@ -45,14 +47,21 @@ public class ImportSchedule {
     @EJB
     private UserPostService userPostService;
 
-    @Schedule(hour = "*", minute = "*/1", persistent = false)
+    @Schedule(hour = "*", minute = "*/5", persistent = false)
     public void schedule() {
         log.info("Start import users by schedule");
-        importUsersReportRepository.findAllImportUsersReports()
+        List<ImportUsersReportEntity> importUsersReportEntities = importUsersReportRepository.findAllImportUsersReports()
                 .stream()
                 .filter(o -> o.getImportUserData() != null && !o.getImportUserData().isEmpty())
-                .filter(o -> !o.isDone())
-                .forEach(o -> createImportUsers(o));
+                .filter(o -> o.getStatus().equals(ImportUsersReportStatus.AWAITING))
+                .peek(o -> {
+                    o.setStatus(ImportUsersReportStatus.IN_PROGRESS);
+                    importUsersReportRepository.updateImportUsersReport(o);
+                })
+                .collect(Collectors.toList());
+        for (ImportUsersReportEntity importUsersReportEntity : importUsersReportEntities){
+            createImportUsers(importUsersReportEntity);
+        }
         log.info("End import users by schedule");
     }
 
@@ -85,7 +94,7 @@ public class ImportSchedule {
                 });
         importUsersReport.setCountClones(countClones.intValue());
         importUsersReport.setCountCreatedUsers(createdUsers.intValue());
-        importUsersReport.setDone(true);
+        importUsersReport.setStatus(ImportUsersReportStatus.DONE);
         importUsersReportRepository.updateImportUsersReport(importUsersReport);
     }
 

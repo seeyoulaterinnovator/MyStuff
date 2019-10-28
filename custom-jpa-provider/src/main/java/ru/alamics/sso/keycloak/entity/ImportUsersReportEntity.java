@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
+import ru.alamics.sso.keycloak.entity.common.ImportUsersReportStatus;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -32,8 +33,9 @@ public class ImportUsersReportEntity {
     private int countCreatedUsers;
     @Column(name = "count_clones")
     private int countClones;
-    @Column(name = "is_done")
-    private boolean isDone;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private ImportUsersReportStatus status;
     @OneToMany(mappedBy = "importUsersReport", cascade = CascadeType.ALL)
     private List<ImportUsersDataEntity> importUserData;
 }

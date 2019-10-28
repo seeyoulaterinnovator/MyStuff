@@ -2334,8 +2334,8 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
     };
 
     $scope.downloadImportUsersReport = function (importReport) {
-        if (importReport.done === false){
-            Notifications.info("Import users report must have status 'is done'");
+        if (importReport.status !== "DONE"){
+            Notifications.info("Import users report must have status 'DONE'");
             return;
         }
         var linkElement = document.createElement('a');

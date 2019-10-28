@@ -4,6 +4,7 @@ import org.keycloak.authentication.FormContext;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.keycloak.entity.ImportUsersDataEntity;
 import ru.alamics.sso.keycloak.entity.ImportUsersReportEntity;
+import ru.alamics.sso.keycloak.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.user.model.ImportResponse;
@@ -211,7 +212,7 @@ public class UserMapper {
         importUserReport.setCountCreatedUsers(importResponse.getCreatedUsers().intValue());
         importUserReport.setCountClones(importResponse.getCountClones().intValue());
         importUserReport.setRealmId(realmId);
-        importUserReport.setDone(true);
+        importUserReport.setStatus(ImportUsersReportStatus.DONE);
         importUserDataEntities.forEach(o -> o.setImportUsersReport(importUserReport));
         importUserReport.setImportUserData(importUserDataEntities);
         return importUserReport;
@@ -242,7 +243,7 @@ public class UserMapper {
                 .countClones(importUsersReportEntity.getCountClones())
                 .countCreatedUsers(importUsersReportEntity.getCountCreatedUsers())
                 .countImportUsers(importUsersReportEntity.getCountImportUsers())
-                .isDone(importUsersReportEntity.isDone())
+                .status(importUsersReportEntity.getStatus().getDiscription())
                 .build();
     }
 

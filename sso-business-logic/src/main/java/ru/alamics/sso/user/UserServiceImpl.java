@@ -14,6 +14,7 @@ import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import ru.alamics.sso.keycloak.entity.ImportUsersDataEntity;
 import ru.alamics.sso.keycloak.entity.ImportUsersReportEntity;
+import ru.alamics.sso.keycloak.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
@@ -206,7 +207,7 @@ public class UserServiceImpl implements UserService {
         List<String[]> rows = file.getRows();
         rows.remove(0);
         ImportUsersReportEntity importUsersReport = UserMapper.toImportUsersReportEntity(realm.getName(), getFileName(content), UserMapper.toUserRequestList(rows));
-        importUsersReport.setDone(false);
+        importUsersReport.setStatus(ImportUsersReportStatus.AWAITING);
         importUsersReportService.saveImportUsersReport(importUsersReport);
 
         log.info("Upload import users file success");
