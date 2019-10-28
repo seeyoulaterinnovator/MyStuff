@@ -89,6 +89,23 @@ export default (function() {
   window.recaptchaExpiredCallback = recaptchaExpiredCallback;
   window.recaptchaErrorCallback = recaptchaErrorCallback;
 
+  // resizing ReCaptcha function
+  function scaleCaptcha() {
+    const reCaptcha = document.querySelector(".g-recaptcha");
+    const reCaptchaWidth = 304;
+    const containerWidth = document.getElementById('update-profile-submit').offsetWidth;
+    if(reCaptchaWidth !== containerWidth) {
+      const captchaScale = containerWidth / reCaptchaWidth;
+      reCaptcha.style.transform = 'scale('+captchaScale+')';
+    }
+  }
+  // resizing ReCaptcha initial
+  scaleCaptcha();
+  // resizing ReCaptcha on window resize
+  window.addEventListener('resize', function(){
+    scaleCaptcha();
+  });
+
   function registerField(input) {
     const { name } = input;
 
