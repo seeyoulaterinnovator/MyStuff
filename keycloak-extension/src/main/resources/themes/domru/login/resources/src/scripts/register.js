@@ -35,8 +35,8 @@ export default (function() {
   // @todo
 
   // Wrong email and/or phone number
-  const wrongEmail = document.querySelector('bad_email');
-  const wrongPhone = document.querySelector('bad_phone');
+  const wrongEmail = document.querySelector('.bad_email');
+  const wrongPhone = document.querySelector('.bad_phone');
 
   if (wrongEmail) {
     document.getElementById('email').style.borderColor = '#e31e24';
