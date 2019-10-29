@@ -12,14 +12,13 @@ public class CustomRestResource {
     private UserFindService userFindService;
     private AdminAuth auth;
 
-    public CustomRestResource (KeycloakSession session, UserFindService userFindService, AdminAuth auth) {
+    public CustomRestResource (KeycloakSession session, AdminAuth auth) {
         this.session = session;
-        this.userFindService = userFindService;
         this.auth = auth;
     }
 
     @Path("")
     public CustomUserResource getCustomUserResource() {
-        return new CustomUserResource(session, this.auth, userFindService);
+        return new CustomUserResource(session, this.auth);
     }
 }

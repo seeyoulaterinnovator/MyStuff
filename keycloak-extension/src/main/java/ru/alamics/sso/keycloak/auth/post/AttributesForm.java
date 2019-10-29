@@ -11,7 +11,7 @@ import org.keycloak.provider.ProviderConfigProperty;
 import ru.alamics.sso.auth.UserRole;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
-import ru.alamics.sso.keycloak.search.dto.UserDto;
+import ru.alamics.sso.user.web.UserSearchDto;
 import ru.alamics.sso.keycloak.search.rest.SearchResource;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.model.TbapiConstants;
@@ -46,7 +46,7 @@ public class AttributesForm implements Authenticator {
     }
 
     @Override
-    public void authenticate(AuthenticationFlowContext context) {
+    public void authenticate (AuthenticationFlowContext context) {
         final String DEBUG_STR = "authenticate";
         var authSession = context.getAuthenticationSession();
         log.info("{}: frame={}", DEBUG_STR, authSession.getAuthNote(I_FRAME));
@@ -62,16 +62,10 @@ public class AttributesForm implements Authenticator {
             var session = context.getSession();
             var searchResource = new SearchResource(session);
             var user = context.getUser();
-            List<UserDto> attributes = searchResource.getUsers( "user", null, user.getId(), null, null, true);
+            List<UserSearchDto> attributes = searchResource.getUsers( "user", null, user.getId(), null, null, true);
             if (attributes != null) {
                 attributes = attributes.stream()
                         .filter(attribute -> Objects.nonNull(attribute.getTomsId()) && Objects.nonNull(attribute.getRoleId()))
-                        .map(o -> {
-                            if (o.getOrganization() == null){
-                                o.setOrganization("");
-                            }
-                            return o;
-                        })
                         .collect(Collectors.toList());
             } else {
                 attributes = Collections.emptyList();
@@ -89,7 +83,7 @@ public class AttributesForm implements Authenticator {
 
     }
 
-    private Response createForm(AuthenticationFlowContext context, List<UserDto> attributes) {
+    private Response createForm(AuthenticationFlowContext context, List<UserSearchDto> attributes) {
         LoginFormsProvider form = context.form();
         if (!attributes.isEmpty()) {
             Set<AttributesModel> models = attributes.stream()
@@ -106,7 +100,7 @@ public class AttributesForm implements Authenticator {
     }
 
     @Override
-    public void action(AuthenticationFlowContext context) {
+    public void action (AuthenticationFlowContext context) {
         var authSession = context.getAuthenticationSession();
         role.setUserPost(context);
         authSession.setAuthNote(AUTH_FORM_SUCCESS, "0");
