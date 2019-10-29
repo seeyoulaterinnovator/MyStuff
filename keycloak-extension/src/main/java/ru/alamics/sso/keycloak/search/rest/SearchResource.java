@@ -42,6 +42,7 @@ public class SearchResource {
     public Response getUsersInfo(@QueryParam("search") String search, @QueryParam("searchUser") String searchUser,
                                  @QueryParam("searchToms") String searchToms, @QueryParam("sortField") String sortField,
                                  @QueryParam("sortAsc") boolean sortAsc, @QueryParam("searchRealm") String searchRealm) {
+        session.userCache().clear();
         if (searchRealm == null || searchRealm.isBlank()) {
             searchRealm = "user";
         }

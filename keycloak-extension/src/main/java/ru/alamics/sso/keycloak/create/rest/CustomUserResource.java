@@ -4,15 +4,23 @@ import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.common.Profile;
+import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.events.Details;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.events.EventType;
+import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.*;
+import org.keycloak.models.cache.CacheRealmProvider;
+import org.keycloak.models.jpa.UserAdapter;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.resources.account.AccountFormService;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
+import org.keycloak.services.resources.admin.RoleMapperResource;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.utils.ProfileHelper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
@@ -26,6 +34,8 @@ import ru.alamics.sso.user.model.*;
 import javax.activation.UnsupportedDataTypeException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
@@ -307,5 +317,29 @@ public class CustomUserResource {
                 .detail(Details.IMPERSONATOR, impersonator).success();
 
         return result;
+    }
+
+    @Path("role-mappings/{id}")
+    @Transactional
+    public RoleMapperResource getRoleMappings(@PathParam("id") String id) {
+//        session.userCache().clear();
+//        session.getProvider(CacheRealmProvider.class).clear();
+        RealmModel realm = session.getContext().getRealm();
+        EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
+        UserEntity userEntity = em.find(UserEntity.class, id);
+        if (userEntity == null) return null;
+        UserModel user = new UserAdapter(session, realm, em, userEntity);
+
+        AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
+                .realm(realm)
+                .resource(ResourceType.USER)
+                .resource(ResourceType.USER)
+                .resourcePath(session.getContext().getUri(), user.getId());
+
+        AdminPermissionEvaluator.RequirePermissionCheck manageCheck = () -> auth.users().requireMapRoles(user);
+        AdminPermissionEvaluator.RequirePermissionCheck viewCheck = () -> auth.users().requireView(user);
+        RoleMapperResource resource =  new RoleMapperResource(realm, auth, user, adminEvent, manageCheck, viewCheck);
+        ResteasyProviderFactory.getInstance().injectProperties(resource);
+        return resource;
     }
 }
