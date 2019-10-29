@@ -5,19 +5,19 @@
     <#if section = "header">
         <#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон -->
         <#if lengthCode==6>
-            <@blocks.contentHeader mainTitle="Вам выслан одноразовый пароль на номер:" />
+            <@blocks.verificationHeader mainTitle="Вам выслан одноразовый пароль на номер:" />
         <#else>
             <#if enableRepeatCall?? && enableRepeatCall!>
-                <@blocks.contentHeader mainTitle="Введите последние 4 цифры номера, входящего звонка на номер" />
+                <@blocks.verificationHeader mainTitle="Введите последние 4 цифры номера, входящего звонка на номер" />
             <#else>
-                <@blocks.contentHeader mainTitle="Введите код, отправленый вам на электронную почту:" />
+                <@blocks.verificationHeader mainTitle="Введите код, отправленый вам на электронную почту:" />
             </#if>
         </#if>
     <#elseif section = "form">
         <#if lengthCode==4 && !enableRepeatCall && userEmail??>
-            <h3 class="pb-2 sm:pb-3 md:pb-4">${userEmail}</h3>
+            <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4">${userEmail}</h3>
         <#elseif userPhone??>
-            <h3 class="pb-2 sm:pb-3 md:pb-4" x-ms-format-detection="none">${userPhone?replace('([0-9]{1})([0-9]{3})([0-9]{3})([0-9]{2})([0-9]{2})',
+            <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4" x-ms-format-detection="none">${userPhone?replace('([0-9]{1})([0-9]{3})([0-9]{3})([0-9]{2})([0-9]{2})',
                 '+$1 ($2) $3-$4-$5', 'ri')}</h3>
         </#if>
         <form id="totpe" action="${url.loginAction}" method="POST">
