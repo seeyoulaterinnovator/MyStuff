@@ -1,5 +1,4 @@
 module.controller('RealmDropdownCtrl_ext', function($scope, Realm, Current, Auth, $location) {
-//    Current.realms = Realm.get();
     $scope.current = Current;
 
     $scope.changeRealm = function(selectedRealm) {

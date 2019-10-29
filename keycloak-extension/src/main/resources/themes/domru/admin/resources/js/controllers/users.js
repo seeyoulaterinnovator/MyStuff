@@ -1,10 +1,13 @@
 module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, clients, client, Notifications, RealmRoleMapping,
                                                    ClientRoleMapping, AvailableRealmRoleMapping, AvailableClientRoleMapping,
                                                    CompositeRealmRoleMapping, CompositeClientRoleMapping, $location) {
-    $scope.realm = realm.realm;
+    $scope.realm = realm;
     if ($location.search().searchRealm) {
-        $scope.realm = $location.search().searchRealm;
+        $scope.realm.realm = $location.search().searchRealm;
     }
+    $scope.query = {};
+    $scope.query.searchRealm = $location.search().searchRealm;
+
     $scope.user = user;
     $scope.selectedRealmRoles = [];
     $scope.selectedRealmMappings = [];
@@ -765,19 +768,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
 module.controller('UserTabCtrl', function ($scope, $location, Dialog, Notifications, Current) {
 
-    $scope.init = function () {
-
-        //$scope.realm = realm;
-
-        console.log('UserTabCtrl');
-        console.log($location.search());
-        $scope.query = {};
-        $scope.query.searchRealm = $location.search().searchRealm;//$scope.getSearchParameter($route.current.params.searchRealm);
-
-        //if ($scope.query.searchRealm === '' || ! $scope.userRealms.some(function (realm) {return realm === $scope.query.searchRealm}) ){
-        //    $scope.query.searchRealm = realm.realm;
-        //}
-    };
+    $scope.query = {};
+    $scope.query.searchRealm = $location.search().searchRealm;
 
     $scope.removeUser = function () {
         Dialog.confirmDelete($scope.user.id, 'user', function () {
