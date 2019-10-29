@@ -3,7 +3,7 @@
 
 <#macro registrationLayout displayInfo=false displayMessage=true displayWarningMessage=true displayWide=false environment="dev" displayCity=true>
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" class="h-full min-h-screen scrollable-container">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" class="h-full scrollable-container">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
