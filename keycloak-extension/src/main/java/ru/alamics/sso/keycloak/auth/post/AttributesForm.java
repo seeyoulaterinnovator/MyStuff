@@ -7,46 +7,40 @@ import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.provider.ProviderConfigProperty;
 import ru.alamics.sso.auth.UserRole;
-import ru.alamics.sso.keycloak.lookup.Lookup;
-import ru.alamics.sso.keycloak.response.JsonResponse;
-import ru.alamics.sso.user.web.UserSearchDto;
-import ru.alamics.sso.keycloak.search.rest.SearchResource;
-import ru.alamics.sso.property.ApplicationProperties;
-import ru.alamics.sso.registration.model.TbapiConstants;
+import ru.alamics.sso.keycloak.mapper.DataMapper;
+import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.registration.tbapi.TbapiService;
-import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
+import ru.alamics.sso.user.web.UserSearchDto;
 
 import javax.naming.InitialContext;
-import javax.ws.rs.core.MultivaluedMap;
+import javax.naming.NamingException;
 import javax.ws.rs.core.Response;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
-
-import static ru.alamics.sso.keycloak.registration.UserConfigProperties.*;
-import static ru.alamics.sso.keycloak.registration.UserConfigProperties.SCHEMA_PROPERTY_NAME;
 import static ru.alamics.sso.registration.model.UserConstants.*;
 
 @Slf4j
 public class AttributesForm implements Authenticator {
     private static final String FORM = "attributes.ftl";
     private final UserRole role;
-    private final TbapiService tbapiService;
+    private UserFindService userFindService;
 
-    public AttributesForm(UserRole role, TbapiService tbapiService) {
+    public AttributesForm(UserRole role) {
         this.role = role;
-        this.tbapiService = tbapiService;
+        try {
+            this.userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
+        } catch (NamingException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Something wrong with context");
+        }
     }
 
     @Override
-    public void authenticate (AuthenticationFlowContext context) {
+    public void authenticate(AuthenticationFlowContext context) {
         final String DEBUG_STR = "authenticate";
         var authSession = context.getAuthenticationSession();
         log.info("{}: frame={}", DEBUG_STR, authSession.getAuthNote(I_FRAME));
@@ -59,10 +53,10 @@ public class AttributesForm implements Authenticator {
         boolean isAuth = "1".equals(authSession.getAuthNote(AUTH_FORM_SUCCESS));//it`s magick
 
         if (frame != null || isAuth || redirectIframe != null) {
-            var session = context.getSession();
-            var searchResource = new SearchResource(session);
             var user = context.getUser();
-            List<UserSearchDto> attributes = searchResource.getUsers( "user", null, user.getId(), null, null, true);
+            List<UserSearchDto> attributes = DataMapper.addOrganizationToUserSearchDtos(
+                    userFindService.getUsersByParameters("user", null, user.getId(), null,
+                            null, true));
             if (attributes != null) {
                 attributes = attributes.stream()
                         .filter(attribute -> Objects.nonNull(attribute.getTomsId()) && Objects.nonNull(attribute.getRoleId()))
@@ -100,7 +94,7 @@ public class AttributesForm implements Authenticator {
     }
 
     @Override
-    public void action (AuthenticationFlowContext context) {
+    public void action(AuthenticationFlowContext context) {
         var authSession = context.getAuthenticationSession();
         role.setUserPost(context);
         authSession.setAuthNote(AUTH_FORM_SUCCESS, "0");

@@ -13,16 +13,15 @@ import ru.alamics.sso.registration.tbapi.model.TbapiRequest;
 import ru.alamics.sso.registration.tbapi.port.TbapiRemoteService;
 
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_DMP_NAME;
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_TOMS_NAME;
 
 @Slf4j
 public class TbapiServiceRestImpl implements TbapiRemoteService {

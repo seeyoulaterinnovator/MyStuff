@@ -63,13 +63,12 @@ public class AttributesFormFactory implements AuthenticatorFactory {
     @Override
     public Authenticator create (KeycloakSession session) {
         UserRole role = null;
-        TbapiService tbapiService = new TbapiService(new TbapiServiceRestImpl());
         try {
             role = (UserRole) new InitialContext().lookup("java:global/domru-sso/" + UserRole.class.getSimpleName());
         } catch (NamingException e) {
             log.error("Cannot find userRole bean, HELP!!");
         }
-        return new AttributesForm(role, tbapiService);
+        return new AttributesForm(role);
     }
 
     @Override
