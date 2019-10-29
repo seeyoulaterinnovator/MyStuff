@@ -7,10 +7,16 @@
         <#if lengthCode==6>
             <@blocks.contentHeader mainTitle="Вам выслан одноразовый пароль на номер:" />
         <#else>
-            <@blocks.contentHeader mainTitle="На ваш номер поступит звонок:" />
+            <#if enableRepeatCall?? && enableRepeatCall!>
+                <@blocks.contentHeader mainTitle="Введите последние 4 цифры номера, входящего звонка на номер" />
+            <#else>
+                <@blocks.contentHeader mainTitle="Введите код, отправленый вам на электронную почту:" />
+            </#if>
         </#if>
     <#elseif section = "form">
-        <#if userPhone??>
+        <#if lengthCode==4 && !enableRepeatCall && userEmail??>
+            <h3 class="pb-2 sm:pb-3 md:pb-4">${userEmail}</h3>
+        <#elseif userPhone??>
             <h3 class="pb-2 sm:pb-3 md:pb-4" x-ms-format-detection="none">${userPhone?replace('([0-9]{1})([0-9]{3})([0-9]{3})([0-9]{2})([0-9]{2})',
                 '+$1 ($2) $3-$4-$5', 'ri')}</h3>
         </#if>
@@ -30,7 +36,6 @@
             <#else>
                 <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds!}" />
             </#if>
-
 
             <input id="smscode" name="smscode" class="hidden" />
 
