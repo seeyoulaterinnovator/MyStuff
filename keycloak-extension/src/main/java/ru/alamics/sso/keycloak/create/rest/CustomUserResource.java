@@ -20,6 +20,7 @@ import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.resources.account.AccountFormService;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
+import org.keycloak.services.resources.admin.ClientsResource;
 import org.keycloak.services.resources.admin.RoleMapperResource;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.utils.ProfileHelper;
@@ -58,6 +59,7 @@ public class CustomUserResource {
     private UserService userService;
     private AdminPermissionEvaluator auth;
     private ImportUsersReportService importUsersReportService;
+    private RealmModel realm;
 
     public CustomUserResource(KeycloakSession session, AdminPermissionEvaluator auth) {
         this.session = session;
@@ -70,6 +72,7 @@ public class CustomUserResource {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
         }
+        this.realm = session.getContext().getRealm();
     }
 
     @POST
@@ -283,7 +286,6 @@ public class CustomUserResource {
         ProfileHelper.requireFeature(Profile.Feature.IMPERSONATION);
 
         auth.users().canImpersonate();
-        RealmModel realm = session.getContext().getRealm();
         UserModel user = session.users().getUserById(id, realm);
         // if same realm logout before impersonation
         boolean sameRealm = false;
@@ -322,9 +324,6 @@ public class CustomUserResource {
     @Path("role-mappings/{id}")
     @Transactional
     public RoleMapperResource getRoleMappings(@PathParam("id") String id) {
-//        session.userCache().clear();
-//        session.getProvider(CacheRealmProvider.class).clear();
-        RealmModel realm = session.getContext().getRealm();
         EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
         UserEntity userEntity = em.find(UserEntity.class, id);
         if (userEntity == null) return null;
@@ -332,14 +331,22 @@ public class CustomUserResource {
 
         AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
                 .realm(realm)
-                .resource(ResourceType.USER)
-                .resource(ResourceType.USER)
-                .resourcePath(session.getContext().getUri(), user.getId());
+                .resource(ResourceType.USER);
 
         AdminPermissionEvaluator.RequirePermissionCheck manageCheck = () -> auth.users().requireMapRoles(user);
         AdminPermissionEvaluator.RequirePermissionCheck viewCheck = () -> auth.users().requireView(user);
         RoleMapperResource resource =  new RoleMapperResource(realm, auth, user, adminEvent, manageCheck, viewCheck);
         ResteasyProviderFactory.getInstance().injectProperties(resource);
         return resource;
+    }
+
+    @Path("clients")
+    public ClientsResource getClients() {
+        AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
+                .realm(realm)
+                .resource(ResourceType.REALM);
+        ClientsResource clientsResource = new ClientsResource(realm, auth, adminEvent);
+        ResteasyProviderFactory.getInstance().injectProperties(clientsResource);
+        return clientsResource;
     }
 }
