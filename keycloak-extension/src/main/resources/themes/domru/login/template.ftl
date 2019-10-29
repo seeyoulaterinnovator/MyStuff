@@ -66,10 +66,11 @@
                 </#if>
                 <#if message.type = 'error'>
                     <#if message.summary?contains('Номер мобильного телефона уже используется в другой учетной записи.')>
-                        <#if message.summary?contains(msg('emailExistsMessage'))>
+                        <#if message.summary?contains('Адрес')>
                             <span class="text-accentRed bad_phone bad_email">${kcSanitize(message.summary)?no_esc}</span>
                         <#else>
                         <span class="text-accentRed bad_phone">${kcSanitize(message.summary)?no_esc}</span>
+                        </#if>
                     <#elseif message.summary == msg('emailExistsMessage')>
                         <span class="text-accentRed bad_email">${kcSanitize(message.summary)?no_esc}</span>
                     <#else>
