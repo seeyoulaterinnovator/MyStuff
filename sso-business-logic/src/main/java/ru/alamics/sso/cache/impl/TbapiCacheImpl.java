@@ -1,5 +1,6 @@
 package ru.alamics.sso.cache.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.cache.TbapiCache;
 
 import java.time.LocalDateTime;
@@ -9,7 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-
+@Slf4j
 public class TbapiCacheImpl implements TbapiCache {
     private static final TbapiCache INSTANCE = new TbapiCacheImpl();
     private Map<String, LocalDateTime> invalidationsTime = new HashMap<>();
@@ -31,17 +32,13 @@ public class TbapiCacheImpl implements TbapiCache {
     }
 
     @Override
-    public void deleteFromCache(String customerId) {
-        this.cache.remove(getCustomerCacheName(customerId));
-    }
-
-    @Override
     public Object getCustomerNameFromCache(String customerId) {
         return this.cache.get(customerId);
     }
 
     @Override
     public Map<String, Object> getCustomerNamesFromCache(List<String> customers) {
+        log.info("tbapi cache : {}", cache.toString());
         Map<String, Object> ret = new HashMap<>();
         customers.forEach(customer -> ret.put(customer, getCustomerNameFromCache(getCustomerCacheName(customer))));
         return ret;
@@ -52,9 +49,10 @@ public class TbapiCacheImpl implements TbapiCache {
         LocalDateTime now = LocalDateTime.now();
         var invalidate = this.invalidationsTime.entrySet().stream().filter(map -> map.getValue().isBefore(now)).map(Map.Entry::getKey).collect(Collectors.toList());
         invalidate.forEach(invalidCache -> {
-            deleteFromCache(invalidCache);
+            this.cache.remove(invalidCache);
             this.invalidationsTime.remove(invalidCache);
         });
+        log.info("invalidate tomsIds: {}", invalidate.toString());
     }
 
     public static TbapiCache getInstance() {
