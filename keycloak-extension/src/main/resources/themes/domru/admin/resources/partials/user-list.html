@@ -131,7 +131,7 @@
                 <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.access.length > 0">
 
                     <tr data-ng-repeat="access in user.access" >
-                        <td class="clip inner-table__cell" rowspan="{{getEqualOrg(user.access, access.organization)}}"
+                        <td class="clip inner-table__cell" rowspan="{{getCountSystemNames(user.access, access)}}"
                             data-ng-if="isFirstOrg(user.access, access.organization, access) != ''">
                             {{isFirstOrg(user.access, access.organization, access)}}
                         </td>

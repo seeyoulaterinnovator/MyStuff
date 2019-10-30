@@ -705,21 +705,13 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     }
 
     $scope.isFirstOrg = function (userAccess, org, access) {
-        var equalToms = userAccess.filter(access => access.organization === org);
+        var equalToms = userAccess.filter(ua => ua.userPostId === access.userPostId && ua.organization === org);
         var index = equalToms.indexOf(access);
         if (index === 0) {
             return access.organization;
         } else {
             return '';//Gavno
         }
-    }
-
-    $scope.getEqualOrg = function (userAccess, org) {
-        return userAccess.filter(access => access.organization === org).length
-    }
-
-    $scope.getEqualRoleName = function (userAccess, roleName) {
-        return userAccess.filter(access => access.roleName === roleName).length
     }
 
     $scope.isFirstRoleName = function (userAccess, roleName, access) {
