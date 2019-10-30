@@ -173,6 +173,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                         .setAttribute("expirationSeconds", activationCodeType.getExpiredSeconds())
                         .setAttribute("lengthCode", activationCodeType.getLengthCode())
                         .setAttribute("userPhone", user.getPhone())
+                        .setAttribute("userEmail", user.getEmail())
                         .setAttribute("enableRepeatCall", authSession.getAuthNote(NEED_SEND_EMAIL_CODE) == null)
                         .createForm(VERIFY_PHONE_FTL);
                 context.challenge(challenge);

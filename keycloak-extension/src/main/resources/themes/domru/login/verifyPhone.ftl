@@ -8,9 +8,9 @@
             <@blocks.verificationHeader mainTitle="Вам выслан одноразовый пароль на номер:" />
         <#else>
             <#if enableRepeatCall?? && enableRepeatCall!>
-                <@blocks.verificationHeader mainTitle="Введите последние 4 цифры номера, входящего звонка на номер" />
+                <@blocks.verificationHeader mainTitle="Введите последние 4 цифры номера, входящего звонка на номер:" />
             <#else>
-                <@blocks.verificationHeader mainTitle="Введите код, отправленый вам на электронную почту:" />
+                <@blocks.verificationHeader mainTitle="Введите код, отправленый Вам на электронную почту:" />
             </#if>
         </#if>
     <#elseif section = "form">
