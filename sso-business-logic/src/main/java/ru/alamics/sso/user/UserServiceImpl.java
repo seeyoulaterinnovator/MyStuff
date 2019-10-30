@@ -292,17 +292,21 @@ public class UserServiceImpl implements UserService {
                 }
                 addUserPost(user, o, userRequest);
             } catch (FoundException e) {
+                List<Object> errorsByUsers = new LinkedList<>();
                 e.getResult().forEach((k, v) -> {
                     Map<String, Object> error = new HashMap<>();
                     error.put("error", v);
                     error.put("importUserName", o.getFirstName());
+                    errorsByUsers.add(v);
                     importResponse.addError(error);
                 });
+                o.setErrors(errorsByUsers.toString().substring(1, errorsByUsers.toString().length()-1));
                 countClones.getAndIncrement();
             } catch (NotFoundException | ValidationException e) {
                 Map<String, Object> error = new HashMap<>();
                 error.put("error", e.getMessage());
                 error.put("importUserName", o.getFirstName());
+                o.setErrors(e.getMessage());
                 importResponse.addError(error);
             }
         });
