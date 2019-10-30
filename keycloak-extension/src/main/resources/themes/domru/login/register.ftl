@@ -41,7 +41,7 @@
                     </div>
                 </#if>
 
-                <div class="flex flex-col-reverse justify-between sm:flex-row mt-0 xl:mt-4">
+                <div class="flex flex-col-reverse justify-between sm:flex-row mt-0 xl:mt-2">
                   <div class="flex flex-basis-1/2 items-center">
                     <button id="submit" class="btn btn-main pass-fields" type="submit">${msg('doRegister')}</button>
                   </div>
