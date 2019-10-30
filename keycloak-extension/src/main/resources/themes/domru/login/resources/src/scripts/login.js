@@ -1,6 +1,7 @@
 import IMask from 'imask';
 import { setButtonAvailability } from './helpers.js';
 import Cookie from 'js-cookie';
+import {WRONG_PASS_REG} from "../constants/passwordCharset";
 
 export default (function() {
   const formElement = document.getElementById('loginForm');
@@ -31,6 +32,7 @@ export default (function() {
   });
 
   passwordElement.addEventListener('input', () => {
+    replacePassword();
     setButtonAvailability(validate, submitElement);
   });
 
@@ -47,5 +49,14 @@ export default (function() {
     isUsernameValid = dynamicMask.unmaskedValue !== '';
 
     return isPasswordExists && isUsernameValid;
+  }
+
+  function replacePassword() {
+    const regExp = new RegExp(WRONG_PASS_REG);
+    const passwordRaw = passwordElement.value;
+    if (regExp.test(passwordRaw)) {
+      const replacePassword = passwordRaw.replace(WRONG_PASS_REG, '');
+      passwordElement.value = replacePassword;
+    }
   }
 })();

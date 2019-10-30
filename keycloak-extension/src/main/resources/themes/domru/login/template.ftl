@@ -64,7 +64,19 @@
                 <#if message.type = 'success' && message.summary != msg('emailSentMessage')>
                     <span class="text-accentGreen">${kcSanitize(message.summary)?no_esc}</span>
                 </#if>
-                <#if message.type = 'error'><span class="text-accentRed">${kcSanitize(message.summary)?no_esc}</span></#if>
+                <#if message.type = 'error'>
+                    <#if message.summary?contains('Номер мобильного телефона уже используется в другой учетной записи.')>
+                        <#if message.summary?contains(msg('emailExistsMessage'))>
+                            <span class="text-accentRed bad_phone bad_email">${kcSanitize(message.summary)?no_esc}</span>
+                        <#else>
+                            <span class="text-accentRed bad_phone">${kcSanitize(message.summary)?no_esc}</span>
+                        </#if>
+                    <#elseif message.summary == msg('emailExistsMessage')>
+                        <span class="text-accentRed bad_email">${kcSanitize(message.summary)?no_esc}</span>
+                    <#else>
+                        <span class="text-accentRed">${kcSanitize(message.summary)?no_esc}</span>
+                    </#if>
+                </#if>
                 </div>
             </#if>
 
