@@ -34,6 +34,17 @@ export default (function() {
 
   // @todo
 
+  // Wrong email and/or phone number
+  const wrongEmail = document.querySelector('.bad_email');
+  const wrongPhone = document.querySelector('.bad_phone');
+
+  if (wrongEmail) {
+    document.getElementById('email').style.borderColor = '#e31e24';
+  }
+  if (wrongPhone) {
+    document.getElementById('phone').style.borderColor = '#e31e24';
+  }
+
   const formElement = document.getElementById('registrationForm');
   if (!formElement) return;
 
@@ -70,7 +81,10 @@ export default (function() {
     }
 
     if (!values.password.match(VALIDATION_RULES['password_8-16']))
-      errors.password = 'Пароль не подходит. Попробуйте другой';
+      errors.password = 'Пароль не подходит';
+
+    // if (!values['password-confirm'].match(VALIDATION_RULES['password_8-16']))
+    //   errors.password = 'Пароль не подходит. Попробуйте другой';
 
     if (values['password-confirm'] !== values.password)
       errors['password-confirm'] = 'Пароли не совпадают';
@@ -171,7 +185,6 @@ export default (function() {
           input.value = value === undefined ? '' : value;
           input
         }
-
         // show/hide errors
         if (errorElement) {
           if (touched && error) {
@@ -212,12 +225,15 @@ export default (function() {
     return form.getFieldState('password').value;
   }
   function setPassword(password) {
-    // form.getFieldState('password').change(password);
+    form.getFieldState('password').change(password);
     // form.getFieldState('password-confirm').change(password);
     // form.getFieldState('password-confirm').blur();
   }
   function getConfirmation() {
     return form.getFieldState('password-confirm').value;
   }
-  linkPasswords(getPassword, setPassword, getConfirmation, document.getElementById('password'), document.getElementById('password-confirm'));
+  function setConfirmation(confirmation) {
+    form.getFieldState('password-confirm').change(confirmation);
+  }
+  linkPasswords(getPassword, setPassword, getConfirmation, setConfirmation, document.getElementById('password'), document.getElementById('password-confirm'));
 })();

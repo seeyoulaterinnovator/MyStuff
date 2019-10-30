@@ -40,7 +40,7 @@ export default (function() {
     }
 
     if (!values['password-new'].match(VALIDATION_RULES['password_8-16']))
-      errors['password-new'] = 'Пароль не подходит. Попробуйте другой';
+      errors['password-new'] = 'Пароль не подходит';
 
     if (values['password-confirm'] !== values['password-new'])
       errors['password-confirm'] = 'Пароли не совпадают';
@@ -131,12 +131,16 @@ export default (function() {
     // passwordElement.value = password;
     // passwordConfirmElement.value = password;
     // setButtonAvailability(validate, submitElement);
+    form.getFieldState('password-new').change(password);
   }
   function getConfirmation() {
     return form.getFieldState('password-confirm').value;
   }
+  function setConfirmation(confirmation) {
+    form.getFieldState('password-confirm').change(confirmation);
+  }
 
-  linkPasswords(getPassword, setPassword, getConfirmation, passwordElement, passwordConfirmElement);
+  linkPasswords(getPassword, setPassword, getConfirmation, setConfirmation, passwordElement, passwordConfirmElement);
 
   // passwordElement.addEventListener('input', () => {
   //   setButtonAvailability(validate, submitElement);

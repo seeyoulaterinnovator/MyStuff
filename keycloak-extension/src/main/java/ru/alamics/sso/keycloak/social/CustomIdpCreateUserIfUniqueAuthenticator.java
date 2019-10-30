@@ -8,13 +8,13 @@ import org.keycloak.authentication.authenticators.broker.util.SerializedBrokered
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.validation.Validation;
-import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.registration.userpost.UserPostCreatorProvider;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.registration.service.UserPostService;
+import ru.alamics.sso.user.mapper.UserMapper;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -36,7 +36,7 @@ public class CustomIdpCreateUserIfUniqueAuthenticator extends IdpCreateUserIfUni
 
     @Override
     protected void userRegisteredSuccess(AuthenticationFlowContext context, UserModel registeredUser, SerializedBrokeredIdentityContext serializedCtx, BrokeredIdentityContext brokerContext) {
-        UserPostRequest userPostRequest = DataMapper.toUserPostRequest(registeredUser);
+        UserPostRequest userPostRequest = UserMapper.toUserPostRequest(registeredUser);
         userPostRequest.setRoleId(UserPostCreatorProvider.ROLE_ID);
         userPostService.addUserPostAndSystemRole(userPostRequest);
     }

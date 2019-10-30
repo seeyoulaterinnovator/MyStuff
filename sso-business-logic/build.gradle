@@ -10,4 +10,12 @@ dependencies {
     implementation group: 'javax', name: 'javaee-api', version: '8.0.1'
     implementation "org.keycloak:keycloak-model-jpa:$keycloakVersion"
     implementation group: 'org.freemarker', name: 'freemarker', version: '2.3.26-incubating'
+
+    // https://mvnrepository.com/artifact/org.apache.poi/poi
+    implementation group: 'org.apache.poi', name: 'poi', version: '4.1.0'
+    // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
+    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.0'
+    // https://mvnrepository.com/artifact/com.opencsv/opencsv
+    implementation group: 'com.opencsv', name: 'opencsv', version: '4.0'
+
 }

@@ -56,15 +56,27 @@
             <#nested "info">
           </#if>
 
-          <div class="py-3">
+          <div class="py-2 sm:py-3 lg:py-4">
             <#if displayMessage && message?has_content>
-              <div class="alert pb-3">
+              <div class="alert pb-4">
                 <#if message.type = 'info'><span class="text-black">${kcSanitize(message.summary)?no_esc}</span></#if>
                 <#if message.type = 'warning' && displayWarningMessage><span class="text-extra">${kcSanitize(message.summary)?no_esc}</span></#if>
                 <#if message.type = 'success' && message.summary != msg('emailSentMessage')>
                     <span class="text-accentGreen">${kcSanitize(message.summary)?no_esc}</span>
                 </#if>
-                <#if message.type = 'error'><span class="text-accentRed">${kcSanitize(message.summary)?no_esc}</span></#if>
+                <#if message.type = 'error'>
+                    <#if message.summary?contains('Номер мобильного телефона уже используется в другой учетной записи.')>
+                        <#if message.summary?contains(msg('emailExistsMessage'))>
+                            <span class="text-accentRed bad_phone bad_email">${kcSanitize(message.summary)?no_esc}</span>
+                        <#else>
+                            <span class="text-accentRed bad_phone">${kcSanitize(message.summary)?no_esc}</span>
+                        </#if>
+                    <#elseif message.summary == msg('emailExistsMessage')>
+                        <span class="text-accentRed bad_email">${kcSanitize(message.summary)?no_esc}</span>
+                    <#else>
+                        <span class="text-accentRed">${kcSanitize(message.summary)?no_esc}</span>
+                    </#if>
+                </#if>
                 </div>
             </#if>
 
@@ -98,7 +110,7 @@
     </#if>
 
     <#include "templates/domru-chat.html">
-    <script src="https://raw.github.com/davidjbradshaw/iframe-resizer/master/js/iframeResizer.contentWindow.min.js"></script>
+    <!--<script src="${url.resourcesPath}/build/iframeResizer.contentWindow.min.js" async></script> -->
   </body>
 </html>
 </#macro>

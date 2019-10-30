@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.create.model;
+package ru.alamics.sso.user.model;
 
 import com.opencsv.*;
 
@@ -7,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class CsvImpl implements FileModel {
