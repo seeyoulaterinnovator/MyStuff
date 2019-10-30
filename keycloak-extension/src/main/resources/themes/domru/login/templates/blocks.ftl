@@ -56,7 +56,7 @@
     </h1>
 
     <#if secondaryTitle != "">
-      <h2 class="text-secondary-title text-main text-3xl">
+      <h2 class="text-secondary-title text-3xl">
         <a href="${secondaryHref}">
           <b>
             ${secondaryTitle}
