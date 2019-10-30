@@ -88,20 +88,23 @@ public class UserMapper {
         List<UserSearchDto> result = new LinkedList<>();
         for (int i = 0; i < userDtos.size(); i++) {
             UserSearchDto userDto = userDtos.get(i);
+            String userPostId = userDto.getUserPostId();
             String systemNames = userDto.getSystemName();
-            for (int j = i + 1; j < userDtos.size(); j++) {
-                UserSearchDto userDtoJ = userDtos.get(j);
-                if (userDto.getId().equals(userDtoJ.getId()) && userDtoJ.getSystemName() != null && !userDtoJ.getSystemName().isBlank()) {
-                    if (systemNames == null || systemNames.isBlank()) {
-                        systemNames = userDtoJ.getSystemName();
-                    } else {
-                        systemNames += ", " + userDtoJ.getSystemName();
+            if (userPostId != null) {
+                for (int j = i + 1; j < userDtos.size(); j++) {
+                    UserSearchDto userDtoJ = userDtos.get(j);
+                    if (userPostId.equals(userDtoJ.getUserPostId()) && userDto.getId().equals(userDtoJ.getId()) && userDtoJ.getSystemName() != null && !userDtoJ.getSystemName().isBlank()) {
+                        if (systemNames == null || systemNames.isBlank()) {
+                            systemNames = userDtoJ.getSystemName();
+                        } else {
+                            systemNames += ", " + userDtoJ.getSystemName();
+                        }
+                        userDtos.remove(j);
+                        j--;
                     }
-                    userDtos.remove(j);
-                    j--;
                 }
+                userDto.setSystemName(systemNames);
             }
-            userDto.setSystemName(systemNames);
             result.add(userDto);
         }
         return result;

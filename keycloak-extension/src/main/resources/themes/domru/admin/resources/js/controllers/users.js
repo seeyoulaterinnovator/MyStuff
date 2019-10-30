@@ -628,14 +628,15 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             let findGroupedUser = $scope.findById(ret, user.id);
             if (!findGroupedUser) {
                 var access = [];
-                if (user.systemId || user.roleId || user.tomsId || user.organization) {
+                if (user.systemId || user.roleId || user.tomsId || user.organization || user.userPostId) {
                     access.push({
                         systemId: user.systemId,
                         systemName: user.systemName,
                         roleId: user.roleId,
                         roleName: user.roleName,
                         tomsId: user.tomsId,
-                        organization: user.organization
+                        organization: user.organization,
+                        userPostId: user.userPostId
                     })
                 }
                 ;
@@ -659,7 +660,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                     roleId: user.roleId,
                     roleName: user.roleName,
                     tomsId: user.tomsId,
-                    organization: user.organization
+                    organization: user.organization,
+                    userPostId: user.userPostId
                 };
 
                 findGroupedUser.access.push(access);
@@ -692,12 +694,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         return values.filter((val, index) => values.indexOf(val) === index);
     };
 
-    $scope.getEqualTomsId = function (userAccess, tomsId) {
-        return userAccess.filter(access => access.tomsId === tomsId).length
-    }
-
     $scope.isFirstTomsId = function (userAccess, tomsId, access) {
-        var equalToms = userAccess.filter(access => access.tomsId === tomsId);
+        var equalToms = userAccess.filter(ua => ua.userPostId === access.userPostId && ua.tomsId === tomsId);
         var index = equalToms.indexOf(access);
         if (index === 0) {
             return access.tomsId;
@@ -725,7 +723,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     }
 
     $scope.isFirstRoleName = function (userAccess, roleName, access) {
-        var equalToms = userAccess.filter(access => access.roleName === roleName);
+        var equalToms = userAccess.filter(ua => ua.userPostId === access.userPostId && ua.roleName === roleName);
         var index = equalToms.indexOf(access);
         if (index === 0) {
             return access.roleName;
@@ -734,8 +732,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         }
     }
 
-    $scope.getEqualSystemName = function (userAccess, systemName) {
-        return userAccess.filter(access => access.systemName === systemName).length
+    $scope.getCountSystemNames = function (userAccess, access) {
+        return userAccess.filter(ua => ua.userPostId === access.userPostId).length;
     }
 
     $scope.isFirstSystemName = function (userAccess, systemName, access) {

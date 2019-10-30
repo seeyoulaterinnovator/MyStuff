@@ -135,11 +135,11 @@
                             data-ng-if="isFirstOrg(user.access, access.organization, access) != ''">
                             {{isFirstOrg(user.access, access.organization, access)}}
                         </td>
-                        <td class="clip inner-table__cell" rowspan="{{getEqualTomsId(user.access, access.tomsId)}}"
+                        <td class="clip inner-table__cell" rowspan="{{getCountSystemNames(user.access, access)}}"
                             data-ng-if="isFirstTomsId(user.access, access.tomsId, access) != ''">
                             {{isFirstTomsId(user.access, access.tomsId, access)}}
                         </td>
-                        <td class="clip inner-table__cell" rowspan="{{getEqualRoleName(user.access, access.roleName)}}"
+                        <td class="clip inner-table__cell" rowspan="{{getCountSystemNames(user.access, access)}}"
                             data-ng-if="isFirstRoleName(user.access, access.roleName, access) != ''">
                             {{isFirstRoleName(user.access, access.roleName, access)}}
                         </td>
