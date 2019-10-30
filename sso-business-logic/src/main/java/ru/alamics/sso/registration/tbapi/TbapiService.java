@@ -75,8 +75,6 @@ public class TbapiService {
     }
 
     public Map<String, Object> customerNames(TbapiConnectConfig connectConfig, String... customerIds) {
-        final String DEBUG_STR = "customerName";
-        log.info("{}: customerId={}", DEBUG_STR, customerIds);
         List<String> customerList = List.of(customerIds);
         Map<String, Object> customerNamesFromCache = this.cache.getCustomerNamesFromCache(customerList);
         List<String> customersWithNullNames = customerNamesFromCache.entrySet().stream()

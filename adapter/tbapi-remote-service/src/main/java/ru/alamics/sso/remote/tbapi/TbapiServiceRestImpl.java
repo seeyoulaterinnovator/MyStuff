@@ -98,6 +98,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
 
     @Override
     public Map<String, Object> getCustomerName(List<String> id, TbapiConnectConfig connectConfig) {
+        log.info("customer names request : customerIds={}", id);
         Map<String, Object> responseMap = new HashMap<>();
         try {
             URI uri = new ResteasyUriBuilder()
@@ -122,6 +123,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
             if (responseMap.get("businessErrorCode") != null){
                 throw new Exception("error tbapi code: " +  responseMap.get("businessErrorCode").toString());
             }
+            log.info("customer names response : {}", responseMap);
         } catch (Exception e){
             log.error("tbapi error post request: ", e);
         } finally {
