@@ -119,7 +119,6 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
                     .invoke();
 
             responseMap = response.readEntity(new GenericType<>(mapExample.getClass()));
-            log.info("tbapi response : {}", responseMap.toString());
             if (responseMap.get("businessErrorCode") != null){
                 throw new Exception("error tbapi code: " +  responseMap.get("businessErrorCode").toString());
             }

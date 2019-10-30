@@ -38,7 +38,6 @@ public class TbapiCacheImpl implements TbapiCache {
 
     @Override
     public Map<String, Object> getCustomerNamesFromCache(List<String> customers) {
-        log.info("tbapi cache : {}", cache.toString());
         Map<String, Object> ret = new HashMap<>();
         customers.forEach(customer -> ret.put(customer, getCustomerNameFromCache(getCustomerCacheName(customer))));
         return ret;
