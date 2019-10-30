@@ -56,9 +56,9 @@
             <#nested "info">
           </#if>
 
-          <div class="py-3">
+          <div class="py-2 sm:py-3 lg:py-4">
             <#if displayMessage && message?has_content>
-              <div class="alert pb-3">
+              <div class="alert pb-4">
                 <#if message.type = 'info'><span class="text-black">${kcSanitize(message.summary)?no_esc}</span></#if>
                 <#if message.type = 'warning' && displayWarningMessage><span class="text-extra">${kcSanitize(message.summary)?no_esc}</span></#if>
                 <#if message.type = 'success' && message.summary != msg('emailSentMessage')>
@@ -98,7 +98,7 @@
     </#if>
 
     <#include "templates/domru-chat.html">
-    <script src="https://raw.github.com/davidjbradshaw/iframe-resizer/master/js/iframeResizer.contentWindow.min.js"></script>
+    <!--<script src="${url.resourcesPath}/build/iframeResizer.contentWindow.min.js" async></script> -->
   </body>
 </html>
 </#macro>

@@ -81,6 +81,9 @@
 .field__input:placeholder-shown + .field__label {
   color: transparent;
 }
+.field__input:-ms-input-placeholder + .field__label {
+  color: transparent;
+}
 
 .field__label {
   @apply .text-main;

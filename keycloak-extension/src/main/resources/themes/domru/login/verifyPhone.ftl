@@ -11,14 +11,14 @@
         </#if>
     <#elseif section = "form">
         <#if userPhone??>
-            <p class="pb-6" x-ms-format-detection="none">${userPhone?replace('([0-9]{1})([0-9]{3})([0-9]{3})([0-9]{2})([0-9]{2})',
-                '+$1 ($2) $3-$4-$5', 'ri')}</p>
+            <h3 class="pb-2 sm:pb-3 md:pb-4" x-ms-format-detection="none">${userPhone?replace('([0-9]{1})([0-9]{3})([0-9]{3})([0-9]{2})([0-9]{2})',
+                '+$1 ($2) $3-$4-$5', 'ri')}</h3>
         </#if>
         <form id="totpe" action="${url.loginAction}" method="POST">
          </form>
         <form id="totpForm" action="${url.loginAction}" method="POST">
         <#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон -->
-        <p class="pb-6 text-accentRed"> ${error!}<p>
+        <p class="pb-2 sm:pb-3 md:pb-4 text-accentRed"> ${error!}<p>
             <div class="flex justify-between w-full xl:pb-37px md:pb-10 sm:pb-8 pb-6">
                 <#list 1..lengthCode as x>
                     <input placeholder="-" maxlength="1" id="smscode-${x}" name="smscode-${x}" class="text-center align-middle text-3xl w-10 h-10 sm:w-16 sm:h-16 border rounded-lg focus:border-extra outline-none" autocomplete="off" />
@@ -30,23 +30,26 @@
             <#else>
                 <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds!}" />
             </#if>
-            
-            
+
+
             <input id="smscode" name="smscode" class="hidden" />
 
             <div class="flex md:justify-start justify-center w-full items-center text-center md:text-right xl:pb-55px md:pb-10 sm:pb-8 pb-6">
                 <#if lengthCode==4>
-                    <button class="border-b border-hoverable border-dashed text-black-50 text-right hidden" form="totpe" id="sentCode" name="sendEmailCode" type="submit">Отправить на email</button>
+                    <button class="border-b hoverable border-dashed text-black-50 text-right hidden" form="totpe" id="sentCode" name="sendEmailCode" type="submit">Отправить на email</button>
                 </#if>
             </div>
             <div class="sm:block md:flex justify-between w-full items-center text-center md:text-left">
                 <button class="btn btn-main w-full md:w-3/7 mr-0 md:mr-4" name="accept" id="accept" type="submit">Подтвердить</button>
-                
+
                 <div id="timer" class="text-main-600 text-center md:text-right text-sm flex items-center my-6 md:my-0 justify-center md:justify-start">
                     Пароль действует <span id="timer-time" class="px-1 text-black text-5/3em"></span> мин
                 </div>
-
-                <button class="hidden border-b border-hoverable border-dashed text-black-50 text-center md:text-right my-6 md:my-0" name="resend" id="resend" type="submit" >Позвонить еще раз</button>
+                <#if lengthCode==6>
+                    <button class="hidden border-b hoverable border-dashed text-black-50 text-center md:text-right my-6 md:my-0" name="resend" id="resend" type="submit" >Отправить еще раз</button>
+                <#elseif enableRepeatCall?? && enableRepeatCall!>
+                    <button class="hidden border-b hoverable border-dashed text-black-50 text-center md:text-right my-6 md:my-0" name="resend" id="resend" type="submit" >Позвонить еще раз</button>
+                </#if>
 
             </div>
         </form>

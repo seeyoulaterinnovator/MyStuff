@@ -21,13 +21,11 @@ public class PolicyRepository {
     public List<RealmEntity> findRealmWithPolicy (final String policy) {
         final String DEBUG_STR = "findRealmWithPolicy";
 
-        List<RealmEntity> ret = em.createQuery("select re from RealmEntity re where re.passwordPolicy is not null ", RealmEntity.class)
-                .getResultStream()
-                .filter(realm -> realm.getPasswordPolicy().contains(policy))
-                .collect(Collectors.toList());
-
-
-        return ret;
+        return em.createQuery(
+                "select re from RealmEntity re " +
+                        "where re.passwordPolicy LIKE CONCAT('%', :policy, '%') ", RealmEntity.class)
+                .setParameter("policy", policy)
+                .getResultList();
     }
 
     public void findExpiredPasswords (final String realm, final long millis) {

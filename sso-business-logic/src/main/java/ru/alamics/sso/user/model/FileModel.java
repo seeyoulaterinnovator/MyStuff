@@ -1,8 +1,6 @@
-package ru.alamics.sso.keycloak.create.model;
+package ru.alamics.sso.user.model;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.LinkedList;
 import java.util.List;
 
 public interface FileModel {

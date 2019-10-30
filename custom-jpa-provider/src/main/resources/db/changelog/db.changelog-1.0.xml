@@ -280,4 +280,128 @@
             ALTER TABLE FEDERATED_IDENTITY CHANGE FEDERATED_USER_ID FEDERATED_USER_ID varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
         </sql>
     </changeSet>
+
+    <changeSet id="24_1" author="strukov-av" dbms="mssql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_POST" />
+            <not><columnExists tableName="USER_POST" columnName="SELECTED" /></not>
+        </preConditions>
+        <sql>
+            ALTER TABLE USER_POST ADD SELECTED BIT DEFAULT B'0'
+        </sql>
+    </changeSet>
+
+    <changeSet id="24_2" author="strukov-av" dbms="h2">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_POST" />
+            <not><columnExists tableName="USER_POST" columnName="SELECTED" /></not>
+        </preConditions>
+        <sql>
+            alter table USER_POST add SELECTED boolean default false;
+        </sql>
+    </changeSet>
+
+    <changeSet id="24_3" author="plyusnin-da" dbms="mysql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_POST" />
+            <not><columnExists tableName="USER_POST" columnName="SELECTED" /></not>
+        </preConditions>
+        <sql>
+            ALTER TABLE USER_POST ADD SELECTED BIT DEFAULT B'0'
+        </sql>
+    </changeSet>
+
+    <changeSet id="25" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <not> <tableExists tableName="IMPORT_USERS_REPORT"></tableExists> </not>
+        </preConditions>
+        <createTable tableName="IMPORT_USERS_REPORT">
+            <column name="id" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="realm_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="import_date" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="count_import_users" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="count_created_users" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="count_clones" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_done" type="BOOLEAN" defaultValueBoolean="false">
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="26" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <not> <tableExists tableName="IMPORT_USERS_DATA"></tableExists> </not>
+        </preConditions>
+        <createTable tableName="IMPORT_USERS_DATA">
+            <column name="id" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="import_id" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="FK_IMPORT_DATA_IMPORT_REPORT" references="IMPORT_USERS_REPORT(id)"/>
+            </column>
+            <column name="first_name" type="varchar(255)"></column>
+            <column name="email" type="varchar(255)"></column>
+            <column name="phone" type="varchar(255)"></column>
+            <column name="toms_id" type="varchar(255)"></column>
+            <column name="dmp_id" type="varchar(20)"></column>
+            <column name="role" type="varchar(20)"></column>
+            <column name="systems" type="varchar(255)"></column>
+            <column name="is_created" type="BOOLEAN"></column>
+            <column name="errors" type="varchar(2048)"></column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="27" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mysql" />
+            <tableExists tableName="IMPORT_USERS_DATA"></tableExists>
+        </preConditions>
+        <sql>
+            ALTER TABLE IMPORT_USERS_DATA CHANGE FIRST_NAME FIRST_NAME varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
+
+    <changeSet id="28" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="IMPORT_USERS_REPORT" />
+            <columnExists tableName="IMPORT_USERS_REPORT" columnName="IS_DONE"/>
+        </preConditions>
+        <dropColumn tableName="IMPORT_USERS_REPORT" columnName="IS_DONE" />
+        <addColumn tableName="IMPORT_USERS_REPORT">
+            <column name="STATUS" type="varchar(255)" defaultValue="AWAITING">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <update tableName="IMPORT_USERS_REPORT" >
+            <column name="STATUS" value="DONE">
+            </column>
+        </update>
+    </changeSet>
+
+    <changeSet id="29" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mysql" />
+            <tableExists tableName="IDP_MAPPER_CONFIG"></tableExists>
+            <tableExists tableName="ADMIN_EVENT_ENTITY"></tableExists>
+        </preConditions>
+        <sql>
+            ALTER TABLE IDP_MAPPER_CONFIG CHANGE VALUE VALUE longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            ALTER TABLE ADMIN_EVENT_ENTITY CHANGE RESOURCE_PATH RESOURCE_PATH varchar(2550) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

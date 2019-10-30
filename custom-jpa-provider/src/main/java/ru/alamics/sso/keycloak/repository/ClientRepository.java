@@ -15,14 +15,15 @@ public class ClientRepository {
     @PersistenceContext
     private EntityManager em;
 
-    public ClientEntity findClientById(final String clientId) {
+    public ClientEntity findClientById(final String clientId, final String realmId) {
         ClientEntity client = null;
         try {
             client = em.createQuery(
                     "select cl " +
                             "from ClientEntity cl " +
-                            "where cl.clientId = :client_id", ClientEntity.class)
+                            "where cl.clientId = :client_id and cl.realm.name = :realmId ", ClientEntity.class)
                     .setParameter("client_id", clientId)
+                    .setParameter("realmId", realmId)
                     .getSingleResult();
         } finally {
             return client;

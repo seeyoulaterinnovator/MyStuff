@@ -26,7 +26,7 @@
                     </div>
                   </td>
                   <td style="text-align: right;">
-                    <a href="tel:88005500479" class="contacts">
+                    <a href="tel:88003339000" class="contacts">
                       <table margin="0" padding="0" cellpadding="0" cellspacing="0" style="vertical-align: center; text-align: right; display: inline-table;">
                         <tr>
                           <td>
@@ -35,7 +35,7 @@
                                  alt="Телефон" />
                           </td>
                           <td width="125" class="contact__number">
-                            8&nbsp;800&nbsp;550&nbsp;0479
+                            8&nbsp;800&nbsp;333&nbsp;9000
                           </td>
                         </tr>
                       </table>
@@ -53,7 +53,7 @@
               <div class="mail-container__footer">
                 <p class="mail-text--bold">Благодарим Вас!</p>
                 <p>За выбор услуг «Дом.ru Бизнес» для Вашей компании.</p>
-                <p class="mail-text--copyright mail-text--light-gray">© АО «ЭР-Телеком Холдинг» 2011-2017</p>
+                <p class="mail-text--copyright mail-text--light-gray">© АО «ЭР-Телеком Холдинг» 2011-2020</p>
               </div>
             </td>
           </tr>

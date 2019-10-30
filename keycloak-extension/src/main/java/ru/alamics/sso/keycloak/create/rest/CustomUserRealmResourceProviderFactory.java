@@ -46,13 +46,12 @@ public class CustomUserRealmResourceProviderFactory implements BaseResourceProvi
     public RealmResourceProvider create(KeycloakSession session) {
         this.auth = this.initAuthByWorkingRealm(session);
         this.session = session;
-        this.userFindService = (UserFindService) Lookup.lookup(UserFindService.class);
         return this;
     }
 
     @Override
     public Object getResource() {
-        return new CustomRestResource(session, userFindService, this.auth);
+        return new CustomRestResource(session, this.auth);
     }
 
     @Override

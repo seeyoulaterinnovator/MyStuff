@@ -24,4 +24,8 @@ public class RealmRepository {
         RealmAdapter adapter = new RealmAdapter(null, em, realm);
         return adapter;
     }
+
+    public RealmEntity findRealmEntityById(final String id) {
+        return em.find(RealmEntity.class, id);
+    }
 }

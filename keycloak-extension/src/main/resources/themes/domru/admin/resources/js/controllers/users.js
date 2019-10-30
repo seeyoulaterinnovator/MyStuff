@@ -310,7 +310,9 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             $scope.query.searchByTomsId = $scope.getSearchParameter($route.current.params.searchToms);
             $scope.query.searchRealm = $scope.getSearchParameter($route.current.params.searchRealm);
 
-            if ($scope.query.searchRealm === '' || ! $scope.userRealms.some(function (realm) {return realm === $scope.query.searchRealm}) ){
+            if ($scope.query.searchRealm === '' || !$scope.userRealms.some(function (realm) {
+                return realm === $scope.query.searchRealm
+            })) {
                 $scope.query.searchRealm = realm.realm;
             }
 
@@ -319,7 +321,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         });
     };
 
-    $scope.getSearchParameter = function (param){
+    $scope.getSearchParameter = function (param) {
         if (param === undefined) {
             return '';
         }
@@ -406,7 +408,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             var resp = angular.fromJson(response).data.results['import-report'];
             this.importMsg(resp)
         }).catch(error => {
-            if(error.status === 400) {
+            if (error.status === 400) {
                 Notifications.error(error.data.message);
             } else {
                 Notifications.error(error.statusText);
@@ -428,7 +430,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             var resp = angular.fromJson(response).data.results['import-report'];
             this.importMsg(resp)
         }).catch(error => {
-            if(error.status === 400) {
+            if (error.status === 400) {
                 Notifications.error(error.data.message);
             } else {
                 Notifications.error(error.statusText);
@@ -440,17 +442,15 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         return self.indexOf(value) === index;
     }
 
-    $scope.importMsg = function(resp) {
+    $scope.importMsg = function (resp) {
         var errors = [];
-        if(resp.errors) {
-            errors = resp.errors.map(error => error.error).filter(onlyUnique );
+        if (resp.errors) {
+            errors = resp.errors.map(error => error.error).filter(onlyUnique);
         }
         var errorMsg = errors.length === 0 ? "Ошибок нет" : errors.join(",\n\t\t\t\t\t\t\t   ");
         var msg = `
             Количество записей, для которых найдены дубли: ${resp.countClones}
             Количество созданых пользователей: ${resp.createdUsers}
-            Количество записей, для которых не было положительного ответа от TBAPI: ${resp.tbapiErrors}
-            Количество записей, для которых был положительный ответ от TBAPI: ${resp.tbapiSuccess}
             Информация об ошибках: ${errorMsg}`;
 
         Dialog.message('Информация', msg, () => location.reload());
@@ -465,12 +465,13 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 "FIRST_NAME",
                 "EMAIL",
                 "PHONE",
-                "ORGANIZATION",
+                "TOMS_ID",
+                "DMP_ID",
                 "ROLE",
                 "SYSTEM"
             ],
             userIds: ["XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"]
-    };
+        };
         $scope.tempRealm = $scope.query.searchRealm;
         $scope.query.searchRealm = $scope.realm.realm;
         $scope.exportTemplateXlsx(payload)
@@ -484,11 +485,11 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 "FIRST_NAME",
                 "EMAIL",
                 "PHONE",
-                "ORGANIZATION",
+                "TOMS_ID",
+                "DMP_ID",
                 "ROLE",
                 "SYSTEM",
-                "ENABLED",
-                "CUSTOMER"
+                "ENABLED"
             ],
             userIds: $scope.users.filter(user => user.active).map(user => user.id)
         };
@@ -505,27 +506,27 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             responseType: 'arraybuffer'
         }).then((response) => {
             var headers = response.headers();
-        var filename = 'users_info.xlsx';
-        var contentType = headers['content-type'];
-        var blob = new Blob([response.data], {type: contentType});
-        var url = window.URL.createObjectURL(blob, {
-            type: 'data:attachment/xlsx'
-        });
+            var filename = 'users_info.xlsx';
+            var contentType = headers['content-type'];
+            var blob = new Blob([response.data], {type: contentType});
+            var url = window.URL.createObjectURL(blob, {
+                type: 'data:attachment/xlsx'
+            });
 
-        linkElement.setAttribute('href', url);
-        linkElement.setAttribute("download", filename);
+            linkElement.setAttribute('href', url);
+            linkElement.setAttribute("download", filename);
 
-        var clickEvent = new MouseEvent("click", {
-            "view": window,
-            "bubbles": true,
-            "cancelable": false
-        });
-        linkElement.dispatchEvent(clickEvent);
+            var clickEvent = new MouseEvent("click", {
+                "view": window,
+                "bubbles": true,
+                "cancelable": false
+            });
+            linkElement.dispatchEvent(clickEvent);
 
-        if ($scope.tempRealm !== undefined){
-            $scope.query.searchRealm = $scope.tempRealm;
-        }
-    })
+            if ($scope.tempRealm !== undefined) {
+                $scope.query.searchRealm = $scope.tempRealm;
+            }
+        })
     };
 
     $scope.downloadTemplateCSV = function () {
@@ -535,7 +536,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 "FIRST_NAME",
                 "EMAIL",
                 "PHONE",
-                "ORGANIZATION",
+                "TOMS_ID",
+                "DMP_ID",
                 "ROLE",
                 "SYSTEM"
             ],
@@ -554,11 +556,11 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 "FIRST_NAME",
                 "EMAIL",
                 "PHONE",
-                "ORGANIZATION",
+                "TOMS_ID",
+                "DMP_ID",
                 "ROLE",
                 "SYSTEM",
-                "ENABLED",
-                "CUSTOMER"
+                "ENABLED"
             ],
             userIds: $scope.users.filter(user => user.active).map(user => user.id)
         };
@@ -571,25 +573,25 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             headers: {'Accept': 'application/octet-stream;charset=UTF-8', 'Content-Type': 'application/json'}
         }).then((response) => {
             var headers = response.headers();
-        var filename = 'users_info.csv';
-        var contentType = headers['content-type'];
-        var blob = new Blob(["\ufeff", response.data], {type: contentType});
-        var url = window.URL.createObjectURL(blob);
+            var filename = 'users_info.csv';
+            var contentType = headers['content-type'];
+            var blob = new Blob(["\ufeff", response.data], {type: contentType});
+            var url = window.URL.createObjectURL(blob);
 
-        linkElement.setAttribute('href', url);
-        linkElement.setAttribute("download", filename);
+            linkElement.setAttribute('href', url);
+            linkElement.setAttribute("download", filename);
 
-        var clickEvent = new MouseEvent("click", {
-            "view": window,
-            "bubbles": true,
-            "cancelable": false
-        });
-        linkElement.dispatchEvent(clickEvent);
+            var clickEvent = new MouseEvent("click", {
+                "view": window,
+                "bubbles": true,
+                "cancelable": false
+            });
+            linkElement.dispatchEvent(clickEvent);
 
-        if ($scope.tempRealm !== undefined){
-            $scope.query.searchRealm = $scope.tempRealm;
-        }
-    })
+            if ($scope.tempRealm !== undefined) {
+                $scope.query.searchRealm = $scope.tempRealm;
+            }
+        })
     };
 
     $scope.nextPage = function () {
@@ -619,7 +621,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
     $scope.groupByUser = function (data) {
         let ret = [];
-        if (data === null){
+        if (data === null) {
             return ret;
         }
         data.map(user => {
@@ -698,7 +700,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         if (index === 0) {
             return access.tomsId;
         } else {
-            return '';//Gavno
+            return '';
         }
     }
 
@@ -712,7 +714,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         if (index === 0) {
             return access.roleName;
         } else {
-            return '';//Gavno
+            return '';
         }
     }
 
@@ -721,12 +723,12 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     }
 
     $scope.isFirstSystemName = function (userAccess, systemName, access) {
-        var equalToms = userAccess.filter(access => access.systemName === systemName);
+        var equalToms = userAccess.filter(ua => ua === access && ua.systemName === systemName);
         var index = equalToms.indexOf(access);
         if (index === 0) {
             return access.systemName;
         } else {
-            return '';//Gavno
+            return '';
         }
     }
 
@@ -2287,6 +2289,80 @@ module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, 
         $http.post(authUrl + '/realms/' + 'master' + '/user-post/edit', addMap).then(function () {
             console.info('editUserPost')
         });
+    };
+
+    $scope.init();
+});
+
+module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, Notifications) {
+
+    $scope.realm = realm;
+    $scope.userPosts = [];
+    $scope.customerRoles = [];
+    $scope.systemRoles = [];
+    $scope.duplicatedPhone = false;
+
+    $scope.ImportReports = [];
+
+    $scope.init = function () {
+        $http.get(authUrl + '/realms/' + realm.realm + '/users-toms/importUsersReports').then(function (data) {
+            $scope.ImportReports = angular.fromJson(data).data.results['importUsersReports'];
+        });
+    };
+
+    $scope.importFile = function (files) {
+        var formData = new FormData();
+        var file = files[0];
+        formData.append('file', file);
+        $http.post(`${authUrl}/realms/${$scope.realm.realm}/users-toms/uploadImportUsersFile`, formData, {
+            transformRequest: angular.identity,
+            headers: {
+                'Content-Type': undefined,
+                'Content-Disposition': `form-data; name="file"; filename=${file.name}`
+            }
+        }).then(response => {
+            if (response.status === 200){
+                Notifications.success("Upload import users file success! Please, refresh 'import users' page");
+            }
+        }).catch(error => {
+            if (error.status === 400) {
+                Notifications.error(error.data.message);
+            } else {
+                Notifications.error(error.statusText);
+            }
+        })
+    };
+
+    $scope.downloadImportUsersReport = function (importReport) {
+        if (importReport.status !== "DONE"){
+            Notifications.info("Import users report must have status 'DONE'");
+            return;
+        }
+        var linkElement = document.createElement('a');
+        $http.post(`${authUrl}/realms/${$scope.realm.realm}/users-toms/downloadImportUsersReport/${importReport.id}`, null,
+            { headers: {
+                    'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8',
+                    'Content-Type': 'application/json'
+                },
+                responseType: 'arraybuffer'
+            })
+            .then((response) => {
+                var headers = response.headers();
+                var filename = headers['filename'];
+                var contentType = headers['content-type'];
+                var blob = new Blob([response.data], {type: contentType});
+                var url = window.URL.createObjectURL(blob)
+
+                linkElement.setAttribute('href', url);
+                linkElement.setAttribute("download", filename);
+
+                var clickEvent = new MouseEvent("click", {
+                    "view": window,
+                    "bubbles": true,
+                    "cancelable": false
+                });
+                linkElement.dispatchEvent(clickEvent);
+            });
     };
 
     $scope.init();
