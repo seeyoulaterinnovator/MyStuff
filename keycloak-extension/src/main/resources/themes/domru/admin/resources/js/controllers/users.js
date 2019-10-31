@@ -20,9 +20,9 @@ module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, c
     $scope.clientMappings = [];
     $scope.dummymodel = [];
 
-    $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/clients').then(function (data) {
-        $scope.clients = data.data;
-    });
+    // $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/clients').then(function (data) {
+    //     $scope.clients = data.data;
+    // });
     // $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/role-mappings/' + $scope.user.id + '/realm/available').then(function (data) {
     //     $scope.realmRoles = data.data;
     // });
