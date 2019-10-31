@@ -1,0 +1,36 @@
+.verification {
+  &__title {
+    font-size: 36px;
+    line-height: 42px;
+    letter-spacing: -1px;
+    font-weight: 700;
+    opacity: 0.8;
+    @media (max-width: 959px) {
+      font-size: 32px;
+      line-height: 38px;
+    }
+
+    @media (max-width: 639px) {
+      font-size: 27px;
+      line-height: 32px;
+    }
+  }
+
+  &__sub {
+     font-size: 25px;
+     line-height: 34px;
+     letter-spacing: -1px;
+     opacity: 0.8;
+    @media (max-width: 1199px) {
+      font-size: 21px;
+      line-height: 28px;
+    }
+
+    @media (max-width: 639px) {
+      font-size: 18px;
+      line-height: 23px;
+      letter-spacing: -0.5px;
+    }
+  }
+
+}

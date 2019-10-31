@@ -26,6 +26,7 @@ import './css/components/email-sent.css';
 import './css/components/cities.css';
 import './css/components/confirmation.css';
 import './css/components/customers.css';
+import './css/components/verification.css';
 
 const app = new App({
   target: document.body,
