@@ -288,9 +288,10 @@ public class CustomUserResource {
         auth.users().canImpersonate();
         UserModel user = session.users().getUserById(id, realm);
         // if same realm logout before impersonation
+        RealmModel authenticatedRealm = auth.adminAuth().getRealm();
         boolean sameRealm = false;
         ClientConnection clientConnection = session.getContext().getConnection();
-        if (realm.getId().equals(realm.getId())) {
+        if (authenticatedRealm.getId().equals(realm.getId())) {
             sameRealm = true;
             UserSessionModel userSession = session.sessions().getUserSession(realm, auth.adminAuth().getToken().getSessionState());
             AuthenticationManager.expireIdentityCookie(realm, session.getContext().getUri(), clientConnection);
@@ -321,34 +322,35 @@ public class CustomUserResource {
         return result;
     }
 
-    @Path("role-mappings/{id}")
-    @Transactional
-    public RoleMapperResource getRoleMappings(@PathParam("id") String id) {
-        EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
-        UserEntity userEntity = em.find(UserEntity.class, id);
-        if (userEntity == null) return null;
-        UserModel user = new UserAdapter(session, realm, em, userEntity);
-
-        AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
-                .realm(realm)
-                .resource(ResourceType.USER);
-
-        AdminPermissionEvaluator.RequirePermissionCheck manageCheck = () -> auth.users().requireMapRoles(user);
-        AdminPermissionEvaluator.RequirePermissionCheck viewCheck = () -> auth.users().requireView(user);
-        RoleMapperResource resource =  new RoleMapperResource(realm, auth, user, adminEvent, manageCheck, viewCheck);
-        ResteasyProviderFactory.getInstance().injectProperties(resource);
-        return resource;
-    }
-
-    @Path("clients")
-    public ClientsResource getClients() {
-        AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
-                .realm(realm)
-                .resource(ResourceType.REALM);
-        ClientsResource clientsResource = new ClientsResource(realm, auth, adminEvent);
-        ResteasyProviderFactory.getInstance().injectProperties(clientsResource);
-        return clientsResource;
-    }
+    //fixme код для отображения role-mappings в админке (почему-то падает в разных местах при обращении к базе, обычно на composite и availiable roles )
+//    @Path("role-mappings/{id}")
+//    @Transactional
+//    public RoleMapperResource getRoleMappings(@PathParam("id") String id) {
+//        EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
+//        UserEntity userEntity = em.find(UserEntity.class, id);
+//        if (userEntity == null) return null;
+//        UserModel user = new UserAdapter(session, realm, em, userEntity);
+//
+//        AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
+//                .realm(realm)
+//                .resource(ResourceType.USER);
+//
+//        AdminPermissionEvaluator.RequirePermissionCheck manageCheck = () -> auth.users().requireMapRoles(user);
+//        AdminPermissionEvaluator.RequirePermissionCheck viewCheck = () -> auth.users().requireView(user);
+//        RoleMapperResource resource =  new RoleMapperResource(realm, auth, user, adminEvent, manageCheck, viewCheck);
+//        ResteasyProviderFactory.getInstance().injectProperties(resource);
+//        return resource;
+//    }
+//
+//    @Path("clients")
+//    public ClientsResource getClients() {
+//        AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
+//                .realm(realm)
+//                .resource(ResourceType.REALM);
+//        ClientsResource clientsResource = new ClientsResource(realm, auth, adminEvent);
+//        ResteasyProviderFactory.getInstance().injectProperties(clientsResource);
+//        return clientsResource;
+//    }
 
     @Path("users")
     public UsersResource users() {

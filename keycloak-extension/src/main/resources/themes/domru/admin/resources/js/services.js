@@ -666,6 +666,8 @@ module.factory('UserExecuteActionsEmail', function($resource) {
     });
 });
 
+//fixme код для отображения role-mappings в админке (почему-то падает в разных местах при обращении к базе, обычно на composite и availiable roles )
+
 // module.factory('RealmRoleMapping', function($resource) {
 //     return $resource(authUrl + '/realms/:realm/users-toms/role-mappings/:userId/realm', {
 //         realm : '@realm',

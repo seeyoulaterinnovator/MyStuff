@@ -20,6 +20,7 @@ module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, c
     $scope.clientMappings = [];
     $scope.dummymodel = [];
 
+    //fixme код для отображения role-mappings в админке (почему-то падает в разных местах при обращении к базе, обычно на composite и availiable roles )
     // $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/clients').then(function (data) {
     //     $scope.clients = data.data;
     // });
@@ -814,42 +815,15 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
         }
         convertAttributeValuesToString(user);
 
-        console.log('UserDetailCtrl');
-        console.log($location.search());
-        $scope.query = {};
-        $scope.query.searchRealm = $location.search().searchRealm;
-        //if ($scope.query.searchRealm === '' || ! $scope.userRealms.some(function (realm) {return realm === $scope.query.searchRealm}) ){
-        //    $scope.query.searchRealm = realm.realm;
-        //}
         $scope.user = angular.copy(user);
         $scope.impersonate = function () {
-
-            var hackedRealm = realm.realm;
-            if ($scope.query && $scope.query.searchRealm) {
-                hackedRealm = $scope.query.searchRealm;
-            }
-
-            console.log('user detail impersonate');
-            console.log('real ' + realm.realm);
-            console.log('searched ' + $scope.query.searchRealm);
-
-            $http.post(authUrl + '/realms/' + hackedRealm + '/users-toms/impersonation/' + $scope.user.id).then(function (data) {
+            $http.post(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/impersonation/' + $scope.user.id).then(function (data) {
                 if (data.data.sameRealm) {
                     window.location = data.data.redirect;
                 } else {
                     window.open(data.data.redirect, "_blank");
                 }
             });
-
-            // UserImpersonation.save({realm: hackedRealm, user: $scope.user.id}, function (data) {
-            //     if (data.sameRealm) {
-            //         window.location = data.redirect;
-            //     } else {
-            //         window.open(data.redirect, "_blank");
-            //     }
-            // });
-
-
         };
         if (user.federationLink) {
             console.log("federationLink is not null. It is " + user.federationLink);
