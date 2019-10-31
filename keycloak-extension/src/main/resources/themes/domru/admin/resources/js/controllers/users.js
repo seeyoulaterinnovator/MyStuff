@@ -2380,6 +2380,11 @@ module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, 
 module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, Notifications) {
 
     $scope.realm = realm;
+    $scope.query = {};
+    $scope.query.searchRealm = realm.realm;
+    if ($location.search().searchRealm) {
+        $scope.query.searchRealm = $location.search().searchRealm;
+    }
     $scope.userPosts = [];
     $scope.customerRoles = [];
     $scope.systemRoles = [];
@@ -2388,7 +2393,7 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
     $scope.ImportReports = [];
 
     $scope.init = function () {
-        $http.get(authUrl + '/realms/' + realm.realm + '/users-toms/importUsersReports').then(function (data) {
+        $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/importUsersReports').then(function (data) {
             $scope.ImportReports = angular.fromJson(data).data.results['importUsersReports'];
         });
     };
@@ -2397,7 +2402,7 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
         var formData = new FormData();
         var file = files[0];
         formData.append('file', file);
-        $http.post(`${authUrl}/realms/${$scope.realm.realm}/users-toms/uploadImportUsersFile`, formData, {
+        $http.post(`${authUrl}/realms/${$scope.query.searchRealm}/users-toms/uploadImportUsersFile`, formData, {
             transformRequest: angular.identity,
             headers: {
                 'Content-Type': undefined,
@@ -2422,7 +2427,7 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
             return;
         }
         var linkElement = document.createElement('a');
-        $http.post(`${authUrl}/realms/${$scope.realm.realm}/users-toms/downloadImportUsersReport/${importReport.id}`, null,
+        $http.post(`${authUrl}/realms/${$scope.query.searchRealm}/users-toms/downloadImportUsersReport/${importReport.id}`, null,
             { headers: {
                     'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8',
                     'Content-Type': 'application/json'
