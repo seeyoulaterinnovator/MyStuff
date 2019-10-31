@@ -4,6 +4,9 @@
     <#if section = "style">
         <#include 'styles/content-style--default.html' >
     <#elseif section = "body">
-        ${kcSanitize(msg("identityProviderLinkBodyHtml", identityProviderAlias, user.email, identityProviderContext.username, link, linkExpiration, linkExpirationFormatter(linkExpiration)))?no_esc}
+        <#assign email=realmName>
+        <#if user?? && user.getEmail??>
+            <#assign email= user.getEmail()>
+        ${kcSanitize(msg("identityProviderLinkBodyHtml", identityProviderAlias, email, identityProviderContext.username, link, linkExpiration, linkExpirationFormatter(linkExpiration)))?no_esc}
     </#if>
 </@template.layout>
