@@ -4,9 +4,9 @@ module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, c
     $scope.realm = realm;
     $scope.query = {};
     $scope.query.searchRealm = realm.realm;
-    if ($location.search().searchRealm) {
-        $scope.query.searchRealm = $location.search().searchRealm;
-    }
+    // if ($location.search().searchRealm) {
+    //     $scope.query.searchRealm = $location.search().searchRealm;
+    // }
     $scope.user = user;
     $scope.selectedRealmRoles = [];
     $scope.selectedRealmMappings = [];
