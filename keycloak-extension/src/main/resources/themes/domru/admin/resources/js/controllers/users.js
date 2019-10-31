@@ -358,10 +358,6 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         return param;
     };
 
-    $scope.getHrefAddUser = function () {
-        $window.location.href = `#/create/user/${$scope.query.searchRealm}`;
-    };
-
     $scope.changeSearchRealm = function () {
         $scope.query.search = '';
         $scope.query.searchByUserId = '';
@@ -799,22 +795,15 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
                                               Components,
                                               UserImpersonation, RequiredActions,
                                               UserStorageOperations,
-                                              $location, $http, Dialog, Notifications,
-                                              RealmClearUserCache, RealmClearRealmCache, RealmClearKeysCache) {
+                                              $location, $http, Dialog, Notifications) {
     $scope.realm = realm;
     $scope.create = !user.id;
     $scope.editUsername = $scope.create || $scope.realm.editUsernameAllowed;
 
-    $scope.clearCache = function() {
-        RealmClearUserCache.save({ realm: $scope.realm.realm}, function () {
-            //Notifications.success("User cache cleared");
-        });
-        RealmClearRealmCache.save({ realm: $scope.realm.realm}, function () {
-            //Notifications.success("Realm cache cleared");
-        });
-        RealmClearKeysCache.save({ realm: $scope.realm.realm}, function () {
-            //Notifications.success("Public keys cache cleared");
-        });
+    $scope.query = {};
+    $scope.query.searchRealm = realm.realm;
+    if ($location.search().searchRealm) {
+        $scope.query.searchRealm = $location.search().searchRealm;
     }
 
     if ($scope.create) {
@@ -973,7 +962,7 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
 
         if ($scope.create) {
             User.save({
-                realm: realm.realm
+                realm: $scope.query.searchRealm
             }, $scope.user, function (data, headers) {
                 $scope.changed = false;
                 convertAttributeValuesToString($scope.user);
@@ -984,7 +973,7 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
 
                 var id = l.substring(l.lastIndexOf("/") + 1);
 
-                $location.url("/realms/" + realm.realm + "/users/" + id);
+                $location.url("/realms/" + realm.realm + "/users/" + id + "?searchRealm=" + $scope.query.searchRealm);
                 Notifications.success("The user has been created.");
             });
         } else {

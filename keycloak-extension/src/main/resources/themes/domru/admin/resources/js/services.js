@@ -521,7 +521,7 @@ module.factory('ClientScopeProtocolMapper', function($resource) {
 });
 
 module.factory('User', function($resource) {
-    return $resource(authUrl + '/admin/realms/:realm/users/:userId', {
+    return $resource(authUrl + '/realms/:realm/users-toms/users/:userId', {
         realm : '@realm',
         userId : '@userId'
     }, {

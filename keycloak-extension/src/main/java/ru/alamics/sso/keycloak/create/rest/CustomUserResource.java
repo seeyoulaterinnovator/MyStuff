@@ -13,7 +13,6 @@ import org.keycloak.events.EventBuilder;
 import org.keycloak.events.EventType;
 import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.*;
-import org.keycloak.models.cache.CacheRealmProvider;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.services.ErrorResponse;
@@ -22,6 +21,7 @@ import org.keycloak.services.resources.account.AccountFormService;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.ClientsResource;
 import org.keycloak.services.resources.admin.RoleMapperResource;
+import org.keycloak.services.resources.admin.UsersResource;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.utils.ProfileHelper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
@@ -348,5 +348,15 @@ public class CustomUserResource {
         ClientsResource clientsResource = new ClientsResource(realm, auth, adminEvent);
         ResteasyProviderFactory.getInstance().injectProperties(clientsResource);
         return clientsResource;
+    }
+
+    @Path("users")
+    public UsersResource users() {
+        AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
+                .realm(realm)
+                .resource(ResourceType.REALM);
+        UsersResource users = new UsersResource(realm, auth, adminEvent);
+        ResteasyProviderFactory.getInstance().injectProperties(users);
+        return users;
     }
 }
