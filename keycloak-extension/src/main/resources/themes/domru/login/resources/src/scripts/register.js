@@ -38,12 +38,22 @@ export default (function() {
   const wrongEmail = document.querySelector('.bad_email');
   const wrongPhone = document.querySelector('.bad_phone');
 
+  function cleanBorder(ctx) {
+    ctx.target.style.borderColor = null;
+    ctx.target.removeEventListener('input', cleanBorder, false)
+  }
+
   if (wrongEmail) {
-    document.getElementById('email').style.borderColor = '#e31e24';
+    const emailField = document.getElementById('email');
+    emailField.style.borderColor = '#e31e24';
+    emailField.addEventListener('input', cleanBorder, false)
   }
   if (wrongPhone) {
-    document.getElementById('phone').style.borderColor = '#e31e24';
+    const phoneField = document.getElementById('phone')
+    phoneField.style.borderColor = '#e31e24';
+    phoneField.addEventListener('input', cleanBorder, false)
   }
+
 
   const formElement = document.getElementById('registrationForm');
   if (!formElement) return;
