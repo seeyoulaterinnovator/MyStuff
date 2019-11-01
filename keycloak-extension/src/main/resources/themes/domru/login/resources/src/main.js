@@ -1,5 +1,6 @@
 import App from './App.svelte';
 
+import './scripts/detectCity.js';
 import './scripts/login.js';
 import './scripts/login-iframe.js';
 import './scripts/register.js';
