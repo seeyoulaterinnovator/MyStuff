@@ -158,6 +158,6 @@ input[type="number"] {
   }
 }
 
-#password, #password-confirm {
+#password, #password-new, #password-confirm {
   padding-right: 3rem;
 }
