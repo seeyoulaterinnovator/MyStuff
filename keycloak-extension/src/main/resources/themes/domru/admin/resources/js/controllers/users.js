@@ -313,7 +313,11 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             if ($scope.query.searchRealm === '' || !$scope.userRealms.some(function (realm) {
                 return realm === $scope.query.searchRealm
             })) {
-                $scope.query.searchRealm = realm.realm;
+                if (realm.realm === 'manager'){
+                    $scope.query.searchRealm = $scope.userRealms[0];
+                } else {
+                    $scope.query.searchRealm = realm.realm;
+                }
             }
 
             if (!UserSearchState.isFirstSearch) $scope.search();
