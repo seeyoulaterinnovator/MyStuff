@@ -157,3 +157,7 @@ input[type="number"] {
     padding-bottom: 1rem;
   }
 }
+
+#password, #password-new, #password-confirm {
+  padding-right: 3rem;
+}
