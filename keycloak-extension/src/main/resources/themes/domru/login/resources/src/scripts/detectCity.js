@@ -1,6 +1,9 @@
 import Cookie from 'js-cookie';
+import axios from 'axios';
+import { showModal, city as citySvelte } from '../Cities/stores.js';
 
 export default (function() {
+  const url = '/auth/realms/user/cities';
   let detectedCity = '';
   if (location.search.indexOf('city') > 0) {
     let params = [];
@@ -19,6 +22,23 @@ export default (function() {
           }
         }
       });
+    Cookie.set('VISITED', '1');
+    showModal.set(false);
+    axios
+      .get(url)
+      .then(response => {
+        const respCities  = response.data.results.cities || []; //citiesJson.results.cities || [];
+        const replacedCities = respCities.map(city => city.name === 'Холдинг' ? {
+          ...city,
+          name: 'Федеральный Клиент',
+        } : city);
+        const cityName = replacedCities.filter(city => city.city === detectedCity);
+        console.log(cityName)
+        if (cityName.length) {
+          Cookie.set('CITY', cityName[0].name);
+          Cookie.set('city-domain', detectedCity)
+          citySvelte.set(cityName[0].name);
+        }
+      })
   }
-  Cookie.set('CITY', detectedCity)
 })();
