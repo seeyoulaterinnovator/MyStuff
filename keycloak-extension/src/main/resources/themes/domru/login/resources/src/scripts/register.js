@@ -52,8 +52,12 @@ export default (function() {
 
   // Убираем красные рамки инпутов на событии ввода после получения ошибки
   function cleanBorder() {
-    if (wrongEmail) wrongEmail.classList.remove('bad_email')
-    if (wrongPhone) wrongEmail.classList.remove('bad_phone')
+    if (wrongEmail) {
+      wrongEmail.classList.remove('bad_email')
+    }
+    if (wrongPhone) {
+      wrongPhone.classList.remove('bad_phone')
+    }
     this.style.borderColor = '';
     this.removeEventListener('input', cleanBorder, false)
   }
