@@ -313,7 +313,11 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             if ($scope.query.searchRealm === '' || !$scope.userRealms.some(function (realm) {
                 return realm === $scope.query.searchRealm
             })) {
-                $scope.query.searchRealm = realm.realm;
+                if (realm.realm === 'manager'){
+                    $scope.query.searchRealm = $scope.userRealms[0];
+                } else {
+                    $scope.query.searchRealm = realm.realm;
+                }
             }
 
             if (!UserSearchState.isFirstSearch) $scope.search();
@@ -628,13 +632,14 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             let findGroupedUser = $scope.findById(ret, user.id);
             if (!findGroupedUser) {
                 var access = [];
-                if (user.systemId || user.roleId || user.tomsId) {
+                if (user.systemId || user.roleId || user.tomsId || user.userPostId) {
                     access.push({
                         systemId: user.systemId,
                         systemName: user.systemName,
                         roleId: user.roleId,
                         roleName: user.roleName,
-                        tomsId: user.tomsId
+                        tomsId: user.tomsId,
+                        userPostId: user.userPostId
                     })
                 }
                 ;
@@ -657,7 +662,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                     systemName: user.systemName,
                     roleId: user.roleId,
                     roleName: user.roleName,
-                    tomsId: user.tomsId
+                    tomsId: user.tomsId,
+                    userPostId: user.userPostId
                 };
 
                 findGroupedUser.access.push(access);
@@ -690,12 +696,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         return values.filter((val, index) => values.indexOf(val) === index);
     };
 
-    $scope.getEqualTomsId = function (userAccess, tomsId) {
-        return userAccess.filter(access => access.tomsId === tomsId).length
-    }
-
     $scope.isFirstTomsId = function (userAccess, tomsId, access) {
-        var equalToms = userAccess.filter(access => access.tomsId === tomsId);
+        var equalToms = userAccess.filter(ua => ua.userPostId === access.userPostId && ua.tomsId === tomsId);
         var index = equalToms.indexOf(access);
         if (index === 0) {
             return access.tomsId;
@@ -704,12 +706,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         }
     }
 
-    $scope.getEqualRoleName = function (userAccess, roleName) {
-        return userAccess.filter(access => access.roleName === roleName).length
-    }
-
     $scope.isFirstRoleName = function (userAccess, roleName, access) {
-        var equalToms = userAccess.filter(access => access.roleName === roleName);
+        var equalToms = userAccess.filter(ua => ua.userPostId === access.userPostId && ua.roleName === roleName);
         var index = equalToms.indexOf(access);
         if (index === 0) {
             return access.roleName;
@@ -718,8 +716,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         }
     }
 
-    $scope.getEqualSystemName = function (userAccess, systemName) {
-        return userAccess.filter(access => access.systemName === systemName).length
+    $scope.getCountSystemNames = function (userAccess, access) {
+        return userAccess.filter(ua => ua.userPostId === access.userPostId).length;
     }
 
     $scope.isFirstSystemName = function (userAccess, systemName, access) {
@@ -2225,15 +2223,15 @@ module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, 
     $scope.duplicatedPhone = false;
 
     $scope.init = function () {
-        $http.get(authUrl + '/realms/' + 'master' + '/user-post/users/' + user.id).then(function (data) {
+        $http.get(authUrl + '/realms/' + realm.realm + '/user-post/users/' + user.id).then(function (data) {
             $scope.userPosts = angular.fromJson(data).data.results.user_post;
         });
 
-        $http.get(authUrl + '/realms/' + 'master' + '/user-post/roles').then(function (data) {
+        $http.get(authUrl + '/realms/' + realm.realm + '/user-post/roles').then(function (data) {
             $scope.customerRoles = angular.fromJson(data).data.results.roles;
         });
 
-        $http.get(authUrl + '/realms/' + 'master' + '/user-post/system-roles').then(function (data) {
+        $http.get(authUrl + '/realms/' + realm.realm + '/user-post/system-roles').then(function (data) {
             let roles = angular.fromJson(data).data.results['system-roles'];
             roles = roles.filter(role => role.name === 'access_granted').filter((role, index, self) => self.indexOf(role) === index);
             $scope.systemRoles = roles;
@@ -2242,7 +2240,7 @@ module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, 
 
     //удаление строки
     $scope.removeUserPost = function (userPostId) {
-        $http.post(authUrl + '/realms/' + 'master' + '/user-post/delete/' + userPostId).then(function () {
+        $http.post(authUrl + '/realms/' + $scope.realm.realm + '/user-post/delete/' + userPostId).then(function () {
             console.info('removeUserPost');
             window.location.reload();
         });
@@ -2251,7 +2249,7 @@ module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, 
     //удаление одной системы
     $scope.removeSystemRole = function (userPostId, systemRoleId) {
         var mapDelete = {userPostId: userPostId, systemRoleId: systemRoleId};
-        $http.post(authUrl + '/realms/' + 'master' + '/user-post/remove-system-role', mapDelete).then(function () {
+        $http.post(authUrl + '/realms/' + $scope.realm.realm + '/user-post/remove-system-role', mapDelete).then(function () {
             console.info('removeSystemRole sdf');
             $scope.init();
         });
@@ -2260,7 +2258,7 @@ module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, 
     //добавление одной роли
     $scope.addSystemRole = function (userPostId, systemRoleId) {
         var addMap = {userPostId: userPostId, systemRoleId: systemRoleId};
-        $http.post(authUrl + '/realms/' + 'master' + '/user-post/add-system-role', addMap).then(function () {
+        $http.post(authUrl + '/realms/' + $scope.realm.realm + '/user-post/add-system-role', addMap).then(function () {
             console.info('addSystemRole');
             $scope.init();
         });
@@ -2274,7 +2272,7 @@ module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, 
             roleId: $scope.newAccess.customerRole.id,
             dmpId: $scope.newAccess.dmpId
         };
-        $http.post(authUrl + '/realms/' + 'master' + '/user-post/create', addMap).then(function (response) {
+        $http.post(authUrl + '/realms/' + $scope.realm.realm + '/user-post/create', addMap).then(function (response) {
             console.info('addUserPost');
             if ($scope.newAccess.systemRole) {
                 $scope.addSystemRole(angular.fromJson(response).data.results['user_post'].id, $scope.newAccess.systemRole.id);
@@ -2286,7 +2284,7 @@ module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, 
     //редактирование роли
     $scope.editUserPost = function (userPostId, systemRoleId) {
         var addMap = {id: userPostId, roleId: systemRoleId};
-        $http.post(authUrl + '/realms/' + 'master' + '/user-post/edit', addMap).then(function () {
+        $http.post(authUrl + '/realms/' + $scope.realm.realm + '/user-post/edit', addMap).then(function () {
             console.info('editUserPost')
         });
     };

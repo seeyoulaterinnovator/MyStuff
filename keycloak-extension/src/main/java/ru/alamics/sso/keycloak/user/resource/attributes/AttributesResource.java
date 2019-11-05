@@ -2,10 +2,13 @@ package ru.alamics.sso.keycloak.user.resource.attributes;
 
 import lombok.Data;
 import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.registration.AttributeFormatException;
+import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.user.web.AttributeRequest;
 import ru.alamics.sso.user.UserAttributeService;
 
+import javax.validation.ValidationException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -24,17 +27,29 @@ public class AttributesResource {
     @POST
     @Path("/{user_id}")
     public Response createAttributes(@PathParam("user_id") String userId, List<AttributeRequest> attributeRequests) {
-        return JsonResponse.success()
+        try {
+            return JsonResponse.success()
                 .addResult("user", UserMapper.toDto(service.createAttributes(userId, attributeRequests)))
                 .build();
+        }  catch (FoundException e) {
+            return JsonResponse.error(Response.Status.CONFLICT).message(e.getMessage()).build();
+        } catch (AttributeFormatException e) {
+            return JsonResponse.error(Response.Status.BAD_REQUEST).message(e.getMessage()).build();
+        }
     }
 
     @PATCH
     @Path("/{user_id}")
     public Response patchAttributes(@PathParam("user_id") String userId, List<AttributeRequest> attributeRequests) {
-        return JsonResponse.success()
-                .addResult("user", UserMapper.toDto(service.patchAttributes(userId, attributeRequests)))
-                .build();
+        try {
+            return JsonResponse.success()
+                    .addResult("user", UserMapper.toDto(service.patchAttributes(userId, attributeRequests)))
+                    .build();
+        }  catch (FoundException e) {
+            return JsonResponse.error(Response.Status.CONFLICT).message(e.getMessage()).build();
+        } catch (AttributeFormatException e) {
+            return JsonResponse.error(Response.Status.BAD_REQUEST).message(e.getMessage()).build();
+        }
     }
 
     @DELETE

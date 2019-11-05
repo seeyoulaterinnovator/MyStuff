@@ -89,10 +89,10 @@ public class SearchResource {
                             }
                             return false;
                         case "manager":
-                            if (o.getName().equalsIgnoreCase("master")) {
-                                return false;
+                            if (o.getName().equalsIgnoreCase("user")) {
+                                return true;
                             }
-                            return true;
+                            return false;
                     }
                     return false;
                 })
