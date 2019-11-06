@@ -2372,7 +2372,7 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
         $http.post(`${authUrl}/realms/${$scope.realm.realm}/users-toms/activateImportUsersReport/${importReport.id}`)
             .then(response => {
             if (response.status === 200){
-                Notifications.success("Activate import users from report success!");
+                Notifications.success("Activate imported users from report success!");
             }
             });
     };

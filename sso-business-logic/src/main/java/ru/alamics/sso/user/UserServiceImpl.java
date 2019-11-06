@@ -3,13 +3,11 @@ package ru.alamics.sso.user;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.RequiredActionProvider;
-import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.provider.ProviderFactory;
 import org.keycloak.services.resources.admin.AdminAuth;
@@ -30,7 +28,6 @@ import ru.alamics.sso.util.Util;
 import javax.activation.UnsupportedDataTypeException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.persistence.EntityManager;
 import javax.validation.ValidationException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,7 +47,6 @@ public class UserServiceImpl implements UserService {
     private UserPostService userPostService;
     private UserFindService userFindService;
     private ImportUsersReportService importUsersReportService;
-    private EntityManager em;
 
     public UserServiceImpl(KeycloakSession session, AdminAuth auth) {
         this.auth = auth;
@@ -64,7 +60,6 @@ public class UserServiceImpl implements UserService {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
         }
-        em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
     }
 
     private void commit() {
@@ -95,12 +90,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public FileModel downloadUsersByImportReportId(String importId) throws IOException {
         ImportUsersReportEntity importUsersReport = importUsersReportService.findImportUsersReportByImportId(importId);
-        FileModel file = FileFactory.createFileModel(importUsersReport.getName().substring(importUsersReport.getName().lastIndexOf(".")+1));
+        FileModel file = FileFactory.createFileModel(importUsersReport.getName().substring(importUsersReport.getName().lastIndexOf(".") + 1));
         if (file == null) {
             throw new UnsupportedDataTypeException("Unsupported file format!");
         }
         List<String> userParameterNames = getUserParameterNames(UserParameter.values());
-        List<String> finishParameterNames = userParameterNames.stream().skip(1).limit(userParameterNames.size()-2).collect(Collectors.toList());
+        List<String> finishParameterNames = userParameterNames.stream().skip(1).limit(userParameterNames.size() - 2).collect(Collectors.toList());
         finishParameterNames.addAll(List.of("Статус импорта", "Ошибки"));
         file.addRow(finishParameterNames);
         importUsersReport.getImportUserData().stream()
@@ -123,13 +118,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public void activateImportUsersFromReport(String importId) {
         ImportUsersReportEntity importUsersReport = importUsersReportService.findImportUsersReportByImportId(importId);
-        for (ImportUsersDataEntity importData : importUsersReport.getImportUserData()){
+        for (ImportUsersDataEntity importData : importUsersReport.getImportUserData()) {
             String id = importData.getUserId();
-            if (id == null || id.isBlank()){
+            if (id == null || id.isBlank()) {
                 continue;
             }
             UserModel user = session.users().getUserById(id, realm);
-            if (user == null || user.isEnabled()){
+            if (user == null || user.isEnabled()) {
                 continue;
             }
             user.setEnabled(true);
@@ -322,7 +317,7 @@ public class UserServiceImpl implements UserService {
                     errorsByUsers.add(v);
                     importResponse.addError(error);
                 });
-                o.setErrors(errorsByUsers.toString().substring(1, errorsByUsers.toString().length()-1));
+                o.setErrors(errorsByUsers.toString().substring(1, errorsByUsers.toString().length() - 1));
                 countClones.getAndIncrement();
             } catch (NotFoundException | ValidationException e) {
                 Map<String, Object> error = new HashMap<>();
