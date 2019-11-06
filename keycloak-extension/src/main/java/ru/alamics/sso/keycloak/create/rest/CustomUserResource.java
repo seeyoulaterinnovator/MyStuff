@@ -7,6 +7,7 @@ import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.keycloak.models.*;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.resources.admin.AdminAuth;
+import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.user.FileServiceException;
 import ru.alamics.sso.user.ImportUsersReportService;
 import ru.alamics.sso.user.UserService;
@@ -214,6 +215,36 @@ public class CustomUserResource {
     }
 
     @POST
+    @Path("/downloadImportUsersTemplate/{type}")
+    @NoCache
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response downloadImportUsersTemplate(@PathParam("type") String type) {
+        log.info("Download import users template");
+        try {
+            if (type.equalsIgnoreCase("xlsx")) {
+                byte[] bytes = CustomUserResource.class.getResourceAsStream("/template/template.xlsx").readAllBytes();
+                Response.ResponseBuilder response = Response.ok((Object) bytes);
+                response.header("Content-Disposition", "attachment; filename=\"template.xlsx" + "\"");
+                response.header("filename", "template.xlsx");
+                response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
+                return response.build();
+            }
+
+            byte[] bytes = CustomUserResource.class.getResourceAsStream("/template/template.csv").readAllBytes();
+            Response.ResponseBuilder response = Response.ok((Object) bytes);
+            response.header("Content-Disposition", "attachment; filename=\"template.csv" + "\"");
+            response.header("filename", "template.csv");
+            response.header("Content-Type", MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8");
+            return response.build();
+        } catch (IOException e) {
+            log.error("Could not download import users template", e);
+            return JsonResponse.fail()
+                    .message("Error writing file")
+                    .build();
+        }
+    }
+
+    @POST
     @Path("/downloadImportUsersReport/{id}")
     @NoCache
     @Consumes(MediaType.APPLICATION_JSON)
@@ -245,4 +276,5 @@ public class CustomUserResource {
                     .build();
         }
     }
+
 }

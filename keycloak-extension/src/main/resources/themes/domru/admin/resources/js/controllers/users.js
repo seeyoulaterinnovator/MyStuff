@@ -463,22 +463,15 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
     $scope.downloadTemplateXlsx = function () {
-        let payload = {
-            type: 'xlsx',
-            userParameters: [
-                "FIRST_NAME",
-                "EMAIL",
-                "PHONE",
-                "TOMS_ID",
-                "DMP_ID",
-                "ROLE",
-                "SYSTEM"
-            ],
-            userIds: ["XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"]
-        };
-        $scope.tempRealm = $scope.query.searchRealm;
-        $scope.query.searchRealm = $scope.realm.realm;
-        $scope.exportTemplateXlsx(payload)
+        $http.post(`${authUrl}/realms/${$scope.query.searchRealm}/users-toms/downloadImportUsersTemplate/xlsx`, null, {
+            headers: {
+                'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8',
+                'Content-Type': 'application/json'
+            },
+            responseType: 'arraybuffer'
+        }).then((response) => {
+            $scope.responseHandleXlsx(response);
+        })
     };
 
     $scope.exportXlsx = function () {
@@ -501,7 +494,6 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
     $scope.exportTemplateXlsx = function (payload) {
-        var linkElement = document.createElement('a');
         $http.post(`${authUrl}/realms/${$scope.query.searchRealm}/users-toms/downloadUsers`, payload, {
             headers: {
                 'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8',
@@ -509,47 +501,41 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             },
             responseType: 'arraybuffer'
         }).then((response) => {
-            var headers = response.headers();
-            var filename = 'users_info.xlsx';
-            var contentType = headers['content-type'];
-            var blob = new Blob([response.data], {type: contentType});
-            var url = window.URL.createObjectURL(blob, {
-                type: 'data:attachment/xlsx'
-            });
-
-            linkElement.setAttribute('href', url);
-            linkElement.setAttribute("download", filename);
-
-            var clickEvent = new MouseEvent("click", {
-                "view": window,
-                "bubbles": true,
-                "cancelable": false
-            });
-            linkElement.dispatchEvent(clickEvent);
-
-            if ($scope.tempRealm !== undefined) {
-                $scope.query.searchRealm = $scope.tempRealm;
-            }
+            $scope.responseHandleXlsx(response);
         })
     };
 
+    $scope.responseHandleXlsx = function(response){
+        var linkElement = document.createElement('a');
+        var headers = response.headers();
+        var filename = 'users_info.xlsx';
+        var contentType = headers['content-type'];
+        var blob = new Blob([response.data], {type: contentType});
+        var url = window.URL.createObjectURL(blob, {
+            type: 'data:attachment/xlsx'
+        });
+
+        linkElement.setAttribute('href', url);
+        linkElement.setAttribute("download", filename);
+
+        var clickEvent = new MouseEvent("click", {
+            "view": window,
+            "bubbles": true,
+            "cancelable": false
+        });
+        linkElement.dispatchEvent(clickEvent);
+
+        if ($scope.tempRealm !== undefined) {
+            $scope.query.searchRealm = $scope.tempRealm;
+        }
+    }
+
     $scope.downloadTemplateCSV = function () {
-        let payload = {
-            type: 'csv',
-            userParameters: [
-                "FIRST_NAME",
-                "EMAIL",
-                "PHONE",
-                "TOMS_ID",
-                "DMP_ID",
-                "ROLE",
-                "SYSTEM"
-            ],
-            userIds: ["XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"]
-        };
-        $scope.tempRealm = $scope.query.searchRealm;
-        $scope.query.searchRealm = $scope.realm.realm;
-        $scope.exportTemplateCSV(payload)
+        $http.post(`${authUrl}/realms/${$scope.query.searchRealm}/users-toms/downloadImportUsersTemplate/csv`, null, {
+            headers: {'Accept': 'application/octet-stream;charset=UTF-8', 'Content-Type': 'application/json'}
+        }).then((response) => {
+            $scope.responseHandleCsv(response);
+        })
     };
 
     $scope.exportCSV = function () {
@@ -576,27 +562,32 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         $http.post(`${authUrl}/realms/${$scope.query.searchRealm}/users-toms/downloadUsers`, payload, {
             headers: {'Accept': 'application/octet-stream;charset=UTF-8', 'Content-Type': 'application/json'}
         }).then((response) => {
-            var headers = response.headers();
-            var filename = 'users_info.csv';
-            var contentType = headers['content-type'];
-            var blob = new Blob(["\ufeff", response.data], {type: contentType});
-            var url = window.URL.createObjectURL(blob);
-
-            linkElement.setAttribute('href', url);
-            linkElement.setAttribute("download", filename);
-
-            var clickEvent = new MouseEvent("click", {
-                "view": window,
-                "bubbles": true,
-                "cancelable": false
-            });
-            linkElement.dispatchEvent(clickEvent);
-
-            if ($scope.tempRealm !== undefined) {
-                $scope.query.searchRealm = $scope.tempRealm;
-            }
+            $scope.responseHandleCsv(response);
         })
     };
+
+    $scope.responseHandleCsv = function(response){
+        var linkElement = document.createElement('a');
+        var headers = response.headers();
+        var filename = 'users_info.csv';
+        var contentType = headers['content-type'];
+        var blob = new Blob(["\ufeff", response.data], {type: contentType});
+        var url = window.URL.createObjectURL(blob);
+
+        linkElement.setAttribute('href', url);
+        linkElement.setAttribute("download", filename);
+
+        var clickEvent = new MouseEvent("click", {
+            "view": window,
+            "bubbles": true,
+            "cancelable": false
+        });
+        linkElement.dispatchEvent(clickEvent);
+
+        if ($scope.tempRealm !== undefined) {
+            $scope.query.searchRealm = $scope.tempRealm;
+        }
+    }
 
     $scope.nextPage = function () {
         $scope.query.first += parseInt($scope.query.max);
