@@ -13,14 +13,14 @@
             <div id="post" class="table scrollable-container overflow-x-hidden overflow-y-auto">
                 <div class="trow theader">
                     <div class="org-cell">Организация</div>
-                    <div class="org-cell">Уникальный номер</div>
+<#--                    <div class="org-cell">Уникальный номер</div>-->
                     <div class="role-cell">Роль пользователя</div>
                 </div>
                 <#list posts as post>
                         <#assign firstRow = post?index == 0>
                         <div class="${firstRow?then('selected', '')} trow titems">
+                            <div id="tomsId-${post?index}" class="hidden">${post.tomsId!}</div>
                             <div id="tomsName-${post?index}" class="org-cell">${post.tomsName!}</div>
-                            <div id="tomsId-${post?index}" class="org-cell">${post.tomsId!}</div>
                             <div id="roleName-${post?index}" class="role-cell">${post.roleName!}</div>
                         </div>
                 </#list>
