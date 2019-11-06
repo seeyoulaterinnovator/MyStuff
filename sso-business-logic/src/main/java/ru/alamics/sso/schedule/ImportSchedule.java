@@ -47,7 +47,7 @@ public class ImportSchedule {
     @EJB
     private UserPostService userPostService;
 
-    @Schedule(hour = "*", minute = "*/1", persistent = false)
+    @Schedule(hour = "*", minute = "*/5", persistent = false)
     public void schedule() {
         log.info("Start import users by schedule");
         List<ImportUsersReportEntity> importUsersReportEntities = importUsersReportRepository.findAllImportUsersReports()
