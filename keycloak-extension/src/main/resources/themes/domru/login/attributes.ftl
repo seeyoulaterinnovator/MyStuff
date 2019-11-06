@@ -10,7 +10,7 @@
         <div class="table-wrapper">
             <h1 class="title">Выбрать организацию</h1>
 
-            <div id="post" class="table scrollable-container overflow-x-hidden overflow-y-auto">
+            <div id="post" class="table overflow-x-hidden overflow-y-auto">
                 <div class="trow theader">
                     <div class="org-cell">Организация</div>
 <#--                    <div class="org-cell">Уникальный номер</div>-->
