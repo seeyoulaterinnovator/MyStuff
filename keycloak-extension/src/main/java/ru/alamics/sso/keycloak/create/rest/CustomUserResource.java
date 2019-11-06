@@ -245,4 +245,16 @@ public class CustomUserResource {
                     .build();
         }
     }
+
+    @POST
+    @Path("/activateImportUsersReport/{id}")
+    @NoCache
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response activateImportUsersFromReport(@PathParam("id") String importId) {
+        log.info("Start activate Import Users From Report");
+        userService.activateImportUsersFromReport(importId);
+        log.info("End activate Import Users From Report");
+        return JsonResponse.success()
+                .build();
+    }
 }

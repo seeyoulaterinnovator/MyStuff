@@ -34,7 +34,8 @@ public class ImportUsersDataEntity {
     private String systems;
     @Column(name = "is_created")
     private boolean isCreated;
+    @Column(name = "user_id")
+    private String userId;
     @Column(name = "errors")
     private String errors;
-
 }
