@@ -78,4 +78,10 @@ public class Util {
             throw new ValidationException("Email is not valid");
         }
     }
+
+    public static void validateId(String id) {
+        if (id != null && !id.isBlank() && id.replaceAll("[0-9]+", "").length()>0) {
+            throw new ValidationException("TomsId or DmpId is not valid");
+        }
+    }
 }
