@@ -9,7 +9,7 @@
         <form id="loginUpdatePasswordForm" action="${url.loginAction}" method="post">
             <@blocks.password firstFieldName="password-new" />
 
-            <div class="flex flex-col justify-between sm:flex-row md:mt-10 mt-5">
+            <div class="flex flex-col justify-between sm:flex-row xl:mt-12 md:mt-8 mt-7">
                 <div class="flex-basis-1/2 mb-2 sm:mb-0">
                     <button id="submit" class="btn btn-main w-full pass-fields pass-fields--change-pass" type="submit">Сменить пароль</button>
                 </div>

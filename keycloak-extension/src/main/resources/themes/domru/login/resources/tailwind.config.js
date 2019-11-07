@@ -20,6 +20,7 @@ module.exports = {
         'basis-1/2': '0 1 50%',
       },
       spacing: {
+        '7': '1.75rem',
         '14': '56px',
         '17': '73px',
         '96': '24rem',
