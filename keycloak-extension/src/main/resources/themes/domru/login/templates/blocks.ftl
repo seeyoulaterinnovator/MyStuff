@@ -2,7 +2,7 @@
 <#import "./svg.ftl" as svg>
 
 <#macro password firstFieldName="password" secondFieldName="password-confirm" >
-  <div id="password-block" class="mb-4">
+  <div id="password-block" class="mb-5 xs:mb-4">
     <p class="text-black-80">Пароль должен состоять из комбинации букв, цифр, cпецсимволов и быть не менее 8 и не более 16 символов</p>
     <div class="flex text-black-50 py-6">
       <div id="letters-password" class="flex flex-1 flex-col mr-4">
@@ -21,9 +21,9 @@
 
     <div class="flex flex-col-reverse sm:flex-row">
       <div class="pass-fields">
-        <@components.field class="mb-4" fieldName="${firstFieldName}" label="${msg('password')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true />
+        <@components.field class="mb-3 sm:mb-4" fieldName="${firstFieldName}" label="${msg('password')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true />
         
-        <@components.field class="mb-4" fieldName="${secondFieldName}" label="${msg('passwordConfirm')}" placeholder="${msg('passwordConfirmPlaceholder')}" type="password" required=true />
+        <@components.field class="mb-3 sm:mb-4" fieldName="${secondFieldName}" label="${msg('passwordConfirm')}" placeholder="${msg('passwordConfirmPlaceholder')}" type="password" required=true />
       </div>
 
       <div class="mx-auto generated-password">
