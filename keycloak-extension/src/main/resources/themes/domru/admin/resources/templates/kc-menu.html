@@ -52,7 +52,7 @@
     <div class="nav-category" data-ng-show="current.realm && (access.viewRealm || access.queryGroups || access.queryUsers || access.viewEvents)">
         <h2>{{:: 'manage' | translate}}</h2>
         <ul class="nav nav-pills nav-stacked">
-            <li data-ng-show="access.queryGroups" data-ng-class="(path[1] == 'group' || path[2] == 'groups'
+            <li data-ng-show="access.viewRealm" data-ng-class="(path[1] == 'group' || path[2] == 'groups'
                         || path[2] == 'default-groups') && 'active'"><a href="#/realms/{{realm.realm}}/groups"><span class="pficon pficon-users"></span> {{:: 'groups' | translate}}</a></li>
             <li data-ng-show="access.queryUsers" data-ng-class="(path[1] == 'user' && (path[2] != 'custom-settings-general' && path[2] != 'custom-settings-first') || path[2] == 'users' || path[2] == 'users-permissions') && 'active'"><a href="#/realms/{{realm.realm}}/users"><span class="pficon pficon-user"></span> {{:: 'users' | translate}}</a></li>
             <li data-ng-show="access.viewRealm" data-ng-class="(path[2] == 'import-users') && 'active'"><a href="#/realms/{{realm.realm}}/import-users"><span class="pficon pficon-import"></span> Import Users </a></li>

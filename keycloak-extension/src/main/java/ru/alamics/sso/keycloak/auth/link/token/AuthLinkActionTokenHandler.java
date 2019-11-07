@@ -20,6 +20,7 @@ import org.keycloak.sessions.AuthenticationSessionModel;
 import javax.ws.rs.core.Response;
 
 import java.util.Objects;
+import java.util.Set;
 
 import static org.keycloak.services.resources.LoginActionsService.AUTHENTICATE_PATH;
 
@@ -41,11 +42,32 @@ public class AuthLinkActionTokenHandler extends AbstractActionTokenHander<AuthLi
     public Response handleToken(AuthLinkActionToken token, ActionTokenContext<AuthLinkActionToken> tokenContext) {
         // Continue with the authenticator action
 
-        log.info("Handle token for user " + token.getUserId());
-
         AuthenticationSessionModel authSession = tokenContext.getAuthenticationSession();
 
-        String redirectUri = RedirectUtils.verifyRedirectUri(tokenContext.getUriInfo(), null,
+        log.info("Handle token for user " + token.getUserId() + ", client = " + authSession.getClient());
+
+        String redirect = null;
+        if (authSession.getClient() != null) {
+            Set<String> set = authSession.getClient().getRedirectUris();
+            for (String validR : set) {
+
+                if (validR == null)
+                    continue;
+
+                int idx = validR.indexOf("/*");
+                if (idx > -1) {
+                    validR = validR.substring(0, idx);
+                }
+
+                validR = validR.replaceAll("\\*", "");
+                if (validR.length() > 0) {
+                    redirect = validR;
+                    break;
+                }
+            }
+        }
+
+        String redirectUri = RedirectUtils.verifyRedirectUri(tokenContext.getUriInfo(), redirect,
                 tokenContext.getRealm(), authSession.getClient(), false);
 
         if (redirectUri != null) {

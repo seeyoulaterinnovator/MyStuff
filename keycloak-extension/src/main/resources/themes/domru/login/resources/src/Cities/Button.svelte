@@ -34,7 +34,7 @@
       <circle cx="8" cy="7" r="1" fill="black" />
     </g>
   </svg>
-  <span class="border-dashed border-b border-main-600 leading-normal">
+  <span class="border-dashed border-b border-main-600 h-6 leading-normal">
     {$city}
   </span>
 </button>

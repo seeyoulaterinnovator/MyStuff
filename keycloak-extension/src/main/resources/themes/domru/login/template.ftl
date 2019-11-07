@@ -39,7 +39,7 @@
 
     <@header.defaultTemplate withCity=displayCity></@header.defaultTemplate>
 
-      <main id="content" class="flex-1 py-12 mx-auto md:mx-auto w-full max-w-440px xl:max-w-470px">
+      <main id="content" class="flex-1 py-8 md:py-12 mx-auto md:mx-auto w-full max-w-440px xl:max-w-470px">
         <#if displayMessage && message?has_content && message.summary == msg('emailSentMessage')>
           <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}"; section>
             <#if section = "header">
@@ -64,7 +64,19 @@
                 <#if message.type = 'success' && message.summary != msg('emailSentMessage')>
                     <span class="text-accentGreen">${kcSanitize(message.summary)?no_esc}</span>
                 </#if>
-                <#if message.type = 'error'><span class="text-accentRed">${kcSanitize(message.summary)?no_esc}</span></#if>
+                <#if message.type = 'error'>
+                    <#if message.summary?contains('Номер мобильного телефона уже используется в другой учетной записи.')>
+                        <#if message.summary?contains(msg('emailExistsMessage'))>
+                            <span class="text-accentRed bad_phone bad_email">${kcSanitize(message.summary)?no_esc}</span>
+                        <#else>
+                            <span class="text-accentRed bad_phone">${kcSanitize(message.summary)?no_esc}</span>
+                        </#if>
+                    <#elseif message.summary == msg('emailExistsMessage')>
+                        <span class="text-accentRed bad_email">${kcSanitize(message.summary)?no_esc}</span>
+                    <#else>
+                        <span class="text-accentRed">${kcSanitize(message.summary)?no_esc}</span>
+                    </#if>
+                </#if>
                 </div>
             </#if>
 

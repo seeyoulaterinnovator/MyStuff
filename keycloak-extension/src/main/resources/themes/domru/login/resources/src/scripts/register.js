@@ -34,6 +34,14 @@ export default (function() {
 
   // @todo
 
+  // Wrong email and/or phone number
+  let wrongEmail = document.querySelector('.bad_email');
+  let wrongPhone = document.querySelector('.bad_phone');
+  const orgNameField = document.getElementById('orgName');
+  const firstName = document.getElementById('firstName');
+  const emailField = document.getElementById('email');
+  const phoneField = document.getElementById('phone');
+
   const formElement = document.getElementById('registrationForm');
   if (!formElement) return;
 
@@ -42,16 +50,36 @@ export default (function() {
     mask: '+{7} (000) 000-00-00',
   });
 
+  // Убираем красные рамки инпутов на событии ввода после получения ошибки
+  function cleanBorder() {
+    if (wrongEmail) {
+      wrongEmail.classList.remove('bad_email')
+    }
+    if (wrongPhone) {
+      wrongPhone.classList.remove('bad_phone')
+    }
+    this.style.borderColor = '';
+    this.removeEventListener('input', cleanBorder, false)
+  }
+  if (wrongEmail) {
+    emailField.style.borderColor = '#e31e24';
+    emailField.addEventListener('input', cleanBorder, false)
+  }
+  if (wrongPhone) {
+    phoneField.style.borderColor = '#e31e24';
+    phoneField.addEventListener('input', cleanBorder, false)
+  }
+
   // Создаем объект формы с помощью final-form
   const registered = {};
   const form = createForm({
     onSubmit: () => {},
     initialValues: {
-      orgName: document.getElementById('orgName') && document.getElementById('orgName').value || '',
-      firstName: document.getElementById('firstName') && document.getElementById('firstName').value || '',
+      orgName: orgNameField && orgNameField.value || '',
+      firstName: firstName && firstName.value || '',
       lastName: '-',
-      email: document.getElementById('email') && document.getElementById('email').value || '',
-      phone: document.getElementById('phone') && document.getElementById('phone').value || '',
+      email: emailField && emailField.value || '',
+      phone: phoneField && phoneField.value || '',
       password: '',
       'password-confirm': '',
     },
@@ -71,6 +99,9 @@ export default (function() {
 
     if (!values.password.match(VALIDATION_RULES['password_8-16']))
       errors.password = 'Пароль не подходит';
+
+    // if (!values['password-confirm'].match(VALIDATION_RULES['password_8-16']))
+    //   errors.password = 'Пароль не подходит. Попробуйте другой';
 
     if (values['password-confirm'] !== values.password)
       errors['password-confirm'] = 'Пароли не совпадают';
@@ -171,7 +202,6 @@ export default (function() {
           input.value = value === undefined ? '' : value;
           input
         }
-
         // show/hide errors
         if (errorElement) {
           if (touched && error) {
@@ -212,12 +242,15 @@ export default (function() {
     return form.getFieldState('password').value;
   }
   function setPassword(password) {
-    // form.getFieldState('password').change(password);
+    form.getFieldState('password').change(password);
     // form.getFieldState('password-confirm').change(password);
     // form.getFieldState('password-confirm').blur();
   }
   function getConfirmation() {
     return form.getFieldState('password-confirm').value;
   }
-  linkPasswords(getPassword, setPassword, getConfirmation, document.getElementById('password'), document.getElementById('password-confirm'));
+  function setConfirmation(confirmation) {
+    form.getFieldState('password-confirm').change(confirmation);
+  }
+  linkPasswords(getPassword, setPassword, getConfirmation, setConfirmation, document.getElementById('password'), document.getElementById('password-confirm'));
 })();

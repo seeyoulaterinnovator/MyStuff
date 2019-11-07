@@ -1,4 +1,4 @@
-<#macro defaultTemplate email="" backHref="/" buttonExist=true>
+<#macro defaultTemplate email="" backHref="/" buttonExist=true isVerified=false>
   <div class="container">
     <div class="mr-33">
       <svg class="ok" viewBox="0 0 104 104" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -7,17 +7,19 @@
       </svg>
     </div>
     <div>
-    <h1 class="text text__title"><#nested "header"></h1>
-    <p class="text text--close">
-      На почту:
-    </p>
-    <p class="text text__email">${email}</p>
-    <p class="text text--far">
-      <#nested "description">
-    </p>
-    <#if buttonExist>
-    <a class="btn btn-main text-center btn--thanks" href="${backHref}">Спасибо</a>
-    </#if>
+      <h1 class="text text__title"><#nested "header"></h1>
+        <#if !isVerified>
+          <p class="text text--close">
+            На почту:
+          </p>
+          <p class="text text__email">${email}</p>
+          <p class="text text--far">
+              <#nested "description">
+          </p>
+        </#if>
+        <#if buttonExist>
+          <a class="btn btn-main text-center btn--thanks" href="${backHref}">Спасибо</a>
+        </#if>
     </div>
   </div>
 </#macro>
