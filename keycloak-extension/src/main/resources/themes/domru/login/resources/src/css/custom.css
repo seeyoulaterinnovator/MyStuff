@@ -68,9 +68,11 @@ input[type="number"] {
 }
 
 .text-secondary-title {
+  color: black;
+  opacity: 0.1;
   transition: 0.2s ease-in-out;
   &:hover {
-    color: black;
+    opacity: 0.5;
   }
 }
 
@@ -154,4 +156,8 @@ input[type="number"] {
   .g-recaptcha {
     padding-bottom: 1rem;
   }
+}
+
+#password, #password-new, #password-confirm {
+  padding-right: 3rem;
 }

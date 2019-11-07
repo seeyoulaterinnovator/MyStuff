@@ -99,12 +99,14 @@
       </div>
     </header>
 
-    <div class="flex flex-1 {$status === STATUS.INITIAL ? 'items-center' : ''} justify-center content-box h-full scrollable-container overflow-x-hidden overflow-y-auto mt-4 xl:mt-20">
-      {#if $status === STATUS.INITIAL}
+    {#if $status === STATUS.INITIAL}
+      <div class="flex flex-1 {$status === STATUS.INITIAL ? 'items-center' : ''} justify-center content-box h-full mt-4 xl:mt-17">
         <Confirmation />
-      {:else if $status === STATUS.SELECTING}
+      </div>
+    {:else if $status === STATUS.SELECTING}
+      <div class="flex flex-1 {$status === STATUS.INITIAL ? 'items-center' : ''} justify-center content-box h-full scrollable-container overflow-x-hidden overflow-y-auto mt-4 xl:mt-17">
         <Selection {search} />
-      {/if}
-    </div>
+      </div>
+    {/if}
   </div>
 {/if}
