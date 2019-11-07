@@ -33,11 +33,15 @@ export default (function() {
           name: 'Федеральный Клиент',
         } : city);
         const cityName = replacedCities.filter(city => city.city === detectedCity);
-        console.log(cityName)
         if (cityName.length) {
-          Cookie.set('CITY', cityName[0].name);
-          Cookie.set('city-domain', detectedCity)
-          citySvelte.set(cityName[0].name);
+          if (cityName[0].bss) {
+            Cookie.set('CITY', cityName[0].name);
+            Cookie.set('city-domain', detectedCity)
+            citySvelte.set(cityName[0].name);
+          } else {
+            location.replace('https://lkb2b.domru.ru/login')
+          }
+
         }
       })
   }
