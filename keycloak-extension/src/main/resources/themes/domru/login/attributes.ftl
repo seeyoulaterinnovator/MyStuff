@@ -19,7 +19,7 @@
                 <#list posts as post>
                         <#assign firstRow = post?index == 0>
                         <div class="${firstRow?then('selected', '')} trow titems">
-                            <div id="tomsId-${post?index}" class="hidden">${post.tomsId!}</div>
+                            <div id="tomsId-${post?index}" style="display:none">${post.tomsId!}</div>
                             <div id="tomsName-${post?index}" class="org-cell">${post.tomsName!}</div>
                             <div id="roleName-${post?index}" class="role-cell">${post.roleName!}</div>
                         </div>
