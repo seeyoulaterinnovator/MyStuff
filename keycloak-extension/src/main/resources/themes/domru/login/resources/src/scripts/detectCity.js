@@ -32,16 +32,15 @@ export default (function() {
           ...city,
           name: 'Федеральный Клиент',
         } : city);
-        const cityName = replacedCities.filter(city => city.city === detectedCity);
-        if (cityName.length) {
-          if (cityName[0].bss) {
-            Cookie.set('CITY', cityName[0].name);
+        const cityName = replacedCities.filter(city => city.city === detectedCity)[0];
+        if (cityName) {
+          if (cityName.bss) {
+            Cookie.set('CITY', cityName.name);
             Cookie.set('city-domain', detectedCity)
-            citySvelte.set(cityName[0].name);
+            citySvelte.set(cityName.name);
           } else {
-            location.replace('https://lkb2b.domru.ru/login')
+            location.replace(`https://lkb2b.domru.ru/login?citydomain=${cityName.domain}`)
           }
-
         }
       })
   }
