@@ -632,13 +632,14 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             let findGroupedUser = $scope.findById(ret, user.id);
             if (!findGroupedUser) {
                 var access = [];
-                if (user.systemId || user.roleId || user.tomsId || user.userPostId) {
+                if (user.systemId || user.roleId || user.tomsId || user.organization || user.userPostId) {
                     access.push({
                         systemId: user.systemId,
                         systemName: user.systemName,
                         roleId: user.roleId,
                         roleName: user.roleName,
                         tomsId: user.tomsId,
+                        organization: user.organization,
                         userPostId: user.userPostId
                     })
                 }
@@ -663,6 +664,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                     roleId: user.roleId,
                     roleName: user.roleName,
                     tomsId: user.tomsId,
+                    organization: user.organization,
                     userPostId: user.userPostId
                 };
 
@@ -703,6 +705,16 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             return access.tomsId;
         } else {
             return '';
+        }
+    }
+
+    $scope.isFirstOrg = function (userAccess, org, access) {
+        var equalToms = userAccess.filter(ua => ua.userPostId === access.userPostId && ua.organization === org);
+        var index = equalToms.indexOf(access);
+        if (index === 0) {
+            return access.organization;
+        } else {
+            return '';//Gavno
         }
     }
 

@@ -21,6 +21,7 @@ public class UserSearchDto implements Serializable {
     private String userPostId;
     private String tomsId;
     private String dmpId;
+    private String organization;
     private String roleId;
     private String roleName;
     private String systemRoleId;

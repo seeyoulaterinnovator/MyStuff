@@ -14,6 +14,7 @@ dependencies {
     providedCompile "org.keycloak:keycloak-server-spi:$keycloakVersion"
     providedCompile "org.keycloak:keycloak-server-spi-private:$keycloakVersion"
     providedCompile "org.keycloak:keycloak-model-jpa:$keycloakVersion"
+    providedCompile "org.keycloak:keycloak-model-infinispan:$keycloakVersion"
     providedCompile group: 'javax', name: 'javaee-api', version: '8.0.1'
 
     providedCompile 'org.slf4j:slf4j-api:1.7.22'
