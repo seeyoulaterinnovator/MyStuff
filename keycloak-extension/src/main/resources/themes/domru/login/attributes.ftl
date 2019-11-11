@@ -18,9 +18,10 @@
                 </div>
                 <#list posts as post>
                         <#assign firstRow = post?index == 0>
+                        <#assign hasOrgName = post.tomsName?? && (post.tomsName!?length > 0)>
                         <div class="${firstRow?then('selected', '')} trow titems">
                             <div id="tomsId-${post?index}" style="display:none">${post.tomsId!}</div>
-                            <div id="tomsName-${post?index}" class="org-cell">${post.tomsName?then(post.tomsName!, post.tomsId!)}</div>
+                            <div id="tomsName-${post?index}" class="org-cell">${hasOrgName?then(post.tomsName!, post.tomsId!)}</div>
                             <div id="roleName-${post?index}" class="role-cell">${post.roleName!}</div>
                         </div>
                 </#list>
