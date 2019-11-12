@@ -90,14 +90,26 @@ export default (function() {
         }
 
         // show/hide errors
+        // Скрываем сообщение об ошибке во время фокуса на ошибочном поле
         if (errorElement) {
           if (touched && error) {
             input.parentElement.classList.add('field--error');
-
-            if (errorElement) errorElement.textContent = error;
+            errorElement.textContent = error;
+            input.addEventListener('focus', (e) => {
+              e.target.parentElement.nextElementSibling.classList.add('hidden')
+            })
+            input.addEventListener('blur', (e) => {
+              e.target.parentElement.nextElementSibling.classList.remove('hidden')
+            })
           } else {
             input.parentElement.classList.remove('field--error');
-            if (errorElement) errorElement.textContent = '';
+            errorElement.textContent = '';
+            input.removeEventListener('focus', (e) => {
+              e.target.parentElement.nextElementSibling.classList.add('hidden')
+            })
+            input.removeEventListener('blur', (e) => {
+              e.target.parentElement.nextElementSibling.classList.remove('hidden')
+            })
           }
         }
       },
