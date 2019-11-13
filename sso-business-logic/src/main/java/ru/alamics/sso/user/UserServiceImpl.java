@@ -90,12 +90,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public FileModel downloadUsersByImportReportId(String importId) throws IOException {
         ImportUsersReportEntity importUsersReport = importUsersReportService.findImportUsersReportByImportId(importId);
-        FileModel file = FileFactory.createFileModel(importUsersReport.getName().substring(importUsersReport.getName().lastIndexOf(".")+1));
+        FileModel file = FileFactory.createFileModel(importUsersReport.getName().substring(importUsersReport.getName().lastIndexOf(".") + 1));
         if (file == null) {
             throw new UnsupportedDataTypeException("Unsupported file format!");
         }
         List<String> userParameterNames = getUserParameterNames(UserParameter.values());
-        List<String> finishParameterNames = userParameterNames.stream().skip(1).limit(userParameterNames.size()-2).collect(Collectors.toList());
+        List<String> finishParameterNames = userParameterNames.stream().skip(1).limit(userParameterNames.size() - 2).collect(Collectors.toList());
         finishParameterNames.addAll(List.of("Статус импорта", "Ошибки"));
         file.addRow(finishParameterNames);
         importUsersReport.getImportUserData().stream()
@@ -113,6 +113,23 @@ public class UserServiceImpl implements UserService {
                     file.addRow(list);
                 });
         return file;
+    }
+
+    @Override
+    public void activateImportUsersFromReport(String importId) {
+        ImportUsersReportEntity importUsersReport = importUsersReportService.findImportUsersReportByImportId(importId);
+        for (ImportUsersDataEntity importData : importUsersReport.getImportUserData()) {
+            String id = importData.getUserId();
+            if (id == null || id.isBlank()) {
+                continue;
+            }
+            UserModel user = session.users().getUserById(id, realm);
+            if (user == null || user.isEnabled()) {
+                continue;
+            }
+            user.setEnabled(true);
+            createAdminEvent(OperationType.CREATE, user);
+        }
     }
 
     private List<UserSearchDto> searchUsersById(List<UserSearchDto> userDtos, String[] userIds) {
@@ -300,7 +317,7 @@ public class UserServiceImpl implements UserService {
                     errorsByUsers.add(v);
                     importResponse.addError(error);
                 });
-                o.setErrors(errorsByUsers.toString().substring(1, errorsByUsers.toString().length()-1));
+                o.setErrors(errorsByUsers.toString().substring(1, errorsByUsers.toString().length() - 1));
                 countClones.getAndIncrement();
             } catch (NotFoundException | ValidationException e) {
                 Map<String, Object> error = new HashMap<>();
