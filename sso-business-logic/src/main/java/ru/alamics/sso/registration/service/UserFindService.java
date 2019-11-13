@@ -62,4 +62,8 @@ public class UserFindService {
         }
         return sort;
     }
+
+    public UserEntity getUserEntity(String userId){
+        return userRepository.findUser(userId);
+    }
 }

@@ -9,8 +9,9 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderConfigProperty;
 import ru.alamics.sso.auth.UserRole;
+import ru.alamics.sso.registration.tbapi.TbapiService;
+import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
-import javax.ejb.EJB;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.util.List;

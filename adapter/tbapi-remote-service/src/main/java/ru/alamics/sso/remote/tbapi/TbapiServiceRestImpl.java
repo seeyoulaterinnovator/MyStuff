@@ -13,15 +13,15 @@ import ru.alamics.sso.registration.tbapi.model.TbapiRequest;
 import ru.alamics.sso.registration.tbapi.port.TbapiRemoteService;
 
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_DMP_NAME;
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_TOMS_NAME;
 
 @Slf4j
 public class TbapiServiceRestImpl implements TbapiRemoteService {
@@ -94,5 +94,40 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
         }
 
         return responseMap;
+    }
+
+    @Override
+    public Map<String, Object> getCustomerName(List<String> id, TbapiConnectConfig connectConfig) {
+        log.info("customer names request : customerIds={}", id);
+        Map<String, Object> responseMap = new HashMap<>();
+        try {
+            URI uri = new ResteasyUriBuilder()
+                    .scheme(connectConfig.isSecure() ? "https" : "http")
+                    .host(connectConfig.getHost())
+                    .port(connectConfig.getPort())
+                    .path(connectConfig.getPath())
+                    .build();
+
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("id", id);
+            Entity<Map<String, Object>> entity = Entity.json(requestBody);
+            ResteasyWebTarget target = client.target(uri);
+            target.request(MediaType.APPLICATION_JSON);
+            Response response = target.register(ResteasyJackson2Provider.class).request()
+                    .header("Accept", MediaType.APPLICATION_JSON)
+                    .header("Authorization", String.format("Trusted application=\"%s\", username=\"%s\"", connectConfig.getAppname(), connectConfig.getUsername()))
+                    .build("POST", entity)
+                    .invoke();
+
+            responseMap = response.readEntity(new GenericType<>(mapExample.getClass()));
+            if (responseMap.get("businessErrorCode") != null){
+                throw new Exception("error tbapi code: " +  responseMap.get("businessErrorCode").toString());
+            }
+            log.info("customer names response : {}", responseMap);
+        } catch (Exception e){
+            log.error("tbapi error post request: ", e);
+        } finally {
+            return responseMap;
+        }
     }
 }

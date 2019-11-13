@@ -11,7 +11,7 @@
          
         <#if realm.password>
             <form id="loginForm" class="md:flex md:flex-wrap md:justify-between" onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
-                <div class="field field__container field--required mb-4 md:w-full">
+                <div class="field field__container field--required mb-3 sm:mb-4 md:w-full">
                     <#if usernameEditDisabled??>
                         <input name="username" id="username" class="field__input" label="${msg('username')}" placeholder="${msg('usernameOrEmailPlaceholder')}" value="${(login.username!)}" type="text" disabled />
                     <#else>
@@ -21,7 +21,7 @@
                   <input class="hidden w-0 h-0" id="domain-login" name="city">
                 </div>
 
-                <@components.field class="mb-6 md:w-full" fieldName="password" label="${msg('password')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true />
+                <@components.field class="mb-7 sm:mb-8 md:w-full" fieldName="password" label="${msg('password')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true />
                 
                 <div class="flex justify-between w-full items-center">
                     <button id="submit" class="btn btn-main w-1/2 btn-enter" type="submit">Войти</button>
@@ -33,7 +33,7 @@
             </form>
         </#if>
         <#if realm.password && social.providers??>
-            <div class="flex items-center mt-8">
+            <div class="flex items-center mt-12">
                 <div class="text-no-wrap mr-4">Войти через: </div>
                 <ul class="logo-social-providers">
                     <#list social.providers as p>

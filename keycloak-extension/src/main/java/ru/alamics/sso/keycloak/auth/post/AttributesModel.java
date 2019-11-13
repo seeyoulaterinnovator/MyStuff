@@ -9,6 +9,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AttributesModel {
+    private String tomsName;
     private String tomsId;
     private String roleName;
 

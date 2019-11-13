@@ -404,4 +404,14 @@
         </sql>
     </changeSet>
 
+    <changeSet id="30" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="IMPORT_USERS_DATA" />
+            <not> <columnExists tableName="IMPORT_USERS_REPORT" columnName="USER_ID"/> </not>
+        </preConditions>
+        <addColumn tableName="IMPORT_USERS_DATA">
+            <column name="USER_ID" type="varchar(36)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

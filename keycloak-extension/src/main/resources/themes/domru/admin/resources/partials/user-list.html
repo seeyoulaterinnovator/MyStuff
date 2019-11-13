@@ -103,6 +103,7 @@
             <th class="w-12">{{:: 'first-name' | translate}}</th>
             <th class="w-1">Enabled</th>
             <th class="w-12">Phone</th>
+            <th class="w-12">Organization</th>
             <th class="w-12">Toms Id</th>
             <th class="w-12">Roles</th>
             <th class="w-12">Systems</th>
@@ -126,10 +127,14 @@
             </td>
             <td class="clip">{{user.phone}}</td>
 
-            <td class="clip" colspan="3" style="padding: 0 0 0 0">
+            <td class="clip" colspan="4" style="padding: 0 0 0 0">
                 <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.access.length > 0">
 
                     <tr data-ng-repeat="access in user.access" >
+                        <td class="clip inner-table__cell" rowspan="{{getCountSystemNames(user.access, access)}}"
+                            data-ng-if="isFirstOrg(user.access, access.organization, access) != ''">
+                            {{isFirstOrg(user.access, access.organization, access)}}
+                        </td>
                         <td class="clip inner-table__cell" rowspan="{{getCountSystemNames(user.access, access)}}"
                             data-ng-if="isFirstTomsId(user.access, access.tomsId, access) != ''">
                             {{isFirstTomsId(user.access, access.tomsId, access)}}
