@@ -670,6 +670,10 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         return users.filter(user => user.id === userId)[0];
     };
 
+    $scope.editUser = function (user) {
+        $window.location.href = `#/realms/${realm.realm}/users/${user.id}?searchRealm=${$scope.query.searchRealm}`;
+    };
+
     $scope.removeUser = function (user) {
         Dialog.confirmDelete(user.id, 'user', function () {
             $http.delete(`${authUrl}/admin/realms/${realm.realm}/users/${user.id}`)
