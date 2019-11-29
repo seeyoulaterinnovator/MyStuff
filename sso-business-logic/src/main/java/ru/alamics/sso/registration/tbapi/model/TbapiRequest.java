@@ -11,8 +11,6 @@ public class TbapiRequest {
 
     final private CustomerCategory customerCategory = new CustomerCategory();
 
-    final private LegalAddress legalAddress = new LegalAddress();
-
     private ExtendedMap extendedMap = new ExtendedMap();
 
     @JsonIgnore
@@ -20,16 +18,9 @@ public class TbapiRequest {
 
     private String name;
 
-    @JsonIgnore
     private String phoneNumber;
 
     private String legalName;
-
-    @Data
-    private class LegalAddress {
-
-        final private String id = "9153062588613043803";
-    }
 
     @Data
     private class CustomerCategory {
@@ -77,6 +68,6 @@ public class TbapiRequest {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
-        getExtendedMap().getPhoneHolder().getSingleValue().setAttributeValue(phoneNumber);
+        //getExtendedMap().getPhoneHolder().getSingleValue().setAttributeValue(phoneNumber);
     }
 }

@@ -44,11 +44,11 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
         }
 
         // TODO ? StandResolver.isMock()
-        if (true && !"localhost".equalsIgnoreCase(connectConfig.getHost())) {
-            return createCustomerMOCK(request);
-        } else {
+//        if (true && !"localhost".equalsIgnoreCase(connectConfig.getHost())) {
+//            return createCustomerMOCK(request);
+//        } else {
             return createCustomerBattle(request, connectConfig);
-        }
+//        }
     }
 
     private Map<String, Object> createCustomerMOCK(TbapiRequest request) throws TbapiRegisterException

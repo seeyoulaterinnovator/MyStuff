@@ -37,11 +37,12 @@ public class TbapiService {
         TbapiRequest request = new TbapiRequest();
         //.id(user.getId())
         request.setEmail(user.getEmail());
-        request.setName(user.getName());
         request.setPhoneNumber(user.getPhone());
 
         List<String> orgg = user.getAttributes().get(ATTR_ORG_NAME);// TODO
-        request.setLegalName(orgg == null ? null : orgg.get(0));
+        String orgName = orgg == null ? null : orgg.get(0);
+        request.setLegalName(orgName);
+        request.setName(orgName);
 
         try {
             String attrStr = jacksonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(request);
