@@ -150,7 +150,7 @@
                     </tr>
                 </table>
             </td>
-            <td class="kc-action-cell" kc-open="/realms/{{realm.realm}}/users/{{user.id}}">{{:: 'edit' | translate}}
+            <td class="kc-action-cell" data-ng-click="editUser(user)">{{:: 'edit' | translate}}
             </td>
             <td class="kc-action-cell" data-ng-click="removeUser(user)">{{:: 'delete' | translate}}</td>
         </tr>
