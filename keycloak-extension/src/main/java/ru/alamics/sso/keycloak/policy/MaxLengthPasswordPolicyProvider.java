@@ -7,7 +7,7 @@ import org.keycloak.policy.PasswordPolicyProvider;
 import org.keycloak.policy.PolicyError;
 
 public class MaxLengthPasswordPolicyProvider implements PasswordPolicyProvider {
-    private static final String ERROR_MESSAGE = "Invalid password: maximum length %d.";
+    private static final String ERROR_MESSAGE = "invalidPasswordMaxLengthMessage";
 
     private KeycloakSession session;
 
@@ -24,7 +24,7 @@ public class MaxLengthPasswordPolicyProvider implements PasswordPolicyProvider {
     public PolicyError validate (String user, String password) {
         var context = session.getContext();
         int max = context.getRealm().getPasswordPolicy().getPolicyConfig(MaxLengthPasswordPolicyProviderFactory.ID);
-        return password.length() > max ? new PolicyError(String.format(ERROR_MESSAGE, max), max) : null;
+        return password.length() > max ? new PolicyError(ERROR_MESSAGE, max) : null;
     }
 
     @Override
