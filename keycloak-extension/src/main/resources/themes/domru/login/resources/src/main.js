@@ -1,5 +1,6 @@
 import App from './App.svelte';
 
+import './scripts/detectCity.js';
 import './scripts/login.js';
 import './scripts/login-iframe.js';
 import './scripts/register.js';
@@ -7,6 +8,7 @@ import './scripts/login-update-profile.js';
 import './scripts/login-reset-password.js';
 import './scripts/login-update-password.js';
 import './scripts/totp.js';
+import './scripts/iframeResizer.contentWindow.min.js';
 
 import './css/tailwind-base.css';
 import './css/tailwind-advanced.css';
@@ -25,6 +27,7 @@ import './css/components/email-sent.css';
 import './css/components/cities.css';
 import './css/components/confirmation.css';
 import './css/components/customers.css';
+import './css/components/verification.css';
 
 const app = new App({
   target: document.body,

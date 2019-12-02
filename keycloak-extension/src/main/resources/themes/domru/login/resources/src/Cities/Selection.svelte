@@ -15,23 +15,17 @@
   } from './stores.js';
   import { STATUS } from './constants.js';
 
+  import './selection';
+
   import * as citiesJson  from '../mock/cities.json'
+  import {selectCity} from "./selection";
 
   let groupedCities = [];
 
   export let search;
 
   function handleClick(currentCity) {
-    if (currentCity.domain) {
-      window.open(`https://lkb2b.domru.ru/login?citydomain=${currentCity.domain}`);
-    } else {
-      city.set(currentCity.name);
-      Cookie.set('CITY', currentCity.name);
-      Cookie.set('city-domain', currentCity.domain);
-      status.set(STATUS.CONFIRMED);
-      showModal.set(false);
-      editingStarted.set(false);
-    }
+      selectCity($allCities.find(obj => obj.name === currentCity.name));
   }
 
   function groupByFirstCharacter(arr) {
@@ -66,7 +60,6 @@
       return acc;
     }, []);
 
-    console.log(Object.values(groupedCitiesObject.map(part => Object.values(part))));
     return groupedCitiesObject.map(part => Object.values(part));
   }
 
@@ -84,6 +77,8 @@
         allCities.set(replacedCities);
 
         groupedCities = groupByFirstCharacter($allCities);
+        editingStarted.set(false);
+
       })
       .catch(error => console.error('Error:', error));
   });
@@ -96,21 +91,20 @@
   });
 </script>
 
-<ul class="flex flex-wrap flex-row cities-container w-full
-  scrollable-container overflow-x-hidden overflow-y-auto">
+<ul class="flex flex-wrap flex-row cities-container w-full px-4">
     {#each groupedCities as groupPart}
       <ul class="flex flex-col cities-column">
       {#each groupPart as group}
 
-        <ul class="flex flex-row mb-4 px-2 capital">
-          <h2 class="text-extra mr-2 capitalize text-center leading-none w-5 ">
+        <ul class="flex mb-4 capital flex-col md:flex-row px-0 md:px-2 capital">
+          <h2 class="text-extra mr-2 capitalize text-left md:text-center mb-2 mbd:mb-0 leading-none w-5 ">
             {group.firstCharacter}
           </h2>
 
            <ul class="flex flex-col">
            {#each group.cities as city}
               <li class="mb-2 sm:px-2 hover:bg-extra city">
-                <button class="city" on:click={() => handleClick(city)}>{city.name}</button>
+                <button class="city text-left" on:click={() => handleClick(city)}>{city.name}</button>
               </li>
             {:else}
               <div />

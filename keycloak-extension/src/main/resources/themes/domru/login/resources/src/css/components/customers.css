@@ -1,20 +1,14 @@
-.py-3 {
-  height: 100%;
-}
-
 .table-wrapper {
   display: flex;
   flex-direction: column;
   justify-content: center;
   height: 100%;
+  padding-bottom: .75rem;
 }
 
 .title {
-  font-size: 36px;
-  line-height: 42px;
-  text-align: center;
-  letter-spacing: -1px;
   color: rgba(0, 0, 0, 0.8);
+  font-weight: bold;
   margin-bottom: 30px;
 }
 
@@ -35,18 +29,17 @@
 .trow div {
   padding-left: 10px;
 }
-.theader {
-  font-size: 13px;
-  line-height: 17px;
-  color: rgba(0, 0, 0, 0.3);
-}
 .titems:hover {
   background-color: #ffdd00;
   cursor: pointer;
 }
 
+.org-cell,
+.role-cell {
+  min-width: 220px;
+}
+
 .org-cell {
-  width: 450px;
   text-overflow: ellipsis;
   font-size: 17px;
   line-height: 22px;
@@ -54,21 +47,24 @@
   color: rgba(0, 0, 0, 0.8);
 }
 .role-cell {
-  width: 180px;
   font-size: 13px;
   line-height: 17px;
   color: rgba(0, 0, 0, 0.5);
 }
 
+.theader > div {
+  font-size: 13px !important;
+  line-height: 17px !important;
+  color: rgba(0, 0, 0, 0.3) !important;
+}
+
 @media (max-width: 960px) {
   .org-cell {
-    width: 430px;
     font-size: 15px;
     line-height: 19px;
     letter-spacing: -0.35px;
   }
   .role-cell {
-    width: 190px;
     color: rgba(0, 0, 0, 0.6);
   }
 }
@@ -79,18 +75,8 @@
     line-height: 38px;
     margin-bottom: 30px;
   }
-  .trow {
-    height: 48px;
-  }
   .trow div {
     padding-left: 15px;
-  }
-  .org-cell {
-    width: 425px;
-  }
-  .role-cell {
-    width: 125px;
-    line-height: 18px;
   }
 }
 
@@ -104,26 +90,30 @@
     display: none;
   }
   .trow {
+    height: 60px;
+    padding: 5px 0;
     border-radius: 0;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-around;
+    align-items: flex-start;
   }
   .trow div {
     padding-left: 25px;
     padding-right: 25px;
   }
   .org-cell {
-    width: 430px;
+    width: 100%;
     font-size: 14px;
     text-overflow: initial;
     color: #000000;
   }
   .role-cell {
-    width: 430px;
+    width: 100%;
     font-size: 10px;
     line-height: 13px;
     letter-spacing: 0.5px;
     color: rgba(0, 0, 0, 0.5);
+    padding-top: 3px;
   }
 }
 
@@ -135,10 +125,24 @@
     padding-left: 15px;
     padding-right: 15px;
   }
-  .org-cell {
-    width: 290px;
+}
+
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+  .table-wrapper {
+    display: table-cell;
+    vertical-align: middle;
   }
-  .role-cell {
-    width: 290px;
+  .table {
+    display: inline-block;
+    max-width: 440px;
+  }
+  .trow {
+    vertical-align: middle;
+  }
+  .trow div {
+    display: table-cell;
+    vertical-align: middle;
   }
 }
+
+

@@ -1,20 +1,33 @@
 package ru.alamics.sso.keycloak.auth;
 
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
+import org.keycloak.broker.provider.BrokeredIdentityContext;
+import org.keycloak.common.util.ObjectUtil;
+import org.keycloak.forms.login.LoginFormsPages;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.forms.login.freemarker.FreeMarkerLoginFormsProvider;
-import org.keycloak.models.AuthenticatorConfigModel;
+import org.keycloak.forms.login.freemarker.Templates;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RequiredActionProviderModel;
+import org.keycloak.models.UserModel;
+import org.keycloak.services.ErrorPage;
+import org.keycloak.services.messages.Messages;
+import org.keycloak.theme.BrowserSecurityHeaderSetup;
+import org.keycloak.theme.FreeMarkerException;
 import org.keycloak.theme.FreeMarkerUtil;
 import org.keycloak.theme.Theme;
+import org.keycloak.theme.beans.MessageType;
+import org.keycloak.utils.MediaType;
 import ru.alamics.sso.keycloak.auth.model.AuthType;
+import ru.alamics.sso.registration.model.FormConstants;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -23,18 +36,18 @@ import static ru.alamics.sso.registration.model.UserConstants.*;
 @Slf4j
 public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
-    public SsoFreeMarkerLoginForm (KeycloakSession session, FreeMarkerUtil freeMarker) {
+    public SsoFreeMarkerLoginForm(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
     }
 
     @Override
-    protected UriBuilder prepareBaseUriBuilder (boolean resetRequestUriParams) {
+    protected UriBuilder prepareBaseUriBuilder(boolean resetRequestUriParams) {
         var ret = super.prepareBaseUriBuilder(resetRequestUriParams);
         return addQueryParamToBuilder(ret);
     }
 
     @Override
-    public LoginFormsProvider setActionUri (URI actionUri) {
+    public LoginFormsProvider setActionUri(URI actionUri) {
         var uri = addQueryParams(actionUri);
         var ret = super.setActionUri(uri);
         return ret;
@@ -61,21 +74,41 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         return processTemplate(theme, form, locale);
     }
 
+    @Override
+    protected Response processTemplate(Theme theme, String templateName, Locale locale) {
+        try {
+            String result = freeMarker.processTemplate(attributes, templateName, theme);
+            javax.ws.rs.core.MediaType mediaType = contentType == null ? MediaType.TEXT_HTML_UTF_8_TYPE : contentType;
+            Response.ResponseBuilder builder = Response.status(status == null ? Response.Status.OK : status).type(mediaType).language(locale).entity(result);
+            BrowserSecurityHeaderSetup.headers(builder, realm);
+            for (Map.Entry<String, String> entry : httpResponseHeaders.entrySet()) {
+                builder.header(entry.getKey(), entry.getValue());
+            }
+            return builder.build();
+        } catch (FreeMarkerException e) {
+            log.error("Failed to process template", e);
+            if (templateName.equals(Templates.getTemplate(LoginFormsPages.ERROR))){
+                return Response.serverError().build();
+            }
+            return ErrorPage.error(session, authenticationSession, Response.Status.INTERNAL_SERVER_ERROR, "500");
+        }
+    }
+
     private URI addQueryParams(URI src) {
         UriBuilder builder = UriBuilder.fromUri(src);
         builder = addQueryParamToBuilder(builder);
         return builder.build();
     }
 
-    private UriBuilder addQueryParamToBuilder (UriBuilder builder) {
+    private UriBuilder addQueryParamToBuilder(UriBuilder builder) {
         var queryParameters = this.session.getContext().getUri().getQueryParameters();
-        if(queryParameters != null) {
+        if (queryParameters != null) {
             queryParameters.forEach((k, v) -> {
-                if(k.equals(HIDDEN_HEADER)) {
+                if (k.equals(HIDDEN_HEADER)) {
                     builder.queryParam(HIDDEN_HEADER, v.get(0));
-                } else if(k.equals(I_FRAME)) {
+                } else if (k.equals(I_FRAME)) {
                     builder.queryParam(I_FRAME, v.get(0));
-                } else if(k.equals(CITY)) {
+                } else if (k.equals(CITY)) {
                     builder.queryParam(CITY, v.get(0));
                 }
             });
@@ -84,7 +117,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     }
 
     @Override
-    public Response createRegistration () {
+    public Response createRegistration() {
         var realm = this.session.getContext().getRealm();
         var requiredActionsProvider = realm.getRequiredActionProviders();
         var twoStepAuth = requiredActionsProvider.stream()
@@ -92,11 +125,33 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                 .map(RequiredActionProviderModel::getAlias)
                 .collect(Collectors.toList());
         var authType = AuthType.getByList(twoStepAuth);
-        if(authType != null) {
+        if (authType != null) {
             this.attributes.put("twoStepAuthType", authType.getDescription());
         } else {
             this.attributes.put("twoStepAuthType", "");
         }
+        if (formData != null) {
+            this.attributes.put(FormConstants.FIELD_ORG_NAME, formData.getFirst(FormConstants.FIELD_ORG_NAME));
+            this.attributes.put(FormConstants.FIELD_EMAIL, formData.getFirst(FormConstants.FIELD_EMAIL));
+            this.attributes.put(FormConstants.FIELD_FIRST_NAME, formData.getFirst(FormConstants.FIELD_FIRST_NAME));
+            this.attributes.put(FormConstants.FIELD_USERNAME, formData.getFirst(FormConstants.FIELD_USERNAME));
+            this.attributes.put(FormConstants.FIELD_PHONE, formData.getFirst(FormConstants.FIELD_PHONE));
+        }
+        log.info("create form attr = {}", attributes);
         return super.createRegistration();
+    }
+
+    @Override
+    public Response createIdpLinkEmailPage() {
+        BrokeredIdentityContext brokerContext = (BrokeredIdentityContext) this.attributes.get(IDENTITY_PROVIDER_BROKER_CONTEXT);
+        String idpAlias = brokerContext.getIdpConfig().getAlias();
+        idpAlias = ObjectUtil.capitalize(idpAlias);
+        setMessage(MessageType.WARNING, Messages.LINK_IDP, idpAlias);
+
+        UserModel existingUser = AbstractIdpAuthenticator.getExistingUser(session, session.getContext().getRealm(), brokerContext.getAuthenticationSession());
+        if (existingUser != null ) {
+            attributes.put(FormConstants.EXISTING_USER_EMAIL, existingUser.getEmail());
+        }
+        return createResponse(LoginFormsPages.LOGIN_IDP_LINK_EMAIL);
     }
 }

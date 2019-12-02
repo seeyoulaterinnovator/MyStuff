@@ -56,7 +56,7 @@ public class PhoneCheckProvider implements FormAction {
             context.getEvent().detail("Phone", user.getPhone());
             errors.add(new FormMessage(FIELD_PHONE, "Телефон должен быть заполнен"));
         } else {
-            UserEntity userEntity = userFindService.getUserByPhone(user.getPhone());
+            UserEntity userEntity = userFindService.getUserByPhone(context.getRealm(), user.getPhone());
 
             if (userEntity != null) {
                 formData.remove(FIELD_PHONE);

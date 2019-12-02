@@ -34,6 +34,14 @@ export default (function() {
 
   // @todo
 
+  // Wrong email and/or phone number
+  let wrongEmail = document.querySelector('.bad_email');
+  let wrongPhone = document.querySelector('.bad_phone');
+  const orgNameField = document.getElementById('orgName');
+  const firstName = document.getElementById('firstName');
+  const emailField = document.getElementById('email');
+  const phoneField = document.getElementById('phone');
+
   const formElement = document.getElementById('registrationForm');
   if (!formElement) return;
 
@@ -42,15 +50,36 @@ export default (function() {
     mask: '+{7} (000) 000-00-00',
   });
 
+  // Убираем красные рамки инпутов на событии ввода после получения ошибки
+  function cleanBorder() {
+    if (wrongEmail) {
+      wrongEmail.classList.remove('bad_email')
+    }
+    if (wrongPhone) {
+      wrongPhone.classList.remove('bad_phone')
+    }
+    this.style.borderColor = '';
+    this.removeEventListener('input', cleanBorder, false)
+  }
+  if (wrongEmail) {
+    emailField.style.borderColor = '#e31e24';
+    emailField.addEventListener('input', cleanBorder, false)
+  }
+  if (wrongPhone) {
+    phoneField.style.borderColor = '#e31e24';
+    phoneField.addEventListener('input', cleanBorder, false)
+  }
+
   // Создаем объект формы с помощью final-form
   const registered = {};
   const form = createForm({
     onSubmit: () => {},
     initialValues: {
-      orgName: '',
-      firstName: '',
+      orgName: orgNameField && orgNameField.value || '',
+      firstName: firstName && firstName.value || '',
       lastName: '-',
-      email: '',
+      email: emailField && emailField.value || '',
+      phone: phoneField && phoneField.value || '',
       password: '',
       'password-confirm': '',
     },
@@ -69,13 +98,16 @@ export default (function() {
     }
 
     if (!values.password.match(VALIDATION_RULES['password_8-16']))
-      errors.password = 'Пароль не подходит. Попробуйте другой';
+      errors.password = 'Пароль не подходит';
+
+    // if (!values['password-confirm'].match(VALIDATION_RULES['password_8-16']))
+    //   errors.password = 'Пароль не подходит. Попробуйте другой';
 
     if (values['password-confirm'] !== values.password)
       errors['password-confirm'] = 'Пароли не совпадают';
 
     if (values.recaptcha === false)
-      errors.recaptcha = 'Подтвердите, что вы не робот';
+      errors.recaptcha = 'Подтвердите, что Вы не робот';
 
     if (!phoneMask.unmaskedValue.match(VALIDATION_RULES.phone))
       errors.phone = 'Неверный формат номера';
@@ -123,6 +155,23 @@ export default (function() {
   window.recaptchaExpiredCallback = recaptchaExpiredCallback;
   window.recaptchaErrorCallback = recaptchaErrorCallback;
 
+  // resizing ReCaptcha function
+  function scaleCaptcha() {
+    const reCaptcha = document.querySelector(".g-recaptcha");
+    const reCaptchaWidth = 304;
+    const containerWidth = document.getElementById('password').offsetWidth;
+    if(reCaptchaWidth !== containerWidth) {
+      const captchaScale = containerWidth / reCaptchaWidth;
+      reCaptcha.style.transform = 'scale('+captchaScale+')';
+    }
+  }
+  // resizing ReCaptcha initial
+  scaleCaptcha();
+  // resizing ReCaptcha on window resize
+  window.addEventListener('resize', function(){
+    scaleCaptcha();
+  });
+
   function registerField(input) {
     const { name } = input;
 
@@ -151,17 +200,30 @@ export default (function() {
           input.checked = value;
         } else {
           input.value = value === undefined ? '' : value;
+          input
         }
 
         // show/hide errors
+        // Скрываем сообщение об ошибке во время фокуса на ошибочном поле
         if (errorElement) {
           if (touched && error) {
             input.parentElement.classList.add('field--error');
-
-            if (errorElement) errorElement.textContent = error;
+            errorElement.textContent = error;
+            input.addEventListener('focus', (e) => {
+              e.target.parentElement.nextElementSibling.classList.add('hidden')
+            })
+            input.addEventListener('blur', (e) => {
+              e.target.parentElement.nextElementSibling.classList.remove('hidden')
+            })
           } else {
             input.parentElement.classList.remove('field--error');
-            if (errorElement) errorElement.textContent = '';
+            errorElement.textContent = '';
+            input.removeEventListener('focus', (e) => {
+              e.target.parentElement.nextElementSibling.classList.add('hidden')
+            })
+            input.removeEventListener('blur', (e) => {
+              e.target.parentElement.nextElementSibling.classList.remove('hidden')
+            })
           }
         }
       },
@@ -180,8 +242,6 @@ export default (function() {
 
       const submitButton = document.getElementById('submit');
 
-      console.log(values, errors);
-
       if (!isEmpty(errors)) submitButton.disabled = true;
       else submitButton.disabled = false;
     },
@@ -195,10 +255,15 @@ export default (function() {
     return form.getFieldState('password').value;
   }
   function setPassword(password) {
-    // form.getFieldState('password').change(password);
+    form.getFieldState('password').change(password);
     // form.getFieldState('password-confirm').change(password);
     // form.getFieldState('password-confirm').blur();
   }
-  linkPasswords(getPassword, setPassword, document.getElementById('password'));
-  console.log(document.querySelectorAll('.field__open'));
+  function getConfirmation() {
+    return form.getFieldState('password-confirm').value;
+  }
+  function setConfirmation(confirmation) {
+    form.getFieldState('password-confirm').change(confirmation);
+  }
+  linkPasswords(getPassword, setPassword, getConfirmation, setConfirmation, document.getElementById('password'), document.getElementById('password-confirm'));
 })();

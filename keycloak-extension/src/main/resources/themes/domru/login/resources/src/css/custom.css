@@ -17,6 +17,22 @@
   border-radius: 1px;
 }
 
+.hoverable {
+  transition: .2s ease-in-out;
+}
+
+.border-b.hoverable {
+  &:hover {
+    border-bottom-color: transparent;
+  }
+}
+
+.text-black-50.hoverable {
+  &:hover {
+     color: rgba(0,0,0,.8);
+  }
+}
+
 .border-box {
   box-sizing: border-box;
 }
@@ -28,6 +44,9 @@ input[type='number']::-webkit-inner-spin-button,
 input[type='number']::-webkit-outer-spin-button {
   margin: 0;
   -webkit-appearance: none;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
 }
 
 .service__item::before {
@@ -46,6 +65,42 @@ input[type='number']::-webkit-outer-spin-button {
 
 .login-title-text {
   max-width: 306px;
+}
+
+.text-secondary-title {
+  color: black;
+  opacity: 0.1;
+  transition: 0.2s ease-in-out;
+  &:hover {
+    opacity: 0.5;
+  }
+}
+
+.text-no-wrap {
+  white-space: nowrap;
+}
+
+.reset-password {
+  position: relative;
+  transition: 0.2s ease-in-out;
+  opacity: 0.5;
+  cursor: pointer;
+  &::after {
+    transition: 0.2s ease-in-out;
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 1.4px;
+    width: 100%;
+    @apply .bg-black-50;
+  }
+  &:hover {
+    opacity: 1;
+    &:after {
+       @apply .bg-extra;
+    }
+  }
 }
 
 .footer {
@@ -82,4 +137,27 @@ input[type='number']::-webkit-outer-spin-button {
   .footer {
     margin-bottom: 16px;
   }
+}
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  body {
+    display: table !important;
+    width: 100%;
+  }
+  .footer {
+    display: table-footer-group;
+  }
+}
+
+.g-recaptcha {
+  transform-origin: 0 0;
+}
+@media (max-width: 479px) {
+  .g-recaptcha {
+    padding-bottom: 1rem;
+  }
+}
+
+#password, #password-new, #password-confirm {
+  padding-right: 3rem;
 }

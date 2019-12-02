@@ -54,8 +54,9 @@ public class ResetCredentialEmailOrPhone extends AuthBaseClass {
 
         if (user == null && username.startsWith("+7")) {
             username = username.replaceAll("\\D", "");
-            var userFind = userFindService.getUserByPhone(username);
+            var userFind = userFindService.getUserByPhone(context.getRealm(), username);
             if (userFind != null) {
+                user = context.getSession().users().getUserById(userFind.getId(), context.getSession().realms().getRealm(userFind.getRealmId()));
                 username = userFind.getUsername();
                 authenticationSession.setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, userFind.getEmail());
                 context.getHttpRequest().getDecodedFormParameters().replace("username", Collections.singletonList(userFind.getEmail()));

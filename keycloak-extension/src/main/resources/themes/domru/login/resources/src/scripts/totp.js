@@ -5,6 +5,7 @@ export default (function() {
   const formElement = document.getElementById('totpForm');
   if (!formElement) return;
 
+  const timerElement = document.getElementById('timer');
   const submitElement = document.getElementById('accept');
   const resendElement = document.getElementById('resend');
   const sentCode = document.getElementById('sentCode');
@@ -15,7 +16,7 @@ export default (function() {
 
   // Инициируем обратный отсчет таймера.
   // После него появится кнопка "Отправить еще раз"
-  const timer = new Timer(expirationSeconds.value || 60 * 5);
+  const timer = new Timer(expirationSeconds.value || 30);
   timer.timeElement = document.getElementById('timer-time');
   if (expirationSeconds.value == 0) {
     switchTimer();
@@ -24,16 +25,20 @@ export default (function() {
   }
 
   function switchTimer() {
-    const timerElement = document.getElementById('timer');
+    if (timerElement) {
+      timerElement.classList.remove('flex');
+      timerElement.classList.add('hidden');
+    }
 
-    timerElement.classList.remove('flex');
-    timerElement.classList.add('hidden');
+    if (sentCode) {
+      sentCode.classList.remove('hidden');
+      sentCode.disabled = false;
+    }
 
-    sentCode.classList.remove('hidden');
-    sentCode.disabled = false;
-
-    resendElement.classList.remove('hidden');
-    resendElement.disabled = false;
+    if (resendElement) {
+      resendElement.classList.remove('hidden');
+      resendElement.disabled = false;
+    }
   }
 
   // Обрабатываем события на каждом инпуте

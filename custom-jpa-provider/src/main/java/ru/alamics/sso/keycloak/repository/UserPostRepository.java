@@ -12,8 +12,8 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Stateless
@@ -73,6 +73,15 @@ public class UserPostRepository {
                 .getResultList();
     }
 
+    public List<UserPostEntity> getAllUserPostByUserId(String userId) {
+        return em.createQuery(
+                "select upe " +
+                        "from UserPostEntity upe " +
+                        "where upe.user.id = :userId ", UserPostEntity.class)
+                .setParameter("userId", userId)
+                .getResultList();
+    }
+
     public List<UserPostRoleEntity> getAllUserPostRoles(){
         return em.createQuery(
                 "select apr " +
@@ -111,7 +120,7 @@ public class UserPostRepository {
         }
     }
 
-    public List<UserPostEntity> findUserPostRole(final UserEntity user) {
+    public List<UserPostEntity> findUserPostsByUser(final UserEntity user) {
         final String DEBUG_STR = "findUserPostRole";
         log.info("{}: user={}", DEBUG_STR, user.getId());
 
@@ -127,7 +136,7 @@ public class UserPostRepository {
 
         UserEntity userEntity = em.find(UserEntity.class, userId);
         if (userEntity != null) {
-            return findUserPostRole(userEntity);
+            return new ArrayList<>(findUserPostsByUser(userEntity));
         } else {
             log.info("User not found by id={}", userId);
             throw new NotFoundException("User not found");
@@ -148,11 +157,40 @@ public class UserPostRepository {
                 .getResultList();
     }
 
-    public UserPostRoleEntity findUserPostRole(Long id){
+    public UserPostRoleEntity findUserPostsByUser(Long id){
         return em.find(UserPostRoleEntity.class, id);
     }
 
     public ExternalSystemRoleEntity findExternalSystemRole(Long id){
         return em.find(ExternalSystemRoleEntity.class, id);
+    }
+
+    public UserPostEntity findUserPostByParam(String userId, final String tomsId, final String roleName) {
+
+        List<UserPostEntity> ret = em.createQuery("select upe from UserPostEntity upe where upe.tomsId =:toms and upe.role.name =:role and upe.user.id = :user_id ", UserPostEntity.class)
+                .setParameter("toms", tomsId)
+                .setParameter("role", roleName)
+                .setParameter("user_id", userId)
+                .getResultList();
+
+        return Optional.of(ret.get(0)).orElseThrow(() -> new IllegalArgumentException("Cannot find user post with"));
+    }
+
+    public List<ExternalSystemRoleEntity> findSystemsByUserPost(final UserPostEntity post) {
+
+        List<ExternalSystemRoleEntity> ret = em.createQuery("select ext from ExternalSystemRoleEntity ext left join ext.userPosts post where post.id =:postId", ExternalSystemRoleEntity.class)
+                .setParameter("postId", post.getId())
+                .getResultList();
+
+        return ret;
+    }
+
+    public List<ExternalSystemRoleEntity> findSystemByUser(final UserEntity user) {
+
+        List<ExternalSystemRoleEntity> ret = em.createQuery("select ext from ExternalSystemRoleEntity ext join ext.userPosts post where post.user =:user", ExternalSystemRoleEntity.class)
+                .setParameter("user", user)
+                .getResultList();
+
+        return ret;
     }
 }

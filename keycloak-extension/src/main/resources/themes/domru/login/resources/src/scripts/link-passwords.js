@@ -1,11 +1,14 @@
-import { HIGHLIGHT_VALIDATION_CHARSET } from '../constants/passwordCharset.js';
+import { HIGHLIGHT_VALIDATION_CHARSET, WRONG_PASS_REG, REQUIRED_PASSWORD } from '../constants/passwordCharset.js';
 import { fetchPassword } from './helpers';
 
 // Привязывает логику к блоку 'password-block'
 export default (
   getPassword,
   setPassword,
+  getConfirmation,
+  setConfirmation,
   passwordElement = document.getElementById('password'),
+  passwordConfirmElement = document.getElementById('password-confirm')
 ) => {
   const passwordBlock = document.getElementById('password-block');
   if (!passwordBlock) return;
@@ -72,4 +75,42 @@ export default (
     }
   }
   passwordElement.addEventListener('input', highlightRules);
+
+  function inputSomePass(element) {
+    const elementId = element.id;
+    const passwordRaw = elementId==='password-confirm' ? getConfirmation() : getPassword();
+    const regExp = new RegExp(WRONG_PASS_REG);
+
+    if (regExp.test(passwordRaw)) {
+      const replacePassword = passwordRaw.replace(WRONG_PASS_REG, '');
+      // element.value = replacePassword;
+      if (elementId==='password-confirm') {
+        setConfirmation(replacePassword);
+      }
+      else {
+        setPassword(replacePassword);
+      }
+    }
+  }
+  passwordElement.addEventListener('input', function() { inputSomePass(passwordElement); });
+  passwordConfirmElement.addEventListener('input', function() { inputSomePass(passwordConfirmElement); });
+
+  function checkPasswordConfirmation() {
+    const password = getPassword();
+    const confirmation = getConfirmation();
+    const ok = document.querySelectorAll('.passw_ok');
+
+    if (REQUIRED_PASSWORD.test(password) && confirmation === password) {
+      passwordElement.classList.add('field-good');
+      passwordConfirmElement.classList.add('field-good');
+      ok.forEach((img_block) => img_block.classList.remove('hidden'));
+    }
+    else {
+      passwordElement.classList.remove('field-good');
+      passwordConfirmElement.classList.remove('field-good');
+      ok.forEach((img_block) => img_block.classList.add('hidden'));
+    }
+  }
+  passwordElement.addEventListener('input', checkPasswordConfirmation);
+  passwordConfirmElement.addEventListener('input', checkPasswordConfirmation);
 };

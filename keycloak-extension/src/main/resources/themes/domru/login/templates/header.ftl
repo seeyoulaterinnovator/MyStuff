@@ -1,15 +1,15 @@
 <#macro defaultTemplate withCity=true>
   <header id="page-header" class="flex items-center">
     <div class="w-full flex justify-between">
-      <a href="/auth">
+      <a href="https://b2b.domru.ru/">
         <div
           class="h-30px w-60px md:h-10 md:w-20 xl:h-16 xl:w-32 bg-contain bg-no-repeat logo logo--domru"
         ></div>
       </a>
-      <div class="flex opacity-50 items-center xl:items-start">
+      <div class="flex items-center xl:items-start">
         <div id="cities-button" class=${withCity ? string("sm:mr-10", "hidden w-0 h-0")} data-city=""></div>
 
-        <a href="tel:88005500479" class=${withCity ? string("phone--hidden-small phone-call-center", "phone-call-center")}>
+        <a href="tel:88003339000" class=opacity-50 ${withCity ? string("phone--hidden-small phone-call-center", "phone-call-center")}>
           <div class="flex h-6 items-center">
             <svg
               class="h-8 w-auto mr-1 phone-icon"
@@ -19,7 +19,7 @@
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <g opacity="0.2">
+              <g opacity="0.5">
                 <path
                   fill-rule="evenodd"
                   clip-rule="evenodd"
@@ -104,7 +104,7 @@
                 />
               </g>
             </svg>
-            <span class="">8&nbsp;800&nbsp;550&nbsp;0479</span>
+            <span class="phone-number">8&nbsp;800&nbsp;333&nbsp;9000</span>
           </div>
         </a>
       </div>

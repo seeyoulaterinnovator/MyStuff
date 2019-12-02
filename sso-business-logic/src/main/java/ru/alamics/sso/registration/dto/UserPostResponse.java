@@ -15,6 +15,8 @@ public class UserPostResponse {
     private String dmpId;
     private UserPostRoleDto userRole;
     private List<ExternalSystemRoleDto> systemRoles;
+    private boolean selected;
+    private String organization;
 
     @JsonPOJOBuilder(withPrefix = "")
     public static class UserPostResponseBuilder {

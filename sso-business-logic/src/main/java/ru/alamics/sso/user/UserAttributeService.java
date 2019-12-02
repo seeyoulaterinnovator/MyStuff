@@ -7,8 +7,14 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
+import ru.alamics.sso.registration.AttributeFormatException;
+import ru.alamics.sso.registration.FoundException;
+import ru.alamics.sso.registration.model.UserConstants;
+import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.user.web.AttributeRequest;
+import ru.alamics.sso.util.Util;
 
+import javax.validation.ValidationException;
 import java.util.Collections;
 import java.util.List;
 
@@ -17,24 +23,28 @@ public class UserAttributeService {
     private final KeycloakSession session;
     private final KeycloakContext context;
     private final RealmModel realm;
+    private final UserFindService userFindService;
 
-    public UserAttributeService (KeycloakSession session) {
+    public UserAttributeService(KeycloakSession session, UserFindService userFindService) {
         this.session = session;
         this.context = session.getContext();
         this.realm = context.getRealm();
+        this.userFindService = userFindService;
     }
 
-    public UserModel createAttributes (final String userId, final List<AttributeRequest> attributes) {
+    public UserModel createAttributes (final String userId, final List<AttributeRequest> attributes) throws FoundException, AttributeFormatException {
         var user = getUser(userId);
         if(attributes != null) {
+            checkPhoneInAttr(attributes, userId);
             attributes.forEach(attribute -> user.setAttribute(attribute.getName(), Collections.singletonList(attribute.getValue())));
         }
         return user;
     }
 
-    public UserModel patchAttributes (final String userId, final List<AttributeRequest> attributeRequests) {
+    public UserModel patchAttributes (final String userId, final List<AttributeRequest> attributeRequests) throws FoundException, AttributeFormatException {
         var user = getUser(userId);
         if(attributeRequests != null) {
+            checkPhoneInAttr(attributeRequests, userId);
             attributeRequests.forEach(attributeRequest -> user.setAttribute(attributeRequest.getName(), Collections.singletonList(attributeRequest.getValue())));
         }
         return user;
@@ -55,5 +65,18 @@ public class UserAttributeService {
             throw new NotFoundException("User not found");
         }
         return user;
+    }
+
+    private void checkPhoneInAttr(final List<AttributeRequest> attributes, String userId) throws FoundException, AttributeFormatException {
+        var presentPhone =  attributes.stream()
+                .filter(x -> UserConstants.ATTR_PHONE_NAME.equals(x.getName()) && (x.getValue() != null && !x.getValue().isBlank()))
+                .findFirst();
+        if (presentPhone.isPresent()) {
+            Util.validateUserPhone(presentPhone.get().getValue());
+            var user = userFindService.getUserByPhoneAndExcludedUserId(presentPhone.get().getValue(), userId);
+            if (user != null) {
+                throw new FoundException("Another user found by phone");
+            }
+        }
     }
 }

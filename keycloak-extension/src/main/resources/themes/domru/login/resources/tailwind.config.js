@@ -1,6 +1,7 @@
 module.exports = {
   theme: {
     screens: {
+      xs: '320px',
       sm: '480px',
       md: '640px',
       lg: '960px',
@@ -19,14 +20,23 @@ module.exports = {
         'basis-1/2': '0 1 50%',
       },
       spacing: {
+        '7': '1.75rem',
+        '9': '2,75rem',
+        '14': '56px',
+        '17': '73px',
         '96': '24rem',
         '128': '32rem',
+        '37px': '37px',
+        '55px': '55px',
+        '111px': '111px',
       },
       height: {
+        '14': '56px',
         '30px': '30px',
         '60px': '60px',
       },
       width: {
+        '14': '56px',
         '3/7': '42.8%',
         '30px': '30px',
         '60px': '60px',

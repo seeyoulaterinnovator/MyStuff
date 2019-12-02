@@ -3,6 +3,7 @@ package ru.alamics.sso.remote.viber;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import ru.alamics.sso.registration.phone.SmsConfig;
 import ru.alamics.sso.registration.phone.exception.ViberSendException;
@@ -28,10 +29,10 @@ import java.util.concurrent.TimeUnit;
 @Stateless(name = "ViberSender")
 public class ViberSendServiceImpl implements ViberSendService {
 
-    private static final String SMSC_NAME = "centerName";
-    private static final String USERNAME = "user";
-    private static final String PASSWORD = "pass";
-    private static final String SENDER_NAME = "sender";
+    private static final String SMSC_NAME = "rapporto_viber";
+    private static final String USERNAME = "ertelecom";
+    private static final String PASSWORD = "P10BxzA6Z1BRM";
+    private static final String SENDER_NAME = "Domru";
 
     private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
             .connectTimeout(3, TimeUnit.SECONDS)
@@ -77,12 +78,18 @@ public class ViberSendServiceImpl implements ViberSendService {
         URI uri = smsConfig.getUrl();
 
         try {
-            String response = client.target(uri)
+            ResteasyWebTarget webTarget = client.target(uri)
                     .queryParams(getConfigForQuery())
                     .queryParam("to", Util.getCleanUserPhone(phone))
-                    .queryParam("text", URLEncoder.encode(text, smsConfig.getCharset()))
+                    .queryParam("text", URLEncoder.encode(text, smsConfig.getCharset()));
+
+            //System.out.println(webTarget.getUri());
+
+            String response = webTarget
                     .request()
-                    .post(null, String.class);
+                    .get(String.class);
+
+            //System.out.println(response);
 
             return response;
 
