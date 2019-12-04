@@ -33,8 +33,8 @@ public class TbapiRequest {
     @Data
     private class ExtendedMap {
 
-        @JsonProperty(TBAPI_PHONE_ID)
-        private MapObjectHolder phoneHolder = new MapObjectHolder(TBAPI_PHONE_NAME);
+        //@JsonProperty(TBAPI_PHONE_ID)
+        //private MapObjectHolder phoneHolder = new MapObjectHolder(TBAPI_PHONE_NAME);
 
         @JsonProperty(TBAPI_EMAIL_ID)
         private MapObjectHolder emailHolder = new MapObjectHolder(TBAPI_EMAIL_NAME);
