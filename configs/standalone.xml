@@ -133,7 +133,7 @@
                         <user-name>sso</user-name>
                         <password>Okcyetlihoaphho</password>
                     </security>
-                    <validation>                   
+                    <validation>
                         <check-valid-connection-sql>select 1</check-valid-connection-sql>
                         <background-validation>true</background-validation>
                         <background-validation-millis>15000</background-validation-millis>
