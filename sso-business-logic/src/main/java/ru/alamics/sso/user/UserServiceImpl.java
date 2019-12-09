@@ -16,6 +16,7 @@ import ru.alamics.sso.keycloak.entity.ImportUsersDataEntity;
 import ru.alamics.sso.keycloak.entity.ImportUsersReportEntity;
 import ru.alamics.sso.keycloak.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.registration.FoundException;
+import ru.alamics.sso.registration.dto.ExternalSystemRoleDto;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserFindService;
@@ -408,7 +409,7 @@ public class UserServiceImpl implements UserService {
         checkOnExistUser(request, realm);
         UserModel user = createUser(request);
         if (bss) {
-            addUserPost(user, request);
+            addUserPostLPR(user, request);
         }
         createAdminEvent(OperationType.CREATE, user);
         commit();
@@ -456,10 +457,15 @@ public class UserServiceImpl implements UserService {
                 .success();
     }
 
-    private void addUserPost(UserModel userModel, UserRequest request) throws NotFoundException {
+    private void addUserPostLPR(UserModel userModel, UserRequest request) throws NotFoundException {
         UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, request);
         userPostRequest.setRoleId(DEFAULT_ROLE_ID);
-        userPostService.save(userPostRequest);
+        UserPostResponse userPostResponse = userPostService.save(userPostRequest);
+
+        for (ExternalSystemRoleDto sysRole : userPostService.getExternalSystemRoles()) {
+
+            userPostService.addSystemRole(UserMapper.toExternalSystemRoleRequest(userPostResponse.getId(), sysRole.getId()));
+        }
     }
 
     private void addUserPost(UserModel userModel, ImportUsersDataEntity userImport, UserRequest userRequest) throws NotFoundException {
