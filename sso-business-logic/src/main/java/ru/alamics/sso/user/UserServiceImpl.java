@@ -359,6 +359,8 @@ public class UserServiceImpl implements UserService {
 
     private UserModel createUser(UserRequest userRequest) {
         try {
+            userRequest.setPhone(Util.getCleanUserPhone(userRequest.getPhone()));
+
             UserModel user = session.users().addUser(realm, userRequest.getEmail());
             updateUserFromRequest(user, userRequest, realm, session, false);
             return user;
@@ -401,7 +403,9 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(request.getPhone()));
+        String phone = Util.getCleanUserPhone(request.getPhone());
+        if (phone != null)
+            user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(phone));
     }
 
     @Override
