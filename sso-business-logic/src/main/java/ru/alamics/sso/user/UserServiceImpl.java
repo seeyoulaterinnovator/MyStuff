@@ -538,8 +538,8 @@ public class UserServiceImpl implements UserService {
 
         UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, request);
 
-        UserPostEntity userPost = userPostService.getUserPostByToms(userPostRequest.getUserId(), userPostRequest.getTomsId());
-        if (userPost != null) {
+        List<UserPostEntity> userPostList = userPostService.getUserPostByToms(userPostRequest.getUserId(), userPostRequest.getTomsId());
+        if (userPostList != null) {
             throw new FoundException("User already have this customer").addResult("tomsId", userPostRequest.getTomsId());
         }
 

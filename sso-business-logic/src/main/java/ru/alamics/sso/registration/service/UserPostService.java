@@ -144,7 +144,7 @@ public class UserPostService {
         }
     }
 
-    public UserPostEntity getUserPostByToms(String userId, String tomsId) {
+    public List<UserPostEntity> getUserPostByToms(String userId, String tomsId) {
 
         return userPostRepository.findUserPostByToms(userId, tomsId);
     }
