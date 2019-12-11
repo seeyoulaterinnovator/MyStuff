@@ -14,6 +14,7 @@ import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import ru.alamics.sso.keycloak.entity.ImportUsersDataEntity;
 import ru.alamics.sso.keycloak.entity.ImportUsersReportEntity;
+import ru.alamics.sso.keycloak.entity.UserPostEntity;
 import ru.alamics.sso.keycloak.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleDto;
@@ -410,14 +411,86 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserModel createUser(UserRequest request, boolean bss) throws FoundException, NotFoundException {
-        checkOnExistUser(request, realm);
-        UserModel user = createUser(request);
+
+        FoundException exception = null;
+
+        String userIdByPhone = null;
+        try {
+            checkOnExistUserByPhone(request, realm);
+        } catch (FoundException e) {
+
+            if (!bss)
+                throw e;
+
+            exception = e;
+            userIdByPhone = (String)e.getResult().get("userId");
+        }
+
+        String userIdByEmail = null;
+        try {
+            checkOnExistUserByEmailAndUsername(request, realm);
+        } catch (FoundException e) {
+
+            if (!bss)
+                throw e;
+
+            exception = e;
+            userIdByEmail = (String)e.getResult().get("userId");
+        }
+
+        if (bss) {
+            // xor - нашли совпадение только по одному
+            if ((userIdByPhone != null) ^ (userIdByEmail != null)) {
+                throw exception;
+            }
+
+            // нашли юзеров по телефону и по мылу, но их ид - разные
+            if ((userIdByPhone != null) && (userIdByEmail != null)) {
+
+                if (!userIdByPhone.equals(userIdByEmail)) {
+                    throw exception;
+                }
+            }
+        }
+
+
+        boolean userNotFound = userIdByPhone == null && userIdByEmail == null;
+
+        UserModel user = null;
+        if (bss && !userNotFound) {
+
+            user = session.users().getUserById(userIdByPhone, realm);
+
+        } else {
+            user = createUser(request);
+        }
+
+
         if (bss) {
             addUserPostLPR(user, request);
         }
+
         createAdminEvent(OperationType.CREATE, user);
         commit();
         return user;
+    }
+
+    public static void main(String[] args) {
+
+        boolean a = false;
+        boolean b = false;
+
+        a = false; b = false;
+        System.out.println(a ^ b); // true
+
+        a = false; b = true;
+        System.out.println(a ^ b); // false
+
+        a = true; b = false;
+        System.out.println(a ^ b); // false
+
+        a = true; b = true;
+        System.out.println(a ^ b); // true
     }
 
     private void checkOnExistUser(UserRequest request, RealmModel realm) throws FoundException {
@@ -461,8 +534,15 @@ public class UserServiceImpl implements UserService {
                 .success();
     }
 
-    private void addUserPostLPR(UserModel userModel, UserRequest request) throws NotFoundException {
+    private void addUserPostLPR(UserModel userModel, UserRequest request) throws NotFoundException, FoundException {
+
         UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, request);
+
+        UserPostEntity userPost = userPostService.getUserPostByToms(userPostRequest.getUserId(), userPostRequest.getTomsId());
+        if (userPost != null) {
+            throw new FoundException("User already have this customer").addResult("tomsId", userPostRequest.getTomsId());
+        }
+
         userPostRequest.setRoleId(DEFAULT_ROLE_ID);
         UserPostResponse userPostResponse = userPostService.save(userPostRequest);
 

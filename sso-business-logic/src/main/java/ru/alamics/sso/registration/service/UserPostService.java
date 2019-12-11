@@ -143,4 +143,9 @@ public class UserPostService {
             log.error(e.getMessage(), e);
         }
     }
+
+    public UserPostEntity getUserPostByToms(String userId, String tomsId) {
+
+        return userPostRepository.findUserPostByToms(userId, tomsId);
+    }
 }

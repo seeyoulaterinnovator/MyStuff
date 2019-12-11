@@ -176,6 +176,16 @@ public class UserPostRepository {
         return Optional.of(ret.get(0)).orElseThrow(() -> new IllegalArgumentException("Cannot find user post with"));
     }
 
+    public UserPostEntity findUserPostByToms(String userId, final String tomsId) {
+
+        List<UserPostEntity> ret = em.createQuery("select upe from UserPostEntity upe where upe.tomsId =:toms and upe.user.id = :user_id ", UserPostEntity.class)
+                .setParameter("toms", tomsId)
+                .setParameter("user_id", userId)
+                .getResultList();
+
+        return ret.get(0);
+    }
+
     public List<ExternalSystemRoleEntity> findSystemsByUserPost(final UserPostEntity post) {
 
         List<ExternalSystemRoleEntity> ret = em.createQuery("select ext from ExternalSystemRoleEntity ext left join ext.userPosts post where post.id =:postId", ExternalSystemRoleEntity.class)
