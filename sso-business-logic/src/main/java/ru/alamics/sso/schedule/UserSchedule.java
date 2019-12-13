@@ -24,6 +24,7 @@ import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.settings.SettingsDto;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.ejb.*;
 import java.io.IOException;
 import java.util.HashMap;
@@ -32,9 +33,12 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+@Startup
 @Singleton
 @DependsOn("ApplicationProperties")
 public class UserSchedule {
+    private static final String TIMER_NAME = "User Schedule Timer";
+    private static final long DEFAULT_INTERVAL_DURATION = 300000;
     private final static String[] SETTINGS_REALM_NAMES_SCHEDULE = {"user", "manager"};
     private final static String CLIENT_ID = "lkb2b";
     @EJB
@@ -54,10 +58,31 @@ public class UserSchedule {
     @EJB
     private ApplicationProperties properties;
 
-    private String host;
+    @Resource
+    TimerService timerService;
 
-    @Schedule(hour = "*", minute = "*/1", persistent = false)
-    public void schedule() {
+    @PostConstruct
+    private void init() {
+        final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
+        log.info("Timer:{} is created", TIMER_NAME);
+        try {
+            final long intervalDuration = Long.parseLong(properties.getProperty("application.schedule.user.milliseconds"));
+            timerService.createIntervalTimer(0, DEFAULT_INTERVAL_DURATION, timerConfig);
+            log.error("User schedule timer interval duration set to value=" + intervalDuration + " milliseconds ");
+        } catch (Exception e) {
+            timerService.createIntervalTimer(0, DEFAULT_INTERVAL_DURATION, timerConfig);
+            log.error("Error read configuration! User schedule timer interval duration set to default value=" +
+                    DEFAULT_INTERVAL_DURATION + " milliseconds");
+        }
+    }
+
+    @Timeout
+    public void schedule(Timer timer) {
+        if (!TIMER_NAME.equals(timer.getInfo())) {
+            return;
+        }
+
+        log.info("Timer:{}", timer.getInfo());
         log.info("start UserSchedule");
         findExpiredPassword();
         for (String realm : SETTINGS_REALM_NAMES_SCHEDULE) {
@@ -183,7 +208,7 @@ public class UserSchedule {
                 .bodyTemplate(template);
     }
 
-    private String getClientLink(ClientEntity client){
+    private String getClientLink(ClientEntity client) {
         if (client != null) {
             return client.getRedirectUris().stream().findFirst().get();
         }
@@ -204,10 +229,5 @@ public class UserSchedule {
         }
         adminEvent.setResourceType("USER");
         adminEventRepository.save(adminEvent);
-    }
-
-    @PostConstruct
-    public void init() {
-        this.host = properties.getProperty("application.host");
     }
 }
