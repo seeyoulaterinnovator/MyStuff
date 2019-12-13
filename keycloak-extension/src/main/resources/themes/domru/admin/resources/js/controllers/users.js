@@ -693,23 +693,42 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         return values.filter((val, index) => values.indexOf(val) === index);
     };
 
+    $scope.getAccessGroup = function (userAccess){
+        const map = new Map();
+        userAccess.forEach((item) => {
+            const key = item.userPostId;
+            const collection = map.get(key);
+            if (!collection) {
+                map.set(key, [item]);
+            } else {
+                collection.push(item);
+            }
+        });
+        return map;
+    }
+
+    $scope.getKeys = function (userAccess){
+        const map = $scope.getAccessGroup(userAccess);
+        return Array.from(map.keys());
+    }
+
     $scope.isFirstTomsId = function (userAccess, tomsId, access) {
         var equalToms = userAccess.filter(ua => ua.userPostId === access.userPostId && ua.tomsId === tomsId);
         var index = equalToms.indexOf(access);
         if (index === 0) {
             return access.tomsId;
         } else {
-            return '';
+            return '\u00A0';
         }
     }
 
     $scope.isFirstOrg = function (userAccess, org, access) {
         var equalToms = userAccess.filter(ua => ua.userPostId === access.userPostId && ua.organization === org);
         var index = equalToms.indexOf(access);
-        if (index === 0) {
+        if (index === 0 && access.organization.trim() !== '') {
             return access.organization;
         } else {
-            return '';//Gavno
+            return '\u00A0';
         }
     }
 
@@ -719,24 +738,9 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         if (index === 0) {
             return access.roleName;
         } else {
-            return '';
+            return '\u00A0';
         }
     }
-
-    $scope.getCountSystemNames = function (userAccess, access) {
-        return userAccess.filter(ua => ua.userPostId === access.userPostId).length;
-    }
-
-    $scope.isFirstSystemName = function (userAccess, systemName, access) {
-        var equalToms = userAccess.filter(ua => ua === access && ua.systemName === systemName);
-        var index = equalToms.indexOf(access);
-        if (index === 0) {
-            return access.systemName;
-        } else {
-            return '';
-        }
-    }
-
 
 });
 

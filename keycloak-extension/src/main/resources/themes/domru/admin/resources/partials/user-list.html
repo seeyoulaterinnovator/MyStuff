@@ -127,26 +127,63 @@
             </td>
             <td class="clip">{{user.phone}}</td>
 
-            <td class="clip" colspan="4" style="padding: 0 0 0 0">
+            <td class="clip" colspan="1" style="padding: 0 0 0 0">
                 <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.access.length > 0">
-
-                    <tr data-ng-repeat="access in user.access" >
-                        <td class="clip inner-table__cell" rowspan="{{getCountSystemNames(user.access, access)}}"
-                            data-ng-if="isFirstOrg(user.access, access.organization, access) != ''">
-                            {{isFirstOrg(user.access, access.organization, access)}}
+                    <tr data-ng-repeat="keys in getKeys(user.access)" >
+                        <td class="clip inner-table__cell">
+                            <div class="form-inline">
+                                <ul>
+                                    <li ng-repeat="access in getAccessGroup(user.access).get(keys)" class="role-list">
+                                        <span> {{isFirstOrg(user.access, access.organization, access)}}</span>
+                                    </li>
+                                </ul>
+                            </div>
                         </td>
-                        <td class="clip inner-table__cell" rowspan="{{getCountSystemNames(user.access, access)}}"
-                            data-ng-if="isFirstTomsId(user.access, access.tomsId, access) != ''">
-                            {{isFirstTomsId(user.access, access.tomsId, access)}}
+                    </tr>
+                </table>
+            </td>
+            <td class="clip" colspan="1" style="padding: 0 0 0 0">
+                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.access.length > 0">
+                    <tr data-ng-repeat="keys in getKeys(user.access)" >
+                        <td class="clip inner-table__cell">
+                            <div class="form-inline">
+                                <ul>
+                                    <li ng-repeat="access in getAccessGroup(user.access).get(keys)" class="role-list">
+                                        <span>{{isFirstTomsId(user.access, access.tomsId, access)}}</span>
+                                    </li>
+                                </ul>
+                            </div>
                         </td>
-                        <td class="clip inner-table__cell" rowspan="{{getCountSystemNames(user.access, access)}}"
-                            data-ng-if="isFirstRoleName(user.access, access.roleName, access) != ''">
-                            {{isFirstRoleName(user.access, access.roleName, access)}}
+                    </tr>
+                </table>
+            </td>
+            <td class="clip" colspan="1" style="padding: 0 0 0 0">
+                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.access.length > 0">
+                    <tr data-ng-repeat="keys in getKeys(user.access)" >
+                        <td class="clip inner-table__cell">
+                            <div class="form-inline">
+                                <ul>
+                                    <li ng-repeat="access in getAccessGroup(user.access).get(keys)" class="role-list">
+                                        <span>{{isFirstRoleName(user.access, access.roleName, access)}}</span>
+                                    </li>
+                                </ul>
+                            </div>
                         </td>
-                        <td class="clip inner-table__cell" data-ng-if="isFirstSystemName(user.access, access.systemName, access) != ''">
-                            {{isFirstSystemName(user.access, access.systemName, access)}}
+                    </tr>
+                </table>
+            </td>
+            <td class="clip" colspan="1" style="padding: 0 0 0 0">
+                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.access.length > 0">
+                    <tr data-ng-repeat="keys in getKeys(user.access)" >
+                        <td class="clip inner-table__cell">
+                            <div class="form-inline">
+                                <ul>
+                                    <li ng-repeat="access in getAccessGroup(user.access).get(keys)" class="role-list">
+                                        <span>{{access.systemName}}</span>
+                                    </li>
+                                </ul>
+                            </div>
                         </td>
-
                     </tr>
                 </table>
             </td>
