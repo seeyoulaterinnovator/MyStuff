@@ -295,6 +295,8 @@ module.controller('UserOfflineSessionsCtrl', function ($scope, $location, realm,
 module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState, UserImpersonation, BruteForce, Notifications, $route, Dialog/*, CustomUser*/, $http, $window) {
 
     $scope.userRealms = [];
+    $scope.currentAccess = [];
+    $scope.currentAccessMap = [];
 
     $scope.init = function () {
         $scope.realm = realm;
@@ -694,6 +696,10 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
     $scope.getAccessGroup = function (userAccess){
+        if ( $scope.currentAccess === userAccess ){
+            return $scope.currentAccessMap;
+        }
+
         const map = new Map();
         userAccess.forEach((item) => {
             const key = item.userPostId;
@@ -704,6 +710,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 collection.push(item);
             }
         });
+
+        $scope.currentAccessMap = map;
         return map;
     }
 
@@ -716,7 +724,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         var equalToms = userAccess.filter(ua => ua.userPostId === access.userPostId && ua.tomsId === tomsId);
         var index = equalToms.indexOf(access);
         if (index === 0) {
-            return access.tomsId;
+            return access.tomsId.substr(0, 10) + "...";
         } else {
             return '\u00A0';
         }
@@ -737,6 +745,14 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         var index = equalToms.indexOf(access);
         if (index === 0) {
             return access.roleName;
+        } else {
+            return '\u00A0';
+        }
+    }
+
+    $scope.getSystemName = function (access) {
+        if (access.systemName !== undefined && access.systemName.trim() !== '') {
+            return access.systemName;
         } else {
             return '\u00A0';
         }

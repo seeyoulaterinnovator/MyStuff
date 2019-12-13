@@ -126,7 +126,6 @@
                 <input type="checkbox" data-ng-model="user.enabled" disabled/>
             </td>
             <td class="clip">{{user.phone}}</td>
-
             <td class="clip" colspan="1" style="padding: 0 0 0 0">
                 <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.access.length > 0">
                     <tr data-ng-repeat="keys in getKeys(user.access)" >
@@ -179,7 +178,7 @@
                             <div class="form-inline">
                                 <ul>
                                     <li ng-repeat="access in getAccessGroup(user.access).get(keys)" class="role-list">
-                                        <span>{{access.systemName}}</span>
+                                        <span>{{getSystemName(access)}}</span>
                                     </li>
                                 </ul>
                             </div>
