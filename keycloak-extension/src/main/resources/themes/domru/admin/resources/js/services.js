@@ -668,68 +668,22 @@ module.factory('UserExecuteActionsEmail', function($resource) {
 
 //fixme код для отображения role-mappings в админке (почему-то падает в разных местах при обращении к базе, обычно на composite и availiable roles )
 
-// module.factory('RealmRoleMapping', function($resource) {
-//     return $resource(authUrl + '/realms/:realm/users-toms/role-mappings/:userId/realm', {
-//         realm : '@realm',
-//         userId : '@userId'
-//     });
-// });
-//
-// module.factory('CompositeRealmRoleMapping', function($resource) {
-//     return $resource(authUrl + '/realms/:realm/users-toms/role-mappings/:userId/realm/composite', {
-//         realm : '@realm',
-//         userId : '@userId'
-//     });
-// });
-//
-// module.factory('AvailableRealmRoleMapping', function($resource) {
-//     return $resource(authUrl + '/realms/:realm/users-toms/role-mappings/:userId/realm/available', {
-//         realm : '@realm',
-//         userId : '@userId'
-//     });
-// });
-//
-//
-// module.factory('ClientRoleMapping', function($resource) {
-//     return $resource(authUrl + '/realms/:realm/users-toms/role-mappings/:userId/clients/:client', {
-//         realm : '@realm',
-//         userId : '@userId',
-//         client : "@client"
-//     });
-// });
-//
-// module.factory('AvailableClientRoleMapping', function($resource) {
-//     return $resource(authUrl + '/realms/:realm/users-toms/role-mappings/:userId/clients/:client/available', {
-//         realm : '@realm',
-//         userId : '@userId',
-//         client : "@client"
-//     });
-// });
-//
-// module.factory('CompositeClientRoleMapping', function($resource) {
-//     return $resource(authUrl + '/realms/:realm/users-toms/role-mappings/:userId/clients/:client/composite', {
-//         realm : '@realm',
-//         userId : '@userId',
-//         client : "@client"
-//     });
-// });
-
 module.factory('RealmRoleMapping', function($resource) {
-    return $resource(authUrl + '/admin/realms/:realm/users/:userId/role-mappings/realm', {
+    return $resource(authUrl + '/realms/:realm/users-toms/role-mappings/:userId/realm', {
         realm : '@realm',
         userId : '@userId'
     });
 });
 
 module.factory('CompositeRealmRoleMapping', function($resource) {
-    return $resource(authUrl + '/admin/realms/:realm/users/:userId/role-mappings/realm/composite', {
+    return $resource(authUrl + '/realms/:realm/users-toms/role-mappings/:userId/realm/composite', {
         realm : '@realm',
         userId : '@userId'
     });
 });
 
 module.factory('AvailableRealmRoleMapping', function($resource) {
-    return $resource(authUrl + '/admin/realms/:realm/users/:userId/role-mappings/realm/available', {
+    return $resource(authUrl + '/realms/:realm/users-toms/role-mappings/:userId/realm/available', {
         realm : '@realm',
         userId : '@userId'
     });
@@ -737,7 +691,7 @@ module.factory('AvailableRealmRoleMapping', function($resource) {
 
 
 module.factory('ClientRoleMapping', function($resource) {
-    return $resource(authUrl + '/admin/realms/:realm/users/:userId/role-mappings/clients/:client', {
+    return $resource(authUrl + '/realms/:realm/users-toms/role-mappings/:userId/clients/:client', {
         realm : '@realm',
         userId : '@userId',
         client : "@client"
@@ -745,7 +699,7 @@ module.factory('ClientRoleMapping', function($resource) {
 });
 
 module.factory('AvailableClientRoleMapping', function($resource) {
-    return $resource(authUrl + '/admin/realms/:realm/users/:userId/role-mappings/clients/:client/available', {
+    return $resource(authUrl + '/realms/:realm/users-toms/role-mappings/:userId/clients/:client/available', {
         realm : '@realm',
         userId : '@userId',
         client : "@client"
@@ -753,12 +707,58 @@ module.factory('AvailableClientRoleMapping', function($resource) {
 });
 
 module.factory('CompositeClientRoleMapping', function($resource) {
-    return $resource(authUrl + '/admin/realms/:realm/users/:userId/role-mappings/clients/:client/composite', {
+    return $resource(authUrl + '/realms/:realm/users-toms/role-mappings/:userId/clients/:client/composite', {
         realm : '@realm',
         userId : '@userId',
         client : "@client"
     });
 });
+
+// module.factory('RealmRoleMapping', function($resource) {
+//     return $resource(authUrl + '/admin/realms/:realm/users/:userId/role-mappings/realm', {
+//         realm : '@realm',
+//         userId : '@userId'
+//     });
+// });
+//
+// module.factory('CompositeRealmRoleMapping', function($resource) {
+//     return $resource(authUrl + '/admin/realms/:realm/users/:userId/role-mappings/realm/composite', {
+//         realm : '@realm',
+//         userId : '@userId'
+//     });
+// });
+//
+// module.factory('AvailableRealmRoleMapping', function($resource) {
+//     return $resource(authUrl + '/admin/realms/:realm/users/:userId/role-mappings/realm/available', {
+//         realm : '@realm',
+//         userId : '@userId'
+//     });
+// });
+//
+//
+// module.factory('ClientRoleMapping', function($resource) {
+//     return $resource(authUrl + '/admin/realms/:realm/users/:userId/role-mappings/clients/:client', {
+//         realm : '@realm',
+//         userId : '@userId',
+//         client : "@client"
+//     });
+// });
+//
+// module.factory('AvailableClientRoleMapping', function($resource) {
+//     return $resource(authUrl + '/admin/realms/:realm/users/:userId/role-mappings/clients/:client/available', {
+//         realm : '@realm',
+//         userId : '@userId',
+//         client : "@client"
+//     });
+// });
+//
+// module.factory('CompositeClientRoleMapping', function($resource) {
+//     return $resource(authUrl + '/admin/realms/:realm/users/:userId/role-mappings/clients/:client/composite', {
+//         realm : '@realm',
+//         userId : '@userId',
+//         client : "@client"
+//     });
+// });
 
 module.factory('ClientRealmScopeMapping', function($resource) {
     return $resource(authUrl + '/admin/realms/:realm/clients/:client/scope-mappings/realm', {
