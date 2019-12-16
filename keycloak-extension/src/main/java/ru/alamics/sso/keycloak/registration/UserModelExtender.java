@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static ru.alamics.sso.keycloak.registration.UserConfigProperties.*;
 import static ru.alamics.sso.registration.model.FormConstants.*;
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_ORG_NAME;
 
@@ -41,30 +42,6 @@ public class UserModelExtender implements FormAction, FormActionFactory {
     ObjectMapper jacksonMapper = new ObjectMapper();
 
     private static final String PROVIDER_ID = "registration-user-extension";
-
-    private static final String HOSTNAME_PROPERTY_NAME = "targetHost";
-    private static final String HOSTNAME_PROPERTY_LABEL = "Адрес";
-    private static final String HOSTNAME_PROPERTY_HELP_TEXT = "Домен, к которому будут выполняться запросы";
-
-    private static final String PORT_PROPERTY_NAME = "targetPort";
-    private static final String PORT_PROPERTY_LABEL = "Порт";
-    private static final String PORT_PROPERTY_HELP_TEXT = "Порт, на котором сервер слушает запросы";
-
-    private static final String AUTH_APPNAME_NAME = "authAppname";
-    private static final String AUTH_APPNAME_LABEL = "Appname";
-    private static final String AUTH_APPNAME_HELP_TEXT = "Параметр appname заголовка авторизации";
-
-    private static final String AUTH_USERNAME_NAME = "authUsername";
-    private static final String AUTH_USERNAME_LABEL = "Username";
-    private static final String AUTH_USERNAME_HELP_TEXT = "Параметр username заголовка авторизации";
-
-    private static final String PATH_PROPERTY_NAME = "targetPath";
-    private static final String PATH_PROPERTY_LABEL = "Путь";
-    private static final String PATH_PROPERTY_HELP_TEXT = "Путь, к которому нужно выполнить запрос";
-
-    private static final String SCHEMA_PROPERTY_NAME = "targetSchema";
-    private static final String SCHEMA_PROPERTY_LABEL = "HTTPS";
-    private static final String SCHEMA_PROPERTY_HELP_TEXT = "Использовать ли шифрованное подключение";
 
     private static final List<ProviderConfigProperty> CONFIG_PROPERTIES = List.of(
             new ProviderConfigProperty(HOSTNAME_PROPERTY_NAME, HOSTNAME_PROPERTY_LABEL, HOSTNAME_PROPERTY_HELP_TEXT,

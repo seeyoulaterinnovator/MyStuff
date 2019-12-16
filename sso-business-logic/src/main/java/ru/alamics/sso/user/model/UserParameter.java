@@ -7,7 +7,7 @@ public enum UserParameter {
     PHONE("Телефон"),
     TOMS_ID("TOMS ID"),
     DMP_ID("DMP ID"),
-    ROLE("Роли пользователя"),
+    ROLE("Роль пользователя"),
     SYSTEM("Целевая система"),
     ENABLED("Активность");
 

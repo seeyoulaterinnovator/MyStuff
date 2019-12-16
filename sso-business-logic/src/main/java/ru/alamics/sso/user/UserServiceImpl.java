@@ -14,8 +14,10 @@ import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import ru.alamics.sso.keycloak.entity.ImportUsersDataEntity;
 import ru.alamics.sso.keycloak.entity.ImportUsersReportEntity;
+import ru.alamics.sso.keycloak.entity.UserPostEntity;
 import ru.alamics.sso.keycloak.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.registration.FoundException;
+import ru.alamics.sso.registration.dto.ExternalSystemRoleDto;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserFindService;
@@ -90,12 +92,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public FileModel downloadUsersByImportReportId(String importId) throws IOException {
         ImportUsersReportEntity importUsersReport = importUsersReportService.findImportUsersReportByImportId(importId);
-        FileModel file = FileFactory.createFileModel(importUsersReport.getName().substring(importUsersReport.getName().lastIndexOf(".")+1));
+        FileModel file = FileFactory.createFileModel(importUsersReport.getName().substring(importUsersReport.getName().lastIndexOf(".") + 1));
         if (file == null) {
             throw new UnsupportedDataTypeException("Unsupported file format!");
         }
         List<String> userParameterNames = getUserParameterNames(UserParameter.values());
-        List<String> finishParameterNames = userParameterNames.stream().skip(1).limit(userParameterNames.size()-2).collect(Collectors.toList());
+        List<String> finishParameterNames = userParameterNames.stream().skip(1).limit(userParameterNames.size() - 2).collect(Collectors.toList());
         finishParameterNames.addAll(List.of("Статус импорта", "Ошибки"));
         file.addRow(finishParameterNames);
         importUsersReport.getImportUserData().stream()
@@ -113,6 +115,23 @@ public class UserServiceImpl implements UserService {
                     file.addRow(list);
                 });
         return file;
+    }
+
+    @Override
+    public void activateImportUsersFromReport(String importId) {
+        ImportUsersReportEntity importUsersReport = importUsersReportService.findImportUsersReportByImportId(importId);
+        for (ImportUsersDataEntity importData : importUsersReport.getImportUserData()) {
+            String id = importData.getUserId();
+            if (id == null || id.isBlank()) {
+                continue;
+            }
+            UserModel user = session.users().getUserById(id, realm);
+            if (user == null || user.isEnabled()) {
+                continue;
+            }
+            user.setEnabled(true);
+            createAdminEvent(OperationType.CREATE, user);
+        }
     }
 
     private List<UserSearchDto> searchUsersById(List<UserSearchDto> userDtos, String[] userIds) {
@@ -300,7 +319,7 @@ public class UserServiceImpl implements UserService {
                     errorsByUsers.add(v);
                     importResponse.addError(error);
                 });
-                o.setErrors(errorsByUsers.toString().substring(1, errorsByUsers.toString().length()-1));
+                o.setErrors(errorsByUsers.toString().substring(1, errorsByUsers.toString().length() - 1));
                 countClones.getAndIncrement();
             } catch (NotFoundException | ValidationException e) {
                 Map<String, Object> error = new HashMap<>();
@@ -319,6 +338,8 @@ public class UserServiceImpl implements UserService {
 
     private void checkImportUser(UserRequest userRequest) throws FoundException {
         Util.validateUserPhoneAndEmail(userRequest.getEmail(), userRequest.getPhone());
+        Util.validateId(userRequest.getTomsId());
+        Util.validateId(userRequest.getDmpId());
 
         FoundException foundException = new FoundException();
         try {
@@ -339,6 +360,8 @@ public class UserServiceImpl implements UserService {
 
     private UserModel createUser(UserRequest userRequest) {
         try {
+            userRequest.setPhone(Util.getCleanUserPhone(userRequest.getPhone()));
+
             UserModel user = session.users().addUser(realm, userRequest.getEmail());
             updateUserFromRequest(user, userRequest, realm, session, false);
             return user;
@@ -381,19 +404,93 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(request.getPhone()));
+        String phone = Util.getCleanUserPhone(request.getPhone());
+        if (phone != null)
+            user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(phone));
     }
 
     @Override
     public UserModel createUser(UserRequest request, boolean bss) throws FoundException, NotFoundException {
-        checkOnExistUser(request, realm);
-        UserModel user = createUser(request);
-        if (bss) {
-            addUserPost(user, request);
+
+        FoundException exception = null;
+
+        String userIdByPhone = null;
+        try {
+            checkOnExistUserByPhone(request, realm);
+        } catch (FoundException e) {
+
+            if (!bss)
+                throw e;
+
+            exception = e;
+            userIdByPhone = (String)e.getResult().get("userId");
         }
+
+        String userIdByEmail = null;
+        try {
+            checkOnExistUserByEmailAndUsername(request, realm);
+        } catch (FoundException e) {
+
+            if (!bss)
+                throw e;
+
+            exception = e;
+            userIdByEmail = (String)e.getResult().get("userId");
+        }
+
+        if (bss) {
+            // xor - нашли совпадение только по одному
+            if ((userIdByPhone != null) ^ (userIdByEmail != null)) {
+                throw exception;
+            }
+
+            // нашли юзеров по телефону и по мылу, но их ид - разные
+            if ((userIdByPhone != null) && (userIdByEmail != null)) {
+
+                if (!userIdByPhone.equals(userIdByEmail)) {
+                    throw exception;
+                }
+            }
+        }
+
+
+        boolean userNotFound = userIdByPhone == null && userIdByEmail == null;
+
+        UserModel user = null;
+        if (bss && !userNotFound) {
+
+            user = session.users().getUserById(userIdByPhone, realm);
+
+        } else {
+            user = createUser(request);
+        }
+
+
+        if (bss) {
+            addUserPostLPR(user, request);
+        }
+
         createAdminEvent(OperationType.CREATE, user);
         commit();
         return user;
+    }
+
+    public static void main(String[] args) {
+
+        boolean a = false;
+        boolean b = false;
+
+        a = false; b = false;
+        System.out.println(a ^ b); // true
+
+        a = false; b = true;
+        System.out.println(a ^ b); // false
+
+        a = true; b = false;
+        System.out.println(a ^ b); // false
+
+        a = true; b = true;
+        System.out.println(a ^ b); // true
     }
 
     private void checkOnExistUser(UserRequest request, RealmModel realm) throws FoundException {
@@ -437,10 +534,22 @@ public class UserServiceImpl implements UserService {
                 .success();
     }
 
-    private void addUserPost(UserModel userModel, UserRequest request) throws NotFoundException {
+    private void addUserPostLPR(UserModel userModel, UserRequest request) throws NotFoundException, FoundException {
+
         UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, request);
+
+        List<UserPostEntity> userPostList = userPostService.getUserPostByToms(userPostRequest.getUserId(), userPostRequest.getTomsId());
+        if (userPostList != null && !userPostList.isEmpty()) {
+            throw new FoundException("User already have this customer").addResult("tomsId", userPostRequest.getTomsId());
+        }
+
         userPostRequest.setRoleId(DEFAULT_ROLE_ID);
-        userPostService.save(userPostRequest);
+        UserPostResponse userPostResponse = userPostService.save(userPostRequest);
+
+        for (ExternalSystemRoleDto sysRole : userPostService.getExternalSystemRoles()) {
+
+            userPostService.addSystemRole(UserMapper.toExternalSystemRoleRequest(userPostResponse.getId(), sysRole.getId()));
+        }
     }
 
     private void addUserPost(UserModel userModel, ImportUsersDataEntity userImport, UserRequest userRequest) throws NotFoundException {

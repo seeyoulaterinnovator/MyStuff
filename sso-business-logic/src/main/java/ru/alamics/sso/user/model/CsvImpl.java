@@ -7,10 +7,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class CsvImpl implements FileModel {
 
+    private static final int COUNT_ROW_INDENT = 2;
     public static final String UTF8_BOM = "\uFEFF";
 
     private List<String[]> rows;
@@ -22,6 +24,7 @@ public class CsvImpl implements FileModel {
         CSVParser parser = new CSVParserBuilder().withSeparator(';').withIgnoreLeadingWhiteSpace(true).build();
         csvReader = new CSVReaderBuilder(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).withCSVParser(parser).build();
         this.rows = csvReader.readAll();
+        rows.removeAll(rows.stream().limit(COUNT_ROW_INDENT).skip(1).collect(Collectors.toList()));
 
         Optional.ofNullable(this.rows).orElseGet(Collections::emptyList)
                 .forEach(row -> IntStream.range(0, row.length)

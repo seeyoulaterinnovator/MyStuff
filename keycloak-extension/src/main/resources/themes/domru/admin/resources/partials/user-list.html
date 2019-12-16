@@ -41,21 +41,21 @@
                             <div class="input-group-addon">
                                 <input type="text" placeholder="{{:: 'search.placeholder' | translate}}"
                                        data-ng-model="query.search" class="form-control search"
-                                       onkeydown="if (event.keyCode == 13) document.getElementById('searchUsers').click()">
+                                       onkeydown="if (event.keyCode == 13) document.getElementById('userSearch').click()">
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="input-group-addon">
                                 <input type="text" placeholder="Search by User Id..."
                                        data-ng-model="query.searchByUserId" class="form-control search"
-                                       onkeydown="if (event.keyCode == 13) document.getElementById('searchUsers').click()">
+                                       onkeydown="if (event.keyCode == 13) document.getElementById('userSearchById').click()">
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="input-group-addon">
                                 <input type="text" placeholder="Search by Toms Id..."
                                        data-ng-model="query.searchByTomsId" class="form-control search"
-                                       onkeydown="if (event.keyCode == 13) document.getElementById('searchUsers').click()">
+                                       onkeydown="if (event.keyCode == 13) document.getElementById('userSearchByTomsId').click()">
                             </div>
                         </div>
                     </div>
@@ -95,7 +95,7 @@
         <tr>
         <tr data-ng-show="searchLoaded && users.length > 0">
             <th class="w-1">
-                <input type="checkbox" data-ng-click="selectAll()" data-ng-model="selectedAll">
+                <input type="checkbox" data-ng-click="selectAll()" data-ng-model="selectedAll"> Select
             </th>
             <th class="w-12">{{:: 'id' | translate}}</th>
             <th class="w-12">{{:: 'username' | translate}}</th>
@@ -103,6 +103,7 @@
             <th class="w-12">{{:: 'first-name' | translate}}</th>
             <th class="w-1">Enabled</th>
             <th class="w-12">Phone</th>
+            <th class="w-12">Organization</th>
             <th class="w-12">Toms Id</th>
             <th class="w-12">Roles</th>
             <th class="w-12">Systems</th>
@@ -126,15 +127,19 @@
             </td>
             <td class="clip">{{user.phone}}</td>
 
-            <td class="clip" colspan="3" style="padding: 0 0 0 0">
+            <td class="clip" colspan="4" style="padding: 0 0 0 0">
                 <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.access.length > 0">
 
                     <tr data-ng-repeat="access in user.access" >
-                        <td class="clip inner-table__cell" rowspan="{{getEqualTomsId(user.access, access.tomsId)}}"
+                        <td class="clip inner-table__cell" rowspan="{{getCountSystemNames(user.access, access)}}"
+                            data-ng-if="isFirstOrg(user.access, access.organization, access) != ''">
+                            {{isFirstOrg(user.access, access.organization, access)}}
+                        </td>
+                        <td class="clip inner-table__cell" rowspan="{{getCountSystemNames(user.access, access)}}"
                             data-ng-if="isFirstTomsId(user.access, access.tomsId, access) != ''">
                             {{isFirstTomsId(user.access, access.tomsId, access)}}
                         </td>
-                        <td class="clip inner-table__cell" rowspan="{{getEqualRoleName(user.access, access.roleName)}}"
+                        <td class="clip inner-table__cell" rowspan="{{getCountSystemNames(user.access, access)}}"
                             data-ng-if="isFirstRoleName(user.access, access.roleName, access) != ''">
                             {{isFirstRoleName(user.access, access.roleName, access)}}
                         </td>
@@ -145,7 +150,7 @@
                     </tr>
                 </table>
             </td>
-            <td class="kc-action-cell" kc-open="/realms/{{realm.realm}}/users/{{user.id}}?searchRealm={{query.searchRealm}}">{{:: 'edit' | translate}}
+            <td class="kc-action-cell" data-ng-click="editUser(user)">{{:: 'edit' | translate}}
             </td>
             <td class="kc-action-cell" data-ng-click="removeUser(user)">{{:: 'delete' | translate}}</td>
         </tr>

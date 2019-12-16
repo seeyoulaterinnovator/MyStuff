@@ -35,15 +35,12 @@ export default (function() {
   // @todo
 
   // Wrong email and/or phone number
-  const wrongEmail = document.querySelector('.bad_email');
-  const wrongPhone = document.querySelector('.bad_phone');
-
-  if (wrongEmail) {
-    document.getElementById('email').style.borderColor = '#e31e24';
-  }
-  if (wrongPhone) {
-    document.getElementById('phone').style.borderColor = '#e31e24';
-  }
+  let wrongEmail = document.querySelector('.bad_email');
+  let wrongPhone = document.querySelector('.bad_phone');
+  const orgNameField = document.getElementById('orgName');
+  const firstName = document.getElementById('firstName');
+  const emailField = document.getElementById('email');
+  const phoneField = document.getElementById('phone');
 
   const formElement = document.getElementById('registrationForm');
   if (!formElement) return;
@@ -53,16 +50,36 @@ export default (function() {
     mask: '+{7} (000) 000-00-00',
   });
 
+  // Убираем красные рамки инпутов на событии ввода после получения ошибки
+  function cleanBorder() {
+    if (wrongEmail) {
+      wrongEmail.classList.remove('bad_email')
+    }
+    if (wrongPhone) {
+      wrongPhone.classList.remove('bad_phone')
+    }
+    this.style.borderColor = '';
+    this.removeEventListener('input', cleanBorder, false)
+  }
+  if (wrongEmail) {
+    emailField.style.borderColor = '#e31e24';
+    emailField.addEventListener('input', cleanBorder, false)
+  }
+  if (wrongPhone) {
+    phoneField.style.borderColor = '#e31e24';
+    phoneField.addEventListener('input', cleanBorder, false)
+  }
+
   // Создаем объект формы с помощью final-form
   const registered = {};
   const form = createForm({
     onSubmit: () => {},
     initialValues: {
-      orgName: document.getElementById('orgName') && document.getElementById('orgName').value || '',
-      firstName: document.getElementById('firstName') && document.getElementById('firstName').value || '',
+      orgName: orgNameField && orgNameField.value || '',
+      firstName: firstName && firstName.value || '',
       lastName: '-',
-      email: document.getElementById('email') && document.getElementById('email').value || '',
-      phone: document.getElementById('phone') && document.getElementById('phone').value || '',
+      email: emailField && emailField.value || '',
+      phone: phoneField && phoneField.value || '',
       password: '',
       'password-confirm': '',
     },
@@ -185,15 +202,28 @@ export default (function() {
           input.value = value === undefined ? '' : value;
           input
         }
+
         // show/hide errors
+        // Скрываем сообщение об ошибке во время фокуса на ошибочном поле
         if (errorElement) {
           if (touched && error) {
             input.parentElement.classList.add('field--error');
-
-            if (errorElement) errorElement.textContent = error;
+            errorElement.textContent = error;
+            input.addEventListener('focus', (e) => {
+              e.target.parentElement.nextElementSibling.classList.add('hidden')
+            })
+            input.addEventListener('blur', (e) => {
+              e.target.parentElement.nextElementSibling.classList.remove('hidden')
+            })
           } else {
             input.parentElement.classList.remove('field--error');
-            if (errorElement) errorElement.textContent = '';
+            errorElement.textContent = '';
+            input.removeEventListener('focus', (e) => {
+              e.target.parentElement.nextElementSibling.classList.add('hidden')
+            })
+            input.removeEventListener('blur', (e) => {
+              e.target.parentElement.nextElementSibling.classList.remove('hidden')
+            })
           }
         }
       },

@@ -152,8 +152,12 @@ input[type="number"] {
 .g-recaptcha {
   transform-origin: 0 0;
 }
-@media (max-width: 1199px) {
+@media (max-width: 479px) {
   .g-recaptcha {
     padding-bottom: 1rem;
   }
+}
+
+#password, #password-new, #password-confirm {
+  padding-right: 3rem;
 }

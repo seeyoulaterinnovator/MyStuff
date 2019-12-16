@@ -74,9 +74,9 @@ public class ImportSchedule {
                     o.setErrors(null);
                     checkImportUser(importUsersReport.getRealmId(), o.getEmail(), o.getPhone());
                     UserEntity user = createUser(importUsersReport.getRealmId(), o);
-                    createAdminEvent(OperationType.CREATE, user, importUsersReport.getRealmId());
                     createdUsers.getAndIncrement();
                     o.setCreated(true);
+                    o.setUserId(user.getId());
                     if (o.getTomsId() == null || o.getTomsId().isBlank()) {
                         throw new NotFoundException("TomsId is not exist");
                     }
@@ -96,6 +96,7 @@ public class ImportSchedule {
         importUsersReport.setCountCreatedUsers(createdUsers.intValue());
         importUsersReport.setStatus(ImportUsersReportStatus.DONE);
         importUsersReportRepository.updateImportUsersReport(importUsersReport);
+        createAdminEvent(OperationType.CREATE, importUsersReport, importUsersReport.getRealmId());
         log.info(String.format("importing users from file %s is done: countUsers=%s, countCreatedUsers=%s, countClones=%s ",
                 importUsersReport.getName(), importUsersReport.getCountImportUsers(), importUsersReport.getCountCreatedUsers(),
                 importUsersReport.getCountClones()));
@@ -153,7 +154,7 @@ public class ImportSchedule {
         user.setFirstName(importUserData.getFirstName());
         user.setRealmId(realmId);
         user.setEmailVerified(false);
-        user.setEnabled(true);
+        user.setEnabled(false);
         user = userRepository.save(user);
 
         RealmEntity realm = realmRepository.findRealmEntityById(realmId);
@@ -183,18 +184,13 @@ public class ImportSchedule {
         return user;
     }
 
-    private void createAdminEvent(OperationType operationType, UserEntity userEntity, String realmId) {
+    private void createAdminEvent(OperationType operationType, ImportUsersReportEntity report, String realmId) {
         AdminEventEntity adminEvent = new AdminEventEntity();
         adminEvent.setTime(Time.toMillis(Time.currentTime()));
         adminEvent.setRealmId(realmId);
         adminEvent.setOperationType(operationType.name());
         adminEvent.setAuthRealmId(realmId);
-        adminEvent.setResourcePath("schedule/importUsers");
-        try {
-            adminEvent.setRepresentation(JsonSerialization.writeValueAsString(DataMapper.toUserEntityRepresentation(userEntity)));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        adminEvent.setResourcePath("schedule/importUsersReport/" + report.getId());
         adminEvent.setResourceType("USER");
         adminEventRepository.save(adminEvent);
     }

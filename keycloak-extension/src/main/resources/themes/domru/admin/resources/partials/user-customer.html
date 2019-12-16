@@ -21,6 +21,7 @@
             <tr>
                 <th>current select</th>
                 <th>id</th>
+                <th>organization</th>
                 <th>toms</th>
                 <th>dmp</th>
                 <th>role</th>
@@ -32,6 +33,7 @@
             <tr ng-repeat="userPost in userPosts ">
                 <td>{{userPost.selected === true ? "selected" : ""}}</td>
                 <td>{{userPost.id}}</td>
+                <td class="clip">{{userPost.organization}}</td>
                 <td>{{userPost.tomsId}}</td>
                 <td>{{userPost.dmpId}}</td>
                 <td>
@@ -64,6 +66,7 @@
                 <td class="kc-action-cell" data-ng-click="removeUserPost(userPost.id)">{{:: 'delete' | translate}}</td>
             </tr>
             <tr>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td><input class="form-control" id="newTomsId" ng-model="newAccess.tomsId" type="text"/></td>

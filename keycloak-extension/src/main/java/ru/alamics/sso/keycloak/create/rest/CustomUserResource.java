@@ -16,6 +16,8 @@ import org.keycloak.models.*;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.services.ErrorResponse;
+import org.keycloak.services.resources.admin.AdminAuth;
+import ru.alamics.sso.property.ApplicationProperties;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.resources.account.AccountFormService;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
@@ -245,6 +247,36 @@ public class CustomUserResource {
     }
 
     @POST
+    @Path("/downloadImportUsersTemplate/{type}")
+    @NoCache
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response downloadImportUsersTemplate(@PathParam("type") String type) {
+        log.info("Download import users template");
+        try {
+            if (type.equalsIgnoreCase("xlsx")) {
+                byte[] bytes = CustomUserResource.class.getResourceAsStream("/template/template.xlsx").readAllBytes();
+                Response.ResponseBuilder response = Response.ok((Object) bytes);
+                response.header("Content-Disposition", "attachment; filename=\"template.xlsx" + "\"");
+                response.header("filename", "template.xlsx");
+                response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
+                return response.build();
+            }
+
+            byte[] bytes = CustomUserResource.class.getResourceAsStream("/template/template.csv").readAllBytes();
+            Response.ResponseBuilder response = Response.ok((Object) bytes);
+            response.header("Content-Disposition", "attachment; filename=\"template.csv" + "\"");
+            response.header("filename", "template.csv");
+            response.header("Content-Type", MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8");
+            return response.build();
+        } catch (IOException e) {
+            log.error("Could not download import users template", e);
+            return JsonResponse.fail()
+                    .message("Error writing file")
+                    .build();
+        }
+    }
+
+    @POST
     @Path("/downloadImportUsersReport/{id}")
     @NoCache
     @Consumes(MediaType.APPLICATION_JSON)
@@ -275,6 +307,18 @@ public class CustomUserResource {
                     .message("Error writing file")
                     .build();
         }
+    }
+
+    @POST
+    @Path("/activateImportUsersReport/{id}")
+    @NoCache
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response activateImportUsersFromReport(@PathParam("id") String importId) {
+        log.info("Start activate Import Users From Report:{}", importId);
+        userService.activateImportUsersFromReport(importId);
+        log.info("End activate Import Users From Report:{}", importId);
+        return JsonResponse.success()
+                .build();
     }
 
     @Path("impersonation/{id}")
