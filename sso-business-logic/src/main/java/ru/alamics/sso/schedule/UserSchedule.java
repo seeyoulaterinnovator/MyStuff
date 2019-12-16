@@ -57,32 +57,30 @@ public class UserSchedule {
     private AdminEventRepository adminEventRepository;
     @EJB
     private ApplicationProperties properties;
-
     @Resource
-    TimerService timerService;
+    private TimerService timerService;
 
     @PostConstruct
     private void init() {
         final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
-        log.info("Timer:{} is created", TIMER_NAME);
         try {
             final long intervalDuration = Long.parseLong(properties.getProperty("application.schedule.user.milliseconds"));
-            timerService.createIntervalTimer(0, DEFAULT_INTERVAL_DURATION, timerConfig);
-            log.error("User schedule timer interval duration set to value=" + intervalDuration + " milliseconds ");
+            timerService.createIntervalTimer(intervalDuration, intervalDuration, timerConfig);
+            log.info("Timer:{} is created, interval duration set to value={} milliseconds ", TIMER_NAME, intervalDuration);
         } catch (Exception e) {
-            timerService.createIntervalTimer(0, DEFAULT_INTERVAL_DURATION, timerConfig);
-            log.error("Error read configuration! User schedule timer interval duration set to default value=" +
-                    DEFAULT_INTERVAL_DURATION + " milliseconds");
+            timerService.createIntervalTimer(DEFAULT_INTERVAL_DURATION, DEFAULT_INTERVAL_DURATION, timerConfig);
+            log.warn("Timer:{} is created; Error read configuration, interval duration set to default value={} milliseconds",
+                    TIMER_NAME, DEFAULT_INTERVAL_DURATION);
         }
     }
 
     @Timeout
     public void schedule(Timer timer) {
-        if (!TIMER_NAME.equals(timer.getInfo())) {
+        if (!TIMER_NAME.equals(timer.getInfo().toString())) {
             return;
         }
 
-        log.info("Timer:{}", timer.getInfo());
+        log.info("Schedule by timer:{}", timer.getInfo());
         log.info("start UserSchedule");
         findExpiredPassword();
         for (String realm : SETTINGS_REALM_NAMES_SCHEDULE) {
