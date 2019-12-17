@@ -9,6 +9,14 @@
       font-size: 18px;
     }
   }
+  &_hoverable {
+   color: black;
+   opacity: .5;
+   border-bottom-color: black;
+    &:hover {
+      opacity: .8;
+    }
+  }
 }
 
 .generate-btn {
