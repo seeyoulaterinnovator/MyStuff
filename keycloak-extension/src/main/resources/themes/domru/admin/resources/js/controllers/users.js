@@ -36,7 +36,6 @@ module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, c
     }
 
     $scope.updateClientData = function () {
-        '/realms/:realm/users-toms/role-mappings/:userId/clients/:client/composite'
         $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/role-mappings/' + $scope.user.id + '/clients/' + $scope.targetClient.id + '/available').then(function (data) {
             $scope.clientRoles = data.data;
             $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/role-mappings/' + $scope.user.id + '/clients/' + $scope.targetClient.id + '/composite').then(function (data) {
@@ -60,7 +59,6 @@ module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, c
             $scope.selectRealmRoles = [];
             if ($scope.targetClient) {
                 console.log('load available');
-                $scope.updateClientData();
                 $scope.selectedClientRoles = [];
                 $scope.selectedClientMappings = [];
             }
@@ -78,7 +76,6 @@ module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, c
             $scope.selectRealmRoles = [];
             if ($scope.targetClient) {
                 console.log('load available');
-                $scope.updateClientData();
                 $scope.selectedClientRoles = [];
                 $scope.selectedClientMappings = [];
             }
@@ -93,8 +90,6 @@ module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, c
             $scope.updateClientData();
             $scope.selectedClientRoles = [];
             $scope.selectedClientMappings = [];
-            $scope.realmComposite = CompositeRealmRoleMapping.query({realm: $scope.query.searchRealm, userId: user.id});
-            $scope.realmRoles = AvailableRealmRoleMapping.query({realm: $scope.query.searchRealm, userId: user.id});
             Notifications.success("Role mappings updated.");
         });
     };
@@ -106,8 +101,6 @@ module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, c
             $scope.updateClientData();
             $scope.selectedClientRoles = [];
             $scope.selectedClientMappings = [];
-            $scope.realmComposite = CompositeRealmRoleMapping.query({realm: $scope.query.searchRealm, userId: user.id});
-            $scope.realmRoles = AvailableRealmRoleMapping.query({realm: $scope.query.searchRealm, userId: user.id});
             Notifications.success("Role mappings updated.");
         });
     };
@@ -130,10 +123,16 @@ module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, c
 
 });
 
-module.controller('UserSessionsCtrl', function ($scope, realm, user, sessions, UserSessions, UserLogout, UserSessionLogout, Notifications) {
+module.controller('UserSessionsCtrl', function ($scope, realm, user, sessions, UserSessions, UserLogout,
+                                                UserSessionLogout, Notifications, $location) {
     $scope.realm = realm;
     $scope.user = user;
     $scope.sessions = sessions;
+    $scope.query = {};
+    $scope.query.searchRealm = realm.realm;
+    if ($location.search().searchRealm) {
+        $scope.query.searchRealm = $location.search().searchRealm;
+    }
 
     $scope.logoutAll = function () {
         UserLogout.save({realm: realm.realm, user: user.id}, function () {
@@ -159,6 +158,11 @@ module.controller('UserFederatedIdentityCtrl', function ($scope, $location, real
     $scope.realm = realm;
     $scope.user = user;
     $scope.federatedIdentities = federatedIdentities;
+    $scope.query = {};
+    $scope.query.searchRealm = realm.realm;
+    if ($location.search().searchRealm) {
+        $scope.query.searchRealm = $location.search().searchRealm;
+    }
 
     $scope.hasAnyProvidersToCreate = function () {
         return realm.identityProviders.length - $scope.federatedIdentities.length > 0;
@@ -220,10 +224,17 @@ module.controller('UserFederatedIdentityAddCtrl', function ($scope, $location, r
 
 });
 
-module.controller('UserConsentsCtrl', function ($scope, realm, user, userConsents, UserConsents, Notifications) {
+module.controller('UserConsentsCtrl', function ($scope, realm, user, userConsents, UserConsents, Notifications,
+                                                $location) {
     $scope.realm = realm;
     $scope.user = user;
     $scope.userConsents = userConsents;
+
+    $scope.query = {};
+    $scope.query.searchRealm = realm.realm;
+    if ($location.search().searchRealm) {
+        $scope.query.searchRealm = $location.search().searchRealm;
+    }
 
     $scope.revokeConsent = function (clientId) {
         UserConsents.delete({realm: realm.realm, user: user.id, client: clientId}, function () {
@@ -273,7 +284,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             if ($scope.query.searchRealm === '' || !$scope.userRealms.some(function (realm) {
                 return realm === $scope.query.searchRealm
             })) {
-                if (realm.realm === 'manager') {
+                if (realm.realm === 'manager' && $scope.userRealms.length === 1) {
                     $scope.query.searchRealm = $scope.userRealms[0];
                 } else {
                     $scope.query.searchRealm = realm.realm;
@@ -966,12 +977,19 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
     }
 });
 
-module.controller('UserCredentialsCtrl', function ($scope, realm, user, $route, RequiredActions, User, UserExecuteActionsEmail, UserCredentials, Notifications, Dialog, TimeUnit2) {
+module.controller('UserCredentialsCtrl', function ($scope, realm, user, $route, RequiredActions, User,
+                                                   UserExecuteActionsEmail, UserCredentials, Notifications, Dialog,
+                                                   TimeUnit2, $location) {
     console.log('UserCredentialsCtrl');
 
     $scope.realm = realm;
     $scope.user = angular.copy(user);
     $scope.temporaryPassword = true;
+    $scope.query = {};
+    $scope.query.searchRealm = realm.realm;
+    if ($location.search().searchRealm) {
+        $scope.query.searchRealm = $location.search().searchRealm;
+    }
 
     $scope.isTotp = false;
     if (!!user.totp) {
@@ -1100,6 +1118,11 @@ module.controller('UserFederationCtrl', function ($scope, $location, $route, rea
     $scope.realm = realm;
     $scope.providers = serverInfo.componentTypes['org.keycloak.storage.UserStorageProvider'];
     $scope.instancesLoaded = false;
+    $scope.query = {};
+    $scope.query.searchRealm = realm.realm;
+    if ($location.search().searchRealm) {
+        $scope.query.searchRealm = $location.search().searchRealm;
+    }
 
     if (!$scope.providers) $scope.providers = [];
 
@@ -1410,7 +1433,9 @@ function removeGroupMember(groups, member) {
     }
 }
 
-module.controller('UserGroupMembershipCtrl', function ($scope, $q, realm, user, UserGroupMembership, UserGroupMembershipCount, UserGroupMapping, Notifications, Groups, GroupsCount) {
+module.controller('UserGroupMembershipCtrl', function ($scope, $q, realm, user, UserGroupMembership,
+                                                       UserGroupMembershipCount, UserGroupMapping, Notifications,
+                                                       Groups, GroupsCount, $location) {
     $scope.realm = realm;
     $scope.user = user;
     $scope.groupList = [];
@@ -1428,6 +1453,12 @@ module.controller('UserGroupMembershipCtrl', function ($scope, $q, realm, user, 
     $scope.pageSize = 20;
     $scope.numberOfPages = 1;
     $scope.numberOfMembershipPages = 1;
+
+    $scope.query = {};
+    $scope.query.searchRealm = realm.realm;
+    if ($location.search().searchRealm) {
+        $scope.query.searchRealm = $location.search().searchRealm;
+    }
 
     var refreshCompleteUserGroupMembership = function () {
         var queryParams = {
@@ -2215,6 +2246,11 @@ module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, 
     $scope.customerRoles = [];
     $scope.systemRoles = [];
     $scope.duplicatedPhone = false;
+    $scope.query = {};
+    $scope.query.searchRealm = realm.realm;
+    if ($location.search().searchRealm) {
+        $scope.query.searchRealm = $location.search().searchRealm;
+    }
 
     $scope.init = function () {
         $http.get(authUrl + '/realms/' + realm.realm + '/user-post/users/' + user.id).then(function (data) {
