@@ -1,6 +1,20 @@
 <script type="text/javascript">
-    const isIframe = (location.search.indexOf('hiddenHeader%3Dtrue') > 0) || (location.search.indexOf('hiddenHeader=true') > 0);
-    if (!isIframe) {
+
+    var isFramed = false;
+    try {
+        isFramed = window !== window.top || document !== top.document || self.location !== top.location;
+    } catch (e) {
+        isFramed = true;
+    }
+    console.log("isFramed  " + isFramed);
+
+    if (isFramed) {
+
+        document.getElementById('page-header').style.display = 'none';
+        document.getElementById('page-footer').style.display = 'none';
+        document.getElementById('content').style.padding = '0';
+    } else {
+
         let script = document.createElement('script');
         script.id = "chat-script";
         script.type = 'text/javascript';
