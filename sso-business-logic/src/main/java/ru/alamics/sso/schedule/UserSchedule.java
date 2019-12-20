@@ -3,7 +3,6 @@ package ru.alamics.sso.schedule;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.common.util.Time;
-import org.keycloak.email.EmailException;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.jpa.AdminEventEntity;
 import org.keycloak.models.PasswordPolicy;
@@ -24,7 +23,10 @@ import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.settings.SettingsDto;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.*;
+import javax.ejb.DependsOn;
+import javax.ejb.EJB;
+import javax.ejb.Schedule;
+import javax.ejb.Singleton;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -120,27 +122,23 @@ public class UserSchedule {
             RealmModel realm = realmRepository.findRealmById(user.getRealmId());
             ClientEntity client = clientRepository.findClientById(CLIENT_ID, realm.getName());
             UserModel userModel = new UserAdapter(null, realm, null, user);
-            try {
-                if (notification.getType() == NotificationType.ABSENCE_NOTIFICATION) {
-                    var prepareBlockNotification = prepareBlockNotification(realm.getName(), getClientLink(client));
-                    prepareBlockNotification.realmModel(realm)
-                            .user(userModel);
-                    sender.send(prepareBlockNotification.build());
-                } else if (notification.getType() == NotificationType.ABSENCE_BLOCKING) {
-                    var bockNotification = bockNotification();
-                    bockNotification.realmModel(realm)
-                            .user(userModel);
-                    sender.send(bockNotification.build());
-                    user.setEnabled(false);
-                    createAdminEvent(OperationType.UPDATE, user, realm);
-                } else if (notification.getType() == NotificationType.PASSWORD_EXPIRED) {
-                    var passwordExpired = passwordExpired(getClientLink(client));
-                    passwordExpired.realmModel(realm)
-                            .user(userModel);
-                    sender.send(passwordExpired.build());
-                }
-            } catch (EmailException e) {
-                log.error("sendEmailError:{}", user.getEmail());
+            if (notification.getType() == NotificationType.ABSENCE_NOTIFICATION) {
+                var prepareBlockNotification = prepareBlockNotification(realm.getName(), getClientLink(client));
+                prepareBlockNotification.realmModel(realm)
+                        .user(userModel);
+                sender.send(prepareBlockNotification.build());
+            } else if (notification.getType() == NotificationType.ABSENCE_BLOCKING) {
+                var bockNotification = bockNotification();
+                bockNotification.realmModel(realm)
+                        .user(userModel);
+                sender.send(bockNotification.build());
+                user.setEnabled(false);
+                createAdminEvent(OperationType.UPDATE, user, realm);
+            } else if (notification.getType() == NotificationType.PASSWORD_EXPIRED) {
+                var passwordExpired = passwordExpired(getClientLink(client));
+                passwordExpired.realmModel(realm)
+                        .user(userModel);
+                sender.send(passwordExpired.build());
             }
         }
         log.info("stop={}", DEBUG_STR);
@@ -183,7 +181,7 @@ public class UserSchedule {
                 .bodyTemplate(template);
     }
 
-    private String getClientLink(ClientEntity client){
+    private String getClientLink(ClientEntity client) {
         if (client != null) {
             return client.getRedirectUris().stream().findFirst().get();
         }
