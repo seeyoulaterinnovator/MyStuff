@@ -57,7 +57,7 @@ public class EmailSender {
                                     emailModel.getBodyTemplate(), emailModel.getBodyAttributes(),
                                     emailModel.getTheme(), emailModel.getLocale());
                             emailSenderProvider.send(emailModel.getRealmModel().getSmtpConfig(), emailModel.getUser(), template.getSubject(), template.getTextBody(), template.getHtmlBody());
-                            createEmailEvent(OperationType.ACTION, emailModel);
+                            createEmailEvent(OperationType.ACTION, emailModel, template.subject);
                             log.info("send to " + emailModel.getUser().getEmail() + " is finished");
                             Thread.sleep(THREAD_SLEEP_MILLISECONDS);
                         }
@@ -78,16 +78,18 @@ public class EmailSender {
         this.freeMarkerUtil = new FreeMarkerUtil();
     }
 
-    private void createEmailEvent(OperationType operationType, EmailModel emailModel) {
+    private void createEmailEvent(OperationType operationType, EmailModel emailModel, String emailTheme) {
         AdminEventEntity adminEvent = new AdminEventEntity();
         adminEvent.setTime(Time.toMillis(Time.currentTime()));
         adminEvent.setRealmId(emailModel.getRealmModel().getName());
         adminEvent.setOperationType(operationType.name());
         adminEvent.setAuthRealmId(emailModel.getRealmModel().getName());
-        adminEvent.setResourcePath("sending email");
+        adminEvent.setResourcePath("sending_email/" + emailModel.getUser().getId());
         Map<String, Object> repr = new HashMap<>();
         repr.put("action", "send_account_data");
+        repr.put("userId", emailModel.getUser().getId());
         repr.put("email", emailModel.getUser().getEmail());
+        repr.put("emailTheme", emailTheme);
         try {
             adminEvent.setRepresentation(JsonSerialization.writeValueAsString(repr));
         } catch (IOException e) {
