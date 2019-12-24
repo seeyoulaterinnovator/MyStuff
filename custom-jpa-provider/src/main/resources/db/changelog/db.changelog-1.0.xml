@@ -414,4 +414,38 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="31" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <not> <tableExists tableName="CUSTOMER" /> </not>
+        </preConditions>
+        <createTable tableName="CUSTOMER">
+            <column name="id" type="varchar(30)">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="name" type="varchar(1024)" />
+        </createTable>
+    </changeSet>
+
+    <changeSet id="32" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="CUSTOMER" />
+            <tableExists tableName="USER_POST" />
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="USER_POST" foreignKeyName="FK_USER_POST_TO_CUSTOMER" />
+            </not>
+        </preConditions>
+
+        <modifyDataType tableName="USER_POST" columnName="TOMS_ID" newDataType="varchar(30)" />
+
+        <sql>
+            ALTER TABLE customer CHANGE id id varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            ALTER TABLE user_post CHANGE TOMS_ID TOMS_ID varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            insert into CUSTOMER(ID) select distinct p.toms_id from USER_POST p;
+        </sql>
+
+        <addForeignKeyConstraint baseTableName="USER_POST" baseColumnNames="TOMS_ID"
+                                 constraintName="FK_USER_POST_TO_CUSTOMER"
+                                 referencedTableName="CUSTOMER" referencedColumnNames="ID" />
+    </changeSet>
+
 </databaseChangeLog>

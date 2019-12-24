@@ -18,7 +18,6 @@ import javax.ejb.Stateless;
 import javax.ws.rs.core.MultivaluedMap;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_TOMS_NAME;
 
@@ -45,7 +44,7 @@ public class UserRole {
 
         var userPosts = postRepository.getAllUserPostByUserId(user.getId());
         userPosts.forEach(o -> {
-            o.setSelected(o.getTomsId().equals(tomsId) && o.getRole().getName().equals(roleName));
+            o.setSelected(o.getCustomer().getId().equals(tomsId) && o.getRole().getName().equals(roleName));
         });
 
         var realm = context.getRealm();
@@ -101,6 +100,6 @@ public class UserRole {
             }
         });
 
-        user.setAttribute(ATTR_TOMS_NAME, Collections.singletonList(activePost.getTomsId()));
+        user.setAttribute(ATTR_TOMS_NAME, Collections.singletonList(activePost.getCustomer().getId()));
     }
 }

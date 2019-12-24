@@ -153,6 +153,7 @@ public class UserRepository {
                         "       UE.ENABLED    as enabled,\n" +
                         "       UP.id         as user_post_id,\n" +
                         "       UP.TOMS_ID    as toms_id,\n" +
+                        "       C.NAME        as org,\n" +
                         "       UP.DMP_ID     as dmp_id,\n" +
                         "       UP.ROLE_ID    as role_id,\n" +
                         "       UPR.NAME      as role_name,\n" +
@@ -168,6 +169,7 @@ public class UserRepository {
                         "         left join USERPOST_EXT_SYSTEM_ROLE UESR on UP.ID = UESR.USER_POST_ID\n" +
                         "         left join EXT_SYSTEM_ROLE ESR on UESR.EXT_SYSTEM_ROLE_ID = ESR.ID\n" +
                         "         left join EXTERNAL_SYSTEM ES on ESR.SYSTEM_ID = ES.ID\n" +
+                        "         left join CUSTOMER C on C.ID = UP.TOMS_ID\n" +
                         "WHERE UE.REALM_ID = :realm\n" +
                         "  AND CASE\n" +
                         "          WHEN :search is not null and :search != '' then (\n" +

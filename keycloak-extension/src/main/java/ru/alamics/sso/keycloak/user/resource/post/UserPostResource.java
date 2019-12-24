@@ -4,14 +4,11 @@ import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.keycloak.models.KeycloakSession;
-import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostEditRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.service.UserPostService;
-import ru.alamics.sso.registration.tbapi.TbapiService;
-import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -112,7 +109,7 @@ public class UserPostResource {
     public Response getUserPost(@PathParam("id") String userId) {
         try {
             return JsonResponse.success()
-                    .addResult("user_post", DataMapper.getUserPostResponsesWithOrganizations(userPostService.getUserPost(userId)))
+                    .addResult("user_post", userPostService.getUserPost(userId))
                     .build();
         } catch (NotFoundException e) {
             return JsonResponse.fail()

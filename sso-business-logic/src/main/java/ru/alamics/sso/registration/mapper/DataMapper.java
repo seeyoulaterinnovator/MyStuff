@@ -1,8 +1,6 @@
 package ru.alamics.sso.registration.mapper;
 
-import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
-import org.keycloak.representations.account.UserRepresentation;
 import ru.alamics.sso.keycloak.entity.*;
 import ru.alamics.sso.registration.dto.*;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
@@ -23,7 +21,7 @@ public class DataMapper {
         UserEntity userEntity = new UserEntity();
         userEntity.setId(userPostRequest.getUserId());
         userPost.setUser(userEntity);
-        userPost.setTomsId(userPostRequest.getTomsId());
+        userPost.setCustomer(Customer.builder().id(userPostRequest.getTomsId()).name(userPostRequest.getOrgName()).build());
         userPost.setDmpId(userPostRequest.getDmpId());
         UserPostRoleEntity userPostRole = new UserPostRoleEntity();
         userPostRole.setId(userPostRequest.getRoleId());
@@ -56,7 +54,8 @@ public class DataMapper {
                 .id(userPost.getId())
                 .userId(userPost.getUser().getId())
                 .userRole(toUserPostRoleDto(userPost.getRole()))
-                .tomsId(userPost.getTomsId())
+                .tomsId(userPost.getCustomer().getId())
+                .organization(userPost.getCustomer().getName())
                 .dmpId(userPost.getDmpId())
                 .selected(userPost.isSelected())
                 .systemRoles(toExternalSystemRoleDtos(externalSystemRoles))
