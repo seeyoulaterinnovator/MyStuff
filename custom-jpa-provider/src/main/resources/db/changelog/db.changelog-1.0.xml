@@ -423,6 +423,9 @@
                 <constraints nullable="false" primaryKey="true" />
             </column>
             <column name="name" type="varchar(1024)" />
+            <column name="update_time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
 
@@ -440,7 +443,7 @@
         <sql>
             ALTER TABLE customer CHANGE id id varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
             ALTER TABLE user_post CHANGE TOMS_ID TOMS_ID varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-            insert into CUSTOMER(ID) select distinct p.toms_id from USER_POST p;
+            insert into CUSTOMER(ID, UPDATE_TIME) select distinct p.toms_id, CURRENT_TIMESTAMP from USER_POST p;
         </sql>
 
         <addForeignKeyConstraint baseTableName="USER_POST" baseColumnNames="TOMS_ID"
