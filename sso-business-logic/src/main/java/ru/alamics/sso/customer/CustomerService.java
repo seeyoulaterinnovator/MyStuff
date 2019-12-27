@@ -28,7 +28,10 @@ public class CustomerService {
         if (customer == null) {
             return null;
         }
-        return null;//new Customer(customer.getTomsId(), customer.getName());
+        return Customer.builder()
+                .id(customer.getTomsId())
+                .name(customer.getName())
+                .build();
     }
 
     private CustomerDto toCustomerDto(Customer customer) {

@@ -1,0 +1,10 @@
+<jboss-web>
+    <resource-ref>
+        <res-ref-name>infinispan/custom_container</res-ref-name>
+        <lookup-name>java:jboss/infinispan/container/custom_container</lookup-name>
+    </resource-ref>
+    <resource-ref>
+        <res-ref-name>infinispan/custom_container/custom_cache</res-ref-name>
+        <lookup-name>java:jboss/infinispan/cache/custom_container/custom_cache</lookup-name>
+    </resource-ref>
+</jboss-web>
