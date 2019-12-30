@@ -16,7 +16,7 @@ import java.util.Set;
 @Slf4j
 public class UserPostCache implements CustomCache<UserPostResponse> {
 
-    @Resource(lookup = "infinispan/custom_container/custom_cache")
+    @Resource(lookup = "infinispan/custom_container/user_post_cache")
     private Cache<String, Set<UserPostResponse>> cache;
 
     @Override
@@ -30,7 +30,21 @@ public class UserPostCache implements CustomCache<UserPostResponse> {
     }
 
     @Override
-    public Set<UserPostResponse> getAll(String userId) {
+    public Set<UserPostResponse> get(String userId) {
         return cache.get(userId);
+    }
+
+    @Override
+    public void clear() {
+        cache.clear();
+    }
+
+    @Override
+    public void clearById(String userId) {
+        Set<UserPostResponse> posts = cache.get(userId);
+        if (posts == null) {
+            return;
+        }
+        posts.clear();
     }
 }

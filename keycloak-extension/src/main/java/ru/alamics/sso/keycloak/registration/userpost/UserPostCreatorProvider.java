@@ -8,8 +8,8 @@ import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import ru.alamics.sso.keycloak.facade.UserPostFacade;
 import ru.alamics.sso.registration.dto.UserPostRequest;
-import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.user.mapper.UserMapper;
 
 import javax.naming.InitialContext;
@@ -18,11 +18,11 @@ import javax.naming.NamingException;
 @Slf4j
 public class UserPostCreatorProvider implements FormAction {
     public static final Long ROLE_ID = 1L;     //Соотаветсвует ЛПР
-    private UserPostService userPostService;
+    private UserPostFacade userPostFacade;
 
     public UserPostCreatorProvider() {
         try {
-            this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
+            this.userPostFacade = (UserPostFacade) new InitialContext().lookup("java:global/domru-sso/" + UserPostFacade.class.getSimpleName());
         } catch (NamingException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
@@ -44,7 +44,7 @@ public class UserPostCreatorProvider implements FormAction {
         UserPostRequest userPostRequest = UserMapper.toUserPostRequest(context);
         if (userPostRequest != null && userPostRequest.getTomsId() != null) {
             userPostRequest.setRoleId(ROLE_ID);
-            userPostService.addUserPostAndSystemRole(userPostRequest);
+            userPostFacade.addUserPostAndSystemRole(userPostRequest);
         }
     }
 

@@ -134,18 +134,19 @@ public class UserPostService {
         return externalSystemRole.getId();
     }
 
-    public void addUserPostAndSystemRole(UserPostRequest userPostRequest) {
+    public UserPostResponse addUserPostAndSystemRole(UserPostRequest userPostRequest) {
         try {
             UserPostResponse userPost = save(userPostRequest);
             for (ExternalSystemRoleDto systemRoleDto : getExternalSystemRoles()) {
                 ExternalSystemRoleRequest systemRole = new ExternalSystemRoleRequest();
                 systemRole.setUserPostId(userPost.getId());
                 systemRole.setSystemRoleId(systemRoleDto.getId());
-                addSystemRole(systemRole);
+                return addSystemRole(systemRole);
             }
         } catch (NotFoundException e) {
             log.error(e.getMessage(), e);
         }
+        return null;
     }
 
     public List<UserPostEntity> getUserPostByToms(String userId, String tomsId) {

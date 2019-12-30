@@ -4,6 +4,7 @@ import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.keycloak.models.KeycloakSession;
+import ru.alamics.sso.keycloak.facade.UserPostFacade;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostEditRequest;
@@ -24,11 +25,13 @@ public class UserPostResource {
 
     protected KeycloakSession session;
     private UserPostService userPostService;
+    private UserPostFacade userPostFacade;
 
     public UserPostResource(KeycloakSession session) {
         this.session = session;
         try {
             this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
+            this.userPostFacade = (UserPostFacade) new InitialContext().lookup("java:global/domru-sso/" + UserPostFacade.class.getSimpleName());
         } catch (NamingException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
@@ -195,5 +198,27 @@ public class UserPostResource {
                     .message(e.getMessage())
                     .build();
         }
+    }
+
+    @POST
+    @Path("/clear-cache")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response clearCache() {
+        userPostFacade.clearCache();
+        return JsonResponse.success()
+                .build();
+    }
+
+    @POST
+    @Path("/clear-cache/{userId}")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response clearCacheByUserId(@PathParam("userId") String userId) {
+        userPostFacade.clearCacheByUserId(userId);
+        return JsonResponse.success()
+                .build();
     }
 }

@@ -26,13 +26,11 @@ import static ru.alamics.sso.registration.model.UserConstants.*;
 public class AttributesForm implements Authenticator {
     private static final String FORM = "attributes.ftl";
     private final UserRole role;
-    private UserFindService userFindService;
     private UserPostFacade userPostFacade;
 
     public AttributesForm(UserRole role) {
         this.role = role;
         try {
-            this.userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
             this.userPostFacade = (UserPostFacade) new InitialContext().lookup("java:global/domru-sso/" + UserPostFacade.class.getSimpleName());
         } catch (NamingException e) {
             log.error(e.getMessage(), e);

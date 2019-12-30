@@ -370,7 +370,7 @@
             </cache-container>
 
             <cache-container name="custom_container">
-                <local-cache name="custom_cache">
+                <local-cache name="user_post_cache">
                     <object-memory size="10000"/>
                     <expiration max-idle="100000"/>
                 </local-cache>

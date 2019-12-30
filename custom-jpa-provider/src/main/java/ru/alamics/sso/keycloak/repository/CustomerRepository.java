@@ -16,9 +16,13 @@ public class CustomerRepository {
     private EntityManager em;
 
     public Customer save(Customer customer) {
-        if (findByTomsId(customer.getId()) == null) {
+        Customer customerInDb = findByTomsId(customer.getId());
+        if (customerInDb == null) {
             em.persist(customer);
         } else {
+            if (customerInDb.getName() != null && (customer.getName() == null || customer.getName().isBlank())) {
+                customer.setName(customerInDb.getName());
+            }
             em.merge(customer);
         }
         em.flush();
