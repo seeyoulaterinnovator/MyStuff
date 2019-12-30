@@ -2,8 +2,6 @@ package ru.alamics.sso.registration.tbapi;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import ru.alamics.sso.cache.TbapiCache;
-import ru.alamics.sso.cache.impl.TbapiCacheImpl;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
@@ -29,7 +27,6 @@ public class TbapiService {
     ObjectMapper jacksonMapper = new ObjectMapper();
 
     private final TbapiRemoteService remoteService;
-    private final TbapiCache cache = TbapiCacheImpl.getInstance();
 
     public TbapiService(TbapiRemoteService remoteService) {
         this.remoteService = remoteService;
