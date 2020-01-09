@@ -4,17 +4,19 @@ import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
-import org.keycloak.models.*;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.ModelDuplicateException;
+import org.keycloak.models.ModelException;
+import org.keycloak.models.UserModel;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.resources.admin.AdminAuth;
-import ru.alamics.sso.property.ApplicationProperties;
+import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.user.FileServiceException;
 import ru.alamics.sso.user.ImportUsersReportService;
 import ru.alamics.sso.user.UserService;
 import ru.alamics.sso.user.UserServiceImpl;
 import ru.alamics.sso.user.model.*;
-import ru.alamics.sso.keycloak.response.JsonResponse;
-import ru.alamics.sso.registration.FoundException;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.naming.InitialContext;
@@ -25,7 +27,9 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 @Slf4j
 public class CustomUserResource {

@@ -4,7 +4,7 @@ import java.io.File;
 
 public class StandResolver {
 
-    public static final EStand ENV =  notNull(System.getenv("SITE"), EStand.LOCAL); // площадка
+    public static final EStand ENV = notNull(System.getenv("SITE"), EStand.LOCAL); // площадка
     private static final boolean BATTLE = ENV.isBattle() || System.getenv("BATTLE") != null;
 
     public static final String CONFIG_FOLDER = "config";

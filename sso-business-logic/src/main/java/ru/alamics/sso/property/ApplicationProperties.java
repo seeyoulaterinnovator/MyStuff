@@ -1,9 +1,8 @@
 package ru.alamics.sso.property;
 
-import ru.alamics.sso.keycloak.entity.Settings;
-import ru.alamics.sso.keycloak.repository.SettingsRepository;
-import ru.alamics.sso.registration.mapper.DataMapper;
-import ru.alamics.sso.settings.SettingsDto;
+import lombok.extern.slf4j.Slf4j;
+import ru.alamics.sso.keycloak.repository.AppPropertyRepository;
+import ru.alamics.sso.util.StandResolver;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -11,53 +10,36 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Duration;
 import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 
 @Singleton
 @Startup
+@Slf4j
 public class ApplicationProperties {
     private Properties properties;
-
     @EJB
-    private SettingsRepository repository;
-
-
-    public long getSettingsValue(final PropertyConstants property, final String realmId) {
-        final String keyName = property.getKey();
-        Settings settings = repository.getSettings(keyName, realmId);
-        long ret = -1;
-        if(settings != null) {
-            ret = TimeUnit.SECONDS.convert(Long.parseLong(settings.getValue()), settings.getUnit());
-        }
-        return ret;
-    }
+    private AppPropertyRepository propertyRepository;
 
     public String getProperty(final String name) {
-        String envProperty = System.getenv(name);
-        String vmOpts = System.getProperty(name);
-        String ret;
-        if(envProperty != null) {
-            ret = envProperty;
-        } else if(vmOpts != null) {
-            ret = vmOpts;
-        } else {
-            ret = this.properties.getProperty(name);
-        }
-        return ret;
-    }
+        String result = System.getenv(name);
 
-    public SettingsDto getSetting(final PropertyConstants property, final String realmId){
-        final String keyName = property.getKey();
-        return DataMapper.toDto(repository.getSettings(keyName, realmId));
+        if (result == null) {
+            result = System.getProperty(name);
+        }
+        if (result == null) {
+            result = this.properties.getProperty(name);
+        }
+        if (result == null) {
+            result = propertyRepository.findByName(name).getValue();
+        }
+        return result;
     }
 
     @PostConstruct
     public void init() throws IOException {
-        final InputStream stream = ApplicationProperties.class.getResourceAsStream("/application.properties");
+        final String appPropResPath = "/application-" + StandResolver.ENV.name().toLowerCase() + ".properties";
+        log.info("Initializing app properties file:\"{}\"", appPropResPath);
+        final InputStream stream = ApplicationProperties.class.getResourceAsStream(appPropResPath);
         this.properties = new Properties();
         this.properties.load(stream);
     }

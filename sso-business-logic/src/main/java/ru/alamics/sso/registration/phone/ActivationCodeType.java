@@ -1,25 +1,25 @@
 package ru.alamics.sso.registration.phone;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.alamics.sso.property.ApplicationProperties;
-import ru.alamics.sso.property.PropertyConstants;
+import ru.alamics.sso.settings.SettingConstants;
+import ru.alamics.sso.settings.SettingsService;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import static ru.alamics.sso.property.PropertyConstants.*;
+import static ru.alamics.sso.settings.SettingConstants.*;
 
 @Slf4j
-public enum  ActivationCodeType {
+public enum ActivationCodeType {
     CODE_TO_EMAIL(4, 300L, EXPIRE_INCOMING_CALL_EMAIL_CODE),
     CODE_BY_PHONE_NUMBER(4, 20L, EXPIRE_INCOMING_CALL_CODE),
     CODE_TO_SMS(6, 300L, EXPIRE_SMS_VIBER_CODE);
 
     private final int lengthCode;
     private long expiredSeconds;
-    private PropertyConstants propertyConstant;
+    private SettingConstants propertyConstant;
 
-    ActivationCodeType(int lengthCode, long expiredSeconds, PropertyConstants propertyConstant) {
+    ActivationCodeType(int lengthCode, long expiredSeconds, SettingConstants propertyConstant) {
         this.lengthCode = lengthCode;
         this.expiredSeconds = expiredSeconds;
         this.propertyConstant = propertyConstant;
@@ -48,16 +48,16 @@ public enum  ActivationCodeType {
         this.expiredSeconds = expiredSeconds;
     }
 
-    public PropertyConstants getPropertyConstant(){
+    public SettingConstants getPropertyConstant() {
         return propertyConstant;
     }
 
-    public static void init(){
+    public static void init() {
         try {
             InitialContext context = new InitialContext();
-            ApplicationProperties applicationProperties = (ApplicationProperties) context.lookup("java:global/domru-sso/" + ApplicationProperties.class.getSimpleName());
+            SettingsService settingsService = (SettingsService) context.lookup("java:global/domru-sso/" + SettingsService.class.getSimpleName());
             for (ActivationCodeType activationCodeType : ActivationCodeType.values()) {
-                activationCodeType.setExpiredSeconds(applicationProperties.getSettingsValue(activationCodeType.getPropertyConstant(), "user"));
+                activationCodeType.setExpiredSeconds(settingsService.getSettingsValue(activationCodeType.getPropertyConstant(), "user"));
             }
         } catch (NamingException e) {
             log.error(e.getMessage(), e);

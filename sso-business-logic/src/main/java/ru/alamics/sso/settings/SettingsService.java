@@ -8,12 +8,12 @@ import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Stateless
 @LocalBean
 public class SettingsService {
-
 
     @EJB
     private SettingsRepository repository;
@@ -43,5 +43,20 @@ public class SettingsService {
                 .build();
 
         return DataMapper.toDto(repository.save(settingsToSave));
+    }
+
+    public long getSettingsValue(final SettingConstants property, final String realmId) {
+        final String keyName = property.getKey();
+        Settings settings = repository.getSettings(keyName, realmId);
+        long ret = -1;
+        if (settings != null) {
+            ret = TimeUnit.SECONDS.convert(Long.parseLong(settings.getValue()), settings.getUnit());
+        }
+        return ret;
+    }
+
+    public SettingsDto getSetting(final SettingConstants property, final String realmId) {
+        final String keyName = property.getKey();
+        return DataMapper.toDto(repository.getSettings(keyName, realmId));
     }
 }

@@ -18,13 +18,14 @@ import ru.alamics.sso.emailer.EmailSender;
 import ru.alamics.sso.keycloak.entity.AutoLockNotification;
 import ru.alamics.sso.keycloak.entity.common.NotificationType;
 import ru.alamics.sso.keycloak.repository.*;
-import ru.alamics.sso.property.ApplicationProperties;
-import ru.alamics.sso.property.PropertyConstants;
+import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.settings.SettingsDto;
+import ru.alamics.sso.settings.SettingsService;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.*;
+import javax.ejb.EJB;
+import javax.ejb.Schedule;
+import javax.ejb.Singleton;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +34,6 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Singleton
-@DependsOn("ApplicationProperties")
 public class UserSchedule {
     private final static String[] SETTINGS_REALM_NAMES_SCHEDULE = {"user", "manager"};
     private final static String CLIENT_ID = "lkb2b";
@@ -52,9 +52,7 @@ public class UserSchedule {
     @EJB
     private AdminEventRepository adminEventRepository;
     @EJB
-    private ApplicationProperties properties;
-
-    private String host;
+    private SettingsService settingsService;
 
     @Schedule(hour = "*", minute = "*/1", persistent = false)
     public void schedule() {
@@ -71,7 +69,7 @@ public class UserSchedule {
     private void notificationInactiveUsers(String realm) {
         final String DEBUG_STR = "findNotifications";
         log.info("start:{}", DEBUG_STR);
-        long absenceTimeNotification = properties.getSettingsValue(PropertyConstants.ABSENCE_NOTIFICATION_DAYS, realm);
+        long absenceTimeNotification = settingsService.getSettingsValue(SettingConstants.ABSENCE_NOTIFICATION_DAYS, realm);
         if (absenceTimeNotification > -1) {
             userHistoryLoginRepository.findInactiveUsers(absenceTimeNotification, realm);
         }
@@ -81,8 +79,8 @@ public class UserSchedule {
     private void block(String realm) {
         final String DEBUG_STR = "block";
         log.info("start:{}", DEBUG_STR);
-        long absenceTimeBlock = properties.getSettingsValue(PropertyConstants.ABSENCE_BLOCKING_DAYS, realm) -
-                properties.getSettingsValue(PropertyConstants.ABSENCE_NOTIFICATION_DAYS, realm);
+        long absenceTimeBlock = settingsService.getSettingsValue(SettingConstants.ABSENCE_BLOCKING_DAYS, realm) -
+                settingsService.getSettingsValue(SettingConstants.ABSENCE_NOTIFICATION_DAYS, realm);
         if (absenceTimeBlock > -1) {
             autoLockNotificationRepository.findUsersToBlock(absenceTimeBlock, realm);
         }
@@ -158,9 +156,9 @@ public class UserSchedule {
     private EmailModel.EmailModelBuilder prepareBlockNotification(String realm, String link) {
         final String subject = "Предупреждение о блокирование аккаунта";
         final String template = "block-prepare-notification.ftl";
-        SettingsDto blockSetting = properties.getSetting(PropertyConstants.ABSENCE_BLOCKING_DAYS, realm);
-        long inactiveBlockTimeout = properties.getSettingsValue(PropertyConstants.ABSENCE_BLOCKING_DAYS, realm);
-        long inactiveNotificationTimeout = properties.getSettingsValue(PropertyConstants.ABSENCE_NOTIFICATION_DAYS, realm);
+        SettingsDto blockSetting = settingsService.getSetting(SettingConstants.ABSENCE_BLOCKING_DAYS, realm);
+        long inactiveBlockTimeout = settingsService.getSettingsValue(SettingConstants.ABSENCE_BLOCKING_DAYS, realm);
+        long inactiveNotificationTimeout = settingsService.getSettingsValue(SettingConstants.ABSENCE_NOTIFICATION_DAYS, realm);
         String timeToBlock = String.valueOf(
                 blockSetting.getUnit().convert(inactiveBlockTimeout - inactiveNotificationTimeout, TimeUnit.SECONDS));
         Map<String, Object> body = new HashMap<>();
@@ -183,7 +181,7 @@ public class UserSchedule {
                 .bodyTemplate(template);
     }
 
-    private String getClientLink(ClientEntity client){
+    private String getClientLink(ClientEntity client) {
         if (client != null) {
             return client.getRedirectUris().stream().findFirst().get();
         }
@@ -206,8 +204,4 @@ public class UserSchedule {
         adminEventRepository.save(adminEvent);
     }
 
-    @PostConstruct
-    public void init() {
-        this.host = properties.getProperty("application.host");
-    }
 }

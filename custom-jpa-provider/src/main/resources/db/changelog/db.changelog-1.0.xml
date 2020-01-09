@@ -414,4 +414,23 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="33" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <not> <tableExists tableName="APP_PROPERTIES" /> </not>
+        </preConditions>
+        <createTable tableName="APP_PROPERTIES">
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="value" type="varchar(255)"/>
+        </createTable>
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.host', '10.121.10.41');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.port', '26800');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.secure', 'false');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.auth.appname', 'SSO');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.auth.username', 'anonymous');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.find.path', '/api/v1/customerManagement/customerAccounts/names');
+        </sql>
+    </changeSet>
 </databaseChangeLog>
