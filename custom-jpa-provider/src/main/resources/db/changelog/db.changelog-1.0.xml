@@ -433,4 +433,38 @@
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.find.path', '/api/v1/customerManagement/customerAccounts/names');
         </sql>
     </changeSet>
+
+    <changeSet id="34" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="APP_PROPERTIES" />
+        </preConditions>
+
+        <!--    PhoneCaller properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('phoneCaller.uri.perm', 'http://LoGSsOIn:1LoGSsOPaSsERTH777@call-auth.cc-perm.ertelecom.ru/sso_call.php');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('phoneCaller.uri.voronezh', 'http://LoGSsOIn:1LoGSsOPaSsERTH777@call-auth.cc-voronezh.ertelecom.ru/sso_call.php');
+        </sql>
+        <!--    RiasApi properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasApi.uri', 'https://hq-dev.db.ertelecom.ru:443/cgi-bin/ppo/excells/web_cabinet.get_info_unauth');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasApi.client.name', 'SSO');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasApi.client.salt', 'W2NHAYTWrfEG9fDw2MAt2TuuM7VK2K7H');
+        </sql>
+        <!--    SmsSender properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('smsSender.uri', 'http://smsgw.ertelecom.ru:13003/cgi-bin/sendsms');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('smsSender.smscName', 'rapporto_gold');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('smsSender.username', 'ertelecom');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('smsSender.password', 'P10BxzA6Z1BRM');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('smsSender.senderName', 'Domru');
+        </sql>
+        <!--    ViberSender properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.uri', 'http://smsgw-prior.ertelecom.ru:13003/cgi-bin/sendsms');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.smscName', 'rapporto_viber');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.username', 'ertelecom');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.password', 'P10BxzA6Z1BRM');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.senderName', 'Domru');
+        </sql>
+    </changeSet>
 </databaseChangeLog>

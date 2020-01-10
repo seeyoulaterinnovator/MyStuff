@@ -5,18 +5,20 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.internal.ClientInvocationBuilder;
 import org.jboss.resteasy.plugins.providers.StringTextStar;
-import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
+import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.phone.SmsConfig;
 import ru.alamics.sso.registration.phone.exception.SmsSendException;
 import ru.alamics.sso.registration.phone.port.SmsSendService;
-import ru.alamics.sso.util.EStand;
 import ru.alamics.sso.util.StandResolver;
 import ru.alamics.sso.util.Util;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -26,11 +28,14 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Stateless(name = "SmsSender")
 public class SmsSendServiceImpl implements SmsSendService {
+    @Resource(lookup = "java:global/domru-sso/ApplicationProperties")
+    private ApplicationProperties properties;
 
-    private static final String SMSC_NAME = "rapporto_gold";
-    private static final String USERNAME = "ertelecom";
-    private static final String PASSWORD = "P10BxzA6Z1BRM";
-    private static final String SENDER_NAME = "Domru";
+    private static final String SEND_URI = "smsSender.uri";
+    private static final String SMSC_NAME = "smsSender.smscName";
+    private static final String USERNAME = "smsSender.username";
+    private static final String PASSWORD = "smsSender.password";
+    private static final String SENDER_NAME = "smsSender.senderName";
 
     private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
             .connectTimeout(3, TimeUnit.SECONDS)
@@ -40,24 +45,24 @@ public class SmsSendServiceImpl implements SmsSendService {
 
     private static SmsConfig smsConfig;
 
-    public SmsSendServiceImpl() {
+    @PostConstruct
+    private void init() {
         smsConfig = SmsConfig.builder()
-                .url(new ResteasyUriBuilder()
-                        .scheme("http")
-                        .host("smsgw.ertelecom.ru")
-                        .port(13003)
-                        .path("cgi-bin/sendsms")
-                        .build())
-                .smsCenterName(SMSC_NAME)
-                .username(USERNAME)
-                .password(PASSWORD)
-                .senderName(SENDER_NAME)
+                .url(URI.create(properties.getProperty(SEND_URI)))
+                .smsCenterName(properties.getProperty(SMSC_NAME))
+                .username(properties.getProperty(USERNAME))
+                .password(properties.getProperty(PASSWORD))
+                .senderName(properties.getProperty(SENDER_NAME))
                 .timeout(1440)
                 .priority(SmsConfig.Priority.LOWEST)
                 .reportsMask(SmsConfig.ReportsConfig.DELIVERED_TO_PHONE)
                 .encoding(SmsConfig.Encoding.UCS2)
                 .charset(StandardCharsets.UTF_8)
                 .build();
+    }
+
+    public SmsSendServiceImpl() {
+
     }
 
     public SmsSendServiceImpl(SmsConfig smsConfig) {
@@ -76,13 +81,12 @@ public class SmsSendServiceImpl implements SmsSendService {
         URI uri = smsConfig.getUrl();
 
         // TODO https://stackoverflow.com/questions/53760939/processingexception-resteasy003145-unable-to-find-a-messagebodyreader-of-conte?noredirect=1&lq=1
-        ClientInvocationBuilder builder = (ClientInvocationBuilder)client.register(StringTextStar.class)
+        ClientInvocationBuilder builder = (ClientInvocationBuilder) client.register(StringTextStar.class)
                 .target(uri)
                 .queryParams(getConfigForQuery())
                 .queryParam("to", Util.getCleanUserPhone(phone))
                 .queryParam("text", URLEncoder.encode(text, smsConfig.getCharset()))
-                .request()
-                ;
+                .request();
         try {
             return builder.get(String.class);
 

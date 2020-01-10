@@ -3,12 +3,14 @@ package ru.alamics.sso.remote.rias;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
+import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.port.RiasApiService;
 import ru.alamics.sso.remote.rias.model.RiasData;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -23,6 +25,9 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Stateless(name = "RiasApiService")
 public class RiasUserExistsCheckImpl implements RiasApiService {
+    private static final String RIAS_API_URI = "riasApi.uri";
+    private static final String CLIENT_NAME = "riasApi.client.name";
+    private static final String CLIENT_SALT = "riasApi.client.salt";
 
     private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
             .connectTimeout(3, TimeUnit.SECONDS)
@@ -30,26 +35,25 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
 
     private static final ResteasyClient client = clientBuilder.build();
 
-    private final URI uri;
+    @Resource(lookup = "java:global/domru-sso/ApplicationProperties")
+    private ApplicationProperties properties;
+
+    private URI uri;
+
+    @PostConstruct
+    private void init() {
+        uri = URI.create(properties.getProperty(RIAS_API_URI));
+    }
 
     public RiasUserExistsCheckImpl() {
-        uri = new ResteasyUriBuilder()
-                .scheme("https")
-                .host("hq-dev.db.ertelecom.ru")
-                .port(443)
-                .path("/cgi-bin/ppo/excells/web_cabinet.get_info_unauth")
-                .build();
     }
 
     public RiasUserExistsCheckImpl(URI uri) {
         this.uri = uri;
     }
 
-    private static final String CLIENT_NAME = "SSO";
-    private static final String CLIENT_SALT = "W2NHAYTWrfEG9fDw2MAt2TuuM7VK2K7H";
 
-    public boolean checkParam(String param) throws RiasCheckException
-    {
+    public boolean checkParam(String param) throws RiasCheckException {
         LocalDateTime dateTime = LocalDateTime.now();
 
         String timestamp = dateTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));

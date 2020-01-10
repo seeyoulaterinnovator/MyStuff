@@ -4,19 +4,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
-import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
+import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.phone.SmsConfig;
 import ru.alamics.sso.registration.phone.exception.ViberSendException;
 import ru.alamics.sso.registration.phone.port.ViberSendService;
-import ru.alamics.sso.util.EStand;
 import ru.alamics.sso.util.StandResolver;
 import ru.alamics.sso.util.Util;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.ejb.DependsOn;
 import javax.ejb.Stateless;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
@@ -28,11 +28,14 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Stateless(name = "ViberSender")
 public class ViberSendServiceImpl implements ViberSendService {
+    @Resource(lookup = "java:global/domru-sso/ApplicationProperties")
+    private ApplicationProperties properties;
 
-    private static final String SMSC_NAME = "rapporto_viber";
-    private static final String USERNAME = "ertelecom";
-    private static final String PASSWORD = "P10BxzA6Z1BRM";
-    private static final String SENDER_NAME = "Domru";
+    private static final String SEND_URI = "viberSender.uri";
+    private static final String SMSC_NAME = "viberSender.smscName";
+    private static final String USERNAME = "viberSender.username";
+    private static final String PASSWORD = "viberSender.password";
+    private static final String SENDER_NAME = "viberSender.senderName";
 
     private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
             .connectTimeout(3, TimeUnit.SECONDS)
@@ -41,18 +44,14 @@ public class ViberSendServiceImpl implements ViberSendService {
     private static final ResteasyClient client = clientBuilder.build();
     private static SmsConfig smsConfig;
 
-    public ViberSendServiceImpl() {
+    @PostConstruct
+    private void init(){
         smsConfig = SmsConfig.builder()
-                .url(new ResteasyUriBuilder()
-                        .scheme("http")
-                        .host("smsgw-prior.ertelecom.ru")
-                        .port(13003)
-                        .path("cgi-bin/sendsms")
-                        .build())
-                .smsCenterName(SMSC_NAME)
-                .username(USERNAME)
-                .password(PASSWORD)
-                .senderName(SENDER_NAME)
+                .url(URI.create(properties.getProperty(SEND_URI)))
+                .smsCenterName(properties.getProperty(SMSC_NAME))
+                .username(properties.getProperty(USERNAME))
+                .password(properties.getProperty(PASSWORD))
+                .senderName(properties.getProperty(SENDER_NAME))
                 .timeout(5)
                 .priority(SmsConfig.Priority.HIGH)
                 .reportsMask(SmsConfig.ReportsConfig.DELIVERED_TO_PHONE)
@@ -61,13 +60,15 @@ public class ViberSendServiceImpl implements ViberSendService {
                 .build();
     }
 
+    public ViberSendServiceImpl() {
+    }
+
     public ViberSendServiceImpl(SmsConfig config) {
         smsConfig = config;
     }
 
     @Override
-    public String sendMsg(String phone, String text) throws ViberSendException
-    {
+    public String sendMsg(String phone, String text) throws ViberSendException {
 
         // локально и на дэве фиксированный код и не отправляю смс
         if (!StandResolver.isBattle()) {
