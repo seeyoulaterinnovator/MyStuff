@@ -5,11 +5,13 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
+import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.model.RiasLogin;
 import ru.alamics.sso.registration.rias.port.RiasLoginService;
 
+import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -32,24 +34,25 @@ public class RiasUserLoginImpl implements RiasLoginService {
 
     private static final ResteasyClient client = clientBuilder.build();
 
-    private static final String AUTH_SCHEME = "https";
-    private static final String AUTH_DEF_CITY = "perm-dev";
-    private static final String AUTH_DOMAIN = "db.ertelecom.ru";
-    private static final int AUTH_PORT = 443;
-    private static final String AUTH_PATH = "/cgi-bin/ppo/es_webface/open_auth.authorize_password";
+    @Resource(lookup = "java:global/domru-sso/ApplicationProperties")
+    private ApplicationProperties properties;
+
+    private static final String AUTH_SCHEME = "riasLogin.scheme";
+    private static final String AUTH_DEF_CITY = "riasLogin.defCity";
+    private static final String AUTH_DOMAIN = "riasLogin.domain";
+    private static final String AUTH_PORT = "riasLogin.port";
+    private static final String AUTH_PATH = "riasLogin.path";
+    private static final String CLIENT_NAME = "riasLogin.client.name";
+    private static final String CLIENT_SALT = "riasLogin.client.salt";
+    private static final String GRANT_TYPE = "riasLogin.grantType";
 
     public RiasUserLoginImpl() {}
 
-    private static final String CLIENT_NAME = "WEB_CABINET_B2B";
-    private static final String CLIENT_SALT = "kad14duh534u2h3j2mmi8dyla9dze";
-
-    private static final String GRANT_TYPE = "password";
-
-    public RiasLogin loginUser(String domain, String username, String password) throws RiasCheckException
-    {
+    public RiasLogin loginUser(String domain, String username, String password) throws RiasCheckException {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
 
-        String clientSecret = CLIENT_NAME + GRANT_TYPE + username + password + timestamp + CLIENT_SALT;
+        String clientSecret = properties.getProperty(CLIENT_NAME) + properties.getProperty(GRANT_TYPE) + username + password + timestamp +
+                properties.getProperty(CLIENT_SALT);
         String secretHash = HashGenerator.getSecretHashMD5(clientSecret);
 
         String usernameV = URLEncoder.encode(username, StandardCharsets.UTF_8);
@@ -65,15 +68,15 @@ public class RiasUserLoginImpl implements RiasLoginService {
         try {
 
             URI uri = new ResteasyUriBuilder()
-                    .scheme(AUTH_SCHEME)
-                    .host(String.format("%s.%s", domain == null? AUTH_DEF_CITY : domain, AUTH_DOMAIN))
-                    .port(AUTH_PORT)
-                    .path(AUTH_PATH)
+                    .scheme(properties.getProperty(AUTH_SCHEME))
+                    .host(String.format("%s.%s", domain == null ? properties.getProperty(AUTH_DEF_CITY) : domain, properties.getProperty(AUTH_DOMAIN)))
+                    .port(Integer.parseInt(properties.getProperty(AUTH_PORT)))
+                    .path(properties.getProperty(AUTH_PATH))
                     .build();
 
             ResteasyWebTarget wt = client.target(uri)
-                    .queryParam("client_id", CLIENT_NAME)
-                    .queryParam("grant_type", GRANT_TYPE)
+                    .queryParam("client_id", properties.getProperty(CLIENT_NAME))
+                    .queryParam("grant_type", properties.getProperty(GRANT_TYPE))
                     .queryParam("username", usernameV)
                     .queryParam("timestamp$c", timestamp)
                     .queryParam("client_secret", secretHash);

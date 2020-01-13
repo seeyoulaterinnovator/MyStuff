@@ -467,4 +467,47 @@
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.senderName', 'Domru');
         </sql>
     </changeSet>
+
+    <changeSet id="35" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="APP_PROPERTIES" />
+        </preConditions>
+        <!--    RiasLogin properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('cities.url', 'https://master.lk-backend.b2bweb.t2.ertelecom.ru/site/domains');
+        </sql>
+        <!--    RiasLogin properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.scheme', 'https');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.defCity', 'perm-dev');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.domain', 'db.ertelecom.ru');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.port', '443');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.path', '/cgi-bin/ppo/es_webface/open_auth.authorize_password');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.client.name', 'WEB_CABINET_B2B');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.client.salt', 'kad14duh534u2h3j2mmi8dyla9dze');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.grantType', 'password');
+        </sql>
+
+        <!--    Esia properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('esia.domain.url', 'https://esia-portal1.test.gosuslugi.ru');
+        </sql>
+
+        <!--    vk properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('vk.auth.url', 'https://oauth.vk.com/authorize');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('vk.token.url', 'https://oauth.vk.com/access_token');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('vk.profile.url', 'https://api.vk.com/method/users.get');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('vk.default.scope', 'email');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('vk.api.version', '5.101');
+        </sql>
+
+        <!--    CustomIdpReview properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('idpReview.siteKey', '6LfQG68UAAAAAOowA30NhSf4_VjiuH_KeT8bN3_B');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('idpReview.siteSecretValue', '6LfQG68UAAAAAH8quIVwZ_8Cizgwi6CqjPIP5a3w');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('idpReview.recaptcha.url', 'https://www.google.com/recaptcha/api.js?hl=');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('idpReview.recaptcha.siteVerify', 'https://www.google.com/recaptcha/api/siteverify');
+        </sql>
+    </changeSet>
 </databaseChangeLog>

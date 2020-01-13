@@ -2,20 +2,26 @@ package ru.alamics.sso.keycloak.social.esia;
 
 import org.keycloak.broker.oidc.OAuth2IdentityProviderConfig;
 import org.keycloak.models.IdentityProviderModel;
+import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.property.ApplicationProperties;
 
 
 public class EsiaIdentityProviderConfig extends OAuth2IdentityProviderConfig {
 
-	public EsiaIdentityProviderConfig(IdentityProviderModel model) {
-		super(model);
-	}
+    private ApplicationProperties properties;
+    private final static String ESIA_DOMAIN_URL = "esia.domain.url";
 
-	public String getEsiaDomainUrl() {
-		return getConfig().getOrDefault("esiaDomainUrl", "https://esia-portal1.test.gosuslugi.ru");
-	}
+    public EsiaIdentityProviderConfig(IdentityProviderModel model) {
+        super(model);
+        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+    }
 
-	public void setEsiaDomainUrl(String url) {
-		getConfig().put("esiaDomainUrl", url);
-	}
+    public String getEsiaDomainUrl() {
+        return getConfig().getOrDefault("esiaDomainUrl", properties.getProperty(ESIA_DOMAIN_URL));
+    }
+
+    public void setEsiaDomainUrl(String url) {
+        getConfig().put("esiaDomainUrl", url);
+    }
 
 }
