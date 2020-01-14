@@ -76,7 +76,7 @@ public class UserServiceImpl implements UserService {
         if (file == null) {
             throw new UnsupportedDataTypeException("Unsupported file format!");
         }
-        List<UserSearchDto> userDto = userFindService.getUsersByParameters(realm.getName(), null, null, null, null, true);
+        List<UserSearchDto> userDto = userFindService.getUsersByParametersWithoutGrouping(realm.getName(), null, null, null, null, true);
         if (userDto == null || userDto.isEmpty()) {
             return null;
         }

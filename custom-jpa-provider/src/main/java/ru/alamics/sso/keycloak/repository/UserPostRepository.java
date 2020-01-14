@@ -82,6 +82,15 @@ public class UserPostRepository {
                 .getResultList();
     }
 
+    public List<UserPostEntity> findUserPostsByIds(List<String> userPostIds) {
+        return em.createQuery(
+                "select upe " +
+                        "from UserPostEntity upe " +
+                        "where upe.id in :userPostIds ", UserPostEntity.class)
+                .setParameter("userPostIds", userPostIds)
+                .getResultList();
+    }
+
     public List<UserPostRoleEntity> getAllUserPostRoles(){
         return em.createQuery(
                 "select apr " +

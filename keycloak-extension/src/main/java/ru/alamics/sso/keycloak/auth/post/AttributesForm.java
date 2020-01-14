@@ -10,7 +10,6 @@ import org.keycloak.models.UserModel;
 import ru.alamics.sso.auth.UserRole;
 import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.registration.service.UserFindService;
-import ru.alamics.sso.registration.tbapi.TbapiService;
 import ru.alamics.sso.user.web.UserSearchDto;
 
 import javax.naming.InitialContext;
@@ -55,7 +54,7 @@ public class AttributesForm implements Authenticator {
         if (frame != null || isAuth || redirectIframe != null) {
             var user = context.getUser();
             List<UserSearchDto> attributes = DataMapper.addOrganizationToUserSearchDtos(
-                    userFindService.getUsersByParameters("user", null, user.getId(), null,
+                    userFindService.getUsersByParametersWithoutGrouping("user", null, user.getId(), null,
                             null, true));
             if (attributes != null) {
                 attributes = attributes.stream()

@@ -7,13 +7,16 @@ import ru.alamics.sso.keycloak.entity.ImportUsersReportEntity;
 import ru.alamics.sso.keycloak.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
+import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.user.model.ImportResponse;
 import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.user.web.ImportUsersReportDto;
 import ru.alamics.sso.user.web.UserDto;
+import ru.alamics.sso.user.web.UserSearch;
 import ru.alamics.sso.user.web.UserSearchDto;
 
 import javax.persistence.Tuple;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -62,12 +65,46 @@ public class UserMapper {
 
     public static List<UserSearchDto> toUserDtoList(List<Tuple> tuples) {
         if (tuples.isEmpty()) {
-            return null;
+            return Collections.emptyList();
         }
 
         LinkedList<UserSearchDto> userDtos = new LinkedList<>();
         tuples.forEach(o -> userDtos.add(toUserDto(o)));
         return userDtos;
+    }
+
+    public static List<UserSearch> toUserSearchList(List<Tuple> tuples) {
+        if (tuples.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        LinkedList<UserSearch> userDtos = new LinkedList<>();
+        tuples.forEach(o -> userDtos.add(toUserSearch(o)));
+        return userDtos;
+    }
+
+    public static UserSearch toUserSearch(Tuple tuple) {
+        if (tuple == null) {
+            return null;
+        }
+        List<UserPostResponse> userPosts = new LinkedList<>();
+        String userPostIds = toString(tuple.get("user_post_ids"));
+        if (userPostIds != null) {
+            userPosts = List.of(userPostIds.split(",")).stream()
+                    .map(id -> UserPostResponse.builder().id(id).build())
+                    .collect(Collectors.toList());
+        }
+
+        return UserSearch.builder()
+                .id(toString(tuple.get("user_id")))
+                .username(toString(tuple.get("username")))
+                .firstName(toString(tuple.get("first_name")))
+                .lastName(toString(tuple.get("last_name")))
+                .email(toString(tuple.get("email")))
+                .phone(toString(tuple.get("phone")))
+                .enabled(toBoolean(tuple.get("enabled")))
+                .userPosts(userPosts)
+                .build();
     }
 
     private static String toString(Object object) {
