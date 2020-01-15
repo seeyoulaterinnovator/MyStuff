@@ -298,6 +298,11 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     $scope.currentAccess = [];
     $scope.currentAccessMap = [];
 
+    $scope.pages = {};
+    $scope.pages.number = 1;
+    var isInitPagination = false;
+    $scope.pageSize = {};
+
     $scope.init = function () {
         $scope.realm = realm;
         $http.get(authUrl + '/realms/' + realm.realm + '/users-info/accessible-realms').then(function (data) {
@@ -322,10 +327,78 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 }
             }
 
-            if (!UserSearchState.isFirstSearch) $scope.search();
+            if (!UserSearchState.isFirstSearch) {
+                $scope.search();
+            }
             else $scope.firstPage();
         });
     };
+
+    function initPagination() {
+        isInitPagination = true;
+
+        var lastPage = 1;
+
+        $('.pagination')
+            .find('li')
+            .slice(1, -1)
+            .remove();
+
+        for (var i = 1; i <= $scope.pages.totalPages; ) {
+            $('.pagination #prev')
+                .before(
+                    '<li data-page="' + i + '">\
+                         <span>' + i++ + '<span class="sr-only">(current)</span></span>\
+                    </li>').show();
+                    }
+
+        $('.pagination [data-page="1"]').addClass('active');
+
+        limitPagging();
+
+        $('.pagination li').on('click', function(evt) {
+            // on click each page
+            evt.stopImmediatePropagation();
+            evt.preventDefault();
+            var pageNum = $(this).attr('data-page'); // get it's number
+
+            if (pageNum == 'prev') {
+                if (lastPage == 1) {
+                    return;
+                }
+                pageNum = --lastPage;
+            }
+            if (pageNum == 'next') {
+                if (lastPage == $('.pagination li').length - 2) {
+                    return;
+                }
+                pageNum = ++lastPage;
+            }
+            lastPage = pageNum;
+            $('.pagination li').removeClass('active'); // remove active class from all li
+            $('.pagination [data-page="' + lastPage + '"]').addClass('active'); // add active class to the clicked
+            limitPagging();
+            $scope.pages.number = pageNum;
+            $scope.search();
+        }); // end of on click pagination list
+    }
+
+    function limitPagging(){
+        if($('.pagination li').length > 7 ){
+            var currentPage = $('.pagination li.active').attr('data-page');
+            if( currentPage <= 3 ){
+                $('.pagination li:gt(5)').hide();
+                $('.pagination li:lt(5)').show();
+                $('.pagination [data-page="next"]').show();
+            }if (currentPage > 3){
+                $('.pagination li:gt(0)').hide();
+                $('.pagination [data-page="next"]').show();
+                for( let i = ( parseInt($('.pagination li.active').attr('data-page'))  - 2 )  ; i <= ( parseInt($('.pagination li.active').attr('data-page'))  + 2 ) ; i++ ){
+                    $('.pagination [data-page="'+i+'"]').show();
+                }
+            }
+        }
+    }
 
     $scope.getSearchParameter = function (param) {
         if (param === undefined) {
@@ -364,6 +437,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
     $scope.firstPage = function () {
         $scope.query.first = 0;
+        isInitPagination = false;
         $scope.search();
     };
 
@@ -598,7 +672,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
     $scope.searchQuery = function () {
         console.log("query.search: " + $scope.query.search);
-        $http.get(`${authUrl}/realms/user/users-info?searchRealm=${$scope.query.searchRealm}`).then(function (data) {
+        $http.get(`${authUrl}/realms/user/users-info/search?searchRealm=${$scope.query.searchRealm}`).then(function (data) {
             $scope.users = $scope.groupByUser(angular.fromJson(data).data.results['users-info']);
             $scope.searchLoaded = true;
             $scope.lastSearch = $scope.query.search;
@@ -608,11 +682,19 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
     $scope.search = function () {
         console.log("query.search: " + $scope.query.search);
-        $http.get(`${authUrl}/realms/user/users-info?searchRealm=${$scope.query.searchRealm}&search=${$scope.query.search}&searchUser=${$scope.query.searchByUserId}&searchToms=${$scope.query.searchByTomsId}`).then(function (data) {
-            $scope.users = $scope.groupByUser(angular.fromJson(data).data.results['users-info']);
+        $http.get(`${authUrl}/realms/user/users-info/search?` +
+        `searchRealm=${$scope.query.searchRealm}&search=${$scope.query.search}
+        &searchUser=${$scope.query.searchByUserId}&searchToms=${$scope.query.searchByTomsId}
+        &pageNum=${$scope.pages.number}&pageSize=${$scope.pageSize}`).then(function (data) {
+            $scope.users = angular.fromJson(data).data.results['users-info'];
+            $scope.pages = angular.fromJson(data).data.results['page-info'];
             $scope.searchLoaded = true;
             $scope.lastSearch = $scope.query.search;
             UserSearchState.isFirstSearch = false;
+
+            if (!isInitPagination){
+                initPagination();
+            }
         });
     };
 

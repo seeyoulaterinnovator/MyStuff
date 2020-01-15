@@ -146,7 +146,7 @@ public class DataMapper {
     }
 
     public static PageDto toPageDto(List<UserSearch> users, long totalElements, int pageNum, int pageSize) {
-        long totalPages = pageSize == 0 ? 1 : totalElements / pageSize + 1;
+        long totalPages = pageSize == 0 ? 1 : (long) Math.ceil((double) totalElements / (double) pageSize);
         return new PageDto(pageNum, pageSize, users.size(), totalElements, totalPages, pageNum > 1, pageNum < totalPages);
     }
 }

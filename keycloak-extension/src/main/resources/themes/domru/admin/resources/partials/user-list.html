@@ -201,6 +201,32 @@
         </tr>
         </tbody>
     </table>
+    <!--		Start Pagination -->
+    <div class='pagination-container' >
+        <nav>
+            <ul class="pagination">
+                <select class  ="form-control" name="state" ng-model="pageSize" ng-change="firstPage()" ng-init="pageSize='100'">
+                    <option value="5000">5000</option>
+                    <option selected value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                    <option value="70">70</option>
+                    <option value="100">100</option>
+                </select>
+
+                <li data-page="prev" >
+                    <span> < <span class="sr-only">(current)</span></span>
+                </li>
+                <li data-page="next" id="prev">
+                    <span> > <span class="sr-only">(current)</span></span>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+</div> <!-- 		End of Container -->
 </div>
 
 <kc-menu></kc-menu>
