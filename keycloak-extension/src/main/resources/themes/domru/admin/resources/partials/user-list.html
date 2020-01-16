@@ -99,8 +99,8 @@
             </th>
             <th class="w-12">{{:: 'id' | translate}}</th>
             <th class="w-12">{{:: 'username' | translate}}</th>
-            <th class="w-12">{{:: 'email' | translate}}</th>
-            <th class="w-12">{{:: 'first-name' | translate}}</th>
+            <th class="w-12" data-ng-click="sort(SORT_FIELD_EMAIL)">{{:: 'email' | translate}}  {{sortMarkEmail}}</th>
+            <th class="w-12" data-ng-click="sort(SORT_FIELD_NAME)">{{:: 'first-name' | translate}}  {{sortMarkName}}</th>
             <th class="w-1">Enabled</th>
             <th class="w-12">Phone</th>
             <th class="w-12">Organization</th>
@@ -216,11 +216,17 @@
                     <option value="100">100</option>
                 </select>
 
+                <li data-page="first" >
+                    <span> << <span class="sr-only">(current)</span></span>
+                </li>
                 <li data-page="prev" >
                     <span> < <span class="sr-only">(current)</span></span>
                 </li>
                 <li data-page="next" id="prev">
                     <span> > <span class="sr-only">(current)</span></span>
+                </li>
+                <li data-page="last">
+                    <span> >> <span class="sr-only">(current)</span></span>
                 </li>
             </ul>
         </nav>

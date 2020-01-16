@@ -303,6 +303,13 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     var isInitPagination = false;
     $scope.pageSize = {};
 
+    sortAsc = true;
+    $scope.sortMarkEmail = "↓"
+    $scope.sortMarkName = ""
+    $scope.SORT_FIELD_EMAIL = "email";
+    $scope.SORT_FIELD_NAME = "firstName";
+    currentSortField = $scope.SORT_FIELD_EMAIL;
+
     $scope.init = function () {
         $scope.realm = realm;
         $http.get(authUrl + '/realms/' + realm.realm + '/users-info/accessible-realms').then(function (data) {
@@ -334,6 +341,34 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         });
     };
 
+    $scope.sort = function(sortField) {
+        if (currentSortField === sortField) {
+            sortAsc = sortAsc === false;
+        } else {
+            sortAsc = true;
+        }
+
+        if (sortField === $scope.SORT_FIELD_EMAIL){
+            currentSortField = sortField;
+            $scope.sortMarkEmail = getSortMark(sortAsc);
+            $scope.sortMarkName = "";
+        }
+        if (sortField === $scope.SORT_FIELD_NAME){
+            currentSortField = sortField;
+            $scope.sortMarkName = getSortMark(sortAsc);
+            $scope.sortMarkEmail = "";
+        }
+        $scope.search();
+    }
+
+    function getSortMark(sortAsc){
+        if (sortAsc === true){
+            return "↓";
+        } else {
+            return "↑";
+        }
+    }
+
     function initPagination() {
         isInitPagination = true;
 
@@ -341,7 +376,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
         $('.pagination')
             .find('li')
-            .slice(1, -1)
+            .slice(2, -2)
             .remove();
 
         for (var i = 1; i <= $scope.pages.totalPages; ) {
@@ -362,6 +397,12 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             evt.preventDefault();
             var pageNum = $(this).attr('data-page'); // get it's number
 
+            if (pageNum == 'first') {
+                if (lastPage == 1) {
+                    return;
+                }
+                pageNum = 1;
+            }
             if (pageNum == 'prev') {
                 if (lastPage == 1) {
                     return;
@@ -369,10 +410,16 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 pageNum = --lastPage;
             }
             if (pageNum == 'next') {
-                if (lastPage == $('.pagination li').length - 2) {
+                if (lastPage == $('.pagination li').length - 4) {
                     return;
                 }
                 pageNum = ++lastPage;
+            }
+            if (pageNum == 'last') {
+                if (lastPage == $('.pagination li').length - 4) {
+                    return;
+                }
+                pageNum = $('.pagination li').length - 4;
             }
             lastPage = pageNum;
             $('.pagination li').removeClass('active'); // remove active class from all li
@@ -683,9 +730,10 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     $scope.search = function () {
         console.log("query.search: " + $scope.query.search);
         $http.get(`${authUrl}/realms/user/users-info/search?` +
-        `searchRealm=${$scope.query.searchRealm}&search=${$scope.query.search}
-        &searchUser=${$scope.query.searchByUserId}&searchToms=${$scope.query.searchByTomsId}
-        &pageNum=${$scope.pages.number}&pageSize=${$scope.pageSize}`).then(function (data) {
+        `searchRealm=${$scope.query.searchRealm}&search=${$scope.query.search}` +
+        `&searchUser=${$scope.query.searchByUserId}&searchToms=${$scope.query.searchByTomsId}`+
+        `&pageNum=${$scope.pages.number}&pageSize=${$scope.pageSize}`+
+        `&sortAsc=${sortAsc}&sortField=${currentSortField}`).then(function (data) {
             $scope.users = angular.fromJson(data).data.results['users-info'];
             $scope.pages = angular.fromJson(data).data.results['page-info'];
             $scope.searchLoaded = true;
