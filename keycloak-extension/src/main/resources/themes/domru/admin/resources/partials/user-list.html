@@ -1,7 +1,6 @@
 <style>
     li.role-list {
         list-style-type: none; /* Убираем маркеры */
-        /*line-height: 1.5px;*/
     }
 
     ul {
@@ -25,6 +24,12 @@
         white-space: pre;
     }
 
+    li.clip {
+        white-space: nowrap; /* Запрещаем перенос строк */
+        overflow: hidden; /* Обрезаем все, что не помещается в область */
+        padding: 0px 5px 0px 5px; /* Поля вокруг текста */
+        text-overflow: ellipsis; /* Добавляем многоточие */
+    }
 </style>
 <div class="col-sm-9 col-md-10 col-sm-push-3 col-md-push-2" ng-init="init()">
 
@@ -127,61 +132,45 @@
             </td>
             <td class="clip">{{user.phone}}</td>
             <td class="clip" colspan="1" style="padding: 0 0 0 0">
-                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.access.length > 0">
-                    <tr data-ng-repeat="keys in getKeys(user.access)" >
+                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.userPosts.length > 0">
+                    <tr data-ng-repeat="userPost in user.userPosts" >
                         <td class="clip inner-table__cell">
-                            <div class="form-inline">
-                                <ul>
-                                    <li ng-repeat="access in getAccessGroup(user.access).get(keys)" class="role-list">
-                                        <span> {{isFirstOrg(user.access, access.organization, access)}}</span>
-                                    </li>
-                                </ul>
-                            </div>
+                            <li ng-repeat="org in getOrgs(userPost) track by $index" class="role-list clip">
+                                <span>{{org}}</span>
+                            </li>
                         </td>
                     </tr>
                 </table>
             </td>
             <td class="clip" colspan="1" style="padding: 0 0 0 0">
-                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.access.length > 0">
-                    <tr data-ng-repeat="keys in getKeys(user.access)" >
-                        <td class="clip inner-table__cell">
-                            <div class="form-inline">
-                                <ul>
-                                    <li ng-repeat="access in getAccessGroup(user.access).get(keys)" class="role-list">
-                                        <span>{{isFirstTomsId(user.access, access.tomsId, access)}}</span>
-                                    </li>
-                                </ul>
-                            </div>
+                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.userPosts.length > 0">
+                    <tr data-ng-repeat="userPost in user.userPosts" >
+                        <td class="clip">
+                            <li ng-repeat="tomsId in getTomsIds(userPost) track by $index" class="role-list clip">
+                                {{tomsId}}
+                            </li>
                         </td>
                     </tr>
                 </table>
             </td>
             <td class="clip" colspan="1" style="padding: 0 0 0 0">
-                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.access.length > 0">
-                    <tr data-ng-repeat="keys in getKeys(user.access)" >
+                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.userPosts.length > 0">
+                    <tr data-ng-repeat="userPost in user.userPosts" >
                         <td class="clip inner-table__cell">
-                            <div class="form-inline">
-                                <ul>
-                                    <li ng-repeat="access in getAccessGroup(user.access).get(keys)" class="role-list">
-                                        <span>{{isFirstRoleName(user.access, access.roleName, access)}}</span>
-                                    </li>
-                                </ul>
-                            </div>
+                            <li ng-repeat="roleName in getRoleNames(userPost) track by $index" class="role-list clip">
+                                <span>{{roleName}}</span>
+                            </li>
                         </td>
                     </tr>
                 </table>
             </td>
             <td class="clip" colspan="1" style="padding: 0 0 0 0">
-                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.access.length > 0">
-                    <tr data-ng-repeat="keys in getKeys(user.access)" >
+                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.userPosts.length > 0">
+                    <tr data-ng-repeat="userPost in user.userPosts" >
                         <td class="clip inner-table__cell">
-                            <div class="form-inline">
-                                <ul>
-                                    <li ng-repeat="access in getAccessGroup(user.access).get(keys)" class="role-list">
-                                        <span>{{getSystemName(access)}}</span>
-                                    </li>
-                                </ul>
-                            </div>
+                            <li ng-repeat="sysName in getSystemNames(userPost) track by $index" class="role-list clip">
+                                <span>{{sysName}}</span>
+                            </li>
                         </td>
                     </tr>
                 </table>
@@ -205,7 +194,7 @@
     <div class='pagination-container' >
         <nav>
             <ul class="pagination">
-                <select class  ="form-control" name="state" ng-model="pageSize" ng-change="firstPage()" ng-init="pageSize='100'">
+                <select class  ="form-control" name="state" ng-model="pageSize" ng-change="firstPage()" ng-init="pageSize='15'">
                     <option value="5000">5000</option>
                     <option selected value="5">5</option>
                     <option value="10">10</option>

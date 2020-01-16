@@ -295,8 +295,6 @@ module.controller('UserOfflineSessionsCtrl', function ($scope, $location, realm,
 module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState, UserImpersonation, BruteForce, Notifications, $route, Dialog/*, CustomUser*/, $http, $window) {
 
     $scope.userRealms = [];
-    $scope.currentAccess = [];
-    $scope.currentAccessMap = [];
 
     $scope.pages = {};
     $scope.pages.number = 1;
@@ -511,16 +509,6 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         })
     };
 
-
-    $scope.previousPage = function () {
-        $scope.query.first -= parseInt($scope.query.max);
-        if ($scope.query.first < 0) {
-            $scope.query.first = 0;
-        }
-        $scope.searchQuery();
-    };
-
-
     $scope.importFileCSV = function (files) {
         var formData = new FormData();
         var file = files[0];
@@ -712,21 +700,6 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         }
     }
 
-    $scope.nextPage = function () {
-        $scope.query.first += parseInt($scope.query.max);
-        $scope.searchQuery();
-    };
-
-    $scope.searchQuery = function () {
-        console.log("query.search: " + $scope.query.search);
-        $http.get(`${authUrl}/realms/user/users-info/search?searchRealm=${$scope.query.searchRealm}`).then(function (data) {
-            $scope.users = $scope.groupByUser(angular.fromJson(data).data.results['users-info']);
-            $scope.searchLoaded = true;
-            $scope.lastSearch = $scope.query.search;
-            UserSearchState.isFirstSearch = false;
-        });
-    };
-
     $scope.search = function () {
         console.log("query.search: " + $scope.query.search);
         $http.get(`${authUrl}/realms/user/users-info/search?` +
@@ -746,62 +719,6 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         });
     };
 
-    $scope.groupByUser = function (data) {
-        let ret = [];
-        if (data === null) {
-            return ret;
-        }
-        data.map(user => {
-            let findGroupedUser = $scope.findById(ret, user.id);
-            if (!findGroupedUser) {
-                var access = [];
-                if (user.systemId || user.roleId || user.tomsId || user.organization || user.userPostId) {
-                    access.push({
-                        systemId: user.systemId,
-                        systemName: user.systemName,
-                        roleId: user.roleId,
-                        roleName: user.roleName,
-                        tomsId: user.tomsId,
-                        organization: user.organization,
-                        userPostId: user.userPostId
-                    })
-                }
-                ;
-                findGroupedUser = {
-                    id: user.id,
-                    username: user.username,
-                    firstName: user.firstName,
-                    email: user.email,
-                    phone: user.phone,
-                    enabled: user.enabled,
-                    active: false,
-                    access: access
-                };
-
-                ret.push(findGroupedUser);
-            } else {
-
-                let access = {
-                    systemId: user.systemId,
-                    systemName: user.systemName,
-                    roleId: user.roleId,
-                    roleName: user.roleName,
-                    tomsId: user.tomsId,
-                    organization: user.organization,
-                    userPostId: user.userPostId
-                };
-
-                findGroupedUser.access.push(access);
-            }
-        });
-
-        return ret;
-    };
-
-    $scope.findById = function (users, userId) {
-        return users.filter(user => user.id === userId)[0];
-    };
-
     $scope.editUser = function (user) {
         $window.location.href = `#/realms/${realm.realm}/users/${user.id}?searchRealm=${$scope.query.searchRealm}`;
     };
@@ -818,74 +735,48 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         });
     };
 
-    console.log('Called Constructor');
-    $scope.uniqueVal = function (values) {
-        if (!values) return;
-
-        return values.filter((val, index) => values.indexOf(val) === index);
-    };
-
-    $scope.getAccessGroup = function (userAccess){
-        if ( $scope.currentAccess === userAccess ){
-            return $scope.currentAccessMap;
+    //fixme поправить, после изменения в запросах к тбапи за именами организаций
+    //браться будет из другого места
+    $scope.getTomsIds = function (userPost) {
+        var tomsIds = Array.from([userPost.tomsId]);
+        if (userPost.systemRoles === undefined || userPost.systemRoles.length === 0) {
+            return tomsIds;
         }
-
-        const map = new Map();
-        userAccess.forEach((item) => {
-            const key = item.userPostId;
-            const collection = map.get(key);
-            if (!collection) {
-                map.set(key, [item]);
-            } else {
-                collection.push(item);
-            }
-        });
-
-        $scope.currentAccessMap = map;
-        return map;
+        for (var i = 1; i < userPost.systemRoles.length; i++) {
+            tomsIds.push('\u00A0');  //пустой символ
+        }
+        return tomsIds;
     }
 
-    $scope.getKeys = function (userAccess){
-        const map = $scope.getAccessGroup(userAccess);
-        return Array.from(map.keys());
+    //fixme поправить, после изменения в запросах к тбапи за именами организаций
+    //пока заглушка, что всегда пустой
+    $scope.getOrgs = function (userPost) {
+        var orgs = Array.from('\u00A0');
+        if (userPost.systemRoles === undefined || userPost.systemRoles.length === 0) {
+            return orgs;
+        }
+        for (var i = 1; i < userPost.systemRoles.length; i++) {
+            orgs.push('\u00A0');  //пустой символ
+        }
+        return orgs;
     }
 
-    $scope.isFirstTomsId = function (userAccess, tomsId, access) {
-        var equalToms = userAccess.filter(ua => ua.userPostId === access.userPostId && ua.tomsId === tomsId);
-        var index = equalToms.indexOf(access);
-        if (index === 0) {
-            return access.tomsId.substr(0, 10) + "...";
-        } else {
-            return '\u00A0';
+    $scope.getRoleNames = function (userPost, sysName) {
+        var roleNames = Array.from([userPost.userRole.name]);
+        if (userPost.systemRoles === undefined || userPost.systemRoles.length === 0) {
+            return roleNames;
         }
+        for (var i = 1; i < userPost.systemRoles.length; i++) {
+            roleNames.push('\u00A0');  //пустой символ
+        }
+        return roleNames;
     }
 
-    $scope.isFirstOrg = function (userAccess, org, access) {
-        var equalToms = userAccess.filter(ua => ua.userPostId === access.userPostId && ua.organization === org);
-        var index = equalToms.indexOf(access);
-        if (index === 0 && access.organization.trim() !== '') {
-            return access.organization;
-        } else {
-            return '\u00A0';
+    $scope.getSystemNames = function (userPost) {
+        if (userPost.systemRoles === undefined || userPost.systemRoles.length === 0) {
+            return Array.from('\u00A0'); //пустой символ
         }
-    }
-
-    $scope.isFirstRoleName = function (userAccess, roleName, access) {
-        var equalToms = userAccess.filter(ua => ua.userPostId === access.userPostId && ua.roleName === roleName);
-        var index = equalToms.indexOf(access);
-        if (index === 0) {
-            return access.roleName;
-        } else {
-            return '\u00A0';
-        }
-    }
-
-    $scope.getSystemName = function (access) {
-        if (access.systemName !== undefined && access.systemName.trim() !== '') {
-            return access.systemName;
-        } else {
-            return '\u00A0';
-        }
+        return userPost.systemRoles.map(role => role.externalSystem.name);
     }
 
 });
