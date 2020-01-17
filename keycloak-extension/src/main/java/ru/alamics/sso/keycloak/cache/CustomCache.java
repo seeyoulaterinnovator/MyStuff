@@ -1,7 +1,5 @@
 package ru.alamics.sso.keycloak.cache;
 
-import ru.alamics.sso.registration.dto.UserPostResponse;
-
 import java.util.List;
 import java.util.Set;
 
@@ -9,7 +7,9 @@ public interface CustomCache<T> {
 
     void put(String key, List<T> values);
 
-    Set<UserPostResponse> get(String key);
+    Set<T> get(String key);
+
+    Set<T> getAll();
 
     void clear();
 

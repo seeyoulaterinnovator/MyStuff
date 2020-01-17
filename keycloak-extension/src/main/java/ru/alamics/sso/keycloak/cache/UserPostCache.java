@@ -7,9 +7,11 @@ import ru.alamics.sso.registration.dto.UserPostResponse;
 import javax.annotation.Resource;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Singleton
 @Startup
@@ -32,6 +34,11 @@ public class UserPostCache implements CustomCache<UserPostResponse> {
     @Override
     public Set<UserPostResponse> get(String userId) {
         return cache.get(userId);
+    }
+
+    @Override
+    public Set<UserPostResponse> getAll() {
+        return cache.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
     }
 
     @Override

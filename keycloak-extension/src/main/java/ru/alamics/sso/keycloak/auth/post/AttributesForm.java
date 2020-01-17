@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.auth.post;
 
+import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
@@ -10,7 +11,6 @@ import org.keycloak.models.UserModel;
 import ru.alamics.sso.auth.UserRole;
 import ru.alamics.sso.keycloak.facade.UserPostFacade;
 import ru.alamics.sso.registration.dto.UserPostResponse;
-import ru.alamics.sso.registration.service.UserFindService;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -53,7 +53,12 @@ public class AttributesForm implements Authenticator {
 
         if (frame != null || isAuth || redirectIframe != null) {
             var user = context.getUser();
-            List<UserPostResponse> attributes = userPostFacade.findByUserId(user.getId());
+            List<UserPostResponse> attributes = null;
+            try {
+                attributes = userPostFacade.findByUserId(user.getId());
+            } catch (NotFoundException e) {
+                attributes = Collections.emptyList();
+            }
             if (attributes != null) {
                 attributes = attributes.stream()
                         .filter(attribute -> Objects.nonNull(attribute.getTomsId()) && Objects.nonNull(attribute.getUserRole()))

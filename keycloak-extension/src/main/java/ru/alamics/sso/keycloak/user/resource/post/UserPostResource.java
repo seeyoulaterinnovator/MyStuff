@@ -112,7 +112,7 @@ public class UserPostResource {
     public Response getUserPost(@PathParam("id") String userId) {
         try {
             return JsonResponse.success()
-                    .addResult("user_post", userPostService.getUserPost(userId))
+                    .addResult("user_post", userPostFacade.findByUserId(userId))
                     .build();
         } catch (NotFoundException e) {
             return JsonResponse.fail()
