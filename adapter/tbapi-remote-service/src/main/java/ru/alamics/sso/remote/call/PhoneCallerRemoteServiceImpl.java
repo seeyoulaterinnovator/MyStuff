@@ -59,7 +59,7 @@ public class PhoneCallerRemoteServiceImpl implements PhoneCallerRemoteService {
         String response = null;
         try {
             if (uriPerm != null) {
-                response = getCode(uriPerm, phone, count);
+                response = getCode(uriPerm, Util.getCleanUserPhone(phone), count);
             }
             if (isNull(response)) {
                 response = getCode(uriVoronezh, Util.getCleanUserPhone(phone), count);
