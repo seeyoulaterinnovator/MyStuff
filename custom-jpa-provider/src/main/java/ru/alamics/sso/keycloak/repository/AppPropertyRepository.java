@@ -16,7 +16,7 @@ public class AppPropertyRepository {
     @PersistenceContext
     private EntityManager em;
 
-    private List<AppProperty> findAll() {
+    public List<AppProperty> findAll() {
         return em.createQuery("select ap from AppProperty ap ", AppProperty.class).getResultList();
     }
 

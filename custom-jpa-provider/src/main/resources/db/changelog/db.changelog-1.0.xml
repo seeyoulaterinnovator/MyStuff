@@ -457,6 +457,7 @@
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('smsSender.username', 'ertelecom');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('smsSender.password', 'P10BxzA6Z1BRM');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('smsSender.senderName', 'Domru');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('smsSender.timeout', '1440');
         </sql>
         <!--    ViberSender properties    -->
         <sql>
@@ -465,6 +466,7 @@
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.username', 'ertelecom');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.password', 'P10BxzA6Z1BRM');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.senderName', 'Domru');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.timeout', '5');
         </sql>
     </changeSet>
 

@@ -36,6 +36,7 @@ public class SmsSendServiceImpl implements SmsSendService {
     private static final String USERNAME = "smsSender.username";
     private static final String PASSWORD = "smsSender.password";
     private static final String SENDER_NAME = "smsSender.senderName";
+    private static final String TIMEOUT = "smsSender.timeout";
 
     private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
             .connectTimeout(3, TimeUnit.SECONDS)
@@ -53,7 +54,7 @@ public class SmsSendServiceImpl implements SmsSendService {
                 .username(properties.getProperty(USERNAME))
                 .password(properties.getProperty(PASSWORD))
                 .senderName(properties.getProperty(SENDER_NAME))
-                .timeout(1440)
+                .timeout(Integer.parseInt(properties.getProperty(TIMEOUT)))
                 .priority(SmsConfig.Priority.LOWEST)
                 .reportsMask(SmsConfig.ReportsConfig.DELIVERED_TO_PHONE)
                 .encoding(SmsConfig.Encoding.UCS2)

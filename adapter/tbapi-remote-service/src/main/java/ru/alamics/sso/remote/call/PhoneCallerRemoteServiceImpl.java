@@ -41,8 +41,16 @@ public class PhoneCallerRemoteServiceImpl implements PhoneCallerRemoteService {
 
     @PostConstruct
     private void init() {
-        uriPerm = URI.create(properties.getProperty(URI_PERM));
-        uriVoronezh = URI.create(properties.getProperty(URI_VORONEZH));
+        try {
+            uriPerm = URI.create(properties.getProperty(URI_PERM));
+        } catch (Exception e) {
+            log.error("Fail uriPerm initialize", e);
+        }
+        try {
+            uriVoronezh = URI.create(properties.getProperty(URI_VORONEZH));
+        } catch (Exception e) {
+            log.error("Fail uriVoronezh initialize", e);
+        }
     }
 
     @Override
@@ -50,7 +58,9 @@ public class PhoneCallerRemoteServiceImpl implements PhoneCallerRemoteService {
 
         String response = null;
         try {
-            response = getCode(uriPerm, phone, count);
+            if (uriPerm != null) {
+                response = getCode(uriPerm, phone, count);
+            }
             if (isNull(response)) {
                 response = getCode(uriVoronezh, Util.getCleanUserPhone(phone), count);
             }

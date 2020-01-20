@@ -1,16 +1,17 @@
 package ru.alamics.sso.property;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.alamics.sso.keycloak.entity.AppProperty;
 import ru.alamics.sso.keycloak.repository.AppPropertyRepository;
 import ru.alamics.sso.util.StandResolver;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
+import javax.annotation.Resource;
+import javax.ejb.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 @Singleton
 @Startup
@@ -29,18 +30,27 @@ public class ApplicationProperties {
         if (result == null) {
             result = this.properties.getProperty(name);
         }
-        if (result == null) {
-            result = propertyRepository.findByName(name).getValue();
-        }
         return result;
     }
 
     @PostConstruct
+    @Schedule(hour = "*/1", persistent = false)
     public void init() throws IOException {
-        final String appPropResPath = "/application-" + StandResolver.ENV.name().toLowerCase() + ".properties";
+        this.properties = new Properties();
+        initPropertiesFromDb();
+        initPropertiesFromFile();
+        log.info("Initializing application properties finished:{}", properties.toString());
+    }
+
+    private void initPropertiesFromFile() throws IOException {
+        final String appPropResPath = "/" + StandResolver.ENV_CONFIG + "/application.properties";
         log.info("Initializing app properties file:\"{}\"", appPropResPath);
         final InputStream stream = ApplicationProperties.class.getResourceAsStream(appPropResPath);
-        this.properties = new Properties();
         this.properties.load(stream);
+    }
+
+    private void initPropertiesFromDb() {
+        properties.putAll(propertyRepository.findAll().stream()
+                .collect(Collectors.toMap(AppProperty::getName, AppProperty::getValue)));
     }
 }

@@ -13,7 +13,6 @@ import ru.alamics.sso.util.Util;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.ejb.DependsOn;
 import javax.ejb.Stateless;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -36,6 +35,7 @@ public class ViberSendServiceImpl implements ViberSendService {
     private static final String USERNAME = "viberSender.username";
     private static final String PASSWORD = "viberSender.password";
     private static final String SENDER_NAME = "viberSender.senderName";
+    private static final String TIMEOUT = "viberSender.timeout";
 
     private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
             .connectTimeout(3, TimeUnit.SECONDS)
@@ -45,14 +45,14 @@ public class ViberSendServiceImpl implements ViberSendService {
     private static SmsConfig smsConfig;
 
     @PostConstruct
-    private void init(){
+    private void init() {
         smsConfig = SmsConfig.builder()
                 .url(URI.create(properties.getProperty(SEND_URI)))
                 .smsCenterName(properties.getProperty(SMSC_NAME))
                 .username(properties.getProperty(USERNAME))
                 .password(properties.getProperty(PASSWORD))
                 .senderName(properties.getProperty(SENDER_NAME))
-                .timeout(5)
+                .timeout(Integer.parseInt(properties.getProperty(TIMEOUT)))
                 .priority(SmsConfig.Priority.HIGH)
                 .reportsMask(SmsConfig.ReportsConfig.DELIVERED_TO_PHONE)
                 .encoding(SmsConfig.Encoding.UCS2)

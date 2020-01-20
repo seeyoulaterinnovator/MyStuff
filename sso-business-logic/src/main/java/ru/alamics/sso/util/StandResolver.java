@@ -8,7 +8,7 @@ public class StandResolver {
     private static final boolean BATTLE = ENV.isBattle() || System.getenv("BATTLE") != null;
 
     public static final String CONFIG_FOLDER = "config";
-    public static final String ENV_CONFIG = CONFIG_FOLDER + File.separator + ENV.name().toLowerCase(); // конфиг
+    public static final String ENV_CONFIG = CONFIG_FOLDER + "/" + ENV.name().toLowerCase(); // конфиг
 
     private static EStand notNull(String env, EStand dflt) {
 
