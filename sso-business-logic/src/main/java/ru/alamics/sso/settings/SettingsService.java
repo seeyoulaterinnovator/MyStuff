@@ -1,5 +1,6 @@
 package ru.alamics.sso.settings;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.keycloak.entity.Settings;
 import ru.alamics.sso.keycloak.repository.SettingsRepository;
 import ru.alamics.sso.registration.mapper.DataMapper;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 @Stateless
 @LocalBean
+@Slf4j
 public class SettingsService {
 
     @EJB
@@ -50,7 +52,11 @@ public class SettingsService {
         Settings settings = repository.getSettings(keyName, realmId);
         long ret = -1;
         if (settings != null) {
-            ret = TimeUnit.SECONDS.convert(Long.parseLong(settings.getValue()), settings.getUnit());
+            try {
+                ret = TimeUnit.SECONDS.convert(Long.parseLong(settings.getValue()), settings.getUnit());
+            } catch (Exception e) {
+                log.error("Failed convert time settings. Default value={}", ret);
+            }
         }
         return ret;
     }

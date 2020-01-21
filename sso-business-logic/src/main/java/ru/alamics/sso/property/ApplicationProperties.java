@@ -10,6 +10,7 @@ import javax.ejb.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -53,8 +54,12 @@ public class ApplicationProperties {
 
     @Schedule(hour = "*/1", persistent = false)
     private void initDbProperties() {
-        dbProperties.putAll(propertyRepository.findAll().stream()
+        Properties tempProp = new Properties();
+        tempProp.putAll(propertyRepository.findAll().stream()
                 .collect(Collectors.toMap(AppProperty::getName, AppProperty::getValue)));
+        if (!tempProp.isEmpty()){
+            dbProperties = tempProp;
+        }
         log.info("Initializing application properties from database finished:{}", dbProperties.toString());
     }
 }

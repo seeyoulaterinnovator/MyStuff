@@ -512,4 +512,15 @@
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('idpReview.recaptcha.siteVerify', 'https://www.google.com/recaptcha/api/siteverify');
         </sql>
     </changeSet>
+
+    <changeSet id="36" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="APP_PROPERTIES" />
+        </preConditions>
+        <!--    Schedule properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('application.schedule.import.milliseconds', '300000');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('application.schedule.user.milliseconds', '60000');
+        </sql>
+    </changeSet>
 </databaseChangeLog>

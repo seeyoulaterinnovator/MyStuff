@@ -18,6 +18,7 @@ import ru.alamics.sso.emailer.EmailSender;
 import ru.alamics.sso.keycloak.entity.AutoLockNotification;
 import ru.alamics.sso.keycloak.entity.common.NotificationType;
 import ru.alamics.sso.keycloak.repository.*;
+import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsDto;
@@ -41,6 +42,7 @@ public class UserSchedule {
     private static final long DEFAULT_INTERVAL_DURATION = 300000;
     private final static String[] SETTINGS_REALM_NAMES_SCHEDULE = {"user", "manager"};
     private final static String CLIENT_ID = "lkb2b";
+    private final static String TIMER_INTERVAL_DURATION_PROPERTY = "application.schedule.user.milliseconds";
     @EJB
     private EmailSender sender;
     @EJB
@@ -56,6 +58,8 @@ public class UserSchedule {
     @EJB
     private AdminEventRepository adminEventRepository;
     @EJB
+    private ApplicationProperties properties;
+    @EJB
     private SettingsService settingsService;
     @Resource
     private TimerService timerService;
@@ -64,7 +68,7 @@ public class UserSchedule {
     private void init() {
         final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
         try {
-            final long intervalDuration = Long.parseLong(settingsService.getProperty("application.schedule.user.milliseconds"));
+            final long intervalDuration = Long.parseLong(properties.getProperty(TIMER_INTERVAL_DURATION_PROPERTY));
             timerService.createIntervalTimer(intervalDuration, intervalDuration, timerConfig);
             log.info("Timer:{} is created, interval duration set to value={} milliseconds ", TIMER_NAME, intervalDuration);
         } catch (Exception e) {
