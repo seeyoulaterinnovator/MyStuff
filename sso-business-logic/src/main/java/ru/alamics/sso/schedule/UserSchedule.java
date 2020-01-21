@@ -18,14 +18,14 @@ import ru.alamics.sso.emailer.EmailSender;
 import ru.alamics.sso.keycloak.entity.AutoLockNotification;
 import ru.alamics.sso.keycloak.entity.common.NotificationType;
 import ru.alamics.sso.keycloak.repository.*;
-import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.registration.mapper.DataMapper;
+import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsDto;
 import ru.alamics.sso.settings.SettingsService;
 
-import javax.ejb.EJB;
-import javax.ejb.Schedule;
-import javax.ejb.Singleton;
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.ejb.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,8 +33,12 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+@Startup
 @Singleton
+@DependsOn("ApplicationProperties")
 public class UserSchedule {
+    private static final String TIMER_NAME = "User Schedule Timer";
+    private static final long DEFAULT_INTERVAL_DURATION = 300000;
     private final static String[] SETTINGS_REALM_NAMES_SCHEDULE = {"user", "manager"};
     private final static String CLIENT_ID = "lkb2b";
     @EJB
@@ -53,9 +57,30 @@ public class UserSchedule {
     private AdminEventRepository adminEventRepository;
     @EJB
     private SettingsService settingsService;
+    @Resource
+    private TimerService timerService;
 
-    @Schedule(hour = "*", minute = "*/1", persistent = false)
-    public void schedule() {
+    @PostConstruct
+    private void init() {
+        final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
+        try {
+            final long intervalDuration = Long.parseLong(settingsService.getProperty("application.schedule.user.milliseconds"));
+            timerService.createIntervalTimer(intervalDuration, intervalDuration, timerConfig);
+            log.info("Timer:{} is created, interval duration set to value={} milliseconds ", TIMER_NAME, intervalDuration);
+        } catch (Exception e) {
+            timerService.createIntervalTimer(DEFAULT_INTERVAL_DURATION, DEFAULT_INTERVAL_DURATION, timerConfig);
+            log.warn("Timer:{} is created; Error read configuration, interval duration set to default value={} milliseconds",
+                    TIMER_NAME, DEFAULT_INTERVAL_DURATION);
+        }
+    }
+
+    @Timeout
+    public void schedule(Timer timer) {
+        if (!TIMER_NAME.equals(timer.getInfo().toString())) {
+            return;
+        }
+
+        log.info("Schedule by timer:{}", timer.getInfo());
         log.info("start UserSchedule");
         findExpiredPassword();
         for (String realm : SETTINGS_REALM_NAMES_SCHEDULE) {
@@ -203,5 +228,4 @@ public class UserSchedule {
         adminEvent.setResourceType("USER");
         adminEventRepository.save(adminEvent);
     }
-
 }
