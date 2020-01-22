@@ -6,6 +6,12 @@
             <module name="org.keycloak.keycloak-server-spi"/>
             <module name="org.keycloak.keycloak-server-spi-private"/>
             <module name="org.bouncycastle"/>
+            <module name="com.sso" >
+                <imports>
+                    <include path="META-INF**"/>
+                    <include path="org**"/>
+                </imports>
+            </module>
         </dependencies>
     </deployment>
 </jboss-deployment-structure>

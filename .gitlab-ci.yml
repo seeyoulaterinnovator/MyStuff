@@ -108,6 +108,7 @@ back:war:
       - build/**/libs/*.war
       - build/**/libs/*.jar
       - build/deploy/
+      - tools/jar-module.xml
     name: "domru-sso-compile-$CI_PIPELINE_ID"
     expire_in: 1 week
 
@@ -166,3 +167,19 @@ dpl:stage:
     url: http://domru-sso-stage.alamics.ru
   script:
     - $BASE_DIR/scripts/deploy.sh
+
+dpl:prod:
+  stage: deploy
+  when: manual
+  only:
+    - tags
+  environment:
+    name: stage
+    url: http://sso.dev.itrev.ru
+  script:
+    - mkdir -p /usr/local/keycloak/modules/system/layers/base/com/sso
+    - cp artifacts/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/com/sso
+    - cp tools/jar-module.xml /usr/local/keycloak/modules/system/layers/base/com/sso/module.xml
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect deploy artifacts/domru-sso.war
+  tags:
+    - sso-domain-controller
