@@ -171,8 +171,6 @@ dpl:stage:
 dpl:prod:
   stage: deploy
   when: manual
-  only:
-    - tags
   environment:
     name: stage
     url: http://sso.dev.itrev.ru
