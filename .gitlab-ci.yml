@@ -178,6 +178,6 @@ dpl:prod:
     - mkdir -p /usr/local/keycloak/modules/system/layers/base/com/sso
     - cp artifacts/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/com/sso
     - cp tools/jar-module.xml /usr/local/keycloak/modules/system/layers/base/com/sso/module.xml
-    - /usr/local/keycloak/bin/jboss-cli.sh --connect deploy artifacts/domru-sso.war
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect deploy build/deploy/standalone/deployments/domru-sso.war
   tags:
     - sso-domain-controller
