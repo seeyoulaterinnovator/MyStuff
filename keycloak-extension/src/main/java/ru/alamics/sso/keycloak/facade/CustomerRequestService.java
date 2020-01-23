@@ -11,10 +11,7 @@ import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
 import javax.ejb.Singleton;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Slf4j
@@ -26,7 +23,7 @@ public class CustomerRequestService {
 
     private TbapiService tbapiService;
     private CustomerService customerService;
-    private ConcurrentLinkedQueue<String> tomsIdQueue;
+    private ConcurrentLinkedQueue<String> tomsIdQueue = new ConcurrentLinkedQueue<>();
     private ApplicationProperties properties;
 
     public CustomerRequestService() {
@@ -41,42 +38,45 @@ public class CustomerRequestService {
         }
     }
 
-    public List<CustomerDto> updateCustomerNames() {
-        List<String> currentUpdatingTomsIds = extractListFromQueue(tbapiRequestMaxSize);
-        if (currentUpdatingTomsIds.isEmpty()) {
-            return Collections.emptyList();
+    public Map<String, String> updateCustomerNames() {
+        List<String> currentTomsIds = extractListFromQueue(tbapiRequestMaxSize);
+        if (currentTomsIds.isEmpty()) {
+            return new HashMap<>();
         }
         try {
-            Map<String, Object> customerMap = tbapiService.customerNames(connectConfig(), currentUpdatingTomsIds);
-            List<CustomerDto> customers = new LinkedList<>();
-            for (String tomsId : currentUpdatingTomsIds) {
-                customers.add(customerService.save(CustomerDto.builder()
+            Map<String, Object> customerMap = tbapiService.customerNames(connectConfig(), currentTomsIds);
+            Map<String, String> customers = new HashMap<>();
+            for (String tomsId : currentTomsIds) {
+                CustomerDto customer = CustomerDto.builder()
                         .tomsId(tomsId)
-                        .name(customerMap.get(tomsId) == null ? " " : customerMap.get(tomsId).toString()).build()));
+                        .name(customerMap.get(tomsId) == null ? " " : customerMap.get(tomsId).toString())
+                        .build();
+                customerService.save(customer);
+                customers.put(customer.getTomsId(), customer.getName());
             }
             return customers;
         } catch (Exception e) {
-            log.error("Fail getting customer names by tomsIds={}", currentUpdatingTomsIds.toString(), e);
-            return Collections.emptyList();
+            log.error("Fail getting customer names by tomsIds={}", currentTomsIds.toString(), e);
+            return new HashMap<>();
         }
     }
 
     public void addTomsIdsInQueue(List<String> updatingTomsId) {
-        if (tomsIdQueue == null) {
-            tomsIdQueue = new ConcurrentLinkedQueue<>();
-        }
-        updatingTomsId.stream()
-                .filter(tomsId -> !tomsIdQueue.contains(tomsId))
-                .forEach(tomsId -> tomsIdQueue.offer(tomsId));
+        updatingTomsId.forEach(tomsId -> tomsIdQueue.offer(tomsId));
     }
 
-    private List<String> extractListFromQueue(int сountElements) {
+    public int getLoadCoeff() {
+        return tomsIdQueue.size() / tbapiRequestMaxSize / 100;
+    }
+
+    private List<String> extractListFromQueue(int countElements) {
         List<String> result = new LinkedList<>();
-        if (tomsIdQueue == null || tomsIdQueue.isEmpty()) {
+        if (tomsIdQueue.isEmpty()) {
             return Collections.emptyList();
         }
+
         int currentElement = 0;
-        while (!tomsIdQueue.isEmpty() && currentElement <= сountElements) {
+        while (!tomsIdQueue.isEmpty() && currentElement <= countElements) {
             result.add(tomsIdQueue.poll());
             currentElement++;
         }

@@ -1,7 +1,8 @@
-package ru.alamics.sso.keycloak.cache;
+package ru.alamics.sso.keycloak.cache.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.infinispan.Cache;
+import ru.alamics.sso.keycloak.cache.CustomCache;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 
 import javax.annotation.Resource;

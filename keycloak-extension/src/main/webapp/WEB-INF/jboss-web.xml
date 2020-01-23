@@ -7,4 +7,8 @@
         <res-ref-name>infinispan/custom_container/user_post_cache</res-ref-name>
         <lookup-name>java:jboss/infinispan/cache/custom_container/user_post_cache</lookup-name>
     </resource-ref>
+    <resource-ref>
+        <res-ref-name>infinispan/custom_container/customer_cache</res-ref-name>
+        <lookup-name>java:jboss/infinispan/cache/custom_container/customer_cache</lookup-name>
+    </resource-ref>
 </jboss-web>
