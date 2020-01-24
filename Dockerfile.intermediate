@@ -28,6 +28,8 @@ USER 1000
 
 EXPOSE 8080
 EXPOSE 8443
+EXPOSE 9990
+EXPOSE 9999
 
 ENTRYPOINT [ "/opt/jboss/tools/docker-entrypoint.sh" ]
 
