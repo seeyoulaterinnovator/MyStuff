@@ -162,7 +162,8 @@ export default (function() {
     const containerWidth = document.getElementById('password').offsetWidth;
     if(reCaptchaWidth !== containerWidth) {
       const captchaScale = containerWidth / reCaptchaWidth;
-      reCaptcha.style.transform = 'scale('+captchaScale+')';
+      if (reCaptcha)
+        reCaptcha.style.transform = 'scale('+captchaScale+')';
     }
   }
   // resizing ReCaptcha initial
@@ -200,7 +201,6 @@ export default (function() {
           input.checked = value;
         } else {
           input.value = value === undefined ? '' : value;
-          input
         }
 
         // show/hide errors
