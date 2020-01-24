@@ -1,3 +1,6 @@
 FROM registry.alamics.ru/devops/keycloak/keycloak:6.0.1
 
+RUN cp /opt/jboss/configs/host-master.xml /opt/jboss/keycloak/domain/configuration
+RUN cp /opt/jboss/configs/host-slave.xml /opt/jboss/keycloak/domain/configuration
+
 ENTRYPOINT [ "/opt/jboss/tools/docker-domain-entrypoint.sh" ]
