@@ -60,6 +60,10 @@ public class CustomerUpdateTask implements Runnable {
     private void updateCustomers() {
         Map<String, String> customers = customerRequestService.updateCustomerNames();
 
+        if (customers.isEmpty()) {
+            return;
+        }
+
         //Замена во всем кэше имен организаций (ключ кэша - tomsId)
         customers.entrySet().stream()
                 .filter(customer -> customer.getValue() != null && !customer.getValue().isBlank())
