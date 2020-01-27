@@ -36,6 +36,7 @@ import ru.alamics.sso.registration.tbapi.TbapiService;
 import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
+import ru.alamics.sso.util.Util;
 
 import javax.ws.rs.core.MultivaluedMap;
 import java.io.InputStream;
@@ -135,7 +136,10 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
         userCtx.setUsername(username);
         userCtx.setFirstName(formData.getFirst(UserModel.FIRST_NAME));
         userCtx.setLastName(formData.getFirst(UserModel.LAST_NAME));
-        userCtx.setAttribute(FormConstants.FIELD_PHONE, Collections.singletonList(formData.getFirst(FormConstants.FIELD_PHONE)));
+
+        String phone = Util.getCleanUserPhone(formData.getFirst(FormConstants.FIELD_PHONE));
+        if (phone != null)
+            userCtx.setAttribute(FormConstants.FIELD_PHONE, Collections.singletonList(phone));
         userCtx.setAttribute(FormConstants.FIELD_ORG_NAME, Collections.singletonList(formData.getFirst(FormConstants.FIELD_ORG_NAME)));
 
         String email = formData.getFirst(FormConstants.FIELD_EMAIL);
@@ -204,10 +208,13 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
     }
 
     private User getTbApiUser(MultivaluedMap<String, String> formData) throws TbapiRegisterException {
+
+        String phone = Util.getCleanUserPhone(formData.getFirst(FormConstants.FIELD_PHONE));
+
         User user = User.builder()
                 .name(formData.getFirst(FormConstants.FIELD_FIRST_NAME))
                 .email(formData.getFirst(FormConstants.FIELD_EMAIL))
-                .phone(formData.getFirst(FormConstants.FIELD_PHONE))
+                .phone(phone)
                 .build();
 
         String orgName = formData.getFirst(FormConstants.FIELD_ORG_NAME);

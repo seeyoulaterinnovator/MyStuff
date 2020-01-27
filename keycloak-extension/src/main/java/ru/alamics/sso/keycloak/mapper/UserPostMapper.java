@@ -130,6 +130,8 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
 
     public static Object getUserModelValue(UserPostResponse userPost, String propertyName) {
         switch (UserPostPropertyType.valueOf(propertyName)) {
+            case POST_ID:
+                return userPost.getId();
             case TOMS_ID:
                 return userPost.getTomsId();
             case DMP_ID:

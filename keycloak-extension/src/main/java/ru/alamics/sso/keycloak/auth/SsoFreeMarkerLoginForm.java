@@ -21,6 +21,7 @@ import org.keycloak.theme.beans.MessageType;
 import org.keycloak.utils.MediaType;
 import ru.alamics.sso.keycloak.auth.model.AuthType;
 import ru.alamics.sso.registration.model.FormConstants;
+import ru.alamics.sso.util.Util;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -131,11 +132,14 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             this.attributes.put("twoStepAuthType", "");
         }
         if (formData != null) {
+
+            String phone = Util.getCleanUserPhone(formData.getFirst(FormConstants.FIELD_PHONE));
+
             this.attributes.put(FormConstants.FIELD_ORG_NAME, formData.getFirst(FormConstants.FIELD_ORG_NAME));
             this.attributes.put(FormConstants.FIELD_EMAIL, formData.getFirst(FormConstants.FIELD_EMAIL));
             this.attributes.put(FormConstants.FIELD_FIRST_NAME, formData.getFirst(FormConstants.FIELD_FIRST_NAME));
             this.attributes.put(FormConstants.FIELD_USERNAME, formData.getFirst(FormConstants.FIELD_USERNAME));
-            this.attributes.put(FormConstants.FIELD_PHONE, formData.getFirst(FormConstants.FIELD_PHONE));
+            this.attributes.put(FormConstants.FIELD_PHONE, phone);
         }
         log.info("create form attr = {}", attributes);
         return super.createRegistration();
