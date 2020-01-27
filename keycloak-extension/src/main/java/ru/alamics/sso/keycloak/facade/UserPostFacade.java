@@ -15,45 +15,27 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.Singleton;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Singleton
 public class UserPostFacade {
-    private static final int MAX_SIZE_POOL = 3;
     private static final String CUSTOMER_CACHE_LIFESPAN_IN_DB_PROPERTY = "user.post.cache.db.lifespan.days";
     private static final int CUSTOMER_CACHE_LIFESPAN_IN_DB = 1;
 
-    private static final String TBAPI_REQUEST_INTERVAL_PROPERTY = "tbapi.customer.request.interval.milliseconds";
-    private long TBAPI_REQUEST_INTERVAL = 10000;
-
     private int customerCacheLifespanInDb;
-    private long tbapiRequestInterval = TBAPI_REQUEST_INTERVAL;
 
     private CustomCache<UserPostResponse> cache;
     @Resource(lookup = "infinispan/custom_container/customer_cache")
     private Cache<String, String> customerCache;
 
-    private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(3);
-    private ConcurrentLinkedQueue<ScheduledFuture> updateCustomerTasks = new ConcurrentLinkedQueue<>();
-
     private UserPostService userPostService;
     private CustomerRequestService customerRequestService;
     private ApplicationProperties properties;
-
-    @PostConstruct
-    private void init() {
-        try {
-            tbapiRequestInterval = Long.parseLong(properties.getProperty(TBAPI_REQUEST_INTERVAL_PROPERTY));
-        } finally {
-            updateCustomerTasks.offer(executorService.scheduleAtFixedRate(createUpdateCustomerTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
-        }
-    }
 
     public UserPostFacade() {
         try {
@@ -70,15 +52,20 @@ public class UserPostFacade {
         }
     }
 
+    @PostConstruct
+    private void init() {
+        new CustomerUpdateTask(customerRequestService, customerCache, null, null);
+    }
+
     public List<UserPostResponse> findByUserId(String userId) throws NotFoundException {
-        Set<UserPostResponse> userPostCached = cache.get(userId);
-        if (userPostCached == null || userPostCached.isEmpty()) {
+        List<UserPostResponse> userPostCached = getCachedUserPosts(userId);
+        if (userPostCached.isEmpty()) {
             List<UserPostResponse> userPosts = userPostService.getUserPost(userId);
             addCustomersToRequest(userPosts);
             cache.put(userId, userPosts);
             return userPosts;
         }
-        return userPostCached.stream().collect(Collectors.toList());
+        return userPostCached;
     }
 
     public void addUserPostAndSystemRole(UserPostRequest userPostRequest) {
@@ -110,35 +97,12 @@ public class UserPostFacade {
         customerRequestService.addTomsIdsInQueue(updatingTomsId);
     }
 
-    private Runnable createUpdateCustomerTask() {
-        return () -> {
-            updateCustomers();
-            checkLoad();
-        };
-    }
-
-    private void updateCustomers() {
-        Map<String, String> customers = customerRequestService.updateCustomerNames();
-
-        //Замена во всем кэше имен организаций (ключ кэша - userId)
-        cache.getAll().stream()
-                .filter(post -> customers.containsKey(post.getTomsId()))
-                .forEach(post -> post.setOrganization(customers.get(post.getTomsId())));
-        log.info("update customers");
-    }
-
-    private void checkLoad() {
-        //Добавление дополнительного потока
-        if (customerRequestService.getLoadCoeff() > updateCustomerTasks.size() && updateCustomerTasks.size() < MAX_SIZE_POOL) {
-            updateCustomerTasks.offer(executorService.scheduleAtFixedRate(createUpdateCustomerTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
-            log.info("Increased count tasks for update customers. Count tasks={}", updateCustomerTasks.size());
-            return;
+    private List<UserPostResponse> getCachedUserPosts(String userId) {
+        Set<UserPostResponse> cachedPosts = cache.get(userId);
+        if (cachedPosts == null || cachedPosts.isEmpty()) {
+            return new LinkedList<>();
         }
-
-        //Удаление лишнего потока
-        if (customerRequestService.getLoadCoeff() < updateCustomerTasks.size() - 1) {
-            Objects.requireNonNull(updateCustomerTasks.poll()).cancel(true);
-            log.info("Decreased count tasks for update customers. Count tasks={}", updateCustomerTasks.size());
-        }
+        cachedPosts.forEach(post -> post.setOrganization(customerCache.get(post.getTomsId())));
+        return new ArrayList<>(cachedPosts);
     }
 }

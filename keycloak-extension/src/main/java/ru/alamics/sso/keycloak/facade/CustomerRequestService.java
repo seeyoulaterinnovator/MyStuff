@@ -12,18 +12,22 @@ import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
 import javax.ejb.Singleton;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 @Slf4j
 @Singleton
 public class CustomerRequestService {
     private static final String TBAPI_REQUEST_MAX_SIZE_PROPERTY = "tbapi.customer.request.max.size";
-    private int TBAPI_REQUEST_MAX_SIZE = 10;
+    private static final int TBAPI_REQUEST_MAX_SIZE = 10;
+    private static final String LOAD_COEFF_PROPERTY = "tbapi.customer.request.load.coeff";
+    private static final int LOAD_COEFF_DEFAULT = 100;
+
     private int tbapiRequestMaxSize;
+    private int loadCoeff;
 
     private TbapiService tbapiService;
     private CustomerService customerService;
-    private ConcurrentLinkedQueue<String> tomsIdQueue = new ConcurrentLinkedQueue<>();
+    private LinkedBlockingQueue<String> tomsIdQueue = new LinkedBlockingQueue<>();
     private ApplicationProperties properties;
 
     public CustomerRequestService() {
@@ -32,9 +36,11 @@ public class CustomerRequestService {
             properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
             customerService = (CustomerService) Lookup.lookup(CustomerService.class);
             tbapiRequestMaxSize = Integer.parseInt(properties.getProperty(TBAPI_REQUEST_MAX_SIZE_PROPERTY));
+            loadCoeff = Integer.parseInt(properties.getProperty(LOAD_COEFF_PROPERTY));
         } catch (NumberFormatException e) {
             log.warn("Error parse properties file. All properties values set to default");
             tbapiRequestMaxSize = TBAPI_REQUEST_MAX_SIZE;
+            loadCoeff = LOAD_COEFF_DEFAULT;
         }
     }
 
@@ -66,7 +72,7 @@ public class CustomerRequestService {
     }
 
     public int getLoadCoeff() {
-        return tomsIdQueue.size() / tbapiRequestMaxSize / 100;
+        return tomsIdQueue.size() / tbapiRequestMaxSize / loadCoeff;
     }
 
     private List<String> extractListFromQueue(int countElements) {
