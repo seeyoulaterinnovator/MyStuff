@@ -47,6 +47,10 @@ public class CustomerUpdateService {
         tasksPool.offer(executorService.scheduleAtFixedRate(new UpdateTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
     }
 
+    public int getTasksPoolSize() {
+        return tasksPool.size();
+    }
+
     private class UpdateTask implements Runnable {
         @Override
         public void run() {

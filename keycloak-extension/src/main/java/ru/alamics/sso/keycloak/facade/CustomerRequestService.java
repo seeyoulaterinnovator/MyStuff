@@ -75,6 +75,14 @@ public class CustomerRequestService {
         return tomsIdQueue.size() / tbapiRequestMaxSize / loadCoeff;
     }
 
+    public int getTomsIdQueueSize() {
+        return tomsIdQueue.size();
+    }
+
+    public int getTbapiRequestMaxSize() {
+        return tbapiRequestMaxSize;
+    }
+
     private List<String> extractListFromQueue(int countElements) {
         List<String> result = new LinkedList<>();
         if (tomsIdQueue.isEmpty()) {
