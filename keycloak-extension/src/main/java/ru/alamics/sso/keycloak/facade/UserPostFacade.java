@@ -11,11 +11,9 @@ import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserPostService;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.Singleton;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +34,7 @@ public class UserPostFacade {
     private UserPostService userPostService;
     private CustomerRequestService customerRequestService;
     private ApplicationProperties properties;
+    private CustomerUpdateService customerUpdateService;
 
     public UserPostFacade() {
         try {
@@ -44,17 +43,13 @@ public class UserPostFacade {
             cache = (CustomCache<UserPostResponse>) Lookup.lookup(UserPostCache.class);
             userPostService = (UserPostService) Lookup.lookup(UserPostService.class);
             customerRequestService = (CustomerRequestService) Lookup.lookup(CustomerRequestService.class);
+            customerUpdateService = (CustomerUpdateService) Lookup.lookup(CustomerUpdateService.class);
 
             customerCacheLifespanInDb = Integer.parseInt(properties.getProperty(CUSTOMER_CACHE_LIFESPAN_IN_DB_PROPERTY));
         } catch (Exception e) {
             log.warn("Error parse properties file. All properties values set to default");
             customerCacheLifespanInDb = CUSTOMER_CACHE_LIFESPAN_IN_DB;
         }
-    }
-
-    @PostConstruct
-    private void init() {
-        new CustomerUpdateTask(customerRequestService, customerCache, null, null);
     }
 
     public List<UserPostResponse> findByUserId(String userId) throws NotFoundException {
@@ -102,7 +97,9 @@ public class UserPostFacade {
         if (cachedPosts == null || cachedPosts.isEmpty()) {
             return new LinkedList<>();
         }
-        cachedPosts.forEach(post -> post.setOrganization(customerCache.get(post.getTomsId())));
-        return new ArrayList<>(cachedPosts);
+        cachedPosts.stream()
+                .filter(post -> customerCache.get(post.getTomsId()) != null && !customerCache.get(post.getTomsId()).isBlank())
+                .forEach(post -> post.setOrganization(customerCache.get(post.getTomsId())));
+        return new LinkedList<>(cachedPosts);
     }
 }
