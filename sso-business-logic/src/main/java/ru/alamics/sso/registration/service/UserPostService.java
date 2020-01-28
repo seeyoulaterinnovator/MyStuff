@@ -35,7 +35,7 @@ public class UserPostService {
             throw new NotFoundException("UserPostRole with this roleId is not exist!");
         }
         UserPostEntity userPost = DataMapper.toUserPost(new UserPostEntity(), userPostRequest);
-        customerRepository.save(userPost.getCustomer());
+        userPost.setCustomer(customerRepository.save(userPost.getCustomer()));
         return DataMapper.toUserPostResponse(userPostRepository.save(userPost));
     }
 

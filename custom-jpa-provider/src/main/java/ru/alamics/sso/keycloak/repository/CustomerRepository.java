@@ -23,7 +23,7 @@ public class CustomerRepository {
             if (customerInDb.getName() != null && (customer.getName() == null || customer.getName().isBlank())) {
                 customer.setName(customerInDb.getName());
             }
-            em.merge(customer);
+            customer = em.merge(customer);
         }
         em.flush();
         return customer;

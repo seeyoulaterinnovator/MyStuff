@@ -45,7 +45,7 @@ public class UserPostResource {
     public Response create(@NotNull @Valid UserPostRequest userPostRequest, HttpHeaders headers) {
         try {
             return JsonResponse.success()
-                    .addResult("user_post", userPostService.save(userPostRequest))
+                    .addResult("user_post", userPostFacade.save(userPostRequest))
                     .build();
         } catch (NotFoundException e) {
             return JsonResponse.fail()
@@ -76,7 +76,7 @@ public class UserPostResource {
     @NoCache
     public Response delete(@PathParam("id") String id) {
         try {
-            userPostService.remove(id);
+            userPostFacade.remove(id);
             return JsonResponse.success()
                     .build();
         } catch (NotFoundException e) {

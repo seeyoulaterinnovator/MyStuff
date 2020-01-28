@@ -67,6 +67,19 @@ public class UserPostFacade {
         cache.put(userPostRequest.getUserId(), List.of(userPostService.addUserPostAndSystemRole(userPostRequest)));
     }
 
+    public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException {
+        UserPostResponse post = userPostService.save(userPostRequest);
+        addCustomersToRequest(List.of(post));
+        cache.put(userPostRequest.getUserId(), List.of(post));
+        return post;
+    }
+
+    public void remove(String userPostId) throws NotFoundException {
+        UserPostResponse removePost = userPostService.get(userPostId);
+        cache.get(removePost.getUserId()).removeIf(post -> post.getId().equals(userPostId));
+        userPostService.remove(userPostId);
+    }
+
     public void clearCacheByUserId(String userId) {
         cache.clearById(userId);
     }

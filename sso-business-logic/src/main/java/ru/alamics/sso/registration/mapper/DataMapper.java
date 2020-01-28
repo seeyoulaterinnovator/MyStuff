@@ -56,6 +56,7 @@ public class DataMapper {
                 .userRole(toUserPostRoleDto(userPost.getRole()))
                 .tomsId(userPost.getCustomer().getId())
                 .organization(userPost.getCustomer().getName())
+                .updateTime(userPost.getCustomer().getUpdateTime())
                 .dmpId(userPost.getDmpId())
                 .selected(userPost.isSelected())
                 .systemRoles(toExternalSystemRoleDtos(externalSystemRoles))
