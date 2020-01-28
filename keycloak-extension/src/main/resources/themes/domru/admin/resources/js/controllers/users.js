@@ -731,6 +731,9 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     }
 
     $scope.isFirstOrg = function (userAccess, org, access) {
+        if (access.organization === undefined){
+            return '\u00A0';
+        }
         var equalToms = userAccess.filter(ua => ua.userPostId === access.userPostId && ua.organization === org);
         var index = equalToms.indexOf(access);
         if (index === 0 && access.organization.trim() !== '') {
