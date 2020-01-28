@@ -81,7 +81,7 @@ public class UserPostFacade {
                 .filter(post -> post.getUpdateTime().isBefore(LocalDateTime.now().minusDays(customerCacheLifespanInDb)) ||
                         post.getOrganization() == null)
                 .map(post -> {
-                    customerCache.put(post.getTomsId(), post.getOrganization());
+                    customerCache.put(post.getTomsId(), post.getOrganization() == null ? " " : post.getOrganization());
                     return post.getTomsId();
                 })
                 .distinct()
