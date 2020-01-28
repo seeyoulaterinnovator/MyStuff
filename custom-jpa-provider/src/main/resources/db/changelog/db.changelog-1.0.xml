@@ -441,9 +441,9 @@
         <modifyDataType tableName="USER_POST" columnName="TOMS_ID" newDataType="varchar(30)" />
 
         <sql>
-            ALTER TABLE customer CHANGE id id varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-            ALTER TABLE user_post CHANGE TOMS_ID TOMS_ID varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-            insert into CUSTOMER(ID, UPDATE_TIME) select distinct p.toms_id, CURRENT_TIMESTAMP from USER_POST p;
+            ALTER TABLE CUSTOMER CHANGE ID ID varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            ALTER TABLE USER_POST CHANGE TOMS_ID TOMS_ID varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            insert into CUSTOMER(ID, UPDATE_TIME) select distinct p.TOMS_ID, CURRENT_TIMESTAMP from USER_POST p;
         </sql>
 
         <addForeignKeyConstraint baseTableName="USER_POST" baseColumnNames="TOMS_ID"
