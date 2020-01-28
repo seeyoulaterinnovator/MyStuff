@@ -126,19 +126,19 @@ public class UserSchedule {
                 var prepareBlockNotification = prepareBlockNotification(realm.getName(), getClientLink(client));
                 prepareBlockNotification.realmModel(realm)
                         .user(userModel);
-                sender.send(prepareBlockNotification.build());
+                sender.blockingSend(prepareBlockNotification.build());
             } else if (notification.getType() == NotificationType.ABSENCE_BLOCKING) {
                 var bockNotification = bockNotification();
                 bockNotification.realmModel(realm)
                         .user(userModel);
-                sender.send(bockNotification.build());
+                sender.blockingSend(bockNotification.build());
                 user.setEnabled(false);
                 createAdminEvent(OperationType.UPDATE, user, realm);
             } else if (notification.getType() == NotificationType.PASSWORD_EXPIRED) {
                 var passwordExpired = passwordExpired(getClientLink(client));
                 passwordExpired.realmModel(realm)
                         .user(userModel);
-                sender.send(passwordExpired.build());
+                sender.blockingSend(passwordExpired.build());
             }
         }
         log.info("stop={}", DEBUG_STR);

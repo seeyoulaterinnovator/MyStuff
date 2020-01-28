@@ -74,7 +74,7 @@ public abstract class SsoEvent {
             String link = builder.build(realm.getName()).toString();
             attributes.put("accountLink", link);
 
-            emailSender.send(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
+            emailSender.blockingSend(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
                     session.theme().getTheme(Theme.Type.EMAIL), session.getContext().resolveLocale(user)));
 
             log.info("Email transmit to EmailSender is finished: email={}", user.getEmail());

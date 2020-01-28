@@ -48,7 +48,7 @@ public class EmailSender {
     @EJB
     private ApplicationProperties properties;
 
-    public void send(EmailModel emailModel) {
+    public void blockingSend(EmailModel emailModel) {
         if (emailModel.getUser().getEmail() == null) {
             return;
         }
@@ -58,6 +58,14 @@ public class EmailSender {
         } catch (InterruptedException e) {
             log.error("Fail put email into send queue", e);
         }
+    }
+
+    public int getEmailQueueSize() {
+        return emailQueue.size();
+    }
+
+    public long getSendInterval() {
+        return sendInterval;
     }
 
     private class SendTask implements Runnable {
