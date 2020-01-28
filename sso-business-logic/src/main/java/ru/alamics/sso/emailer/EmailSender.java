@@ -26,10 +26,10 @@ import javax.ejb.Stateless;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 
 @Stateless
 @Slf4j
@@ -40,10 +40,9 @@ public class EmailSender {
     private long sendInterval = 1000;
 
     private FreeMarkerUtil freeMarkerUtil;
-    private ConcurrentLinkedQueue<EmailModel> emailQueue;
+    private BlockingQueue<EmailModel> emailQueue;
     private EmailSenderProvider emailSenderProvider;
     private ExecutorService executorService;
-    private Future sendTask;
     @EJB
     private AdminEventRepository adminEventRepository;
     @EJB
@@ -53,43 +52,44 @@ public class EmailSender {
         if (emailModel.getUser().getEmail() == null) {
             return;
         }
-        emailQueue.offer(emailModel);
 
-        if (sendTask == null || sendTask.isDone()) {
-            sendTask = executorService.submit(() -> {
-                log.info("Thread email sender is started");
-                while (!emailQueue.isEmpty()) {
-                    send();
-                    try {
-                        Thread.sleep(sendInterval);
-                    } catch (InterruptedException e) {
-                    }
-                }
-                log.info("Thread email sender is finished");
-            });
+        try {
+            emailQueue.put(emailModel);
+        } catch (InterruptedException e) {
+            log.error("Fail put email into send queue", e);
         }
     }
 
-    private void send() {
-        try {
-            EmailModel emailModel = emailQueue.poll();
-            EmailTemplate template = processTemplate(emailModel.getSubject(), emailModel.getSubjectAttributes(),
-                    emailModel.getBodyTemplate(), emailModel.getBodyAttributes(),
-                    emailModel.getTheme(), emailModel.getLocale());
-            emailSenderProvider.send(emailModel.getRealmModel().getSmtpConfig(), emailModel.getUser(), template.getSubject(), template.getTextBody(), template.getHtmlBody());
-            createEmailEvent(OperationType.ACTION, emailModel, template.subject);
-            log.info("send to " + emailModel.getUser().getEmail() + " is finished");
-        } catch (Exception e) {
-            log.error("Thread email sender is ended with error:", e);
+    private class SendTask implements Runnable {
+        @Override
+        public void run() {
+            try {
+                EmailModel emailModel = null;
+                while ((emailModel = emailQueue.take()) != null) {
+                    EmailTemplate template = processTemplate(emailModel.getSubject(), emailModel.getSubjectAttributes(),
+                            emailModel.getBodyTemplate(), emailModel.getBodyAttributes(),
+                            emailModel.getTheme(), emailModel.getLocale());
+                    emailSenderProvider.send(emailModel.getRealmModel().getSmtpConfig(), emailModel.getUser(), template.getSubject(), template.getTextBody(), template.getHtmlBody());
+                    createEmailEvent(OperationType.ACTION, emailModel, template.subject);
+                    log.info("send to " + emailModel.getUser().getEmail() + " is finished");
+
+                    Thread.sleep(sendInterval);
+                }
+            } catch (InterruptedException e) {
+                log.error(e.getMessage());
+            } catch (Exception e) {
+                log.error("Thread email sender is ended with error:", e);
+            }
         }
     }
 
     @PostConstruct
     public void init() {
         this.emailSenderProvider = new DefaultEmailSenderProvider(null);
-        this.emailQueue = new ConcurrentLinkedQueue<EmailModel>();
+        this.emailQueue = new LinkedBlockingQueue<>();
         this.freeMarkerUtil = new FreeMarkerUtil();
         this.executorService = Executors.newSingleThreadExecutor();
+        executorService.submit(new SendTask());
 
         try {
             sendInterval = Long.parseLong(properties.getProperty(SEND_INTERVAL_PROPERTY));
