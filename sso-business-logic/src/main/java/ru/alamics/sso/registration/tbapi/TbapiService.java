@@ -22,6 +22,12 @@ import static ru.alamics.sso.registration.model.UserConstants.*;
 @Slf4j
 public class TbapiService {
 
+    private final static String TBAPI_TOMS_ID = "id";
+    private final static String TBAPI_DMP_ID = "dmpCustomerId";
+
+    private final static String TBAPI_ERROR_FLAG = "businessErrorCode";
+    private final static String TBAPI_ERROR_DETAIL = "userMessage";
+
     // jackson serialize
     ObjectMapper jacksonMapper = new ObjectMapper();
 
@@ -60,17 +66,26 @@ public class TbapiService {
             log.error("", e);
         }
 
-        // TODO check response
+        checkResponse(result);
 
         return filterRegisterResponse(result);
+    }
+
+    private void checkResponse(Map<String, Object> resp) throws TbapiRegisterException
+    {
+        if (resp.get(TBAPI_ERROR_FLAG) != null)
+            throw new TbapiRegisterException((String)resp.get(TBAPI_ERROR_DETAIL));
+
+        if (resp.get(TBAPI_TOMS_ID) == null)
+            throw new TbapiRegisterException("TOMS ID not found");
     }
 
     private Map<String, Object> filterRegisterResponse(Map<String, Object> resp) {
 
         Map<String, Object> ret = new HashMap<>();
 
-        ret.put(ATTR_TOMS_NAME, resp.get("id"));
-        ret.put(ATTR_DMP_NAME, resp.get("dmpCustomerId"));
+        ret.put(ATTR_TOMS_NAME, resp.get(TBAPI_TOMS_ID));
+        ret.put(ATTR_DMP_NAME, resp.get(TBAPI_DMP_ID));
 
         return ret;
     }
