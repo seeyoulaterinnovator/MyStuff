@@ -79,14 +79,14 @@ public class EmailSender {
                             emailModel.getTheme(), emailModel.getLocale());
                     emailSenderProvider.send(emailModel.getRealmModel().getSmtpConfig(), emailModel.getUser(), template.getSubject(), template.getTextBody(), template.getHtmlBody());
                     createEmailEvent(OperationType.ACTION, emailModel, template.subject);
-                    log.info("send to " + emailModel.getUser().getEmail() + " is finished");
+                    log.info("send to " + emailModel.getUser().getEmail() + " is finished. EmailQueueSize={}, SendInterval={}", getEmailQueueSize(), sendInterval);
 
                     Thread.sleep(sendInterval);
                 }
-            } catch (InterruptedException e) {
-                log.error(e.getMessage());
             } catch (Exception e) {
-                log.error("Thread email sender is ended with error:", e);
+                log.error("'Email sender' task is ended with error : EmailQueueSize={} ", getEmailQueueSize(), e);
+            } finally {
+                log.error("'Email sender' task is finished. Mailing disabled : EmailQueueSize={}", getEmailQueueSize());
             }
         }
     }

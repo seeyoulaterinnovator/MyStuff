@@ -74,8 +74,6 @@ public class ImportSchedule {
             return;
         }
 
-        log.info("Schedule by timer:{}", timer.getInfo());
-        log.info("Start import users by schedule");
         List<ImportUsersReportEntity> importUsersReportEntities = importUsersReportRepository.findAllImportUsersReports()
                 .stream()
                 .filter(o -> o.getImportUserData() != null && !o.getImportUserData().isEmpty())
@@ -88,7 +86,6 @@ public class ImportSchedule {
         for (ImportUsersReportEntity importUsersReportEntity : importUsersReportEntities) {
             createImportUsers(importUsersReportEntity);
         }
-        log.info("End import users by schedule");
     }
 
     private void createImportUsers(ImportUsersReportEntity importUsersReport) {
@@ -116,6 +113,7 @@ public class ImportSchedule {
                 countClones.getAndIncrement();
             } catch (NotFoundException | ValidationException e) {
                 o.setErrors(e.getMessage());
+                log.error("Importing user data is failed. {}",e.getMessage());
             }
         }
         importUsersReport.setCountClones(countClones.intValue());

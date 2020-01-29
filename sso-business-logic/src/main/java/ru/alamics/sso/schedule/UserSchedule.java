@@ -79,41 +79,38 @@ public class UserSchedule {
             return;
         }
 
-        log.info("Schedule by timer:{}", timer.getInfo());
-        log.info("start UserSchedule");
         findExpiredPassword();
         for (String realm : SETTINGS_REALM_NAMES_SCHEDULE) {
             notificationInactiveUsers(realm);
             block(realm);
         }
         sendEmails();
-        log.info("end UserSchedule");
     }
 
     private void notificationInactiveUsers(String realm) {
         final String DEBUG_STR = "findNotifications";
-        log.info("start:{}", DEBUG_STR);
+        log.debug("start:{}", DEBUG_STR);
         long absenceTimeNotification = properties.getSettingsValue(PropertyConstants.ABSENCE_NOTIFICATION_DAYS, realm);
         if (absenceTimeNotification > -1) {
             userHistoryLoginRepository.findInactiveUsers(absenceTimeNotification, realm);
         }
-        log.info("stop:{}", DEBUG_STR);
+        log.debug("stop:{}", DEBUG_STR);
     }
 
     private void block(String realm) {
         final String DEBUG_STR = "block";
-        log.info("start:{}", DEBUG_STR);
+        log.debug("start:{}", DEBUG_STR);
         long absenceTimeBlock = properties.getSettingsValue(PropertyConstants.ABSENCE_BLOCKING_DAYS, realm) -
                 properties.getSettingsValue(PropertyConstants.ABSENCE_NOTIFICATION_DAYS, realm);
         if (absenceTimeBlock > -1) {
             autoLockNotificationRepository.findUsersToBlock(absenceTimeBlock, realm);
         }
-        log.info("stop:{}", DEBUG_STR);
+        log.debug("stop:{}", DEBUG_STR);
     }
 
     private void findExpiredPassword() {
         final String DEBUG_STR = "findExpiredPassword";
-        log.info("start: {}", DEBUG_STR);
+        log.debug("start: {}", DEBUG_STR);
         var realms = policyRepository.findRealmWithPolicy(PasswordPolicy.FORCE_EXPIRED_ID);
 
         realms.forEach(realm -> {
@@ -129,12 +126,12 @@ public class UserSchedule {
                 }
             }
         });
-        log.info("stop: {}", DEBUG_STR);
+        log.debug("stop: {}", DEBUG_STR);
     }
 
     private void sendEmails() {
         final String DEBUG_STR = "sendEmails";
-        log.info("start={}", DEBUG_STR);
+        log.debug("start={}", DEBUG_STR);
 
         var autoLockNotifications = autoLockNotificationRepository.findNotifications();
         for (AutoLockNotification notification : autoLockNotifications) {
@@ -161,7 +158,7 @@ public class UserSchedule {
                 sender.blockingSend(passwordExpired.build());
             }
         }
-        log.info("stop={}", DEBUG_STR);
+        log.debug("stop={}", DEBUG_STR);
     }
 
 
