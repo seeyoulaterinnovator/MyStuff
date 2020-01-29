@@ -4,7 +4,6 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.RealmAdapter;
 import org.keycloak.models.jpa.entities.RealmEntity;
 
-
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -19,7 +18,11 @@ public class RealmRepository {
     private EntityManager em;
 
     public RealmModel findRealmById(final String id) {
-        RealmEntity realm = em.find(RealmEntity.class, id);
+        RealmEntity realm = em.createQuery("select r from RealmEntity r " +
+                "left join fetch r.smtpConfig " +
+                "where r.id = :id ", RealmEntity.class)
+                .setParameter("id", id)
+                .getSingleResult();
         if (realm == null) return null;
         RealmAdapter adapter = new RealmAdapter(null, em, realm);
         return adapter;

@@ -74,16 +74,20 @@ public class EmailSender {
             try {
                 EmailModel emailModel = null;
                 while ((emailModel = emailQueue.take()) != null) {
-                    EmailTemplate template = processTemplate(emailModel.getSubject(), emailModel.getSubjectAttributes(),
-                            emailModel.getBodyTemplate(), emailModel.getBodyAttributes(),
-                            emailModel.getTheme(), emailModel.getLocale());
-                    emailSenderProvider.send(emailModel.getRealmModel().getSmtpConfig(), emailModel.getUser(), template.getSubject(), template.getTextBody(), template.getHtmlBody());
-                    createEmailEvent(OperationType.ACTION, emailModel, template.subject);
-                    log.info("send to " + emailModel.getUser().getEmail() + " is finished. EmailQueueSize={}, SendInterval={}", getEmailQueueSize(), sendInterval);
+                    try {
+                        EmailTemplate template = processTemplate(emailModel.getSubject(), emailModel.getSubjectAttributes(),
+                                emailModel.getBodyTemplate(), emailModel.getBodyAttributes(),
+                                emailModel.getTheme(), emailModel.getLocale());
+                        emailSenderProvider.send(emailModel.getRealmModel().getSmtpConfig(), emailModel.getUser(), template.getSubject(), template.getTextBody(), template.getHtmlBody());
+                        createEmailEvent(OperationType.ACTION, emailModel, template.subject);
+                        log.info("send to " + emailModel.getUser().getEmail() + " is finished. EmailQueueSize={}, SendInterval={}", getEmailQueueSize(), sendInterval);
+                    } catch (Exception e) {
+                        log.error("send to " + emailModel.getUser().getEmail() + " is failed : EmailQueueSize={} ", getEmailQueueSize(), e);
+                    }
 
                     Thread.sleep(sendInterval);
                 }
-            } catch (Exception e) {
+            } catch (InterruptedException e) {
                 log.error("'Email sender' task is ended with error : EmailQueueSize={} ", getEmailQueueSize(), e);
             } finally {
                 log.error("'Email sender' task is finished. Mailing disabled : EmailQueueSize={}", getEmailQueueSize());
@@ -131,7 +135,7 @@ public class EmailSender {
                                             Theme theme, Locale locale) throws EmailException {
         try {
             String textBody;
-            String subject = null;
+            String subject = subjectKey;
             if (locale != null) {
                 attributes.put("locale", locale);
                 Properties rb = theme.getMessages(locale);
