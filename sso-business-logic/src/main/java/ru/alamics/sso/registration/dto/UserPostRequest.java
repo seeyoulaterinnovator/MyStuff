@@ -12,6 +12,7 @@ public class UserPostRequest {
     private String userId;
     @NotNull
     private String tomsId;
+    private String orgName;
     private String dmpId;
     @NotNull
     private Long roleId;

@@ -12,8 +12,10 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Stateless
@@ -57,7 +59,7 @@ public class UserPostRepository {
             access = em.createQuery(
                     "select ac " +
                             "from UserPostEntity ac " +
-                            "where ac.tomsId = :toms_id and ac.user = :user", UserPostEntity.class)
+                            "where ac.customer.id = :toms_id and ac.user = :user", UserPostEntity.class)
                     .setParameter("user", userEntity)
                     .setParameter("toms_id", tomsId)
                     .getSingleResult();
@@ -82,7 +84,7 @@ public class UserPostRepository {
                 .getResultList();
     }
 
-    public List<UserPostRoleEntity> getAllUserPostRoles(){
+    public List<UserPostRoleEntity> getAllUserPostRoles() {
         return em.createQuery(
                 "select apr " +
                         "from UserPostRoleEntity apr", UserPostRoleEntity.class)
@@ -143,31 +145,31 @@ public class UserPostRepository {
         }
     }
 
-    public List<ExternalSystemEntity> getAllExternalSystem(){
+    public List<ExternalSystemEntity> getAllExternalSystem() {
         return em.createQuery(
                 "select sys " +
                         "from ExternalSystemEntity sys", ExternalSystemEntity.class)
                 .getResultList();
     }
 
-    public List<ExternalSystemRoleEntity> getAllExternalSystemRole(){
+    public List<ExternalSystemRoleEntity> getAllExternalSystemRole() {
         return em.createQuery(
                 "select role " +
                         "from ExternalSystemRoleEntity role", ExternalSystemRoleEntity.class)
                 .getResultList();
     }
 
-    public UserPostRoleEntity findUserPostsByUser(Long id){
+    public UserPostRoleEntity findUserPostsByUser(Long id) {
         return em.find(UserPostRoleEntity.class, id);
     }
 
-    public ExternalSystemRoleEntity findExternalSystemRole(Long id){
+    public ExternalSystemRoleEntity findExternalSystemRole(Long id) {
         return em.find(ExternalSystemRoleEntity.class, id);
     }
 
     public UserPostEntity findUserPostByParam(String userId, final String tomsId, final String roleName) {
 
-        List<UserPostEntity> ret = em.createQuery("select upe from UserPostEntity upe where upe.tomsId =:toms and upe.role.name =:role and upe.user.id = :user_id ", UserPostEntity.class)
+        List<UserPostEntity> ret = em.createQuery("select upe from UserPostEntity upe where upe.customer.id =:toms and upe.role.name =:role and upe.user.id = :user_id ", UserPostEntity.class)
                 .setParameter("toms", tomsId)
                 .setParameter("role", roleName)
                 .setParameter("user_id", userId)
@@ -178,7 +180,7 @@ public class UserPostRepository {
 
     public List<UserPostEntity> findUserPostByToms(String userId, final String tomsId) {
 
-        List<UserPostEntity> ret = em.createQuery("select upe from UserPostEntity upe where upe.tomsId =:toms and upe.user.id = :user_id ", UserPostEntity.class)
+        List<UserPostEntity> ret = em.createQuery("select upe from UserPostEntity upe where upe.customer.id =:toms and upe.user.id = :user_id ", UserPostEntity.class)
                 .setParameter("toms", tomsId)
                 .setParameter("user_id", userId)
                 .getResultList();

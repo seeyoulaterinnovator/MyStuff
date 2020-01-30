@@ -1,12 +1,17 @@
 module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, clients, client, Notifications, RealmRoleMapping,
                                                    ClientRoleMapping, AvailableRealmRoleMapping, AvailableClientRoleMapping,
-                                                   CompositeRealmRoleMapping, CompositeClientRoleMapping) {
+                                                   CompositeRealmRoleMapping, CompositeClientRoleMapping, $location) {
     $scope.realm = realm;
+    $scope.query = {};
+    $scope.query.searchRealm = realm.realm;
+    if ($location.search().searchRealm) {
+        $scope.query.searchRealm = $location.search().searchRealm;
+    }
     $scope.user = user;
     $scope.selectedRealmRoles = [];
     $scope.selectedRealmMappings = [];
     $scope.realmMappings = [];
-    $scope.clients = clients;
+    $scope.clients = [];
     $scope.client = client;
     $scope.clientRoles = [];
     $scope.clientComposite = [];
@@ -15,37 +20,45 @@ module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, c
     $scope.clientMappings = [];
     $scope.dummymodel = [];
 
-    $scope.realmMappings = RealmRoleMapping.query({realm: realm.realm, userId: user.id});
-    $scope.realmRoles = AvailableRealmRoleMapping.query({realm: realm.realm, userId: user.id});
-    $scope.realmComposite = CompositeRealmRoleMapping.query({realm: realm.realm, userId: user.id});
+    $scope.updateRealmData = function (){
+        $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/role-mappings/' + $scope.user.id + '/realm/available').then(function (data) {
+            $scope.realmRoles = data.data;
+            $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/role-mappings/' + $scope.user.id + '/realm/composite').then(function (data) {
+                $scope.realmComposite = data.data;
+                $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/role-mappings/' + $scope.user.id + '/realm').then(function (data) {
+                    $scope.realmMappings = data.data;
+                    $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/clients').then(function (data) {
+                        $scope.clients = data.data;
+                    });
+                });
+            });
+        });
+    }
+
+    $scope.updateClientData = function () {
+        $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/role-mappings/' + $scope.user.id + '/clients/' + $scope.targetClient.id + '/available').then(function (data) {
+            $scope.clientRoles = data.data;
+            $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/role-mappings/' + $scope.user.id + '/clients/' + $scope.targetClient.id + '/composite').then(function (data) {
+                $scope.clientComposite = data.data;
+                $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/role-mappings/' + $scope.user.id + '/clients/' + $scope.targetClient.id).then(function (data) {
+                    $scope.clientMappings = data.data;
+                });
+            });
+        });
+    }
+
+    $scope.updateRealmData();
 
     $scope.addRealmRole = function () {
         $scope.realmRolesToAdd = JSON.parse('[' + $scope.selectedRealmRoles + ']');
         $scope.selectedRealmRoles = [];
-        $http.post(authUrl + '/admin/realms/' + realm.realm + '/users/' + user.id + '/role-mappings/realm',
+        $http.post(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/role-mappings/' + $scope.user.id + '/realm',
             $scope.realmRolesToAdd).then(function () {
-            $scope.realmMappings = RealmRoleMapping.query({realm: realm.realm, userId: user.id});
-            $scope.realmRoles = AvailableRealmRoleMapping.query({realm: realm.realm, userId: user.id});
-            $scope.realmComposite = CompositeRealmRoleMapping.query({realm: realm.realm, userId: user.id});
+            $scope.updateRealmData();
             $scope.selectedRealmMappings = [];
             $scope.selectRealmRoles = [];
             if ($scope.targetClient) {
                 console.log('load available');
-                $scope.clientComposite = CompositeClientRoleMapping.query({
-                    realm: realm.realm,
-                    userId: user.id,
-                    client: $scope.targetClient.id
-                });
-                $scope.clientRoles = AvailableClientRoleMapping.query({
-                    realm: realm.realm,
-                    userId: user.id,
-                    client: $scope.targetClient.id
-                });
-                $scope.clientMappings = ClientRoleMapping.query({
-                    realm: realm.realm,
-                    userId: user.id,
-                    client: $scope.targetClient.id
-                });
                 $scope.selectedClientRoles = [];
                 $scope.selectedClientMappings = [];
             }
@@ -56,30 +69,13 @@ module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, c
 
     $scope.deleteRealmRole = function () {
         $scope.realmRolesToRemove = JSON.parse('[' + $scope.selectedRealmMappings + ']');
-        $http.delete(authUrl + '/admin/realms/' + realm.realm + '/users/' + user.id + '/role-mappings/realm',
+        $http.delete(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/role-mappings/' + $scope.user.id + '/realm',
             {data: $scope.realmRolesToRemove, headers: {"content-type": "application/json"}}).then(function () {
-            $scope.realmMappings = RealmRoleMapping.query({realm: realm.realm, userId: user.id});
-            $scope.realmRoles = AvailableRealmRoleMapping.query({realm: realm.realm, userId: user.id});
-            $scope.realmComposite = CompositeRealmRoleMapping.query({realm: realm.realm, userId: user.id});
+            $scope.updateRealmData();
             $scope.selectedRealmMappings = [];
             $scope.selectRealmRoles = [];
             if ($scope.targetClient) {
                 console.log('load available');
-                $scope.clientComposite = CompositeClientRoleMapping.query({
-                    realm: realm.realm,
-                    userId: user.id,
-                    client: $scope.targetClient.id
-                });
-                $scope.clientRoles = AvailableClientRoleMapping.query({
-                    realm: realm.realm,
-                    userId: user.id,
-                    client: $scope.targetClient.id
-                });
-                $scope.clientMappings = ClientRoleMapping.query({
-                    realm: realm.realm,
-                    userId: user.id,
-                    client: $scope.targetClient.id
-                });
                 $scope.selectedClientRoles = [];
                 $scope.selectedClientMappings = [];
             }
@@ -89,54 +85,22 @@ module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, c
 
     $scope.addClientRole = function () {
         $scope.clientRolesToAdd = JSON.parse('[' + $scope.selectedClientRoles + ']');
-        $http.post(authUrl + '/admin/realms/' + realm.realm + '/users/' + user.id + '/role-mappings/clients/' + $scope.targetClient.id,
+        $http.post(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/role-mappings/' + $scope.user.id + '/clients/' + $scope.targetClient.id,
             $scope.clientRolesToAdd).then(function () {
-            $scope.clientMappings = ClientRoleMapping.query({
-                realm: realm.realm,
-                userId: user.id,
-                client: $scope.targetClient.id
-            });
-            $scope.clientRoles = AvailableClientRoleMapping.query({
-                realm: realm.realm,
-                userId: user.id,
-                client: $scope.targetClient.id
-            });
-            $scope.clientComposite = CompositeClientRoleMapping.query({
-                realm: realm.realm,
-                userId: user.id,
-                client: $scope.targetClient.id
-            });
+            $scope.updateClientData();
             $scope.selectedClientRoles = [];
             $scope.selectedClientMappings = [];
-            $scope.realmComposite = CompositeRealmRoleMapping.query({realm: realm.realm, userId: user.id});
-            $scope.realmRoles = AvailableRealmRoleMapping.query({realm: realm.realm, userId: user.id});
             Notifications.success("Role mappings updated.");
         });
     };
 
     $scope.deleteClientRole = function () {
         $scope.clientRolesToRemove = JSON.parse('[' + $scope.selectedClientMappings + ']');
-        $http.delete(authUrl + '/admin/realms/' + realm.realm + '/users/' + user.id + '/role-mappings/clients/' + $scope.targetClient.id,
+        $http.delete(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/role-mappings/' + $scope.user.id + '/clients/' + $scope.targetClient.id,
             {data: $scope.clientRolesToRemove, headers: {"content-type": "application/json"}}).then(function () {
-            $scope.clientMappings = ClientRoleMapping.query({
-                realm: realm.realm,
-                userId: user.id,
-                client: $scope.targetClient.id
-            });
-            $scope.clientRoles = AvailableClientRoleMapping.query({
-                realm: realm.realm,
-                userId: user.id,
-                client: $scope.targetClient.id
-            });
-            $scope.clientComposite = CompositeClientRoleMapping.query({
-                realm: realm.realm,
-                userId: user.id,
-                client: $scope.targetClient.id
-            });
+            $scope.updateClientData();
             $scope.selectedClientRoles = [];
             $scope.selectedClientMappings = [];
-            $scope.realmComposite = CompositeRealmRoleMapping.query({realm: realm.realm, userId: user.id});
-            $scope.realmRoles = AvailableRealmRoleMapping.query({realm: realm.realm, userId: user.id});
             Notifications.success("Role mappings updated.");
         });
     };
@@ -146,21 +110,7 @@ module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, c
         console.log('changeClient');
         if ($scope.targetClient) {
             console.log('load available');
-            $scope.clientComposite = CompositeClientRoleMapping.query({
-                realm: realm.realm,
-                userId: user.id,
-                client: $scope.targetClient.id
-            });
-            $scope.clientRoles = AvailableClientRoleMapping.query({
-                realm: realm.realm,
-                userId: user.id,
-                client: $scope.targetClient.id
-            });
-            $scope.clientMappings = ClientRoleMapping.query({
-                realm: realm.realm,
-                userId: user.id,
-                client: $scope.targetClient.id
-            });
+            $scope.updateClientData();
         } else {
             $scope.clientRoles = null;
             $scope.clientMappings = null;
@@ -173,10 +123,16 @@ module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, c
 
 });
 
-module.controller('UserSessionsCtrl', function ($scope, realm, user, sessions, UserSessions, UserLogout, UserSessionLogout, Notifications) {
+module.controller('UserSessionsCtrl', function ($scope, realm, user, sessions, UserSessions, UserLogout,
+                                                UserSessionLogout, Notifications, $location) {
     $scope.realm = realm;
     $scope.user = user;
     $scope.sessions = sessions;
+    $scope.query = {};
+    $scope.query.searchRealm = realm.realm;
+    if ($location.search().searchRealm) {
+        $scope.query.searchRealm = $location.search().searchRealm;
+    }
 
     $scope.logoutAll = function () {
         UserLogout.save({realm: realm.realm, user: user.id}, function () {
@@ -202,6 +158,11 @@ module.controller('UserFederatedIdentityCtrl', function ($scope, $location, real
     $scope.realm = realm;
     $scope.user = user;
     $scope.federatedIdentities = federatedIdentities;
+    $scope.query = {};
+    $scope.query.searchRealm = realm.realm;
+    if ($location.search().searchRealm) {
+        $scope.query.searchRealm = $location.search().searchRealm;
+    }
 
     $scope.hasAnyProvidersToCreate = function () {
         return realm.identityProviders.length - $scope.federatedIdentities.length > 0;
@@ -263,10 +224,17 @@ module.controller('UserFederatedIdentityAddCtrl', function ($scope, $location, r
 
 });
 
-module.controller('UserConsentsCtrl', function ($scope, realm, user, userConsents, UserConsents, Notifications) {
+module.controller('UserConsentsCtrl', function ($scope, realm, user, userConsents, UserConsents, Notifications,
+                                                $location) {
     $scope.realm = realm;
     $scope.user = user;
     $scope.userConsents = userConsents;
+
+    $scope.query = {};
+    $scope.query.searchRealm = realm.realm;
+    if ($location.search().searchRealm) {
+        $scope.query.searchRealm = $location.search().searchRealm;
+    }
 
     $scope.revokeConsent = function (clientId) {
         UserConsents.delete({realm: realm.realm, user: user.id, client: clientId}, function () {
@@ -292,7 +260,10 @@ module.controller('UserOfflineSessionsCtrl', function ($scope, $location, realm,
     };
 });
 
-module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState, UserImpersonation, BruteForce, Notifications, $route, Dialog/*, CustomUser*/, $http, $window) {
+module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState, UserImpersonation,
+                                            BruteForce, Notifications, $route, Dialog/*, CustomUser*/,
+                                            $http, $window,
+                                            RealmClearUserCache, RealmClearRealmCache, RealmClearKeysCache) {
 
     $scope.userRealms = [];
     $scope.currentAccess = [];
@@ -315,7 +286,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             if ($scope.query.searchRealm === '' || !$scope.userRealms.some(function (realm) {
                 return realm === $scope.query.searchRealm
             })) {
-                if (realm.realm === 'manager'){
+                if (realm.realm === 'manager' && $scope.userRealms.length === 1) {
                     $scope.query.searchRealm = $scope.userRealms[0];
                 } else {
                     $scope.query.searchRealm = realm.realm;
@@ -327,15 +298,33 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         });
     };
 
+    $scope.clearCache = function () {
+        RealmClearUserCache.save({realm: $scope.realm.realm}, function () {
+            //Notifications.success("User cache cleared");
+        });
+        RealmClearRealmCache.save({realm: $scope.realm.realm}, function () {
+            //Notifications.success("Realm cache cleared");
+        });
+        RealmClearKeysCache.save({realm: $scope.realm.realm}, function () {
+            //Notifications.success("Public keys cache cleared");
+        });
+    }
+
     $scope.getSearchParameter = function (param) {
         if (param === undefined) {
             return '';
         }
         return param;
-    }
+    };
 
-    $scope.getHrefAddUser = function () {
-        $window.location.href = `#/create/user/${$scope.query.searchRealm}`;
+    $scope.changeSearchRealm = function () {
+        $scope.query.search = '';
+        $scope.query.searchByUserId = '';
+        $scope.query.searchByTomsId = '';
+
+        $scope.firstPage();
+
+        //$window.location.href = '?searchRealm=' + $scope.query.searchRealm + '#/realms/' + $scope.realm + '/users';
     };
 
     $scope.impersonate = function (userId) {
@@ -507,7 +496,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         })
     };
 
-    $scope.responseHandleXlsx = function(response){
+    $scope.responseHandleXlsx = function (response) {
         var linkElement = document.createElement('a');
         var headers = response.headers();
         var filename = 'users_info.xlsx';
@@ -568,7 +557,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         })
     };
 
-    $scope.responseHandleCsv = function(response){
+    $scope.responseHandleCsv = function (response) {
         var linkElement = document.createElement('a');
         var headers = response.headers();
         var filename = 'users_info.csv';
@@ -731,6 +720,9 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     }
 
     $scope.isFirstOrg = function (userAccess, org, access) {
+        if (access.organization === undefined){
+            return '\u00A0';
+        }
         var equalToms = userAccess.filter(ua => ua.userPostId === access.userPostId && ua.organization === org);
         var index = equalToms.indexOf(access);
         if (index === 0 && access.organization.trim() !== '') {
@@ -761,6 +753,10 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 });
 
 module.controller('UserTabCtrl', function ($scope, $location, Dialog, Notifications, Current) {
+
+    $scope.query = {};
+    $scope.query.searchRealm = $location.search().searchRealm;
+
     $scope.removeUser = function () {
         Dialog.confirmDelete($scope.user.id, 'user', function () {
             $scope.user.$remove({
@@ -785,6 +781,12 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
     $scope.create = !user.id;
     $scope.editUsername = $scope.create || $scope.realm.editUsernameAllowed;
 
+    $scope.query = {};
+    $scope.query.searchRealm = realm.realm;
+    if ($location.search().searchRealm) {
+        $scope.query.searchRealm = $location.search().searchRealm;
+    }
+
     if ($scope.create) {
         $scope.user = {enabled: true, attributes: {}}
     } else {
@@ -793,14 +795,13 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
         }
         convertAttributeValuesToString(user);
 
-
         $scope.user = angular.copy(user);
         $scope.impersonate = function () {
-            UserImpersonation.save({realm: realm.realm, user: $scope.user.id}, function (data) {
-                if (data.sameRealm) {
-                    window.location = data.redirect;
+            $http.post(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/impersonation/' + $scope.user.id).then(function (data) {
+                if (data.data.sameRealm) {
+                    window.location = data.data.redirect;
                 } else {
-                    window.open(data.redirect, "_blank");
+                    window.open(data.data.redirect, "_blank");
                 }
             });
         };
@@ -915,7 +916,7 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
 
         if ($scope.create) {
             User.save({
-                realm: realm.realm
+                realm: $scope.query.searchRealm
             }, $scope.user, function (data, headers) {
                 $scope.changed = false;
                 convertAttributeValuesToString($scope.user);
@@ -926,7 +927,7 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
 
                 var id = l.substring(l.lastIndexOf("/") + 1);
 
-                $location.url("/realms/" + realm.realm + "/users/" + id);
+                $location.url("/realms/" + realm.realm + "/users/" + id + "?searchRealm=" + $scope.query.searchRealm);
                 Notifications.success("The user has been created.");
             });
         } else {
@@ -999,12 +1000,19 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
     }
 });
 
-module.controller('UserCredentialsCtrl', function ($scope, realm, user, $route, RequiredActions, User, UserExecuteActionsEmail, UserCredentials, Notifications, Dialog, TimeUnit2) {
+module.controller('UserCredentialsCtrl', function ($scope, realm, user, $route, RequiredActions, User,
+                                                   UserExecuteActionsEmail, UserCredentials, Notifications, Dialog,
+                                                   TimeUnit2, $location) {
     console.log('UserCredentialsCtrl');
 
     $scope.realm = realm;
     $scope.user = angular.copy(user);
     $scope.temporaryPassword = true;
+    $scope.query = {};
+    $scope.query.searchRealm = realm.realm;
+    if ($location.search().searchRealm) {
+        $scope.query.searchRealm = $location.search().searchRealm;
+    }
 
     $scope.isTotp = false;
     if (!!user.totp) {
@@ -1133,6 +1141,11 @@ module.controller('UserFederationCtrl', function ($scope, $location, $route, rea
     $scope.realm = realm;
     $scope.providers = serverInfo.componentTypes['org.keycloak.storage.UserStorageProvider'];
     $scope.instancesLoaded = false;
+    $scope.query = {};
+    $scope.query.searchRealm = realm.realm;
+    if ($location.search().searchRealm) {
+        $scope.query.searchRealm = $location.search().searchRealm;
+    }
 
     if (!$scope.providers) $scope.providers = [];
 
@@ -1443,7 +1456,9 @@ function removeGroupMember(groups, member) {
     }
 }
 
-module.controller('UserGroupMembershipCtrl', function ($scope, $q, realm, user, UserGroupMembership, UserGroupMembershipCount, UserGroupMapping, Notifications, Groups, GroupsCount) {
+module.controller('UserGroupMembershipCtrl', function ($scope, $q, realm, user, UserGroupMembership,
+                                                       UserGroupMembershipCount, UserGroupMapping, Notifications,
+                                                       Groups, GroupsCount, $location) {
     $scope.realm = realm;
     $scope.user = user;
     $scope.groupList = [];
@@ -1461,6 +1476,12 @@ module.controller('UserGroupMembershipCtrl', function ($scope, $q, realm, user, 
     $scope.pageSize = 20;
     $scope.numberOfPages = 1;
     $scope.numberOfMembershipPages = 1;
+
+    $scope.query = {};
+    $scope.query.searchRealm = realm.realm;
+    if ($location.search().searchRealm) {
+        $scope.query.searchRealm = $location.search().searchRealm;
+    }
 
     var refreshCompleteUserGroupMembership = function () {
         var queryParams = {
@@ -2248,6 +2269,11 @@ module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, 
     $scope.customerRoles = [];
     $scope.systemRoles = [];
     $scope.duplicatedPhone = false;
+    $scope.query = {};
+    $scope.query.searchRealm = realm.realm;
+    if ($location.search().searchRealm) {
+        $scope.query.searchRealm = $location.search().searchRealm;
+    }
 
     $scope.init = function () {
         $http.get(authUrl + '/realms/' + realm.realm + '/user-post/users/' + user.id).then(function (data) {
@@ -2322,6 +2348,11 @@ module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, 
 module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, Notifications) {
 
     $scope.realm = realm;
+    $scope.query = {};
+    $scope.query.searchRealm = realm.realm;
+    if ($location.search().searchRealm) {
+        $scope.query.searchRealm = $location.search().searchRealm;
+    }
     $scope.userPosts = [];
     $scope.customerRoles = [];
     $scope.systemRoles = [];
@@ -2330,7 +2361,7 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
     $scope.ImportReports = [];
 
     $scope.init = function () {
-        $http.get(authUrl + '/realms/' + realm.realm + '/users-toms/importUsersReports').then(function (data) {
+        $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/importUsersReports').then(function (data) {
             $scope.ImportReports = angular.fromJson(data).data.results['importUsersReports'];
         });
     };
@@ -2339,14 +2370,14 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
         var formData = new FormData();
         var file = files[0];
         formData.append('file', file);
-        $http.post(`${authUrl}/realms/${$scope.realm.realm}/users-toms/uploadImportUsersFile`, formData, {
+        $http.post(`${authUrl}/realms/${$scope.query.searchRealm}/users-toms/uploadImportUsersFile`, formData, {
             transformRequest: angular.identity,
             headers: {
                 'Content-Type': undefined,
                 'Content-Disposition': `form-data; name="file"; filename=${file.name}`
             }
         }).then(response => {
-            if (response.status === 200){
+            if (response.status === 200) {
                 Notifications.success("Upload import users file success! Please, refresh 'import users' page");
             }
         }).catch(error => {
@@ -2359,13 +2390,14 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
     };
 
     $scope.downloadImportUsersReport = function (importReport) {
-        if (importReport.status !== "DONE"){
+        if (importReport.status !== "DONE") {
             Notifications.info("Import users report must have status 'DONE'");
             return;
         }
         var linkElement = document.createElement('a');
-        $http.post(`${authUrl}/realms/${$scope.realm.realm}/users-toms/downloadImportUsersReport/${importReport.id}`, null,
-            { headers: {
+        $http.post(`${authUrl}/realms/${$scope.query.searchRealm}/users-toms/downloadImportUsersReport/${importReport.id}`, null,
+            {
+                headers: {
                     'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8',
                     'Content-Type': 'application/json'
                 },
@@ -2391,16 +2423,16 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
     };
 
     $scope.activateImportUsersReport = function (importReport) {
-        if (importReport.status !== "DONE"){
+        if (importReport.status !== "DONE") {
             Notifications.info("Import users report must have status 'DONE'");
             return;
         }
         var linkElement = document.createElement('a');
         $http.post(`${authUrl}/realms/${$scope.realm.realm}/users-toms/activateImportUsersReport/${importReport.id}`)
             .then(response => {
-            if (response.status === 200){
-                Notifications.success("Activate imported users from report success!");
-            }
+                if (response.status === 200) {
+                    Notifications.success("Activate imported users from report success!");
+                }
             });
     };
 

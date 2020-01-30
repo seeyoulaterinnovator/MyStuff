@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.auth.post;
 
+import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
@@ -8,10 +9,8 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.auth.UserRole;
-import ru.alamics.sso.keycloak.mapper.DataMapper;
-import ru.alamics.sso.registration.service.UserFindService;
-import ru.alamics.sso.registration.tbapi.TbapiService;
-import ru.alamics.sso.user.web.UserSearchDto;
+import ru.alamics.sso.keycloak.facade.CachedUserPostFacade;
+import ru.alamics.sso.registration.dto.UserPostResponse;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -27,12 +26,12 @@ import static ru.alamics.sso.registration.model.UserConstants.*;
 public class AttributesForm implements Authenticator {
     private static final String FORM = "attributes.ftl";
     private final UserRole role;
-    private UserFindService userFindService;
+    private CachedUserPostFacade cachedUserPostFacade;
 
     public AttributesForm(UserRole role) {
         this.role = role;
         try {
-            this.userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
+            this.cachedUserPostFacade = (CachedUserPostFacade) new InitialContext().lookup("java:global/domru-sso/" + CachedUserPostFacade.class.getSimpleName());
         } catch (NamingException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
@@ -54,12 +53,15 @@ public class AttributesForm implements Authenticator {
 
         if (frame != null || isAuth || redirectIframe != null) {
             var user = context.getUser();
-            List<UserSearchDto> attributes = DataMapper.addOrganizationToUserSearchDtos(
-                    userFindService.getUsersByParameters("user", null, user.getId(), null,
-                            null, true));
+            List<UserPostResponse> attributes = null;
+            try {
+                attributes = cachedUserPostFacade.findByUserId(user.getId());
+            } catch (NotFoundException e) {
+                attributes = Collections.emptyList();
+            }
             if (attributes != null) {
                 attributes = attributes.stream()
-                        .filter(attribute -> Objects.nonNull(attribute.getTomsId()) && Objects.nonNull(attribute.getRoleId()))
+                        .filter(attribute -> Objects.nonNull(attribute.getTomsId()) && Objects.nonNull(attribute.getUserRole()))
                         .collect(Collectors.toList());
             } else {
                 attributes = Collections.emptyList();
@@ -77,12 +79,12 @@ public class AttributesForm implements Authenticator {
 
     }
 
-    private Response createForm(AuthenticationFlowContext context, List<UserSearchDto> attributes) {
+    private Response createForm(AuthenticationFlowContext context, List<UserPostResponse> attributes) {
         LoginFormsProvider form = context.form();
         if (!attributes.isEmpty()) {
             Set<AttributesModel> models = attributes.stream()
                     .map(attribute -> AttributesModel.builder()
-                            .roleName(attribute.getRoleName())
+                            .roleName(attribute.getUserRole().getName())
                             .tomsId(attribute.getTomsId())
                             .tomsName(attribute.getOrganization())
                             .build()

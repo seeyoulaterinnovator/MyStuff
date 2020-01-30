@@ -6,9 +6,7 @@ import ru.alamics.sso.keycloak.entity.UserLoginHistory;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -19,13 +17,12 @@ public class UserHistoryLoginRepository {
     @PersistenceContext
     private EntityManager em;
 
-    public void findInactiveUsers (final long absenceTime, final String realmId) {
-        log.info("findInactiveUsers: realmId={}, absenceTime={}", realmId, absenceTime);
+    public void findInactiveUsers(final long absenceTime, final String realmId) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime absenceDate = now.minusSeconds(absenceTime);
         long absenceMilis = System.currentTimeMillis() - TimeUnit.MILLISECONDS.convert(absenceTime, TimeUnit.SECONDS);
 
-        em.createNativeQuery(
+        int countInactivedUsers = em.createNativeQuery(
                 "insert into AUTO_LOCK_NOTIFICATION(id, user_id, sended_at, type, status)\n" +
                         "select uuid(), ue.ID, null, 'ABSENCE_NOTIFICATION', 'PREPARE'\n" +
                         "from USER_ENTITY ue\n" +
@@ -53,9 +50,12 @@ public class UserHistoryLoginRepository {
                 .setParameter("realm_id", realmId)
                 .setParameter("absenceMilis", absenceMilis)
                 .executeUpdate();
+        if (countInactivedUsers > 0) {
+            log.info("findInactiveUsers: realmId={}, absenceTime={}, countInactiveUsers={}", realmId, absenceTime, countInactivedUsers);
+        }
     }
 
-    public UserLoginHistory save (UserLoginHistory history) {
+    public UserLoginHistory save(UserLoginHistory history) {
         final String id = UUID.randomUUID().toString();
         history.setId(id);
         em.persist(history);

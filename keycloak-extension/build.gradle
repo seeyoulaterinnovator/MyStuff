@@ -29,3 +29,11 @@ dependencies {
     providedCompile  group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.60'
     providedCompile  group: 'org.bouncycastle', name: 'bcmail-jdk15on', version: '1.60'
 }
+
+war {
+    manifest {
+        attributes(
+                'Dependencies':'org.infinispan'
+        )
+    }
+}

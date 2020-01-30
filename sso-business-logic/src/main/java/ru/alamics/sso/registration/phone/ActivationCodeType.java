@@ -57,7 +57,11 @@ public enum ActivationCodeType {
             InitialContext context = new InitialContext();
             SettingsService settingsService = (SettingsService) context.lookup("java:global/domru-sso/" + SettingsService.class.getSimpleName());
             for (ActivationCodeType activationCodeType : ActivationCodeType.values()) {
-                activationCodeType.setExpiredSeconds(settingsService.getSettingsValue(activationCodeType.getPropertyConstant(), "user"));
+                long timeValue = settingsService.getSettingsValue(activationCodeType.getPropertyConstant(), "user");
+                if (timeValue <= -1) {
+                    timeValue = 0;
+                }
+                activationCodeType.setExpiredSeconds(timeValue);
             }
         } catch (NamingException e) {
             log.error(e.getMessage(), e);

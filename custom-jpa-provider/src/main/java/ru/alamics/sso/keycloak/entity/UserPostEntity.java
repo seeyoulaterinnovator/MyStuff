@@ -21,8 +21,9 @@ public class UserPostEntity {
     @ManyToOne(targetEntity = UserEntity.class)
     @JoinColumn(name = "user_id")
     private UserEntity user;
-    @Column(name = "toms_id")
-    private String tomsId;
+    @ManyToOne(targetEntity = Customer.class)
+    @JoinColumn(name = "toms_id")
+    private Customer customer;
     @Column(name = "dmp_id")
     private String dmpId;
     @ManyToOne(targetEntity = UserPostRoleEntity.class)
@@ -43,7 +44,7 @@ public class UserPostEntity {
         return "UserPost{" +
                 "id='" + id + '\'' +
                 ", user=" + user +
-                ", tomsId='" + tomsId + '\'' +
+                ", tomsId='" + customer.getId() + '\'' +
                 ", dmpId='" + dmpId + '\'' +
                 ", role=" + role +
                 '}';
@@ -58,7 +59,7 @@ public class UserPostEntity {
 
         if (id != null ? !id.equals(userPost.id) : userPost.id != null) return false;
         if (user != null ? !user.equals(userPost.user) : userPost.user != null) return false;
-        if (tomsId != null ? !tomsId.equals(userPost.tomsId) : userPost.tomsId != null) return false;
+        if (customer != null ? !customer.equals(userPost.customer) : userPost.customer != null) return false;
         if (dmpId != null ? !dmpId.equals(userPost.dmpId) : userPost.dmpId != null) return false;
         return role != null ? role.equals(userPost.role) : userPost.role == null;
     }
@@ -67,7 +68,7 @@ public class UserPostEntity {
     public int hashCode() {
         int result = id != null ? id.hashCode() : 0;
         result = 31 * result + (user != null ? user.hashCode() : 0);
-        result = 31 * result + (tomsId != null ? tomsId.hashCode() : 0);
+        result = 31 * result + (customer != null ? customer.hashCode() : 0);
         result = 31 * result + (dmpId != null ? dmpId.hashCode() : 0);
         result = 31 * result + (role != null ? role.hashCode() : 0);
         return result;
