@@ -3,7 +3,6 @@ package ru.alamics.sso.schedule;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.common.util.Time;
-import org.keycloak.email.EmailException;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.jpa.AdminEventEntity;
 import org.keycloak.models.PasswordPolicy;
@@ -80,41 +79,38 @@ public class UserSchedule {
             return;
         }
 
-        log.info("Schedule by timer:{}", timer.getInfo());
-        log.info("start UserSchedule");
         findExpiredPassword();
         for (String realm : SETTINGS_REALM_NAMES_SCHEDULE) {
             notificationInactiveUsers(realm);
             block(realm);
         }
         sendEmails();
-        log.info("end UserSchedule");
     }
 
     private void notificationInactiveUsers(String realm) {
         final String DEBUG_STR = "findNotifications";
-        log.info("start:{}", DEBUG_STR);
+        log.debug("start:{}", DEBUG_STR);
         long absenceTimeNotification = properties.getSettingsValue(PropertyConstants.ABSENCE_NOTIFICATION_DAYS, realm);
         if (absenceTimeNotification > -1) {
             userHistoryLoginRepository.findInactiveUsers(absenceTimeNotification, realm);
         }
-        log.info("stop:{}", DEBUG_STR);
+        log.debug("stop:{}", DEBUG_STR);
     }
 
     private void block(String realm) {
         final String DEBUG_STR = "block";
-        log.info("start:{}", DEBUG_STR);
+        log.debug("start:{}", DEBUG_STR);
         long absenceTimeBlock = properties.getSettingsValue(PropertyConstants.ABSENCE_BLOCKING_DAYS, realm) -
                 properties.getSettingsValue(PropertyConstants.ABSENCE_NOTIFICATION_DAYS, realm);
         if (absenceTimeBlock > -1) {
             autoLockNotificationRepository.findUsersToBlock(absenceTimeBlock, realm);
         }
-        log.info("stop:{}", DEBUG_STR);
+        log.debug("stop:{}", DEBUG_STR);
     }
 
     private void findExpiredPassword() {
         final String DEBUG_STR = "findExpiredPassword";
-        log.info("start: {}", DEBUG_STR);
+        log.debug("start: {}", DEBUG_STR);
         var realms = policyRepository.findRealmWithPolicy(PasswordPolicy.FORCE_EXPIRED_ID);
 
         realms.forEach(realm -> {
@@ -130,12 +126,12 @@ public class UserSchedule {
                 }
             }
         });
-        log.info("stop: {}", DEBUG_STR);
+        log.debug("stop: {}", DEBUG_STR);
     }
 
     private void sendEmails() {
         final String DEBUG_STR = "sendEmails";
-        log.info("start={}", DEBUG_STR);
+        log.debug("start={}", DEBUG_STR);
 
         var autoLockNotifications = autoLockNotificationRepository.findNotifications();
         for (AutoLockNotification notification : autoLockNotifications) {
@@ -143,30 +139,26 @@ public class UserSchedule {
             RealmModel realm = realmRepository.findRealmById(user.getRealmId());
             ClientEntity client = clientRepository.findClientById(CLIENT_ID, realm.getName());
             UserModel userModel = new UserAdapter(null, realm, null, user);
-            try {
-                if (notification.getType() == NotificationType.ABSENCE_NOTIFICATION) {
-                    var prepareBlockNotification = prepareBlockNotification(realm.getName(), getClientLink(client));
-                    prepareBlockNotification.realmModel(realm)
-                            .user(userModel);
-                    sender.send(prepareBlockNotification.build());
-                } else if (notification.getType() == NotificationType.ABSENCE_BLOCKING) {
-                    var bockNotification = bockNotification();
-                    bockNotification.realmModel(realm)
-                            .user(userModel);
-                    sender.send(bockNotification.build());
-                    user.setEnabled(false);
-                    createAdminEvent(OperationType.UPDATE, user, realm);
-                } else if (notification.getType() == NotificationType.PASSWORD_EXPIRED) {
-                    var passwordExpired = passwordExpired(getClientLink(client));
-                    passwordExpired.realmModel(realm)
-                            .user(userModel);
-                    sender.send(passwordExpired.build());
-                }
-            } catch (EmailException e) {
-                log.error("sendEmailError:{}", user.getEmail());
+            if (notification.getType() == NotificationType.ABSENCE_NOTIFICATION) {
+                var prepareBlockNotification = prepareBlockNotification(realm.getName(), getClientLink(client));
+                prepareBlockNotification.realmModel(realm)
+                        .user(userModel);
+                sender.blockingSend(prepareBlockNotification.build());
+            } else if (notification.getType() == NotificationType.ABSENCE_BLOCKING) {
+                var bockNotification = bockNotification();
+                bockNotification.realmModel(realm)
+                        .user(userModel);
+                sender.blockingSend(bockNotification.build());
+                user.setEnabled(false);
+                createAdminEvent(OperationType.UPDATE, user, realm);
+            } else if (notification.getType() == NotificationType.PASSWORD_EXPIRED) {
+                var passwordExpired = passwordExpired(getClientLink(client));
+                passwordExpired.realmModel(realm)
+                        .user(userModel);
+                sender.blockingSend(passwordExpired.build());
             }
         }
-        log.info("stop={}", DEBUG_STR);
+        log.debug("stop={}", DEBUG_STR);
     }
 
 
