@@ -412,15 +412,17 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     }
 
     function limitPagging(){
-        if($('.pagination li').length > 7 ){
+        if($('.pagination li').length > 9 ){
             var currentPage = $('.pagination li.active').attr('data-page');
             if( currentPage <= 3 ){
-                $('.pagination li:gt(5)').hide();
-                $('.pagination li:lt(5)').show();
+                $('.pagination li:gt(6)').hide();
+                $('.pagination li:lt(7)').show();
                 $('.pagination [data-page="next"]').show();
+                $('.pagination [data-page="last"]').show();
             }if (currentPage > 3){
-                $('.pagination li:gt(0)').hide();
+                $('.pagination li:gt(1)').hide();
                 $('.pagination [data-page="next"]').show();
+                $('.pagination [data-page="last"]').show();
                 for( let i = ( parseInt($('.pagination li.active').attr('data-page'))  - 2 )  ; i <= ( parseInt($('.pagination li.active').attr('data-page'))  + 2 ) ; i++ ){
                     $('.pagination [data-page="'+i+'"]').show();
                 }

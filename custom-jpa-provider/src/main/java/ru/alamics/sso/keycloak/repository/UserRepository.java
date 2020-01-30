@@ -202,7 +202,7 @@ public class UserRepository {
 
     public long getTotalUsersByParameters(String realm, String search, String searchUser, String searchToms) {
         Query query = em.createNativeQuery(
-                "select count(*) over()  " +
+                "select count(distinct UE.ID)  " +
                         "from USER_ENTITY UE\n" +
                         "         left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone'\n" +
                         "         left join USER_POST UP on UE.ID = UP.USER_ID\n" +
@@ -225,8 +225,7 @@ public class UserRepository {
                         "          else UE.ID LIKE '%' OR  UE.ID is null end\n" +
                         "  AND CASE\n" +
                         "          WHEN :searchToms is not null and :searchToms != '' then (UP.TOMS_ID = :searchToms)\n" +
-                        "          else UP.TOMS_ID LIKE '%' OR UP.TOMS_ID is null end\n" +
-                        "group by UE.ID ")
+                        "          else UP.TOMS_ID LIKE '%' OR UP.TOMS_ID is null end\n")
                 .setParameter("search", search.trim())
                 .setParameter("searchUser", searchUser.trim())
                 .setParameter("searchToms", searchToms.trim())
