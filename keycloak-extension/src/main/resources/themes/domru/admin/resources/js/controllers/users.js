@@ -20,7 +20,7 @@ module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, c
     $scope.clientMappings = [];
     $scope.dummymodel = [];
 
-    $scope.updateRealmData = function (){
+    $scope.updateRealmData = function () {
         $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/role-mappings/' + $scope.user.id + '/realm/available').then(function (data) {
             $scope.realmRoles = data.data;
             $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/role-mappings/' + $scope.user.id + '/realm/composite').then(function (data) {
@@ -305,8 +305,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
             if (!UserSearchState.isFirstSearch) {
                 $scope.search();
-            }
-            else $scope.firstPage();
+            } else $scope.firstPage();
         });
     };
 
@@ -322,19 +321,19 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         });
     }
 
-    $scope.sort = function(sortField) {
+    $scope.sort = function (sortField) {
         if (currentSortField === sortField) {
             sortAsc = sortAsc === false;
         } else {
             sortAsc = true;
         }
 
-        if (sortField === $scope.SORT_FIELD_EMAIL){
+        if (sortField === $scope.SORT_FIELD_EMAIL) {
             currentSortField = sortField;
             $scope.sortMarkEmail = getSortMark(sortAsc);
             $scope.sortMarkName = "";
         }
-        if (sortField === $scope.SORT_FIELD_NAME){
+        if (sortField === $scope.SORT_FIELD_NAME) {
             currentSortField = sortField;
             $scope.sortMarkName = getSortMark(sortAsc);
             $scope.sortMarkEmail = "";
@@ -342,8 +341,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         $scope.search();
     }
 
-    function getSortMark(sortAsc){
-        if (sortAsc === true){
+    function getSortMark(sortAsc) {
+        if (sortAsc === true) {
             return "↓";
         } else {
             return "↑";
@@ -360,19 +359,19 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             .slice(2, -2)
             .remove();
 
-        for (var i = 1; i <= $scope.pages.totalPages; ) {
+        for (var i = 1; i <= $scope.pages.totalPages;) {
             $('.pagination #prev')
                 .before(
                     '<li data-page="' + i + '">\
                          <span>' + i++ + '<span class="sr-only">(current)</span></span>\
                     </li>').show();
-                    }
+        }
 
         $('.pagination [data-page="1"]').addClass('active');
 
         limitPagging();
 
-        $('.pagination li').on('click', function(evt) {
+        $('.pagination li').on('click', function (evt) {
             // on click each page
             evt.stopImmediatePropagation();
             evt.preventDefault();
@@ -411,20 +410,21 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         }); // end of on click pagination list
     }
 
-    function limitPagging(){
-        if($('.pagination li').length > 9 ){
+    function limitPagging() {
+        if ($('.pagination li').length > 9) {
             var currentPage = $('.pagination li.active').attr('data-page');
-            if( currentPage <= 3 ){
+            if (currentPage <= 3) {
                 $('.pagination li:gt(6)').hide();
                 $('.pagination li:lt(7)').show();
                 $('.pagination [data-page="next"]').show();
                 $('.pagination [data-page="last"]').show();
-            }if (currentPage > 3){
+            }
+            if (currentPage > 3) {
                 $('.pagination li:gt(1)').hide();
                 $('.pagination [data-page="next"]').show();
                 $('.pagination [data-page="last"]').show();
-                for( let i = ( parseInt($('.pagination li.active').attr('data-page'))  - 2 )  ; i <= ( parseInt($('.pagination li.active').attr('data-page'))  + 2 ) ; i++ ){
-                    $('.pagination [data-page="'+i+'"]').show();
+                for (let i = (parseInt($('.pagination li.active').attr('data-page')) - 2); i <= (parseInt($('.pagination li.active').attr('data-page')) + 2); i++) {
+                    $('.pagination [data-page="' + i + '"]').show();
                 }
             }
         }
@@ -694,17 +694,17 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     $scope.search = function () {
         console.log("query.search: " + $scope.query.search);
         $http.get(`${authUrl}/realms/user/users-info/search?` +
-        `searchRealm=${$scope.query.searchRealm}&search=${$scope.query.search}` +
-        `&searchUser=${$scope.query.searchByUserId}&searchToms=${$scope.query.searchByTomsId}`+
-        `&pageNum=${$scope.pages.number}&pageSize=${$scope.pageSize}`+
-        `&sortAsc=${sortAsc}&sortField=${currentSortField}`).then(function (data) {
+            `searchRealm=${$scope.query.searchRealm}&search=${$scope.query.search}` +
+            `&searchUser=${$scope.query.searchByUserId}&searchToms=${$scope.query.searchByTomsId}` +
+            `&pageNum=${$scope.pages.number}&pageSize=${$scope.pageSize}` +
+            `&sortAsc=${sortAsc}&sortField=${currentSortField}`).then(function (data) {
             $scope.users = angular.fromJson(data).data.results['users-info'];
             $scope.pages = angular.fromJson(data).data.results['page-info'];
             $scope.searchLoaded = true;
             $scope.lastSearch = $scope.query.search;
             UserSearchState.isFirstSearch = false;
 
-            if (!isInitPagination){
+            if (!isInitPagination) {
                 initPagination();
             }
         });
@@ -726,8 +726,6 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         });
     };
 
-    //fixme поправить, после изменения в запросах к тбапи за именами организаций
-    //браться будет из другого места
     $scope.getTomsIds = function (userPost) {
         var tomsIds = Array.from([userPost.tomsId]);
         if (userPost.systemRoles === undefined || userPost.systemRoles.length === 0) {
@@ -739,10 +737,13 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         return tomsIds;
     }
 
-    //fixme поправить, после изменения в запросах к тбапи за именами организаций
-    //пока заглушка, что всегда пустой
     $scope.getOrgs = function (userPost) {
-        var orgs = Array.from('\u00A0');
+        var orgName = '\u00A0';
+        if (userPost.organization !== undefined && userPost.organization.trim() !== '') {
+            orgName = userPost.organization;
+        }
+
+        var orgs = Array.from([orgName]);
         if (userPost.systemRoles === undefined || userPost.systemRoles.length === 0) {
             return orgs;
         }
