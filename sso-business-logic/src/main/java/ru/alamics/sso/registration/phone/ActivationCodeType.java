@@ -10,7 +10,7 @@ import javax.naming.NamingException;
 import static ru.alamics.sso.property.PropertyConstants.*;
 
 @Slf4j
-public enum  ActivationCodeType {
+public enum ActivationCodeType {
     CODE_TO_EMAIL(4, 300L, EXPIRE_INCOMING_CALL_EMAIL_CODE),
     CODE_BY_PHONE_NUMBER(4, 20L, EXPIRE_INCOMING_CALL_CODE),
     CODE_TO_SMS(6, 300L, EXPIRE_SMS_VIBER_CODE);
@@ -48,16 +48,20 @@ public enum  ActivationCodeType {
         this.expiredSeconds = expiredSeconds;
     }
 
-    public PropertyConstants getPropertyConstant(){
+    public PropertyConstants getPropertyConstant() {
         return propertyConstant;
     }
 
-    public static void init(){
+    public static void init() {
         try {
             InitialContext context = new InitialContext();
             ApplicationProperties applicationProperties = (ApplicationProperties) context.lookup("java:global/domru-sso/" + ApplicationProperties.class.getSimpleName());
             for (ActivationCodeType activationCodeType : ActivationCodeType.values()) {
-                activationCodeType.setExpiredSeconds(applicationProperties.getSettingsValue(activationCodeType.getPropertyConstant(), "user"));
+                long timeValue = applicationProperties.getSettingsValue(activationCodeType.getPropertyConstant(), "user");
+                if (timeValue <= -1) {
+                    timeValue = 0;
+                }
+                activationCodeType.setExpiredSeconds(timeValue);
             }
         } catch (NamingException e) {
             log.error(e.getMessage(), e);

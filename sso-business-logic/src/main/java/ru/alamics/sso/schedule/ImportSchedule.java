@@ -7,24 +7,22 @@ import org.keycloak.common.util.Time;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.jpa.AdminEventEntity;
 import org.keycloak.models.jpa.entities.*;
-import org.keycloak.util.JsonSerialization;
 import ru.alamics.sso.keycloak.entity.ImportUsersDataEntity;
 import ru.alamics.sso.keycloak.entity.ImportUsersReportEntity;
 import ru.alamics.sso.keycloak.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.keycloak.repository.*;
+import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
-import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.util.Util;
 
-import javax.ejb.EJB;
-import javax.ejb.Schedule;
-import javax.ejb.Singleton;
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.ejb.*;
 import javax.validation.ValidationException;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -32,8 +30,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Startup
 @Singleton
+@DependsOn("ApplicationProperties")
 public class ImportSchedule {
+    private static final String TIMER_NAME = "Import Schedule Timer";
+    private static final long DEFAULT_INTERVAL_DURATION = 60000;
+
     @EJB
     private ImportUsersReportRepository importUsersReportRepository;
     @EJB
@@ -46,10 +49,31 @@ public class ImportSchedule {
     private AdminEventRepository adminEventRepository;
     @EJB
     private UserPostService userPostService;
+    @EJB
+    private ApplicationProperties properties;
+    @Resource
+    private TimerService timerService;
 
-    @Schedule(hour = "*", minute = "*/5", persistent = false)
-    public void schedule() {
-        log.info("Start import users by schedule");
+    @PostConstruct
+    private void init() {
+        final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
+        try {
+            final long intervalDuration = Long.parseLong(properties.getProperty("application.schedule.import.milliseconds"));
+            timerService.createIntervalTimer(intervalDuration, intervalDuration, timerConfig);
+            log.info("Timer:{} is created, interval duration set to value={} milliseconds ", TIMER_NAME, intervalDuration);
+        } catch (Exception e) {
+            timerService.createIntervalTimer(DEFAULT_INTERVAL_DURATION, DEFAULT_INTERVAL_DURATION, timerConfig);
+            log.warn("Timer:{} is created; Error read configuration, interval duration set to default value={} milliseconds",
+                    TIMER_NAME, DEFAULT_INTERVAL_DURATION);
+        }
+    }
+
+    @Timeout
+    public void schedule(Timer timer) {
+        if (!TIMER_NAME.equals(timer.getInfo().toString())) {
+            return;
+        }
+
         List<ImportUsersReportEntity> importUsersReportEntities = importUsersReportRepository.findAllImportUsersReports()
                 .stream()
                 .filter(o -> o.getImportUserData() != null && !o.getImportUserData().isEmpty())
@@ -59,10 +83,9 @@ public class ImportSchedule {
                     importUsersReportRepository.updateImportUsersReport(o);
                 })
                 .collect(Collectors.toList());
-        for (ImportUsersReportEntity importUsersReportEntity : importUsersReportEntities){
+        for (ImportUsersReportEntity importUsersReportEntity : importUsersReportEntities) {
             createImportUsers(importUsersReportEntity);
         }
-        log.info("End import users by schedule");
     }
 
     private void createImportUsers(ImportUsersReportEntity importUsersReport) {
@@ -70,27 +93,28 @@ public class ImportSchedule {
         AtomicInteger createdUsers = new AtomicInteger();
         AtomicInteger countClones = new AtomicInteger();
         for (ImportUsersDataEntity o : importUsersReport.getImportUserData()) {
-                try {
-                    o.setErrors(null);
-                    checkImportUser(importUsersReport.getRealmId(), o.getEmail(), o.getPhone());
-                    UserEntity user = createUser(importUsersReport.getRealmId(), o);
-                    createdUsers.getAndIncrement();
-                    o.setCreated(true);
-                    o.setUserId(user.getId());
-                    if (o.getTomsId() == null || o.getTomsId().isBlank()) {
-                        throw new NotFoundException("TomsId is not exist");
-                    }
-                    addUserPost(user, o);
-                } catch (FoundException e) {
-                    List<Object> errors = new LinkedList<>();
-                    e.getResult().forEach((k, v) -> {
-                        errors.add(v);
-                    });
-                    o.setErrors(errors.toString().substring(1, errors.toString().length()-1));
-                    countClones.getAndIncrement();
-                } catch (NotFoundException | ValidationException e) {
-                    o.setErrors(e.getMessage());
+            try {
+                o.setErrors(null);
+                checkImportUser(importUsersReport.getRealmId(), o.getEmail(), o.getPhone());
+                UserEntity user = createUser(importUsersReport.getRealmId(), o);
+                createdUsers.getAndIncrement();
+                o.setCreated(true);
+                o.setUserId(user.getId());
+                if (o.getTomsId() == null || o.getTomsId().isBlank()) {
+                    throw new NotFoundException("TomsId is not exist");
                 }
+                addUserPost(user, o);
+            } catch (FoundException e) {
+                List<Object> errors = new LinkedList<>();
+                e.getResult().forEach((k, v) -> {
+                    errors.add(v);
+                });
+                o.setErrors(errors.toString().substring(1, errors.toString().length() - 1));
+                countClones.getAndIncrement();
+            } catch (NotFoundException | ValidationException e) {
+                o.setErrors(e.getMessage());
+                log.error("Importing user data is failed. {}",e.getMessage());
+            }
         }
         importUsersReport.setCountClones(countClones.intValue());
         importUsersReport.setCountCreatedUsers(createdUsers.intValue());

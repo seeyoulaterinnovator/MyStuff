@@ -6,7 +6,6 @@ import org.jboss.resteasy.annotations.jaxrs.QueryParam;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.services.validation.Validation;
-import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.user.web.UserSearch;
@@ -44,13 +43,13 @@ public class SearchResource {
     public Response getUsersInfoWithoutGrouping(@QueryParam("search") String search, @QueryParam("searchUser") String searchUser,
                                                 @QueryParam("searchToms") String searchToms, @QueryParam("sortField") String sortField,
                                                 @QueryParam("sortAsc") boolean sortAsc, @QueryParam("searchRealm") String searchRealm) {
+        session.userCache().clear();
         if (searchRealm == null || searchRealm.isBlank()) {
             searchRealm = "user";
         }
         return JsonResponse.success()
                 .addResult("users-info",
-                        DataMapper.addOrganizationToUserSearchDtos(userFindService.getUsersByParametersWithoutGrouping(
-                                searchRealm, search, searchUser, searchToms, sortField, sortAsc)))
+                        userFindService.getUsersByParametersWithoutGrouping(searchRealm, search, searchUser, searchToms, sortField, sortAsc))
                 .build();
     }
 
@@ -110,10 +109,6 @@ public class SearchResource {
                         case "master":
                             return true;
                         case "user":
-                            if (o.getName().equalsIgnoreCase("user")) {
-                                return true;
-                            }
-                            return false;
                         case "manager":
                             if (o.getName().equalsIgnoreCase("user")) {
                                 return true;

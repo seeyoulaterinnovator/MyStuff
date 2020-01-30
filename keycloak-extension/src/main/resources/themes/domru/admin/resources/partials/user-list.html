@@ -68,22 +68,22 @@
                     <button id="viewAllUsers" class="btn btn-default" ng-click="query.search = ''; query.searchByUserId = ''; query.searchByTomsId = ''; firstPage()">{{::
                         'view-all-users' | translate}}
                     </button>
-                    <select class="form-control" name="realmsSelect" ng-model="query.searchRealm" ng-change="query.search = ''; firstPage()"
+                    <select class="form-control" name="realmsSelect" ng-model="query.searchRealm" ng-change="changeSearchRealm()"
                             ng-options="x for x in userRealms">
                     </select>
 
                     <div class="pull-right" data-ng-show="access.manageUsers">
-                        <button data-ng-click="downloadTemplateCSV()" class="btn btn-default">Download Template CSV</button>
-                        <button data-ng-click="downloadTemplateXlsx()" class="btn btn-default">Download Template Excel</button>
+                        <button data-ng-click="downloadTemplateCSV()" data-ng-show="access.viewRealm" class="btn btn-default">Download Template CSV</button>
+                        <button data-ng-click="downloadTemplateXlsx()" data-ng-show="access.viewRealm" class="btn btn-default">Download Template Excel</button>
 
-                        <label for="import-file-csv" class="btn btn-default ng-binding">Import CSV<i
+                        <label for="import-file-csv" class="btn btn-default ng-binding" data-ng-show="access.viewRealm">Import CSV<i
                                 class="pficon pficon-import"></i></label>
-                        <input id="import-file-csv" type="file" class="hidden" accept=".csv"
+                        <input id="import-file-csv" type="file" class="hidden" accept=".csv" data-ng-show="access.viewRealm"
                                onchange="angular.element(this).scope().importFileCSV(this.files)">
 
-                        <label for="import-file-xlsx" class="btn btn-default ng-binding">Import Xlsx<i
+                        <label for="import-file-xlsx" class="btn btn-default ng-binding" data-ng-show="access.viewRealm">Import Xlsx<i
                                 class="pficon pficon-import"></i></label>
-                        <input id="import-file-xlsx" type="file" class="hidden" accept=".xlsx"
+                        <input id="import-file-xlsx" type="file" class="hidden" accept=".xlsx" data-ng-show="access.viewRealm"
                                onchange="angular.element(this).scope().importFileExcel(this.files)">
 
                         <button data-ng-click="exportCSV()" class="btn btn-default">Export CSV</button>
@@ -92,7 +92,7 @@
                         <button data-ng-click="selectedResetPassword()" class="btn btn-default">Reset Password</button>
                         <button data-ng-click="selectedBlockUsers()" class="btn btn-default">Block Users</button>
                         <button data-ng-click="unlockUsers()" class="btn btn-default">{{:: 'unlock-users' | translate}}</button>
-                        <a id="createUser" class="btn btn-default" ng-click="getHrefAddUser()" >{{:: 'add-user' | translate}}</a>
+                        <a id="createUser" class="btn btn-default" href="#/create/user/{{realm.realm}}?searchRealm={{query.searchRealm}}" >{{:: 'add-user' | translate}}</a>
                     </div>
                 </div>
             </th>
@@ -122,7 +122,7 @@
             <td class="clip" style="width: 5%">
                 <input type="checkbox" data-ng-model="user.active"/>
             </td>
-            <td class="clip"><a href="#/realms/{{realm.realm}}/users/{{user.id}}">{{user.id}}</a>
+            <td class="clip"><a href="#/realms/{{realm.realm}}/users/{{user.id}}?searchRealm={{query.searchRealm}}">{{user.id}}</a>
             </td>
             <td class="clip" rowspan="">{{user.username}}</td>
             <td class="clip">{{user.email}}</td>
@@ -222,6 +222,5 @@
     </div>
 
 </div> <!-- 		End of Container -->
-</div>
 
 <kc-menu></kc-menu>

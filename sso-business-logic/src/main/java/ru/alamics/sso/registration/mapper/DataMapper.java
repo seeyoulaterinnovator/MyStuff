@@ -23,7 +23,7 @@ public class DataMapper {
         UserEntity userEntity = new UserEntity();
         userEntity.setId(userPostRequest.getUserId());
         userPost.setUser(userEntity);
-        userPost.setTomsId(userPostRequest.getTomsId());
+        userPost.setCustomer(Customer.builder().id(userPostRequest.getTomsId()).name(userPostRequest.getOrgName()).build());
         userPost.setDmpId(userPostRequest.getDmpId());
         UserPostRoleEntity userPostRole = new UserPostRoleEntity();
         userPostRole.setId(userPostRequest.getRoleId());
@@ -56,10 +56,13 @@ public class DataMapper {
                 .id(userPost.getId())
                 .userId(userPost.getUser().getId())
                 .userRole(toUserPostRoleDto(userPost.getRole()))
-                .tomsId(userPost.getTomsId())
+                .tomsId(userPost.getCustomer().getId())
+                .organization(userPost.getCustomer().getName())
+                .updateTime(userPost.getCustomer().getUpdateTime())
                 .dmpId(userPost.getDmpId())
                 .selected(userPost.isSelected())
                 .systemRoles(toExternalSystemRoleDtos(externalSystemRoles))
+                .updateTime(userPost.getCustomer().getUpdateTime())
                 .build();
     }
 

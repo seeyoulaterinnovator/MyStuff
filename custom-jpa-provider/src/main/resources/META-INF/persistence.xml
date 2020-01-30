@@ -81,6 +81,7 @@
 		<class>ru.alamics.sso.keycloak.entity.Settings</class>
 		<class>ru.alamics.sso.keycloak.entity.ImportUsersReportEntity</class>
 		<class>ru.alamics.sso.keycloak.entity.ImportUsersDataEntity</class>
+		<class>ru.alamics.sso.keycloak.entity.Customer</class>
 		<properties>
 			<!-- http://docs.jboss.org/hibernate/orm/4.3/javadocs/constant-values.html -->
 

@@ -423,7 +423,7 @@ public class UserServiceImpl implements UserService {
                 throw e;
 
             exception = e;
-            userIdByPhone = (String)e.getResult().get("userId");
+            userIdByPhone = (String) e.getResult().get("userId");
         }
 
         String userIdByEmail = null;
@@ -435,7 +435,7 @@ public class UserServiceImpl implements UserService {
                 throw e;
 
             exception = e;
-            userIdByEmail = (String)e.getResult().get("userId");
+            userIdByEmail = (String) e.getResult().get("userId");
         }
 
         if (bss) {
@@ -480,16 +480,20 @@ public class UserServiceImpl implements UserService {
         boolean a = false;
         boolean b = false;
 
-        a = false; b = false;
+        a = false;
+        b = false;
         System.out.println(a ^ b); // true
 
-        a = false; b = true;
+        a = false;
+        b = true;
         System.out.println(a ^ b); // false
 
-        a = true; b = false;
+        a = true;
+        b = false;
         System.out.println(a ^ b); // false
 
-        a = true; b = true;
+        a = true;
+        b = true;
         System.out.println(a ^ b); // true
     }
 
@@ -527,7 +531,6 @@ public class UserServiceImpl implements UserService {
     private void createAdminEvent(OperationType operationType, UserModel user) {
         new AdminEventBuilder(realm, auth, session, session.getContext().getConnection())
                 .realm(realm)
-                .resource(ResourceType.REALM)
                 .resource(ResourceType.USER)
                 .operation(operationType)
                 .resourcePath(session.getContext().getUri(), user.getId())

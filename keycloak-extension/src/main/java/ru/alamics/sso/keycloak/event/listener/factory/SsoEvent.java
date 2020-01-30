@@ -5,11 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.actiontoken.resetcred.ResetCredentialsActionToken;
 import org.keycloak.common.util.Time;
-import org.keycloak.email.EmailException;
-import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.events.admin.AdminEvent;
-import org.keycloak.events.admin.OperationType;
-import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -17,18 +13,21 @@ import org.keycloak.models.UserModel;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.Urls;
 import org.keycloak.services.managers.AuthenticationSessionManager;
-import org.keycloak.services.resources.admin.AdminAuth;
-import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.sessions.RootAuthenticationSessionModel;
+import org.keycloak.theme.Theme;
+import ru.alamics.sso.emailer.EmailModel;
+import ru.alamics.sso.emailer.EmailSender;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriBuilderException;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 
 @Slf4j
@@ -36,26 +35,29 @@ public abstract class SsoEvent {
     private final static String CLIENT_ID = "lkb2b";
 
     private final KeycloakSession session;
+    private final EmailSender emailSender;
 
-    public SsoEvent (KeycloakSession session) {
+    public SsoEvent(KeycloakSession session) {
         this.session = session;
+        try {
+            this.emailSender = (EmailSender) new InitialContext().lookup("java:global/domru-sso/" + EmailSender.class.getSimpleName());
+        } catch (NamingException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Something wrong with context");
+        }
     }
 
-    public abstract void execute ();
+    public abstract void execute();
 
-    protected void sendEmail(UserModel user, RealmModel realm, String subject, String template, Map<String, Object> attributes){
+    protected void sendEmail(UserModel user, RealmModel realm, String subject, String template, Map<String, Object> attributes) {
         try {
-            log.info("send to " + user.getEmail());
-            var emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
             ClientModel clientModel = session.clientStorageManager().getClientByClientId(CLIENT_ID, realm);
-            if (clientModel == null){
+            if (clientModel == null) {
                 log.error("Failed to send email: {}", "not client=\"" + CLIENT_ID + "\" to redirect!");
                 return;
             }
-            log.info("got client " + clientModel.toString());
 
             AuthenticationSessionModel authenticationSession = createAuthenticationSessionForClient(realm, clientModel);
-            log.info("got authenticationSession " + authenticationSession.toString());
 
             int validityInSecs = realm.getActionTokenGeneratedByUserLifespan(ResetCredentialsActionToken.TOKEN_TYPE);
             int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
@@ -72,37 +74,20 @@ public abstract class SsoEvent {
             String link = builder.build(realm.getName()).toString();
             attributes.put("accountLink", link);
 
-            emailTemplateProvider.setRealm(realm)
-                    .setUser(user)
-                    .send(subject, template, attributes);
+            emailSender.blockingSend(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
+                    session.theme().getTheme(Theme.Type.EMAIL), session.getContext().resolveLocale(user)));
 
-            log.info("ExtendedEventListener: admin create user. Account data is sent");
-
-            Map<String, Object> repr = new HashMap<>();
-            repr.put("action", "send_account_data");
-            repr.put("email", user.getEmail());
-
-            AdminAuth adminAuth = new AdminAuth(realm, null, user, clientModel);
-
-            new AdminEventBuilder(realm, adminAuth, session, session.getContext().getConnection())
-                    .realm(realm)
-                    .resource(ResourceType.USER)
-                    .operation(OperationType.ACTION)
-                    .representation(repr)
-                    .resourcePath(session.getContext().getUri(), user.getId())
-                    .success();
-
-        } catch (EmailException e) {
-            log.error("Failed to send type mail", e);
+        } catch (Exception e) {
+            log.error("Failed to send email: userId={}, email={}", user.getEmail(), user.getEmail(), e);
         }
     }
 
-    protected UserEntityRepresentation getUserEntityRepresentation (String representation) throws IOException {
+    protected UserEntityRepresentation getUserEntityRepresentation(String representation) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(representation, UserEntityRepresentation.class);
     }
 
-    public KeycloakSession getSession () {
+    public KeycloakSession getSession() {
         return session;
     }
 

@@ -56,7 +56,7 @@ public class UserPostRepository {
             access = em.createQuery(
                     "select ac " +
                             "from UserPostEntity ac " +
-                            "where ac.tomsId = :toms_id and ac.user = :user", UserPostEntity.class)
+                            "where ac.customer.id = :toms_id and ac.user = :user", UserPostEntity.class)
                     .setParameter("user", userEntity)
                     .setParameter("toms_id", tomsId)
                     .getSingleResult();
@@ -178,7 +178,7 @@ public class UserPostRepository {
 
     public UserPostEntity findUserPostByParam(String userId, final String tomsId, final String roleName) {
 
-        List<UserPostEntity> ret = em.createQuery("select upe from UserPostEntity upe where upe.tomsId =:toms and upe.role.name =:role and upe.user.id = :user_id ", UserPostEntity.class)
+        List<UserPostEntity> ret = em.createQuery("select upe from UserPostEntity upe where upe.customer.id =:toms and upe.role.name =:role and upe.user.id = :user_id ", UserPostEntity.class)
                 .setParameter("toms", tomsId)
                 .setParameter("role", roleName)
                 .setParameter("user_id", userId)
@@ -189,7 +189,7 @@ public class UserPostRepository {
 
     public List<UserPostEntity> findUserPostByToms(String userId, final String tomsId) {
 
-        List<UserPostEntity> ret = em.createQuery("select upe from UserPostEntity upe where upe.tomsId =:toms and upe.user.id = :user_id ", UserPostEntity.class)
+        List<UserPostEntity> ret = em.createQuery("select upe from UserPostEntity upe where upe.customer.id =:toms and upe.user.id = :user_id ", UserPostEntity.class)
                 .setParameter("toms", tomsId)
                 .setParameter("user_id", userId)
                 .getResultList();

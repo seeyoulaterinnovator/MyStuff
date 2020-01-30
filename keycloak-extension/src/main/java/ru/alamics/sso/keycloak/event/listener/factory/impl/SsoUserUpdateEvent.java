@@ -47,7 +47,7 @@ public class SsoUserUpdateEvent extends SsoEvent {
             }
 
             UserEntityRepresentation userLast = null;
-            if (adminEventEntity != null){
+            if (adminEventEntity != null) {
                 userLast = getUserEntityRepresentation(adminEventEntity.getRepresentation());
             }
 
@@ -88,6 +88,7 @@ public class SsoUserUpdateEvent extends SsoEvent {
                 "select ae " +
                 "from AdminEventEntity ae " +
                 "where ae.representation like concat('%', :userId, '%') " +
+                "and ae.operationType in ('CREATE', 'UPDATE') " +
                 "order by ae.time DESC ", AdminEventEntity.class)
                 .setParameter("userId", userId)
                 .getResultList();
