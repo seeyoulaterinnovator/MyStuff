@@ -133,7 +133,7 @@ public class UserPostRepository {
 
     public List<UserPostEntity> findUserPostsByUser(final UserEntity user) {
         final String DEBUG_STR = "findUserPostRole";
-        log.info("{}: user={}", DEBUG_STR, user.getId());
+        log.debug("{}: user={}", DEBUG_STR, user.getId());
 
         List<UserPostEntity> ret = em.createQuery("select up from UserPostEntity up where up.user =:user", UserPostEntity.class)
                 .setParameter("user", user)
@@ -143,7 +143,7 @@ public class UserPostRepository {
 
     public List<UserPostEntity> findUserPostRoleByUserId(final String userId) throws NotFoundException {
         final String DEBUG_STR = "findUserPostRole";
-        log.info("{}: userId={}", DEBUG_STR, userId);
+        log.debug("{}: userId={}", DEBUG_STR, userId);
 
         UserEntity userEntity = em.find(UserEntity.class, userId);
         if (userEntity != null) {

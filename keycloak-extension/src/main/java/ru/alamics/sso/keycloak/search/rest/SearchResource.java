@@ -7,6 +7,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.user.web.UserSearch;
 
@@ -69,7 +70,7 @@ public class SearchResource {
         return JsonResponse.success()
                 .addResult("users-info", users)
                 .addResult("page-info",
-                        ru.alamics.sso.registration.mapper.DataMapper.toPageDto(users,
+                        DataMapper.toPageDto(users,
                                 userFindService.getTotalUsersByParameters(searchRealm, search, searchUser, searchToms),
                                 pageNum, pageSize))
                 .build();
