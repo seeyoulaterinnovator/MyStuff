@@ -9,7 +9,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.auth.UserRole;
-import ru.alamics.sso.keycloak.facade.UserPostFacade;
+import ru.alamics.sso.keycloak.facade.CachedUserPostFacade;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 
 import javax.naming.InitialContext;
@@ -26,12 +26,12 @@ import static ru.alamics.sso.registration.model.UserConstants.*;
 public class AttributesForm implements Authenticator {
     private static final String FORM = "attributes.ftl";
     private final UserRole role;
-    private UserPostFacade userPostFacade;
+    private CachedUserPostFacade cachedUserPostFacade;
 
     public AttributesForm(UserRole role) {
         this.role = role;
         try {
-            this.userPostFacade = (UserPostFacade) new InitialContext().lookup("java:global/domru-sso/" + UserPostFacade.class.getSimpleName());
+            this.cachedUserPostFacade = (CachedUserPostFacade) new InitialContext().lookup("java:global/domru-sso/" + CachedUserPostFacade.class.getSimpleName());
         } catch (NamingException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
@@ -55,7 +55,7 @@ public class AttributesForm implements Authenticator {
             var user = context.getUser();
             List<UserPostResponse> attributes = null;
             try {
-                attributes = userPostFacade.findByUserId(user.getId());
+                attributes = cachedUserPostFacade.findByUserId(user.getId());
             } catch (NotFoundException e) {
                 attributes = Collections.emptyList();
             }
