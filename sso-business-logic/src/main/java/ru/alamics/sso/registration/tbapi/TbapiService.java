@@ -2,9 +2,6 @@ package ru.alamics.sso.registration.tbapi;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import ru.alamics.sso.cache.TbapiCache;
-import ru.alamics.sso.cache.impl.TbapiCacheImpl;
-import ru.alamics.sso.registration.model.TbapiConstants;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
@@ -14,8 +11,6 @@ import ru.alamics.sso.registration.tbapi.port.TbapiRemoteService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.UserConstants.*;
 
@@ -32,7 +27,6 @@ public class TbapiService {
     ObjectMapper jacksonMapper = new ObjectMapper();
 
     private final TbapiRemoteService remoteService;
-    private final TbapiCache cache = TbapiCacheImpl.getInstance();
 
     public TbapiService(TbapiRemoteService remoteService) {
         this.remoteService = remoteService;
@@ -71,10 +65,9 @@ public class TbapiService {
         return filterRegisterResponse(result);
     }
 
-    private void checkResponse(Map<String, Object> resp) throws TbapiRegisterException
-    {
+    private void checkResponse(Map<String, Object> resp) throws TbapiRegisterException {
         if (resp.get(TBAPI_ERROR_FLAG) != null)
-            throw new TbapiRegisterException((String)resp.get(TBAPI_ERROR_DETAIL));
+            throw new TbapiRegisterException((String) resp.get(TBAPI_ERROR_DETAIL));
 
         if (resp.get(TBAPI_TOMS_ID) == null)
             throw new TbapiRegisterException("TOMS ID not found");
@@ -90,21 +83,7 @@ public class TbapiService {
         return ret;
     }
 
-    public Map<String, Object> customerNames(TbapiConnectConfig connectConfig, String... customerIds) {
-        List<String> customerList = List.of(customerIds);
-        Map<String, Object> customerNamesFromCache = this.cache.getCustomerNamesFromCache(customerList);
-        List<String> customersWithNullNames = customerNamesFromCache.entrySet().stream()
-                .filter(entry -> Objects.isNull(entry.getValue()))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
-        if (customersWithNullNames == null || customersWithNullNames.isEmpty()) {
-            return customerNamesFromCache;
-        }
-
-        Map<String, Object> nullableNames = remoteService.getCustomerName(customersWithNullNames, connectConfig);
-        nullableNames.forEach(customerNamesFromCache::replace);
-        customerNamesFromCache.forEach(this.cache::putToCache);
-
-        return customerNamesFromCache;
+    public Map<String, Object> customerNames(TbapiConnectConfig connectConfig, List<String> customerIds) {
+        return remoteService.getCustomerName(customerIds, connectConfig);
     }
 }

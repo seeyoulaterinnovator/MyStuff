@@ -11,29 +11,30 @@ public class CustomJpaEntityProvider implements org.keycloak.connections.jpa.ent
 
 
     @Override
-    public List<Class<?>> getEntities () {
+    public List<Class<?>> getEntities() {
         return List.of(UserLoginHistory.class,
                 UserPostRoleEntity.class,
                 AutoLockNotification.class,
                 UserPostEntity.class,
                 ExternalSystemEntity.class,
                 ExternalSystemRoleEntity.class,
-                Settings.class
+                Settings.class,
+                Customer.class
         );
     }
 
     @Override
-    public String getChangelogLocation () {
+    public String getChangelogLocation() {
         return CHANGE_LOG;
     }
 
     @Override
-    public String getFactoryId () {
+    public String getFactoryId() {
         return ID;
     }
 
     @Override
-    public void close () {
+    public void close() {
 
     }
 }

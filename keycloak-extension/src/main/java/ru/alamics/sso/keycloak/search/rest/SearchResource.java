@@ -6,11 +6,8 @@ import org.jboss.resteasy.annotations.jaxrs.QueryParam;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.services.validation.Validation;
-import ru.alamics.sso.keycloak.mapper.DataMapper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.service.UserFindService;
-import ru.alamics.sso.registration.tbapi.TbapiService;
-import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -51,8 +48,7 @@ public class SearchResource {
         }
         return JsonResponse.success()
                 .addResult("users-info",
-                        DataMapper.addOrganizationToUserSearchDtos(userFindService.getUsersByParameters(
-                                searchRealm, search, searchUser, searchToms, sortField, sortAsc)))
+                        userFindService.getUsersByParameters(searchRealm, search, searchUser, searchToms, sortField, sortAsc))
                 .build();
     }
 

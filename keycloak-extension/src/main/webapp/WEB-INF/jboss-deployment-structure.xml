@@ -6,6 +6,7 @@
             <module name="org.keycloak.keycloak-server-spi"/>
             <module name="org.keycloak.keycloak-server-spi-private"/>
             <module name="org.bouncycastle"/>
+            <module name="org.keycloak.keycloak-model-infinispan"/>
         </dependencies>
     </deployment>
 </jboss-deployment-structure>

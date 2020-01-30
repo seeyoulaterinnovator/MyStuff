@@ -18,8 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_DMP_NAME;
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_TOMS_NAME;
+import static ru.alamics.sso.registration.model.UserConstants.*;
 
 public class UserMapper {
 
@@ -49,6 +48,7 @@ public class UserMapper {
                 .enabled(toBoolean(tuple.get("enabled")))
                 .userPostId(toString(tuple.get("user_post_id")))
                 .tomsId(toString(tuple.get("toms_id")))
+                .organization(toString(tuple.get("org")))
                 .dmpId(toString(tuple.get("dmp_id")))
                 .roleId(toString(tuple.get("role_id")))
                 .roleName(toString(tuple.get("role_name")))
@@ -178,6 +178,9 @@ public class UserMapper {
         }
         if (!userModel.getAttribute(ATTR_DMP_NAME).isEmpty()) {
             userPostRequest.setDmpId(userModel.getAttribute(ATTR_DMP_NAME).get(0));
+        }
+        if (!userModel.getAttribute(ATTR_ORG_NAME).isEmpty()) {
+            userPostRequest.setOrgName(userModel.getAttribute(ATTR_ORG_NAME).get(0));
         }
         return userPostRequest;
     }
