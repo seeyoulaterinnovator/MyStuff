@@ -468,6 +468,9 @@
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.auth.appname', 'SSO');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.auth.username', 'anonymous');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.find.path', '/api/v1/customerManagement/customerAccounts/names');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.request.max.size', '10');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.request.interval.milliseconds', '10000');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.request.load.coeff', '100');
         </sql>
     </changeSet>
 
@@ -558,6 +561,16 @@
         <sql>
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('application.schedule.import.milliseconds', '300000');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('application.schedule.user.milliseconds', '60000');
+        </sql>
+
+        <!--    Cache properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('user.post.cache.db.lifespan.days', '1');
+        </sql>
+
+        <!--    Email properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('emailSender.interval.milliseconds', '2000');
         </sql>
     </changeSet>
 </databaseChangeLog>

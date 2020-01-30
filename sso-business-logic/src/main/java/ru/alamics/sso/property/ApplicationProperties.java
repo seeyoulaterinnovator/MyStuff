@@ -6,11 +6,12 @@ import ru.alamics.sso.keycloak.repository.AppPropertyRepository;
 import ru.alamics.sso.util.StandResolver;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.*;
+import javax.ejb.EJB;
+import javax.ejb.Schedule;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -57,7 +58,7 @@ public class ApplicationProperties {
         Properties tempProp = new Properties();
         tempProp.putAll(propertyRepository.findAll().stream()
                 .collect(Collectors.toMap(AppProperty::getName, AppProperty::getValue)));
-        if (!tempProp.isEmpty()){
+        if (!tempProp.isEmpty()) {
             dbProperties = tempProp;
         }
         log.info("Initializing application properties from database finished:{}", dbProperties.toString());
