@@ -77,8 +77,6 @@ public abstract class SsoEvent {
             emailSender.blockingSend(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
                     session.theme().getTheme(Theme.Type.EMAIL), session.getContext().resolveLocale(user)));
 
-            log.info("Email transmit to EmailSender is finished: email={}", user.getEmail());
-
         } catch (Exception e) {
             log.error("Failed to send email: userId={}, email={}", user.getEmail(), user.getEmail(), e);
         }

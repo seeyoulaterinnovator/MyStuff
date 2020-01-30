@@ -49,14 +49,16 @@ public class EmailSender {
     private ApplicationProperties properties;
 
     public void blockingSend(EmailModel emailModel) {
-        if (emailModel.getUser().getEmail() == null) {
+        String email = emailModel.getUser().getEmail();
+        if (email == null) {
             return;
         }
 
         try {
             emailQueue.put(emailModel);
+            log.info("Success put email into send queue: email={}, send queue size={}", email, getEmailQueueSize());
         } catch (InterruptedException e) {
-            log.error("Fail put email into send queue", e);
+            log.error("Fail put email into send queue: email={}, send queue size={}", email, getEmailQueueSize(), e);
         }
     }
 
