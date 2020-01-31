@@ -270,6 +270,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     $scope.pages = {};
     $scope.pages.number = 1;
     var isInitPagination = false;
+    var lastPage;
     $scope.pageSize = {};
 
     sortAsc = true;
@@ -352,7 +353,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     function initPagination() {
         isInitPagination = true;
 
-        var lastPage = 1;
+        lastPage = 1;
 
         $('.pagination')
             .find('li')
