@@ -192,9 +192,9 @@ public class UserRepository {
                         "          WHEN :searchToms is not null and :searchToms != '' then (UP.TOMS_ID = :searchToms)\n" +
                         "          else UP.TOMS_ID LIKE '%' OR UP.TOMS_ID is null end\n" +
                         getSort(sortField, sortAsc), Tuple.class)
-                .setParameter("search", search.trim())
-                .setParameter("searchUser", searchUser.trim())
-                .setParameter("searchToms", searchToms.trim())
+                .setParameter("search", search)
+                .setParameter("searchUser", searchUser)
+                .setParameter("searchToms", searchToms)
                 .setParameter("realm", realm);
 
         return query.getResultList();
@@ -226,16 +226,16 @@ public class UserRepository {
                         "  AND CASE\n" +
                         "          WHEN :searchToms is not null and :searchToms != '' then (UP.TOMS_ID = :searchToms)\n" +
                         "          else UP.TOMS_ID LIKE '%' OR UP.TOMS_ID is null end\n")
-                .setParameter("search", search.trim())
-                .setParameter("searchUser", searchUser.trim())
-                .setParameter("searchToms", searchToms.trim())
+                .setParameter("search", search)
+                .setParameter("searchUser", searchUser)
+                .setParameter("searchToms", searchToms)
                 .setParameter("realm", realm);
 
         return Long.parseLong(query.getSingleResult().toString());
     }
 
     public List<Tuple> getTupleUsersByParameters(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc,
-                                                  Integer pageNum, Integer pageSize) {
+                                                 Integer pageNum, Integer pageSize) {
         Query query = em.createNativeQuery(
                 "select " +
                         "       UE.ID         as user_id,\n" +
@@ -271,9 +271,9 @@ public class UserRepository {
                         "          else UP.TOMS_ID LIKE '%' OR UP.TOMS_ID is null end\n" +
                         "group by UE.ID " +
                         getSort(sortField, sortAsc), Tuple.class)
-                .setParameter("search", search.trim())
-                .setParameter("searchUser", searchUser.trim())
-                .setParameter("searchToms", searchToms.trim())
+                .setParameter("search", search)
+                .setParameter("searchUser", searchUser)
+                .setParameter("searchToms", searchToms)
                 .setParameter("realm", realm);
 
         if (pageNum != null && pageNum != 0 && pageSize != null && pageSize != 0) {

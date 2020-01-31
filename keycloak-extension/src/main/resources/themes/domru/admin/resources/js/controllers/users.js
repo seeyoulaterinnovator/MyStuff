@@ -474,6 +474,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     $scope.firstPage = function () {
         $scope.query.first = 0;
         isInitPagination = false;
+        $scope.pages.number = 1;
         $scope.search();
     };
 

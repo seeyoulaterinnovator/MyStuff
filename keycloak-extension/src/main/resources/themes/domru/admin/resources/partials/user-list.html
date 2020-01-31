@@ -64,7 +64,7 @@
                             </div>
                         </div>
                     </div>
-                    <button id="searchUsers" class="btn btn-default" ng-click="search()">Search users</button>
+                    <button id="searchUsers" class="btn btn-default" ng-click="firstPage()">Search users</button>
                     <button id="viewAllUsers" class="btn btn-default" ng-click="query.search = ''; query.searchByUserId = ''; query.searchByTomsId = ''; firstPage()">{{::
                         'view-all-users' | translate}}
                     </button>
@@ -194,11 +194,9 @@
     <div class='pagination-container' >
         <nav>
             <ul class="pagination">
-                <select class  ="form-control" name="state" ng-model="pageSize" ng-change="firstPage()" ng-init="pageSize='15'">
-                    <option value="5000">5000</option>
+                <select class  ="form-control" name="state" ng-model="pageSize" ng-change="firstPage()" ng-init="pageSize='10'">
                     <option selected value="5">5</option>
                     <option value="10">10</option>
-                    <option value="15">15</option>
                     <option value="20">20</option>
                     <option value="50">50</option>
                     <option value="70">70</option>
