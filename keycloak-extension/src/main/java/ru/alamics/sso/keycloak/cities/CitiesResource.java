@@ -1,30 +1,29 @@
 package ru.alamics.sso.keycloak.cities;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.keycloak.broker.provider.util.SimpleHttp;
 import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.cities.model.CityMigration;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.property.ApplicationProperties;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
 public class CitiesResource {
-
-    private final static String url = "https://master.lk-backend.b2bweb.t2.ertelecom.ru/site/domains";
-    //private final static String url = "https://api-lkb2b.domru.ru/site/domains";
+    private static final String CITIES_URL = "cities.url";
+    private static String url;
 
     private static ReentrantLock lock = new ReentrantLock();
 
@@ -34,6 +33,10 @@ public class CitiesResource {
 
     public CitiesResource(KeycloakSession session) {
         this.session = session;
+        ApplicationProperties properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        if (url == null) {
+            url = properties.getProperty(CITIES_URL);
+        }
     }
 
     @GET
@@ -45,9 +48,10 @@ public class CitiesResource {
             lock.lock();
             try {
                 if (cityList.isEmpty()) {
-                    cityList = SimpleHttp.doGet(url, session).asJson(new TypeReference<List<CityMigration>>() {});
+                    cityList = SimpleHttp.doGet(url, session).asJson(new TypeReference<List<CityMigration>>() {
+                    });
                 }
-            }  catch (IOException e){
+            } catch (IOException e) {
                 log.error("Connect to " + url + " failed");
             } finally {
                 lock.unlock();

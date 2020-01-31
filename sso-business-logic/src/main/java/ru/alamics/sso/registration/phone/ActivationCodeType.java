@@ -1,13 +1,13 @@
 package ru.alamics.sso.registration.phone;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.alamics.sso.property.ApplicationProperties;
-import ru.alamics.sso.property.PropertyConstants;
+import ru.alamics.sso.settings.SettingConstants;
+import ru.alamics.sso.settings.SettingsService;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import static ru.alamics.sso.property.PropertyConstants.*;
+import static ru.alamics.sso.settings.SettingConstants.*;
 
 @Slf4j
 public enum ActivationCodeType {
@@ -17,9 +17,9 @@ public enum ActivationCodeType {
 
     private final int lengthCode;
     private long expiredSeconds;
-    private PropertyConstants propertyConstant;
+    private SettingConstants propertyConstant;
 
-    ActivationCodeType(int lengthCode, long expiredSeconds, PropertyConstants propertyConstant) {
+    ActivationCodeType(int lengthCode, long expiredSeconds, SettingConstants propertyConstant) {
         this.lengthCode = lengthCode;
         this.expiredSeconds = expiredSeconds;
         this.propertyConstant = propertyConstant;
@@ -48,16 +48,16 @@ public enum ActivationCodeType {
         this.expiredSeconds = expiredSeconds;
     }
 
-    public PropertyConstants getPropertyConstant() {
+    public SettingConstants getPropertyConstant() {
         return propertyConstant;
     }
 
     public static void init() {
         try {
             InitialContext context = new InitialContext();
-            ApplicationProperties applicationProperties = (ApplicationProperties) context.lookup("java:global/domru-sso/" + ApplicationProperties.class.getSimpleName());
+            SettingsService settingsService = (SettingsService) context.lookup("java:global/domru-sso/" + SettingsService.class.getSimpleName());
             for (ActivationCodeType activationCodeType : ActivationCodeType.values()) {
-                long timeValue = applicationProperties.getSettingsValue(activationCodeType.getPropertyConstant(), "user");
+                long timeValue = settingsService.getSettingsValue(activationCodeType.getPropertyConstant(), "user");
                 if (timeValue <= -1) {
                     timeValue = 0;
                 }

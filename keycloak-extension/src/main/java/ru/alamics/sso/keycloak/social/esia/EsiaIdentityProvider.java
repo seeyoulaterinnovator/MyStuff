@@ -14,19 +14,13 @@ import org.keycloak.common.ClientConnection;
 import org.keycloak.events.Errors;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.events.EventType;
-import org.keycloak.models.KeycloakContext;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserSessionModel;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.protocol.oidc.endpoints.AuthorizationEndpoint;
 import org.keycloak.services.ErrorPage;
-import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
-import org.keycloak.sessions.AuthenticationSessionModel;
-import org.keycloak.sessions.RootAuthenticationSessionModel;
-import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.util.Signer;
 
 import javax.ws.rs.GET;
@@ -36,10 +30,12 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import java.net.http.HttpRequest;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j

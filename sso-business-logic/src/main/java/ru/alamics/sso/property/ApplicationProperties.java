@@ -1,64 +1,66 @@
 package ru.alamics.sso.property;
 
-import ru.alamics.sso.keycloak.entity.Settings;
-import ru.alamics.sso.keycloak.repository.SettingsRepository;
-import ru.alamics.sso.registration.mapper.DataMapper;
-import ru.alamics.sso.settings.SettingsDto;
+import lombok.extern.slf4j.Slf4j;
+import ru.alamics.sso.keycloak.entity.AppProperty;
+import ru.alamics.sso.keycloak.repository.AppPropertyRepository;
+import ru.alamics.sso.util.StandResolver;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Duration;
 import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
+import java.util.stream.Collectors;
 
 @Singleton
 @Startup
+@Slf4j
 public class ApplicationProperties {
-    private Properties properties;
-
+    private Properties fileProperties = new Properties();
+    private Properties dbProperties = new Properties();
     @EJB
-    private SettingsRepository repository;
-
-
-    public long getSettingsValue(final PropertyConstants property, final String realmId) {
-        final String keyName = property.getKey();
-        Settings settings = repository.getSettings(keyName, realmId);
-        long ret = -1;
-        if(settings != null) {
-            ret = TimeUnit.SECONDS.convert(Long.parseLong(settings.getValue()), settings.getUnit());
-        }
-        return ret;
-    }
+    private AppPropertyRepository propertyRepository;
 
     public String getProperty(final String name) {
-        String envProperty = System.getenv(name);
-        String vmOpts = System.getProperty(name);
-        String ret;
-        if(envProperty != null) {
-            ret = envProperty;
-        } else if(vmOpts != null) {
-            ret = vmOpts;
-        } else {
-            ret = this.properties.getProperty(name);
-        }
-        return ret;
-    }
+        String result = System.getenv(name);
 
-    public SettingsDto getSetting(final PropertyConstants property, final String realmId){
-        final String keyName = property.getKey();
-        return DataMapper.toDto(repository.getSettings(keyName, realmId));
+        if (result == null) {
+            result = System.getProperty(name);
+        }
+        if (result == null) {
+            result = this.fileProperties.getProperty(name);
+        }
+        if (result == null) {
+            result = this.dbProperties.getProperty(name);
+        }
+        return result;
     }
 
     @PostConstruct
     public void init() throws IOException {
-        final InputStream stream = ApplicationProperties.class.getResourceAsStream("/application.properties");
-        this.properties = new Properties();
-        this.properties.load(stream);
+        initDbProperties();
+        initFileProperties();
+    }
+
+    private void initFileProperties() throws IOException {
+        final String appPropResPath = "/" + StandResolver.ENV_CONFIG + "/application.properties";
+        log.info("Initializing app properties file:\"{}\"", appPropResPath);
+        final InputStream stream = ApplicationProperties.class.getResourceAsStream(appPropResPath);
+        this.fileProperties.load(stream);
+        log.info("Initializing application properties from file finished:{}", fileProperties.toString());
+    }
+
+    @Schedule(hour = "*/1", persistent = false)
+    private void initDbProperties() {
+        Properties tempProp = new Properties();
+        tempProp.putAll(propertyRepository.findAll().stream()
+                .collect(Collectors.toMap(AppProperty::getName, AppProperty::getValue)));
+        if (!tempProp.isEmpty()) {
+            dbProperties = tempProp;
+        }
+        log.info("Initializing application properties from database finished:{}", dbProperties.toString());
     }
 }

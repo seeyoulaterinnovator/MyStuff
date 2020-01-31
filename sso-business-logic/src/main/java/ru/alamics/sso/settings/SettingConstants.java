@@ -1,6 +1,6 @@
-package ru.alamics.sso.property;
+package ru.alamics.sso.settings;
 
-public enum PropertyConstants {
+public enum SettingConstants {
     ABSENCE_BLOCKING_DAYS("user.absence.blocking.days"),
     ABSENCE_NOTIFICATION_DAYS("user.absence.notifications.days"),
     EXPIRE_SMS_VIBER_CODE("user.expire.sms-viber.code"),
@@ -9,7 +9,7 @@ public enum PropertyConstants {
 
     private String key;
 
-    PropertyConstants(String key) {
+    SettingConstants(String key) {
         this.key = key;
     }
 

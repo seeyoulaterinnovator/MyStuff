@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 public class ImportSchedule {
     private static final String TIMER_NAME = "Import Schedule Timer";
     private static final long DEFAULT_INTERVAL_DURATION = 60000;
+    private final static String TIMER_INTERVAL_DURATION_PROPERTY = "application.schedule.import.milliseconds";
 
     @EJB
     private ImportUsersReportRepository importUsersReportRepository;
@@ -58,7 +59,7 @@ public class ImportSchedule {
     private void init() {
         final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
         try {
-            final long intervalDuration = Long.parseLong(properties.getProperty("application.schedule.import.milliseconds"));
+            final long intervalDuration = Long.parseLong(properties.getProperty(TIMER_INTERVAL_DURATION_PROPERTY));
             timerService.createIntervalTimer(intervalDuration, intervalDuration, timerConfig);
             log.info("Timer:{} is created, interval duration set to value={} milliseconds ", TIMER_NAME, intervalDuration);
         } catch (Exception e) {

@@ -18,8 +18,9 @@ public class CustomJpaEntityProvider implements org.keycloak.connections.jpa.ent
                 UserPostEntity.class,
                 ExternalSystemEntity.class,
                 ExternalSystemRoleEntity.class,
+                Customer.class,
                 Settings.class,
-                Customer.class
+                AppProperty.class
         );
     }
 

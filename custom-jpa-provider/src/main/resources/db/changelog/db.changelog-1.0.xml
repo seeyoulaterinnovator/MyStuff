@@ -451,4 +451,126 @@
                                  referencedTableName="CUSTOMER" referencedColumnNames="ID" />
     </changeSet>
 
+    <changeSet id="33" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <not> <tableExists tableName="APP_PROPERTIES" /> </not>
+        </preConditions>
+        <createTable tableName="APP_PROPERTIES">
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="value" type="varchar(255)"/>
+        </createTable>
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.host', '10.121.10.41');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.port', '26800');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.secure', 'false');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.auth.appname', 'SSO');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.auth.username', 'anonymous');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.find.path', '/api/v1/customerManagement/customerAccounts/names');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.request.max.size', '10');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.request.interval.milliseconds', '10000');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.request.load.coeff', '100');
+        </sql>
+    </changeSet>
+
+    <changeSet id="34" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="APP_PROPERTIES" />
+        </preConditions>
+
+        <!--    PhoneCaller properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('phoneCaller.uri.perm', 'http://LoGSsOIn:1LoGSsOPaSsERTH777@call-auth.cc-perm.ertelecom.ru/sso_call.php');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('phoneCaller.uri.voronezh', 'http://LoGSsOIn:1LoGSsOPaSsERTH777@call-auth.cc-voronezh.ertelecom.ru/sso_call.php');
+        </sql>
+        <!--    RiasApi properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasApi.uri', 'https://hq-dev.db.ertelecom.ru:443/cgi-bin/ppo/excells/web_cabinet.get_info_unauth');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasApi.client.name', 'SSO');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasApi.client.salt', 'W2NHAYTWrfEG9fDw2MAt2TuuM7VK2K7H');
+        </sql>
+        <!--    SmsSender properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('smsSender.uri', 'http://smsgw.ertelecom.ru:13003/cgi-bin/sendsms');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('smsSender.smscName', 'rapporto_gold');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('smsSender.username', 'ertelecom');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('smsSender.password', 'P10BxzA6Z1BRM');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('smsSender.senderName', 'Domru');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('smsSender.timeout', '1440');
+        </sql>
+        <!--    ViberSender properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.uri', 'http://smsgw-prior.ertelecom.ru:13003/cgi-bin/sendsms');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.smscName', 'rapporto_viber');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.username', 'ertelecom');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.password', 'P10BxzA6Z1BRM');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.senderName', 'Domru');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.timeout', '5');
+        </sql>
+    </changeSet>
+
+    <changeSet id="35" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="APP_PROPERTIES" />
+        </preConditions>
+        <!--    RiasLogin properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('cities.url', 'https://master.lk-backend.b2bweb.t2.ertelecom.ru/site/domains');
+        </sql>
+        <!--    RiasLogin properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.scheme', 'https');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.defCity', 'perm-dev');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.domain', 'db.ertelecom.ru');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.port', '443');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.path', '/cgi-bin/ppo/es_webface/open_auth.authorize_password');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.client.name', 'WEB_CABINET_B2B');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.client.salt', 'kad14duh534u2h3j2mmi8dyla9dze');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.grantType', 'password');
+        </sql>
+
+        <!--    Esia properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('esia.domain.url', 'https://esia-portal1.test.gosuslugi.ru');
+        </sql>
+
+        <!--    vk properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('vk.auth.url', 'https://oauth.vk.com/authorize');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('vk.token.url', 'https://oauth.vk.com/access_token');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('vk.profile.url', 'https://api.vk.com/method/users.get');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('vk.default.scope', 'email');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('vk.api.version', '5.101');
+        </sql>
+
+        <!--    CustomIdpReview properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('idpReview.siteKey', '6LfQG68UAAAAAOowA30NhSf4_VjiuH_KeT8bN3_B');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('idpReview.siteSecretValue', '6LfQG68UAAAAAH8quIVwZ_8Cizgwi6CqjPIP5a3w');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('idpReview.recaptcha.url', 'https://www.google.com/recaptcha/api.js?hl=');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('idpReview.recaptcha.siteVerify', 'https://www.google.com/recaptcha/api/siteverify');
+        </sql>
+    </changeSet>
+
+    <changeSet id="36" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="APP_PROPERTIES" />
+        </preConditions>
+        <!--    Schedule properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('application.schedule.import.milliseconds', '300000');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('application.schedule.user.milliseconds', '60000');
+        </sql>
+
+        <!--    Cache properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('user.post.cache.db.lifespan.days', '1');
+        </sql>
+
+        <!--    Email properties    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('emailSender.interval.milliseconds', '2000');
+        </sql>
+    </changeSet>
 </databaseChangeLog>
