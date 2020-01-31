@@ -6,26 +6,26 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.internal.ClientInvocationBuilder;
 import org.jboss.resteasy.plugins.providers.StringTextStar;
-import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
+import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.phone.exception.PhoneCallException;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 import ru.alamics.sso.util.Util;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 @Slf4j
 @Stateless(name = "PhoneCaller")
 public class PhoneCallerRemoteServiceImpl implements PhoneCallerRemoteService {
 
-    private static final String LOGIN_SSO_CALL = "LoGSsOIn:1LoGSsOPaSsERTH777@";
-    private static final String host_perm = LOGIN_SSO_CALL + "call-auth.cc-perm.ertelecom.ru";
-    private static final String host_voronezh = LOGIN_SSO_CALL + "call-auth.cc-voronezh.ertelecom.ru";
+    private static final String URI_PERM = "phoneCaller.uri.perm";
+    private static final String URI_VORONEZH = "phoneCaller.uri.voronezh";
 
     private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
             .connectTimeout(3, TimeUnit.SECONDS)
@@ -33,23 +33,34 @@ public class PhoneCallerRemoteServiceImpl implements PhoneCallerRemoteService {
 
     private static final ResteasyClient client = clientBuilder.build();
 
-    private static final URI uriVoronezh = new ResteasyUriBuilder()
-            .scheme("http")
-            .host(host_voronezh)
-            .path("sso_call.php")
-            .build();
-    private static final URI uriPerm = new ResteasyUriBuilder()
-            .scheme("http")
-            .host(host_perm)
-            .path("sso_call.php")
-            .build();
+    @Resource(lookup = "java:global/domru-sso/ApplicationProperties")
+    private ApplicationProperties properties;
+
+    private URI uriPerm;
+    private URI uriVoronezh;
+
+    @PostConstruct
+    private void init() {
+        try {
+            uriPerm = URI.create(properties.getProperty(URI_PERM));
+        } catch (Exception e) {
+            log.error("Fail uriPerm initialize", e);
+        }
+        try {
+            uriVoronezh = URI.create(properties.getProperty(URI_VORONEZH));
+        } catch (Exception e) {
+            log.error("Fail uriVoronezh initialize", e);
+        }
+    }
 
     @Override
     public String call(String phone, int count) throws PhoneCallException {
 
         String response = null;
         try {
-            response = getCode(uriPerm, phone, count);
+            if (uriPerm != null) {
+                response = getCode(uriPerm, Util.getCleanUserPhone(phone), count);
+            }
             if (isNull(response)) {
                 response = getCode(uriVoronezh, Util.getCleanUserPhone(phone), count);
             }

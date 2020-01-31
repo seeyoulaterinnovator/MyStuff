@@ -5,11 +5,6 @@ import org.keycloak.broker.provider.AbstractIdentityProviderFactory;
 import org.keycloak.broker.social.SocialIdentityProviderFactory;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
-import ru.alamics.sso.property.ApplicationProperties;
-import ru.alamics.sso.registration.phone.ActivationCodeType;
-
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 @Slf4j
 public class EsiaIdentityProviderFactory extends AbstractIdentityProviderFactory<EsiaIdentityProvider> implements SocialIdentityProviderFactory<EsiaIdentityProvider> {

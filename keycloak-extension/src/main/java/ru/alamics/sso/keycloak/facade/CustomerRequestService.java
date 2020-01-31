@@ -5,8 +5,8 @@ import ru.alamics.sso.customer.CustomerDto;
 import ru.alamics.sso.customer.CustomerService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.property.ApplicationProperties;
-import ru.alamics.sso.registration.model.TbapiConstants;
 import ru.alamics.sso.registration.tbapi.TbapiService;
+import ru.alamics.sso.registration.tbapi.model.TbapiConnect;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
@@ -50,7 +50,7 @@ public class CustomerRequestService {
             return new HashMap<>();
         }
         try {
-            Map<String, Object> customerMap = tbapiService.customerNames(connectConfig(), currentTomsIds);
+            Map<String, Object> customerMap = tbapiService.customerNames(new TbapiConnectConfig(TbapiConnect.CUTOMER_NAMES), currentTomsIds);
             Map<String, String> customers = new HashMap<>();
             for (String tomsId : currentTomsIds) {
                 CustomerDto customer = CustomerDto.builder()
@@ -97,16 +97,4 @@ public class CustomerRequestService {
         return result;
     }
 
-    private TbapiConnectConfig connectConfig() {
-        TbapiConnectConfig connectConfig = new TbapiConnectConfig();
-        if (properties != null) {
-            connectConfig.setHost(properties.getProperty(TbapiConstants.HOST));
-            connectConfig.setPort(Integer.parseInt(properties.getProperty(TbapiConstants.PORT)));
-            connectConfig.setAppname(properties.getProperty(TbapiConstants.AUTH_APPNAME));
-            connectConfig.setUsername(properties.getProperty(TbapiConstants.AUTH_USERNAME));
-            connectConfig.setPath(properties.getProperty(TbapiConstants.CUSTOMER_FIND_PATH));
-            connectConfig.setSecure(Boolean.parseBoolean(TbapiConstants.SECURE));
-        }
-        return connectConfig;
-    }
 }

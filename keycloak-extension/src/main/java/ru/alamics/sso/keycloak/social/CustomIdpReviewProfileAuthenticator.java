@@ -29,11 +29,14 @@ import org.keycloak.services.messages.Messages;
 import org.keycloak.services.resources.AttributeFormDataProcessor;
 import org.keycloak.services.validation.Validation;
 import org.keycloak.util.JsonSerialization;
+import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.UserExtension;
 import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.tbapi.TbapiService;
 import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
+import ru.alamics.sso.registration.tbapi.model.TbapiConnect;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 import ru.alamics.sso.util.Util;
@@ -51,16 +54,20 @@ import static ru.alamics.sso.registration.model.UserConstants.ATTR_ORG_NAME;
 @Slf4j
 public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthenticator {
 
-    private static final String SITE_KEY = "6LfQG68UAAAAAOowA30NhSf4_VjiuH_KeT8bN3_B";
-    private static final String SITE_SECRET_VAL = "6LfQG68UAAAAAH8quIVwZ_8Cizgwi6CqjPIP5a3w";
+    private static final String SITE_KEY = "idpReview.siteKey";
+    private static final String SITE_SECRET_VAL = "idpReview.siteSecretValue";
+    private static final String RECAPTCHA_URL = "idpReview.recaptcha.url";
+    private static final String RECAPTCHA_VERIFY_URL = "idpReview.recaptcha.siteVerify";
 
     private final TbapiService tbapiService;
     private final UserExtension userExtension;
 
+    private ApplicationProperties properties;
+
     public CustomIdpReviewProfileAuthenticator() {
         tbapiService = new TbapiService(new TbapiServiceRestImpl());
         userExtension = new UserExtension();
-
+        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
     }
 
     @Override
@@ -75,8 +82,8 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
                     .setAttribute(LoginFormsProvider.UPDATE_PROFILE_CONTEXT_ATTR, userCtx)
                     .setFormData(null);
             form.setAttribute("recaptchaRequired", true);
-            form.setAttribute("recaptchaSiteKey", SITE_KEY);
-            form.addScript("https://www.google.com/recaptcha/api.js?hl=" + userLanguageTag);
+            form.setAttribute("recaptchaSiteKey", properties.getProperty(SITE_KEY));
+            form.addScript(properties.getProperty(RECAPTCHA_URL) + userLanguageTag);
             context.challenge(form.createUpdateProfilePage());
         } else {
             // Not required to update profile. Marked success
@@ -124,8 +131,8 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
                     .setErrors(errors)
                     .setAttribute(LoginFormsProvider.UPDATE_PROFILE_CONTEXT_ATTR, userCtx)
                     .setAttribute("recaptchaRequired", true)
-                    .setAttribute("recaptchaSiteKey", SITE_KEY);
-            form.addScript("https://www.google.com/recaptcha/api.js?hl=" + userLanguageTag);
+                    .setAttribute("recaptchaSiteKey", properties.getProperty(SITE_KEY));
+            form.addScript(properties.getProperty(RECAPTCHA_URL) + userLanguageTag);
             form.setFormData(formData);
 
             context.challenge(form.createUpdateProfilePage());
@@ -179,9 +186,9 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
 
     private boolean validateRecaptcha(AuthenticationFlowContext context, String captcha) {
         HttpClient httpClient = context.getSession().getProvider(HttpClientProvider.class).getHttpClient();
-        HttpPost post = new HttpPost("https://www.google.com/recaptcha/api/siteverify");
+        HttpPost post = new HttpPost(properties.getProperty(RECAPTCHA_VERIFY_URL));
         List<NameValuePair> formparams = new LinkedList<>();
-        formparams.add(new BasicNameValuePair("secret", SITE_SECRET_VAL));
+        formparams.add(new BasicNameValuePair("secret", properties.getProperty(SITE_SECRET_VAL)));
         formparams.add(new BasicNameValuePair("response", captcha));
         formparams.add(new BasicNameValuePair("remoteip", context.getConnection().getRemoteAddr()));
         try {
@@ -225,7 +232,7 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
         user.getAttributes().put(ATTR_ORG_NAME, Collections.singletonList(orgName));
 
 
-        Map<String, Object> attributes = tbapiService.registerUser(user, TbapiConnectConfig.getStaticConfig());
+        Map<String, Object> attributes = tbapiService.registerUser(user, new TbapiConnectConfig(TbapiConnect.REGISTRATION));
 
         userExtension.extendUser(user, attributes);
 
