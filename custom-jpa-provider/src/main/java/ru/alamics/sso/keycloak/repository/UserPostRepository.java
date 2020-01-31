@@ -12,10 +12,7 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Stateless
@@ -84,6 +81,18 @@ public class UserPostRepository {
                 .getResultList();
     }
 
+    public List<UserPostEntity> findUserPostsByIds(List<String> userPostIds) {
+        if (userPostIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return em.createQuery(
+                "select upe " +
+                        "from UserPostEntity upe " +
+                        "where upe.id in :userPostIds ", UserPostEntity.class)
+                .setParameter("userPostIds", userPostIds)
+                .getResultList();
+    }
+
     public List<UserPostRoleEntity> getAllUserPostRoles() {
         return em.createQuery(
                 "select apr " +
@@ -124,7 +133,7 @@ public class UserPostRepository {
 
     public List<UserPostEntity> findUserPostsByUser(final UserEntity user) {
         final String DEBUG_STR = "findUserPostRole";
-        log.info("{}: user={}", DEBUG_STR, user.getId());
+        log.debug("{}: user={}", DEBUG_STR, user.getId());
 
         List<UserPostEntity> ret = em.createQuery("select up from UserPostEntity up where up.user =:user", UserPostEntity.class)
                 .setParameter("user", user)
@@ -134,7 +143,7 @@ public class UserPostRepository {
 
     public List<UserPostEntity> findUserPostRoleByUserId(final String userId) throws NotFoundException {
         final String DEBUG_STR = "findUserPostRole";
-        log.info("{}: userId={}", DEBUG_STR, userId);
+        log.debug("{}: userId={}", DEBUG_STR, userId);
 
         UserEntity userEntity = em.find(UserEntity.class, userId);
         if (userEntity != null) {
