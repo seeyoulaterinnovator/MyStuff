@@ -186,7 +186,7 @@ dpl:stage:
   script:
     - $BASE_DIR/scripts/deploy.sh
 
-dpl:stage1:
+dpl:stage2:
   stage: deploy
   when: manual
   only:
@@ -197,7 +197,7 @@ dpl:stage1:
   script:
     - $BASE_DIR/scripts/deploy.sh
 
-dpl:stage2:
+dpl:stage3:
   stage: deploy
   when: manual
   only:
