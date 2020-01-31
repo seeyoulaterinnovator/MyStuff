@@ -36,6 +36,7 @@ import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.tbapi.TbapiService;
 import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
+import ru.alamics.sso.registration.tbapi.model.TbapiConnect;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 import ru.alamics.sso.util.Util;
@@ -231,7 +232,7 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
         user.getAttributes().put(ATTR_ORG_NAME, Collections.singletonList(orgName));
 
 
-        Map<String, Object> attributes = tbapiService.registerUser(user, TbapiConnectConfig.getStaticConfig());
+        Map<String, Object> attributes = tbapiService.registerUser(user, new TbapiConnectConfig(TbapiConnect.REGISTRATION));
 
         userExtension.extendUser(user, attributes);
 

@@ -573,4 +573,30 @@
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('emailSender.interval.milliseconds', '2000');
         </sql>
     </changeSet>
+
+    <changeSet id="37" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="APP_PROPERTIES" />
+        </preConditions>
+        <!--    delete properties    -->
+        <sql>
+            DELETE FROM APP_PROPERTIES WHERE NAME IN ('tbapi.host', 'tbapi.port', 'tbapi.secure', 'tbapi.auth.appname', 'tbapi.auth.username')
+        </sql>
+
+        <!--    add   -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.registration.host', '10.121.10.41');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.registration.port', '26800');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.registration.secure', 'false');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.registration.auth.appname', 'SSP');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.registration.auth.username', 'anonymous');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.registration.find.path', '/api/v1/customerManagement/customerAccount');
+
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.host', '10.121.10.41');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.port', '26800');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.secure', 'false');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.auth.appname', 'SSO');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.auth.username', 'anonymous');
+        </sql>
+    </changeSet>
 </databaseChangeLog>
