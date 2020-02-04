@@ -1,23 +1,18 @@
 package ru.alamics.sso.util;
 
 import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.FileTemplateLoader;
-import freemarker.cache.TemplateLoader;
-import freemarker.cache.URLTemplateLoader;
 import freemarker.core.HTMLOutputFormat;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.keycloak.theme.FreeMarkerException;
-
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 
 
-
-public class FreeMarkerUtil {
-    private FreeMarkerUtil () { }
+public class CustomFreeMarkerUtil {
+    private CustomFreeMarkerUtil() { }
 
     public static String processTemplate(Object data, String templateName) throws FreeMarkerException {
         try {
@@ -30,11 +25,11 @@ public class FreeMarkerUtil {
         }
     }
 
-    private static Template getTemplate (final String templateName) throws IOException {
+    private static Template getTemplate(final String templateName) throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_23);
         cfg.setLocalizedLookup(false);
         cfg.setDefaultEncoding("UTF-8");
-        ClassTemplateLoader ctl = new ClassTemplateLoader(FreeMarkerUtil.class, "/templates/mail");
+        ClassTemplateLoader ctl = new ClassTemplateLoader(CustomFreeMarkerUtil.class, "/templates/mail");
         cfg.setTemplateLoader(ctl);
 
         if (templateName.toLowerCase().endsWith(".ftl")) {

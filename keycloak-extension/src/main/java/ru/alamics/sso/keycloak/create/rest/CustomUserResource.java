@@ -4,45 +4,74 @@ import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.keycloak.common.ClientConnection;
+import org.keycloak.common.Profile;
+import org.keycloak.connections.jpa.JpaConnectionProvider;
+import org.keycloak.events.Details;
+import org.keycloak.events.EventBuilder;
+import org.keycloak.events.EventType;
+import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.*;
+import org.keycloak.models.jpa.UserAdapter;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.services.ErrorResponse;
-import org.keycloak.services.resources.admin.AdminAuth;
-import ru.alamics.sso.property.ApplicationProperties;
+import org.keycloak.services.managers.AuthenticationManager;
+import org.keycloak.services.resources.account.AccountFormService;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
+import org.keycloak.services.resources.admin.ClientsResource;
+import org.keycloak.services.resources.admin.RoleMapperResource;
+import org.keycloak.services.resources.admin.UsersResource;
+import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
+import org.keycloak.utils.ProfileHelper;
+import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.user.FileServiceException;
 import ru.alamics.sso.user.ImportUsersReportService;
 import ru.alamics.sso.user.UserService;
 import ru.alamics.sso.user.UserServiceImpl;
 import ru.alamics.sso.user.model.*;
-import ru.alamics.sso.keycloak.response.JsonResponse;
-import ru.alamics.sso.registration.FoundException;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.persistence.EntityManager;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.keycloak.models.ImpersonationSessionNote.IMPERSONATOR_ID;
+import static org.keycloak.models.ImpersonationSessionNote.IMPERSONATOR_USERNAME;
 
 @Slf4j
 public class CustomUserResource {
     protected KeycloakSession session;
     private UserService userService;
+    private AdminPermissionEvaluator auth;
     private ImportUsersReportService importUsersReportService;
+    private RealmModel realm;
 
-    public CustomUserResource(KeycloakSession session, AdminAuth auth) {
+    public CustomUserResource(KeycloakSession session, AdminPermissionEvaluator auth) {
         this.session = session;
-//        AdminAuth auth = authenticateRealmAdminRequest(session.getContext().getRealm());
-        this.userService = new UserServiceImpl(session, auth);
+        this.auth = auth;
+        auth.users().canManage();
+        this.userService = new UserServiceImpl(session, auth.adminAuth());
         try {
             this.importUsersReportService = (ImportUsersReportService) new InitialContext().lookup("java:global/domru-sso/" + ImportUsersReportService.class.getSimpleName());
         } catch (NamingException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
         }
+        this.realm = session.getContext().getRealm();
     }
 
     @POST
@@ -287,5 +316,89 @@ public class CustomUserResource {
         log.info("End activate Import Users From Report:{}", importId);
         return JsonResponse.success()
                 .build();
+    }
+
+    @Path("impersonation/{id}")
+    @POST
+    @NoCache
+    @Produces(MediaType.APPLICATION_JSON)
+    public Map<String, Object> impersonate(@PathParam("id") String id) {
+        session.userCache().clear();
+        ProfileHelper.requireFeature(Profile.Feature.IMPERSONATION);
+
+        auth.users().canImpersonate();
+        UserModel user = session.users().getUserById(id, realm);
+        // if same realm logout before impersonation
+        RealmModel authenticatedRealm = auth.adminAuth().getRealm();
+        boolean sameRealm = false;
+        ClientConnection clientConnection = session.getContext().getConnection();
+        if (authenticatedRealm.getId().equals(realm.getId())) {
+            sameRealm = true;
+            UserSessionModel userSession = session.sessions().getUserSession(realm, auth.adminAuth().getToken().getSessionState());
+            AuthenticationManager.expireIdentityCookie(realm, session.getContext().getUri(), clientConnection);
+            AuthenticationManager.expireRememberMeCookie(realm, session.getContext().getUri(), clientConnection);
+            AuthenticationManager.backchannelLogout(session, realm, userSession, session.getContext().getUri(), clientConnection, session.getContext().getRequestHeaders(), true);
+        }
+        EventBuilder event = new EventBuilder(realm, session, clientConnection);
+
+        UserSessionModel userSession = session.sessions().createUserSession(realm, user, user.getUsername(), clientConnection.getRemoteAddr(), "impersonate", false, null, null);
+
+        UserModel adminUser = auth.adminAuth().getUser();
+        String impersonatorId = adminUser.getId();
+        String impersonator = adminUser.getUsername();
+        userSession.setNote(IMPERSONATOR_ID.toString(), impersonatorId);
+        userSession.setNote(IMPERSONATOR_USERNAME.toString(), impersonator);
+
+        AuthenticationManager.createLoginCookie(session, realm, userSession.getUser(), userSession, session.getContext().getUri(), clientConnection);
+        URI redirect = AccountFormService.accountServiceApplicationPage(session.getContext().getUri()).build(realm.getName());
+        Map<String, Object> result = new HashMap<>();
+        result.put("sameRealm", sameRealm);
+        result.put("redirect", redirect.toString());
+        event.event(EventType.IMPERSONATE)
+                .session(userSession)
+                .user(user)
+                .detail(Details.IMPERSONATOR_REALM, realm.getName())
+                .detail(Details.IMPERSONATOR, impersonator).success();
+
+        return result;
+    }
+
+    @Path("role-mappings/{id}")
+    public RoleMapperResource getRoleMappings(@PathParam("id") String id) {
+        EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
+        UserEntity userEntity = em.find(UserEntity.class, id);
+        if (userEntity == null) throw new org.jboss.resteasy.spi.NotFoundException("User not found");
+        UserModel user = new UserAdapter(session, realm, em, userEntity);
+
+        AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
+                .realm(realm)
+                .resource(ResourceType.USER);
+
+        AdminPermissionEvaluator.RequirePermissionCheck manageCheck = () -> auth.users().requireMapRoles(user);
+        AdminPermissionEvaluator.RequirePermissionCheck viewCheck = () -> auth.users().requireView(user);
+        RoleMapperResource resource = new RoleMapperResource(realm, auth, user, adminEvent, manageCheck, viewCheck);
+        ResteasyProviderFactory.getInstance().injectProperties(resource);
+        return resource;
+    }
+
+    @Path("clients")
+    public ClientsResource getClients() {
+        AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
+                .realm(realm)
+                .resource(ResourceType.REALM);
+        ClientsResource clientsResource = new ClientsResource(realm, auth, adminEvent);
+        ResteasyProviderFactory.getInstance().injectProperties(clientsResource);
+        return clientsResource;
+    }
+
+
+    @Path("users")
+    public UsersResource users() {
+        AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
+                .realm(realm)
+                .resource(ResourceType.REALM);
+        UsersResource users = new UsersResource(realm, auth, adminEvent);
+        ResteasyProviderFactory.getInstance().injectProperties(users);
+        return users;
     }
 }

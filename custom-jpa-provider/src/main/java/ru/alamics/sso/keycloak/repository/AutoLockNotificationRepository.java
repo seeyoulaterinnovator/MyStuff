@@ -1,18 +1,14 @@
 package ru.alamics.sso.keycloak.repository;
 
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.entity.AutoLockNotification;
 import ru.alamics.sso.keycloak.entity.common.NotificationStatus;
-import ru.alamics.sso.keycloak.entity.common.NotificationType;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,10 +28,9 @@ public class AutoLockNotificationRepository {
     }
 
     public void findUsersToBlock(final long absenceTimeBlock, final String realmId) {
-        log.info("findBlockingUsers: realmId={}, absenceTimeBlock={}", realmId, absenceTimeBlock);
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime absence = now.minusSeconds(absenceTimeBlock);
-        entityManager.createNativeQuery(
+        int countUsersToBlock = entityManager.createNativeQuery(
                 "insert into AUTO_LOCK_NOTIFICATION(id, user_id, sended_at, type, status)\n" +
                         "select uuid(), ue.ID, null, 'ABSENCE_BLOCKING', 'PREPARE'\n" +
                         "from USER_ENTITY ue\n" +
@@ -54,6 +49,9 @@ public class AutoLockNotificationRepository {
                 .setParameter("date", absence)
                 .setParameter("realm_id", realmId)
                 .executeUpdate();
+        if (countUsersToBlock > 0) {
+            log.info("findBlockingUsers: realmId={}, absenceTimeBlock={}, countUsersToBlock={}", realmId, absenceTimeBlock, countUsersToBlock);
+        }
     }
 
     public List<AutoLockNotification> findNotifications() {

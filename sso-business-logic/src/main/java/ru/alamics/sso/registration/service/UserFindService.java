@@ -2,22 +2,28 @@ package ru.alamics.sso.registration.service;
 
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.UserEntity;
+import ru.alamics.sso.keycloak.repository.UserPostRepository;
 import ru.alamics.sso.keycloak.repository.UserRepository;
+import ru.alamics.sso.registration.dto.UserPostResponse;
+import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.user.mapper.UserMapper;
+import ru.alamics.sso.user.web.UserSearch;
 import ru.alamics.sso.user.web.UserSearchDto;
 import ru.alamics.sso.util.Util;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Stateless
 public class UserFindService {
-    private final static String SORT_FIELD_NAME = "firstName";
-    private final static String SORT_FIELD_EMAIL = "email";
-
     @EJB
     private UserRepository userRepository;
+    @EJB
+    private UserPostRepository userPostRepository;
 
     public UserEntity getUserByPhone(RealmModel realm, String phone) {
         phone = Util.getCleanUserPhone(phone);
@@ -43,27 +49,38 @@ public class UserFindService {
         return null;
     }
 
-    public List<UserSearchDto> getUsersByParameters(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc) {
-        return UserMapper.toUserDtoList(userRepository.getTupleUsersByParameters(realm, search, searchUser, searchToms, getSort(sortField, sortAsc)));
+    public List<UserSearchDto> getUsersByParametersWithoutGrouping(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc) {
+        return UserMapper.toUserDtoList(userRepository.getTupleUsersByParametersWithoutGrouping(realm, search, searchUser, searchToms, sortField, sortAsc));
     }
 
-    private String getSort(String sortField, boolean sortAsc) {
-        String sort = "";
-        if (SORT_FIELD_NAME.equalsIgnoreCase(sortField)) {
-            sort += "ORDER BY first_name";
-        } else if (SORT_FIELD_EMAIL.equalsIgnoreCase(sortField)) {
-            sort += "ORDER BY email";
+    public List<UserSearch> getUsersByParameters(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc,
+                                                 Integer pageNum, Integer pageSize) {
+        List<UserSearch> userSearches = UserMapper.toUserSearchList(userRepository.getTupleUsersByParameters(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize));
+        if (userSearches.isEmpty()) {
+            return userSearches;
         }
-        if (sort.isBlank()) {
-            return sort;
-        }
-        if (!sortAsc) {
-            sort += " DESC";
-        }
-        return sort;
+        
+        Map<String, List<UserPostResponse>> userPostEntities = userPostRepository
+                .findUserPostsByIds(
+                        userSearches.stream()
+                                .map(UserSearch::getUserPosts)
+                                .flatMap(Collection::stream)
+                                .map(UserPostResponse::getId)
+                                .collect(Collectors.toList()))
+                .stream()
+                .map(DataMapper::toUserPostResponse)
+                .collect(Collectors.groupingBy(UserPostResponse::getUserId));
+
+        userSearches.forEach(user -> user.setUserPosts(userPostEntities.get(user.getId())));
+        return userSearches;
     }
 
-    public UserEntity getUserEntity(String userId){
+
+    public long getTotalUsersByParameters(String realm, String search, String searchUser, String searchToms) {
+        return userRepository.getTotalUsersByParameters(realm, search, searchUser, searchToms);
+    }
+
+    public UserEntity getUserEntity(String userId) {
         return userRepository.findUser(userId);
     }
 }

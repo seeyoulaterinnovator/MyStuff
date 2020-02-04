@@ -1,3 +1,3 @@
 #!/bin/sh
 
-/usr/local/keycloak/bin/domain.sh --host-config=host-${ROLE}.xml
+/opt/jboss/keycloak/bin/domain.sh --host-config=host-${ROLE}.xml

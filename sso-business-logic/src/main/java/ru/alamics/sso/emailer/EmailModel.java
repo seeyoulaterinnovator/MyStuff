@@ -6,8 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.theme.Theme;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Data
@@ -19,6 +22,9 @@ public class EmailModel {
     private RealmModel realmModel;
     private String subject;
     private String bodyTemplate;
+    @NotNull
     private List<Object> subjectAttributes;
     private Map<String, Object> bodyAttributes;
+    private Theme theme;
+    private Locale locale;
 }

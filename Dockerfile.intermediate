@@ -21,12 +21,15 @@ USER root
 RUN yum update -y && yum install -y epel-release git && yum install -y jq openssl which && yum clean all
 
 ADD tools /opt/jboss/tools
+ADD configs /opt/jboss/configs
 RUN /opt/jboss/tools/build-keycloak.sh
 
 USER 1000
 
 EXPOSE 8080
 EXPOSE 8443
+EXPOSE 9990
+EXPOSE 9999
 
 ENTRYPOINT [ "/opt/jboss/tools/docker-entrypoint.sh" ]
 

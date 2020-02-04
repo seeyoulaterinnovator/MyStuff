@@ -1,7 +1,6 @@
 <style>
     li.role-list {
         list-style-type: none; /* Убираем маркеры */
-        /*line-height: 1.5px;*/
     }
 
     ul {
@@ -25,6 +24,12 @@
         white-space: pre;
     }
 
+    li.clip {
+        white-space: nowrap; /* Запрещаем перенос строк */
+        overflow: hidden; /* Обрезаем все, что не помещается в область */
+        padding: 0px 5px 0px 5px; /* Поля вокруг текста */
+        text-overflow: ellipsis; /* Добавляем многоточие */
+    }
 </style>
 <div class="col-sm-9 col-md-10 col-sm-push-3 col-md-push-2" ng-init="init()">
 
@@ -59,26 +64,26 @@
                             </div>
                         </div>
                     </div>
-                    <button id="searchUsers" class="btn btn-default" ng-click="search()">Search users</button>
+                    <button id="searchUsers" class="btn btn-default" ng-click="firstPage()">Search users</button>
                     <button id="viewAllUsers" class="btn btn-default" ng-click="query.search = ''; query.searchByUserId = ''; query.searchByTomsId = ''; firstPage()">{{::
                         'view-all-users' | translate}}
                     </button>
-                    <select class="form-control" name="realmsSelect" ng-model="query.searchRealm" ng-change="query.search = ''; firstPage()"
+                    <select class="form-control" name="realmsSelect" ng-model="query.searchRealm" ng-change="changeSearchRealm()"
                             ng-options="x for x in userRealms">
                     </select>
 
                     <div class="pull-right" data-ng-show="access.manageUsers">
-                        <button data-ng-click="downloadTemplateCSV()" class="btn btn-default">Download Template CSV</button>
-                        <button data-ng-click="downloadTemplateXlsx()" class="btn btn-default">Download Template Excel</button>
+                        <button data-ng-click="downloadTemplateCSV()" data-ng-show="access.viewRealm" class="btn btn-default">Download Template CSV</button>
+                        <button data-ng-click="downloadTemplateXlsx()" data-ng-show="access.viewRealm" class="btn btn-default">Download Template Excel</button>
 
-                        <label for="import-file-csv" class="btn btn-default ng-binding">Import CSV<i
+                        <label for="import-file-csv" class="btn btn-default ng-binding" data-ng-show="access.viewRealm">Import CSV<i
                                 class="pficon pficon-import"></i></label>
-                        <input id="import-file-csv" type="file" class="hidden" accept=".csv"
+                        <input id="import-file-csv" type="file" class="hidden" accept=".csv" data-ng-show="access.viewRealm"
                                onchange="angular.element(this).scope().importFileCSV(this.files)">
 
-                        <label for="import-file-xlsx" class="btn btn-default ng-binding">Import Xlsx<i
+                        <label for="import-file-xlsx" class="btn btn-default ng-binding" data-ng-show="access.viewRealm">Import Xlsx<i
                                 class="pficon pficon-import"></i></label>
-                        <input id="import-file-xlsx" type="file" class="hidden" accept=".xlsx"
+                        <input id="import-file-xlsx" type="file" class="hidden" accept=".xlsx" data-ng-show="access.viewRealm"
                                onchange="angular.element(this).scope().importFileExcel(this.files)">
 
                         <button data-ng-click="exportCSV()" class="btn btn-default">Export CSV</button>
@@ -87,7 +92,7 @@
                         <button data-ng-click="selectedResetPassword()" class="btn btn-default">Reset Password</button>
                         <button data-ng-click="selectedBlockUsers()" class="btn btn-default">Block Users</button>
                         <button data-ng-click="unlockUsers()" class="btn btn-default">{{:: 'unlock-users' | translate}}</button>
-                        <a id="createUser" class="btn btn-default" ng-click="getHrefAddUser()" =>{{:: 'add-user' | translate}}</a>
+                        <a id="createUser" class="btn btn-default" href="#/create/user/{{realm.realm}}?searchRealm={{query.searchRealm}}" >{{:: 'add-user' | translate}}</a>
                     </div>
                 </div>
             </th>
@@ -99,8 +104,8 @@
             </th>
             <th class="w-12">{{:: 'id' | translate}}</th>
             <th class="w-12">{{:: 'username' | translate}}</th>
-            <th class="w-12">{{:: 'email' | translate}}</th>
-            <th class="w-12">{{:: 'first-name' | translate}}</th>
+            <th class="w-12" data-ng-click="sort(SORT_FIELD_EMAIL)">{{:: 'email' | translate}}  {{sortMarkEmail}}</th>
+            <th class="w-12" data-ng-click="sort(SORT_FIELD_NAME)">{{:: 'first-name' | translate}}  {{sortMarkName}}</th>
             <th class="w-1">Enabled</th>
             <th class="w-12">Phone</th>
             <th class="w-12">Organization</th>
@@ -117,7 +122,7 @@
             <td class="clip" style="width: 5%">
                 <input type="checkbox" data-ng-model="user.active"/>
             </td>
-            <td class="clip"><a href="#/realms/{{realm.realm}}/users/{{user.id}}">{{user.id}}</a>
+            <td class="clip"><a href="#/realms/{{realm.realm}}/users/{{user.id}}?searchRealm={{query.searchRealm}}">{{user.id}}</a>
             </td>
             <td class="clip" rowspan="">{{user.username}}</td>
             <td class="clip">{{user.email}}</td>
@@ -127,61 +132,45 @@
             </td>
             <td class="clip">{{user.phone}}</td>
             <td class="clip" colspan="1" style="padding: 0 0 0 0">
-                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.access.length > 0">
-                    <tr data-ng-repeat="keys in getKeys(user.access)" >
+                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.userPosts.length > 0">
+                    <tr data-ng-repeat="userPost in user.userPosts" >
                         <td class="clip inner-table__cell">
-                            <div class="form-inline">
-                                <ul>
-                                    <li ng-repeat="access in getAccessGroup(user.access).get(keys)" class="role-list">
-                                        <span> {{isFirstOrg(user.access, access.organization, access)}}</span>
-                                    </li>
-                                </ul>
-                            </div>
+                            <li ng-repeat="org in getOrgs(userPost) track by $index" class="role-list clip">
+                                <span>{{org}}</span>
+                            </li>
                         </td>
                     </tr>
                 </table>
             </td>
             <td class="clip" colspan="1" style="padding: 0 0 0 0">
-                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.access.length > 0">
-                    <tr data-ng-repeat="keys in getKeys(user.access)" >
-                        <td class="clip inner-table__cell">
-                            <div class="form-inline">
-                                <ul>
-                                    <li ng-repeat="access in getAccessGroup(user.access).get(keys)" class="role-list">
-                                        <span>{{isFirstTomsId(user.access, access.tomsId, access)}}</span>
-                                    </li>
-                                </ul>
-                            </div>
+                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.userPosts.length > 0">
+                    <tr data-ng-repeat="userPost in user.userPosts" >
+                        <td class="clip">
+                            <li ng-repeat="tomsId in getTomsIds(userPost) track by $index" class="role-list clip">
+                                {{tomsId}}
+                            </li>
                         </td>
                     </tr>
                 </table>
             </td>
             <td class="clip" colspan="1" style="padding: 0 0 0 0">
-                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.access.length > 0">
-                    <tr data-ng-repeat="keys in getKeys(user.access)" >
+                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.userPosts.length > 0">
+                    <tr data-ng-repeat="userPost in user.userPosts" >
                         <td class="clip inner-table__cell">
-                            <div class="form-inline">
-                                <ul>
-                                    <li ng-repeat="access in getAccessGroup(user.access).get(keys)" class="role-list">
-                                        <span>{{isFirstRoleName(user.access, access.roleName, access)}}</span>
-                                    </li>
-                                </ul>
-                            </div>
+                            <li ng-repeat="roleName in getRoleNames(userPost) track by $index" class="role-list clip">
+                                <span>{{roleName}}</span>
+                            </li>
                         </td>
                     </tr>
                 </table>
             </td>
             <td class="clip" colspan="1" style="padding: 0 0 0 0">
-                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.access.length > 0">
-                    <tr data-ng-repeat="keys in getKeys(user.access)" >
+                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.userPosts.length > 0">
+                    <tr data-ng-repeat="userPost in user.userPosts" >
                         <td class="clip inner-table__cell">
-                            <div class="form-inline">
-                                <ul>
-                                    <li ng-repeat="access in getAccessGroup(user.access).get(keys)" class="role-list">
-                                        <span>{{getSystemName(access)}}</span>
-                                    </li>
-                                </ul>
-                            </div>
+                            <li ng-repeat="sysName in getSystemNames(userPost) track by $index" class="role-list clip">
+                                <span>{{sysName}}</span>
+                            </li>
                         </td>
                     </tr>
                 </table>
@@ -201,6 +190,35 @@
         </tr>
         </tbody>
     </table>
-</div>
+    <!--		Start Pagination -->
+    <div class='pagination-container' >
+        <nav>
+            <ul class="pagination">
+                <select class  ="form-control" name="state" ng-model="pageSize" ng-change="firstPage()" ng-init="pageSize='10'">
+                    <option selected value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                    <option value="70">70</option>
+                    <option value="100">100</option>
+                </select>
+
+                <li data-page="first" >
+                    <span> << <span class="sr-only">(current)</span></span>
+                </li>
+                <li data-page="prev" >
+                    <span> < <span class="sr-only">(current)</span></span>
+                </li>
+                <li data-page="next" id="prev">
+                    <span> > <span class="sr-only">(current)</span></span>
+                </li>
+                <li data-page="last">
+                    <span> >> <span class="sr-only">(current)</span></span>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+</div> <!-- 		End of Container -->
 
 <kc-menu></kc-menu>

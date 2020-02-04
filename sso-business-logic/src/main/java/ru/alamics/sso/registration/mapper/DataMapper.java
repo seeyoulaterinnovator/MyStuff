@@ -1,12 +1,12 @@
 package ru.alamics.sso.registration.mapper;
 
-import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
-import org.keycloak.representations.account.UserRepresentation;
 import ru.alamics.sso.keycloak.entity.*;
 import ru.alamics.sso.registration.dto.*;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
 import ru.alamics.sso.settings.SettingsDto;
+import ru.alamics.sso.user.web.UserSearch;
+import ru.alamics.sso.user.web.UserSearchDto;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -23,7 +23,7 @@ public class DataMapper {
         UserEntity userEntity = new UserEntity();
         userEntity.setId(userPostRequest.getUserId());
         userPost.setUser(userEntity);
-        userPost.setTomsId(userPostRequest.getTomsId());
+        userPost.setCustomer(Customer.builder().id(userPostRequest.getTomsId()).name(userPostRequest.getOrgName()).build());
         userPost.setDmpId(userPostRequest.getDmpId());
         UserPostRoleEntity userPostRole = new UserPostRoleEntity();
         userPostRole.setId(userPostRequest.getRoleId());
@@ -56,10 +56,13 @@ public class DataMapper {
                 .id(userPost.getId())
                 .userId(userPost.getUser().getId())
                 .userRole(toUserPostRoleDto(userPost.getRole()))
-                .tomsId(userPost.getTomsId())
+                .tomsId(userPost.getCustomer().getId())
+                .organization(userPost.getCustomer().getName())
+                .updateTime(userPost.getCustomer().getUpdateTime())
                 .dmpId(userPost.getDmpId())
                 .selected(userPost.isSelected())
                 .systemRoles(toExternalSystemRoleDtos(externalSystemRoles))
+                .updateTime(userPost.getCustomer().getUpdateTime())
                 .build();
     }
 
@@ -143,5 +146,10 @@ public class DataMapper {
         userEntityRepresentation.setEmail(user.getEmail());
         userEntityRepresentation.setEnabled(user.isEnabled());
         return userEntityRepresentation;
+    }
+
+    public static PageDto toPageDto(List<UserSearch> users, long totalElements, int pageNum, int pageSize) {
+        long totalPages = pageSize == 0 ? 1 : (long) Math.ceil((double) totalElements / (double) pageSize);
+        return new PageDto(pageNum, pageSize, users.size(), totalElements, totalPages, pageNum > 1, pageNum < totalPages);
     }
 }

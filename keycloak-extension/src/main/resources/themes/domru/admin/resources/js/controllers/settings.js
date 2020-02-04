@@ -16,10 +16,20 @@ module.controller('CustomTabCtrl', function($scope, realm, $location, $http, Not
     };
 
     $scope.updateSetting = (setting) => {
+        if (!Number(setting.value) || Number(setting.value) < -1){
+            Notifications.error('Settings value is not valid');
+            return;
+        }
+
         $http.put(`${authUrl}/realms/${realm.realm}/settings/${setting.id}`, setting).then(function(data) {
             let index = $scope.settings.indexOf(setting);
             $scope.settings[index] = setting;
-            Notifications.success('Settings was updated');
+            if (setting.value === "-1") {
+                Notifications.success('Settings was disabled');
+                return;
+            } else {
+                Notifications.success('Settings was updated');
+            }
         });
     };
 

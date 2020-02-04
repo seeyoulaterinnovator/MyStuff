@@ -12,23 +12,28 @@ import org.keycloak.broker.social.SocialIdentityProvider;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.property.ApplicationProperties;
 
 import java.util.Objects;
 
 @Slf4j
 public class VkIdentityProvider extends AbstractOAuth2IdentityProvider<OAuth2IdentityProviderConfig> implements SocialIdentityProvider<OAuth2IdentityProviderConfig> {
     private static final String OAUTH2_PARAMETER_EMAIL = "email";
-    private static final String AUTH_URL = "https://oauth.vk.com/authorize";
-    private static final String TOKEN_URL = "https://oauth.vk.com/access_token";
-    private static final String PROFILE_URL = "https://api.vk.com/method/users.get";
-    private static final String DEFAULT_SCOPE = "email";
-    private static final String VK_API_VERSION = "5.101";
+    private static final String AUTH_URL = "vk.auth.url";
+    private static final String TOKEN_URL = "vk.token.url";
+    private static final String PROFILE_URL = "vk.profile.url";
+    private static final String DEFAULT_SCOPE = "vk.default.scope";
+    private static final String VK_API_VERSION = "vk.api.version";
+
+    private ApplicationProperties properties;
 
     VkIdentityProvider(KeycloakSession session, OAuth2IdentityProviderConfig config) {
         super(session, config);
-        config.setAuthorizationUrl(AUTH_URL);
-        config.setTokenUrl(TOKEN_URL);
-        config.setUserInfoUrl(PROFILE_URL);
+        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        config.setAuthorizationUrl(properties.getProperty(AUTH_URL));
+        config.setTokenUrl(properties.getProperty(TOKEN_URL));
+        config.setUserInfoUrl(properties.getProperty(PROFILE_URL));
     }
 
     public BrokeredIdentityContext getFederatedIdentity(String response) {
@@ -43,13 +48,13 @@ public class VkIdentityProvider extends AbstractOAuth2IdentityProvider<OAuth2Ide
 
     private BrokeredIdentityContext doGetFederatedIdentity(String accessToken, String email) {
         try {
-            JsonNode profile = SimpleHttp.doGet(PROFILE_URL, session)
+            JsonNode profile = SimpleHttp.doGet(properties.getProperty(PROFILE_URL), session)
                     .param("access_token", accessToken)
-                    .param("v", VK_API_VERSION)
+                    .param("v", properties.getProperty(VK_API_VERSION))
                     .param("response_type", "token")
                     .param("fields", "domain")
                     .asJson();
-                return extractIdentityFromProfile(profile, email);
+            return extractIdentityFromProfile(profile, email);
         } catch (Exception e) {
             throw new IdentityBrokerException("Could not obtain user profile from vk.", e);
         }
@@ -87,7 +92,7 @@ public class VkIdentityProvider extends AbstractOAuth2IdentityProvider<OAuth2Ide
 
     @Override
     protected String getDefaultScopes() {
-        return DEFAULT_SCOPE;
+        return properties.getProperty(DEFAULT_SCOPE);
     }
 
     @Override

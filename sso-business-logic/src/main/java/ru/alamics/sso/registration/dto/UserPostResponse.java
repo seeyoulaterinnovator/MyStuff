@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -17,6 +18,7 @@ public class UserPostResponse {
     private List<ExternalSystemRoleDto> systemRoles;
     private boolean selected;
     private String organization;
+    private LocalDateTime updateTime;
 
     @JsonPOJOBuilder(withPrefix = "")
     public static class UserPostResponseBuilder {
