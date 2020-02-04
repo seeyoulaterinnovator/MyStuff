@@ -599,4 +599,14 @@
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.auth.username', 'anonymous');
         </sql>
     </changeSet>
+
+    <changeSet id="38" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mysql" />
+            <tableExists tableName="CUSTOMER"></tableExists>
+        </preConditions>
+        <sql>
+            ALTER TABLE CUSTOMER CHANGE NAME NAME varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
 </databaseChangeLog>
