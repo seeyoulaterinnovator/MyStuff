@@ -1,8 +1,8 @@
 package ru.alamics.sso.property;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.alamics.sso.keycloak.entity.AppProperty;
-import ru.alamics.sso.keycloak.repository.AppPropertyRepository;
+import ru.alamics.sso.jpa.entity.AppProperty;
+import ru.alamics.sso.jpa.repository.AppPropertyRepository;
 import ru.alamics.sso.util.StandResolver;
 
 import javax.annotation.PostConstruct;

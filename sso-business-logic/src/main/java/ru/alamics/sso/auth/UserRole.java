@@ -6,11 +6,11 @@ import org.keycloak.models.jpa.entities.RealmEntity;
 import org.keycloak.models.jpa.entities.RoleEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.jpa.entities.UserRoleMappingEntity;
-import ru.alamics.sso.keycloak.entity.ExternalSystemRoleEntity;
-import ru.alamics.sso.keycloak.entity.UserPostEntity;
-import ru.alamics.sso.keycloak.repository.RoleRepository;
-import ru.alamics.sso.keycloak.repository.UserPostRepository;
-import ru.alamics.sso.keycloak.repository.UserRepository;
+import ru.alamics.sso.jpa.entity.ExternalSystemRoleEntity;
+import ru.alamics.sso.jpa.entity.UserPostEntity;
+import ru.alamics.sso.jpa.repository.RoleRepository;
+import ru.alamics.sso.jpa.repository.UserPostRepository;
+import ru.alamics.sso.jpa.repository.UserRepository;
 
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;

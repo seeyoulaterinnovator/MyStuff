@@ -72,17 +72,17 @@
 		<class>org.keycloak.storage.jpa.entity.FederatedUserRequiredActionEntity</class>
 		<class>org.keycloak.storage.jpa.entity.FederatedUserRoleMappingEntity</class>
 
-		<class>ru.alamics.sso.keycloak.entity.UserLoginHistory</class>
-		<class>ru.alamics.sso.keycloak.entity.AutoLockNotification</class>
-		<class>ru.alamics.sso.keycloak.entity.UserPostEntity</class>
-		<class>ru.alamics.sso.keycloak.entity.UserPostRoleEntity</class>
-		<class>ru.alamics.sso.keycloak.entity.ExternalSystemEntity</class>
-		<class>ru.alamics.sso.keycloak.entity.ExternalSystemRoleEntity</class>
-		<class>ru.alamics.sso.keycloak.entity.Settings</class>
-		<class>ru.alamics.sso.keycloak.entity.ImportUsersReportEntity</class>
-		<class>ru.alamics.sso.keycloak.entity.ImportUsersDataEntity</class>
-		<class>ru.alamics.sso.keycloak.entity.Customer</class>
-		<class>ru.alamics.sso.keycloak.entity.AppProperty</class>
+		<class>ru.alamics.sso.jpa.entity.UserLoginHistory</class>
+		<class>ru.alamics.sso.jpa.entity.AutoLockNotification</class>
+		<class>ru.alamics.sso.jpa.entity.UserPostEntity</class>
+		<class>ru.alamics.sso.jpa.entity.UserPostRoleEntity</class>
+		<class>ru.alamics.sso.jpa.entity.ExternalSystemEntity</class>
+		<class>ru.alamics.sso.jpa.entity.ExternalSystemRoleEntity</class>
+		<class>ru.alamics.sso.jpa.entity.Settings</class>
+		<class>ru.alamics.sso.jpa.entity.ImportUsersReportEntity</class>
+		<class>ru.alamics.sso.jpa.entity.ImportUsersDataEntity</class>
+		<class>ru.alamics.sso.jpa.entity.Customer</class>
+		<class>ru.alamics.sso.jpa.entity.AppProperty</class>
 		<properties>
 			<!-- http://docs.jboss.org/hibernate/orm/4.3/javadocs/constant-values.html -->
 

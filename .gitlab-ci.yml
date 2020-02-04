@@ -146,7 +146,12 @@ dpl:devel:domain:
     name: devel
     url: http://domru-sso-devel-domain.dev.itrev.ru
   script:
-    - $BASE_DIR/scripts/deploy.sh
+    - mkdir -p /usr/local/keycloak/modules/ru/alamics/sso/jpa/main
+    - cp artifacts/custom-jpa.jar /usr/local/keycloak/modules/ru/alamics/sso/jpa/main
+    - cp tools/jar-module.xml /usr/local/keycloak/modules/ru/alamics/sso/jpa/main/module.xml
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect deploy build/deploy/standalone/deployments/domru-sso.war
+  tags:
+    - sso-domain-controller
 
 dpl:devel:
   stage: deploy

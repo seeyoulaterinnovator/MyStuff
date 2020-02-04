@@ -1,8 +1,8 @@
 package ru.alamics.sso.customer;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.alamics.sso.keycloak.entity.Customer;
-import ru.alamics.sso.keycloak.repository.CustomerRepository;
+import ru.alamics.sso.jpa.entity.Customer;
+import ru.alamics.sso.jpa.repository.CustomerRepository;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;

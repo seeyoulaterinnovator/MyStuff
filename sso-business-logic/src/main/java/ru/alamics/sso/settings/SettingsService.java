@@ -1,8 +1,8 @@
 package ru.alamics.sso.settings;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.alamics.sso.keycloak.entity.Settings;
-import ru.alamics.sso.keycloak.repository.SettingsRepository;
+import ru.alamics.sso.jpa.entity.Settings;
+import ru.alamics.sso.jpa.repository.SettingsRepository;
 import ru.alamics.sso.registration.mapper.DataMapper;
 
 import javax.ejb.EJB;

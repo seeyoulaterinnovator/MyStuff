@@ -2,12 +2,12 @@ package ru.alamics.sso.registration.service;
 
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import ru.alamics.sso.keycloak.entity.ExternalSystemRoleEntity;
-import ru.alamics.sso.keycloak.entity.UserPostEntity;
-import ru.alamics.sso.keycloak.entity.UserPostRoleEntity;
-import ru.alamics.sso.keycloak.repository.CustomerRepository;
-import ru.alamics.sso.keycloak.repository.UserPostRepository;
-import ru.alamics.sso.keycloak.repository.UserRepository;
+import ru.alamics.sso.jpa.entity.ExternalSystemRoleEntity;
+import ru.alamics.sso.jpa.entity.UserPostEntity;
+import ru.alamics.sso.jpa.entity.UserPostRoleEntity;
+import ru.alamics.sso.jpa.repository.CustomerRepository;
+import ru.alamics.sso.jpa.repository.UserPostRepository;
+import ru.alamics.sso.jpa.repository.UserRepository;
 import ru.alamics.sso.registration.dto.*;
 import ru.alamics.sso.registration.mapper.DataMapper;
 

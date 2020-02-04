@@ -15,7 +15,7 @@ import org.keycloak.theme.FreeMarkerUtil;
 import org.keycloak.theme.Theme;
 import org.keycloak.theme.beans.MessageFormatterMethod;
 import org.keycloak.util.JsonSerialization;
-import ru.alamics.sso.keycloak.repository.AdminEventRepository;
+import ru.alamics.sso.jpa.repository.AdminEventRepository;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.util.CustomFreeMarkerUtil;
 

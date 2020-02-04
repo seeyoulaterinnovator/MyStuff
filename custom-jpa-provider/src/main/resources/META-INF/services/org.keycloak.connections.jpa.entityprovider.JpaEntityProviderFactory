@@ -1,1 +1,1 @@
-ru.alamics.sso.keycloak.entity.provider.factory.CustomJpaProviderFactory
+ru.alamics.sso.jpa.entity.provider.factory.CustomJpaProviderFactory

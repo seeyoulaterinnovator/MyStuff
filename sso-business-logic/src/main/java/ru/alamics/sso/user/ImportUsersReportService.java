@@ -1,7 +1,7 @@
 package ru.alamics.sso.user;
 
-import ru.alamics.sso.keycloak.entity.ImportUsersReportEntity;
-import ru.alamics.sso.keycloak.repository.ImportUsersReportRepository;
+import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
+import ru.alamics.sso.jpa.repository.ImportUsersReportRepository;
 import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.user.web.ImportUsersReportDto;
 

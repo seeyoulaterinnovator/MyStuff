@@ -3,8 +3,8 @@ package ru.alamics.sso.stats;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.jpa.entities.UserEntity;
-import ru.alamics.sso.keycloak.entity.UserLoginHistory;
-import ru.alamics.sso.keycloak.repository.UserHistoryLoginRepository;
+import ru.alamics.sso.jpa.entity.UserLoginHistory;
+import ru.alamics.sso.jpa.repository.UserHistoryLoginRepository;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;

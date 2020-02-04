@@ -7,6 +7,12 @@
             <module name="org.keycloak.keycloak-server-spi-private"/>
             <module name="org.bouncycastle"/>
             <module name="org.keycloak.keycloak-model-infinispan"/>
+            <module name="ru.alamics.sso.jpa" >
+                <imports>
+                    <include path="META-INF**"/>
+                    <include path="ru.alamics.sso.jpa**"/>
+                </imports>
+            </module>
         </dependencies>
     </deployment>
 </jboss-deployment-structure>

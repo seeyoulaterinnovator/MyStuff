@@ -2,8 +2,8 @@ package ru.alamics.sso.registration.service;
 
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.UserEntity;
-import ru.alamics.sso.keycloak.repository.UserPostRepository;
-import ru.alamics.sso.keycloak.repository.UserRepository;
+import ru.alamics.sso.jpa.repository.UserPostRepository;
+import ru.alamics.sso.jpa.repository.UserRepository;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.user.mapper.UserMapper;

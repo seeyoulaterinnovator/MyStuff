@@ -1,12 +1,11 @@
 package ru.alamics.sso.registration.mapper;
 
 import org.keycloak.models.jpa.entities.UserEntity;
-import ru.alamics.sso.keycloak.entity.*;
+import ru.alamics.sso.jpa.entity.*;
 import ru.alamics.sso.registration.dto.*;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
 import ru.alamics.sso.settings.SettingsDto;
 import ru.alamics.sso.user.web.UserSearch;
-import ru.alamics.sso.user.web.UserSearchDto;
 
 import java.util.LinkedList;
 import java.util.List;
