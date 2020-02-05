@@ -148,8 +148,7 @@ dpl:devel:domain:
   script:
     - mkdir -p /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    - cp tools/jar-module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main/module.xml
-    - /usr/local/keycloak/bin/jboss-cli.sh --connect deploy build/deploy/standalone/deployments/domru-sso.war
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect --command="deploy build/deploy/standalone/deployments/domru-sso.war"
   tags:
     - sso-domain-controller
 
@@ -221,8 +220,7 @@ dpl:prod:
     url: http://sso.dev.itrev.ru
   script:
     - mkdir -p /usr/local/keycloak/modules/system/layers/base/com/sso
-    - cp artifacts/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/com/sso
-    - cp tools/jar-module.xml /usr/local/keycloak/modules/system/layers/base/com/sso/module.xml
+    - cp  build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/com/sso
     - /usr/local/keycloak/bin/jboss-cli.sh --connect --command="deploy build/deploy/standalone/deployments/domru-sso.war"
   tags:
     - sso-domain-controller
