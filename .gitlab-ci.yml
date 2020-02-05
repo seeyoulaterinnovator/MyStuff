@@ -93,6 +93,7 @@ back:war:
     - cd keycloak-extension/src/main/resources/themes/domru/login/resources
     - npm install
     - npm run build
+    - rm -rf node_modules
     - cd $currentdir
     - mkdir -p .ci_status
     - ./gradlew :deploy -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
