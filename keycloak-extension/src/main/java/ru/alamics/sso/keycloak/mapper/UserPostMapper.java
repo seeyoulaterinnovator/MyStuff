@@ -31,10 +31,7 @@ import ru.alamics.sso.registration.service.UserPostService;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -137,9 +134,13 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
             case DMP_ID:
                 return userPost.getDmpId();
             case ROLE:
-                return userPost.getUserRole().getName();
+                return userPost.getUserRole() == null? "" : userPost.getUserRole().getName();
             case SYSTEMS:
+                if (userPost.getSystemRoles() == null)
+                    return Collections.EMPTY_LIST;
+
                 return userPost.getSystemRoles().stream()
+                        .filter(o -> o != null && o.getExternalSystem() != null)
                         .map(o -> o.getExternalSystem().getName())
                         .collect(Collectors.toList());
         }
