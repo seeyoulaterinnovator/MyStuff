@@ -150,7 +150,7 @@ dpl:devel:domain:
     - ls -l
     - mkdir -p /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    - /usr/local/keycloak/bin/jboss-cli.sh --connect --command="deploy build/deploy/standalone/deployments/domru-sso.war"
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect --connect --user=admin --password=addMin --command="deploy --all-server-groups build/deploy/standalone/deployments/domru-sso.war"
   tags:
     - sso-domain-controller
 
