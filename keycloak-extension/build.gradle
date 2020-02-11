@@ -17,7 +17,7 @@ dependencies {
     providedCompile "org.keycloak:keycloak-model-infinispan:$keycloakVersion"
     providedCompile group: 'javax', name: 'javaee-api', version: '8.0.1'
 
-    providedCompile 'org.slf4j:slf4j-api:1.7.22'
+    providedCompile 'org.slf4j:slf4j-api:1.7.22.jbossorg-1'
 
     // https://mvnrepository.com/artifact/org.jboss.resteasy/resteasy-jaxrs
     implementation group: 'org.jboss.resteasy', name: 'resteasy-jaxrs', version: '3.9.0.Final'
