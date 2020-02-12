@@ -11,6 +11,6 @@
     <module name="org.keycloak.keycloak-server-spi-private"/>
     <module name="org.keycloak.keycloak-model-jpa"/>
     <module name="javaee.api"/>
-    <module name="org.slf4j.slf4j-api"/>
+    <!--<module name="org.slf4j.slf4j-api"/>-->
 </dependencies>
 </module>
