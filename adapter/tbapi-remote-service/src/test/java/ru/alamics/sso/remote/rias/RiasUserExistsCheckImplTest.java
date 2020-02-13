@@ -5,12 +5,16 @@ import org.assertj.core.api.Assertions;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.phone.SmsConfig;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
+import ru.alamics.sso.remote.ApplicationPropertiesMock;
 import ru.alamics.sso.remote.sms.SmsSendServiceImpl;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Properties;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -31,13 +35,16 @@ class RiasUserExistsCheckImplTest {
         server = new WireMockServer(wireMockConfig().dynamicPort());
         server.start();
 
-        service = new RiasUserExistsCheckImpl(new ResteasyUriBuilder()
+        URI uri = new ResteasyUriBuilder()
                 .scheme("http")
                 .host("localhost")
                 .port(server.port())
                 .path(PATH)
-                .build()
-        );
+                .build();
+
+        ApplicationProperties props = new ApplicationPropertiesMock(new Properties());
+
+        service = new RiasUserExistsCheckImpl(props, uri);
     }
 
     @Test

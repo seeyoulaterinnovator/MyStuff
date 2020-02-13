@@ -52,6 +52,11 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
         this.uri = uri;
     }
 
+    public RiasUserExistsCheckImpl(ApplicationProperties properties, URI uri) {
+
+        this.properties = properties;
+        this.uri = uri;
+    }
 
     public boolean checkParam(String param) throws RiasCheckException {
         LocalDateTime dateTime = LocalDateTime.now();
