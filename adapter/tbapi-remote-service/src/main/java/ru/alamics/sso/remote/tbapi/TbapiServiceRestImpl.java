@@ -72,7 +72,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
                 .path(connectConfig.getPath())
                 .build();
 
-        log.info("TBAPI request to %s", uri.toString());
+        log.info("TBAPI request to {}", uri.toString());
 
         ResteasyWebTarget target = client.target(uri);
         target.request(MediaType.APPLICATION_JSON);
@@ -110,7 +110,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
                     .path(connectConfig.getPath())
                     .build();
 
-            log.info("TBAPI request to %s", uri.toString());
+            log.info("TBAPI request to {}", uri.toString());
 
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("id", id);
