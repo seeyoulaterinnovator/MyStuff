@@ -39,6 +39,58 @@ public class ApplicationProperties {
         return result;
     }
 
+    public int getPropertyInt(final String name) throws PropertyException {
+
+        try {
+            return Integer.parseInt(getProperty(name));
+        } catch (NumberFormatException nfe) {
+            throw new PropertyException(String.format("Can't parse value of '%s'", name), nfe);
+        }
+    }
+
+    public int getPropertyInt(final String name, int defValue) {
+
+        return getPropertyInt(name, defValue, null);
+    }
+
+    public int getPropertyInt(final String name, int defValue, String logDefault) {
+
+        try {
+            return Integer.parseInt(getProperty(name));
+        } catch (NumberFormatException nfe) {
+            if (logDefault != null)
+                log.info(logDefault, name, defValue);
+
+            return defValue;
+        }
+    }
+
+    public long getPropertyLong(final String name) throws PropertyException {
+
+        try {
+            return Long.parseLong(getProperty(name));
+        } catch (NumberFormatException nfe) {
+            throw new PropertyException(String.format("Can't parse value of '%s'", name), nfe);
+        }
+    }
+
+    public long getPropertyLong(final String name, long defValue) {
+
+        return getPropertyLong(name, defValue, null);
+    }
+
+    public long getPropertyLong(final String name, long defValue, String logDefault) {
+
+        try {
+            return Long.parseLong(getProperty(name));
+        } catch (NumberFormatException nfe) {
+            if (logDefault != null)
+                log.info(logDefault, name, defValue);
+
+            return defValue;
+        }
+    }
+
     @PostConstruct
     public void init() throws IOException {
         initDbProperties();

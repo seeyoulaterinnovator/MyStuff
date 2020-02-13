@@ -34,18 +34,14 @@ public class UserPostFacade {
     protected ApplicationProperties properties;
 
     public UserPostFacade() {
-        try {
-            properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
 
-            userPostService = (UserPostService) Lookup.lookup(UserPostService.class);
-            customerRequestService = (CustomerRequestService) Lookup.lookup(CustomerRequestService.class);
-            customerUpdateService = (CustomerUpdateService) Lookup.lookup(CustomerUpdateService.class);
+        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
 
-            customerCacheLifespanInDb = Integer.parseInt(properties.getProperty(CUSTOMER_CACHE_LIFESPAN_IN_DB_PROPERTY));
-        } catch (Exception e) {
-            log.warn("Error parse properties file. All properties values set to default");
-            customerCacheLifespanInDb = CUSTOMER_CACHE_LIFESPAN_IN_DB;
-        }
+        userPostService = (UserPostService) Lookup.lookup(UserPostService.class);
+        customerRequestService = (CustomerRequestService) Lookup.lookup(CustomerRequestService.class);
+        customerUpdateService = (CustomerUpdateService) Lookup.lookup(CustomerUpdateService.class);
+
+        customerCacheLifespanInDb = properties.getPropertyInt(CUSTOMER_CACHE_LIFESPAN_IN_DB_PROPERTY, CUSTOMER_CACHE_LIFESPAN_IN_DB, "UserPostFacade: default value used: '%s' = '%s'");
     }
 
     public List<UserPostResponse> findByUserId(String userId) throws NotFoundException {

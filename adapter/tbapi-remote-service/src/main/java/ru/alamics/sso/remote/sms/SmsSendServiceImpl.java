@@ -54,7 +54,7 @@ public class SmsSendServiceImpl implements SmsSendService {
                 .username(properties.getProperty(USERNAME))
                 .password(properties.getProperty(PASSWORD))
                 .senderName(properties.getProperty(SENDER_NAME))
-                .timeout(Integer.parseInt(properties.getProperty(TIMEOUT)))
+                .timeout(properties.getPropertyInt(TIMEOUT, 1440, "SmsSendServiceImpl: default value used: '%s' = '%s'"))
                 .priority(SmsConfig.Priority.LOWEST)
                 .reportsMask(SmsConfig.ReportsConfig.DELIVERED_TO_PHONE)
                 .encoding(SmsConfig.Encoding.UCS2)

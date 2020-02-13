@@ -22,7 +22,7 @@ public class TbapiConnectConfig {
         try {
             ApplicationProperties properties = (ApplicationProperties) new InitialContext().lookup("java:global/domru-sso/" + ApplicationProperties.class.getSimpleName());
             host = properties.getProperty(connect.getHost());
-            port = Integer.parseInt(properties.getProperty(connect.getPort()));
+            port = properties.getPropertyInt(connect.getPort());
             appname = properties.getProperty(connect.getAppname());
             username = properties.getProperty(connect.getUsername());
             secure = Boolean.parseBoolean(properties.getProperty(connect.getSecure()));

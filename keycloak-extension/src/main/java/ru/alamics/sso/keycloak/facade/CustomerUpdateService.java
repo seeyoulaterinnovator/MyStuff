@@ -36,14 +36,11 @@ public class CustomerUpdateService {
 
     @PostConstruct
     private void init() {
-        try {
-            ApplicationProperties properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
-            tbapiRequestInterval = Long.parseLong(properties.getProperty(TBAPI_REQUEST_INTERVAL_PROPERTY));
-            log.info("tbapiRequestInterval set to value={}", tbapiRequestInterval);
-        } catch (Exception e) {
-            tbapiRequestInterval = TBAPI_REQUEST_INTERVAL_DEFAULT;
-            log.warn("tbapiRequestInterval set to default value={}", tbapiRequestInterval);
-        }
+
+        ApplicationProperties properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        tbapiRequestInterval = properties.getPropertyLong(TBAPI_REQUEST_INTERVAL_PROPERTY, TBAPI_REQUEST_INTERVAL_DEFAULT, "CustomerUpdateService: default value used: '%s' = '%s'");
+        log.info("tbapiRequestInterval set to value={}", tbapiRequestInterval);
+
         tasksPool.offer(executorService.scheduleAtFixedRate(new UpdateTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
     }
 
