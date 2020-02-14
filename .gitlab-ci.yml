@@ -147,13 +147,16 @@ dpl:devel:domain:
     name: devel
     url: http://domru-sso-devel-domain.dev.itrev.ru
   script:
-    - ls -l
-    - mkdir -p /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="deploy --all-server-groups build/deploy/standalone/deployments/domru-sso.war"
-  tags:
-    - sso-domain-controller
+    - $BASE_DIR/scripts/deploy.sh
+
+dpl:devel:domwar:
+  stage: deploy
+  when: manual
+  environment:
+    name: devel
+    url: http://domru-sso-devel-domain.dev.itrev.ru
+  script:
+    - $BASE_DIR/scripts/deploy.sh
 
 dpl:devel:
   stage: deploy
