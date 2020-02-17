@@ -7,5 +7,5 @@ dependencies {
     implementation "org.keycloak:keycloak-model-jpa:$keycloakVersion"
     implementation group: 'javax', name: 'javaee-api', version: '8.0.1'
 
-    compileOnly 'org.slf4j:slf4j-api:1.7.22'
+    compileOnly 'org.slf4j:slf4j-api:1.7.22.jbossorg-1'
 }
