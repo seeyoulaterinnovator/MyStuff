@@ -71,6 +71,9 @@
                 <logger category="sun.rmi">
                     <level name="WARN"/>
                 </logger>
+                <logger category="org.jboss.modules">
+                    <level name="TRACE"/>
+                </logger>
                 <root-logger>
                     <level name="INFO"/>
                     <handlers>
@@ -542,6 +545,9 @@
                 </logger>
                 <logger category="sun.rmi">
                     <level name="WARN"/>
+                </logger>
+                <logger category="org.jboss.modules">
+                    <level name="TRACE"/>
                 </logger>
                 <root-logger>
                     <level name="INFO"/>
@@ -1053,6 +1059,9 @@
                 </logger>
                 <logger category="sun.rmi">
                     <level name="WARN"/>
+                </logger>
+                <logger category="org.jboss.modules">
+                    <level name="TRACE"/>
                 </logger>
                 <root-logger>
                     <level name="INFO"/>
