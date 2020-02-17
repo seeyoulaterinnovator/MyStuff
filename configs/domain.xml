@@ -493,11 +493,11 @@
                     <cacheTemplates>true</cacheTemplates>
                     <dir>${jboss.home.dir}/themes</dir>
                 </theme>
-                <spi name="user">
+                <!--<spi name="user">
                     <default-provider>customjpa</default-provider>
                     <provider name="jpa" enabled="false"/>
                     <provider name="customjpa" enabled="true"/>
-                </spi>
+                </spi>-->
                 <spi name="eventsStore">
                     <provider name="jpa" enabled="true">
                         <properties>
