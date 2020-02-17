@@ -460,11 +460,6 @@
                         </properties>
                     </provider>
                 </spi>
-                 <spi name="user">
-                    <default-provider>customjpa</default-provider>
-                    <provider name="jpa" enabled="false"/>
-                    <provider name="customjpa" enabled="true"/>
-                </spi>
                 <spi name="userCache">
                     <provider name="default" enabled="true"/>
                 </spi>
