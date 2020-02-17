@@ -98,8 +98,8 @@
                             <max-pool-size>20</max-pool-size>
                         </pool>
                         <security>
-                            <user-name>sso</user-name>
-                            <password>Okcyetlihoaphho</password>
+                            <user-name>${env.DB_USER}</user-name>
+                            <password>${env.DB_PASSWORD}</password>
                         </security>
                         <validation>
                             <check-valid-connection-sql>select 1</check-valid-connection-sql>
