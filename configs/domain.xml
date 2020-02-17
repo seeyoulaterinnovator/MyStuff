@@ -92,7 +92,7 @@
             <subsystem xmlns="urn:jboss:domain:datasources:5.0">
                 <datasources>
                     <datasource jndi-name="java:jboss/datasources/KeycloakDS" pool-name="KeycloakDS" enabled="true" use-java-context="true">
-                        <connection-url>jdbc:mariadb://mariadb:${env.DB_PORT}/${env.DB_DATABASE}</connection-url>
+                        <connection-url>jdbc:mariadb://${env.DB_HOST}:${env.DB_PORT}/${env.DB_DATABASE}</connection-url>
                         <driver>mariadb</driver>
                         <pool>
                             <max-pool-size>20</max-pool-size>
