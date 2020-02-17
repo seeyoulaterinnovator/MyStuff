@@ -8,6 +8,10 @@ RUN mkdir -p /opt/jboss/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/m
 RUN cp /opt/jboss/build/custom-jpa.jar /opt/jboss/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
 RUN cp /opt/jboss/tools/module.xml /opt/jboss/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
 
+RUN mkdir -p /opt/jboss/keycloak/modules/ru/alamics/sso/jpa/main
+RUN cp /opt/jboss/build/custom-jpa.jar /opt/jboss/keycloak/modules/ru/alamics/sso/jpa/main
+RUN cp /opt/jboss/tools/module.xml /opt/jboss/keycloak/modules/ru/alamics/sso/jpa/main
+
 RUN echo '#$REALM_NAME=ManagementRealm$ This line is used by the add-user utility to identify the realm name already used in this file.' > /opt/jboss/keycloak/domain/configuration/mgmt-users.properties
 RUN echo "admin=fbfd754b0b0b48b7bbbe7cad57ea7920" >> /opt/jboss/keycloak/domain/configuration/mgmt-users.properties
 RUN echo "admin=PowerUser,BillingAdmin" > /opt/jboss/keycloak/domain/configuration/mgmt-groups.properties
