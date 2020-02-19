@@ -105,11 +105,7 @@ public class EmailSender {
         this.executorService = Executors.newSingleThreadExecutor();
         executorService.submit(new SendTask());
 
-        try {
-            sendInterval = Long.parseLong(properties.getProperty(SEND_INTERVAL_PROPERTY));
-        } finally {
-            log.info("send interval={} milliseconds", sendInterval);
-        }
+        sendInterval = properties.getPropertyLong(SEND_INTERVAL_PROPERTY, 1000, "EmailSender interval: default value used: '%s' = '%s'");
     }
 
     private void createEmailEvent(OperationType operationType, EmailModel emailModel, String emailTheme) {

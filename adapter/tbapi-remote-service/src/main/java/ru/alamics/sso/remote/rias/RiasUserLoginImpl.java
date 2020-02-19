@@ -6,6 +6,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import ru.alamics.sso.property.ApplicationProperties;
+import ru.alamics.sso.property.PropertyException;
 import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.model.RiasLogin;
@@ -70,7 +71,7 @@ public class RiasUserLoginImpl implements RiasLoginService {
             URI uri = new ResteasyUriBuilder()
                     .scheme(properties.getProperty(AUTH_SCHEME))
                     .host(String.format("%s.%s", domain == null ? properties.getProperty(AUTH_DEF_CITY) : domain, properties.getProperty(AUTH_DOMAIN)))
-                    .port(Integer.parseInt(properties.getProperty(AUTH_PORT)))
+                    .port(properties.getPropertyInt(AUTH_PORT))
                     .path(properties.getProperty(AUTH_PATH))
                     .build();
 
@@ -88,7 +89,7 @@ public class RiasUserLoginImpl implements RiasLoginService {
 
             result = response.readEntity(RiasLogin.class);
 
-        } catch (ProcessingException | WebApplicationException wae) {
+        } catch (PropertyException | ProcessingException | WebApplicationException wae) {
             throw new RiasCheckException(wae);
         } finally {
             if (response != null)

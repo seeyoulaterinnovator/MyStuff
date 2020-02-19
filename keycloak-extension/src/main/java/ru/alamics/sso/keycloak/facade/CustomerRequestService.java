@@ -32,16 +32,10 @@ public class CustomerRequestService {
 
     public CustomerRequestService() {
         tbapiService = new TbapiService(new TbapiServiceRestImpl());
-        try {
-            properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
-            customerService = (CustomerService) Lookup.lookup(CustomerService.class);
-            tbapiRequestMaxSize = Integer.parseInt(properties.getProperty(TBAPI_REQUEST_MAX_SIZE_PROPERTY));
-            loadCoeff = Integer.parseInt(properties.getProperty(LOAD_COEFF_PROPERTY));
-        } catch (NumberFormatException e) {
-            log.warn("Error parse properties file. All properties values set to default");
-            tbapiRequestMaxSize = TBAPI_REQUEST_MAX_SIZE;
-            loadCoeff = LOAD_COEFF_DEFAULT;
-        }
+        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        customerService = (CustomerService) Lookup.lookup(CustomerService.class);
+        tbapiRequestMaxSize = properties.getPropertyInt(TBAPI_REQUEST_MAX_SIZE_PROPERTY, TBAPI_REQUEST_MAX_SIZE, "CustomerRequestService: default value used: '%s' = '%s'");
+        loadCoeff = properties.getPropertyInt(LOAD_COEFF_PROPERTY, LOAD_COEFF_DEFAULT, "CustomerRequestService: default value used: '%s' = '%s'");
     }
 
     public Map<String, String> updateCustomerNames() {

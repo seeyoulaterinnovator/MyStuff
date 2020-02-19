@@ -52,7 +52,7 @@ public class ViberSendServiceImpl implements ViberSendService {
                 .username(properties.getProperty(USERNAME))
                 .password(properties.getProperty(PASSWORD))
                 .senderName(properties.getProperty(SENDER_NAME))
-                .timeout(Integer.parseInt(properties.getProperty(TIMEOUT)))
+                .timeout(properties.getPropertyInt(TIMEOUT, 5, "ViberSendServiceImpl: default value used: '%s' = '%s'"))
                 .priority(SmsConfig.Priority.HIGH)
                 .reportsMask(SmsConfig.ReportsConfig.DELIVERED_TO_PHONE)
                 .encoding(SmsConfig.Encoding.UCS2)

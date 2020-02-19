@@ -52,19 +52,24 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
         this.uri = uri;
     }
 
+    public RiasUserExistsCheckImpl(ApplicationProperties properties, URI uri) {
+
+        this.properties = properties;
+        this.uri = uri;
+    }
 
     public boolean checkParam(String param) throws RiasCheckException {
         LocalDateTime dateTime = LocalDateTime.now();
 
         String timestamp = dateTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
 
-        String clientSecret = param + timestamp + CLIENT_NAME + CLIENT_SALT;
+        String clientSecret = param + timestamp + properties.getProperty(CLIENT_NAME) + properties.getProperty(CLIENT_SALT);
 
         String secretHash = HashGenerator.getSecretHash(clientSecret);
 
         String paramsV = "check_profile_data";
         String namesV = URLEncoder.encode("data_for_check$c,timestamp,client,client_secret", StandardCharsets.UTF_8);
-        String valuesV = URLEncoder.encode(param + "," + timestamp + "," + CLIENT_NAME + "," + secretHash, StandardCharsets.UTF_8);
+        String valuesV = URLEncoder.encode(param + "," + timestamp + "," + properties.getProperty(CLIENT_NAME) + "," + secretHash, StandardCharsets.UTF_8);
 
 
         // TODO Entity<RiasData> => response.close() ?

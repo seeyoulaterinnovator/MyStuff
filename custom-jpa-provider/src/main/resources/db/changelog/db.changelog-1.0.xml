@@ -609,4 +609,14 @@
             ALTER TABLE CUSTOMER CHANGE NAME NAME varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
         </sql>
     </changeSet>
+
+    <changeSet id="39" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="REALM_ATTRIBUTE"></tableExists>
+        </preConditions>
+        <sql>
+            alter table REALM_ATTRIBUTE change VALUE VALUE varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

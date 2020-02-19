@@ -20,6 +20,7 @@ import java.util.Objects;
 @Slf4j
 public class VkIdentityProvider extends AbstractOAuth2IdentityProvider<OAuth2IdentityProviderConfig> implements SocialIdentityProvider<OAuth2IdentityProviderConfig> {
     private static final String OAUTH2_PARAMETER_EMAIL = "email";
+
     private static final String AUTH_URL = "vk.auth.url";
     private static final String TOKEN_URL = "vk.token.url";
     private static final String PROFILE_URL = "vk.profile.url";

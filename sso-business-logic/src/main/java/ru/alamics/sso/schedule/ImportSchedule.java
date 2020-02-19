@@ -58,15 +58,10 @@ public class ImportSchedule {
     @PostConstruct
     private void init() {
         final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
-        try {
-            final long intervalDuration = Long.parseLong(properties.getProperty(TIMER_INTERVAL_DURATION_PROPERTY));
-            timerService.createIntervalTimer(intervalDuration, intervalDuration, timerConfig);
-            log.info("Timer:{} is created, interval duration set to value={} milliseconds ", TIMER_NAME, intervalDuration);
-        } catch (Exception e) {
-            timerService.createIntervalTimer(DEFAULT_INTERVAL_DURATION, DEFAULT_INTERVAL_DURATION, timerConfig);
-            log.warn("Timer:{} is created; Error read configuration, interval duration set to default value={} milliseconds",
-                    TIMER_NAME, DEFAULT_INTERVAL_DURATION);
-        }
+
+        final long intervalDuration = properties.getPropertyLong(TIMER_INTERVAL_DURATION_PROPERTY, DEFAULT_INTERVAL_DURATION);
+        timerService.createIntervalTimer(intervalDuration, intervalDuration, timerConfig);
+        log.info("Timer:{} is created, interval duration set to value={} milliseconds ", TIMER_NAME, intervalDuration);
     }
 
     @Timeout
