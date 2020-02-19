@@ -484,6 +484,7 @@
                 <web-context>auth</web-context>
                 <providers>
                     <provider>classpath:${jboss.home.dir}/providers/*</provider>
+                    <provider>module:ru.alamics.sso.jpa</provider>
                 </providers>
                 <master-realm-name>master</master-realm-name>
                 <scheduled-task-interval>900</scheduled-task-interval>
@@ -493,11 +494,11 @@
                     <cacheTemplates>true</cacheTemplates>
                     <dir>${jboss.home.dir}/themes</dir>
                 </theme>
-                <!--<spi name="user">
+                <spi name="user">
                     <default-provider>customjpa</default-provider>
                     <provider name="jpa" enabled="false"/>
                     <provider name="customjpa" enabled="true"/>
-                </spi>-->
+                </spi>
                 <spi name="eventsStore">
                     <provider name="jpa" enabled="true">
                         <properties>

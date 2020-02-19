@@ -12,5 +12,6 @@
     <module name="org.keycloak.keycloak-model-jpa"/>
     <module name="javaee.api"/>
     <module name="org.slf4j"/>
+    <module name="org.hibernate"/>
 </dependencies>
 </module>
