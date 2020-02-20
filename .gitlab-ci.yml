@@ -95,6 +95,7 @@ back:test:sso-business-logic:
 back:test:sso-business-logic:1.8:
   stage: test
   when: on_success
+  dependencies: ["back:test:adp:tbapi-remote-service:1.8"]
   needs: ["back:test:adp:tbapi-remote-service:1.8"]
   except:
     - master
