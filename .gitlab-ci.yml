@@ -225,17 +225,16 @@ dpl:prod:
     name: stage
     url: http://sso.dev.itrev.ru
   script:
-    #- mkdir -p /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    #- scp build/deploy/standalone/deployments/custom-jpa.jar sso-app02:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    #- scp tools/module.xml sso-app02:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    #- scp build/deploy/standalone/deployments/custom-jpa.jar sso-app03:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    #- scp tools/module.xml sso-app03:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    #- scp build/deploy/standalone/deployments/custom-jpa.jar sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    #- scp tools/module.xml sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    #- scp build/deploy/standalone/deployments/custom-jpa.jar sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    #- scp tools/module.xml sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    #- cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    #- cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app02:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app02:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app03:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app03:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="deploy --all-server-groups build/deploy/standalone/deployments/domru-sso.war"
   tags:
     - sso-domain-controller
