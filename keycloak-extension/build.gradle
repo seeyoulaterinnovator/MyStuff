@@ -10,7 +10,9 @@ dependencies {
     )
 
     providedCompile "org.keycloak:keycloak-core:$keycloakVersion"
-    providedCompile "org.keycloak:keycloak-services:$keycloakVersion"
+    providedCompile("org.keycloak:keycloak-services:$keycloakVersion") {
+        exclude group: 'org.slf4j'
+    }
     providedCompile "org.keycloak:keycloak-server-spi:$keycloakVersion"
     providedCompile "org.keycloak:keycloak-server-spi-private:$keycloakVersion"
     providedCompile "org.keycloak:keycloak-model-jpa:$keycloakVersion"

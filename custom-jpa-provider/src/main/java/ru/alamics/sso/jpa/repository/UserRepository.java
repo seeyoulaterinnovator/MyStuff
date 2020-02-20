@@ -71,7 +71,7 @@ public class UserRepository {
         if (Validation.isBlank(phone))
             return null;
 
-        var users = em.createQuery("select u from UserEntity u join u.attributes attr \n" +
+        List<UserEntity> users = em.createQuery("select u from UserEntity u join u.attributes attr \n" +
                 "  where u.realmId = :realmId " +
                 "       and attr.name = :name " +
                 "       and (:excludedUserId is null or u.id <> :excludedUserId) " +
@@ -92,7 +92,7 @@ public class UserRepository {
         if (Validation.isBlank(phone))
             return null;
 
-        var users = em.createQuery("select u from UserEntity u join u.attributes attr \n" +
+        List<UserEntity> users = em.createQuery("select u from UserEntity u join u.attributes attr \n" +
                 "  where attr.name = :name " +
                 "       and (:excludedUserId is null or u.id <> :excludedUserId) " +
                 "       and attr.value = :phoneNmbr", UserEntity.class)
@@ -107,7 +107,7 @@ public class UserRepository {
     }
 
     public UserEntity getFirstUserByPhone(String phone) {
-        var users = em.createQuery(
+        List<UserEntity> users = em.createQuery(
                 "select u from UserEntity u " +
                         "join u.attributes attr \n" +
                         "  where attr.name = :name " +
@@ -122,7 +122,7 @@ public class UserRepository {
     }
 
     public UserEntity getFirstUserByEmail(String realmId, String email) {
-        var users = em.createQuery("select u from UserEntity u \n" +
+        List<UserEntity> users = em.createQuery("select u from UserEntity u \n" +
                 "  where u.realmId = :realmId and u.email = :email ", UserEntity.class)
                 .setParameter("realmId", realmId)
                 .setParameter("email", email)
@@ -134,7 +134,7 @@ public class UserRepository {
     }
 
     public UserEntity getFirstUserByUsername(String realmId, String username) {
-        var users = em.createQuery("select u from UserEntity u \n" +
+        List<UserEntity> users = em.createQuery("select u from UserEntity u \n" +
                 "  where u.realmId = :realmId and u.username = :username ", UserEntity.class)
                 .setParameter("realmId", realmId)
                 .setParameter("username", username)

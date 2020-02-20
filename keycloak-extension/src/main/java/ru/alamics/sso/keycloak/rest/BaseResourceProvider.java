@@ -2,10 +2,7 @@ package ru.alamics.sso.keycloak.rest;
 
 import org.keycloak.jose.jws.JWSInput;
 import org.keycloak.jose.jws.JWSInputException;
-import org.keycloak.models.ClientModel;
-import org.keycloak.models.KeycloakContext;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
+import org.keycloak.models.*;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager;
@@ -17,6 +14,7 @@ import org.keycloak.services.resources.admin.permissions.AdminPermissions;
 
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.core.MultivaluedMap;
 import java.util.Optional;
 
 public interface BaseResourceProvider<T> extends RealmResourceProvider {
@@ -31,11 +29,11 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
         KeycloakContext context = session.getContext();
         AdminAuth auth = initAdminAuth(session);
 
-        var realmManager = new RealmManager(session);
-        var uri = context.getUri();
-        var pathParameters = uri.getPathParameters();
-        var realmFromRequestName = pathParameters.getFirst("realm");
-        var realmFromRequest = Optional.ofNullable(realmManager.getRealmByName(realmFromRequestName))
+        RealmManager realmManager = new RealmManager(session);
+        KeycloakUriInfo uri = context.getUri();
+        MultivaluedMap<String, String> pathParameters = uri.getPathParameters();
+        String realmFromRequestName = pathParameters.getFirst("realm");
+        RealmModel realmFromRequest = Optional.ofNullable(realmManager.getRealmByName(realmFromRequestName))
                 .orElseThrow(() -> new NotAuthorizedException("Unknown realm in path param"));
 
         AdminPermissions.evaluator(session, realmFromRequest, auth).users().requireManage();//Проверяем права пользователя на редактирование реалма в которй он сделал запрос
@@ -67,7 +65,7 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
         return AdminPermissions.evaluator(session, realmFromToken, auth); //fixme нет возврата сессии обратно
     }
 
-    private AdminAuth initAdminAuth(KeycloakSession session){
+    default AdminAuth initAdminAuth(KeycloakSession session){
         KeycloakContext context = session.getContext();
         AppAuthManager appAuthManager = new AppAuthManager();
         String tokenString = Optional.ofNullable(appAuthManager.extractAuthorizationHeaderToken(context.getRequestHeaders())).orElseThrow(() -> new NotAuthorizedException("Bearer"));

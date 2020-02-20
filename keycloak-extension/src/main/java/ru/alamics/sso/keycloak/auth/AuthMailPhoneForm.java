@@ -126,7 +126,7 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
 
         String username = formData.getFirst(FormConstants.FIELD_USERNAME);
         String password = formData.getFirst(FormConstants.FIELD_PASSWORD);
-        var city = formData.getFirst(FormConstants.FIELD_CITY);
+        String city = formData.getFirst(FormConstants.FIELD_CITY);
 
         log.info("RIAS auth, got city = " + city);
 

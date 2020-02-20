@@ -34,7 +34,7 @@ public class SettingsService {
     }
 
     public SettingsDto save(final SettingsDto settings) {
-        var settingsToSave = Settings.builder()
+        Settings settingsToSave = Settings.builder()
                 .desc(settings.getDesc())
                 .name(settings.getName())
                 .id(settings.getId())

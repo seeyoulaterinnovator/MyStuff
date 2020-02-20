@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.RealmProvider;
 import org.keycloak.models.UserModel;
 import org.keycloak.theme.Theme;
 import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
@@ -25,8 +26,8 @@ public class SsoUserCreateEvent extends SsoEvent {
     @Override
     public void execute () {
         try {
-            var session = this.getSession();
-            var model = session.realms();
+            KeycloakSession session = this.getSession();
+            RealmProvider model = session.realms();
             log.info("ExtendedEventListener: admin create user");
             String userId = this.getUserId(event);
             if (userId == null) {

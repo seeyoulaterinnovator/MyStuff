@@ -17,6 +17,7 @@ import ru.alamics.sso.util.esia.X509CertificateFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -81,8 +82,8 @@ public class Signer {
 
     private static synchronized void initKeys() {
         try {
-            var privatePath = Signer.class.getClassLoader().getResourceAsStream("cert/private.pem");
-            var publicPath = Signer.class.getClassLoader().getResourceAsStream("cert/public.pem");
+            InputStream privatePath = Signer.class.getClassLoader().getResourceAsStream("cert/private.pem");
+            InputStream publicPath = Signer.class.getClassLoader().getResourceAsStream("cert/public.pem");
 //            Path keyPath = Paths.get(privatePath); //путь к приватоному ключу ЕСИА
 //            Path certPath = Paths.get(publicPath); //путь к сертификату ЕСИА
 

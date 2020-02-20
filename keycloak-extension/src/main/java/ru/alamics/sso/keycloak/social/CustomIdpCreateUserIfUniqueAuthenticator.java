@@ -7,6 +7,7 @@ import org.keycloak.authentication.authenticators.broker.util.ExistingUserInfo;
 import org.keycloak.authentication.authenticators.broker.util.SerializedBrokeredIdentityContext;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.keycloak.registration.userpost.UserPostCreatorProvider;
 import ru.alamics.sso.registration.dto.UserPostRequest;
@@ -43,14 +44,14 @@ public class CustomIdpCreateUserIfUniqueAuthenticator extends IdpCreateUserIfUni
 
     @Override
     protected ExistingUserInfo checkExistingUser(AuthenticationFlowContext context, String username, SerializedBrokeredIdentityContext serializedCtx, BrokeredIdentityContext brokerContext) {
-        var user = super.checkExistingUser(context, username, serializedCtx, brokerContext);
+        ExistingUserInfo user = super.checkExistingUser(context, username, serializedCtx, brokerContext);
         if (user != null) {
             return user;
         }
 
         final String phone = serializedCtx.getFirstAttribute(FormConstants.FIELD_PHONE);
         if (!Validation.isBlank(phone)) {
-            var userEntity = userFindService.getUserByPhone(context.getRealm(), phone);
+            UserEntity userEntity = userFindService.getUserByPhone(context.getRealm(), phone);
             if (userEntity != null) {
                 return new ExistingUserInfo(userEntity.getId(), MessageConstants.PHONE, phone);
             }

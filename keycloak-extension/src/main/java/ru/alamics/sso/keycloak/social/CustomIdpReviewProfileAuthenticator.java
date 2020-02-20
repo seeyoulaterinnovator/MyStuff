@@ -78,7 +78,7 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
 
             log.info("Identity provider '{}' requires update profile action for broker user '{}'.", idpConfig.getAlias(), userCtx.getUsername());
             String userLanguageTag = context.getSession().getContext().resolveLocale(context.getUser()).toLanguageTag();
-            var form = context.form()
+            LoginFormsProvider form = context.form()
                     .setAttribute(LoginFormsProvider.UPDATE_PROFILE_CONTEXT_ATTR, userCtx)
                     .setFormData(null);
             form.setAttribute("recaptchaRequired", true);
@@ -127,7 +127,7 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
 
         if (!errors.isEmpty()) {
             String userLanguageTag = context.getSession().getContext().resolveLocale(context.getUser()).toLanguageTag();
-            var form = context.form()
+            LoginFormsProvider form = context.form()
                     .setErrors(errors)
                     .setAttribute(LoginFormsProvider.UPDATE_PROFILE_CONTEXT_ATTR, userCtx)
                     .setAttribute("recaptchaRequired", true)
@@ -210,7 +210,7 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
     }
 
     private void fillUserContextFromTbApi(MultivaluedMap<String, String> formData, SerializedBrokeredIdentityContext userCtx) throws TbapiRegisterException {
-        var user = getTbApiUser(formData);
+        User user = getTbApiUser(formData);
         user.getAttributes().forEach(userCtx::setAttribute);
     }
 

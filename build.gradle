@@ -37,13 +37,17 @@ allprojects {
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
     }
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
 }
 
 subprojects {
 
     version = rootProject.version + '-' + (System.getenv('CI_PIPELINE_ID') != null ? System.getenv('CI_PIPELINE_ID') : 'SNAPSHOT')
     group = 'ru.alamics.sso'
-    sourceCompatibility = '11'
 
     buildDir = new File(rootProject.projectDir, "build/" + project.name)
 
