@@ -5,9 +5,7 @@ variables:
 
 stages:
   - compile
-  - testadp
-  - testsso
-  - testext
+  - test
   - build
   - createwar
   - docker
@@ -21,16 +19,8 @@ back:compile:
     - ./gradlew :classes --stacktrace -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
   cache: {}
 
-back:compile:1.8:
-  stage: compile
-  except:
-    - master
-  script:
-    - ./gradlew :classes --stacktrace -Dorg.gradle.java.home=/usr/java/jdk1.8.0
-  cache: {}
-
 back:test:adapter:tbapi-remote-service:
-  stage: testadp
+  stage: test
   when: on_success
   except:
     - master
@@ -50,31 +40,8 @@ back:test:adapter:tbapi-remote-service:
     reports:
       junit: build/test-results/tbapi-remote-service/TEST-*.xml
 
-back:test:adp:tbapi-remote-service:1.8:
-  stage: testadp
-  when: on_success
-  dependencies: ["back:compile:1.8"]
-  needs: ["back:compile:1.8"]
-  except:
-    - master
-  script:
-    - ./gradlew :tbapi-remote-service:check -Dorg.gradle.java.home=/usr/java/jdk1.8.0
-  cache:
-    key: "$CI_COMMIT_SHA"
-    paths:
-      - .gradle/
-      - build/
-    policy: pull
-  artifacts:
-    when: always
-    paths:
-      - build/test-results/tbapi-remote-service/reports
-    name: "tbapi-remote-service-test-reports-$CI_PIPELINE_ID"
-    reports:
-      junit: build/test-results/tbapi-remote-service/TEST-*.xml
-
 back:test:sso-business-logic:
-  stage: testsso
+  stage: test
   when: on_success
   except:
     - master
@@ -94,58 +61,13 @@ back:test:sso-business-logic:
     reports:
       junit: build/test-results/sso-business-logic/TEST-*.xml
 
-back:test:sso-business-logic:1.8:
-  stage: testsso
-  when: on_success
-  dependencies: ["back:test:adp:tbapi-remote-service:1.8"]
-  needs: ["back:test:adp:tbapi-remote-service:1.8"]
-  except:
-    - master
-  script:
-    - ./gradlew :sso-business-logic:check -Dorg.gradle.java.home=/usr/java/jdk1.8.0
-  cache:
-    key: "$CI_COMMIT_SHA"
-    paths:
-      - .gradle/
-      - build/
-    policy: pull
-  artifacts:
-    when: always
-    paths:
-      - build/test-results/sso-business-logic/reports
-    name: "sso-business-logic-test-reports-$CI_PIPELINE_ID"
-    reports:
-      junit: build/test-results/sso-business-logic/TEST-*.xml
-
 back:test:keycloak-extension:
-  stage: testext
+  stage: test
   when: on_success
   except:
     - master
   script:
     - ./gradlew :keycloak-extension:check -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
-  cache:
-    key: "$CI_COMMIT_SHA"
-    paths:
-      - .gradle/
-      - build/
-    policy: pull
-  artifacts:
-    when: always
-    paths:
-      - build/test-results/keycloak-extension/reports
-    name: "keycloak-extension-test-reports-$CI_PIPELINE_ID"
-    reports:
-      junit: build/test-results/keycloak-extension/TEST-*.xml
-
-back:test:keycloak-extension:1.8:
-  stage: testext
-  when: on_success
-  needs: ["back:test:sso-business-logic:1.8"]
-  except:
-    - master
-  script:
-    - ./gradlew :keycloak-extension:check -Dorg.gradle.java.home=/usr/java/jdk1.8.0
   cache:
     key: "$CI_COMMIT_SHA"
     paths:
@@ -174,37 +96,6 @@ back:war:
     - cd $currentdir
     - mkdir -p .ci_status
     - ./gradlew :deploy -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
-    - touch .ci_status/war_built
-  cache:
-    key: "$CI_COMMIT_SHA"
-    paths:
-      - .gradle/
-      - build/
-  artifacts:
-    paths:
-      - .ci_status/
-      - build/**/libs/*.war
-      - build/**/libs/*.jar
-      - build/deploy/
-      - tools/module.xml
-    name: "domru-sso-compile-$CI_PIPELINE_ID"
-    expire_in: 1 week
-
-back:war:1.8:
-  stage: build
-  when: on_success
-  needs: ["back:test:keycloak-extension:1.8"]
-  except:
-    - master
-  script:
-    - currentdir=`pwd`
-    - cd keycloak-extension/src/main/resources/themes/domru/login/resources
-    - npm install
-    - npm run build
-    - rm -rf node_modules
-    - cd $currentdir
-    - mkdir -p .ci_status
-    - ./gradlew :deploy -Dorg.gradle.java.home=/usr/java/jdk1.8.0
     - touch .ci_status/war_built
   cache:
     key: "$CI_COMMIT_SHA"
