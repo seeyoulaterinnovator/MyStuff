@@ -39,12 +39,13 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
     public SsoFreeMarkerLoginForm(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
+
+        attributes.put("redirectUrl", client.getRedirectUris().iterator().next());
     }
 
     @Override
     protected UriBuilder prepareBaseUriBuilder(boolean resetRequestUriParams) {
         var ret = super.prepareBaseUriBuilder(resetRequestUriParams);
-        attributes.put("redirectUrl", client.getRedirectUris().iterator().next());
         return addQueryParamToBuilder(ret);
     }
 
