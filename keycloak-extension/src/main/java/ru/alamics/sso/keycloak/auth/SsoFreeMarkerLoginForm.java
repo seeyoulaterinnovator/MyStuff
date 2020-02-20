@@ -44,6 +44,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     @Override
     protected UriBuilder prepareBaseUriBuilder(boolean resetRequestUriParams) {
         var ret = super.prepareBaseUriBuilder(resetRequestUriParams);
+        attributes.put("redirectUrl", client.getRedirectUris().iterator().next());
         return addQueryParamToBuilder(ret);
     }
 
@@ -88,7 +89,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             return builder.build();
         } catch (FreeMarkerException e) {
             log.error("Failed to process template", e);
-            if (templateName.equals(Templates.getTemplate(LoginFormsPages.ERROR))){
+            if (templateName.equals(Templates.getTemplate(LoginFormsPages.ERROR))) {
                 return Response.serverError().build();
             }
             return ErrorPage.error(session, authenticationSession, Response.Status.INTERNAL_SERVER_ERROR, "500");
@@ -153,7 +154,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         setMessage(MessageType.WARNING, Messages.LINK_IDP, idpAlias);
 
         UserModel existingUser = AbstractIdpAuthenticator.getExistingUser(session, session.getContext().getRealm(), brokerContext.getAuthenticationSession());
-        if (existingUser != null ) {
+        if (existingUser != null) {
             attributes.put(FormConstants.EXISTING_USER_EMAIL, existingUser.getEmail());
         }
         return createResponse(LoginFormsPages.LOGIN_IDP_LINK_EMAIL);
