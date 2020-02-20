@@ -48,7 +48,7 @@ back:test:adapter:tbapi-remote-service:
     reports:
       junit: build/test-results/tbapi-remote-service/TEST-*.xml
 
-back:test:adapter:tbapi-remote-service:1.8:
+back:test:adp:tbapi-remote-service:1.8:
   stage: test
   when: on_success
   needs: ["back:compile:1.8"]
@@ -94,7 +94,7 @@ back:test:sso-business-logic:
 back:test:sso-business-logic:1.8:
   stage: test
   when: on_success
-  needs: ["back:test:adapter:tbapi-remote-service:1.8"]
+  needs: ["back:test:adp:tbapi-remote-service:1.8"]
   except:
     - master
   script:
