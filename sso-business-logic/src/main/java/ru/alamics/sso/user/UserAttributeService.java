@@ -71,7 +71,7 @@ public class UserAttributeService {
 
     private void checkPhoneInAttr(final List<AttributeRequest> attributes, String userId) throws FoundException, AttributeFormatException {
         Optional<AttributeRequest> presentPhone =  attributes.stream()
-                .filter(x -> UserConstants.ATTR_PHONE_NAME.equals(x.getName()) && (x.getValue() != null && !x.getValue().isBlank()))
+                .filter(x -> UserConstants.ATTR_PHONE_NAME.equals(x.getName()) && (x.getValue() != null && !x.getValue().isEmpty()))
                 .findFirst();
         if (presentPhone.isPresent()) {
             Util.validateUserPhone(presentPhone.get().getValue());

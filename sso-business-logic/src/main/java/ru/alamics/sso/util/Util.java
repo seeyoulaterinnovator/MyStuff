@@ -15,6 +15,10 @@ import ru.alamics.sso.user.model.UserRequest;
 
 import javax.validation.ValidationException;
 import javax.ws.rs.NotAuthorizedException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.IllegalFormatException;
 
 public class Util {
@@ -22,6 +26,22 @@ public class Util {
     public static boolean isEmpty(String val) {
 
         return val == null || val.length() == 0;
+    }
+
+    public static String encodeUTF8(String str) {
+
+        return encodeCharset(str, StandardCharsets.UTF_8);
+    }
+
+    public static String encodeCharset(String str, Charset charset) {
+
+        try {
+            return URLEncoder.encode(str, charset.name());
+        } catch (UnsupportedEncodingException ignore) {
+
+        }
+
+        return null;
     }
 
     public static void validateToken(String tokenString, final KeycloakSession session) {
@@ -80,7 +100,7 @@ public class Util {
     }
 
     public static void validateId(String id) {
-        if (id != null && !id.isBlank() && id.replaceAll("[0-9]+", "").length()>0) {
+        if (id != null && !id.isEmpty() && id.replaceAll("[0-9]+", "").length()>0) {
             throw new ValidationException("TomsId or DmpId is not valid");
         }
     }

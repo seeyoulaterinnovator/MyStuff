@@ -20,7 +20,7 @@ public class CustomerRepository {
         if (customerInDb == null) {
             em.persist(customer);
         } else {
-            if (customerInDb.getName() != null && (customer.getName() == null || customer.getName().isBlank())) {
+            if (customerInDb.getName() != null && (customer.getName() == null || customer.getName().isEmpty())) {
                 customer.setName(customerInDb.getName());
             }
             customer = em.merge(customer);

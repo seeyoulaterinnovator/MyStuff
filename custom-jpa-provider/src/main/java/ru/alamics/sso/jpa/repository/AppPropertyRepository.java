@@ -25,7 +25,7 @@ public class AppPropertyRepository {
     }
 
     public AppProperty save(AppProperty appProperty) {
-        if (appProperty.getName() == null || appProperty.getName().isBlank()) {
+        if (appProperty.getName() == null || appProperty.getName().isEmpty()) {
             throw new ValidationException("Name is required!");
         }
         AppProperty result = findByName(appProperty.getName());

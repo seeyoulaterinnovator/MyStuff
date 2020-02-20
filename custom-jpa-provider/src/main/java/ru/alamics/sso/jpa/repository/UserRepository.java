@@ -291,7 +291,7 @@ public class UserRepository {
         } else if (SORT_FIELD_EMAIL.equalsIgnoreCase(sortField)) {
             sort += "ORDER BY email";
         }
-        if (sort.isBlank()) {
+        if (sort.isEmpty()) {
             return sort;
         }
         if (!sortAsc) {

@@ -51,6 +51,11 @@ subprojects {
 
     buildDir = new File(rootProject.projectDir, "build/" + project.name)
 
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }    
+    
     dependencies {
         annotationProcessor "org.projectlombok:lombok:$lombokVersion"
         compileOnly "org.projectlombok:lombok:$lombokVersion"

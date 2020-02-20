@@ -16,6 +16,7 @@ import ru.alamics.sso.user.web.UserSearch;
 import ru.alamics.sso.user.web.UserSearchDto;
 
 import javax.persistence.Tuple;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -90,7 +91,7 @@ public class UserMapper {
         List<UserPostResponse> userPosts = new LinkedList<>();
         String userPostIds = toString(tuple.get("user_post_ids"));
         if (userPostIds != null) {
-            userPosts = List.of(userPostIds.split(",")).stream()
+            userPosts = Arrays.asList(userPostIds.split(",")).stream()
                     .map(id -> UserPostResponse.builder().id(id).build())
                     .collect(Collectors.toList());
         }
@@ -130,8 +131,8 @@ public class UserMapper {
             if (userPostId != null) {
                 for (int j = i + 1; j < userDtos.size(); j++) {
                     UserSearchDto userDtoJ = userDtos.get(j);
-                    if (userPostId.equals(userDtoJ.getUserPostId()) && userDto.getId().equals(userDtoJ.getId()) && userDtoJ.getSystemName() != null && !userDtoJ.getSystemName().isBlank()) {
-                        if (systemNames == null || systemNames.isBlank()) {
+                    if (userPostId.equals(userDtoJ.getUserPostId()) && userDto.getId().equals(userDtoJ.getId()) && userDtoJ.getSystemName() != null && !userDtoJ.getSystemName().isEmpty()) {
+                        if (systemNames == null || systemNames.isEmpty()) {
                             systemNames = userDtoJ.getSystemName();
                         } else {
                             systemNames += ", " + userDtoJ.getSystemName();
@@ -170,7 +171,7 @@ public class UserMapper {
                     userImport.setRole(row[i]);
                     break;
                 case 6:
-                    //userImport.setSystemNames(List.of(row[i].replaceAll("\\s", "").split(",")));
+                    //userImport.setSystemNames(Arrays.asList(row[i].replaceAll("\\s", "").split(",")));
                     userImport.setSystems(row[i]);
                     break;
             }

@@ -11,6 +11,7 @@ import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.model.RiasLogin;
 import ru.alamics.sso.registration.rias.port.RiasLoginService;
+import ru.alamics.sso.util.Util;
 
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
@@ -56,7 +57,7 @@ public class RiasUserLoginImpl implements RiasLoginService {
                 properties.getProperty(CLIENT_SALT);
         String secretHash = HashGenerator.getSecretHashMD5(clientSecret);
 
-        String usernameV = URLEncoder.encode(username, StandardCharsets.UTF_8);
+        String usernameV = Util.encodeUTF8(username);
 
         Response response = null;
         RiasLogin result = null;

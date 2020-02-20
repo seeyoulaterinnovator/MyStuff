@@ -35,7 +35,7 @@ public class UserPhoneVerifier {
     public AuthContext sendValidationSms(User user,
                                          AuthContext context,
                                          ActivationCodeType codeType) throws UserPhoneEmpty, PhoneCallException, SmsSendException {
-        if (user.getPhone() == null || user.getPhone().isBlank())
+        if (user.getPhone() == null || user.getPhone().isEmpty())
             throw new UserPhoneEmpty();
 
 //        Если в контексте нет хэша - надо отправить смс

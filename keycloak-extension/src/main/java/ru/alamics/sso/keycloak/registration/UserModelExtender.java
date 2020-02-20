@@ -23,10 +23,7 @@ import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
 import javax.ws.rs.core.MultivaluedMap;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static ru.alamics.sso.registration.model.FormConstants.*;
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_ORG_NAME;
@@ -183,7 +180,7 @@ public class UserModelExtender implements FormAction, FormActionFactory {
 
     @Override
     public List<ProviderConfigProperty> getConfigProperties() {
-        return List.of();
+        return Arrays.asList();
     }
 
     @Override

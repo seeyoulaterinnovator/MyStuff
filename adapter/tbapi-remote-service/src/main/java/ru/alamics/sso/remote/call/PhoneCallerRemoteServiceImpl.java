@@ -100,6 +100,6 @@ public class PhoneCallerRemoteServiceImpl implements PhoneCallerRemoteService {
     }
 
     private boolean isNull(String field) {
-        return field == null || field.isBlank();
+        return field == null || field.isEmpty();
     }
 }

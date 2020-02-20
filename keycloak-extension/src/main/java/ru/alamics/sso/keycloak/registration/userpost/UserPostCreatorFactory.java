@@ -9,6 +9,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderConfigProperty;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -53,7 +54,7 @@ public class UserPostCreatorFactory implements FormActionFactory {
 
     @Override
     public List<ProviderConfigProperty> getConfigProperties() {
-        return List.of();
+        return Arrays.asList();
     }
 
     @Override
