@@ -5,7 +5,9 @@ variables:
 
 stages:
   - compile
-  - test
+  - testadp
+  - testsso
+  - testext
   - build
   - createwar
   - docker
@@ -28,7 +30,7 @@ back:compile:1.8:
   cache: {}
 
 back:test:adapter:tbapi-remote-service:
-  stage: test
+  stage: testadp
   when: on_success
   except:
     - master
@@ -49,7 +51,7 @@ back:test:adapter:tbapi-remote-service:
       junit: build/test-results/tbapi-remote-service/TEST-*.xml
 
 back:test:adp:tbapi-remote-service:1.8:
-  stage: test
+  stage: testadp
   when: on_success
   dependencies: ["back:compile:1.8"]
   needs: ["back:compile:1.8"]
@@ -72,7 +74,7 @@ back:test:adp:tbapi-remote-service:1.8:
       junit: build/test-results/tbapi-remote-service/TEST-*.xml
 
 back:test:sso-business-logic:
-  stage: test
+  stage: testsso
   when: on_success
   except:
     - master
@@ -93,7 +95,7 @@ back:test:sso-business-logic:
       junit: build/test-results/sso-business-logic/TEST-*.xml
 
 back:test:sso-business-logic:1.8:
-  stage: test
+  stage: testsso
   when: on_success
   dependencies: ["back:test:adp:tbapi-remote-service:1.8"]
   needs: ["back:test:adp:tbapi-remote-service:1.8"]
@@ -116,7 +118,7 @@ back:test:sso-business-logic:1.8:
       junit: build/test-results/sso-business-logic/TEST-*.xml
 
 back:test:keycloak-extension:
-  stage: test
+  stage: testext
   when: on_success
   except:
     - master
@@ -137,7 +139,7 @@ back:test:keycloak-extension:
       junit: build/test-results/keycloak-extension/TEST-*.xml
 
 back:test:keycloak-extension:1.8:
-  stage: test
+  stage: testext
   when: on_success
   needs: ["back:test:sso-business-logic:1.8"]
   except:
