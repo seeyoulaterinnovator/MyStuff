@@ -8,6 +8,7 @@ import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.port.RiasApiService;
 import ru.alamics.sso.remote.rias.model.RiasData;
+import ru.alamics.sso.util.Util;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -68,8 +69,8 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
         String secretHash = HashGenerator.getSecretHash(clientSecret);
 
         String paramsV = "check_profile_data";
-        String namesV = URLEncoder.encode("data_for_check$c,timestamp,client,client_secret", StandardCharsets.UTF_8);
-        String valuesV = URLEncoder.encode(param + "," + timestamp + "," + properties.getProperty(CLIENT_NAME) + "," + secretHash, StandardCharsets.UTF_8);
+        String namesV = Util.encodeUTF8("data_for_check$c,timestamp,client,client_secret");
+        String valuesV = Util.encodeUTF8(param + "," + timestamp + "," + properties.getProperty(CLIENT_NAME) + "," + secretHash);
 
 
         // TODO Entity<RiasData> => response.close() ?

@@ -13,11 +13,13 @@ import org.keycloak.events.Errors;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.events.EventType;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
+import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.keycloak.resetcred.ResetCredential;
 import ru.alamics.sso.keycloak.resetcred.ResetCredentialEmailOrPhoneFactory;
 
@@ -36,7 +38,7 @@ public class ResetCredentialEmail extends ResetCredential {
 
     @Override
     public void reset (UserModel user, String username) {
-        var authenticationSession = context.getAuthenticationSession();
+        AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
         if (user == null) {
             context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT));
             return;
@@ -61,7 +63,7 @@ public class ResetCredentialEmail extends ResetCredential {
             return;
         }
 
-        var realm = context.getRealm();
+        RealmModel realm = context.getRealm();
         int validityInSecs = realm.getActionTokenGeneratedByUserLifespan(ResetCredentialsActionToken.TOKEN_TYPE);
         int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
 
@@ -77,7 +79,7 @@ public class ResetCredentialEmail extends ResetCredential {
         long expirationInMinutes = TimeUnit.SECONDS.toMinutes(validityInSecs);
 
         try {
-            var template = context.getSession().getProvider(EmailTemplateProvider.class);
+            EmailTemplateProvider template = context.getSession().getProvider(EmailTemplateProvider.class);
             template.setRealm(realm)
                     .setUser(user)
                     .setAuthenticationSession(authenticationSession)

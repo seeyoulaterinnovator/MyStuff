@@ -51,7 +51,7 @@ public class PhoneCheckProvider implements FormAction {
                 .phone(formData.getFirst(FIELD_PHONE))
                 .build();
 
-        if (user.getPhone() == null || user.getPhone().isBlank()) {
+        if (user.getPhone() == null || user.getPhone().isEmpty()) {
             formData.remove(FIELD_PHONE);
             context.getEvent().detail("Phone", user.getPhone());
             errors.add(new FormMessage(FIELD_PHONE, "Телефон должен быть заполнен"));

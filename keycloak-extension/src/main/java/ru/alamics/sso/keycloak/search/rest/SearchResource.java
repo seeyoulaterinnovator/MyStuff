@@ -5,6 +5,7 @@ import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.annotations.jaxrs.QueryParam;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.mapper.DataMapper;
@@ -45,7 +46,7 @@ public class SearchResource {
                                                 @QueryParam("searchToms") String searchToms, @QueryParam("sortField") String sortField,
                                                 @QueryParam("sortAsc") boolean sortAsc, @QueryParam("searchRealm") String searchRealm) {
         session.userCache().clear();
-        if (searchRealm == null || searchRealm.isBlank()) {
+        if (searchRealm == null || searchRealm.isEmpty()) {
             searchRealm = "user";
         }
         return JsonResponse.success()
@@ -63,7 +64,7 @@ public class SearchResource {
                                  @QueryParam("searchToms") String searchToms, @QueryParam("sortField") String sortField,
                                  @QueryParam("sortAsc") boolean sortAsc, @QueryParam("searchRealm") String searchRealm,
                                  @QueryParam("pageNum") int pageNum, @QueryParam("pageSize") int pageSize) {
-        if (searchRealm == null || searchRealm.isBlank()) {
+        if (searchRealm == null || searchRealm.isEmpty()) {
             searchRealm = "user";
         }
         List<UserSearch> users = userFindService.getUsersByParameters(searchRealm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
@@ -94,7 +95,7 @@ public class SearchResource {
             );
         }
         //fixme сквозной поиск по всем реалмам
-        var user = userFindService.getUserByPhoneAndExcludedUserId(phone, excludedUserId);
+        UserEntity user = userFindService.getUserByPhoneAndExcludedUserId(phone, excludedUserId);
         return JsonResponse.success().addResult("foundUserId", user == null ? null : user.getId()).build();
     }
 

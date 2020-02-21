@@ -12,6 +12,7 @@ import ru.alamics.sso.registration.service.UserPostService;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,7 +53,7 @@ public class UserPostFacade {
 
     public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException {
         UserPostResponse post = userPostService.save(userPostRequest);
-        addCustomersToRequest(List.of(post));
+        addCustomersToRequest(Arrays.asList(post));
         return post;
     }
 

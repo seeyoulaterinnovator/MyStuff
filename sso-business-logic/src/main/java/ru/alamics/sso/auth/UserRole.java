@@ -2,10 +2,10 @@ package ru.alamics.sso.auth;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
-import org.keycloak.models.jpa.entities.RealmEntity;
-import org.keycloak.models.jpa.entities.RoleEntity;
-import org.keycloak.models.jpa.entities.UserEntity;
-import org.keycloak.models.jpa.entities.UserRoleMappingEntity;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
+import org.keycloak.models.jpa.entities.*;
+import ru.alamics.sso.jpa.entity.ExternalSystemEntity;
 import ru.alamics.sso.jpa.entity.ExternalSystemRoleEntity;
 import ru.alamics.sso.jpa.entity.UserPostEntity;
 import ru.alamics.sso.jpa.repository.RoleRepository;
@@ -40,18 +40,18 @@ public class UserRole {
         final String tomsId = formData.getFirst("tomsId");
         final String roleName = formData.get("roleName").get(0);
 
-        var user = context.getUser();
+        UserModel user = context.getUser();
 
-        var userPosts = postRepository.getAllUserPostByUserId(user.getId());
+        List<UserPostEntity> userPosts = postRepository.getAllUserPostByUserId(user.getId());
         userPosts.forEach(o -> {
             o.setSelected(o.getCustomer().getId().equals(tomsId) && o.getRole().getName().equals(roleName));
         });
 
-        var realm = context.getRealm();
-        var roleEntity = repository.findRoleEntity(roleName, realm.getId());
+        RealmModel realm = context.getRealm();
+        RoleEntity roleEntity = repository.findRoleEntity(roleName, realm.getId());
 
         if (roleEntity == null) {
-            var realmEntity = new RealmEntity();
+            RealmEntity realmEntity = new RealmEntity();
             realmEntity.setId(realm.getId());
             roleEntity = new RoleEntity();
             roleEntity.setName(roleName);
@@ -72,16 +72,16 @@ public class UserRole {
         mappingEntity.setUser(userEntity);
         repository.save(mappingEntity);
 
-        var activePost = userPosts.stream().filter(UserPostEntity::isSelected).findFirst().get();
+        UserPostEntity activePost = userPosts.stream().filter(UserPostEntity::isSelected).findFirst().get();
         //FIXME Добавить роли пользователя по его системам, сделать можно лучше
         List<ExternalSystemRoleEntity> systems = postRepository.findSystemsByUserPost(activePost);
         systems.forEach(system -> {
-            var externalSystem = system.getExternalSystem();
-            var client = repository.findClientByName(externalSystem.getName(), realm.getId());
+            ExternalSystemEntity externalSystem = system.getExternalSystem();
+            ClientEntity client = repository.findClientByName(externalSystem.getName(), realm.getId());
             if (client != null) {
-                var role = repository.findClientRoleEntity(system.getName(), realm.getId(), client);
+                RoleEntity role = repository.findClientRoleEntity(system.getName(), realm.getId(), client);
                 if (role == null) {
-                    var realmEntity = new RealmEntity();
+                    RealmEntity realmEntity = new RealmEntity();
                     realmEntity.setId(realm.getId());
                     role = new RoleEntity();
                     role.setName(system.getName());

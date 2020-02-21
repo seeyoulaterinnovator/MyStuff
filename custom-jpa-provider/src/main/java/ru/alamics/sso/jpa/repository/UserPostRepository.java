@@ -23,7 +23,7 @@ public class UserPostRepository {
     private EntityManager em;
 
     public UserPostEntity save(UserPostEntity userPost) {
-        if (userPost.getId() == null || userPost.getId().isBlank()) {
+        if (userPost.getId() == null || userPost.getId().isEmpty()) {
             userPost.setId(UUID.randomUUID().toString());
         }
         em.persist(userPost);

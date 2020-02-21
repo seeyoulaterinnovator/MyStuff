@@ -4,6 +4,7 @@ import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.*;
 import org.keycloak.models.utils.ModelToRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 
@@ -30,13 +31,13 @@ public class UserManageResource {
     @Path("/block")
     @POST
     public Response blockUsers(List<String> ids) {
-        var userProvider = getUsers();
+        UserProvider userProvider = getUsers();
         if(ids != null) {
             ids.forEach(id -> {
-                var user = userProvider.getUserById(id, realm);
+                UserModel user = userProvider.getUserById(id, realm);
                 if(user != null) {
                     user.setEnabled(false);
-                    var rep = ModelToRepresentation.toRepresentation(session, realm, user);
+                    UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
                     eventBuilder.operation(OperationType.UPDATE)
                             .resourcePath(session.getContext().getUri())
                             .representation(rep)
@@ -53,13 +54,13 @@ public class UserManageResource {
     @Path("/unlock")
     @POST
     public Response unlockUsers(List<String> ids) {
-        var userProvider = getUsers();
+        UserProvider userProvider = getUsers();
         if(ids != null) {
             ids.forEach(id -> {
-                var user = userProvider.getUserById(id, realm);
+                UserModel user = userProvider.getUserById(id, realm);
                 if(user != null) {
                     user.setEnabled(true);
-                    var rep = ModelToRepresentation.toRepresentation(session, realm, user);
+                    UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
                     eventBuilder.operation(OperationType.UPDATE)
                             .resourcePath(session.getContext().getUri())
                             .representation(rep)
@@ -79,10 +80,10 @@ public class UserManageResource {
     @Path("/credential/reset")
     @POST
     public Response resetPassword(List<String> ids) {
-        var userProvider = getUsers();
+        UserProvider userProvider = getUsers();
         if(ids != null) {
             ids.forEach(id -> {
-                var user = userProvider.getUserById(id, realm);
+                UserModel user = userProvider.getUserById(id, realm);
                 user.addRequiredAction(UserModel.RequiredAction.UPDATE_PASSWORD);
             });
         }

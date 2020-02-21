@@ -9,6 +9,7 @@ import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 
 import javax.ejb.Stateless;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -34,7 +35,7 @@ public class CachedUserPostFacade extends UserPostFacade {
     }
 
     public void addUserPostAndSystemRole(UserPostRequest userPostRequest) {
-        cache.put(userPostRequest.getUserId(), List.of(userPostService.addUserPostAndSystemRole(userPostRequest)));
+        cache.put(userPostRequest.getUserId(), Arrays.asList(userPostService.addUserPostAndSystemRole(userPostRequest)));
     }
 
     public void remove(String userPostId) throws NotFoundException {
@@ -60,7 +61,7 @@ public class CachedUserPostFacade extends UserPostFacade {
             return new LinkedList<>();
         }
         cachedPosts.stream()
-                .filter(post -> customerCache.get(post.getTomsId()) != null && !customerCache.get(post.getTomsId()).isBlank())
+                .filter(post -> customerCache.get(post.getTomsId()) != null && !customerCache.get(post.getTomsId()).isEmpty())
                 .forEach(post -> post.setOrganization(customerCache.get(post.getTomsId())));
         return new LinkedList<>(cachedPosts);
     }

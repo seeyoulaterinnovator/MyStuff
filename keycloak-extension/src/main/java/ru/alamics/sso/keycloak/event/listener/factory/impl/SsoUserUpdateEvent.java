@@ -6,6 +6,7 @@ import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.events.jpa.AdminEventEntity;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.RealmProvider;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
@@ -32,8 +33,8 @@ public class SsoUserUpdateEvent extends SsoEvent {
     @Override
     public void execute() {
         try {
-            var session = this.getSession();
-            var model = session.realms();
+            KeycloakSession session = this.getSession();
+            RealmProvider model = session.realms();
             UserEntityRepresentation userNow = this.getUserEntityRepresentation(event.getRepresentation());
 
             String userId = userNow.getId();

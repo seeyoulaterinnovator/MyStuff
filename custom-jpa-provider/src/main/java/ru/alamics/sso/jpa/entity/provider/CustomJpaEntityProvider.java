@@ -3,6 +3,7 @@ package ru.alamics.sso.jpa.entity.provider;
 import ru.alamics.sso.jpa.entity.*;
 import ru.alamics.sso.jpa.entity.provider.factory.CustomJpaProviderFactory;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class CustomJpaEntityProvider implements org.keycloak.connections.jpa.entityprovider.JpaEntityProvider {
@@ -11,7 +12,7 @@ public class CustomJpaEntityProvider implements org.keycloak.connections.jpa.ent
 
     @Override
     public List<Class<?>> getEntities() {
-        return List.of(UserLoginHistory.class,
+        return Arrays.asList(UserLoginHistory.class,
                 UserPostRoleEntity.class,
                 AutoLockNotification.class,
                 UserPostEntity.class,

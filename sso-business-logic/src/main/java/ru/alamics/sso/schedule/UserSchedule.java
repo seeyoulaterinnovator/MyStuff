@@ -10,6 +10,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.ClientEntity;
+import org.keycloak.models.jpa.entities.RealmEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.util.JsonSerialization;
 import ru.alamics.sso.emailer.EmailModel;
@@ -28,6 +29,7 @@ import javax.annotation.Resource;
 import javax.ejb.*;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -110,14 +112,14 @@ public class UserSchedule {
     private void findExpiredPassword() {
         final String DEBUG_STR = "findExpiredPassword";
         log.debug("start: {}", DEBUG_STR);
-        var realms = policyRepository.findRealmWithPolicy(PasswordPolicy.FORCE_EXPIRED_ID);
+        List<RealmEntity> realms = policyRepository.findRealmWithPolicy(PasswordPolicy.FORCE_EXPIRED_ID);
 
         realms.forEach(realm -> {
             String passwordPolicy = realm.getPasswordPolicy();
             if (Objects.nonNull(passwordPolicy)) {
-                var charNumbs = PasswordPolicy.FORCE_EXPIRED_ID.length() + 3;
-                var index = passwordPolicy.indexOf(PasswordPolicy.FORCE_EXPIRED_ID);
-                var expirePolicy = passwordPolicy.substring(index, index + charNumbs);
+                int charNumbs = PasswordPolicy.FORCE_EXPIRED_ID.length() + 3;
+                int index = passwordPolicy.indexOf(PasswordPolicy.FORCE_EXPIRED_ID);
+                String expirePolicy = passwordPolicy.substring(index, index + charNumbs);
                 int expiresDays = Integer.parseInt(expirePolicy.substring(expirePolicy.indexOf('(') + 1, expirePolicy.lastIndexOf(')')));
                 if (expiresDays != -1) {
                     long timeToExpire = TimeUnit.DAYS.toMillis(expiresDays);
@@ -132,26 +134,26 @@ public class UserSchedule {
         final String DEBUG_STR = "sendEmails";
         log.debug("start={}", DEBUG_STR);
 
-        var autoLockNotifications = autoLockNotificationRepository.findNotifications();
+        List<AutoLockNotification> autoLockNotifications = autoLockNotificationRepository.findNotifications();
         for (AutoLockNotification notification : autoLockNotifications) {
-            var user = notification.getUser();
+            UserEntity user = notification.getUser();
             RealmModel realm = realmRepository.findRealmById(user.getRealmId());
             ClientEntity client = clientRepository.findClientById(CLIENT_ID, realm.getName());
             UserModel userModel = new UserAdapter(null, realm, null, user);
             if (notification.getType() == NotificationType.ABSENCE_NOTIFICATION) {
-                var prepareBlockNotification = prepareBlockNotification(realm.getName(), getClientLink(client));
+                EmailModel.EmailModelBuilder prepareBlockNotification = prepareBlockNotification(realm.getName(), getClientLink(client));
                 prepareBlockNotification.realmModel(realm)
                         .user(userModel);
                 sender.blockingSend(prepareBlockNotification.build());
             } else if (notification.getType() == NotificationType.ABSENCE_BLOCKING) {
-                var bockNotification = bockNotification();
+                EmailModel.EmailModelBuilder bockNotification = bockNotification();
                 bockNotification.realmModel(realm)
                         .user(userModel);
                 sender.blockingSend(bockNotification.build());
                 user.setEnabled(false);
                 createAdminEvent(OperationType.UPDATE, user, realm);
             } else if (notification.getType() == NotificationType.PASSWORD_EXPIRED) {
-                var passwordExpired = passwordExpired(getClientLink(client));
+                EmailModel.EmailModelBuilder passwordExpired = passwordExpired(getClientLink(client));
                 passwordExpired.realmModel(realm)
                         .user(userModel);
                 sender.blockingSend(passwordExpired.build());

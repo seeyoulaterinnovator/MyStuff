@@ -12,6 +12,7 @@ import ru.alamics.sso.registration.rias.RiasService;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -59,7 +60,7 @@ public class RiasCheckFactory implements FormActionFactory {
 
     @Override
     public List<ProviderConfigProperty> getConfigProperties() {
-        return List.of();
+        return Arrays.asList();
     }
 
     @Override

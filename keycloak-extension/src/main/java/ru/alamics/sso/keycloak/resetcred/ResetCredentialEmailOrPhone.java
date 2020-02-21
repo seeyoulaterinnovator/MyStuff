@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAuthenticator;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.UserModel;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionModel;
@@ -47,14 +49,14 @@ public class ResetCredentialEmailOrPhone extends AuthBaseClass {
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
-        var user = context.getUser();
-        var resetType = ResetType.EMAIL;
-        var authenticationSession = context.getAuthenticationSession();
-        var username = authenticationSession.getAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME);
+        UserModel user = context.getUser();
+        ResetType resetType = ResetType.EMAIL;
+        AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
+        String username = authenticationSession.getAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME);
 
         if (user == null && username.startsWith("+7")) {
             username = username.replaceAll("\\D", "");
-            var userFind = userFindService.getUserByPhone(context.getRealm(), username);
+            UserEntity userFind = userFindService.getUserByPhone(context.getRealm(), username);
             if (userFind != null) {
                 user = context.getSession().users().getUserById(userFind.getId(), context.getSession().realms().getRealm(userFind.getRealmId()));
                 username = userFind.getUsername();

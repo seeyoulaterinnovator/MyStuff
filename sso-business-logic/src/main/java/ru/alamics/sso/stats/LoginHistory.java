@@ -21,7 +21,7 @@ public class LoginHistory {
     private KeycloakSession session;
 
     public void create(UserEntity user) {
-        var history = UserLoginHistory.builder()
+        UserLoginHistory history = UserLoginHistory.builder()
                 .loginedAt(LocalDateTime.now())
                 .user(user)
                 .build();

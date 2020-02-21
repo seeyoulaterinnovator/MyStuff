@@ -22,10 +22,9 @@ import ru.alamics.sso.util.Util;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.*;
+import javax.ejb.Timer;
 import javax.validation.ValidationException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -96,7 +95,7 @@ public class ImportSchedule {
                 createdUsers.getAndIncrement();
                 o.setCreated(true);
                 o.setUserId(user.getId());
-                if (o.getTomsId() == null || o.getTomsId().isBlank()) {
+                if (o.getTomsId() == null || o.getTomsId().isEmpty()) {
                     throw new NotFoundException("TomsId is not exist");
                 }
                 addUserPost(user, o);
@@ -228,7 +227,7 @@ public class ImportSchedule {
     }
 
     private void addSystemRoles(ImportUsersDataEntity userImport, String userPostId) throws javassist.NotFoundException {
-        List<String> systems = List.of(userImport.getSystems().replaceAll("\\s", "").split(","));
+        List<String> systems = Arrays.asList(userImport.getSystems().replaceAll("\\s", "").split(","));
         if (systems != null && !systems.isEmpty()) {
             for (String sysName : systems) {
                 userPostService.addSystemRole(UserMapper.toExternalSystemRoleRequest(userPostId,

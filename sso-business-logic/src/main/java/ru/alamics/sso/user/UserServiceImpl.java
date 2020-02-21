@@ -98,7 +98,7 @@ public class UserServiceImpl implements UserService {
         }
         List<String> userParameterNames = getUserParameterNames(UserParameter.values());
         List<String> finishParameterNames = userParameterNames.stream().skip(1).limit(userParameterNames.size() - 2).collect(Collectors.toList());
-        finishParameterNames.addAll(List.of("Статус импорта", "Ошибки"));
+        finishParameterNames.addAll(Arrays.asList("Статус импорта", "Ошибки"));
         file.addRow(finishParameterNames);
         importUsersReport.getImportUserData().stream()
                 .forEach(o -> {
@@ -122,7 +122,7 @@ public class UserServiceImpl implements UserService {
         ImportUsersReportEntity importUsersReport = importUsersReportService.findImportUsersReportByImportId(importId);
         for (ImportUsersDataEntity importData : importUsersReport.getImportUserData()) {
             String id = importData.getUserId();
-            if (id == null || id.isBlank()) {
+            if (id == null || id.isEmpty()) {
                 continue;
             }
             UserModel user = session.users().getUserById(id, realm);
@@ -306,7 +306,7 @@ public class UserServiceImpl implements UserService {
                 o.setCreated(true);
                 importResponse.addCreatedUserIds("userId", user.getId());
 
-                if (userRequest.getTomsId() == null || userRequest.getTomsId().isBlank()) {
+                if (userRequest.getTomsId() == null || userRequest.getTomsId().isEmpty()) {
                     throw new NotFoundException("TomsId is not exist");
                 }
                 addUserPost(user, o, userRequest);
@@ -564,7 +564,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void addSystemRoles(ImportUsersDataEntity userImport, String userPostId) throws NotFoundException {
-        List<String> systems = List.of(userImport.getSystems().replaceAll("\\s", "").split(","));
+        List<String> systems = Arrays.asList(userImport.getSystems().replaceAll("\\s", "").split(","));
         if (systems != null && !systems.isEmpty()) {
             for (String sysName : systems) {
                 userPostService.addSystemRole(UserMapper.toExternalSystemRoleRequest(userPostId,
