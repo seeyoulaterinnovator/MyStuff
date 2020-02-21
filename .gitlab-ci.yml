@@ -231,15 +231,15 @@ dpl:prod:
     - scp -r build/deploy/themes/domru sso-app04:/usr/local/keycloak/themes
     - scp -r build/deploy/themes/domru sso-app05:/usr/local/keycloak/themes
     - mkdir -p /usr/local/keycloak/domain/data/password-blacklists
-    - cp build/deploy/standalone/data/password-blacklists/black_list_password.txt /usr/local/keycloak/domain/servers/server-one/data
+    - cp build/deploy/standalone/data/password-blacklists/black_list_password.txt /usr/local/keycloak/domain/servers/server-one/data/password-blacklists
     - ssh sso-app02 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
-    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app02:/usr/local/keycloak/domain/servers/server-two/data
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app02:/usr/local/keycloak/domain/servers/server-two/data/password-blacklists
     - ssh sso-app03 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
-    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app03:/usr/local/keycloak/domain/servers/server-three/data
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app03:/usr/local/keycloak/domain/servers/server-three/data/password-blacklists
     - ssh sso-app04 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
-    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app04:/usr/local/keycloak/domain/servers/server-four/data
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app04:/usr/local/keycloak/domain/servers/server-four/data/password-blacklists
     - ssh sso-app05 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
-    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app05:/usr/local/keycloak/domain/servers/server-five/data
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app05:/usr/local/keycloak/domain/servers/server-five/data/password-blacklists
     # java artifacts
     - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app02:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - scp tools/module.xml sso-app02:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
