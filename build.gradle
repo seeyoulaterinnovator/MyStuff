@@ -46,7 +46,7 @@ allprojects {
 
 subprojects {
 
-    version = rootProject.version + '-' + (System.getenv('CI_PIPELINE_ID') != null ? System.getenv('CI_PIPELINE_ID') : 'SNAPSHOT')
+    version = rootProject.version // + '-' + (System.getenv('CI_PIPELINE_ID') != null ? System.getenv('CI_PIPELINE_ID') : 'SNAPSHOT')
     group = 'ru.alamics.sso'
 
     buildDir = new File(rootProject.projectDir, "build/" + project.name)
