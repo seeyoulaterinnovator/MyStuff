@@ -8,6 +8,8 @@
             <module name="org.bouncycastle"/>
             <module name="org.keycloak.keycloak-model-infinispan"/>
             <module name="ru.alamics.sso.jpa"/>
+            <module name="sso-business-logic-0.0.1.jar" />
+            <module name="tbapi-remote-service-0.0.1.jar" />
         </dependencies>
         <resources>
             <resource-root path="WEB-INF/lib/sso-business-logic-0.0.1.jar" >
