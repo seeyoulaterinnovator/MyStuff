@@ -10,12 +10,12 @@
             <module name="ru.alamics.sso.jpa"/>
         </dependencies>
         <resources>
-            <resource-root path="sso-business-logic-0.0.1.jar" >
+            <resource-root path="/WEB-INF/lib/sso-business-logic-0.0.1.jar" >
                 <filter>
                     <include path="/**"></include>
                 </filter>
             </resource-root>
-            <resource-root path="tbapi-remote-service-0.0.1.jar" >
+            <resource-root path="/WEB-INF/lib/tbapi-remote-service-0.0.1.jar" >
                 <filter>
                     <include path="/**"></include>
                 </filter>
