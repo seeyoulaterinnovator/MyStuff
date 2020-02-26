@@ -21,9 +21,11 @@ public class CustomerRequestService {
     private static final int TBAPI_REQUEST_MAX_SIZE = 10;
     private static final String LOAD_COEFF_PROPERTY = "tbapi.customer.request.load.coeff";
     private static final int LOAD_COEFF_DEFAULT = 100;
+    private static final String TBAPI_CUSTOMER_DONT_REQUEST = "tbapi.customer.dont.request";
 
     private int tbapiRequestMaxSize;
     private int loadCoeff;
+    private boolean dontRequest = false;
 
     private TbapiService tbapiService;
     private CustomerService customerService;
@@ -36,6 +38,8 @@ public class CustomerRequestService {
         customerService = (CustomerService) Lookup.lookup(CustomerService.class);
         tbapiRequestMaxSize = properties.getPropertyInt(TBAPI_REQUEST_MAX_SIZE_PROPERTY, TBAPI_REQUEST_MAX_SIZE, "CustomerRequestService: default value used: '%s' = '%s'");
         loadCoeff = properties.getPropertyInt(LOAD_COEFF_PROPERTY, LOAD_COEFF_DEFAULT, "CustomerRequestService: default value used: '%s' = '%s'");
+
+        dontRequest = Boolean.parseBoolean(properties.getProperty(TBAPI_CUSTOMER_DONT_REQUEST));
     }
 
     public Map<String, String> updateCustomerNames() {
@@ -44,7 +48,7 @@ public class CustomerRequestService {
             return new HashMap<>();
         }
         try {
-            Map<String, Object> customerMap = tbapiService.customerNames(new TbapiConnectConfig(TbapiConnect.CUTOMER_NAMES), currentTomsIds);
+            Map<String, Object> customerMap = requestCustomerNames(currentTomsIds);
             Map<String, String> customers = new HashMap<>();
             for (String tomsId : currentTomsIds) {
                 CustomerDto customer = CustomerDto.builder()
@@ -59,6 +63,17 @@ public class CustomerRequestService {
             log.error("Fail getting customer names by tomsIds={}", currentTomsIds.toString(), e);
             return new HashMap<>();
         }
+    }
+
+    private Map<String, Object> requestCustomerNames(List<String> currentTomsIds) {
+
+        if (dontRequest) {
+            log.info("FAKE customer names request due to properties: customerIds={}", currentTomsIds);
+            return new HashMap<>();
+        }
+
+        return tbapiService.customerNames(new TbapiConnectConfig(TbapiConnect.CUTOMER_NAMES), currentTomsIds);
+
     }
 
     public void addTomsIdsInQueue(List<String> updatingTomsId) {
