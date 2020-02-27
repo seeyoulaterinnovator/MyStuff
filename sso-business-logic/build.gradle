@@ -1,6 +1,6 @@
 dependencies {
 
-    compileOnly (
+    implementation (
             project(':custom-jpa-provider'),
     )
     implementation 'org.jboss.resteasy:resteasy-jackson2-provider:3.6.3.Final'

@@ -8,18 +8,6 @@
             <module name="org.bouncycastle"/>
             <module name="org.keycloak.keycloak-model-infinispan"/>
             <module name="ru.alamics.sso.jpa"/>
-            <module name="depl.module.sso-bl"/>
-            <module name="depl.module.tbapi"/>
         </dependencies>
     </deployment>
-    <module name="depl.module.sso-bl">
-        <resources>
-            <resource-root path="WEB-INF/lib/sso-business-logic-0.0.1.jar"/>
-        </resources>
-    </module>
-    <module name="depl.module.tbapi">
-        <resources>
-            <resource-root path="WEB-INF/lib/tbapi-remote-service-0.0.1.jar"/>
-        </resources>
-    </module>
 </jboss-deployment-structure>
