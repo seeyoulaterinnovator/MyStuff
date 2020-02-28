@@ -29,6 +29,8 @@ public class UserPostResource {
     private CachedUserPostFacade cachedUserPostFacade;
     private UserPostFacade userPostFacade;
 
+    // TODO кэш?
+
     public UserPostResource(KeycloakSession session) {
         this.session = session;
         try {

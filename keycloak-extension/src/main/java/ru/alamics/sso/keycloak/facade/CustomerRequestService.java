@@ -77,7 +77,10 @@ public class CustomerRequestService {
     }
 
     public void addTomsIdsInQueue(List<String> updatingTomsId) {
-        updatingTomsId.forEach(tomsId -> tomsIdQueue.offer(tomsId));
+
+        for (String tomsId : updatingTomsId) {
+            tomsIdQueue.offer(tomsId);
+        }
     }
 
     public int getLoadCoeff() {

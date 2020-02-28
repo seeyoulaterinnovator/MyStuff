@@ -132,7 +132,7 @@ public class UserPostRepository {
     }
 
     public List<UserPostEntity> findUserPostsByUser(final UserEntity user) {
-        final String DEBUG_STR = "findUserPostRole";
+        final String DEBUG_STR = "findUserPosts";
         log.debug("{}: user={}", DEBUG_STR, user.getId());
 
         List<UserPostEntity> ret = em.createQuery("select up from UserPostEntity up where up.user =:user", UserPostEntity.class)
