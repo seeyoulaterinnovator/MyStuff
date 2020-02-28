@@ -209,7 +209,7 @@ stage2:
     - $BASE_DIR/scripts/deploy.sh
 
 stage3:
-  stage: deploy stage
+  stage: deploy devel
   when: manual
   only:
     - tags
