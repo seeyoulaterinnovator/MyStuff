@@ -58,6 +58,15 @@
                     <suffix value=".yyyy-MM-dd"/>
                     <append value="true"/>
                 </periodic-rotating-file-handler>
+                <periodic-rotating-file-handler name="ERROR" autoflush="true">
+                    <level name="ERROR"/>
+                    <formatter>
+                        <named-formatter name="PATTERN"/>
+                    </formatter>
+                    <file relative-to="jboss.server.log.dir" path="error.log"/>
+                    <suffix value=".yyyy-MM-dd"/>
+                    <append value="true"/>
+                </periodic-rotating-file-handler>
                 <logger category="com.arjuna">
                     <level name="WARN"/>
                 </logger>
@@ -78,10 +87,11 @@
                     <handlers>
                         <handler name="CONSOLE"/>
                         <handler name="FILE"/>
+                        <handler name="ERROR"/>
                     </handlers>
                 </root-logger>
                 <formatter name="PATTERN">
-                    <pattern-formatter pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"/>
+                    <pattern-formatter pattern="${hostName} %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"/>
                 </formatter>
                 <formatter name="COLOR-PATTERN">
                     <pattern-formatter pattern="%K{level}%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"/>
