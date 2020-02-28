@@ -9,7 +9,9 @@ stages:
   - build
   - createwar
   - docker
-  - deploy
+  - deploy devel
+  - deploy perm
+  - deploy voronezh
 
 back:compile:
   stage: compile
@@ -139,8 +141,8 @@ container:
     paths:
       - .ci_status/
 
-dpl:devel:domain:
-  stage: deploy
+devel:domain:
+  stage: deploy devel
   when: manual
   environment:
     name: devel
@@ -148,8 +150,8 @@ dpl:devel:domain:
   script:
     - $BASE_DIR/scripts/deploy.sh
 
-dpl:devel:domwar:
-  stage: deploy
+devel:domwar:
+  stage: deploy devel
   when: manual
   environment:
     name: devel
@@ -157,8 +159,8 @@ dpl:devel:domwar:
   script:
     - $BASE_DIR/scripts/deploy.sh
 
-dpl:devel:
-  stage: deploy
+devel:
+  stage: deploy devel
   when: manual
   environment:
     name: devel
@@ -166,8 +168,8 @@ dpl:devel:
   script:
     - $BASE_DIR/scripts/deploy.sh
 
-dpl:test:
-  stage: deploy
+test:
+  stage: deploy devel
   when: manual
   environment:
     name: test
@@ -175,8 +177,8 @@ dpl:test:
   script:
     - $BASE_DIR/scripts/deploy.sh
 
-dpl:test:battle:
-  stage: deploy
+test:battle:
+  stage: deploy devel
   when: manual
   environment:
     name: test
@@ -184,8 +186,8 @@ dpl:test:battle:
   script:
     - $BASE_DIR/scripts/deploy.sh
 
-dpl:stage:
-  stage: deploy
+stage:
+  stage: deploy devel
   when: manual
   only:
     - tags
@@ -195,8 +197,8 @@ dpl:stage:
   script:
     - $BASE_DIR/scripts/deploy.sh
 
-dpl:stage2:
-  stage: deploy
+stage2:
+  stage: deploy devel
   when: manual
   only:
     - tags
@@ -206,8 +208,8 @@ dpl:stage2:
   script:
     - $BASE_DIR/scripts/deploy.sh
 
-dpl:stage3:
-  stage: deploy
+stage3:
+  stage: deploy devel
   when: manual
   only:
     - tags
@@ -217,8 +219,8 @@ dpl:stage3:
   script:
     - $BASE_DIR/scripts/deploy.sh
 
-dpl:prod:
-  stage: deploy
+perm:
+  stage: deploy perm
   when: manual
   environment:
     name: stage
@@ -254,4 +256,43 @@ dpl:prod:
     - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="undeploy --all-relevant-server-groups domru-sso.war"
     - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="deploy --server-groups=auth-server-group build/deploy/standalone/deployments/domru-sso.war"
   tags:
-    - sso-domain-controller
+    - sso-domain-controller-perm
+
+voronezh:
+  stage: deploy voronezh
+  when: manual
+  environment:
+    name: stage
+    url: http://sso.dev.itrev.ru
+  script:
+    # themes and text artifacts
+    - cp -r build/deploy/themes/domru /usr/local/keycloak/themes
+    - scp -r build/deploy/themes/domru sso-app02:/usr/local/keycloak/themes
+    - scp -r build/deploy/themes/domru sso-app03:/usr/local/keycloak/themes
+    - scp -r build/deploy/themes/domru sso-app04:/usr/local/keycloak/themes
+    - scp -r build/deploy/themes/domru sso-app05:/usr/local/keycloak/themes
+    - mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - cp build/deploy/standalone/data/password-blacklists/black_list_password.txt /usr/local/keycloak/domain/servers/server-one/data/password-blacklists
+    - ssh sso-app02 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app02:/usr/local/keycloak/domain/servers/server-two/data/password-blacklists
+    - ssh sso-app03 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app03:/usr/local/keycloak/domain/servers/server-three/data/password-blacklists
+    - ssh sso-app04 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app04:/usr/local/keycloak/domain/servers/server-four/data/password-blacklists
+    - ssh sso-app05 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app05:/usr/local/keycloak/domain/servers/server-five/data/password-blacklists
+    # java artifacts
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app02:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app02:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app03:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app03:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="undeploy --all-relevant-server-groups domru-sso.war"
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="deploy --server-groups=auth-server-group build/deploy/standalone/deployments/domru-sso.war"
+  tags:
+    - sso-domain-controller-voronezh
