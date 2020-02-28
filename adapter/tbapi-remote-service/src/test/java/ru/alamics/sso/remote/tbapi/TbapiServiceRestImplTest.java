@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.tbapi.model.TbapiRequest;
+import ru.alamics.sso.registration.tbapi.model.TbapiResponse;
 
 import java.util.Map;
 
@@ -43,7 +44,34 @@ class TbapiServiceRestImplTest {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{\"id\":\"12345\",\"address\":{\"field1\":\"someValue1\",\"field2\":\"someValue2\"},\"name\":\"someName\",\"legalName\":\"someLegalName\",\"description\":\"someDescription\",\"addressDetails\":\"someAddressDetails\",\"assignedTo\":{\"id\":\"12345\",\"field1\":\"someValue1\"},\"customerCategory\":{\"id\":\"12345\",\"field1\":\"someValue1\"},\"plannedProductDetails\":\"somePlannedProductDetails\",\"serviceAddresses\":[{\"field1\":\"someValue1\"},{\"field1\":\"someValue1-2\"}],\"status\":\"Open\",\"extendedMap\":{\"id\":\"12345\",\"field1\":\"someValue1\"},\"identificationNumber\":\"someIdentificationNumber\",\"phoneNumber\":\"81234567890\",\"email\":\"some@mail.ru\"}")
+                        .withBody("{\n" +
+                                "  \"id\" : \"9156571701513270883\",\n" +
+                                "  \"name\" : \"РОГА И КОПЫТА\",\n" +
+                                "  \"status\" : \"Prospect\",\n" +
+                                "  \"extendedMap\" : {\n" +
+                                "    \"9152455932013395741\" : {\n" +
+                                "      \"attributeType\" : 0,\n" +
+                                "      \"attributeName\" : \"DMP Customer Id\",\n" +
+                                "      \"singleValue\" : {\n" +
+                                "        \"attributeValue\" : \"9bfc86e3-29ed-4448-a65d-22ea07fe78c2\"\n" +
+                                "      }\n" +
+                                "    },\n" +
+                                "    \"9132121613813866323\" : {\n" +
+                                "      \"attributeType\" : 0,\n" +
+                                "      \"attributeName\" : \"E-mail\",\n" +
+                                "      \"singleValue\" : {\n" +
+                                "        \"attributeValue\" : \"testemail@itrev.ru\"\n" +
+                                "      }\n" +
+                                "    },\n" +
+                                "    \"9132121613813866318\" : {\n" +
+                                "      \"attributeType\" : 0,\n" +
+                                "      \"attributeName\" : \"Phone Number\",\n" +
+                                "      \"singleValue\" : {\n" +
+                                "        \"attributeValue\" : \"+7 (111) 123-45-67\"\n" +
+                                "      }\n" +
+                                "    }\n" +
+                                "  }\n" +
+                                "}")
                 )
         );
 
@@ -57,16 +85,21 @@ class TbapiServiceRestImplTest {
         conectConfig.setSecure(false);
 
         TbapiRequest req = new TbapiRequest();
-        //.id(UUID.randomUUID().toString())
-        req.setEmail("test@test.ru");
-        //.firstName("User")
-        req.setName("Test");
+        req.setEmail("testemail@itrev.ru");
+        req.setName("Рога и копыта");
 
-        Map<String, Object> lead = service.createCustomer(
+        TbapiResponse customer = service.createCustomer(
                 req,
                 conectConfig
         );
 
-        assertThat(lead).containsKeys(/*"id", */"name", /*"legalName",*/ "description", "status", "identificationNumber");
+        assertThat(customer).isNotNull();
+        assertThat(customer.getBusinessErrorCode()).isNull();
+
+        assertThat(customer.getId()).isEqualTo("9156571701513270883");
+
+        assertThat(customer.getExtendedMap().getCustomerHolder()).isNotNull();
+        assertThat(customer.getExtendedMap().getCustomerHolder().getSingleValue()).isNotNull();
+        assertThat(customer.getExtendedMap().getCustomerHolder().getSingleValue().getAttributeValue()).isEqualTo("9bfc86e3-29ed-4448-a65d-22ea07fe78c2");
     }
 }
