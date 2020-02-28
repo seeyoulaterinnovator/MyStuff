@@ -168,6 +168,15 @@ devel:
   script:
     - $BASE_DIR/scripts/deploy.sh
 
+reference:
+  stage: deploy devel
+  when: manual
+  environment:
+    name: reference
+    url: http://domru-reference.alamics.ru
+  script:
+    - $BASE_DIR/scripts/deploy.sh
+
 test:
   stage: deploy devel
   when: manual
