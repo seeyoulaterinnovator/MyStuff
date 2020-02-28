@@ -358,7 +358,8 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private UserModel createUser(UserRequest userRequest) {
+    // TODO ConcurrentModificationException etc. еще конфликтует с checkOnExistUserByEmailAndUsername()
+    private synchronized UserModel createUser(UserRequest userRequest) {
         try {
             userRequest.setPhone(Util.getCleanUserPhone(userRequest.getPhone()));
 
@@ -473,28 +474,6 @@ public class UserServiceImpl implements UserService {
         createAdminEvent(OperationType.CREATE, user);
         commit();
         return user;
-    }
-
-    public static void main(String[] args) {
-
-        boolean a = false;
-        boolean b = false;
-
-        a = false;
-        b = false;
-        System.out.println(a ^ b); // true
-
-        a = false;
-        b = true;
-        System.out.println(a ^ b); // false
-
-        a = true;
-        b = false;
-        System.out.println(a ^ b); // false
-
-        a = true;
-        b = true;
-        System.out.println(a ^ b); // true
     }
 
     private void checkOnExistUser(UserRequest request, RealmModel realm) throws FoundException {

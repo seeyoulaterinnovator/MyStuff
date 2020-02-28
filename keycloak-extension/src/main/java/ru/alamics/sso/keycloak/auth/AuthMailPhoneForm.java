@@ -18,6 +18,8 @@ import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.keycloak.cities.CitiesResource;
 import ru.alamics.sso.keycloak.cities.model.CityMigration;
+import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.registration.rias.RiasService;
 import ru.alamics.sso.registration.rias.model.RiasLogin;
@@ -34,6 +36,7 @@ import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 @Slf4j
 public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator implements Authenticator {
 
+    private final static String RIAS_REDIRECT_PROPERTY = "riasLogin.redirect.url";
     // TODO
     private final static String LKB2B_ID = "lkb2b";
     private final static String CONSOLE_ID = "security-admin-console";
@@ -44,10 +47,14 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
     private final RiasService riasService;
     private final UserFindService userFindService;
 
+    private final ApplicationProperties properties;
+
     public AuthMailPhoneForm(EntityManager em, RiasService riasService, UserFindService userFindService) {
         this.em = em;
         this.riasService = riasService;
         this.userFindService = userFindService;
+
+        this.properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
     }
 
     @Override
@@ -160,10 +167,15 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
                 context.forceChallenge(response);
                 */
 
-                String redirectTo = "https://master.b2b-lk.web.t2.ertelecom.ru/login";
+                String redirectTo = properties.getProperty(RIAS_REDIRECT_PROPERTY);
+                if (redirectTo == null)
+                    redirectTo = "https://master.b2b-lk.web.t2.ertelecom.ru/login";
+
                 if (!Validation.isBlank(city)) {
                     redirectTo += "?citydomain=" + city;
                 }
+                log.info("Redirecting to {}", redirectTo);
+
                 String redirectHeader = riasLogin.getAccess_token();
 
                 Response challenge = context.form()
