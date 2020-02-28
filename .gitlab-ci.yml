@@ -256,7 +256,7 @@ perm:
     - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="undeploy --all-relevant-server-groups domru-sso.war"
     - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="deploy --server-groups=auth-server-group build/deploy/standalone/deployments/domru-sso.war"
   tags:
-    - sso-domain-controller1
+    - sso-domain-controller-perm
 
 voronezh:
   stage: deploy voronezh
@@ -295,4 +295,4 @@ voronezh:
     - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="undeploy --all-relevant-server-groups domru-sso.war"
     - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="deploy --server-groups=auth-server-group build/deploy/standalone/deployments/domru-sso.war"
   tags:
-    - sso-domain-controller2
+    - sso-domain-controller-voronezh
