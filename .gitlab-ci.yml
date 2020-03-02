@@ -198,8 +198,6 @@ test:battle:
 stage:
   stage: deploy devel
   when: manual
-  only:
-    - tags
   environment:
     name: stage
     url: http://domru-sso-stage.alamics.ru
@@ -209,8 +207,6 @@ stage:
 stage2:
   stage: deploy devel
   when: manual
-  only:
-    - tags
   environment:
     name: stage
     url: http://domru-sso-stage1.alamics.ru
@@ -220,8 +216,6 @@ stage2:
 stage3:
   stage: deploy devel
   when: manual
-  only:
-    - tags
   environment:
     name: stage
     url: http://domru-sso-stage2.alamics.ru
@@ -316,8 +310,7 @@ voronezh:xml:
     - rm /usr/local/keycloak/domain/configuration/domain.xml
     - cp -r configs/domain.xml /usr/local/keycloak/domain/configuration
     - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="reload --host=master --restart-servers=true"
-  artifacts:
-    - {}
+  artifacts: {}
   tags:
     - sso-domain-controller-voronezh
 
@@ -331,7 +324,6 @@ perm:xml:
     - rm /usr/local/keycloak/domain/configuration/domain.xml
     - cp -r configs/domain.xml /usr/local/keycloak/domain/configuration
     - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="reload --host=master --restart-servers=true"
-  artifacts:
-    - {}
+  artifacts: {}
   tags:
     - sso-domain-controller-perm
