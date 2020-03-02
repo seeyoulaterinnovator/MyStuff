@@ -271,7 +271,7 @@ voronezh:
   stage: deploy voronezh
   when: manual
   environment:
-    name: stage
+    name: production
     url: http://sso.dev.itrev.ru
   script:
     # themes and text artifacts
@@ -305,3 +305,27 @@ voronezh:
     - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="deploy --server-groups=auth-server-group build/deploy/standalone/deployments/domru-sso.war"
   tags:
     - sso-domain-controller-voronezh
+
+voronezh:xml:
+  stage: deploy voronezh
+  when: manual
+  environment:
+    name: production
+    url: http://sso.dev.itrev.ru
+  script:
+    - cp -r configs/domain.xml /usr/local/keycloak/domain/configuration
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command=":reload"
+  tags:
+    - sso-domain-controller-voronezh
+
+perm:xml:
+  stage: deploy voronezh
+  when: manual
+  environment:
+    name: production
+    url: http://sso.dev.itrev.ru
+  script:
+    - cp -r configs/domain.xml /usr/local/keycloak/domain/configuration
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command=":reload"
+  tags:
+    - sso-domain-controller-perm
