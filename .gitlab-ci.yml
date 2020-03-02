@@ -319,7 +319,7 @@ voronezh:xml:
     - sso-domain-controller-voronezh
 
 perm:xml:
-  stage: deploy voronezh
+  stage: deploy perm
   when: manual
   environment:
     name: production
