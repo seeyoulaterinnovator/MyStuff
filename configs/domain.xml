@@ -681,20 +681,12 @@
             <socket-binding name="modcluster" interface="private" multicast-address="${jboss.modcluster.multicast.address:224.0.1.105}" multicast-port="23364"/>
         </socket-binding-group>
     </socket-binding-groups>
-    <deployments>
-        <deployment name="domru-sso.war" runtime-name="domru-sso.war">
-            <content sha1="e731f422acb77575aaa1948e60fceea892f490b8"/>
-        </deployment>
-    </deployments>
     <server-groups>
         <server-group name="auth-server-group" profile="auth-server-clustered">
             <jvm name="default">
-                <heap size="64m" max-size="512m"/>
+                <heap size="512m" max-size="2048m"/>
             </jvm>
             <socket-binding-group ref="ha-sockets"/>
-            <deployments>
-                <deployment name="domru-sso.war" runtime-name="domru-sso.war"/>
-            </deployments>
         </server-group>
         <server-group name="load-balancer-group" profile="load-balancer">
             <jvm name="default">
