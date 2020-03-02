@@ -314,7 +314,7 @@ voronezh:xml:
     url: http://sso.dev.itrev.ru
   script:
     - cp -r configs/domain.xml /usr/local/keycloak/domain/configuration
-    - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command=":reload"
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="reload --host=master --restart-servers=true"
   tags:
     - sso-domain-controller-voronezh
 
@@ -326,6 +326,6 @@ perm:xml:
     url: http://sso.dev.itrev.ru
   script:
     - cp -r configs/domain.xml /usr/local/keycloak/domain/configuration
-    - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command=":reload"
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="reload --host=master --restart-servers=true"
   tags:
     - sso-domain-controller-perm
