@@ -313,6 +313,7 @@ voronezh:xml:
     name: production
     url: http://sso.dev.itrev.ru
   script:
+    - rm /usr/local/keycloak/domain/configuration/domain.xml
     - cp -r configs/domain.xml /usr/local/keycloak/domain/configuration
     - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="reload --host=master --restart-servers=true"
   tags:
@@ -325,6 +326,7 @@ perm:xml:
     name: production
     url: http://sso.dev.itrev.ru
   script:
+    - rm /usr/local/keycloak/domain/configuration/domain.xml
     - cp -r configs/domain.xml /usr/local/keycloak/domain/configuration
     - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="reload --host=master --restart-servers=true"
   tags:
