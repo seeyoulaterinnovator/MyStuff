@@ -684,7 +684,7 @@
     <server-groups>
         <server-group name="auth-server-group" profile="auth-server-clustered">
             <jvm name="default">
-                <heap size="512m" max-size="2048m"/>
+                <heap size="2048m" max-size="6144m"/>
             </jvm>
             <socket-binding-group ref="ha-sockets"/>
         </server-group>
