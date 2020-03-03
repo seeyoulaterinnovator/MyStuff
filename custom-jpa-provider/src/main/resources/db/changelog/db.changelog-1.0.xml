@@ -647,4 +647,84 @@
         <modifyDataType tableName="REALM_ATTRIBUTE" columnName="VALUE" newDataType="varchar(2000)" />
     </changeSet>
 
+    <changeSet id="40_1" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_USER_POST_ROLE_ID"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_USER_POST_ROLE_ID
+            on USER_POST (ROLE_ID);
+        </sql>
+    </changeSet>
+
+    <changeSet id="40_2" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_USER_POST_TOMS_ID"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_USER_POST_TOMS_ID
+            on USER_POST (TOMS_ID);
+        </sql>
+    </changeSet>
+
+    <changeSet id="40_3" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_USER_POST_USER_ID"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_USER_POST_USER_ID
+            on USER_POST (USER_ID);
+        </sql>
+    </changeSet>
+
+    <changeSet id="40_4" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_USER_POST_ROLE_NAME"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_USER_POST_ROLE_NAME
+            on USER_POST_ROLE (NAME);
+        </sql>
+    </changeSet>
+
+    <changeSet id="40_5" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_EXT_SYSTEM_NAME"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_EXT_SYSTEM_NAME
+            on EXTERNAL_SYSTEM (NAME);
+        </sql>
+    </changeSet>
+
+    <changeSet id="40_6" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_EXT_SYSTEM_ROLE_ID"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_EXT_SYSTEM_ROLE_ID
+            on EXT_SYSTEM_ROLE (SYSTEM_ID);
+        </sql>
+    </changeSet>
+
+    <changeSet id="40_7" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_EXT_SYS_ROLE_USER_POST_ID"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_EXT_SYS_ROLE_USER_POST_ID
+            on USERPOST_EXT_SYSTEM_ROLE (USER_POST_ID);
+        </sql>
+    </changeSet>
+
+    <changeSet id="40_8" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_EXT_SYS_ROLE_ID"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_EXT_SYS_ROLE_ID
+            on USERPOST_EXT_SYSTEM_ROLE (EXT_SYSTEM_ROLE_ID);
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
