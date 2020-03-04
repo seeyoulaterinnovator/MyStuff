@@ -83,8 +83,6 @@
         </jvm>
     </jvms>
     <servers>
-        <!-- load-balancer should be removed in production systems and replaced with a better softare or hardare based one -->
-        <server name="load-balancer" group="load-balancer-group"/>
         <server name="server-one" group="auth-server-group" auto-start="true">
             <!--
               ~  Remote JPDA debugging for a specific server
