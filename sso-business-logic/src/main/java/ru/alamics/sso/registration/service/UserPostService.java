@@ -89,14 +89,17 @@ public class UserPostService {
         if (userPost == null) {
             throw new NotFoundException("UserPost is not exist");
         }
+
         ExternalSystemRoleEntity externalSystemRole = userPostRepository.findExternalSystemRole(externalSystemRoleRequest.getSystemRoleId());
         if (externalSystemRole == null) {
             throw new NotFoundException("SystemRole with this systemRoleId is not exist!");
         }
+
         Set<ExternalSystemRoleEntity> systemRoles = userPost.getSystemRoles();
         if (systemRoles == null) {
             systemRoles = new HashSet<>();
         }
+
         systemRoles.add(externalSystemRole);
         userPost.setSystemRoles(systemRoles);
         return DataMapper.toUserPostResponse(userPostRepository.update(userPost));
