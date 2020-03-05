@@ -34,7 +34,7 @@
         </#if>
         <#if realm.password && social.providers??>
             <div class="flex items-center mt-12">
-                <div class="text-no-wrap mr-4">Войти через: </div>
+                <div class="text-no-wrap mr-6">Войти через: </div>
                 <ul class="logo-social-providers">
                     <#list social.providers as p>
                         <li class="mr-4">
