@@ -104,7 +104,7 @@
                         <connection-url>jdbc:mariadb://${env.DB_HOST}:${env.DB_PORT}/${env.DB_DATABASE}</connection-url>
                         <driver>mariadb</driver>
                         <pool>
-                            <max-pool-size>20</max-pool-size>
+                            <max-pool-size>100</max-pool-size>
                         </pool>
                         <security>
                             <user-name>${env.DB_USER}</user-name>
@@ -267,14 +267,14 @@
                     <local-cache name="realms">
                         <object-memory size="10000"/>
                     </local-cache>
-                    <local-cache name="users">
+                    <local-cache name="users" statistics-enabled="true">
                         <object-memory size="10000"/>
                     </local-cache>
-                    <local-cache name="authorization">
+                    <local-cache name="authorization" statistics-enabled="true">
                         <object-memory size="10000"/>
                     </local-cache>
-                    <local-cache name="keys">
-                        <object-memory size="1000"/>
+                    <local-cache name="keys" statistics-enabled="true">
+                        <object-memory size="100000"/>
                         <expiration max-idle="3600000"/>
                     </local-cache>
                     <replicated-cache name="work"/>
@@ -313,8 +313,8 @@
                 </cache-container>
                 <cache-container name="hibernate" module="org.infinispan.hibernate-cache">
                     <transport lock-timeout="60000"/>
-                    <local-cache name="local-query">
-                        <object-memory size="10000"/>
+                    <local-cache name="local-query" statistics-enabled="true">
+                        <object-memory size="100000"/>
                         <expiration max-idle="100000"/>
                     </local-cache>
                     <invalidation-cache name="entity">
@@ -558,14 +558,14 @@
                     </process-id>
                 </core-environment>
                 <recovery-environment socket-binding="txn-recovery-environment" status-socket-binding="txn-status-manager"/>
-                <coordinator-environment statistics-enabled="${wildfly.transactions.statistics-enabled:${wildfly.statistics-enabled:false}}"/>
+                <coordinator-environment statistics-enabled="true"/>
                 <object-store path="tx-object-store" relative-to="jboss.server.data.dir"/>
             </subsystem>
-            <subsystem xmlns="urn:jboss:domain:undertow:8.0" default-server="default-server" default-virtual-host="default-host" default-servlet-container="default" default-security-domain="other" statistics-enabled="${wildfly.undertow.statistics-enabled:${wildfly.statistics-enabled:false}}">
+            <subsystem xmlns="urn:jboss:domain:undertow:8.0" default-server="default-server" default-virtual-host="default-host" default-servlet-container="default" default-security-domain="other" statistics-enabled="true">
                 <buffer-cache name="default"/>
                 <server name="default-server">
-                    <ajp-listener name="ajp" socket-binding="ajp"/>
-                    <http-listener name="default" socket-binding="http" redirect-socket="https" proxy-address-forwarding="true"/>
+                    <ajp-listener name="ajp" socket-binding="ajp" record-request-start-time="true"/>
+                    <http-listener name="default" socket-binding="http" record-request-start-time="true" redirect-socket="https" proxy-address-forwarding="true"/>
                     <host name="default-host" alias="localhost">
                         <location name="/" handler="welcome-content"/>
                         <http-invoker security-realm="ApplicationRealm"/>
@@ -614,12 +614,20 @@
             </outbound-socket-binding>
         </socket-binding-group>
     </socket-binding-groups>
+    <deployments>
+        <deployment name="domru-sso.war" runtime-name="domru-sso.war">
+            <content sha1="090f0943d45883e281ad6913116659d713fe0c3b"/>
+        </deployment>
+    </deployments>
     <server-groups>
         <server-group name="auth-server-group" profile="auth-server-clustered">
             <jvm name="default">
                 <heap size="2048m" max-size="6144m"/>
             </jvm>
             <socket-binding-group ref="ha-sockets"/>
+            <deployments>
+                <deployment name="domru-sso.war" runtime-name="domru-sso.war"/>
+            </deployments>
         </server-group>
     </server-groups>
 </domain>
