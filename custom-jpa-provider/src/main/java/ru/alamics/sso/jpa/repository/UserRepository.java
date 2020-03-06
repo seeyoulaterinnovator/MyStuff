@@ -71,7 +71,8 @@ public class UserRepository {
         if (Validation.isBlank(phone))
             return null;
 
-        List<UserEntity> users = em.createQuery("select u from UserEntity u join u.attributes attr \n" +
+        /*
+        var users1 = em.createQuery("select u from UserEntity u join u.attributes attr \n" +
                 "  where u.realmId = :realmId " +
                 "       and attr.name = :name " +
                 "       and (:excludedUserId is null or u.id <> :excludedUserId) " +
@@ -81,6 +82,27 @@ public class UserRepository {
                 .setParameter("phoneNmbr", phone)
                 .setParameter("excludedUserId", Validation.isBlank(excludedUserId) ? null : excludedUserId)
                 .getResultList();
+        */
+
+        var users = (List<UserEntity>)em.createNativeQuery(
+                "select * " +
+                        "  from USER_ENTITY ue " +
+                        "  where ue.REALM_ID = :realmId " +
+                        "    and (:excludedUserId is null or ue.ID <> :excludedUserId) " +
+                        "    and exists ( " +
+                        "      select 1 " +
+                        "      from USER_ATTRIBUTE attr " +
+                        "      where attr.USER_ID = ue.ID " +
+                        "        and attr.NAME = :name " +
+                        "        and attr.VALUE = :phoneNmbr " +
+                        "    )"
+                , UserEntity.class)
+                .setParameter("realmId", realmModel == null ? "user" : realmModel.getId())
+                .setParameter("name", "phone")
+                .setParameter("phoneNmbr", phone)
+                .setParameter("excludedUserId", Validation.isBlank(excludedUserId) ? null : excludedUserId)
+                .getResultList();
+
         if (users != null && users.size() > 0) {
             return users.get(0);
         }
