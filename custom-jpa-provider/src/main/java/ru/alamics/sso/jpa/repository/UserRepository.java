@@ -72,7 +72,7 @@ public class UserRepository {
             return null;
 
         /*
-        var users1 = em.createQuery("select u from UserEntity u join u.attributes attr \n" +
+        List<UserEntity> users1 = em.createQuery("select u from UserEntity u join u.attributes attr \n" +
                 "  where u.realmId = :realmId " +
                 "       and attr.name = :name " +
                 "       and (:excludedUserId is null or u.id <> :excludedUserId) " +
@@ -84,7 +84,7 @@ public class UserRepository {
                 .getResultList();
         */
 
-        var users = (List<UserEntity>)em.createNativeQuery(
+        List<UserEntity> users = (List<UserEntity>)em.createNativeQuery(
                 "select * " +
                         "  from USER_ENTITY ue " +
                         "  where ue.REALM_ID = :realmId " +
