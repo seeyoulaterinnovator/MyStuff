@@ -154,12 +154,12 @@ export default (function() {
 
   linkPasswords(getPassword, setPassword, getConfirmation, setConfirmation, passwordElement, passwordConfirmElement);
 
-  // passwordElement.addEventListener('input', () => {
-  //   setButtonAvailability(validate, submitElement);
-  // });
-  //
-  // passwordConfirmElement.addEventListener('input', () => {
-  //   setButtonAvailability(validate, submitElement);
-  // });
+  passwordElement.addEventListener('input', () => {
+    submitElement.disabled = !isEmpty(validate({'password-new': getPassword(), 'password-confirm': getConfirmation()}));
+  });
+
+  passwordConfirmElement.addEventListener('input', () => {
+    submitElement.disabled = !isEmpty(validate({'password-new': getPassword(), 'password-confirm': getConfirmation()}));
+  });
 
 })();
