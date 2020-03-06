@@ -8,9 +8,11 @@ import org.keycloak.models.utils.FormMessage;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.keycloak.auth.AuthBaseClass;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.resetcred.factory.ResetFactory;
 import ru.alamics.sso.keycloak.resetcred.factory.ResetFactoryImpl;
 import ru.alamics.sso.keycloak.resetcred.type.ResetType;
+import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.port.RiasApiService;
 import ru.alamics.sso.registration.service.UserFindService;
@@ -26,23 +28,23 @@ import java.util.Collections;
 @Slf4j
 public class ResetCredentialEmailOrPhone extends AuthBaseClass {
 
+    private static final String RESET_CREDENTIALS_REDIRECT_URL = "reset.credentials.redirect.url";
+
     private KeycloakSession session;
     private RiasApiService riasApiService;
     private UserFindService userFindService;
+    private ApplicationProperties properties;
 
     ResetCredentialEmailOrPhone(KeycloakSession session) {
         this.session = session;
-        try {
-            InitialContext context = new InitialContext();
-            riasApiService = (RiasApiService) context.lookup("java:global/domru-sso/" + RiasApiService.class.getSimpleName());
-            log.info("Got riasService from context");
 
-            userFindService = (UserFindService) context.lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
-            log.info("Got userFindService from context");
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context");
-        }
+        riasApiService = (RiasApiService) Lookup.lookup(RiasApiService.class);
+        log.info("Got riasService from context");
+
+        userFindService = (UserFindService) Lookup.lookup(UserFindService.class);
+        log.info("Got userFindService from context");
+
+        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
     }
 
     @Override
@@ -101,7 +103,9 @@ public class ResetCredentialEmailOrPhone extends AuthBaseClass {
             return false;
         }
 
-        String location = "https://lkb2b.domru.ru/recovery";
+        String location = properties.getProperty(RESET_CREDENTIALS_REDIRECT_URL);
+        if (location == null)
+            location = "https://lkb2b.domru.ru/recovery";
 
         URI uriLoc = UriBuilder.fromPath(location).build();
 
