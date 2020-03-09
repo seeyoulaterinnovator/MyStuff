@@ -15,11 +15,14 @@ import java.util.Set;
 public class ExternalSystemRoleEntity {
     @Id
     private Long id;
+
     @Column(name = "name")
     private String name;
+
     @ManyToOne
     @JoinColumn(name = "system_id")
     private ExternalSystemEntity externalSystem;
-    @ManyToMany(mappedBy = "systemRoles")
-    private Set<UserPostEntity> userPosts;
+
+    //@ManyToMany(mappedBy = "systemRoles")
+    //private Set<UserPostEntity> userPosts;
 }
