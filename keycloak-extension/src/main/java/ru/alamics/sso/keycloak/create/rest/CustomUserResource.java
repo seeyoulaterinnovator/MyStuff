@@ -83,7 +83,7 @@ public class CustomUserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUser(final UserRequest request, final HttpHeaders headers) {
         if (request.getPhone() == null || request.getPhone().isEmpty()) {
-            return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Phone is required attribute.", Response.Status.BAD_REQUEST);
         }
         return getUserResponse(request, false);
     }
