@@ -90,8 +90,9 @@ public class UserRepository {
         List<UserEntity> users = (List<UserEntity>)em.createNativeQuery(
                 "select * " +
                         "  from USER_ENTITY ue " +
-                        "  where ue.REALM_ID = :realmId " +
-                        "    and (:excludedUserId is null or ue.ID <> :excludedUserId) " +
+                        "  where " +
+                    //  " ue.REALM_ID = :realmId and " +
+                        "     (:excludedUserId is null or ue.ID <> :excludedUserId) " +
                         "    and exists ( " +
                         "      select 1 " +
                         "      from USER_ATTRIBUTE attr " +
