@@ -89,6 +89,7 @@ public class UserPostService {
         if (userPost == null) {
             throw new NotFoundException("UserPost is not exist");
         }
+        // TODO практически константа
         ExternalSystemRoleEntity externalSystemRole = userPostRepository.findExternalSystemRole(externalSystemRoleRequest.getSystemRoleId());
         if (externalSystemRole == null) {
             throw new NotFoundException("SystemRole with this systemRoleId is not exist!");

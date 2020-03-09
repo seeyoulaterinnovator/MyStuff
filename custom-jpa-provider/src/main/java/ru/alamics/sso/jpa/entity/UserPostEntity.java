@@ -17,18 +17,25 @@ public class UserPostEntity {
 
 
     @Id
+    @Column(name="ID", length = 36)
+    @Access(AccessType.PROPERTY) // we do this because relationships often fetch id, but not entity.  This avoids an extra SQL
     private String id;
-    @ManyToOne(targetEntity = UserEntity.class)
+
+    @ManyToOne(targetEntity = UserEntity.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserEntity user;
-    @ManyToOne(targetEntity = Customer.class)
+
+    @ManyToOne(targetEntity = Customer.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "toms_id")
     private Customer customer;
+
     @Column(name = "dmp_id")
     private String dmpId;
+
     @ManyToOne(targetEntity = UserPostRoleEntity.class)
     @JoinColumn(name = "role_id")
     private UserPostRoleEntity role;
+
     @ManyToMany
     @JoinTable(
             name = "USERPOST_EXT_SYSTEM_ROLE",
@@ -36,6 +43,7 @@ public class UserPostEntity {
             inverseJoinColumns = @JoinColumn(name = "ext_system_role_id")
     )
     private Set<ExternalSystemRoleEntity> systemRoles;
+
     @Column(name = "selected")
     private boolean selected;
 
