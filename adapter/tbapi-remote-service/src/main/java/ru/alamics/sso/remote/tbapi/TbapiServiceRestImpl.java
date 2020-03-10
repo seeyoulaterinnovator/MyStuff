@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.jboss.resteasy.plugins.providers.StringTextStar;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import ru.alamics.sso.registration.model.User;
@@ -71,6 +72,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
         TbapiResponse responseData;
         try (Response response = target
                 .register(ResteasyJackson2Provider.class) // TODO
+                .register(StringTextStar.class)
                 .request()
                 .header("Accept", MediaType.APPLICATION_JSON)
                 .header("Authorization", String.format("Trusted application=\"%s\", username=\"%s\"", connectConfig.getAppname(), connectConfig.getUsername()))
