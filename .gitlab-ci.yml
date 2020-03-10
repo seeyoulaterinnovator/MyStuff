@@ -262,7 +262,8 @@ perm:
     - scp tools/module.xml sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    -> deploymentname=`/usr/local/keycloak/bin/jboss-cli.sh --connect --command="deployment list"` || true
+    - | 
+        deploymentname=`/usr/local/keycloak/bin/jboss-cli.sh --connect --command="deployment list"` || true
         if [ "x$deploymentname" != "x" ]; then
             echo "Found a deployment: $deploymentname, undeploying it first."
             /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="undeploy --all-relevant-server-groups $deploymentname"
