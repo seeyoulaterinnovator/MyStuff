@@ -338,8 +338,6 @@ public class UserServiceImpl implements UserService {
 
     private void checkImportUser(UserRequest userRequest) throws FoundException {
         Util.validateUserPhoneAndEmail(userRequest.getEmail(), userRequest.getPhone());
-        Util.validateId(userRequest.getTomsId());
-        Util.validateId(userRequest.getDmpId());
 
         FoundException foundException = new FoundException();
         try {

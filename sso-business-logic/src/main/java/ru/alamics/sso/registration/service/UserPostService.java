@@ -42,13 +42,7 @@ public class UserPostService {
             throw new NotFoundException("UserPostRole with this roleId is not exist!");
         }
 
-        UserPostEntity post = userPostRepository.findUserPostByUserIdAndTomsId(user.getId(), userPostRequest.getTomsId());
-        if (post != null) {
-            throw new FoundUserPostException(String.format("User already have userPost with this tomsId: userId=%s, userPostId=%s, tomsId=%s",
-                    user.getId(), post.getId(), userPostRequest.getTomsId()));
-        }
-
-        Util.validateId(userPostRequest.getTomsId());
+        checkUserPost(userPostRequest);
 
         UserPostEntity userPost = DataMapper.toUserPost(userPostRequest);
         userPost.setUser(user);
@@ -56,6 +50,20 @@ public class UserPostService {
         userPost.setCustomer(customerRepository.save(userPost.getCustomer()));
 
         return DataMapper.toUserPostResponse(userPostRepository.save(userPost));
+    }
+
+    private void checkUserPost(UserPostRequest postRequest) throws FoundUserPostException {
+        UserPostEntity post = userPostRepository.findUserPostByUserIdAndTomsId(postRequest.getUserId(), postRequest.getTomsId());
+        if (post != null) {
+            throw new FoundUserPostException(String.format("User already have userPost with this tomsId: userId=%s, userPostId=%s, tomsId=%s",
+                    postRequest.getUserId(), post.getId(), postRequest.getTomsId()));
+        }
+
+        Util.validateId(postRequest.getTomsId());
+
+        if (postRequest.getDmpId() != null && !post.getDmpId().isBlank()) {
+            Util.validateId(postRequest.getDmpId());
+        }
     }
 
     public UserPostResponse edit(UserPostEditRequest userPostEditRequest) throws NotFoundException {
