@@ -262,7 +262,7 @@ perm:
     - scp tools/module.xml sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    - deploymentname=$(/usr/local/keycloak/bin/jboss-cli.sh --connect --command="deployment list")
+    - deploymentname=`/usr/local/keycloak/bin/jboss-cli.sh --connect --command="deployment list"`
     - if [ "x$deploymentname" != "x" ]; then
     -     /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="undeploy --all-relevant-server-groups $deploymentname"
     - fi
@@ -304,7 +304,7 @@ voronezh:
     - scp tools/module.xml sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    - deploymentname=$(/usr/local/keycloak/bin/jboss-cli.sh --connect --command="deployment list")
+    - deploymentname=`/usr/local/keycloak/bin/jboss-cli.sh --connect --command="deployment list"`
     - if [ "x$deploymentname" != "x" ]; then
     -     /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="undeploy --all-relevant-server-groups $deploymentname"
     - fi
