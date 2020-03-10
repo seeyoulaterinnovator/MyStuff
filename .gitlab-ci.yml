@@ -18,7 +18,7 @@ back:compile:
   except:
     - master
   script:
-    - ./gradlew :classes --stacktrace -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
+    - ./gradlew :classes --stacktrace -Dorg.gradle.java.home=/usr/java/jdk1.8.0
   cache: {}
 
 back:test:adapter:tbapi-remote-service:
@@ -27,7 +27,7 @@ back:test:adapter:tbapi-remote-service:
   except:
     - master
   script:
-    - ./gradlew :tbapi-remote-service:check -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
+    - ./gradlew :tbapi-remote-service:check -Dorg.gradle.java.home=/usr/java/jdk1.8.0
   cache:
     key: "$CI_COMMIT_SHA"
     paths:
@@ -48,7 +48,7 @@ back:test:sso-business-logic:
   except:
     - master
   script:
-    - ./gradlew :sso-business-logic:check -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
+    - ./gradlew :sso-business-logic:check -Dorg.gradle.java.home=/usr/java/jdk1.8.0
   cache:
     key: "$CI_COMMIT_SHA"
     paths:
@@ -69,7 +69,7 @@ back:test:keycloak-extension:
   except:
     - master
   script:
-    - ./gradlew :keycloak-extension:check -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
+    - ./gradlew :keycloak-extension:check -Dorg.gradle.java.home=/usr/java/jdk1.8.0
   cache:
     key: "$CI_COMMIT_SHA"
     paths:
@@ -97,7 +97,7 @@ back:war:
     - rm -rf node_modules
     - cd $currentdir
     - mkdir -p .ci_status
-    - ./gradlew :deploy -Dorg.gradle.java.home=/usr/java/jdk-11.0.2
+    - ./gradlew :deploy -Dorg.gradle.java.home=/usr/java/jdk1.8.0
     - touch .ci_status/war_built
   cache:
     key: "$CI_COMMIT_SHA"
@@ -262,8 +262,11 @@ perm:
     - scp tools/module.xml sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="undeploy --all-relevant-server-groups domru-sso.war"
-    - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="deploy --server-groups=auth-server-group build/deploy/standalone/deployments/domru-sso.war"
+    - deploymentname=$(/usr/local/keycloak/bin/jboss-cli.sh --connect --command="deployment list")
+    - if [ "x$deploymentname" != "x" ]; then
+    -     /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="undeploy --all-relevant-server-groups $deploymentname"
+    - fi
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="deploy --server-groups=auth-server-group --name=sso-$CI_PIPELINE_ID --runtime-name=domru-sso.war build/deploy/standalone/deployments/domru-sso.war"
   tags:
     - sso-domain-controller-perm
 
@@ -301,8 +304,11 @@ voronezh:
     - scp tools/module.xml sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="undeploy --all-relevant-server-groups domru-sso.war"
-    - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="deploy --server-groups=auth-server-group build/deploy/standalone/deployments/domru-sso.war"
+    - deploymentname=$(/usr/local/keycloak/bin/jboss-cli.sh --connect --command="deployment list")
+    - if [ "x$deploymentname" != "x" ]; then
+    -     /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="undeploy --all-relevant-server-groups $deploymentname"
+    - fi
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="deploy --server-groups=auth-server-group --name=sso-$CI_PIPELINE_ID --runtime-name=domru-sso.war build/deploy/standalone/deployments/domru-sso.war"
   tags:
     - sso-domain-controller-voronezh
 
@@ -313,8 +319,10 @@ voronezh:xml:
     name: production
     url: http://sso.dev.itrev.ru
   script:
+    - rm /usr/local/keycloak/domain/configuration/domain.xml
     - cp -r configs/domain.xml /usr/local/keycloak/domain/configuration
-    - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="reload --host=master --restart-servers=true"
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect --command-timeout=180 --user=admin --password=addMin --command="reload --host=master --restart-servers=true"
+  artifacts: {}
   tags:
     - sso-domain-controller-voronezh
 
@@ -325,7 +333,9 @@ perm:xml:
     name: production
     url: http://sso.dev.itrev.ru
   script:
+    - rm /usr/local/keycloak/domain/configuration/domain.xml
     - cp -r configs/domain.xml /usr/local/keycloak/domain/configuration
-    - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="reload --host=master --restart-servers=true"
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect --command-timeout=180 --user=admin --password=addMin --command="reload --host=master --restart-servers=true"
+  artifacts: {}
   tags:
     - sso-domain-controller-perm
