@@ -61,7 +61,7 @@ public class UserPostService {
 
         Util.validateId(postRequest.getTomsId());
 
-        if (postRequest.getDmpId() != null && !post.getDmpId().isBlank()) {
+        if (postRequest.getDmpId() != null && !postRequest.getDmpId().isBlank()) {
             Util.validateId(postRequest.getDmpId());
         }
     }
