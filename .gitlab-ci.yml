@@ -263,8 +263,9 @@ perm:
     - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - deploymentname=`/usr/local/keycloak/bin/jboss-cli.sh --connect --command="deployment list"` || true
-    - if [ "x\$deploymentname" != "x" ]; then
-    -     /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="undeploy --all-relevant-server-groups \$deploymentname"
+    - if [ "x$$deploymentname" != "x" ]; then
+    -     echo "Found a deployment: $$deploymentname, undeploying it first."
+    -     /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="undeploy --all-relevant-server-groups $$deploymentname"
     - fi
     - /usr/local/keycloak/bin/jboss-cli.sh --connect --user=admin --password=addMin --command="deploy --server-groups=auth-server-group --name=sso-$CI_PIPELINE_ID --runtime-name=domru-sso.war build/deploy/standalone/deployments/domru-sso.war"
   tags:
