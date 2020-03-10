@@ -22,6 +22,7 @@ RUN yum update -y && yum install -y epel-release git && yum install -y jq openss
 
 ADD tools /opt/jboss/tools
 ADD configs /opt/jboss/configs
+RUN /opt/jboss/tools/build-keycloak.sh
 
 USER 1000
 
