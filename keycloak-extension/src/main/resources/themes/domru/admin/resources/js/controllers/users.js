@@ -2284,7 +2284,7 @@ module.controller('LDAPMapperCreateCtrl', function ($scope, realm, provider, map
 
 });
 
-module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, $http) {
+module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, $http, Notifications) {
 
     $scope.realm = realm;
     $scope.user = user;
@@ -2354,6 +2354,13 @@ module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, 
                 $scope.addSystemRole(angular.fromJson(response).data.results['user_post'].id, $scope.newAccess.systemRole.id);
             }
             window.location.reload();
+        }).catch(error => {
+            if (error.status === 400) {
+                error.data.message === "" ? Notifications.error(error.statusText) :
+                    Notifications.error(error.data.message);
+            } else {
+                Notifications.error(error.statusText);
+            }
         });
     };
 

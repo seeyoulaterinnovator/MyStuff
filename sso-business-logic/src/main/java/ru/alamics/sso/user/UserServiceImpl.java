@@ -14,9 +14,9 @@ import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import ru.alamics.sso.keycloak.entity.ImportUsersDataEntity;
 import ru.alamics.sso.keycloak.entity.ImportUsersReportEntity;
-import ru.alamics.sso.keycloak.entity.UserPostEntity;
 import ru.alamics.sso.keycloak.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.registration.FoundException;
+import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleDto;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
@@ -321,7 +321,7 @@ public class UserServiceImpl implements UserService {
                 });
                 o.setErrors(errorsByUsers.toString().substring(1, errorsByUsers.toString().length() - 1));
                 countClones.getAndIncrement();
-            } catch (NotFoundException | ValidationException e) {
+            } catch (NotFoundException | ValidationException | FoundUserPostException e) {
                 Map<String, Object> error = new HashMap<>();
                 error.put("error", e.getMessage());
                 error.put("importUserName", o.getFirstName());
@@ -410,7 +410,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserModel createUser(UserRequest request, boolean bss) throws FoundException, NotFoundException {
+    public UserModel createUser(UserRequest request, boolean bss) throws FoundException, NotFoundException, FoundUserPostException {
 
         FoundException exception = null;
 
@@ -537,16 +537,12 @@ public class UserServiceImpl implements UserService {
                 .success();
     }
 
-    private void addUserPostLPR(UserModel userModel, UserRequest request) throws NotFoundException, FoundException {
+    private void addUserPostLPR(UserModel userModel, UserRequest request) throws NotFoundException, FoundException, FoundUserPostException {
 
         UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, request);
 
-        List<UserPostEntity> userPostList = userPostService.getUserPostByToms(userPostRequest.getUserId(), userPostRequest.getTomsId());
-        if (userPostList != null && !userPostList.isEmpty()) {
-            throw new FoundException("User already have this customer").addResult("tomsId", userPostRequest.getTomsId());
-        }
-
         userPostRequest.setRoleId(DEFAULT_ROLE_ID);
+
         UserPostResponse userPostResponse = userPostService.save(userPostRequest);
 
         for (ExternalSystemRoleDto sysRole : userPostService.getExternalSystemRoles()) {
@@ -555,7 +551,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void addUserPost(UserModel userModel, ImportUsersDataEntity userImport, UserRequest userRequest) throws NotFoundException {
+    private void addUserPost(UserModel userModel, ImportUsersDataEntity userImport, UserRequest userRequest) throws NotFoundException, FoundUserPostException {
         UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, userRequest);
         userPostRequest.setRoleId(userPostService.getUserPostRole(userImport.getRole()));
         UserPostResponse userPostResponse = userPostService.save(userPostRequest);

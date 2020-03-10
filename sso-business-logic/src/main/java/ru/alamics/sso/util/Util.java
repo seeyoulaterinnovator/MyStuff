@@ -11,11 +11,9 @@ import org.keycloak.representations.AccessToken;
 import org.keycloak.services.managers.RealmManager;
 import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.registration.AttributeFormatException;
-import ru.alamics.sso.user.model.UserRequest;
 
 import javax.validation.ValidationException;
 import javax.ws.rs.NotAuthorizedException;
-import java.util.IllegalFormatException;
 
 public class Util {
 
@@ -42,8 +40,8 @@ public class Util {
         }
     }
 
-    public static UserAdapter getUserAdapter(KeycloakSession session, UserEntity userEntity){
-        if (userEntity == null){
+    public static UserAdapter getUserAdapter(KeycloakSession session, UserEntity userEntity) {
+        if (userEntity == null) {
             return null;
         }
         return new UserAdapter(session,
@@ -80,8 +78,8 @@ public class Util {
     }
 
     public static void validateId(String id) {
-        if (id != null && !id.isBlank() && id.replaceAll("[0-9]+", "").length()>0) {
-            throw new ValidationException("TomsId or DmpId is not valid");
+        if (id == null || id.isBlank() || !id.matches("[0-9]+")) {
+            throw new ValidationException(String.format("ID is not valid : id=\"%s\"", id));
         }
     }
 }

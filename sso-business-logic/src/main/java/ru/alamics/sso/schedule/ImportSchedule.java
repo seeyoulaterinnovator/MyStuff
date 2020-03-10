@@ -13,6 +13,7 @@ import ru.alamics.sso.keycloak.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.keycloak.repository.*;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.FoundException;
+import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserPostService;
@@ -107,9 +108,9 @@ public class ImportSchedule {
                 });
                 o.setErrors(errors.toString().substring(1, errors.toString().length() - 1));
                 countClones.getAndIncrement();
-            } catch (NotFoundException | ValidationException e) {
+            } catch (NotFoundException | ValidationException | FoundUserPostException e) {
                 o.setErrors(e.getMessage());
-                log.error("Importing user data is failed. {}",e.getMessage());
+                log.error("Importing user data is failed. {}", e.getMessage());
             }
         }
         importUsersReport.setCountClones(countClones.intValue());
@@ -215,7 +216,7 @@ public class ImportSchedule {
         adminEventRepository.save(adminEvent);
     }
 
-    private void addUserPost(UserEntity user, ImportUsersDataEntity userImport) throws javassist.NotFoundException {
+    private void addUserPost(UserEntity user, ImportUsersDataEntity userImport) throws NotFoundException, FoundUserPostException {
         UserPostRequest userPostRequest = new UserPostRequest();
         userPostRequest.setUserId(user.getId());
         userPostRequest.setTomsId(userImport.getTomsId());
@@ -227,7 +228,7 @@ public class ImportSchedule {
         addSystemRoles(userImport, userPostResponse.getId());
     }
 
-    private void addSystemRoles(ImportUsersDataEntity userImport, String userPostId) throws javassist.NotFoundException {
+    private void addSystemRoles(ImportUsersDataEntity userImport, String userPostId) throws NotFoundException {
         List<String> systems = List.of(userImport.getSystems().replaceAll("\\s", "").split(","));
         if (systems != null && !systems.isEmpty()) {
             for (String sysName : systems) {
