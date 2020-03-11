@@ -80,10 +80,10 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
                 .header("Authorization", String.format("Trusted application=\"%s\", username=\"%s\"", connectConfig.getAppname(), connectConfig.getUsername()))
                 .post(entity)) {
 
-            log.debug("response media type " + response.getMediaType());
-            log.debug("response status " + response.getStatus());
+            log.info("response media type " + response.getMediaType());
+            log.info("response status " + response.getStatus());
 
-            log.debug("response " + response.readEntity(String.class));
+            log.info("response " + response.readEntity(String.class));
 
             //responseData = response.readEntity(TbapiResponse.class);
 
