@@ -721,7 +721,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             $http.delete(`${authUrl}/admin/realms/${realm.realm}/users/${user.id}`)
                 .then(() => {
                     Notifications.success("The user has been deleted.");
-                    $route.reload();
+                    $scope.search();
                 }).catch((error) => {
                 Notifications.error("User couldn't be deleted");
             })
