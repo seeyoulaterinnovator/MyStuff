@@ -65,16 +65,15 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
         log.info("TBAPI request to {}", uri.toString());
 
         ResteasyWebTarget target = client.target(uri);
-        target.request(MediaType.APPLICATION_JSON);
 
         Entity<TbapiRequest> entity = Entity.json(request);
 
         TbapiResponse responseData;
         try (Response response = target
                 .register(ResteasyJackson2Provider.class) // TODO
-                .register(StringTextStar.class)
                 .request()
-                .header("Accept", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Content-Type", MediaType.APPLICATION_JSON)
                 .header("Authorization", String.format("Trusted application=\"%s\", username=\"%s\"", connectConfig.getAppname(), connectConfig.getUsername()))
                 .post(entity)) {
 
@@ -93,6 +92,9 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
     public Map<String, Object> getCustomerName(List<String> id, TbapiConnectConfig connectConfig) {
         log.info("customer names request : customerIds={}", id);
         Map<String, Object> responseMap = new HashMap<>();
+
+        Response response = null;
+
         try {
             URI uri = new ResteasyUriBuilder()
                     .scheme(connectConfig.isSecure() ? "https" : "http")
@@ -106,10 +108,11 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("id", id);
             Entity<Map<String, Object>> entity = Entity.json(requestBody);
+
             ResteasyWebTarget target = client.target(uri);
-            target.request(MediaType.APPLICATION_JSON);
-            Response response = target.register(ResteasyJackson2Provider.class).request()
-                    .header("Accept", MediaType.APPLICATION_JSON)
+            response = target.register(ResteasyJackson2Provider.class).request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header("Content-Type", MediaType.APPLICATION_JSON)
                     .header("Authorization", String.format("Trusted application=\"%s\", username=\"%s\"", connectConfig.getAppname(), connectConfig.getUsername()))
                     .build("POST", entity)
                     .invoke();
@@ -122,6 +125,10 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
         } catch (Exception e){
             log.error("tbapi error post request: ", e);
         } finally {
+
+            if (response != null)
+                response.close();
+
             return responseMap;
         }
     }
