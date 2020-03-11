@@ -18,7 +18,8 @@ import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.user.mapper.UserMapper;
-import ru.alamics.sso.util.Util;
+import ru.alamics.sso.util.validator.model.EmailValidator;
+import ru.alamics.sso.util.validator.model.PhoneValidator;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -124,7 +125,8 @@ public class ImportSchedule {
     }
 
     private void checkImportUser(String realmId, String email, String phone) throws FoundException {
-        Util.validateUserPhoneAndEmail(email, phone);
+        new EmailValidator(email).validate();
+        new PhoneValidator(phone).validate();
 
         FoundException foundException = new FoundException();
         try {

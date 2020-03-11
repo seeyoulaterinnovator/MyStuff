@@ -5,14 +5,12 @@ import org.keycloak.models.KeycloakContext;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-
-import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import ru.alamics.sso.registration.AttributeFormatException;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.model.UserConstants;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.user.web.AttributeRequest;
-import ru.alamics.sso.util.Util;
+import ru.alamics.sso.util.validator.model.PhoneValidator;
 
 import javax.validation.ValidationException;
 import java.util.Collections;
@@ -72,7 +70,13 @@ public class UserAttributeService {
                 .filter(x -> UserConstants.ATTR_PHONE_NAME.equals(x.getName()) && (x.getValue() != null && !x.getValue().isBlank()))
                 .findFirst();
         if (presentPhone.isPresent()) {
-            Util.validateUserPhone(presentPhone.get().getValue());
+
+            try {
+                new PhoneValidator(presentPhone.get().getValue()).validate();
+            } catch (ValidationException e){
+                throw new AttributeFormatException("phone");
+            }
+
             var user = userFindService.getUserByPhoneAndExcludedUserId(presentPhone.get().getValue(), userId);
             if (user != null) {
                 throw new FoundException("Another user found by phone");

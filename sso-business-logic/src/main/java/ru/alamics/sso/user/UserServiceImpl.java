@@ -26,6 +26,8 @@ import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.user.model.*;
 import ru.alamics.sso.user.web.UserSearchDto;
 import ru.alamics.sso.util.Util;
+import ru.alamics.sso.util.validator.model.EmailValidator;
+import ru.alamics.sso.util.validator.model.PhoneValidator;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.naming.InitialContext;
@@ -337,7 +339,8 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkImportUser(UserRequest userRequest) throws FoundException {
-        Util.validateUserPhoneAndEmail(userRequest.getEmail(), userRequest.getPhone());
+        new EmailValidator(userRequest.getEmail()).validate();
+        new PhoneValidator(userRequest.getPhone()).validate();
 
         FoundException foundException = new FoundException();
         try {
