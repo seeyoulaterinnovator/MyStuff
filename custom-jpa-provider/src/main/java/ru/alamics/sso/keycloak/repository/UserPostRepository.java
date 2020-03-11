@@ -168,7 +168,7 @@ public class UserPostRepository {
                 .getResultList();
     }
 
-    public UserPostRoleEntity findUserPostsByUser(Long id) {
+    public UserPostRoleEntity findUserPostRoleById(Long id) {
         return em.find(UserPostRoleEntity.class, id);
     }
 

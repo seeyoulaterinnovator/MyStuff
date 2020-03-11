@@ -6,7 +6,6 @@ import ru.alamics.sso.registration.dto.*;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
 import ru.alamics.sso.settings.SettingsDto;
 import ru.alamics.sso.user.web.UserSearch;
-import ru.alamics.sso.user.web.UserSearchDto;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -15,30 +14,19 @@ import java.util.stream.Collectors;
 
 public class DataMapper {
 
-    public static UserPostEntity toUserPost(UserPostEntity userPost, UserPostRequest userPostRequest) {
+    public static UserPostEntity toUserPost(UserPostRequest userPostRequest) {
         if (userPostRequest == null) {
             return null;
         }
 
-        UserEntity userEntity = new UserEntity();
-        userEntity.setId(userPostRequest.getUserId());
-        userPost.setUser(userEntity);
-        userPost.setCustomer(Customer.builder().id(userPostRequest.getTomsId()).name(userPostRequest.getOrgName()).build());
+        UserPostEntity userPost = new UserPostEntity();
+
+        userPost.setCustomer(Customer.builder()
+                .id(userPostRequest.getTomsId())
+                .name(userPostRequest.getOrgName())
+                .build());
+
         userPost.setDmpId(userPostRequest.getDmpId());
-        UserPostRoleEntity userPostRole = new UserPostRoleEntity();
-        userPostRole.setId(userPostRequest.getRoleId());
-        userPost.setRole(userPostRole);
-
-        return userPost;
-    }
-
-    public static UserPostEntity toUserPost(UserPostEntity userPost, UserPostEditRequest userPostEditRequest) {
-        if (userPostEditRequest == null) {
-            return null;
-        }
-        UserPostRoleEntity userPostRole = new UserPostRoleEntity();
-        userPostRole.setId(userPostEditRequest.getRoleId());
-        userPost.setRole(userPostRole);
 
         return userPost;
     }

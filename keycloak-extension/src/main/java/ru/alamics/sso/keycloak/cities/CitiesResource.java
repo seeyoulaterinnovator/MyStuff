@@ -34,7 +34,7 @@ public class CitiesResource {
     public CitiesResource(KeycloakSession session) {
         this.session = session;
         ApplicationProperties properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
-        if (url == null) {
+        if (url == null && properties != null) {
             url = properties.getProperty(CITIES_URL);
         }
     }

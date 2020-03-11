@@ -6,6 +6,7 @@ import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.tbapi.model.TbapiRequest;
+import ru.alamics.sso.registration.tbapi.model.TbapiResponse;
 import ru.alamics.sso.registration.tbapi.port.TbapiRemoteService;
 
 import java.util.HashMap;
@@ -51,7 +52,7 @@ public class TbapiService {
             log.error("", e);
         }
 
-        Map<String, Object> result = remoteService.createCustomer(request, connectConfig);
+        TbapiResponse result = remoteService.createCustomer(request, connectConfig);
 
         try {
             String attrStr = jacksonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
@@ -65,20 +66,24 @@ public class TbapiService {
         return filterRegisterResponse(result);
     }
 
-    private void checkResponse(Map<String, Object> resp) throws TbapiRegisterException {
-        if (resp.get(TBAPI_ERROR_FLAG) != null)
-            throw new TbapiRegisterException((String) resp.get(TBAPI_ERROR_DETAIL));
+    private void checkResponse(TbapiResponse resp) throws TbapiRegisterException {
+        if (resp.getBusinessErrorCode() != null)
+            throw new TbapiRegisterException(resp.getUserMessage());
 
-        if (resp.get(TBAPI_TOMS_ID) == null)
+        if (resp.getId() == null)
             throw new TbapiRegisterException("TOMS ID not found");
     }
 
-    private Map<String, Object> filterRegisterResponse(Map<String, Object> resp) {
+    private Map<String, Object> filterRegisterResponse(TbapiResponse resp) {
 
         Map<String, Object> ret = new HashMap<>();
 
-        ret.put(ATTR_TOMS_NAME, resp.get(TBAPI_TOMS_ID));
-        ret.put(ATTR_DMP_NAME, resp.get(TBAPI_DMP_ID));
+        ret.put(ATTR_TOMS_NAME, resp.getId());
+
+        if (resp.getExtendedMap() != null &&
+                resp.getExtendedMap().getCustomerHolder() != null &&
+                resp.getExtendedMap().getCustomerHolder().getSingleValue() != null)
+            ret.put(ATTR_DMP_NAME, resp.getExtendedMap().getCustomerHolder().getSingleValue().getAttributeValue());
 
         return ret;
     }

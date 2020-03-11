@@ -85,13 +85,15 @@ public class UserModelExtender implements FormAction, FormActionFactory {
 
             Map<String, Object> attributes = tbapiService.registerUser(user, new TbapiConnectConfig(TbapiConnect.REGISTRATION));
 
+            log.info(String.format("registerUser attributes: %s", attributes));
+
             userExtension.extendUser(user, attributes);
 
 
             String userStr = null;
             try {
                 userStr = jacksonMapper.writer().writeValueAsString(user);
-                log.info(String.format("serialized: %s", userStr));
+                log.info(String.format("serialized user: %s", userStr));
             } catch (Exception e) {
                 log.error("", e);
             }

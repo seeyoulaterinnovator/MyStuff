@@ -1,6 +1,7 @@
 package ru.alamics.sso.keycloak.auth;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.common.util.ObjectUtil;
@@ -41,6 +42,19 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         super(session, freeMarker);
 
         attributes.put("redirectUrl", client.getRedirectUris().iterator().next());
+
+        attributes.put("hashJs", getHash("bundle.min.js"));
+        attributes.put("hashCss", getHash("bundle.min.css"));
+    }
+
+    private String getHash(String fileName) {
+        String hash = "";
+        try {
+            hash = DigestUtils.md5Hex(SsoFreeMarkerLoginForm.class.getResourceAsStream("/themes/domru/login/resources/build/" + fileName));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return hash;
     }
 
     @Override
