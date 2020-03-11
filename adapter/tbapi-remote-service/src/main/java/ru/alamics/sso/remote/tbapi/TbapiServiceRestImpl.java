@@ -63,21 +63,29 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
                 .build();
 
         log.info("TBAPI request to {}", uri.toString());
+        log.info("TBAPI config {}", connectConfig.toString());
 
         ResteasyWebTarget target = client.target(uri);
 
         Entity<TbapiRequest> entity = Entity.json(request);
 
-        TbapiResponse responseData;
+        TbapiResponse responseData = null;
         try (Response response = target
                 .register(ResteasyJackson2Provider.class) // TODO
+                .register(StringTextStar.class)
                 .request()
                 .accept(MediaType.APPLICATION_JSON)
+                .header("Content-Type", MediaType.APPLICATION_JSON)
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .header("Authorization", String.format("Trusted application=\"%s\", username=\"%s\"", connectConfig.getAppname(), connectConfig.getUsername()))
                 .post(entity)) {
 
-            responseData = response.readEntity(TbapiResponse.class);
+            log.debug("response media type " + response.getMediaType());
+            log.debug("response status " + response.getStatus());
+
+            log.debug("response " + response.readEntity(String.class));
+
+            //responseData = response.readEntity(TbapiResponse.class);
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
