@@ -263,7 +263,7 @@
             </subsystem>
             <subsystem xmlns="urn:jboss:domain:infinispan:8.0">
                 <cache-container name="keycloak">
-                    <transport lock-timeout="120000"/>
+                    <transport lock-timeout="60000"/>
                     <local-cache name="realms">
                         <object-memory size="10000"/>
                     </local-cache>
@@ -290,13 +290,13 @@
                     </distributed-cache>
                 </cache-container>
                 <cache-container name="server" aliases="singleton cluster" default-cache="default" module="org.wildfly.clustering.server">
-                    <transport lock-timeout="120000"/>
+                    <transport lock-timeout="60000"/>
                     <replicated-cache name="default">
                         <transaction mode="BATCH"/>
                     </replicated-cache>
                 </cache-container>
                 <cache-container name="web" default-cache="dist" module="org.wildfly.clustering.web.infinispan">
-                    <transport lock-timeout="120000"/>
+                    <transport lock-timeout="60000"/>
                     <distributed-cache name="dist">
                         <locking isolation="REPEATABLE_READ"/>
                         <transaction mode="BATCH"/>
@@ -304,7 +304,7 @@
                     </distributed-cache>
                 </cache-container>
                 <cache-container name="ejb" aliases="sfsb" default-cache="dist" module="org.wildfly.clustering.ejb.infinispan">
-                    <transport lock-timeout="120000"/>
+                    <transport lock-timeout="60000"/>
                     <distributed-cache name="dist">
                         <locking isolation="REPEATABLE_READ"/>
                         <transaction mode="BATCH"/>
@@ -312,7 +312,7 @@
                     </distributed-cache>
                 </cache-container>
                 <cache-container name="hibernate" module="org.infinispan.hibernate-cache">
-                    <transport lock-timeout="120000"/>
+                    <transport lock-timeout="60000"/>
                     <local-cache name="local-query" statistics-enabled="true">
                         <object-memory size="100000"/>
                         <expiration max-idle="100000"/>
