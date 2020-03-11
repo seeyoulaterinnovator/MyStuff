@@ -6,6 +6,7 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.keycloak.entity.UserPostEntity;
+import twitter4j.User;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -210,11 +211,6 @@ public class UserRepository {
                 "select count(distinct UE.ID)  " +
                         "from USER_ENTITY UE\n" +
                         "         left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone'\n" +
-                        "         left join USER_POST UP on UE.ID = UP.USER_ID\n" +
-                        "         left join USER_POST_ROLE UPR on UP.ROLE_ID = UPR.ID\n" +
-                        "         left join USERPOST_EXT_SYSTEM_ROLE UESR on UP.ID = UESR.USER_POST_ID\n" +
-                        "         left join EXT_SYSTEM_ROLE ESR on UESR.EXT_SYSTEM_ROLE_ID = ESR.ID\n" +
-                        "         left join EXTERNAL_SYSTEM ES on ESR.SYSTEM_ID = ES.ID\n" +
                         "WHERE UE.REALM_ID = :realm\n" +
                         "  AND CASE\n" +
                         "          WHEN :search is not null and :search != '' then (\n" +
@@ -229,8 +225,11 @@ public class UserRepository {
                         "          WHEN :searchUser is not null and :searchUser != '' then (UE.ID = :searchUser)\n" +
                         "          else UE.ID LIKE '%' OR  UE.ID is null end\n" +
                         "  AND CASE\n" +
-                        "          WHEN :searchToms is not null and :searchToms != '' then (UP.TOMS_ID = :searchToms)\n" +
-                        "          else UP.TOMS_ID LIKE '%' OR UP.TOMS_ID is null end\n")
+                        "          WHEN :searchToms is not null and :searchToms != '' then EXISTS(  select * " +
+                        "                                                                           FROM USER_POST UP " +
+                        "                                                                           where UP.USER_ID = UE.ID " +
+                        "                                                                           and UP.TOMS_ID = :searchToms ) " +
+                        "          else :searchToms is null or :searchToms = '' end\n")
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
@@ -239,25 +238,13 @@ public class UserRepository {
         return Long.parseLong(query.getSingleResult().toString());
     }
 
-    public List<UserEntity> getTupleUsersByParameters(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc,
-                                                 Integer pageNum, Integer pageSize) {
-//        Query query = em.createQuery(
-//                "select UE " +
-//                        "from UserEntity UE " +
-//                        "         left join UserAttributeEntity UA on UA.user = UE and UA.name = 'phone' " +
-//                        "         left join UserPostEntity UP on UP.user = UE " +
-//                        "where ue.realmId = :realm " +
-//                        "  AND CASE WHEN (:search is not null and :search <> '') then (UE.email LIKE CONCAT('%', :search, '%')) else UE.ID LIKE '%' end "
-//                ,UserEntity.class)
-//                .setParameter("realm", realm)
-////                .setParameter("search", search)
-//                ;
-
+    public List<UserEntity> findUsersByParameters(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc,
+                                                  Integer pageNum, Integer pageSize) {
         Query query = em.createNativeQuery(
-                "select distinct UE.* " +
+                "select UE.*," +
+                        "        UA.VALUE " +
                         "from USER_ENTITY UE\n" +
                         "         left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone'\n" +
-                        "         left join USER_POST UP on UE.ID = UP.USER_ID\n" +
                         "WHERE UE.REALM_ID = :realm\n" +
                         "  AND CASE\n" +
                         "          WHEN :search is not null and :search != '' then (\n" +
@@ -271,13 +258,16 @@ public class UserRepository {
                         "  AND CASE\n" +
                         "          WHEN :searchUser is not null and :searchUser != '' then (UE.ID = :searchUser)\n" +
                         "          else UE.ID LIKE '%' OR  UE.ID is null end\n" +
-                        "  AND CASE\n" +
-                        "          WHEN :searchToms is not null and :searchToms != '' then (UP.TOMS_ID = :searchToms)\n" +
-                        "          else UP.TOMS_ID LIKE '%' OR UP.TOMS_ID is null end\n" +
-                        getSort(sortField, sortAsc), Tuple.class)
+//                        "  AND CASE\n" +
+//                        "          WHEN :searchToms is not null and :searchToms != '' then EXISTS(  select * " +
+//                        "                                                                           FROM USER_POST UP " +
+//                        "                                                                           where UP.USER_ID = UE.ID " +
+//                        "                                                                           and UP.TOMS_ID = :searchToms ) " +
+//                        "          else :searchToms is null or :searchToms = '' end\n" +
+                        getSort(sortField, sortAsc), UserEntity.class)
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
-                .setParameter("searchToms", searchToms)
+//                .setParameter("searchToms", searchToms)
                 .setParameter("realm", realm);
 
         if (pageNum != null && pageNum != 0 && pageSize != null && pageSize != 0) {

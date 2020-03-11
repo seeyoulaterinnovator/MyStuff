@@ -13,8 +13,8 @@ import ru.alamics.sso.util.Util;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import java.util.Collection;
-import java.util.Collections;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -56,26 +56,21 @@ public class UserFindService {
 
     public List<UserSearch> getUsersByParameters(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc,
                                                  Integer pageNum, Integer pageSize) {
-//        List<UserSearch> userSearches = UserMapper.toUserSearchList(userRepository.getTupleUsersByParameters(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize));
-        List<UserSearch> userSearches = Collections.emptyList();
+        LocalDateTime time = LocalDateTime.now();
+        List<UserEntity> users = userRepository.findUsersByParameters(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
+        System.out.println("time query:" + Duration.between(time, LocalDateTime.now()).getSeconds());
 
-        List<UserEntity> ues = userRepository.getTupleUsersByParameters(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
-        if (userSearches.isEmpty()) {
-            return userSearches;
-        }
-
-        Map<String, List<UserPostResponse>> userPostEntities = userPostRepository
-                .findUserPostsByIds(
-                        userSearches.stream()
-                                .map(UserSearch::getUserPosts)
-                                .flatMap(Collection::stream)
-                                .map(UserPostResponse::getId)
+        Map<String, List<UserPostResponse>> userPosts = userPostRepository
+                .findUserPostsByUserIds(
+                        users.stream()
+                                .map(UserEntity::getId)
                                 .collect(Collectors.toList()))
                 .stream()
                 .map(DataMapper::toUserPostResponse)
                 .collect(Collectors.groupingBy(UserPostResponse::getUserId));
 
-        userSearches.forEach(user -> user.setUserPosts(userPostEntities.get(user.getId())));
+        List<UserSearch> userSearches = UserMapper.toUserSearchList(users);
+        userSearches.forEach(user -> user.setUserPosts(userPosts.get(user.getId())));
         return userSearches;
     }
 
