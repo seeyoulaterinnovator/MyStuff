@@ -11,10 +11,7 @@ import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 
 import javax.ejb.Stateless;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Stateless
@@ -46,7 +43,7 @@ public class CachedUserPostFacade extends UserPostFacade {
         UserPostResponse post = super.save(userPostRequest);
 
         if (cache.get(userPostRequest.getUserId()) != null) {
-            cache.put(userPostRequest.getUserId(), List.of(post));
+            cache.put(userPostRequest.getUserId(), Arrays.asList(post));
         }
 
         return post;
