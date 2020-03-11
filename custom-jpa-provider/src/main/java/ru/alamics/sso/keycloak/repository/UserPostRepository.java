@@ -88,6 +88,10 @@ public class UserPostRepository {
         return em.createQuery(
                 "select upe " +
                         "from UserPostEntity upe " +
+                        "left join fetch upe.user " +
+                        "left join fetch upe.systemRoles " +
+                        "left join fetch upe.role " +
+                        "left join fetch upe.customer " +
                         "where upe.id in :userPostIds ", UserPostEntity.class)
                 .setParameter("userPostIds", userPostIds)
                 .getResultList();

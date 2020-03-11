@@ -88,12 +88,12 @@ public class UserMapper {
             return null;
         }
         List<UserPostResponse> userPosts = new LinkedList<>();
-        String userPostIds = toString(tuple.get("user_post_ids"));
-        if (userPostIds != null) {
-            userPosts = List.of(userPostIds.split(",")).stream()
-                    .map(id -> UserPostResponse.builder().id(id).build())
-                    .collect(Collectors.toList());
-        }
+//        String userPostIds = toString(tuple.get("user_post_ids"));
+//        if (userPostIds != null) {
+//            userPosts = List.of(userPostIds.split(",")).stream()
+//                    .map(id -> UserPostResponse.builder().id(id).build())
+//                    .collect(Collectors.toList());
+//        }
 
         return UserSearch.builder()
                 .id(toString(tuple.get("user_id")))
@@ -103,7 +103,7 @@ public class UserMapper {
                 .email(toString(tuple.get("email")))
                 .phone(toString(tuple.get("phone")))
                 .enabled(toBoolean(tuple.get("enabled")))
-                .userPosts(userPosts)
+//                .userPosts(userPosts)
                 .build();
     }
 

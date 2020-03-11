@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Immutable;
 
 import javax.persistence.*;
-import java.util.Set;
 
 @Entity
 @Immutable
@@ -20,6 +19,4 @@ public class ExternalSystemRoleEntity {
     @ManyToOne
     @JoinColumn(name = "system_id")
     private ExternalSystemEntity externalSystem;
-    @ManyToMany(mappedBy = "systemRoles")
-    private Set<UserPostEntity> userPosts;
 }

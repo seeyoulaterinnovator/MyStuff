@@ -5,6 +5,7 @@ import org.keycloak.models.jpa.entities.UserAttributeEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.services.validation.Validation;
+import ru.alamics.sso.keycloak.entity.UserPostEntity;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -12,6 +13,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.Tuple;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Root;
 import java.util.List;
 
 @LocalBean
@@ -234,25 +239,25 @@ public class UserRepository {
         return Long.parseLong(query.getSingleResult().toString());
     }
 
-    public List<Tuple> getTupleUsersByParameters(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc,
+    public List<UserEntity> getTupleUsersByParameters(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc,
                                                  Integer pageNum, Integer pageSize) {
+//        Query query = em.createQuery(
+//                "select UE " +
+//                        "from UserEntity UE " +
+//                        "         left join UserAttributeEntity UA on UA.user = UE and UA.name = 'phone' " +
+//                        "         left join UserPostEntity UP on UP.user = UE " +
+//                        "where ue.realmId = :realm " +
+//                        "  AND CASE WHEN (:search is not null and :search <> '') then (UE.email LIKE CONCAT('%', :search, '%')) else UE.ID LIKE '%' end "
+//                ,UserEntity.class)
+//                .setParameter("realm", realm)
+////                .setParameter("search", search)
+//                ;
+
         Query query = em.createNativeQuery(
-                "select " +
-                        "       UE.ID         as user_id,\n" +
-                        "       UE.USERNAME   as username,\n" +
-                        "       UE.FIRST_NAME as first_name,\n" +
-                        "       UE.LAST_NAME  as last_name,\n" +
-                        "       UE.EMAIL      as email,\n" +
-                        "       UA.VALUE      as phone,\n" +
-                        "       UE.ENABLED    as enabled,\n" +
-                        "       group_concat(UP.id)  as user_post_ids\n" +
+                "select distinct UE.* " +
                         "from USER_ENTITY UE\n" +
                         "         left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone'\n" +
                         "         left join USER_POST UP on UE.ID = UP.USER_ID\n" +
-                        "         left join USER_POST_ROLE UPR on UP.ROLE_ID = UPR.ID\n" +
-                        "         left join USERPOST_EXT_SYSTEM_ROLE UESR on UP.ID = UESR.USER_POST_ID\n" +
-                        "         left join EXT_SYSTEM_ROLE ESR on UESR.EXT_SYSTEM_ROLE_ID = ESR.ID\n" +
-                        "         left join EXTERNAL_SYSTEM ES on ESR.SYSTEM_ID = ES.ID\n" +
                         "WHERE UE.REALM_ID = :realm\n" +
                         "  AND CASE\n" +
                         "          WHEN :search is not null and :search != '' then (\n" +
@@ -269,7 +274,6 @@ public class UserRepository {
                         "  AND CASE\n" +
                         "          WHEN :searchToms is not null and :searchToms != '' then (UP.TOMS_ID = :searchToms)\n" +
                         "          else UP.TOMS_ID LIKE '%' OR UP.TOMS_ID is null end\n" +
-                        "group by UE.ID " +
                         getSort(sortField, sortAsc), Tuple.class)
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
