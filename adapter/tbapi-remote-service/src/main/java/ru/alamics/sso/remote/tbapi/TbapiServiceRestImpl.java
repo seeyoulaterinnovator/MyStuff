@@ -75,17 +75,18 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
                 .register(StringTextStar.class)
                 .request()
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Accept", MediaType.APPLICATION_JSON)
                 .header("Content-Type", MediaType.APPLICATION_JSON)
+                .header("HOST", connectConfig.getHost())
                 .header("Authorization", String.format("Trusted application=\"%s\", username=\"%s\"", connectConfig.getAppname(), connectConfig.getUsername()))
                 .post(entity)) {
 
-            log.info("response media type " + response.getMediaType());
-            log.info("response status " + response.getStatus());
+            log.info("response media type {}, status {}", response.getMediaType(), response.getStatus());
 
-            log.info("response " + response.readEntity(String.class));
-
-            //responseData = response.readEntity(TbapiResponse.class);
+            if (response.getMediaType().toString().equalsIgnoreCase("text/html")) {
+                log.error("response " + response.readEntity(String.class));
+            } else {
+                responseData = response.readEntity(TbapiResponse.class);
+            }
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -121,24 +122,34 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
             response = target.register(ResteasyJackson2Provider.class).request()
                     .accept(MediaType.APPLICATION_JSON)
                     .header("Content-Type", MediaType.APPLICATION_JSON)
+                    .header("HOST", connectConfig.getHost())
                     .header("Authorization", String.format("Trusted application=\"%s\", username=\"%s\"", connectConfig.getAppname(), connectConfig.getUsername()))
                     .build("POST", entity)
                     .invoke();
 
-            responseMap = response.readEntity(new GenericType<>(mapExample.getClass()));
-            if (responseMap.get("businessErrorCode") != null){
-                throw new Exception("error tbapi code: " +  responseMap.get("businessErrorCode").toString());
+            log.info("response media type {}, status {}", response.getMediaType(), response.getStatus());
+
+            if (response.getMediaType().toString().equalsIgnoreCase("text/html")) {
+                log.error("response " + response.readEntity(String.class));
+
+            } else {
+
+                responseMap = response.readEntity(new GenericType<>(mapExample.getClass()));
+                if (responseMap.get("businessErrorCode") != null) {
+                    throw new Exception("error tbapi code: " + responseMap.get("businessErrorCode").toString());
+                }
             }
+
             log.info("customer names response : {}", responseMap);
+
         } catch (Exception e){
             log.error("tbapi error post request: ", e);
         } finally {
 
             if (response != null)
                 response.close();
-
-            return responseMap;
         }
+        return responseMap;
     }
 
     public static void main(String[] args) {
