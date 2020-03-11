@@ -19,7 +19,8 @@
 }
 
 .trow {
-  height: 40px;
+  min-height: 40px;
+  padding: 9px 0;
   border-radius: 8px;
   display: flex;
   justify-content: space-between;
@@ -90,7 +91,7 @@
     display: none;
   }
   .trow {
-    height: 60px;
+    min-height: 60px;
     padding: 5px 0;
     border-radius: 0;
     flex-direction: column;
@@ -119,7 +120,7 @@
 
 @media (max-width: 320px) {
   .trow {
-    height: 68px;
+    min-height: 68px;
   }
   .trow div {
     padding-left: 15px;

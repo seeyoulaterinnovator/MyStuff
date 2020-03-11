@@ -14,30 +14,19 @@ import java.util.stream.Collectors;
 
 public class DataMapper {
 
-    public static UserPostEntity toUserPost(UserPostEntity userPost, UserPostRequest userPostRequest) {
+    public static UserPostEntity toUserPost(UserPostRequest userPostRequest) {
         if (userPostRequest == null) {
             return null;
         }
 
-        UserEntity userEntity = new UserEntity();
-        userEntity.setId(userPostRequest.getUserId());
-        userPost.setUser(userEntity);
-        userPost.setCustomer(Customer.builder().id(userPostRequest.getTomsId()).name(userPostRequest.getOrgName()).build());
+        UserPostEntity userPost = new UserPostEntity();
+
+        userPost.setCustomer(Customer.builder()
+                .id(userPostRequest.getTomsId())
+                .name(userPostRequest.getOrgName())
+                .build());
+
         userPost.setDmpId(userPostRequest.getDmpId());
-        UserPostRoleEntity userPostRole = new UserPostRoleEntity();
-        userPostRole.setId(userPostRequest.getRoleId());
-        userPost.setRole(userPostRole);
-
-        return userPost;
-    }
-
-    public static UserPostEntity toUserPost(UserPostEntity userPost, UserPostEditRequest userPostEditRequest) {
-        if (userPostEditRequest == null) {
-            return null;
-        }
-        UserPostRoleEntity userPostRole = new UserPostRoleEntity();
-        userPostRole.setId(userPostEditRequest.getRoleId());
-        userPost.setRole(userPostRole);
 
         return userPost;
     }

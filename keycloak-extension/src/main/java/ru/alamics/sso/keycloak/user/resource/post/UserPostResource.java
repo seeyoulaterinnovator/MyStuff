@@ -66,7 +66,7 @@ public class UserPostResource {
     public Response edit(@Valid UserPostEditRequest userPostEditRequest, HttpHeaders headers) {
         try {
             return JsonResponse.success()
-                    .addResult("user_post", userPostService.edit(userPostEditRequest))
+                    .addResult("user_post", cachedUserPostFacade.edit(userPostEditRequest))
                     .build();
         } catch (NotFoundException e) {
             return JsonResponse.fail()
@@ -179,7 +179,7 @@ public class UserPostResource {
     public Response addSystemRole(@NotNull @Valid ExternalSystemRoleRequest externalSystemRoleRequest) {
         try {
             return JsonResponse.success()
-                    .addResult("user-post", userPostService.addSystemRole(externalSystemRoleRequest))
+                    .addResult("user-post", cachedUserPostFacade.addSystemRole(externalSystemRoleRequest))
                     .build();
         } catch (NotFoundException e) {
             return JsonResponse.fail()
@@ -196,7 +196,7 @@ public class UserPostResource {
     public Response removeSystemRole(@NotNull @Valid ExternalSystemRoleRequest externalSystemRoleRequest) {
         try {
             return JsonResponse.success()
-                    .addResult("user-post", userPostService.removeSystemRole(externalSystemRoleRequest))
+                    .addResult("user-post", cachedUserPostFacade.removeSystemRole(externalSystemRoleRequest))
                     .build();
         } catch (NotFoundException e) {
             return JsonResponse.fail()

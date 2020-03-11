@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.infinispan.Cache;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.property.ApplicationProperties;
+import ru.alamics.sso.registration.dto.UserPostEditRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserPostService;
