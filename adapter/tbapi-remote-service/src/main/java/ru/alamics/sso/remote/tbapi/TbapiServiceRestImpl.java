@@ -75,7 +75,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
                 .register(StringTextStar.class)
                 .request()
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .header("Accept", MediaType.APPLICATION_JSON)
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .header("Authorization", String.format("Trusted application=\"%s\", username=\"%s\"", connectConfig.getAppname(), connectConfig.getUsername()))
                 .post(entity)) {
