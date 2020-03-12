@@ -2,11 +2,10 @@ package ru.alamics.sso.user.mapper;
 
 import org.keycloak.authentication.FormContext;
 import org.keycloak.models.UserModel;
-import org.keycloak.models.jpa.entities.UserAttributeEntity;
-import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.entity.ImportUsersDataEntity;
 import ru.alamics.sso.keycloak.entity.ImportUsersReportEntity;
 import ru.alamics.sso.keycloak.entity.common.ImportUsersReportStatus;
+import ru.alamics.sso.keycloak.model.UserSummaryView;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.user.model.ImportResponse;
@@ -74,7 +73,7 @@ public class UserMapper {
         return userDtos;
     }
 
-    public static List<UserSearch> toUserSearchList(List<UserEntity> users) {
+    public static List<UserSearch> toUserSearchList(List<UserSummaryView> users) {
         if (users.isEmpty()) {
             return Collections.emptyList();
         }
@@ -85,9 +84,7 @@ public class UserMapper {
                                 .id(user.getId())
                                 .email(user.getEmail())
                                 .username(user.getUsername())
-//                                .phone(user.getAttributes().stream()
-//                                        .filter(attr -> ATTR_PHONE_NAME.equals(attr.getName()))
-//                                        .map(UserAttributeEntity::getValue).findFirst().get())
+                                .phone(user.getPhone())
                                 .firstName(user.getFirstName())
                                 .lastName(user.getLastName())
                                 .enabled(user.isEnabled())

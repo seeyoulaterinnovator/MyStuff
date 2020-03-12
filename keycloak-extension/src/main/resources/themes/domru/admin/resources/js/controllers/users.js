@@ -2461,3 +2461,10 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
 
     $scope.init();
 });
+
+$(window).load(function() {
+
+    $(".loader_inner").fadeOut();
+    $(".loader").delay(400).fadeOut("slow");
+
+});

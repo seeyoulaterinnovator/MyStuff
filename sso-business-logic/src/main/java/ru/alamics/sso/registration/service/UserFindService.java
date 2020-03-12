@@ -2,6 +2,7 @@ package ru.alamics.sso.registration.service;
 
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.UserEntity;
+import ru.alamics.sso.keycloak.model.UserSummaryView;
 import ru.alamics.sso.keycloak.repository.UserPostRepository;
 import ru.alamics.sso.keycloak.repository.UserRepository;
 import ru.alamics.sso.registration.dto.UserPostResponse;
@@ -15,6 +16,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -57,13 +59,17 @@ public class UserFindService {
     public List<UserSearch> getUsersByParameters(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc,
                                                  Integer pageNum, Integer pageSize) {
         LocalDateTime time = LocalDateTime.now();
-        List<UserEntity> users = userRepository.findUsersByParameters(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
+        List<UserSummaryView> users = userRepository.findUsersByParameters(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
         System.out.println("time query:" + Duration.between(time, LocalDateTime.now()).getSeconds());
+
+        if (users.isEmpty()) {
+            return Collections.emptyList();
+        }
 
         Map<String, List<UserPostResponse>> userPosts = userPostRepository
                 .findUserPostsByUserIds(
                         users.stream()
-                                .map(UserEntity::getId)
+                                .map(UserSummaryView::getId)
                                 .collect(Collectors.toList()))
                 .stream()
                 .map(DataMapper::toUserPostResponse)
@@ -71,6 +77,8 @@ public class UserFindService {
 
         List<UserSearch> userSearches = UserMapper.toUserSearchList(users);
         userSearches.forEach(user -> user.setUserPosts(userPosts.get(user.getId())));
+
+        System.out.println("total time query:" + Duration.between(time, LocalDateTime.now()).getSeconds());
         return userSearches;
     }
 
