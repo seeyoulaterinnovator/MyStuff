@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.registration.userpost;
 
+import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormContext;
@@ -9,6 +10,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.keycloak.facade.CachedUserPostFacade;
+import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.user.mapper.UserMapper;
 
@@ -44,7 +46,12 @@ public class UserPostCreatorProvider implements FormAction {
         UserPostRequest userPostRequest = UserMapper.toUserPostRequest(context);
         if (userPostRequest != null && userPostRequest.getTomsId() != null) {
             userPostRequest.setRoleId(ROLE_ID);
-            cachedUserPostFacade.addUserPostAndSystemRole(userPostRequest);
+            
+            try {
+                cachedUserPostFacade.addUserPostAndSystemRole(userPostRequest);
+            } catch (NotFoundException | FoundUserPostException e) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 

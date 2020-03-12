@@ -647,4 +647,14 @@
         <modifyDataType tableName="REALM_ATTRIBUTE" columnName="VALUE" newDataType="varchar(2000)" />
     </changeSet>
 
+    <changeSet id="40" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_POST"/>
+        </preConditions>
+
+        <addUniqueConstraint tableName="USER_POST"
+                             columnNames="USER_ID, TOMS_ID"
+                             constraintName="UC_USER_ID_TOMS_ID"/>
+    </changeSet>
+
 </databaseChangeLog>
