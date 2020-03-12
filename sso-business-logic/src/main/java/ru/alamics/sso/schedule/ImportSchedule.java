@@ -230,9 +230,13 @@ public class ImportSchedule {
         addSystemRoles(userImport, userPostResponse.getId());
     }
 
-    private void addSystemRoles(ImportUsersDataEntity userImport, String userPostId) throws NotFoundException {
+    private void addSystemRoles(ImportUsersDataEntity userImport, String userPostId) throws javassist.NotFoundException {
+        if (userImport.getSystems() == null || userImport.getSystems().isBlank()) {
+            return;
+        }
+
         List<String> systems = List.of(userImport.getSystems().replaceAll("\\s", "").split(","));
-        if (systems != null && !systems.isEmpty()) {
+        if (!systems.isEmpty()) {
             for (String sysName : systems) {
                 userPostService.addSystemRole(UserMapper.toExternalSystemRoleRequest(userPostId,
                         userPostService.getExternalSystemRoleId(sysName)));

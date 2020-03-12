@@ -8,7 +8,7 @@
     <div class="swr-content">
       <h1>Что-то пошло не так</h1>
       <p>Регистрация временно недоступна, попробуйте повторить попытку позже.</p>
-      <a href="${backHref}" class="btn swr-button"><div>На главную</div></a>
+      <a href="${redirectUrl}" class="btn swr-button"><div>На главную</div></a>
     </div>
   </div>
 </#macro>
