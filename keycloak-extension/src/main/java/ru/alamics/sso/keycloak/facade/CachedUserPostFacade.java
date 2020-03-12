@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.keycloak.cache.CustomCache;
 import ru.alamics.sso.keycloak.cache.impl.UserPostCache;
 import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostEditRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
@@ -35,11 +36,11 @@ public class CachedUserPostFacade extends UserPostFacade {
         return userPostCached;
     }
 
-    public void addUserPostAndSystemRole(UserPostRequest userPostRequest) {
+    public void addUserPostAndSystemRole(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException {
         cache.put(userPostRequest.getUserId(), Arrays.asList(userPostService.addUserPostAndSystemRole(userPostRequest)));
     }
 
-    public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException {
+    public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException {
         UserPostResponse post = super.save(userPostRequest);
 
         if (cache.get(userPostRequest.getUserId()) != null) {

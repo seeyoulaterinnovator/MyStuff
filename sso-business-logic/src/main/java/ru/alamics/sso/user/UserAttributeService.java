@@ -13,7 +13,7 @@ import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.model.UserConstants;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.user.web.AttributeRequest;
-import ru.alamics.sso.util.Util;
+import ru.alamics.sso.util.validator.PhoneValidator;
 
 import javax.validation.ValidationException;
 import java.util.Collections;
@@ -74,7 +74,13 @@ public class UserAttributeService {
                 .filter(x -> UserConstants.ATTR_PHONE_NAME.equals(x.getName()) && (x.getValue() != null && !x.getValue().isEmpty()))
                 .findFirst();
         if (presentPhone.isPresent()) {
-            Util.validateUserPhone(presentPhone.get().getValue());
+
+            try {
+                PhoneValidator.validate(presentPhone.get().getValue());
+            } catch (ValidationException e){
+                throw new AttributeFormatException("phone");
+            }
+
             UserEntity user = userFindService.getUserByPhoneAndExcludedUserId(presentPhone.get().getValue(), userId);
             if (user != null) {
                 throw new FoundException("Another user found by phone");

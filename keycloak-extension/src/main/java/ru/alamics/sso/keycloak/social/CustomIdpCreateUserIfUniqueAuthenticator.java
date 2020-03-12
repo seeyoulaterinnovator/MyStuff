@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.social;
 
+import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.authenticators.broker.IdpCreateUserIfUniqueAuthenticator;
@@ -10,6 +11,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.keycloak.registration.userpost.UserPostCreatorProvider;
+import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.registration.model.MessageConstants;
@@ -39,11 +41,17 @@ public class CustomIdpCreateUserIfUniqueAuthenticator extends IdpCreateUserIfUni
     protected void userRegisteredSuccess(AuthenticationFlowContext context, UserModel registeredUser, SerializedBrokeredIdentityContext serializedCtx, BrokeredIdentityContext brokerContext) {
         UserPostRequest userPostRequest = UserMapper.toUserPostRequest(registeredUser);
         userPostRequest.setRoleId(UserPostCreatorProvider.ROLE_ID);
-        userPostService.addUserPostAndSystemRole(userPostRequest);
+
+        try {
+            userPostService.addUserPostAndSystemRole(userPostRequest);
+        } catch (NotFoundException | FoundUserPostException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     @Override
-    protected ExistingUserInfo checkExistingUser(AuthenticationFlowContext context, String username, SerializedBrokeredIdentityContext serializedCtx, BrokeredIdentityContext brokerContext) {
+    protected ExistingUserInfo checkExistingUser(AuthenticationFlowContext context, String
+            username, SerializedBrokeredIdentityContext serializedCtx, BrokeredIdentityContext brokerContext) {
         ExistingUserInfo user = super.checkExistingUser(context, username, serializedCtx, brokerContext);
         if (user != null) {
             return user;

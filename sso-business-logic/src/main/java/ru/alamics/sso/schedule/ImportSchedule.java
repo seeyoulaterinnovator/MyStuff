@@ -13,11 +13,13 @@ import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.jpa.repository.*;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.FoundException;
+import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.user.mapper.UserMapper;
-import ru.alamics.sso.util.Util;
+import ru.alamics.sso.util.validator.EmailValidator;
+import ru.alamics.sso.util.validator.PhoneValidator;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -106,9 +108,9 @@ public class ImportSchedule {
                 });
                 o.setErrors(errors.toString().substring(1, errors.toString().length() - 1));
                 countClones.getAndIncrement();
-            } catch (NotFoundException | ValidationException e) {
+            } catch (NotFoundException | ValidationException | FoundUserPostException e) {
                 o.setErrors(e.getMessage());
-                log.error("Importing user data is failed. {}",e.getMessage());
+                log.error("Importing user data is failed. {}", e.getMessage());
             }
         }
         importUsersReport.setCountClones(countClones.intValue());
@@ -122,7 +124,8 @@ public class ImportSchedule {
     }
 
     private void checkImportUser(String realmId, String email, String phone) throws FoundException {
-        Util.validateUserPhoneAndEmail(email, phone);
+        EmailValidator.validate(email);
+        PhoneValidator.validate(phone);
 
         FoundException foundException = new FoundException();
         try {
@@ -214,7 +217,7 @@ public class ImportSchedule {
         adminEventRepository.save(adminEvent);
     }
 
-    private void addUserPost(UserEntity user, ImportUsersDataEntity userImport) throws javassist.NotFoundException {
+    private void addUserPost(UserEntity user, ImportUsersDataEntity userImport) throws NotFoundException, FoundUserPostException {
         UserPostRequest userPostRequest = new UserPostRequest();
         userPostRequest.setUserId(user.getId());
         userPostRequest.setTomsId(userImport.getTomsId());
@@ -227,8 +230,12 @@ public class ImportSchedule {
     }
 
     private void addSystemRoles(ImportUsersDataEntity userImport, String userPostId) throws javassist.NotFoundException {
+        if (userImport.getSystems() == null || userImport.getSystems().isEmpty()) {
+            return;
+        }
+
         List<String> systems = Arrays.asList(userImport.getSystems().replaceAll("\\s", "").split(","));
-        if (systems != null && !systems.isEmpty()) {
+        if (!systems.isEmpty()) {
             for (String sysName : systems) {
                 userPostService.addSystemRole(UserMapper.toExternalSystemRoleRequest(userPostId,
                         userPostService.getExternalSystemRoleId(sysName)));

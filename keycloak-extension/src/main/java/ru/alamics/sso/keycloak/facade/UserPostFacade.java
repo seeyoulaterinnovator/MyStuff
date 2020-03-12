@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.infinispan.Cache;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.property.ApplicationProperties;
-import ru.alamics.sso.registration.dto.UserPostEditRequest;
+import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserPostService;
@@ -26,7 +26,6 @@ public class UserPostFacade {
     private int customerCacheLifespanInDb;
 
     private CustomerRequestService customerRequestService;
-    private CustomerUpdateService customerUpdateService;
 
     @Resource(lookup = "infinispan/custom_container/customer_cache")
     protected Cache<String, String> customerCache;
@@ -41,7 +40,6 @@ public class UserPostFacade {
 
         userPostService = (UserPostService) Lookup.lookup(UserPostService.class);
         customerRequestService = (CustomerRequestService) Lookup.lookup(CustomerRequestService.class);
-        customerUpdateService = (CustomerUpdateService) Lookup.lookup(CustomerUpdateService.class);
 
         customerCacheLifespanInDb = properties.getPropertyInt(CUSTOMER_CACHE_LIFESPAN_IN_DB_PROPERTY, CUSTOMER_CACHE_LIFESPAN_IN_DB, "UserPostFacade: default value used: '%s' = '%s'");
     }
@@ -52,7 +50,7 @@ public class UserPostFacade {
         return userPosts;
     }
 
-    public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException {
+    public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException {
         UserPostResponse post = userPostService.save(userPostRequest);
         addCustomersToRequest(Arrays.asList(post));
         return post;

@@ -4,7 +4,7 @@ public enum EStand {
 
     LOCAL("local", false),
     DEV("dev", false),
-    TEST("dev", false),
+    TEST("test", true),
     STAGE("stage", true),
     PROD("prod", true);
 

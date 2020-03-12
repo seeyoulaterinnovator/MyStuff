@@ -9,8 +9,11 @@ import ru.alamics.sso.jpa.entity.UserPostRoleEntity;
 import ru.alamics.sso.jpa.repository.CustomerRepository;
 import ru.alamics.sso.jpa.repository.UserPostRepository;
 import ru.alamics.sso.jpa.repository.UserRepository;
+import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.*;
 import ru.alamics.sso.registration.mapper.DataMapper;
+import ru.alamics.sso.util.validator.DmpIdValidator;
+import ru.alamics.sso.util.validator.TomsIdValidator;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -29,7 +32,7 @@ public class UserPostService {
     @EJB
     private CustomerRepository customerRepository;
 
-    public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException {
+    public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException {
         UserEntity user = userRepository.findUser(userPostRequest.getUserId());
         if (user == null) {
             throw new NotFoundException("User with this userId is not exist!");
@@ -40,12 +43,28 @@ public class UserPostService {
             throw new NotFoundException("UserPostRole with this roleId is not exist!");
         }
 
+        checkUserPost(userPostRequest);
+
         UserPostEntity userPost = DataMapper.toUserPost(userPostRequest);
         userPost.setUser(user);
         userPost.setRole(role);
         userPost.setCustomer(customerRepository.save(userPost.getCustomer()));
 
         return DataMapper.toUserPostResponse(userPostRepository.save(userPost));
+    }
+
+    private void checkUserPost(UserPostRequest postRequest) throws FoundUserPostException {
+        UserPostEntity post = userPostRepository.findUserPostByUserIdAndTomsId(postRequest.getUserId(), postRequest.getTomsId());
+        if (post != null) {
+            throw new FoundUserPostException(String.format("User already have userPost with this tomsId: userId=%s, userPostId=%s, tomsId=%s",
+                    postRequest.getUserId(), post.getId(), postRequest.getTomsId()));
+        }
+
+        TomsIdValidator.validate(postRequest.getTomsId());
+
+        if (postRequest.getDmpId() != null && !postRequest.getDmpId().isEmpty()) {
+            DmpIdValidator.validate(postRequest.getDmpId());
+        }
     }
 
     public UserPostResponse edit(UserPostEditRequest userPostEditRequest) throws NotFoundException {
@@ -152,23 +171,14 @@ public class UserPostService {
         return externalSystemRole.getId();
     }
 
-    public UserPostResponse addUserPostAndSystemRole(UserPostRequest userPostRequest) {
-        try {
-            UserPostResponse userPost = save(userPostRequest);
-            for (ExternalSystemRoleDto systemRoleDto : getExternalSystemRoles()) {
-                ExternalSystemRoleRequest systemRole = new ExternalSystemRoleRequest();
-                systemRole.setUserPostId(userPost.getId());
-                systemRole.setSystemRoleId(systemRoleDto.getId());
-                return addSystemRole(systemRole);
-            }
-        } catch (NotFoundException e) {
-            log.error(e.getMessage(), e);
+    public UserPostResponse addUserPostAndSystemRole(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException {
+        UserPostResponse userPost = save(userPostRequest);
+        for (ExternalSystemRoleDto systemRoleDto : getExternalSystemRoles()) {
+            ExternalSystemRoleRequest systemRole = new ExternalSystemRoleRequest();
+            systemRole.setUserPostId(userPost.getId());
+            systemRole.setSystemRoleId(systemRoleDto.getId());
+            userPost = addSystemRole(systemRole);
         }
-        return null;
-    }
-
-    public List<UserPostEntity> getUserPostByToms(String userId, String tomsId) {
-
-        return userPostRepository.findUserPostByToms(userId, tomsId);
+        return userPost;
     }
 }

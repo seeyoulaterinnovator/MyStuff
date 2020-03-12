@@ -52,7 +52,7 @@ public class UserPostResource {
             return JsonResponse.success()
                     .addResult("user_post", cachedUserPostFacade.save(userPostRequest))
                     .build();
-        } catch (NotFoundException e) {
+        } catch (Exception e) {
             return JsonResponse.fail()
                     .message(e.getMessage())
                     .build();
