@@ -48,16 +48,15 @@ public class UserPostRepository {
         return access;
     }
 
-    public UserPostEntity getUserPost(String userId, String tomsId) {
-        UserEntity userEntity = new UserEntity();
-        userEntity.setId(userId);
+    public UserPostEntity findUserPostByUserIdAndTomsId(String userId, String tomsId) {
         UserPostEntity access = null;
         try {
             access = em.createQuery(
                     "select ac " +
                             "from UserPostEntity ac " +
-                            "where ac.customer.id = :toms_id and ac.user = :user", UserPostEntity.class)
-                    .setParameter("user", userEntity)
+                            "where ac.customer.id = :toms_id " +
+                            "and ac.user.id = :userId", UserPostEntity.class)
+                    .setParameter("userId", userId)
                     .setParameter("toms_id", tomsId)
                     .getSingleResult();
         } finally {
@@ -203,16 +202,6 @@ public class UserPostRepository {
                 .getResultList();
 
         return Optional.of(ret.get(0)).orElseThrow(() -> new IllegalArgumentException("Cannot find user post with"));
-    }
-
-    public List<UserPostEntity> findUserPostByToms(String userId, final String tomsId) {
-
-        List<UserPostEntity> ret = em.createQuery("select upe from UserPostEntity upe where upe.customer.id =:toms and upe.user.id = :user_id ", UserPostEntity.class)
-                .setParameter("toms", tomsId)
-                .setParameter("user_id", userId)
-                .getResultList();
-
-        return ret;
     }
 
     public List<ExternalSystemRoleEntity> findSystemsByUserPost(final UserPostEntity post) {

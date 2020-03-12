@@ -1,6 +1,7 @@
 package ru.alamics.sso.keycloak.auth;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.common.util.ObjectUtil;
@@ -39,6 +40,21 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
     public SsoFreeMarkerLoginForm(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
+
+        attributes.put("redirectUrl", client.getRedirectUris().iterator().next());
+
+        attributes.put("hashJs", getHash("bundle.min.js"));
+        attributes.put("hashCss", getHash("bundle.min.css"));
+    }
+
+    private String getHash(String fileName) {
+        String hash = "";
+        try {
+            hash = DigestUtils.md5Hex(SsoFreeMarkerLoginForm.class.getResourceAsStream("/themes/domru/login/resources/build/" + fileName));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return hash;
     }
 
     @Override
@@ -88,7 +104,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             return builder.build();
         } catch (FreeMarkerException e) {
             log.error("Failed to process template", e);
-            if (templateName.equals(Templates.getTemplate(LoginFormsPages.ERROR))){
+            if (templateName.equals(Templates.getTemplate(LoginFormsPages.ERROR))) {
                 return Response.serverError().build();
             }
             return ErrorPage.error(session, authenticationSession, Response.Status.INTERNAL_SERVER_ERROR, "500");
@@ -153,7 +169,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         setMessage(MessageType.WARNING, Messages.LINK_IDP, idpAlias);
 
         UserModel existingUser = AbstractIdpAuthenticator.getExistingUser(session, session.getContext().getRealm(), brokerContext.getAuthenticationSession());
-        if (existingUser != null ) {
+        if (existingUser != null) {
             attributes.put(FormConstants.EXISTING_USER_EMAIL, existingUser.getEmail());
         }
         return createResponse(LoginFormsPages.LOGIN_IDP_LINK_EMAIL);
