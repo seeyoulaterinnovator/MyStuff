@@ -213,7 +213,7 @@ public class UserRepository {
                         "                                         UE.username LIKE CONCAT('%', :search, '%') OR\n" +
                         "                                         UA.value LIKE CONCAT('%', :search, '%')))\n" +
                         "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser)\n" +
-                        "and (:searchToms is null or :searchToms = '' or exists(select id\n" +
+                        "and (:searchToms is null or :searchToms = '' or exists(select UP.id\n" +
                         "                    from UserPostEntity UP\n" +
                         "                    where UP.user = UE and UP.customer.id = :searchToms))\n")
                 .setParameter("search", search)
@@ -243,7 +243,7 @@ public class UserRepository {
                         "                                         UE.username LIKE CONCAT('%', :search, '%') OR\n" +
                         "                                         UA.value LIKE CONCAT('%', :search, '%')))\n" +
                         "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser)\n" +
-                        "and (:searchToms is null or :searchToms = '' or exists(select id\n" +
+                        "and (:searchToms is null or :searchToms = '' or exists(select UP.id\n" +
                         "                    from UserPostEntity UP\n" +
                         "                    where UP.user = UE and UP.customer.id = :searchToms))\n" +
                         getSort(sortField, sortAsc)
@@ -264,7 +264,7 @@ public class UserRepository {
     private String getSort(String sortField, boolean sortAsc) {
         String sort = "";
         if (SORT_FIELD_NAME.equalsIgnoreCase(sortField)) {
-            sort += "ORDER BY firstName";
+            sort += "ORDER BY first_name";
         } else if (SORT_FIELD_EMAIL.equalsIgnoreCase(sortField)) {
             sort += "ORDER BY email";
         }

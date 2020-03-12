@@ -266,6 +266,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                                             RealmClearUserCache, RealmClearRealmCache, RealmClearKeysCache) {
 
     $scope.userRealms = [];
+    $scope.users = [];
 
     $scope.pages = {};
     $scope.pages.number = 1;
@@ -694,6 +695,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     }
 
     $scope.search = function () {
+        $scope.users = [];
+
         console.log("query.search: " + $scope.query.search);
         $http.get(`${authUrl}/realms/user/users-info/search?` +
             `searchRealm=${$scope.query.searchRealm}&search=${$scope.query.search}` +
@@ -2460,11 +2463,4 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
     };
 
     $scope.init();
-});
-
-$(window).load(function() {
-
-    $(".loader_inner").fadeOut();
-    $(".loader").delay(400).fadeOut("slow");
-
 });
