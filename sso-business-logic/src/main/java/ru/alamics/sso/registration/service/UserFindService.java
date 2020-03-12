@@ -58,9 +58,7 @@ public class UserFindService {
 
     public List<UserSearch> getUsersByParameters(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc,
                                                  Integer pageNum, Integer pageSize) {
-        LocalDateTime time = LocalDateTime.now();
         List<UserSummaryView> users = userRepository.findUsersByParameters(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
-        System.out.println("time query:" + Duration.between(time, LocalDateTime.now()).getSeconds());
 
         if (users.isEmpty()) {
             return Collections.emptyList();
@@ -78,7 +76,6 @@ public class UserFindService {
         List<UserSearch> userSearches = UserMapper.toUserSearchList(users);
         userSearches.forEach(user -> user.setUserPosts(userPosts.get(user.getId())));
 
-        System.out.println("total time query:" + Duration.between(time, LocalDateTime.now()).getSeconds());
         return userSearches;
     }
 
