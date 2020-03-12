@@ -10,7 +10,7 @@ import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.model.UserConstants;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.user.web.AttributeRequest;
-import ru.alamics.sso.util.validator.model.PhoneValidator;
+import ru.alamics.sso.util.validator.PhoneValidator;
 
 import javax.validation.ValidationException;
 import java.util.Collections;
@@ -72,7 +72,7 @@ public class UserAttributeService {
         if (presentPhone.isPresent()) {
 
             try {
-                new PhoneValidator(presentPhone.get().getValue()).validate();
+                PhoneValidator.validate(presentPhone.get().getValue());
             } catch (ValidationException e){
                 throw new AttributeFormatException("phone");
             }

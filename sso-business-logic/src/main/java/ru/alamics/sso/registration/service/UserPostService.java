@@ -12,8 +12,8 @@ import ru.alamics.sso.keycloak.repository.UserRepository;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.*;
 import ru.alamics.sso.registration.mapper.DataMapper;
-import ru.alamics.sso.util.validator.model.DmpIdValidator;
-import ru.alamics.sso.util.validator.model.TomsIdValidator;
+import ru.alamics.sso.util.validator.DmpIdValidator;
+import ru.alamics.sso.util.validator.TomsIdValidator;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -60,10 +60,10 @@ public class UserPostService {
                     postRequest.getUserId(), post.getId(), postRequest.getTomsId()));
         }
 
-        new TomsIdValidator(postRequest.getTomsId()).validate();
+        TomsIdValidator.validate(postRequest.getTomsId());
 
         if (postRequest.getDmpId() != null && !postRequest.getDmpId().isBlank()) {
-            new DmpIdValidator(postRequest.getDmpId()).validate();
+            DmpIdValidator.validate(postRequest.getDmpId());
         }
     }
 

@@ -1,17 +1,10 @@
-package ru.alamics.sso.util.validator.model;
-
-import lombok.AllArgsConstructor;
-import ru.alamics.sso.util.validator.Validator;
+package ru.alamics.sso.util.validator;
 
 import javax.validation.ValidationException;
 
-@AllArgsConstructor
-public class EmailValidator implements Validator {
+public abstract class EmailValidator {
 
-    private String email;
-
-    @Override
-    public void validate() {
+    public static void validate(String email) {
         if (email == null || !email.contains("@") || !email.substring(0, 1).matches("([\\w[\\s]])+")
                 || email.substring(0, 1).matches("[\\d]+") || email.contains(" ") ||
                 !email.substring(email.indexOf("@") + 1, email.indexOf("@") + 2).matches("([\\w[\\s]])+")) {

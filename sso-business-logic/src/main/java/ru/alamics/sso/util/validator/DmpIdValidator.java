@@ -1,18 +1,11 @@
-package ru.alamics.sso.util.validator.model;
-
-import lombok.AllArgsConstructor;
-import ru.alamics.sso.util.validator.Validator;
+package ru.alamics.sso.util.validator;
 
 import javax.validation.ValidationException;
 import java.util.UUID;
 
-@AllArgsConstructor
-public class DmpIdValidator implements Validator {
+public abstract class DmpIdValidator {
 
-    private String dmpId;
-
-    @Override
-    public void validate() {
+    public static void validate(String dmpId) {
         try {
             UUID.fromString(dmpId);
         } catch (IllegalArgumentException e) {
