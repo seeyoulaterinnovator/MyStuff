@@ -159,8 +159,9 @@ public class UserPostService {
                 ExternalSystemRoleRequest systemRole = new ExternalSystemRoleRequest();
                 systemRole.setUserPostId(userPost.getId());
                 systemRole.setSystemRoleId(systemRoleDto.getId());
-                return addSystemRole(systemRole);
+                userPost = addSystemRole(systemRole);
             }
+            return userPost;
         } catch (NotFoundException e) {
             log.error(e.getMessage(), e);
         }
