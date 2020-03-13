@@ -737,4 +737,14 @@
         </sql>
     </changeSet>
 
+    <changeSet id="41" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_USER_ENTITY_SERVICE_REALM"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_USER_ENTITY_SERVICE_REALM
+              on USER_ENTITY (SERVICE_ACCOUNT_CLIENT_LINK, REALM_ID);
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
