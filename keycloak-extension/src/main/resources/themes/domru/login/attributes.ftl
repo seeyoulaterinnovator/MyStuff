@@ -20,14 +20,15 @@
                         <#assign firstRow = post?index == 0>
                         <div class="${firstRow?then('selected', '')} trow titems">
                             <div id="tomsId-${post?index}" style="display:none">${post.tomsId!}</div>
+                            <div id="postId-${post?index}" style="display:none">${post.id!}</div>
                             <div id="tomsName-${post?index}" class="org-cell">
-                                <#if (post.tomsName?hasContent && post.tomsName?length > 1)>
-                                    ${post.tomsName}
+                                <#if (post.organization?hasContent && post.organization?length > 1)>
+                                    ${post.organization}
                                 <#else>
                                     ${post.tomsId}
                                 </#if>
                             </div>
-                            <div id="roleName-${post?index}" class="role-cell">${post.roleName!}</div>
+                            <div id="roleName-${post?index}" class="role-cell">${post.userRole.name!}</div>
                         </div>
                 </#list>
             </div>
@@ -36,6 +37,7 @@
         <form class="form-actions" action="${url.loginAction}" method="POST">
             <input style="visibility:hidden" type="text" name="roleName" id="roleName" value="${posts[0].roleName!}"/>
             <input style="visibility:hidden" type="text" name="tomsId" id="tomsId" value="${posts[0].tomsId!}"/>
+            <input style="visibility:hidden" type="text" name="postId" id="postId" value="${posts[0].id!}"/>
             <input style="visibility:hidden" name="accept" id="kc-accept" type="submit" value="Отправить"/>
         </form>
 
@@ -127,9 +129,11 @@
         Array.from(document.getElementsByClassName('titems')).forEach(function (el, index) {
             var roleName = document.getElementById("roleName-" + index).textContent;
             var tomsId = document.getElementById("tomsId-" + index).textContent;
+            var postId = document.getElementById("postId-" + index).textContent;
             el.addEventListener('click', function () {
                 document.getElementById('roleName').value = roleName;
                 document.getElementById('tomsId').value = tomsId;
+                document.getElementById('postId').value = postId;
                 window.parent.postMessage('post-selected', '*');
                 document.getElementById('kc-accept').click();
             });
