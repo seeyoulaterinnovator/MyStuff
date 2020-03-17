@@ -24,7 +24,7 @@
     
     <#if properties.styles?has_content>
       <#list properties.styles?split(' ') as style>
-        <link href="${url.resourcesPath}/${style}?hash=${hashCss}" rel="stylesheet" />
+        <link href="${url.resourcesPath}/${style}?hash=" rel="stylesheet" />
       </#list>
     </#if>
   </head>
@@ -93,7 +93,7 @@
 
     <#if properties.scripts?has_content>
       <#list properties.scripts?split(' ') as script>
-        <script src="${url.resourcesPath}/${script}?hash=${hashJs}" async></script>
+        <script src="${url.resourcesPath}/${script}?hash=" async></script>
       </#list>
     </#if>
     
