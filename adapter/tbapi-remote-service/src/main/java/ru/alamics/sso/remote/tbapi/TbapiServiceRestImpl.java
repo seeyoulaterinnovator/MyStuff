@@ -4,12 +4,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.jboss.resteasy.plugins.providers.StringTextStar;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
+import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.phone.SmsCodeGenerator;
+import ru.alamics.sso.registration.tbapi.TbapiService;
 import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.tbapi.model.TbapiRequest;
+import ru.alamics.sso.registration.tbapi.model.TbapiResponse;
 import ru.alamics.sso.registration.tbapi.port.TbapiRemoteService;
 
 import javax.ws.rs.client.Entity;
@@ -23,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static ru.alamics.sso.registration.model.UserConstants.ATTR_ORG_NAME;
+
 @Slf4j
 public class TbapiServiceRestImpl implements TbapiRemoteService {
 
@@ -35,7 +41,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
     private static final ResteasyClient client = clientBuilder.build();
 
     @Override
-    public Map<String, Object> createCustomer(TbapiRequest request, TbapiConnectConfig connectConfig) throws TbapiRegisterException
+    public TbapiResponse createCustomer(TbapiRequest request, TbapiConnectConfig connectConfig) throws TbapiRegisterException
     {
         // нужно кидать exception для показа страницы с ошибкой
         if (request != null && request.getLegalName() != null && request.getLegalName().equalsIgnoreCase("ПВФ Сейлор Мун")) {
@@ -43,26 +49,10 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
             throw new TbapiRegisterException();
         }
 
-        // TODO ? StandResolver.isMock()
-//        if (true && !"localhost".equalsIgnoreCase(connectConfig.getHost())) {
-//            return createCustomerMOCK(request);
-//        } else {
-            return createCustomerBattle(request, connectConfig);
-//        }
+        return createCustomerBattle(request, connectConfig);
     }
 
-    private Map<String, Object> createCustomerMOCK(TbapiRequest request) throws TbapiRegisterException
-    {
-        log.info("Mocked TBAPI sending");
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("id", SmsCodeGenerator.getCode(10));
-        result.put("dmpCustomerId", SmsCodeGenerator.getCode(8));
-
-        return result;
-    }
-
-    private Map<String, Object> createCustomerBattle(TbapiRequest request, TbapiConnectConfig connectConfig) throws TbapiRegisterException
+    private TbapiResponse createCustomerBattle(TbapiRequest request, TbapiConnectConfig connectConfig) throws TbapiRegisterException
     {
 
         URI uri = new ResteasyUriBuilder()
@@ -73,21 +63,30 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
                 .build();
 
         log.info("TBAPI request to {}", uri.toString());
+        log.info("TBAPI config {}", connectConfig.toString());
 
         ResteasyWebTarget target = client.target(uri);
-        target.request(MediaType.APPLICATION_JSON);
 
         Entity<TbapiRequest> entity = Entity.json(request);
 
-        Map<String, Object> responseMap;
+        TbapiResponse responseData = null;
         try (Response response = target
                 .register(ResteasyJackson2Provider.class) // TODO
+                .register(StringTextStar.class)
                 .request()
-                .header("Accept", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .header("HOST", connectConfig.getHost())
                 .header("Authorization", String.format("Trusted application=\"%s\", username=\"%s\"", connectConfig.getAppname(), connectConfig.getUsername()))
                 .post(entity)) {
 
-            responseMap = response.readEntity(new GenericType<>(mapExample.getClass()));
+            log.info("response media type {}, status {}", response.getMediaType(), response.getStatus());
+
+            if (response.getMediaType().toString().equalsIgnoreCase("text/html")) {
+                log.error("response " + response.readEntity(String.class));
+            } else {
+                responseData = response.readEntity(TbapiResponse.class);
+            }
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -95,13 +94,16 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
             throw new TbapiRegisterException(e);
         }
 
-        return responseMap;
+        return responseData;
     }
 
     @Override
     public Map<String, Object> getCustomerName(List<String> id, TbapiConnectConfig connectConfig) {
         log.info("customer names request : customerIds={}", id);
         Map<String, Object> responseMap = new HashMap<>();
+
+        Response response = null;
+
         try {
             URI uri = new ResteasyUriBuilder()
                     .scheme(connectConfig.isSecure() ? "https" : "http")
@@ -115,23 +117,66 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("id", id);
             Entity<Map<String, Object>> entity = Entity.json(requestBody);
+
             ResteasyWebTarget target = client.target(uri);
-            target.request(MediaType.APPLICATION_JSON);
-            Response response = target.register(ResteasyJackson2Provider.class).request()
-                    .header("Accept", MediaType.APPLICATION_JSON)
+            response = target.register(ResteasyJackson2Provider.class).request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header("Content-Type", MediaType.APPLICATION_JSON)
+                    .header("HOST", connectConfig.getHost())
                     .header("Authorization", String.format("Trusted application=\"%s\", username=\"%s\"", connectConfig.getAppname(), connectConfig.getUsername()))
                     .build("POST", entity)
                     .invoke();
 
-            responseMap = response.readEntity(new GenericType<>(mapExample.getClass()));
-            if (responseMap.get("businessErrorCode") != null){
-                throw new Exception("error tbapi code: " +  responseMap.get("businessErrorCode").toString());
+            log.info("response media type {}, status {}", response.getMediaType(), response.getStatus());
+
+            if (response.getMediaType().toString().equalsIgnoreCase("text/html")) {
+                log.error("response " + response.readEntity(String.class));
+
+            } else {
+
+                responseMap = response.readEntity(new GenericType<>(mapExample.getClass()));
+                if (responseMap.get("businessErrorCode") != null) {
+                    throw new Exception("error tbapi code: " + responseMap.get("businessErrorCode").toString());
+                }
             }
+
             log.info("customer names response : {}", responseMap);
+
         } catch (Exception e){
             log.error("tbapi error post request: ", e);
         } finally {
-            return responseMap;
+
+            if (response != null)
+                response.close();
+        }
+        return responseMap;
+    }
+
+    public static void main(String[] args) {
+
+        TbapiConnectConfig connectConfig = new TbapiConnectConfig();
+
+        connectConfig.setHost("10.121.10.30");
+        connectConfig.setPort(26800);
+        connectConfig.setAppname("SSP");
+        connectConfig.setUsername("anonymous");
+        connectConfig.setPath("/api/v1/customerManagement/customerAccount");
+        connectConfig.setSecure(false);
+
+        User user = User.builder()
+                .name("sdfs22dfsdf")
+                .email("sdf22ds@gfsdgdfg.ru")
+                .phone("71116460466")
+                .build();
+
+        String orgName = "dfgd22fgdfg";
+        user.getAttributes().put(ATTR_ORG_NAME, Collections.singletonList(orgName));
+
+        try {
+            Map<String, Object> attributes = new TbapiService(new TbapiServiceRestImpl()).registerUser(user, connectConfig);
+            System.out.println(attributes);
+        } catch (TbapiRegisterException e) {
+            e.printStackTrace();
         }
     }
 }

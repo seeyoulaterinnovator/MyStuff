@@ -429,7 +429,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="32" author="strukov-av">
+    <changeSet id="32_mysql" author="strukov-av" dbms="mysql">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="CUSTOMER" />
             <tableExists tableName="USER_POST" />
@@ -443,6 +443,26 @@
         <sql>
             ALTER TABLE CUSTOMER CHANGE ID ID varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
             ALTER TABLE USER_POST CHANGE TOMS_ID TOMS_ID varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            insert into CUSTOMER(ID, UPDATE_TIME) select distinct p.TOMS_ID, CURRENT_TIMESTAMP from USER_POST p;
+        </sql>
+
+        <addForeignKeyConstraint baseTableName="USER_POST" baseColumnNames="TOMS_ID"
+                                 constraintName="FK_USER_POST_TO_CUSTOMER"
+                                 referencedTableName="CUSTOMER" referencedColumnNames="ID" />
+    </changeSet>
+
+    <changeSet id="32_h2" author="strukov-av" dbms="h2">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="CUSTOMER" />
+            <tableExists tableName="USER_POST" />
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="USER_POST" foreignKeyName="FK_USER_POST_TO_CUSTOMER" />
+            </not>
+        </preConditions>
+
+        <modifyDataType tableName="USER_POST" columnName="TOMS_ID" newDataType="varchar(30)" />
+
+        <sql>
             insert into CUSTOMER(ID, UPDATE_TIME) select distinct p.TOMS_ID, CURRENT_TIMESTAMP from USER_POST p;
         </sql>
 
@@ -610,13 +630,31 @@
         </sql>
     </changeSet>
 
-    <changeSet id="39" author="plyusnin-da">
+    <changeSet id="39_mysql" author="plyusnin-da" dbms="mysql">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="REALM_ATTRIBUTE"></tableExists>
         </preConditions>
         <sql>
             alter table REALM_ATTRIBUTE change VALUE VALUE varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
         </sql>
+    </changeSet>
+
+    <changeSet id="39_h2" author="plyusnin-da" dbms="h2">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="REALM_ATTRIBUTE"></tableExists>
+        </preConditions>
+
+        <modifyDataType tableName="REALM_ATTRIBUTE" columnName="VALUE" newDataType="varchar(2000)" />
+    </changeSet>
+
+    <changeSet id="40" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_POST"/>
+        </preConditions>
+
+        <addUniqueConstraint tableName="USER_POST"
+                             columnNames="USER_ID, TOMS_ID"
+                             constraintName="UC_USER_ID_TOMS_ID"/>
     </changeSet>
 
 </databaseChangeLog>

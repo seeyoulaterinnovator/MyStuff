@@ -36,8 +36,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 @LocalBean
 public class EmailSender {
     private static final String SEND_INTERVAL_PROPERTY = "emailSender.interval.milliseconds";
+    private static final String DO_NOT_SEND_PROPERTY = "emailSender.dont.send";
 
     private long sendInterval = 1000;
+    private boolean dontSend = false;
 
     private FreeMarkerUtil freeMarkerUtil;
     private BlockingQueue<EmailModel> emailQueue;
@@ -58,7 +60,7 @@ public class EmailSender {
             emailQueue.put(emailModel);
             log.info("Success put email into send queue: email={}, send queue size={}", email, getEmailQueueSize());
         } catch (InterruptedException e) {
-            log.error("Fail put email into send queue: email={}, send queue size={}", email, getEmailQueueSize(), e);
+            log.error(String.format("Fail put email into send queue: email=%s, send queue size=%d", email, getEmailQueueSize()), e);
         }
     }
 
@@ -80,17 +82,21 @@ public class EmailSender {
                         EmailTemplate template = processTemplate(emailModel.getSubject(), emailModel.getSubjectAttributes(),
                                 emailModel.getBodyTemplate(), emailModel.getBodyAttributes(),
                                 emailModel.getTheme(), emailModel.getLocale());
-                        emailSenderProvider.send(emailModel.getRealmModel().getSmtpConfig(), emailModel.getUser(), template.getSubject(), template.getTextBody(), template.getHtmlBody());
-                        createEmailEvent(OperationType.ACTION, emailModel, template.subject);
-                        log.info("send to " + emailModel.getUser().getEmail() + " is finished. EmailQueueSize={}, SendInterval={}", getEmailQueueSize(), sendInterval);
+                        if (!dontSend) {
+                            emailSenderProvider.send(emailModel.getRealmModel().getSmtpConfig(), emailModel.getUser(), template.getSubject(), template.getTextBody(), template.getHtmlBody());
+                            createEmailEvent(OperationType.ACTION, emailModel, template.subject);
+                        } else {
+                            log.info("FAKE sending to {} due to properties", emailModel.getUser().getEmail());
+                        }
+                        log.info("send to {} is finished. EmailQueueSize={}, SendInterval={}", emailModel.getUser().getEmail(), getEmailQueueSize(), sendInterval);
                     } catch (Exception e) {
-                        log.error("send to " + emailModel.getUser().getEmail() + " is failed : EmailQueueSize={} ", getEmailQueueSize(), e);
+                        log.error(String.format("send to %s is failed : EmailQueueSize=%d ", emailModel.getUser().getEmail(), getEmailQueueSize()), e);
                     }
 
                     Thread.sleep(sendInterval);
                 }
             } catch (InterruptedException e) {
-                log.error("'Email sender' task is ended with error : EmailQueueSize={} ", getEmailQueueSize(), e);
+                log.error(String.format("'Email sender' task is ended with error : EmailQueueSize=%d ", getEmailQueueSize()), e);
             } finally {
                 log.error("'Email sender' task is finished. Mailing disabled : EmailQueueSize={}", getEmailQueueSize());
             }
@@ -106,6 +112,7 @@ public class EmailSender {
         executorService.submit(new SendTask());
 
         sendInterval = properties.getPropertyLong(SEND_INTERVAL_PROPERTY, 1000, "EmailSender interval: default value used: '%s' = '%s'");
+        dontSend = Boolean.parseBoolean(properties.getProperty(DO_NOT_SEND_PROPERTY));
     }
 
     private void createEmailEvent(OperationType operationType, EmailModel emailModel, String emailTheme) {

@@ -26,6 +26,7 @@ import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluato
 import org.keycloak.utils.ProfileHelper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundException;
+import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.user.FileServiceException;
 import ru.alamics.sso.user.ImportUsersReportService;
 import ru.alamics.sso.user.UserService;
@@ -117,7 +118,7 @@ public class CustomUserResource {
             return JsonResponse.error(Response.Status.INTERNAL_SERVER_ERROR)
                     .message("Could not create user")
                     .build();
-        } catch (NotFoundException e) {
+        } catch (NotFoundException | FoundUserPostException e) {
             log.error("Could not create user", e);
             return JsonResponse.error(Response.Status.FOUND)
                     .message(e.getMessage())
