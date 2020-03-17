@@ -43,6 +43,10 @@ public class UserPostFacade {
         customerCacheLifespanInDb = properties.getPropertyInt(CUSTOMER_CACHE_LIFESPAN_IN_DB_PROPERTY, CUSTOMER_CACHE_LIFESPAN_IN_DB, "UserPostFacade: default value used: '%s' = '%s'");
     }
 
+    public UserPostService getUserPostService() {
+        return userPostService;
+    }
+
     public List<UserPostResponse> findByUserId(String userId) throws NotFoundException {
         List<UserPostResponse> userPosts = userPostService.getUserPost(userId);
         addCustomersToRequest(userPosts);

@@ -16,6 +16,7 @@ import ru.alamics.sso.registration.tbapi.model.TbapiRequest;
 import ru.alamics.sso.registration.tbapi.model.TbapiResponse;
 import ru.alamics.sso.registration.tbapi.port.TbapiRemoteService;
 
+import javax.ejb.Stateless;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
@@ -30,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_ORG_NAME;
 
 @Slf4j
+@Stateless(name = "TbapiRemoteService")
 public class TbapiServiceRestImpl implements TbapiRemoteService {
 
     private static final Map<String, Object> mapExample = Collections.unmodifiableMap(new HashMap<>());
