@@ -80,6 +80,20 @@ public class UserPostRepository {
                 .getResultList();
     }
 
+    public List<UserPostEntity> findUserPostsByUserIds(List<String> userIds) {
+        return em.createQuery(
+                "select distinct upe " +
+                        "from UserPostEntity upe " +
+                        "left join fetch upe.user " +
+                        "left join fetch upe.systemRoles sr " +
+                        "left join fetch upe.role " +
+                        "left join fetch upe.customer " +
+                        "left join fetch sr.externalSystem " +
+                        "where upe.user.id in :userIds ", UserPostEntity.class)
+                .setParameter("userIds", userIds)
+                .getResultList();
+    }
+
     public List<UserPostEntity> findUserPostsByIds(List<String> userPostIds) {
         if (userPostIds.isEmpty()) {
             return Collections.emptyList();
@@ -87,6 +101,10 @@ public class UserPostRepository {
         return em.createQuery(
                 "select upe " +
                         "from UserPostEntity upe " +
+                        "left join fetch upe.user " +
+                        "left join fetch upe.systemRoles " +
+                        "left join fetch upe.role " +
+                        "left join fetch upe.customer " +
                         "where upe.id in :userPostIds ", UserPostEntity.class)
                 .setParameter("userPostIds", userPostIds)
                 .getResultList();

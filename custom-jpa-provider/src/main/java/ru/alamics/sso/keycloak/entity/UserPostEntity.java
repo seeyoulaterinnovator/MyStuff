@@ -18,18 +18,18 @@ public class UserPostEntity {
 
     @Id
     private String id;
-    @ManyToOne(targetEntity = UserEntity.class)
+    @ManyToOne(targetEntity = UserEntity.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserEntity user;
-    @ManyToOne(targetEntity = Customer.class)
+    @ManyToOne(targetEntity = Customer.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "toms_id")
     private Customer customer;
     @Column(name = "dmp_id")
     private String dmpId;
-    @ManyToOne(targetEntity = UserPostRoleEntity.class)
+    @ManyToOne(targetEntity = UserPostRoleEntity.class, fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
     private UserPostRoleEntity role;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "USERPOST_EXT_SYSTEM_ROLE",
             joinColumns = @JoinColumn(name = "user_post_id"),
