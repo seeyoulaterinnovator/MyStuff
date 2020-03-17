@@ -264,19 +264,19 @@
             <subsystem xmlns="urn:jboss:domain:infinispan:8.0">
                 <cache-container name="keycloak">
                     <transport lock-timeout="60000"/>
-                    <local-cache name="realms">
+                    <distributed-cache name="realms">
                         <object-memory size="10000"/>
-                    </local-cache>
-                    <local-cache name="users" statistics-enabled="true">
+                    </distributed-cache>
+                    <distributed-cache name="users" statistics-enabled="true">
                         <object-memory size="10000"/>
-                    </local-cache>
-                    <local-cache name="authorization" statistics-enabled="true">
+                    </distributed-cache>
+                    <distributed-cache name="authorization" statistics-enabled="true">
                         <object-memory size="10000"/>
-                    </local-cache>
-                    <local-cache name="keys" statistics-enabled="true">
+                    </distributed-cache>
+                    <distributed-cache name="keys" statistics-enabled="true">
                         <object-memory size="100000"/>
                         <expiration max-idle="3600000"/>
-                    </local-cache>
+                    </distributed-cache>
                     <replicated-cache name="work"/>
                     <distributed-cache name="sessions" owners="1"/>
                     <distributed-cache name="authenticationSessions" owners="1"/>
