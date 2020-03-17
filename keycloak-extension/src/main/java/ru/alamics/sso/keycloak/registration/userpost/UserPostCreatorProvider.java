@@ -46,6 +46,7 @@ public class UserPostCreatorProvider implements FormAction {
         UserPostRequest userPostRequest = UserMapper.toUserPostRequest(context);
         if (userPostRequest != null && userPostRequest.getTomsId() != null) {
             userPostRequest.setRoleId(ROLE_ID);
+            userPostRequest.setSelected(true);
             
             try {
                 cachedUserPostFacade.addUserPostAndSystemRole(userPostRequest);
