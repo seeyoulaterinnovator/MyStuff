@@ -66,6 +66,9 @@ public class SearchResource {
         if (searchRealm == null || searchRealm.isBlank()) {
             searchRealm = "user";
         }
+
+        session.userCache().clear();
+
         List<UserSearch> users = userFindService.getUsersByParameters(searchRealm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
         return JsonResponse.success()
                 .addResult("users-info", users)
