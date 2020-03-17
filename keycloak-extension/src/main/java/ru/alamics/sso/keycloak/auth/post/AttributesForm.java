@@ -79,19 +79,13 @@ public class AttributesForm implements Authenticator {
 
     }
 
-    private Response createForm(AuthenticationFlowContext context, List<UserPostResponse> attributes) {
+    private Response createForm(AuthenticationFlowContext context, List<UserPostResponse> posts) {
         LoginFormsProvider form = context.form();
-        if (!attributes.isEmpty()) {
-            Set<AttributesModel> models = attributes.stream()
-                    .map(attribute -> AttributesModel.builder()
-                            .roleName(attribute.getUserRole().getName())
-                            .tomsId(attribute.getTomsId())
-                            .tomsName(attribute.getOrganization())
-                            .build()
-                    ).collect(Collectors.toSet());
 
-            form.setAttribute("posts", models);
+        if (!posts.isEmpty()) {
+            form.setAttribute("posts", posts);
         }
+
         return form.createForm(FORM);
     }
 

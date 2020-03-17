@@ -1,17 +1,18 @@
 package ru.alamics.sso.keycloak.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Immutable;
 
 import javax.persistence.*;
-import java.util.Set;
 
 @Entity
 @Immutable
 @Table(name = "EXT_SYSTEM_ROLE")
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode
 public class ExternalSystemRoleEntity {
     @Id
     private Long id;
@@ -20,6 +21,4 @@ public class ExternalSystemRoleEntity {
     @ManyToOne
     @JoinColumn(name = "system_id")
     private ExternalSystemEntity externalSystem;
-    @ManyToMany(mappedBy = "systemRoles")
-    private Set<UserPostEntity> userPosts;
 }
