@@ -16,4 +16,6 @@ public class UserPostRequest {
     private String dmpId;
     @NotNull
     private Long roleId;
+
+    private boolean selected;
 }
