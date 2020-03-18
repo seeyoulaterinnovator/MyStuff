@@ -657,4 +657,14 @@
                              constraintName="UC_USER_ID_TOMS_ID"/>
     </changeSet>
 
+    <changeSet id="41" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="IMPORT_USERS_DATA"/>
+        </preConditions>
+
+        <modifyDataType tableName="IMPORT_USERS_DATA"
+                        columnName="DMP_ID"
+                        newDataType="varchar(255)" />
+    </changeSet>
+
 </databaseChangeLog>
