@@ -325,6 +325,7 @@
                     <replicated-cache name="timestamps"/>
                 </cache-container>
                 <cache-container name="custom_container">
+                    <transport lock-timeout="60000"/>
                     <distributed-cache name="user_post_cache">
                         <object-memory size="10000"/>
                         <expiration max-idle="100000"/>
@@ -614,20 +615,12 @@
             </outbound-socket-binding>
         </socket-binding-group>
     </socket-binding-groups>
-    <deployments>
-        <deployment name="domru-sso.war" runtime-name="domru-sso.war">
-            <content sha1="090f0943d45883e281ad6913116659d713fe0c3b"/>
-        </deployment>
-    </deployments>
     <server-groups>
         <server-group name="auth-server-group" profile="auth-server-clustered">
             <jvm name="default">
-                <heap size="2048m" max-size="6144m"/>
+                <heap size="2048m" max-size="12288m"/>
             </jvm>
             <socket-binding-group ref="ha-sockets"/>
-            <deployments>
-                <deployment name="domru-sso.war" runtime-name="domru-sso.war"/>
-            </deployments>
         </server-group>
     </server-groups>
 </domain>
