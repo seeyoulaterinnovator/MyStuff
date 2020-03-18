@@ -16,13 +16,14 @@ import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
 import ru.alamics.sso.jpa.entity.UserPostEntity;
 import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
+import ru.alamics.sso.keycloak.facade.UserPostFacade;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleDto;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserFindService;
-import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.user.model.*;
 import ru.alamics.sso.user.web.UserSearchDto;
@@ -31,8 +32,6 @@ import ru.alamics.sso.util.validator.EmailValidator;
 import ru.alamics.sso.util.validator.PhoneValidator;
 
 import javax.activation.UnsupportedDataTypeException;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.validation.ValidationException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,26 +44,22 @@ import static ru.alamics.sso.user.model.UserParameter.*;
 
 @Slf4j
 public class UserServiceImpl implements UserService {
-    private final static Long DEFAULT_ROLE_ID = 1L;   //Соответствует роли LPR
+    private final static Long DEFAULT_ROLE_ID = 1L;   //Соответствует роли LPR // TODO но это не точно
     protected KeycloakSession session;
     private AdminAuth auth;
     private RealmModel realm;
-    private UserPostService userPostService;
     private UserFindService userFindService;
     private ImportUsersReportService importUsersReportService;
+    private UserPostFacade userPostFacade;
 
     public UserServiceImpl(KeycloakSession session, AdminAuth auth) {
         this.auth = auth;
         this.session = session;
         realm = session.getContext().getRealm();
-        try {
-            this.userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
-            this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
-            this.importUsersReportService = (ImportUsersReportService) new InitialContext().lookup("java:global/domru-sso/" + ImportUsersReportService.class.getSimpleName());
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context");
-        }
+
+        this.userFindService = (UserFindService) Lookup.lookup(UserFindService.class);
+        this.importUsersReportService = (ImportUsersReportService) Lookup.lookup(ImportUsersReportService.class);
+        this.userPostFacade = (UserPostFacade) Lookup.lookup(UserPostFacade.class);
     }
 
     private void commit() {
@@ -524,18 +519,18 @@ public class UserServiceImpl implements UserService {
 
         userPostRequest.setRoleId(DEFAULT_ROLE_ID);
 
-        UserPostResponse userPostResponse = userPostService.save(userPostRequest);
+        UserPostResponse userPostResponse = userPostFacade.save(userPostRequest);
 
-        for (ExternalSystemRoleDto sysRole : userPostService.getExternalSystemRoles()) {
+        for (ExternalSystemRoleDto sysRole : userPostFacade.getUserPostService().getExternalSystemRoles()) {
 
-            userPostService.addSystemRole(UserMapper.toExternalSystemRoleRequest(userPostResponse.getId(), sysRole.getId()));
+            userPostFacade.getUserPostService().addSystemRole(UserMapper.toExternalSystemRoleRequest(userPostResponse.getId(), sysRole.getId()));
         }
     }
 
     private void addUserPost(UserModel userModel, ImportUsersDataEntity userImport, UserRequest userRequest) throws NotFoundException, FoundUserPostException {
         UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, userRequest);
-        userPostRequest.setRoleId(userPostService.getUserPostRole(userImport.getRole()));
-        UserPostResponse userPostResponse = userPostService.save(userPostRequest);
+        userPostRequest.setRoleId(userPostFacade.getUserPostService().getUserPostRole(userImport.getRole()));
+        UserPostResponse userPostResponse = userPostFacade.getUserPostService().save(userPostRequest);
 
         addSystemRoles(userImport, userPostResponse.getId());
     }
@@ -548,8 +543,8 @@ public class UserServiceImpl implements UserService {
         List<String> systems = Arrays.asList(userImport.getSystems().replaceAll("\\s", "").split(","));
         if (!systems.isEmpty()) {
             for (String sysName : systems) {
-                userPostService.addSystemRole(UserMapper.toExternalSystemRoleRequest(userPostId,
-                        userPostService.getExternalSystemRoleId(sysName)));
+                userPostFacade.getUserPostService().addSystemRole(UserMapper.toExternalSystemRoleRequest(userPostId,
+                        userPostFacade.getUserPostService().getExternalSystemRoleId(sysName)));
             }
         }
     }

@@ -27,6 +27,7 @@ public class DataMapper {
                 .build());
 
         userPost.setDmpId(userPostRequest.getDmpId());
+        userPost.setSelected(userPostRequest.isSelected());
 
         return userPost;
     }

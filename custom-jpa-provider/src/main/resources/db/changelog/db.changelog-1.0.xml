@@ -737,7 +737,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="41" author="plyusnin-da">
+    <changeSet id="41_p" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
             <not><indexExists indexName="IDX_USER_ENTITY_SERVICE_REALM"/></not>
         </preConditions>
@@ -745,6 +745,16 @@
             create index IDX_USER_ENTITY_SERVICE_REALM
               on USER_ENTITY (SERVICE_ACCOUNT_CLIENT_LINK, REALM_ID);
         </sql>
+    </changeSet>
+
+    <changeSet id="41" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="IMPORT_USERS_DATA"/>
+        </preConditions>
+
+        <modifyDataType tableName="IMPORT_USERS_DATA"
+                        columnName="DMP_ID"
+                        newDataType="varchar(255)" />
     </changeSet>
 
 </databaseChangeLog>

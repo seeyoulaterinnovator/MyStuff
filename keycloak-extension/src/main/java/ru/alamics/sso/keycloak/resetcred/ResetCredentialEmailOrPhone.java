@@ -31,6 +31,7 @@ import java.util.Collections;
 public class ResetCredentialEmailOrPhone extends AuthBaseClass {
 
     private static final String RESET_CREDENTIALS_REDIRECT_URL = "reset.credentials.redirect.url";
+    private final static String RESET_CRED_TO_RIAS_FORM = "reset-cred-to-rias.ftl";
 
     private KeycloakSession session;
     private RiasApiService riasApiService;
@@ -109,13 +110,14 @@ public class ResetCredentialEmailOrPhone extends AuthBaseClass {
         if (location == null)
             location = "https://lkb2b.domru.ru/recovery";
 
-        URI uriLoc = UriBuilder.fromPath(location).build();
+        log.info("Redirecting to {}", location);
 
-        Response response = Response.seeOther(uriLoc)
-                .build();
+        Response challenge = context.form()
+                .setAttribute("redirectTo", location)
+                .setAttribute("redirectHeader", username)
+                .createForm(RESET_CRED_TO_RIAS_FORM);
 
-        log.debug("Redirecting to {}", location);
-        context.forceChallenge(response);
+        context.challenge(challenge);
 
         return true;
     }

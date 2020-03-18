@@ -5,6 +5,7 @@ import org.keycloak.models.jpa.entities.UserAttributeEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.services.validation.Validation;
+import ru.alamics.sso.keycloak.model.UserSummaryView;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -236,31 +237,20 @@ public class UserRepository {
     }
 
     public long getTotalUsersByParameters(String realm, String search, String searchUser, String searchToms) {
-        Query query = em.createNativeQuery(
-                "select count(distinct UE.ID)  " +
-                        "from USER_ENTITY UE\n" +
-                        "         left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone'\n" +
-                        "         left join USER_POST UP on UE.ID = UP.USER_ID\n" +
-                        "         left join USER_POST_ROLE UPR on UP.ROLE_ID = UPR.ID\n" +
-                        "         left join USERPOST_EXT_SYSTEM_ROLE UESR on UP.ID = UESR.USER_POST_ID\n" +
-                        "         left join EXT_SYSTEM_ROLE ESR on UESR.EXT_SYSTEM_ROLE_ID = ESR.ID\n" +
-                        "         left join EXTERNAL_SYSTEM ES on ESR.SYSTEM_ID = ES.ID\n" +
-                        "WHERE UE.REALM_ID = :realm\n" +
-                        "  AND CASE\n" +
-                        "          WHEN :search is not null and :search != '' then (\n" +
-                        "                      UE.EMAIL LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                      UE.FIRST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                      UE.LAST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                      UE.USERNAME LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                      UA.VALUE LIKE CONCAT('%', :search, '%')\n" +
-                        "              )\n" +
-                        "          else UE.ID LIKE '%' end\n" +
-                        "  AND CASE\n" +
-                        "          WHEN :searchUser is not null and :searchUser != '' then (UE.ID = :searchUser)\n" +
-                        "          else UE.ID LIKE '%' OR  UE.ID is null end\n" +
-                        "  AND CASE\n" +
-                        "          WHEN :searchToms is not null and :searchToms != '' then (UP.TOMS_ID = :searchToms)\n" +
-                        "          else UP.TOMS_ID LIKE '%' OR UP.TOMS_ID is null end\n")
+        Query query = em.createQuery(
+                "select count(UE)  " +
+                        "from UserEntity UE\n" +
+                        "         left join UserAttributeEntity UA on UE = UA.user AND UA.name = 'phone'\n" +
+                        "WHERE UE.realmId = :realm\n" +
+                        "and (:search is null or :search = '' or (UE.email LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                                         UE.firstName LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                                         UE.lastName LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                                         UE.username LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                                         UA.value LIKE CONCAT('%', :search, '%')))\n" +
+                        "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser)\n" +
+                        "and (:searchToms is null or :searchToms = '' or exists(select UP.id\n" +
+                        "                    from UserPostEntity UP\n" +
+                        "                    where UP.user = UE and UP.customer.id = :searchToms))\n")
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
@@ -269,43 +259,30 @@ public class UserRepository {
         return Long.parseLong(query.getSingleResult().toString());
     }
 
-    public List<Tuple> getTupleUsersByParameters(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc,
-                                                 Integer pageNum, Integer pageSize) {
-        Query query = em.createNativeQuery(
-                "select " +
-                        "       UE.ID         as user_id,\n" +
-                        "       UE.USERNAME   as username,\n" +
-                        "       UE.FIRST_NAME as first_name,\n" +
-                        "       UE.LAST_NAME  as last_name,\n" +
-                        "       UE.EMAIL      as email,\n" +
-                        "       UA.VALUE      as phone,\n" +
-                        "       UE.ENABLED    as enabled,\n" +
-                        "       group_concat(UP.id)  as user_post_ids\n" +
-                        "from USER_ENTITY UE\n" +
-                        "         left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone'\n" +
-                        "         left join USER_POST UP on UE.ID = UP.USER_ID\n" +
-                        "         left join USER_POST_ROLE UPR on UP.ROLE_ID = UPR.ID\n" +
-                        "         left join USERPOST_EXT_SYSTEM_ROLE UESR on UP.ID = UESR.USER_POST_ID\n" +
-                        "         left join EXT_SYSTEM_ROLE ESR on UESR.EXT_SYSTEM_ROLE_ID = ESR.ID\n" +
-                        "         left join EXTERNAL_SYSTEM ES on ESR.SYSTEM_ID = ES.ID\n" +
-                        "WHERE UE.REALM_ID = :realm\n" +
-                        "  AND CASE\n" +
-                        "          WHEN :search is not null and :search != '' then (\n" +
-                        "                      UE.EMAIL LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                      UE.FIRST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                      UE.LAST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                      UE.USERNAME LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                      UA.VALUE LIKE CONCAT('%', :search, '%')\n" +
-                        "              )\n" +
-                        "          else UE.ID LIKE '%' end\n" +
-                        "  AND CASE\n" +
-                        "          WHEN :searchUser is not null and :searchUser != '' then (UE.ID = :searchUser)\n" +
-                        "          else UE.ID LIKE '%' OR  UE.ID is null end\n" +
-                        "  AND CASE\n" +
-                        "          WHEN :searchToms is not null and :searchToms != '' then (UP.TOMS_ID = :searchToms)\n" +
-                        "          else UP.TOMS_ID LIKE '%' OR UP.TOMS_ID is null end\n" +
-                        "group by UE.ID " +
-                        getSort(sortField, sortAsc), Tuple.class)
+    public List<UserSummaryView> findUsersByParameters(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc,
+                                                       Integer pageNum, Integer pageSize) {
+        Query query = em.createQuery(
+                "select new ru.alamics.sso.keycloak.model.UserSummaryView(UE.id, " +
+                        "                                                         UE.username," +
+                        "                                                         UE.firstName, " +
+                        "                                                         UE.lastName, " +
+                        "                                                         UE.email, " +
+                        "                                                         UA.value, " +
+                        "                                                         UE.enabled) " +
+                        "from UserEntity UE\n" +
+                        "         left join UserAttributeEntity UA on UE = UA.user AND UA.name = 'phone'\n" +
+                        "WHERE UE.realmId = :realm\n" +
+                        "and (:search is null or :search = '' or (UE.email LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                                         UE.firstName LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                                         UE.lastName LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                                         UE.username LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                                         UA.value LIKE CONCAT('%', :search, '%')))\n" +
+                        "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser)\n" +
+                        "and (:searchToms is null or :searchToms = '' or exists(select UP.id\n" +
+                        "                    from UserPostEntity UP\n" +
+                        "                    where UP.user = UE and UP.customer.id = :searchToms))\n" +
+                        getSort(sortField, sortAsc)
+                , UserSummaryView.class)
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)

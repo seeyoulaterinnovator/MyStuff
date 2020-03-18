@@ -18,4 +18,6 @@ dependencies {
     // https://mvnrepository.com/artifact/com.opencsv/opencsv
     implementation group: 'com.opencsv', name: 'opencsv', version: '4.0'
 
+    implementation "org.keycloak:keycloak-model-infinispan:$keycloakVersion"
+
 }

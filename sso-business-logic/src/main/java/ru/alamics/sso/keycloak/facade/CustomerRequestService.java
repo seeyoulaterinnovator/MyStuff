@@ -8,7 +8,7 @@ import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.tbapi.TbapiService;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnect;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
-import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
+import ru.alamics.sso.registration.tbapi.port.TbapiRemoteService;
 
 import javax.ejb.Singleton;
 import java.util.*;
@@ -33,7 +33,10 @@ public class CustomerRequestService {
     private ApplicationProperties properties;
 
     public CustomerRequestService() {
-        tbapiService = new TbapiService(new TbapiServiceRestImpl());
+
+        TbapiRemoteService tbapiRemoteService = (TbapiRemoteService) Lookup.lookup(TbapiRemoteService.class);
+
+        tbapiService = new TbapiService(tbapiRemoteService);
         properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
         customerService = (CustomerService) Lookup.lookup(CustomerService.class);
         tbapiRequestMaxSize = properties.getPropertyInt(TBAPI_REQUEST_MAX_SIZE_PROPERTY, TBAPI_REQUEST_MAX_SIZE, "CustomerRequestService: default value used: '%s' = '%s'");

@@ -32,11 +32,11 @@ public class UserPostEntity {
     @Column(name = "dmp_id")
     private String dmpId;
 
-    @ManyToOne(targetEntity = UserPostRoleEntity.class)
+    @ManyToOne(targetEntity = UserPostRoleEntity.class, fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
     private UserPostRoleEntity role;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "USERPOST_EXT_SYSTEM_ROLE",
             joinColumns = @JoinColumn(name = "user_post_id"),
