@@ -66,20 +66,15 @@
     </domain-controller>
     <interfaces>
         <interface name="management">
-            <inet-address value="${jboss.bind.address.management:0.0.0.0}"/>
+            <inet-address value="${jboss.bind.address.management:127.0.0.1}"/>
         </interface>
         <interface name="public">
-            <inet-address value="${jboss.bind.address:0.0.0.0}"/>
+            <inet-address value="${jboss.bind.address:127.0.0.1}"/>
         </interface>
     </interfaces>
     <jvms>
         <jvm name="default">
             <heap size="64m" max-size="256m"/>
-            <jvm-options>
-                <option value="-server"/>
-                <option value="-XX:MetaspaceSize=96m"/>
-                <option value="-XX:MaxMetaspaceSize=256m"/>
-            </jvm-options>
         </jvm>
     </jvms>
     <servers>
@@ -97,7 +92,7 @@
               ~  server-two avoids port conflicts by incrementing the ports in
               ~                  the default socket-group declared in the server-group 
               -->
-            <socket-bindings port-offset="150"/>
+            <socket-bindings port-offset="0"/>
         </server>
     </servers>
     <profile>

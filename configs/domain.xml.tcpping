@@ -262,29 +262,29 @@
                 </sasl>
             </subsystem>
             <subsystem xmlns="urn:jboss:domain:infinispan:8.0">
-                <cache-container name="keycloak" statistics-enabled="true">
+                <cache-container name="keycloak">
                     <transport lock-timeout="60000"/>
                     <replicated-cache name="work"/>
-                    <local-cache name="realms">
+                    <distributed-cache name="realms">
                         <object-memory size="10000"/>
-                    </local-cache>
-                    <local-cache name="users" statistics-enabled="true">
+                    </distributed-cache>
+                    <distributed-cache name="users" statistics-enabled="true">
                         <object-memory size="10000"/>
-                    </local-cache>
-                    <local-cache name="authorization" statistics-enabled="true">
+                    </distributed-cache>
+                    <distributed-cache name="authorization" statistics-enabled="true">
                         <object-memory size="10000"/>
-                    </local-cache>
-                    <local-cache name="keys" statistics-enabled="true">
+                    </distributed-cache>
+                    <distributed-cache name="keys" statistics-enabled="true">
                         <object-memory size="100000"/>
                         <expiration max-idle="3600000"/>
-                    </local-cache>
-                    <replicated-cache name="sessions" statistics-enabled="true"/>
-                    <replicated-cache name="authenticationSessions" statistics-enabled="true"/>
-                    <replicated-cache name="offlineSessions" statistics-enabled="true"/>
-                    <replicated-cache name="clientSessions" statistics-enabled="true"/>
-                    <replicated-cache name="offlineClientSessions" statistics-enabled="true"/>
-                    <replicated-cache name="loginFailures" statistics-enabled="true"/>
-                    <replicated-cache name="actionTokens" statistics-enabled="true">
+                    </distributed-cache>
+                    <replicated-cache name="sessions"/>
+                    <replicated-cache name="authenticationSessions"/>
+                    <replicated-cache name="offlineSessions"/>
+                    <replicated-cache name="clientSessions"/>
+                    <replicated-cache name="offlineClientSessions"/>
+                    <replicated-cache name="loginFailures"/>
+                    <replicated-cache name="actionTokens">
                         <object-memory size="-1"/>
                         <expiration interval="300000" max-idle="-1"/>
                     </replicated-cache>
@@ -324,7 +324,7 @@
                     </invalidation-cache>
                     <replicated-cache name="timestamps"/>
                 </cache-container>
-                <cache-container name="customcontainer">
+                <cache-container name="custom_container">
                     <transport lock-timeout="60000"/>
                     <distributed-cache name="user_post_cache">
                         <object-memory size="10000"/>
@@ -360,9 +360,12 @@
                 </default-workmanager>
                 <cached-connection-manager/>
             </subsystem>
-            <subsystem xmlns="urn:jboss:domain:jgroups:6.0">
+            <subsystem xmlns="urn:jboss:domain:jgroups:6.0" default-stack="tcp">
                 <channels default="ee">
+                    <!--
                     <channel name="ee" stack="udp" cluster="ejb"/>
+                    -->
+                    <channel name="ee" stack="tcp" cluster="ejb"/>
                 </channels>
                 <stacks>
                     <stack name="udp">
@@ -382,7 +385,8 @@
                     </stack>
                     <stack name="tcp">
                         <transport type="TCP" socket-binding="jgroups-tcp"/>
-                        <socket-protocol type="MPING" socket-binding="jgroups-mping"/>
+                        <!--<socket-protocol type="MPING" socket-binding="jgroups-mping"/>-->
+                        <socket-discovery-protocol type="TCPPING" socket-bindings="jgroups-server-one jgroups-server-two jgroups-server-three jgroups-server-four jgroups-server-five"/>
                         <protocol type="MERGE3"/>
                         <protocol type="FD_SOCK"/>
                         <protocol type="FD_ALL"/>
@@ -584,27 +588,51 @@
     </profiles>
     <interfaces>
         <interface name="management"/>
-        <interface name="public"/>
-        <interface name="jgroupsif">
-           <nic name="eth0"/>
+        <interface name="public">
+            <nic name="eth0"/>
         </interface>
         <interface name="private">
             <inet-address value="${jboss.bind.address.private:127.0.0.1}"/>
         </interface>
     </interfaces>
     <socket-binding-groups>
+        <!--<socket-binding-group name="standard-sockets" default-interface="public">
+            <socket-binding name="ajp" port="${jboss.ajp.port:8009}"/>
+            <socket-binding name="http" port="${jboss.http.port:8080}"/>
+            <socket-binding name="https" port="${jboss.https.port:8443}"/>
+            <socket-binding name="txn-recovery-environment" port="4712"/>
+            <socket-binding name="txn-status-manager" port="4713"/>
+            <outbound-socket-binding name="mail-smtp">
+                <remote-destination host="localhost" port="25"/>
+            </outbound-socket-binding>
+        </socket-binding-group>-->
         <socket-binding-group name="ha-sockets" default-interface="public">
             <socket-binding name="ajp" port="${jboss.ajp.port:8009}"/>
             <socket-binding name="http" port="${jboss.http.port:8080}"/>
             <socket-binding name="https" port="${jboss.https.port:8443}"/>
-            <socket-binding name="jgroups-mping" interface="jgroupsif" multicast-address="${jboss.default.multicast.address:230.0.0.4}" multicast-port="45700"/>
-            <socket-binding name="jgroups-tcp" interface="jgroupsif" port="7600"/>
-            <socket-binding name="jgroups-udp" interface="jgroupsif" port="55200" multicast-address="${jboss.default.multicast.address:230.0.0.4}" multicast-port="45688"/>
+            <socket-binding name="jgroups-mping" multicast-address="${jboss.default.multicast.address:230.0.0.4}" multicast-port="45700"/>
+            <socket-binding name="jgroups-tcp" port="7600"/>
+            <socket-binding name="jgroups-udp" port="55200" multicast-address="${jboss.default.multicast.address:230.0.0.4}" multicast-port="45688"/>
             <socket-binding name="modcluster" multicast-address="${jboss.modcluster.multicast.address:224.0.1.105}" multicast-port="23364"/>
             <socket-binding name="txn-recovery-environment" port="4712"/>
             <socket-binding name="txn-status-manager" port="4713"/>
             <outbound-socket-binding name="mail-smtp">
                 <remote-destination host="localhost" port="25"/>
+            </outbound-socket-binding>
+            <outbound-socket-binding name="jgroups-server-one">
+                <remote-destination host="${env.SSO_APP_ONE}" port="7600"/>
+            </outbound-socket-binding>
+            <outbound-socket-binding name="jgroups-server-two">
+                <remote-destination host="${env.SSO_APP_TWO}" port="7600"/>
+            </outbound-socket-binding>
+            <outbound-socket-binding name="jgroups-server-three">
+                <remote-destination host="${env.SSO_APP_THREE}" port="7600"/>
+            </outbound-socket-binding>
+            <outbound-socket-binding name="jgroups-server-four">
+                <remote-destination host="${env.SSO_APP_FOUR}" port="7600"/>
+            </outbound-socket-binding>
+            <outbound-socket-binding name="jgroups-server-five">
+                <remote-destination host="${env.SSO_APP_FIVE}" port="7600"/>
             </outbound-socket-binding>
         </socket-binding-group>
     </socket-binding-groups>
