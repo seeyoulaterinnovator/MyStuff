@@ -561,10 +561,21 @@ public class UserServiceImpl implements UserService {
         }
 
         List<String> systems = List.of(userImport.getSystems().replaceAll("\\s", "").split(","));
+
         if (!systems.isEmpty()) {
+            List<String> errorSystemNames = new LinkedList<>();
+
             for (String sysName : systems) {
-                userPostFacade.getUserPostService().addSystemRole(UserMapper.toExternalSystemRoleRequest(userPostId,
-                        userPostFacade.getUserPostService().getExternalSystemRoleId(sysName)));
+                try {
+                    userPostFacade.getUserPostService().addSystemRole(UserMapper.toExternalSystemRoleRequest(userPostId,
+                            userPostFacade.getUserPostService().getExternalSystemRoleId(sysName)));
+                } catch (NotFoundException e) {
+                    errorSystemNames.add(sysName);
+                }
+            }
+
+            if (!errorSystemNames.isEmpty()) {
+                throw new NotFoundException(String.format("Not found roles for systems: systems=%s", errorSystemNames.toString()));
             }
         }
     }
