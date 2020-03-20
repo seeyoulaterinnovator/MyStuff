@@ -7,8 +7,6 @@ import org.keycloak.policy.BlacklistPasswordPolicyProviderFactory;
 import org.keycloak.policy.PasswordPolicyProvider;
 import org.keycloak.policy.PolicyError;
 
-import java.nio.file.Path;
-
 public class SsoBlacklistPasswordPolicyProvider implements PasswordPolicyProvider {
 
     public static final String ERROR_MESSAGE = "invalidPasswordBlacklistedMessage";
@@ -30,11 +28,11 @@ public class SsoBlacklistPasswordPolicyProvider implements PasswordPolicyProvide
             return null;
         }
 
-        if (!(policyConfig instanceof SsoBlacklistPasswordPolicyProviderFactory.PasswordBlacklist)) {
+        if (!(policyConfig instanceof BlacklistPasswordPolicyProviderFactory.PasswordBlacklist)) {
             return null;
         }
 
-        SsoBlacklistPasswordPolicyProviderFactory.PasswordBlacklist blacklist = (SsoBlacklistPasswordPolicyProviderFactory.FileBasedPasswordBlacklist) policyConfig;
+        BlacklistPasswordPolicyProviderFactory.PasswordBlacklist blacklist = (SsoFileBasedPasswordBlacklist) policyConfig;
 
         if (!blacklist.contains(password)) {
             return null;
@@ -63,9 +61,4 @@ public class SsoBlacklistPasswordPolicyProvider implements PasswordPolicyProvide
         //noop
     }
 
-    public static class SsoFileBasedPasswordBlacklist extends BlacklistPasswordPolicyProviderFactory.FileBasedPasswordBlacklist {
-        public SsoFileBasedPasswordBlacklist(Path blacklistBasePath, String name) {
-            super(blacklistBasePath, name);
-        }
-    }
 }
