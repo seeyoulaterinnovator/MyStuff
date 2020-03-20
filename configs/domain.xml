@@ -324,7 +324,7 @@
                     </invalidation-cache>
                     <replicated-cache name="timestamps"/>
                 </cache-container>
-                <cache-container name="customcontainer">
+                <cache-container name="custom_container">
                     <transport lock-timeout="60000"/>
                     <distributed-cache name="user_post_cache">
                         <object-memory size="10000"/>
