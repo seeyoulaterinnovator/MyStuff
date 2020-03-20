@@ -609,9 +609,6 @@
         </socket-binding-group>
     </socket-binding-groups>
     <deployments>
-        <deployment name="sso-44261" runtime-name="domru-sso.war">
-            <content sha1="6ffd26641e85b0c992cb7b15ecb1f03bf2a15a49"/>
-        </deployment>
     </deployments>
     <server-groups>
         <server-group name="auth-server-group" profile="auth-server-clustered">
@@ -619,9 +616,6 @@
                 <heap size="2048m" max-size="12288m"/>
             </jvm>
             <socket-binding-group ref="ha-sockets"/>
-            <deployments>
-                <deployment name="sso-44261" runtime-name="domru-sso.war"/>
-            </deployments>
         </server-group>
     </server-groups>
 </domain>
