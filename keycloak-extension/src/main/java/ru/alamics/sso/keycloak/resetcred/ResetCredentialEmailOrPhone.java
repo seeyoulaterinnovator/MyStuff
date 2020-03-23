@@ -59,8 +59,6 @@ public class ResetCredentialEmailOrPhone extends AuthBaseClass {
                 username = userFind.getUsername();
                 authenticationSession.setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, userFind.getEmail());
                 context.getHttpRequest().getDecodedFormParameters().replace("username", Collections.singletonList(userFind.getEmail()));
-            } else {
-                context.getHttpRequest().getDecodedFormParameters().replace("username", Collections.singletonList(""));
             }
         }
 
