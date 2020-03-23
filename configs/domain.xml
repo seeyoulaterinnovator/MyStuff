@@ -78,19 +78,15 @@
                 <logger category="sun.rmi">
                     <level name="WARN"/>
                 </logger>
-                <logger category="org.hibernate">
-                    <level name="WARN"/>
-                </logger>
                 <root-logger>
                     <level name="INFO"/>
                     <handlers>
                         <handler name="CONSOLE"/>
                         <handler name="FILE"/>
-                        <handler name="ERROR"/>
                     </handlers>
                 </root-logger>
                 <formatter name="PATTERN">
-                    <pattern-formatter pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"/>
+                    <pattern-formatter pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"/>
                 </formatter>
                 <formatter name="COLOR-PATTERN">
                     <pattern-formatter pattern="%K{level}%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"/>
@@ -262,32 +258,32 @@
                 </sasl>
             </subsystem>
             <subsystem xmlns="urn:jboss:domain:infinispan:8.0">
-                <cache-container name="keycloak" statistics-enabled="true">
+                <cache-container name="keycloak">
                     <transport lock-timeout="60000"/>
-                    <replicated-cache name="work"/>
                     <local-cache name="realms">
                         <object-memory size="10000"/>
                     </local-cache>
-                    <local-cache name="users" statistics-enabled="true">
+                    <local-cache name="users">
                         <object-memory size="10000"/>
                     </local-cache>
-                    <local-cache name="authorization" statistics-enabled="true">
+                    <local-cache name="authorization">
                         <object-memory size="10000"/>
                     </local-cache>
-                    <local-cache name="keys" statistics-enabled="true">
-                        <object-memory size="100000"/>
+                    <local-cache name="keys">
+                        <object-memory size="1000"/>
                         <expiration max-idle="3600000"/>
                     </local-cache>
-                    <replicated-cache name="sessions" statistics-enabled="true"/>
-                    <replicated-cache name="authenticationSessions" statistics-enabled="true"/>
-                    <replicated-cache name="offlineSessions" statistics-enabled="true"/>
-                    <replicated-cache name="clientSessions" statistics-enabled="true"/>
-                    <replicated-cache name="offlineClientSessions" statistics-enabled="true"/>
-                    <replicated-cache name="loginFailures" statistics-enabled="true"/>
-                    <replicated-cache name="actionTokens" statistics-enabled="true">
+                    <replicated-cache name="work"/>
+                    <distributed-cache name="sessions" owners="1"/>
+                    <distributed-cache name="authenticationSessions" owners="1"/>
+                    <distributed-cache name="offlineSessions" owners="1"/>
+                    <distributed-cache name="clientSessions" owners="1"/>
+                    <distributed-cache name="offlineClientSessions" owners="1"/>
+                    <distributed-cache name="loginFailures" owners="1"/>
+                    <distributed-cache name="actionTokens" owners="2">
                         <object-memory size="-1"/>
                         <expiration interval="300000" max-idle="-1"/>
-                    </replicated-cache>
+                    </distributed-cache>
                 </cache-container>
                 <cache-container name="server" aliases="singleton cluster" default-cache="default" module="org.wildfly.clustering.server">
                     <transport lock-timeout="60000"/>
@@ -313,8 +309,8 @@
                 </cache-container>
                 <cache-container name="hibernate" module="org.infinispan.hibernate-cache">
                     <transport lock-timeout="60000"/>
-                    <local-cache name="local-query" statistics-enabled="true">
-                        <object-memory size="100000"/>
+                    <local-cache name="local-query">
+                        <object-memory size="10000"/>
                         <expiration max-idle="100000"/>
                     </local-cache>
                     <invalidation-cache name="entity">
@@ -409,9 +405,6 @@
                     <provider>
                         classpath:${jboss.home.dir}/providers/*
                     </provider>
-                    <provider>
-                        module:ru.alamics.sso.jpa
-                    </provider>
                 </providers>
                 <master-realm-name>master</master-realm-name>
                 <scheduled-task-interval>900</scheduled-task-interval>
@@ -419,8 +412,6 @@
                     <staticMaxAge>2592000</staticMaxAge>
                     <cacheThemes>true</cacheThemes>
                     <cacheTemplates>true</cacheTemplates>
-                    <welcomeTheme>${env.KEYCLOAK_WELCOME_THEME:keycloak}</welcomeTheme>
-                    <default>${env.KEYCLOAK_DEFAULT_THEME:keycloak}</default>
                     <dir>${jboss.home.dir}/themes</dir>
                 </theme>
                 <spi name="user">
@@ -559,13 +550,13 @@
                     </process-id>
                 </core-environment>
                 <recovery-environment socket-binding="txn-recovery-environment" status-socket-binding="txn-status-manager"/>
-                <coordinator-environment statistics-enabled="true"/>
+                <coordinator-environment statistics-enabled="${wildfly.transactions.statistics-enabled:${wildfly.statistics-enabled:false}}"/>
                 <object-store path="tx-object-store" relative-to="jboss.server.data.dir"/>
             </subsystem>
-            <subsystem xmlns="urn:jboss:domain:undertow:8.0" default-server="default-server" default-virtual-host="default-host" default-servlet-container="default" default-security-domain="other" statistics-enabled="true">
+            <subsystem xmlns="urn:jboss:domain:undertow:8.0" default-server="default-server" default-virtual-host="default-host" default-servlet-container="default" default-security-domain="other" statistics-enabled="${wildfly.undertow.statistics-enabled:${wildfly.statistics-enabled:false}}">
                 <buffer-cache name="default"/>
                 <server name="default-server">
-                    <ajp-listener name="ajp" socket-binding="ajp" record-request-start-time="true"/>
+                    <ajp-listener name="ajp" socket-binding="ajp"/>
                     <http-listener name="default" socket-binding="http" record-request-start-time="true" redirect-socket="https" proxy-address-forwarding="true"/>
                     <host name="default-host" alias="localhost">
                         <location name="/" handler="welcome-content"/>
@@ -584,28 +575,43 @@
     </profiles>
     <interfaces>
         <interface name="management"/>
-        <interface name="public"/>
-        <interface name="jgroupsif">
-           <nic name="eth0"/>
+        <interface name="public">
+            <nic name="eth0"/>
         </interface>
         <interface name="private">
             <inet-address value="${jboss.bind.address.private:127.0.0.1}"/>
         </interface>
     </interfaces>
     <socket-binding-groups>
+        <socket-binding-group name="standard-sockets" default-interface="public">
+            <socket-binding name="ajp" port="${jboss.ajp.port:8009}"/>
+            <socket-binding name="http" port="${jboss.http.port:8080}"/>
+            <socket-binding name="https" port="${jboss.https.port:8443}"/>
+            <socket-binding name="txn-recovery-environment" port="4712"/>
+            <socket-binding name="txn-status-manager" port="4713"/>
+            <outbound-socket-binding name="mail-smtp">
+                <remote-destination host="localhost" port="25"/>
+            </outbound-socket-binding>
+        </socket-binding-group>
         <socket-binding-group name="ha-sockets" default-interface="public">
             <socket-binding name="ajp" port="${jboss.ajp.port:8009}"/>
             <socket-binding name="http" port="${jboss.http.port:8080}"/>
             <socket-binding name="https" port="${jboss.https.port:8443}"/>
-            <socket-binding name="jgroups-mping" interface="jgroupsif" multicast-address="${jboss.default.multicast.address:230.0.0.4}" multicast-port="45700"/>
-            <socket-binding name="jgroups-tcp" interface="jgroupsif" port="7600"/>
-            <socket-binding name="jgroups-udp" interface="jgroupsif" port="55200" multicast-address="${jboss.default.multicast.address:230.0.0.4}" multicast-port="45688"/>
+            <socket-binding name="jgroups-mping" interface="public" multicast-address="${jboss.default.multicast.address:230.0.0.4}" multicast-port="45700"/>
+            <socket-binding name="jgroups-tcp" interface="public" port="7600"/>
+            <socket-binding name="jgroups-udp" interface="public" port="55200" multicast-address="${jboss.default.multicast.address:230.0.0.4}" multicast-port="45688"/>
             <socket-binding name="modcluster" multicast-address="${jboss.modcluster.multicast.address:224.0.1.105}" multicast-port="23364"/>
             <socket-binding name="txn-recovery-environment" port="4712"/>
             <socket-binding name="txn-status-manager" port="4713"/>
             <outbound-socket-binding name="mail-smtp">
                 <remote-destination host="localhost" port="25"/>
             </outbound-socket-binding>
+        </socket-binding-group>
+        <socket-binding-group name="load-balancer-sockets" default-interface="public">
+            <socket-binding name="http" port="${jboss.http.port:8080}"/>
+            <socket-binding name="https" port="${jboss.https.port:8443}"/>
+            <socket-binding name="mcmp-management" interface="private" port="${jboss.mcmp.port:8090}"/>
+            <socket-binding name="modcluster" interface="private" multicast-address="${jboss.modcluster.multicast.address:224.0.1.105}" multicast-port="23364"/>
         </socket-binding-group>
     </socket-binding-groups>
     <deployments>
