@@ -11,4 +11,9 @@
         <res-ref-name>infinispan/custom_container/customer_cache</res-ref-name>
         <lookup-name>java:jboss/infinispan/cache/custom_container/customer_cache</lookup-name>
     </resource-ref>
+
+    <!-- replication-config deprecated since WildFly 17 -->
+    <replication-config>
+        <replication-granularity>SESSION</replication-granularity>
+    </replication-config>
 </jboss-web>
