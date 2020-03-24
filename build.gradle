@@ -145,6 +145,13 @@ task deploy {
 //            from file('/configs/local/standalone.xml')
 //            into(deployDir + '/standalone/configuration')
 //        }
+
+
+        //setup hash to front resources
+        def currentTime = new Date().format('yyyyMMddHHmmss');
+        ant.replaceregexp(match:'hash=', replace:'hash='+currentTime, flags:'g', byline:true) {
+            fileset(dir: themesTargetFolder + '/domru/login', includes: 'template.ftl')
+        }
     }
 }
 
