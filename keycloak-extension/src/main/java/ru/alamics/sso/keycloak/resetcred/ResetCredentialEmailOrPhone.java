@@ -17,11 +17,7 @@ import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.port.RiasApiService;
 import ru.alamics.sso.registration.service.UserFindService;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-import java.net.URI;
 import java.util.Collections;
 
 
