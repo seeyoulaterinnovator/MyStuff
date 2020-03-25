@@ -31,7 +31,7 @@ public class VkIdentityProvider extends AbstractOAuth2IdentityProvider<OAuth2Ide
 
     VkIdentityProvider(KeycloakSession session, OAuth2IdentityProviderConfig config) {
         super(session, config);
-        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+
         config.setAuthorizationUrl(properties.getProperty(AUTH_URL));
         config.setTokenUrl(properties.getProperty(TOKEN_URL));
         config.setUserInfoUrl(properties.getProperty(PROFILE_URL));
@@ -93,6 +93,7 @@ public class VkIdentityProvider extends AbstractOAuth2IdentityProvider<OAuth2Ide
 
     @Override
     protected String getDefaultScopes() {
+        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
         return properties.getProperty(DEFAULT_SCOPE);
     }
 
