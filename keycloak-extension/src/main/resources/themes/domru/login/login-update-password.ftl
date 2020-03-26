@@ -17,7 +17,6 @@
                     <a id="cancel" href="https://master.frontend2.b2bweb.t2.ertelecom.ru" class="btn w-full">${msg("doCancel")}</a>
                 </div>
             </div>
-            <input name="city" id="city" class="city_hidden_input" type="text" />
         </form>
     </#if>
 </@layout.registrationLayout>
