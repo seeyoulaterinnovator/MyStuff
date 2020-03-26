@@ -1,15 +1,15 @@
 import IMask from 'imask';
 import VALIDATION_RULES from '../constants/validationRules.js';
 import { setButtonAvailability } from './helpers.js';
-import { city } from '../Cities/stores';
+import { domain } from '../Cities/stores.js';
 
 export default (function() {
   const formElement = document.getElementById('loginResetPasswordForm');
   if (!formElement) return;
 
   const cityInput = document.getElementById('city');
-  const unsubscribeCity = city.subscribe(value => {
-    cityInput.value = value
+  domain.subscribe(value => {
+    cityInput.value = value;
   });
 
   const submitElement = document.getElementById('submit');
