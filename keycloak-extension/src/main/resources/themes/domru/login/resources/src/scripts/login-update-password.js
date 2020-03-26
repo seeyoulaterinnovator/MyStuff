@@ -5,6 +5,8 @@ import { setButtonAvailability, isEmpty } from './helpers.js';
 
 import VALIDATION_RULES from '../constants/validationRules.js';
 
+import { city } from '../Cities/stores';
+
 export default (function() {
   const formElement = document.getElementById('loginUpdatePasswordForm');
   if (!formElement) return;
@@ -13,6 +15,9 @@ export default (function() {
   const passwordElement = document.getElementById('password-new');
   const passwordConfirmElement = document.getElementById('password-confirm');
   submitElement.disabled = true;
+
+  const cityInput = document.getElementById('city');
+  cityInput.value = city;
 
   let isPasswordExists = false;
   let isPasswordConfirmExists = false;
@@ -35,7 +40,9 @@ export default (function() {
 
     function checkExistence() {
       Object.keys(registered).forEach(name => {
-        if (name && !values[name]) errors[name] = 'Обязательное поле';
+        if (name && !values[name] && name !== 'city') {
+          errors[name] = 'Обязательное поле';
+        }
       });
     }
 

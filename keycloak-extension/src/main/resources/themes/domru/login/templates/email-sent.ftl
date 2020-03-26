@@ -9,10 +9,6 @@
     <div>
       <h1 class="text text__title"><#nested "header"></h1>
         <#if !isVerified>
-          <p class="text text--close">
-            На почту:
-          </p>
-          <p class="text text__email">${email}</p>
           <p class="text text--far">
               <#nested "description">
           </p>

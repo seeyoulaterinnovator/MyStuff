@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.policy;
+package ru.alamics.sso.keycloak.policy.rest;
 
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.resource.RealmResourceProvider;

@@ -519,6 +519,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         }).catch(error => {
             if (error.status === 400) {
                 Notifications.error(error.data.message);
+            } else if (error.status === 502) {
+                Notifications.info("Too many users to import. You can view the report on the “Import Users” tab later ");
             } else {
                 Notifications.error(error.statusText);
             }
@@ -541,6 +543,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         }).catch(error => {
             if (error.status === 400) {
                 Notifications.error(error.data.message);
+            } else if (error.status === 502) {
+                Notifications.info("Too many users to import. You can view the report on the “Import Users” tab later ");
             } else {
                 Notifications.error(error.statusText);
             }
