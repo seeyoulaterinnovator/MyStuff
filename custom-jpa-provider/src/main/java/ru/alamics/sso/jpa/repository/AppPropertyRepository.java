@@ -39,13 +39,13 @@ public class AppPropertyRepository {
     }
 
 
-    public int checkStatusDb() {
+    public boolean checkStatusDb() {
         try {
             em.createNativeQuery("select 1").getSingleResult();
         } catch (Exception e) {
-            return 0;
+            return false;
         }
 
-        return 1;
+        return true;
     }
 }

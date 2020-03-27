@@ -29,9 +29,16 @@ public class StatusResource {
     @NoCache
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     public Response getStatus() {
+        boolean status = properties.checkStatusDb();
+
+        if (!status) {
+            return JsonResponse.error(Response.Status.SERVICE_UNAVAILABLE)
+                    .addResult("status", status)
+                    .build();
+        }
 
         return JsonResponse.success()
-                .addResult("status", properties.checkStatusDb())
+                .addResult("status", status)
                 .build();
     }
 }
