@@ -45,9 +45,6 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         super(session, freeMarker);
 
         attributes.put("redirectUrl", client.getRedirectUris().iterator().next());
-
-        attributes.put("hashJs", getHash("bundle.min.js"));
-        attributes.put("hashCss", getHash("bundle.min.css"));
     }
 
     private String getHash(String fileName) {

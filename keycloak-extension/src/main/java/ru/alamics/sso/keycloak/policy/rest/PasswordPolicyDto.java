@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.policy;
+package ru.alamics.sso.keycloak.policy.rest;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
