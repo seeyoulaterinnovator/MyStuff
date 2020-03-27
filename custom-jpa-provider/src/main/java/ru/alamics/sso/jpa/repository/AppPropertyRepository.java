@@ -37,4 +37,15 @@ public class AppPropertyRepository {
         em.flush();
         return appProperty;
     }
+
+
+    public boolean checkStatusDb() {
+        try {
+            em.createNativeQuery("select 1").getSingleResult();
+        } catch (Exception e) {
+            return false;
+        }
+
+        return true;
+    }
 }
