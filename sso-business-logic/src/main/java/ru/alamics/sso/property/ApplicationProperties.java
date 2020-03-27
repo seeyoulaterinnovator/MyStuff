@@ -116,7 +116,7 @@ public class ApplicationProperties {
         log.info("Initializing application properties from database finished:{}", dbProperties.toString());
     }
 
-    public boolean checkStatusDb() {
+    public int checkStatusDb() {
         return propertyRepository.checkStatusDb();
     }
 }
