@@ -10,12 +10,15 @@ import ru.alamics.sso.registration.tbapi.model.TbapiConnect;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.tbapi.port.TbapiRemoteService;
 
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 
 @Slf4j
 @Singleton
+@Lock(LockType.READ)
 public class CustomerRequestService {
     private static final String TBAPI_REQUEST_MAX_SIZE_PROPERTY = "tbapi.customer.request.max.size";
     private static final int TBAPI_REQUEST_MAX_SIZE = 10;
@@ -45,6 +48,7 @@ public class CustomerRequestService {
         dontRequest = Boolean.parseBoolean(properties.getProperty(TBAPI_CUSTOMER_DONT_REQUEST));
     }
 
+    @Lock(LockType.WRITE)
     public Map<String, String> updateCustomerNames() {
         List<String> currentTomsIds = extractListFromQueue(tbapiRequestMaxSize);
         if (currentTomsIds.isEmpty()) {
@@ -68,6 +72,7 @@ public class CustomerRequestService {
         }
     }
 
+    @Lock(LockType.WRITE)
     private Map<String, Object> requestCustomerNames(List<String> currentTomsIds) {
 
         if (dontRequest) {

@@ -6,6 +6,8 @@ import ru.alamics.sso.keycloak.cache.CustomCache;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 
 import javax.annotation.Resource;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import java.util.Collection;
@@ -33,11 +35,13 @@ public class UserPostCache implements CustomCache<UserPostResponse> {
     }
 
     @Override
+    @Lock(LockType.READ)
     public Set<UserPostResponse> get(String userId) {
         return cache.get(userId);
     }
 
     @Override
+    @Lock(LockType.READ)
     public Set<UserPostResponse> getAll() {
         return cache.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
     }
