@@ -9,6 +9,9 @@ export const city = writable(
     'Пермь',
 );
 
+export const domain = writable(
+  Cookie.get('city-domain') || 'perm');
+
 const isFirstVisit =
   Cookie.get('VISITED') === '0' || typeof Cookie.get('VISITED') === 'undefined';
 

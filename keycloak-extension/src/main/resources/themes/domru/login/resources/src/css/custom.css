@@ -161,3 +161,7 @@ input[type="number"] {
 #password, #password-new, #password-confirm {
   padding-right: 3rem;
 }
+
+.city_hidden_input {
+  display: none;
+}
