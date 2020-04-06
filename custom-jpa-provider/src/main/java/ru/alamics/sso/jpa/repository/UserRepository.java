@@ -271,6 +271,7 @@ public class UserRepository {
                         "                                                         UE.enabled) " +
                         "from UserEntity UE\n" +
                         "         left join UserAttributeEntity UA on UE = UA.user AND UA.name = 'phone'\n" +
+                        "         left join UserPostEntity UP on UE = UP.user \n" +
                         "WHERE UE.realmId = :realm\n" +
                         "and (:search is null or :search = '' or (UE.email LIKE CONCAT('%', :search, '%') OR\n" +
                         "                                         UE.firstName LIKE CONCAT('%', :search, '%') OR\n" +
@@ -278,9 +279,7 @@ public class UserRepository {
                         "                                         UE.username LIKE CONCAT('%', :search, '%') OR\n" +
                         "                                         UA.value LIKE CONCAT('%', :search, '%')))\n" +
                         "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser)\n" +
-                        "and (:searchToms is null or :searchToms = '' or exists(select UP.id\n" +
-                        "                    from UserPostEntity UP\n" +
-                        "                    where UP.user = UE and UP.customer.id = :searchToms))\n" +
+                        "and (:searchToms is null or :searchToms = '' or UP.customer.id = :searchToms)\n" +
                         getSort(sortField, sortAsc)
                 , UserSummaryView.class)
                 .setParameter("search", search)
