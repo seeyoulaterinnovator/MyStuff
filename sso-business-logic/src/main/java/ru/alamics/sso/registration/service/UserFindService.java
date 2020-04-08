@@ -1,5 +1,6 @@
 package ru.alamics.sso.registration.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.model.UserSummaryView;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Stateless
+@Slf4j
 public class UserFindService {
     @EJB
     private UserRepository userRepository;
