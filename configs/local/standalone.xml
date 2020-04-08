@@ -151,7 +151,7 @@
                     </pool>
                     <security>
                         <user-name>sso</user-name>
-                        <password>Nojtofnervumlyhi</password>
+                        <password></password>
                     </security>
                     <validation>
                         <check-valid-connection-sql>select 1</check-valid-connection-sql>
