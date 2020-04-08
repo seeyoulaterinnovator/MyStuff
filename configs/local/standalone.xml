@@ -132,6 +132,7 @@
         <subsystem xmlns="urn:jboss:domain:core-management:1.0"/>
         <subsystem xmlns="urn:jboss:domain:datasources:5.0">
             <datasources>
+                <!-- local -->
                 <datasource jndi-name="java:jboss/datasources/KeycloakDS" pool-name="KeycloakDS" enabled="true" use-java-context="true" statistics-enabled="${wildfly.datasources.statistics-enabled:${wildfly.statistics-enabled:false}}">
                     <connection-url>jdbc:h2:${jboss.server.data.dir}/keycloak;AUTO_SERVER=TRUE</connection-url>
                     <driver>h2</driver>
@@ -140,9 +141,31 @@
                         <password>sa</password>
                     </security>
                 </datasource>
+                <!-- PROD -->
+                <!--
+                <datasource jndi-name="java:jboss/datasources/KeycloakDS" pool-name="KeycloakDS" enabled="true" use-java-context="true" statistics-enabled="true">
+                    <connection-url>jdbc:mariadb://192.168.57.23:3308/sso</connection-url>
+                    <driver>mariadb</driver>
+                    <pool>
+                        <max-pool-size>10</max-pool-size>
+                    </pool>
+                    <security>
+                        <user-name>sso</user-name>
+                        <password></password>
+                    </security>
+                    <validation>
+                        <check-valid-connection-sql>select 1</check-valid-connection-sql>
+                        <background-validation>true</background-validation>
+                        <background-validation-millis>15000</background-validation-millis>
+                    </validation>
+                </datasource>
+                -->
                 <drivers>
                     <driver name="h2" module="com.h2database.h2">
                         <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
+                    </driver>
+                    <driver name="mariadb" module="org.mariadb.jdbc">
+                        <xa-datasource-class>org.mariadb.jdbc.MariaDbDataSource</xa-datasource-class>
                     </driver>
                 </drivers>
             </datasources>
@@ -418,6 +441,9 @@
             <providers>
                 <provider>
                     classpath:${jboss.home.dir}/providers/*
+                </provider>
+                <provider>
+                    module:ru.alamics.sso.jpa
                 </provider>
             </providers>
             <master-realm-name>master</master-realm-name>

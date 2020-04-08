@@ -70,11 +70,14 @@ public class SearchResource {
             searchRealm = "user";
         }
         List<UserSearch> users = userFindService.getUsersByParameters(searchRealm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
+
+        long total = userFindService.getTotalUsersByParameters(searchRealm, search, searchUser, searchToms);
+
         return JsonResponse.success()
                 .addResult("users-info", users)
                 .addResult("page-info",
                         DataMapper.toPageDto(users,
-                                userFindService.getTotalUsersByParameters(searchRealm, search, searchUser, searchToms),
+                                total,
                                 pageNum, pageSize))
                 .build();
     }
