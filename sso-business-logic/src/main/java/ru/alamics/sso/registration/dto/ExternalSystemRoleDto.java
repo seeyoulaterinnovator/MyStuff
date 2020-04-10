@@ -1,10 +1,12 @@
 package ru.alamics.sso.registration.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
+@JsonDeserialize(builder = ExternalSystemRoleDto.ExternalSystemRoleDtoBuilder.class)
 @Builder(builderClassName = "ExternalSystemRoleDtoBuilder", toBuilder = true)
 public class ExternalSystemRoleDto {
     private Long id;
