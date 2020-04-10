@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 public class UserPostRoleDto {
     private Long id;
     private String name;
+    private String description;
 
     @Override
     public String toString() {

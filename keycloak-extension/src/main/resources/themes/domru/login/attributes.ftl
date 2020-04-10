@@ -28,7 +28,13 @@
                                     ${post.tomsId}
                                 </#if>
                             </div>
-                            <div id="roleName-${post?index}" class="role-cell">${post.userRole.name!}</div>
+                            <div id="roleName-${post?index}" class="role-cell">
+                                <#if (post.userRole.description?hasContent && post.userRole.description?length > 1)>
+                                    ${post.userRole.description}
+                                <#else>
+                                    ${post.userRole.name}
+                                </#if>
+                            </div>
                         </div>
                 </#list>
             </div>
