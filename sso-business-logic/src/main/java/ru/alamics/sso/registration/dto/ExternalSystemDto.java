@@ -12,7 +12,8 @@ public class ExternalSystemDto {
     private Long id;
     private String name;
     private String label;
-    private Set<ExternalSystemRoleDto> systemRoles;
+    // падает сериализация. для кластера
+    //private Set<ExternalSystemRoleDto> systemRoles;
 
     @JsonPOJOBuilder(withPrefix = "")
     public static class ExternalSystemDtoBuilder {
