@@ -92,7 +92,7 @@ public class UserRepository {
                 "select * " +
                         "  from USER_ENTITY ue " +
                         "  where " +
-                    //  " ue.REALM_ID = :realmId and " +
+                        " ue.REALM_ID = :realmId and " +
                         "     (:excludedUserId is null or ue.ID <> :excludedUserId) " +
                         "    and exists ( " +
                         "      select 1 " +
@@ -100,14 +100,18 @@ public class UserRepository {
                         "      where attr.USER_ID = ue.ID " +
                         "        and attr.NAME = :name " +
                         "        and attr.VALUE = :phoneNmbr " +
-                        "    )"
+                        "    )" +
+                        "  limit 1"
                 , UserEntity.class)
-                //.setParameter("realmId", realmName) // без реалма запрос быстрее, а почти все юзеры из реалма user
+                .setParameter("realmId", realmName)
                 .setParameter("name", "phone")
                 .setParameter("phoneNmbr", phone)
                 .setParameter("excludedUserId", Validation.isBlank(excludedUserId) ? null : excludedUserId)
                 .getResultList();
 
+        if (users != null && !users.isEmpty())
+            return users.get(0);
+        /*
         if (users != null && users.size() > 0) {
 
             for (UserEntity ue : users) {
@@ -115,6 +119,7 @@ public class UserRepository {
                     return ue;
             }
         }
+        */
         return null;
     }
 
