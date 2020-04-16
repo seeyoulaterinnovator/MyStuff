@@ -265,8 +265,11 @@ public class UserRepository {
 
     public List<UserSummaryView> findUsersByParameters(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc,
                                                        Integer pageNum, Integer pageSize) {
+        if (search != null && !search.isEmpty())
+            search = "%" + search + "%";
+
         Query query = em.createQuery(
-                "select new ru.alamics.sso.keycloak.model.UserSummaryView(UE.id, " +
+                "select distinct new ru.alamics.sso.keycloak.model.UserSummaryView(UE.id, " +
                         "                                                         UE.username," +
                         "                                                         UE.firstName, " +
                         "                                                         UE.lastName, " +
@@ -275,13 +278,13 @@ public class UserRepository {
                         "                                                         UE.enabled) " +
                         "from UserEntity UE\n" +
                         "         left join UserAttributeEntity UA on UE = UA.user AND UA.name = 'phone'\n" +
+                        "                AND (:search is null or :search = '' or UA.value LIKE :search) \n" +
                         "         left join UserPostEntity UP on UE = UP.user \n" +
                         "WHERE UE.realmId = :realm\n" +
-                        "and (:search is null or :search = '' or (UE.email LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                                         UE.firstName LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                                         UE.lastName LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                                         UE.username LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                                         UA.value LIKE CONCAT('%', :search, '%')))\n" +
+                        "and (:search is null or :search = '' or (UE.email LIKE :search OR\n" +
+                        "                                         UE.firstName LIKE :search OR\n" +
+//                        "                                         UE.lastName LIKE :search OR\n" +
+                        "                                         UE.username LIKE :search ))\n" +
                         "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser)\n" +
                         "and (:searchToms is null or :searchToms = '' or UP.customer.id = :searchToms)\n" +
                         getSort(sortField, sortAsc)

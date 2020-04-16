@@ -66,6 +66,8 @@ public class UserFindService {
             return Collections.emptyList();
         }
 
+        log.info("getUsersByParameters 1");
+
         Map<String, List<UserPostResponse>> userPosts = userPostRepository
                 .findUserPostsByUserIds(
                         users.stream()
@@ -75,8 +77,12 @@ public class UserFindService {
                 .map(DataMapper::toUserPostResponse)
                 .collect(Collectors.groupingBy(UserPostResponse::getUserId));
 
+        log.info("getUsersByParameters 2");
+
         List<UserSearch> userSearches = UserMapper.toUserSearchList(users);
         userSearches.forEach(user -> user.setUserPosts(userPosts.get(user.getId())));
+
+        log.info("getUsersByParameters 3");
 
         return userSearches;
     }

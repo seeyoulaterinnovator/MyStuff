@@ -69,17 +69,28 @@ public class SearchResource {
         if (searchRealm == null || searchRealm.isEmpty()) {
             searchRealm = "user";
         }
+
+        log.info("getUsersInfo 1");
+
         List<UserSearch> users = userFindService.getUsersByParameters(searchRealm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
 
-        long total = userFindService.getTotalUsersByParameters(searchRealm, search, searchUser, searchToms);
+        log.info("getUsersInfo 2");
 
-        return JsonResponse.success()
+        long total = 200; // userFindService.getTotalUsersByParameters(searchRealm, search, searchUser, searchToms);
+
+        log.info("getUsersInfo 3");
+
+        Response respB = JsonResponse.success()
                 .addResult("users-info", users)
                 .addResult("page-info",
                         DataMapper.toPageDto(users,
                                 total,
                                 pageNum, pageSize))
                 .build();
+
+        log.info("getUsersInfo 4");
+
+        return respB;
     }
 
     @GET

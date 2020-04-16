@@ -44,7 +44,8 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     public SsoFreeMarkerLoginForm(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
 
-        attributes.put("redirectUrl", client.getRedirectUris().iterator().next());
+        if (client != null)
+            attributes.put("redirectUrl", client.getRedirectUris().iterator().next());
     }
 
     private String getHash(String fileName) {

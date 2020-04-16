@@ -39,7 +39,7 @@
         <caption data-ng-show="users" class="hidden">{{:: 'table-of-realm-users' | translate}}</caption>
         <thead>
         <tr>
-            <th colspan="13">
+            <th colspan="14">
                 <div class="form-inline">
                     <div class="form-group form-inline">
                         <div class="form-group">
@@ -99,6 +99,7 @@
         </tr>
         <tr>
         <tr data-ng-show="searchLoaded && users.length > 0">
+            <th class="w-1"></th>
             <th class="w-1">
                 <input type="checkbox" data-ng-click="selectAll()" data-ng-model="selectedAll"> Select
             </th>
@@ -119,6 +120,7 @@
         </thead>
         <tbody>
         <tr ng-repeat="user in users">
+            <td>{{user.num}}</td>
             <td class="clip" style="width: 5%">
                 <input type="checkbox" data-ng-model="user.active"/>
             </td>
@@ -218,6 +220,8 @@
                 <li data-page="last">
                     <span> >> <span class="sr-only">(current)</span></span>
                 </li>
+
+                <button data-ng-click="moreSearch()" class="btn btn-default more-search">More results</button>
             </ul>
         </nav>
     </div>
