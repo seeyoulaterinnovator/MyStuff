@@ -28,6 +28,7 @@ public class PolicyRepository {
                 .getResultList();
     }
 
+    // TODO ?
     public void findExpiredPasswords (final String realm, final long millis) {
         em.createNativeQuery("insert into AUTO_LOCK_NOTIFICATION(id, user_id, sended_at, type, status)\n" +
                 "SELECT uuid(), cred.USER_ID, null, 'PASSWORD_EXPIRED', 'PREPARE'\n" +
@@ -42,6 +43,7 @@ public class PolicyRepository {
                 "                                             and aln.TYPE = 'PASSWORD_EXPIRED'\n" +
                 "                                             and aln.TYPE = 'SENT')) * 1000)\n" +
                 "  and ue.REALM_ID = :realm\n" +
+                " LIMIT 100 " +
                 "    for update")
                 .setParameter("millis", millis)
                 .setParameter("realm", realm)

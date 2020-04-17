@@ -16,10 +16,7 @@ import ru.alamics.sso.user.web.UserSearch;
 import ru.alamics.sso.user.web.UserSearchDto;
 
 import javax.persistence.Tuple;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.UserConstants.*;
@@ -107,26 +104,34 @@ public class UserMapper {
         return Boolean.valueOf(object.toString());
     }
 
+    // что это за хрень
     public static List<UserSearchDto> toGroupUserDtos(List<UserSearchDto> userDtos) {
         List<UserSearchDto> result = new LinkedList<>();
         for (int i = 0; i < userDtos.size(); i++) {
             UserSearchDto userDto = userDtos.get(i);
             String userPostId = userDto.getUserPostId();
-            String systemNames = userDto.getSystemName();
+
+            StringBuilder sysNames = new StringBuilder();
+            if (userDto.getSystemName() != null)
+                sysNames.append(userDto.getSystemName());
+
             if (userPostId != null) {
                 for (int j = i + 1; j < userDtos.size(); j++) {
                     UserSearchDto userDtoJ = userDtos.get(j);
                     if (userPostId.equals(userDtoJ.getUserPostId()) && userDto.getId().equals(userDtoJ.getId()) && userDtoJ.getSystemName() != null && !userDtoJ.getSystemName().isEmpty()) {
-                        if (systemNames == null || systemNames.isEmpty()) {
-                            systemNames = userDtoJ.getSystemName();
-                        } else {
-                            systemNames += ", " + userDtoJ.getSystemName();
+
+                        if (userDtoJ.getSystemName() != null) {
+
+                            if (sysNames.length() > 0)
+                                sysNames.append(", ");
+
+                            sysNames.append(userDtoJ.getSystemName());
+                            userDtos.remove(j);
+                            j--;
                         }
-                        userDtos.remove(j);
-                        j--;
                     }
                 }
-                userDto.setSystemName(systemNames);
+                userDto.setSystemName(sysNames.toString());
             }
             result.add(userDto);
         }

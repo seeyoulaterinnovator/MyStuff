@@ -182,10 +182,10 @@ public class CustomUserResource {
             log.info("Start download users");
             byte[] bytes = userService.exportUsers(downloadUserRequest);
             if (bytes == null) {
-                log.warn("Users not found. Maybe database is empty");
+                log.warn("Users not found");
                 return JsonResponse
                         .fail()
-                        .message("Users not found. Maybe database is empty")
+                        .message("Users not found")
                         .build();
             }
             Response.ResponseBuilder response = Response.ok((Object) bytes);

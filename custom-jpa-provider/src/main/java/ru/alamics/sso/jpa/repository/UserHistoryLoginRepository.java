@@ -17,6 +17,7 @@ public class UserHistoryLoginRepository {
     @PersistenceContext
     private EntityManager em;
 
+    // TODO ?
     public void findInactiveUsers(final long absenceTime, final String realmId) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime absenceDate = now.minusSeconds(absenceTime);
@@ -45,7 +46,9 @@ public class UserHistoryLoginRepository {
                         "  and ue.REALM_ID = :realm_id\n" +
                         "  and (ulh.date <= :absence or (ulh.date is null and ue.CREATED_TIMESTAMP < :absenceMilis))\n" +
                         "  and ((ab.block <= :absence and ab.block >= aln.notif) or aln.notif is null or aln.notif < ulh.date)\n" +
-                        "  and ue.SERVICE_ACCOUNT_CLIENT_LINK is null")
+                        "  and ue.SERVICE_ACCOUNT_CLIENT_LINK is null \n" +
+                        "LIMIT 100"
+        )
                 .setParameter("absence", absenceDate)
                 .setParameter("realm_id", realmId)
                 .setParameter("absenceMilis", absenceMilis)

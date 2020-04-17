@@ -54,12 +54,30 @@ public class UserFindService {
         return null;
     }
 
-    public List<UserSearchDto> getUsersByParametersWithoutGrouping(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc) {
-        return UserMapper.toUserDtoList(userRepository.getTupleUsersByParametersWithoutGrouping(realm, search, searchUser, searchToms, sortField, sortAsc));
+    public List<UserSearchDto> getUsersByParametersWithoutGrouping(
+            String realm,
+            String search,
+            String searchUser,
+            String searchToms,
+            String sortField,
+            boolean sortAsc,
+            int pageNum,
+            int pageSize,
+            List<String> includeOnlyIDs
+    ) {
+        return UserMapper.toUserDtoList(userRepository.getTupleUsersByParametersWithoutGrouping(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize, includeOnlyIDs));
     }
 
-    public List<UserSearch> getUsersByParameters(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc,
-                                                 Integer pageNum, Integer pageSize) {
+    public List<UserSearch> getUsersByParameters(
+            String realm,
+            String search,
+            String searchUser,
+            String searchToms,
+            String sortField,
+            boolean sortAsc,
+            Integer pageNum,
+            Integer pageSize
+    ) {
         List<UserSummaryView> users = userRepository.findUsersByParameters(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
 
         if (users.isEmpty()) {

@@ -74,13 +74,18 @@ public class UserServiceImpl implements UserService {
         if (file == null) {
             throw new UnsupportedDataTypeException("Unsupported file format!");
         }
-        List<UserSearchDto> userDto = userFindService.getUsersByParametersWithoutGrouping(realm.getName(), null, null, null, null, true);
+
+        if (userRequest.getUserIds() == null)
+            return null;
+
+        List<UserSearchDto> userDto = userFindService.getUsersByParametersWithoutGrouping(
+                realm.getName(), null, null, null,
+                null, true, 1, 1000, Arrays.asList(userRequest.getUserIds()));
+
         if (userDto == null || userDto.isEmpty()) {
             return null;
         }
-        if (userRequest.getUserIds() != null && userRequest.getUserIds().length != 0) {
-            userDto = searchUsersById(userDto, userRequest.getUserIds());
-        }
+
         userDto = UserMapper.toGroupUserDtos(userDto);
         file.addRow(getUserParameterNames(userRequest.getUserParameters()));
         userDto.stream().forEach(o -> file.addRow(getUserParameters(o, userRequest.getUserParameters())));
@@ -130,19 +135,6 @@ public class UserServiceImpl implements UserService {
             user.setEnabled(true);
             createAdminEvent(OperationType.CREATE, user);
         }
-    }
-
-    private List<UserSearchDto> searchUsersById(List<UserSearchDto> userDtos, String[] userIds) {
-        List<UserSearchDto> result = new LinkedList<>();
-        userDtos.stream()
-                .forEach(o -> {
-                    for (String userId : userIds) {
-                        if (o.getId().equals(userId)) {
-                            result.add(o);
-                        }
-                    }
-                });
-        return result;
     }
 
     private List<String> getUserParameterNames(UserParameter[] userParameters) {

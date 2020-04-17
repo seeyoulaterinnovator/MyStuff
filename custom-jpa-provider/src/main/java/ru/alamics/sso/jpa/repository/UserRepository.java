@@ -186,10 +186,23 @@ public class UserRepository {
         return null;
     }
 
+    @Deprecated
+    public List<Tuple> getTupleUsersByParametersWithoutGrouping(
+            String realm,
+            String search,
+            String searchUser,
+            String searchToms,
+            String sortField,
+            boolean sortAsc,
+            int pageNum,
+            int pageSize,
+            List<String> includeOnlyIDs
+    ) {
 
-    public List<Tuple> getTupleUsersByParametersWithoutGrouping(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc) {
-        Query query = em.createNativeQuery(
-                "select " +
+        if (search != null && !search.isEmpty())
+            search = "%" + search + "%";
+
+       String queryStr =        "select " +
                         "       UE.ID         as user_id,\n" +
                         "       UE.USERNAME   as username,\n" +
                         "       UE.FIRST_NAME as first_name,\n" +
@@ -207,7 +220,7 @@ public class UserRepository {
                         "       ESR.NAME      as system_role,\n" +
                         "       ES.ID         as system_id,\n" +
                         "       ES.NAME       as system_name,\n" +
-                        "       ES.LABEL      as system_label\n" +
+                        "       ES.LABEL      as system_label\n " +
                         "from USER_ENTITY UE\n" +
                         "         left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone'\n" +
                         "         left join USER_POST UP on UE.ID = UP.USER_ID\n" +
@@ -215,24 +228,23 @@ public class UserRepository {
                         "         left join USERPOST_EXT_SYSTEM_ROLE UESR on UP.ID = UESR.USER_POST_ID\n" +
                         "         left join EXT_SYSTEM_ROLE ESR on UESR.EXT_SYSTEM_ROLE_ID = ESR.ID\n" +
                         "         left join EXTERNAL_SYSTEM ES on ESR.SYSTEM_ID = ES.ID\n" +
-                        "         left join CUSTOMER C on C.ID = UP.TOMS_ID\n" +
+                        "         left join CUSTOMER C on C.ID = UP.TOMS_ID \n" +
                         "WHERE UE.REALM_ID = :realm\n" +
-                        "  AND CASE\n" +
-                        "          WHEN :search is not null and :search != '' then (\n" +
-                        "                      UE.EMAIL LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                      UE.FIRST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                      UE.LAST_NAME LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                      UE.USERNAME LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                      UA.VALUE LIKE CONCAT('%', :search, '%')\n" +
-                        "              )\n" +
-                        "          else UE.ID LIKE '%' end\n" +
-                        "  AND CASE\n" +
-                        "          WHEN :searchUser is not null and :searchUser != '' then (UE.ID = :searchUser)\n" +
-                        "          else UE.ID LIKE '%' OR  UE.ID is null end\n" +
-                        "  AND CASE\n" +
-                        "          WHEN :searchToms is not null and :searchToms != '' then (UP.TOMS_ID = :searchToms)\n" +
-                        "          else UP.TOMS_ID LIKE '%' OR UP.TOMS_ID is null end\n" +
-                        getSort(sortField, sortAsc), Tuple.class)
+                        "  AND (:search is null or :search = '' or\n" +
+                        "    UE.EMAIL LIKE :search OR\n" +
+                        "    UE.FIRST_NAME LIKE :search OR\n" +
+                        "    UA.VALUE LIKE :search OR\n" +
+                        "    UE.USERNAME LIKE :search\n" +
+                        "  )\n" +
+                        "  AND (:searchUser is null or :searchUser = '' or UE.ID = :searchUser )\n" +
+                        "  AND (:searchToms is null or :searchToms = '' or UP.TOMS_ID = :searchToms)\n" +
+                        getIdList(includeOnlyIDs) +
+                        getSort(sortField, sortAsc) +
+                        getLimit(pageNum, pageSize);
+
+        Query query = em.createNativeQuery(
+                queryStr
+                , Tuple.class)
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
@@ -263,8 +275,16 @@ public class UserRepository {
         return Long.parseLong(query.getSingleResult().toString());
     }
 
-    public List<UserSummaryView> findUsersByParameters(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc,
-                                                       Integer pageNum, Integer pageSize) {
+    public List<UserSummaryView> findUsersByParameters(
+            String realm,
+            String search,
+            String searchUser,
+            String searchToms,
+            String sortField,
+            boolean sortAsc,
+            int pageNum,
+            int pageSize
+    ) {
         if (search != null && !search.isEmpty())
             search = "%" + search + "%";
 
@@ -278,12 +298,11 @@ public class UserRepository {
                         "                                                         UE.enabled) " +
                         "from UserEntity UE\n" +
                         "         left join UserAttributeEntity UA on UE = UA.user AND UA.name = 'phone'\n" +
-                        "                AND (:search is null or :search = '' or UA.value LIKE :search) \n" +
                         "         left join UserPostEntity UP on UE = UP.user \n" +
                         "WHERE UE.realmId = :realm\n" +
                         "and (:search is null or :search = '' or (UE.email LIKE :search OR\n" +
                         "                                         UE.firstName LIKE :search OR\n" +
-//                        "                                         UE.lastName LIKE :search OR\n" +
+                        "                                         UA.value LIKE :search OR\n" +
                         "                                         UE.username LIKE :search ))\n" +
                         "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser)\n" +
                         "and (:searchToms is null or :searchToms = '' or UP.customer.id = :searchToms)\n" +
@@ -294,10 +313,11 @@ public class UserRepository {
                 .setParameter("searchToms", searchToms)
                 .setParameter("realm", realm);
 
-        if (pageNum != null && pageNum != 0 && pageSize != null && pageSize != 0) {
-            query.setFirstResult((pageNum - 1) * pageSize);
-            query.setMaxResults(pageSize);
-        }
+        pageNum = Math.max(1, pageNum);
+        pageSize = Math.max(1, pageSize);
+
+        query.setFirstResult((pageNum - 1) * pageSize);
+        query.setMaxResults(pageSize);
 
         return query.getResultList();
     }
@@ -305,16 +325,41 @@ public class UserRepository {
     private String getSort(String sortField, boolean sortAsc) {
         String sort = "";
         if (SORT_FIELD_NAME.equalsIgnoreCase(sortField)) {
-            sort += "ORDER BY first_name";
+            sort += " ORDER BY first_name ";
         } else if (SORT_FIELD_EMAIL.equalsIgnoreCase(sortField)) {
-            sort += "ORDER BY email";
+            sort += " ORDER BY email ";
         }
-        if (sort.isEmpty()) {
-            return sort;
-        }
-        if (!sortAsc) {
+        if (!sort.isEmpty() && !sortAsc) {
             sort += " DESC";
         }
         return sort;
+    }
+
+    private String getIdList(List<String> includeOnlyIDs) {
+
+        if (includeOnlyIDs == null || includeOnlyIDs.isEmpty())
+            return "";
+
+        String res = " AND (UE.ID in (\n";
+        StringBuilder listStr = new StringBuilder();
+        for (String id : includeOnlyIDs) {
+
+            if (listStr.length() > 0)
+                listStr.append(",\n");
+
+            listStr.append("'").append(id).append("'");
+        }
+        res += listStr.toString() + ")) \n";
+
+        return res;
+    }
+
+    private String getLimit(int page, int limit) {
+
+        page = Math.max(1, page);
+        limit = Math.max(1, limit);
+        // TODO max limit ?
+
+        return " LIMIT " + limit + " OFFSET " + (page - 1) * limit;
     }
 }

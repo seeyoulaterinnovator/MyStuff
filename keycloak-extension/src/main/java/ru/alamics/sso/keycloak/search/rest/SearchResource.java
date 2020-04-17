@@ -45,14 +45,15 @@ public class SearchResource {
     @NoCache
     public Response getUsersInfoWithoutGrouping(@QueryParam("search") String search, @QueryParam("searchUser") String searchUser,
                                                 @QueryParam("searchToms") String searchToms, @QueryParam("sortField") String sortField,
-                                                @QueryParam("sortAsc") boolean sortAsc, @QueryParam("searchRealm") String searchRealm) {
+                                                @QueryParam("sortAsc") boolean sortAsc, @QueryParam("searchRealm") String searchRealm,
+                                                @DefaultValue("1") @QueryParam("pageNum") int pageNum, @DefaultValue("100") @QueryParam("pageSize") int pageSize) {
         session.userCache().clear();
         if (searchRealm == null || searchRealm.isEmpty()) {
             searchRealm = "user";
         }
         return JsonResponse.success()
                 .addResult("users-info",
-                        userFindService.getUsersByParametersWithoutGrouping(searchRealm, search, searchUser, searchToms, sortField, sortAsc))
+                        userFindService.getUsersByParametersWithoutGrouping(searchRealm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize, null))
                 .build();
     }
 

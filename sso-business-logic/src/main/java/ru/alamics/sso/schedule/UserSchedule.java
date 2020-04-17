@@ -114,7 +114,7 @@ public class UserSchedule {
         log.debug("start: {}", DEBUG_STR);
         List<RealmEntity> realms = policyRepository.findRealmWithPolicy(PasswordPolicy.FORCE_EXPIRED_ID);
 
-        realms.forEach(realm -> {
+        for (RealmEntity realm : realms) {
             String passwordPolicy = realm.getPasswordPolicy();
             if (Objects.nonNull(passwordPolicy)) {
                 int charNumbs = PasswordPolicy.FORCE_EXPIRED_ID.length() + 3;
@@ -126,7 +126,7 @@ public class UserSchedule {
                     policyRepository.findExpiredPasswords(realm.getId(), timeToExpire);
                 }
             }
-        });
+        }
         log.debug("stop: {}", DEBUG_STR);
     }
 

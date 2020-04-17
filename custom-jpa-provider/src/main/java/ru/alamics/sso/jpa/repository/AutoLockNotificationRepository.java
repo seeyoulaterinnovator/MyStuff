@@ -27,6 +27,7 @@ public class AutoLockNotificationRepository {
         entityManager.flush();
     }
 
+    // TODO ?
     public void findUsersToBlock(final long absenceTimeBlock, final String realmId) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime absence = now.minusSeconds(absenceTimeBlock);
@@ -45,7 +46,9 @@ public class AutoLockNotificationRepository {
                         "                    group by aln.USER_ID) aln on ue.ID = aln.USER_ID\n" +
                         "where ue.ENABLED = true\n" +
                         "  and ue.REALM_ID = :realm_id\n" +
-                        "  and ((aln.notif < :date and ab.block < aln.notif) or (ab.block is null and aln.notif < :date))")
+                        "  and ((aln.notif < :date and ab.block < aln.notif) or (ab.block is null and aln.notif < :date)) \n" +
+                        "LIMIT 100"
+                )
                 .setParameter("date", absence)
                 .setParameter("realm_id", realmId)
                 .executeUpdate();
