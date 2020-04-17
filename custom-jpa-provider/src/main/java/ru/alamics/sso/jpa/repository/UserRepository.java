@@ -75,6 +75,7 @@ public class UserRepository {
         String realmName = realmModel == null ? "user" : realmModel.getId();
 
         // запрос в таком виде выполняется больше секунды на более 100т юзерах
+        // с нормальным индексом уже без разницы на 6кк - 60мс, rows 1
         /*
         List<UserEntity> users1 = em.createQuery("select u from UserEntity u join u.attributes attr \n" +
                 "  where u.realmId = :realmId " +

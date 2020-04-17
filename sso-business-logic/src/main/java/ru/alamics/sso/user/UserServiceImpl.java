@@ -285,7 +285,7 @@ public class UserServiceImpl implements UserService {
 
         AtomicInteger createdUsers = new AtomicInteger();
         AtomicInteger countClones = new AtomicInteger();
-        userImports.stream().forEach(o -> {
+        userImports.forEach(o -> {
             try {
                 UserRequest userRequest = UserMapper.toUserRequest(o);
                 checkImportUser(userRequest);

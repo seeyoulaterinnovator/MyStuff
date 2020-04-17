@@ -757,4 +757,14 @@
                         newDataType="varchar(255)" />
     </changeSet>
 
+    <changeSet id="42_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_USER_ATTRIBUTE_NAME_VALUE"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_USER_ATTRIBUTE_NAME_VALUE
+                on USER_ATTRIBUTE (NAME, VALUE);
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
