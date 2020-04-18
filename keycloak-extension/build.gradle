@@ -33,6 +33,7 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.google.guava/guava
     compile group: 'com.google.guava', name: 'guava', version: '28.2-jre'
+    compile group: 'commons-io', name: 'commons-io', version: '2.5'
 }
 
 war {
