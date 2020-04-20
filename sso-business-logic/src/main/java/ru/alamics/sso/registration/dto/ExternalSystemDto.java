@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
 @JsonDeserialize(builder = ExternalSystemDto.ExternalSystemDtoBuilder.class)
-public class ExternalSystemDto {
+public class ExternalSystemDto implements Serializable {
     private Long id;
     private String name;
     private String label;
