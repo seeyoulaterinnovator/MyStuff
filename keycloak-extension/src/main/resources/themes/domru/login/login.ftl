@@ -12,13 +12,13 @@
         <#if realm.password>
             <form id="loginForm" class="md:flex md:flex-wrap md:justify-between" onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
                 <div class="field field__container field--required mb-3 sm:mb-4 md:w-full">
+                  <input class="hidden w-0 h-0" id="domain-login" name="city">
                     <#if usernameEditDisabled??>
                         <input name="username" id="username" class="field__input" label="${msg('username')}" placeholder="${msg('usernameOrEmailPlaceholder')}" value="${(login.username!)}" type="text" disabled />
                     <#else>
                         <input name="username" id="username" class="field__input" label="${msg('username')}" placeholder="${msg('usernameOrEmailPlaceholder')}" value="${(login.username!)}" type="text" autofocus autocomplete="off" />
                     </#if>
                   <label class="field__label" for="username">${msg("username")}</label>
-                  <input class="hidden w-0 h-0" id="domain-login" name="city">
                 </div>
 
                 <@components.field class="mb-7 sm:mb-8 md:w-full" fieldName="password" label="${msg('password')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true />
