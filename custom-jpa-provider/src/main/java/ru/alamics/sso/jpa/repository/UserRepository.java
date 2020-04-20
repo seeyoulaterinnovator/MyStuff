@@ -5,7 +5,7 @@ import org.keycloak.models.jpa.entities.UserAttributeEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.services.validation.Validation;
-import ru.alamics.sso.keycloak.model.UserSummaryView;
+import ru.alamics.sso.jpa.model.UserSummaryView;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;

@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.model;
+package ru.alamics.sso.jpa.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -3,7 +3,7 @@ package ru.alamics.sso.registration.service;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.UserEntity;
-import ru.alamics.sso.keycloak.model.UserSummaryView;
+import ru.alamics.sso.jpa.model.UserSummaryView;
 import ru.alamics.sso.jpa.repository.UserPostRepository;
 import ru.alamics.sso.jpa.repository.UserRepository;
 import ru.alamics.sso.registration.dto.UserPostResponse;
@@ -15,8 +15,6 @@ import ru.alamics.sso.util.Util;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
