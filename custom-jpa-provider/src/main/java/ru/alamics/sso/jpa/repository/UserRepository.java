@@ -290,7 +290,7 @@ public class UserRepository {
             search = "%" + search + "%";
 
         Query query = em.createQuery(
-                "select distinct new ru.alamics.sso.keycloak.model.UserSummaryView(UE.id, " +
+                "select distinct new ru.alamics.sso.jpa.model.UserSummaryView(UE.id, " +
                         "                                                         UE.username," +
                         "                                                         UE.firstName, " +
                         "                                                         UE.lastName, " +
