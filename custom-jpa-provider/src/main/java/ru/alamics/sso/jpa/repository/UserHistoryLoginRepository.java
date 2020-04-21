@@ -18,6 +18,7 @@ public class UserHistoryLoginRepository {
     private EntityManager em;
 
     // TODO ?
+    // TODO индекс на USER_ENTITY
     public void findInactiveUsers(final long absenceTime, final String realmId) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime absenceDate = now.minusSeconds(absenceTime);
@@ -47,6 +48,7 @@ public class UserHistoryLoginRepository {
                         "  and (ulh.date <= :absence or (ulh.date is null and ue.CREATED_TIMESTAMP < :absenceMilis))\n" +
                         "  and ((ab.block <= :absence and ab.block >= aln.notif) or aln.notif is null or aln.notif < ulh.date)\n" +
                         "  and ue.SERVICE_ACCOUNT_CLIENT_LINK is null \n" +
+                        "  and ue.EMAIL not like '%sso.local' and ue.EMAIL not like 'bmt%it-rev.ru' and ue.EMAIL not like 'st%it-rev.ru' \n" + // TODO временно пока в бд сгенерированные юзеры
                         "LIMIT 100"
         )
                 .setParameter("absence", absenceDate)

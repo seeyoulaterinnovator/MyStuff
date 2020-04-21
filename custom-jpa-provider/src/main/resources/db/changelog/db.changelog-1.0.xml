@@ -767,4 +767,15 @@
         </sql>
     </changeSet>
 
+    <changeSet id="43_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="AUTO_LOCK_NOTIFICATION_SORT2"/></not>
+        </preConditions>
+        <sql>
+            CREATE INDEX AUTO_LOCK_NOTIFICATION_SORT2
+                ON AUTO_LOCK_NOTIFICATION (TYPE, USER_ID)
+        </sql>
+    </changeSet>
+
+
 </databaseChangeLog>

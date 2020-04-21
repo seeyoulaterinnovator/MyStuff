@@ -43,8 +43,7 @@ public class PolicyRepository {
                 "                                             and aln.TYPE = 'PASSWORD_EXPIRED'\n" +
                 "                                             and aln.TYPE = 'SENT')) * 1000)\n" +
                 "  and ue.REALM_ID = :realm\n" +
-                " LIMIT 100 " +
-                "    for update")
+                " LIMIT 100 ")
                 .setParameter("millis", millis)
                 .setParameter("realm", realm)
                 .executeUpdate();

@@ -47,6 +47,7 @@ public class AutoLockNotificationRepository {
                         "where ue.ENABLED = true\n" +
                         "  and ue.REALM_ID = :realm_id\n" +
                         "  and ((aln.notif < :date and ab.block < aln.notif) or (ab.block is null and aln.notif < :date)) \n" +
+                        "  and ue.EMAIL not like '%sso.local' and ue.EMAIL not like 'bmt%it-rev.ru' and ue.EMAIL not like 'st%it-rev.ru' \n" +
                         "LIMIT 100"
                 )
                 .setParameter("date", absence)
