@@ -41,7 +41,7 @@ public class AppPropertyRepository {
 
     public boolean checkStatusDb() {
         try {
-            em.createNativeQuery("select 1").getSingleResult();
+            em.createNativeQuery("commit").getSingleResult();
         } catch (Exception e) {
             return false;
         }
