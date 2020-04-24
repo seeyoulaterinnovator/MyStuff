@@ -1,5 +1,6 @@
 package ru.alamics.sso.jpa.repository;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.AppProperty;
 
 import javax.ejb.LocalBean;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @Stateless
 @LocalBean
+@Slf4j
 public class AppPropertyRepository {
 
     @PersistenceContext
@@ -41,8 +43,10 @@ public class AppPropertyRepository {
 
     public boolean checkStatusDb() {
         try {
-            em.createNativeQuery("select 1").getSingleResult();
+            //em.createNativeQuery("select 1").getSingleResult();
+            em.getTransaction().commit();
         } catch (Exception e) {
+            log.error("checkStatusDb", e);
             return false;
         }
 
