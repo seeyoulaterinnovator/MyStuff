@@ -688,4 +688,17 @@
         </sql>
     </changeSet>
 
+    <changeSet id="42_update" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_POST_ROLE" />
+            <columnExists tableName="USER_POST_ROLE" columnName="DESCRIPTION"/>
+        </preConditions>
+        <sql>
+            UPDATE USER_POST_ROLE SET description = 'Лицо принимающее решение' WHERE name = 'LPR';
+            UPDATE USER_POST_ROLE SET description = 'Бухгалтер' WHERE name = 'BUH';
+            UPDATE USER_POST_ROLE SET description = 'Технический специалист' WHERE name = 'TECH';
+            UPDATE USER_POST_ROLE SET description = 'Гость' WHERE name = 'GUEST';
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
