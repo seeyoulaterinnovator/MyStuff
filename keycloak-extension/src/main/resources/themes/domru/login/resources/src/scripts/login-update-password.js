@@ -35,7 +35,9 @@ export default (function() {
 
     function checkExistence() {
       Object.keys(registered).forEach(name => {
-        if (name && !values[name]) errors[name] = 'Обязательное поле';
+        if (name && !values[name]) {
+          errors[name] = 'Обязательное поле';
+        }
       });
     }
 

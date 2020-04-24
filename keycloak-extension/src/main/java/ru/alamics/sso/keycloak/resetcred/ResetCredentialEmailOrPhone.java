@@ -8,6 +8,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.services.messages.Messages;
+import org.keycloak.services.validation.Validation;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.keycloak.auth.AuthBaseClass;
 import ru.alamics.sso.keycloak.lookup.Lookup;
@@ -15,6 +16,7 @@ import ru.alamics.sso.keycloak.resetcred.factory.ResetFactory;
 import ru.alamics.sso.keycloak.resetcred.factory.ResetFactoryImpl;
 import ru.alamics.sso.keycloak.resetcred.type.ResetType;
 import ru.alamics.sso.property.ApplicationProperties;
+import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.port.RiasApiService;
 import ru.alamics.sso.registration.service.UserFindService;
@@ -103,8 +105,16 @@ public class ResetCredentialEmailOrPhone extends AuthBaseClass {
         }
 
         String location = properties.getProperty(RESET_CREDENTIALS_REDIRECT_URL);
-        if (location == null)
+        if (location == null) {
             location = "https://lkb2b.domru.ru/recovery";
+        }
+
+        String city = context.getHttpRequest().getDecodedFormParameters().getFirst(FormConstants.FIELD_CITY);
+        if (Validation.isBlank(city)) {
+            city = "perm-dev"; // TODO с фронта не приходит город
+        }
+
+        location += "?citydomain=" + city;
 
         log.info("Redirecting to {}", location);
 
