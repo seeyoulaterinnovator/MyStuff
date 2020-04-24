@@ -69,6 +69,7 @@ public class DataMapper {
         UserPostRoleDto userPostRoleDto = new UserPostRoleDto();
         userPostRoleDto.setId(userPostRole.getId());
         userPostRoleDto.setName(userPostRole.getName());
+        userPostRoleDto.setDescription(userPostRole.getDescription());
         return userPostRoleDto;
     }
 

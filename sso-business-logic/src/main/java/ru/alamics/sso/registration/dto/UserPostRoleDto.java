@@ -10,4 +10,13 @@ import java.io.Serializable;
 public class UserPostRoleDto implements Serializable {
     private Long id;
     private String name;
+    private String description;
+
+    @Override
+    public String toString() {
+        return "UserPostRoleDto{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

@@ -757,6 +757,40 @@
                         newDataType="varchar(255)" />
     </changeSet>
 
+    <changeSet id="42" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_POST_ROLE" />
+            <not><columnExists tableName="USER_POST_ROLE" columnName="DESCRIPTION"/></not>
+        </preConditions>
+
+        <addColumn tableName="USER_POST_ROLE">
+            <column name="DESCRIPTION" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="42_mysql" author="strukov-av" dbms="mysql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_POST_ROLE" />
+            <columnExists tableName="USER_POST_ROLE" columnName="DESCRIPTION"/>
+        </preConditions>
+        <sql>
+            alter table USER_POST_ROLE change DESCRIPTION DESCRIPTION varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
+
+    <changeSet id="42_update" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_POST_ROLE" />
+            <columnExists tableName="USER_POST_ROLE" columnName="DESCRIPTION"/>
+        </preConditions>
+        <sql>
+            UPDATE USER_POST_ROLE SET description = 'Лицо принимающее решение' WHERE name = 'LPR';
+            UPDATE USER_POST_ROLE SET description = 'Бухгалтер' WHERE name = 'BUH';
+            UPDATE USER_POST_ROLE SET description = 'Технический специалист' WHERE name = 'TECH';
+            UPDATE USER_POST_ROLE SET description = 'Гость' WHERE name = 'GUEST';
+        </sql>
+    </changeSet>
+
     <changeSet id="42_p" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
             <not><indexExists indexName="IDX_USER_ATTRIBUTE_NAME_VALUE"/></not>
