@@ -811,5 +811,16 @@
         </sql>
     </changeSet>
 
+    <changeSet id="44_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not> <tableExists tableName="CHECK_TABLE" /> </not>
+        </preConditions>
+        <createTable tableName="CHECK_TABLE">
+            <column name="name" type="varchar(100)">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="updated" type="timestamp"/>
+        </createTable>
+    </changeSet>
 
 </databaseChangeLog>

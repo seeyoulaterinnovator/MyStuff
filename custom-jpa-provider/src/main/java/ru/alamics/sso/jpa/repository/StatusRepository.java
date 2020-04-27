@@ -1,0 +1,59 @@
+package ru.alamics.sso.jpa.repository;
+
+import lombok.extern.slf4j.Slf4j;
+
+import javax.ejb.LocalBean;
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
+
+@Stateless
+@LocalBean
+@Slf4j
+public class StatusRepository {
+
+    @PersistenceContext
+    private EntityManager em;
+
+    public void tryInsertNodeName(String nodeName) {
+
+        try {
+            log.info("Checking nodeName " + nodeName);
+            try {
+                Object name = em
+                    .createNativeQuery("SELECT name FROM CHECK_TABLE WHERE name = :nodeName ")
+                    .setParameter("nodeName", nodeName)
+                    .getSingleResult();
+
+            } catch (NoResultException ignored) {
+
+                log.info("Inserting nodeName " + nodeName);
+                em
+                    .createNativeQuery("INSERT INTO CHECK_TABLE (name, updated) VALUES (:nodeName , CURRENT_TIMESTAMP());")
+                    .setParameter("nodeName", nodeName)
+                    .executeUpdate();
+            }
+
+        } catch (Exception e) {
+            log.error("tryInsertNodeName", e);
+        }
+    }
+
+    @Transactional
+    public boolean checkStatusDb(String nodeName) {
+        try {
+            em
+                .createNativeQuery("UPDATE CHECK_TABLE SET updated = CURRENT_TIMESTAMP() WHERE name = :nodeName")
+                .setParameter("nodeName", nodeName)
+                .executeUpdate();
+
+        } catch (Exception e) {
+            log.error("checkStatusDb", e);
+            return false;
+        }
+
+        return true;
+    }
+}

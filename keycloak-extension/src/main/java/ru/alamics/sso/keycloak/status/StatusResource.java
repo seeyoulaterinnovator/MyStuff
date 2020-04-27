@@ -6,6 +6,7 @@ import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.property.ApplicationProperties;
+import ru.alamics.sso.status.StatusService;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -17,11 +18,11 @@ import javax.ws.rs.core.Response;
 public class StatusResource {
 
     protected KeycloakSession session;
-    private ApplicationProperties properties;
+    private StatusService statusService;
 
     public StatusResource(KeycloakSession session) {
         this.session = session;
-        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        this.statusService = (StatusService) Lookup.lookup(StatusService.class);
     }
 
     @GET
@@ -30,14 +31,14 @@ public class StatusResource {
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     public Response getStatus() {
 
-        if (properties == null) {
+        if (statusService == null) {
 
             return JsonResponse.error(Response.Status.NO_CONTENT)
                     .addResult("status", true)
                     .build();
         }
 
-        boolean status = properties.checkStatusDb();
+        boolean status = statusService.checkStatusDb();
 
         if (!status) {
             return JsonResponse.error(Response.Status.SERVICE_UNAVAILABLE)
