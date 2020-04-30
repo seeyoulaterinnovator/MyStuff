@@ -75,8 +75,12 @@ public class CustomJpaUserProvider extends JpaUserProvider {
         em.createNamedQuery("deleteFederatedIdentityByUser").setParameter("user", user).executeUpdate();
         em.createNamedQuery("deleteUserConsentClientScopesByUser").setParameter("user", user).executeUpdate();
         em.createNamedQuery("deleteUserConsentsByUser").setParameter("user", user).executeUpdate();
-        em.createNativeQuery("delete from USERPOST_EXT_SYSTEM_ROLE where USER_POST_ID in (select id from USER_POST where USER_ID =:user_id)")
-                .setParameter("user_id", user.getId()).executeUpdate();
+
+        //em.createNativeQuery("delete from USERPOST_EXT_SYSTEM_ROLE where USER_POST_ID in (select id from USER_POST where USER_ID =:user_id)")
+        //        .setParameter("user_id", user.getId()).executeUpdate();
+
+        removePostSystem(user);
+
         em.flush();
         // not sure why i have to do a clear() here.  I was getting some messed up errors that Hibernate couldn't
         // un-delete the UserEntity.
@@ -87,5 +91,18 @@ public class CustomJpaUserProvider extends JpaUserProvider {
         }
 
         em.flush();
+    }
+
+    private void removePostSystem(UserEntity user) {
+
+        List<String> ret = em.createQuery("select ID from USER_POST where USER_ID = :user_id", String.class)
+                .setParameter("user_id", user)
+                .getResultList();
+
+        for (String postId : ret) {
+
+            em.createNativeQuery("delete from USERPOST_EXT_SYSTEM_ROLE where USER_POST_ID = :post_id")
+                    .setParameter("post_id", postId).executeUpdate();
+        }
     }
 }

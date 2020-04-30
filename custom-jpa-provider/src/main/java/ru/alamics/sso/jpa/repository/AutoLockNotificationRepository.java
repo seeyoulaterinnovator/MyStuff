@@ -64,6 +64,7 @@ public class AutoLockNotificationRepository {
         List<AutoLockNotification> ret = entityManager.createQuery("select aln from AutoLockNotification aln where aln.status =:status", AutoLockNotification.class)
                 .setParameter("status", NotificationStatus.PREPARE)
                 .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                .setMaxResults(100)
                 .getResultList();
         ret.forEach(lock -> {
             lock.setStatus(NotificationStatus.SENT);
