@@ -59,6 +59,7 @@ public class CustomJpaUserProvider extends JpaUserProvider {
 
     @Override
     public boolean removeUser (RealmModel realm, UserModel user) {
+        log.info("remove user starts");
         UserEntity userEntity = em.find(UserEntity.class, user.getId());
         if (userEntity == null) return false;
         removeUser(userEntity);
@@ -68,7 +69,6 @@ public class CustomJpaUserProvider extends JpaUserProvider {
     private void removeUser(UserEntity user) {
         String id = user.getId();
         em.createNativeQuery(AutoLockNotification.DELETE_BY_USER_SQL).setParameter("user", user).executeUpdate();
-        em.createNativeQuery(UserPostEntity.DELETE_BY_USER_SQL).setParameter("user", user).executeUpdate();
         em.createNativeQuery(UserLoginHistory.DELETE_BY_USER_SQL).setParameter("user", user).executeUpdate();
         em.createNamedQuery("deleteUserRoleMappingsByUser").setParameter("user", user).executeUpdate();
         em.createNamedQuery("deleteUserGroupMembershipsByUser").setParameter("user", user).executeUpdate();
@@ -81,6 +81,8 @@ public class CustomJpaUserProvider extends JpaUserProvider {
 
         removePostSystem(user);
 
+        em.createNativeQuery(UserPostEntity.DELETE_BY_USER_SQL).setParameter("user", user).executeUpdate();
+
         em.flush();
         // not sure why i have to do a clear() here.  I was getting some messed up errors that Hibernate couldn't
         // un-delete the UserEntity.
@@ -91,11 +93,12 @@ public class CustomJpaUserProvider extends JpaUserProvider {
         }
 
         em.flush();
+        log.info("remove user ends");
     }
 
     private void removePostSystem(UserEntity user) {
 
-        List<String> ret = em.createQuery("select ID from USER_POST where USER_ID = :user_id", String.class)
+        List<String> ret = em.createQuery("select id from UserPostEntity e where e.user = :user_id", String.class)
                 .setParameter("user_id", user)
                 .getResultList();
 
