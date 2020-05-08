@@ -20,7 +20,7 @@
     let search;
 
     const unsubscribeCity = city.subscribe(value => {
-        Cookie.set('CITY', value);
+        Cookie.set('CITY', value, {sameSite: 'None', secure: document.location.protocol === 'https:'});
         search = value;
     });
 

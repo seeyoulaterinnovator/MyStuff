@@ -22,7 +22,7 @@ export default (function() {
           }
         }
       });
-    Cookie.set('VISITED', '1');
+    Cookie.set('VISITED', '1', {sameSite: 'None', secure: document.location.protocol === 'https:'});
     showModal.set(false);
     axios
       .get(url)
@@ -35,8 +35,8 @@ export default (function() {
         const cityName = replacedCities.filter(city => city.city === detectedCity)[0];
         if (cityName) {
           if (cityName.bss) {
-            Cookie.set('CITY', cityName.name);
-            Cookie.set('city-domain', detectedCity)
+            Cookie.set('CITY', cityName.name, {sameSite: 'None', secure: document.location.protocol === 'https:'});
+            Cookie.set('city-domain', detectedCity, {sameSite: 'None', secure: document.location.protocol === 'https:'})
             citySvelte.set(cityName.name);
           } else {
             location.replace(`https://lkb2b.domru.ru/login?citydomain=${detectedCity}`)
