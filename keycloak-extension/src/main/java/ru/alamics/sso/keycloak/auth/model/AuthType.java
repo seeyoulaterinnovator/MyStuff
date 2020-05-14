@@ -18,7 +18,7 @@ public enum AuthType {
     ),
     EMAIL_AND_PHONE_CODE(
             new String[]{UserModel.RequiredAction.VERIFY_EMAIL.toString(), PhoneVerificationBySmsFactory.PROVIDER_ID},
-            "На указанный email будет выслана ссылка, после прохождения по ней на указанный номер телефона в Viber или СМС придет код подтверждения"
+            "На указанный email будет выслана ссылка, после прохождения по ней на указанный номер телефона в Viber и СМС придет код подтверждения"
     ),
     INCOMING_CALL(
             new String[]{PhoneVerificationByIncomingCallFactory.PROVIDER_ID},
@@ -26,7 +26,7 @@ public enum AuthType {
     ),
     PHONE_CODE(
             new String[]{PhoneVerificationBySmsFactory.PROVIDER_ID},
-            "На указанный номер телефона будет выслано сообщение в Viber или СМС с одноразовым паролем"
+            "На указанный номер телефона будет выслано сообщение в Viber и СМС с одноразовым паролем"
     );
 
     private String description;
