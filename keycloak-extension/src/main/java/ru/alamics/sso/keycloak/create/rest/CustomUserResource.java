@@ -95,10 +95,10 @@ public class CustomUserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUserBss(final UserRequest request, final HttpHeaders headers) {
         if (request.getPhone() == null || request.getPhone().isEmpty()) {
-            return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле Телефон должно быть заполнено", Response.Status.BAD_REQUEST);
         }
         if (request.getTomsId() == null || request.getTomsId().isEmpty()) {
-            return ErrorResponse.error("TomsId is required attribute", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле TomsId должно быть заполнено", Response.Status.BAD_REQUEST);
         }
 
         return getUserResponse(request, true);
@@ -114,12 +114,12 @@ public class CustomUserResource {
         } catch (ModelDuplicateException e) {
             log.error("Could not create user", e);
             return JsonResponse.error(Response.Status.CONFLICT)
-                    .message("User exists with same username or email or phone")
+                    .message("Уже существует УЗ с таким username или email или phone")
                     .build();
         } catch (ModelException me) {
             log.error("Could not create user", me);
             return JsonResponse.error(Response.Status.INTERNAL_SERVER_ERROR)
-                    .message("Could not create user")
+                    .message("Не удалось создать УЗ")
                     .build();
         } catch (NotFoundException | FoundUserPostException e) {
             log.error("Could not create user", e);

@@ -27,6 +27,8 @@ public class RiasCheckProvider implements FormAction {
 
     private final RiasService riasService;
 
+    public static final String RIAS_REJECTED = "rias.rejected";
+
     public RiasCheckProvider(RiasService riasService) {
         this.riasService = riasService;
     }
@@ -71,6 +73,7 @@ public class RiasCheckProvider implements FormAction {
         if (!errors.isEmpty()) {
             context.error(eventError);
             context.validationError(formData, errors);
+            context.getAuthenticationSession().setAuthNote(RIAS_REJECTED, "1");
         } else {
             context.success();
         }

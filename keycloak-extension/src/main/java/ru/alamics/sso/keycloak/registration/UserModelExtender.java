@@ -14,6 +14,7 @@ import org.keycloak.models.*;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.provider.ProviderConfigProperty;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
+import ru.alamics.sso.keycloak.registration.rias.RiasCheckProvider;
 import ru.alamics.sso.registration.UserExtension;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.tbapi.TbapiService;
@@ -59,6 +60,9 @@ public class UserModelExtender implements FormAction, FormActionFactory {
 
     @Override
     public void validate(ValidationContext context) {
+
+        if (context.getAuthenticationSession().getAuthNote(RiasCheckProvider.RIAS_REJECTED) != null)
+            return;
 
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         List<FormMessage> errors = new ArrayList<>();
