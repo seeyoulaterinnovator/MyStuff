@@ -14,10 +14,7 @@ import ru.alamics.sso.registration.phone.ActivationCodeType;
 import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.phone.SmsCodeGenerator;
 import ru.alamics.sso.registration.phone.UserPhoneVerifier;
-import ru.alamics.sso.registration.phone.exception.PhoneCallException;
-import ru.alamics.sso.registration.phone.exception.SmsSendException;
-import ru.alamics.sso.registration.phone.exception.UserPhoneEmpty;
-import ru.alamics.sso.registration.phone.exception.WrongSmsCode;
+import ru.alamics.sso.registration.phone.exception.*;
 
 import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
@@ -101,6 +98,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             log.info("ignore... EmailException {}", e.getMessage());
         } catch (SmsSendException se) {
             log.info("ignore... SmsSendException {}", se.getMessage());
+        } catch (ViberSendException ve) {
+            log.info("ignore... ViberSendException {}", ve.getMessage());
         }
     }
 
