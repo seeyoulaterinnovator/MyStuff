@@ -503,7 +503,7 @@ public class UserServiceImpl implements UserService {
 
         if (user != null) {
             log.error("User exists with same phone {}", request.getPhone());
-            throw new FoundException("User exists with same phone").addResult("userId", user.getId());
+            throw new FoundException("Уже существует УЗ с таким phone").addResult("userId", user.getId());
         }
     }
 
@@ -513,14 +513,14 @@ public class UserServiceImpl implements UserService {
             UserModel userModel = session.users().getUserByEmail(request.getEmail(), realm);
             if (userModel != null) {
                 log.error("User exists with same email {}", request.getEmail());
-                throw new FoundException("User exists with same email").addResult("userId", userModel.getId());
+                throw new FoundException("Уже существует УЗ с таким email").addResult("userId", userModel.getId());
             }
         }
 
         UserModel userModel = session.users().getUserByUsername(request.getEmail(), realm);
         if (userModel != null) {
             log.error("User exists with same username {}", request.getEmail());
-            throw new FoundException("User exists with same username").addResult("userId", userModel.getId());
+            throw new FoundException("Уже существует УЗ с таким username").addResult("userId", userModel.getId());
         }
     }
 
