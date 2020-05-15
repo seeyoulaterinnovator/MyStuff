@@ -59,6 +59,7 @@ public class UserPostCreatorFactory implements FormActionFactory {
 
     @Override
     public FormAction create(KeycloakSession session) {
+        log.info("Creating UserPostCreatorProvider");
         return new UserPostCreatorProvider();
     }
 

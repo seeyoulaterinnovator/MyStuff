@@ -61,12 +61,18 @@ public class UserModelExtender implements FormAction, FormActionFactory {
     @Override
     public void validate(ValidationContext context) {
 
-        if (context.getAuthenticationSession().getAuthNote(RiasCheckProvider.RIAS_REJECTED) != null)
-            return;
-
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         List<FormMessage> errors = new ArrayList<>();
         String eventError = Errors.INVALID_REGISTRATION;
+
+        if (context.getAuthenticationSession().getAuthNote(RiasCheckProvider.RIAS_REJECTED) != null) {
+            log.info("RIAS rejected, so no need to request TBAPI");
+
+            // иначе падает разбор на стороне КС
+            context.error(eventError);
+            context.validationError(formData, errors);
+            return;
+        }
 
         try {
             context.getEvent().detail(Details.REGISTER_METHOD, "form");
@@ -191,6 +197,7 @@ public class UserModelExtender implements FormAction, FormActionFactory {
 
     @Override
     public FormAction create(KeycloakSession session) {
+        log.info("Creating UserModelExtender");
         return this;
     }
 
