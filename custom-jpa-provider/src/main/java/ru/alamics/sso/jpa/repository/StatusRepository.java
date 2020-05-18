@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -42,6 +44,7 @@ public class StatusRepository {
     }
 
     @Transactional
+    @Lock(LockType.WRITE)
     public boolean checkStatusDb(String nodeName) {
         try {
             em
