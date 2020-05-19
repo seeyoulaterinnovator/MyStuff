@@ -1,6 +1,7 @@
 package ru.alamics.sso.jpa.repository;
 
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.QueryHints;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -48,7 +49,7 @@ public class StatusRepository {
             em
                 .createNativeQuery("UPDATE CHECK_TABLE SET updated = CURRENT_TIMESTAMP() WHERE name = :nodeName")
                 .setParameter("nodeName", nodeName)
-                .setLockMode(LockModeType.NONE)
+                .setHint(QueryHints.NATIVE_LOCKMODE, LockModeType.NONE)
                 .executeUpdate();
 
         } catch (Exception e) {
