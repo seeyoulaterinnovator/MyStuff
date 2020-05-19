@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
@@ -47,6 +48,7 @@ public class StatusRepository {
             em
                 .createNativeQuery("UPDATE CHECK_TABLE SET updated = CURRENT_TIMESTAMP() WHERE name = :nodeName")
                 .setParameter("nodeName", nodeName)
+                .setLockMode(LockModeType.NONE)
                 .executeUpdate();
 
         } catch (Exception e) {

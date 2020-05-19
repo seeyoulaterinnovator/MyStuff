@@ -823,4 +823,15 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="45_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="AUTO_LOCK_NOTIFICATION" />
+            <not><columnExists tableName="AUTO_LOCK_NOTIFICATION" columnName="version"/></not>
+        </preConditions>
+
+        <addColumn tableName="AUTO_LOCK_NOTIFICATION">
+            <column name="version" type="bigint"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
