@@ -1,15 +1,15 @@
 package ru.alamics.sso.util.validator;
 
-import javax.validation.ValidationException;
 import java.util.UUID;
 
 public abstract class DmpIdValidator {
 
-    public static void validate(String dmpId) {
+    public static void validate(String dmpId) throws NotValidException
+    {
         try {
             UUID.fromString(dmpId);
         } catch (IllegalArgumentException e) {
-            throw new ValidationException(String.format("DmpId is not valid : dmpId=\"%s\"", dmpId));
+            throw new NotValidException(String.format("DmpId не прошел валидацию : dmpId=\"%s\"", dmpId));
         }
     }
 }

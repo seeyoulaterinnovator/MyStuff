@@ -25,18 +25,4 @@ public class AppPropertyRepository {
     public AppProperty findByName(String name) {
         return em.find(AppProperty.class, name);
     }
-
-    public AppProperty save(AppProperty appProperty) {
-        if (appProperty.getName() == null || appProperty.getName().isEmpty()) {
-            throw new ValidationException("Name is required!");
-        }
-        AppProperty result = findByName(appProperty.getName());
-        if (result == null) {
-            em.persist(appProperty);
-        } else {
-            em.merge(appProperty);
-        }
-        em.flush();
-        return appProperty;
-    }
 }

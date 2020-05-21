@@ -9,6 +9,7 @@ import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserPostService;
+import ru.alamics.sso.util.validator.NotValidException;
 
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
@@ -54,7 +55,7 @@ public class UserPostFacade {
         return userPosts;
     }
 
-    public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException {
+    public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException, NotValidException {
         UserPostResponse post = userPostService.save(userPostRequest);
         addCustomersToRequest(Arrays.asList(post));
         return post;

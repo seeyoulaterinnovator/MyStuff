@@ -13,6 +13,7 @@ import ru.alamics.sso.keycloak.facade.CachedUserPostFacade;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.user.mapper.UserMapper;
+import ru.alamics.sso.util.validator.NotValidException;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -50,7 +51,7 @@ public class UserPostCreatorProvider implements FormAction {
             
             try {
                 cachedUserPostFacade.addUserPostAndSystemRole(userPostRequest);
-            } catch (NotFoundException | FoundUserPostException e) {
+            } catch (NotFoundException | FoundUserPostException | NotValidException e) {
                 log.error(e.getMessage(), e);
             }
         }
