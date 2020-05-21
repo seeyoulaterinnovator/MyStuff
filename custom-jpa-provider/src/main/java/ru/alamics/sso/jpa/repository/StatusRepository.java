@@ -5,6 +5,8 @@ import org.hibernate.annotations.QueryHints;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
@@ -44,6 +46,7 @@ public class StatusRepository {
     }
 
     @Transactional
+    @Lock(LockType.WRITE)
     public boolean checkStatusDb(String nodeName) {
         try {
             em
