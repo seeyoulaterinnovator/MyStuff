@@ -70,8 +70,12 @@ public class UserSchedule {
         final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
 
         final long intervalDuration = properties.getPropertyLong(TIMER_INTERVAL_DURATION_PROPERTY, DEFAULT_INTERVAL_DURATION, "UserSchedule: default value used: '%s' = '%s'");
-        timerService.createIntervalTimer(intervalDuration, intervalDuration, timerConfig);
-        log.info("Timer:{} is created, interval duration set to value={} milliseconds ", TIMER_NAME, intervalDuration);
+
+        // пробую развести по времени начало
+        long initialDuration = Math.round(Math.random() * intervalDuration);
+
+        timerService.createIntervalTimer(initialDuration, intervalDuration, timerConfig);
+        log.info("Timer:{} is created, interval duration value = {} ms, initial duration value = {} ms ", TIMER_NAME, intervalDuration, initialDuration);
     }
 
     @Timeout

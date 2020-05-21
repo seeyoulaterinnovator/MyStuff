@@ -33,6 +33,7 @@ import ru.alamics.sso.user.ImportUsersReportService;
 import ru.alamics.sso.user.UserService;
 import ru.alamics.sso.user.UserServiceImpl;
 import ru.alamics.sso.user.model.*;
+import ru.alamics.sso.util.validator.NotValidException;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.naming.InitialContext;
@@ -113,7 +114,7 @@ public class CustomUserResource {
                     .build();
         } catch (ModelDuplicateException e) {
             log.error("Could not create user", e);
-            return JsonResponse.error(Response.Status.CONFLICT)
+            return JsonResponse.error(Response.Status.BAD_REQUEST)
                     .message("Уже существует УЗ с таким username или email или phone")
                     .build();
         } catch (ModelException me) {
@@ -123,14 +124,19 @@ public class CustomUserResource {
                     .build();
         } catch (NotFoundException | FoundUserPostException e) {
             log.error("Could not create user", e);
-            return JsonResponse.error(Response.Status.FOUND)
+            return JsonResponse.error(Response.Status.BAD_REQUEST)
                     .message(e.getMessage())
                     .build();
         } catch (FoundException e) {
             log.error("Could not create user", e);
-            return JsonResponse.error(Response.Status.CONFLICT)
+            return JsonResponse.error(Response.Status.BAD_REQUEST)
                     .message(e.getMessage())
                     .addResult("info", e.getResult())
+                    .build();
+        } catch (NotValidException e) {
+            log.error("NotValidException", e);
+            return JsonResponse.error(Response.Status.BAD_REQUEST)
+                    .message(e.getMessage())
                     .build();
         }
     }

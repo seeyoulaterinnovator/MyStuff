@@ -18,6 +18,7 @@ import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.user.mapper.UserMapper;
+import ru.alamics.sso.util.validator.NotValidException;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -44,7 +45,7 @@ public class CustomIdpCreateUserIfUniqueAuthenticator extends IdpCreateUserIfUni
 
         try {
             userPostService.addUserPostAndSystemRole(userPostRequest);
-        } catch (NotFoundException | FoundUserPostException e) {
+        } catch (NotFoundException | FoundUserPostException | NotValidException e) {
             log.error(e.getMessage(), e);
         }
     }

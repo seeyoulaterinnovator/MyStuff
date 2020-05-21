@@ -29,6 +29,7 @@ import ru.alamics.sso.user.model.*;
 import ru.alamics.sso.user.web.UserSearchDto;
 import ru.alamics.sso.util.Util;
 import ru.alamics.sso.util.validator.EmailValidator;
+import ru.alamics.sso.util.validator.NotValidException;
 import ru.alamics.sso.util.validator.PhoneValidator;
 
 import javax.activation.UnsupportedDataTypeException;
@@ -311,7 +312,7 @@ public class UserServiceImpl implements UserService {
                 });
                 o.setErrors(errorsByUsers.toString().substring(1, errorsByUsers.toString().length() - 1));
                 countClones.getAndIncrement();
-            } catch (NotFoundException | ValidationException | FoundUserPostException e) {
+            } catch (NotFoundException | NotValidException | FoundUserPostException e) {
                 Map<String, Object> error = new HashMap<>();
                 error.put("error", e.getMessage());
                 error.put("importUserName", o.getFirstName());
@@ -326,7 +327,8 @@ public class UserServiceImpl implements UserService {
         return importResponse;
     }
 
-    private void checkImportUser(UserRequest userRequest) throws FoundException {
+    private void checkImportUser(UserRequest userRequest) throws FoundException, NotValidException {
+
         EmailValidator.validate(userRequest.getEmail());
         PhoneValidator.validate(userRequest.getPhone());
 
@@ -400,7 +402,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserModel createUser(UserRequest request, boolean bss) throws FoundException, NotFoundException, FoundUserPostException {
+    public UserModel createUser(UserRequest request, boolean bss) throws FoundException, NotFoundException, FoundUserPostException, NotValidException {
 
         FoundException exception = null;
 
@@ -505,7 +507,7 @@ public class UserServiceImpl implements UserService {
                 .success();
     }
 
-    private void addUserPostLPR(UserModel userModel, UserRequest request) throws NotFoundException, FoundException, FoundUserPostException {
+    private void addUserPostLPR(UserModel userModel, UserRequest request) throws NotFoundException, FoundException, FoundUserPostException, NotValidException {
 
         UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, request);
 
@@ -519,7 +521,8 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void addUserPost(UserModel userModel, ImportUsersDataEntity userImport, UserRequest userRequest) throws NotFoundException, FoundUserPostException {
+    private void addUserPost(UserModel userModel, ImportUsersDataEntity userImport, UserRequest userRequest)
+            throws NotFoundException, FoundUserPostException, NotValidException {
         UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, userRequest);
         userPostRequest.setRoleId(userPostFacade.getUserPostService().getUserPostRole(userImport.getRole()));
         UserPostResponse userPostResponse = userPostFacade.getUserPostService().save(userPostRequest);

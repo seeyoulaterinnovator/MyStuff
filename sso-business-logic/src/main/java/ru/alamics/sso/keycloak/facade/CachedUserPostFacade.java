@@ -10,6 +10,7 @@ import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostEditRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
+import ru.alamics.sso.util.validator.NotValidException;
 
 import javax.ejb.Stateless;
 import java.util.*;
@@ -36,11 +37,11 @@ public class CachedUserPostFacade extends UserPostFacade {
         return userPostCached;
     }
 
-    public void addUserPostAndSystemRole(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException {
+    public void addUserPostAndSystemRole(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException, NotValidException {
         cache.put(userPostRequest.getUserId(), Arrays.asList(userPostService.addUserPostAndSystemRole(userPostRequest)));
     }
 
-    public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException {
+    public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException, NotValidException {
         UserPostResponse post = super.save(userPostRequest);
 
         if (cache.get(userPostRequest.getUserId()) != null) {

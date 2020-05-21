@@ -38,4 +38,6 @@ public class AutoLockNotification implements Serializable {
     @Enumerated(EnumType.STRING)
     private NotificationStatus status;
 
+    @Version
+    private long version;
 }
