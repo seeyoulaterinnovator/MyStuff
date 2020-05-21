@@ -49,6 +49,14 @@
                         <named-formatter name="PATTERN"/>
                     </formatter>
                 </console-handler>
+                <custom-handler name="Remotelog4j" class="org.apache.log4j.net.SocketAppender" module="org.apache.log4j">
+                    <level name="INFO"/>
+                    <properties>
+                        <property name="RemoteHost" value="188.17.155.29"/>
+                        <property name="Port" value="4712"/>
+                        <property name="LocationInfo" value="true"/>
+                    </properties>
+                </custom-handler>
                 <periodic-rotating-file-handler name="FILE" autoflush="true">
                     <formatter>
                         <named-formatter name="PATTERN"/>
@@ -102,6 +110,7 @@
                         <handler name="CONSOLE"/>
                         <handler name="FILE"/>
                         <handler name="ERROR"/>
+                        <handler name="Remotelog4j"/>
                     </handlers>
                 </root-logger>
                 <formatter name="PATTERN">
@@ -277,8 +286,7 @@
                 </sasl>
             </subsystem>
             <subsystem xmlns="urn:jboss:domain:infinispan:8.0">
-                <cache-container name="keycloak">
-                    <transport lock-timeout="60000"/>
+                <cache-container name="keycloak" module="org.keycloak.keycloak-model-infinispan">
                     <transport lock-timeout="60000"/>
                     <local-cache name="realms">
                         <object-memory size="10000"/>
@@ -286,30 +294,99 @@
                     <local-cache name="users">
                         <object-memory size="10000"/>
                     </local-cache>
-                    <replicated-cache name="work"/>
-                    <replicated-cache name="sessions"/>
-                    <replicated-cache name="authenticationSessions"/>
-                    <replicated-cache name="offlineSessions"/>
-                    <replicated-cache name="clientSessions"/>
-                    <replicated-cache name="offlineClientSessions"/>
-                    <replicated-cache name="loginFailures"/>
-                    <replicated-cache name="actionTokens">
-                        <object-memory size="-1"/>
-                        <expiration interval="300000" max-idle="-1"/>
-                    </replicated-cache>
                     <local-cache name="authorization">
                         <object-memory size="10000"/>
                     </local-cache>
-                    <replicated-cache name="work"/>
                     <local-cache name="keys">
                         <object-memory size="1000"/>
                         <expiration max-idle="3600000"/>
                     </local-cache>
+                    <replicated-cache name="work">
+                        <remote-store cache="work" remote-servers="remote-cache" fetch-state="false" passivation="false" preload="false" purge="false" shared="true">
+                            <property name="rawValues">
+                                true
+                            </property>
+                            <property name="marshaller">
+                                org.keycloak.cluster.infinispan.KeycloakHotRodMarshallerFactory
+                            </property>
+                        </remote-store>
+                        <state-transfer chunk-size="2048" timeout="120000"/>
+                    </replicated-cache>
+                    <replicated-cache name="authenticationSessions"/>
+                    <distributed-cache name="sessions" owners="1">
+                        <remote-store cache="sessions" remote-servers="remote-cache" fetch-state="false" passivation="false" preload="false" purge="false" shared="true">
+                            <property name="rawValues">
+                                true
+                            </property>
+                            <property name="marshaller">
+                                org.keycloak.cluster.infinispan.KeycloakHotRodMarshallerFactory
+                            </property>
+                        </remote-store>
+                        <state-transfer chunk-size="2048" timeout="120000"/>
+                    </distributed-cache>
+                    <distributed-cache name="offlineSessions" owners="1">
+                        <remote-store cache="offlineSessions" remote-servers="remote-cache" fetch-state="false" passivation="false" preload="false" purge="false" shared="true">
+                            <property name="rawValues">
+                                true
+                            </property>
+                            <property name="marshaller">
+                                org.keycloak.cluster.infinispan.KeycloakHotRodMarshallerFactory
+                            </property>
+                        </remote-store>
+                        <state-transfer chunk-size="2048" timeout="120000"/>
+                    </distributed-cache>
+                    <distributed-cache name="clientSessions" owners="1">
+                        <remote-store cache="clientSessions" remote-servers="remote-cache" fetch-state="false" passivation="false" preload="false" purge="false" shared="true">
+                            <property name="rawValues">
+                                true
+                            </property>
+                            <property name="marshaller">
+                                org.keycloak.cluster.infinispan.KeycloakHotRodMarshallerFactory
+                            </property>
+                        </remote-store>
+                        <state-transfer chunk-size="2048" timeout="120000"/>
+                    </distributed-cache>
+                    <distributed-cache name="offlineClientSessions" owners="1">
+                        <remote-store cache="offlineClientSessions" remote-servers="remote-cache" fetch-state="false" passivation="false" preload="false" purge="false" shared="true">
+                            <property name="rawValues">
+                                true
+                            </property>
+                            <property name="marshaller">
+                                org.keycloak.cluster.infinispan.KeycloakHotRodMarshallerFactory
+                            </property>
+                        </remote-store>
+                        <state-transfer chunk-size="2048" timeout="120000"/>
+                    </distributed-cache>
+                    <distributed-cache name="loginFailures" owners="1">
+                        <remote-store cache="loginFailures" remote-servers="remote-cache" fetch-state="false" passivation="false" preload="false" purge="false" shared="true">
+                            <property name="rawValues">
+                                true
+                            </property>
+                            <property name="marshaller">
+                                org.keycloak.cluster.infinispan.KeycloakHotRodMarshallerFactory
+                            </property>
+                        </remote-store>
+                        <state-transfer chunk-size="2048" timeout="120000"/>
+                    </distributed-cache>
+                    <distributed-cache name="actionTokens" owners="1">
+                        <object-memory size="-1"/>
+                        <expiration interval="300000" max-idle="-1"/>
+                        <remote-store cache="actionTokens" remote-servers="remote-cache" fetch-state="false" passivation="false" preload="true" purge="false" shared="true">
+                            <property name="rawValues">
+                                true
+                            </property>
+                            <property name="marshaller">
+                                org.keycloak.cluster.infinispan.KeycloakHotRodMarshallerFactory
+                            </property>
+                        </remote-store>
+                        <state-transfer chunk-size="2048" timeout="120000"/>
+                    </distributed-cache>
                 </cache-container>
                 <cache-container name="server" aliases="singleton cluster" default-cache="default" module="org.wildfly.clustering.server">
                     <transport lock-timeout="60000"/>
                     <replicated-cache name="default">
                         <transaction mode="BATCH"/>
+                        <state-transfer chunk-size="2048" timeout="120000"/>
                     </replicated-cache>
                 </cache-container>
                 <cache-container name="web" default-cache="dist" module="org.wildfly.clustering.web.infinispan">
@@ -318,6 +395,7 @@
                         <locking isolation="REPEATABLE_READ"/>
                         <transaction mode="BATCH"/>
                         <file-store/>
+                        <state-transfer chunk-size="2048" timeout="120000"/>
                     </distributed-cache>
                 </cache-container>
                 <cache-container name="ejb" aliases="sfsb" default-cache="dist" module="org.wildfly.clustering.ejb.infinispan">
@@ -326,6 +404,7 @@
                         <locking isolation="REPEATABLE_READ"/>
                         <transaction mode="BATCH"/>
                         <file-store/>
+                        <state-transfer chunk-size="2048" timeout="120000"/>
                     </distributed-cache>
                 </cache-container>
                 <cache-container name="hibernate" module="org.infinispan.hibernate-cache">
@@ -339,17 +418,21 @@
                         <object-memory size="10000"/>
                         <expiration max-idle="100000"/>
                     </invalidation-cache>
-                    <replicated-cache name="timestamps"/>
+                    <replicated-cache name="timestamps">
+                        <state-transfer chunk-size="2048" timeout="120000"/>
+                    </replicated-cache>
                 </cache-container>
                 <cache-container name="custom_container">
                     <transport lock-timeout="60000"/>
                     <distributed-cache name="user_post_cache">
                         <object-memory size="10000"/>
                         <expiration max-idle="100000"/>
+                        <state-transfer chunk-size="2048" timeout="120000"/>
                     </distributed-cache>
                     <distributed-cache name="customer_cache">
                         <object-memory size="10000"/>
                         <expiration max-idle="100000"/>
+                        <state-transfer chunk-size="2048" timeout="120000"/>
                     </distributed-cache>
                 </cache-container>
             </subsystem>
@@ -383,7 +466,7 @@
                 </channels>
                 <stacks>
                     <stack name="udp">
-                        <transport type="UDP" socket-binding="jgroups-udp"/>
+                        <transport type="UDP" socket-binding="jgroups-udp" site="${jboss.site.name}"/>
                         <protocol type="PING"/>
                         <protocol type="MERGE3"/>
                         <protocol type="FD_SOCK"/>
@@ -636,6 +719,9 @@
             </outbound-socket-binding>
             <outbound-socket-binding name="jgroups-server-five">
                 <remote-destination host="${env.SSO_APP_FIVE}" port="7600"/>
+            </outbound-socket-binding>
+            <outbound-socket-binding name="remote-cache">
+                <remote-destination host="${remote.cache.host:localhost}" port="${remote.cache.port:12222}"/>
             </outbound-socket-binding>
         </socket-binding-group>
     </socket-binding-groups>
