@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 public class DownloadUserRequest {
     @NotNull
     private String type;
-    @NotNull
     private UserParameter[] userParameters;
+    @NotNull
     private String[] userIds;
 }

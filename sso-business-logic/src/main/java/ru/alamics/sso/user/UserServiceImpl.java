@@ -79,6 +79,9 @@ public class UserServiceImpl implements UserService {
         if (userRequest.getUserIds() == null)
             return null;
 
+        if (userRequest.getUserParameters() == null)
+            userRequest.setUserParameters(UserParameter.values());
+
         List<UserSearchDto> userDto = userFindService.getUsersByParametersWithoutGrouping(
                 realm.getName(), null, null, null,
                 null, true, 1, 1000, Arrays.asList(userRequest.getUserIds()));
@@ -139,9 +142,12 @@ public class UserServiceImpl implements UserService {
     }
 
     private List<String> getUserParameterNames(UserParameter[] userParameters) {
+
         List<String> names = new LinkedList<>();
         for (UserParameter userParameter : userParameters) {
-            names.add(userParameter.getName());
+            if (userParameter == null)
+                continue;
+            names.add(userParameter.getDesc());
         }
         return names;
     }
@@ -149,6 +155,9 @@ public class UserServiceImpl implements UserService {
     private List<String> getUserParameters(UserSearchDto userDto, UserParameter[] userParameters) {
         List<String> parameters = new LinkedList<>();
         for (UserParameter userParameter : userParameters) {
+            if (userParameter == null)
+                continue;
+
             switch (userParameter) {
                 case EMAIL:
                     parameters.add(userDto.getEmail());
@@ -276,7 +285,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkHeader(String head, UserParameter userParameter) throws FileServiceException {
-        if (!head.equalsIgnoreCase(userParameter.getName())) {
+        if (!head.equalsIgnoreCase(userParameter.getDesc())) {
             throw new FileServiceException("File Structure is not valid! Header is not valid");
         }
     }
