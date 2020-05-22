@@ -35,12 +35,12 @@ public class UserPostService {
     public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException {
         UserEntity user = userRepository.findUser(userPostRequest.getUserId());
         if (user == null) {
-            throw new NotFoundException("User with this userId is not exist!");
+            throw new NotFoundException("УЗ с таким ID не найдена");
         }
 
         UserPostRoleEntity role = userPostRepository.findUserPostRoleById(userPostRequest.getRoleId());
         if (role == null) {
-            throw new NotFoundException("UserPostRole with this roleId is not exist!");
+            throw new NotFoundException("Роль не найдена");
         }
 
         checkUserPost(userPostRequest);
@@ -56,7 +56,7 @@ public class UserPostService {
     private void checkUserPost(UserPostRequest postRequest) throws FoundUserPostException {
         UserPostEntity post = userPostRepository.findUserPostByUserIdAndTomsId(postRequest.getUserId(), postRequest.getTomsId());
         if (post != null) {
-            throw new FoundUserPostException(String.format("User already have userPost with this tomsId: userId=%s, userPostId=%s, tomsId=%s",
+            throw new FoundUserPostException(String.format("УЗ уже имеет должность с таким tomsId: userId=%s, userPostId=%s, tomsId=%s",
                     postRequest.getUserId(), post.getId(), postRequest.getTomsId()));
         }
 
@@ -70,12 +70,12 @@ public class UserPostService {
     public UserPostResponse edit(UserPostEditRequest userPostEditRequest) throws NotFoundException {
         UserPostEntity userPost = userPostRepository.getUserPost(userPostEditRequest.getId());
         if (userPost == null) {
-            throw new NotFoundException("UserPost is not exist");
+            throw new NotFoundException("Должность не найдена");
         }
 
         UserPostRoleEntity role = userPostRepository.findUserPostRoleById(userPostEditRequest.getRoleId());
         if (role == null) {
-            throw new NotFoundException("UserPostRole with this roleId is not exist!");
+            throw new NotFoundException("Роль не найдена");
         }
 
         userPost.setRole(role);
@@ -85,7 +85,7 @@ public class UserPostService {
 
     public void remove(String id) throws NotFoundException {
         if (userPostRepository.getUserPost(id) == null) {
-            throw new NotFoundException("UserPost is not exist");
+            throw new NotFoundException("Должность с таким ID не найдена");
         }
         userPostRepository.remove(id);
     }
@@ -93,7 +93,7 @@ public class UserPostService {
     public UserPostResponse get(String id) throws NotFoundException {
         UserPostEntity userPost = userPostRepository.getUserPost(id);
         if (userPost == null) {
-            throw new NotFoundException("UserPost is not exist");
+            throw new NotFoundException("Должность с таким ID не найдена");
         }
         return DataMapper.toUserPostResponse(userPost);
     }
@@ -121,12 +121,12 @@ public class UserPostService {
     public UserPostResponse addSystemRole(ExternalSystemRoleRequest externalSystemRoleRequest) throws NotFoundException {
         UserPostEntity userPost = userPostRepository.getUserPost(externalSystemRoleRequest.getUserPostId());
         if (userPost == null) {
-            throw new NotFoundException("UserPost is not exist");
+            throw new NotFoundException("Должность не найдена");
         }
 
         ExternalSystemRoleEntity externalSystemRole = userPostRepository.findExternalSystemRole(externalSystemRoleRequest.getSystemRoleId());
         if (externalSystemRole == null) {
-            throw new NotFoundException("SystemRole with this systemRoleId is not exist!");
+            throw new NotFoundException("Доступ в систему не найден");
         }
 
         Set<ExternalSystemRoleEntity> systemRoles = userPost.getSystemRoles();
@@ -142,12 +142,12 @@ public class UserPostService {
     public UserPostResponse removeSystemRole(ExternalSystemRoleRequest externalSystemRoleRequest) throws NotFoundException {
         UserPostEntity userPost = userPostRepository.getUserPost(externalSystemRoleRequest.getUserPostId());
         if (userPost == null) {
-            throw new NotFoundException("UserPost is not exist");
+            throw new NotFoundException("Должность не найдена");
         }
         if (userPost.getSystemRoles() == null || userPost.getSystemRoles().isEmpty() ||
                 !userPost.getSystemRoles().stream().anyMatch(o ->
                         o.getId().equals(externalSystemRoleRequest.getSystemRoleId()))) {
-            throw new NotFoundException("SystemRole is not exist in this UserPost");
+            throw new NotFoundException("Роль не найдена в этой должности");
         }
         userPost.getSystemRoles().remove(userPost.getSystemRoles().stream()
                 .filter(o -> o.getId().equals(externalSystemRoleRequest.getSystemRoleId()))
@@ -158,7 +158,7 @@ public class UserPostService {
     public Long getUserPostRole(String name) throws NotFoundException {
         UserPostRoleEntity userPostRole = userPostRepository.getUserPostRole(name);
         if (userPostRole == null) {
-            throw new NotFoundException("UserPostRole is not exist");
+            throw new NotFoundException("Роль не найдена");
         }
         return userPostRepository.getUserPostRole(name).getId();
     }
@@ -166,7 +166,7 @@ public class UserPostService {
     public Long getExternalSystemRoleId(String sysName) throws NotFoundException {
         ExternalSystemRoleEntity externalSystemRole = userPostRepository.getExternalSystemRole(sysName);
         if (externalSystemRole == null) {
-            throw new NotFoundException("ExternalSystemRole is not exist");
+            throw new NotFoundException("Роль клиента не найдена");
         }
         return externalSystemRole.getId();
     }
