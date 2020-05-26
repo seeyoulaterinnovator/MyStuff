@@ -1,7 +1,7 @@
 <#import "templates/email-sent.ftl" as emailSent>
 <#import "templates/header.ftl" as header>
 
-<#macro registrationLayout displayInfo=false displayMessage=true displayWarningMessage=true displayWide=false environment="dev" displayCity=true>
+<#macro registrationLayout displayInfo=false displayMessage=true displayWarningMessage=true displayWide=false environment="production" displayCity=true>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="ru" class="h-full scrollable-container">
   <head>
