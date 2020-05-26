@@ -23,6 +23,7 @@ import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.theme.Theme;
 import org.keycloak.theme.beans.LinkExpirationFormatterMethod;
+import ru.alamics.sso.schedule.Translator;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -83,11 +84,15 @@ public class VerifyEmailFactory extends VerifyEmail {
         String link = builder.build(realm.getName()).toString();
         long expirationInMinutes = TimeUnit.SECONDS.toMinutes(validityInSecs);
 
+        String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(validityInSecs);
+
         try {
             EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class)
                     .setAuthenticationSession(authSession)
                     .setRealm(realm)
-                    .setUser(user);
+                    .setUser(user)
+                    .setAttribute("expTime", expirationStrRus);
+
             if (user.isEmailVerified()) {
                 sendAuthorizationEmail(emailTemplateProvider, user, link, expirationInMinutes, session);
             } else {
