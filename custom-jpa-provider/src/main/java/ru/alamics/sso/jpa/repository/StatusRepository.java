@@ -13,6 +13,7 @@ import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 
 @Stateless
 @LocalBean
@@ -49,7 +50,9 @@ public class StatusRepository {
     @Transactional
     public boolean checkStatusDb(String nodeName) {
         try {
-            CheckTableEntity ent = CheckTableEntity.builder().name(nodeName).build();
+            CheckTableEntity ent = em.find(CheckTableEntity.class, nodeName);
+
+            ent.setUpdateTime(LocalDateTime.now());
 
             em.merge(ent);
             em.flush();
