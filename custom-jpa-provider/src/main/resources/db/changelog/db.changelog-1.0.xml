@@ -834,4 +834,15 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="46_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="CHECK_TABLE" />
+            <not><columnExists tableName="CHECK_TABLE" columnName="version"/></not>
+        </preConditions>
+
+        <addColumn tableName="CHECK_TABLE">
+            <column name="version" type="bigint"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

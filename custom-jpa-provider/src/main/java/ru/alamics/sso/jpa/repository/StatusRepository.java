@@ -2,6 +2,7 @@ package ru.alamics.sso.jpa.repository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.QueryHints;
+import ru.alamics.sso.jpa.entity.status.CheckTableEntity;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -49,11 +50,18 @@ public class StatusRepository {
     @Lock(LockType.WRITE)
     public boolean checkStatusDb(String nodeName) {
         try {
+            CheckTableEntity ent = CheckTableEntity.builder().name(nodeName).build();
+
+            em.merge(ent);
+            em.flush();
+
+            /*
             em
                 .createNativeQuery("UPDATE CHECK_TABLE SET updated = CURRENT_TIMESTAMP() WHERE name = :nodeName")
                 .setParameter("nodeName", nodeName)
                 .setHint(QueryHints.NATIVE_LOCKMODE, LockModeType.NONE)
                 .executeUpdate();
+            */
 
         } catch (Exception e) {
             log.error("checkStatusDb", e);
