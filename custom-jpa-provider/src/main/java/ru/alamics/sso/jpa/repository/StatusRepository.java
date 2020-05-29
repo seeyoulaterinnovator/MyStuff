@@ -46,7 +46,6 @@ public class StatusRepository {
     }
 
     @Transactional
-    @Lock(LockType.WRITE)
     public boolean checkStatusDb(String nodeName) {
         try {
             em
