@@ -845,4 +845,24 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="47_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="AUTO_LOCK_NOTIFICATION" />
+            <columnExists tableName="AUTO_LOCK_NOTIFICATION" columnName="version"/>
+        </preConditions>
+        <sql>
+            UPDATE AUTO_LOCK_NOTIFICATION SET version = 0 WHERE version IS NULL;
+        </sql>
+    </changeSet>
+
+    <changeSet id="48_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="CHECK_TABLE" />
+            <columnExists tableName="CHECK_TABLE" columnName="version"/>
+        </preConditions>
+        <sql>
+            UPDATE CHECK_TABLE SET version = 0 WHERE version IS NULL;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
