@@ -39,5 +39,5 @@ public class AutoLockNotification implements Serializable {
     private NotificationStatus status;
 
     @Version
-    private long version;
+    private Long version;
 }
