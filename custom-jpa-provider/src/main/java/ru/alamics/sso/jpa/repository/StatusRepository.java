@@ -50,7 +50,7 @@ public class StatusRepository {
     @Lock(LockType.WRITE)
     public boolean checkStatusDb(String nodeName) {
         try {
-            CheckTableEntity ent = CheckTableEntity.builder().name(nodeName).build();
+            CheckTableEntity ent = em.find(CheckTableEntity.class, nodeName);
 
             em.merge(ent);
             em.flush();
