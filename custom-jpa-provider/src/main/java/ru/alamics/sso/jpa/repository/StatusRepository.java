@@ -53,9 +53,9 @@ public class StatusRepository {
 
             ent.setUpdateTime(LocalDateTime.now());
 
-            //em.unwrap(Session.class).update(ent);
+            em.unwrap(Session.class).update(ent);
 
-            em.merge(ent);
+            //em.merge(ent);
             em.flush();
 
             /*
