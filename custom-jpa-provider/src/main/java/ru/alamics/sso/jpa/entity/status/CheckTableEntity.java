@@ -21,7 +21,6 @@ public class CheckTableEntity {
     @Column(name = "name")
     private String name;
 
-    @UpdateTimestamp
     @Column(name = "updated")
     private LocalDateTime updateTime;
 

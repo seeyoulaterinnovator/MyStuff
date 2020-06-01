@@ -1,6 +1,7 @@
 package ru.alamics.sso.jpa.repository;
 
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Session;
 import org.hibernate.annotations.QueryHints;
 import ru.alamics.sso.jpa.entity.status.CheckTableEntity;
 
@@ -51,6 +52,8 @@ public class StatusRepository {
             CheckTableEntity ent = em.find(CheckTableEntity.class, nodeName, LockModeType.OPTIMISTIC);
 
             ent.setUpdateTime(LocalDateTime.now());
+
+            em.unwrap(Session.class).update(ent);
 
             //em.merge(ent);
             // em.flush();
