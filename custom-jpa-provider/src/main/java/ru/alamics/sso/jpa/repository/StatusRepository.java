@@ -49,7 +49,7 @@ public class StatusRepository {
     @Lock(LockType.WRITE)
     public boolean checkStatusDb(String nodeName) {
         try {
-            CheckTableEntity ent = em.find(CheckTableEntity.class, nodeName, LockModeType.OPTIMISTIC);
+            CheckTableEntity ent = em.find(CheckTableEntity.class, nodeName);
 
             ent.setUpdateTime(LocalDateTime.now());
 
