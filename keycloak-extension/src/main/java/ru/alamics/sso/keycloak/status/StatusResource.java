@@ -38,6 +38,8 @@ public class StatusResource {
                     .build();
         }
 
+        log.info("Health check");
+
         boolean status = statusService.checkStatusDb();
 
         if (!status) {
