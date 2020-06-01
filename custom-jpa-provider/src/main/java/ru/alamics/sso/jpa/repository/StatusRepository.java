@@ -8,10 +8,7 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import javax.persistence.*;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 
@@ -47,7 +44,7 @@ public class StatusRepository {
         }
     }
 
-    //@Transactional
+    @Transactional
     @Lock(LockType.WRITE)
     public boolean checkStatusDb(String nodeName) {
         try {
@@ -55,7 +52,7 @@ public class StatusRepository {
 
             ent.setUpdateTime(LocalDateTime.now());
 
-            em.merge(ent);
+            //em.merge(ent);
             // em.flush();
 
             /*
@@ -65,7 +62,8 @@ public class StatusRepository {
                 .setHint(QueryHints.NATIVE_LOCKMODE, LockModeType.NONE)
                 .executeUpdate();
             */
-
+        } catch (OptimisticLockException oe) {
+            log.info("OptimisticLockException " + oe.getMessage());
         } catch (Exception e) {
             log.error("checkStatusDb", e);
             return false;
