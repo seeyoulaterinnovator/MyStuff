@@ -56,7 +56,7 @@ public class StatusRepository {
             //em.unwrap(Session.class).update(ent);
 
             em.merge(ent);
-            // em.flush();
+            em.flush();
 
             /*
             em
