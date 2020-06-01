@@ -48,6 +48,7 @@ public class StatusRepository {
     }
 
     @Transactional
+    @Lock(LockType.WRITE)
     public boolean checkStatusDb(String nodeName) {
         try {
             CheckTableEntity ent = em.find(CheckTableEntity.class, nodeName);
@@ -55,7 +56,7 @@ public class StatusRepository {
             ent.setUpdateTime(LocalDateTime.now());
 
             em.merge(ent);
-            em.flush();
+            // em.flush();
 
             /*
             em
