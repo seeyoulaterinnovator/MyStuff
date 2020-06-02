@@ -13,12 +13,17 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 public class StatusResource {
 
     protected KeycloakSession session;
     private StatusService statusService;
+
+    private static AtomicLong healthUpdated = new AtomicLong(0);
+    private static AtomicBoolean healthStatus = new AtomicBoolean(false);
 
     public StatusResource(KeycloakSession session) {
         this.session = session;
@@ -38,9 +43,23 @@ public class StatusResource {
                     .build();
         }
 
+        long now = System.currentTimeMillis();
+
+        if (now - healthUpdated.get() < 500) {
+            log.info("Health check, cached value");
+            return buildResponse(healthStatus.get());
+        }
+
+        healthUpdated.set(now);
+
         log.info("Health check");
 
-        boolean status = statusService.checkStatusDb();
+        healthStatus.set(statusService.checkStatusDb());
+
+        return buildResponse(healthStatus.get());
+    }
+
+    private Response buildResponse(boolean status) {
 
         if (!status) {
             return JsonResponse.error(Response.Status.SERVICE_UNAVAILABLE)

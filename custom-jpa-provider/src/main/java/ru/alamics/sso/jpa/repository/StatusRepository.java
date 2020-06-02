@@ -54,9 +54,9 @@ public class StatusRepository {
             ent.setUpdateTime(LocalDateTime.now());
 
             em.unwrap(Session.class).update(ent);
-
             //em.merge(ent);
-            em.flush();
+
+            // em.flush(); // no need if value is cached. but uncomment if there is exceptions "Row was updated or deleted by another transaction"
 
             /*
             em
