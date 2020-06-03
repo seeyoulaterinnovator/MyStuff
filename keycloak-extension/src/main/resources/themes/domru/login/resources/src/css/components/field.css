@@ -119,7 +119,7 @@
 
   @media (max-width: 479px) {
     width: 100%;
-    max-width: unset;
+    max-width: 100%;
   }
 }
 

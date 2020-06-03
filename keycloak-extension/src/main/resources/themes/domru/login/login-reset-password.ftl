@@ -4,7 +4,7 @@
 <@layout.registrationLayout displayInfo=true displayCity=true; section>
     <#if section = "header">
         <#include "templates/required-fields.html">
-        
+
         <@blocks.contentHeader mainTitle="${msg('emailForgotContentTitle')}" />
     <#elseif section = "form">
         <form id="loginResetPasswordForm" action="${url.loginAction}" method="post">
@@ -23,11 +23,11 @@
             </div>
 
             <div class="flex flex-col justify-between sm:flex-row xl:mt-12 md:mt-8 mt-7">
-                <div class="flex-basis-1/2 mb-2 sm:mb-0">
+                <div class="flex-basis-auto w-full mb-2 sm:mb-0">
                     <#--  <button id="submit" class="btn btn-main w-full" type="submit">${msg("doSubmit")}</button>  -->
                     <button id="submit" class="btn btn-main w-full" type="submit">Далее</button>
                 </div>
-                <div class="flex-basis-1/2 ml-0 text-sm sm:ml-6">
+                <div class="flex-basis-auto w-full ml-0 text-sm sm:ml-6">
                     <#--  <button id="cancel" class="btn w-full" type="button">${msg("doCancel")}</button>  -->
                     <a id="cancel" href="https://master.frontend2.b2bweb.t2.ertelecom.ru" class="btn w-full">${msg("doCancel")}</a>
                 </div>

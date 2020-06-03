@@ -18,6 +18,7 @@ module.exports = {
       },
       flex: {
         'basis-1/2': '0 1 50%',
+        'basis-auto': '0 1 auto',
       },
       spacing: {
         '7': '1.75rem',

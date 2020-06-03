@@ -10,10 +10,10 @@
             <@blocks.password firstFieldName="password-new" />
 
             <div class="flex flex-col justify-between sm:flex-row xl:mt-12 md:mt-8 mt-7">
-                <div class="flex-basis-1/2 mb-2 sm:mb-0">
+                <div class="flex-basis-auto w-full mb-2 sm:mb-0">
                     <button id="submit" class="btn btn-main w-full pass-fields pass-fields--change-pass" type="submit">Сменить пароль</button>
                 </div>
-                <div class="flex-basis-1/2 ml-0 text-sm sm:ml-6">
+                <div class="flex-basis-auto w-full ml-0 text-sm sm:ml-6">
                     <a id="cancel" href="https://master.frontend2.b2bweb.t2.ertelecom.ru" class="btn w-full">${msg("doCancel")}</a>
                 </div>
             </div>
