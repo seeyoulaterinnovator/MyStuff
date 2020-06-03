@@ -84,7 +84,7 @@ export default (function() {
       'password-confirm': '',
     },
     validate,
-    validateOnBlur: true,
+    validateOnBlur: false,
   });
 
   // Валидация полей
