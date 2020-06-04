@@ -22,7 +22,7 @@
     <div class="flex flex-col-reverse sm:flex-row">
       <div class="pass-fields">
         <@components.field class="mb-3 sm:mb-4" fieldName="${firstFieldName}" label="${msg('password')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true />
-        
+
         <@components.field fieldName="${secondFieldName}" label="${msg('passwordConfirm')}" placeholder="${msg('passwordConfirmPlaceholder')}" type="password" required=true />
       </div>
 
@@ -37,7 +37,7 @@
             <button id="refresh-password-button" class="w-12 h-12 focus:outline-none" type="button">
               <@svg.reloadButton color="accentBlue"></@svg.reloadButton>
             </button>
-          </div>                                
+          </div>
         </div>
       </div>
     </div>
@@ -46,8 +46,8 @@
 
 <#macro contentHeader mainTitle secondaryTitle="" secondaryHref="" withBorder=false >
   <header class="flex justify-between items-center pb-2 sm:pb-3 md:pb-4">
-    <h1 
-      id="page-title" 
+    <h1
+      id="page-title"
       class="<#if withBorder>border-extra border-b-2 md:border-b-3 xl:border-b-4</#if> <#if secondaryTitle != ''>text-3xl</#if>"
     >
       <b>
@@ -63,12 +63,12 @@
           </b>
         </a>
       </h2>
-    </#if>    
+    </#if>
   </header>
 </#macro>
 
 <#macro verificationHeader mainTitle>
-  <header class="flex justify-between items-center pb-2 sm:pb-3 md:pb-4">
+  <header class="pb-2 sm:pb-3 md:pb-4">
     <h1
       id="page-title"
       class="verification__title"
