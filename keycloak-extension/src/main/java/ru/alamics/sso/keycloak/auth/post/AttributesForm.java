@@ -25,11 +25,11 @@ import static ru.alamics.sso.registration.model.UserConstants.*;
 @Slf4j
 public class AttributesForm implements Authenticator {
     private static final String FORM = "attributes.ftl";
-    private final UserRole role;
+    private final UserRole roleService;
     private CachedUserPostFacade cachedUserPostFacade;
 
-    public AttributesForm(UserRole role) {
-        this.role = role;
+    public AttributesForm(UserRole roleService) {
+        this.roleService = roleService;
         try {
             this.cachedUserPostFacade = (CachedUserPostFacade) new InitialContext().lookup("java:global/domru-sso/" + CachedUserPostFacade.class.getSimpleName());
         } catch (NamingException e) {
@@ -42,10 +42,12 @@ public class AttributesForm implements Authenticator {
     public void authenticate(AuthenticationFlowContext context) {
         final String DEBUG_STR = "authenticate";
         var authSession = context.getAuthenticationSession();
-        log.info("{}: frame={}", DEBUG_STR, authSession.getAuthNote(I_FRAME));
+
+        log.info("{}: frame={}, user={}", DEBUG_STR, authSession.getAuthNote(I_FRAME), context.getUser().getId());
         var uriInfo = context.getUriInfo();
         var queryParams = uriInfo.getQueryParameters();
         queryParams.forEach((key, value) -> log.info("{}: key={} value={}", DEBUG_STR, key, value));
+
         String frame = uriInfo.getQueryParameters().getFirst(I_FRAME);
         var redirectUriQueryParams = extractQueryParamsFromRedirectUri(queryParams.getFirst(REDIRECT_URI));
         String redirectIframe = redirectUriQueryParams.get(I_FRAME);
@@ -92,7 +94,7 @@ public class AttributesForm implements Authenticator {
     @Override
     public void action(AuthenticationFlowContext context) {
         var authSession = context.getAuthenticationSession();
-        role.setUserPost(context);
+        roleService.setUserPost(context);
         authSession.setAuthNote(AUTH_FORM_SUCCESS, "0");
         context.success();
     }
