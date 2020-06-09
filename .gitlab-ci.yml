@@ -228,7 +228,7 @@ stage3:
   script:
     - $BASE_DIR/scripts/deploy.sh
 
-perm:
+perm:primary:
   stage: deploy perm
   when: manual
   environment:
@@ -239,30 +239,43 @@ perm:
     - cp -r build/deploy/themes/domru /usr/local/keycloak/themes
     - scp -r build/deploy/themes/domru sso-app02:/usr/local/keycloak/themes
     - scp -r build/deploy/themes/domru sso-app03:/usr/local/keycloak/themes
-    - scp -r build/deploy/themes/domru sso-app04:/usr/local/keycloak/themes
-    - scp -r build/deploy/themes/domru sso-app05:/usr/local/keycloak/themes
     - mkdir -p /usr/local/keycloak/domain/data/password-blacklists
     - cp build/deploy/standalone/data/password-blacklists/black_list_password.txt /usr/local/keycloak/domain/servers/server-one/data/password-blacklists
     - ssh sso-app02 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
     - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app02:/usr/local/keycloak/domain/servers/server-two/data/password-blacklists
     - ssh sso-app03 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
     - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app03:/usr/local/keycloak/domain/servers/server-three/data/password-blacklists
-    - ssh sso-app04 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
-    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app04:/usr/local/keycloak/domain/servers/server-four/data/password-blacklists
-    - ssh sso-app05 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
-    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app05:/usr/local/keycloak/domain/servers/server-five/data/password-blacklists
     # java artifacts
     - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app02:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - scp tools/module.xml sso-app02:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app03:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - scp tools/module.xml sso-app03:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - ~/scripts/deploy-primary.sh
+  tags:
+    - sso-domain-controller-perm
+
+perm:secondary:
+  stage: deploy perm
+  when: manual
+  environment:
+    name: stage
+    url: http://sso.dev.itrev.ru
+  script:
+    # themes and text artifacts
+    - scp -r build/deploy/themes/domru sso-app04:/usr/local/keycloak/themes
+    - scp -r build/deploy/themes/domru sso-app05:/usr/local/keycloak/themes
+    - ssh sso-app04 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app04:/usr/local/keycloak/domain/servers/server-four/data/password-blacklists
+    - ssh sso-app05 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app05:/usr/local/keycloak/domain/servers/server-five/data/password-blacklists
+    # java artifacts
     - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - scp tools/module.xml sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - scp tools/module.xml sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    - ~/scripts/deploy.sh
+    - ~/scripts/deploy-secondary.sh
   tags:
     - sso-domain-controller-perm
 
