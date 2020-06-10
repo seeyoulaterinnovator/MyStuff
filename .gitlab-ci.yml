@@ -305,7 +305,7 @@ voronezh:primary:
     - scp tools/module.xml sso-app03:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    - ~/scripts/deploy.sh
+    - ~/scripts/deploy-primary.sh
   tags:
     - sso-domain-controller-voronezh
 
