@@ -252,7 +252,7 @@ perm:primary:
     - scp tools/module.xml sso-app03:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    - ~/scripts/deploy-primary.sh
+    - ~/scripts/deploy.sh primary
   tags:
     - sso-domain-controller-perm
 
@@ -275,7 +275,7 @@ perm:secondary:
     - scp tools/module.xml sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - scp tools/module.xml sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    - ~/scripts/deploy-secondary.sh
+    - ~/scripts/deploy.sh secondary
   tags:
     - sso-domain-controller-perm
 
@@ -305,7 +305,7 @@ voronezh:primary:
     - scp tools/module.xml sso-app03:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    - ~/scripts/deploy-primary.sh
+    - ~/scripts/deploy.sh primary
   tags:
     - sso-domain-controller-voronezh
 
@@ -329,7 +329,7 @@ voronezh:secondary:
     - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - scp tools/module.xml sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-    - ~/scripts/deploy-secondary.sh
+    - ~/scripts/deploy.sh secondary
   tags:
     - sso-domain-controller-voronezh
 
