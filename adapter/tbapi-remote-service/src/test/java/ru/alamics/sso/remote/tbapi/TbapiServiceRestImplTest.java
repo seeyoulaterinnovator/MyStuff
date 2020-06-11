@@ -81,6 +81,7 @@ class TbapiServiceRestImplTest {
         conectConfig.setPort(server.port());
         conectConfig.setAppname("appname");
         conectConfig.setUsername("username");
+        conectConfig.setPassword("password");
         conectConfig.setPath("/api/v1/leadManagement/lead");
         conectConfig.setSecure(false);
 

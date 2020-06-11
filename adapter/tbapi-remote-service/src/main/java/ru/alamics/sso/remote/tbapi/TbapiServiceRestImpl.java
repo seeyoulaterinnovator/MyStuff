@@ -79,7 +79,8 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .header("HOST", connectConfig.getHost())
-                .header("Authorization", String.format("Trusted application=\"%s\", username=\"%s\"", connectConfig.getAppname(), connectConfig.getUsername()))
+                .header("Authorization", String.format("Trusted application=\"%s\", username=\"%s\", password=\"%s\"",
+                        connectConfig.getAppname(), connectConfig.getUsername(), connectConfig.getPassword()))
                 .post(entity)) {
 
             log.info("response media type {}, status {}", response.getMediaType(), response.getStatus());
@@ -125,7 +126,8 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
                     .accept(MediaType.APPLICATION_JSON)
                     .header("Content-Type", MediaType.APPLICATION_JSON)
                     .header("HOST", connectConfig.getHost())
-                    .header("Authorization", String.format("Trusted application=\"%s\", username=\"%s\"", connectConfig.getAppname(), connectConfig.getUsername()))
+                    .header("Authorization", String.format("Trusted application=\"%s\", username=\"%s\", password=\"%s\"",
+                            connectConfig.getAppname(), connectConfig.getUsername(), connectConfig.getPassword()))
                     .build("POST", entity)
                     .invoke();
 
