@@ -46,26 +46,33 @@
                             <div class="input-group-addon">
                                 <input type="text" placeholder="{{:: 'search.placeholder' | translate}}"
                                        data-ng-model="query.search" class="form-control search"
-                                       onkeydown="if (event.keyCode == 13) document.getElementById('userSearch').click()">
+                                       onkeydown="if (event.keyCode == 13) document.getElementById('searchUsers').click()">
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="input-group-addon">
                                 <input type="text" placeholder="Search by User Id..."
                                        data-ng-model="query.searchByUserId" class="form-control search"
-                                       onkeydown="if (event.keyCode == 13) document.getElementById('userSearchById').click()">
+                                       onkeydown="if (event.keyCode == 13) document.getElementById('searchUsers').click()">
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="input-group-addon">
                                 <input type="text" placeholder="Search by Toms Id..."
                                        data-ng-model="query.searchByTomsId" class="form-control search"
-                                       onkeydown="if (event.keyCode == 13) document.getElementById('userSearchByTomsId').click()">
+                                       onkeydown="if (event.keyCode == 13) document.getElementById('searchUsers').click()">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="input-group-addon">
+                                <input type="text" placeholder="Search by Phone..."
+                                       data-ng-model="query.searchByPhone" class="form-control search"
+                                       onkeydown="if (event.keyCode == 13) document.getElementById('searchUsers').click()">
                             </div>
                         </div>
                     </div>
                     <button id="searchUsers" class="btn btn-default" ng-click="firstPage()">Search users</button>
-                    <button id="viewAllUsers" class="btn btn-default" ng-click="query.search = ''; query.searchByUserId = ''; query.searchByTomsId = ''; firstPage()">{{::
+                    <button id="viewAllUsers" class="btn btn-default" ng-click="query.search = ''; query.searchByUserId = ''; query.searchByTomsId = ''; query.searchByPhone = ''; firstPage()">{{::
                         'view-all-users' | translate}}
                     </button>
                     <select class="form-control" name="realmsSelect" ng-model="query.searchRealm" ng-change="changeSearchRealm()"

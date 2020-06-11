@@ -323,6 +323,82 @@ public class UserRepository {
         return query.getResultList();
     }
 
+    public List<UserSummaryView> findUsersByName(
+            String realm,
+            String search,
+            String searchUser,
+            String searchToms,
+            String sortField,
+            boolean sortAsc,
+            int pageNum,
+            int pageSize
+    ) {
+        Query query = em.createNativeQuery(
+                "select UE.id, " +
+                        "                                                         UE.username," +
+                        "                                                         UE.firstName, " +
+                        "                                                         UE.lastName, " +
+                        "                                                         UE.email, " +
+                        "                                                         null, " +
+                        "                                                         UE.enabled " +
+                        "from UserEntity UE \n" +
+                        "WHERE UE.realm = :realm \n" +
+                        "and (:search is null or :search = '' or MATCH(UE.email, UE.firstName, UE.username) AGAINST(:search IN BOOLEAN MODE)) \n" +
+                        "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser) \n" +
+                        "and (:searchToms is null or :searchToms = '' or exists( \n" +
+                        "  select UP.id \n" +
+                        "  from UserPostEntity UP \n" +
+                        "  where UP.user = UE and UP.customer.id = :searchToms \n" +
+                        ")) \n" +
+                        getSort(sortField, sortAsc)
+                , UserSummaryView.class)
+                .setParameter("search", search)
+                .setParameter("searchUser", searchUser)
+                .setParameter("searchToms", searchToms)
+                .setParameter("realm", realm);
+
+        pageNum = Math.max(1, pageNum);
+        pageSize = Math.max(1, pageSize);
+
+        query.setFirstResult((pageNum - 1) * pageSize);
+        query.setMaxResults(pageSize);
+
+        return query.getResultList();
+    }
+
+    public List<UserSummaryView> findUsersByPhone(
+            String realm,
+            String searchPhone,
+            String sortField,
+            boolean sortAsc,
+            int pageNum,
+            int pageSize
+    ) {
+        Query query = em.createNativeQuery(
+                "select UE.id, " +
+                        "                                                    UE.username," +
+                        "                                                    UE.firstName, " +
+                        "                                                    UE.lastName, " +
+                        "                                                    UE.email, " +
+                        "                                                    UA.value, " +
+                        "                                                    UE.enabled " +
+                        "from UserEntity UE \n" +
+                        "join UserAttributeEntity UA on UE = UA.user \n" +
+                        "where UA.name = 'phone' and MATCH(UA.value) AGAINST(:searchPhone IN BOOLEAN MODE) \n" +
+                        getSort(sortField, sortAsc)
+                , UserSummaryView.class)
+                .setParameter("searchPhone", searchPhone)
+                .setParameter("realm", realm);
+
+        pageNum = Math.max(1, pageNum);
+        pageSize = Math.max(1, pageSize);
+
+        query.setFirstResult((pageNum - 1) * pageSize);
+        query.setMaxResults(pageSize);
+
+        return query.getResultList();
+    }
+
     private String getSort(String sortField, boolean sortAsc) {
         String sort = "";
         if (SORT_FIELD_NAME.equalsIgnoreCase(sortField)) {

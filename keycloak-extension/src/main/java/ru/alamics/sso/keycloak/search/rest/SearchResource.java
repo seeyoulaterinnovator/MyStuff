@@ -64,8 +64,9 @@ public class SearchResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response getUsersInfo(@QueryParam("search") String search, @QueryParam("searchUser") String searchUser,
-                                 @QueryParam("searchToms") String searchToms, @QueryParam("sortField") String sortField,
-                                 @QueryParam("sortAsc") boolean sortAsc, @QueryParam("searchRealm") String searchRealm,
+                                 @QueryParam("searchToms") String searchToms, @QueryParam("searchPhone") String searchPhone,
+                                 @QueryParam("sortField") String sortField, @QueryParam("sortAsc") boolean sortAsc,
+                                 @QueryParam("searchRealm") String searchRealm,
                                  @QueryParam("pageNum") int pageNum, @QueryParam("pageSize") int pageSize) {
         if (searchRealm == null || searchRealm.isEmpty()) {
             searchRealm = "user";
@@ -73,7 +74,7 @@ public class SearchResource {
 
         log.info("getUsersInfo 1");
 
-        List<UserSearch> users = userFindService.getUsersByParameters(searchRealm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
+        List<UserSearch> users = userFindService.getUsersByParameters(searchRealm, search, searchUser, searchToms, searchPhone, sortField, sortAsc, pageNum, pageSize);
 
         log.info("getUsersInfo 2");
 

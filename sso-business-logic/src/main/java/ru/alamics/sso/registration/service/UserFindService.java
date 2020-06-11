@@ -71,12 +71,24 @@ public class UserFindService {
             String search,
             String searchUser,
             String searchToms,
+            String searchPhone,
             String sortField,
             boolean sortAsc,
             Integer pageNum,
             Integer pageSize
     ) {
-        List<UserSummaryView> users = userRepository.findUsersByParameters(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
+        List<UserSummaryView> users = null;
+
+        // TODO нужна поддержка других db кроме mysql
+
+        if (!Util.isEmpty(searchPhone)) {
+            log.info("getUsersByParameters phone");
+            users = userRepository.findUsersByPhone(realm, searchPhone, sortField, sortAsc, pageNum, pageSize);
+        } else {
+            log.info("getUsersByParameters name");
+            users = userRepository.findUsersByName(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
+            // TODO в users[n] нет телефона
+        }
 
         if (users.isEmpty()) {
             return Collections.emptyList();

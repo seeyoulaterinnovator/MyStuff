@@ -294,6 +294,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             $scope.query.search = $scope.getSearchParameter($route.current.params.search);
             $scope.query.searchByUserId = $scope.getSearchParameter($route.current.params.searchUser);
             $scope.query.searchByTomsId = $scope.getSearchParameter($route.current.params.searchToms);
+            $scope.query.searchByPhone = $scope.getSearchParameter($route.current.params.searchPhone);
             $scope.query.searchRealm = $scope.getSearchParameter($route.current.params.searchRealm);
 
             if ($scope.query.searchRealm === '' || !$scope.userRealms.some(function (realm) {
@@ -455,6 +456,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         $scope.query.search = '';
         $scope.query.searchByUserId = '';
         $scope.query.searchByTomsId = '';
+        $scope.query.searchByPhone = '';
 
         $scope.firstPage();
 
@@ -722,7 +724,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         console.log("query.search: " + $scope.query.search);
         $http.get(`${authUrl}/realms/user/users-info/search?` +
             `searchRealm=${$scope.query.searchRealm}&search=${$scope.query.search}` +
-            `&searchUser=${$scope.query.searchByUserId}&searchToms=${$scope.query.searchByTomsId}` +
+            `&searchUser=${$scope.query.searchByUserId}&searchToms=${$scope.query.searchByTomsId}&searchPhone=${$scope.query.searchByPhone}` +
             `&pageNum=${$scope.pages.number}&pageSize=${$scope.pageSize}` +
             `&sortAsc=${sortAsc}&sortField=${currentSortField}`).then(function (data) {
 
