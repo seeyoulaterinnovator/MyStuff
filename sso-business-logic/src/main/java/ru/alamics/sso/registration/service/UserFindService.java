@@ -6,6 +6,8 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.jpa.model.UserSummaryView;
 import ru.alamics.sso.jpa.repository.UserPostRepository;
 import ru.alamics.sso.jpa.repository.UserRepository;
+import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.user.mapper.UserMapper;
@@ -27,6 +29,13 @@ public class UserFindService {
     private UserRepository userRepository;
     @EJB
     private UserPostRepository userPostRepository;
+
+    private ApplicationProperties properties;
+
+    public UserFindService() {
+
+        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+    }
 
     public UserEntity getUserByPhone(RealmModel realm, String phone) {
         phone = Util.getCleanUserPhone(phone);
@@ -79,11 +88,14 @@ public class UserFindService {
     ) {
         List<UserSummaryView> users = null;
 
-        // TODO нужна поддержка других db кроме mysql
+        if (properties.getProperty("db.non.mysql") != null) {
+            log.info("getUsersByParameters non mysql");
+            users = userRepository.findUsersByParameters(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
 
-        if (!Util.isEmpty(searchPhone)) {
+        } else if (!Util.isEmpty(searchPhone)) {
             log.info("getUsersByParameters phone");
             users = userRepository.findUsersByPhone(realm, searchPhone, sortField, sortAsc, pageNum, pageSize);
+
         } else {
             log.info("getUsersByParameters name");
             users = userRepository.findUsersByName(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);

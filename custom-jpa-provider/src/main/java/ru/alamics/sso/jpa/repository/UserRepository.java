@@ -19,6 +19,8 @@ import java.util.List;
 @Stateless
 public class UserRepository {
 
+    private final static String USER_SUMMARY_MAPPER_NAME = "UserSummaryMapper";
+
     private final static String SORT_FIELD_NAME = "firstName";
     private final static String SORT_FIELD_EMAIL = "email";
 
@@ -333,25 +335,28 @@ public class UserRepository {
             int pageNum,
             int pageSize
     ) {
+        if (search != null && !search.isEmpty())
+            search = search + "*";
+
         Query query = em.createNativeQuery(
                 "select UE.id, " +
-                        "                                                         UE.username," +
-                        "                                                         UE.firstName, " +
-                        "                                                         UE.lastName, " +
-                        "                                                         UE.email, " +
-                        "                                                         null, " +
-                        "                                                         UE.enabled " +
-                        "from UserEntity UE \n" +
-                        "WHERE UE.realm = :realm \n" +
-                        "and (:search is null or :search = '' or MATCH(UE.email, UE.firstName, UE.username) AGAINST(:search IN BOOLEAN MODE)) \n" +
-                        "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser) \n" +
-                        "and (:searchToms is null or :searchToms = '' or exists( \n" +
-                        "  select UP.id \n" +
-                        "  from UserPostEntity UP \n" +
-                        "  where UP.user = UE and UP.customer.id = :searchToms \n" +
-                        ")) \n" +
+                        "         UE.USERNAME," +
+                        "         UE.FIRST_NAME, " +
+                        "         UE.LAST_NAME, " +
+                        "         UE.EMAIL, " +
+                        "         null as PHONE, " +
+                        "         UE.ENABLED " +
+                        "from USER_ENTITY UE \n" +
+                        "WHERE UE.REALM_ID = :realm \n" +
+                        "  and (:search is null or :search = '' or MATCH(UE.EMAIL, UE.FIRST_NAME, UE.USERNAME) AGAINST(:search IN BOOLEAN MODE)) \n" +
+                        "  and (:searchUser is null or :searchUser = '' or UE.id = :searchUser) \n" +
+                        "  and (:searchToms is null or :searchToms = '' or exists(" +
+                        "    select UP.id \n" +
+                        "    from USER_POST UP \n" +
+                        "    where UP.USER_ID = UE.ID and UP.TOMS_ID = :searchToms) \n" +
+                        "  ) \n" +
                         getSort(sortField, sortAsc)
-                , UserSummaryView.class)
+                , USER_SUMMARY_MAPPER_NAME)
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
@@ -374,19 +379,24 @@ public class UserRepository {
             int pageNum,
             int pageSize
     ) {
+        if (searchPhone != null && !searchPhone.isEmpty())
+            searchPhone = searchPhone + "*";
+
         Query query = em.createNativeQuery(
                 "select UE.id, " +
-                        "                                                    UE.username," +
-                        "                                                    UE.firstName, " +
-                        "                                                    UE.lastName, " +
-                        "                                                    UE.email, " +
-                        "                                                    UA.value, " +
-                        "                                                    UE.enabled " +
-                        "from UserEntity UE \n" +
-                        "join UserAttributeEntity UA on UE = UA.user \n" +
-                        "where UA.name = 'phone' and MATCH(UA.value) AGAINST(:searchPhone IN BOOLEAN MODE) \n" +
+                        "        UE.USERNAME," +
+                        "        UE.FIRST_NAME, " +
+                        "        UE.LAST_NAME, " +
+                        "        UE.EMAIL, " +
+                        "        UA.VALUE as PHONE, " +
+                        "        UE.ENABLED " +
+                        "from USER_ENTITY UE \n" +
+                        "join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID \n" +
+                        "where UE.REALM_ID = :realm \n" +
+                        "  and UA.NAME = 'phone' \n" +
+                        "  and MATCH(UA.VALUE) AGAINST(:searchPhone IN BOOLEAN MODE) \n" +
                         getSort(sortField, sortAsc)
-                , UserSummaryView.class)
+                , USER_SUMMARY_MAPPER_NAME)
                 .setParameter("searchPhone", searchPhone)
                 .setParameter("realm", realm);
 
