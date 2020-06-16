@@ -138,7 +138,7 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
         log.info("RIAS auth, got city = " + city);
 
         if (Validation.isBlank(city)) {
-            city = "perm-dev"; // TODO с фронта не приходит город
+            city = "yar"; // TODO с фронта не приходит город
         }
 
         String domain = null;

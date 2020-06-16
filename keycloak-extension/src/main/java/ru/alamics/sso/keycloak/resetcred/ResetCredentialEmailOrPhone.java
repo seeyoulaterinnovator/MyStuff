@@ -111,7 +111,7 @@ public class ResetCredentialEmailOrPhone extends AuthBaseClass {
 
         String city = context.getHttpRequest().getDecodedFormParameters().getFirst(FormConstants.FIELD_CITY);
         if (Validation.isBlank(city)) {
-            city = "perm-dev"; // TODO с фронта не приходит город
+            city = "yar"; // TODO с фронта не приходит город
         }
 
         location += "?citydomain=" + city;
