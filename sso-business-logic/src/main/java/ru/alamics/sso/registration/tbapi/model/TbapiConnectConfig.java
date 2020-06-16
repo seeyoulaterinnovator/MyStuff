@@ -14,6 +14,7 @@ public class TbapiConnectConfig {
     private int port;
     private String appname;
     private String username;
+    private String password;
     private String path;
     private boolean secure;
 
@@ -31,6 +32,7 @@ public class TbapiConnectConfig {
             port = properties.getPropertyInt(connect.getPort());
             appname = properties.getProperty(connect.getAppname());
             username = properties.getProperty(connect.getUsername());
+            password = properties.getProperty(connect.getPassword());
             secure = Boolean.parseBoolean(properties.getProperty(connect.getSecure()));
             path = properties.getProperty(connect.getPath());
         } catch (Exception e) {

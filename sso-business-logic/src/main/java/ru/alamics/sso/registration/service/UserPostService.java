@@ -86,7 +86,7 @@ public class UserPostService {
 
     public void remove(String id) throws NotFoundException {
         if (userPostRepository.getUserPost(id) == null) {
-            throw new NotFoundException("UserPost is not exist");
+            throw new NotFoundException("Должность с таким ID не найдена");
         }
         userPostRepository.remove(id);
     }

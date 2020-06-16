@@ -17,8 +17,8 @@ export function setAllSelected() {
 
 export function setSelectedCity(selectedCity, selectedDomain) {
   city.set(selectedCity);
-  Cookie.set('CITY', selectedCity);
-  Cookie.set('city-domain', selectedDomain);
+  Cookie.set('CITY', selectedCity, {sameSite: 'None', secure: document.location.protocol === 'https:'});
+  Cookie.set('city-domain', selectedDomain, {sameSite: 'None', secure: document.location.protocol === 'https:'});
 }
 
 export function selectCity(selectedCity) {

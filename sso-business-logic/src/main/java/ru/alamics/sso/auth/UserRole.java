@@ -38,7 +38,7 @@ public class UserRole {
 
     public void setUserPost(AuthenticationFlowContext context) {
         final String DEBUG_STR = "setUserPost";
-        log.debug("{}: user={}", DEBUG_STR, context.getUser().getId());
+        log.info("{}: user={}", DEBUG_STR, context.getUser().getId());
 
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         final String tomsId = formData.getFirst("tomsId");
