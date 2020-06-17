@@ -27,7 +27,7 @@ public class SettingsResource {
     @Path("/")
     @GET
     public Response getSettings() {
-        var realmId = session.getContext().getRealm().getId();
+        String realmId = session.getContext().getRealm().getId();
         return JsonResponse.success()
                 .addResult("settings", service.getRealmSettings(realmId))
                 .build();
@@ -36,7 +36,7 @@ public class SettingsResource {
     @Path("/{settingId}")
     @DELETE
     public Response deleteSetting(@PathParam("settingId") final String settingId) {
-        var realmId = session.getContext().getRealm().getId();
+        String realmId = session.getContext().getRealm().getId();
         service.deleteSetting(settingId);
         return JsonResponse.success()
                 .httpStatus(Response.Status.NO_CONTENT)

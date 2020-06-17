@@ -10,11 +10,10 @@ import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostEditRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
+import ru.alamics.sso.util.validator.NotValidException;
 
 import javax.ejb.Stateless;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Stateless
@@ -38,15 +37,15 @@ public class CachedUserPostFacade extends UserPostFacade {
         return userPostCached;
     }
 
-    public void addUserPostAndSystemRole(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException {
-        cache.put(userPostRequest.getUserId(), List.of(userPostService.addUserPostAndSystemRole(userPostRequest)));
+    public void addUserPostAndSystemRole(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException, NotValidException {
+        cache.put(userPostRequest.getUserId(), Arrays.asList(userPostService.addUserPostAndSystemRole(userPostRequest)));
     }
 
-    public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException {
+    public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException, NotValidException {
         UserPostResponse post = super.save(userPostRequest);
 
         if (cache.get(userPostRequest.getUserId()) != null) {
-            cache.put(userPostRequest.getUserId(), List.of(post));
+            cache.put(userPostRequest.getUserId(), Arrays.asList(post));
         }
 
         return post;
@@ -102,7 +101,7 @@ public class CachedUserPostFacade extends UserPostFacade {
         }
 
         cachedPosts.stream()
-                .filter(post -> customerCache.get(post.getTomsId()) != null && !customerCache.get(post.getTomsId()).isBlank())
+                .filter(post -> customerCache.get(post.getTomsId()) != null && !customerCache.get(post.getTomsId()).isEmpty())
                 .forEach(post -> post.setOrganization(customerCache.get(post.getTomsId())));
 
         return new LinkedList<>(cachedPosts);

@@ -1,0 +1,74 @@
+package ru.alamics.sso.keycloak.status;
+
+import lombok.extern.slf4j.Slf4j;
+import org.jboss.resteasy.annotations.cache.NoCache;
+import org.keycloak.models.KeycloakSession;
+import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.property.ApplicationProperties;
+import ru.alamics.sso.status.StatusService;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+
+@Slf4j
+public class StatusResource {
+
+    protected KeycloakSession session;
+    private StatusService statusService;
+
+    private static AtomicLong healthUpdated = new AtomicLong(0);
+    private static AtomicBoolean healthStatus = new AtomicBoolean(false);
+
+    public StatusResource(KeycloakSession session) {
+        this.session = session;
+        this.statusService = (StatusService) Lookup.lookup(StatusService.class);
+    }
+
+    @GET
+    @Path("health")
+    @NoCache
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    public Response getStatus() {
+
+        if (statusService == null) {
+
+            return JsonResponse.error(Response.Status.NO_CONTENT)
+                    .addResult("status", true)
+                    .build();
+        }
+
+        long now = System.currentTimeMillis();
+
+        if (now - healthUpdated.get() < 500) {
+            log.info("Health check, cached value");
+            return buildResponse(healthStatus.get());
+        }
+
+        healthUpdated.set(now);
+
+        log.info("Health check");
+
+        healthStatus.set(statusService.checkStatusDb());
+
+        return buildResponse(healthStatus.get());
+    }
+
+    private Response buildResponse(boolean status) {
+
+        if (!status) {
+            return JsonResponse.error(Response.Status.SERVICE_UNAVAILABLE)
+                    .addResult("status", status)
+                    .build();
+        }
+
+        return JsonResponse.success()
+                .addResult("status", status)
+                .build();
+    }
+}

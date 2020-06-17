@@ -12,9 +12,10 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.provider.ProviderFactory;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
-import ru.alamics.sso.keycloak.entity.ImportUsersDataEntity;
-import ru.alamics.sso.keycloak.entity.ImportUsersReportEntity;
-import ru.alamics.sso.keycloak.entity.common.ImportUsersReportStatus;
+import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
+import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
+import ru.alamics.sso.jpa.entity.UserPostEntity;
+import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.keycloak.facade.UserPostFacade;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.FoundException;
@@ -28,6 +29,7 @@ import ru.alamics.sso.user.model.*;
 import ru.alamics.sso.user.web.UserSearchDto;
 import ru.alamics.sso.util.Util;
 import ru.alamics.sso.util.validator.EmailValidator;
+import ru.alamics.sso.util.validator.NotValidException;
 import ru.alamics.sso.util.validator.PhoneValidator;
 
 import javax.activation.UnsupportedDataTypeException;
@@ -73,13 +75,21 @@ public class UserServiceImpl implements UserService {
         if (file == null) {
             throw new UnsupportedDataTypeException("Unsupported file format!");
         }
-        List<UserSearchDto> userDto = userFindService.getUsersByParametersWithoutGrouping(realm.getName(), null, null, null, null, true);
+
+        if (userRequest.getUserIds() == null)
+            return null;
+
+        if (userRequest.getUserParameters() == null)
+            userRequest.setUserParameters(UserParameter.values());
+
+        List<UserSearchDto> userDto = userFindService.getUsersByParametersWithoutGrouping(
+                realm.getName(), null, null, null,
+                null, true, 1, 1000, Arrays.asList(userRequest.getUserIds()));
+
         if (userDto == null || userDto.isEmpty()) {
             return null;
         }
-        if (userRequest.getUserIds() != null && userRequest.getUserIds().length != 0) {
-            userDto = searchUsersById(userDto, userRequest.getUserIds());
-        }
+
         userDto = UserMapper.toGroupUserDtos(userDto);
         file.addRow(getUserParameterNames(userRequest.getUserParameters()));
         userDto.stream().forEach(o -> file.addRow(getUserParameters(o, userRequest.getUserParameters())));
@@ -95,7 +105,7 @@ public class UserServiceImpl implements UserService {
         }
         List<String> userParameterNames = getUserParameterNames(UserParameter.values());
         List<String> finishParameterNames = userParameterNames.stream().skip(1).limit(userParameterNames.size() - 2).collect(Collectors.toList());
-        finishParameterNames.addAll(List.of("Статус импорта", "Ошибки"));
+        finishParameterNames.addAll(Arrays.asList("Статус импорта", "Ошибки"));
         file.addRow(finishParameterNames);
         importUsersReport.getImportUserData().stream()
                 .forEach(o -> {
@@ -119,7 +129,7 @@ public class UserServiceImpl implements UserService {
         ImportUsersReportEntity importUsersReport = importUsersReportService.findImportUsersReportByImportId(importId);
         for (ImportUsersDataEntity importData : importUsersReport.getImportUserData()) {
             String id = importData.getUserId();
-            if (id == null || id.isBlank()) {
+            if (id == null || id.isEmpty()) {
                 continue;
             }
             UserModel user = session.users().getUserById(id, realm);
@@ -131,23 +141,13 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private List<UserSearchDto> searchUsersById(List<UserSearchDto> userDtos, String[] userIds) {
-        List<UserSearchDto> result = new LinkedList<>();
-        userDtos.stream()
-                .forEach(o -> {
-                    for (String userId : userIds) {
-                        if (o.getId().equals(userId)) {
-                            result.add(o);
-                        }
-                    }
-                });
-        return result;
-    }
-
     private List<String> getUserParameterNames(UserParameter[] userParameters) {
+
         List<String> names = new LinkedList<>();
         for (UserParameter userParameter : userParameters) {
-            names.add(userParameter.getName());
+            if (userParameter == null)
+                continue;
+            names.add(userParameter.getDesc());
         }
         return names;
     }
@@ -155,6 +155,9 @@ public class UserServiceImpl implements UserService {
     private List<String> getUserParameters(UserSearchDto userDto, UserParameter[] userParameters) {
         List<String> parameters = new LinkedList<>();
         for (UserParameter userParameter : userParameters) {
+            if (userParameter == null)
+                continue;
+
             switch (userParameter) {
                 case EMAIL:
                     parameters.add(userDto.getEmail());
@@ -282,7 +285,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkHeader(String head, UserParameter userParameter) throws FileServiceException {
-        if (!head.equalsIgnoreCase(userParameter.getName())) {
+        if (!head.equalsIgnoreCase(userParameter.getDesc())) {
             throw new FileServiceException("File Structure is not valid! Header is not valid");
         }
     }
@@ -292,7 +295,7 @@ public class UserServiceImpl implements UserService {
 
         AtomicInteger createdUsers = new AtomicInteger();
         AtomicInteger countClones = new AtomicInteger();
-        userImports.stream().forEach(o -> {
+        userImports.forEach(o -> {
             try {
                 UserRequest userRequest = UserMapper.toUserRequest(o);
                 checkImportUser(userRequest);
@@ -303,7 +306,7 @@ public class UserServiceImpl implements UserService {
                 o.setCreated(true);
                 importResponse.addCreatedUserIds("userId", user.getId());
 
-                if (userRequest.getTomsId() == null || userRequest.getTomsId().isBlank()) {
+                if (userRequest.getTomsId() == null || userRequest.getTomsId().isEmpty()) {
                     throw new NotFoundException("TomsId is not exist");
                 }
                 addUserPost(user, o, userRequest);
@@ -318,7 +321,7 @@ public class UserServiceImpl implements UserService {
                 });
                 o.setErrors(errorsByUsers.toString().substring(1, errorsByUsers.toString().length() - 1));
                 countClones.getAndIncrement();
-            } catch (NotFoundException | ValidationException | FoundUserPostException e) {
+            } catch (NotFoundException | NotValidException | FoundUserPostException e) {
                 Map<String, Object> error = new HashMap<>();
                 error.put("error", e.getMessage());
                 error.put("importUserName", o.getFirstName());
@@ -333,7 +336,8 @@ public class UserServiceImpl implements UserService {
         return importResponse;
     }
 
-    private void checkImportUser(UserRequest userRequest) throws FoundException {
+    private void checkImportUser(UserRequest userRequest) throws FoundException, NotValidException {
+
         EmailValidator.validate(userRequest.getEmail());
         PhoneValidator.validate(userRequest.getPhone());
 
@@ -354,7 +358,8 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private UserModel createUser(UserRequest userRequest) {
+    // TODO ConcurrentModificationException etc. еще конфликтует с checkOnExistUserByEmailAndUsername()
+    private synchronized UserModel createUser(UserRequest userRequest) {
         try {
             userRequest.setPhone(Util.getCleanUserPhone(userRequest.getPhone()));
 
@@ -406,7 +411,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserModel createUser(UserRequest request, boolean bss) throws FoundException, NotFoundException, FoundUserPostException {
+    public UserModel createUser(UserRequest request, boolean bss) throws FoundException, NotFoundException, FoundUserPostException, NotValidException {
 
         FoundException exception = null;
 
@@ -471,28 +476,6 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-    public static void main(String[] args) {
-
-        boolean a = false;
-        boolean b = false;
-
-        a = false;
-        b = false;
-        System.out.println(a ^ b); // true
-
-        a = false;
-        b = true;
-        System.out.println(a ^ b); // false
-
-        a = true;
-        b = false;
-        System.out.println(a ^ b); // false
-
-        a = true;
-        b = true;
-        System.out.println(a ^ b); // true
-    }
-
     private void checkOnExistUser(UserRequest request, RealmModel realm) throws FoundException {
         checkOnExistUserByPhone(request, realm);
         checkOnExistUserByEmailAndUsername(request, realm);
@@ -533,7 +516,7 @@ public class UserServiceImpl implements UserService {
                 .success();
     }
 
-    private void addUserPostLPR(UserModel userModel, UserRequest request) throws NotFoundException, FoundException, FoundUserPostException {
+    private void addUserPostLPR(UserModel userModel, UserRequest request) throws NotFoundException, FoundException, FoundUserPostException, NotValidException {
 
         UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, request);
 
@@ -547,7 +530,8 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void addUserPost(UserModel userModel, ImportUsersDataEntity userImport, UserRequest userRequest) throws NotFoundException, FoundUserPostException {
+    private void addUserPost(UserModel userModel, ImportUsersDataEntity userImport, UserRequest userRequest)
+            throws NotFoundException, FoundUserPostException, NotValidException {
         UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, userRequest);
         userPostRequest.setRoleId(userPostFacade.getUserPostService().getUserPostRole(userImport.getRole()));
         UserPostResponse userPostResponse = userPostFacade.getUserPostService().save(userPostRequest);
@@ -556,12 +540,11 @@ public class UserServiceImpl implements UserService {
     }
 
     private void addSystemRoles(ImportUsersDataEntity userImport, String userPostId) throws NotFoundException {
-        if (userImport.getSystems() == null || userImport.getSystems().isBlank()) {
+        if (userImport.getSystems() == null || userImport.getSystems().isEmpty()) {
             return;
         }
 
-        List<String> systems = List.of(userImport.getSystems().replaceAll("\\s", "").split(","));
-
+        List<String> systems = Arrays.asList(userImport.getSystems().replaceAll("\\s", "").split(","));
         if (!systems.isEmpty()) {
             List<String> errorSystemNames = new LinkedList<>();
 

@@ -20,6 +20,8 @@ USER root
 
 RUN yum update -y && yum install -y epel-release git && yum install -y jq openssl which && yum clean all
 
+RUN mkdir -p /opt/jboss/build
+ADD build/deploy/standalone/deployments/custom-jpa.jar /opt/jboss/build
 ADD tools /opt/jboss/tools
 ADD configs /opt/jboss/configs
 RUN /opt/jboss/tools/build-keycloak.sh

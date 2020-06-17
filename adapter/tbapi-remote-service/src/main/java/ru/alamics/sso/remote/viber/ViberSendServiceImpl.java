@@ -82,7 +82,7 @@ public class ViberSendServiceImpl implements ViberSendService {
             ResteasyWebTarget webTarget = client.target(uri)
                     .queryParams(getConfigForQuery())
                     .queryParam("to", Util.getCleanUserPhone(phone))
-                    .queryParam("text", URLEncoder.encode(text, smsConfig.getCharset()));
+                    .queryParam("text", Util.encodeCharset(text, smsConfig.getCharset()));
 
             //System.out.println(webTarget.getUri());
 
@@ -102,16 +102,18 @@ public class ViberSendServiceImpl implements ViberSendService {
     }
 
     private MultivaluedMap<String, Object> getConfigForQuery() {
-        return new MultivaluedHashMap<>(Map.of(
-                "smsc", smsConfig.getSmsCenterName(),
-                "username", smsConfig.getUsername(),
-                "password", smsConfig.getPassword(),
-                "from", smsConfig.getSenderName(),
-                "validity", smsConfig.getTimeout(),
-                "priority", smsConfig.getPriority().getPriorityAsInt(),
-                "dlr-mask", smsConfig.getReportsMask(),
-                "coding", smsConfig.getEncoding().getPriorityAsInt(),
-                "charset", smsConfig.getCharset()
-        ));
+
+        MultivaluedHashMap<String, Object> map = new MultivaluedHashMap<>();
+        map.add("smsc", smsConfig.getSmsCenterName());
+        map.add("username", smsConfig.getUsername());
+        map.add("password", smsConfig.getPassword());
+        map.add("from", smsConfig.getSenderName());
+        map.add("validity", smsConfig.getTimeout());
+        map.add("priority", smsConfig.getPriority().getPriorityAsInt());
+        map.add("dlr-mask", smsConfig.getReportsMask());
+        map.add("coding", smsConfig.getEncoding().getPriorityAsInt());
+        map.add("charset", smsConfig.getCharset());
+
+        return map;
     }
 }

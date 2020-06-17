@@ -1,6 +1,7 @@
 package ru.alamics.sso.remote.sms;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.matching.StringValuePattern;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -9,6 +10,7 @@ import ru.alamics.sso.registration.phone.SmsConfig;
 import ru.alamics.sso.registration.phone.exception.SmsSendException;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -61,18 +63,19 @@ class SmsSendServiceImplTest {
     @Test
     void sensSms() {
 
+        Map<String, StringValuePattern> map = new HashMap<>();
+        map.put("smsc", equalTo(SMSC_NAME));
+        map.put("username", equalTo(USERNAME));
+        map.put("password", equalTo(PASSWORD));
+        map.put("from", equalTo(SENDER_NAME));
+        map.put("validity", equalTo(String.valueOf(5)));
+        map.put("priority", equalTo(String.valueOf(SmsConfig.Priority.HIGH.getPriorityAsInt())));
+        map.put("dlr-mask", equalTo(String.valueOf(SmsConfig.ReportsConfig.DELIVERED_TO_PHONE)));
+        map.put("coding", equalTo(String.valueOf(SmsConfig.Encoding.UCS2.getPriorityAsInt())));
+        map.put("charset", equalTo(StandardCharsets.UTF_8.name()));
+
         server.stubFor(post(urlPathEqualTo(PATH))
-                .withQueryParams(Map.of(
-                        "smsc", equalTo(SMSC_NAME),
-                        "username", equalTo(USERNAME),
-                        "password", equalTo(PASSWORD),
-                        "from", equalTo(SENDER_NAME),
-                        "validity", equalTo(String.valueOf(5)),
-                        "priority", equalTo(String.valueOf(SmsConfig.Priority.HIGH.getPriorityAsInt())),
-                        "dlr-mask", equalTo(String.valueOf(SmsConfig.ReportsConfig.DELIVERED_TO_PHONE)),
-                        "coding", equalTo(String.valueOf(SmsConfig.Encoding.UCS2.getPriorityAsInt())),
-                        "charset", equalTo(StandardCharsets.UTF_8.name())
-                ))
+                .withQueryParams(map)
                 .willReturn(aResponse()
                         .withStatus(202)
                         .withHeader("Content-Type", "TEXT/PLAIN")

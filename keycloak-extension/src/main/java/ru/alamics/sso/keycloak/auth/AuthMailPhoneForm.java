@@ -133,12 +133,12 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
 
         String username = formData.getFirst(FormConstants.FIELD_USERNAME);
         String password = formData.getFirst(FormConstants.FIELD_PASSWORD);
-        var city = formData.getFirst(FormConstants.FIELD_CITY);
+        String city = formData.getFirst(FormConstants.FIELD_CITY);
 
         log.info("RIAS auth, got city = " + city);
 
         if (Validation.isBlank(city)) {
-            city = "perm-dev"; // TODO с фронта не приходит город
+            city = "yar"; // TODO с фронта не приходит город
         }
 
         String domain = null;
@@ -169,7 +169,7 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
 
                 String redirectTo = properties.getProperty(RIAS_REDIRECT_PROPERTY);
                 if (redirectTo == null)
-                    redirectTo = "https://master.b2b-lk.web.t2.ertelecom.ru/login";
+                    redirectTo = "https://lkb2b.domru.ru/login";
 
                 if (!Validation.isBlank(city)) {
                     redirectTo += "?citydomain=" + city;

@@ -23,7 +23,7 @@ public class AttributesResourceProvider implements BaseResourceProvider<Attribut
         UserFindService userFindService = null;
         try {
             userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
-            var service = new UserAttributeService(this.session, userFindService);
+            UserAttributeService service = new UserAttributeService(this.session, userFindService);
             return new AttributesResource(service);
         } catch (NamingException e) {
             log.error(e.getMessage(), e);

@@ -10,6 +10,7 @@ import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.forms.login.freemarker.FreeMarkerLoginFormsProvider;
 import org.keycloak.forms.login.freemarker.Templates;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
 import org.keycloak.models.RequiredActionProviderModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.ErrorPage;
@@ -24,10 +25,12 @@ import ru.alamics.sso.keycloak.auth.model.AuthType;
 import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.util.Util;
 
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -41,7 +44,8 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     public SsoFreeMarkerLoginForm(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
 
-        attributes.put("redirectUrl", client.getRedirectUris().iterator().next());
+        if (client != null)
+            attributes.put("redirectUrl", client.getRedirectUris().iterator().next());
     }
 
     private String getHash(String fileName) {
@@ -56,14 +60,14 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
     @Override
     protected UriBuilder prepareBaseUriBuilder(boolean resetRequestUriParams) {
-        var ret = super.prepareBaseUriBuilder(resetRequestUriParams);
+        UriBuilder ret = super.prepareBaseUriBuilder(resetRequestUriParams);
         return addQueryParamToBuilder(ret);
     }
 
     @Override
     public LoginFormsProvider setActionUri(URI actionUri) {
-        var uri = addQueryParams(actionUri);
-        var ret = super.setActionUri(uri);
+        URI uri = addQueryParams(actionUri);
+        LoginFormsProvider ret = super.setActionUri(uri);
         return ret;
     }
 
@@ -115,7 +119,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     }
 
     private UriBuilder addQueryParamToBuilder(UriBuilder builder) {
-        var queryParameters = this.session.getContext().getUri().getQueryParameters();
+        MultivaluedMap<String, String> queryParameters = this.session.getContext().getUri().getQueryParameters();
         if (queryParameters != null) {
             queryParameters.forEach((k, v) -> {
                 if (k.equals(HIDDEN_HEADER)) {
@@ -132,13 +136,13 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
     @Override
     public Response createRegistration() {
-        var realm = this.session.getContext().getRealm();
-        var requiredActionsProvider = realm.getRequiredActionProviders();
-        var twoStepAuth = requiredActionsProvider.stream()
+        RealmModel realm = this.session.getContext().getRealm();
+        List<RequiredActionProviderModel> requiredActionsProvider = realm.getRequiredActionProviders();
+        List<String> twoStepAuth = requiredActionsProvider.stream()
                 .filter(RequiredActionProviderModel::isDefaultAction)
                 .map(RequiredActionProviderModel::getAlias)
                 .collect(Collectors.toList());
-        var authType = AuthType.getByList(twoStepAuth);
+        AuthType authType = AuthType.getByList(twoStepAuth);
         if (authType != null) {
             this.attributes.put("twoStepAuthType", authType.getDescription());
         } else {

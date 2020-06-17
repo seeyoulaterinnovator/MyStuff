@@ -59,7 +59,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
 
         URI uri = new ResteasyUriBuilder()
                 .scheme(connectConfig.isSecure() ? "https" : "http")
-                .host(connectConfig.getHost())
+                .host(connectConfig.getIp())
                 .port(connectConfig.getPort())
                 .path(connectConfig.getPath())
                 .build();
@@ -110,7 +110,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
         try {
             URI uri = new ResteasyUriBuilder()
                     .scheme(connectConfig.isSecure() ? "https" : "http")
-                    .host(connectConfig.getHost())
+                    .host(connectConfig.getIp())
                     .port(connectConfig.getPort())
                     .path(connectConfig.getPath())
                     .build();

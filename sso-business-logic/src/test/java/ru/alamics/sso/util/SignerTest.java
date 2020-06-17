@@ -7,7 +7,7 @@ class SignerTest {
 
     @Test
     void signString() {
-        var forSign = "TESTMYCOMPANY";
+        String forSign = "TESTMYCOMPANY";
         Assert.notNull(Signer.signString(forSign));
     }
 }

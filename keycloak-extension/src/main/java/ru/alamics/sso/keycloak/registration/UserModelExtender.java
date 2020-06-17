@@ -14,6 +14,7 @@ import org.keycloak.models.*;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.provider.ProviderConfigProperty;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
+import ru.alamics.sso.keycloak.registration.rias.RiasCheckProvider;
 import ru.alamics.sso.registration.UserExtension;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.tbapi.TbapiService;
@@ -23,10 +24,7 @@ import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
 import javax.ws.rs.core.MultivaluedMap;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static ru.alamics.sso.registration.model.FormConstants.*;
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_ORG_NAME;
@@ -66,6 +64,15 @@ public class UserModelExtender implements FormAction, FormActionFactory {
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         List<FormMessage> errors = new ArrayList<>();
         String eventError = Errors.INVALID_REGISTRATION;
+
+        if (context.getAuthenticationSession().getAuthNote(RiasCheckProvider.RIAS_REJECTED) != null) {
+            log.info("RIAS rejected, so no need to request TBAPI");
+
+            // иначе падает разбор на стороне КС
+            context.error(eventError);
+            context.validationError(formData, errors);
+            return;
+        }
 
         try {
             context.getEvent().detail(Details.REGISTER_METHOD, "form");
@@ -185,11 +192,12 @@ public class UserModelExtender implements FormAction, FormActionFactory {
 
     @Override
     public List<ProviderConfigProperty> getConfigProperties() {
-        return List.of();
+        return Arrays.asList();
     }
 
     @Override
     public FormAction create(KeycloakSession session) {
+        log.info("Creating UserModelExtender");
         return this;
     }
 

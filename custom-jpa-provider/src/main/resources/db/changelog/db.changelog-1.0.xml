@@ -657,6 +657,96 @@
                              constraintName="UC_USER_ID_TOMS_ID"/>
     </changeSet>
 
+    <changeSet id="40_1" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_USER_POST_ROLE_ID"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_USER_POST_ROLE_ID
+            on USER_POST (ROLE_ID);
+        </sql>
+    </changeSet>
+
+    <changeSet id="40_2" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_USER_POST_TOMS_ID"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_USER_POST_TOMS_ID
+            on USER_POST (TOMS_ID);
+        </sql>
+    </changeSet>
+
+    <changeSet id="40_3" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_USER_POST_USER_ID"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_USER_POST_USER_ID
+            on USER_POST (USER_ID);
+        </sql>
+    </changeSet>
+
+    <changeSet id="40_4" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_USER_POST_ROLE_NAME"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_USER_POST_ROLE_NAME
+            on USER_POST_ROLE (NAME);
+        </sql>
+    </changeSet>
+
+    <changeSet id="40_5" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_EXT_SYSTEM_NAME"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_EXT_SYSTEM_NAME
+            on EXTERNAL_SYSTEM (NAME);
+        </sql>
+    </changeSet>
+
+    <changeSet id="40_6" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_EXT_SYSTEM_ROLE_ID"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_EXT_SYSTEM_ROLE_ID
+            on EXT_SYSTEM_ROLE (SYSTEM_ID);
+        </sql>
+    </changeSet>
+
+    <changeSet id="40_7" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_EXT_SYS_ROLE_USER_POST_ID"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_EXT_SYS_ROLE_USER_POST_ID
+            on USERPOST_EXT_SYSTEM_ROLE (USER_POST_ID);
+        </sql>
+    </changeSet>
+
+    <changeSet id="40_8" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_EXT_SYS_ROLE_ID"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_EXT_SYS_ROLE_ID
+            on USERPOST_EXT_SYSTEM_ROLE (EXT_SYSTEM_ROLE_ID);
+        </sql>
+    </changeSet>
+
+    <changeSet id="41_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_USER_ENTITY_SERVICE_REALM"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_USER_ENTITY_SERVICE_REALM
+              on USER_ENTITY (SERVICE_ACCOUNT_CLIENT_LINK, REALM_ID);
+        </sql>
+    </changeSet>
+
     <changeSet id="41" author="strukov-av">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="IMPORT_USERS_DATA"/>
@@ -698,6 +788,80 @@
             UPDATE USER_POST_ROLE SET description = 'Бухгалтер' WHERE name = 'BUH';
             UPDATE USER_POST_ROLE SET description = 'Технический специалист' WHERE name = 'TECH';
             UPDATE USER_POST_ROLE SET description = 'Гость' WHERE name = 'GUEST';
+        </sql>
+    </changeSet>
+
+    <changeSet id="42_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_USER_ATTRIBUTE_NAME_VALUE"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_USER_ATTRIBUTE_NAME_VALUE
+                on USER_ATTRIBUTE (NAME, VALUE);
+        </sql>
+    </changeSet>
+
+    <changeSet id="43_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="AUTO_LOCK_NOTIFICATION_SORT2"/></not>
+        </preConditions>
+        <sql>
+            CREATE INDEX AUTO_LOCK_NOTIFICATION_SORT2
+                ON AUTO_LOCK_NOTIFICATION (TYPE, USER_ID)
+        </sql>
+    </changeSet>
+
+    <changeSet id="44_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not> <tableExists tableName="CHECK_TABLE" /> </not>
+        </preConditions>
+        <createTable tableName="CHECK_TABLE">
+            <column name="name" type="varchar(100)">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="updated" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="45_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="AUTO_LOCK_NOTIFICATION" />
+            <not><columnExists tableName="AUTO_LOCK_NOTIFICATION" columnName="version"/></not>
+        </preConditions>
+
+        <addColumn tableName="AUTO_LOCK_NOTIFICATION">
+            <column name="version" type="bigint"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="46_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="CHECK_TABLE" />
+            <not><columnExists tableName="CHECK_TABLE" columnName="version"/></not>
+        </preConditions>
+
+        <addColumn tableName="CHECK_TABLE">
+            <column name="version" type="bigint"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="47_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="AUTO_LOCK_NOTIFICATION" />
+            <columnExists tableName="AUTO_LOCK_NOTIFICATION" columnName="version"/>
+        </preConditions>
+        <sql>
+            UPDATE AUTO_LOCK_NOTIFICATION SET version = 0 WHERE version IS NULL;
+        </sql>
+    </changeSet>
+
+    <changeSet id="48_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="CHECK_TABLE" />
+            <columnExists tableName="CHECK_TABLE" columnName="version"/>
+        </preConditions>
+        <sql>
+            UPDATE CHECK_TABLE SET version = 0 WHERE version IS NULL;
         </sql>
     </changeSet>
 

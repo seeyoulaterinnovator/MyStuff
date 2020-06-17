@@ -78,6 +78,7 @@ class TbapiServiceRestImplTest {
         TbapiConnectConfig conectConfig = new TbapiConnectConfig();
 
         conectConfig.setHost("localhost");
+        conectConfig.setIp("localhost");
         conectConfig.setPort(server.port());
         conectConfig.setAppname("appname");
         conectConfig.setUsername("username");

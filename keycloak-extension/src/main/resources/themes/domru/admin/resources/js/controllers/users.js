@@ -273,13 +273,14 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     var isInitPagination = false;
     var lastPage;
     $scope.pageSize = {};
+    var counter = 1;
 
     sortAsc = true;
-    $scope.sortMarkEmail = "↓"
-    $scope.sortMarkName = ""
+    $scope.sortMarkEmail = "";
+    $scope.sortMarkName = "";
     $scope.SORT_FIELD_EMAIL = "email";
     $scope.SORT_FIELD_NAME = "firstName";
-    currentSortField = $scope.SORT_FIELD_EMAIL;
+    currentSortField = "";//$scope.SORT_FIELD_EMAIL;
 
     $scope.init = function () {
         $scope.realm = realm;
@@ -293,6 +294,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             $scope.query.search = $scope.getSearchParameter($route.current.params.search);
             $scope.query.searchByUserId = $scope.getSearchParameter($route.current.params.searchUser);
             $scope.query.searchByTomsId = $scope.getSearchParameter($route.current.params.searchToms);
+            $scope.query.searchByPhone = $scope.getSearchParameter($route.current.params.searchPhone);
             $scope.query.searchRealm = $scope.getSearchParameter($route.current.params.searchRealm);
 
             if ($scope.query.searchRealm === '' || !$scope.userRealms.some(function (realm) {
@@ -321,7 +323,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         RealmClearKeysCache.save({realm: $scope.realm.realm}, function () {
             //Notifications.success("Public keys cache cleared");
         });
-    }
+    };
 
     $scope.sort = function (sortField) {
         if (currentSortField === sortField) {
@@ -340,8 +342,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             $scope.sortMarkName = getSortMark(sortAsc);
             $scope.sortMarkEmail = "";
         }
-        $scope.search();
-    }
+        $scope.firstPage();
+    };
 
     function getSortMark(sortAsc) {
         if (sortAsc === true) {
@@ -352,7 +354,12 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     }
 
     function initPagination() {
+
+        $('.pagination li').hide();
+
         isInitPagination = true;
+
+        return;
 
         lastPage = 1;
 
@@ -412,6 +419,12 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         }); // end of on click pagination list
     }
 
+    $scope.moreSearch = function () {
+
+        $scope.pages.number = $scope.pages.number + 1;
+        $scope.search();
+    };
+
     function limitPagging() {
         if ($('.pagination li').length > 9) {
             var currentPage = $('.pagination li.active').attr('data-page');
@@ -443,6 +456,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         $scope.query.search = '';
         $scope.query.searchByUserId = '';
         $scope.query.searchByTomsId = '';
+        $scope.query.searchByPhone = '';
 
         $scope.firstPage();
 
@@ -477,6 +491,11 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         $scope.query.first = 0;
         isInitPagination = false;
         $scope.pages.number = 1;
+
+        $scope.users = [];
+        $('.more-search').show();
+        counter = 1;
+
         $scope.search();
     };
 
@@ -637,7 +656,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         if ($scope.tempRealm !== undefined) {
             $scope.query.searchRealm = $scope.tempRealm;
         }
-    }
+    };
 
     $scope.downloadTemplateCSV = function () {
         $http.post(`${authUrl}/realms/${$scope.query.searchRealm}/users-toms/downloadImportUsersTemplate/csv`, null, {
@@ -696,22 +715,32 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         if ($scope.tempRealm !== undefined) {
             $scope.query.searchRealm = $scope.tempRealm;
         }
-    }
+    };
 
     $scope.search = function () {
-        $scope.users = [];
+
+        //$scope.users = [];
 
         console.log("query.search: " + $scope.query.search);
         $http.get(`${authUrl}/realms/user/users-info/search?` +
             `searchRealm=${$scope.query.searchRealm}&search=${$scope.query.search}` +
-            `&searchUser=${$scope.query.searchByUserId}&searchToms=${$scope.query.searchByTomsId}` +
+            `&searchUser=${$scope.query.searchByUserId}&searchToms=${$scope.query.searchByTomsId}&searchPhone=${$scope.query.searchByPhone}` +
             `&pageNum=${$scope.pages.number}&pageSize=${$scope.pageSize}` +
             `&sortAsc=${sortAsc}&sortField=${currentSortField}`).then(function (data) {
-            $scope.users = angular.fromJson(data).data.results['users-info'];
+
+            //$scope.users = angular.fromJson(data).data.results['users-info'];
+            var respUsers = angular.fromJson(data).data.results['users-info'];
+            respUsers.forEach(user => {user.num = counter; counter++;});
+            Array.prototype.push.apply($scope.users, respUsers);
+
             $scope.pages = angular.fromJson(data).data.results['page-info'];
             $scope.searchLoaded = true;
             $scope.lastSearch = $scope.query.search;
             UserSearchState.isFirstSearch = false;
+
+            if (respUsers.length === 0) {
+                $('.more-search').hide();
+            }
 
             if (!isInitPagination) {
                 initPagination();
@@ -728,7 +757,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             $http.delete(`${authUrl}/admin/realms/${realm.realm}/users/${user.id}`)
                 .then(() => {
                     Notifications.success("The user has been deleted.");
-                    $scope.search();
+                    $scope.firstPage();
                 }).catch((error) => {
                 Notifications.error("User couldn't be deleted");
             })

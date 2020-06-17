@@ -3,16 +3,17 @@ package ru.alamics.sso.registration.service;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.jpa.entities.UserEntity;
-import ru.alamics.sso.keycloak.entity.ExternalSystemRoleEntity;
-import ru.alamics.sso.keycloak.entity.UserPostEntity;
-import ru.alamics.sso.keycloak.entity.UserPostRoleEntity;
-import ru.alamics.sso.keycloak.repository.CustomerRepository;
-import ru.alamics.sso.keycloak.repository.UserPostRepository;
-import ru.alamics.sso.keycloak.repository.UserRepository;
+import ru.alamics.sso.jpa.entity.ExternalSystemRoleEntity;
+import ru.alamics.sso.jpa.entity.UserPostEntity;
+import ru.alamics.sso.jpa.entity.UserPostRoleEntity;
+import ru.alamics.sso.jpa.repository.CustomerRepository;
+import ru.alamics.sso.jpa.repository.UserPostRepository;
+import ru.alamics.sso.jpa.repository.UserRepository;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.*;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.util.validator.DmpIdValidator;
+import ru.alamics.sso.util.validator.NotValidException;
 import ru.alamics.sso.util.validator.TomsIdValidator;
 
 import javax.ejb.EJB;
@@ -32,7 +33,7 @@ public class UserPostService {
     @EJB
     private CustomerRepository customerRepository;
 
-    public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException {
+    public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException, NotValidException {
         UserEntity user = userRepository.findUser(userPostRequest.getUserId());
         if (user == null) {
             throw new NotFoundException("УЗ с таким ID не найдена");
@@ -53,16 +54,16 @@ public class UserPostService {
         return DataMapper.toUserPostResponse(userPostRepository.save(userPost));
     }
 
-    private void checkUserPost(UserPostRequest postRequest) throws FoundUserPostException {
+    private void checkUserPost(UserPostRequest postRequest) throws FoundUserPostException, NotValidException {
         UserPostEntity post = userPostRepository.findUserPostByUserIdAndTomsId(postRequest.getUserId(), postRequest.getTomsId());
         if (post != null) {
-            throw new FoundUserPostException(String.format("УЗ уже имеет должность с таким tomsId: userId=%s, userPostId=%s, tomsId=%s",
+            throw new FoundUserPostException(String.format("УЗ уже имеет должность с таким tomsId: userId=%s, postId=%s, tomsId=%s",
                     postRequest.getUserId(), post.getId(), postRequest.getTomsId()));
         }
 
         TomsIdValidator.validate(postRequest.getTomsId());
 
-        if (postRequest.getDmpId() != null && !postRequest.getDmpId().isBlank()) {
+        if (postRequest.getDmpId() != null && !postRequest.getDmpId().isEmpty()) {
             DmpIdValidator.validate(postRequest.getDmpId());
         }
     }
@@ -123,7 +124,7 @@ public class UserPostService {
         if (userPost == null) {
             throw new NotFoundException("Должность не найдена");
         }
-
+        // TODO практически константа
         ExternalSystemRoleEntity externalSystemRole = userPostRepository.findExternalSystemRole(externalSystemRoleRequest.getSystemRoleId());
         if (externalSystemRole == null) {
             throw new NotFoundException("Доступ в систему не найден");
@@ -171,7 +172,7 @@ public class UserPostService {
         return externalSystemRole.getId();
     }
 
-    public UserPostResponse addUserPostAndSystemRole(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException {
+    public UserPostResponse addUserPostAndSystemRole(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException, NotValidException {
         UserPostResponse userPost = save(userPostRequest);
         for (ExternalSystemRoleDto systemRoleDto : getExternalSystemRoles()) {
             ExternalSystemRoleRequest systemRole = new ExternalSystemRoleRequest();

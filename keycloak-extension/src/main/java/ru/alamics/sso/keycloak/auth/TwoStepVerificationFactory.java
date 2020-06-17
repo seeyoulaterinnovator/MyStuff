@@ -30,7 +30,7 @@ public class TwoStepVerificationFactory implements Authenticator, AuthenticatorF
             AuthenticationExecutionModel.Requirement.DISABLED
     };
 
-    private static final List<ProviderConfigProperty> CONFIG_PROPERTIES = List.of(getTwoStepVerificationTypes());
+    private static final List<ProviderConfigProperty> CONFIG_PROPERTIES = Arrays.asList(getTwoStepVerificationTypes());
 
     @Override
     public List<ProviderConfigProperty> getConfigProperties() {
@@ -46,7 +46,7 @@ public class TwoStepVerificationFactory implements Authenticator, AuthenticatorF
         AuthType.REQUIRED_ACTIONS.forEach(x -> context.getUser().removeRequiredAction(x));
 
         String disable = context.getUser().getFirstAttribute(UserConstants.DISABLE_TWO_STEP_AUTH);
-        if (authType != null && (disable == null || disable.isBlank())) {
+        if (authType != null && (disable == null || disable.isEmpty())) {
             for (String providerName : authType.getRequiredActionNames()) {
                 context.getUser().addRequiredAction(providerName);
             }

@@ -72,7 +72,9 @@ public class VkIdentityProvider extends AbstractOAuth2IdentityProvider<OAuth2Ide
         String firstName = getJsonProperty(profile, "first_name");
         String lastName = getJsonProperty(profile, "last_name");
         if (username == null) {
-            username = Objects.requireNonNullElse(email, id);
+            username = email;
+            if (username == null)
+                username = id;
         }
         if (lastName == null) {
             lastName = "";

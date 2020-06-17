@@ -8,6 +8,7 @@ import ru.alamics.sso.user.model.DownloadUserRequest;
 import ru.alamics.sso.user.model.FileModel;
 import ru.alamics.sso.user.model.ImportResponse;
 import ru.alamics.sso.user.model.UserRequest;
+import ru.alamics.sso.util.validator.NotValidException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +22,7 @@ public interface UserService {
 
     void uploadImportUsersFile(InputStream inputStream, String content) throws IOException, FileServiceException;
 
-    UserModel createUser(UserRequest request, boolean bss) throws FoundException, NotFoundException, FoundUserPostException;
+    UserModel createUser(UserRequest request, boolean bss) throws FoundException, NotFoundException, FoundUserPostException, NotValidException;
 
     FileModel downloadUsersByImportReportId(String importId) throws IOException;
 }

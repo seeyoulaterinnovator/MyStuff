@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.alamics.sso.registration.model.User;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -29,10 +30,11 @@ class UserExtensionTest {
                 .name("Test")
                 .build();
 
-        extension.extendUser(user, Map.of(
-                "clientId", "someClientId",
-                "someAttribute", "someValue"
-        ));
+        Map<String, Object> map = new HashMap<>();
+        map.put("clientId", "someClientId");
+        map.put("someAttribute", "someValue");
+
+        extension.extendUser(user, map);
 
         Map<String, List<String>> attributes = user.getAttributes();
 

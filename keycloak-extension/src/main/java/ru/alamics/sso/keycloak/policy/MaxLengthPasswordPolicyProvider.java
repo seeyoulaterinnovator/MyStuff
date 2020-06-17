@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.policy;
 
+import org.keycloak.models.KeycloakContext;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -22,7 +23,7 @@ public class MaxLengthPasswordPolicyProvider implements PasswordPolicyProvider {
 
     @Override
     public PolicyError validate (String user, String password) {
-        var context = session.getContext();
+        KeycloakContext context = session.getContext();
         int max = context.getRealm().getPasswordPolicy().getPolicyConfig(MaxLengthPasswordPolicyProviderFactory.ID);
         return password.length() > max ? new PolicyError(ERROR_MESSAGE, max) : null;
     }

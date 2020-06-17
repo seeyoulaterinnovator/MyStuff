@@ -1,0 +1,15 @@
+ROLE=master
+JAVA_OPTS="-server -Xms64m -Xmx512m -Djboss.modules.system.pkgs=org.jboss.byteman -XX:ReservedCodeCacheSize=384m -XX:+UseCodeCacheFlushing -Djava.awt.headless=true -Djboss.site.name=perm -Djboss.bind.address.management=0.0.0.0 -Djboss.bind.address=188.186.146.175 -Djboss.domain.master.address=188.186.146.175 -Djava.net.preferIPv4Stack=true -Djboss.node.name=sso-app01.cc-perm.ertelecom.ru -Dbind.address=188.186.146.175"
+DB_HOST=sso-balancer-db.cc-perm.ertelecom.ru
+DB_USER=sso
+DB_PASSWORD=Nojtofnervumlyhi
+DB_DATABASE=sso
+DB_PORT=3306
+DB_VENDOR=mariadb
+KEYCLOAK_HOSTNAME=sso.dev.itrev.ru
+SITE=prod
+SSO_APP_ONE=188.186.146.175
+SSO_APP_TWO=188.186.146.176
+SSO_APP_THREE=188.186.146.177
+SSO_APP_FOUR=188.186.146.178
+SSO_APP_FIVE=188.186.146.179

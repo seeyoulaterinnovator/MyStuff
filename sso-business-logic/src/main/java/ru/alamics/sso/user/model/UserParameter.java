@@ -1,5 +1,7 @@
 package ru.alamics.sso.user.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 public enum UserParameter {
     USER_ID("USER ID"),
     FIRST_NAME("Имя пользователя"),
@@ -11,13 +13,23 @@ public enum UserParameter {
     SYSTEM("Целевая система"),
     ENABLED("Активность");
 
-    private final String name;
+    private final String desc;
 
-    UserParameter(String name){
-        this.name = name;
+    UserParameter(String desc){
+        this.desc = desc;
     }
 
-    public String getName(){
-        return name;
+    public String getDesc(){
+        return desc;
+    }
+
+    @JsonCreator // This is the factory method and must be static
+    public static UserParameter fromString(String str) {
+        for (UserParameter b : UserParameter.values()) {
+            if (b.name().equalsIgnoreCase(str)) {
+                return b;
+            }
+        }
+        return null;
     }
 }

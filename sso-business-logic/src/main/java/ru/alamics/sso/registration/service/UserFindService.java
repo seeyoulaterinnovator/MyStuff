@@ -1,10 +1,13 @@
 package ru.alamics.sso.registration.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.UserEntity;
-import ru.alamics.sso.keycloak.model.UserSummaryView;
-import ru.alamics.sso.keycloak.repository.UserPostRepository;
-import ru.alamics.sso.keycloak.repository.UserRepository;
+import ru.alamics.sso.jpa.model.UserSummaryView;
+import ru.alamics.sso.jpa.repository.UserPostRepository;
+import ru.alamics.sso.jpa.repository.UserRepository;
+import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.user.mapper.UserMapper;
@@ -14,19 +17,25 @@ import ru.alamics.sso.util.Util;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Stateless
+@Slf4j
 public class UserFindService {
     @EJB
     private UserRepository userRepository;
     @EJB
     private UserPostRepository userPostRepository;
+
+    private ApplicationProperties properties;
+
+    public UserFindService() {
+
+        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+    }
 
     public UserEntity getUserByPhone(RealmModel realm, String phone) {
         phone = Util.getCleanUserPhone(phone);
@@ -52,17 +61,52 @@ public class UserFindService {
         return null;
     }
 
-    public List<UserSearchDto> getUsersByParametersWithoutGrouping(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc) {
-        return UserMapper.toUserDtoList(userRepository.getTupleUsersByParametersWithoutGrouping(realm, search, searchUser, searchToms, sortField, sortAsc));
+    public List<UserSearchDto> getUsersByParametersWithoutGrouping(
+            String realm,
+            String search,
+            String searchUser,
+            String searchToms,
+            String sortField,
+            boolean sortAsc,
+            int pageNum,
+            int pageSize,
+            List<String> includeOnlyIDs
+    ) {
+        return UserMapper.toUserDtoList(userRepository.getTupleUsersByParametersWithoutGrouping(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize, includeOnlyIDs));
     }
 
-    public List<UserSearch> getUsersByParameters(String realm, String search, String searchUser, String searchToms, String sortField, boolean sortAsc,
-                                                 Integer pageNum, Integer pageSize) {
-        List<UserSummaryView> users = userRepository.findUsersByParameters(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
+    public List<UserSearch> getUsersByParameters(
+            String realm,
+            String search,
+            String searchUser,
+            String searchToms,
+            String searchPhone,
+            String sortField,
+            boolean sortAsc,
+            Integer pageNum,
+            Integer pageSize
+    ) {
+        List<UserSummaryView> users = null;
+
+        if (properties.getProperty("db.non.mysql") != null) {
+            log.info("getUsersByParameters non mysql");
+            users = userRepository.findUsersByParameters(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
+
+        } else if (!Util.isEmpty(searchPhone)) {
+            log.info("getUsersByParameters phone");
+            users = userRepository.findUsersByPhone(realm, searchPhone, sortField, sortAsc, pageNum, pageSize);
+
+        } else {
+            log.info("getUsersByParameters name");
+            users = userRepository.findUsersByName(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
+            // TODO в users[n] нет телефона
+        }
 
         if (users.isEmpty()) {
             return Collections.emptyList();
         }
+
+        log.info("getUsersByParameters 1");
 
         Map<String, List<UserPostResponse>> userPosts = userPostRepository
                 .findUserPostsByUserIds(
@@ -73,8 +117,12 @@ public class UserFindService {
                 .map(DataMapper::toUserPostResponse)
                 .collect(Collectors.groupingBy(UserPostResponse::getUserId));
 
+        log.info("getUsersByParameters 2");
+
         List<UserSearch> userSearches = UserMapper.toUserSearchList(users);
         userSearches.forEach(user -> user.setUserPosts(userPosts.get(user.getId())));
+
+        log.info("getUsersByParameters 3");
 
         return userSearches;
     }

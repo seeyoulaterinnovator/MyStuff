@@ -10,6 +10,7 @@ import javax.naming.InitialContext;
 @Data
 public class TbapiConnectConfig {
     private String host;
+    private String ip;
     private int port;
     private String appname;
     private String username;
@@ -23,6 +24,11 @@ public class TbapiConnectConfig {
         try {
             ApplicationProperties properties = (ApplicationProperties) new InitialContext().lookup("java:global/domru-sso/" + ApplicationProperties.class.getSimpleName());
             host = properties.getProperty(connect.getHost());
+            ip = properties.getProperty(connect.getIp());
+
+            if (ip == null)
+                ip = host;
+
             port = properties.getPropertyInt(connect.getPort());
             appname = properties.getProperty(connect.getAppname());
             username = properties.getProperty(connect.getUsername());

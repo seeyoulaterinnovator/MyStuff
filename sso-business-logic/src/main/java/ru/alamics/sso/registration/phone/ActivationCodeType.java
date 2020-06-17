@@ -27,7 +27,7 @@ public enum ActivationCodeType {
 
     public static ActivationCodeType fromString(String authNote) {
         try {
-            if (authNote == null || authNote.isBlank()) {
+            if (authNote == null || authNote.isEmpty()) {
                 return valueOf(authNote);
             }
         } catch (IllegalArgumentException ignore) {

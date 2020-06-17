@@ -6,11 +6,11 @@ import { STATUS } from './constants.js';
 export const city = writable(
   document.getElementById('cities-button').dataset.city ||
     Cookie.get('CITY') ||
-    'Пермь',
+    'Ярославль',
 );
 
 export const domain = writable(
-  Cookie.get('city-domain') || 'perm');
+  Cookie.get('city-domain') || 'yar');
 
 const isFirstVisit =
   Cookie.get('VISITED') === '0' || typeof Cookie.get('VISITED') === 'undefined';

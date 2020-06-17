@@ -8,6 +8,7 @@ import org.keycloak.authentication.authenticators.broker.util.ExistingUserInfo;
 import org.keycloak.authentication.authenticators.broker.util.SerializedBrokeredIdentityContext;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.keycloak.registration.userpost.UserPostCreatorProvider;
 import ru.alamics.sso.registration.FoundUserPostException;
@@ -17,6 +18,7 @@ import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.user.mapper.UserMapper;
+import ru.alamics.sso.util.validator.NotValidException;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -43,7 +45,7 @@ public class CustomIdpCreateUserIfUniqueAuthenticator extends IdpCreateUserIfUni
 
         try {
             userPostService.addUserPostAndSystemRole(userPostRequest);
-        } catch (NotFoundException | FoundUserPostException e) {
+        } catch (NotFoundException | FoundUserPostException | NotValidException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -51,14 +53,14 @@ public class CustomIdpCreateUserIfUniqueAuthenticator extends IdpCreateUserIfUni
     @Override
     protected ExistingUserInfo checkExistingUser(AuthenticationFlowContext context, String
             username, SerializedBrokeredIdentityContext serializedCtx, BrokeredIdentityContext brokerContext) {
-        var user = super.checkExistingUser(context, username, serializedCtx, brokerContext);
+        ExistingUserInfo user = super.checkExistingUser(context, username, serializedCtx, brokerContext);
         if (user != null) {
             return user;
         }
 
         final String phone = serializedCtx.getFirstAttribute(FormConstants.FIELD_PHONE);
         if (!Validation.isBlank(phone)) {
-            var userEntity = userFindService.getUserByPhone(context.getRealm(), phone);
+            UserEntity userEntity = userFindService.getUserByPhone(context.getRealm(), phone);
             if (userEntity != null) {
                 return new ExistingUserInfo(userEntity.getId(), MessageConstants.PHONE, phone);
             }

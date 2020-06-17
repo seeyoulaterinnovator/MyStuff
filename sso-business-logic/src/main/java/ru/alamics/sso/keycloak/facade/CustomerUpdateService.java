@@ -7,6 +7,8 @@ import ru.alamics.sso.property.ApplicationProperties;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import java.util.Map;
@@ -44,6 +46,7 @@ public class CustomerUpdateService {
         tasksPool.offer(executorService.scheduleAtFixedRate(new UpdateTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
     }
 
+    @Lock(LockType.READ)
     public int getTasksPoolSize() {
         return tasksPool.size();
     }
@@ -65,7 +68,7 @@ public class CustomerUpdateService {
 
         //Замена во всем кэше имен организаций (ключ кэша - tomsId)
         customers.entrySet().stream()
-                .filter(customer -> customer.getValue() != null && !customer.getValue().isBlank())
+                .filter(customer -> customer.getValue() != null && !customer.getValue().isEmpty())
                 .forEach(customer -> customerCache.put(customer.getKey(), customer.getValue()));
         log.info("customers update is finished");
     }

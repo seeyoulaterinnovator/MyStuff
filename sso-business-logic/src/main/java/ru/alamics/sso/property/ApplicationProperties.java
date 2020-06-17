@@ -1,15 +1,12 @@
 package ru.alamics.sso.property;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.alamics.sso.keycloak.entity.AppProperty;
-import ru.alamics.sso.keycloak.repository.AppPropertyRepository;
+import ru.alamics.sso.jpa.entity.AppProperty;
+import ru.alamics.sso.jpa.repository.AppPropertyRepository;
 import ru.alamics.sso.util.StandResolver;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.ejb.Schedule;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
+import javax.ejb.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -18,6 +15,7 @@ import java.util.stream.Collectors;
 @Singleton
 @Startup
 @Slf4j
+@Lock(LockType.READ)
 public class ApplicationProperties {
     private Properties fileProperties = new Properties();
     private Properties dbProperties = new Properties();
@@ -92,6 +90,7 @@ public class ApplicationProperties {
     }
 
     @PostConstruct
+    @Lock(LockType.WRITE)
     public void init() throws IOException {
         initDbProperties();
         initFileProperties();
@@ -115,4 +114,5 @@ public class ApplicationProperties {
         }
         log.info("Initializing application properties from database finished:{}", dbProperties.toString());
     }
+
 }

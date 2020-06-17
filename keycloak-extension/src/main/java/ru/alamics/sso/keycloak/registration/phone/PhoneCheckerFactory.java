@@ -12,6 +12,7 @@ import ru.alamics.sso.registration.service.UserFindService;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -57,7 +58,7 @@ public class PhoneCheckerFactory implements FormActionFactory {
 
     @Override
     public List<ProviderConfigProperty> getConfigProperties() {
-        return List.of();
+        return Arrays.asList();
     }
 
     @Override

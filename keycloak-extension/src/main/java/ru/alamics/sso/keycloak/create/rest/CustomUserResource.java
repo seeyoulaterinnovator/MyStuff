@@ -2,6 +2,7 @@ package ru.alamics.sso.keycloak.create.rest;
 
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
@@ -32,6 +33,7 @@ import ru.alamics.sso.user.ImportUsersReportService;
 import ru.alamics.sso.user.UserService;
 import ru.alamics.sso.user.UserServiceImpl;
 import ru.alamics.sso.user.model.*;
+import ru.alamics.sso.util.validator.NotValidException;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.naming.InitialContext;
@@ -47,6 +49,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -80,8 +84,8 @@ public class CustomUserResource {
     @NoCache
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUser(final UserRequest request, final HttpHeaders headers) {
-        if (request.getPhone() == null || request.getPhone().isBlank()) {
-            return ErrorResponse.error("Phone is required attribute", Response.Status.BAD_REQUEST);
+        if (request.getPhone() == null || request.getPhone().isEmpty()) {
+            return ErrorResponse.error("Phone is required attribute.", Response.Status.BAD_REQUEST);
         }
         return getUserResponse(request, false);
     }
@@ -91,10 +95,10 @@ public class CustomUserResource {
     @NoCache
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUserBss(final UserRequest request, final HttpHeaders headers) {
-        if (request.getPhone() == null || request.getPhone().isBlank()) {
+        if (request.getPhone() == null || request.getPhone().isEmpty()) {
             return ErrorResponse.error("Поле Телефон должно быть заполнено", Response.Status.BAD_REQUEST);
         }
-        if (request.getTomsId() == null || request.getTomsId().isBlank()) {
+        if (request.getTomsId() == null || request.getTomsId().isEmpty()) {
             return ErrorResponse.error("Поле TomsId должно быть заполнено", Response.Status.BAD_REQUEST);
         }
 
@@ -129,6 +133,11 @@ public class CustomUserResource {
                     .message(e.getMessage())
                     .addResult("info", e.getResult())
                     .build();
+        } catch (NotValidException e) {
+            log.error("NotValidException", e);
+            return JsonResponse.error(Response.Status.BAD_REQUEST)
+                    .message(e.getMessage())
+                    .build();
         }
     }
 
@@ -149,7 +158,7 @@ public class CustomUserResource {
     public Response uploadUsers(@MultipartForm FileDto file, @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content) {
 
         if (file == null ||
-                content == null || content.isBlank()) {
+                content == null || content.isEmpty()) {
             return JsonResponse.error(Response.Status.BAD_REQUEST).build();
         }
         try (InputStream bas = new ByteArrayInputStream(file.getFileData())) {
@@ -179,10 +188,10 @@ public class CustomUserResource {
             log.info("Start download users");
             byte[] bytes = userService.exportUsers(downloadUserRequest);
             if (bytes == null) {
-                log.warn("Users not found. Maybe database is empty");
+                log.warn("Users not found");
                 return JsonResponse
                         .fail()
-                        .message("Users not found. Maybe database is empty")
+                        .message("Users not found")
                         .build();
             }
             Response.ResponseBuilder response = Response.ok((Object) bytes);
@@ -224,7 +233,7 @@ public class CustomUserResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @NoCache
     public Response uploadImportUsersFile(@MultipartForm FileDto file, @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content) {
-        if (file == null || content == null || content.isBlank()) {
+        if (file == null || content == null || content.isEmpty()) {
             return JsonResponse.error(Response.Status.BAD_REQUEST).build();
         }
         try (InputStream bas = new ByteArrayInputStream(file.getFileData())) {
@@ -252,7 +261,7 @@ public class CustomUserResource {
         log.info("Download import users template");
         try {
             if (type.equalsIgnoreCase("xlsx")) {
-                byte[] bytes = CustomUserResource.class.getResourceAsStream("/template/template.xlsx").readAllBytes();
+                byte[] bytes = IOUtils.toByteArray(CustomUserResource.class.getResourceAsStream("/template/template.xlsx")); // TODO check. replaced from .getResourceAsStream(<>).readAllBytes();
                 Response.ResponseBuilder response = Response.ok((Object) bytes);
                 response.header("Content-Disposition", "attachment; filename=\"template.xlsx" + "\"");
                 response.header("filename", "template.xlsx");
@@ -260,7 +269,7 @@ public class CustomUserResource {
                 return response.build();
             }
 
-            byte[] bytes = CustomUserResource.class.getResourceAsStream("/template/template.csv").readAllBytes();
+            byte[] bytes = IOUtils.toByteArray(CustomUserResource.class.getResourceAsStream("/template/template.csv")); // TODO check. replaced
             Response.ResponseBuilder response = Response.ok((Object) bytes);
             response.header("Content-Disposition", "attachment; filename=\"template.csv" + "\"");
             response.header("filename", "template.csv");

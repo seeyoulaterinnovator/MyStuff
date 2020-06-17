@@ -64,36 +64,26 @@
     <domain-controller>
         <remote username="admin" security-realm="ManagementRealm">
             <discovery-options>
-                <!--<static-discovery name="primary" protocol="${jboss.domain.master.protocol:remote}" host="${jboss.domain.master.address:0.0.0.0}" port="${jboss.domain.master.port:9999}"/>-->
-                <static-discovery name="primary" protocol="${jboss.domain.master.protocol:remote}" host="keycloak-master" port="${jboss.domain.master.port:9999}"/>
+                <static-discovery name="primary" protocol="${jboss.domain.master.protocol:remote}" host="${jboss.domain.master.address:127.0.0.1}" port="${jboss.domain.master.port:9999}"/>
             </discovery-options>
         </remote>
     </domain-controller>
     <interfaces>
         <interface name="management">
-            <inet-address value="${jboss.bind.address.management:0.0.0.0}"/>
+            <inet-address value="${jboss.bind.address.management:127.0.0.1}"/>
         </interface>
         <interface name="public">
-            <inet-address value="${jboss.bind.address:0.0.0.0}"/>
+            <inet-address value="${jboss.bind.address:127.0.0.1}"/>
         </interface>
     </interfaces>
     <jvms>
         <jvm name="default">
             <heap size="64m" max-size="256m"/>
-            <jvm-options>
-                <option value="-server"/>
-                <option value="-XX:MetaspaceSize=96m"/>
-                <option value="-XX:MaxMetaspaceSize=256m"/>
-            </jvm-options>
         </jvm>
     </jvms>
     <servers>
         <server name="server-two" group="auth-server-group" auto-start="true">
-            <!--
-              ~  server-two avoids port conflicts by incrementing the ports in
-              ~                  the default socket-group declared in the server-group 
-              -->
-            <socket-bindings port-offset="250"/>
+            <socket-bindings port-offset="0"/>
         </server>
     </servers>
     <profile>

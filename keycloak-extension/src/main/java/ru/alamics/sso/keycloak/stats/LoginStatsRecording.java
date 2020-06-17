@@ -21,7 +21,7 @@ public class LoginStatsRecording implements RequiredActionProvider  {
     @Override
     public void evaluateTriggers (RequiredActionContext context) {
         final String DEBUG_STR = "evaluateTriggers";
-        var user = context.getUser();
+        UserModel user = context.getUser();
         Objects.requireNonNull(user);
         log.debug("{}: username={}", DEBUG_STR, user.getUsername());
 

@@ -18,7 +18,7 @@ public enum AuthType {
     ),
     EMAIL_AND_PHONE_CODE(
             new String[]{UserModel.RequiredAction.VERIFY_EMAIL.toString(), PhoneVerificationBySmsFactory.PROVIDER_ID},
-            "На указанный email будет выслана ссылка, после прохождения по ней на указанный номер телефона в Viber или СМС придет код подтверждения"
+            "На указанный email будет выслана ссылка, после прохождения по ней на указанный номер телефона в Viber и СМС придет код подтверждения"
     ),
     INCOMING_CALL(
             new String[]{PhoneVerificationByIncomingCallFactory.PROVIDER_ID},
@@ -26,7 +26,7 @@ public enum AuthType {
     ),
     PHONE_CODE(
             new String[]{PhoneVerificationBySmsFactory.PROVIDER_ID},
-            "На указанный номер телефона будет выслано сообщение в Viber или СМС с одноразовым паролем"
+            "На указанный номер телефона будет выслано сообщение в Viber и СМС с одноразовым паролем"
     );
 
     private String description;
@@ -38,7 +38,7 @@ public enum AuthType {
     }
 
     public static AuthType getByString(String type) {
-        if (type == null || type.isBlank()) return null;
+        if (type == null || type.isEmpty()) return null;
         try {
             return AuthType.valueOf(type.toUpperCase());
         } catch (IllegalArgumentException e) {
@@ -50,9 +50,9 @@ public enum AuthType {
     public static AuthType getByList(List<String> types) {
         if (types == null || types.isEmpty()) return null;
         try {
-            List<AuthType> authTypeList = List.of(EMAIL, EMAIL_AND_PHONE_CODE, INCOMING_CALL, PHONE_CODE);
+            List<AuthType> authTypeList = Arrays.asList(EMAIL, EMAIL_AND_PHONE_CODE, INCOMING_CALL, PHONE_CODE);
             List<String> authTypes = new LinkedList<>();
-            authTypeList.stream().forEach(o -> authTypes.addAll(List.of(o.getRequiredActionNames())));
+            authTypeList.stream().forEach(o -> authTypes.addAll(Arrays.asList(o.getRequiredActionNames())));
             List<String> filterTypes = types.stream().filter(o -> authTypes.contains(o)).collect(Collectors.toList());
             return authTypeList.stream()
                     .filter(authType -> {
@@ -74,7 +74,7 @@ public enum AuthType {
         return requiredActionNames;
     }
 
-    public static List<String> REQUIRED_ACTIONS = List.of(
+    public static List<String> REQUIRED_ACTIONS = Arrays.asList(
             UserModel.RequiredAction.VERIFY_EMAIL.toString(),
             PhoneVerificationByIncomingCallFactory.PROVIDER_ID,
             PhoneVerificationBySmsFactory.PROVIDER_ID

@@ -7,10 +7,10 @@ import org.keycloak.common.util.Time;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.jpa.AdminEventEntity;
 import org.keycloak.models.jpa.entities.*;
-import ru.alamics.sso.keycloak.entity.ImportUsersDataEntity;
-import ru.alamics.sso.keycloak.entity.ImportUsersReportEntity;
-import ru.alamics.sso.keycloak.entity.common.ImportUsersReportStatus;
-import ru.alamics.sso.keycloak.repository.*;
+import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
+import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
+import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
+import ru.alamics.sso.jpa.repository.*;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
@@ -19,15 +19,15 @@ import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.util.validator.EmailValidator;
+import ru.alamics.sso.util.validator.NotValidException;
 import ru.alamics.sso.util.validator.PhoneValidator;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.*;
+import javax.ejb.Timer;
 import javax.validation.ValidationException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -98,7 +98,7 @@ public class ImportSchedule {
                 createdUsers.getAndIncrement();
                 o.setCreated(true);
                 o.setUserId(user.getId());
-                if (o.getTomsId() == null || o.getTomsId().isBlank()) {
+                if (o.getTomsId() == null || o.getTomsId().isEmpty()) {
                     throw new NotFoundException("TomsId is not exist");
                 }
                 addUserPost(user, o);
@@ -109,7 +109,7 @@ public class ImportSchedule {
                 });
                 o.setErrors(errors.toString().substring(1, errors.toString().length() - 1));
                 countClones.getAndIncrement();
-            } catch (NotFoundException | ValidationException | FoundUserPostException e) {
+            } catch (NotFoundException | NotValidException | FoundUserPostException e) {
                 o.setErrors(e.getMessage());
                 log.error("Importing user data is failed. {}", e.getMessage());
             }
@@ -124,7 +124,8 @@ public class ImportSchedule {
                 importUsersReport.getCountClones()));
     }
 
-    private void checkImportUser(String realmId, String email, String phone) throws FoundException {
+    private void checkImportUser(String realmId, String email, String phone) throws FoundException, NotValidException {
+
         EmailValidator.validate(email);
         PhoneValidator.validate(phone);
 
@@ -218,7 +219,7 @@ public class ImportSchedule {
         adminEventRepository.save(adminEvent);
     }
 
-    private void addUserPost(UserEntity user, ImportUsersDataEntity userImport) throws NotFoundException, FoundUserPostException {
+    private void addUserPost(UserEntity user, ImportUsersDataEntity userImport) throws NotFoundException, FoundUserPostException, NotValidException {
         UserPostRequest userPostRequest = new UserPostRequest();
         userPostRequest.setUserId(user.getId());
         userPostRequest.setTomsId(userImport.getTomsId());
@@ -231,12 +232,11 @@ public class ImportSchedule {
     }
 
     private void addSystemRoles(ImportUsersDataEntity userImport, String userPostId) throws javassist.NotFoundException {
-        if (userImport.getSystems() == null || userImport.getSystems().isBlank()) {
+        if (userImport.getSystems() == null || userImport.getSystems().isEmpty()) {
             return;
         }
 
-        List<String> systems = List.of(userImport.getSystems().replaceAll("\\s", "").split(","));
-
+        List<String> systems = Arrays.asList(userImport.getSystems().replaceAll("\\s", "").split(","));
         if (!systems.isEmpty()) {
             List<String> errorSystemNames = new LinkedList<>();
 

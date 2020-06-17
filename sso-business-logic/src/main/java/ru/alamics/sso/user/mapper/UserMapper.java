@@ -2,10 +2,10 @@ package ru.alamics.sso.user.mapper;
 
 import org.keycloak.authentication.FormContext;
 import org.keycloak.models.UserModel;
-import ru.alamics.sso.keycloak.entity.ImportUsersDataEntity;
-import ru.alamics.sso.keycloak.entity.ImportUsersReportEntity;
-import ru.alamics.sso.keycloak.entity.common.ImportUsersReportStatus;
-import ru.alamics.sso.keycloak.model.UserSummaryView;
+import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
+import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
+import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
+import ru.alamics.sso.jpa.model.UserSummaryView;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.user.model.ImportResponse;
@@ -16,9 +16,7 @@ import ru.alamics.sso.user.web.UserSearch;
 import ru.alamics.sso.user.web.UserSearchDto;
 
 import javax.persistence.Tuple;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.UserConstants.*;
@@ -106,26 +104,34 @@ public class UserMapper {
         return Boolean.valueOf(object.toString());
     }
 
+    // что это за хрень
     public static List<UserSearchDto> toGroupUserDtos(List<UserSearchDto> userDtos) {
         List<UserSearchDto> result = new LinkedList<>();
         for (int i = 0; i < userDtos.size(); i++) {
             UserSearchDto userDto = userDtos.get(i);
             String userPostId = userDto.getUserPostId();
-            String systemNames = userDto.getSystemName();
+
+            StringBuilder sysNames = new StringBuilder();
+            if (userDto.getSystemName() != null)
+                sysNames.append(userDto.getSystemName());
+
             if (userPostId != null) {
                 for (int j = i + 1; j < userDtos.size(); j++) {
                     UserSearchDto userDtoJ = userDtos.get(j);
-                    if (userPostId.equals(userDtoJ.getUserPostId()) && userDto.getId().equals(userDtoJ.getId()) && userDtoJ.getSystemName() != null && !userDtoJ.getSystemName().isBlank()) {
-                        if (systemNames == null || systemNames.isBlank()) {
-                            systemNames = userDtoJ.getSystemName();
-                        } else {
-                            systemNames += ", " + userDtoJ.getSystemName();
+                    if (userPostId.equals(userDtoJ.getUserPostId()) && userDto.getId().equals(userDtoJ.getId()) && userDtoJ.getSystemName() != null && !userDtoJ.getSystemName().isEmpty()) {
+
+                        if (userDtoJ.getSystemName() != null) {
+
+                            if (sysNames.length() > 0)
+                                sysNames.append(", ");
+
+                            sysNames.append(userDtoJ.getSystemName());
+                            userDtos.remove(j);
+                            j--;
                         }
-                        userDtos.remove(j);
-                        j--;
                     }
                 }
-                userDto.setSystemName(systemNames);
+                userDto.setSystemName(sysNames.toString());
             }
             result.add(userDto);
         }
@@ -155,7 +161,7 @@ public class UserMapper {
                     userImport.setRole(row[i]);
                     break;
                 case 6:
-                    //userImport.setSystemNames(List.of(row[i].replaceAll("\\s", "").split(",")));
+                    //userImport.setSystemNames(Arrays.asList(row[i].replaceAll("\\s", "").split(",")));
                     userImport.setSystems(row[i]);
                     break;
             }
