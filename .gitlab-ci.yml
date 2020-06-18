@@ -198,8 +198,8 @@ test:battle:
 stage:
   stage: deploy devel
   when: manual
-  only:
-    - tags
+  #only:
+  #  - tags
   environment:
     name: stage
     url: http://domru-sso-stage.alamics.ru
