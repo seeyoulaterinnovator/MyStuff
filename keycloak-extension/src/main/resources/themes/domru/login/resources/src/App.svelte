@@ -1,6 +1,11 @@
 <script>
   import Cities from './Cities/index.svelte';
   import CitiesButton from './Cities/Button.svelte';
+  import Chat from './scripts/chat.svelte';
+
+  const chat = new Chat({
+    target: document.body,
+  });
 
   const cities = new Cities({
     target: document.getElementById('cities-modal'),
