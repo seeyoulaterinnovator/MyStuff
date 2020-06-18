@@ -8,8 +8,9 @@ COPY themes/ /opt/jboss/keycloak/themes
 COPY standalone/data/password-blacklists /opt/jboss/keycloak/standalone/data/password-blacklists
 RUN mkdir -p /opt/jboss/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
 COPY tools/module.xml /opt/jboss/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
-COPY build/custom-jpa-provider/libs/custom-jpa-provider-0.0.1.jar /opt/jboss/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main/custom-jpa.jar
+RUN cp build/custom-jpa.jar /opt/jboss/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
 RUN cp /opt/jboss/configs/ertk.pem /etc/pki/ca-trust/source/anchors
+RUn rm keycloak/standalone/deployments/custom-jpa.jar
 RUN update-ca-trust
 
 USER 1000

@@ -418,6 +418,9 @@
                 <provider>
                     classpath:${jboss.home.dir}/providers/*
                 </provider>
+                <provider>
+                    module:ru.alamics.sso.jpa
+                </provider>
             </providers>
             <master-realm-name>master</master-realm-name>
             <scheduled-task-interval>900</scheduled-task-interval>
