@@ -10,6 +10,7 @@ RUN mkdir -p /opt/jboss/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/m
 COPY tools/module.xml /opt/jboss/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
 RUN cp build/custom-jpa.jar /opt/jboss/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
 RUN cp /opt/jboss/configs/ertk.pem /etc/pki/ca-trust/source/anchors
+RUn rm keycloak/standalone/deployments/custom-jpa.jar
 RUN update-ca-trust
 
 USER 1000
