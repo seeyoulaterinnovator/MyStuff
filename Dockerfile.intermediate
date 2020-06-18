@@ -1,4 +1,4 @@
-FROM jboss/base-jdk:11
+FROM jboss/base-jdk:8
 
 ENV KEYCLOAK_VERSION 6.0.1
 ENV JDBC_POSTGRES_VERSION 42.2.5
