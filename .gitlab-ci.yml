@@ -339,7 +339,7 @@ voronezh:xml:
     url: http://sso.dev.itrev.ru
   script:
     - rm /usr/local/keycloak/domain/configuration/domain.xml
-    - cp -r configs/domain.xml /usr/local/keycloak/domain/configuration
+    - cp -r configs/domain.xml.voronezh /usr/local/keycloak/domain/configuration/domain.xml
     - /usr/local/keycloak/bin/jboss-cli.sh --connect --command-timeout=180 --user=admin --password=addMin --command="reload --host=master --restart-servers=true"
   artifacts: {}
   tags:
@@ -353,7 +353,7 @@ perm:xml:
     url: http://sso.dev.itrev.ru
   script:
     - rm /usr/local/keycloak/domain/configuration/domain.xml
-    - cp -r configs/domain.xml /usr/local/keycloak/domain/configuration
+    - cp -r configs/domain.xml.perm /usr/local/keycloak/domain/configuration/domain.xml
     - /usr/local/keycloak/bin/jboss-cli.sh --connect --command-timeout=180 --user=admin --password=addMin --command="reload --host=master --restart-servers=true"
   artifacts: {}
   tags:

@@ -43,18 +43,46 @@
     <profiles>
         <profile name="auth-server-clustered">
             <subsystem xmlns="urn:jboss:domain:logging:6.0">
+                <async-handler name="LOGSTASH-ASYNC">
+                    <queue-length value="512"/>
+                    <subhandlers>
+                        <handler name="LOGSTASH-SOCKET"/>
+                    </subhandlers>
+                </async-handler>
+                <async-handler name="LOGSTASH-ASYNC-SPLUNK">
+                    <queue-length value="512"/>
+                    <subhandlers>
+                        <handler name="LOGSTASH-SOCKET-SPLUNK"/>
+                    </subhandlers>
+                </async-handler>
                 <console-handler name="CONSOLE">
                     <level name="INFO"/>
                     <formatter>
                         <named-formatter name="PATTERN"/>
                     </formatter>
                 </console-handler>
-                <custom-handler name="Remotelog4j" class="org.apache.log4j.net.SocketAppender" module="org.apache.log4j">
-                    <level name="INFO"/>
+                <custom-handler name="LOGSTASH-SOCKET" class="net.logstash.logging.handler.SocketHandler" module="x1.wildfly-logstash">
+                    <level name="DEBUG"/>
+                    <formatter>
+                        <named-formatter name="LOGSTASH-PATTERN"/>
+                    </formatter>
                     <properties>
-                        <property name="RemoteHost" value="188.17.155.29"/>
-                        <property name="Port" value="4712"/>
-                        <property name="LocationInfo" value="true"/>
+                        <property name="protocol" value="TCP"/>
+                        <property name="hostname" value="logstash.itrev.ru"/>
+                        <property name="port" value="9996"/>
+                        <property name="subHandler" value="LOGSTASH"/>
+                    </properties>
+                </custom-handler>
+                <custom-handler name="LOGSTASH-SOCKET-SPLUNK" class="net.logstash.logging.handler.SocketHandler" module="x1.wildfly-logstash">
+                    <level name="DEBUG"/>
+                    <formatter>
+                        <named-formatter name="LOGSTASH-PATTERN"/>
+                    </formatter>
+                    <properties>
+                        <property name="protocol" value="TCP"/>
+                        <property name="hostname" value="10.101.5.245"/>
+                        <property name="port" value="50514"/>
+                        <property name="subHandler" value="LOGSTASH"/>
                     </properties>
                 </custom-handler>
                 <periodic-rotating-file-handler name="FILE" autoflush="true">
@@ -71,6 +99,15 @@
                         <named-formatter name="PATTERN"/>
                     </formatter>
                     <file relative-to="jboss.server.log.dir" path="error.log"/>
+                    <suffix value=".yyyy-MM-dd"/>
+                    <append value="true"/>
+                </periodic-rotating-file-handler>
+                <periodic-rotating-file-handler name="LOGSTASH" autoflush="true">
+                    <level name="ERROR"/>
+                    <formatter>
+                        <named-formatter name="LOGSTASH-PATTERN"/>
+                    </formatter>
+                    <file relative-to="jboss.server.log.dir" path="logstash.log"/>
                     <suffix value=".yyyy-MM-dd"/>
                     <append value="true"/>
                 </periodic-rotating-file-handler>
@@ -104,16 +141,15 @@
                 <logger category="org.infinispan.remoting.transport.jgroups.JGroupsTransport">
                     <level name="DEBUG"/>
                 </logger>
-                <logger category="org.keycloak.services.managers">
-                    <level name="DEBUG"/>
-                </logger>
                 <root-logger>
                     <level name="INFO"/>
                     <handlers>
                         <handler name="CONSOLE"/>
                         <handler name="FILE"/>
                         <handler name="ERROR"/>
-                        <handler name="Remotelog4j"/>
+                        <handler name="LOGSTASH"/>
+                        <handler name="LOGSTASH-ASYNC"/>
+                        <handler name="LOGSTASH-ASYNC-SPLUNK"/>
                     </handlers>
                 </root-logger>
                 <formatter name="PATTERN">
@@ -121,6 +157,9 @@
                 </formatter>
                 <formatter name="COLOR-PATTERN">
                     <pattern-formatter pattern="%K{level}%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"/>
+                </formatter>
+                <formatter name="LOGSTASH-PATTERN">
+                    <custom-formatter module="x1.wildfly-logstash" class="net.logstash.logging.formatter.LogstashUtilFormatter"/>
                 </formatter>
             </subsystem>
             <subsystem xmlns="urn:jboss:domain:bean-validation:1.0"/>
@@ -313,7 +352,7 @@
                                 org.keycloak.cluster.infinispan.KeycloakHotRodMarshallerFactory
                             </property>
                         </remote-store>
-                        <state-transfer chunk-size="2048" timeout="120000"/>
+                        <state-transfer chunk-size="2048" timeout="180000"/>
                     </replicated-cache>
                     <replicated-cache name="authenticationSessions"/>
                     <distributed-cache name="sessions" owners="1">
@@ -325,7 +364,7 @@
                                 org.keycloak.cluster.infinispan.KeycloakHotRodMarshallerFactory
                             </property>
                         </remote-store>
-                        <state-transfer chunk-size="2048" timeout="120000"/>
+                        <state-transfer chunk-size="2048" timeout="180000"/>
                     </distributed-cache>
                     <distributed-cache name="offlineSessions" owners="1">
                         <remote-store cache="offlineSessions" remote-servers="remote-cache" fetch-state="false" passivation="false" preload="false" purge="false" shared="true">
@@ -731,7 +770,13 @@
     <deployments>
     </deployments>
     <server-groups>
-        <server-group name="auth-server-group" profile="auth-server-clustered">
+        <server-group name="primary" profile="auth-server-clustered">
+            <jvm name="default">
+                <heap size="2048m" max-size="12288m"/>
+            </jvm>
+            <socket-binding-group ref="ha-sockets"/>
+        </server-group>
+        <server-group name="secondary" profile="auth-server-clustered">
             <jvm name="default">
                 <heap size="2048m" max-size="12288m"/>
             </jvm>
