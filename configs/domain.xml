@@ -104,6 +104,9 @@
                 <logger category="org.infinispan.remoting.transport.jgroups.JGroupsTransport">
                     <level name="DEBUG"/>
                 </logger>
+                <logger category="org.keycloak.services.managers">
+                    <level name="DEBUG"/>
+                </logger>
                 <root-logger>
                     <level name="INFO"/>
                     <handlers>

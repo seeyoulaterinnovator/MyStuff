@@ -106,6 +106,9 @@
             <logger category="org.keycloak">
                 <level name="${env.KEYCLOAK_LOGLEVEL:INFO}"/>
             </logger>
+            <logger category="org.keycloak.services.managers">
+                <level name="DEBUG"/>
+            </logger>
             <root-logger>
                 <level name="${env.ROOT_LOGLEVEL:INFO}"/>
                 <handlers>

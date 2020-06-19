@@ -206,8 +206,8 @@ stage:
 stage2:
   stage: deploy devel
   when: manual
-  only:
-    - tags
+  #only:
+  #  - tags
   environment:
     name: stage
     url: http://domru-sso-stage1.alamics.ru
@@ -217,8 +217,8 @@ stage2:
 stage3:
   stage: deploy devel
   when: manual
-  only:
-    - tags
+  #only:
+  #  - tags
   environment:
     name: stage
     url: http://domru-sso-stage2.alamics.ru
