@@ -10,7 +10,6 @@ COPY tools/module.xml /opt/jboss/keycloak/modules/system/layers/base/ru/alamics/
 COPY build/deploy/standalone/deployments/custom-jpa.jar /opt/jboss/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
 COPY build/deploy/standalone/deployments/domru-sso.war /opt/jboss/keycloak/standalone/deployments
 RUN cp /opt/jboss/configs/ertk.pem /etc/pki/ca-trust/source/anchors
-RUN rm /opt/jboss/keycloak/standalone/deployments/custom-jpa.jar
 RUN update-ca-trust
 
 USER 1000
