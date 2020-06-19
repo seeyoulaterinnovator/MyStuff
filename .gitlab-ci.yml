@@ -105,7 +105,7 @@ back:war:
     paths:
       - .ci_status/
       - build/deploy/standalone/deployments/domru-sso.war
-      - build/deploy/standalone/deployments/domru-sso.war
+      - build/deploy/standalone/deployments/custom-jpa.jar
       - deploy/modules/system/layers/base/ru/alamics/sso/jpa/main/module.xml
       - deploy/themes
     name: "domru-sso-compile-$CI_PIPELINE_ID"
