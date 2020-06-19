@@ -43,20 +43,28 @@ public class StatusResource {
                     .build();
         }
 
-        long now = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
+        boolean cached = false;
+        boolean curStatus = false;
 
-        if (now - healthUpdated.get() < 500) {
-            log.info("Health check, cached value");
-            return buildResponse(healthStatus.get());
+        try {
+            if (start - healthUpdated.get() >= 500) {
+                healthUpdated.set(start);
+            } else {
+                cached = true;
+                curStatus = healthStatus.get();
+                return buildResponse(curStatus);
+            }
+
+            healthStatus.set(statusService.checkStatusDb());
+            curStatus = healthStatus.get();
+
+            return buildResponse(curStatus);
+
+        } finally {
+            long complete = System.currentTimeMillis();
+            log.info("Health check {}, {} ms {}", curStatus?"OK":"FAIL", (complete - start), cached?"cached":"");
         }
-
-        healthUpdated.set(now);
-
-        log.info("Health check");
-
-        healthStatus.set(statusService.checkStatusDb());
-
-        return buildResponse(healthStatus.get());
     }
 
     private Response buildResponse(boolean status) {
