@@ -40,12 +40,22 @@ import static ru.alamics.sso.registration.model.UserConstants.*;
 
 @Slf4j
 public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
+    private static final String HOME_PAGE = "https://newlkb2b.domru.ru";
 
     public SsoFreeMarkerLoginForm(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
 
-        if (client != null)
-            attributes.put("redirectUrl", client.getRedirectUris().iterator().next());
+        attributes.put("redirectUrl", getRedirectUrl());
+    }
+
+    private String getRedirectUrl() {
+        if (client != null) {
+            String redirectUrl = client.getRedirectUris().iterator().next();
+            if (redirectUrl != null && redirectUrl.endsWith("/*")) {
+                return redirectUrl.substring(0, redirectUrl.length() - 2);
+            }
+        }
+        return HOME_PAGE;
     }
 
     private String getHash(String fileName) {
