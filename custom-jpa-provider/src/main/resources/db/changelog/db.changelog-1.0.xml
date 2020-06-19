@@ -865,4 +865,54 @@
         </sql>
     </changeSet>
 
+    <changeSet id="49_p" author="plyusnin-da" dbms="mysql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_ATTRIBUTE" />
+            <not><indexExists indexName="IDX_USER_ATTR_FULLTEXT"/></not>
+        </preConditions>
+        <sql>
+            CREATE FULLTEXT INDEX IDX_USER_ATTR_FULLTEXT ON USER_ATTRIBUTE(VALUE);
+        </sql>
+    </changeSet>
+
+    <changeSet id="50_p" author="plyusnin-da" dbms="mysql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_ENTITY" />
+            <columnExists tableName="USER_ENTITY" columnName="EMAIL"/>
+        </preConditions>
+        <sql>
+            alter table USER_ENTITY change EMAIL EMAIL varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
+
+    <changeSet id="51_p" author="plyusnin-da" dbms="mysql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_ENTITY" />
+            <columnExists tableName="USER_ENTITY" columnName="FIRST_NAME"/>
+        </preConditions>
+        <sql>
+            alter table USER_ENTITY change FIRST_NAME FIRST_NAME varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
+
+    <changeSet id="52_p" author="plyusnin-da" dbms="mysql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_ENTITY" />
+            <columnExists tableName="USER_ENTITY" columnName="USERNAME"/>
+        </preConditions>
+        <sql>
+            alter table USER_ENTITY change USERNAME USERNAME varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
+
+    <changeSet id="53_p" author="plyusnin-da" dbms="mysql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_ENTITY" />
+            <not><indexExists indexName="IDX_USER_FULLTEXT"/></not>
+        </preConditions>
+        <sql>
+            CREATE FULLTEXT INDEX IDX_USER_FULLTEXT ON USER_ENTITY(EMAIL, FIRST_NAME, USERNAME);
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
