@@ -107,8 +107,8 @@ back:war:
       - build/deploy/standalone/deployments/domru-sso.war
       - build/deploy/standalone/deployments/custom-jpa.jar
       - build/deploy/modules/system/layers/base/ru/alamics/sso/jpa/main/module.xml
-      - build/deploy/themes
-      - build/deploy/standalone/data/password-blacklists
+      - build/deploy/themes/
+      - build/deploy/standalone/data/password-blacklists/
     name: "domru-sso-compile-$CI_PIPELINE_ID"
     expire_in: 1 week
 
