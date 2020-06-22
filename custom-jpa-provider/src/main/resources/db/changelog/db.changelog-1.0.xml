@@ -915,4 +915,38 @@
         </sql>
     </changeSet>
 
+    <changeSet id="54_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="AUTO_LOCK_NOTIFICATION" />
+            <columnExists tableName="AUTO_LOCK_NOTIFICATION" columnName="version" />
+        </preConditions>
+        <addNotNullConstraint
+            columnDataType="bigint"
+            columnName="version"
+            defaultNullValue="0"
+            tableName="AUTO_LOCK_NOTIFICATION"/>
+        <addDefaultValue
+            columnDataType="bigint"
+            columnName="version"
+            defaultValueNumeric="0"
+            tableName="AUTO_LOCK_NOTIFICATION"/>
+    </changeSet>
+
+    <changeSet id="55_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="CHECK_TABLE" />
+            <columnExists tableName="CHECK_TABLE" columnName="version" />
+        </preConditions>
+        <addNotNullConstraint
+                columnDataType="bigint"
+                columnName="version"
+                defaultNullValue="0"
+                tableName="CHECK_TABLE"/>
+        <addDefaultValue
+                columnDataType="bigint"
+                columnName="version"
+                defaultValueNumeric="0"
+                tableName="CHECK_TABLE"/>
+    </changeSet>
+
 </databaseChangeLog>
