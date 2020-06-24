@@ -123,11 +123,13 @@ public class UserSchedule {
             if (Objects.nonNull(passwordPolicy)) {
                 int charNumbs = PasswordPolicy.FORCE_EXPIRED_ID.length() + 3;
                 int index = passwordPolicy.indexOf(PasswordPolicy.FORCE_EXPIRED_ID);
-                String expirePolicy = passwordPolicy.substring(index, index + charNumbs);
-                int expiresDays = Integer.parseInt(expirePolicy.substring(expirePolicy.indexOf('(') + 1, expirePolicy.lastIndexOf(')')));
-                if (expiresDays != -1) {
-                    long timeToExpire = TimeUnit.DAYS.toMillis(expiresDays);
-                    policyRepository.findExpiredPasswords(realm.getId(), timeToExpire);
+                if (index >= 0) {
+                    String expirePolicy = passwordPolicy.substring(index, index + charNumbs);
+                    int expiresDays = Integer.parseInt(expirePolicy.substring(expirePolicy.indexOf('(') + 1, expirePolicy.lastIndexOf(')')));
+                    if (expiresDays != -1) {
+                        long timeToExpire = TimeUnit.DAYS.toMillis(expiresDays);
+                        policyRepository.findExpiredPasswords(realm.getId(), timeToExpire);
+                    }
                 }
             }
         }
