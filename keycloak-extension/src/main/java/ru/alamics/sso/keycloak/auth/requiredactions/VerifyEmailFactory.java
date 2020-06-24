@@ -94,7 +94,7 @@ public class VerifyEmailFactory extends VerifyEmail {
                     .setAttribute("expTime", expirationStrRus);
 
             if (user.isEmailVerified()) {
-                sendAuthorizationEmail(emailTemplateProvider, user, link, expirationInMinutes, session);
+                sendAuthorizationEmail(emailTemplateProvider, user, link, validityInSecs, session);
             } else {
                 emailTemplateProvider.sendVerifyEmail(link, expirationInMinutes);
             }
@@ -108,11 +108,17 @@ public class VerifyEmailFactory extends VerifyEmail {
     }
 
     private void sendAuthorizationEmail(EmailTemplateProvider emailTemplateProvider, UserModel user, String link,
-                                        long expirationInMinutes, KeycloakSession session) throws EmailException {
+                                        int validityInSecs, KeycloakSession session) throws EmailException {
+
+        long expirationInMinutes = TimeUnit.SECONDS.toMinutes(validityInSecs);
+        String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(validityInSecs);
+
         Map<String, Object> attributes = new HashMap<String, Object>();
         attributes.put("user", new ProfileBean(user));
         attributes.put("link", link);
         attributes.put("linkExpiration", expirationInMinutes);
+        attributes.put("expTime", expirationStrRus);
+
         try {
             Locale locale = session.getContext().resolveLocale(user);
             attributes.put("linkExpirationFormatter",
@@ -120,6 +126,7 @@ public class VerifyEmailFactory extends VerifyEmail {
         } catch (IOException e) {
             throw new EmailException("Failed to template email", e);
         }
+
         emailTemplateProvider.send("emailVerificationSubject",
                 "email-verification-login.ftl", attributes);
     }
