@@ -14,7 +14,7 @@
             <#if section = "header">
               Подтверждение данных
             <#elseif section = "description">
-              Отправлены инструкции для связывания аккаунтов
+              Вам на почту отправлены инструкции для связывания аккаунтов
             </#if>
         </@emailSent.defaultTemplate>
     </#if>
