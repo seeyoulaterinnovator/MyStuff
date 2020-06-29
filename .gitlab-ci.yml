@@ -12,6 +12,8 @@ stages:
   - deploy devel
   - deploy perm
   - deploy voronezh
+  - deploy selectel-msk
+  - deploy selectel-spb
 
 back:compile:
   stage: compile
@@ -358,3 +360,75 @@ perm:xml:
   artifacts: {}
   tags:
     - sso-domain-controller-perm
+
+selectel-msk:primary:
+  stage: deploy selectel-msk
+  when: manual
+  environment:
+    name: stage
+    url: http://sso.selectel.itrev.ru
+  script:
+    # themes and text artifacts
+    - cp -r build/deploy/themes/domru /usr/local/keycloak/themes
+    - mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - cp build/deploy/standalone/data/password-blacklists/black_list_password.txt /usr/local/keycloak/domain/servers/server-one/data/password-blacklists
+    # java artifacts
+    - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - ~/scripts/deploy.sh primary
+  tags:
+    - selectel-sso-msk-controller
+
+selectel-msk:secondary:
+  stage: deploy selectel-msk
+  when: manual
+  environment:
+    name: stage
+    url: http://sso.selectel.itrev.ru
+  script:
+    # themes and text artifacts
+    - scp -r build/deploy/themes/domru 95.213.249.251:/usr/local/keycloak/themes
+    - ssh 95.213.249.251 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt 95.213.249.251:/usr/local/keycloak/domain/servers/server-four/data/password-blacklists
+    # java artifacts
+    - scp build/deploy/standalone/deployments/custom-jpa.jar 95.213.249.251:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml 95.213.249.251:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - ~/scripts/deploy.sh secondary
+  tags:
+    - selectel-sso-msk-controller
+
+selectel-spb:primary:
+  stage: deploy selectel-spb
+  when: manual
+  environment:
+    name: stage
+    url: http://sso.selectel.itrev.ru
+  script:
+    # themes and text artifacts
+    - cp -r build/deploy/themes/domru /usr/local/keycloak/themes
+    - mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - cp build/deploy/standalone/data/password-blacklists/black_list_password.txt /usr/local/keycloak/domain/servers/server-one/data/password-blacklists
+    # java artifacts
+    - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - ~/scripts/deploy.sh primary
+  tags:
+    - selectel-sso-spb-controller
+
+selectel-spb:secondary:
+  stage: deploy selectel-spb
+  when: manual
+  environment:
+    name: stage
+    url: http://sso.selectel.itrev.ru
+  script:
+    # themes and text artifacts
+    - scp -r build/deploy/themes/domru 92.53.102.218:/usr/local/keycloak/themes
+    - ssh 92.53.102.218 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt 95.213.249.251:/usr/local/keycloak/domain/servers/server-four/data/password-blacklists
+    # java artifacts
+    - scp build/deploy/standalone/deployments/custom-jpa.jar 92.53.102.218:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml 92.53.102.218:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - ~/scripts/deploy.sh secondary
+  tags:
+    - selectel-sso-spb-controller
