@@ -49,12 +49,25 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     }
 
     private String getRedirectUrl() {
+
+        String redirectUrl = null;
+
         if (client != null) {
-            String redirectUrl = client.getRedirectUris().iterator().next();
-            if (redirectUrl != null && redirectUrl.endsWith("/*")) {
-                return redirectUrl.substring(0, redirectUrl.length() - 2);
+            for (String rediUrl : client.getRedirectUris()) {
+
+                if (rediUrl != null && redirectUrl == null) {
+
+                    redirectUrl = rediUrl;
+                    if (redirectUrl.endsWith("/*")) {
+                        redirectUrl = redirectUrl.substring(0, redirectUrl.length() - 2);
+                    }
+                }
+                log.info("getRedirectUrl for {} is {}", client.getName(), rediUrl); // TODO set to debug
             }
         }
+        if (redirectUrl != null)
+            return redirectUrl;
+
         return HOME_PAGE;
     }
 
