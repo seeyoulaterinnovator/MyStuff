@@ -42,7 +42,7 @@ public class UserPostFacade {
         userPostService = (UserPostService) Lookup.lookup(UserPostService.class);
         customerRequestService = (CustomerRequestService) Lookup.lookup(CustomerRequestService.class);
 
-        customerCacheLifespanInDb = properties.getPropertyInt(CUSTOMER_CACHE_LIFESPAN_IN_DB_PROPERTY, CUSTOMER_CACHE_LIFESPAN_IN_DB, "UserPostFacade: default value used: '%s' = '%s'");
+        customerCacheLifespanInDb = properties.getPropertyInt(CUSTOMER_CACHE_LIFESPAN_IN_DB_PROPERTY, CUSTOMER_CACHE_LIFESPAN_IN_DB, "UserPostFacade: default value used: '{}' = '{}'");
     }
 
     public UserPostService getUserPostService() {
@@ -64,7 +64,7 @@ public class UserPostFacade {
     private void addCustomersToRequest(List<UserPostResponse> userPosts) {
         List<String> updatingTomsId = userPosts.stream()
                 .filter(post -> !customerCache.containsKey(post.getTomsId()))
-                .filter(post -> post.getUpdateTime().isBefore(LocalDateTime.now().minusDays(customerCacheLifespanInDb)) ||
+                .filter(post -> post.getUpdateTime().isBefore(LocalDateTime.now().minusHours(customerCacheLifespanInDb)) ||
                         post.getOrganization() == null)
                 .map(post -> {
                     customerCache.put(post.getTomsId(), post.getOrganization() == null ? " " : post.getOrganization());
