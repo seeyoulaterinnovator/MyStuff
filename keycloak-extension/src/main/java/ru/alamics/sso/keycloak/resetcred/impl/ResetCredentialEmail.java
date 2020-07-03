@@ -12,6 +12,7 @@ import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.events.EventType;
+import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -71,6 +72,8 @@ public class ResetCredentialEmail extends ResetCredential {
         String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
         ResetCredentialsActionToken token = new ResetCredentialsActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, authenticationSession.getClient().getClientId());
 
+        token.setOtherClaims("reduri", getRedirectUrl(authenticationSession.getClient()));
+
         String link = UriBuilder
                 .fromUri(context.getActionTokenUrl(token.serialize(context.getSession(), realm, context.getUriInfo())))
                 .build()
@@ -101,5 +104,30 @@ public class ResetCredentialEmail extends ResetCredential {
                     .createErrorPage(Response.Status.INTERNAL_SERVER_ERROR);
             context.failure(AuthenticationFlowError.INTERNAL_ERROR, challenge);
         }
+    }
+
+    private static final String HOME_PAGE = "https://newlkb2b.domru.ru";
+
+    private String getRedirectUrl(ClientModel client) {
+
+        String redirectUrl = null;
+
+        if (client != null) {
+            for (String rediUrl : client.getRedirectUris()) {
+
+                if (rediUrl != null && redirectUrl == null) {
+
+                    redirectUrl = rediUrl;
+                    if (redirectUrl.endsWith("/*")) {
+                        redirectUrl = redirectUrl.substring(0, redirectUrl.length() - 2);
+                    }
+                }
+                log.info("getRedirectUrl2 for {} is {}", client.getClientId(), rediUrl); // TODO set to debug
+            }
+        }
+        if (redirectUrl != null)
+            return redirectUrl;
+
+        return HOME_PAGE;
     }
 }

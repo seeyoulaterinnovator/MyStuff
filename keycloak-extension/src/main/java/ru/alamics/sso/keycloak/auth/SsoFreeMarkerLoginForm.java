@@ -62,7 +62,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                         redirectUrl = redirectUrl.substring(0, redirectUrl.length() - 2);
                     }
                 }
-                log.info("getRedirectUrl for {} is {}", client.getName(), rediUrl); // TODO set to debug
+                log.info("getRedirectUrl for {} is {}", client.getClientId(), rediUrl); // TODO set to debug
             }
         }
         if (redirectUrl != null)
