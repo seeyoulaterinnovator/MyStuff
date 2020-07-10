@@ -33,12 +33,12 @@ import java.util.concurrent.TimeUnit;
 public class ResetCredentialEmail extends ResetCredential {
 
 
-    public ResetCredentialEmail (KeycloakSession session, AuthenticationFlowContext context) {
+    public ResetCredentialEmail(KeycloakSession session, AuthenticationFlowContext context) {
         super(session, context);
     }
 
     @Override
-    public void reset (UserModel user, String username) {
+    public void reset(UserModel user, String username) {
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
         if (user == null) {
             context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT));
@@ -48,7 +48,7 @@ public class ResetCredentialEmail extends ResetCredential {
         String actionTokenUserId = authenticationSession.getAuthNote(DefaultActionTokenKey.ACTION_TOKEN_USER_ID);
 
         if (actionTokenUserId != null && Objects.equals(user.getId(), actionTokenUserId)) {
-            log.debug("Forget-password triggered when reauthenticating user after authentication via action token. Skipping {} screen and using user {} ",  ResetCredentialEmailOrPhoneFactory.ID, user.getUsername());
+            log.debug("Forget-password triggered when reauthenticating user after authentication via action token. Skipping {} screen and using user {} ", ResetCredentialEmailOrPhoneFactory.ID, user.getUsername());
             context.success();
             return;
         }
@@ -69,6 +69,7 @@ public class ResetCredentialEmail extends ResetCredential {
         int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
 
         // We send the secret in the email in a link as a query param.
+        authenticationSession.setRedirectUri(getRedirectUrl(authenticationSession.getClient()));
         String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
         ResetCredentialsActionToken token = new ResetCredentialsActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, authenticationSession.getClient().getClientId());
 
