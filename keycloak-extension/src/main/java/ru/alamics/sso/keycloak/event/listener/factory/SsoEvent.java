@@ -20,6 +20,7 @@ import org.keycloak.theme.Theme;
 import ru.alamics.sso.emailer.EmailModel;
 import ru.alamics.sso.emailer.EmailSender;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
+import ru.alamics.sso.util.Util;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -74,7 +75,7 @@ public abstract class SsoEvent {
             String link = builder.build(realm.getName()).toString();
             attributes.put("accountLink", link);
 
-            emailSender.blockingSend(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
+            emailSender.send(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
                     session.theme().getTheme(Theme.Type.EMAIL), session.getContext().resolveLocale(user)));
 
         } catch (Exception e) {
@@ -113,7 +114,7 @@ public abstract class SsoEvent {
 
         authSession.setAction(AuthenticationSessionModel.Action.AUTHENTICATE.name());
         authSession.setProtocol(OIDCLoginProtocol.LOGIN_PROTOCOL);
-        String redirectUri = client.getRedirectUris().stream().findFirst().get();
+        String redirectUri = Util.getRedirectUrl(client.getRedirectUris());
         authSession.setRedirectUri(redirectUri);
         authSession.setClientNote(OIDCLoginProtocol.REDIRECT_URI_PARAM, redirectUri);
         authSession.setClientNote(OIDCLoginProtocol.RESPONSE_TYPE_PARAM, OAuth2Constants.CODE);

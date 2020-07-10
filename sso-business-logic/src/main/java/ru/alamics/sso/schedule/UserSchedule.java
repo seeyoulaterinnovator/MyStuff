@@ -150,19 +150,19 @@ public class UserSchedule {
                 EmailModel.EmailModelBuilder prepareBlockNotification = prepareBlockNotification(realm.getName(), getClientLink(client));
                 prepareBlockNotification.realmModel(realm)
                         .user(userModel);
-                sender.blockingSend(prepareBlockNotification.build());
+                sender.send(prepareBlockNotification.build());
             } else if (notification.getType() == NotificationType.ABSENCE_BLOCKING) {
                 EmailModel.EmailModelBuilder bockNotification = bockNotification();
                 bockNotification.realmModel(realm)
                         .user(userModel);
-                sender.blockingSend(bockNotification.build());
+                sender.send(bockNotification.build());
                 user.setEnabled(false);
                 createAdminEvent(OperationType.UPDATE, user, realm);
             } else if (notification.getType() == NotificationType.PASSWORD_EXPIRED) {
                 EmailModel.EmailModelBuilder passwordExpired = passwordExpired(getClientLink(client));
                 passwordExpired.realmModel(realm)
                         .user(userModel);
-                sender.blockingSend(passwordExpired.build());
+                sender.send(passwordExpired.build());
             }
         }
         log.debug("stop={}", DEBUG_STR);

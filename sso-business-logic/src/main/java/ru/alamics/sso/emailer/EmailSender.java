@@ -50,7 +50,7 @@ public class EmailSender {
     @EJB
     private ApplicationProperties properties;
 
-    public void blockingSend(EmailModel emailModel) {
+    public void send(EmailModel emailModel) {
         String email = emailModel.getUser().getEmail();
         if (email == null) {
             return;
