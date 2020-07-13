@@ -9,3 +9,4 @@ ru.alamics.sso.keycloak.user.resource.manage.UserManageProviderFactory
 ru.alamics.sso.keycloak.policy.rest.PasswordPolicyResourceProviderFactory
 ru.alamics.sso.keycloak.fake.FakeRealmResourceProviderFactory
 ru.alamics.sso.keycloak.status.StatusRealmResourceProviderFactory
+ru.alamics.sso.keycloak.client.ClientRealmResourceProviderFactory

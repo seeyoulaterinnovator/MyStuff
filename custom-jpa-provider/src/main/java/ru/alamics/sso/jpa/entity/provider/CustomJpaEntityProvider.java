@@ -20,7 +20,8 @@ public class CustomJpaEntityProvider implements org.keycloak.connections.jpa.ent
                 ExternalSystemRoleEntity.class,
                 Customer.class,
                 Settings.class,
-                AppProperty.class
+                AppProperty.class,
+                MainRedirectUri.class
         );
     }
 

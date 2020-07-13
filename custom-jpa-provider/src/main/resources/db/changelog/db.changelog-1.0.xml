@@ -949,4 +949,30 @@
                 tableName="CHECK_TABLE"/>
     </changeSet>
 
+    <changeSet id="56" author="strukov-av">
+        <preConditions onFail="MARK_RAN">
+            <not> <tableExists tableName="MAIN_REDIRECT_URIS" /> </not>
+        </preConditions>
+        <createTable tableName="MAIN_REDIRECT_URIS">
+            <column name="client_id" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="uri" type="varchar(255)"/>
+        </createTable>
+        <sql>
+            create index IDX_MAIN_REDIRECT_URIS_CLIENT
+            on MAIN_REDIRECT_URIS (CLIENT_ID);
+        </sql>
+    </changeSet>
+
+    <changeSet id="57" author="strukov-av" dbms="mysql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="MAIN_REDIRECT_URIS" />
+            <columnExists tableName="MAIN_REDIRECT_URIS" columnName="URI"/>
+        </preConditions>
+        <sql>
+            alter table MAIN_REDIRECT_URIS change URI URI varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
