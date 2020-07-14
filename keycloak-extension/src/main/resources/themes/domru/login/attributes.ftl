@@ -140,10 +140,9 @@
                 document.getElementById('roleName').value = roleName;
                 document.getElementById('tomsId').value = tomsId;
                 document.getElementById('postId').value = postId;
-                window.parent.postMessage('post-selected', '*');
                 document.getElementById('kc-accept').click();
+                window.parent.postMessage('post-selected', '*');
             });
         });
-
     </script>
 </@layout.registrationLayout>
