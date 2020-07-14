@@ -21,6 +21,8 @@ import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import ru.alamics.sso.client.ClientService;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.resetcred.ResetCredential;
 import ru.alamics.sso.keycloak.resetcred.ResetCredentialEmailOrPhoneFactory;
 
@@ -32,9 +34,12 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class ResetCredentialEmail extends ResetCredential {
 
+    private final ClientService service;
 
     public ResetCredentialEmail(KeycloakSession session, AuthenticationFlowContext context) {
         super(session, context);
+
+        this.service = (ClientService) Lookup.lookup(ClientService.class);
     }
 
     @Override
@@ -111,21 +116,8 @@ public class ResetCredentialEmail extends ResetCredential {
 
     private String getRedirectUrl(ClientModel client) {
 
-        String redirectUrl = null;
+        String redirectUrl = service.findMainRedirectUri(client.getId());
 
-        if (client != null) {
-            for (String rediUrl : client.getRedirectUris()) {
-
-                if (rediUrl != null && redirectUrl == null) {
-
-                    redirectUrl = rediUrl;
-                    if (redirectUrl.endsWith("/*")) {
-                        redirectUrl = redirectUrl.substring(0, redirectUrl.length() - 2);
-                    }
-                }
-                log.info("getRedirectUrl2 for {} is {}", client.getClientId(), rediUrl); // TODO set to debug
-            }
-        }
         if (redirectUrl != null)
             return redirectUrl;
 
