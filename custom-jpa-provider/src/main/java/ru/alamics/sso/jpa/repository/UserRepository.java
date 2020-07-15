@@ -14,6 +14,8 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.Tuple;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @LocalBean
 @Stateless
@@ -91,7 +93,7 @@ public class UserRepository {
                 .getResultList();
         */
 
-        List<UserEntity> users = (List<UserEntity>)em.createNativeQuery(
+        List<UserEntity> users = (List<UserEntity>) em.createNativeQuery(
                 "select * " +
                         "  from USER_ENTITY ue " +
                         "  where " +
@@ -205,45 +207,45 @@ public class UserRepository {
         if (search != null && !search.isEmpty())
             search = "%" + search + "%";
 
-       String queryStr =        "select " +
-                        "       UE.ID         as user_id,\n" +
-                        "       UE.USERNAME   as username,\n" +
-                        "       UE.FIRST_NAME as first_name,\n" +
-                        "       UE.LAST_NAME  as last_name,\n" +
-                        "       UE.EMAIL      as email,\n" +
-                        "       UA.VALUE      as phone,\n" +
-                        "       UE.ENABLED    as enabled,\n" +
-                        "       UP.id         as user_post_id,\n" +
-                        "       UP.TOMS_ID    as toms_id,\n" +
-                        "       C.NAME        as org,\n" +
-                        "       UP.DMP_ID     as dmp_id,\n" +
-                        "       UP.ROLE_ID    as role_id,\n" +
-                        "       UPR.NAME      as role_name,\n" +
-                        "       ESR.ID        as system_role_id,\n" +
-                        "       ESR.NAME      as system_role,\n" +
-                        "       ES.ID         as system_id,\n" +
-                        "       ES.NAME       as system_name,\n" +
-                        "       ES.LABEL      as system_label\n " +
-                        "from USER_ENTITY UE\n" +
-                        "         left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone'\n" +
-                        "         left join USER_POST UP on UE.ID = UP.USER_ID\n" +
-                        "         left join USER_POST_ROLE UPR on UP.ROLE_ID = UPR.ID\n" +
-                        "         left join USERPOST_EXT_SYSTEM_ROLE UESR on UP.ID = UESR.USER_POST_ID\n" +
-                        "         left join EXT_SYSTEM_ROLE ESR on UESR.EXT_SYSTEM_ROLE_ID = ESR.ID\n" +
-                        "         left join EXTERNAL_SYSTEM ES on ESR.SYSTEM_ID = ES.ID\n" +
-                        "         left join CUSTOMER C on C.ID = UP.TOMS_ID \n" +
-                        "WHERE UE.REALM_ID = :realm\n" +
-                        "  AND (:search is null or :search = '' or\n" +
-                        "    UE.EMAIL LIKE :search OR\n" +
-                        "    UE.FIRST_NAME LIKE :search OR\n" +
-                        "    UA.VALUE LIKE :search OR\n" +
-                        "    UE.USERNAME LIKE :search\n" +
-                        "  )\n" +
-                        "  AND (:searchUser is null or :searchUser = '' or UE.ID = :searchUser )\n" +
-                        "  AND (:searchToms is null or :searchToms = '' or UP.TOMS_ID = :searchToms)\n" +
-                        getIdList(includeOnlyIDs) +
-                        getSort(sortField, sortAsc) +
-                        getLimit(pageNum, pageSize);
+        String queryStr = "select " +
+                "       UE.ID         as user_id,\n" +
+                "       UE.USERNAME   as username,\n" +
+                "       UE.FIRST_NAME as first_name,\n" +
+                "       UE.LAST_NAME  as last_name,\n" +
+                "       UE.EMAIL      as email,\n" +
+                "       UA.VALUE      as phone,\n" +
+                "       UE.ENABLED    as enabled,\n" +
+                "       UP.id         as user_post_id,\n" +
+                "       UP.TOMS_ID    as toms_id,\n" +
+                "       C.NAME        as org,\n" +
+                "       UP.DMP_ID     as dmp_id,\n" +
+                "       UP.ROLE_ID    as role_id,\n" +
+                "       UPR.NAME      as role_name,\n" +
+                "       ESR.ID        as system_role_id,\n" +
+                "       ESR.NAME      as system_role,\n" +
+                "       ES.ID         as system_id,\n" +
+                "       ES.NAME       as system_name,\n" +
+                "       ES.LABEL      as system_label\n " +
+                "from USER_ENTITY UE\n" +
+                "         left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone'\n" +
+                "         left join USER_POST UP on UE.ID = UP.USER_ID\n" +
+                "         left join USER_POST_ROLE UPR on UP.ROLE_ID = UPR.ID\n" +
+                "         left join USERPOST_EXT_SYSTEM_ROLE UESR on UP.ID = UESR.USER_POST_ID\n" +
+                "         left join EXT_SYSTEM_ROLE ESR on UESR.EXT_SYSTEM_ROLE_ID = ESR.ID\n" +
+                "         left join EXTERNAL_SYSTEM ES on ESR.SYSTEM_ID = ES.ID\n" +
+                "         left join CUSTOMER C on C.ID = UP.TOMS_ID \n" +
+                "WHERE UE.REALM_ID = :realm\n" +
+                "  AND (:search is null or :search = '' or\n" +
+                "    UE.EMAIL LIKE :search OR\n" +
+                "    UE.FIRST_NAME LIKE :search OR\n" +
+                "    UA.VALUE LIKE :search OR\n" +
+                "    UE.USERNAME LIKE :search\n" +
+                "  )\n" +
+                "  AND (:searchUser is null or :searchUser = '' or UE.ID = :searchUser )\n" +
+                "  AND (:searchToms is null or :searchToms = '' or UP.TOMS_ID = :searchToms)\n" +
+                getIdList(includeOnlyIDs) +
+                getSort(sortField, sortAsc) +
+                getLimit(pageNum, pageSize);
 
         Query query = em.createNativeQuery(
                 queryStr
@@ -327,7 +329,7 @@ public class UserRepository {
 
     public List<UserSummaryView> findUsersByName(
             String realm,
-            String search,
+            final String search,
             String searchUser,
             String searchToms,
             String sortField,
@@ -335,8 +337,12 @@ public class UserRepository {
             int pageNum,
             int pageSize
     ) {
-        if (search != null && !search.isEmpty())
-            search = search + "*";
+
+        String fullTextSearch = null;
+
+        if (search != null && !search.isEmpty()) {
+            fullTextSearch = convertToFullTextSearchString(search);
+        }
 
         Query query = em.createNativeQuery(
                 "select UE.id, " +
@@ -357,7 +363,7 @@ public class UserRepository {
                         "  ) \n" +
                         getSort(sortField, sortAsc)
                 , USER_SUMMARY_MAPPER_NAME)
-                .setParameter("search", search)
+                .setParameter("search", fullTextSearch)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
                 .setParameter("realm", realm);
@@ -407,6 +413,20 @@ public class UserRepository {
         query.setMaxResults(pageSize);
 
         return query.getResultList();
+    }
+
+    private String convertToFullTextSearchString(String search) {
+        Matcher matcher = Pattern.compile(".*[.@-_&]").matcher(search);
+
+        if (!matcher.find()) {
+            return search + "*";
+        }
+
+        int lastIndexSymbol = matcher.end();
+
+        return "+\"" + search.substring(0, lastIndexSymbol) + "\"" +
+                (lastIndexSymbol == search.length() ? "" : " " + search.substring(lastIndexSymbol) + "* " +
+                        search.substring(lastIndexSymbol));
     }
 
     private String getSort(String sortField, boolean sortAsc) {
