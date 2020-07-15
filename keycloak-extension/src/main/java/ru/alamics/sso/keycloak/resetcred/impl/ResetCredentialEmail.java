@@ -21,6 +21,8 @@ import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import ru.alamics.sso.client.ClientService;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.resetcred.ResetCredential;
 import ru.alamics.sso.keycloak.resetcred.ResetCredentialEmailOrPhoneFactory;
 
@@ -32,13 +34,16 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class ResetCredentialEmail extends ResetCredential {
 
+    private final ClientService service;
 
-    public ResetCredentialEmail (KeycloakSession session, AuthenticationFlowContext context) {
+    public ResetCredentialEmail(KeycloakSession session, AuthenticationFlowContext context) {
         super(session, context);
+
+        this.service = (ClientService) Lookup.lookup(ClientService.class);
     }
 
     @Override
-    public void reset (UserModel user, String username) {
+    public void reset(UserModel user, String username) {
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
         if (user == null) {
             context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT));
@@ -48,7 +53,7 @@ public class ResetCredentialEmail extends ResetCredential {
         String actionTokenUserId = authenticationSession.getAuthNote(DefaultActionTokenKey.ACTION_TOKEN_USER_ID);
 
         if (actionTokenUserId != null && Objects.equals(user.getId(), actionTokenUserId)) {
-            log.debug("Forget-password triggered when reauthenticating user after authentication via action token. Skipping {} screen and using user {} ",  ResetCredentialEmailOrPhoneFactory.ID, user.getUsername());
+            log.debug("Forget-password triggered when reauthenticating user after authentication via action token. Skipping {} screen and using user {} ", ResetCredentialEmailOrPhoneFactory.ID, user.getUsername());
             context.success();
             return;
         }
@@ -69,6 +74,7 @@ public class ResetCredentialEmail extends ResetCredential {
         int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
 
         // We send the secret in the email in a link as a query param.
+        authenticationSession.setRedirectUri(getRedirectUrl(authenticationSession.getClient()));
         String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
         ResetCredentialsActionToken token = new ResetCredentialsActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, authenticationSession.getClient().getClientId());
 
@@ -110,21 +116,8 @@ public class ResetCredentialEmail extends ResetCredential {
 
     private String getRedirectUrl(ClientModel client) {
 
-        String redirectUrl = null;
+        String redirectUrl = service.findMainRedirectUri(client.getId());
 
-        if (client != null) {
-            for (String rediUrl : client.getRedirectUris()) {
-
-                if (rediUrl != null && redirectUrl == null) {
-
-                    redirectUrl = rediUrl;
-                    if (redirectUrl.endsWith("/*")) {
-                        redirectUrl = redirectUrl.substring(0, redirectUrl.length() - 2);
-                    }
-                }
-                log.info("getRedirectUrl2 for {} is {}", client.getClientId(), rediUrl); // TODO set to debug
-            }
-        }
         if (redirectUrl != null)
             return redirectUrl;
 
