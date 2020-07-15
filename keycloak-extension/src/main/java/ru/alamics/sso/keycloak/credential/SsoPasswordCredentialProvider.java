@@ -19,7 +19,8 @@ import org.keycloak.services.managers.AuthenticationSessionManager;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.sessions.RootAuthenticationSessionModel;
-import ru.alamics.sso.util.Util;
+import ru.alamics.sso.client.ClientService;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriBuilderException;
@@ -31,8 +32,12 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
     private final static String CLIENT_ID = "lkb2b";
     private final static int VALIDITY_IN_SECS = 259200;
 
+    private final ClientService service;
+
     public SsoPasswordCredentialProvider(KeycloakSession session) {
         super(session);
+
+        service = (ClientService) Lookup.lookup(ClientService.class);
     }
 
     @Override
@@ -81,7 +86,9 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
 
         authSession.setAction(AuthenticationSessionModel.Action.AUTHENTICATE.name());
         authSession.setProtocol(OIDCLoginProtocol.LOGIN_PROTOCOL);
-        String redirectUri = Util.getRedirectUrl(client.getRedirectUris());
+
+        String redirectUri = service.findMainRedirectUri(client.getId());
+
         authSession.setRedirectUri(redirectUri);
         authSession.setClientNote(OIDCLoginProtocol.REDIRECT_URI_PARAM, redirectUri);
         authSession.setClientNote(OIDCLoginProtocol.RESPONSE_TYPE_PARAM, OAuth2Constants.CODE);

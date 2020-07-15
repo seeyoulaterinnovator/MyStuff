@@ -6,8 +6,6 @@ import ru.alamics.sso.jpa.repository.ClientRepository;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Stateless
@@ -21,12 +19,12 @@ public class ClientService {
         return uri == null ? null : uri.getUri();
     }
 
-    public void saveMainRedirect(String clientId, String uri) {
+    public void saveMainRedirectUri(String clientId, String uri) {
         MainRedirectUri mainRedirectUri = new MainRedirectUri();
         mainRedirectUri.setClientId(clientId);
         mainRedirectUri.setUri(uri);
 
-        repository.save(mainRedirectUri);
+        repository.saveMainRedirectUri(mainRedirectUri);
     }
 
 }
