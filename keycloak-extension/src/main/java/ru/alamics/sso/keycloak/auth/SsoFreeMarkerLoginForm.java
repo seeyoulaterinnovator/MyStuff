@@ -21,7 +21,9 @@ import org.keycloak.theme.FreeMarkerUtil;
 import org.keycloak.theme.Theme;
 import org.keycloak.theme.beans.MessageType;
 import org.keycloak.utils.MediaType;
+import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.keycloak.auth.model.AuthType;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.util.Util;
 
@@ -49,24 +51,13 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     }
 
     private String getRedirectUrl() {
+        ClientService clientService = (ClientService) Lookup.lookup(ClientService.class);
 
-        String redirectUrl = null;
+        String redirectUri = clientService.findMainRedirectUri(client.getId());
 
-        if (client != null) {
-            for (String rediUrl : client.getRedirectUris()) {
-
-                if (rediUrl != null && redirectUrl == null) {
-
-                    redirectUrl = rediUrl;
-                    if (redirectUrl.endsWith("/*")) {
-                        redirectUrl = redirectUrl.substring(0, redirectUrl.length() - 2);
-                    }
-                }
-                log.info("getRedirectUrl for {} is {}", client.getClientId(), rediUrl); // TODO set to debug
-            }
+        if (redirectUri != null) {
+            return redirectUri;
         }
-        if (redirectUrl != null)
-            return redirectUrl;
 
         return HOME_PAGE;
     }

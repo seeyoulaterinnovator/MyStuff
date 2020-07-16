@@ -19,6 +19,8 @@ import org.keycloak.services.managers.AuthenticationSessionManager;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.sessions.RootAuthenticationSessionModel;
+import ru.alamics.sso.client.ClientService;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriBuilderException;
@@ -30,21 +32,25 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
     private final static String CLIENT_ID = "lkb2b";
     private final static int VALIDITY_IN_SECS = 259200;
 
-    public SsoPasswordCredentialProvider (KeycloakSession session) {
+    private final ClientService service;
+
+    public SsoPasswordCredentialProvider(KeycloakSession session) {
         super(session);
+
+        service = (ClientService) Lookup.lookup(ClientService.class);
     }
 
     @Override
-    public void disableCredentialType (RealmModel realm, UserModel user, String credentialType) {
+    public void disableCredentialType(RealmModel realm, UserModel user, String credentialType) {
         super.disableCredentialType(realm, user, credentialType);
 
-        if(CredentialModel.PASSWORD.equals(credentialType)) {
+        if (CredentialModel.PASSWORD.equals(credentialType)) {
             user.addRequiredAction(UserModel.RequiredAction.UPDATE_PASSWORD);
             sendDisableCredentialEmail(realm, user);
         }
     }
 
-    private void sendDisableCredentialEmail(RealmModel realm, UserModel user){
+    private void sendDisableCredentialEmail(RealmModel realm, UserModel user) {
         int absoluteExpirationInSecs = Time.currentTime() + VALIDITY_IN_SECS;
 
         ClientModel clientModel = session.clientStorageManager().getClientByClientId(CLIENT_ID, realm);
@@ -71,7 +77,7 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
         }
     }
 
-    public AuthenticationSessionModel createAuthenticationSessionForClient(RealmModel realm, ClientModel client)
+    private AuthenticationSessionModel createAuthenticationSessionForClient(RealmModel realm, ClientModel client)
             throws UriBuilderException, IllegalArgumentException {
         AuthenticationSessionModel authSession;
 
@@ -80,7 +86,9 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
 
         authSession.setAction(AuthenticationSessionModel.Action.AUTHENTICATE.name());
         authSession.setProtocol(OIDCLoginProtocol.LOGIN_PROTOCOL);
-        String redirectUri = client.getRedirectUris().stream().findFirst().get();
+
+        String redirectUri = service.findMainRedirectUri(client.getId());
+
         authSession.setRedirectUri(redirectUri);
         authSession.setClientNote(OIDCLoginProtocol.REDIRECT_URI_PARAM, redirectUri);
         authSession.setClientNote(OIDCLoginProtocol.RESPONSE_TYPE_PARAM, OAuth2Constants.CODE);

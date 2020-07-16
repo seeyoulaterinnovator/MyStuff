@@ -16,7 +16,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.IllegalFormatException;
+import java.util.Set;
 
 public class Util {
 
@@ -74,6 +74,16 @@ public class Util {
             return null;
         }
         return phone.replaceAll("[^0-9]+", "");
+    }
+
+    public static String getRedirectUrl(Set<String> redirectUris) {
+        return redirectUris.stream()
+                .map(redirectUrl -> {
+                    if (redirectUrl.endsWith("/*")) {
+                        return redirectUrl.substring(0, redirectUrl.length() - 2);
+                    }
+                    return redirectUrl;
+                }).findFirst().get();
     }
 
 }

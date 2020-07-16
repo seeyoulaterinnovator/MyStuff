@@ -47,7 +47,7 @@ public class ClientRepository {
         return em.find(MainRedirectUri.class, clientId);
     }
 
-    public void save(MainRedirectUri uri) {
+    public void saveMainRedirectUri(MainRedirectUri uri) {
         MainRedirectUri mainRedirectUri = findMainRedirectUriByClientId(uri.getClientId());
 
         if (mainRedirectUri == null) {

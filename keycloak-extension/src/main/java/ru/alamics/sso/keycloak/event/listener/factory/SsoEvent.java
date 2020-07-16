@@ -17,8 +17,10 @@ import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.sessions.RootAuthenticationSessionModel;
 import org.keycloak.theme.Theme;
+import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.emailer.EmailModel;
 import ru.alamics.sso.emailer.EmailSender;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
 
 import javax.naming.InitialContext;
@@ -36,6 +38,7 @@ public abstract class SsoEvent {
 
     private final KeycloakSession session;
     private final EmailSender emailSender;
+    private final ClientService clientService;
 
     public SsoEvent(KeycloakSession session) {
         this.session = session;
@@ -45,6 +48,8 @@ public abstract class SsoEvent {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
         }
+
+        clientService = (ClientService) Lookup.lookup(ClientService.class);
     }
 
     public abstract void execute();
@@ -74,7 +79,7 @@ public abstract class SsoEvent {
             String link = builder.build(realm.getName()).toString();
             attributes.put("accountLink", link);
 
-            emailSender.blockingSend(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
+            emailSender.send(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
                     session.theme().getTheme(Theme.Type.EMAIL), session.getContext().resolveLocale(user)));
 
         } catch (Exception e) {
@@ -113,7 +118,9 @@ public abstract class SsoEvent {
 
         authSession.setAction(AuthenticationSessionModel.Action.AUTHENTICATE.name());
         authSession.setProtocol(OIDCLoginProtocol.LOGIN_PROTOCOL);
-        String redirectUri = client.getRedirectUris().stream().findFirst().get();
+
+        String redirectUri = clientService.findMainRedirectUri(client.getId());
+
         authSession.setRedirectUri(redirectUri);
         authSession.setClientNote(OIDCLoginProtocol.REDIRECT_URI_PARAM, redirectUri);
         authSession.setClientNote(OIDCLoginProtocol.RESPONSE_TYPE_PARAM, OAuth2Constants.CODE);

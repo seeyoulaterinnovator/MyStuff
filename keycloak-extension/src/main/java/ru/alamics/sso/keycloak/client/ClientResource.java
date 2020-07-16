@@ -88,7 +88,7 @@ public class ClientResource {
 
         try {
             updateClientFromRep(rep, client, session);
-            service.saveMainRedirect(client.getId(), rep.getMainRedirectUri());
+            service.saveMainRedirectUri(client.getId(), rep.getMainRedirectUri());
             adminEvent.operation(OperationType.UPDATE).resourcePath(session.getContext().getUri()).representation(rep).success();
             updateAuthorizationSettings(rep);
             return Response.noContent().build();
