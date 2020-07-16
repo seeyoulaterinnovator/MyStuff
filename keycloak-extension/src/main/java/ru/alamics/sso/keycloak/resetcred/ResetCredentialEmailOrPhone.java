@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAuthenticator;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.FormMessage;
@@ -55,9 +56,15 @@ public class ResetCredentialEmailOrPhone extends AuthBaseClass {
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
         String username = authenticationSession.getAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME);
 
-        if (user == null && username.startsWith("+7")) {
-            username = username.replaceAll("\\D", "");
-            UserEntity userFind = userFindService.getUserByPhone(context.getRealm(), username);
+        //Если пользак есть в кейклоке, то автоматом по мылу он уже будет
+        if (user == null) {
+            //Если ввели вместо мыла телефон
+            UserEntity userFind = findUserByConvertUsernameToPhone(context.getRealm(), username);
+
+            if (userFind == null && checkRias(context)) {
+                return;
+            }
+
             if (userFind != null) {
                 user = context.getSession().users().getUserById(userFind.getId(), context.getSession().realms().getRealm(userFind.getRealmId()));
                 username = userFind.getUsername();
@@ -66,11 +73,7 @@ public class ResetCredentialEmailOrPhone extends AuthBaseClass {
             }
         }
 
-        if (checkRias(context)) {
-            return;
-        } else {
-            context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT));
-        }
+        context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT));
 
         authenticationSession.setAuthNote("RESET_TYPE", resetType.name());
         ResetFactory factory = new ResetFactoryImpl(this.session, context);
@@ -78,6 +81,15 @@ public class ResetCredentialEmailOrPhone extends AuthBaseClass {
         resetCredential.reset(user, username);
     }
 
+    private UserEntity findUserByConvertUsernameToPhone(RealmModel realm, final String username) {
+        if (!username.startsWith("+7")) {
+            return null;
+        }
+
+        final String phone = username.replaceAll("\\D", "");
+
+        return userFindService.getUserByPhone(realm, phone);
+    }
 
     @Override
     public void action(AuthenticationFlowContext context) {
