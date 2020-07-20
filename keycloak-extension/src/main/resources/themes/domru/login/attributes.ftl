@@ -1,10 +1,10 @@
 <#import "template.ftl" as layout>
 <@layout.registrationLayout; section>
     <#if section = "header">
-<#--        ${msg("termsTitle")}-->
+    <#--        ${msg("termsTitle")}-->
     <#elseIf section = "form">
         <div id="kc-terms-text">
-<#--            ${kcSanitize(msg("termsText"))?no_esc}-->
+            <#--            ${kcSanitize(msg("termsText"))?no_esc}-->
         </div>
 
         <div class="table-wrapper">
@@ -13,34 +13,34 @@
             <div id="post" class="table overflow-x-hidden overflow-y-auto">
                 <div class="trow theader">
                     <div class="org-cell">Организация</div>
-<#--                    <div class="org-cell">Уникальный номер</div>-->
+                    <#--                    <div class="org-cell">Уникальный номер</div>-->
                     <div class="role-cell">Роль пользователя</div>
                 </div>
                 <#list posts as post>
-                        <#assign firstRow = post?index == 0>
-                        <div class="${firstRow?then('selected', '')} trow titems">
-                            <div id="tomsId-${post?index}" style="display:none">${post.tomsId!}</div>
-                            <div id="postId-${post?index}" style="display:none">${post.id!}</div>
-                            <div id="tomsName-${post?index}" class="org-cell">
-                                <#if (post.organization?hasContent && post.organization?length > 1)>
-                                    ${post.organization}
-                                <#else>
-                                    ${post.tomsId}
-                                </#if>
-                            </div>
-                            <div id="roleName-${post?index}" class="role-cell">
-                                <#if (post.userRole.description?hasContent && post.userRole.description?length > 1)>
-                                    ${post.userRole.description}
-                                <#else>
-                                    ${post.userRole.name}
-                                </#if>
-                            </div>
+                    <#assign firstRow = post?index == 0>
+                    <div class="${firstRow?then('selected', '')} trow titems">
+                        <div id="tomsId-${post?index}" style="display:none">${post.tomsId!}</div>
+                        <div id="postId-${post?index}" style="display:none">${post.id!}</div>
+                        <div id="tomsName-${post?index}" class="org-cell">
+                            <#if (post.organization?hasContent && post.organization?length > 1)>
+                                ${post.organization}
+                            <#else>
+                                ${post.tomsId}
+                            </#if>
                         </div>
+                        <div id="roleName-${post?index}" class="role-cell">
+                            <#if (post.userRole.description?hasContent && post.userRole.description?length > 1)>
+                                ${post.userRole.description}
+                            <#else>
+                                ${post.userRole.name}
+                            </#if>
+                        </div>
+                    </div>
                 </#list>
             </div>
         </div>
 
-        <form class="form-actions" action="${url.loginAction}" method="POST">
+        <form class="form-actions" action="${url.loginAction}" method="POST" onsubmit="return selectCustomer(this)">
             <input style="visibility:hidden" type="text" name="roleName" id="roleName" value="${posts[0].roleName!}"/>
             <input style="visibility:hidden" type="text" name="tomsId" id="tomsId" value="${posts[0].tomsId!}"/>
             <input style="visibility:hidden" type="text" name="postId" id="postId" value="${posts[0].id!}"/>
@@ -59,8 +59,12 @@
                 };
                 var toInteger = function (value) {
                     var number = Number(value);
-                    if (isNaN(number)) { return 0; }
-                    if (number === 0 || !isFinite(number)) { return number; }
+                    if (isNaN(number)) {
+                        return 0;
+                    }
+                    if (number === 0 || !isFinite(number)) {
+                        return number;
+                    }
                     return (number > 0 ? 1 : -1) * Math.floor(Math.abs(number));
                 };
                 var maxSafeInteger = Math.pow(2, 53) - 1;
@@ -141,8 +145,36 @@
                 document.getElementById('tomsId').value = tomsId;
                 document.getElementById('postId').value = postId;
                 document.getElementById('kc-accept').click();
-                window.parent.postMessage('post-selected', '*');
             });
         });
+    </script>
+
+    <script>
+        function selectCustomer(f) {
+            try {
+                var xhr = new XMLHttpRequest();
+
+                var actionUrl = "${url.loginAction}";
+                actionUrl = actionUrl.replace(/&amp;/g, "&");
+
+                xhr.open('POST', actionUrl, false);
+
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                xhr.onloadend = function (response) {
+                    window.parent.postMessage('post-selected', '*');
+                    window.location.replace(response.currentTarget.responseURL);
+                }
+
+                xhr.send("tomsId=" + document.getElementById('tomsId').value +
+                    "&postId=" + document.getElementById('postId').value);
+
+            } catch (e) {
+                window.parent.postMessage('post-selected-error', e);
+                console.error(e);
+            }
+
+            return false;
+        }
     </script>
 </@layout.registrationLayout>
