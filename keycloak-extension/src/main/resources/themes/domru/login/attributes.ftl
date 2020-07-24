@@ -40,7 +40,7 @@
             </div>
         </div>
 
-        <form class="form-actions" action="${url.loginAction}" method="POST" onsubmit="return selectCustomer(this)">
+        <form class="form-actions" action="${url.loginAction}" method="POST"> <!-- onsubmit="return selectCustomer(this)"> -->
             <input style="visibility:hidden" type="text" name="roleName" id="roleName" value="${posts[0].roleName!}"/>
             <input style="visibility:hidden" type="text" name="tomsId" id="tomsId" value="${posts[0].tomsId!}"/>
             <input style="visibility:hidden" type="text" name="postId" id="postId" value="${posts[0].id!}"/>
@@ -144,7 +144,12 @@
                 document.getElementById('roleName').value = roleName;
                 document.getElementById('tomsId').value = tomsId;
                 document.getElementById('postId').value = postId;
-                document.getElementById('kc-accept').click();
+
+                window.parent.postMessage('post-selected', '*');
+
+                setTimeout(function(){
+                    document.getElementById('kc-accept').click();
+                },100);
             });
         });
     </script>
