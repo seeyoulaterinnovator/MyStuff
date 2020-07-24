@@ -119,18 +119,24 @@ public class UserSchedule {
         List<RealmEntity> realms = policyRepository.findRealmWithPolicy(PasswordPolicy.FORCE_EXPIRED_ID);
 
         for (RealmEntity realm : realms) {
-            String passwordPolicy = realm.getPasswordPolicy();
-            if (Objects.nonNull(passwordPolicy)) {
-                int charNumbs = PasswordPolicy.FORCE_EXPIRED_ID.length() + 3;
-                int index = passwordPolicy.indexOf(PasswordPolicy.FORCE_EXPIRED_ID);
-                if (index >= 0) {
-                    String expirePolicy = passwordPolicy.substring(index, index + charNumbs);
-                    int expiresDays = Integer.parseInt(expirePolicy.substring(expirePolicy.indexOf('(') + 1, expirePolicy.lastIndexOf(')')));
-                    if (expiresDays != -1) {
-                        long timeToExpire = TimeUnit.DAYS.toMillis(expiresDays);
-                        policyRepository.findExpiredPasswords(realm.getId(), timeToExpire);
+            try {
+                String passwordPolicy = realm.getPasswordPolicy();
+                if (Objects.nonNull(passwordPolicy)) {
+                    int charNumbs = PasswordPolicy.FORCE_EXPIRED_ID.length() + 3;
+                    int index = passwordPolicy.indexOf(PasswordPolicy.FORCE_EXPIRED_ID);
+                    if (index >= 0) {
+                        String expirePolicy = passwordPolicy.substring(index, index + charNumbs);
+                        if (expirePolicy.indexOf('(') > -1 && expirePolicy.indexOf(')') > -1) {
+                            int expiresDays = Integer.parseInt(expirePolicy.substring(expirePolicy.indexOf('(') + 1, expirePolicy.lastIndexOf(')')));
+                            if (expiresDays != -1) {
+                                long timeToExpire = TimeUnit.DAYS.toMillis(expiresDays);
+                                policyRepository.findExpiredPasswords(realm.getId(), timeToExpire);
+                            }
+                        }
                     }
                 }
+            } catch (Exception e) {
+                log.error(DEBUG_STR, e);
             }
         }
         log.debug("stop: {}", DEBUG_STR);
