@@ -44,16 +44,19 @@ import static ru.alamics.sso.registration.model.UserConstants.*;
 public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     private static final String HOME_PAGE = "https://newlkb2b.domru.ru";
 
+    private ClientService clientService;
+
     public SsoFreeMarkerLoginForm(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
 
         attributes.put("redirectUrl", getRedirectUrl());
+
+        clientService = (ClientService) Lookup.lookup(ClientService.class);
     }
 
     private String getRedirectUrl() {
-        ClientService clientService = (ClientService) Lookup.lookup(ClientService.class);
 
-        String redirectUri = clientService.findMainRedirectUri(client.getId());
+        String redirectUri = clientService.findMainRedirectUri(client);
 
         if (redirectUri != null) {
             return redirectUri;

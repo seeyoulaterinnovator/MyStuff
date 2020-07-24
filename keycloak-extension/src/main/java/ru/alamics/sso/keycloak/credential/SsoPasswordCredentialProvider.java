@@ -32,12 +32,12 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
     private final static String CLIENT_ID = "lkb2b";
     private final static int VALIDITY_IN_SECS = 259200;
 
-    private final ClientService service;
+    private final ClientService clientService;
 
     public SsoPasswordCredentialProvider(KeycloakSession session) {
         super(session);
 
-        service = (ClientService) Lookup.lookup(ClientService.class);
+        clientService = (ClientService) Lookup.lookup(ClientService.class);
     }
 
     @Override
@@ -87,7 +87,7 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
         authSession.setAction(AuthenticationSessionModel.Action.AUTHENTICATE.name());
         authSession.setProtocol(OIDCLoginProtocol.LOGIN_PROTOCOL);
 
-        String redirectUri = service.findMainRedirectUri(client.getId());
+        String redirectUri = clientService.findMainRedirectUri(client);
 
         authSession.setRedirectUri(redirectUri);
         authSession.setClientNote(OIDCLoginProtocol.REDIRECT_URI_PARAM, redirectUri);

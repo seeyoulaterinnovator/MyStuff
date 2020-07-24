@@ -34,12 +34,12 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class ResetCredentialEmail extends ResetCredential {
 
-    private final ClientService service;
+    private final ClientService clientService;
 
     public ResetCredentialEmail(KeycloakSession session, AuthenticationFlowContext context) {
         super(session, context);
 
-        this.service = (ClientService) Lookup.lookup(ClientService.class);
+        this.clientService = (ClientService) Lookup.lookup(ClientService.class);
     }
 
     @Override
@@ -116,7 +116,7 @@ public class ResetCredentialEmail extends ResetCredential {
 
     private String getRedirectUrl(ClientModel client) {
 
-        String redirectUrl = service.findMainRedirectUri(client.getId());
+        String redirectUrl = clientService.findMainRedirectUri(client);
 
         if (redirectUrl != null)
             return redirectUrl;

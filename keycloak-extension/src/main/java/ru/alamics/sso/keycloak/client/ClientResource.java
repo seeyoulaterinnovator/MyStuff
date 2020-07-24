@@ -66,7 +66,7 @@ public class ClientResource {
 
         representation.setAccess(auth.clients().getAccess(client));
 
-        representation.setMainRedirectUri(service.findMainRedirectUri(client.getId()));
+        representation.setMainRedirectUri(service.getMainRedirectUri(client.getId()));
 
         return representation;
     }

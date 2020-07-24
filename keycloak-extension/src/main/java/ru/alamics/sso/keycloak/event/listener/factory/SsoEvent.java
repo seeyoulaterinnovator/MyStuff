@@ -119,7 +119,7 @@ public abstract class SsoEvent {
         authSession.setAction(AuthenticationSessionModel.Action.AUTHENTICATE.name());
         authSession.setProtocol(OIDCLoginProtocol.LOGIN_PROTOCOL);
 
-        String redirectUri = clientService.findMainRedirectUri(client.getId());
+        String redirectUri = clientService.findMainRedirectUri(client);
 
         authSession.setRedirectUri(redirectUri);
         authSession.setClientNote(OIDCLoginProtocol.REDIRECT_URI_PARAM, redirectUri);
