@@ -2,12 +2,14 @@ package ru.alamics.sso.client;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.ClientModel;
+import org.keycloak.models.jpa.entities.ClientEntity;
 import ru.alamics.sso.jpa.entity.MainRedirectUri;
 import ru.alamics.sso.jpa.repository.ClientRepository;
 import ru.alamics.sso.util.Util;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import java.util.Set;
 
 @Slf4j
 @Stateless
@@ -27,25 +29,46 @@ public class ClientService {
 
         if (mru == null) {
 
-            for (String rediUrl : client.getRedirectUris()) {
+            mru = findRedirectUri(client.getRedirectUris());
+        }
 
-                if (rediUrl != null) {
+        return mru;
+    }
 
-                    rediUrl = rediUrl.replaceAll("\\*", "");
+    public String findMainRedirectUri(ClientEntity client) {
 
-                    if (rediUrl.endsWith("/")) {
-                        rediUrl = rediUrl.substring(0, rediUrl.length() - 1);
-                    }
+        String mru = getMainRedirectUri(client.getId());
 
-                    if (!Util.isEmpty(rediUrl)) {
-                        mru = rediUrl;
-                        break;
-                    }
+        if (mru == null) {
+
+            mru = findRedirectUri(client.getRedirectUris());
+        }
+
+        return mru;
+    }
+
+    private String findRedirectUri(Set<String> redirectUris) {
+
+        String res = null;
+
+        for (String rediUrl : redirectUris) {
+
+            if (rediUrl != null) {
+
+                rediUrl = rediUrl.replaceAll("\\*", "");
+
+                if (rediUrl.endsWith("/")) {
+                    rediUrl = rediUrl.substring(0, rediUrl.length() - 1);
+                }
+
+                if (!Util.isEmpty(rediUrl)) {
+                    res = rediUrl;
+                    break;
                 }
             }
         }
 
-        return mru;
+        return res;
     }
 
     public void saveMainRedirectUri(String clientId, String uri) {

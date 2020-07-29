@@ -13,6 +13,7 @@ import org.keycloak.models.jpa.entities.ClientEntity;
 import org.keycloak.models.jpa.entities.RealmEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.util.JsonSerialization;
+import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.emailer.EmailModel;
 import ru.alamics.sso.emailer.EmailSender;
 import ru.alamics.sso.jpa.entity.AutoLockNotification;
@@ -64,6 +65,8 @@ public class UserSchedule {
     private SettingsService settingsService;
     @Resource
     private TimerService timerService;
+    @EJB
+    private ClientService сlientService;
 
     @PostConstruct
     private void init() {
@@ -212,9 +215,12 @@ public class UserSchedule {
     }
 
     private String getClientLink(ClientEntity client) {
-        if (client != null) {
-            return client.getRedirectUris().stream().findFirst().get();
-        }
+
+        String uri = сlientService.findMainRedirectUri(client);
+
+        if (uri != null)
+            return uri;
+
         return "";
     }
 
