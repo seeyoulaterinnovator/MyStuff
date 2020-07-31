@@ -41,7 +41,8 @@ public class PolicyRepository {
                 "                                           from AUTO_LOCK_NOTIFICATION aln\n" +
                 "                                           where aln.USER_ID = cred.USER_ID\n" +
                 "                                             and aln.TYPE = 'PASSWORD_EXPIRED'\n" +
-                "                                             and aln.STATUS = 'SENT')) * 1000)\n" +
+                "                                             and aln.STATUS = 'SENT'\n" +
+                "                                           limit 1)) * 1000)\n" +
                 "  and ue.REALM_ID = :realm\n" +
                 " LIMIT 100 ")
                 .setParameter("millis", millis)
