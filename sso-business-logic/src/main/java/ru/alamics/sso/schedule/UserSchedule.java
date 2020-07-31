@@ -123,12 +123,13 @@ public class UserSchedule {
 
         for (RealmEntity realm : realms) {
             try {
-                String passwordPolicy = realm.getPasswordPolicy();
+                String passwordPolicy = realm.getPasswordPolicy(); // forceExpiredPasswordChange(365) and passwordBlacklist(black_list_password.txt)
                 if (Objects.nonNull(passwordPolicy)) {
-                    int charNumbs = PasswordPolicy.FORCE_EXPIRED_ID.length() + 3;
+                    //int charNumbs = PasswordPolicy.FORCE_EXPIRED_ID.length() + 3;
                     int index = passwordPolicy.indexOf(PasswordPolicy.FORCE_EXPIRED_ID);
                     if (index >= 0) {
-                        String expirePolicy = passwordPolicy.substring(index, index + charNumbs);
+                        int endOfPassPolicyIndex = passwordPolicy.indexOf(")", index);
+                        String expirePolicy = passwordPolicy.substring(index, endOfPassPolicyIndex + 1);
                         if (expirePolicy.indexOf('(') > -1 && expirePolicy.indexOf(')') > -1) {
                             int expiresDays = Integer.parseInt(expirePolicy.substring(expirePolicy.indexOf('(') + 1, expirePolicy.lastIndexOf(')')));
                             if (expiresDays != -1) {
