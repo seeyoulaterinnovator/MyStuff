@@ -104,7 +104,7 @@ public class ApplicationProperties {
         log.info("Initializing application properties from file finished:{}", fileProperties.toString());
     }
 
-    @Schedule(minute = "*/10", persistent = false)
+    @Schedule(hour = "*", minute = "*/10", persistent = false)
     private void initDbProperties() {
         Properties tempProp = new Properties();
         tempProp.putAll(propertyRepository.findAll().stream()
