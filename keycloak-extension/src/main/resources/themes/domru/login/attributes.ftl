@@ -8,7 +8,11 @@
         </div>
 
         <div class="table-wrapper">
+            <#if posts?size gt 1>
             <h1 class="title">Выбрать организацию</h1>
+            <#else>
+            <h1 class="title" style="visibility: hidden">Выбрать организацию</h1>
+            </#if>
 
             <div id="post" class="table overflow-x-hidden overflow-y-auto">
                 <div class="trow theader">
