@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
@@ -26,6 +27,9 @@ public class CitiesResource {
     private static String url;
 
     private static ReentrantLock lock = new ReentrantLock();
+
+    private static final long CACHE_TIME = 60 * 60 * 1000; // 1h
+    private static volatile AtomicLong updated = new AtomicLong(0);
 
     private static List<CityMigration> cityList = new ArrayList<>();
 
@@ -44,8 +48,12 @@ public class CitiesResource {
     @NoCache
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     public Response getCities() {
-        if (cityList.isEmpty()) {
+
+        long now = System.currentTimeMillis();
+
+        if (cityList.isEmpty() || now > updated.get() + CACHE_TIME) {
             lock.lock();
+            updated.set(now);
             try {
                 if (cityList.isEmpty()) {
                     cityList = SimpleHttp.doGet(url, session).asJson(new TypeReference<List<CityMigration>>() {
