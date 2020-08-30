@@ -1,4 +1,4 @@
-package ru.alamics.sso.user.model;
+package ru.alamics.sso.user.filetype;
 
 import com.opencsv.*;
 

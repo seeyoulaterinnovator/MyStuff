@@ -5,7 +5,7 @@ import org.keycloak.models.UserModel;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.user.model.DownloadUserRequest;
-import ru.alamics.sso.user.model.FileModel;
+import ru.alamics.sso.user.filetype.FileModel;
 import ru.alamics.sso.user.model.ImportResponse;
 import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.util.validator.NotValidException;

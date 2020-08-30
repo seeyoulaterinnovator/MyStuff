@@ -16,22 +16,18 @@ public class ImportResponse {
     private AtomicInteger tbapiErrors;
     private AtomicInteger tbapiSuccess;
     private AtomicInteger createdUsers;
-    private List<Map<String, Object>> createdUserIds;
-    private List<Map<String, Object>> errors;
+    private List<Map<String, Object>> createdUserIds = new LinkedList<>();
+    private List<Map<String, Object>> errors = new LinkedList<>();
 
     public void addCreatedUserIds(String key, Object value){
-        if (createdUserIds == null){
-            createdUserIds = new LinkedList<>();
-        }
+
         Map<String, Object> map = new HashMap<>();
         map.put(key,value);
         createdUserIds.add(map);
     }
 
     public void addError(Map<String, Object> error){
-        if (errors == null){
-            errors = new LinkedList<>();
-        }
+
         errors.add(error);
     }
 }

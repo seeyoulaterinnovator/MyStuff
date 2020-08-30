@@ -1,4 +1,4 @@
-package ru.alamics.sso.user.model;
+package ru.alamics.sso.user.filetype;
 
 import java.io.IOException;
 import java.io.InputStream;

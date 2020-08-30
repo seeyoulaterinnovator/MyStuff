@@ -1,8 +1,9 @@
-package ru.alamics.sso.user.model;
+package ru.alamics.sso.user.filetype;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import ru.alamics.sso.user.filetype.FileModel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

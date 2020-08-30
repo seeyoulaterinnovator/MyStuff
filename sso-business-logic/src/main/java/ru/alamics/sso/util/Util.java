@@ -86,4 +86,19 @@ public class Util {
                 }).findFirst().get();
     }
 
+    public static String getFileExtension(String contentDisposition) {
+        String finalFileName = getFileName(contentDisposition);
+        return finalFileName.substring(finalFileName.lastIndexOf('.') + 1);
+    }
+
+    public static String getFileName(String contentDisposition) {
+        String[] contentList = contentDisposition.split(";");
+        for (String filename : contentList) {
+            if ((filename.trim().startsWith("filename"))) {
+                String[] name = filename.split("=");
+                return name[1].trim().replaceAll("\"", "");
+            }
+        }
+        return "unknown";
+    }
 }
