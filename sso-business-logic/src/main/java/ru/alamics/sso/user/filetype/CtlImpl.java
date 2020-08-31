@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class CsvImpl implements FileModel {
+public class CtlImpl implements FileModel  {
 
     private static final int COUNT_ROW_INDENT = 2;
     public static final String UTF8_BOM = "\uFEFF";
@@ -22,9 +22,11 @@ public class CsvImpl implements FileModel {
 
     private String ext;
 
-    public CsvImpl(String fileExtension, InputStream inputStream) throws IOException {
-        CSVParser parser = new CSVParserBuilder().withSeparator(';').withIgnoreLeadingWhiteSpace(true).build();
+    public CtlImpl(String fileExtension, InputStream inputStream) throws IOException {
+        CSVParser parser = new CSVParserBuilder().withSeparator(';').withIgnoreLeadingWhiteSpace(true).withIgnoreQuotations(true).build();
         csvReader = new CSVReaderBuilder(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).withCSVParser(parser).build();
+
+        // TODO ???
         this.rows = csvReader.readAll();
         rows.removeAll(rows.stream().limit(COUNT_ROW_INDENT).skip(1).collect(Collectors.toList()));
 
@@ -36,7 +38,7 @@ public class CsvImpl implements FileModel {
         ext = fileExtension;
     }
 
-    public CsvImpl(String fileExtension) {
+    public CtlImpl(String fileExtension) {
         byteArrayOutputStream = new ByteArrayOutputStream();
         csvWriter = new CSVWriter(new OutputStreamWriter(byteArrayOutputStream, StandardCharsets.UTF_8),';',
                 CSVWriter.NO_QUOTE_CHARACTER,
@@ -48,10 +50,8 @@ public class CsvImpl implements FileModel {
 
     @Override
     public String[] getHeaders() {
-        if (rows == null || rows.isEmpty()) {
-            return null;
-        }
-        return rows.get(0);
+
+        return null;
     }
 
     @Override

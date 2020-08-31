@@ -38,4 +38,7 @@ public class ImportUsersDataEntity {
     private String userId;
     @Column(name = "errors")
     private String errors;
+
+    // not column
+    private String cleanPassword;
 }

@@ -2,16 +2,18 @@ package ru.alamics.sso.user;
 
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.resteasy.spi.BadRequestException;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.provider.ProviderFactory;
+import org.keycloak.services.ErrorResponseException;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
+import org.keycloak.services.resources.admin.AdminRoot;
+import org.keycloak.storage.ReadOnlyException;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
 import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
@@ -35,8 +37,10 @@ import ru.alamics.sso.util.validator.NotValidException;
 import ru.alamics.sso.util.validator.PhoneValidator;
 
 import javax.activation.UnsupportedDataTypeException;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.*;
 
 @Slf4j
@@ -103,11 +107,8 @@ public class UserServiceImpl implements UserService {
         log.info("Start upload users");
 
         FileModel file = FileFactory.createFileModel(inputStream, Util.getFileExtension(content));
-        if (file == null) {
-            throw new UnsupportedDataTypeException("Unsupported file format!");
-        }
 
-        ImportFormat impF = new StandartImportFormat();
+        ImportFormat impF = FileFactory.getImportFormat(file);
         impF.checkStructure(file);
         List<ImportUsersDataEntity> dataList = impF.getDataList(file);
 
@@ -115,6 +116,8 @@ public class UserServiceImpl implements UserService {
         ImportUsersReportEntity importUsersReport = importUsersReportService.createImportUsersReport(realm, Util.getFileName(content), dataList);
 
         importService.createImportUsers(importUsersReport);
+
+        doGeneratePasswords(importUsersReport);
 
         ImportResponse importResponse = UserMapper.toImportUsersReportEntity(importUsersReport);
 
@@ -128,12 +131,9 @@ public class UserServiceImpl implements UserService {
 
         // different file types
         FileModel file = FileFactory.createFileModel(inputStream, Util.getFileExtension(content));
-        if (file == null) {
-            throw new UnsupportedDataTypeException("Unsupported file format!");
-        }
 
         // different file format
-        ImportFormat impF = new StandartImportFormat();
+        ImportFormat impF = FileFactory.getImportFormat(file);
         impF.checkStructure(file);
         List<ImportUsersDataEntity> dataList = impF.getDataList(file);
 
@@ -141,6 +141,33 @@ public class UserServiceImpl implements UserService {
         importUsersReportService.createImportUsersReportAsync(realm, Util.getFileName(content), dataList);
 
         log.info("Upload import users file success");
+    }
+
+    // TODO to utils
+    // TODO persist new errors
+    private void doGeneratePasswords(ImportUsersReportEntity importUsersReport) {
+
+        for (ImportUsersDataEntity data : importUsersReport.getImportUserData()) {
+
+            if (data.getUserId() != null && data.getCleanPassword() != null) {
+
+                UserModel user = session.users().getUserById(data.getUserId(), realm);
+                UserCredentialModel cred = UserCredentialModel.password(data.getCleanPassword(), true); // TODO adminRequest ?
+                try {
+                    session.userCredentialManager().updateCredential(realm, user, cred);
+
+                } catch (IllegalStateException ise) {
+                    log.error("", ise);
+                    data.setErrors(data.getErrors() + "Resetting to N old passwords is not allowed.");
+                } catch (ReadOnlyException mre) {
+                    log.error("", mre);
+                    data.setErrors(data.getErrors() + "Can't reset password as account is read only");
+                } catch (ModelException e) {
+                    log.error("", e);
+                    data.setErrors(data.getErrors() + e.getMessage());
+                }
+            }
+        }
     }
 
     @Override

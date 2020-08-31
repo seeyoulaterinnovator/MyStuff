@@ -14,7 +14,7 @@ public class StandartImportFormat implements ImportFormat {
 
     public void checkStructure(FileModel file) throws FileServiceException {
         String[] headers = file.getHeaders();
-        if (headers.length != 7 || file.getCountRows() < 2) {
+        if (headers == null || headers.length != 7 || file.getCountRows() < 2) {
             throw new FileServiceException("File Structure is not valid! Count columns not valid or data is empty!");
         }
         checkHeaders(headers);

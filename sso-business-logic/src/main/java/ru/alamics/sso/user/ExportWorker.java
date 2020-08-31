@@ -35,9 +35,6 @@ public class ExportWorker {
     public byte[] exportUsers(DownloadUserRequest userRequest) throws IOException {
 
         FileModel file = FileFactory.createFileModel(userRequest.getType());
-        if (file == null) {
-            throw new UnsupportedDataTypeException("Unsupported file format!");
-        }
 
         List<UserSearchDto> userDto = userFindService.getUsersByParametersWithoutGrouping(
                 realm.getName(), null, null, null,
@@ -56,9 +53,7 @@ public class ExportWorker {
     public FileModel downloadUsersByImportReportId(String importId) throws IOException {
         ImportUsersReportEntity importUsersReport = importUsersReportService.findImportUsersReportByImportId(importId);
         FileModel file = FileFactory.createFileModel(importUsersReport.getName().substring(importUsersReport.getName().lastIndexOf(".") + 1));
-        if (file == null) {
-            throw new UnsupportedDataTypeException("Unsupported file format!");
-        }
+
         List<String> userParameterNames = UserServiceUtil.getUserParameterNames(UserParameter.values());
         List<String> finishParameterNames = userParameterNames.stream().skip(1).limit(userParameterNames.size() - 2).collect(Collectors.toList());
         finishParameterNames.addAll(Arrays.asList("Статус импорта", "Ошибки"));

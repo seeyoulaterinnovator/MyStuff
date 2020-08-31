@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface FileModel {
+
     String[] getHeaders();
 
     List<String[]> getRows();
@@ -13,4 +14,6 @@ public interface FileModel {
     byte[] save() throws IOException;
 
     int getCountRows();
+
+    String getFileExtension();
 }
