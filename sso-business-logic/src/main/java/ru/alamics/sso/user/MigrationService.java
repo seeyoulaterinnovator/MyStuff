@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.common.util.Time;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.jpa.AdminEventEntity;
-import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.*;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
@@ -13,16 +12,12 @@ import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.jpa.repository.*;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
+import ru.alamics.sso.registration.dto.ExternalSystemRoleDto;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserPostService;
-import ru.alamics.sso.user.filetype.FileFactory;
 import ru.alamics.sso.user.mapper.UserMapper;
-import ru.alamics.sso.user.model.ImportResponse;
-import ru.alamics.sso.user.model.UserRequest;
-import ru.alamics.sso.util.validator.EmailValidator;
-import ru.alamics.sso.util.validator.NotValidException;
-import ru.alamics.sso.util.validator.PhoneValidator;
+import ru.alamics.sso.util.validator.*;
 
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
@@ -32,15 +27,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
-/**
-    imports users from files
-
-    same as UserExtService
-*/
 @Slf4j
 @Stateless
 @LocalBean
-public class ImportService {
+public class MigrationService {
+
+    private final static Long DEFAULT_ROLE_ID = 1L;   //Соответствует роли LPR // TODO но это не точно
 
     @EJB
     private ImportUsersReportRepository importUsersReportRepository;
@@ -54,47 +46,55 @@ public class ImportService {
     private AdminEventRepository adminEventRepository;
     @EJB
     private UserPostService userPostService;
-    @EJB
-    private MigrationService migrationService;
 
+    //
     public void createImportUsers(ImportUsersReportEntity importUsersReport) {
 
-        if (FileFactory.CTL.equalsIgnoreCase(importUsersReport.getFiletype())) {
-            migrationService.createImportUsers(importUsersReport);
-        } else {
-            importUsers(importUsersReport);
-        }
-    }
-
-    private void importUsers(ImportUsersReportEntity importUsersReport) {
         log.info("importing users from file {} in progress", importUsersReport.getName());
+        long migrationStarts = new Date().getTime();
+
         AtomicInteger createdUsers = new AtomicInteger();
         AtomicInteger countClones = new AtomicInteger();
+
         for (ImportUsersDataEntity o : importUsersReport.getImportUserData()) {
+            UserEntity user = null;
+            boolean modified = false;
             try {
                 o.setEmail(UserServiceUtil.doCleanMail(o.getEmail()));
                 o.setPhone(UserServiceUtil.doCleanPhone(o.getPhone()));
 
                 o.setErrors(null);
-                checkImportUser(importUsersReport.getRealmId(), o.getEmail(), o.getPhone());
-                UserEntity user = createUser(importUsersReport.getRealmId(), o);
-                createdUsers.getAndIncrement();
-                o.setCreated(true);
-                o.setUserId(user.getId());
-                if (o.getTomsId() == null || o.getTomsId().isEmpty()) {
-                    throw new NotFoundException("TomsId is not exist");
+
+                user = checkImportUser(importUsersReport.getRealmId(), o.getEmail(), o.getPhone());
+                if (user == null) {
+                    user = createUser(importUsersReport.getRealmId(), o);
+                    createdUsers.getAndIncrement();
+                    o.setCreated(true);
+                    modified = true;
                 }
-                addUserPost(user, o);
-            } catch (FoundException e) {
-                List<Object> errors = new LinkedList<>();
-                e.getResult().forEach((k, v) -> {
-                    errors.add(v);
-                });
-                o.setErrors(errors.toString().substring(1, errors.toString().length() - 1));
-                countClones.getAndIncrement();
-            } catch (NotFoundException | NotValidException | FoundUserPostException e) {
+                o.setUserId(user.getId());
+
+                checkToms(o);
+                boolean modif = addUserPost(user, o);
+                if (modif) {
+                    modified = true;
+                }
+
+            } catch (AllNotValidException av) {
+
+                o.setErrors(av.getMessageList().toString());
+                log.error("Importing user data is failed. {}", av.getMessageList().toString());
+
+            } catch (NotFoundException | NotValidException e) {
                 o.setErrors(e.getMessage());
                 log.error("Importing user data is failed. {}", e.getMessage());
+            } finally {
+
+                if (user != null && modified) {
+                    addMigrationAttribute(user, migrationStarts);
+                } else if (!modified) {
+                    countClones.incrementAndGet();
+                }
             }
         }
         importUsersReport.setCountClones(countClones.intValue());
@@ -109,53 +109,55 @@ public class ImportService {
                 importUsersReport.getCountClones()));
     }
 
-    private void checkImportUser(String realmId, String email, String phone) throws FoundException, NotValidException {
+    private void addMigrationAttribute(UserEntity user, long migrationStarts) {
 
-        EmailValidator.validate(email);
-        PhoneValidator.validate(phone);
+        String value = "migration" + migrationStarts;
 
-        FoundException foundException = new FoundException();
-        try {
-            checkOnExistUserByPhone(phone);
-        } catch (FoundException e) {
-            foundException.addResult("error1", e.getMessage());
-        }
-        try {
-            checkOnExistUserByEmailAndUsername(realmId, email);
-        } catch (FoundException e) {
-            foundException.addResult("error2", e.getMessage());
-        }
+        UserAttributeEntity attributeEntity = new UserAttributeEntity();
+        attributeEntity.setId(UUID.randomUUID().toString());
+        attributeEntity.setName(value);
+        attributeEntity.setUser(user);
+        attributeEntity.setValue(value);
+        userRepository.saveAttributes(attributeEntity);
+    }
 
-        if (foundException.getResult() != null) {
-            throw foundException;
+    private UserEntity checkImportUser(String realmId, String email, String phone) throws AllNotValidException {
+
+        ValidatorBuilder vb = new ValidatorBuilder().setEmail(email).setPhone(phone).build();
+        StringValidator.process(vb);
+
+        UserEntity user = getUserByPhone(phone);
+        if (user != null)
+            return user;
+
+        return getUserByEmailAndUsername(realmId, email);
+    }
+
+    private void checkToms(ImportUsersDataEntity o) throws NotFoundException {
+
+        if (o.getTomsId() == null || o.getTomsId().isEmpty()) {
+            throw new NotFoundException("TomsId is not exist");
         }
     }
 
-    private void checkOnExistUserByPhone(String phone) throws FoundException {
-        UserEntity user = userRepository.getFirstUserByPhone(phone);
-
-        if (user != null) {
-            log.error("User exists with same phone {}", phone);
-            throw new FoundException("User exists with same phone").addResult("userId", user.getId());
-        }
+    private UserEntity getUserByPhone(String phone) {
+        return userRepository.getFirstUserByPhone(phone);
     }
 
-    private void checkOnExistUserByEmailAndUsername(String realmId, String email) throws FoundException {
+    private UserEntity getUserByEmailAndUsername(String realmId, String email) {
+
         // Double-check duplicated username and email here due to federation
         UserEntity user = userRepository.getFirstUserByEmail(realmId, email);
         if (user != null) {
-            log.error("User exists with same email {}", email);
-            throw new FoundException("User exists with same email").addResult("userId", user.getId());
+            return user;
         }
 
-        user = userRepository.getFirstUserByUsername(realmId, email);
-        if (user != null) {
-            log.error("User exists with same username {}", email);
-            throw new FoundException("User exists with same username").addResult("userId", user.getId());
-        }
+        return userRepository.getFirstUserByUsername(realmId, email);
     }
 
+    //
     private UserEntity createUser(String realmId, ImportUsersDataEntity importUserData) {
+
         UserEntity user = new UserEntity();
         user.setCreatedTimestamp(System.currentTimeMillis());
         user.setUsername(importUserData.getEmail().toLowerCase());
@@ -164,6 +166,11 @@ public class ImportService {
         user.setRealmId(realmId);
         user.setEmailVerified(false);
         user.setEnabled(false);
+        if (importUserData.getCleanPassword() != null) {
+            user.setEmailVerified(true);
+            user.setEnabled(true);
+        }
+
         user = userRepository.save(user);
 
         RealmEntity realm = realmRepository.findRealmEntityById(realmId);
@@ -190,9 +197,11 @@ public class ImportService {
         attributeEntity.setUser(user);
         attributeEntity.setValue(importUserData.getPhone());
         userRepository.saveAttributes(attributeEntity);
+
         return user;
     }
 
+    //
     private void createAdminEvent(OperationType operationType, ImportUsersReportEntity report, String realmId) {
         AdminEventEntity adminEvent = new AdminEventEntity();
         adminEvent.setTime(Time.toMillis(Time.currentTime()));
@@ -204,39 +213,28 @@ public class ImportService {
         adminEventRepository.save(adminEvent);
     }
 
-    private void addUserPost(UserEntity user, ImportUsersDataEntity userImport) throws NotFoundException, FoundUserPostException, NotValidException {
+    private boolean addUserPost(UserEntity user, ImportUsersDataEntity userImport) throws NotFoundException, NotValidException {
+
+        boolean modified = false;
+
         UserPostRequest userPostRequest = new UserPostRequest();
         userPostRequest.setUserId(user.getId());
         userPostRequest.setTomsId(userImport.getTomsId());
         userPostRequest.setDmpId(userImport.getDmpId());
 
-        userPostRequest.setRoleId(userPostService.getUserPostRole(userImport.getRole()));
-        UserPostResponse userPostResponse = userPostService.save(userPostRequest);
+        userPostRequest.setRoleId(DEFAULT_ROLE_ID);
 
-        addSystemRoles(userImport, userPostResponse.getId());
-    }
-
-    private void addSystemRoles(ImportUsersDataEntity userImport, String userPostId) throws javassist.NotFoundException {
-        if (userImport.getSystems() == null || userImport.getSystems().isEmpty()) {
-            return;
+        String postId = null;
+        try {
+            UserPostResponse userPostResponse = userPostService.save(userPostRequest);
+            postId = userPostResponse.getId();
+            modified = true;
+        } catch (FoundUserPostException e) {
+            postId = e.getPostId();
         }
 
-        List<String> systems = Arrays.asList(userImport.getSystems().replaceAll("\\s", "").split(","));
-        if (!systems.isEmpty()) {
-            List<String> errorSystemNames = new LinkedList<>();
+        userPostService.addAllSystemRole(postId);
 
-            for (String sysName : systems) {
-                try {
-                    userPostService.addSystemRole(UserMapper.toExternalSystemRoleRequest(userPostId,
-                            userPostService.getExternalSystemRoleId(sysName)));
-                } catch (NotFoundException e) {
-                    errorSystemNames.add(sysName);
-                }
-            }
-
-            if (!errorSystemNames.isEmpty()) {
-                throw new NotFoundException(String.format("Not found roles for systems: systems=%s", errorSystemNames.toString()));
-            }
-        }
+        return modified;
     }
 }

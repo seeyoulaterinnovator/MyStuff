@@ -156,7 +156,7 @@ public class UserPostResource {
     @NoCache
     public Response getAllSystemRoles() {
         return JsonResponse.success()
-                .addResult("system-roles", userPostService.getExternalSystemRoles())
+                .addResult("system-roles", userPostService.getAllExternalSystemRoleDTO())
                 .build();
     }
 

@@ -522,7 +522,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         })
     };
 
-    $scope.importFileCSV = function (files) {
+    $scope.importFileCommon = function (files) {
         var formData = new FormData();
         var file = files[0];
         formData.append('file', file);
@@ -530,7 +530,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             transformRequest: angular.identity,
             headers: {
                 'Content-Type': undefined,
-                'Content-Disposition': `form-data; name="file"; filename="import.csv"`
+                'Content-Disposition': `form-data; name="file"; filename=${file.name}`
             }
         }).then(response => {
             var resp = angular.fromJson(response).data.results['import-report'];
@@ -2432,7 +2432,7 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
         });
     };
 
-    $scope.importFile = function (files) {
+    $scope.importFileAsync = function (files) {
         var formData = new FormData();
         var file = files[0];
         formData.append('file', file);

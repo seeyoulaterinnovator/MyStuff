@@ -39,6 +39,7 @@ public class ImportUsersDataEntity {
     @Column(name = "errors")
     private String errors;
 
-    // not column
+    // not a column
+    @Transient
     private String cleanPassword;
 }

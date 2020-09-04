@@ -16,7 +16,7 @@ public abstract class EmailValidator {
         Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(emailStr);
 
         if (!matcher.find()) {
-            throw new NotValidException(String.format("Email не прошел валидацию: email=%s", emailStr));
+            throw new NotValidException(EValidator.EMAIL, String.format("Email не прошел валидацию: email=%s", emailStr));
         }
     }
 }

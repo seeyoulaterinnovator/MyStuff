@@ -25,7 +25,6 @@ import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.util.Util;
 import ru.alamics.sso.util.validator.NotValidException;
 
-import javax.ejb.LocalBean;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -119,6 +118,9 @@ public class UserExtService {
     }
 
     public UserModel createUser(UserRequest request, boolean bss) throws FoundException, NotFoundException, FoundUserPostException, NotValidException {
+
+        request.setEmail(UserServiceUtil.doCleanMail(request.getEmail()));
+        request.setPhone(UserServiceUtil.doCleanPhone(request.getPhone()));
 
         FoundException exception = null;
 
@@ -231,9 +233,6 @@ public class UserExtService {
 
         UserPostResponse userPostResponse = userPostFacade.save(userPostRequest);
 
-        for (ExternalSystemRoleDto sysRole : userPostFacade.getUserPostService().getExternalSystemRoles()) {
-
-            userPostFacade.getUserPostService().addSystemRole(UserMapper.toExternalSystemRoleRequest(userPostResponse.getId(), sysRole.getId()));
-        }
+        userPostFacade.getUserPostService().addAllSystemRole(userPostResponse.getId());
     }
 }

@@ -59,4 +59,18 @@ public class UserServiceUtil {
         }
         return parameters;
     }
+
+    public static String doCleanMail(String mail) {
+
+        if (mail == null) return null;
+
+        return mail.toLowerCase().trim();
+    }
+
+    public static String doCleanPhone(String phone) {
+
+        if (phone == null) return null;
+
+        return phone.toLowerCase().trim();
+    }
 }

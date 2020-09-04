@@ -152,7 +152,7 @@ public class UserServiceImpl implements UserService {
             if (data.getUserId() != null && data.getCleanPassword() != null) {
 
                 UserModel user = session.users().getUserById(data.getUserId(), realm);
-                UserCredentialModel cred = UserCredentialModel.password(data.getCleanPassword(), true); // TODO adminRequest ?
+                UserCredentialModel cred = UserCredentialModel.password(data.getCleanPassword(), false);
                 try {
                     session.userCredentialManager().updateCredential(realm, user, cred);
 
@@ -165,6 +165,8 @@ public class UserServiceImpl implements UserService {
                 } catch (ModelException e) {
                     log.error("", e);
                     data.setErrors(data.getErrors() + e.getMessage());
+                } finally {
+                    log.info("Migration: set password to " + user.getId());
                 }
             }
         }

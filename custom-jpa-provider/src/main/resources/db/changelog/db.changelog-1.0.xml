@@ -975,4 +975,13 @@
         </sql>
     </changeSet>
 
+    <changeSet id="58_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="IMPORT_USERS_REPORT" />
+        </preConditions>
+        <addColumn tableName="IMPORT_USERS_REPORT">
+            <column name="file_type" type="varchar(50)" defaultValue="csv"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

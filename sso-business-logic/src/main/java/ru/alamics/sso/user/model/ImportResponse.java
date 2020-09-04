@@ -12,10 +12,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Data
 @NoArgsConstructor
 public class ImportResponse {
-    private AtomicInteger countClones;
-    private AtomicInteger tbapiErrors;
-    private AtomicInteger tbapiSuccess;
-    private AtomicInteger createdUsers;
+    private AtomicInteger countClones = new AtomicInteger();
+    private AtomicInteger tbapiErrors = new AtomicInteger();
+    private AtomicInteger tbapiSuccess = new AtomicInteger();
+    private AtomicInteger createdUsers = new AtomicInteger();
     private List<Map<String, Object>> createdUserIds = new LinkedList<>();
     private List<Map<String, Object>> errors = new LinkedList<>();
 

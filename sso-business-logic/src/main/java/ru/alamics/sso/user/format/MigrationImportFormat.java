@@ -19,6 +19,7 @@ public class MigrationImportFormat implements ImportFormat {
     public List<ImportUsersDataEntity> getDataList(FileModel file) {
 
         // чищу весь хэдер
+        /*
         for (Iterator<String[]> it = file.getRows().iterator(); it.hasNext();) {
             String[] line = it.next();
 
@@ -31,6 +32,7 @@ public class MigrationImportFormat implements ImportFormat {
             }
             it.remove();
         }
+        */
 
         return toUserRequestList(file.getRows());
     }
@@ -44,9 +46,7 @@ public class MigrationImportFormat implements ImportFormat {
         if (row.length > 3) userImport.setFirstName(row[3]);
         if (row.length > 4) userImport.setPhone(row[4]);
         // phone 2
-        // crap 1
-        // crap 2
-        if (row.length > 8) userImport.setCleanPassword(row[8]);
+        if (row.length > 6) userImport.setCleanPassword(row[6]);
 
         userImport.setCreated(false);
         return userImport;
