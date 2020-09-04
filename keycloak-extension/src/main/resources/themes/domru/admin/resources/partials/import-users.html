@@ -5,7 +5,7 @@
         <label for="import-file-xlsx" class="btn btn-default ng-binding">Upload Import Users File<i
                 class="pficon pficon-import"></i></label>
         <input id="import-file-xlsx" type="file" class="hidden" accept=".xlsx, .csv"
-               onchange="angular.element(this).scope().importFile(this.files)">
+               onchange="angular.element(this).scope().importFileAsync(this.files)">
     </div>
     <div>
         <h4>Import users reports</h4>

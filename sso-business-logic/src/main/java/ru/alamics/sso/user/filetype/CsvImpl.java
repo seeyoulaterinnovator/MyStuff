@@ -1,4 +1,4 @@
-package ru.alamics.sso.user.model;
+package ru.alamics.sso.user.filetype;
 
 import com.opencsv.*;
 
@@ -20,7 +20,9 @@ public class CsvImpl implements FileModel {
     private CSVWriter csvWriter;
     private ByteArrayOutputStream byteArrayOutputStream;
 
-    public CsvImpl(InputStream inputStream) throws IOException {
+    private String ext;
+
+    public CsvImpl(String fileExtension, InputStream inputStream) throws IOException {
         CSVParser parser = new CSVParserBuilder().withSeparator(';').withIgnoreLeadingWhiteSpace(true).build();
         csvReader = new CSVReaderBuilder(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).withCSVParser(parser).build();
         this.rows = csvReader.readAll();
@@ -30,14 +32,18 @@ public class CsvImpl implements FileModel {
                 .forEach(row -> IntStream.range(0, row.length)
                         .forEach(index -> row[index] = removeUTF8BOM(row[index]))
                 );
+
+        ext = fileExtension;
     }
 
-    public CsvImpl() {
+    public CsvImpl(String fileExtension) {
         byteArrayOutputStream = new ByteArrayOutputStream();
         csvWriter = new CSVWriter(new OutputStreamWriter(byteArrayOutputStream, StandardCharsets.UTF_8),';',
                 CSVWriter.NO_QUOTE_CHARACTER,
                 CSVWriter.DEFAULT_ESCAPE_CHARACTER,
                 CSVWriter.DEFAULT_LINE_END);
+
+        ext = fileExtension;
     }
 
     @Override
@@ -75,5 +81,10 @@ public class CsvImpl implements FileModel {
             s = s.substring(1);
         }
         return s;
+    }
+
+    @Override
+    public String getFileExtension() {
+        return ext;
     }
 }

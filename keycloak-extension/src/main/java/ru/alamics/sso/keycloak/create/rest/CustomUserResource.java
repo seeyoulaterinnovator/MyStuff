@@ -32,6 +32,8 @@ import ru.alamics.sso.user.FileServiceException;
 import ru.alamics.sso.user.ImportUsersReportService;
 import ru.alamics.sso.user.UserService;
 import ru.alamics.sso.user.UserServiceImpl;
+import ru.alamics.sso.user.filetype.FileModel;
+import ru.alamics.sso.user.filetype.XlsxImpl;
 import ru.alamics.sso.user.model.*;
 import ru.alamics.sso.util.validator.NotValidException;
 
@@ -49,8 +51,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 

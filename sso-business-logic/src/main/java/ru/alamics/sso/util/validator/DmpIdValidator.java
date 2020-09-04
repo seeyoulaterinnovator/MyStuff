@@ -9,7 +9,7 @@ public abstract class DmpIdValidator {
         try {
             UUID.fromString(dmpId);
         } catch (IllegalArgumentException e) {
-            throw new NotValidException(String.format("DmpId не прошел валидацию : dmpId=\"%s\"", dmpId));
+            throw new NotValidException(EValidator.DMP, String.format("DmpId не прошел валидацию : dmpId=\"%s\"", dmpId));
         }
     }
 }

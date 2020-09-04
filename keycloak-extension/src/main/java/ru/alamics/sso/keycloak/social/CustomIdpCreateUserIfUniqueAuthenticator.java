@@ -44,7 +44,7 @@ public class CustomIdpCreateUserIfUniqueAuthenticator extends IdpCreateUserIfUni
         userPostRequest.setRoleId(UserPostCreatorProvider.ROLE_ID);
 
         try {
-            userPostService.addUserPostAndSystemRole(userPostRequest);
+            userPostService.addUserPostAndAllSystemRole(userPostRequest);
         } catch (NotFoundException | FoundUserPostException | NotValidException e) {
             log.error(e.getMessage(), e);
         }

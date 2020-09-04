@@ -38,4 +38,8 @@ public class ImportUsersDataEntity {
     private String userId;
     @Column(name = "errors")
     private String errors;
+
+    // not a column
+    @Transient
+    private String cleanPassword;
 }

@@ -38,4 +38,6 @@ public class ImportUsersReportEntity {
     private ImportUsersReportStatus status;
     @OneToMany(mappedBy = "importUsersReport", cascade = CascadeType.ALL)
     private List<ImportUsersDataEntity> importUserData;
+    @Column(name = "file_type")
+    private String filetype;
 }
