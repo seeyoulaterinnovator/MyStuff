@@ -44,6 +44,7 @@ public class UserSchedule {
     private static final long DEFAULT_INTERVAL_DURATION = 300000;
     private final static String[] SETTINGS_REALM_NAMES_SCHEDULE = {"user", "manager"};
     private final static String CLIENT_ID = "lkb2b";
+    private final static String DEFAULT_CLIENT_ID = "account";
     private final static String TIMER_INTERVAL_DURATION_PROPERTY = "application.schedule.user.milliseconds";
     @EJB
     private EmailSender sender;
@@ -155,6 +156,8 @@ public class UserSchedule {
             UserEntity user = notification.getUser();
             RealmModel realm = realmRepository.findRealmById(user.getRealmId());
             ClientEntity client = clientRepository.findClientById(CLIENT_ID, realm.getName());
+            if (client == null)
+                client = clientRepository.findClientById(DEFAULT_CLIENT_ID, realm.getName());
             UserModel userModel = new UserAdapter(null, realm, null, user);
             if (notification.getType() == NotificationType.ABSENCE_NOTIFICATION) {
                 EmailModel.EmailModelBuilder prepareBlockNotification = prepareBlockNotification(realm.getName(), getClientLink(client));
