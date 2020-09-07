@@ -1,5 +1,6 @@
 package ru.alamics.sso.jpa.repository;
 
+import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
 
 import javax.ejb.LocalBean;
@@ -45,5 +46,11 @@ public class ImportUsersReportRepository {
         em.merge(importUsersReportEntity);
         em.flush();
         return importUsersReportEntity;
+    }
+
+    public ImportUsersDataEntity updateImportUsersData(ImportUsersDataEntity entity) {
+        em.merge(entity);
+        em.flush();
+        return entity;
     }
 }
