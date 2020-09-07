@@ -25,6 +25,8 @@ public class ClientService {
 
     public String findMainRedirectUri(ClientModel client) {
 
+        if (client == null) return null;
+
         String mru = getMainRedirectUri(client.getId());
 
         if (mru == null) {
@@ -36,6 +38,8 @@ public class ClientService {
     }
 
     public String findMainRedirectUri(ClientEntity client) {
+
+        if (client == null) return null;
 
         String mru = getMainRedirectUri(client.getId());
 

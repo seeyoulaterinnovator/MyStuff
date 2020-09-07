@@ -35,6 +35,7 @@ import java.util.Map;
 @Slf4j
 public abstract class SsoEvent {
     private final static String CLIENT_ID = "lkb2b";
+    private final static String DEFAULT_CLIENT_ID = "account";
 
     private final KeycloakSession session;
     private final EmailSender emailSender;
@@ -57,8 +58,10 @@ public abstract class SsoEvent {
     protected void sendEmail(UserModel user, RealmModel realm, String subject, String template, Map<String, Object> attributes) {
         try {
             ClientModel clientModel = session.clientStorageManager().getClientByClientId(CLIENT_ID, realm);
+            if (clientModel == null)
+                clientModel = session.clientStorageManager().getClientByClientId(DEFAULT_CLIENT_ID, realm);
             if (clientModel == null) {
-                log.error("Failed to send email: {}", "not client=\"" + CLIENT_ID + "\" to redirect!");
+                log.error("Failed to send email: {}", "have no client=\"" + CLIENT_ID + "\" to redirect!");
                 return;
             }
 

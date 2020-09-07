@@ -30,6 +30,7 @@ import java.util.Map;
 @Slf4j
 public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
     private final static String CLIENT_ID = "lkb2b";
+    private final static String DEFAULT_CLIENT_ID = "account";
     private final static int VALIDITY_IN_SECS = 259200;
 
     private final ClientService clientService;
@@ -54,6 +55,8 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
         int absoluteExpirationInSecs = Time.currentTime() + VALIDITY_IN_SECS;
 
         ClientModel clientModel = session.clientStorageManager().getClientByClientId(CLIENT_ID, realm);
+        if (clientModel == null)
+            clientModel = session.clientStorageManager().getClientByClientId(DEFAULT_CLIENT_ID, realm);
         clientModel.setAttribute(OIDCConfigAttributes.EXCLUDE_SESSION_STATE_FROM_AUTH_RESPONSE, "true");
 
         AuthenticationSessionModel authenticationSession = createAuthenticationSessionForClient(realm, clientModel);//rootAuthenticationSessionModel.createAuthenticationSession(clientModel);
