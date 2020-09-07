@@ -21,6 +21,7 @@ import javax.ejb.Stateless;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Stateless
 @Slf4j
@@ -117,6 +118,10 @@ public class UserPostService {
 
     public List<ExternalSystemDto> getExternalSystems() {
         return DataMapper.toExternalSystemDtos(userPostRepository.getAllExternalSystem());
+    }
+
+    public List<String> getAllExternalSystemLabels() {
+        return userPostRepository.getAllExternalSystem().stream().map(m -> m.getLabel()).collect(Collectors.toList());
     }
 
     public UserPostResponse addSystemRole(ExternalSystemRoleRequest externalSystemRoleRequest) throws NotFoundException {

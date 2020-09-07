@@ -17,6 +17,7 @@ import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.user.mapper.UserMapper;
+import ru.alamics.sso.util.Util;
 import ru.alamics.sso.util.validator.*;
 
 import javax.ejb.EJB;
@@ -33,6 +34,7 @@ import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 public class MigrationService {
 
     private final static Long DEFAULT_ROLE_ID = 1L;   //Соответствует роли LPR // TODO но это не точно
+    private final static String DEFAULT_ROLE_STR = "LPR";
 
     @EJB
     private ImportUsersReportRepository importUsersReportRepository;
@@ -47,7 +49,6 @@ public class MigrationService {
     @EJB
     private UserPostService userPostService;
 
-    //
     public void createImportUsers(ImportUsersReportEntity importUsersReport) {
 
         log.info("importing users from file {} in progress", importUsersReport.getName());
@@ -91,7 +92,7 @@ public class MigrationService {
             } finally {
 
                 if (user != null && modified) {
-                    addMigrationAttribute(user, migrationStarts);
+                    addMigrationAttribute(importUsersReport.getId(), user, migrationStarts);
                 } else if (!modified) {
                     countClones.incrementAndGet();
                 }
@@ -109,15 +110,13 @@ public class MigrationService {
                 importUsersReport.getCountClones()));
     }
 
-    private void addMigrationAttribute(UserEntity user, long migrationStarts) {
-
-        String value = "migration" + migrationStarts;
+    private void addMigrationAttribute(String reportId, UserEntity user, long migrationStarts) {
 
         UserAttributeEntity attributeEntity = new UserAttributeEntity();
         attributeEntity.setId(UUID.randomUUID().toString());
-        attributeEntity.setName(value);
+        attributeEntity.setName("migration" + reportId);
         attributeEntity.setUser(user);
-        attributeEntity.setValue(value);
+        attributeEntity.setValue(String.valueOf(migrationStarts));
         userRepository.saveAttributes(attributeEntity);
     }
 
@@ -155,7 +154,6 @@ public class MigrationService {
         return userRepository.getFirstUserByUsername(realmId, email);
     }
 
-    //
     private UserEntity createUser(String realmId, ImportUsersDataEntity importUserData) {
 
         UserEntity user = new UserEntity();
@@ -201,7 +199,6 @@ public class MigrationService {
         return user;
     }
 
-    //
     private void createAdminEvent(OperationType operationType, ImportUsersReportEntity report, String realmId) {
         AdminEventEntity adminEvent = new AdminEventEntity();
         adminEvent.setTime(Time.toMillis(Time.currentTime()));
@@ -234,6 +231,11 @@ public class MigrationService {
         }
 
         userPostService.addAllSystemRole(postId);
+
+        if (modified) {
+            userImport.setRole(DEFAULT_ROLE_STR);
+            userImport.setSystems(Util.join(userPostService.getAllExternalSystemLabels(), ","));
+        }
 
         return modified;
     }

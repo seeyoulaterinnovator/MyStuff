@@ -143,13 +143,13 @@ public class UserServiceImpl implements UserService {
         log.info("Upload import users file success");
     }
 
-    // TODO to utils
-    // TODO persist new errors
     private void doGeneratePasswords(ImportUsersReportEntity importUsersReport) {
 
         for (ImportUsersDataEntity data : importUsersReport.getImportUserData()) {
 
             if (data.getUserId() != null && data.getCleanPassword() != null) {
+
+                String errors = "";
 
                 UserModel user = session.users().getUserById(data.getUserId(), realm);
                 UserCredentialModel cred = UserCredentialModel.password(data.getCleanPassword(), false);
@@ -158,18 +158,24 @@ public class UserServiceImpl implements UserService {
 
                 } catch (IllegalStateException ise) {
                     log.error("", ise);
-                    data.setErrors(data.getErrors() + "Resetting to N old passwords is not allowed.");
+                    errors += "Resetting to N old passwords is not allowed.";
                 } catch (ReadOnlyException mre) {
                     log.error("", mre);
-                    data.setErrors(data.getErrors() + "Can't reset password as account is read only");
+                    errors +=  "Can't reset password as account is read only.";
                 } catch (ModelException e) {
                     log.error("", e);
-                    data.setErrors(data.getErrors() + e.getMessage());
+                    errors +=  e.getMessage();
                 } finally {
                     log.info("Migration: set password to " + user.getId());
+                    if (!errors.isEmpty()) {
+                        data.setErrors(data.getErrors() + errors);
+                        importUsersReportService.updateImportUsersData(data);
+                    }
                 }
             }
         }
+
+
     }
 
     @Override

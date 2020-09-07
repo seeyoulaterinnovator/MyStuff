@@ -24,6 +24,7 @@ public class ImportUsersReportService {
 
         ImportUsersReportEntity importUsersReport = UserMapper.toImportUsersReportEntity(realm.getName(), filename, dataList);
         importUsersReport.setStatus(ImportUsersReportStatus.AWAITING);
+        importUsersReport.setFiletype(Util.getFileExtByFilename(filename));
 
         saveImportUsersReport(importUsersReport);
     }
@@ -32,6 +33,7 @@ public class ImportUsersReportService {
 
         ImportUsersReportEntity importUsersReport = UserMapper.toImportUsersReportEntity(realm.getName(), filename, dataList);
         importUsersReport.setStatus(ImportUsersReportStatus.IN_PROGRESS);
+        importUsersReport.setFiletype(Util.getFileExtByFilename(filename));
 
         saveImportUsersReport(importUsersReport);
 
@@ -51,5 +53,9 @@ public class ImportUsersReportService {
 
     public ImportUsersReportEntity findImportUsersReportByImportId(String importId) {
         return importUsersReportRepository.findImportUsersReportByImportId(importId);
+    }
+
+    public void updateImportUsersData(ImportUsersDataEntity data) {
+        importUsersReportRepository.updateImportUsersData(data);
     }
 }
