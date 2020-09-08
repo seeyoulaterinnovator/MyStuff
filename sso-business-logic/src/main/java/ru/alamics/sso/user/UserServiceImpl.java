@@ -145,6 +145,8 @@ public class UserServiceImpl implements UserService {
 
     private void doGeneratePasswords(ImportUsersReportEntity importUsersReport) {
 
+        Map<String, UserModel> listToSend = new HashMap<>();
+
         for (ImportUsersDataEntity data : importUsersReport.getImportUserData()) {
 
             if (data.getUserId() != null && data.getCleanPassword() != null) {
@@ -171,13 +173,16 @@ public class UserServiceImpl implements UserService {
                         data.setErrors(data.getErrors() + errors);
                         importUsersReportService.updateImportUsersData(data);
                     } else {
-                        createAdminEvent(OperationType.CREATE, user);
+                        // чтобы не было дублей
+                        listToSend.put(user.getId(), user);
                     }
                 }
             }
         }
 
-
+        for (UserModel user : listToSend.values()) {
+            createAdminEvent(OperationType.CREATE, user);
+        }
     }
 
     @Override
