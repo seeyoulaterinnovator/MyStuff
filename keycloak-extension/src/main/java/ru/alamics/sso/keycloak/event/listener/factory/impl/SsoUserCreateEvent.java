@@ -48,7 +48,12 @@ public class SsoUserCreateEvent extends SsoEvent {
                 attributes.put("userFirstName", user.getFirstName());
                 attributes.put("userLastName", user.getLastName());
 
-                this.sendEmail(user, realm, "emailAccountDataSubject", "mail-account-data.ftl", attributes);
+                // если миграция с паролями, просить вводить пароль не нужно
+                if (user.isEmailVerified()) {
+                    this.sendEmail(user, realm, "emailAccountDataSubject", "mail-account-create.ftl", attributes);
+                } else {
+                    this.sendEmail(user, realm, "emailAccountDataSubject", "mail-account-data.ftl", attributes);
+                }
             } else {
                 log.error(String.format("User '%s' not found or do not have email", userId));
             }
