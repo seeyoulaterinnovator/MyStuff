@@ -170,6 +170,8 @@ public class UserServiceImpl implements UserService {
                     if (!errors.isEmpty()) {
                         data.setErrors(data.getErrors() + errors);
                         importUsersReportService.updateImportUsersData(data);
+                    } else {
+                        createAdminEvent(OperationType.CREATE, user);
                     }
                 }
             }

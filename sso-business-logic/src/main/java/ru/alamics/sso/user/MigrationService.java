@@ -205,7 +205,7 @@ public class MigrationService {
         adminEvent.setRealmId(realmId);
         adminEvent.setOperationType(operationType.name());
         adminEvent.setAuthRealmId(realmId);
-        adminEvent.setResourcePath("schedule/importUsersReport/" + report.getId());
+        adminEvent.setResourcePath("migration/importUsersReport/" + report.getId());
         adminEvent.setResourceType("USER");
         adminEventRepository.save(adminEvent);
     }
