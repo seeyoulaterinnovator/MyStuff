@@ -55,7 +55,7 @@ public class CitiesResource {
             lock.lock();
             updated.set(now);
             try {
-                if (cityList.isEmpty()) {
+                if (cityList.isEmpty() || now > updated.get() + CACHE_TIME) {
                     cityList = SimpleHttp.doGet(url, session).asJson(new TypeReference<List<CityMigration>>() {
                     });
                 }
