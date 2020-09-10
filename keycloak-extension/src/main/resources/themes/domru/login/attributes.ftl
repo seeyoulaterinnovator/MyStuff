@@ -9,9 +9,9 @@
 
         <div class="table-wrapper">
             <#if posts?size gt 1>
-            <h1 class="title">Выбрать организацию</h1>
+                <h1 class="title">Выбрать организацию</h1>
             <#else>
-            <h1 class="title" style="visibility: hidden">Выбрать организацию</h1>
+                <h1 class="title" style="visibility: hidden">Выбрать организацию</h1>
             </#if>
 
             <div id="post" class="table overflow-x-hidden overflow-y-auto">
@@ -44,7 +44,7 @@
             </div>
         </div>
 
-        <form class="form-actions" action="${url.loginAction}" method="POST"> <!-- onsubmit="return selectCustomer(this)"> -->
+        <form class="form-actions" action="${url.loginAction}" method="POST">
             <input style="visibility:hidden" type="text" name="roleName" id="roleName" value="${posts[0].roleName!}"/>
             <input style="visibility:hidden" type="text" name="tomsId" id="tomsId" value="${posts[0].tomsId!}"/>
             <input style="visibility:hidden" type="text" name="postId" id="postId" value="${posts[0].id!}"/>
@@ -139,6 +139,8 @@
     </script>
 
     <script>
+        window.onunload = () => window.parent.postMessage('post-selected', '*');
+
         var table = document.getElementById('post');
         Array.from(document.getElementsByClassName('titems')).forEach(function (el, index) {
             var roleName = document.getElementById("roleName-" + index).textContent;
@@ -148,42 +150,10 @@
                 document.getElementById('roleName').value = roleName;
                 document.getElementById('tomsId').value = tomsId;
                 document.getElementById('postId').value = postId;
-
-                window.parent.postMessage('post-selected', '*');
-
-                setTimeout(function(){
-                    document.getElementById('kc-accept').click();
-                },100);
+                document.getElementById('kc-accept').click();
             });
         });
     </script>
 
-    <script>
-        function selectCustomer(f) {
-            try {
-                var xhr = new XMLHttpRequest();
 
-                var actionUrl = "${url.loginAction}";
-                actionUrl = actionUrl.replace(/&amp;/g, "&");
-
-                xhr.open('POST', actionUrl, false);
-
-                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
-                xhr.onloadend = function (response) {
-                    window.parent.postMessage('post-selected', '*');
-                    window.location.replace(response.currentTarget.responseURL);
-                }
-
-                xhr.send("tomsId=" + document.getElementById('tomsId').value +
-                    "&postId=" + document.getElementById('postId').value);
-
-            } catch (e) {
-                window.parent.postMessage('post-selected-error', e);
-                console.error(e);
-            }
-
-            return false;
-        }
-    </script>
 </@layout.registrationLayout>
