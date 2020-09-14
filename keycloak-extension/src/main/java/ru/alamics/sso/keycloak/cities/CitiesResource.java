@@ -53,11 +53,11 @@ public class CitiesResource {
 
         if (cityList.isEmpty() || now > updated.get() + CACHE_TIME) {
             lock.lock();
-            updated.set(now);
             try {
                 if (cityList.isEmpty() || now > updated.get() + CACHE_TIME) {
                     cityList = SimpleHttp.doGet(url, session).asJson(new TypeReference<List<CityMigration>>() {
                     });
+                    updated.set(now);
                 }
             } catch (IOException e) {
                 log.error("Connect to " + url + " failed");
