@@ -30,6 +30,7 @@
 
   function groupByFirstCharacter(arr) {
     if (!arr || !arr.length) return [];
+    arr = arr.sort((a, b) => a.name.localeCompare(b.name));
     let quarterStore = 0;
     const unsubscribe = quarter.subscribe(value => {
       quarterStore = value;
