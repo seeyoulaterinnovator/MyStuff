@@ -139,7 +139,9 @@
     </script>
 
     <script>
-        window.onunload = () => window.parent.postMessage('post-selected', '*');
+        window.onunload = function () {
+            window.parent.postMessage('post-selected', '*');
+        };
 
         var table = document.getElementById('post');
         Array.from(document.getElementsByClassName('titems')).forEach(function (el, index) {
