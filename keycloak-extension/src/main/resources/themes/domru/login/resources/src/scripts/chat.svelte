@@ -19,7 +19,7 @@
       nickname: 'Пользователь',
       subject: 'Вопросы со страницы авторизации',
       city: Cookie.get('city-domain') || 'yar',
-      isProd: true
+      isProd: false
     });
     chat.attach(chatContent);
   });
