@@ -62,7 +62,7 @@ public class ImportSchedule {
         final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
 
         final long intervalDuration = properties.getPropertyLong(TIMER_INTERVAL_DURATION_PROPERTY, DEFAULT_INTERVAL_DURATION);
-        timerService.createIntervalTimer(intervalDuration, intervalDuration, timerConfig);
+        timerService.createIntervalTimer(DEFAULT_INTERVAL_DURATION, intervalDuration, timerConfig);
         log.info("Timer:{} is created, interval duration set to value={} milliseconds ", TIMER_NAME, intervalDuration);
     }
 
