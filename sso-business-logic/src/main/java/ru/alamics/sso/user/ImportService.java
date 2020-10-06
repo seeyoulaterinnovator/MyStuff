@@ -99,6 +99,7 @@ public class ImportService {
                     o.setErrors(e.getMessage());
                     log.error("Importing user data is failed. {}", e.getMessage());
                 } finally {
+                    importUsersReportRepository.updateImportUsersData(o);
                     processedUsers++;
                 }
             }
