@@ -87,7 +87,7 @@ public class ImportService {
                     if (o.getTomsId() == null || o.getTomsId().isEmpty()) {
                         throw new NotFoundException("TomsId is not exist");
                     }
-                    addUserPost(user, o);
+                    //addUserPost(user, o);
                 } catch (FoundException e) {
                     List<Object> errors = new LinkedList<>();
                     e.getResult().forEach((k, v) -> {
@@ -95,7 +95,7 @@ public class ImportService {
                     });
                     o.setErrors(errors.toString().substring(1, errors.toString().length() - 1));
                     countClones.getAndIncrement();
-                } catch (NotFoundException | NotValidException | FoundUserPostException e) {
+                } catch (NotFoundException | NotValidException /*| FoundUserPostException*/ e) {
                     o.setErrors(e.getMessage());
                     log.error("Importing user data is failed. {}", e.getMessage());
                 } finally {
