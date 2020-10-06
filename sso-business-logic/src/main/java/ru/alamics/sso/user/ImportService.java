@@ -177,6 +177,7 @@ public class ImportService {
         user.setEnabled(false);
         user = userRepository.save(user);
 
+        /*
         RealmEntity realm = realmRepository.findRealmEntityById(realmId);
         if (realm.getDefaultRoles() != null && !realm.getDefaultRoles().isEmpty()) {
             UserEntity finalUser = user;
@@ -195,6 +196,8 @@ public class ImportService {
                 roleRepository.save(roleMapping);
             });
         }
+        */
+
         UserAttributeEntity attributeEntity = new UserAttributeEntity();
         attributeEntity.setId(UUID.randomUUID().toString());
         attributeEntity.setName(ATTR_PHONE_NAME);
