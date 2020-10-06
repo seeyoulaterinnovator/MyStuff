@@ -225,7 +225,7 @@ public class UserMapper {
         importUsersReport.setName(name);
         importUsersReport.setCountImportUsers(importUserDataEntities.size());
         importUsersReport.setRealmId(realmId);
-        importUserDataEntities.forEach(o -> o.setImportUsersReport(importUsersReport));
+        //importUserDataEntities.forEach(o -> o.setImportUsersReport(importUsersReport));
         importUsersReport.setImportUserData(importUserDataEntities);
         return importUsersReport;
     }
