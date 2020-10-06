@@ -227,7 +227,7 @@ public class ImportService {
         userPostRequest.setRoleId(userPostService.getUserPostRole(userImport.getRole()));
         UserPostResponse userPostResponse = userPostService.save(userPostRequest);
 
-        addSystemRoles(userImport, userPostResponse.getId());
+        // addSystemRoles(userImport, userPostResponse.getId());
     }
 
     private void addSystemRoles(ImportUsersDataEntity userImport, String userPostId) throws javassist.NotFoundException {
