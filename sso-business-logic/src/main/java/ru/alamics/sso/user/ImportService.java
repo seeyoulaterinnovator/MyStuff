@@ -87,7 +87,7 @@ public class ImportService {
                     if (o.getTomsId() == null || o.getTomsId().isEmpty()) {
                         throw new NotFoundException("TomsId is not exist");
                     }
-                    //addUserPost(user, o);
+                    addUserPost(user, o);
                 } catch (FoundException e) {
                     List<Object> errors = new LinkedList<>();
                     e.getResult().forEach((k, v) -> {
@@ -95,12 +95,15 @@ public class ImportService {
                     });
                     o.setErrors(errors.toString().substring(1, errors.toString().length() - 1));
                     countClones.getAndIncrement();
-                } catch (NotFoundException | NotValidException /*| FoundUserPostException*/ e) {
+                } catch (NotFoundException | NotValidException | FoundUserPostException e) {
                     o.setErrors(e.getMessage());
                     log.error("Importing user data is failed. {}", e.getMessage());
                 } finally {
                     importUsersReportRepository.updateImportUsersData(o);
                     processedUsers++;
+                    if (processedUsers % 500 == 0) {
+                        log.info("processedUsers " + processedUsers);
+                    }
                 }
             }
             importUsersReport.setCountClones(countClones.intValue());
@@ -177,7 +180,6 @@ public class ImportService {
         user.setEnabled(false);
         user = userRepository.save(user);
 
-        /*
         RealmEntity realm = realmRepository.findRealmEntityById(realmId);
         if (realm.getDefaultRoles() != null && !realm.getDefaultRoles().isEmpty()) {
             UserEntity finalUser = user;
@@ -196,16 +198,13 @@ public class ImportService {
                 roleRepository.save(roleMapping);
             });
         }
-        */
 
-        /*
         UserAttributeEntity attributeEntity = new UserAttributeEntity();
         attributeEntity.setId(UUID.randomUUID().toString());
         attributeEntity.setName(ATTR_PHONE_NAME);
         attributeEntity.setUser(user);
         attributeEntity.setValue(importUserData.getPhone());
         userRepository.saveAttributes(attributeEntity);
-        */
 
         return user;
     }
@@ -230,7 +229,7 @@ public class ImportService {
         userPostRequest.setRoleId(userPostService.getUserPostRole(userImport.getRole()));
         UserPostResponse userPostResponse = userPostService.save(userPostRequest);
 
-        // addSystemRoles(userImport, userPostResponse.getId());
+        addSystemRoles(userImport, userPostResponse.getId());
     }
 
     private void addSystemRoles(ImportUsersDataEntity userImport, String userPostId) throws javassist.NotFoundException {
