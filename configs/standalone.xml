@@ -92,7 +92,7 @@
                 </formatter>
             </console-handler>
             <logger category="com.arjuna">
-                <level name="TRACE"/>
+                <level name="DEBUG"/>
             </logger>
             <logger category="io.jaegertracing.Configuration">
                 <level name="WARN"/>

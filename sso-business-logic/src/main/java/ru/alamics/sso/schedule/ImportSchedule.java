@@ -52,10 +52,11 @@ public class ImportSchedule {
                 .stream()
                 .filter(o -> o.getImportUserData() != null && !o.getImportUserData().isEmpty())
                 .filter(o -> o.getStatus().equals(ImportUsersReportStatus.AWAITING))
-                .peek(o -> {
-                    o.setStatus(ImportUsersReportStatus.IN_PROGRESS);
-                    importUsersReportRepository.updateImportUsersReport(o);
-                })
+                // TODO раскоментить
+                //.peek(o -> {
+                //    o.setStatus(ImportUsersReportStatus.IN_PROGRESS);
+                //    importUsersReportRepository.updateImportUsersReport(o);
+                //})
                 .collect(Collectors.toList());
         for (ImportUsersReportEntity importUsersReportEntity : importUsersReportEntities) {
             importService.createImportUsers(importUsersReportEntity);
