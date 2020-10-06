@@ -198,12 +198,15 @@ public class ImportService {
         }
         */
 
+        /*
         UserAttributeEntity attributeEntity = new UserAttributeEntity();
         attributeEntity.setId(UUID.randomUUID().toString());
         attributeEntity.setName(ATTR_PHONE_NAME);
         attributeEntity.setUser(user);
         attributeEntity.setValue(importUserData.getPhone());
         userRepository.saveAttributes(attributeEntity);
+        */
+
         return user;
     }
 

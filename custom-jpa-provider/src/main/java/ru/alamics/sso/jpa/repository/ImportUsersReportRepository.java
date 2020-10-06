@@ -13,6 +13,7 @@ import java.util.List;
 
 @LocalBean
 @Stateless
+@TransactionAttribute(TransactionAttributeType.REQUIRED)
 public class ImportUsersReportRepository {
 
     @PersistenceContext
@@ -38,21 +39,18 @@ public class ImportUsersReportRepository {
                 .getResultList();
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public ImportUsersReportEntity saveImportUsersReport(ImportUsersReportEntity importUsersReportEntity) {
         em.persist(importUsersReportEntity);
         em.flush();
         return importUsersReportEntity;
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public ImportUsersReportEntity updateImportUsersReport(ImportUsersReportEntity importUsersReportEntity) {
         em.merge(importUsersReportEntity);
         em.flush();
         return importUsersReportEntity;
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public ImportUsersDataEntity updateImportUsersData(ImportUsersDataEntity entity) {
         em.merge(entity);
         em.flush();
