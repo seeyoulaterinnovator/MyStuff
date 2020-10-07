@@ -59,8 +59,8 @@ public class ImportSchedule {
                 .collect(Collectors.toList());
 
         for (ImportUsersReportEntity en : importUsersReportEntities) {
-            en.setStatus(ImportUsersReportStatus.IN_PROGRESS);
-            importUsersReportRepository.setReportStatusExt(en.getId(), ImportUsersReportStatus.IN_PROGRESS);
+            //en.setStatus(ImportUsersReportStatus.IN_PROGRESS);
+            importUsersReportRepository.setReportStatus(en, ImportUsersReportStatus.IN_PROGRESS);
         }
 
         for (ImportUsersReportEntity importUsersReportEntity : importUsersReportEntities) {

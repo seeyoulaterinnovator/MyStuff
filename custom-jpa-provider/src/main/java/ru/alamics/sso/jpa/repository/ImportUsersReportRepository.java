@@ -58,12 +58,14 @@ public class ImportUsersReportRepository {
         return entity;
     }
 
-    public void setReportStatus(String id, ImportUsersReportStatus status) {
+    public void setReportStatus(ImportUsersReportEntity entity, ImportUsersReportStatus status) {
 
         em.createQuery("update ImportUsersReportEntity rep set rep.status = :status where rep.id = :id")
                 .setParameter("status", status)
-                .setParameter("id", id)
+                .setParameter("id", entity.getId())
                 .executeUpdate();
+        em.flush();
+        em.refresh(entity);
     }
 
     public void setReportStatusExt(String id, ImportUsersReportStatus status) {
