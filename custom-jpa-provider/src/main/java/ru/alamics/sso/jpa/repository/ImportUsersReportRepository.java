@@ -2,6 +2,7 @@ package ru.alamics.sso.jpa.repository;
 
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
+import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -55,5 +56,13 @@ public class ImportUsersReportRepository {
         em.merge(entity);
         em.flush();
         return entity;
+    }
+
+    public void setReportStatus(String id, ImportUsersReportStatus status) {
+
+        em.createQuery("update ImportUsersReportEntity rep set rep.status = :status where rep.id = :id")
+                .setParameter("status", status.getDiscription())
+                .setParameter("id", id)
+                .executeUpdate();
     }
 }
