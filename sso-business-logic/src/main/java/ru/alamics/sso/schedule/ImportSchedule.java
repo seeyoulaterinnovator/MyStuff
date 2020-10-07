@@ -60,7 +60,7 @@ public class ImportSchedule {
 
         for (ImportUsersReportEntity en : importUsersReportEntities) {
             en.setStatus(ImportUsersReportStatus.IN_PROGRESS);
-            importUsersReportRepository.setReportStatus(en.getId(), ImportUsersReportStatus.IN_PROGRESS);
+            importUsersReportRepository.setReportStatusExt(en.getId(), ImportUsersReportStatus.IN_PROGRESS);
         }
 
         for (ImportUsersReportEntity importUsersReportEntity : importUsersReportEntities) {

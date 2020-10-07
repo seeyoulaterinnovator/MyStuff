@@ -65,4 +65,18 @@ public class ImportUsersReportRepository {
                 .setParameter("id", id)
                 .executeUpdate();
     }
+
+    public void setReportStatusExt(String id, ImportUsersReportStatus status) {
+
+        em.getTransaction().begin();
+
+        int rowsUpdated = em.createQuery("update ImportUsersReportEntity rep set rep.status = :status where rep.id = :id")
+                .setParameter("status", status)
+                .setParameter("id", id)
+                .executeUpdate();
+
+        System.out.println("report " + id + " updated: " + rowsUpdated);
+
+        em.getTransaction().commit();
+    }
 }
