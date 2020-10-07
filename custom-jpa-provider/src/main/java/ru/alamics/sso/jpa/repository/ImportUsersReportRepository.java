@@ -61,7 +61,7 @@ public class ImportUsersReportRepository {
     public void setReportStatus(String id, ImportUsersReportStatus status) {
 
         em.createQuery("update ImportUsersReportEntity rep set rep.status = :status where rep.id = :id")
-                .setParameter("status", status.getDiscription())
+                .setParameter("status", status)
                 .setParameter("id", id)
                 .executeUpdate();
     }
