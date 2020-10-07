@@ -57,10 +57,11 @@ public class UserRepository {
         if (user.getId() == null) {
             user.setId(KeycloakModelUtils.generateId());
             em.persist(user);
+            em.flush();
         } else {
-            em.merge(user);
+            //em.merge(user);
         }
-        em.flush();
+
         return user;
     }
 

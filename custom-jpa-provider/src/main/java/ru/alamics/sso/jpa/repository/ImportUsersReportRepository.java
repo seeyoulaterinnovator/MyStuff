@@ -47,14 +47,14 @@ public class ImportUsersReportRepository {
     }
 
     public ImportUsersReportEntity updateImportUsersReport(ImportUsersReportEntity importUsersReportEntity) {
-        em.merge(importUsersReportEntity);
-        em.flush();
+        //em.merge(importUsersReportEntity);
+        //em.flush();
         return importUsersReportEntity;
     }
 
     public ImportUsersDataEntity updateImportUsersData(ImportUsersDataEntity entity) {
-        em.merge(entity);
-        em.flush();
+        //em.merge(entity);
+        //em.flush();
         return entity;
     }
 
