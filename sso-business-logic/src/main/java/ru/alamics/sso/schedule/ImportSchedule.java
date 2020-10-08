@@ -14,7 +14,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.*;
 import javax.ejb.Timer;
+import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -35,6 +37,12 @@ public class ImportSchedule {
     @Resource
     private TimerService timerService;
 
+    @Resource
+    private ManagedScheduledExecutorService scheduler;
+
+    static final long INITIAL_DELAY = 60;
+    static final long PERIOD = 3600;
+
     @PostConstruct
     private void init() {
         //final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
@@ -43,14 +51,16 @@ public class ImportSchedule {
         //timerService.createIntervalTimer(DEFAULT_INTERVAL_DURATION, intervalDuration, timerConfig);
         //log.info("Timer:{} is created, interval duration set to value={} milliseconds ", TIMER_NAME, intervalDuration);
 
-        schedule(null);
+        this.scheduler.scheduleAtFixedRate(this::schedule,
+                INITIAL_DELAY, PERIOD,
+                TimeUnit.SECONDS);
     }
 
     //@Timeout
-    public void schedule(Timer timer) {
-        if (timer != null && !TIMER_NAME.equals(timer.getInfo().toString())) {
-            return;
-        }
+    public void schedule(/*Timer timer*/) {
+        //if (timer != null && !TIMER_NAME.equals(timer.getInfo().toString())) {
+        //    return;
+        //}
 
         List<ImportUsersReportModel> reportList = importReportService.getReportListByStatus(ImportUsersReportStatus.AWAITING);
 
