@@ -19,6 +19,8 @@ import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.user.filetype.FileFactory;
 import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.user.model.ImportResponse;
+import ru.alamics.sso.user.model.ImportUsersDataModel;
+import ru.alamics.sso.user.model.ImportUsersReportModel;
 import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.util.validator.EmailValidator;
 import ru.alamics.sso.util.validator.NotValidException;
@@ -56,6 +58,8 @@ public class ImportService {
     private UserPostService userPostService;
     @EJB
     private MigrationService migrationService;
+    @EJB
+    private ImportReportService importReportService;
 
     public void createImportUsers(ImportUsersReportEntity importUsersReport) {
 
@@ -63,6 +67,70 @@ public class ImportService {
             migrationService.createImportUsers(importUsersReport);
         } else {
             importUsers(importUsersReport);
+        }
+    }
+
+    public void createImportUsersNew(ImportUsersReportModel reportModel) {
+        importUsers(reportModel);
+    }
+
+    private void importUsers(ImportUsersReportModel reportModel) {
+        log.info("Importing users from file {} in progress", reportModel.getName());
+        int createdUsers = 0;
+        int countClones = 0;
+        int processedUsers = 0;
+
+        List<ImportUsersDataModel> dataList = importReportService.getDataList(reportModel);
+
+        try {
+            for (ImportUsersDataModel data : dataList) {
+                try {
+                    data.setEmail(UserServiceUtil.doCleanMail(data.getEmail()));
+                    data.setPhone(UserServiceUtil.doCleanPhone(data.getPhone()));
+
+                    data.setErrors(null);
+                    checkImportUser(reportModel.getRealmId(), data.getEmail(), data.getPhone());
+                    UserEntity user = createUser(reportModel.getRealmId(), data);
+                    createdUsers++;
+                    data.setCreated(true);
+                    data.setUserId(user.getId());
+                    if (data.getTomsId() == null || data.getTomsId().isEmpty()) {
+                        throw new NotFoundException("TomsId is not exist");
+                    }
+                    //addUserPost(user, o);
+                } catch (FoundException e) {
+                    List<Object> errors = new LinkedList<>();
+                    e.getResult().forEach((k, v) -> {
+                        errors.add(v);
+                    });
+                    data.setErrors(errors.toString().substring(1, errors.toString().length() - 1));
+                    countClones++;
+                } catch (NotFoundException | NotValidException /*| FoundUserPostException*/ e) {
+                    data.setErrors(e.getMessage());
+                    log.error("Importing user data is failed. {}", e.getMessage());
+                } finally {
+                    importReportService.updateImportUsersData(data);
+                    processedUsers++;
+                    if (processedUsers % 500 == 0) {
+                        log.info("ProcessedUsers " + processedUsers);
+                    }
+                }
+            }
+
+            reportModel.setCountClones(countClones);
+            reportModel.setCountCreatedUsers(createdUsers);
+            reportModel.setStatus(ImportUsersReportStatus.DONE);
+
+            importReportService.setReportDone(reportModel);
+
+            createAdminEvent(OperationType.CREATE, reportModel, reportModel.getRealmId());
+            log.info(String.format("Importing users from file %s is done: countUsers=%s, countCreatedUsers=%s, countClones=%s ",
+                    reportModel.getName(), reportModel.getCountImportUsers(), reportModel.getCountCreatedUsers(),
+                    reportModel.getCountClones()));
+
+        } catch (Exception e) {
+            log.error("Error, but processed " + processedUsers, e);
+            throw e;
         }
     }
 
@@ -169,6 +237,20 @@ public class ImportService {
         }
     }
 
+    private UserEntity createUser(String realmId, ImportUsersDataModel data) {
+        UserEntity user = new UserEntity();
+        user.setCreatedTimestamp(System.currentTimeMillis());
+        user.setUsername(data.getEmail().toLowerCase());
+        user.setEmail(data.getEmail().toLowerCase(), false);
+        user.setFirstName(data.getFirstName());
+        user.setRealmId(realmId);
+        user.setEmailVerified(false);
+        user.setEnabled(false);
+        user = userRepository.save(user);
+
+        return user;
+    }
+
     private UserEntity createUser(String realmId, ImportUsersDataEntity importUserData) {
         UserEntity user = new UserEntity();
         user.setCreatedTimestamp(System.currentTimeMillis());
@@ -207,6 +289,17 @@ public class ImportService {
         userRepository.saveAttributes(attributeEntity);
 */
         return user;
+    }
+
+    private void createAdminEvent(OperationType operationType, ImportUsersReportModel report, String realmId) {
+        AdminEventEntity adminEvent = new AdminEventEntity();
+        adminEvent.setTime(Time.toMillis(Time.currentTime()));
+        adminEvent.setRealmId(realmId);
+        adminEvent.setOperationType(operationType.name());
+        adminEvent.setAuthRealmId(realmId);
+        adminEvent.setResourcePath("schedule/importUsersReport/" + report.getId());
+        adminEvent.setResourceType("USER");
+        adminEventRepository.save(adminEvent);
     }
 
     private void createAdminEvent(OperationType operationType, ImportUsersReportEntity report, String realmId) {

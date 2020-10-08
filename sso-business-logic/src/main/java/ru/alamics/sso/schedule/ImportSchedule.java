@@ -6,7 +6,9 @@ import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
 import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.jpa.repository.*;
 import ru.alamics.sso.property.ApplicationProperties;
+import ru.alamics.sso.user.ImportReportService;
 import ru.alamics.sso.user.ImportService;
+import ru.alamics.sso.user.model.ImportUsersReportModel;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -25,7 +27,7 @@ public class ImportSchedule {
     private final static String TIMER_INTERVAL_DURATION_PROPERTY = "application.schedule.import.milliseconds";
 
     @EJB
-    private ImportUsersReportRepository importUsersReportRepository;
+    private ImportReportService importReportService;
     @EJB
     private ApplicationProperties properties;
     @EJB
@@ -48,6 +50,10 @@ public class ImportSchedule {
             return;
         }
 
+        List<ImportUsersReportModel> reportList = importReportService.getReportListByStatus(ImportUsersReportStatus.AWAITING);
+
+
+        /*
         List<ImportUsersReportEntity> importUsersReportEntities = importUsersReportRepository.findAllImportUsersReports()
                 .stream()
                 .filter(o -> o.getImportUserData() != null && !o.getImportUserData().isEmpty())
@@ -57,14 +63,14 @@ public class ImportSchedule {
         //            importUsersReportRepository.updateImportUsersReport(o);
         //        })
                 .collect(Collectors.toList());
+        */
 
-        for (ImportUsersReportEntity en : importUsersReportEntities) {
-            //en.setStatus(ImportUsersReportStatus.IN_PROGRESS);
-            importUsersReportRepository.setReportStatus(en, ImportUsersReportStatus.IN_PROGRESS);
+        for (ImportUsersReportModel en : reportList) {
+            importReportService.setReportStatus(en, ImportUsersReportStatus.IN_PROGRESS);
         }
 
-        for (ImportUsersReportEntity importUsersReportEntity : importUsersReportEntities) {
-            importService.createImportUsers(importUsersReportEntity);
+        for (ImportUsersReportModel reportModel : reportList) {
+            importService.createImportUsersNew(reportModel);
         }
     }
 

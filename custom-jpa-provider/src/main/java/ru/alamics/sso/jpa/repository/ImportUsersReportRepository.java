@@ -24,6 +24,10 @@ public class ImportUsersReportRepository {
         return em.find(ImportUsersReportEntity.class, importId);
     }
 
+    public ImportUsersDataEntity findImportUsersDataById(String id) {
+        return em.find(ImportUsersDataEntity.class, id);
+    }
+
     public List<ImportUsersReportEntity> findImportUsersReports(String realmId) {
         return em.createQuery(
                 "select ire " +
@@ -58,13 +62,36 @@ public class ImportUsersReportRepository {
         return entity;
     }
 
-    public void setReportStatus(ImportUsersReportEntity entity, ImportUsersReportStatus status) {
+    public void setReportStatus(String id, ImportUsersReportStatus status) {
 
         em.createQuery("update ImportUsersReportEntity rep set rep.status = :status where rep.id = :id")
                 .setParameter("status", status)
-                .setParameter("id", entity.getId())
+                .setParameter("id", id)
                 .executeUpdate();
-        em.flush();
-        em.refresh(entity);
+    }
+
+    public void setReportDone(String id, int clones, int created) {
+
+        em.createQuery("update ImportUsersReportEntity rep " +
+                "set rep.status = :status, rep.countClones = :clones, rep.countCreatedUsers = :created where rep.id = :id")
+                .setParameter("id", id)
+                .setParameter("status", ImportUsersReportStatus.DONE)
+                .setParameter("clones", clones)
+                .setParameter("created", created)
+                .executeUpdate();
+    }
+
+    public List<ImportUsersReportEntity> getReportListByStatus(ImportUsersReportStatus status) {
+
+        return em.createQuery("select ImportUsersReportEntity rep where rep.status = :status", ImportUsersReportEntity.class)
+                .setParameter("status", status)
+                .getResultList();
+    }
+
+    public List<ImportUsersDataEntity> getDataByReportId(String reportId) {
+
+        return em.createQuery("select ImportUsersDataEntity data where data.importUsersReport = :id", ImportUsersDataEntity.class)
+                .setParameter("id", reportId)
+                .getResultList();
     }
 }
