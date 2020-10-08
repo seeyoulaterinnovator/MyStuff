@@ -83,14 +83,14 @@ public class ImportUsersReportRepository {
 
     public List<ImportUsersReportEntity> getReportListByStatus(ImportUsersReportStatus status) {
 
-        return em.createQuery("select ImportUsersReportEntity rep where rep.status = :status", ImportUsersReportEntity.class)
+        return em.createQuery("select rep from ImportUsersReportEntity rep where rep.status = :status", ImportUsersReportEntity.class)
                 .setParameter("status", status)
                 .getResultList();
     }
 
     public List<ImportUsersDataEntity> getDataByReportId(String reportId) {
 
-        return em.createQuery("select ImportUsersDataEntity data where data.importUsersReport = :id", ImportUsersDataEntity.class)
+        return em.createQuery("select data from ImportUsersDataEntity data where data.importUsersReport = :id", ImportUsersDataEntity.class)
                 .setParameter("id", reportId)
                 .getResultList();
     }
