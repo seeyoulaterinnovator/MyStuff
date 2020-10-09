@@ -40,7 +40,7 @@ public class ImportSchedule {
 
     @PostConstruct
     private void init() {
-        final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
+        //final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
 
         final long intervalDuration = properties.getPropertyLong(TIMER_INTERVAL_DURATION_PROPERTY, DEFAULT_INTERVAL_DURATION);
         //timerService.createIntervalTimer(DEFAULT_INTERVAL_DURATION, intervalDuration, timerConfig);
