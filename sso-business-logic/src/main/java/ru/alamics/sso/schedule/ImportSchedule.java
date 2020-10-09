@@ -12,7 +12,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.*;
 import javax.ejb.Timer;
+import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -30,24 +32,31 @@ public class ImportSchedule {
     private ApplicationProperties properties;
     @EJB
     private ImportService importService;
+    //@Resource
+    //private TimerService timerService;
     @Resource
-    private TimerService timerService;
+    private ManagedScheduledExecutorService scheduler;
+
 
     @PostConstruct
     private void init() {
         final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
 
         final long intervalDuration = properties.getPropertyLong(TIMER_INTERVAL_DURATION_PROPERTY, DEFAULT_INTERVAL_DURATION);
-        timerService.createIntervalTimer(DEFAULT_INTERVAL_DURATION, intervalDuration, timerConfig);
+        //timerService.createIntervalTimer(DEFAULT_INTERVAL_DURATION, intervalDuration, timerConfig);
+        this.scheduler.scheduleAtFixedRate(this::schedule,
+                DEFAULT_INTERVAL_DURATION, intervalDuration,
+                TimeUnit.MILLISECONDS);
+
         log.info("Timer:{} is created, interval duration set to value={} milliseconds ", TIMER_NAME, intervalDuration);
     }
 
-    @Timeout
-    public void schedule(Timer timer) {
-        if (!TIMER_NAME.equals(timer.getInfo().toString())) {
-            return;
-        }
-
+    //@Timeout
+    //public void schedule(Timer timer) {
+    //    if (!TIMER_NAME.equals(timer.getInfo().toString())) {
+    //        return;
+    //    }
+    public void schedule() {
         List<ImportUsersReportEntity> importUsersReportEntities = importUsersReportRepository.findAllImportUsersReports()
                 .stream()
                 .filter(o -> o.getImportUserData() != null && !o.getImportUserData().isEmpty())
