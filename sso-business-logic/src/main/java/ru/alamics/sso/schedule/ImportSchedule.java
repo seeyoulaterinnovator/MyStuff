@@ -32,31 +32,32 @@ public class ImportSchedule {
     private ApplicationProperties properties;
     @EJB
     private ImportService importService;
-    //@Resource
-    //private TimerService timerService;
     @Resource
-    private ManagedScheduledExecutorService scheduler;
+    private TimerService timerService;
+    // не может грузить lazy
+    //@Resource
+    //private ManagedScheduledExecutorService scheduler;
 
 
     @PostConstruct
     private void init() {
-        //final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
+        final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
 
         final long intervalDuration = properties.getPropertyLong(TIMER_INTERVAL_DURATION_PROPERTY, DEFAULT_INTERVAL_DURATION);
-        //timerService.createIntervalTimer(DEFAULT_INTERVAL_DURATION, intervalDuration, timerConfig);
-        this.scheduler.scheduleAtFixedRate(this::schedule,
-                DEFAULT_INTERVAL_DURATION, intervalDuration,
-                TimeUnit.MILLISECONDS);
+        timerService.createIntervalTimer(DEFAULT_INTERVAL_DURATION, intervalDuration, timerConfig);
+        //this.scheduler.scheduleAtFixedRate(this::schedule,
+        //        DEFAULT_INTERVAL_DURATION, intervalDuration,
+        //        TimeUnit.MILLISECONDS);
 
         log.info("Timer:{} is created, interval duration set to value={} milliseconds ", TIMER_NAME, intervalDuration);
     }
 
-    //@Timeout
-    //public void schedule(Timer timer) {
-    //    if (!TIMER_NAME.equals(timer.getInfo().toString())) {
-    //        return;
-    //    }
-    public void schedule() {
+    @Timeout
+    public void schedule(Timer timer) {
+        if (!TIMER_NAME.equals(timer.getInfo().toString())) {
+            return;
+        }
+    //public void schedule() {
         List<ImportUsersReportEntity> importUsersReportEntities = importUsersReportRepository.findAllImportUsersReports()
                 .stream()
                 .filter(o -> o.getImportUserData() != null && !o.getImportUserData().isEmpty())
