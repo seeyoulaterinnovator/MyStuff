@@ -145,6 +145,8 @@ public class UserServiceImpl implements UserService {
 
     private void doGeneratePasswords(ImportUsersReportEntity importUsersReport) {
 
+        log.info("doGeneratePasswords");
+
         Map<String, UserModel> listToSend = new HashMap<>();
 
         for (ImportUsersDataEntity data : importUsersReport.getImportUserData()) {

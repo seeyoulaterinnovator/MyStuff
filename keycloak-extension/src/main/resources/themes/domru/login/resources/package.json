@@ -13,7 +13,7 @@
     "axios": "^0.19.2",
     "axios-mock-adapter": "ctimmerm/axios-mock-adapter#87c9c4c",
     "core-js": "^3.6.5",
-    "er-chat": "^1.0.49",
+    "er-chat": "1.0.49",
     "final-form": "^4.20.0",
     "imask": "^5.2.1",
     "js-cookie": "^2.2.1",
