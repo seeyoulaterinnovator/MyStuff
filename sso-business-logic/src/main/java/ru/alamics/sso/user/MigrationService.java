@@ -72,6 +72,8 @@ public class MigrationService {
                     createdUsers.getAndIncrement();
                     o.setCreated(true);
                     modified = true;
+                } else {
+                    user.setFirstName(o.getFirstName());
                 }
                 o.setUserId(user.getId());
 

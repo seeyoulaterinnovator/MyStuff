@@ -45,8 +45,7 @@ public class MigrationImportFormat implements ImportFormat {
         if (row.length > 2) userImport.setEmail(row[2]);
         if (row.length > 3) userImport.setFirstName(row[3]);
         if (row.length > 4) userImport.setPhone(row[4]);
-        // phone 2
-        if (row.length > 6) userImport.setCleanPassword(row[6]);
+        if (row.length > 5) userImport.setCleanPassword(row[5]);
 
         userImport.setCreated(false);
         return userImport;

@@ -185,6 +185,8 @@ public class UserServiceImpl implements UserService {
         for (UserModel user : listToSend.values()) {
             createAdminEvent(OperationType.CREATE, user);
         }
+
+        log.info("doGeneratePasswords done");
     }
 
     @Override
