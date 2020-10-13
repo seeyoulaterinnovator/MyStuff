@@ -28,10 +28,7 @@ import org.keycloak.utils.ProfileHelper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
-import ru.alamics.sso.user.FileServiceException;
-import ru.alamics.sso.user.ImportUsersReportService;
-import ru.alamics.sso.user.UserService;
-import ru.alamics.sso.user.UserServiceImpl;
+import ru.alamics.sso.user.*;
 import ru.alamics.sso.user.filetype.FileModel;
 import ru.alamics.sso.user.filetype.XlsxImpl;
 import ru.alamics.sso.user.model.*;
@@ -62,7 +59,7 @@ public class CustomUserResource {
     protected KeycloakSession session;
     private UserService userService;
     private AdminPermissionEvaluator auth;
-    private ImportUsersReportService importUsersReportService;
+    private ImportReportService importReportService;
     private RealmModel realm;
 
     public CustomUserResource(KeycloakSession session, AdminPermissionEvaluator auth) {
@@ -71,7 +68,7 @@ public class CustomUserResource {
         auth.users().canManage();
         this.userService = new UserServiceImpl(session, auth.adminAuth());
         try {
-            this.importUsersReportService = (ImportUsersReportService) new InitialContext().lookup("java:global/domru-sso/" + ImportUsersReportService.class.getSimpleName());
+            this.importReportService = (ImportReportService) new InitialContext().lookup("java:global/domru-sso/" + ImportReportService.class.getSimpleName());
         } catch (NamingException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
@@ -223,7 +220,7 @@ public class CustomUserResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getImportUsersReports() {
         return JsonResponse.success()
-                .addResult("importUsersReports", importUsersReportService.findImportUsersReportsByRealmId(session.getContext().getRealm().getName()))
+                .addResult("importUsersReports", importReportService.findImportUsersReportsByRealmId(session.getContext().getRealm().getName()))
                 .build();
     }
 

@@ -8,6 +8,7 @@ import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.user.model.DownloadUserRequest;
 import ru.alamics.sso.user.filetype.FileFactory;
 import ru.alamics.sso.user.filetype.FileModel;
+import ru.alamics.sso.user.model.ImportUsersDataModel;
 import ru.alamics.sso.user.model.UserParameter;
 import ru.alamics.sso.user.web.UserSearchDto;
 
@@ -23,13 +24,13 @@ public class ExportWorker {
     private RealmModel realm;
 
     private UserFindService userFindService;
-    private ImportUsersReportService importUsersReportService;
+    private ImportReportService importReportService;
 
     public ExportWorker(RealmModel realm) {
         this.realm = realm;
 
         this.userFindService = (UserFindService) Lookup.lookup(UserFindService.class);
-        this.importUsersReportService = (ImportUsersReportService) Lookup.lookup(ImportUsersReportService.class);
+        this.importReportService = (ImportReportService) Lookup.lookup(ImportReportService.class);
     }
 
     public byte[] exportUsers(DownloadUserRequest userRequest) throws IOException {
@@ -51,15 +52,17 @@ public class ExportWorker {
     }
 
     public FileModel downloadUsersByImportReportId(String importId) throws IOException {
-        ImportUsersReportEntity importUsersReport = importUsersReportService.findImportUsersReportByImportId(importId);
+        ImportUsersReportEntity importUsersReport = importReportService.findImportUsersReportByImportId(importId);
         FileModel file = FileFactory.createFileModel(importUsersReport.getName().substring(importUsersReport.getName().lastIndexOf(".") + 1));
 
         List<String> userParameterNames = UserServiceUtil.getUserParameterNames(UserParameter.values());
         List<String> finishParameterNames = userParameterNames.stream().skip(1).limit(userParameterNames.size() - 2).collect(Collectors.toList());
         finishParameterNames.addAll(Arrays.asList("Статус импорта", "Ошибки"));
         file.addRow(finishParameterNames);
-        importUsersReport.getImportUserData().stream()
-                .forEach(o -> {
+
+        List<ImportUsersDataModel> dataList = importReportService.getDataList(importUsersReport.getId());
+
+        dataList.forEach(o -> {
                     List<String> list = new LinkedList<>();
                     list.add(o.getFirstName());
                     list.add(o.getEmail());

@@ -44,10 +44,16 @@ public class ImportUsersReportRepository {
                 .getResultList();
     }
 
-    public ImportUsersReportEntity saveImportUsersReport(ImportUsersReportEntity importUsersReportEntity) {
+    public void saveImportUsersReport(ImportUsersReportEntity importUsersReportEntity) {
+
         em.persist(importUsersReportEntity);
         em.flush();
-        return importUsersReportEntity;
+    }
+
+    public void saveImportUsersData(ImportUsersDataEntity entity) {
+
+        em.persist(entity);
+        em.flush();
     }
 
     public ImportUsersReportEntity updateImportUsersReport(ImportUsersReportEntity importUsersReportEntity) {

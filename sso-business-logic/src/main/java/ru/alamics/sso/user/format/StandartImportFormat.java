@@ -1,8 +1,8 @@
 package ru.alamics.sso.user.format;
 
-import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.user.FileServiceException;
 import ru.alamics.sso.user.filetype.FileModel;
+import ru.alamics.sso.user.model.ImportUsersDataModel;
 import ru.alamics.sso.user.model.UserParameter;
 
 import java.util.LinkedList;
@@ -54,7 +54,7 @@ public class StandartImportFormat implements ImportFormat {
         }
     }
 
-    public List<ImportUsersDataEntity> getDataList(FileModel file) {
+    public List<ImportUsersDataModel> getDataList(FileModel file) {
 
         List<String[]> rows = file.getRows();
         rows.remove(0);
@@ -62,8 +62,8 @@ public class StandartImportFormat implements ImportFormat {
         return toUserRequestList(rows);
     }
 
-    private static ImportUsersDataEntity toUserImport(String[] row) {
-        ImportUsersDataEntity userImport = new ImportUsersDataEntity();
+    private static ImportUsersDataModel toUserImport(String[] row) {
+        ImportUsersDataModel userImport = new ImportUsersDataModel();
         for (int i = 0; i < row.length; i++) {
             switch (i) {
                 case 0:
@@ -94,11 +94,11 @@ public class StandartImportFormat implements ImportFormat {
         return userImport;
     }
 
-    private static List<ImportUsersDataEntity> toUserRequestList(List<String[]> rows) {
+    private static List<ImportUsersDataModel> toUserRequestList(List<String[]> rows) {
         if (rows == null || rows.isEmpty()) {
             return null;
         }
-        List<ImportUsersDataEntity> userImports = new LinkedList<>();
+        List<ImportUsersDataModel> userImports = new LinkedList<>();
         rows.forEach(o -> userImports.add(toUserImport(o)));
         return userImports;
     }

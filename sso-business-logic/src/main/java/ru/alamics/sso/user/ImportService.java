@@ -61,26 +61,23 @@ public class ImportService {
     @EJB
     private ImportReportService importReportService;
 
-    public void createImportUsers(ImportUsersReportEntity importUsersReport) {
+    public void createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList) {
 
-        if (FileFactory.CTL.equalsIgnoreCase(importUsersReport.getFiletype())) {
-            migrationService.createImportUsers(importUsersReport);
+        if (FileFactory.CTL.equalsIgnoreCase(reportModel.getFiletype())) {
+            migrationService.createImportUsers(reportModel, dataList);
         } else {
-            importUsers(importUsersReport);
+            importUsers(reportModel, dataList);
         }
     }
 
-    public void createImportUsersNew(ImportUsersReportModel reportModel) {
-        importUsers(reportModel);
-    }
-
-    private void importUsers(ImportUsersReportModel reportModel) {
+    private void importUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList) {
         log.info("Importing users from file {} in progress", reportModel.getName());
         int createdUsers = 0;
         int countClones = 0;
         int processedUsers = 0;
 
-        List<ImportUsersDataModel> dataList = importReportService.getDataList(reportModel);
+        if (dataList == null)
+            dataList = importReportService.getDataList(reportModel.getId());
 
         try {
             for (ImportUsersDataModel data : dataList) {
@@ -97,7 +94,7 @@ public class ImportService {
                     if (data.getTomsId() == null || data.getTomsId().isEmpty()) {
                         throw new NotFoundException("TomsId is not exist");
                     }
-                    //addUserPost(user, o);
+                    addUserPost(user, data);
                 } catch (FoundException e) {
                     List<Object> errors = new LinkedList<>();
                     e.getResult().forEach((k, v) -> {
@@ -105,7 +102,7 @@ public class ImportService {
                     });
                     data.setErrors(errors.toString().substring(1, errors.toString().length() - 1));
                     countClones++;
-                } catch (NotFoundException | NotValidException /*| FoundUserPostException*/ e) {
+                } catch (NotFoundException | NotValidException | FoundUserPostException e) {
                     data.setErrors(e.getMessage());
                     log.error("Importing user data is failed. {}", e.getMessage());
                 } finally {
@@ -127,63 +124,6 @@ public class ImportService {
             log.info(String.format("Importing users from file %s is done: countUsers=%s, countCreatedUsers=%s, countClones=%s ",
                     reportModel.getName(), reportModel.getCountImportUsers(), reportModel.getCountCreatedUsers(),
                     reportModel.getCountClones()));
-
-        } catch (Exception e) {
-            log.error("Error, but processed " + processedUsers, e);
-            throw e;
-        }
-    }
-
-    private void importUsers(ImportUsersReportEntity importUsersReport) {
-        log.info("importing users from file {} in progress", importUsersReport.getName());
-        AtomicInteger createdUsers = new AtomicInteger();
-        AtomicInteger countClones = new AtomicInteger();
-        int processedUsers = 0;
-
-        try {
-            for (ImportUsersDataEntity o : importUsersReport.getImportUserData()) {
-                try {
-                    o.setEmail(UserServiceUtil.doCleanMail(o.getEmail()));
-                    o.setPhone(UserServiceUtil.doCleanPhone(o.getPhone()));
-
-                    o.setErrors(null);
-                    checkImportUser(importUsersReport.getRealmId(), o.getEmail(), o.getPhone());
-                    UserEntity user = createUser(importUsersReport.getRealmId(), o);
-                    createdUsers.getAndIncrement();
-                    o.setCreated(true);
-                    o.setUserId(user.getId());
-                    if (o.getTomsId() == null || o.getTomsId().isEmpty()) {
-                        throw new NotFoundException("TomsId is not exist");
-                    }
-                    //addUserPost(user, o);
-                } catch (FoundException e) {
-                    List<Object> errors = new LinkedList<>();
-                    e.getResult().forEach((k, v) -> {
-                        errors.add(v);
-                    });
-                    o.setErrors(errors.toString().substring(1, errors.toString().length() - 1));
-                    countClones.getAndIncrement();
-                } catch (NotFoundException | NotValidException /*| FoundUserPostException*/ e) {
-                    o.setErrors(e.getMessage());
-                    log.error("Importing user data is failed. {}", e.getMessage());
-                } finally {
-                    importUsersReportRepository.updateImportUsersData(o);
-                    processedUsers++;
-                    if (processedUsers % 500 == 0) {
-                        log.info("processedUsers " + processedUsers);
-                    }
-                }
-            }
-            importUsersReport.setCountClones(countClones.intValue());
-            importUsersReport.setCountCreatedUsers(createdUsers.intValue());
-            importUsersReport.setStatus(ImportUsersReportStatus.DONE);
-
-            importUsersReportRepository.updateImportUsersReport(importUsersReport);
-
-            createAdminEvent(OperationType.CREATE, importUsersReport, importUsersReport.getRealmId());
-            log.info(String.format("importing users from file %s is done: countUsers=%s, countCreatedUsers=%s, countClones=%s ",
-                    importUsersReport.getName(), importUsersReport.getCountImportUsers(), importUsersReport.getCountCreatedUsers(),
-                    importUsersReport.getCountClones()));
 
         } catch (Exception e) {
             log.error("Error, but processed " + processedUsers, e);
@@ -238,6 +178,7 @@ public class ImportService {
     }
 
     private UserEntity createUser(String realmId, ImportUsersDataModel data) {
+
         UserEntity user = new UserEntity();
         user.setCreatedTimestamp(System.currentTimeMillis());
         user.setUsername(data.getEmail().toLowerCase());
@@ -248,20 +189,6 @@ public class ImportService {
         user.setEnabled(false);
         user = userRepository.save(user);
 
-        return user;
-    }
-
-    private UserEntity createUser(String realmId, ImportUsersDataEntity importUserData) {
-        UserEntity user = new UserEntity();
-        user.setCreatedTimestamp(System.currentTimeMillis());
-        user.setUsername(importUserData.getEmail().toLowerCase());
-        user.setEmail(importUserData.getEmail().toLowerCase(), false);
-        user.setFirstName(importUserData.getFirstName());
-        user.setRealmId(realmId);
-        user.setEmailVerified(false);
-        user.setEnabled(false);
-        user = userRepository.save(user);
-/*
         RealmEntity realm = realmRepository.findRealmEntityById(realmId);
         if (realm.getDefaultRoles() != null && !realm.getDefaultRoles().isEmpty()) {
             UserEntity finalUser = user;
@@ -285,9 +212,9 @@ public class ImportService {
         attributeEntity.setId(UUID.randomUUID().toString());
         attributeEntity.setName(ATTR_PHONE_NAME);
         attributeEntity.setUser(user);
-        attributeEntity.setValue(importUserData.getPhone());
+        attributeEntity.setValue(data.getPhone());
         userRepository.saveAttributes(attributeEntity);
-*/
+
         return user;
     }
 
@@ -302,30 +229,19 @@ public class ImportService {
         adminEventRepository.save(adminEvent);
     }
 
-    private void createAdminEvent(OperationType operationType, ImportUsersReportEntity report, String realmId) {
-        AdminEventEntity adminEvent = new AdminEventEntity();
-        adminEvent.setTime(Time.toMillis(Time.currentTime()));
-        adminEvent.setRealmId(realmId);
-        adminEvent.setOperationType(operationType.name());
-        adminEvent.setAuthRealmId(realmId);
-        adminEvent.setResourcePath("schedule/importUsersReport/" + report.getId());
-        adminEvent.setResourceType("USER");
-        adminEventRepository.save(adminEvent);
-    }
-
-    private void addUserPost(UserEntity user, ImportUsersDataEntity userImport) throws NotFoundException, FoundUserPostException, NotValidException {
+    private void addUserPost(UserEntity user, ImportUsersDataModel data) throws NotFoundException, FoundUserPostException, NotValidException {
         UserPostRequest userPostRequest = new UserPostRequest();
         userPostRequest.setUserId(user.getId());
-        userPostRequest.setTomsId(userImport.getTomsId());
-        userPostRequest.setDmpId(userImport.getDmpId());
+        userPostRequest.setTomsId(data.getTomsId());
+        userPostRequest.setDmpId(data.getDmpId());
 
-        userPostRequest.setRoleId(userPostService.getUserPostRole(userImport.getRole()));
+        userPostRequest.setRoleId(userPostService.getUserPostRole(data.getRole()));
         UserPostResponse userPostResponse = userPostService.save(userPostRequest);
 
-        addSystemRoles(userImport, userPostResponse.getId());
+        addSystemRoles(data, userPostResponse.getId());
     }
 
-    private void addSystemRoles(ImportUsersDataEntity userImport, String userPostId) throws javassist.NotFoundException {
+    private void addSystemRoles(ImportUsersDataModel userImport, String userPostId) throws javassist.NotFoundException {
         if (userImport.getSystems() == null || userImport.getSystems().isEmpty()) {
             return;
         }

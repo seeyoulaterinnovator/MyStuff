@@ -64,25 +64,12 @@ public class ImportSchedule {
 
         List<ImportUsersReportModel> reportList = importReportService.getReportListByStatus(ImportUsersReportStatus.AWAITING);
 
-
-        /*
-        List<ImportUsersReportEntity> importUsersReportEntities = importUsersReportRepository.findAllImportUsersReports()
-                .stream()
-                .filter(o -> o.getImportUserData() != null && !o.getImportUserData().isEmpty())
-                .filter(o -> o.getStatus().equals(ImportUsersReportStatus.AWAITING))
-        //        .peek(o -> {
-        //            o.setStatus(ImportUsersReportStatus.IN_PROGRESS);
-        //            importUsersReportRepository.updateImportUsersReport(o);
-        //        })
-                .collect(Collectors.toList());
-        */
-
         for (ImportUsersReportModel en : reportList) {
             importReportService.setReportStatus(en, ImportUsersReportStatus.IN_PROGRESS);
         }
 
         for (ImportUsersReportModel reportModel : reportList) {
-            importService.createImportUsersNew(reportModel);
+            importService.createImportUsers(reportModel, null);
         }
     }
 

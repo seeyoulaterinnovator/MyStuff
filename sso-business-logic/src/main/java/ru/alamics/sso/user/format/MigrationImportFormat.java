@@ -1,8 +1,8 @@
 package ru.alamics.sso.user.format;
 
-import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.user.FileServiceException;
 import ru.alamics.sso.user.filetype.FileModel;
+import ru.alamics.sso.user.model.ImportUsersDataModel;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -16,7 +16,7 @@ public class MigrationImportFormat implements ImportFormat {
         // TODO
     }
 
-    public List<ImportUsersDataEntity> getDataList(FileModel file) {
+    public List<ImportUsersDataModel> getDataList(FileModel file) {
 
         // чищу весь хэдер
         /*
@@ -37,26 +37,25 @@ public class MigrationImportFormat implements ImportFormat {
         return toUserRequestList(file.getRows());
     }
 
-    private static ImportUsersDataEntity toUserImport(String[] row) {
+    private static ImportUsersDataModel toUserImport(String[] row) {
 
-        ImportUsersDataEntity userImport = new ImportUsersDataEntity();
+        ImportUsersDataModel userImport = new ImportUsersDataModel();
         if (row.length > 0) userImport.setDmpId(row[0]);
         if (row.length > 1) userImport.setTomsId(row[1]);
         if (row.length > 2) userImport.setEmail(row[2]);
         if (row.length > 3) userImport.setFirstName(row[3]);
         if (row.length > 4) userImport.setPhone(row[4]);
-        // phone 2
-        if (row.length > 6) userImport.setCleanPassword(row[6]);
+        if (row.length > 5) userImport.setCleanPassword(row[5]);
 
         userImport.setCreated(false);
         return userImport;
     }
 
-    private static List<ImportUsersDataEntity> toUserRequestList(List<String[]> rows) {
+    private static List<ImportUsersDataModel> toUserRequestList(List<String[]> rows) {
         if (rows == null || rows.isEmpty()) {
             return null;
         }
-        List<ImportUsersDataEntity> userImports = new LinkedList<>();
+        List<ImportUsersDataModel> userImports = new LinkedList<>();
         rows.forEach(o -> userImports.add(toUserImport(o)));
         return userImports;
     }

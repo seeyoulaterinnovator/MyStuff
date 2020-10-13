@@ -49,7 +49,9 @@ public class UserServiceImpl implements UserService {
     protected KeycloakSession session;
     private AdminAuth auth;
     private RealmModel realm;
+    // TODO rename these three
     private ImportUsersReportService importUsersReportService;
+    private ImportReportService importReportService;
     private ImportService importService;
 
     private ExportWorker exportWorker;
@@ -61,6 +63,7 @@ public class UserServiceImpl implements UserService {
         this.realm = session.getContext().getRealm();
 
         this.importUsersReportService = (ImportUsersReportService) Lookup.lookup(ImportUsersReportService.class);
+        this.importReportService = (ImportReportService) Lookup.lookup(ImportReportService.class);
         this.importService = (ImportService) Lookup.lookup(ImportService.class);
 
         this.exportWorker = new ExportWorker(realm);
@@ -87,7 +90,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void activateImportUsersFromReport(String importId) {
-        ImportUsersReportEntity importUsersReport = importUsersReportService.findImportUsersReportByImportId(importId);
+        ImportUsersReportEntity importUsersReport = importReportService.findImportUsersReportByImportId(importId);
         for (ImportUsersDataEntity importData : importUsersReport.getImportUserData()) {
             String id = importData.getUserId();
             if (id == null || id.isEmpty()) {
@@ -110,16 +113,16 @@ public class UserServiceImpl implements UserService {
 
         ImportFormat impF = FileFactory.getImportFormat(file);
         impF.checkStructure(file);
-        List<ImportUsersDataEntity> dataList = impF.getDataList(file);
+        List<ImportUsersDataModel> dataList = impF.getDataList(file);
 
         // create report
-        ImportUsersReportEntity importUsersReport = importUsersReportService.createImportUsersReport(realm, Util.getFileName(content), dataList);
+        ImportUsersReportModel importUsersReport = importUsersReportService.createImportUsersReport(realm, Util.getFileName(content), dataList);
 
-        importService.createImportUsers(importUsersReport);
+        importService.createImportUsers(importUsersReport, dataList);
 
-        doGeneratePasswords(importUsersReport);
+        doGeneratePasswords(dataList);
 
-        ImportResponse importResponse = UserMapper.toImportUsersReportEntity(importUsersReport);
+        ImportResponse importResponse = UserMapper.toImportUsersReportEntity(importUsersReport, dataList);
 
         log.info("Upload users success!", importResponse);
         return importResponse;
@@ -135,7 +138,7 @@ public class UserServiceImpl implements UserService {
         // different file format
         ImportFormat impF = FileFactory.getImportFormat(file);
         impF.checkStructure(file);
-        List<ImportUsersDataEntity> dataList = impF.getDataList(file);
+        List<ImportUsersDataModel> dataList = impF.getDataList(file);
 
         // create report
         importUsersReportService.createImportUsersReportAsync(realm, Util.getFileName(content), dataList);
@@ -143,11 +146,11 @@ public class UserServiceImpl implements UserService {
         log.info("Upload import users file success");
     }
 
-    private void doGeneratePasswords(ImportUsersReportEntity importUsersReport) {
+    private void doGeneratePasswords(List<ImportUsersDataModel> dataList) {
 
         Map<String, UserModel> listToSend = new HashMap<>();
 
-        for (ImportUsersDataEntity data : importUsersReport.getImportUserData()) {
+        for (ImportUsersDataModel data : dataList) {
 
             if (data.getUserId() != null && data.getCleanPassword() != null) {
 
@@ -171,7 +174,7 @@ public class UserServiceImpl implements UserService {
                     log.info("Migration: set password to " + user.getId());
                     if (!errors.isEmpty()) {
                         data.setErrors(data.getErrors() + errors);
-                        importUsersReportService.updateImportUsersData(data);
+                        importReportService.updateImportUsersData(data);
                     } else {
                         // чтобы не было дублей
                         listToSend.put(user.getId(), user);

@@ -17,6 +17,8 @@ import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.user.mapper.UserMapper;
+import ru.alamics.sso.user.model.ImportUsersDataModel;
+import ru.alamics.sso.user.model.ImportUsersReportModel;
 import ru.alamics.sso.util.Util;
 import ru.alamics.sso.util.validator.*;
 
@@ -48,66 +50,87 @@ public class MigrationService {
     private AdminEventRepository adminEventRepository;
     @EJB
     private UserPostService userPostService;
+    @EJB
+    private ImportReportService importReportService;
 
-    public void createImportUsers(ImportUsersReportEntity importUsersReport) {
+    public void createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList) {
 
-        log.info("importing users from file {} in progress", importUsersReport.getName());
+        log.info("importing users from file {} in progress", reportModel.getName());
         long migrationStarts = new Date().getTime();
 
-        AtomicInteger createdUsers = new AtomicInteger();
-        AtomicInteger countClones = new AtomicInteger();
+        int createdUsers = 0;
+        int countClones = 0;
+        int processedUsers = 0;
 
-        for (ImportUsersDataEntity o : importUsersReport.getImportUserData()) {
-            UserEntity user = null;
-            boolean modified = false;
-            try {
-                o.setEmail(UserServiceUtil.doCleanMail(o.getEmail()));
-                o.setPhone(UserServiceUtil.doCleanPhone(o.getPhone()));
+        if (dataList == null)
+            dataList = importReportService.getDataList(reportModel.getId());
 
-                o.setErrors(null);
+        try {
+            for (ImportUsersDataModel data : dataList) {
+                UserEntity user = null;
+                boolean modified = false;
+                try {
+                    data.setEmail(UserServiceUtil.doCleanMail(data.getEmail()));
+                    data.setPhone(UserServiceUtil.doCleanPhone(data.getPhone()));
 
-                user = checkImportUser(importUsersReport.getRealmId(), o.getEmail(), o.getPhone());
-                if (user == null) {
-                    user = createUser(importUsersReport.getRealmId(), o);
-                    createdUsers.getAndIncrement();
-                    o.setCreated(true);
-                    modified = true;
-                }
-                o.setUserId(user.getId());
+                    data.setErrors(null);
 
-                checkToms(o);
-                boolean modif = addUserPost(user, o);
-                if (modif) {
-                    modified = true;
-                }
+                    user = checkImportUser(reportModel.getRealmId(), data.getEmail(), data.getPhone());
+                    if (user == null) {
+                        user = createUser(reportModel.getRealmId(), data);
+                        createdUsers++;
+                        data.setCreated(true);
+                        modified = true;
+                    } else {
+                        user.setFirstName(data.getFirstName());
+                    }
+                    data.setUserId(user.getId());
 
-            } catch (AllNotValidException av) {
+                    checkToms(data);
+                    boolean modif = addUserPost(user, data);
+                    if (modif) {
+                        modified = true;
+                    }
 
-                o.setErrors(av.getMessageList().toString());
-                log.error("Importing user data is failed. {}", av.getMessageList().toString());
+                } catch (AllNotValidException av) {
 
-            } catch (NotFoundException | NotValidException e) {
-                o.setErrors(e.getMessage());
-                log.error("Importing user data is failed. {}", e.getMessage());
-            } finally {
+                    data.setErrors(av.getMessageList().toString());
+                    log.error("Importing user data is failed. {}", av.getMessageList().toString());
 
-                if (user != null && modified) {
-                    addMigrationAttribute(importUsersReport.getId(), user, migrationStarts);
-                } else if (!modified) {
-                    countClones.incrementAndGet();
+                } catch (NotFoundException | NotValidException e) {
+                    data.setErrors(e.getMessage());
+                    log.error("Importing user data is failed. {}", e.getMessage());
+                } finally {
+
+                    if (user != null && modified) {
+                        addMigrationAttribute(reportModel.getId(), user, migrationStarts);
+                    } else if (!modified) {
+                        countClones++;
+                    }
+
+                    importReportService.updateImportUsersData(data);
+                    processedUsers++;
+                    if (processedUsers % 500 == 0) {
+                        log.info("ProcessedUsers " + processedUsers);
+                    }
                 }
             }
+            reportModel.setCountClones(countClones);
+            reportModel.setCountCreatedUsers(createdUsers);
+            reportModel.setStatus(ImportUsersReportStatus.DONE);
+
+            importReportService.setReportDone(reportModel);
+
+            createAdminEvent(OperationType.CREATE, reportModel, reportModel.getRealmId());
+
+            log.info(String.format("importing users from file %s is done: countUsers=%s, countCreatedUsers=%s, countClones=%s ",
+                    reportModel.getName(), reportModel.getCountImportUsers(), reportModel.getCountCreatedUsers(),
+                    reportModel.getCountClones()));
+
+        } catch (Exception e) {
+            log.error("Error, but processed " + processedUsers, e);
+            throw e;
         }
-        importUsersReport.setCountClones(countClones.intValue());
-        importUsersReport.setCountCreatedUsers(createdUsers.intValue());
-        importUsersReport.setStatus(ImportUsersReportStatus.DONE);
-
-        importUsersReportRepository.updateImportUsersReport(importUsersReport);
-
-        createAdminEvent(OperationType.CREATE, importUsersReport, importUsersReport.getRealmId());
-        log.info(String.format("importing users from file %s is done: countUsers=%s, countCreatedUsers=%s, countClones=%s ",
-                importUsersReport.getName(), importUsersReport.getCountImportUsers(), importUsersReport.getCountCreatedUsers(),
-                importUsersReport.getCountClones()));
     }
 
     private void addMigrationAttribute(String reportId, UserEntity user, long migrationStarts) {
@@ -132,7 +155,7 @@ public class MigrationService {
         return getUserByEmailAndUsername(realmId, email);
     }
 
-    private void checkToms(ImportUsersDataEntity o) throws NotFoundException {
+    private void checkToms(ImportUsersDataModel o) throws NotFoundException {
 
         if (o.getTomsId() == null || o.getTomsId().isEmpty()) {
             throw new NotFoundException("TomsId is not exist");
@@ -154,7 +177,7 @@ public class MigrationService {
         return userRepository.getFirstUserByUsername(realmId, email);
     }
 
-    private UserEntity createUser(String realmId, ImportUsersDataEntity importUserData) {
+    private UserEntity createUser(String realmId, ImportUsersDataModel importUserData) {
 
         UserEntity user = new UserEntity();
         user.setCreatedTimestamp(System.currentTimeMillis());
@@ -199,7 +222,7 @@ public class MigrationService {
         return user;
     }
 
-    private void createAdminEvent(OperationType operationType, ImportUsersReportEntity report, String realmId) {
+    private void createAdminEvent(OperationType operationType, ImportUsersReportModel report, String realmId) {
         AdminEventEntity adminEvent = new AdminEventEntity();
         adminEvent.setTime(Time.toMillis(Time.currentTime()));
         adminEvent.setRealmId(realmId);
@@ -210,7 +233,7 @@ public class MigrationService {
         adminEventRepository.save(adminEvent);
     }
 
-    private boolean addUserPost(UserEntity user, ImportUsersDataEntity userImport) throws NotFoundException, NotValidException {
+    private boolean addUserPost(UserEntity user, ImportUsersDataModel userImport) throws NotFoundException, NotValidException {
 
         boolean modified = false;
 

@@ -9,6 +9,8 @@ import ru.alamics.sso.jpa.model.UserSummaryView;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.user.model.ImportResponse;
+import ru.alamics.sso.user.model.ImportUsersDataModel;
+import ru.alamics.sso.user.model.ImportUsersReportModel;
 import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.user.web.ImportUsersReportDto;
 import ru.alamics.sso.user.web.UserDto;
@@ -195,7 +197,7 @@ public class UserMapper {
         return userRequest;
     }
 
-    public static ImportResponse toImportUsersReportEntity(ImportUsersReportEntity importUserReport) {
+    public static ImportResponse toImportUsersReportEntity(ImportUsersReportModel importUserReport, List<ImportUsersDataModel> dataList ) {
         if (importUserReport == null) {
             return null;
         }
@@ -204,7 +206,7 @@ public class UserMapper {
         importResponse.getCreatedUsers().set(importUserReport.getCountCreatedUsers());
         importResponse.getCountClones().set(importUserReport.getCountClones());
         // TODO ?
-        for (ImportUsersDataEntity data : importUserReport.getImportUserData()) {
+        for (ImportUsersDataModel data : dataList) {
             importResponse.addCreatedUserIds(data.getEmail(), data.getUserId());
 
             Map<String, Object> map = new HashMap<>();
@@ -217,16 +219,16 @@ public class UserMapper {
         return importResponse;
     }
 
-    public static ImportUsersReportEntity toImportUsersReportEntity(String realmId, String name, List<ImportUsersDataEntity> importUserDataEntities) {
+    public static ImportUsersReportModel toImportUsersReportEntity(String realmId, String name, List<ImportUsersDataModel> importUserDataEntities) {
         if (importUserDataEntities == null) {
             return null;
         }
-        ImportUsersReportEntity importUsersReport = new ImportUsersReportEntity();
+        ImportUsersReportModel importUsersReport = new ImportUsersReportModel();
         importUsersReport.setName(name);
         importUsersReport.setCountImportUsers(importUserDataEntities.size());
         importUsersReport.setRealmId(realmId);
         //importUserDataEntities.forEach(o -> o.setImportUsersReport(importUsersReport));
-        importUsersReport.setImportUserData(importUserDataEntities);
+        //importUsersReport.setImportUserData(importUserDataEntities);
         return importUsersReport;
     }
 

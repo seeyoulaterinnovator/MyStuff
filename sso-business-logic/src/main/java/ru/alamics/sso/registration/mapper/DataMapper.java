@@ -181,4 +181,39 @@ public class DataMapper {
 
         return data;
     }
+
+    public static ImportUsersReportEntity newReportEntity(ImportUsersReportModel model) {
+
+        ImportUsersReportEntity entity = new ImportUsersReportEntity();
+        entity.setId(model.getId());
+        entity.setName(model.getName());
+        entity.setRealmId(model.getRealmId());
+        entity.setImportDate(model.getImportDate());
+        entity.setCountImportUsers(model.getCountImportUsers());
+        entity.setCountCreatedUsers(model.getCountCreatedUsers());
+        entity.setCountClones(model.getCountClones());
+        entity.setStatus(model.getStatus());
+        entity.setFiletype(model.getFiletype());
+
+        return entity;
+    }
+
+    public static ImportUsersDataEntity newDataEntity(ImportUsersDataModel data) {
+
+        ImportUsersDataEntity entity = new ImportUsersDataEntity();
+        entity.setId(data.getId());
+        entity.setImportUsersReport(data.getReportId());
+        entity.setFirstName(data.getFirstName());
+        entity.setEmail(data.getEmail());
+        entity.setPhone(data.getPhone());
+        entity.setTomsId(data.getTomsId());
+        entity.setDmpId(data.getDmpId());
+        entity.setRole(data.getRole());
+        entity.setSystems(data.getSystems());
+        entity.setCreated(data.isCreated());
+        entity.setUserId(data.getUserId());
+        entity.setErrors(data.getErrors());
+
+        return entity;
+    }
 }
