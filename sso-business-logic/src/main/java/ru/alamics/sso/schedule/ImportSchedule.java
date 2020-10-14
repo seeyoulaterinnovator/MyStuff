@@ -34,26 +34,23 @@ public class ImportSchedule {
     private ApplicationProperties properties;
     @EJB
     private ImportService importService;
-    @Resource
-    private TimerService timerService;
+    //@Resource
+    //private TimerService timerService;
 
     @Resource
     private ManagedScheduledExecutorService scheduler;
-
-    static final long INITIAL_DELAY = 60;
-    static final long PERIOD = 3600;
 
     @PostConstruct
     private void init() {
         //final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
 
-        //final long intervalDuration = properties.getPropertyLong(TIMER_INTERVAL_DURATION_PROPERTY, DEFAULT_INTERVAL_DURATION);
+        final long intervalDuration = properties.getPropertyLong(TIMER_INTERVAL_DURATION_PROPERTY, DEFAULT_INTERVAL_DURATION);
         //timerService.createIntervalTimer(DEFAULT_INTERVAL_DURATION, intervalDuration, timerConfig);
         //log.info("Timer:{} is created, interval duration set to value={} milliseconds ", TIMER_NAME, intervalDuration);
 
         this.scheduler.scheduleAtFixedRate(this::schedule,
-                INITIAL_DELAY, PERIOD,
-                TimeUnit.SECONDS);
+                DEFAULT_INTERVAL_DURATION, intervalDuration,
+                TimeUnit.MILLISECONDS);
     }
 
     //@Timeout
