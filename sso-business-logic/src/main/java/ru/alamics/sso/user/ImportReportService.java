@@ -90,6 +90,7 @@ public class ImportReportService {
             ImportUsersDataEntity importUsersdataEntity = DataMapper.newDataEntity(data);
 
             importUsersReportRepository.saveImportUsersData(importUsersdataEntity);
+            data.setId(importUsersdataEntity.getId());
         }
     }
 
