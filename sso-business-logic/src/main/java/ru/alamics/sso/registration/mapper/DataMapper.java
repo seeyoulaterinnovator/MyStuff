@@ -178,6 +178,7 @@ public class DataMapper {
         data.setCreated(entity.isCreated());
         data.setUserId(entity.getUserId());
         data.setErrors(entity.getErrors());
+        data.setStatus(entity.getStatus());
 
         return data;
     }
@@ -213,6 +214,7 @@ public class DataMapper {
         entity.setCreated(data.isCreated());
         entity.setUserId(data.getUserId());
         entity.setErrors(data.getErrors());
+        entity.setStatus(data.getStatus());
 
         return entity;
     }

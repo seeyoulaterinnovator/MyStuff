@@ -9,6 +9,7 @@ import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.user.ImportReportService;
 import ru.alamics.sso.user.ImportService;
 import ru.alamics.sso.user.model.ImportUsersReportModel;
+import ru.alamics.sso.user.model.RepeatNextTimeException;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -27,6 +28,8 @@ public class ImportSchedule {
     private static final String TIMER_NAME = "Import Schedule Timer";
     private static final long DEFAULT_INTERVAL_DURATION = 60000;
     private final static String TIMER_INTERVAL_DURATION_PROPERTY = "application.schedule.import.milliseconds";
+
+    private static final long MAX_TIMEOUT_MILLI = (4 * 60 + 45) * 1000L;
 
     @EJB
     private ImportReportService importReportService;
@@ -59,6 +62,8 @@ public class ImportSchedule {
         //    return;
         //}
 
+        long scheduleStart = System.currentTimeMillis();
+
         List<ImportUsersReportModel> reportList = importReportService.getReportListByStatus(ImportUsersReportStatus.AWAITING);
 
         for (ImportUsersReportModel en : reportList) {
@@ -66,8 +71,17 @@ public class ImportSchedule {
         }
 
         for (ImportUsersReportModel reportModel : reportList) {
-            importService.createImportUsers(reportModel, null);
+            importService.createImportUsers(reportModel, null, scheduleStart);
         }
     }
 
+    public static void checkTimeout(Long scheduleStart) throws RepeatNextTimeException {
+
+        if (scheduleStart == null)
+            return;
+
+        long now = System.currentTimeMillis();
+        if (now - scheduleStart > MAX_TIMEOUT_MILLI)
+            throw new RepeatNextTimeException();
+    }
 }

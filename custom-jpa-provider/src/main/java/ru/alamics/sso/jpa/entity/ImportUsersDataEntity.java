@@ -3,6 +3,8 @@ package ru.alamics.sso.jpa.entity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
+import ru.alamics.sso.jpa.entity.common.ImportUsersDataStatus;
+import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 
 import javax.persistence.*;
 
@@ -40,6 +42,9 @@ public class ImportUsersDataEntity {
     private String userId;
     @Column(name = "errors")
     private String errors;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private ImportUsersDataStatus status = ImportUsersDataStatus.AWAITING;
 
     // not a column
     @Transient

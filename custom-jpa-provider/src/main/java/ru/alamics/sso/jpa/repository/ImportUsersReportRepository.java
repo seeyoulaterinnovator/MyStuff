@@ -76,12 +76,12 @@ public class ImportUsersReportRepository {
                 .executeUpdate();
     }
 
-    public void setReportDone(String id, int clones, int created) {
+    public void updateReport(String id, ImportUsersReportStatus status, int clones, int created) {
 
         em.createQuery("update ImportUsersReportEntity rep " +
                 "set rep.status = :status, rep.countClones = :clones, rep.countCreatedUsers = :created where rep.id = :id")
                 .setParameter("id", id)
-                .setParameter("status", ImportUsersReportStatus.DONE)
+                .setParameter("status", status)
                 .setParameter("clones", clones)
                 .setParameter("created", created)
                 .executeUpdate();

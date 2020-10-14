@@ -45,9 +45,9 @@ public class ImportReportService {
         return list.stream().map(DataMapper::toDataModel).collect(Collectors.toList());
     }
 
-    public void setReportDone(ImportUsersReportModel report) {
+    public void updateReport(ImportUsersReportModel report) {
 
-        importUsersReportRepository.setReportDone(report.getId(), report.getCountClones(), report.getCountCreatedUsers());
+        importUsersReportRepository.updateReport(report.getId(), report.getStatus(), report.getCountClones(), report.getCountCreatedUsers());
     }
 
     public void updateImportUsersData(ImportUsersDataModel data) {
@@ -62,6 +62,7 @@ public class ImportReportService {
         entity.setCreated(data.isCreated());
         entity.setUserId(data.getUserId());
         entity.setErrors(data.getErrors());
+        entity.setStatus(data.getStatus());
 
         importUsersReportRepository.updateImportUsersData(entity);
     }

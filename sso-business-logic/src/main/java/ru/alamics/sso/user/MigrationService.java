@@ -8,6 +8,7 @@ import org.keycloak.events.jpa.AdminEventEntity;
 import org.keycloak.models.jpa.entities.*;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
+import ru.alamics.sso.jpa.entity.common.ImportUsersDataStatus;
 import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.jpa.repository.*;
 import ru.alamics.sso.registration.FoundException;
@@ -16,9 +17,11 @@ import ru.alamics.sso.registration.dto.ExternalSystemRoleDto;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserPostService;
+import ru.alamics.sso.schedule.ImportSchedule;
 import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.user.model.ImportUsersDataModel;
 import ru.alamics.sso.user.model.ImportUsersReportModel;
+import ru.alamics.sso.user.model.RepeatNextTimeException;
 import ru.alamics.sso.util.Util;
 import ru.alamics.sso.util.validator.*;
 
@@ -53,13 +56,13 @@ public class MigrationService {
     @EJB
     private ImportReportService importReportService;
 
-    public void createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList) {
+    public void createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart) {
 
         log.info("importing users from file {} in progress", reportModel.getName());
         long migrationStarts = new Date().getTime();
 
-        int createdUsers = 0;
-        int countClones = 0;
+        int createdUsers = reportModel.getCountCreatedUsers();
+        int countClones = reportModel.getCountClones();
         int processedUsers = 0;
 
         if (dataList == null)
@@ -67,6 +70,12 @@ public class MigrationService {
 
         try {
             for (ImportUsersDataModel data : dataList) {
+
+                ImportSchedule.checkTimeout(scheduleStart);
+
+                if (data.getStatus() == ImportUsersDataStatus.DONE)
+                    continue;
+
                 UserEntity user = null;
                 boolean modified = false;
                 try {
@@ -108,6 +117,8 @@ public class MigrationService {
                         countClones++;
                     }
 
+                    data.setStatus(ImportUsersDataStatus.DONE);
+
                     importReportService.updateImportUsersData(data);
                     processedUsers++;
                     if (processedUsers % 500 == 0) {
@@ -119,13 +130,22 @@ public class MigrationService {
             reportModel.setCountCreatedUsers(createdUsers);
             reportModel.setStatus(ImportUsersReportStatus.DONE);
 
-            importReportService.setReportDone(reportModel);
+            importReportService.updateReport(reportModel);
 
             createAdminEvent(OperationType.CREATE, reportModel, reportModel.getRealmId());
 
             log.info(String.format("importing users from file %s is done: countUsers=%s, countCreatedUsers=%s, countClones=%s ",
                     reportModel.getName(), reportModel.getCountImportUsers(), reportModel.getCountCreatedUsers(),
                     reportModel.getCountClones()));
+
+        } catch (RepeatNextTimeException rte) {
+
+            log.info("Interrupted by timeout, processed " + processedUsers);
+
+            reportModel.setCountClones(countClones);
+            reportModel.setCountCreatedUsers(createdUsers);
+            reportModel.setStatus(ImportUsersReportStatus.AWAITING);
+            importReportService.updateReport(reportModel);
 
         } catch (Exception e) {
             log.error("Error, but processed " + processedUsers, e);

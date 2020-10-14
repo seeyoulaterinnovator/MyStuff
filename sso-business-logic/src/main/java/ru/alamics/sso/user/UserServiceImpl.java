@@ -118,7 +118,7 @@ public class UserServiceImpl implements UserService {
         // create report
         ImportUsersReportModel importUsersReport = importUsersReportService.createImportUsersReport(realm, Util.getFileName(content), dataList);
 
-        importService.createImportUsers(importUsersReport, dataList);
+        importService.createImportUsers(importUsersReport, dataList, null);
 
         doGeneratePasswords(dataList);
 

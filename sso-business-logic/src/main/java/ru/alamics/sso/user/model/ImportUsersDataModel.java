@@ -1,6 +1,7 @@
 package ru.alamics.sso.user.model;
 
 import lombok.Data;
+import ru.alamics.sso.jpa.entity.common.ImportUsersDataStatus;
 
 @Data
 public class ImportUsersDataModel {
@@ -17,6 +18,7 @@ public class ImportUsersDataModel {
     private boolean isCreated;
     private String userId;
     private String errors;
+    private ImportUsersDataStatus status;
 
     private String cleanPassword;
 }

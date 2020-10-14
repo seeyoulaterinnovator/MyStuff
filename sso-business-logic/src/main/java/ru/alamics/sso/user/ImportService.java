@@ -9,6 +9,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.*;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
+import ru.alamics.sso.jpa.entity.common.ImportUsersDataStatus;
 import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.jpa.repository.*;
 import ru.alamics.sso.registration.FoundException;
@@ -16,12 +17,10 @@ import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserPostService;
+import ru.alamics.sso.schedule.ImportSchedule;
 import ru.alamics.sso.user.filetype.FileFactory;
 import ru.alamics.sso.user.mapper.UserMapper;
-import ru.alamics.sso.user.model.ImportResponse;
-import ru.alamics.sso.user.model.ImportUsersDataModel;
-import ru.alamics.sso.user.model.ImportUsersReportModel;
-import ru.alamics.sso.user.model.UserRequest;
+import ru.alamics.sso.user.model.*;
 import ru.alamics.sso.util.validator.EmailValidator;
 import ru.alamics.sso.util.validator.NotValidException;
 import ru.alamics.sso.util.validator.PhoneValidator;
@@ -61,19 +60,20 @@ public class ImportService {
     @EJB
     private ImportReportService importReportService;
 
-    public void createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList) {
+    public void createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart) {
 
         if (FileFactory.CTL.equalsIgnoreCase(reportModel.getFiletype())) {
-            migrationService.createImportUsers(reportModel, dataList);
+            migrationService.createImportUsers(reportModel, dataList, scheduleStart);
         } else {
-            importUsers(reportModel, dataList);
+            importUsers(reportModel, dataList, scheduleStart);
         }
     }
 
-    private void importUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList) {
+    private void importUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart) {
         log.info("Importing users from file {} in progress", reportModel.getName());
-        int createdUsers = 0;
-        int countClones = 0;
+
+        int createdUsers = reportModel.getCountCreatedUsers();
+        int countClones = reportModel.getCountClones();
         int processedUsers = 0;
 
         if (dataList == null)
@@ -81,6 +81,13 @@ public class ImportService {
 
         try {
             for (ImportUsersDataModel data : dataList) {
+
+
+                ImportSchedule.checkTimeout(scheduleStart);
+
+                if (data.getStatus() == ImportUsersDataStatus.DONE)
+                    continue;
+
                 try {
                     data.setEmail(UserServiceUtil.doCleanMail(data.getEmail()));
                     data.setPhone(UserServiceUtil.doCleanPhone(data.getPhone()));
@@ -95,6 +102,7 @@ public class ImportService {
                         throw new NotFoundException("TomsId is not exist");
                     }
                     addUserPost(user, data);
+
                 } catch (FoundException e) {
                     List<Object> errors = new LinkedList<>();
                     e.getResult().forEach((k, v) -> {
@@ -106,7 +114,11 @@ public class ImportService {
                     data.setErrors(e.getMessage());
                     log.error("Importing user data is failed. {}", e.getMessage());
                 } finally {
+
+                    data.setStatus(ImportUsersDataStatus.DONE);
+
                     importReportService.updateImportUsersData(data);
+
                     processedUsers++;
                     if (processedUsers % 500 == 0) {
                         log.info("ProcessedUsers " + processedUsers);
@@ -118,12 +130,21 @@ public class ImportService {
             reportModel.setCountCreatedUsers(createdUsers);
             reportModel.setStatus(ImportUsersReportStatus.DONE);
 
-            importReportService.setReportDone(reportModel);
+            importReportService.updateReport(reportModel);
 
             createAdminEvent(OperationType.CREATE, reportModel, reportModel.getRealmId());
             log.info(String.format("Importing users from file %s is done: countUsers=%s, countCreatedUsers=%s, countClones=%s ",
                     reportModel.getName(), reportModel.getCountImportUsers(), reportModel.getCountCreatedUsers(),
                     reportModel.getCountClones()));
+
+        } catch (RepeatNextTimeException rte) {
+
+            log.info("Interrupted by timeout, processed " + processedUsers);
+
+            reportModel.setCountClones(countClones);
+            reportModel.setCountCreatedUsers(createdUsers);
+            reportModel.setStatus(ImportUsersReportStatus.AWAITING);
+            importReportService.updateReport(reportModel);
 
         } catch (Exception e) {
             log.error("Error, but processed " + processedUsers, e);
