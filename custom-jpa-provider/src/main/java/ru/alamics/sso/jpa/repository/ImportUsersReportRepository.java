@@ -74,6 +74,8 @@ public class ImportUsersReportRepository {
                 .setParameter("status", status)
                 .setParameter("id", id)
                 .executeUpdate();
+
+        refreshEntityById(id, ImportUsersReportEntity.class);
     }
 
     public void updateReport(String id, ImportUsersReportStatus status, int clones, int created) {
@@ -85,6 +87,18 @@ public class ImportUsersReportRepository {
                 .setParameter("clones", clones)
                 .setParameter("created", created)
                 .executeUpdate();
+
+        refreshEntityById(id, ImportUsersReportEntity.class);
+    }
+
+    public <T> T findEntityById(final String id, Class<T> clazz) {
+        return em.find(clazz, id);
+    }
+
+    public <T> void refreshEntityById(String id, Class<T> clazz) {
+
+        T en = findEntityById(id, clazz);
+        em.refresh(en);
     }
 
     public List<ImportUsersReportEntity> getReportListByStatus(ImportUsersReportStatus status) {
