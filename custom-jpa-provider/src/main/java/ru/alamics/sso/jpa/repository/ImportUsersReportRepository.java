@@ -91,7 +91,7 @@ public class ImportUsersReportRepository {
         refreshEntityById(id, ImportUsersReportEntity.class);
     }
 
-    public <T> T findEntityById(final String id, Class<T> clazz) {
+    public <T> T findEntityById(String id, Class<T> clazz) {
         return em.find(clazz, id);
     }
 

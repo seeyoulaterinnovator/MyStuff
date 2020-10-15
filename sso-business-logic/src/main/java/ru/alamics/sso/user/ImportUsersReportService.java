@@ -29,6 +29,7 @@ public class ImportUsersReportService {
         importUsersReport.setFiletype(Util.getFileExtByFilename(filename));
 
         String reportId = importReportService.saveImportUsersReport(importUsersReport);
+        importUsersReport.setId(reportId);
         importReportService.saveImportUsersData(reportId, dataList); // TODO really need?
     }
 
@@ -39,6 +40,7 @@ public class ImportUsersReportService {
         importUsersReport.setFiletype(Util.getFileExtByFilename(filename));
 
         String reportId = importReportService.saveImportUsersReport(importUsersReport);
+        importUsersReport.setId(reportId);
         importReportService.saveImportUsersData(reportId, dataList); // TODO really need?
 
         return importUsersReport;
