@@ -102,4 +102,8 @@ public class ImportReportService {
     public ImportUsersReportEntity findImportUsersReportByImportId(String importId) {
         return importUsersReportRepository.findImportUsersReportByImportId(importId);
     }
+
+    public List<ImportUsersDataEntity> findImportUsersDataByImportId(String importId) {
+        return importUsersReportRepository.findImportUsersDataByImportId(importId);
+    }
 }
