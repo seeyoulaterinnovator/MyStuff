@@ -24,6 +24,15 @@ public class ImportUsersReportRepository {
         return em.find(ImportUsersReportEntity.class, importId);
     }
 
+    public List<ImportUsersDataEntity> findImportUsersDataByImportId(final String importId) {
+        return em.createQuery(
+                "select d " +
+                        "from ImportUsersDataEntity d where d.importUsersReport = :importId "
+                , ImportUsersDataEntity.class)
+                .setParameter("importId", importId)
+                .getResultList();
+    }
+
     public ImportUsersDataEntity findImportUsersDataById(String id) {
         return em.find(ImportUsersDataEntity.class, id);
     }
@@ -31,7 +40,7 @@ public class ImportUsersReportRepository {
     public List<ImportUsersReportEntity> findImportUsersReports(String realmId) {
         return em.createQuery(
                 "select ire " +
-                "from ImportUsersReportEntity ire where ire.realmId = :realmId " +
+                        "from ImportUsersReportEntity ire where ire.realmId = :realmId " +
                         "order by ire.importDate desc ", ImportUsersReportEntity.class)
                 .setParameter("realmId", realmId)
                 .getResultList();

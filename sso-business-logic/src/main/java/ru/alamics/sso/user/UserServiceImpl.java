@@ -2,46 +2,29 @@ package ru.alamics.sso.user;
 
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.spi.BadRequestException;
-import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.*;
-import org.keycloak.models.jpa.entities.UserEntity;
-import org.keycloak.provider.ProviderFactory;
-import org.keycloak.services.ErrorResponseException;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
-import org.keycloak.services.resources.admin.AdminRoot;
 import org.keycloak.storage.ReadOnlyException;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
-import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
-import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
-import ru.alamics.sso.keycloak.facade.UserPostFacade;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
-import ru.alamics.sso.registration.dto.ExternalSystemRoleDto;
-import ru.alamics.sso.registration.dto.UserPostRequest;
-import ru.alamics.sso.registration.dto.UserPostResponse;
-import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.user.filetype.FileFactory;
 import ru.alamics.sso.user.filetype.FileModel;
 import ru.alamics.sso.user.format.ImportFormat;
-import ru.alamics.sso.user.format.StandartImportFormat;
 import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.user.model.*;
 import ru.alamics.sso.util.Util;
-import ru.alamics.sso.util.validator.EmailValidator;
 import ru.alamics.sso.util.validator.NotValidException;
-import ru.alamics.sso.util.validator.PhoneValidator;
 
-import javax.activation.UnsupportedDataTypeException;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.MessageFormat;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class UserServiceImpl implements UserService {
@@ -90,8 +73,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void activateImportUsersFromReport(String importId) {
-        ImportUsersReportEntity importUsersReport = importReportService.findImportUsersReportByImportId(importId);
-        for (ImportUsersDataEntity importData : importUsersReport.getImportUserData()) {
+        final List<ImportUsersDataEntity> importUsersData = importReportService.findImportUsersDataByImportId(importId);
+        for (ImportUsersDataEntity importData : importUsersData) {
             String id = importData.getUserId();
             if (id == null || id.isEmpty()) {
                 continue;
@@ -166,10 +149,10 @@ public class UserServiceImpl implements UserService {
                     errors += "Resetting to N old passwords is not allowed.";
                 } catch (ReadOnlyException mre) {
                     log.error("", mre);
-                    errors +=  "Can't reset password as account is read only.";
+                    errors += "Can't reset password as account is read only.";
                 } catch (ModelException e) {
                     log.error("", e);
-                    errors +=  e.getMessage();
+                    errors += e.getMessage();
                 } finally {
                     log.info("Migration: set password to " + user.getId());
                     if (!errors.isEmpty()) {
