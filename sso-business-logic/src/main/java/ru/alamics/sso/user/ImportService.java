@@ -77,7 +77,7 @@ public class ImportService {
         int processedUsers = 0;
 
         if (dataList == null)
-            dataList = importReportService.getDataList(reportModel.getId());
+            dataList = importReportService.getDataListAwaiting(reportModel.getId());
 
         try {
             for (ImportUsersDataModel data : dataList) {
