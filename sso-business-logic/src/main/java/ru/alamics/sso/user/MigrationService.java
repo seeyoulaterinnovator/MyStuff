@@ -6,30 +6,31 @@ import org.keycloak.common.util.Time;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.jpa.AdminEventEntity;
 import org.keycloak.models.jpa.entities.*;
-import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
-import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
 import ru.alamics.sso.jpa.entity.common.ImportUsersDataStatus;
 import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.jpa.repository.*;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
-import ru.alamics.sso.registration.dto.ExternalSystemRoleDto;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.schedule.ImportSchedule;
-import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.user.model.ImportUsersDataModel;
 import ru.alamics.sso.user.model.ImportUsersReportModel;
 import ru.alamics.sso.user.model.RepeatNextTimeException;
 import ru.alamics.sso.util.Util;
-import ru.alamics.sso.util.validator.*;
+import ru.alamics.sso.util.validator.AllNotValidException;
+import ru.alamics.sso.util.validator.NotValidException;
+import ru.alamics.sso.util.validator.StringValidator;
+import ru.alamics.sso.util.validator.ValidatorBuilder;
 
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
@@ -66,7 +67,7 @@ public class MigrationService {
         int processedUsers = 0;
 
         if (dataList == null)
-            dataList = importReportService.getDataList(reportModel.getId());
+            dataList = importReportService.getDataListAwaiting(reportModel.getId());
 
         try {
             for (ImportUsersDataModel data : dataList) {
@@ -96,10 +97,8 @@ public class MigrationService {
                     data.setUserId(user.getId());
 
                     checkToms(data);
-                    boolean modif = addUserPost(user, data);
-                    if (modif) {
-                        modified = true;
-                    }
+
+                    modified = addUserPost(user, data);
 
                 } catch (AllNotValidException av) {
 
@@ -109,6 +108,14 @@ public class MigrationService {
                 } catch (NotFoundException | NotValidException e) {
                     data.setErrors(e.getMessage());
                     log.error("Importing user data is failed. {}", e.getMessage());
+                } catch (FoundException e) {
+                    List<Object> errors = new LinkedList<>();
+                    e.getResult().forEach((k, v) -> {
+                        errors.add(v);
+                    });
+                    String errorsStr = errors.toString().substring(1, errors.toString().length() - 1);
+                    data.setErrors(errorsStr);
+                    log.error("Importing user data is failed. {}", errorsStr);
                 } finally {
 
                     if (user != null && modified) {
@@ -163,16 +170,32 @@ public class MigrationService {
         userRepository.saveAttributes(attributeEntity);
     }
 
-    private UserEntity checkImportUser(String realmId, String email, String phone) throws AllNotValidException {
+    private UserEntity checkImportUser(String realmId, String email, String phone) throws AllNotValidException, FoundException {
 
         ValidatorBuilder vb = new ValidatorBuilder().setEmail(email).setPhone(phone).build();
         StringValidator.process(vb);
 
-        UserEntity user = getUserByPhone(phone);
-        if (user != null)
-            return user;
+        UserEntity byPhone = getUserByPhone(phone);
+        UserEntity byEmail = getUserByEmailAndUsername(realmId, email);
 
-        return getUserByEmailAndUsername(realmId, email);
+        if (byPhone != null && byPhone.equals(byEmail)) {
+            return byPhone;
+        }
+
+        FoundException foundException = new FoundException();
+        if (byPhone == null && byEmail != null) {
+            foundException.addResult("error1", "User exists with same email userId " + byEmail.getId());
+        } else if (byPhone != null && byEmail == null) {
+            foundException.addResult("error2", "User exists with same phone userId " + byPhone.getId());
+        } else if (byEmail != null) {
+            foundException.addResult("error1", "User exists with same email userId " + byEmail.getId());
+            foundException.addResult("error2", "User exists with same phone userId " + byPhone.getId());
+        }
+        if (foundException.getResult() != null) {
+            throw foundException;
+        }
+
+        return null;
     }
 
     private void checkToms(ImportUsersDataModel o) throws NotFoundException {
