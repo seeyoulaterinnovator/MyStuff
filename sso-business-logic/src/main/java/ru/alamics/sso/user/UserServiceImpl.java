@@ -131,6 +131,8 @@ public class UserServiceImpl implements UserService {
 
     private void doGeneratePasswords(List<ImportUsersDataModel> dataList) {
 
+        log.info("doGeneratePasswords");
+
         Map<String, UserModel> listToSend = new HashMap<>();
 
         for (ImportUsersDataModel data : dataList) {
@@ -169,6 +171,8 @@ public class UserServiceImpl implements UserService {
         for (UserModel user : listToSend.values()) {
             createAdminEvent(OperationType.CREATE, user);
         }
+
+        log.info("doGeneratePasswords done");
     }
 
     @Override

@@ -18,9 +18,9 @@ public class ImportUsersDataEntity {
     @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String id;
 
-    //@ManyToOne(targetEntity = ImportUsersReportEntity.class, fetch = FetchType.LAZY)
-    @Column(name = "import_id")
-    private String importUsersReport;
+    @ManyToOne(targetEntity = ImportUsersReportEntity.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "import_id")
+    private ImportUsersReportEntity importUsersReport;
 
     @Column(name = "first_name")
     private String firstName;
