@@ -19,7 +19,7 @@ public class ImportUsersDataEntity {
     private String id;
 
     //@ManyToOne(targetEntity = ImportUsersReportEntity.class, fetch = FetchType.LAZY)
-    @JoinColumn(name = "import_id")
+    @Column(name = "import_id")
     private String importUsersReport;
 
     @Column(name = "first_name")
