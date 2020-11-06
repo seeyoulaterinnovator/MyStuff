@@ -16,7 +16,6 @@ import ru.alamics.sso.keycloak.facade.UserPostFacade;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
-import ru.alamics.sso.registration.dto.ExternalSystemRoleDto;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserFindService;
@@ -33,9 +32,9 @@ import java.util.Set;
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
 /**
- creates user from external sources
-
- same as ImportService
+ * creates user from external sources
+ * <p>
+ * same as ImportService
  */
 @Slf4j
 public class UserExtService {
@@ -93,7 +92,7 @@ public class UserExtService {
         }
         if (request.getName() != null) user.setFirstName(request.getName());
 
-        user.setEmailVerified(true);
+        user.setEmailVerified(false);
         user.setEnabled(true);
 
         List<String> reqActions = Collections.singletonList("UPDATE_PASSWORD");

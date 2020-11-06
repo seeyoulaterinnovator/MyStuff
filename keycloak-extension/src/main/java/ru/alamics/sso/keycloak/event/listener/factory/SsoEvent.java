@@ -2,7 +2,6 @@ package ru.alamics.sso.keycloak.event.listener.factory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.actiontoken.resetcred.ResetCredentialsActionToken;
 import org.keycloak.common.util.Time;
 import org.keycloak.events.admin.AdminEvent;
@@ -10,23 +9,18 @@ import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.Urls;
 import org.keycloak.services.managers.AuthenticationSessionManager;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
-import org.keycloak.sessions.RootAuthenticationSessionModel;
 import org.keycloak.theme.Theme;
-import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.emailer.EmailModel;
 import ru.alamics.sso.emailer.EmailSender;
-import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriBuilderException;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.util.Collections;
@@ -39,7 +33,6 @@ public abstract class SsoEvent {
 
     private final KeycloakSession session;
     private final EmailSender emailSender;
-    private final ClientService clientService;
 
     public SsoEvent(KeycloakSession session) {
         this.session = session;
@@ -49,8 +42,6 @@ public abstract class SsoEvent {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
         }
-
-        clientService = (ClientService) Lookup.lookup(ClientService.class);
     }
 
     public abstract void execute();
@@ -65,7 +56,10 @@ public abstract class SsoEvent {
                 return;
             }
 
-            AuthenticationSessionModel authenticationSession = createAuthenticationSessionForClient(realm, clientModel);
+            AuthenticationSessionManager authenticationSessionManager = new AuthenticationSessionManager(this.session);
+
+            AuthenticationSessionModel authenticationSession = authenticationSessionManager.createAuthenticationSession(realm, false)
+                    .createAuthenticationSession(clientModel);
 
             int validityInSecs = realm.getActionTokenGeneratedByUserLifespan(ResetCredentialsActionToken.TOKEN_TYPE);
             int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
@@ -110,24 +104,5 @@ public abstract class SsoEvent {
             }
         }
         return userId;
-    }
-
-    public AuthenticationSessionModel createAuthenticationSessionForClient(RealmModel realm, ClientModel client)
-            throws UriBuilderException, IllegalArgumentException {
-        AuthenticationSessionModel authSession;
-
-        RootAuthenticationSessionModel rootAuthSession = new AuthenticationSessionManager(session).createAuthenticationSession(realm, true);
-        authSession = rootAuthSession.createAuthenticationSession(client);
-
-        authSession.setAction(AuthenticationSessionModel.Action.AUTHENTICATE.name());
-        authSession.setProtocol(OIDCLoginProtocol.LOGIN_PROTOCOL);
-
-        String redirectUri = clientService.findMainRedirectUri(client);
-
-        authSession.setRedirectUri(redirectUri);
-        authSession.setClientNote(OIDCLoginProtocol.REDIRECT_URI_PARAM, redirectUri);
-        authSession.setClientNote(OIDCLoginProtocol.RESPONSE_TYPE_PARAM, OAuth2Constants.CODE);
-        authSession.setClientNote(OIDCLoginProtocol.ISSUER, Urls.realmIssuer(session.getContext().getUri().getBaseUri(), realm.getName()));
-        return authSession;
     }
 }
