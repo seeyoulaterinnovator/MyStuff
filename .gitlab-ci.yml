@@ -88,7 +88,7 @@ back:war:
   script:
     - currentdir=`pwd`
     - cd keycloak-extension/src/main/resources/themes/domru/login/resources
-    - cp /opt/npmrc .npmrc
+#    - cp /opt/npmrc .npmrc
     - npm install
     - npm run build
     - rm -rf node_modules
