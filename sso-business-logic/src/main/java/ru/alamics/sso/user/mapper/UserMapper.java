@@ -9,6 +9,8 @@ import ru.alamics.sso.jpa.model.UserSummaryView;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.user.model.ImportResponse;
+import ru.alamics.sso.user.model.ImportUsersDataModel;
+import ru.alamics.sso.user.model.ImportUsersReportModel;
 import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.user.web.ImportUsersReportDto;
 import ru.alamics.sso.user.web.UserDto;
@@ -138,47 +140,6 @@ public class UserMapper {
         return result;
     }
 
-    public static ImportUsersDataEntity toUserImport(String[] row) {
-        ImportUsersDataEntity userImport = new ImportUsersDataEntity();
-        for (int i = 0; i < row.length; i++) {
-            switch (i) {
-                case 0:
-                    userImport.setFirstName(row[i]);
-                    break;
-                case 1:
-                    userImport.setEmail(row[i]);
-                    break;
-                case 2:
-                    userImport.setPhone(row[i]);
-                    break;
-                case 3:
-                    userImport.setTomsId(row[i]);
-                    break;
-                case 4:
-                    userImport.setDmpId(row[i]);
-                    break;
-                case 5:
-                    userImport.setRole(row[i]);
-                    break;
-                case 6:
-                    //userImport.setSystemNames(Arrays.asList(row[i].replaceAll("\\s", "").split(",")));
-                    userImport.setSystems(row[i]);
-                    break;
-            }
-        }
-        userImport.setCreated(false);
-        return userImport;
-    }
-
-    public static List<ImportUsersDataEntity> toUserRequestList(List<String[]> rows) {
-        if (rows == null || rows.isEmpty()) {
-            return null;
-        }
-        List<ImportUsersDataEntity> userImports = new LinkedList<>();
-        rows.forEach(o -> userImports.add(toUserImport(o)));
-        return userImports;
-    }
-
     public static UserPostRequest toUserPostRequest(UserModel userModel, UserRequest request) {
         if (userModel == null || request == null) {
             return null;
@@ -236,32 +197,38 @@ public class UserMapper {
         return userRequest;
     }
 
-    public static ImportUsersReportEntity toImportUsersReportEntity(String realmId, String name, List<ImportUsersDataEntity> importUserDataEntities, ImportResponse importResponse) {
-        if (importUserDataEntities == null) {
+    public static ImportResponse toImportUsersReportEntity(ImportUsersReportModel importUserReport, List<ImportUsersDataModel> dataList ) {
+        if (importUserReport == null) {
             return null;
         }
-        ImportUsersReportEntity importUserReport = new ImportUsersReportEntity();
-        importUserReport.setName(name);
-        importUserReport.setCountImportUsers(importUserDataEntities.size());
-        importUserReport.setCountCreatedUsers(importResponse.getCreatedUsers().intValue());
-        importUserReport.setCountClones(importResponse.getCountClones().intValue());
-        importUserReport.setRealmId(realmId);
-        importUserReport.setStatus(ImportUsersReportStatus.DONE);
-        importUserDataEntities.forEach(o -> o.setImportUsersReport(importUserReport));
-        importUserReport.setImportUserData(importUserDataEntities);
-        return importUserReport;
+
+        ImportResponse importResponse = new ImportResponse();
+        importResponse.getCreatedUsers().set(importUserReport.getCountCreatedUsers());
+        importResponse.getCountClones().set(importUserReport.getCountClones());
+        // TODO ?
+        for (ImportUsersDataModel data : dataList) {
+            importResponse.addCreatedUserIds(data.getEmail(), data.getUserId());
+
+            Map<String, Object> map = new HashMap<>();
+            map.put(data.getEmail(), data.getErrors());
+            importResponse.addError(map);
+        }
+        // tbapi errors
+        // tbapi success
+
+        return importResponse;
     }
 
-    public static ImportUsersReportEntity toImportUsersReportEntity(String realmId, String name, List<ImportUsersDataEntity> importUserDataEntities) {
+    public static ImportUsersReportModel toImportUsersReportEntity(String realmId, String name, List<ImportUsersDataModel> importUserDataEntities) {
         if (importUserDataEntities == null) {
             return null;
         }
-        ImportUsersReportEntity importUsersReport = new ImportUsersReportEntity();
+        ImportUsersReportModel importUsersReport = new ImportUsersReportModel();
         importUsersReport.setName(name);
         importUsersReport.setCountImportUsers(importUserDataEntities.size());
         importUsersReport.setRealmId(realmId);
-        importUserDataEntities.forEach(o -> o.setImportUsersReport(importUsersReport));
-        importUsersReport.setImportUserData(importUserDataEntities);
+        //importUserDataEntities.forEach(o -> o.setImportUsersReport(importUsersReport));
+        //importUsersReport.setImportUserData(importUserDataEntities);
         return importUsersReport;
     }
 

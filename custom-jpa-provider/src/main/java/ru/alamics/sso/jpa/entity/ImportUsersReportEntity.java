@@ -36,6 +36,9 @@ public class ImportUsersReportEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private ImportUsersReportStatus status;
-    @OneToMany(mappedBy = "importUsersReport", cascade = CascadeType.ALL)
+    //@OneToMany(mappedBy = "importUsersReport", cascade = CascadeType.ALL)
+    @Transient
     private List<ImportUsersDataEntity> importUserData;
+    @Column(name = "file_type")
+    private String filetype;
 }

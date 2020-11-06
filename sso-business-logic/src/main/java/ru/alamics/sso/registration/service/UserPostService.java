@@ -21,6 +21,7 @@ import javax.ejb.Stateless;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Stateless
 @Slf4j
@@ -41,7 +42,7 @@ public class UserPostService {
 
         UserPostRoleEntity role = userPostRepository.findUserPostRoleById(userPostRequest.getRoleId());
         if (role == null) {
-            throw new NotFoundException("Роль не найдена");
+            throw new NotFoundException("Роль не найдена.");
         }
 
         checkUserPost(userPostRequest);
@@ -57,7 +58,7 @@ public class UserPostService {
     private void checkUserPost(UserPostRequest postRequest) throws FoundUserPostException, NotValidException {
         UserPostEntity post = userPostRepository.findUserPostByUserIdAndTomsId(postRequest.getUserId(), postRequest.getTomsId());
         if (post != null) {
-            throw new FoundUserPostException(String.format("УЗ уже имеет должность с таким tomsId: userId=%s, postId=%s, tomsId=%s",
+            throw new FoundUserPostException(post.getId(), String.format("УЗ уже имеет должность с таким tomsId: userId=%s, postId=%s, tomsId=%s",
                     postRequest.getUserId(), post.getId(), postRequest.getTomsId()));
         }
 
@@ -111,7 +112,7 @@ public class UserPostService {
         return DataMapper.toUserPostRoleDtoList(userPostRepository.getAllUserPostRoles());
     }
 
-    public List<ExternalSystemRoleDto> getExternalSystemRoles() {
+    public List<ExternalSystemRoleDto> getAllExternalSystemRoleDTO() {
         return DataMapper.toExternalSystemRoleDtos(userPostRepository.getAllExternalSystemRole());
     }
 
@@ -119,7 +120,12 @@ public class UserPostService {
         return DataMapper.toExternalSystemDtos(userPostRepository.getAllExternalSystem());
     }
 
+    public List<String> getAllExternalSystemLabels() {
+        return userPostRepository.getAllExternalSystem().stream().map(m -> m.getLabel()).collect(Collectors.toList());
+    }
+
     public UserPostResponse addSystemRole(ExternalSystemRoleRequest externalSystemRoleRequest) throws NotFoundException {
+
         UserPostEntity userPost = userPostRepository.getUserPost(externalSystemRoleRequest.getUserPostId());
         if (userPost == null) {
             throw new NotFoundException("Должность не найдена");
@@ -137,6 +143,24 @@ public class UserPostService {
 
         systemRoles.add(externalSystemRole);
         userPost.setSystemRoles(systemRoles);
+        return DataMapper.toUserPostResponse(userPostRepository.update(userPost));
+    }
+
+    public UserPostResponse addAllSystemRole(String postId) throws NotFoundException {
+
+        UserPostEntity userPost = userPostRepository.getUserPost(postId);
+        if (userPost == null) {
+            throw new NotFoundException("Должность не найдена");
+        }
+
+        Set<ExternalSystemRoleEntity> systemRoles = userPost.getSystemRoles();
+        if (systemRoles == null) {
+            systemRoles = new HashSet<>();
+        }
+
+        systemRoles.addAll(userPostRepository.getAllExternalSystemRole());
+        userPost.setSystemRoles(systemRoles);
+
         return DataMapper.toUserPostResponse(userPostRepository.update(userPost));
     }
 
@@ -172,14 +196,12 @@ public class UserPostService {
         return externalSystemRole.getId();
     }
 
-    public UserPostResponse addUserPostAndSystemRole(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException, NotValidException {
+    public UserPostResponse addUserPostAndAllSystemRole(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException, NotValidException {
+
         UserPostResponse userPost = save(userPostRequest);
-        for (ExternalSystemRoleDto systemRoleDto : getExternalSystemRoles()) {
-            ExternalSystemRoleRequest systemRole = new ExternalSystemRoleRequest();
-            systemRole.setUserPostId(userPost.getId());
-            systemRole.setSystemRoleId(systemRoleDto.getId());
-            userPost = addSystemRole(systemRole);
-        }
+
+        addAllSystemRole(userPost.getId());
+
         return userPost;
     }
 }

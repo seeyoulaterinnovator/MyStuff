@@ -3,6 +3,8 @@ package ru.alamics.sso.jpa.entity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
+import ru.alamics.sso.jpa.entity.common.ImportUsersDataStatus;
+import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 
 import javax.persistence.*;
 
@@ -15,9 +17,11 @@ public class ImportUsersDataEntity {
     @GeneratedValue(generator = "system-uuid")
     @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String id;
-    @ManyToOne(targetEntity = ImportUsersReportEntity.class, fetch = FetchType.LAZY)
-    @JoinColumn(name = "import_id")
-    private ImportUsersReportEntity importUsersReport;
+
+    //@ManyToOne(targetEntity = ImportUsersReportEntity.class, fetch = FetchType.LAZY)
+    @Column(name = "import_id")
+    private String importUsersReport;
+
     @Column(name = "first_name")
     private String firstName;
     @Column(name = "email")
@@ -38,4 +42,11 @@ public class ImportUsersDataEntity {
     private String userId;
     @Column(name = "errors")
     private String errors;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private ImportUsersDataStatus status = ImportUsersDataStatus.AWAITING;
+
+    // not a column
+    @Transient
+    private String cleanPassword;
 }

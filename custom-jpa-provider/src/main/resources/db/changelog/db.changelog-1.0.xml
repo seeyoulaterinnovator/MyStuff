@@ -975,4 +975,24 @@
         </sql>
     </changeSet>
 
+    <changeSet id="58_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="IMPORT_USERS_REPORT" />
+        </preConditions>
+        <addColumn tableName="IMPORT_USERS_REPORT">
+            <column name="file_type" type="varchar(50)" defaultValue="csv"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="59_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="IMPORT_USERS_DATA" />
+        </preConditions>
+        <addColumn tableName="IMPORT_USERS_DATA">
+            <column name="STATUS" type="varchar(255)" defaultValue="AWAITING">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

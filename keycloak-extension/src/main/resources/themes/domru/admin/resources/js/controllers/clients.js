@@ -4,10 +4,10 @@ Array.prototype.remove = function(from, to) {
     return this.push.apply(this, rest);
 };
 
-module.controller('ClientTabCtrl', function(Dialog, $scope, Current, Notifications, $location) {
+module.controller('ClientTabCtrl', function(Dialog, $scope, Current, Notifications, $location, Client) {
     $scope.removeClient = function() {
         Dialog.confirmDelete($scope.client.clientId, 'client', function() {
-            $scope.client.$remove({
+            Client.remove({
                 realm : Current.realm.realm,
                 client : $scope.client.id
             }, function() {
@@ -728,7 +728,7 @@ module.controller('ClientRoleDetailCtrl', function($scope, realm, client, role, 
         delete $scope.newAttribute;
     }
 
-    $scope.removeAttribute = function(key) {    
+    $scope.removeAttribute = function(key) {
         delete $scope.role.attributes[key];
     }
 
@@ -814,12 +814,12 @@ module.controller('ClientListCtrl', function($scope, realm, Client, serverInfo, 
     $scope.numberOfPages = 1;
     $scope.pageSize = 20;
     $scope.clientStorageProviders = serverInfo.componentTypes['org.keycloak.storage.client.ClientStorageProvider'];
-    
+
     Client.query({realm: realm.realm, viewableOnly: true}).$promise.then(function(clients) {
         $scope.numberOfPages = Math.ceil(clients.length/$scope.pageSize);
         $scope.clients = clients;
     });
-    
+
     $scope.$watch('search', function (newVal, oldVal) {
         $scope.filtered = filterFilter($scope.clients, newVal);
         $scope.totalItems = $scope.filtered.length;
@@ -827,7 +827,7 @@ module.controller('ClientListCtrl', function($scope, realm, Client, serverInfo, 
         $scope.currentPage = 1;
         $scope.currentPageInput = 1;
   }, true);
-  
+
     $scope.removeClient = function(client) {
         Dialog.confirmDelete(client.clientId, 'client', function() {
             Client.remove({
@@ -1160,6 +1160,9 @@ module.controller('ClientDetailCtrl', function($scope, realm, client, flows, $ro
         }
     }
 
+    /**
+     * Функция для добавление значения поля MainRedirectURI
+     */
     $scope.getCustomClientData = function () {
         $http.get(authUrl + '/realms/' + realm.realm + '/custom-client/' + client.id).then(function (data) {
             $scope.client = data.data;
@@ -1175,7 +1178,7 @@ module.controller('ClientDetailCtrl', function($scope, realm, client, flows, $ro
 
         updateProperties();
 
-        $scope.clientEdit = angular.copy($scope.client);
+        $scope.clientEdit = angular.copy(client);
 
         $scope.getCustomClientData();
     }
@@ -1269,7 +1272,7 @@ module.controller('ClientDetailCtrl', function($scope, realm, client, flows, $ro
             $scope.clientEdit.attributes['request.object.signature.alg'] = $scope.requestObjectSignatureAlg;
         }
     };
-    
+
     $scope.changeRequestObjectRequired = function() {
         if ($scope.requestObjectRequired === 'not required') {
             $scope.clientEdit.attributes['request.object.required'] = null;
@@ -1483,7 +1486,6 @@ module.controller('CreateClientCtrl', function($scope, realm, client, $route, se
         enabled: true,
         attributes: {}
     };
-    $scope.client.redirectUris = new Set();
     $scope.protocol = $scope.protocols[0];
 
 

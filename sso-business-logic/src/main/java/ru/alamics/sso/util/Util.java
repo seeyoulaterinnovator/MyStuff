@@ -86,4 +86,41 @@ public class Util {
                 }).findFirst().get();
     }
 
+    public static String getFileExtByFilename(String filename) {
+        return filename.substring(filename.lastIndexOf('.') + 1);
+    }
+
+    public static String getFileExtension(String contentDisposition) {
+        String finalFileName = getFileName(contentDisposition);
+        return getFileExtByFilename(finalFileName);
+    }
+
+    public static String getFileName(String contentDisposition) {
+        String[] contentList = contentDisposition.split(";");
+        for (String filename : contentList) {
+            if ((filename.trim().startsWith("filename"))) {
+                String[] name = filename.split("=");
+                return name[1].trim().replaceAll("\"", "");
+            }
+        }
+        return "unknown";
+    }
+
+    public static String join(Iterable<String> iterable, String separator) {
+        StringBuilder sb = new StringBuilder();
+        boolean isFirst = true;
+
+        for ( String str : iterable ) {
+            if ( !isFirst ) {
+                sb.append( separator );
+            }
+            else {
+                isFirst = false;
+            }
+
+            sb.append(str);
+        }
+
+        return sb.toString();
+    }
 }

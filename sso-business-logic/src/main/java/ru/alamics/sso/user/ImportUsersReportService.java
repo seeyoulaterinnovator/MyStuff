@@ -1,9 +1,15 @@
 package ru.alamics.sso.user;
 
+import org.keycloak.models.RealmModel;
+import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
+import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.jpa.repository.ImportUsersReportRepository;
 import ru.alamics.sso.user.mapper.UserMapper;
+import ru.alamics.sso.user.model.ImportUsersDataModel;
+import ru.alamics.sso.user.model.ImportUsersReportModel;
 import ru.alamics.sso.user.web.ImportUsersReportDto;
+import ru.alamics.sso.util.Util;
 
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
@@ -14,20 +20,30 @@ import java.util.List;
 @LocalBean
 public class ImportUsersReportService {
     @EJB
-    private ImportUsersReportRepository importUsersReportRepository;
+    private ImportReportService importReportService;
 
-    public void saveImportUsersReport(ImportUsersReportEntity importUsersReportEntity) {
-        if (importUsersReportEntity == null) {
-            return;
-        }
-        importUsersReportRepository.saveImportUsersReport(importUsersReportEntity);
+    public void createImportUsersReportAsync(RealmModel realm, String filename, List<ImportUsersDataModel> dataList) {
+
+        ImportUsersReportModel importUsersReport = UserMapper.toImportUsersReportEntity(realm.getName(), filename, dataList);
+        importUsersReport.setStatus(ImportUsersReportStatus.AWAITING);
+        importUsersReport.setFiletype(Util.getFileExtByFilename(filename));
+
+        String reportId = importReportService.saveImportUsersReport(importUsersReport);
+        importUsersReport.setId(reportId);
+        importReportService.saveImportUsersData(reportId, dataList); // TODO really need?
     }
 
-    public List<ImportUsersReportDto> findImportUsersReportsByRealmId(String realmId) {
-        return UserMapper.toImportUsersReportDtos(importUsersReportRepository.findImportUsersReports(realmId));
+    public ImportUsersReportModel createImportUsersReport(RealmModel realm, String filename, List<ImportUsersDataModel> dataList) {
+
+        ImportUsersReportModel importUsersReport = UserMapper.toImportUsersReportEntity(realm.getName(), filename, dataList);
+        importUsersReport.setStatus(ImportUsersReportStatus.IN_PROGRESS);
+        importUsersReport.setFiletype(Util.getFileExtByFilename(filename));
+
+        String reportId = importReportService.saveImportUsersReport(importUsersReport);
+        importUsersReport.setId(reportId);
+        importReportService.saveImportUsersData(reportId, dataList); // TODO really need?
+
+        return importUsersReport;
     }
 
-    public ImportUsersReportEntity findImportUsersReportByImportId(String importId) {
-        return importUsersReportRepository.findImportUsersReportByImportId(importId);
-    }
 }

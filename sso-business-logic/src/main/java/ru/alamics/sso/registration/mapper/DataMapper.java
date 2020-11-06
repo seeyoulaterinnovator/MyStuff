@@ -2,11 +2,15 @@ package ru.alamics.sso.registration.mapper;
 
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.jpa.entity.*;
+import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.registration.dto.*;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
 import ru.alamics.sso.settings.SettingsDto;
+import ru.alamics.sso.user.model.ImportUsersDataModel;
+import ru.alamics.sso.user.model.ImportUsersReportModel;
 import ru.alamics.sso.user.web.UserSearch;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -141,5 +145,77 @@ public class DataMapper {
     public static PageDto toPageDto(List<UserSearch> users, long totalElements, int pageNum, int pageSize) {
         long totalPages = pageSize == 0 ? 1 : (long) Math.ceil((double) totalElements / (double) pageSize);
         return new PageDto(pageNum, pageSize, users.size(), totalElements, totalPages, pageNum > 1, pageNum < totalPages);
+    }
+
+    public static ImportUsersReportModel toReportModel(ImportUsersReportEntity entity) {
+
+        ImportUsersReportModel model = new ImportUsersReportModel();
+        model.setId(entity.getId());
+        model.setName(entity.getName());
+        model.setRealmId(entity.getRealmId());
+        model.setImportDate(entity.getImportDate());
+        model.setCountImportUsers(entity.getCountImportUsers());
+        model.setCountCreatedUsers(entity.getCountCreatedUsers());
+        model.setCountClones(entity.getCountClones());
+        model.setStatus(entity.getStatus());
+        model.setFiletype(entity.getFiletype());
+
+        return model;
+    }
+
+    public static ImportUsersDataModel toDataModel(ImportUsersDataEntity entity) {
+
+        ImportUsersDataModel data = new ImportUsersDataModel();
+        data.setId(entity.getId());
+        data.setReportId(entity.getImportUsersReport());
+        data.setFirstName(entity.getFirstName());
+        data.setEmail(entity.getEmail());
+        data.setPhone(entity.getPhone());
+        data.setTomsId(entity.getTomsId());
+        data.setDmpId(entity.getDmpId());
+        data.setRole(entity.getRole());
+        data.setSystems(entity.getSystems());
+        data.setCreated(entity.isCreated());
+        data.setUserId(entity.getUserId());
+        data.setErrors(entity.getErrors());
+        data.setStatus(entity.getStatus());
+
+        return data;
+    }
+
+    public static ImportUsersReportEntity newReportEntity(ImportUsersReportModel model) {
+
+        ImportUsersReportEntity entity = new ImportUsersReportEntity();
+        entity.setId(model.getId());
+        entity.setName(model.getName());
+        entity.setRealmId(model.getRealmId());
+        entity.setImportDate(model.getImportDate());
+        entity.setCountImportUsers(model.getCountImportUsers());
+        entity.setCountCreatedUsers(model.getCountCreatedUsers());
+        entity.setCountClones(model.getCountClones());
+        entity.setStatus(model.getStatus());
+        entity.setFiletype(model.getFiletype());
+
+        return entity;
+    }
+
+    public static ImportUsersDataEntity newDataEntity(ImportUsersDataModel data) {
+
+        ImportUsersDataEntity entity = new ImportUsersDataEntity();
+        entity.setId(data.getId());
+        entity.setImportUsersReport(data.getReportId());
+        entity.setFirstName(data.getFirstName());
+        entity.setEmail(data.getEmail());
+        entity.setPhone(data.getPhone());
+        entity.setTomsId(data.getTomsId());
+        entity.setDmpId(data.getDmpId());
+        entity.setRole(data.getRole());
+        entity.setSystems(data.getSystems());
+        entity.setCreated(data.isCreated());
+        entity.setUserId(data.getUserId());
+        entity.setErrors(data.getErrors());
+        entity.setStatus(data.getStatus());
+
+        return entity;
     }
 }

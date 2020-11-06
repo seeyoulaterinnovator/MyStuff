@@ -83,15 +83,10 @@
                         <button data-ng-click="downloadTemplateCSV()" data-ng-show="access.viewRealm" class="btn btn-default">Download Template CSV</button>
                         <button data-ng-click="downloadTemplateXlsx()" data-ng-show="access.viewRealm" class="btn btn-default">Download Template Excel</button>
 
-                        <label for="import-file-csv" class="btn btn-default ng-binding" data-ng-show="access.viewRealm">Import CSV<i
+                        <label for="import-file-csv" class="btn btn-default ng-binding" data-ng-show="access.viewRealm">Import File<i
                                 class="pficon pficon-import"></i></label>
-                        <input id="import-file-csv" type="file" class="hidden" accept=".csv" data-ng-show="access.viewRealm"
-                               onchange="angular.element(this).scope().importFileCSV(this.files)">
-
-                        <label for="import-file-xlsx" class="btn btn-default ng-binding" data-ng-show="access.viewRealm">Import Xlsx<i
-                                class="pficon pficon-import"></i></label>
-                        <input id="import-file-xlsx" type="file" class="hidden" accept=".xlsx" data-ng-show="access.viewRealm"
-                               onchange="angular.element(this).scope().importFileExcel(this.files)">
+                        <input id="import-file-csv" type="file" class="hidden" accept=".csv, .xls, .xlsx, .ctl" data-ng-show="access.viewRealm"
+                               onchange="angular.element(this).scope().importFileCommon(this.files)">
 
                         <button data-ng-click="exportCSV()" class="btn btn-default">Export CSV</button>
                         <button data-ng-click="exportXlsx()" class="btn btn-default">Export Excel</button>

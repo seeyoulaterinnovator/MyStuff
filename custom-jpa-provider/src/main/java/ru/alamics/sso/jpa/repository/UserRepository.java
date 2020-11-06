@@ -9,6 +9,8 @@ import ru.alamics.sso.jpa.model.UserSummaryView;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -35,6 +37,7 @@ public class UserRepository {
         return ret;
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<UserEntity> save(List<UserEntity> entities) {
         entities.forEach(entity -> {
             if (entity.getId() == null) {
@@ -49,17 +52,20 @@ public class UserRepository {
         return entities;
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public UserEntity save(UserEntity user) {
         if (user.getId() == null) {
             user.setId(KeycloakModelUtils.generateId());
             em.persist(user);
+            em.flush();
         } else {
-            em.merge(user);
+            //em.merge(user);
         }
-        em.flush();
+
         return user;
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public UserAttributeEntity saveAttributes(UserAttributeEntity attr) {
         if (attr.getId() == null) {
             attr.setId(KeycloakModelUtils.generateId());

@@ -1,8 +1,9 @@
-package ru.alamics.sso.user.model;
+package ru.alamics.sso.user.filetype;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import ru.alamics.sso.user.filetype.FileModel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -16,13 +17,17 @@ public class XlsxImpl implements FileModel {
 
     private XSSFWorkbook workbook;
 
-    public XlsxImpl(InputStream inputStream) throws IOException {
+    private String ext;
+
+    public XlsxImpl(String fileExtension, InputStream inputStream) throws IOException {
         workbook = new XSSFWorkbook(inputStream);
+        ext = fileExtension;
     }
 
-    public XlsxImpl() {
+    public XlsxImpl(String fileExtension) {
         workbook = new XSSFWorkbook();
         workbook.createSheet();
+        ext = fileExtension;
     }
 
     @Override
@@ -103,5 +108,10 @@ public class XlsxImpl implements FileModel {
     @Override
     public int getCountRows() {
         return workbook.getSheetAt(0).getLastRowNum() + 1;
+    }
+
+    @Override
+    public String getFileExtension() {
+        return ext;
     }
 }

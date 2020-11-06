@@ -38,7 +38,7 @@ public class CachedUserPostFacade extends UserPostFacade {
     }
 
     public void addUserPostAndSystemRole(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException, NotValidException {
-        cache.put(userPostRequest.getUserId(), Arrays.asList(userPostService.addUserPostAndSystemRole(userPostRequest)));
+        cache.put(userPostRequest.getUserId(), Arrays.asList(userPostService.addUserPostAndAllSystemRole(userPostRequest)));
     }
 
     public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException, NotValidException {

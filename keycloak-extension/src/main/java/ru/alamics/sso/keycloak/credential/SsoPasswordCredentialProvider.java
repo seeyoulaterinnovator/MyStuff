@@ -1,7 +1,6 @@
 package ru.alamics.sso.keycloak.credential;
 
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.actiontoken.resetcred.ResetCredentialsActionToken;
 import org.keycloak.common.util.Time;
 import org.keycloak.credential.CredentialModel;
@@ -13,17 +12,12 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.protocol.oidc.OIDCConfigAttributes;
-import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.Urls;
 import org.keycloak.services.managers.AuthenticationSessionManager;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
-import org.keycloak.sessions.RootAuthenticationSessionModel;
-import ru.alamics.sso.client.ClientService;
-import ru.alamics.sso.keycloak.lookup.Lookup;
 
 import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriBuilderException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,12 +27,8 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
     private final static String DEFAULT_CLIENT_ID = "account";
     private final static int VALIDITY_IN_SECS = 259200;
 
-    private final ClientService clientService;
-
     public SsoPasswordCredentialProvider(KeycloakSession session) {
         super(session);
-
-        clientService = (ClientService) Lookup.lookup(ClientService.class);
     }
 
     @Override
@@ -59,7 +49,12 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
             clientModel = session.clientStorageManager().getClientByClientId(DEFAULT_CLIENT_ID, realm);
         clientModel.setAttribute(OIDCConfigAttributes.EXCLUDE_SESSION_STATE_FROM_AUTH_RESPONSE, "true");
 
-        AuthenticationSessionModel authenticationSession = createAuthenticationSessionForClient(realm, clientModel);//rootAuthenticationSessionModel.createAuthenticationSession(clientModel);
+        AuthenticationSessionManager authenticationSessionManager = new AuthenticationSessionManager(this.session);
+
+
+        AuthenticationSessionModel authenticationSession = authenticationSessionManager.createAuthenticationSession(realm, false)
+                .createAuthenticationSession(clientModel);
+
         String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
         ResetCredentialsActionToken token = new ResetCredentialsActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, clientModel.getClientId());
         UriBuilder builder = Urls.actionTokenBuilder(session.getContext().getUri().getBaseUri(), token.serialize(session, realm, session.getContext().getUri()),
@@ -78,24 +73,5 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
         } catch (EmailException e) {
             log.error("error {}", e.getMessage());
         }
-    }
-
-    private AuthenticationSessionModel createAuthenticationSessionForClient(RealmModel realm, ClientModel client)
-            throws UriBuilderException, IllegalArgumentException {
-        AuthenticationSessionModel authSession;
-
-        RootAuthenticationSessionModel rootAuthSession = new AuthenticationSessionManager(session).createAuthenticationSession(realm, true);
-        authSession = rootAuthSession.createAuthenticationSession(client);
-
-        authSession.setAction(AuthenticationSessionModel.Action.AUTHENTICATE.name());
-        authSession.setProtocol(OIDCLoginProtocol.LOGIN_PROTOCOL);
-
-        String redirectUri = clientService.findMainRedirectUri(client);
-
-        authSession.setRedirectUri(redirectUri);
-        authSession.setClientNote(OIDCLoginProtocol.REDIRECT_URI_PARAM, redirectUri);
-        authSession.setClientNote(OIDCLoginProtocol.RESPONSE_TYPE_PARAM, OAuth2Constants.CODE);
-        authSession.setClientNote(OIDCLoginProtocol.ISSUER, Urls.realmIssuer(session.getContext().getUri().getBaseUri(), realm.getName()));
-        return authSession;
     }
 }
