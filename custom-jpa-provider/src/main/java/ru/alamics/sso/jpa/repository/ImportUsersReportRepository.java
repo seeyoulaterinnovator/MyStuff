@@ -2,6 +2,7 @@ package ru.alamics.sso.jpa.repository;
 
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
+import ru.alamics.sso.jpa.entity.common.ImportUsersDataStatus;
 import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 
 import javax.ejb.LocalBean;
@@ -121,6 +122,14 @@ public class ImportUsersReportRepository {
 
         return em.createQuery("select data from ImportUsersDataEntity data where data.importUsersReport = :id", ImportUsersDataEntity.class)
                 .setParameter("id", reportId)
+                .getResultList();
+    }
+
+    public List<ImportUsersDataEntity> getDataByReportIdAndStatus(String reportId, ImportUsersDataStatus status) {
+
+        return em.createQuery("select data from ImportUsersDataEntity data where data.importUsersReport = :id and data.status=:status", ImportUsersDataEntity.class)
+                .setParameter("id", reportId)
+                .setParameter("status", status)
                 .getResultList();
     }
 }

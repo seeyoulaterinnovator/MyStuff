@@ -3,6 +3,7 @@ package ru.alamics.sso.user;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
+import ru.alamics.sso.jpa.entity.common.ImportUsersDataStatus;
 import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.jpa.repository.ImportUsersReportRepository;
 import ru.alamics.sso.registration.mapper.DataMapper;
@@ -41,6 +42,13 @@ public class ImportReportService {
     public List<ImportUsersDataModel> getDataList(String reportId) {
 
         List<ImportUsersDataEntity> list = importUsersReportRepository.getDataByReportId(reportId);
+
+        return list.stream().map(DataMapper::toDataModel).collect(Collectors.toList());
+    }
+
+    public List<ImportUsersDataModel> getDataListAwaiting(String reportId) {
+
+        List<ImportUsersDataEntity> list = importUsersReportRepository.getDataByReportIdAndStatus(reportId, ImportUsersDataStatus.AWAITING);
 
         return list.stream().map(DataMapper::toDataModel).collect(Collectors.toList());
     }
