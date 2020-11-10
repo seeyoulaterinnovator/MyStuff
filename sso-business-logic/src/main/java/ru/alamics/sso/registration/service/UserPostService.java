@@ -2,6 +2,7 @@ package ru.alamics.sso.registration.service;
 
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.jpa.entity.ExternalSystemRoleEntity;
 import ru.alamics.sso.jpa.entity.UserPostEntity;
@@ -47,10 +48,16 @@ public class UserPostService {
 
         checkUserPost(userPostRequest);
 
+        List<UserPostEntity> userPosts = userPostRepository.findUserPostsByUser(user);
+        if (userPosts != null) {
+            userPosts = userPosts.stream().filter(UserPostEntity::isSelected).collect(Collectors.toList());
+        }
+
         UserPostEntity userPost = DataMapper.toUserPost(userPostRequest);
         userPost.setUser(user);
         userPost.setRole(role);
         userPost.setCustomer(customerRepository.save(userPost.getCustomer()));
+        userPost.setSelected(CollectionUtils.isEmpty(userPosts));
 
         return DataMapper.toUserPostResponse(userPostRepository.save(userPost));
     }
