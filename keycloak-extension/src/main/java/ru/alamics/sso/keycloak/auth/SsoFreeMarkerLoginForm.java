@@ -63,7 +63,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         //Признак того, что вызов формы ведется в iframe
         final String secFetchDest = session.getContext().getRequestHeaders().getHeaderString("sec-fetch-dest");
 
-        return registrationOnlyInFrame && secFetchDest.equals("iframe");
+        return registrationOnlyInFrame && !secFetchDest.equals("iframe");
     }
 
     private String getRedirectUrl() {
