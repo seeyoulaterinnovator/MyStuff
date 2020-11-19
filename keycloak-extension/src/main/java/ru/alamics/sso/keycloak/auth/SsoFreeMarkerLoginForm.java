@@ -14,6 +14,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.RequiredActionProviderModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.ErrorPage;
+import org.keycloak.services.Urls;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.theme.BrowserSecurityHeaderSetup;
 import org.keycloak.theme.FreeMarkerException;
@@ -43,6 +44,7 @@ import static ru.alamics.sso.registration.model.UserConstants.*;
 @Slf4j
 public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     private static final String HOME_PAGE = "https://newlkb2b.domru.ru";
+    private static final String REGISTRATION_ONLY_IN_FRAME_ATTRIBUTE = "registrationOnlyInFrame";
 
     private ClientService clientService = null;
 
@@ -50,15 +52,26 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         super(session, freeMarker);
 
         attributes.put("redirectUrl", getRedirectUrl());
+        attributes.put("registrationOnlyInFrame", isRegistrationOnlyInFrame());
 
         clientService = (ClientService) Lookup.lookup(ClientService.class);
+    }
+
+    private boolean isRegistrationOnlyInFrame() {
+        final boolean registrationOnlyInFrame = realm.getAttribute(REGISTRATION_ONLY_IN_FRAME_ATTRIBUTE, false);
+
+        //Признак того, что вызов формы ведется в iframe
+        final String secFetchDest = session.getContext().getRequestHeaders().getHeaderString("sec-fetch-dest");
+
+        return registrationOnlyInFrame && secFetchDest.equals("iframe");
     }
 
     private String getRedirectUrl() {
 
         // не успевает иначе
-        if (clientService == null)
+        if (clientService == null) {
             clientService = (ClientService) Lookup.lookup(ClientService.class);
+        }
 
         String redirectUri = clientService.findMainRedirectUri(client);
 
@@ -157,6 +170,11 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
     @Override
     public Response createRegistration() {
+        if (isRegistrationOnlyInFrame()) {
+            final URI redirectUri = Urls.accountLogPage(uriInfo.getBaseUri(), realm.getName());
+            return Response.status(302).location(redirectUri).build();
+        }
+
         RealmModel realm = this.session.getContext().getRealm();
         List<RequiredActionProviderModel> requiredActionsProvider = realm.getRequiredActionProviders();
         List<String> twoStepAuth = requiredActionsProvider.stream()
