@@ -45,4 +45,9 @@ public class ImportUsersReportService {
         return importUsersReport;
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void updateReportStatus(ImportUsersReportModel reportModel) {
+
+        importReportService.updateReport(reportModel);
+    }
 }

@@ -33,6 +33,8 @@ import ru.alamics.sso.util.validator.PhoneValidator;
 
 import javax.ejb.*;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
@@ -63,10 +65,21 @@ public class ImportService {
     @EJB
     private ImportReportService importReportService;
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void doGeneratePasswords(List<ImportUsersDataModel> dataList, RealmModel realm, AdminAuth auth, KeycloakSession session) {
+    private void doGeneratePasswords(List<ImportUsersDataModel> dataList, AdminAuth auth, KeycloakSession session) {
 
         log.info("doGeneratePasswords");
+
+        if (auth == null) {
+            log.info("doGeneratePasswords auth is null");
+            return;
+        }
+
+        if (session == null) {
+            log.info("doGeneratePasswords session is null");
+            return;
+        }
+
+        RealmModel realm = session.getContext().getRealm();
 
         Map<String, UserModel> listToSend = new HashMap<>();
 
@@ -77,9 +90,16 @@ public class ImportService {
                 String errors = "";
 
                 UserModel user = session.users().getUserById(data.getUserId(), realm);
-                UserCredentialModel cred = UserCredentialModel.password(data.getCleanPassword(), false);
+
                 try {
-                    session.userCredentialManager().updateCredential(realm, user, cred);
+                    if (user == null) {
+                        log.info("generate password userid = " + data.getUserId() + ", user is null");
+                        errors += "Password not set";
+                    } else {
+
+                        UserCredentialModel cred = UserCredentialModel.password(data.getCleanPassword(), false);
+                        session.userCredentialManager().updateCredential(realm, user, cred);
+                    }
 
                 } catch (IllegalStateException ise) {
                     log.error("", ise);
@@ -96,15 +116,16 @@ public class ImportService {
                         importReportService.updateImportUsersData(data);
                     } else {
                         // чтобы не было дублей
-                        listToSend.put(user.getId(), user);
+                        if (user != null)
+                            listToSend.put(user.getId(), user);
                     }
                 }
             }
         }
 
-            for (UserModel user : listToSend.values()) {
-                createAdminEvent(OperationType.CREATE, user, realm, auth, session);
-            }
+        for (UserModel user : listToSend.values()) {
+            createAdminEvent(OperationType.CREATE, user, realm, auth, session);
+        }
 
         log.info("doGeneratePasswords done");
     }
@@ -116,8 +137,11 @@ public class ImportService {
                 .resourcePath(session.getContext().getUri(), user.getId())
                 .success();
     }
+
+    //@Asynchronous
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart) {
+    public void createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart,
+                                            AdminAuth auth, KeycloakSession session) {
 
         if (FileFactory.CTL.equalsIgnoreCase(reportModel.getFiletype())) {
 
@@ -126,6 +150,11 @@ public class ImportService {
         } else {
             importUsers(reportModel, dataList, scheduleStart);
         }
+
+        doGeneratePasswords(dataList, auth, session);
+
+        //if (cf != null)
+        //    cf.complete("");
     }
 
     private void importUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart) {
@@ -189,7 +218,7 @@ public class ImportService {
             reportModel.setCountCreatedUsers(createdUsers);
             reportModel.setStatus(ImportUsersReportStatus.DONE);
 
-            importReportService.updateReport(reportModel);
+            //importReportService.updateReport(reportModel);
 
             createAdminEvent(OperationType.CREATE, reportModel, reportModel.getRealmId());
             log.info(String.format("Importing users from file %s is done: countUsers=%s, countCreatedUsers=%s, countClones=%s ",
@@ -203,7 +232,7 @@ public class ImportService {
             reportModel.setCountClones(countClones);
             reportModel.setCountCreatedUsers(createdUsers);
             reportModel.setStatus(ImportUsersReportStatus.AWAITING);
-            importReportService.updateReport(reportModel);
+            //importReportService.updateReport(reportModel);
 
         } catch (Exception e) {
             log.error("Error, but processed " + processedUsers, e);

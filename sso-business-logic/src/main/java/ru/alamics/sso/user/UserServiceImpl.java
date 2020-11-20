@@ -9,6 +9,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.resources.admin.AdminAuth;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
+import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
@@ -20,9 +21,15 @@ import ru.alamics.sso.user.model.*;
 import ru.alamics.sso.util.Util;
 import ru.alamics.sso.util.validator.NotValidException;
 
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 @Slf4j
 public class UserServiceImpl implements UserService {
@@ -87,12 +94,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @SneakyThrows
+    @TransactionAttribute(TransactionAttributeType.NEVER)
     public ImportResponse importUsers(InputStream inputStream, String content) throws IOException, FileServiceException {
         log.info("Start upload users");
-
-        Thread.sleep(360000);
-
 
         FileModel file = FileFactory.createFileModel(inputStream, Util.getFileExtension(content));
 
@@ -104,24 +108,35 @@ public class UserServiceImpl implements UserService {
         ImportUsersReportModel importUsersReport = importUsersReportService.createImportUsersReport(realm, Util.getFileName(content), dataList);
 
 
-        int init = 200;
+        //List<Future<String>> asyncList = new ArrayList<>();
 
-        int a = 0;
-        int b = init;
-        while (b <= dataList.size() + (init - 1)) {
-            List<ImportUsersDataModel> dataListBuffer = dataList.subList(a, Math.min(b, dataList.size()));
-            importService.createImportUsers(importUsersReport, dataListBuffer, null);
-            a = b;
-            b += 200;
+        int wndw = 200;
+
+        int first = 0;
+        int last = first + wndw;
+
+        // b <= dataList.size() + (wndw - 1)
+        while (first < dataList.size()) {
+            List<ImportUsersDataModel> dataListBuffer = dataList.subList(first, Math.min(last, dataList.size()));
+
+            //CompletableFuture<String> cf = new CompletableFuture<>();
+            //asyncList.add(cf);
+
+            importService.createImportUsers(importUsersReport, dataListBuffer, null, auth, session);
+            first = last;
+            last += wndw;
         }
 
-        a = 0;
-        b = init;
-        while (b <= dataList.size() + (init - 1)) {
-            importService.doGeneratePasswords(dataList.subList(a, Math.min(b, dataList.size())), realm, auth, session);
-            a = b;
-            b += 200;
+        /*
+        long countDone = -1;
+        while (asyncList.size() > countDone) {
+            countDone = asyncList.stream().filter(f -> (f.isCancelled() || f.isDone())).count();
+            Thread.sleep(100);
         }
+        */
+
+        importUsersReport.setStatus(ImportUsersReportStatus.DONE);
+        importUsersReportService.updateReportStatus(importUsersReport);
 
         ImportResponse importResponse = UserMapper.toImportUsersReportEntity(importUsersReport, dataList);
 
