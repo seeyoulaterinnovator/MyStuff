@@ -2,13 +2,17 @@ package ru.alamics.sso.user;
 
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.authorization.policy.evaluation.Realm;
 import org.keycloak.common.util.Time;
 import org.keycloak.events.admin.OperationType;
+import org.keycloak.events.admin.ResourceType;
 import org.keycloak.events.jpa.AdminEventEntity;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
 import org.keycloak.models.jpa.entities.*;
-import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
-import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
+import org.keycloak.services.managers.Auth;
+import org.keycloak.services.resources.admin.AdminAuth;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
+import org.keycloak.storage.ReadOnlyException;
 import ru.alamics.sso.jpa.entity.common.ImportUsersDataStatus;
 import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.jpa.repository.*;
@@ -20,24 +24,25 @@ import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.schedule.ImportSchedule;
 import ru.alamics.sso.user.filetype.FileFactory;
 import ru.alamics.sso.user.mapper.UserMapper;
-import ru.alamics.sso.user.model.*;
+import ru.alamics.sso.user.model.ImportUsersDataModel;
+import ru.alamics.sso.user.model.ImportUsersReportModel;
+import ru.alamics.sso.user.model.RepeatNextTimeException;
 import ru.alamics.sso.util.validator.EmailValidator;
 import ru.alamics.sso.util.validator.NotValidException;
 import ru.alamics.sso.util.validator.PhoneValidator;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
+import javax.ejb.*;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
 /**
-    imports users from files
-
-    same as UserExtService
-*/
+ * imports users from files
+ * <p>
+ * same as UserExtService
+ */
 @Slf4j
 @Stateless
 @LocalBean
@@ -60,13 +65,96 @@ public class ImportService {
     @EJB
     private ImportReportService importReportService;
 
-    public void createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart) {
+    private void doGeneratePasswords(List<ImportUsersDataModel> dataList, AdminAuth auth, KeycloakSession session) {
+
+        log.info("doGeneratePasswords");
+
+        if (auth == null) {
+            log.info("doGeneratePasswords auth is null");
+            return;
+        }
+
+        if (session == null) {
+            log.info("doGeneratePasswords session is null");
+            return;
+        }
+
+        RealmModel realm = session.getContext().getRealm();
+
+        Map<String, UserModel> listToSend = new HashMap<>();
+
+        for (ImportUsersDataModel data : dataList) {
+
+            if (data.getUserId() != null && data.getCleanPassword() != null) {
+
+                String errors = "";
+
+                UserModel user = session.users().getUserById(data.getUserId(), realm);
+
+                try {
+                    if (user == null) {
+                        log.info("generate password userid = " + data.getUserId() + ", user is null");
+                        errors += "Password not set";
+                    } else {
+
+                        UserCredentialModel cred = UserCredentialModel.password(data.getCleanPassword(), false);
+                        session.userCredentialManager().updateCredential(realm, user, cred);
+                    }
+
+                } catch (IllegalStateException ise) {
+                    log.error("", ise);
+                    errors += "Resetting to N old passwords is not allowed.";
+                } catch (ReadOnlyException mre) {
+                    log.error("", mre);
+                    errors += "Can't reset password as account is read only.";
+                } catch (ModelException e) {
+                    log.error("", e);
+                    errors += e.getMessage();
+                } finally {
+                    if (!errors.isEmpty()) {
+                        data.setErrors(data.getErrors() + errors);
+                        importReportService.updateImportUsersData(data);
+                    } else {
+                        // чтобы не было дублей
+                        if (user != null)
+                            listToSend.put(user.getId(), user);
+                    }
+                }
+            }
+        }
+
+        for (UserModel user : listToSend.values()) {
+            createAdminEvent(OperationType.CREATE, user, realm, auth, session);
+        }
+
+        log.info("doGeneratePasswords done");
+    }
+    public void createAdminEvent(OperationType operationType, UserModel user, RealmModel realm, AdminAuth auth, KeycloakSession session) {
+        new AdminEventBuilder(realm, auth, session, session.getContext().getConnection())
+                .realm(realm)
+                .resource(ResourceType.USER)
+                .operation(operationType)
+                .resourcePath(session.getContext().getUri(), user.getId())
+                .success();
+    }
+
+    //@Asynchronous
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart,
+                                            AdminAuth auth, KeycloakSession session) {
 
         if (FileFactory.CTL.equalsIgnoreCase(reportModel.getFiletype())) {
+
             migrationService.createImportUsers(reportModel, dataList, scheduleStart);
+
         } else {
             importUsers(reportModel, dataList, scheduleStart);
         }
+
+        doGeneratePasswords(dataList, auth, session);
+
+        //if (cf != null)
+        //    cf.complete("");
     }
 
     private void importUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart) {
@@ -130,7 +218,7 @@ public class ImportService {
             reportModel.setCountCreatedUsers(createdUsers);
             reportModel.setStatus(ImportUsersReportStatus.DONE);
 
-            importReportService.updateReport(reportModel);
+            //importReportService.updateReport(reportModel);
 
             createAdminEvent(OperationType.CREATE, reportModel, reportModel.getRealmId());
             log.info(String.format("Importing users from file %s is done: countUsers=%s, countCreatedUsers=%s, countClones=%s ",
@@ -144,7 +232,7 @@ public class ImportService {
             reportModel.setCountClones(countClones);
             reportModel.setCountCreatedUsers(createdUsers);
             reportModel.setStatus(ImportUsersReportStatus.AWAITING);
-            importReportService.updateReport(reportModel);
+            //importReportService.updateReport(reportModel);
 
         } catch (Exception e) {
             log.error("Error, but processed " + processedUsers, e);

@@ -1,14 +1,15 @@
 package ru.alamics.sso.user;
 
 import javassist.NotFoundException;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.events.admin.OperationType;
-import org.keycloak.events.admin.ResourceType;
-import org.keycloak.models.*;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.services.resources.admin.AdminAuth;
-import org.keycloak.services.resources.admin.AdminEventBuilder;
-import org.keycloak.storage.ReadOnlyException;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
+import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
@@ -20,11 +21,15 @@ import ru.alamics.sso.user.model.*;
 import ru.alamics.sso.util.Util;
 import ru.alamics.sso.util.validator.NotValidException;
 
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 @Slf4j
 public class UserServiceImpl implements UserService {
@@ -84,11 +89,12 @@ public class UserServiceImpl implements UserService {
                 continue;
             }
             user.setEnabled(true);
-            createAdminEvent(OperationType.CREATE, user);
+            importService.createAdminEvent(OperationType.CREATE, user, realm, auth, session);
         }
     }
 
     @Override
+    @TransactionAttribute(TransactionAttributeType.NEVER)
     public ImportResponse importUsers(InputStream inputStream, String content) throws IOException, FileServiceException {
         log.info("Start upload users");
 
@@ -101,9 +107,36 @@ public class UserServiceImpl implements UserService {
         // create report
         ImportUsersReportModel importUsersReport = importUsersReportService.createImportUsersReport(realm, Util.getFileName(content), dataList);
 
-        importService.createImportUsers(importUsersReport, dataList, null);
 
-        doGeneratePasswords(dataList);
+        //List<Future<String>> asyncList = new ArrayList<>();
+
+        int wndw = 200;
+
+        int first = 0;
+        int last = first + wndw;
+
+        // b <= dataList.size() + (wndw - 1)
+        while (first < dataList.size()) {
+            List<ImportUsersDataModel> dataListBuffer = dataList.subList(first, Math.min(last, dataList.size()));
+
+            //CompletableFuture<String> cf = new CompletableFuture<>();
+            //asyncList.add(cf);
+
+            importService.createImportUsers(importUsersReport, dataListBuffer, null, auth, session);
+            first = last;
+            last += wndw;
+        }
+
+        /*
+        long countDone = -1;
+        while (asyncList.size() > countDone) {
+            countDone = asyncList.stream().filter(f -> (f.isCancelled() || f.isDone())).count();
+            Thread.sleep(100);
+        }
+        */
+
+        importUsersReport.setStatus(ImportUsersReportStatus.DONE);
+        importUsersReportService.updateReportStatus(importUsersReport);
 
         ImportResponse importResponse = UserMapper.toImportUsersReportEntity(importUsersReport, dataList);
 
@@ -129,64 +162,11 @@ public class UserServiceImpl implements UserService {
         log.info("Upload import users file success");
     }
 
-    private void doGeneratePasswords(List<ImportUsersDataModel> dataList) {
-
-        log.info("doGeneratePasswords");
-
-        Map<String, UserModel> listToSend = new HashMap<>();
-
-        for (ImportUsersDataModel data : dataList) {
-
-            if (data.getUserId() != null && data.getCleanPassword() != null) {
-
-                String errors = "";
-
-                UserModel user = session.users().getUserById(data.getUserId(), realm);
-                UserCredentialModel cred = UserCredentialModel.password(data.getCleanPassword(), false);
-                try {
-                    session.userCredentialManager().updateCredential(realm, user, cred);
-
-                } catch (IllegalStateException ise) {
-                    log.error("", ise);
-                    errors += "Resetting to N old passwords is not allowed.";
-                } catch (ReadOnlyException mre) {
-                    log.error("", mre);
-                    errors += "Can't reset password as account is read only.";
-                } catch (ModelException e) {
-                    log.error("", e);
-                    errors += e.getMessage();
-                } finally {
-                    log.info("Migration: set password to " + user.getId());
-                    if (!errors.isEmpty()) {
-                        data.setErrors(data.getErrors() + errors);
-                        importReportService.updateImportUsersData(data);
-                    } else {
-                        // чтобы не было дублей
-                        listToSend.put(user.getId(), user);
-                    }
-                }
-            }
-        }
-
-        for (UserModel user : listToSend.values()) {
-            createAdminEvent(OperationType.CREATE, user);
-        }
-
-        log.info("doGeneratePasswords done");
-    }
-
     @Override
     public UserModel createUser(UserRequest request, boolean bss) throws FoundException, NotFoundException, FoundUserPostException, NotValidException {
 
         return userExtService.createUser(request, bss);
     }
 
-    private void createAdminEvent(OperationType operationType, UserModel user) {
-        new AdminEventBuilder(realm, auth, session, session.getContext().getConnection())
-                .realm(realm)
-                .resource(ResourceType.USER)
-                .operation(operationType)
-                .resourcePath(session.getContext().getUri(), user.getId())
-                .success();
-    }
+
 }

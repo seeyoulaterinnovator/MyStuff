@@ -66,12 +66,10 @@ public class ImportSchedule {
 
         List<ImportUsersReportModel> reportList = importReportService.getReportListByStatus(ImportUsersReportStatus.AWAITING);
 
-        for (ImportUsersReportModel en : reportList) {
-            importReportService.setReportStatus(en, ImportUsersReportStatus.IN_PROGRESS);
-        }
-
         for (ImportUsersReportModel reportModel : reportList) {
-            importService.createImportUsers(reportModel, null, scheduleStart);
+            importReportService.setReportStatus(reportModel, ImportUsersReportStatus.IN_PROGRESS);
+            importService.createImportUsers(reportModel, null, scheduleStart, null, null);
+            importReportService.updateReport(reportModel);
         }
     }
 

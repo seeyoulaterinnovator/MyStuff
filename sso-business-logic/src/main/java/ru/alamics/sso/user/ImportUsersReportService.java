@@ -11,9 +11,7 @@ import ru.alamics.sso.user.model.ImportUsersReportModel;
 import ru.alamics.sso.user.web.ImportUsersReportDto;
 import ru.alamics.sso.util.Util;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
+import javax.ejb.*;
 import java.util.List;
 
 @Stateless
@@ -33,6 +31,7 @@ public class ImportUsersReportService {
         importReportService.saveImportUsersData(reportId, dataList); // TODO really need?
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public ImportUsersReportModel createImportUsersReport(RealmModel realm, String filename, List<ImportUsersDataModel> dataList) {
 
         ImportUsersReportModel importUsersReport = UserMapper.toImportUsersReportEntity(realm.getName(), filename, dataList);
@@ -46,4 +45,9 @@ public class ImportUsersReportService {
         return importUsersReport;
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void updateReportStatus(ImportUsersReportModel reportModel) {
+
+        importReportService.updateReport(reportModel);
+    }
 }

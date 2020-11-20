@@ -133,11 +133,13 @@ public class MigrationService {
                     }
                 }
             }
+
             reportModel.setCountClones(countClones);
             reportModel.setCountCreatedUsers(createdUsers);
             reportModel.setStatus(ImportUsersReportStatus.DONE);
 
-            importReportService.updateReport(reportModel);
+            // закомментировано, потому что для пакетной загрузки это может быть не окончательный статус
+            //importReportService.updateReport(reportModel);
 
             createAdminEvent(OperationType.CREATE, reportModel, reportModel.getRealmId());
 
@@ -152,7 +154,8 @@ public class MigrationService {
             reportModel.setCountClones(countClones);
             reportModel.setCountCreatedUsers(createdUsers);
             reportModel.setStatus(ImportUsersReportStatus.AWAITING);
-            importReportService.updateReport(reportModel);
+            // закомментировано, потому что для пакетной загрузки это может быть не окончательный статус
+            //importReportService.updateReport(reportModel);
 
         } catch (Exception e) {
             log.error("Error, but processed " + processedUsers, e);
