@@ -61,9 +61,9 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         final boolean registrationOnlyInFrame = realm.getAttribute(REGISTRATION_ONLY_IN_FRAME_ATTRIBUTE, false);
 
         //Признак того, что вызов формы ведется в iframe
-        final String secFetchDest = session.getContext().getRequestHeaders().getHeaderString("sec-fetch-dest");
+        final String referer = session.getContext().getRequestHeaders().getHeaderString("referer");
 
-        return registrationOnlyInFrame && (secFetchDest == null || !secFetchDest.equals("iframe"));
+        return registrationOnlyInFrame && (referer == null || !referer.contains("iframe=1"));
     }
 
     private String getRedirectUrl() {
