@@ -33,6 +33,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -61,7 +63,15 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         final boolean registrationOnlyInFrame = realm.getAttribute(REGISTRATION_ONLY_IN_FRAME_ATTRIBUTE, false);
 
         //Признак того, что вызов формы ведется в iframe
-        final String referer = session.getContext().getRequestHeaders().getHeaderString("referer");
+        String referer = session.getContext().getRequestHeaders().getHeaderString("referer");
+
+        if (referer != null) {
+            try {
+                referer = URLDecoder.decode(referer, StandardCharsets.UTF_8);
+            } catch (Exception e) {
+                log.warn("Referer is not decoded={}", referer);
+            }
+        }
 
         return registrationOnlyInFrame && (referer == null || !referer.contains("iframe=1"));
     }
