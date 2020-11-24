@@ -8,7 +8,7 @@
         <#if !registrationOnlyInFrame!false>
             <@blocks.contentHeader mainTitle="${msg('doLogIn')}" secondaryTitle="${msg('registerTitle')}" secondaryHref="${url.registrationUrl}" withBorder=true />
         <#else>
-            <@blocks.contentHeader mainTitle="${msg('doLogIn')}" withBorder=true />
+            <@blocks.contentHeader mainTitle="${msg('doLogIn')}" secondaryTitle=" " secondaryHref=" " withBorder=true />
         </#if>
     <#elseif section = "form">
         <p class="pb-3 login-title-text">Если у Вас уже есть учетная запись, Вы можете войти</p>
