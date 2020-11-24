@@ -67,7 +67,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
         if (referer != null) {
             try {
-                referer = URLDecoder.decode(referer, StandardCharsets.UTF_8);
+                referer = URLDecoder.decode(referer, StandardCharsets.UTF_8.name());
             } catch (Exception e) {
                 log.warn("Referer is not decoded={}", referer);
             }
