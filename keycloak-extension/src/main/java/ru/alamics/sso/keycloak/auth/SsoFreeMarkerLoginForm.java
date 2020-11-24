@@ -54,26 +54,35 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         super(session, freeMarker);
 
         attributes.put("redirectUrl", getRedirectUrl());
-        attributes.put("registrationOnlyInFrame", isRegistrationOnlyInFrame());
+        attributes.put("hideRegistration", isHideRegistration());
 
         clientService = (ClientService) Lookup.lookup(ClientService.class);
     }
 
-    private boolean isRegistrationOnlyInFrame() {
+    private boolean isHideRegistration() {
         final boolean registrationOnlyInFrame = realm.getAttribute(REGISTRATION_ONLY_IN_FRAME_ATTRIBUTE, false);
 
         //Признак того, что вызов формы ведется в iframe
         String referer = session.getContext().getRequestHeaders().getHeaderString("referer");
 
-        if (referer != null) {
-            try {
-                referer = URLDecoder.decode(referer, StandardCharsets.UTF_8.name());
-            } catch (Exception e) {
-                log.warn("Referer is not decoded={}", referer);
-            }
+        if (referer == null) {
+            return registrationOnlyInFrame;
         }
 
-        return registrationOnlyInFrame && (referer == null || !referer.contains("iframe=1"));
+        try {
+            referer = URLDecoder.decode(referer, StandardCharsets.UTF_8.name());
+        } catch (Exception e) {
+            log.warn("Referer is not decoded={}", referer);
+        }
+
+        final boolean isIframe = referer.contains("iframe=1");
+
+        //Установка отметки, что вызов происходит в iframe. Необходимо при переходах между вкладками логина и регистрации внутри iframe
+        if (isIframe) {
+            session.getContext().getUri().getPathParameters(true).add("iframe", "1");
+        }
+
+        return registrationOnlyInFrame && !isIframe;
     }
 
     private String getRedirectUrl() {
@@ -180,7 +189,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
     @Override
     public Response createRegistration() {
-        if (isRegistrationOnlyInFrame()) {
+        if (isHideRegistration()) {
             final URI redirectUri = Urls.accountLogPage(uriInfo.getBaseUri(), realm.getName());
             return Response.status(302).location(redirectUri).build();
         }
