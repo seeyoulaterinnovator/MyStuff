@@ -1,0 +1,195 @@
+plugins {
+    id 'com.bmuschko.docker-remote-api' version '4.10.0'
+}
+
+import com.bmuschko.gradle.docker.tasks.container.*
+import com.bmuschko.gradle.docker.tasks.image.*
+
+// test branch
+
+version = '0.0.1'
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'idea'
+
+    idea {
+        module {
+            downloadJavadoc = true
+            downloadSources = true
+        }
+    }
+
+    repositories {
+        jcenter()
+        maven { url "https://repository.jboss.org/nexus/content/repositories/thirdparty-releases/" }
+    }
+
+    ext {
+        keycloakVersion = '6.0.1'
+        lombokVersion = '1.18.8'
+        junitVersion = '5.5.0'
+        generatedMapperSourcesDir = "${buildDir}/generated-src/mapstruct/main"
+        toolsDir = new File(projectDir, "tools")
+    }
+
+    compileJava.options.encoding = 'UTF-8'
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+}
+
+subprojects {
+
+    version = rootProject.version // + '-' + (System.getenv('CI_PIPELINE_ID') != null ? System.getenv('CI_PIPELINE_ID') : 'SNAPSHOT')
+    group = 'ru.alamics.sso'
+
+    buildDir = new File(rootProject.projectDir, "build/" + project.name)
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }    
+    
+    dependencies {
+        annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+        compileOnly "org.projectlombok:lombok:$lombokVersion"
+        implementation "org.projectlombok:lombok:$lombokVersion"
+        // https://mvnrepository.com/artifact/org.mapstruct/mapstruct
+        implementation 'org.mapstruct:mapstruct:1.3.0.Final'
+//        compileOnly 'org.mapstruct:mapstruct-processor:1.3.0.Final'
+        annotationProcessor  'org.mapstruct:mapstruct-processor:1.3.0.Final'
+
+        testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+        testImplementation 'org.assertj:assertj-core:3.12.2'
+        testImplementation 'org.mockito:mockito-junit-jupiter:2.28.2'
+    }
+
+    test {
+        useJUnitPlatform()
+        reports.junitXml.destination = new File(rootProject.projectDir, "build/test-results/" + project.name)
+        reports.html.destination = new File(rootProject.projectDir, "build/test-results/" + project.name + "/reports")
+    }
+
+}
+
+task bundle {
+    dependsOn(':keycloak-extension:bundle')
+}
+
+dependencies {
+    implementation (
+            project(':keycloak-extension'),
+    )
+}
+
+test {
+    dependsOn(':keycloak-extension:test')
+}
+
+//////////// DOCKER
+// POSTGRES
+task postgresPull(type: DockerPullImage) {
+    repository = 'postgres'
+    tag = "latest"
+}
+
+task postgresCreate(type: DockerCreateContainer) {
+    dependsOn postgresPull
+    targetImageId postgresPull.getImageId()
+    containerName = "$project.group-postgres"
+    portBindings = ['5433:5432']
+    withEnvVar('POSTGRES_USER', 'postgres')
+    withEnvVar('POSTGRES_PASSWORD', 'postgres')
+    withEnvVar('POSTGRES_DB', 'keycloak')
+}
+
+task deploy {
+
+    dependsOn(':keycloak-extension:war')
+    dependsOn(':custom-jpa-provider:jar')
+
+    def warArchive =  tasks.getByPath(':keycloak-extension:war').getArchiveFile()
+    def jarArchive =  tasks.getByPath(':custom-jpa-provider:jar').getArchiveFile()
+    def jarModuleXml = new File("$toolsDir", "module.xml")
+    def themesFolder = tasks.getByPath(':keycloak-extension:processResources').getDestinationDir().getAbsolutePath() + '/themes'
+    def blacklistFolder = tasks.getByPath(':keycloak-extension:processResources').getDestinationDir().getAbsolutePath() + '/standalone'
+    def nodeModules = new File(themesFolder, "/domru/login/resources/node_modules")
+    
+    def deployDir = System.getenv('KEYCLOAK_DEPLOY_DIR') != null ? System.getenv('KEYCLOAK_DEPLOY_DIR'): "$rootProject.buildDir/deploy"
+    def archiveTargetFolder = deployDir + '/standalone/deployments'
+    def themesTargetFolder = deployDir + '/themes'
+    def blacklistTargetFolder = deployDir + '/standalone'
+    def jarModuleFolder = deployDir + '/modules/system/layers/base/ru/alamics/sso/jpa/main'
+
+    inputs.files(warArchive, themesFolder, blacklistFolder)
+    outputs.dirs(archiveTargetFolder, themesTargetFolder, blacklistTargetFolder)
+
+    doLast {
+
+        delete nodeModules
+        
+        copy {
+            from file(warArchive)
+            into(archiveTargetFolder)
+            rename { String fileName ->
+                fileName = "domru-sso.war"
+            }
+        }
+        copy {
+            from file(jarArchive)
+            into(jarModuleFolder)
+            rename { String fileName ->
+                fileName = "custom-jpa.jar"
+            }
+        }
+        // TODO сюда не надо бы лишний раз копировать но ломается CI/CD на прод
+        copy {
+            from file(jarArchive)
+            into(archiveTargetFolder)
+            rename { String fileName ->
+                fileName = "custom-jpa.jar"
+            }
+        }        
+        copy {
+            from file(jarModuleXml)
+            into(jarModuleFolder)
+        }
+        copy {
+            from file(themesFolder)
+            into(themesTargetFolder)
+        }
+        copy {
+            from file(blacklistFolder)
+            into(blacklistTargetFolder)
+        }
+        copy {
+            from file('/configs/local/standalone.xml')
+            into(deployDir + '/standalone/configuration')
+        }
+
+
+        //setup hash to front resources
+        def currentTime = new Date().format('yyyyMMddHHmmss');
+        ant.replaceregexp(match:'hash=', replace:'hash='+currentTime, flags:'g', byline:true) {
+            fileset(dir: themesTargetFolder + '/domru/login', includes: 'template.ftl')
+        }
+    }
+}
+
+task postgresStart(type: DockerStartContainer) {
+    dependsOn postgresCreate
+    targetContainerId postgresCreate.getContainerId()
+}
+
+task postgresRemove(type: DockerRemoveContainer) {
+    force = true
+    targetContainerId "$project.group-postgres"
+}

@@ -1,0 +1,117 @@
+package ru.alamics.sso.user.filetype;
+
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import ru.alamics.sso.user.filetype.FileModel;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+public class XlsxImpl implements FileModel {
+
+    private XSSFWorkbook workbook;
+
+    private String ext;
+
+    public XlsxImpl(String fileExtension, InputStream inputStream) throws IOException {
+        workbook = new XSSFWorkbook(inputStream);
+        ext = fileExtension;
+    }
+
+    public XlsxImpl(String fileExtension) {
+        workbook = new XSSFWorkbook();
+        workbook.createSheet();
+        ext = fileExtension;
+    }
+
+    @Override
+    public String[] getHeaders() {
+        Row row = workbook.getSheetAt(0).getRow(0);
+        Iterator<Cell> iterCell = row.cellIterator();
+        LinkedList<String> result = new LinkedList<String>();
+        DataFormatter formatter = new DataFormatter();
+        while (iterCell.hasNext()) {
+            result.add(formatter.formatCellValue(iterCell.next()));
+        }
+        return result.toArray(new String[result.size()]);
+    }
+
+    @Override
+    public void addRow(List<String> cells) {
+        Sheet sheet = workbook.getSheetAt(0);
+        int rowNum = sheet.getLastRowNum();
+        if (sheet.getRow(rowNum) != null) {
+            rowNum++;
+        }
+        Row row = sheet.createRow(rowNum);
+        int i = 0;
+        for (String cell : cells) {
+            row.createCell(i).setCellValue(cell);
+            i++;
+        }
+    }
+
+    private String getValueCell(Cell cell) {
+        CellType type = cell.getCellType();
+        switch (type.toString()) {
+            case "NUMERIC":
+                return Integer.toString((int) cell.getNumericCellValue());
+            case "STRING":
+                return cell.getStringCellValue();
+        }
+        return "";
+    }
+
+    @Override
+    public List<String[]> getRows() {
+        Iterator<Row> iter = workbook.getSheetAt(0).rowIterator();
+        List<String[]> rows = new LinkedList<String[]>();
+        DataFormatter formatter = new DataFormatter();
+        while (iter.hasNext()) {
+            Row row = iter.next();
+            Iterator<Cell> iterCell = row.cellIterator();
+            List<String> cells = new ArrayList<>();
+            int currentColumn = 0;
+            while (iterCell.hasNext()) {
+                XSSFCell cell = (XSSFCell) iterCell.next();
+                if (cell.getColumnIndex() != currentColumn){
+                     fillEmptyCells(cells, cell.getColumnIndex() - currentColumn);
+                     currentColumn += cell.getColumnIndex() - currentColumn;
+                }
+                cells.add(formatter.formatCellValue(cell));
+                currentColumn ++;
+            }
+            rows.add(cells.toArray(new String[cells.size()]));
+        }
+        return rows;
+    }
+
+    private void fillEmptyCells(List<String> cells, int count){
+        for (int i = 0; i < count; i++) {
+            cells.add(null);
+        }
+    }
+
+    @Override
+    public byte[] save() throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        workbook.write(outputStream);
+        return outputStream.toByteArray();
+    }
+
+    @Override
+    public int getCountRows() {
+        return workbook.getSheetAt(0).getLastRowNum() + 1;
+    }
+
+    @Override
+    public String getFileExtension() {
+        return ext;
+    }
+}

@@ -1,0 +1,28 @@
+<script type="text/javascript">
+
+    var isFramed = false;
+    try {
+        isFramed = window !== window.top || document !== top.document || self.location !== top.location;
+    } catch (e) {
+        isFramed = true;
+    }
+
+    console.log("isFramed  " + isFramed);
+
+    if (isFramed) {
+
+        document.getElementById('page-header').style.display = 'none';
+        document.getElementById('page-footer').style.display = 'none';
+        document.getElementById('content').style.padding = '0';
+    } else {
+        /*
+        // old rt chat
+        let script = document.createElement('script');
+        script.id = "chat-script";
+        script.type = 'text/javascript';
+        script.src = "//perm.b2b.domru.ru/chat/?domainUrl=//perm.b2b.domru.ru&amp;cityDomain=perm&amp;cityId=1&isTest";
+        document.body.appendChild(script);
+        */
+    }
+</script>
+

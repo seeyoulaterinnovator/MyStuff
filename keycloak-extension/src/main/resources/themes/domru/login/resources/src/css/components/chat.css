@@ -1,0 +1,100 @@
+.er-chat {
+  height: 100vh;
+  width: 100%;
+  position: fixed;
+  z-index: 200;
+  right: 0;
+  background-color: #FAFAFA;
+  box-shadow: -5px 0px 20px 0px rgba(0, 0, 0, 0.3);
+  top: 0;
+  opacity: 1;
+  transition: 200ms;
+  transform: translateX(0px);
+  @media screen and (min-width: 480px) and (orientation: landscape) {
+    width: 350px;
+  }
+
+
+  &__header {
+    border-bottom: 1px solid #c7c7c7;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    &__close {
+      background-image: url('./images/close.svg');
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0.4;
+      padding: 16px;
+      margin-right: 20px;
+      cursor: pointer;
+    }
+  }
+
+  &-hidden {
+    opacity: 0;
+    transform: translateX(400px);
+  }
+
+  &__content {
+    height: calc(100% - 70px);
+  }
+}
+
+.er-chat-label {
+  overflow: hidden;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  height: 73px;
+  width: 73px;
+  cursor: pointer;
+  z-index: 201;
+  border-radius: 35px;
+  display: flex;
+  background-color: #515b60;
+  align-items: center;
+  justify-content: flex-start;
+  transition: 0.5s;
+
+  &:hover {
+    transition: 0;
+    width: 280px;
+  }
+
+  &__circle {
+    background-color: #00993b;
+    border-radius: 50%;
+    height: 73px;
+    width: 73px;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    box-shadow: 0 0 0 1px rgba(0, 153, 59, 0.9);
+
+    &__icon {
+      background-image: url("./images/chat-icon.svg");
+      background-repeat: no-repeat;
+      margin-top: 5px;
+      height: 40px;
+      width: 40px;
+      background-size: contain;
+    }
+  }
+
+  &__text {
+    transition: 0.5s;
+    width: 0;
+    color: white;
+    white-space: nowrap;
+  }
+
+  &:hover &__text {
+    width: 200px;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+}

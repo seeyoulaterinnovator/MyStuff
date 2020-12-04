@@ -1,0 +1,61 @@
+.reference {
+  transition: 0.2s ease-in-out;
+  border-bottom-width: 1px;
+  border-bottom-style: dashed;
+  &-generate-password {
+    display: inline-block;
+    font-size: 16px;
+    @media screen and (min-width: 1199px) {
+      font-size: 18px;
+    }
+  }
+  &_hoverable {
+   color: black;
+   opacity: .5;
+   border-bottom-color: black;
+    &:hover {
+      opacity: .8;
+    }
+  }
+}
+
+.generate-btn {
+  margin-left: 62px;
+  padding-top: 30px;
+  &:hover {
+    .reference {
+      border-bottom-color: transparent;
+    }
+  }
+}
+
+.generated-password {
+  margin-left: 44px;
+}
+
+@media screen and (max-width: 1199px){
+  .generate-btn {
+    margin-left: 74px;
+  }
+
+  .generated-password {
+    margin-left: 24px;
+  }
+}
+
+@media screen and (max-width: 639px){
+  .generate-btn {
+    padding-top: 27px;
+  }
+}
+
+@media screen and (max-width: 479px){
+  .generate-btn {
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .generated-password {
+    margin: 0 0 17px;
+  }
+}

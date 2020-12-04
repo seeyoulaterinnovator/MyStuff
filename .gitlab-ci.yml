@@ -1,0 +1,382 @@
+variables:
+  GIT_STRATEGY: fetch
+  BASE_DIR: /opt/gitlab-ci
+  REGISTRY: registry.alamics.ru
+
+stages:
+  - compile
+  - test
+  - build
+  - createwar
+  - docker
+  - deploy
+
+back:compile:
+  stage: compile
+  except:
+    - master
+  script:
+    - ./gradlew :classes --stacktrace -Dorg.gradle.java.home=/usr/java/jdk1.8.0
+  cache: {}
+
+back:test:adapter:tbapi-remote-service:
+  stage: test
+  when: on_success
+  except:
+    - master
+  script:
+    - ./gradlew :tbapi-remote-service:check -Dorg.gradle.java.home=/usr/java/jdk1.8.0
+  cache:
+    key: "$CI_COMMIT_SHA"
+    paths:
+      - .gradle/
+      - build/
+    policy: pull
+  artifacts:
+    when: always
+    paths:
+      - build/test-results/tbapi-remote-service/reports
+    name: "tbapi-remote-service-test-reports-$CI_PIPELINE_ID"
+    reports:
+      junit: build/test-results/tbapi-remote-service/TEST-*.xml
+
+back:test:sso-business-logic:
+  stage: test
+  when: on_success
+  except:
+    - master
+  script:
+    - ./gradlew :sso-business-logic:check -Dorg.gradle.java.home=/usr/java/jdk1.8.0
+  cache:
+    key: "$CI_COMMIT_SHA"
+    paths:
+      - .gradle/
+    policy: pull
+  artifacts:
+    when: always
+    paths:
+      - build/test-results/sso-business-logic/reports
+    name: "sso-business-logic-test-reports-$CI_PIPELINE_ID"
+    reports:
+      junit: build/test-results/sso-business-logic/TEST-*.xml
+
+back:test:keycloak-extension:
+  stage: test
+  when: on_success
+  except:
+    - master
+  script:
+    - ./gradlew :keycloak-extension:check -Dorg.gradle.java.home=/usr/java/jdk1.8.0
+  cache:
+    key: "$CI_COMMIT_SHA"
+    paths:
+      - .gradle/
+    policy: pull
+  artifacts:
+    when: always
+    paths:
+      - build/test-results/keycloak-extension/reports
+    name: "keycloak-extension-test-reports-$CI_PIPELINE_ID"
+    reports:
+      junit: build/test-results/keycloak-extension/TEST-*.xml
+
+back:war:
+  stage: build
+  when: on_success
+  except:
+    - master
+  script:
+    - currentdir=`pwd`
+    - cd keycloak-extension/src/main/resources/themes/domru/login/resources
+    - cp /opt/npmrc .npmrc
+    - npm install
+    - npm run build
+    - rm -rf node_modules
+    - cd $currentdir
+    - mkdir -p .ci_status
+    - ./gradlew :deploy -Dorg.gradle.java.home=/usr/java/jdk1.8.0
+    - touch .ci_status/war_built
+  cache:
+    key: "$CI_COMMIT_SHA"
+    paths:
+      - .gradle/
+  artifacts:
+    paths:
+      - .ci_status/
+      - build/deploy/standalone/deployments/domru-sso.war
+      - build/deploy/standalone/deployments/custom-jpa.jar
+      - build/deploy/modules/system/layers/base/ru/alamics/sso/jpa/main/module.xml
+      - build/deploy/themes/
+      - build/deploy/standalone/data/password-blacklists/
+    name: "domru-sso-compile-$CI_PIPELINE_ID"
+    expire_in: 1 week
+
+container:source:
+  stage: docker
+  when: manual
+  script:
+    - $BASE_DIR/scripts/build.sh
+  artifacts:
+    paths:
+      - .ci_status/
+
+container:domain:
+  stage: docker
+  when: manual
+  script:
+    - $BASE_DIR/scripts/build.sh
+  artifacts:
+    paths:
+      - .ci_status/
+
+container:
+  stage: docker
+  when: manual
+  script:
+    - $BASE_DIR/scripts/build.sh
+  artifacts:
+    paths:
+      - .ci_status/
+
+devel:domain:
+  stage: deploy
+  when: manual
+  environment:
+    name: devel
+    url: http://domru-sso-devel-domain.dev.itrev.ru
+  script:
+    - $BASE_DIR/scripts/deploy.sh
+
+devel:domwar:
+  stage: deploy
+  when: manual
+  environment:
+    name: devel
+    url: http://domru-sso-devel-domain.dev.itrev.ru
+  script:
+    - $BASE_DIR/scripts/deploy.sh
+
+devel:
+  stage: deploy
+  when: manual
+  environment:
+    name: devel
+    url: http://domru-sso.alamics.ru
+  script:
+    - $BASE_DIR/scripts/deploy.sh
+
+reference:
+  stage: deploy
+  when: manual
+  environment:
+    name: reference
+    url: http://domru-reference.alamics.ru
+  script:
+    - $BASE_DIR/scripts/deploy.sh
+
+test:
+  stage: deploy
+  when: manual
+  environment:
+    name: test
+    url: http://domru-sso-test.alamics.ru
+  script:
+    - $BASE_DIR/scripts/deploy.sh
+
+test:battle:
+  stage: deploy
+  when: manual
+  environment:
+    name: test
+    url: http://domru-sso-test.alamics.ru
+  script:
+    - $BASE_DIR/scripts/deploy.sh
+
+domru:stage:
+  stage: deploy
+  when: manual
+  #only:
+  #  - tags
+  environment:
+    name: stage
+    url: http://domru-sso-stage.alamics.ru
+  script:
+    - $BASE_DIR/scripts/deploy.sh
+
+domru:stage2:
+  stage: deploy
+  when: manual
+  #only:
+  #  - tags
+  environment:
+    name: stage
+    url: http://domru-sso-stage1.alamics.ru
+  script:
+    - $BASE_DIR/scripts/deploy.sh
+
+domru:stage3:
+  stage: deploy
+  when: manual
+  #only:
+  #  - tags
+  environment:
+    name: stage
+    url: http://domru-sso-stage3.alamics.ru
+  script:
+    - $BASE_DIR/scripts/deploy.sh
+
+domru:stage4:
+  stage: deploy
+  when: manual
+  #only:
+  #  - tags
+  environment:
+    name: stage
+    url: http://domru-sso-stage4.alamics.ru
+  script:
+    - $BASE_DIR/scripts/deploy.sh
+
+domru:perm:primary:
+  stage: deploy
+  when: manual
+  only:
+    - tags
+  environment:
+    name: stage
+    url: http://sso.dev.itrev.ru
+  script:
+    # themes and text artifacts
+    - cp -r build/deploy/themes/domru /usr/local/keycloak/themes
+    - scp -r build/deploy/themes/domru sso-app02:/usr/local/keycloak/themes
+    - scp -r build/deploy/themes/domru sso-app03:/usr/local/keycloak/themes
+    - mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - cp build/deploy/standalone/data/password-blacklists/black_list_password.txt /usr/local/keycloak/domain/servers/server-one/data/password-blacklists
+    - ssh sso-app02 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app02:/usr/local/keycloak/domain/servers/server-two/data/password-blacklists
+    - ssh sso-app03 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app03:/usr/local/keycloak/domain/servers/server-three/data/password-blacklists
+    # java artifacts
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app02:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app02:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app03:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app03:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - ~/scripts/deploy.sh primary
+  tags:
+    - sso-domain-controller-perm
+
+domru:perm:secondary:
+  stage: deploy
+  when: manual
+  only:
+    - tags
+  environment:
+    name: stage
+    url: http://sso.dev.itrev.ru
+  script:
+    # themes and text artifacts
+    - scp -r build/deploy/themes/domru sso-app04:/usr/local/keycloak/themes
+    - scp -r build/deploy/themes/domru sso-app05:/usr/local/keycloak/themes
+    - ssh sso-app04 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app04:/usr/local/keycloak/domain/servers/server-four/data/password-blacklists
+    - ssh sso-app05 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app05:/usr/local/keycloak/domain/servers/server-five/data/password-blacklists
+    # java artifacts
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - ~/scripts/deploy.sh secondary
+  tags:
+    - sso-domain-controller-perm
+
+domru:voronezh:primary:
+  stage: deploy
+  when: manual
+  only:
+    - tags
+  environment:
+    name: production
+    url: http://sso.dev.itrev.ru
+  script:
+    # themes and text artifacts
+    - cp -r build/deploy/themes/domru /usr/local/keycloak/themes
+    - scp -r build/deploy/themes/domru sso-app02:/usr/local/keycloak/themes
+    - scp -r build/deploy/themes/domru sso-app03:/usr/local/keycloak/themes
+    - scp -r build/deploy/themes/domru sso-app04:/usr/local/keycloak/themes
+    - scp -r build/deploy/themes/domru sso-app05:/usr/local/keycloak/themes
+    - mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - cp build/deploy/standalone/data/password-blacklists/black_list_password.txt /usr/local/keycloak/domain/servers/server-one/data/password-blacklists
+    - ssh sso-app02 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app02:/usr/local/keycloak/domain/servers/server-two/data/password-blacklists
+    - ssh sso-app03 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app03:/usr/local/keycloak/domain/servers/server-three/data/password-blacklists
+    # java artifacts
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app02:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app02:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app03:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app03:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - ~/scripts/deploy.sh primary
+  tags:
+    - sso-domain-controller-voronezh
+
+domru:voronezh:secondary:
+  stage: deploy
+  when: manual
+  only:
+    - tags
+  environment:
+    name: production
+    url: http://sso.dev.itrev.ru
+  script:
+    # themes and text artifacts
+    - scp -r build/deploy/themes/domru sso-app04:/usr/local/keycloak/themes
+    - scp -r build/deploy/themes/domru sso-app05:/usr/local/keycloak/themes
+    - ssh sso-app04 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app04:/usr/local/keycloak/domain/servers/server-four/data/password-blacklists
+    - ssh sso-app05 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app05:/usr/local/keycloak/domain/servers/server-five/data/password-blacklists
+    # java artifacts
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - ~/scripts/deploy.sh secondary
+  tags:
+    - sso-domain-controller-voronezh
+
+domru:voronezh:xml:
+  stage: deploy
+  when: manual
+  only:
+    - tags
+  environment:
+    name: production
+    url: http://sso.dev.itrev.ru
+  script:
+    - rm /usr/local/keycloak/domain/configuration/domain.xml
+    - cp -r configs/domain.xml.voronezh /usr/local/keycloak/domain/configuration/domain.xml
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect --command-timeout=180 --user=admin --password=addMin --command="reload --host=master --restart-servers=true"
+  artifacts: {}
+  tags:
+    - sso-domain-controller-voronezh
+
+domru:perm:xml:
+  stage: deploy
+  when: manual
+  only:
+    - tags
+  environment:
+    name: production
+    url: http://sso.dev.itrev.ru
+  script:
+    - rm /usr/local/keycloak/domain/configuration/domain.xml
+    - cp -r configs/domain.xml.perm /usr/local/keycloak/domain/configuration/domain.xml
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect --command-timeout=180 --user=admin --password=addMin --command="reload --host=master --restart-servers=true"
+  artifacts: {}
+  tags:
+    - sso-domain-controller-perm
