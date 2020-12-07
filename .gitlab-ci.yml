@@ -16,6 +16,7 @@ back:compile:
   except:
     - master
   script:
+    - if [ -f ./gradlew ]; then chmod 775 ./gradlew; fi
     - ./gradlew :classes --stacktrace -Dorg.gradle.java.home=/usr/java/jdk1.8.0
   cache: {}
 
