@@ -11,8 +11,15 @@ stages:
   - docker
   - deploy
 
+.build: &build-template
+  before_script:
+  - if [ -f ./gradlew ]; then
+  - chmod 775 ./gradlew
+  - fi
+
 back:compile:
   stage: compile
+  <<: *build-template
   except:
     - master
   script:
@@ -22,6 +29,7 @@ back:compile:
 
 back:test:adapter:tbapi-remote-service:
   stage: test
+  <<: *build-template
   when: on_success
   except:
     - master
@@ -43,6 +51,7 @@ back:test:adapter:tbapi-remote-service:
 
 back:test:sso-business-logic:
   stage: test
+  <<: *build-template
   when: on_success
   except:
     - master
@@ -63,6 +72,7 @@ back:test:sso-business-logic:
 
 back:test:keycloak-extension:
   stage: test
+  <<: *build-template
   when: on_success
   except:
     - master
@@ -83,6 +93,7 @@ back:test:keycloak-extension:
 
 back:war:
   stage: build
+  <<: *build-template
   when: on_success
   except:
     - master
