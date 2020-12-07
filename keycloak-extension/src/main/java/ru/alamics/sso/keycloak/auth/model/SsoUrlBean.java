@@ -9,6 +9,8 @@ import org.keycloak.theme.Theme;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 
+import static ru.alamics.sso.registration.model.UserConstants.I_FRAME;
+
 public class SsoUrlBean extends UrlBean {
     private URI baseURI;
     private RealmModel realm;
@@ -30,7 +32,7 @@ public class SsoUrlBean extends UrlBean {
 
         if (isFrame) {
             //Установка отметки, что вызов происходит в iframe. Необходимо при переходах между вкладками логина и регистрации внутри iframe
-            builder.queryParam("iframe", "1");
+            builder.queryParam(I_FRAME, "1");
         }
 
         return builder.build(realm.getName())

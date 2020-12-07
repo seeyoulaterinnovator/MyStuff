@@ -133,7 +133,13 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         return registrationOnlyInFrame && !isIframe;
     }
 
-    private boolean isFrame() {
+    private boolean isFrameByCurrentRequest() {
+        MultivaluedMap<String, String> queryParameters = this.session.getContext().getUri().getQueryParameters();
+
+        return queryParameters != null && (queryParameters.get(I_FRAME) != null || queryParameters.get(HIDDEN_HEADER) != null);
+    }
+
+    private boolean isFrameByReferer() {
         //Признак того, что вызов формы ведется в iframe
         String referer = session.getContext().getRequestHeaders().getHeaderString("referer");
 
@@ -147,7 +153,11 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             log.warn("Referer is not decoded={}", referer);
         }
 
-        return referer.contains("iframe=1");
+        return referer.contains(I_FRAME + "=1") || referer.contains(HIDDEN_HEADER + "=true");
+    }
+
+    private boolean isFrame() {
+        return isFrameByCurrentRequest() || isFrameByReferer();
     }
 
     private String getRedirectUrl() {
