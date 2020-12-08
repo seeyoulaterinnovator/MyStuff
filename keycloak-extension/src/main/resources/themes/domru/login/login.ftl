@@ -5,7 +5,11 @@
 <@layout.registrationLayout displayInfo=social.displayInfo displayWide=(realm.password && social.providers??); section>
     <#if section = "header">
         <#include "templates/required-fields.html">
-        <@blocks.contentHeader mainTitle="${msg('doLogIn')}" secondaryTitle="${msg('registerTitle')}" secondaryHref="${url.registrationUrl}" withBorder=true />
+        <#if !hideRegistration!false>
+            <@blocks.contentHeader mainTitle="${msg('doLogIn')}" secondaryTitle="${msg('registerTitle')}" secondaryHref="${url.registrationUrl}" withBorder=true />
+        <#else>
+            <@blocks.contentHeader mainTitle="${msg('doLogIn')}" secondaryTitle=" " secondaryHref=" " withBorder=true />
+        </#if>
     <#elseif section = "form">
         <p class="pb-3 login-title-text">Если у Вас уже есть учетная запись, Вы можете войти</p>
          
