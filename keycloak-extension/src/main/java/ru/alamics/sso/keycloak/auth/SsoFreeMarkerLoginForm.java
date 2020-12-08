@@ -7,22 +7,29 @@ import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.common.util.ObjectUtil;
 import org.keycloak.forms.login.LoginFormsPages;
 import org.keycloak.forms.login.LoginFormsProvider;
+import org.keycloak.forms.login.freemarker.AuthenticatorConfiguredMethod;
 import org.keycloak.forms.login.freemarker.FreeMarkerLoginFormsProvider;
+import org.keycloak.forms.login.freemarker.LoginFormsUtil;
 import org.keycloak.forms.login.freemarker.Templates;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.RequiredActionProviderModel;
-import org.keycloak.models.UserModel;
+import org.keycloak.forms.login.freemarker.model.ClientBean;
+import org.keycloak.forms.login.freemarker.model.IdentityProviderBean;
+import org.keycloak.forms.login.freemarker.model.RealmBean;
+import org.keycloak.forms.login.freemarker.model.RequiredActionUrlFormatterMethod;
+import org.keycloak.models.*;
 import org.keycloak.services.ErrorPage;
+import org.keycloak.services.Urls;
 import org.keycloak.services.messages.Messages;
+import org.keycloak.services.resources.LoginActionsService;
 import org.keycloak.theme.BrowserSecurityHeaderSetup;
 import org.keycloak.theme.FreeMarkerException;
 import org.keycloak.theme.FreeMarkerUtil;
 import org.keycloak.theme.Theme;
+import org.keycloak.theme.beans.LocaleBean;
 import org.keycloak.theme.beans.MessageType;
 import org.keycloak.utils.MediaType;
 import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.keycloak.auth.model.AuthType;
+import ru.alamics.sso.keycloak.auth.model.SsoUrlBean;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.util.Util;
@@ -32,6 +39,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -43,6 +52,7 @@ import static ru.alamics.sso.registration.model.UserConstants.*;
 @Slf4j
 public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     private static final String HOME_PAGE = "https://newlkb2b.domru.ru";
+    private static final String REGISTRATION_ONLY_IN_FRAME_ATTRIBUTE = "registrationOnlyInFrame";
 
     private ClientService clientService = null;
 
@@ -50,15 +60,112 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         super(session, freeMarker);
 
         attributes.put("redirectUrl", getRedirectUrl());
+        attributes.put("hideRegistration", isHideRegistration());
 
         clientService = (ClientService) Lookup.lookup(ClientService.class);
+    }
+
+    @Override
+    protected void createCommonAttributes(Theme theme, Locale locale, Properties messagesBundle, UriBuilder baseUriBuilder, LoginFormsPages page) {
+        URI baseUri = baseUriBuilder.build();
+        if (accessCode != null) {
+            baseUriBuilder.queryParam(LoginActionsService.SESSION_CODE, accessCode);
+        }
+        URI baseUriWithCodeAndClientId = baseUriBuilder.build();
+
+        if (client != null) {
+            attributes.put("client", new ClientBean(client, baseUri));
+        }
+
+        if (realm != null) {
+            attributes.put("realm", new RealmBean(realm));
+
+            List<IdentityProviderModel> identityProviders = realm.getIdentityProviders();
+            identityProviders = LoginFormsUtil.filterIdentityProviders(identityProviders, session, realm, attributes, formData);
+            attributes.put("social", new IdentityProviderBean(realm, session, identityProviders, baseUriWithCodeAndClientId));
+
+            attributes.put("url", new SsoUrlBean(realm, theme, baseUri, this.actionUri, isFrame()));
+            attributes.put("requiredActionUrl", new RequiredActionUrlFormatterMethod(realm, baseUri));
+
+            if (realm.isInternationalizationEnabled()) {
+                UriBuilder b;
+                if (page != null) {
+                    switch (page) {
+                        case LOGIN:
+                            b = UriBuilder.fromUri(Urls.realmLoginPage(baseUri, realm.getName()));
+                            break;
+                        case X509_CONFIRM:
+                            b = UriBuilder.fromUri(Urls.realmLoginPage(baseUri, realm.getName()));
+                            break;
+                        case REGISTER:
+                            b = UriBuilder.fromUri(Urls.realmRegisterPage(baseUri, realm.getName()));
+                            break;
+                        default:
+                            b = UriBuilder.fromUri(baseUri).path(uriInfo.getPath());
+                            break;
+                    }
+                } else {
+                    b = UriBuilder.fromUri(baseUri)
+                            .path(uriInfo.getPath());
+                }
+
+                if (execution != null) {
+                    b.queryParam(Constants.EXECUTION, execution);
+                }
+
+                if (authenticationSession != null && authenticationSession.getAuthNote(Constants.KEY) != null) {
+                    b.queryParam(Constants.KEY, authenticationSession.getAuthNote(Constants.KEY));
+                }
+
+                attributes.put("locale", new LocaleBean(realm, locale, b, messagesBundle));
+            }
+        }
+        if (realm != null && user != null && session != null) {
+            attributes.put("authenticatorConfigured", new AuthenticatorConfiguredMethod(realm, user, session));
+        }
+    }
+
+    private boolean isHideRegistration() {
+        final boolean registrationOnlyInFrame = realm.getAttribute(REGISTRATION_ONLY_IN_FRAME_ATTRIBUTE, false);
+
+        final boolean isIframe = isFrame();
+
+        return registrationOnlyInFrame && !isIframe;
+    }
+
+    private boolean isFrameByCurrentRequest() {
+        MultivaluedMap<String, String> queryParameters = this.session.getContext().getUri().getQueryParameters();
+
+        return queryParameters != null && (queryParameters.get(I_FRAME) != null || queryParameters.get(HIDDEN_HEADER) != null);
+    }
+
+    private boolean isFrameByReferer() {
+        //Признак того, что вызов формы ведется в iframe
+        String referer = session.getContext().getRequestHeaders().getHeaderString("referer");
+
+        if (referer == null) {
+            return false;
+        }
+
+        try {
+            referer = URLDecoder.decode(referer, StandardCharsets.UTF_8.name());
+        } catch (Exception e) {
+            log.warn("Referer is not decoded={}", referer);
+        }
+
+        return referer.contains(I_FRAME + "=1") || referer.contains(HIDDEN_HEADER + "=true");
+    }
+
+    private boolean isFrame() {
+        return isFrameByCurrentRequest() || isFrameByReferer();
     }
 
     private String getRedirectUrl() {
 
         // не успевает иначе
-        if (clientService == null)
+        if (clientService == null) {
             clientService = (ClientService) Lookup.lookup(ClientService.class);
+        }
 
         String redirectUri = clientService.findMainRedirectUri(client);
 
@@ -157,6 +264,11 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
     @Override
     public Response createRegistration() {
+        if (isHideRegistration()) {
+            final URI redirectUri = Urls.accountLogPage(uriInfo.getBaseUri(), realm.getName());
+            return Response.status(302).location(redirectUri).build();
+        }
+
         RealmModel realm = this.session.getContext().getRealm();
         List<RequiredActionProviderModel> requiredActionsProvider = realm.getRequiredActionProviders();
         List<String> twoStepAuth = requiredActionsProvider.stream()
