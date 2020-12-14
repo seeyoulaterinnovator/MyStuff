@@ -12,8 +12,6 @@ public class CustomUserCacheSession extends UserCacheSession implements UserCach
 
     public CustomUserCacheSession(UserCacheManager cache, KeycloakSession session) {
         super(cache, session);
-        this.cache = cache;
-        this.session = session;
     }
 
     @Override

@@ -14,9 +14,7 @@ import org.keycloak.models.cache.infinispan.events.InvalidationEvent;
 
 public class CustomUserCache extends InfinispanUserCacheProviderFactory {
 
-    private static final Logger log = Logger.getLogger(org.keycloak.models.cache.infinispan.InfinispanUserCacheProviderFactory.class);
-    protected volatile UserCacheManager userCache;
-
+    private static final Logger log = Logger.getLogger(CustomUserCache.class);
 
     @Override
     public UserCache create(KeycloakSession session) {
