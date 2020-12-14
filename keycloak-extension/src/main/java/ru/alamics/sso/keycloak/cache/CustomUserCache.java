@@ -2,22 +2,18 @@ package ru.alamics.sso.keycloak.cache;
 
 import org.infinispan.Cache;
 import org.jboss.logging.Logger;
-import org.keycloak.Config;
 import org.keycloak.cluster.ClusterEvent;
 import org.keycloak.cluster.ClusterProvider;
 import org.keycloak.connections.infinispan.InfinispanConnectionProvider;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.cache.UserCache;
-import org.keycloak.models.cache.UserCacheProviderFactory;
+import org.keycloak.models.cache.infinispan.InfinispanUserCacheProviderFactory;
 import org.keycloak.models.cache.infinispan.UserCacheManager;
 import org.keycloak.models.cache.infinispan.entities.Revisioned;
 import org.keycloak.models.cache.infinispan.events.InvalidationEvent;
 
-public class CustomUserCache implements UserCacheProviderFactory {
+public class CustomUserCache extends InfinispanUserCacheProviderFactory {
 
-    public static final String USER_CLEAR_CACHE_EVENTS = "USER_CLEAR_CACHE_EVENTS";
-    public static final String USER_INVALIDATION_EVENTS = "USER_INVALIDATION_EVENTS";
     private static final Logger log = Logger.getLogger(org.keycloak.models.cache.infinispan.InfinispanUserCacheProviderFactory.class);
     protected volatile UserCacheManager userCache;
 
@@ -56,27 +52,4 @@ public class CustomUserCache implements UserCacheProviderFactory {
             }
         }
     }
-
-    @Override
-    public void init(Config.Scope config) {
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-
-    }
-
-    @Override
-    public void close() {
-    }
-
-    @Override
-    public String getId() {
-        return "default";
-    }
-
-   /* @Override
-    public int order() {
-        return 1;
-    }*/
 }
