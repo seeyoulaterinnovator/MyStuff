@@ -72,6 +72,8 @@ public class SearchResource {
             searchRealm = "user";
         }
 
+        session.userCache().clear();
+
         log.info("getUsersInfo 1");
 
         List<UserSearch> users = userFindService.getUsersByParameters(searchRealm, search, searchUser, searchToms, searchPhone, sortField, sortAsc, pageNum, pageSize);

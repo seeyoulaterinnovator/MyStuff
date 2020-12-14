@@ -1061,7 +1061,7 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
 
 module.controller('UserCredentialsCtrl', function ($scope, realm, user, $route, RequiredActions, User,
                                                    UserExecuteActionsEmail, UserCredentials, Notifications, Dialog,
-                                                   TimeUnit2, $location) {
+                                                   TimeUnit2, $location, $http) {
     console.log('UserCredentialsCtrl');
 
     $scope.realm = realm;
@@ -1127,13 +1127,11 @@ module.controller('UserCredentialsCtrl', function ($scope, realm, user, $route, 
 
     $scope.disableCredentialTypes = function () {
         Dialog.confirm('Disable credentials', 'Are you sure you want to disable these users credentials?', function () {
-            UserCredentials.disableCredentialTypes({
-                realm: realm.realm,
-                userId: user.id
-            }, $scope.disableableCredentialTypes, function () {
+            $http.put(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/' + user.id + '/disable-credential-types',
+                $scope.disableableCredentialTypes).then(function () {
                 $route.reload();
                 Notifications.success("Credentials disabled");
-            }, function () {
+            }).catch(function() {
                 Notifications.error("Failed to disable credentials");
             });
         });

@@ -17,7 +17,9 @@ import org.keycloak.models.*;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.services.ErrorResponse;
+import org.keycloak.services.ForbiddenException;
 import org.keycloak.services.managers.AuthenticationManager;
+import org.keycloak.services.resources.LoginActionsService;
 import org.keycloak.services.resources.account.AccountFormService;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.ClientsResource;
@@ -50,6 +52,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.keycloak.models.ImpersonationSessionNote.IMPERSONATOR_ID;
@@ -403,11 +406,37 @@ public class CustomUserResource {
 
     @Path("users")
     public UsersResource users() {
+        session.userCache().clear();
+
         AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
                 .realm(realm)
                 .resource(ResourceType.REALM);
         UsersResource users = new UsersResource(realm, auth, adminEvent);
         ResteasyProviderFactory.getInstance().injectProperties(users);
+
         return users;
     }
+
+    @Path("{userId}/disable-credential-types")
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    public void disableCredentialType(List<String> credentialTypes, @PathParam("userId") String userId) {
+        session.userCache().clear();
+
+        UserModel user = session.users().getUserById(userId, realm);
+        if (user == null) {
+            // we do this to make sure somebody can't phish ids
+            if (auth.users().canQuery()) throw new org.jboss.resteasy.spi.NotFoundException("User not found");
+            else throw new ForbiddenException();
+        }
+
+        auth.users().requireManage(user);
+
+        if (credentialTypes == null) return;
+
+        for (String type : credentialTypes) {
+            session.userCredentialManager().disableCredentialType(realm, user, type);
+        }
+    }
+
 }
