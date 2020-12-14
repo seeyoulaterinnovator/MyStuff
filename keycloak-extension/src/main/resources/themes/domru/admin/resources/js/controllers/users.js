@@ -1127,7 +1127,7 @@ module.controller('UserCredentialsCtrl', function ($scope, realm, user, $route, 
 
     $scope.disableCredentialTypes = function () {
         Dialog.confirm('Disable credentials', 'Are you sure you want to disable these users credentials?', function () {
-            $http.put(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/' + user.id + '/disable-credential-types',
+            $http.put(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/users/' + user.id + '/disable-credential-types',
                 $scope.disableableCredentialTypes).then(function () {
                 $route.reload();
                 Notifications.success("Credentials disabled");
@@ -1147,14 +1147,11 @@ module.controller('UserCredentialsCtrl', function ($scope, realm, user, $route, 
             return;
         }
         Dialog.confirm('Send Email', 'Are you sure you want to send email to user?', function () {
-            UserExecuteActionsEmail.update({
-                realm: realm.realm,
-                userId: user.id,
-                lifespan: $scope.emailActionsTimeout.toSeconds()
-            }, $scope.emailActions, function () {
+            $http.put(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/users/' + user.id + '/execute-actions-email?' + $scope.emailActionsTimeout.toSeconds(),
+                $scope.emailActions).then(function () {
                 Notifications.success("Email sent to user");
                 $scope.emailActions = [];
-            }, function () {
+            }).catch(function () {
                 Notifications.error("Failed to send email to user");
             });
         });

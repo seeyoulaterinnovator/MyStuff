@@ -416,27 +416,4 @@ public class CustomUserResource {
 
         return users;
     }
-
-    @Path("{userId}/disable-credential-types")
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    public void disableCredentialType(List<String> credentialTypes, @PathParam("userId") String userId) {
-        session.userCache().clear();
-
-        UserModel user = session.users().getUserById(userId, realm);
-        if (user == null) {
-            // we do this to make sure somebody can't phish ids
-            if (auth.users().canQuery()) throw new org.jboss.resteasy.spi.NotFoundException("User not found");
-            else throw new ForbiddenException();
-        }
-
-        auth.users().requireManage(user);
-
-        if (credentialTypes == null) return;
-
-        for (String type : credentialTypes) {
-            session.userCredentialManager().disableCredentialType(realm, user, type);
-        }
-    }
-
 }
