@@ -1147,7 +1147,8 @@ module.controller('UserCredentialsCtrl', function ($scope, realm, user, $route, 
             return;
         }
         Dialog.confirm('Send Email', 'Are you sure you want to send email to user?', function () {
-            $http.put(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/users/' + user.id + '/execute-actions-email?' + $scope.emailActionsTimeout.toSeconds(),
+            $http.put(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/users/' + user.id + '/execute-actions-email?'
+                + 'lifespan=' + $scope.emailActionsTimeout.toSeconds(),
                 $scope.emailActions).then(function () {
                 Notifications.success("Email sent to user");
                 $scope.emailActions = [];
