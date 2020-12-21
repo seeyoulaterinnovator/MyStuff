@@ -18,6 +18,7 @@
 package ru.alamics.sso.keycloak.user.resource.post;
 
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
 
 
@@ -31,8 +32,11 @@ public class UserPostRealmResourceProvider implements BaseResourceProvider<UserP
 
     @Override
     public UserPostResource getResource() {
-        initAuthByWorkingRealm(this.session);
-        return new UserPostResource(session);
+        AdminPermissionEvaluator auth = initAuthByWorkingRealm(this.session);
+
+        auth.users().canView();
+
+        return new UserPostResource(session, auth);
     }
 
     @Override

@@ -4,6 +4,7 @@ import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import ru.alamics.sso.keycloak.facade.CachedUserPostFacade;
 import ru.alamics.sso.keycloak.facade.UserPostFacade;
 import ru.alamics.sso.keycloak.response.JsonResponse;
@@ -24,15 +25,17 @@ import javax.ws.rs.core.Response;
 @Slf4j
 public class UserPostResource {
 
-    protected KeycloakSession session;
+    private KeycloakSession session;
     private UserPostService userPostService;
     private CachedUserPostFacade cachedUserPostFacade;
     private UserPostFacade userPostFacade;
+    private AdminPermissionEvaluator auth;
 
     // TODO кэш?
 
-    public UserPostResource(KeycloakSession session) {
+    public UserPostResource(KeycloakSession session, AdminPermissionEvaluator auth) {
         this.session = session;
+        this.auth = auth;
         try {
             this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
             this.cachedUserPostFacade = (CachedUserPostFacade) new InitialContext().lookup("java:global/domru-sso/" + CachedUserPostFacade.class.getSimpleName());
@@ -48,6 +51,8 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response create(@NotNull @Valid UserPostRequest userPostRequest, HttpHeaders headers) {
+        auth.users().canManage();
+
         try {
             return JsonResponse.success()
                     .addResult("user_post", cachedUserPostFacade.save(userPostRequest))
@@ -64,6 +69,8 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response edit(@Valid UserPostEditRequest userPostEditRequest, HttpHeaders headers) {
+        auth.users().canManage();
+
         try {
             return JsonResponse.success()
                     .addResult("user_post", cachedUserPostFacade.edit(userPostEditRequest))
@@ -80,6 +87,8 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response delete(@PathParam("id") String id) {
+        auth.users().canManage();
+
         try {
             cachedUserPostFacade.remove(id);
             return JsonResponse.success()
@@ -177,6 +186,8 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response addSystemRole(@NotNull @Valid ExternalSystemRoleRequest externalSystemRoleRequest) {
+        auth.users().canManage();
+
         try {
             return JsonResponse.success()
                     .addResult("user-post", cachedUserPostFacade.addSystemRole(externalSystemRoleRequest))
@@ -194,6 +205,8 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response removeSystemRole(@NotNull @Valid ExternalSystemRoleRequest externalSystemRoleRequest) {
+        auth.users().canManage();
+
         try {
             return JsonResponse.success()
                     .addResult("user-post", cachedUserPostFacade.removeSystemRole(externalSystemRoleRequest))
@@ -211,6 +224,8 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response clearCache() {
+        auth.users().canManage();
+
         cachedUserPostFacade.clearCache();
         return JsonResponse.success()
                 .build();
@@ -222,6 +237,8 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response clearCacheByUserId(@PathParam("userId") String userId) {
+        auth.users().canManage();
+
         cachedUserPostFacade.clearCacheByUserId(userId);
         return JsonResponse.success()
                 .build();

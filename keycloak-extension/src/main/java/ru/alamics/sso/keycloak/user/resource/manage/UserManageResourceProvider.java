@@ -4,6 +4,7 @@ import org.keycloak.models.KeycloakContext;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
+import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
 
 public class UserManageResourceProvider implements BaseResourceProvider<UserManageResource> {
@@ -16,9 +17,13 @@ public class UserManageResourceProvider implements BaseResourceProvider<UserMana
 
     @Override
     public UserManageResource getResource () {
-        AdminAuth adminAuth = this.initAuthByWorkingRealm(session);
+        AdminPermissionEvaluator auth = this.initAuthByWorkingRealm(session);
+
+        auth.users().canManage();
+
         KeycloakContext context = session.getContext();
-        AdminEventBuilder adminEventBuilder = new AdminEventBuilder(context.getRealm(), adminAuth, session, context.getConnection());
+
+        AdminEventBuilder adminEventBuilder = new AdminEventBuilder(context.getRealm(), auth.adminAuth(), session, context.getConnection());
 
         return new UserManageResource(session, adminEventBuilder);
     }
