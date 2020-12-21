@@ -819,7 +819,7 @@ module.controller('UserTabCtrl', function ($scope, $location, Dialog, Notificati
     $scope.removeUser = function () {
         Dialog.confirmDelete($scope.user.id, 'user', function () {
             $scope.user.$remove({
-                realm: Current.realm.realm,
+                realm: $scope.query.searchRealm,
                 userId: $scope.user.id
             }, function () {
                 $location.url("/realms/" + Current.realm.realm + "/users");
