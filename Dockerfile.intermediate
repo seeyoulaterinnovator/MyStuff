@@ -25,6 +25,7 @@ RUN mkdir -p /opt/jboss/build
 ADD build/deploy/standalone/deployments/custom-jpa.jar /opt/jboss/build
 ADD tools /opt/jboss/tools
 ADD configs /opt/jboss/configs
+RUN chmod 755 /opt/jboss/tools/build-keycloak.sh
 RUN /opt/jboss/tools/build-keycloak.sh
 
 USER 1000
