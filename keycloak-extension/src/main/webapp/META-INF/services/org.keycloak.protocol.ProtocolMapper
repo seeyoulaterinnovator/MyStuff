@@ -1,1 +1,2 @@
 ru.alamics.sso.keycloak.mapper.UserPostMapper
+ru.alamics.sso.keycloak.mapper.PersonalAccountMapper

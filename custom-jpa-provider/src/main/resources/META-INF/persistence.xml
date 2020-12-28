@@ -84,6 +84,8 @@
 		<class>ru.alamics.sso.jpa.entity.Customer</class>
 		<class>ru.alamics.sso.jpa.entity.AppProperty</class>
 		<class>ru.alamics.sso.jpa.entity.MainRedirectUri</class>
+		<class>ru.alamics.sso.jpa.entity.PersonalAccountEntity</class>
+		<class>ru.alamics.sso.jpa.entity.PersonalAccountPostEntity</class>
 		<properties>
 			<!-- http://docs.jboss.org/hibernate/orm/4.3/javadocs/constant-values.html -->
 

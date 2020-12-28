@@ -2325,6 +2325,8 @@ module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, 
     $scope.realm = realm;
     $scope.user = user;
     $scope.userPosts = [];
+    $scope.accMap = {};
+    $scope.newAcc = {};
     $scope.customerRoles = [];
     $scope.systemRoles = [];
     $scope.duplicatedPhone = false;
@@ -2337,6 +2339,19 @@ module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, 
     $scope.init = function () {
         $http.get(authUrl + '/realms/' + realm.realm + '/user-post/users/' + user.id).then(function (data) {
             $scope.userPosts = angular.fromJson(data).data.results.user_post;
+
+            //console.info($scope.userPosts);
+            for (let ind in $scope.userPosts) {
+
+                let userPost = $scope.userPosts[ind];
+                if (userPost === undefined || userPost.id === undefined)
+                    continue;
+
+                $http.get(authUrl + '/realms/' + realm.realm + '/personal-account/' + userPost.id).then(function (data) {
+                    $scope.accMap[userPost.id] = angular.fromJson(data).data.results.data;
+                    //console.info($scope.accMap);
+                });
+            }
         });
 
         $http.get(authUrl + '/realms/' + realm.realm + '/user-post/roles').then(function (data) {
@@ -2347,6 +2362,18 @@ module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, 
             let roles = angular.fromJson(data).data.results['system-roles'];
             roles = roles.filter(role => role.name === 'access_granted').filter((role, index, self) => self.indexOf(role) === index);
             $scope.systemRoles = roles;
+        });
+    };
+
+    //удаление лицевого счета
+    $scope.removePersonalAccount = function (postId, persAccId) {
+
+        let subArr = [];
+        subArr.push(persAccId);
+
+        $http.patch(authUrl + '/realms/' + $scope.realm.realm + '/personal-account/' + postId + '/sub', subArr).then(function () {
+            console.info('removePersonalAccount');
+            window.location.reload();
         });
     };
 
@@ -2390,6 +2417,27 @@ module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, 
                 $scope.addSystemRole(angular.fromJson(response).data.results['user_post'].id, $scope.newAccess.systemRole.id);
             }
             window.location.reload();
+        }).catch(error => {
+            if (error.status === 400) {
+                error.data.message === "" ? Notifications.error(error.statusText) :
+                    Notifications.error(error.data.message);
+            } else {
+                Notifications.error(error.statusText);
+            }
+        });
+    };
+
+    //добавление нового лицевого счета
+    $scope.addPersonalAccount = function (postId) {
+
+        let addArr = [];
+        addArr.push($scope.newAcc[postId].value);
+
+        $http.patch(authUrl + '/realms/' + $scope.realm.realm + '/personal-account/' + postId + '/add', addArr).then(function (response) {
+            console.info('addPersonalAccount');
+
+            window.location.reload();
+
         }).catch(error => {
             if (error.status === 400) {
                 error.data.message === "" ? Notifications.error(error.statusText) :

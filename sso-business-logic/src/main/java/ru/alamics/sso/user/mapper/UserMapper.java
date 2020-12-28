@@ -4,14 +4,13 @@ import org.keycloak.authentication.FormContext;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
+import ru.alamics.sso.jpa.entity.PersonalAccountEntity;
+import ru.alamics.sso.jpa.entity.PersonalAccountPostEntity;
 import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.jpa.model.UserSummaryView;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
-import ru.alamics.sso.user.model.ImportResponse;
-import ru.alamics.sso.user.model.ImportUsersDataModel;
-import ru.alamics.sso.user.model.ImportUsersReportModel;
-import ru.alamics.sso.user.model.UserRequest;
+import ru.alamics.sso.user.model.*;
 import ru.alamics.sso.user.web.ImportUsersReportDto;
 import ru.alamics.sso.user.web.UserDto;
 import ru.alamics.sso.user.web.UserSearch;
@@ -255,5 +254,38 @@ public class UserMapper {
         return importUserHistoryEntities.stream()
                 .map(UserMapper::toImportUsersReportDto)
                 .collect(Collectors.toList());
+    }
+
+    public static PersonalAccountModel toPADto(PersonalAccountEntity entity) {
+
+        if (entity == null)
+            return null;
+
+        return PersonalAccountModel.builder()
+                .uuid(entity.getUuid())
+                //.postId(entity.getPostId())
+                .value(entity.getValue())
+                .build();
+    }
+
+    public static List<PersonalAccountModel> toPADtoList(Collection<PersonalAccountEntity> list) {
+
+        if (list == null)
+            return null;
+
+        return list.stream()
+                .map(UserMapper::toPADto)
+                .collect(Collectors.toList());
+    }
+
+    public static PersonalAccountPostModel toPAPostDto(PersonalAccountPostEntity entity) {
+
+        if (entity == null)
+            return null;
+
+        return PersonalAccountPostModel.builder()
+                .postId(entity.getPostId())
+                .accounts(toPADtoList(entity.getAccounts()))
+                .build();
     }
 }
