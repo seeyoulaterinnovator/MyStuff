@@ -18,6 +18,7 @@ ARG KEYCLOAK_DIST=https://downloads.jboss.org/keycloak/$KEYCLOAK_VERSION/keycloa
 
 USER root
 
+RUN echo ip_resolve=4 >> /etc/yum.conf
 RUN yum update -y && yum install -y epel-release git && yum install -y jq openssl which && yum clean all
 
 RUN mkdir -p /opt/jboss/build
