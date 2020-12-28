@@ -14,17 +14,15 @@ public class ClientRestResource {
 
     private KeycloakSession session;
     private AdminPermissionEvaluator auth;
-    private AdminAuth adminAuth;
 
-    public ClientRestResource(KeycloakSession session, AdminPermissionEvaluator auth, AdminAuth adminAuth) {
+    public ClientRestResource(KeycloakSession session, AdminPermissionEvaluator auth) {
         this.session = session;
         this.auth = auth;
-        this.adminAuth = adminAuth;
     }
 
     @Path("{id}")
     public ClientResource getSearchResource(final @PathParam("id") String id) {
-        return new ClientResource(session, auth, adminAuth, findClientById(id));
+        return new ClientResource(session, auth, auth.adminAuth(), findClientById(id));
     }
 
     private ClientModel findClientById(String id) {

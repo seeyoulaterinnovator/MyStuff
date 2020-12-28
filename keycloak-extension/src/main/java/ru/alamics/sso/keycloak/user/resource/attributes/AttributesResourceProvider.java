@@ -2,6 +2,7 @@ package ru.alamics.sso.keycloak.user.resource.attributes;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.user.UserAttributeService;
@@ -19,7 +20,10 @@ public class AttributesResourceProvider implements BaseResourceProvider<Attribut
 
     @Override
     public AttributesResource getResource () {
-        initAuthByWorkingRealm(session);
+        AdminPermissionEvaluator auth = initAuthByWorkingRealm(session);
+
+        auth.users().canManage();
+
         UserFindService userFindService = null;
         try {
             userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
