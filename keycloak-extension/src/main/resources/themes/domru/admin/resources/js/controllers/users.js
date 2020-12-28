@@ -754,7 +754,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
     $scope.removeUser = function (user) {
         Dialog.confirmDelete(user.id, 'user', function () {
-            $http.delete(`${authUrl}/admin/realms/${realm.realm}/users/${user.id}`)
+            $http.delete(`${authUrl}/admin/realms/${$scope.query.searchRealm}/users/${user.id}`)
                 .then(() => {
                     Notifications.success("The user has been deleted.");
                     $scope.firstPage();
@@ -819,7 +819,7 @@ module.controller('UserTabCtrl', function ($scope, $location, Dialog, Notificati
     $scope.removeUser = function () {
         Dialog.confirmDelete($scope.user.id, 'user', function () {
             $scope.user.$remove({
-                realm: Current.realm.realm,
+                realm: $scope.query.searchRealm,
                 userId: $scope.user.id
             }, function () {
                 $location.url("/realms/" + Current.realm.realm + "/users");

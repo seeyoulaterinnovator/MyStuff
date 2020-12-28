@@ -181,7 +181,7 @@
             </td>
             <td class="kc-action-cell" data-ng-click="editUser(user)">{{:: 'edit' | translate}}
             </td>
-            <td class="kc-action-cell" data-ng-click="removeUser(user)">{{:: 'delete' | translate}}</td>
+            <td data-ng-show="access.createRealm && access.manageRealm && access.manageUsers" class="kc-action-cell" data-ng-click="removeUser(user)">{{:: 'delete' | translate}}</td>
         </tr>
         <tr data-ng-show="!users || users.length == 0">
             <td class="text-muted" data-ng-show="!users">{{:: 'users.instruction' | translate}}</td>
