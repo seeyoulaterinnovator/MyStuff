@@ -974,13 +974,12 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
         convertAttributeValuesToLists();
 
         if ($scope.create) {
-            User.save({
-                realm: $scope.query.searchRealm
-            }, $scope.user, function (data, headers) {
+            $http.post(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/users',
+                $scope.user).then(function (response) {
                 $scope.changed = false;
                 convertAttributeValuesToString($scope.user);
                 user = angular.copy($scope.user);
-                var l = headers().location;
+                var l = response.headers().location;
 
                 console.debug("Location == " + l);
 
