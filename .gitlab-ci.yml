@@ -132,6 +132,8 @@ container:source:
   artifacts:
     paths:
       - .ci_status/
+  tags:
+    - sso-stage
 
 container:
   stage: docker
@@ -142,6 +144,9 @@ container:
   artifacts:
     paths:
       - .ci_status/
+  tags:
+    - sso-stage
+
 
 devel:domain:
   stage: deploy
