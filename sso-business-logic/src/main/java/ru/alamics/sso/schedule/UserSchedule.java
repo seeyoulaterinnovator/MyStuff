@@ -71,10 +71,6 @@ public class UserSchedule {
 
     @PostConstruct
     private void init() {
-
-        if (true)
-            return;
-
         final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
 
         final long intervalDuration = properties.getPropertyLong(TIMER_INTERVAL_DURATION_PROPERTY, DEFAULT_INTERVAL_DURATION, "UserSchedule: default value used: '%s' = '%s'");

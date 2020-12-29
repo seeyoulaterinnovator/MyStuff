@@ -1060,7 +1060,7 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
 
 module.controller('UserCredentialsCtrl', function ($scope, realm, user, $route, RequiredActions, User,
                                                    UserExecuteActionsEmail, UserCredentials, Notifications, Dialog,
-                                                   TimeUnit2, $location) {
+                                                   TimeUnit2, $location, $http) {
     console.log('UserCredentialsCtrl');
 
     $scope.realm = realm;
@@ -1126,13 +1126,11 @@ module.controller('UserCredentialsCtrl', function ($scope, realm, user, $route, 
 
     $scope.disableCredentialTypes = function () {
         Dialog.confirm('Disable credentials', 'Are you sure you want to disable these users credentials?', function () {
-            UserCredentials.disableCredentialTypes({
-                realm: realm.realm,
-                userId: user.id
-            }, $scope.disableableCredentialTypes, function () {
+            $http.put(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/users/' + user.id + '/disable-credential-types',
+                $scope.disableableCredentialTypes).then(function () {
                 $route.reload();
                 Notifications.success("Credentials disabled");
-            }, function () {
+            }).catch(function() {
                 Notifications.error("Failed to disable credentials");
             });
         });
@@ -1148,14 +1146,12 @@ module.controller('UserCredentialsCtrl', function ($scope, realm, user, $route, 
             return;
         }
         Dialog.confirm('Send Email', 'Are you sure you want to send email to user?', function () {
-            UserExecuteActionsEmail.update({
-                realm: realm.realm,
-                userId: user.id,
-                lifespan: $scope.emailActionsTimeout.toSeconds()
-            }, $scope.emailActions, function () {
+            $http.put(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/users/' + user.id + '/execute-actions-email?'
+                + 'lifespan=' + $scope.emailActionsTimeout.toSeconds(),
+                $scope.emailActions).then(function () {
                 Notifications.success("Email sent to user");
                 $scope.emailActions = [];
-            }, function () {
+            }).catch(function () {
                 Notifications.error("Failed to send email to user");
             });
         });
