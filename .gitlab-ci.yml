@@ -147,7 +147,6 @@ container:
   tags:
     - sso-stage
 
-
 devel:domain:
   stage: deploy
   when: manual
@@ -212,6 +211,8 @@ domru:stage:
     url: http://domru-sso-stage.alamics.ru
   script:
     - $BASE_DIR/scripts/deploy.sh
+  tags:
+    - sso-domain-controller-perm
 
 domru:stage2:
   stage: deploy
@@ -223,6 +224,8 @@ domru:stage2:
     url: http://domru-sso-stage1.alamics.ru
   script:
     - $BASE_DIR/scripts/deploy.sh
+  tags:
+    - sso-domain-controller-perm
 
 domru:stage3:
   stage: deploy
@@ -234,6 +237,8 @@ domru:stage3:
     url: http://domru-sso-stage3.alamics.ru
   script:
     - $BASE_DIR/scripts/deploy.sh
+  tags:
+    - sso-domain-controller-perm
 
 domru:stage4:
   stage: deploy
@@ -245,6 +250,8 @@ domru:stage4:
     url: http://domru-sso-stage4.alamics.ru
   script:
     - $BASE_DIR/scripts/deploy.sh
+  tags:
+    - sso-domain-controller-perm
 
 domru:perm:primary:
   stage: deploy
