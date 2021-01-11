@@ -147,65 +147,63 @@ container:
   tags:
     - sso-stage
 
-devel:domain:
-  stage: deploy
-  when: manual
-  environment:
-    name: devel
-    url: http://domru-sso-devel-domain.dev.itrev.ru
-  script:
-    - $BASE_DIR/scripts/deploy.sh
+#devel:domain:
+#  stage: deploy
+#  when: manual
+#  environment:
+#    name: devel
+#    url: http://domru-sso-devel-domain.dev.itrev.ru
+#  script:
+#    - $BASE_DIR/scripts/deploy.sh
 
-devel:domwar:
-  stage: deploy
-  when: manual
-  environment:
-    name: devel
-    url: http://domru-sso-devel-domain.dev.itrev.ru
-  script:
-    - $BASE_DIR/scripts/deploy.sh
+#devel:domwar:
+#  stage: deploy
+#  when: manual
+#  environment:
+#    name: devel
+#    url: http://domru-sso-devel-domain.dev.itrev.ru
+#  script:
+#    - $BASE_DIR/scripts/deploy.sh
 
-devel:
-  stage: deploy
-  when: manual
-  environment:
-    name: devel
-    url: http://domru-sso.alamics.ru
-  script:
-    - $BASE_DIR/scripts/deploy.sh
+#devel:
+#  stage: deploy
+#  when: manual
+#  environment:
+#    name: devel
+#    url: http://domru-sso.alamics.ru
+#  script:
+#    - $BASE_DIR/scripts/deploy.sh
 
-reference:
-  stage: deploy
-  when: manual
-  environment:
-    name: reference
-    url: http://domru-reference.alamics.ru
-  script:
-    - $BASE_DIR/scripts/deploy.sh
+#reference:
+#  stage: deploy
+#  when: manual
+#  environment:
+#    name: reference
+#    url: http://domru-reference.alamics.ru
+#  script:
+#    - $BASE_DIR/scripts/deploy.sh
 
-test:
-  stage: deploy
-  when: manual
-  environment:
-    name: test
-    url: http://domru-sso-test.alamics.ru
-  script:
-    - $BASE_DIR/scripts/deploy.sh
+#test:
+#  stage: deploy
+#  when: manual
+#  environment:
+#    name: test
+#    url: http://domru-sso-test.alamics.ru
+#  script:
+#    - $BASE_DIR/scripts/deploy.sh
 
-test:battle:
-  stage: deploy
-  when: manual
-  environment:
-    name: test
-    url: http://domru-sso-test.alamics.ru
-  script:
-    - $BASE_DIR/scripts/deploy.sh
+#test:battle:
+#  stage: deploy
+#  when: manual
+#  environment:
+#    name: test
+#    url: http://domru-sso-test.alamics.ru
+#  script:
+#    - $BASE_DIR/scripts/deploy.sh
 
 domru:stage:
   stage: deploy
   when: manual
-  #only:
-  #  - tags
   environment:
     name: stage
     url: http://domru-sso-stage.alamics.ru
@@ -217,8 +215,6 @@ domru:stage:
 domru:stage2:
   stage: deploy
   when: manual
-  #only:
-  #  - tags
   environment:
     name: stage
     url: http://domru-sso-stage1.alamics.ru
@@ -230,8 +226,6 @@ domru:stage2:
 domru:stage3:
   stage: deploy
   when: manual
-  #only:
-  #  - tags
   environment:
     name: stage
     url: http://domru-sso-stage3.alamics.ru
@@ -243,8 +237,6 @@ domru:stage3:
 domru:stage4:
   stage: deploy
   when: manual
-  #only:
-  #  - tags
   environment:
     name: stage
     url: http://domru-sso-stage4.alamics.ru
