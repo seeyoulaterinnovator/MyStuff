@@ -1,0 +1,171 @@
+.scrollable-container {
+  scrollbar-width: thin;
+  scrollbar-color: #F3F3F3;
+  z-index: 10 !important;
+  overflow: auto !important;
+  touch-action: auto;
+  webkit-user-drag: auto;
+}
+
+.scrollable-container::-webkit-scrollbar {
+  width: 2px;
+
+  background-color: #EFEFEF;
+}
+
+.scrollable-container::-webkit-scrollbar-thumb {
+  @apply .bg-extra;
+
+  width: 2px;
+
+  border-radius: 1px;
+}
+
+.hoverable {
+  transition: .2s ease-in-out;
+}
+
+.border-b.hoverable {
+  &:hover {
+    border-bottom-color: transparent;
+  }
+}
+
+.text-black-50.hoverable {
+  &:hover {
+     color: rgba(0,0,0,.8);
+  }
+}
+
+.border-box {
+  box-sizing: border-box;
+}
+.content-box {
+  box-sizing: content-box;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.service__item::before {
+  @apply .bg-extra !important;
+}
+
+.icon_service-question::before {
+  opacity: 0.5;
+  position: absolute;
+  width: 32px;
+  height: 34px;
+  top: 0;
+  left: 15px;
+  content: url('./images/Chat.svg') !important;
+}
+
+.login-title-text {
+  max-width: 306px;
+}
+
+.text-secondary-title {
+  color: black;
+  opacity: 0.1;
+  transition: 0.2s ease-in-out;
+  &:hover {
+    opacity: 0.5;
+  }
+}
+
+.text-no-wrap {
+  white-space: nowrap;
+}
+
+.reset-password {
+  position: relative;
+  transition: 0.2s ease-in-out;
+  opacity: 0.5;
+  cursor: pointer;
+  &::after {
+    transition: 0.2s ease-in-out;
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 1.4px;
+    width: 100%;
+    @apply .bg-black-50;
+  }
+  &:hover {
+    opacity: 1;
+    &:after {
+       @apply .bg-extra;
+    }
+  }
+}
+
+.footer {
+  margin: auto 0 0;
+  padding: 0;
+  max-width: calc(100% - 75px);
+  bottom: 35px;
+}
+
+@media screen and (max-width: 1199px){
+  .footer {
+    width: 206px;
+  }
+
+  .service__item_main-active {
+    width: 60px;
+  }
+}
+
+@media screen and (max-width: 959px){
+  .footer {
+    bottom: 30px;
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 639px){
+  .login-title-text {
+    max-width: unset;
+  }
+
+  .login-title-text {
+    max-width: unset;
+  }
+}
+
+@media screen and (max-width: 479px){
+  .footer {
+    bottom: 16px;
+  }
+}
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  body {
+    display: table !important;
+    width: 100%;
+  }
+  .footer {
+    display: table-footer-group;
+  }
+}
+
+.g-recaptcha {
+  transform-origin: 0 0;
+}
+@media (max-width: 479px) {
+  .g-recaptcha {
+    padding-bottom: 1rem;
+  }
+}
+
+#password, #password-new, #password-confirm {
+  padding-right: 3rem;
+}

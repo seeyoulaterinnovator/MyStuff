@@ -11,16 +11,25 @@ stages:
   - docker
   - deploy
 
+.build: &build-template
+  before_script:
+  - if [ -f ./gradlew ]; then
+  - chmod 775 ./gradlew
+  - fi
+
 back:compile:
   stage: compile
+  <<: *build-template
   except:
     - master
   script:
+    - if [ -f ./gradlew ]; then chmod 775 ./gradlew; fi
     - ./gradlew :classes --stacktrace -Dorg.gradle.java.home=/usr/java/jdk1.8.0
   cache: {}
 
 back:test:adapter:tbapi-remote-service:
   stage: test
+  <<: *build-template
   when: on_success
   except:
     - master
@@ -42,6 +51,7 @@ back:test:adapter:tbapi-remote-service:
 
 back:test:sso-business-logic:
   stage: test
+  <<: *build-template
   when: on_success
   except:
     - master
@@ -62,6 +72,7 @@ back:test:sso-business-logic:
 
 back:test:keycloak-extension:
   stage: test
+  <<: *build-template
   when: on_success
   except:
     - master
@@ -82,6 +93,7 @@ back:test:keycloak-extension:
 
 back:war:
   stage: build
+  <<: *build-template
   when: on_success
   except:
     - master
@@ -120,6 +132,8 @@ container:source:
   artifacts:
     paths:
       - .ci_status/
+  tags:
+    - sso-stage
 
 container:
   stage: docker
@@ -130,86 +144,106 @@ container:
   artifacts:
     paths:
       - .ci_status/
+  tags:
+    - sso-stage
 
-devel:
-  stage: deploy
-  when: manual
-  environment:
-    name: devel
-    url: http://domru-sso.alamics.ru
-  script:
-    - $BASE_DIR/scripts/deploy.sh
+#devel:domain:
+#  stage: deploy
+#  when: manual
+#  environment:
+#    name: devel
+#    url: http://domru-sso-devel-domain.dev.itrev.ru
+#  script:
+#    - $BASE_DIR/scripts/deploy.sh
 
-reference:
-  stage: deploy
-  when: manual
-  environment:
-    name: reference
-    url: http://domru-reference.alamics.ru
-  script:
-    - $BASE_DIR/scripts/deploy.sh
+#devel:domwar:
+#  stage: deploy
+#  when: manual
+#  environment:
+#    name: devel
+#    url: http://domru-sso-devel-domain.dev.itrev.ru
+#  script:
+#    - $BASE_DIR/scripts/deploy.sh
 
-test:
-  stage: deploy
-  when: manual
-  environment:
-    name: test
-    url: http://domru-sso-test.alamics.ru
-  script:
-    - $BASE_DIR/scripts/deploy.sh
+#devel:
+#  stage: deploy
+#  when: manual
+#  environment:
+#    name: devel
+#    url: http://domru-sso.alamics.ru
+#  script:
+#    - $BASE_DIR/scripts/deploy.sh
 
-test:battle:
-  stage: deploy
-  when: manual
-  environment:
-    name: test
-    url: http://domru-sso-test.alamics.ru
-  script:
-    - $BASE_DIR/scripts/deploy.sh
+#reference:
+#  stage: deploy
+#  when: manual
+#  environment:
+#    name: reference
+#    url: http://domru-reference.alamics.ru
+#  script:
+#    - $BASE_DIR/scripts/deploy.sh
+
+#test:
+#  stage: deploy
+#  when: manual
+#  environment:
+#    name: test
+#    url: http://domru-sso-test.alamics.ru
+#  script:
+#    - $BASE_DIR/scripts/deploy.sh
+
+#test:battle:
+#  stage: deploy
+#  when: manual
+#  environment:
+#    name: test
+#    url: http://domru-sso-test.alamics.ru
+#  script:
+#    - $BASE_DIR/scripts/deploy.sh
 
 domru:stage:
   stage: deploy
   when: manual
-  #only:
-  #  - tags
   environment:
     name: stage
     url: http://domru-sso-stage.alamics.ru
   script:
     - $BASE_DIR/scripts/deploy.sh
+  tags:
+    - sso-domain-controller-perm
 
 domru:stage2:
   stage: deploy
   when: manual
-  #only:
-  #  - tags
   environment:
     name: stage
     url: http://domru-sso-stage1.alamics.ru
   script:
     - $BASE_DIR/scripts/deploy.sh
+  tags:
+    - sso-domain-controller-perm
 
 domru:stage3:
   stage: deploy
   when: manual
-  #only:
-  #  - tags
   environment:
     name: stage
     url: http://domru-sso-stage3.alamics.ru
   script:
     - $BASE_DIR/scripts/deploy.sh
+  tags:
+    - sso-domain-controller-perm
 
 domru:stage4:
   stage: deploy
   when: manual
-  #only:
-  #  - tags
   environment:
     name: stage
     url: http://domru-sso-stage4.alamics.ru
   script:
     - $BASE_DIR/scripts/deploy.sh
+  tags:
+    - sso-domain-controller-perm
 
 domru:perm:primary:
   stage: deploy
