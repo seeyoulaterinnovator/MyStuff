@@ -11,6 +11,7 @@ import ru.alamics.sso.user.model.PersonalAccountPostModel;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import java.util.ArrayList;
 import java.util.List;
 
 @Stateless
@@ -42,7 +43,16 @@ public class PersonalAccountService {
 
         PersonalAccountPostEntity pap = paRepository.getAccount(postId);
 
-        return UserMapper.toPAPostDto(pap);
+        PersonalAccountPostModel model = UserMapper.toPAPostDto(pap);
+
+        if (model == null) {
+            model = PersonalAccountPostModel.builder()
+                    .postId(postId)
+                    .accounts(new ArrayList<>())
+                    .build();
+        }
+
+        return model;
     }
 
     public PersonalAccountPostModel getActivePAByUser(final String userId) {
