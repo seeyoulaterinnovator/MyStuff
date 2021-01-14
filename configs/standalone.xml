@@ -140,6 +140,9 @@
             <formatter name="COLOR-PATTERN">
                 <pattern-formatter pattern="%K{level}%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"/>
             </formatter>
+            <formatter name="LOGSTASH-PATTERN">
+                <custom-formatter module="x1.wildfly-logstash" class="net.logstash.logging.formatter.LogstashUtilFormatter"/>
+            </formatter>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:bean-validation:1.0"/>
         <subsystem xmlns="urn:jboss:domain:core-management:1.0"/>
