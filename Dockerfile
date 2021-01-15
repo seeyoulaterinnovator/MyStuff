@@ -1,4 +1,4 @@
-FROM registry.alamics.ru/devops/keycloak/keycloak:6.0.1
+FROM harbor.ertelecom.ru/sso-protected/keycloak:6.0.1
 
 USER root
 
