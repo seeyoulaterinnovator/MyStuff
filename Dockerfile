@@ -13,6 +13,7 @@ COPY build/deploy/standalone/deployments/custom-jpa.jar /opt/jboss/keycloak/modu
 COPY build/deploy/standalone/deployments/domru-sso.war /opt/jboss/keycloak/standalone/deployments
 COPY build/deploy/standalone/data/password-blacklists /opt/jboss/keycloak/standalone/data
 COPY tools/modules/x1 /opt/jboss/keycloak/modules/system/layers/base
+RUN chmod 755 /opt/jboss/tools/docker-entrypoint.sh
 RUN cp /opt/jboss/configs/ertk.pem /etc/pki/ca-trust/source/anchors
 RUN update-ca-trust
 
