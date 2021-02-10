@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="urn:jboss:module:1.1" name="x1.wildfly-logstash">
+  <resources>
+    <resource-root path="wildfly-logstash-1.0.8.jar" />
+  </resources>
+  <dependencies>
+    <module name="org.jboss.logmanager" />
+    <module name="org.jboss.logging" />
+    <module name="javax.json.api" />
+  </dependencies>
+</module>

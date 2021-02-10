@@ -25,7 +25,7 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
     @Override
     default void close () { }
 
-    default AdminAuth initAuthByWorkingRealm(KeycloakSession session) {
+    default AdminPermissionEvaluator initAuthByWorkingRealm(KeycloakSession session) {
         KeycloakContext context = session.getContext();
         AdminAuth auth = initAdminAuth(session);
 
@@ -36,10 +36,9 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
         RealmModel realmFromRequest = Optional.ofNullable(realmManager.getRealmByName(realmFromRequestName))
                 .orElseThrow(() -> new NotAuthorizedException("Unknown realm in path param"));
 
-        AdminPermissions.evaluator(session, realmFromRequest, auth).users().requireManage();//Проверяем права пользователя на редактирование реалма в которй он сделал запрос
-
         session.getContext().setRealm(realmFromRequest);//FIXME Ставим контексте в реалме, тот в котором работает пользователь
-        return auth;
+
+        return AdminPermissions.evaluator(session, realmFromRequest, auth);
     }
 
     default AdminPermissionEvaluator initAuth(KeycloakSession session) {

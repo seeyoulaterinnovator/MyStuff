@@ -85,6 +85,33 @@
     </management>
     <profile>
         <subsystem xmlns="urn:jboss:domain:logging:6.0">
+            <async-handler name="LOGSTASH-ASYNC-SPLUNK">
+                <queue-length value="512"/>
+                <subhandlers>
+                    <handler name="LOGSTASH-SOCKET-SPLUNK"/>
+                </subhandlers>
+            </async-handler>
+            <custom-handler name="LOGSTASH-SOCKET-SPLUNK" class="net.logstash.logging.handler.SocketHandler" module="x1.wildfly-logstash">
+                <level name="DEBUG"/>
+                <formatter>
+                    <named-formatter name="LOGSTASH-PATTERN"/>
+                </formatter>
+                <properties>
+                    <property name="protocol" value="TCP"/>
+                    <property name="hostname" value="10.101.5.245"/>
+                    <property name="port" value="50514"/>
+                    <property name="subHandler" value="LOGSTASH"/>
+                </properties>
+            </custom-handler>
+            <periodic-rotating-file-handler name="LOGSTASH" autoflush="true">
+                <level name="ERROR"/>
+                <formatter>
+                    <named-formatter name="LOGSTASH-PATTERN"/>
+                </formatter>
+                <file relative-to="jboss.server.log.dir" path="logstash.log"/>
+                <suffix value=".yyyy-MM-dd"/>
+                <append value="true"/>
+            </periodic-rotating-file-handler>
             <console-handler name="CONSOLE">
                 <encoding value="UTF-8"/>
                 <formatter>
@@ -113,6 +140,7 @@
                 <level name="${env.ROOT_LOGLEVEL:INFO}"/>
                 <handlers>
                     <handler name="CONSOLE"/>
+                    <handler name="LOGSTASH-ASYNC-SPLUNK"/>
                 </handlers>
             </root-logger>
             <formatter name="PATTERN">
@@ -120,6 +148,9 @@
             </formatter>
             <formatter name="COLOR-PATTERN">
                 <pattern-formatter pattern="%K{level}%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"/>
+            </formatter>
+            <formatter name="LOGSTASH-PATTERN">
+                <custom-formatter module="x1.wildfly-logstash" class="net.logstash.logging.formatter.LogstashUtilFormatter"/>
             </formatter>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:bean-validation:1.0"/>

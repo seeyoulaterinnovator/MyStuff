@@ -31,7 +31,7 @@ public class ClientRealmResourceProvider implements BaseResourceProvider<ClientR
 
     @Override
     public ClientRestResource getResource() {
-        return new ClientRestResource(session, initAuth(this.session), initAuthByWorkingRealm(session));
+        return new ClientRestResource(session, initAuthByWorkingRealm(session));
     }
 
     @Override
