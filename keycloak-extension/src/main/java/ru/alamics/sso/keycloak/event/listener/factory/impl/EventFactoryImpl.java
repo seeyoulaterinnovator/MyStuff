@@ -10,7 +10,7 @@ import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
 public class EventFactoryImpl implements EventFactory {
 
     @Override
-    public SsoEvent create (AdminEvent adminEvent, KeycloakSession session) {
+    public SsoEvent create(AdminEvent adminEvent, KeycloakSession session) {
         SsoEvent event = null;
 
         if (adminEvent.getOperationType() == OperationType.CREATE
@@ -23,10 +23,14 @@ public class EventFactoryImpl implements EventFactory {
             event = new SsoUserUpdateEvent(adminEvent, session);
         }
 
-        if(event == null) {
-            throw new IllegalArgumentException("Illegal argument type");
+        if (adminEvent.getOperationType() == OperationType.ACTION
+                && adminEvent.getResourceType().equals(ResourceType.USER)) {
+            event = new SsoUserCustomEvent(adminEvent, session);
         }
 
+        if (event == null) {
+            throw new IllegalArgumentException("Illegal argument type");
+        }
         return event;
     }
 }

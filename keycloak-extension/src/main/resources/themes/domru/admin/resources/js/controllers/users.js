@@ -514,6 +514,20 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         })
     };
 
+    $scope.selectedSendLogin = function () {
+        let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
+        $http.post(`${authUrl}/realms/${realm.realm}/manage/login/send`, userForResetPassword).then(response => {
+            Notifications.success("Login has been sent");
+        })
+    };
+
+    $scope.selectedSendLoginAndResetPassword = function () {
+        let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
+        $http.post(`${authUrl}/realms/${realm.realm}/manage/credential/reset/with/send/login`, userForResetPassword).then(response => {
+            Notifications.success("Login has been sent and password reset");
+        })
+    };
+
     $scope.selectedBlockUsers = function () {
         let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
         $http.post(`${authUrl}/realms/${realm.realm}/manage/block`, userForResetPassword).then(response => {
@@ -730,7 +744,10 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
             //$scope.users = angular.fromJson(data).data.results['users-info'];
             var respUsers = angular.fromJson(data).data.results['users-info'];
-            respUsers.forEach(user => {user.num = counter; counter++;});
+            respUsers.forEach(user => {
+                user.num = counter;
+                counter++;
+            });
             Array.prototype.push.apply($scope.users, respUsers);
 
             $scope.pages = angular.fromJson(data).data.results['page-info'];
@@ -1130,7 +1147,7 @@ module.controller('UserCredentialsCtrl', function ($scope, realm, user, $route, 
                 $scope.disableableCredentialTypes).then(function () {
                 $route.reload();
                 Notifications.success("Credentials disabled");
-            }).catch(function() {
+            }).catch(function () {
                 Notifications.error("Failed to disable credentials");
             });
         });

@@ -4,12 +4,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserEntityRepresentation {
+    public static String SEND_LOGIN_AND_RESET_PASSWORD = "SEND_LOGIN_AND_RESET_PASSWORD";
+    public static String SEND_LOGIN = "SEND_LOGIN";
+
     private String id;
     private String email;
     private boolean enabled;
     private Long createdTimestamp;
+    private List<String> requiredActions;
 }

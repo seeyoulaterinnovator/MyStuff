@@ -7,6 +7,7 @@ import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.registration.model.UserEntityRepresentation;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -20,7 +21,7 @@ public class UserManageResource {
     private final AdminEventBuilder eventBuilder;
 
 
-    UserManageResource (KeycloakSession session, AdminEventBuilder eventBuilder) {
+    UserManageResource(KeycloakSession session, AdminEventBuilder eventBuilder) {
         this.session = session;
         KeycloakContext context = session.getContext();
         this.eventBuilder = eventBuilder.resource(ResourceType.USER);
@@ -32,10 +33,10 @@ public class UserManageResource {
     @POST
     public Response blockUsers(List<String> ids) {
         UserProvider userProvider = getUsers();
-        if(ids != null) {
+        if (ids != null) {
             ids.forEach(id -> {
                 UserModel user = userProvider.getUserById(id, realm);
-                if(user != null) {
+                if (user != null) {
                     user.setEnabled(false);
                     UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
                     eventBuilder.operation(OperationType.UPDATE)
@@ -55,10 +56,10 @@ public class UserManageResource {
     @POST
     public Response unlockUsers(List<String> ids) {
         UserProvider userProvider = getUsers();
-        if(ids != null) {
+        if (ids != null) {
             ids.forEach(id -> {
                 UserModel user = userProvider.getUserById(id, realm);
-                if(user != null) {
+                if (user != null) {
                     user.setEnabled(true);
                     UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
                     eventBuilder.operation(OperationType.UPDATE)
@@ -81,7 +82,7 @@ public class UserManageResource {
     @POST
     public Response resetPassword(List<String> ids) {
         UserProvider userProvider = getUsers();
-        if(ids != null) {
+        if (ids != null) {
             ids.forEach(id -> {
                 UserModel user = userProvider.getUserById(id, realm);
                 user.addRequiredAction(UserModel.RequiredAction.UPDATE_PASSWORD);
@@ -92,6 +93,51 @@ public class UserManageResource {
                 .build();
     }
 
+    @Path("credential/reset/with/send/login")
+    @POST
+    public Response sendLoginAndResetPassword(List<String> ids) {
+        UserProvider userProvider = getUsers();
+        if (ids != null) {
+            ids.forEach(id -> {
+                UserModel user = userProvider.getUserById(id, realm);
+                if (user != null) {
+                    UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
+                    rep.getRequiredActions().add(UserEntityRepresentation.SEND_LOGIN_AND_RESET_PASSWORD);
+                    eventBuilder.operation(OperationType.ACTION)
+                            .resourcePath(session.getContext().getUri())
+                            .representation(rep)
+                            .realm(realm)
+                            .success();
+                }
+            });
+        }
+        return JsonResponse.success()
+                .httpStatus(Response.Status.NO_CONTENT)
+                .build();
+    }
+
+    @Path("/login/send")
+    @POST
+    public Response sendLogin(List<String> ids) {
+        UserProvider userProvider = getUsers();
+        if (ids != null) {
+            ids.forEach(id -> {
+                UserModel user = userProvider.getUserById(id, realm);
+                if (user != null) {
+                    UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
+                    rep.getRequiredActions().add(UserEntityRepresentation.SEND_LOGIN);
+                    eventBuilder.operation(OperationType.ACTION)
+                            .resourcePath(session.getContext().getUri())
+                            .representation(rep)
+                            .realm(realm)
+                            .success();
+                }
+            });
+        }
+        return JsonResponse.success()
+                .httpStatus(Response.Status.NO_CONTENT)
+                .build();
+    }
 
     private UserProvider getUsers() {
         return this.session.users();
