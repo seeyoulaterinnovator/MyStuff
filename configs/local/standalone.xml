@@ -86,18 +86,23 @@
     <profile>
         <subsystem xmlns="urn:jboss:domain:logging:6.0">
             <console-handler name="CONSOLE">
-                <encoding value="UTF-8"/>
+                <formatter>
+                    <named-formatter name="COLOR-PATTERN"/>
+                </formatter>
+            </console-handler>
+            <periodic-rotating-file-handler name="ERROR" autoflush="true">
+                <level name="ERROR"/>
                 <formatter>
                     <named-formatter name="PATTERN"/>
                 </formatter>
-            </console-handler>
+                <file relative-to="jboss.server.log.dir" path="error.log"/>
+                <suffix value=".yyyy-MM-dd"/>
+                <append value="true"/>
+            </periodic-rotating-file-handler>
             <logger category="com.arjuna">
                 <level name="WARN"/>
             </logger>
             <logger category="io.jaegertracing.Configuration">
-                <level name="WARN"/>
-            </logger>
-            <logger category="org.hibernate.SQL">
                 <level name="WARN"/>
             </logger>
             <logger category="org.jboss.as.config">
@@ -109,14 +114,18 @@
             <logger category="org.keycloak">
                 <level name="${env.KEYCLOAK_LOGLEVEL:INFO}"/>
             </logger>
+            <logger category="org.keycloak.services.managers">
+                <level name="DEBUG"/>
+            </logger>
             <root-logger>
                 <level name="${env.ROOT_LOGLEVEL:INFO}"/>
                 <handlers>
                     <handler name="CONSOLE"/>
+                    <handler name="ERROR"/>
                 </handlers>
             </root-logger>
             <formatter name="PATTERN">
-                <pattern-formatter pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"/>
+                <pattern-formatter pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"/>
             </formatter>
             <formatter name="COLOR-PATTERN">
                 <pattern-formatter pattern="%K{level}%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"/>
@@ -126,15 +135,26 @@
         <subsystem xmlns="urn:jboss:domain:core-management:1.0"/>
         <subsystem xmlns="urn:jboss:domain:datasources:5.0">
             <datasources>
-                <datasource jndi-name="java:jboss/datasources/KeycloakDS" pool-name="KeycloakDS" enabled="true" use-java-context="true">
-                    <connection-url>jdbc:mariadb://localhost:3306/sso</connection-url>
+                <!-- local -->
+                <datasource jndi-name="java:jboss/datasources/KeycloakDS" pool-name="KeycloakDS" enabled="true" use-java-context="true" statistics-enabled="${wildfly.datasources.statistics-enabled:${wildfly.statistics-enabled:false}}">
+                    <connection-url>jdbc:h2:${jboss.server.data.dir}/keycloak;AUTO_SERVER=TRUE</connection-url>
+                    <driver>h2</driver>
+                    <security>
+                        <user-name>sa</user-name>
+                        <password>sa</password>
+                    </security>
+                </datasource>
+                <!-- PROD -->
+                <!--
+                <datasource jndi-name="java:jboss/datasources/KeycloakDS" pool-name="KeycloakDS" enabled="true" use-java-context="true" statistics-enabled="true">
+                    <connection-url>jdbc:mariadb://192.168.57.23:3308/sso</connection-url>
                     <driver>mariadb</driver>
                     <pool>
-                        <max-pool-size>20</max-pool-size>
+                        <max-pool-size>10</max-pool-size>
                     </pool>
                     <security>
-                        <user-name>root</user-name>
-                        <password>1234</password>
+                        <user-name>sso</user-name>
+                        <password></password>
                     </security>
                     <validation>
                         <check-valid-connection-sql>select 1</check-valid-connection-sql>
@@ -142,7 +162,11 @@
                         <background-validation-millis>15000</background-validation-millis>
                     </validation>
                 </datasource>
+                -->
                 <drivers>
+                    <driver name="h2" module="com.h2database.h2">
+                        <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
+                    </driver>
                     <driver name="mariadb" module="org.mariadb.jdbc">
                         <xa-datasource-class>org.mariadb.jdbc.MariaDbDataSource</xa-datasource-class>
                     </driver>
@@ -371,6 +395,7 @@
                 </local-cache>
                 <local-cache name="timestamps"/>
             </cache-container>
+
             <cache-container name="custom_container">
                 <local-cache name="user_post_cache">
                     <object-memory size="10000"/>
@@ -419,6 +444,9 @@
             <providers>
                 <provider>
                     classpath:${jboss.home.dir}/providers/*
+                </provider>
+                <provider>
+                    module:ru.alamics.sso.jpa
                 </provider>
             </providers>
             <master-realm-name>master</master-realm-name>
@@ -470,7 +498,7 @@
             </spi>
             <spi name="connectionsInfinispan">
                 <default-provider>default</default-provider>
-                <provider name="custom" enabled="true">
+                <provider name="default" enabled="true">
                     <properties>
                         <property name="cacheContainer" value="java:jboss/infinispan/container/keycloak"/>
                     </properties>
@@ -563,7 +591,7 @@
                 </process-id>
             </core-environment>
             <recovery-environment socket-binding="txn-recovery-environment" status-socket-binding="txn-status-manager"/>
-            <coordinator-environment statistics-enabled="${wildfly.transactions.statistics-enabled:${wildfly.statistics-enabled:false}}"/>
+            <coordinator-environment statistics-enabled="${wildfly.transactions.statistics-enabled:${wildfly.statistics-enabled:false}}" default-timeout="1200"/>
             <object-store path="tx-object-store" relative-to="jboss.server.data.dir"/>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:undertow:8.0" default-server="default-server" default-virtual-host="default-host" default-servlet-container="default" default-security-domain="other" statistics-enabled="${wildfly.undertow.statistics-enabled:${wildfly.statistics-enabled:false}}">
@@ -583,9 +611,6 @@
             <handlers>
                 <file name="welcome-content" path="${jboss.home.dir}/welcome-content"/>
             </handlers>
-            <filters>
-                <filter name="cookiehandler" class-name="ru.alamics.sso.keycloak.jboss.CookieSameSiteHandler" module="ru.alamics.sso.keycloak.jboss.CookieSameSiteHandler"/>
-            </filters>
         </subsystem>
     </profile>
     <interfaces>
