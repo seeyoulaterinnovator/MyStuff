@@ -516,14 +516,14 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
     $scope.selectedSendLogin = function () {
         let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
-        $http.post(`${authUrl}/realms/${realm.realm}/manage/login/send`, userForResetPassword).then(response => {
+        $http.post(`${authUrl}/realms/${realm.realm}/manage/send/login`, userForResetPassword).then(response => {
             Notifications.success("Login has been sent");
         })
     };
 
     $scope.selectedSendLoginAndResetPassword = function () {
         let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
-        $http.post(`${authUrl}/realms/${realm.realm}/manage/credential/reset/with/send/login`, userForResetPassword).then(response => {
+        $http.post(`${authUrl}/realms/${realm.realm}/manage/credential/reset-with-send-login`, userForResetPassword).then(response => {
             Notifications.success("Login has been sent and password reset");
         })
     };

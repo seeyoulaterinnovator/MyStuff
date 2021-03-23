@@ -9,6 +9,7 @@ import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -37,7 +38,10 @@ public class SsoUserCustomEvent extends SsoEvent {
             if (user != null && user.getEmail() != null) {
                 Map<String, Object> attributes = new HashMap<>();
                 attributes.put("userName", user.getUsername());
-                attributes.put("phone", user.getAttribute("phone").get(0));
+                List<String> phones = user.getAttribute("phone");
+                if (!phones.isEmpty()) {
+                    attributes.put("phone", phones.get(0));
+                }
                 System.out.println(userRepresentation.getRequiredActions());
                 if (userRepresentation.getRequiredActions().contains(UserEntityRepresentation.SEND_LOGIN)) {
                     this.sendEmail(user, realm, "emailSendLoginSubject", "mail-login-send.ftl", attributes);

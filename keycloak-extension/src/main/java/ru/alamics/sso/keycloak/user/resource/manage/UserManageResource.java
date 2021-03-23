@@ -93,7 +93,7 @@ public class UserManageResource {
                 .build();
     }
 
-    @Path("credential/reset/with/send/login")
+    @Path("credential/reset-with-send-login")
     @POST
     public Response sendLoginAndResetPassword(List<String> ids) {
         UserProvider userProvider = getUsers();
@@ -116,7 +116,7 @@ public class UserManageResource {
                 .build();
     }
 
-    @Path("/login/send")
+    @Path("/send/login")
     @POST
     public Response sendLogin(List<String> ids) {
         UserProvider userProvider = getUsers();
