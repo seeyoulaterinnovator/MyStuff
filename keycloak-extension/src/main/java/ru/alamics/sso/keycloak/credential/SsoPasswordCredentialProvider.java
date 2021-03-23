@@ -37,12 +37,20 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
 
         if (CredentialModel.PASSWORD.equals(credentialType)) {
             user.addRequiredAction(UserModel.RequiredAction.UPDATE_PASSWORD);
-            sendDisableCredentialEmail(realm, user);
+            sendDisableCredentialEmail(realm, user, VALIDITY_IN_SECS, "emailCredentialDisableSubject", "credential-disable-password.ftl", new HashMap<>());
         }
     }
 
-    private void sendDisableCredentialEmail(RealmModel realm, UserModel user) {
-        int absoluteExpirationInSecs = Time.currentTime() + VALIDITY_IN_SECS;
+    public void disableCredentialType(RealmModel realm, UserModel user, String credentialType, int expirationTimeSeconds, String subject, String template, Map<String, Object> attributes) {
+        super.disableCredentialType(realm, user, credentialType);
+
+        if (CredentialModel.PASSWORD.equals(credentialType)) {
+            user.addRequiredAction(UserModel.RequiredAction.UPDATE_PASSWORD);
+            sendDisableCredentialEmail(realm, user, expirationTimeSeconds, subject, template, attributes);
+        }
+    }
+
+    private void sendDisableCredentialEmail(RealmModel realm, UserModel user, int expirationTime, String subject, String template, Map<String, Object> attributes) {
 
         ClientModel clientModel = session.clientStorageManager().getClientByClientId(CLIENT_ID, realm);
         if (clientModel == null)
@@ -56,16 +64,13 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
                 .createAuthenticationSession(clientModel);
 
         String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
-        ResetCredentialsActionToken token = new ResetCredentialsActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, clientModel.getClientId());
+        ResetCredentialsActionToken token = new ResetCredentialsActionToken(user.getId(), Time.currentTime() + expirationTime, authSessionEncodedId, clientModel.getClientId());
         UriBuilder builder = Urls.actionTokenBuilder(session.getContext().getUri().getBaseUri(), token.serialize(session, realm, session.getContext().getUri()),
                 clientModel.getClientId(), authenticationSession.getTabId());
         String link = builder.build(realm.getName()).toString();
 
-        Map<String, Object> attributes = new HashMap<>();
         attributes.put("authHref", link);
         EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
-        String subject = "emailCredentialDisableSubject";
-        String template = "credential-disable-password.ftl";
         try {
             emailTemplateProvider.setRealm(realm)
                     .setUser(user)

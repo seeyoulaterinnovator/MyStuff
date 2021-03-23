@@ -1,10 +1,12 @@
 package ru.alamics.sso.keycloak.event.listener.factory.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.credential.CredentialModel;
 import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import ru.alamics.sso.keycloak.credential.SsoPasswordCredentialProvider;
 import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
 
@@ -42,11 +44,15 @@ public class SsoUserCustomEvent extends SsoEvent {
                 if (!phones.isEmpty()) {
                     attributes.put("phone", phones.get(0));
                 }
-                System.out.println(userRepresentation.getRequiredActions());
                 if (userRepresentation.getRequiredActions().contains(UserEntityRepresentation.SEND_LOGIN)) {
                     this.sendEmail(user, realm, "emailSendLoginSubject", "mail-login-send.ftl", attributes);
                 } else if (userRepresentation.getRequiredActions().contains(UserEntityRepresentation.SEND_LOGIN_AND_RESET_PASSWORD)) {
-                    this.sendEmail(user, realm, "emailResetPasswordSubject", "mail-password-reset-with-login.ftl", attributes);
+
+                    SsoPasswordCredentialProvider a = new SsoPasswordCredentialProvider(session);
+                    a.disableCredentialType(realm, user, CredentialModel.PASSWORD,
+                            12 * 60 * 60,
+                            "emailResetPasswordSubject", "mail-password-reset-with-login.ftl", attributes);
+                    //this.sendEmail(user, realm, "emailResetPasswordSubject", "mail-password-reset-with-login.ftl", attributes);
                 }
             } else {
                 log.error(String.format("User '%s' not found or do not have email", userId));

@@ -4,7 +4,7 @@
     <#if section = "style">
         <#include 'styles/content-style--default.html' >
     <#elseif section = "body">
-        ${kcSanitize(msg("emailResetPasswordBodyHtml","url"))?no_esc}
+        ${kcSanitize(msg("emailResetPasswordBodyHtml",authHref))?no_esc}
         <#if phone??>
             ${kcSanitize(msg("emailLoginAndPhoneHtml", userName, phone))?no_esc}
         <#else>
