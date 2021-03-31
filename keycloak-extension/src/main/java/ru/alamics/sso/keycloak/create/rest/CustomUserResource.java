@@ -433,7 +433,7 @@ public class CustomUserResource {
         UserProvider userProvider = session.users();
 
         if (ids != null) {
-            ids.forEach(id -> {
+            for (String id : ids) {
                 UserModel user = userProvider.getUserById(id, realm);
                 if (user != null) {
                     UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
@@ -444,7 +444,7 @@ public class CustomUserResource {
                             .realm(realm)
                             .success();
                 }
-            });
+            }
         }
         return JsonResponse.success()
                 .httpStatus(Response.Status.NO_CONTENT)
@@ -459,7 +459,7 @@ public class CustomUserResource {
         UserProvider userProvider = session.users();
         eventBuilder.resource(ResourceType.USER);
         if (ids != null) {
-            ids.forEach(id -> {
+            for (String id : ids) {
                 UserModel user = userProvider.getUserById(id, realm);
                 if (user != null) {
                     UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
@@ -470,7 +470,7 @@ public class CustomUserResource {
                             .realm(realm)
                             .success();
                 }
-            });
+            }
         }
         return JsonResponse.success()
                 .httpStatus(Response.Status.NO_CONTENT)

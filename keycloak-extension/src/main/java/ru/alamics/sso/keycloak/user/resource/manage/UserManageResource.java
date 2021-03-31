@@ -93,52 +93,6 @@ public class UserManageResource {
                 .build();
     }
 
-    @Path("credential/reset-with-send-login")
-    @POST
-    public Response sendLoginAndResetPassword(List<String> ids) {
-        UserProvider userProvider = getUsers();
-        if (ids != null) {
-            ids.forEach(id -> {
-                UserModel user = userProvider.getUserById(id, realm);
-                if (user != null) {
-                    UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
-                    rep.getRequiredActions().add(UserEntityRepresentation.SEND_LOGIN_AND_RESET_PASSWORD);
-                    eventBuilder.operation(OperationType.ACTION)
-                            .resourcePath(session.getContext().getUri())
-                            .representation(rep)
-                            .realm(realm)
-                            .success();
-                }
-            });
-        }
-        return JsonResponse.success()
-                .httpStatus(Response.Status.NO_CONTENT)
-                .build();
-    }
-
-    @Path("/send/login")
-    @POST
-    public Response sendLogin(List<String> ids) {
-        UserProvider userProvider = getUsers();
-        if (ids != null) {
-            ids.forEach(id -> {
-                UserModel user = userProvider.getUserById(id, realm);
-                if (user != null) {
-                    UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
-                    rep.getRequiredActions().add(UserEntityRepresentation.SEND_LOGIN);
-                    eventBuilder.operation(OperationType.ACTION)
-                            .resourcePath(session.getContext().getUri())
-                            .representation(rep)
-                            .realm(realm)
-                            .success();
-                }
-            });
-        }
-        return JsonResponse.success()
-                .httpStatus(Response.Status.NO_CONTENT)
-                .build();
-    }
-
     private UserProvider getUsers() {
         return this.session.users();
     }
