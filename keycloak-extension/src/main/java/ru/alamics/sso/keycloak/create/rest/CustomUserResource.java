@@ -12,14 +12,15 @@ import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.events.Details;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.events.EventType;
+import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.*;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.models.utils.ModelToRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.services.ErrorResponse;
-import org.keycloak.services.ForbiddenException;
 import org.keycloak.services.managers.AuthenticationManager;
-import org.keycloak.services.resources.LoginActionsService;
 import org.keycloak.services.resources.account.AccountFormService;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.ClientsResource;
@@ -30,10 +31,16 @@ import org.keycloak.utils.ProfileHelper;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
-import ru.alamics.sso.user.*;
+import ru.alamics.sso.registration.model.UserEntityRepresentation;
+import ru.alamics.sso.user.FileServiceException;
+import ru.alamics.sso.user.ImportReportService;
+import ru.alamics.sso.user.UserService;
+import ru.alamics.sso.user.UserServiceImpl;
 import ru.alamics.sso.user.filetype.FileModel;
 import ru.alamics.sso.user.filetype.XlsxImpl;
-import ru.alamics.sso.user.model.*;
+import ru.alamics.sso.user.model.DownloadUserRequest;
+import ru.alamics.sso.user.model.UserParameter;
+import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.util.validator.NotValidException;
 
 import javax.activation.UnsupportedDataTypeException;
@@ -61,10 +68,10 @@ import static org.keycloak.models.ImpersonationSessionNote.IMPERSONATOR_USERNAME
 @Slf4j
 public class CustomUserResource {
     protected KeycloakSession session;
-    private UserService userService;
-    private AdminPermissionEvaluator auth;
-    private ImportReportService importReportService;
-    private RealmModel realm;
+    private final UserService userService;
+    private final AdminPermissionEvaluator auth;
+    private final ImportReportService importReportService;
+    private final RealmModel realm;
 
     public CustomUserResource(KeycloakSession session, AdminPermissionEvaluator auth) {
         this.session = session;
@@ -196,7 +203,7 @@ public class CustomUserResource {
                         .message("Users not found")
                         .build();
             }
-            Response.ResponseBuilder response = Response.ok((Object) bytes);
+            Response.ResponseBuilder response = Response.ok(bytes);
             response.header("Content-Disposition", "attachment; filename=\"users_info." + downloadUserRequest.getType() + "\"");
             if (downloadUserRequest.getType().equals("xlsx")) {
                 response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
@@ -228,7 +235,6 @@ public class CustomUserResource {
                 .addResult("importUsersReports", importReportService.findImportUsersReportsByRealmId(session.getContext().getRealm().getName()))
                 .build();
     }
-
 
     @POST
     @Path("/uploadImportUsersFile")
@@ -264,7 +270,7 @@ public class CustomUserResource {
         try {
             if (type.equalsIgnoreCase("xlsx")) {
                 byte[] bytes = IOUtils.toByteArray(CustomUserResource.class.getResourceAsStream("/template/template.xlsx")); // TODO check. replaced from .getResourceAsStream(<>).readAllBytes();
-                Response.ResponseBuilder response = Response.ok((Object) bytes);
+                Response.ResponseBuilder response = Response.ok(bytes);
                 response.header("Content-Disposition", "attachment; filename=\"template.xlsx" + "\"");
                 response.header("filename", "template.xlsx");
                 response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
@@ -272,7 +278,7 @@ public class CustomUserResource {
             }
 
             byte[] bytes = IOUtils.toByteArray(CustomUserResource.class.getResourceAsStream("/template/template.csv")); // TODO check. replaced
-            Response.ResponseBuilder response = Response.ok((Object) bytes);
+            Response.ResponseBuilder response = Response.ok(bytes);
             response.header("Content-Disposition", "attachment; filename=\"template.csv" + "\"");
             response.header("filename", "template.csv");
             response.header("Content-Type", MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8");
@@ -293,7 +299,7 @@ public class CustomUserResource {
         try {
             log.info("Start download users");
             FileModel file = userService.downloadUsersByImportReportId(importId);
-            Response.ResponseBuilder response = Response.ok((Object) file.save());
+            Response.ResponseBuilder response = Response.ok(file.save());
             if (file instanceof XlsxImpl) {
                 response.header("Content-Disposition", "attachment; filename=\"import_users_report.xlsx" + "\"");
                 response.header("filename", "import_users_report.xlsx");
@@ -416,4 +422,59 @@ public class CustomUserResource {
 
         return users;
     }
+
+
+    @Path("credential/reset-with-send-login")
+    @POST
+    public Response sendLoginAndResetPassword(List<String> ids) {
+        KeycloakContext context = session.getContext();
+        AdminEventBuilder eventBuilder = new AdminEventBuilder(context.getRealm(), auth.adminAuth(), session, context.getConnection());
+        eventBuilder.resource(ResourceType.USER);
+        UserProvider userProvider = session.users();
+
+        if (ids != null) {
+            ids.forEach(id -> {
+                UserModel user = userProvider.getUserById(id, realm);
+                if (user != null) {
+                    UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
+                    rep.getRequiredActions().add(UserEntityRepresentation.SEND_LOGIN_AND_RESET_PASSWORD);
+                    eventBuilder.operation(OperationType.ACTION)
+                            .resourcePath(session.getContext().getUri())
+                            .representation(rep)
+                            .realm(realm)
+                            .success();
+                }
+            });
+        }
+        return JsonResponse.success()
+                .httpStatus(Response.Status.NO_CONTENT)
+                .build();
+    }
+
+    @Path("/send/login")
+    @POST
+    public Response sendLogin(List<String> ids) {
+        KeycloakContext context = session.getContext();
+        AdminEventBuilder eventBuilder = new AdminEventBuilder(context.getRealm(), auth.adminAuth(), session, context.getConnection());
+        UserProvider userProvider = session.users();
+        eventBuilder.resource(ResourceType.USER);
+        if (ids != null) {
+            ids.forEach(id -> {
+                UserModel user = userProvider.getUserById(id, realm);
+                if (user != null) {
+                    UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
+                    rep.getRequiredActions().add(UserEntityRepresentation.SEND_LOGIN);
+                    eventBuilder.operation(OperationType.ACTION)
+                            .resourcePath(session.getContext().getUri())
+                            .representation(rep)
+                            .realm(realm)
+                            .success();
+                }
+            });
+        }
+        return JsonResponse.success()
+                .httpStatus(Response.Status.NO_CONTENT)
+                .build();
+    }
+
 }
