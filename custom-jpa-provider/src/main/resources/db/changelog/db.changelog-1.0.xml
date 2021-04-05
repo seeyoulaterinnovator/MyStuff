@@ -995,4 +995,34 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="60_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not> <tableExists tableName="PERSONAL_ACCOUNT_POST" /> </not>
+        </preConditions>
+        <createTable tableName="PERSONAL_ACCOUNT_POST">
+            <column name="post_id" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="61_p" author="plyusnin-da">
+        <preConditions onFail="MARK_RAN">
+            <not> <tableExists tableName="PERSONAL_ACCOUNT" /> </not>
+        </preConditions>
+        <createTable tableName="PERSONAL_ACCOUNT">
+            <column name="uuid" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="post_id" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="FK_PERSONAL_ACCOUNT_POST" references="PERSONAL_ACCOUNT_POST(post_id)"/>
+            </column>
+            <column name="value" type="varchar(100)"/>
+        </createTable>
+        <sql>
+            create index IDX_PERSONAL_ACCOUNT_POST
+            on PERSONAL_ACCOUNT (post_id);
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
