@@ -2,6 +2,7 @@
     li.role-list {
         list-style-type: none; /* Убираем маркеры */
     }
+
     ul {
         margin-left: 0; /* Отступ слева в браузере IE и Opera */
         padding-left: 0; /* Отступ слева в браузере Firefox, Safari, Chrome */
@@ -27,7 +28,9 @@
                 <th>dmp</th>
                 <th>role</th>
                 <th>system</th>
-                <th data-ng-show="access.manageUsers">{{:: 'actions' | translate}}</th>
+                <th data-ng-show="access.manageUsers && (auth.authz.realm === 'master' || access.editCustomer)">
+                    {{:: 'actions' | translate}}
+                </th>
             </tr>
             </thead>
             <tbody>
@@ -40,14 +43,19 @@
                     <div class="form-horizontal">
                         <div class="form-inline">
                             <ul>
-                                <li ng-repeat="acc in accMap[userPost.id].accounts" class="role-list">
+                                <li class="role-list" ng-repeat="acc in accMap[userPost.id].accounts">
                                     <span>{{acc.value}}</span>
-                                    <button data-ng-click="removePersonalAccount(userPost.id, acc.uuid)" style="color: #6688c9">delete</button>
+                                    <button data-ng-click="removePersonalAccount(userPost.id, acc.uuid)"
+                                            data-ng-hide="!(access.manageUsers && (auth.authz.realm === 'master' || access.editCustomer))"
+                                            style="color: #6688c9">delete
+                                    </button>
                                 </li>
                             </ul>
                         </div>
-                        <div class="form-inline">
-                            <input class="form-control" id="newAcc{{userPost.id}}" ng-model="newAcc[userPost.id].value" type="text"/>
+                        <div class="form-inline"
+                             data-ng-hide="!(access.manageUsers && (auth.authz.realm === 'master' || access.editCustomer))">
+                            <input class="form-control" id="newAcc{{userPost.id}}" ng-model="newAcc[userPost.id].value"
+                                   type="text"/>
                             <button data-ng-click="addPersonalAccount(userPost.id)" style="color: #6688c9">add</button>
                         </div>
                     </div>
@@ -56,35 +64,53 @@
                 <td>{{userPost.tomsId}}</td>
                 <td>{{userPost.dmpId}}</td>
                 <td>
-                    <select name="customerRole" ng-model="userPost.userRole.id" data-ng-show="access.manageUsers">
+                    <select data-ng-show="access.manageUsers && (auth.authz.realm === 'master' || access.editCustomer)"
+                            name="customerRole"
+                            ng-model="userPost.userRole.id">
                         <option ng-repeat="customerRole in customerRoles" ng-value="{{customerRole.id}}">
                             {{customerRole.name}}
                         </option>
                     </select>
-                    <div data-ng-hide="access.manageUsers">{{userPost.userRole.name}}</div>
-                    <button data-ng-show="access.manageUsers" data-ng-click="editUserPost(userPost.id, userPost.userRole.id)" style="color: #6688c9">change</button>
+                    <div data-ng-hide="access.manageUsers && (auth.authz.realm === 'master' || access.editCustomer)">
+                        {{userPost.userRole.name}}
+                    </div>
+                    <button data-ng-click="editUserPost(userPost.id, userPost.userRole.id)"
+                            data-ng-show="access.manageUsers && (auth.authz.realm === 'master' || access.editCustomer)"
+                            style="color: #6688c9">
+                        change
+                    </button>
                 </td>
                 <td>
                     <div class="form-horizontal">
                         <div class="form-inline">
                             <ul>
-                                <li ng-repeat="roleExt in userPost.systemRoles" class="role-list">
+                                <li class="role-list" ng-repeat="roleExt in userPost.systemRoles">
                                     <span>{{roleExt.externalSystem.name}}</span>
-                                    <button data-ng-show="access.manageUsers" data-ng-click="removeSystemRole(userPost.id, roleExt.id)" style="color: #6688c9">delete</button>
+                                    <button data-ng-click="removeSystemRole(userPost.id, roleExt.id)"
+                                            data-ng-show="access.manageUsers && (auth.authz.realm === 'master' || access.editCustomer)"
+                                            style="color: #6688c9">delete
+                                    </button>
                                 </li>
                             </ul>
                         </div>
-                        <div class="form-inline" data-ng-show="access.manageUsers">
+                        <div class="form-inline"
+                             data-ng-show="access.manageUsers && (auth.authz.realm === 'master' || access.editCustomer)">
                             <select ng-model="selectedSystemRole[$index]"
                                     ng-options="y.externalSystem.name for (x, y) in systemRoles"> </select>
-                            <button data-ng-click="addSystemRole(userPost.id, selectedSystemRole[$index].id)" style="color: #6688c9">add</button>
+                            <button data-ng-click="addSystemRole(userPost.id, selectedSystemRole[$index].id)"
+                                    style="color: #6688c9">add
+                            </button>
                         </div>
                     </div>
 
                 </td>
-                <td data-ng-show="access.manageUsers" class="kc-action-cell" data-ng-click="removeUserPost(userPost.id)">{{:: 'delete' | translate}}</td>
+                <td class="kc-action-cell"
+                    data-ng-click="removeUserPost(userPost.id)"
+                    data-ng-show="access.manageUsers && (auth.authz.realm === 'master' || access.editCustomer)">
+                    {{:: 'delete' | translate}}
+                </td>
             </tr>
-            <tr data-ng-show="access.manageUsers">
+            <tr data-ng-show="access.manageUsers && (auth.authz.realm === 'master' || access.editCustomer)">
                 <td></td>
                 <td></td>
                 <td></td>

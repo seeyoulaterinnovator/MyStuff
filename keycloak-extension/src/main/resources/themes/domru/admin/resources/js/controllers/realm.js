@@ -12,6 +12,42 @@ function getAccess(Auth, Current, role) {
 
 function getAccessObject(Auth, Current) {
     return {
+        get editAttributes(){
+            return getAccess(Auth, Current, 'edit-attributes');
+        },
+
+        get editSessions(){
+            return getAccess(Auth, Current, 'edit-sessions');
+        },
+
+        get editRoleMappings(){
+            return getAccess(Auth, Current, 'edit-role-mappings');
+        },
+
+        get editConsents(){
+            return getAccess(Auth, Current, 'edit-consents');
+        },
+
+        get editCredentials(){
+            return getAccess(Auth, Current, 'edit-credentials');
+        },
+
+        get editFederatedIdentity(){
+            return getAccess(Auth, Current, 'edit-federated-identity');
+        },
+
+        get editCustomer(){
+            return getAccess(Auth, Current, 'edit-customer');
+        },
+
+        get editGroups(){
+            return getAccess(Auth, Current, 'edit-groups');
+        },
+
+        get editDetails(){
+            return getAccess(Auth, Current, 'edit-details');
+        },
+
         get createRealm() {
             return Auth.user && Auth.user.createRealm;
         },
@@ -342,11 +378,11 @@ function genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $r
     $scope.realm = angular.copy(realm);
     $scope.serverInfo = serverInfo;
     $scope.registrationAllowed = $scope.realm.registrationAllowed;
-	
+
 	$scope.setRegistrationOnlyInFrame = function(){
 		$scope.registrationOnlyInFrame = $scope.realm.attributes['registrationOnlyInFrame'] == 'true';
 	}
-	
+
 	$scope.setRegistrationOnlyInFrame();
 
     var oldCopy = angular.copy($scope.realm);
@@ -358,7 +394,7 @@ function genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $r
             $scope.changed = true;
         }
     }, true);
-    
+
     $scope.save = function() {
 		$scope.realm.attributes.registrationOnlyInFrame = $scope.registrationOnlyInFrame;
         var realmCopy = angular.copy($scope.realm);
@@ -395,7 +431,7 @@ module.controller('RealmLoginSettingsCtrl', function($scope, Current, Realm, rea
             $scope.realm.duplicateEmailsAllowed = false;
         }
     });
-    
+
     genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $route, Dialog, Notifications, "/realms/" + realm.realm + "/login-settings");
 });
 
@@ -414,9 +450,9 @@ module.controller('RealmThemeCtrl', function($scope, Current, Realm, realm, serv
         'simple_tags' : true,
         'tags' : []
     };
-    
+
     updateSupported();
-    
+
     function localeForTheme(type, name) {
         name = name || 'base';
         for (var i = 0; i < serverInfo.themes[type].length; i++) {
@@ -514,7 +550,7 @@ module.controller('RealmPasswordPolicyCtrl', function($scope, Realm, realm, $htt
                 if (serverInfo.passwordPolicies[j].id == id) {
                     // clone
                     var p = JSON.parse(JSON.stringify(serverInfo.passwordPolicies[j]));
-                    
+
                     p.value = value && value || p.defaultValue;
                     policies.push(p);
                 }
@@ -856,11 +892,11 @@ module.controller('RealmIdentityProviderCtrl', function($scope, $filter, $upload
     $scope.serverInfo = serverInfo;
 
     $scope.allProviders = angular.copy(serverInfo.identityProviders);
-    
+
     $scope.configuredProviders = angular.copy(realm.identityProviders);
 
     removeUsedSocial();
-    
+
     $scope.authFlows = [];
     for (var i=0 ; i<authFlows.length ; i++) {
         if (authFlows[i].providerId == 'basic-flow') {
@@ -874,7 +910,7 @@ module.controller('RealmIdentityProviderCtrl', function($scope, $filter, $upload
     for (var i=0 ; i<$scope.authFlows.length ; i++) {
         $scope.postBrokerAuthFlows.push($scope.authFlows[i]);
     }
-    
+
     if (!$scope.identityProvider.postBrokerLoginFlowAlias) {
         $scope.identityProvider.postBrokerLoginFlowAlias = $scope.postBrokerAuthFlows[0].alias;
     }
@@ -1043,7 +1079,7 @@ module.controller('RealmIdentityProviderCtrl', function($scope, $filter, $upload
             });
         });
     };
-    
+
     // KEYCLOAK-5932: remove social providers that have already been defined
     function removeUsedSocial() {
         var i = $scope.allProviders.length;
@@ -1109,33 +1145,33 @@ module.controller('RealmTokenDetailCtrl', function($scope, Realm, realm, $http, 
 
     var oldCopy = angular.copy($scope.realm);
     $scope.changed = false;
-    
+
     $scope.$watch('realm', function() {
         if (!angular.equals($scope.realm, oldCopy)) {
             $scope.changed = true;
         }
     }, true);
-    
+
     $scope.$watch('actionLifespanId', function () {
         // changedActionLifespanId signals other watchers that we were merely 
         // changing the dropdown and we should not enable 'save' button
         if ($scope.actionTokenAttribute && $scope.actionTokenAttribute.hasOwnProperty('time')) {
             $scope.changedActionLifespanId = true;
         }
-        
+
         $scope.actionTokenAttribute = TimeUnit2.asUnit($scope.realm.attributes['actionTokenGeneratedByUserLifespan.' + $scope.actionLifespanId]);
     }, true);
 
     $scope.$watch('actionTokenAttribute', function () {
         if ($scope.actionLifespanId === null) return;
-        
+
         if ($scope.changedActionLifespanId) {
             $scope.changedActionLifespanId = false;
             return;
         } else {
             $scope.changed = true;
         }
-        
+
         if ($scope.actionTokenAttribute !== null) {
             $scope.realm.attributes['actionTokenGeneratedByUserLifespan.' + $scope.actionLifespanId] = $scope.actionTokenAttribute.toSeconds();
         }
@@ -1166,7 +1202,7 @@ module.controller('RealmTokenDetailCtrl', function($scope, Realm, realm, $http, 
             Notifications.success("The changes have been saved to the realm.");
         });
     };
-    
+
     $scope.resetToDefaultToken = function (actionTokenId) {
         $scope.actionTokenAttribute = {};
         delete $scope.realm.attributes['actionTokenGeneratedByUserLifespan.' + $scope.actionLifespanId];
@@ -1637,15 +1673,15 @@ module.controller('RealmEventsConfigCtrl', function($scope, eventsConfig, RealmE
 
     $scope.eventsConfig.expirationUnit = TimeUnit.autoUnit(eventsConfig.eventsExpiration);
     $scope.eventsConfig.eventsExpiration = TimeUnit.toUnit(eventsConfig.eventsExpiration, $scope.eventsConfig.expirationUnit);
-    
+
     $scope.eventListeners = Object.keys(serverInfo.providers.eventsListener.providers);
-    
+
     $scope.eventsConfigSelectOptions = {
         'multiple': true,
         'simple_tags': true,
         'tags': $scope.eventListeners
     };
-    
+
     $scope.eventSelectOptions = {
         'multiple': true,
         'simple_tags': true,
@@ -1689,7 +1725,7 @@ module.controller('RealmEventsConfigCtrl', function($scope, eventsConfig, RealmE
             });
         });
     };
-    
+
     $scope.clearAdminEvents = function() {
         Dialog.confirmDelete($scope.realm.realm, 'admin-events', function() {
             RealmAdminEvents.remove({ id : $scope.realm.realm }, function() {
@@ -1702,7 +1738,7 @@ module.controller('RealmEventsConfigCtrl', function($scope, eventsConfig, RealmE
 module.controller('RealmEventsCtrl', function($scope, RealmEvents, realm, serverInfo) {
     $scope.realm = realm;
     $scope.page = 0;
-    
+
     $scope.eventSelectOptions = {
         'multiple': true,
         'simple_tags': true,
@@ -1714,7 +1750,7 @@ module.controller('RealmEventsCtrl', function($scope, RealmEvents, realm, server
         max : 5,
         first : 0
     }
-    
+
     $scope.disablePaste = function(e) {
         e.preventDefault();
         return false;
@@ -1729,7 +1765,7 @@ module.controller('RealmEventsCtrl', function($scope, RealmEvents, realm, server
         }
         $scope.events = RealmEvents.query($scope.query);
     }
-    
+
     $scope.reset = function() {
     	$scope.query.first = 0;
     	$scope.query.max = 5;
@@ -1738,10 +1774,10 @@ module.controller('RealmEventsCtrl', function($scope, RealmEvents, realm, server
     	$scope.query.user = '';
     	$scope.query.dateFrom = '';
     	$scope.query.dateTo = '';
-    	
+
     	$scope.update();
     }
-    
+
     $scope.queryUpdate = function() {
         for (var i in $scope.query) {
             if ($scope.query[i] === '') {
@@ -1750,7 +1786,7 @@ module.controller('RealmEventsCtrl', function($scope, RealmEvents, realm, server
         }
         $scope.events = RealmEvents.query($scope.query);
     }
-    
+
     $scope.firstPage = function() {
         $scope.query.first = 0;
         $scope.queryUpdate();
@@ -1793,12 +1829,12 @@ module.controller('RealmAdminEventsCtrl', function($scope, RealmAdminEvents, rea
         'simple_tags': true,
         'tags': serverInfo.enums['resourceType']
     };
-    
+
     $scope.disablePaste = function(e) {
         e.preventDefault();
         return false;
     }
-    
+
     $scope.update = function() {
     	$scope.query.first = 0;
         for (var i in $scope.query) {
@@ -1808,7 +1844,7 @@ module.controller('RealmAdminEventsCtrl', function($scope, RealmAdminEvents, rea
         }
         $scope.events = RealmAdminEvents.query($scope.query);
     };
-    
+
     $scope.reset = function() {
     	$scope.query.first = 0;
     	$scope.query.max = 5;
@@ -1821,10 +1857,10 @@ module.controller('RealmAdminEventsCtrl', function($scope, RealmAdminEvents, rea
     	$scope.query.authIpAddress = '';
     	$scope.query.dateFrom = '';
     	$scope.query.dateTo = '';
-    	
+
     	$scope.update();
     };
-    
+
     $scope.queryUpdate = function() {
         for (var i in $scope.query) {
             if ($scope.query[i] === '') {
@@ -1833,7 +1869,7 @@ module.controller('RealmAdminEventsCtrl', function($scope, RealmAdminEvents, rea
         }
         $scope.events = RealmAdminEvents.query($scope.query);
     }
-    
+
     $scope.firstPage = function() {
         $scope.query.first = 0;
         $scope.queryUpdate();
@@ -1853,7 +1889,7 @@ module.controller('RealmAdminEventsCtrl', function($scope, RealmAdminEvents, rea
     }
 
     $scope.update();
-    
+
     $scope.viewRepresentation = function(event) {
         $modal.open({
             templateUrl: resourceUrl + '/partials/modal/realm-events-admin-representation.html',
@@ -2005,7 +2041,7 @@ module.controller('IdentityProviderMapperCreateCtrl', function($scope, realm, id
     $scope.create = true;
     $scope.mapper = { identityProviderAlias: identityProvider.alias, config: {}};
     $scope.mapperTypes = mapperTypes;
-    
+
     // make first type the default
     $scope.mapperType = mapperTypes[Object.keys(mapperTypes)[0]];
 
@@ -2081,7 +2117,7 @@ module.controller('CreateExecutionFlowCtrl', function($scope, realm, parentFlow,
                                                       Notifications, $location) {
     $scope.realm = realm;
     $scope.formProviders = formProviders;
-    
+
     var defaultFlowType = parentFlow.providerId == 'client-flow' ? 'client-flow' : 'basic-flow';
     $scope.flow = {
         alias: "",
@@ -2110,7 +2146,7 @@ module.controller('CreateExecutionCtrl', function($scope, realm, parentFlow, for
                                                       Notifications, $location) {
     $scope.realm = realm;
     $scope.parentFlow = parentFlow;
-    
+
     if (parentFlow.providerId == 'form-flow') {
         $scope.providers = formActionProviders;
     } else if (parentFlow.providerId == 'client-flow') {
@@ -2146,15 +2182,15 @@ module.controller('AuthenticationFlowsCtrl', function($scope, $route, realm, flo
                                                       $modal, Notifications, CopyDialog, $location) {
     $scope.realm = realm;
     $scope.flows = flows;
-    
+
     if (selectedFlow !== null) {
         LastFlowSelected.alias = selectedFlow;
     }
-    
+
     if (selectedFlow === null && LastFlowSelected.alias !== null) {
         selectedFlow = LastFlowSelected.alias;
     }
-    
+
     if (flows.length > 0) {
         $scope.flow = flows[0];
         if (selectedFlow) {
@@ -2224,7 +2260,7 @@ module.controller('AuthenticationFlowsCtrl', function($scope, $route, realm, flo
             $scope.removeFlow();
         });
     };
-    
+
     $scope.removeFlow = function() {
         console.log('Remove flow:' + $scope.flow.alias);
         if (realm.browserFlow == $scope.flow.alias) {
@@ -2300,7 +2336,7 @@ module.controller('AuthenticationFlowsCtrl', function($scope, $route, realm, flo
                 setupForm();
             });
         });
-        
+
     }
 
     $scope.raisePriority = function(execution) {
@@ -2650,7 +2686,7 @@ module.controller('ClientRegPolicyDetailCtrl', function($scope, realm, clientReg
             $scope.changed = true;
         }
     }, true);
-    
+
     $scope.reset = function() {
         $route.reload();
     };
@@ -2677,7 +2713,7 @@ module.controller('ClientRegPolicyDetailCtrl', function($scope, realm, clientReg
 
 });
 
-module.controller('RealmImportCtrl', function($scope, realm, $route, 
+module.controller('RealmImportCtrl', function($scope, realm, $route,
                                               Notifications, $modal, $resource) {
     $scope.rawContent = {};
     $scope.fileContent = {
@@ -2699,7 +2735,7 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
     $scope.results = {};
     $scope.currentPage = 0;
     var pageSize = 15;
-    
+
     var oldCopy = angular.copy($scope.fileContent);
 
     $scope.importFile = function($fileContent){
@@ -2710,7 +2746,7 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
             Notifications.error('Unable to parse JSON file.');
             return;
         }
-        
+
         $scope.rawContent = angular.copy(parsed);
         if (($scope.rawContent instanceof Array) && ($scope.rawContent.length > 0)) {
             if ($scope.rawContent.length > 1) $scope.isMultiRealm = true;
@@ -2718,7 +2754,7 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
         } else {
             $scope.fileContent = $scope.rawContent;
         }
-        
+
         $scope.importing = true;
         setOnOffSwitchDefaults();
         $scope.results = {};
@@ -2732,23 +2768,23 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
                 ($scope.results.results !== undefined) &&
                 ($scope.results.results.length > 0);
     }
-    
+
     $scope.resultsPage = function() {
         if (!$scope.hasResults()) return {};
         return $scope.results.results.slice(startIndex(), endIndex());
     }
-    
+
     function startIndex() {
         return pageSize * $scope.currentPage;
     }
-    
+
     function endIndex() {
         var length = $scope.results.results.length;
         var endIndex = startIndex() + pageSize;
         if (endIndex > length) endIndex = length;
         return endIndex;
     }
-    
+
     function setOnOffSwitchDefaults() {
         $scope.importUsers = $scope.hasArray('users');
         $scope.importGroups = $scope.hasArray('groups');
@@ -2757,19 +2793,19 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
         $scope.importRealmRoles = $scope.hasRealmRoles();
         $scope.importClientRoles = $scope.hasClientRoles();
     }
-    
+
     $scope.setFirstPage = function() {
         $scope.currentPage = 0;
     }
-    
+
     $scope.setNextPage = function() {
         $scope.currentPage++;
     }
-    
+
     $scope.setPreviousPage = function() {
         $scope.currentPage--;
     }
-    
+
     $scope.hasNext = function() {
         if (!$scope.hasResults()) return false;
         var length = $scope.results.results.length;
@@ -2778,12 +2814,12 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
         //console.log('endIndex=' + endIndex);
         return length > endIndex;
     }
-    
+
     $scope.hasPrevious = function() {
         if (!$scope.hasResults()) return false;
         return $scope.currentPage > 0;
     }
-    
+
     $scope.viewImportDetails = function() {
         $modal.open({
             templateUrl: resourceUrl + '/partials/modal/view-object.html',
@@ -2795,43 +2831,43 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
             }
         })
     };
-    
+
     $scope.hasArray = function(section) {
         return ($scope.fileContent !== 'undefined') &&
                ($scope.fileContent.hasOwnProperty(section)) &&
                ($scope.fileContent[section] instanceof Array) &&
                ($scope.fileContent[section].length > 0);
     }
-    
+
     $scope.hasRealmRoles = function() {
         return $scope.hasRoles() &&
                ($scope.fileContent.roles.hasOwnProperty('realm')) &&
                ($scope.fileContent.roles.realm instanceof Array) &&
                ($scope.fileContent.roles.realm.length > 0);
     }
-    
+
     $scope.hasRoles = function() {
         return ($scope.fileContent !== 'undefined') &&
                ($scope.fileContent.hasOwnProperty('roles')) &&
                ($scope.fileContent.roles !== 'undefined');
     }
-    
+
     $scope.hasClientRoles = function() {
         return $scope.hasRoles() &&
                ($scope.fileContent.roles.hasOwnProperty('client')) &&
                (Object.keys($scope.fileContent.roles.client).length > 0);
     }
-    
+
     $scope.itemCount = function(section) {
         if (!$scope.importing) return 0;
         if ($scope.hasRealmRoles() && (section === 'roles.realm')) return $scope.fileContent.roles.realm.length;
         if ($scope.hasClientRoles() && (section === 'roles.client')) return clientRolesCount($scope.fileContent.roles.client);
-        
+
         if (!$scope.fileContent.hasOwnProperty(section)) return 0;
-        
+
         return $scope.fileContent[section].length;
     }
-    
+
     clientRolesCount = function(clientRoles) {
         var total = 0;
         for (var clientName in clientRoles) {
@@ -2839,7 +2875,7 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
         }
         return total;
     }
-    
+
     $scope.hasResources = function() {
         return ($scope.importUsers && $scope.hasArray('users')) ||
                ($scope.importGroups && $scope.hasArray('groups')) ||
@@ -2848,18 +2884,18 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
                ($scope.importRealmRoles && $scope.hasRealmRoles()) ||
                ($scope.importClientRoles && $scope.hasClientRoles());
     }
-    
+
     $scope.nothingToImport = function() {
         Notifications.error('No resources specified to import.');
     }
-    
+
     $scope.$watch('fileContent', function() {
         if (!angular.equals($scope.fileContent, oldCopy)) {
             $scope.changed = true;
         }
         setOnOffSwitchDefaults();
     }, true);
-    
+
     $scope.successMessage = function() {
         var message = $scope.results.added + ' records added. ';
         if ($scope.ifResourceExists === 'SKIP') {
@@ -2870,7 +2906,7 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
         }
         return message;
     }
-    
+
     $scope.save = function() {
         var json = angular.copy($scope.fileContent);
         json.ifResourceExists = $scope.ifResourceExists;
@@ -2878,12 +2914,12 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
         if (!$scope.importGroups) delete json.groups;
         if (!$scope.importIdentityProviders) delete json.identityProviders;
         if (!$scope.importClients) delete json.clients;
-        
+
         if (json.hasOwnProperty('roles')) {
             if (!$scope.importRealmRoles) delete json.roles.realm;
             if (!$scope.importClientRoles) delete json.roles.client;
         }
-        
+
         var importFile = $resource(authUrl + '/admin/realms/' + realm.realm + '/partialImport');
         $scope.results = importFile.save(json, function() {
             Notifications.success($scope.successMessage());
@@ -2895,7 +2931,7 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
             }
         });
     };
-    
+
     $scope.reset = function() {
         $route.reload();
     }
