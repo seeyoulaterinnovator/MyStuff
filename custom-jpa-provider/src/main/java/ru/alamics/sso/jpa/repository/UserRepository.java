@@ -359,9 +359,10 @@ public class UserRepository {
                         "         UE.FIRST_NAME, " +
                         "         UE.LAST_NAME, " +
                         "         UE.EMAIL, " +
-                        "         null as PHONE, " +
+                        "         UA.VALUE as PHONE, " +
                         "         UE.ENABLED " +
                         "from USER_ENTITY UE \n" +
+                        "left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone' \n" +
                         "WHERE UE.REALM_ID = :realm \n" +
                         "  and (:search is null or :search = '' or MATCH(UE.EMAIL, UE.FIRST_NAME, UE.USERNAME) AGAINST(:search IN BOOLEAN MODE)) \n" +
                         "  and (:searchUser is null or :searchUser = '' or UE.id = :searchUser) \n" +
