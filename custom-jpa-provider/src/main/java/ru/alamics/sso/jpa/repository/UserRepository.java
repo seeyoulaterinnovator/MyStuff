@@ -15,6 +15,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.Tuple;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -474,5 +475,21 @@ public class UserRepository {
         // TODO max limit ?
 
         return " LIMIT " + limit + " OFFSET " + (page - 1) * limit;
+    }
+
+    public List<Tuple> findAccountsByUserIdAndTomsId(String userId, String tomsId) {
+        if (userId == null || tomsId == null) {
+            return Collections.emptyList();
+        }
+        String queryStr = "select PA.value\n" +
+                "from user_post UP\n" +
+                "         join personal_account PA on UP.ID = PA.post_id\n" +
+                "where UP.USER_ID = :userId\n" +
+                "  and UP.TOMS_ID = :tomsId";
+
+        return em.createNativeQuery(queryStr, Tuple.class)
+                .setParameter("userId", userId)
+                .setParameter("tomsId", tomsId)
+                .getResultList();
     }
 }

@@ -1,12 +1,12 @@
 package ru.alamics.sso.user.mapper;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.keycloak.authentication.FormContext;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
 import ru.alamics.sso.jpa.entity.PersonalAccountEntity;
 import ru.alamics.sso.jpa.entity.PersonalAccountPostEntity;
-import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.jpa.model.UserSummaryView;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
@@ -196,7 +196,7 @@ public class UserMapper {
         return userRequest;
     }
 
-    public static ImportResponse toImportUsersReportEntity(ImportUsersReportModel importUserReport, List<ImportUsersDataModel> dataList ) {
+    public static ImportResponse toImportUsersReportEntity(ImportUsersReportModel importUserReport, List<ImportUsersDataModel> dataList) {
         if (importUserReport == null) {
             return null;
         }
@@ -287,5 +287,16 @@ public class UserMapper {
                 .postId(entity.getPostId())
                 .accounts(toPADtoList(entity.getAccounts()))
                 .build();
+    }
+
+    public static List<String> mapTupleValue(List<Tuple> sourceAccounts) {
+        if (CollectionUtils.isEmpty(sourceAccounts)) {
+            return Collections.emptyList();
+        }
+        List<String> result = new LinkedList<>();
+        for (Tuple sourceAccount : sourceAccounts) {
+            result.add(toString(sourceAccount.get("value")));
+        }
+        return result;
     }
 }
