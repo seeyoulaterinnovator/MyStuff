@@ -15,7 +15,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.Tuple;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -241,7 +240,7 @@ public class UserRepository {
                 "         left join EXT_SYSTEM_ROLE ESR on UESR.EXT_SYSTEM_ROLE_ID = ESR.ID\n" +
                 "         left join EXTERNAL_SYSTEM ES on ESR.SYSTEM_ID = ES.ID\n" +
                 "         left join CUSTOMER C on C.ID = UP.TOMS_ID\n" +
-                "         left join personal_account PA on UP.ID = PA.post_id\n" +
+                "         left join PERSONAL_ACCOUNT PA on UP.ID = PA.post_id\n" +
                 "WHERE UE.REALM_ID = :realm\n" +
                 "  AND (:search is null or :search = '' or\n" +
                 "    UE.EMAIL LIKE :search OR\n" +
@@ -252,7 +251,7 @@ public class UserRepository {
                 "  AND (:searchUser is null or :searchUser = '' or UE.ID = :searchUser )\n" +
                 "  AND (:searchToms is null or :searchToms = '' or UP.TOMS_ID = :searchToms)\n" +
                 getIdList(includeOnlyIDs) +
-                "group by UE.ID, UE.USERNAME, UE.FIRST_NAME, UE.LAST_NAME, UE.EMAIL, UA.VALUE, UE.ENABLED, UP.id, UP.TOMS_ID, C.NAME,\n" +
+                "GROUP by UE.ID, UE.USERNAME, UE.FIRST_NAME, UE.LAST_NAME, UE.EMAIL, UA.VALUE, UE.ENABLED, UP.id, UP.TOMS_ID, C.NAME,\n" +
                 "         UP.DMP_ID, UP.ROLE_ID, UPR.NAME, ESR.ID, ESR.NAME, ES.ID, ES.NAME, ES.LABEL" +
                 getSort(sortField, sortAsc) +
                 getLimit(pageNum, pageSize);
