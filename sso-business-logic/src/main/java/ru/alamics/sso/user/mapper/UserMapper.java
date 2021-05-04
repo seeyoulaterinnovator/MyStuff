@@ -295,15 +295,4 @@ public class UserMapper {
                 .accounts(toPADtoList(entity.getAccounts()))
                 .build();
     }
-
-    public static List<String> mapTupleValue(List<Tuple> sourceAccounts) {
-        if (CollectionUtils.isEmpty(sourceAccounts)) {
-            return Collections.emptyList();
-        }
-        List<String> result = new LinkedList<>();
-        for (Tuple sourceAccount : sourceAccounts) {
-            result.add(toString(sourceAccount.get("value")));
-        }
-        return result;
-    }
 }
