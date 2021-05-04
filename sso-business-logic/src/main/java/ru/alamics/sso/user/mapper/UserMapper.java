@@ -54,12 +54,19 @@ public class UserMapper {
                 .dmpId(toString(tuple.get("dmp_id")))
                 .roleId(toString(tuple.get("role_id")))
                 .roleName(toString(tuple.get("role_name")))
+                .account(toStringList(toString(tuple.get("account")), ","))
                 .systemRoleId(toString(tuple.get("system_role_id")))
                 .systemRoleName(toString(tuple.get("system_role")))
                 .systemId(toString(tuple.get("system_id")))
                 .systemName(toString(tuple.get("system_name")))
                 .systemLabel(toString(tuple.get("system_label")))
                 .build();
+    }
+
+    private static List<String> toStringList(String arrayString, String splitRegex) {
+        return arrayString == null || arrayString.isEmpty()
+                ? Collections.emptyList()
+                : Arrays.asList(arrayString.split(splitRegex));
     }
 
     public static List<UserSearchDto> toUserDtoList(List<Tuple> tuples) {

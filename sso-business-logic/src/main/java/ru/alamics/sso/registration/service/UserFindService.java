@@ -72,11 +72,7 @@ public class UserFindService {
             int pageSize,
             List<String> includeOnlyIDs
     ) {
-        List<UserSearchDto> userSearchDtos = UserMapper.toUserDtoList(userRepository.getTupleUsersByParametersWithoutGrouping(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize, includeOnlyIDs));
-        for (UserSearchDto searchDto : userSearchDtos) {
-            searchDto.setAccount(UserMapper.mapTupleValue(userRepository.findAccountsByUserIdAndTomsId(searchDto.getId(), searchDto.getTomsId())));
-        }
-        return userSearchDtos;
+        return UserMapper.toUserDtoList(userRepository.getTupleUsersByParametersWithoutGrouping(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize, includeOnlyIDs));
     }
 
     public List<UserSearch> getUsersByParameters(

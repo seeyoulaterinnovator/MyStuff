@@ -214,25 +214,25 @@ public class UserRepository {
         if (search != null && !search.isEmpty())
             search = "%" + search + "%";
 
-        String queryStr = "select " +
-                "       UE.ID         as user_id,\n" +
-                "       UE.USERNAME   as username,\n" +
-                "       UE.FIRST_NAME as first_name,\n" +
-                "       UE.LAST_NAME  as last_name,\n" +
-                "       UE.EMAIL      as email,\n" +
-                "       UA.VALUE      as phone,\n" +
-                "       UE.ENABLED    as enabled,\n" +
-                "       UP.id         as user_post_id,\n" +
-                "       UP.TOMS_ID    as toms_id,\n" +
-                "       C.NAME        as org,\n" +
-                "       UP.DMP_ID     as dmp_id,\n" +
-                "       UP.ROLE_ID    as role_id,\n" +
-                "       UPR.NAME      as role_name,\n" +
-                "       ESR.ID        as system_role_id,\n" +
-                "       ESR.NAME      as system_role,\n" +
-                "       ES.ID         as system_id,\n" +
-                "       ES.NAME       as system_name,\n" +
-                "       ES.LABEL      as system_label\n " +
+        String queryStr = "select GROUP_CONCAT(PA.VALUE) as account,\n" +
+                "       UE.ID                  as user_id,\n" +
+                "       UE.USERNAME            as username,\n" +
+                "       UE.FIRST_NAME          as first_name,\n" +
+                "       UE.LAST_NAME           as last_name,\n" +
+                "       UE.EMAIL               as email,\n" +
+                "       UA.VALUE               as phone,\n" +
+                "       UE.ENABLED             as enabled,\n" +
+                "       UP.id                  as user_post_id,\n" +
+                "       UP.TOMS_ID             as toms_id,\n" +
+                "       C.NAME                 as org,\n" +
+                "       UP.DMP_ID              as dmp_id,\n" +
+                "       UP.ROLE_ID             as role_id,\n" +
+                "       UPR.NAME               as role_name,\n" +
+                "       ESR.ID                 as system_role_id,\n" +
+                "       ESR.NAME               as system_role,\n" +
+                "       ES.ID                  as system_id,\n" +
+                "       ES.NAME                as system_name,\n" +
+                "       ES.LABEL               as system_label\n" +
                 "from USER_ENTITY UE\n" +
                 "         left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone'\n" +
                 "         left join USER_POST UP on UE.ID = UP.USER_ID\n" +
@@ -240,7 +240,8 @@ public class UserRepository {
                 "         left join USERPOST_EXT_SYSTEM_ROLE UESR on UP.ID = UESR.USER_POST_ID\n" +
                 "         left join EXT_SYSTEM_ROLE ESR on UESR.EXT_SYSTEM_ROLE_ID = ESR.ID\n" +
                 "         left join EXTERNAL_SYSTEM ES on ESR.SYSTEM_ID = ES.ID\n" +
-                "         left join CUSTOMER C on C.ID = UP.TOMS_ID \n" +
+                "         left join CUSTOMER C on C.ID = UP.TOMS_ID\n" +
+                "         left join personal_account PA on UP.ID = PA.post_id\n" +
                 "WHERE UE.REALM_ID = :realm\n" +
                 "  AND (:search is null or :search = '' or\n" +
                 "    UE.EMAIL LIKE :search OR\n" +
@@ -251,6 +252,8 @@ public class UserRepository {
                 "  AND (:searchUser is null or :searchUser = '' or UE.ID = :searchUser )\n" +
                 "  AND (:searchToms is null or :searchToms = '' or UP.TOMS_ID = :searchToms)\n" +
                 getIdList(includeOnlyIDs) +
+                "group by UE.ID, UE.USERNAME, UE.FIRST_NAME, UE.LAST_NAME, UE.EMAIL, UA.VALUE, UE.ENABLED, UP.id, UP.TOMS_ID, C.NAME,\n" +
+                "         UP.DMP_ID, UP.ROLE_ID, UPR.NAME, ESR.ID, ESR.NAME, ES.ID, ES.NAME, ES.LABEL" +
                 getSort(sortField, sortAsc) +
                 getLimit(pageNum, pageSize);
 
@@ -475,21 +478,5 @@ public class UserRepository {
         // TODO max limit ?
 
         return " LIMIT " + limit + " OFFSET " + (page - 1) * limit;
-    }
-
-    public List<Tuple> findAccountsByUserIdAndTomsId(String userId, String tomsId) {
-        if (userId == null || tomsId == null) {
-            return Collections.emptyList();
-        }
-        String queryStr = "select PA.value\n" +
-                "from user_post UP\n" +
-                "         join personal_account PA on UP.ID = PA.post_id\n" +
-                "where UP.USER_ID = :userId\n" +
-                "  and UP.TOMS_ID = :tomsId";
-
-        return em.createNativeQuery(queryStr, Tuple.class)
-                .setParameter("userId", userId)
-                .setParameter("tomsId", tomsId)
-                .getResultList();
     }
 }
