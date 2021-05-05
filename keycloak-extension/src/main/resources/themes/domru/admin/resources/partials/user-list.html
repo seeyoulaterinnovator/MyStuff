@@ -83,7 +83,7 @@
                         <button data-ng-click="selectedSendLogin()" class="btn btn-default">Send Login</button>
                         <button data-ng-click="selectedSendLoginAndResetPassword()" class="btn btn-default">Send Login And Reset Password</button>
                     </div>
-                    <div class="pull-right" data-ng-show="access.manageUsers">
+                    <div class="pull-right" data-ng-show="(auth.authz.realm === 'master' || access.viewManageButtons) && access.manageUsers">
                         <button data-ng-click="downloadTemplateCSV()" data-ng-show="access.viewRealm" class="btn btn-default">Download Template CSV</button>
                         <button data-ng-click="downloadTemplateXlsx()" data-ng-show="access.viewRealm" class="btn btn-default">Download Template Excel</button>
 
