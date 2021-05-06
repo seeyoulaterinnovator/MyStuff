@@ -3,9 +3,9 @@ package ru.alamics.sso.user.web;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 @Builder(builderClassName = "UserDtoBuilder", toBuilder = true)
@@ -24,6 +24,7 @@ public class UserSearchDto implements Serializable {
     private String organization;
     private String roleId;
     private String roleName;
+    private List<String> account;
     private String systemRoleId;
     private String systemRoleName;
     private String systemId;

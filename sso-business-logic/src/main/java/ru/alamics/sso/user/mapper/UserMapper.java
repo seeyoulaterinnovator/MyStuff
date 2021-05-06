@@ -1,12 +1,12 @@
 package ru.alamics.sso.user.mapper;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.keycloak.authentication.FormContext;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
 import ru.alamics.sso.jpa.entity.PersonalAccountEntity;
 import ru.alamics.sso.jpa.entity.PersonalAccountPostEntity;
-import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.jpa.model.UserSummaryView;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
@@ -54,12 +54,19 @@ public class UserMapper {
                 .dmpId(toString(tuple.get("dmp_id")))
                 .roleId(toString(tuple.get("role_id")))
                 .roleName(toString(tuple.get("role_name")))
+                .account(toStringList(toString(tuple.get("account")), ","))
                 .systemRoleId(toString(tuple.get("system_role_id")))
                 .systemRoleName(toString(tuple.get("system_role")))
                 .systemId(toString(tuple.get("system_id")))
                 .systemName(toString(tuple.get("system_name")))
                 .systemLabel(toString(tuple.get("system_label")))
                 .build();
+    }
+
+    private static List<String> toStringList(String arrayString, String splitRegex) {
+        return arrayString == null || arrayString.isEmpty()
+                ? Collections.emptyList()
+                : Arrays.asList(arrayString.split(splitRegex));
     }
 
     public static List<UserSearchDto> toUserDtoList(List<Tuple> tuples) {
@@ -196,7 +203,7 @@ public class UserMapper {
         return userRequest;
     }
 
-    public static ImportResponse toImportUsersReportEntity(ImportUsersReportModel importUserReport, List<ImportUsersDataModel> dataList ) {
+    public static ImportResponse toImportUsersReportEntity(ImportUsersReportModel importUserReport, List<ImportUsersDataModel> dataList) {
         if (importUserReport == null) {
             return null;
         }
