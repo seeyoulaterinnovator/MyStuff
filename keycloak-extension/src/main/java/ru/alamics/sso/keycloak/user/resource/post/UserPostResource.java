@@ -51,7 +51,7 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response create(@NotNull @Valid UserPostRequest userPostRequest, HttpHeaders headers) {
-        auth.users().canManage();
+        auth.users().requireManage();
 
         try {
             return JsonResponse.success()
@@ -69,7 +69,7 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response edit(@Valid UserPostEditRequest userPostEditRequest, HttpHeaders headers) {
-        auth.users().canManage();
+        auth.users().requireManage();
 
         try {
             return JsonResponse.success()
@@ -87,7 +87,7 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response delete(@PathParam("id") String id) {
-        auth.users().canManage();
+        auth.users().requireManage();
 
         try {
             cachedUserPostFacade.remove(id);
@@ -186,7 +186,7 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response addSystemRole(@NotNull @Valid ExternalSystemRoleRequest externalSystemRoleRequest) {
-        auth.users().canManage();
+        auth.users().requireManage();
 
         try {
             return JsonResponse.success()
@@ -205,7 +205,7 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response removeSystemRole(@NotNull @Valid ExternalSystemRoleRequest externalSystemRoleRequest) {
-        auth.users().canManage();
+        auth.users().requireManage();
 
         try {
             return JsonResponse.success()
@@ -224,7 +224,7 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response clearCache() {
-        auth.users().canManage();
+        auth.users().requireManage();
 
         cachedUserPostFacade.clearCache();
         return JsonResponse.success()
@@ -237,7 +237,7 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response clearCacheByUserId(@PathParam("userId") String userId) {
-        auth.users().canManage();
+        auth.users().requireManage();
 
         cachedUserPostFacade.clearCacheByUserId(userId);
         return JsonResponse.success()

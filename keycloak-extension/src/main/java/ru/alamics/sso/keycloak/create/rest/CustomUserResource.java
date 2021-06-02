@@ -20,6 +20,7 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.services.ErrorResponse;
+import org.keycloak.services.ForbiddenException;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.resources.account.AccountFormService;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
@@ -67,16 +68,16 @@ import static org.keycloak.models.ImpersonationSessionNote.IMPERSONATOR_USERNAME
 
 @Slf4j
 public class CustomUserResource {
-    protected KeycloakSession session;
     private final UserService userService;
     private final AdminPermissionEvaluator auth;
     private final ImportReportService importReportService;
     private final RealmModel realm;
+    protected KeycloakSession session;
 
     public CustomUserResource(KeycloakSession session, AdminPermissionEvaluator auth) {
         this.session = session;
         this.auth = auth;
-        auth.users().canManage();
+        auth.users().requireManage();
         this.userService = new UserServiceImpl(session, auth.adminAuth());
         try {
             this.importReportService = (ImportReportService) new InitialContext().lookup("java:global/domru-sso/" + ImportReportService.class.getSimpleName());
@@ -344,7 +345,9 @@ public class CustomUserResource {
         session.userCache().clear();
         ProfileHelper.requireFeature(Profile.Feature.IMPERSONATION);
 
-        auth.users().canImpersonate();
+        if (!auth.users().canImpersonate()) {
+            throw new ForbiddenException();
+        }
         UserModel user = session.users().getUserById(id, realm);
         // if same realm logout before impersonation
         RealmModel authenticatedRealm = auth.adminAuth().getRealm();
