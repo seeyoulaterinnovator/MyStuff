@@ -15,6 +15,7 @@ import ru.alamics.sso.jpa.repository.UserRepository;
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.core.MultivaluedMap;
 import java.util.Collections;
 import java.util.HashSet;
@@ -45,29 +46,27 @@ public class UserRole {
         final String selectedPostId = formData.get("postId").get(0);
 
         UserModel user = context.getUser();
-        UserEntity userEntity = userRepository.findUser(user.getId());
-
-        deselectAllPostsByUser(userEntity);
-
-        selectPostByUser(userEntity, selectedPostId);
-
+        selectPostByUser(user, selectedPostId);
         user.setAttribute(ATTR_TOMS_NAME, Collections.singletonList(tomsId));
     }
 
-    private void deselectAllPostsByUser(UserEntity user) {
+    private List<UserPostEntity> deselectAllPostsByUser(UserEntity user) {
         List<UserPostEntity> userPosts = postRepository.getAllUserPostByUserId(user.getId());
 
         userPosts.forEach(post -> post.setSelected(false));
 
         unbindAllRolesToUser(user);
+        return userPosts;
     }
 
-    private void selectPostByUser(UserEntity user, String selectedPostId) {
-        UserPostEntity post = postRepository.getUserPost(selectedPostId);
-
-        post.setSelected(true);
-
-        bindRolesToUser(user, post);
+    public void selectPostByUser(UserModel user, String selectedPostId) {
+        UserEntity userEntity = userRepository.findUser(user.getId());
+        UserPostEntity userPostEntities = deselectAllPostsByUser(userEntity).stream()
+                .filter(p -> p.getId().equals(selectedPostId))
+                .findFirst()
+                .orElseThrow(ForbiddenException::new);
+        userPostEntities.setSelected(true);
+        bindRolesToUser(userEntity, userPostEntities);
     }
 
     private void unbindAllRolesToUser(UserEntity user) {
