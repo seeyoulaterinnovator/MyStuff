@@ -4,7 +4,9 @@ import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.UserModel;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
+import ru.alamics.sso.auth.UserRole;
 import ru.alamics.sso.keycloak.facade.CachedUserPostFacade;
 import ru.alamics.sso.keycloak.facade.UserPostFacade;
 import ru.alamics.sso.keycloak.response.JsonResponse;
@@ -25,6 +27,7 @@ import javax.ws.rs.core.Response;
 @Slf4j
 public class UserPostResource {
 
+    private final UserRole userRole;
     private KeycloakSession session;
     private UserPostService userPostService;
     private CachedUserPostFacade cachedUserPostFacade;
@@ -37,6 +40,7 @@ public class UserPostResource {
         this.session = session;
         this.auth = auth;
         try {
+            this.userRole = (UserRole) new InitialContext().lookup("java:global/domru-sso/" + UserRole.class.getSimpleName());
             this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
             this.cachedUserPostFacade = (CachedUserPostFacade) new InitialContext().lookup("java:global/domru-sso/" + CachedUserPostFacade.class.getSimpleName());
             this.userPostFacade = (UserPostFacade) new InitialContext().lookup("java:global/domru-sso/" + UserPostFacade.class.getSimpleName());
@@ -44,6 +48,19 @@ public class UserPostResource {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
         }
+    }
+
+    @PUT
+    @Path("/select")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response select(@QueryParam("userId") String userId, @QueryParam("postId") String postId) {
+        auth.users().requireManage();
+        UserModel userModelById = session.users().getUserById(userId, session.getContext().getRealm());
+        userRole.selectPostByUser(userModelById, postId);
+        return JsonResponse.success()
+                .build();
     }
 
     @POST
