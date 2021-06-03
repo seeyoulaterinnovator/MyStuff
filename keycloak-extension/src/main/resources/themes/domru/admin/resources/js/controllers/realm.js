@@ -12,6 +12,10 @@ function getAccess(Auth, Current, role) {
 
 function getAccessObject(Auth, Current) {
     return {
+        get hideManageButtons(){
+            return getAccess(Auth, Current, 'hide-manage-buttons');
+        },
+
         get editAttributes(){
             return getAccess(Auth, Current, 'edit-attributes');
         },
