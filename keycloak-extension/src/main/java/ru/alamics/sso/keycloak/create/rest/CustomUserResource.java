@@ -345,10 +345,8 @@ public class CustomUserResource {
         session.userCache().clear();
         ProfileHelper.requireFeature(Profile.Feature.IMPERSONATION);
 
-        if (!auth.users().canImpersonate()) {
-            throw new ForbiddenException();
-        }
         UserModel user = session.users().getUserById(id, realm);
+        auth.users().requireImpersonate(user);
         // if same realm logout before impersonation
         RealmModel authenticatedRealm = auth.adminAuth().getRealm();
         boolean sameRealm = false;
