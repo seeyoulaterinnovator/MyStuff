@@ -41,7 +41,7 @@ public class RegistrationCustomProfile extends RegistrationProfile {
         }
         */
         formData.remove(RegistrationPage.FIELD_LAST_NAME);
-        formData.add(RegistrationPage.FIELD_LAST_NAME, "");
+        formData.add(RegistrationPage.FIELD_LAST_NAME, " ");
 
         String email = formData.getFirst(Validation.FIELD_EMAIL);
         boolean emailValid = true;
