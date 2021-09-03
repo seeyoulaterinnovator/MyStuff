@@ -41,7 +41,7 @@
 }
 
 .org-cell {
-  text-overflow: ellipsis;
+  word-break: break-word;
   font-size: 17px;
   line-height: 22px;
   letter-spacing: -0.5px;
