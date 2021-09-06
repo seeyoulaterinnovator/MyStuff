@@ -1,6 +1,8 @@
 package ru.alamics.sso.remote.tbapi;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.ssl.SSLContexts;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
@@ -17,6 +19,7 @@ import ru.alamics.sso.registration.tbapi.model.TbapiResponse;
 import ru.alamics.sso.registration.tbapi.port.TbapiRemoteService;
 
 import javax.ejb.Stateless;
+import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
@@ -38,7 +41,8 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
 
     private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
             .connectTimeout(3, TimeUnit.SECONDS)
-            .readTimeout(10, TimeUnit.SECONDS);
+            .readTimeout(10, TimeUnit.SECONDS)
+            .disableTrustManager();
 
     private static final ResteasyClient client = clientBuilder.build();
 
