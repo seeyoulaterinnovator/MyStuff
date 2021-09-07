@@ -56,7 +56,7 @@
               <div class="mail-container__footer">
                 <p class="mail-text--bold">Благодарим Вас!</p>
                 <p>За выбор услуг «Дом.ru Бизнес» для Вашей компании.</p>
-                <p class="mail-text--copyright mail-text--light-gray">© АО «ЭР-Телеком Холдинг» 2011-2020</p>
+                <p class="mail-text--copyright mail-text--light-gray">© АО «ЭР-Телеком Холдинг» 2011-${.now?string.yyyy}</p>
               </div>
             </td>
           </tr>
