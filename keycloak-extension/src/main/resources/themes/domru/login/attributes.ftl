@@ -54,6 +54,17 @@
         <div class="clearfix"></div>
     </#if>
 
+    <script>
+        var btn = document.getElementById("kc-accept");
+        var table = document.getElementById('post');
+        btn.addEventListener('click',function (){
+            submit()
+        })
+        function submit() {
+            table.style.pointerEvents='none';
+        }
+    </script>
+
     <script> <#-- fuck IE -___________- -->
         if (!Array.from) {
             Array.from = (function () {
