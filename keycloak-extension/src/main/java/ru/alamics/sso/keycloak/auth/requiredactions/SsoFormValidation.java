@@ -14,7 +14,7 @@ public class SsoFormValidation {
 
     public static final String FIELD_EMAIL = "email";
     public static final String FIELD_FIRST_NAME = "firstName";
-    public static final String FIELD_PASSWORD = "password";
+    public static final String FIELD_PHONE = "phone";
 
     // Actually allow same emails like angular. See ValidationTest.testEmailValidation()
     private static final Pattern EMAIL_PATTERN = Pattern.compile("[a-zA-Z0-9!#$%&'*+/=?^_`{|}~.-]+@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*");
@@ -34,6 +34,10 @@ public class SsoFormValidation {
             addError(errors, FIELD_EMAIL, Messages.MISSING_EMAIL);
         } else if (!isEmailValid(formData.getFirst(FIELD_EMAIL))) {
             addError(errors, FIELD_EMAIL, Messages.INVALID_EMAIL);
+        }
+
+        if (isBlank(formData.getFirst(FIELD_PHONE))) {
+            addError(errors, FIELD_PHONE, "missingPhoneNumberMessage");
         }
 
         return errors;

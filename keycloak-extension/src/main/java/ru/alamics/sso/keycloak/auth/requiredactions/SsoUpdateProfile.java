@@ -1,7 +1,9 @@
 package ru.alamics.sso.keycloak.auth.requiredactions;
 
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.RequiredActionContext;
+import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.authentication.requiredactions.UpdateProfile;
 import org.keycloak.events.Details;
 import org.keycloak.events.EventBuilder;
@@ -12,10 +14,20 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.resources.AttributeFormDataProcessor;
+import ru.alamics.sso.client.ClientService;
+import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.keycloak.registration.phone.PhoneCheckProvider;
+import ru.alamics.sso.registration.model.MessageConstants;
+import ru.alamics.sso.registration.service.UserFindService;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import java.util.Collections;
 import java.util.List;
+
+import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
 @Slf4j
 public class SsoUpdateProfile extends UpdateProfile {
@@ -24,14 +36,12 @@ public class SsoUpdateProfile extends UpdateProfile {
 
     @Override
     public void processAction(RequiredActionContext context) {
-        super.processAction(context);
         EventBuilder event = context.getEvent();
         event.event(EventType.UPDATE_PROFILE);
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         UserModel user = context.getUser();
         KeycloakSession session = context.getSession();
         RealmModel realm = context.getRealm();
-
 
         List<FormMessage> errors = SsoFormValidation.validateUpdateProfileForm(realm, formData);
         if (!errors.isEmpty()) {
@@ -43,34 +53,56 @@ public class SsoUpdateProfile extends UpdateProfile {
             return;
         }
 
-        String username = formData.getFirst("email");
+        String email = formData.getFirst("email");
+        String phone = formData.getFirst("phone");
+        String firstName = formData.getFirst("firstName");
 
-        user.setFirstName(formData.getFirst("firstName"));
         user.setLastName(DEFAULT_USER_LASTNAME);
 
-        String email = formData.getFirst("email");
-
+        String oldFirstName = user.getFirstName();
         String oldEmail = user.getEmail();
+
+        List<String> phones = user.getAttribute(ATTR_PHONE_NAME);
+        String oldPhone = null;
+        if (!phones.isEmpty()) {
+            oldPhone = phones.get(0);
+        }
+
         boolean emailChanged = oldEmail != null ? !oldEmail.equals(email) : email != null;
+        boolean phoneChanged = oldPhone != null ? !oldPhone.equals(phone) : phone != null;
+        boolean firstNameChanged = oldFirstName != null ? !oldFirstName.equals(firstName) : firstName != null;
+
+
+        if (firstNameChanged) {
+            user.setFirstName(firstName);
+        }
+
+        final UserFindService userFindService = (UserFindService) Lookup.lookup(UserFindService.class);
+
+        if (userFindService == null) {
+            return;
+        }
+
+        if (phoneChanged) {
+            if (userFindService.getUserByPhone(context.getRealm(), phone) != null) {
+                formData.remove("phone");
+                Response challenge = context.form()
+                        .setError(MessageConstants.PHONE_EXISTS)
+                        .setFormData(formData)
+                        .createResponse(UserModel.RequiredAction.UPDATE_PROFILE);
+                context.challenge(challenge);
+                return;
+            }
+            user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(phone));
+        }
 
         if (emailChanged) {
-            if (!realm.isDuplicateEmailsAllowed()) {
-                UserModel userByEmail = session.users().getUserByEmail(email, realm);
-
-                // check for duplicated email
-                if (userByEmail != null && !userByEmail.getId().equals(user.getId())) {
-                    Response challenge = context.form()
-                            .setError(Messages.EMAIL_EXISTS)
-                            .setFormData(formData)
-                            .createResponse(UserModel.RequiredAction.UPDATE_PROFILE);
-                    context.challenge(challenge);
-                    return;
-                }
-            }
-
-            if (session.users().getUserByUsername(username, realm) != null) {
+            UserModel userByEmail = session.users().getUserByEmail(email, realm);
+            // check for duplicated email
+            if (userByEmail != null && !userByEmail.getId().equals(user.getId())) {
+                formData.remove("email");
                 Response challenge = context.form()
-                        .setError(Messages.USERNAME_EXISTS)
+                        .setError(Messages.EMAIL_EXISTS)
                         .setFormData(formData)
                         .createResponse(UserModel.RequiredAction.UPDATE_PROFILE);
                 context.challenge(challenge);
