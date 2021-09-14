@@ -19,6 +19,7 @@ import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.phone.PhoneCheckProvider;
 import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.service.UserFindService;
+import ru.alamics.sso.util.Util;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -68,9 +69,9 @@ public class SsoUpdateProfile extends UpdateProfile {
             oldPhone = phones.get(0);
         }
 
-        boolean emailChanged = oldEmail != null ? !oldEmail.equals(email) : email != null;
-        boolean phoneChanged = oldPhone != null ? !oldPhone.equals(phone) : phone != null;
-        boolean firstNameChanged = oldFirstName != null ? !oldFirstName.equals(firstName) : firstName != null;
+        boolean emailChanged = !(Util.isEmpty(oldEmail) || oldEmail.equals(email));
+        boolean phoneChanged = !(Util.isEmpty(oldPhone) || oldPhone.equals(phone));
+        boolean firstNameChanged = !(Util.isEmpty(oldFirstName) || oldFirstName.equals(firstName));
 
 
         if (firstNameChanged) {
@@ -80,6 +81,7 @@ public class SsoUpdateProfile extends UpdateProfile {
         final UserFindService userFindService = (UserFindService) Lookup.lookup(UserFindService.class);
 
         if (userFindService == null) {
+            log.error("UserFindService failed lookup");
             return;
         }
 
