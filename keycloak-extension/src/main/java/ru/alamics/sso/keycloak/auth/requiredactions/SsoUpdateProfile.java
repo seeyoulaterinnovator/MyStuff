@@ -14,15 +14,11 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.resources.AttributeFormDataProcessor;
-import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
-import ru.alamics.sso.keycloak.registration.phone.PhoneCheckProvider;
 import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.util.Util;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.util.Collections;
@@ -69,9 +65,9 @@ public class SsoUpdateProfile extends UpdateProfile {
             oldPhone = phones.get(0);
         }
 
-        boolean emailChanged = !(Util.isEmpty(oldEmail) || oldEmail.equals(email));
-        boolean phoneChanged = !(Util.isEmpty(oldPhone) || oldPhone.equals(phone));
-        boolean firstNameChanged = !(Util.isEmpty(oldFirstName) || oldFirstName.equals(firstName));
+        boolean emailChanged = !((Util.isEmpty(oldEmail) && Util.isEmpty(email)) || email.equals(oldEmail));
+        boolean phoneChanged = !((Util.isEmpty(oldPhone) && Util.isEmpty(phone)) || phone.equals(oldPhone));
+        boolean firstNameChanged = !((Util.isEmpty(oldFirstName) && Util.isEmpty(firstName)) || firstName.equals(oldFirstName));
 
 
         if (firstNameChanged) {
