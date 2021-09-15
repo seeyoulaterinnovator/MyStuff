@@ -65,10 +65,9 @@ public class SsoUpdateProfile extends UpdateProfile {
             oldPhone = phones.get(0);
         }
 
-        boolean emailChanged = !((Util.isEmpty(oldEmail) && Util.isEmpty(email)) || email.equals(oldEmail));
-        boolean phoneChanged = !((Util.isEmpty(oldPhone) && Util.isEmpty(phone)) || phone.equals(oldPhone));
-        boolean firstNameChanged = !((Util.isEmpty(oldFirstName) && Util.isEmpty(firstName)) || firstName.equals(oldFirstName));
-
+        boolean emailChanged = !(Util.isEmpty(oldEmail) || oldEmail.equals(email));
+        boolean phoneChanged = !(Util.isEmpty(oldPhone) || oldPhone.equals(phone));
+        boolean firstNameChanged = !(Util.isEmpty(oldFirstName) || oldFirstName.equals(firstName));
 
         if (firstNameChanged) {
             user.setFirstName(firstName);
