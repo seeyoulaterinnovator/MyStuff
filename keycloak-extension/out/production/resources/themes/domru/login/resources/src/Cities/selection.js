@@ -25,7 +25,7 @@ export function selectCity(selectedCity) {
   const selectedDomain = selectedCity.city;
   const selectedCityName = selectedCity.name;
   if (selectedDomain && !selectedCity.bss) {
-      window.location = `https://lkb2b.domru.ru/login?citydomain=${selectedDomain}`;
+      window.location = `https://lkb2b.dom.ru/login?citydomain=${selectedDomain}`;
   }
   setSelectedCity(selectedCityName, selectedDomain);
   setAllSelected();

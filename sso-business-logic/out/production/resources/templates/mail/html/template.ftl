@@ -16,7 +16,7 @@
               <table margin="0" padding="0" cellpadding="0" cellspacing="0" class="mail-container__header" width="100%">
                 <tr>
                   <td style="text-align: left;">
-                    <a href="https://b2b.domru.ru" target="_blank" style="height: 0;">
+                    <a href="https://b2b.dom.ru" target="_blank" style="height: 0;">
                       <img class="logo"
                            alt="ДОМ.РУ Бизнес"
                            height="48"

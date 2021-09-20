@@ -150,7 +150,7 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
             if (riasLogin.getAccess_token() != null) {
                 String redirectTo = properties.getProperty(RIAS_REDIRECT_PROPERTY);
                 if (redirectTo == null)
-                    redirectTo = "https://lkb2b.domru.ru/login";
+                    redirectTo = "https://lkb2b.dom.ru/login";
 
                 if (!Validation.isBlank(city)) {
                     redirectTo += "?citydomain=" + city;

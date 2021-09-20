@@ -39,7 +39,7 @@ export default (function() {
             Cookie.set('city-domain', detectedCity, {sameSite: 'None', secure: document.location.protocol === 'https:'})
             citySvelte.set(cityName.name);
           } else {
-            location.replace(`https://lkb2b.domru.ru/login?citydomain=${detectedCity}`)
+            location.replace(`https://lkb2b.dom.ru/login?citydomain=${detectedCity}`)
           }
         }
       })
