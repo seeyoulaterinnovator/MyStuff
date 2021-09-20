@@ -26,10 +26,8 @@ import ru.alamics.sso.registration.rias.model.RiasLogin;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.util.Util;
 
-import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 
@@ -39,18 +37,19 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
     private final static String RIAS_REDIRECT_PROPERTY = "riasLogin.redirect.url";
     // TODO
     private final static String LKB2B_ID = "lkb2b";
+    private final static String B2B_ID = "b2b";
+    private final static String DMP_ID = "dmp-kc-sit";
     private final static String CONSOLE_ID = "security-admin-console";
 
     private final static String REDIRECT_TO_RIAS_FORM = "redirect-to-rias.ftl";
+    private final static String CHOOSE_REDIRECT_TO_LK_FORM = "redirect-to-lk.ftl";
 
-    private final EntityManager em;
     private final RiasService riasService;
     private final UserFindService userFindService;
 
     private final ApplicationProperties properties;
 
-    public AuthMailPhoneForm(EntityManager em, RiasService riasService, UserFindService userFindService) {
-        this.em = em;
+    public AuthMailPhoneForm(RiasService riasService, UserFindService userFindService) {
         this.riasService = riasService;
         this.userFindService = userFindService;
 
@@ -79,7 +78,6 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
     public void authenticate(AuthenticationFlowContext context) {
         MultivaluedMap<String, String> formData = new MultivaluedMapImpl<>();
         String loginHint = context.getAuthenticationSession().getClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM);
-
         String rememberMeUsername = AuthenticationManager.getRememberMeUsername(context.getRealm(), context.getHttpRequest().getHttpHeaders());
 
         if (loginHint != null || rememberMeUsername != null) {
@@ -126,11 +124,10 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
 
     // -------------
 
-    private boolean checkAuthRias(AuthenticationFlowContext context) {
+    private boolean checkAuthRias(AuthenticationFlowContext context, String form) {
         log.info("check auth RIAS");
 
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
-
         String username = formData.getFirst(FormConstants.FIELD_USERNAME);
         String password = formData.getFirst(FormConstants.FIELD_PASSWORD);
         String city = formData.getFirst(FormConstants.FIELD_CITY);
@@ -151,22 +148,6 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
         if (riasLogin != null) {
 
             if (riasLogin.getAccess_token() != null) {
-
-                /*
-                var uriLoc = UriBuilder.fromPath("https://master.b2b-lk.web.t2.ertelecom.ru/login"); //"https://lkb2b.domru.ru/login");
-
-                if (!Validation.isBlank(city)) {
-                    uriLoc.queryParam("citydomain", city);
-                }
-
-                Response response = Response.seeOther(uriLoc.build())
-                        .header("btoken", riasLogin.getAccess_token())
-                        .build();
-
-                log.debug("Redirecting to {}", uriLoc.build());
-                context.forceChallenge(response);
-                */
-
                 String redirectTo = properties.getProperty(RIAS_REDIRECT_PROPERTY);
                 if (redirectTo == null)
                     redirectTo = "https://lkb2b.domru.ru/login";
@@ -181,7 +162,7 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
                 Response challenge = context.form()
                         .setAttribute("redirectTo", redirectTo)
                         .setAttribute("redirectHeader", redirectHeader)
-                        .createForm(REDIRECT_TO_RIAS_FORM);
+                        .createForm(form);
 
                 context.challenge(challenge);
 
@@ -223,12 +204,20 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
                 log.info(user.getId());
             }
             if (user == null) {
-
                 ClientModel cm = context.getAuthenticationSession().getClient();
-
                 log.info("find user by rias: " + cm.getClientId());
-
-                if (cm != null && (LKB2B_ID.equals(cm.getClientId()) || CONSOLE_ID.equals(cm.getClientId())) && checkAuthRias(context)) {
+                if (Util.isFrame(context.getSession()) && (B2B_ID.equals(cm.getClientId()) || DMP_ID.equals(cm.getClientId()))) {
+                    String crutch = context.getHttpRequest().getDecodedFormParameters().getFirst(FormConstants.CRUTCH);
+                    if (Util.isEmpty(crutch) || !crutch.equals("TRUE")) {
+                        context.form().setAttribute("crutch", "TRUE");
+                        context.challenge(context.form().createLogin());
+                    } else if (!checkAuthRias(context, CHOOSE_REDIRECT_TO_LK_FORM)) {
+                        context.getEvent().error(Errors.USER_NOT_FOUND);
+                        context.failureChallenge(AuthenticationFlowError.INVALID_USER, challenge(context, Messages.INVALID_USER));
+                    }
+                    return false;
+                }
+                if ((LKB2B_ID.equals(cm.getClientId()) || CONSOLE_ID.equals(cm.getClientId())) && checkAuthRias(context, REDIRECT_TO_RIAS_FORM)) {
                     return false;
                 }
             }

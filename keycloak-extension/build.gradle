@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
 
-    implementation (
+    implementation(
             project(':sso-business-logic'),
             project(':tbapi-remote-service'),
     )
@@ -23,13 +23,13 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.jboss.resteasy/resteasy-jaxrs
     implementation group: 'org.jboss.resteasy', name: 'resteasy-jaxrs', version: '3.9.0.Final'
-
+    implementation 'org.jboss.resteasy:resteasy-jackson2-provider:3.6.3.Final'
     // https://mvnrepository.com/artifact/javax.ejb/ejb-api
 //    providedCompile group: 'javax.ejb', name: 'ejb-api', version: '3.0'
 
-    providedCompile  group: 'org.apache.xmlbeans', name: 'xmlbeans', version: '3.0.0'
-    providedCompile  group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.60'
-    providedCompile  group: 'org.bouncycastle', name: 'bcmail-jdk15on', version: '1.60'
+    providedCompile group: 'org.apache.xmlbeans', name: 'xmlbeans', version: '3.0.0'
+    providedCompile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.60'
+    providedCompile group: 'org.bouncycastle', name: 'bcmail-jdk15on', version: '1.60'
 
     // https://mvnrepository.com/artifact/com.google.guava/guava
     compile group: 'com.google.guava', name: 'guava', version: '28.2-jre'
@@ -39,7 +39,7 @@ dependencies {
 war {
     manifest {
         attributes(
-                'Dependencies':'org.infinispan'
+                'Dependencies': 'org.infinispan'
         )
     }
 }

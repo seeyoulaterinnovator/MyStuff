@@ -1,6 +1,6 @@
 <script>
-  import { city, status, showModal } from './stores.js';
-  import { STATUS } from './constants.js';
+  import {city, showModal, status} from './stores.js';
+  import {STATUS} from './constants.js';
 
   function handleClick() {
     if ($status === STATUS.CONFIRMED) {
@@ -11,15 +11,16 @@
 </script>
 
 <button
-  on:click={handleClick}
   class="flex focus:outline-none h-6 items-center"
+  id="show-cities"
+  on:click={handleClick}
   title="Выбор города">
   <svg
     class="h-8 w-auto mr-1 outline-none city-icon"
-    width="16"
+    fill="none"
     height="16"
     viewBox="0 0 16 16"
-    fill="none"
+    width="16"
     xmlns="http://www.w3.org/2000/svg">
     <g opacity="0.5">
       <path
@@ -30,8 +31,8 @@
         12.6367C6.90804 12.341 6.37717 11.8964 5.86829 11.331C4.83881 10.1872 4
         8.66549 4 7C4 4.79086 5.79086 3 8 3C10.2091 3 12 4.79086 12 7Z"
         stroke="black"
-        stroke-width="2" />
-      <circle cx="8" cy="7" r="1" fill="black" />
+        stroke-width="2"/>
+      <circle cx="8" cy="7" fill="black" r="1"/>
     </g>
   </svg>
   <span class="border-dashed border-b border-main-600 h-6 leading-normal">

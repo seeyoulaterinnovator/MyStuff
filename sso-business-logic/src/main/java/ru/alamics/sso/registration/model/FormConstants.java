@@ -14,4 +14,6 @@ public class FormConstants {
 
     public static final String FIELD_ORG_NAME = "orgName";
     public static final String FIELD_CITY = "city";
+
+    public static final String CRUTCH = "withCity";
 }
