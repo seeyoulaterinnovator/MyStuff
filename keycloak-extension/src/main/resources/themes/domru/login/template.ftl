@@ -124,7 +124,7 @@
             var x = 0;
             var intervalID = setInterval(function () {
                 if (document.getElementById('show-cities') != null) {
-                    <#if crutch?has_content && crutch == "TRUE">
+                    <#if withCity?has_content && withCity == "TRUE">
                     document.getElementById('show-cities').click()
                     document.getElementById('close-cities').style.display = 'none';
                     document.getElementById('cities-header-logo').style.display = 'none';

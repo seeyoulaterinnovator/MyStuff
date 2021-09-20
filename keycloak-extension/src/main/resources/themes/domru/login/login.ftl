@@ -17,7 +17,7 @@
                   onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
                 <div class="field field__container field--required mb-3 sm:mb-4 md:w-full">
                     <input class="hidden w-0 h-0" id="domain-login" name="city">
-                    <#if crutch?has_content && crutch == "TRUE">
+                    <#if withCity?has_content && withCity == "TRUE">
                         <input class="hidden w-0 h-0" name="withCity" value="TRUE">
                     </#if>
                     <#if usernameEditDisabled??>
