@@ -6,27 +6,53 @@ import { isEmpty } from './helpers';
 import VALIDATION_RULES from '../constants/validationRules.js';
 
 export default (function() {
+
   const formElement = document.getElementById('kc-update-profile-form');
   console.log(111);
   if (!formElement) return;
+
+  let wrongEmail = document.querySelector('.bad_email');
+  let wrongPhone = document.querySelector('.bad_phone');
+  const firstName = document.getElementById('firstName');
+  const emailField = document.getElementById('email');
+  const phoneField = document.getElementById('phone');
 
   // Маска для поля ввода телефона
   const phoneMask = IMask(document.getElementById('phone'), {
     mask: '+{7} (000) 000-00-00',
   });
 
+  // Убираем красные рамки инпутов на событии ввода после получения ошибки
+  function cleanBorder() {
+    if (wrongEmail) {
+      wrongEmail.classList.remove('bad_email')
+    }
+    if (wrongPhone) {
+      wrongPhone.classList.remove('bad_phone')
+    }
+    this.style.borderColor = '';
+    this.removeEventListener('input', cleanBorder, false)
+  }
+  if (wrongEmail) {
+    emailField.style.borderColor = '#e31e24';
+    emailField.addEventListener('input', cleanBorder, false)
+  }
+  if (wrongPhone) {
+    phoneField.style.borderColor = '#e31e24';
+    phoneField.addEventListener('input', cleanBorder, false)
+  }
+
   // Создаем объект формы с помощью final-form
   const registered = {};
   const form = createForm({
     onSubmit: () => {},
     initialValues: {
-      orgName: '',
-      phone: '',
-      firstName: document.getElementById('firstName') && document.getElementById('firstName').value || '',
-      email: document.getElementById('email') && document.getElementById('email').value || '',
+      firstName: firstName && firstName.value || '',
+      email: emailField && emailField.value || '',
+      phone: phoneField && phoneField.value || '',
     },
     validate,
-    validateOnBlur: true,
+    validateOnBlur: false,
   });
 
   // Валидация полей
@@ -59,6 +85,13 @@ export default (function() {
     .forEach(input => {
     registerField(input);
     });
+
+  // Отправляем на сервер значение телефона без маски
+  // Нужно так делать на каждой форме, где есть imask
+  formElement.addEventListener('submit', () => {
+    phoneField.value = phoneMask.unmaskedValue;
+    return true;
+  });
 
   // Делаем то же и для капчи, которая загружается после всех остальных скриптов
   function onloadRecaptchaCallback() {
