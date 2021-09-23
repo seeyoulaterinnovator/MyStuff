@@ -386,7 +386,11 @@ function genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $r
 	$scope.setRegistrationOnlyInFrame = function(){
 		$scope.registrationOnlyInFrame = $scope.realm.attributes['registrationOnlyInFrame'] == 'true';
 	}
+	$scope.setCheckInRiasIfNotFound = function(){
+		$scope.checkInRiasIfNotFound = $scope.realm.attributes['checkInRiasIfNotFound'] == 'true';
+	}
 
+	$scope.setCheckInRiasIfNotFound();
 	$scope.setRegistrationOnlyInFrame();
 
     var oldCopy = angular.copy($scope.realm);
@@ -401,6 +405,7 @@ function genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $r
 
     $scope.save = function() {
 		$scope.realm.attributes.registrationOnlyInFrame = $scope.registrationOnlyInFrame;
+		$scope.realm.attributes.checkInRiasIfNotFound = $scope.checkInRiasIfNotFound;
         var realmCopy = angular.copy($scope.realm);
         console.log('updating realm...');
         $scope.changed = false;
@@ -415,6 +420,7 @@ function genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $r
     $scope.reset = function() {
         $scope.realm = angular.copy(oldCopy);
         $scope.setRegistrationOnlyInFrame();
+        $scope.setCheckInRiasIfNotFound();
         $scope.changed = false;
     };
 

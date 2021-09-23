@@ -206,7 +206,8 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
             if (user == null) {
                 ClientModel cm = context.getAuthenticationSession().getClient();
                 log.info("find user by rias: " + cm.getClientId());
-                if (Util.isFrame(context.getSession()) && (B2B_ID.equals(cm.getClientId()) || DMP_ID.equals(cm.getClientId()))) {
+                boolean checkInRiasIfNotFound = context.getRealm().getAttribute("checkInRiasIfNotFound", false);
+                if (checkInRiasIfNotFound && Util.isFrame(context.getSession()) && (B2B_ID.equals(cm.getClientId()) || DMP_ID.equals(cm.getClientId()))) {
                     String crutch = context.getHttpRequest().getDecodedFormParameters().getFirst(FormConstants.CRUTCH);
                     if (Util.isEmpty(crutch) || !crutch.equals("TRUE")) {
                         context.form().setAttribute("crutch", "TRUE");
