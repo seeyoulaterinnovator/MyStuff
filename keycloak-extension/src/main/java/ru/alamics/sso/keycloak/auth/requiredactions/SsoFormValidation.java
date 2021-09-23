@@ -38,7 +38,7 @@ public class SsoFormValidation {
 
         if (isBlank(formData.getFirst(FIELD_PHONE))) {
             addError(errors, FIELD_PHONE, "missingPhoneNumberMessage");
-        }  if (!isPhoneValid(formData.getFirst(FIELD_PHONE))) {
+        } else if (!isPhoneValid(formData.getFirst(FIELD_PHONE))) {
             addError(errors, FIELD_PHONE, "invalidPhoneMessage");
         }
 
