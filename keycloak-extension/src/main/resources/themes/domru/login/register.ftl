@@ -48,6 +48,16 @@
                   <span class="flex-basis-auto ml-0 mb-6 sm:text-sm text-xs sm:ml-5 sm:mb-0"><span class="opacity-50">Нажимая кнопку, Вы соглашаетесь </span><a class="reference reference_hoverable" href="https://domru.ru/policy.pdf" target="_blink">с политикой обработки данных</a></span>
                 </div>
         </form>
+
+        <script>
+            var btn = document.getElementById("submit");
+            btn.addEventListener('click',function (){
+                submit()
+            })
+            function submit() {
+                btn.style.pointerEvents='none';
+            }
+        </script>
     <#elseif section = "info" >
         <p>${twoStepAuthType}</p>
 <#--        <p>На указанный номер телефона будет выслано СМС с одноразовым паролем</p>-->

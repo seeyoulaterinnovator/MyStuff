@@ -155,6 +155,13 @@
                 document.getElementById('kc-accept').click();
             });
         });
+        var btn = document.getElementById("kc-accept");
+        btn.addEventListener('click',function (){
+            submit()
+        })
+        function submit() {
+            table.style.pointerEvents='none';
+        }
     </script>
 
 
