@@ -107,8 +107,6 @@ public class CitiesResource {
                     }
                     updated.set(now);
                 }
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
             } finally {
                 lock.unlock();
             }
