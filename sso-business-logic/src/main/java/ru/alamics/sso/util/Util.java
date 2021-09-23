@@ -1,5 +1,6 @@
 package ru.alamics.sso.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.jose.jws.JWSInput;
 import org.keycloak.jose.jws.JWSInputException;
@@ -12,13 +13,45 @@ import org.keycloak.services.managers.RealmManager;
 import org.keycloak.services.validation.Validation;
 
 import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.core.MultivaluedMap;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
+import static ru.alamics.sso.registration.model.UserConstants.HIDDEN_HEADER;
+import static ru.alamics.sso.registration.model.UserConstants.I_FRAME;
+
+@Slf4j
 public class Util {
+
+    public static boolean isFrameByCurrentRequest(KeycloakSession session) {
+        MultivaluedMap<String, String> queryParameters = session.getContext().getUri().getQueryParameters();
+        return queryParameters != null && (queryParameters.get(I_FRAME) != null || queryParameters.get(HIDDEN_HEADER) != null);
+    }
+
+    public static boolean isFrameByReferer(KeycloakSession session) {
+        //Признак того, что вызов формы ведется в iframe
+        String referer = session.getContext().getRequestHeaders().getHeaderString("referer");
+
+        if (referer == null) {
+            return false;
+        }
+
+        try {
+            referer = URLDecoder.decode(referer, StandardCharsets.UTF_8.name());
+        } catch (Exception e) {
+            log.warn("Referer is not decoded={}", referer);
+        }
+
+        return referer.contains(I_FRAME + "=1") || referer.contains(HIDDEN_HEADER + "=true");
+    }
+
+    public static boolean isFrame(KeycloakSession session) {
+        return isFrameByCurrentRequest(session) || isFrameByReferer(session);
+    }
 
     public static boolean isEmpty(String val) {
 
@@ -110,11 +143,10 @@ public class Util {
         StringBuilder sb = new StringBuilder();
         boolean isFirst = true;
 
-        for ( String str : iterable ) {
-            if ( !isFirst ) {
-                sb.append( separator );
-            }
-            else {
+        for (String str : iterable) {
+            if (!isFirst) {
+                sb.append(separator);
+            } else {
                 isFirst = false;
             }
 

@@ -1,9 +1,11 @@
 package ru.alamics.sso.keycloak.cities;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
-import org.keycloak.broker.provider.util.SimpleHttp;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.plugins.providers.StringTextStar;
+import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.cities.model.CityMigration;
 import ru.alamics.sso.keycloak.lookup.Lookup;
@@ -13,24 +15,28 @@ import ru.alamics.sso.property.ApplicationProperties;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
 public class CitiesResource {
+
+    private static final ResteasyClient client = new ResteasyClientBuilder()
+            .connectTimeout(3, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS)
+            .disableTrustManager()
+            .build();
     private static final String CITIES_URL = "cities.url";
-    private static String url;
-
-    private static ReentrantLock lock = new ReentrantLock();
-
     private static final long CACHE_TIME = 60 * 60 * 1000; // 1h
-    private static volatile AtomicLong updated = new AtomicLong(0);
-
+    private static final ReentrantLock lock = new ReentrantLock();
+    private static final AtomicLong updated = new AtomicLong(0);
+    private static String url;
     private static List<CityMigration> cityList = new ArrayList<>();
 
     protected KeycloakSession session;
@@ -41,33 +47,6 @@ public class CitiesResource {
         if (url == null && properties != null) {
             url = properties.getProperty(CITIES_URL);
         }
-    }
-
-    @GET
-    @Path("")
-    @NoCache
-    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-    public Response getCities() {
-
-        long now = System.currentTimeMillis();
-
-        if (cityList.isEmpty() || now > updated.get() + CACHE_TIME) {
-            lock.lock();
-            try {
-                if (cityList.isEmpty() || now > updated.get() + CACHE_TIME) {
-                    cityList = SimpleHttp.doGet(url, session).asJson(new TypeReference<List<CityMigration>>() {
-                    });
-                    updated.set(now);
-                }
-            } catch (IOException e) {
-                log.error("Connect to " + url + " failed");
-            } finally {
-                lock.unlock();
-            }
-        }
-        return JsonResponse.success()
-                .addResult("cities", cityList)
-                .build();
     }
 
     public static List<CityMigration> getCityList() {
@@ -98,5 +77,42 @@ public class CitiesResource {
         }
 
         return null;
+    }
+
+    @GET
+    @Path("")
+    @NoCache
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    public Response getCities() {
+
+        long now = System.currentTimeMillis();
+
+        if (cityList.isEmpty() || now > updated.get() + CACHE_TIME) {
+            lock.lock();
+            try {
+                if (cityList.isEmpty() || now > updated.get() + CACHE_TIME) {
+                    try (Response response = client.target(url)
+                            .register(ResteasyJackson2Provider.class)
+                            .register(StringTextStar.class)
+                            .request()
+                            .accept(MediaType.APPLICATION_JSON)
+                            .get()) {
+                        log.info("response media type {}, status {}", response.getMediaType(), response.getStatus());
+                        if (response.getMediaType().toString().equalsIgnoreCase("text/html")) {
+                            log.error("response " + response.readEntity(String.class));
+                        } else {
+                            cityList = response.readEntity(new GenericType<List<CityMigration>>() {
+                            });
+                        }
+                    }
+                    updated.set(now);
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
+        return JsonResponse.success()
+                .addResult("cities", cityList)
+                .build();
     }
 }

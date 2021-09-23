@@ -25,7 +25,9 @@ import java.util.List;
 public class AuthMailPhoneFormFactory implements AuthenticatorFactory, DisplayTypeAuthenticatorFactory {
 
     public static final String PROVIDER_ID = "auth-mail-phone-password-form";
-
+    public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
+            AuthenticationExecutionModel.Requirement.REQUIRED
+    };
     public static AuthMailPhoneForm SINGLETON = null;
 
     @Override
@@ -48,7 +50,7 @@ public class AuthMailPhoneFormFactory implements AuthenticatorFactory, DisplayTy
         }
 
         log.info("Creating AuthMailPhoneForm");
-        SINGLETON = new AuthMailPhoneForm(em, riasService, userFindService);
+        SINGLETON = new AuthMailPhoneForm(riasService, userFindService);
 
         return SINGLETON;
     }
@@ -89,9 +91,6 @@ public class AuthMailPhoneFormFactory implements AuthenticatorFactory, DisplayTy
     public boolean isConfigurable() {
         return false;
     }
-    public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
-            AuthenticationExecutionModel.Requirement.REQUIRED
-    };
 
     @Override
     public AuthenticationExecutionModel.Requirement[] getRequirementChoices() {

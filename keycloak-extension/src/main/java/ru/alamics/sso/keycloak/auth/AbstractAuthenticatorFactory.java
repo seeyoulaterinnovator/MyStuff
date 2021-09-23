@@ -7,41 +7,41 @@ import org.keycloak.provider.ProviderConfigProperty;
 
 import java.util.List;
 
-public abstract class AuthFactoryBaseClass implements AuthenticatorFactory {
+public abstract class AbstractAuthenticatorFactory implements AuthenticatorFactory {
 
     @Override
-    public boolean isConfigurable () {
+    public boolean isConfigurable() {
         return false;
     }
 
     @Override
-    public boolean isUserSetupAllowed () {
+    public boolean isUserSetupAllowed() {
         return false;
     }
 
     @Override
-    public List<ProviderConfigProperty> getConfigProperties () {
+    public List<ProviderConfigProperty> getConfigProperties() {
         return null;
     }
 
 
     @Override
-    public void init (Config.Scope config) {
+    public void init(Config.Scope config) {
 
     }
 
     @Override
-    public void postInit (KeycloakSessionFactory factory) {
+    public void postInit(KeycloakSessionFactory factory) {
 
     }
 
     @Override
-    public String getReferenceCategory () {
+    public String getReferenceCategory() {
         return null;
     }
 
     @Override
-    public void close () {
+    public void close() {
 
     }
 

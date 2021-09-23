@@ -11,7 +11,7 @@ import org.keycloak.models.utils.FormMessage;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
 import org.keycloak.sessions.AuthenticationSessionModel;
-import ru.alamics.sso.keycloak.auth.AuthBaseClass;
+import ru.alamics.sso.keycloak.auth.AbstractAuthenticator;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.resetcred.factory.ResetFactory;
 import ru.alamics.sso.keycloak.resetcred.factory.ResetFactoryImpl;
@@ -27,15 +27,15 @@ import java.util.Collections;
 
 
 @Slf4j
-public class ResetCredentialEmailOrPhone extends AuthBaseClass {
+public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
 
     private static final String RESET_CREDENTIALS_REDIRECT_URL = "reset.credentials.redirect.url";
     private final static String RESET_CRED_TO_RIAS_FORM = "reset-cred-to-rias.ftl";
 
-    private KeycloakSession session;
-    private RiasApiService riasApiService;
-    private UserFindService userFindService;
-    private ApplicationProperties properties;
+    private final KeycloakSession session;
+    private final RiasApiService riasApiService;
+    private final UserFindService userFindService;
+    private final ApplicationProperties properties;
 
     ResetCredentialEmailOrPhone(KeycloakSession session) {
         this.session = session;

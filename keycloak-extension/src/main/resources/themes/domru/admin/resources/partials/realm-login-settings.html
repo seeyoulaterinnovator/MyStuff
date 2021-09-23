@@ -79,6 +79,13 @@
                 </div>
                 <kc-tooltip>{{:: 'sslRequired.tooltip' | translate}}</kc-tooltip>
             </div>
+            <div class="form-group">
+                <label for="checkInRiasIfNotFound" class="col-md-2 control-label">LogIn to RIAS for b2b & dmp</label>
+                <div class="col-md-6">
+                    <input ng-model="checkInRiasIfNotFound" name="checkInRiasIfNotFound" id="checkInRiasIfNotFound" onoffswitch on-text="{{:: 'onText' | translate}}" off-text="{{:: 'offText' | translate}}" data-ng-click="changed = true"/>
+                </div>
+                <kc-tooltip>Проверит наличие пользователя в RIAS и отобразит страницу с переходом, если его не будет в SSO. Работает в iframe.</kc-tooltip>
+            </div>
         </fieldset>
 
         <div class="form-group" data-ng-show="access.manageRealm">

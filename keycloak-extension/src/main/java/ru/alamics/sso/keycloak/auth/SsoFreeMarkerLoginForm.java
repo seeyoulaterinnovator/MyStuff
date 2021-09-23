@@ -39,8 +39,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -84,7 +82,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             identityProviders = LoginFormsUtil.filterIdentityProviders(identityProviders, session, realm, attributes, formData);
             attributes.put("social", new IdentityProviderBean(realm, session, identityProviders, baseUriWithCodeAndClientId));
 
-            attributes.put("url", new SsoUrlBean(realm, theme, baseUri, this.actionUri, isFrame()));
+            attributes.put("url", new SsoUrlBean(realm, theme, baseUri, this.actionUri, Util.isFrame(session)));
             attributes.put("requiredActionUrl", new RequiredActionUrlFormatterMethod(realm, baseUri));
 
             if (realm.isInternationalizationEnabled()) {
@@ -128,36 +126,9 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     private boolean isHideRegistration() {
         final boolean registrationOnlyInFrame = realm.getAttribute(REGISTRATION_ONLY_IN_FRAME_ATTRIBUTE, false);
 
-        final boolean isIframe = isFrame();
+        final boolean isIframe = Util.isFrame(session);
 
         return registrationOnlyInFrame && !isIframe;
-    }
-
-    private boolean isFrameByCurrentRequest() {
-        MultivaluedMap<String, String> queryParameters = this.session.getContext().getUri().getQueryParameters();
-
-        return queryParameters != null && (queryParameters.get(I_FRAME) != null || queryParameters.get(HIDDEN_HEADER) != null);
-    }
-
-    private boolean isFrameByReferer() {
-        //Признак того, что вызов формы ведется в iframe
-        String referer = session.getContext().getRequestHeaders().getHeaderString("referer");
-
-        if (referer == null) {
-            return false;
-        }
-
-        try {
-            referer = URLDecoder.decode(referer, StandardCharsets.UTF_8.name());
-        } catch (Exception e) {
-            log.warn("Referer is not decoded={}", referer);
-        }
-
-        return referer.contains(I_FRAME + "=1") || referer.contains(HIDDEN_HEADER + "=true");
-    }
-
-    private boolean isFrame() {
-        return isFrameByCurrentRequest() || isFrameByReferer();
     }
 
     private String getRedirectUrl() {
