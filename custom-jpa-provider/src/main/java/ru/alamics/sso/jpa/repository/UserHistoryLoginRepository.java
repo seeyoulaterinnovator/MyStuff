@@ -17,7 +17,6 @@ public class UserHistoryLoginRepository {
     @PersistenceContext
     private EntityManager em;
 
-    // TODO ?
     // TODO индекс на USER_ENTITY
     public void findInactiveUsers(final long absenceTime, final String realmId) {
         LocalDateTime now = LocalDateTime.now();
@@ -59,7 +58,6 @@ public class UserHistoryLoginRepository {
         }
     }
 
-    // TODO ?
     public void findUsersToBlock(final long absenceTimeBlock, final String realmId) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime absence = now.minusSeconds(absenceTimeBlock);
