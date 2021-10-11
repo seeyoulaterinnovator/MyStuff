@@ -17,7 +17,6 @@ public class UserHistoryLoginRepository {
     @PersistenceContext
     private EntityManager em;
 
-    // TODO ?
     // TODO индекс на USER_ENTITY
     public void findInactiveUsers(final long absenceTime, final String realmId) {
         LocalDateTime now = LocalDateTime.now();
@@ -48,7 +47,6 @@ public class UserHistoryLoginRepository {
                         "  and (ulh.date <= :absence or (ulh.date is null and ue.CREATED_TIMESTAMP < :absenceMilis))\n" +
                         "  and ((ab.block <= :absence and ab.block >= aln.notif) or aln.notif is null or aln.notif < ulh.date)\n" +
                         "  and ue.SERVICE_ACCOUNT_CLIENT_LINK is null \n" +
-                        "  and ue.EMAIL not like '%sso.local' and ue.EMAIL not like 'bmt%it-rev.ru' and ue.EMAIL not like 'st%it-rev.ru' \n" + // TODO временно пока в бд сгенерированные юзеры
                         "LIMIT 100"
         )
                 .setParameter("absence", absenceDate)
@@ -57,6 +55,32 @@ public class UserHistoryLoginRepository {
                 .executeUpdate();
         if (countInactivedUsers > 0) {
             log.info("findInactiveUsers: realmId={}, absenceTime={}, countInactiveUsers={}", realmId, absenceTime, countInactivedUsers);
+        }
+    }
+
+    public void findUsersToBlock(final long absenceTimeBlock, final String realmId) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime absence = now.minusSeconds(absenceTimeBlock);
+        long absenceMilis = System.currentTimeMillis() - TimeUnit.MILLISECONDS.convert(absenceTimeBlock, TimeUnit.SECONDS);
+        int countUsersToBlock = em.createNativeQuery(
+                "insert into AUTO_LOCK_NOTIFICATION(id, user_id, sended_at, type, status)\n" +
+                        "select uuid(), ue.ID, null, 'ABSENCE_BLOCKING', 'PREPARE'\n" +
+                        "from USER_ENTITY ue\n" +
+                        "         left join (select ul.*,\n" +
+                        "                           max(ul.LOGINED_AT) date\n" +
+                        "                    from USER_LOGIN_HISTORY ul\n" +
+                        "                    group by ul.USER_ID) ulh on ue.ID = ulh.USER_ID\n" +
+                        "where ue.ENABLED = true\n" +
+                        "  and ue.REALM_ID = :realm_id\n" +
+                        "  and (ulh.date <= :absence or (ulh.date is null and ue.CREATED_TIMESTAMP < :absenceMilis))\n" +
+                        "LIMIT 100"
+        )
+                .setParameter("absence", absence)
+                .setParameter("realm_id", realmId)
+                .setParameter("absenceMilis", absenceMilis)
+                .executeUpdate();
+        if (countUsersToBlock > 0) {
+            log.info("findBlockingUsers: realmId={}, absenceTimeBlock={}, countUsersToBlock={}", realmId, absenceTimeBlock, countUsersToBlock);
         }
     }
 

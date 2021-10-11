@@ -25,7 +25,7 @@ public class LoginHistory {
                 .loginedAt(LocalDateTime.now())
                 .user(user)
                 .build();
-        UserLoginHistory loginHistory = repository.save(history);
+        repository.save(history);
 
     }
 

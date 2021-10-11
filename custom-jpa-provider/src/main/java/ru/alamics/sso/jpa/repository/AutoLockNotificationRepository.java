@@ -11,6 +11,7 @@ import javax.persistence.PersistenceContext;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Stateless
@@ -25,37 +26,6 @@ public class AutoLockNotificationRepository {
             entityManager.persist(autoLockNotification);
         });
         entityManager.flush();
-    }
-
-    // TODO ?
-    public void findUsersToBlock(final long absenceTimeBlock, final String realmId) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime absence = now.minusSeconds(absenceTimeBlock);
-        int countUsersToBlock = entityManager.createNativeQuery(
-                "insert into AUTO_LOCK_NOTIFICATION(id, user_id, sended_at, type, status)\n" +
-                        "select uuid(), ue.ID, null, 'ABSENCE_BLOCKING', 'PREPARE'\n" +
-                        "from USER_ENTITY ue\n" +
-                        "         left join (select ab.*, max(ab.SENDED_AT) block\n" +
-                        "                    from AUTO_LOCK_NOTIFICATION ab\n" +
-                        "                    where ab.TYPE = 'ABSENCE_BLOCKING'\n" +
-                        "                    group by ab.USER_ID) ab on ue.ID = ab.USER_ID\n" +
-                        "         left join (select aln.*, max(aln.SENDED_AT) notif\n" +
-                        "                    from AUTO_LOCK_NOTIFICATION aln\n" +
-                        "                    where aln.TYPE = 'ABSENCE_NOTIFICATION'\n" +
-                        "                      and aln.STATUS = 'SENT'\n" +
-                        "                    group by aln.USER_ID) aln on ue.ID = aln.USER_ID\n" +
-                        "where ue.ENABLED = true\n" +
-                        "  and ue.REALM_ID = :realm_id\n" +
-                        "  and ((aln.notif < :date and ab.block < aln.notif) or (ab.block is null and aln.notif < :date)) \n" +
-                        "  and ue.EMAIL not like '%sso.local' and ue.EMAIL not like 'bmt%it-rev.ru' and ue.EMAIL not like 'st%it-rev.ru' \n" +
-                        "LIMIT 100"
-                )
-                .setParameter("date", absence)
-                .setParameter("realm_id", realmId)
-                .executeUpdate();
-        if (countUsersToBlock > 0) {
-            log.info("findBlockingUsers: realmId={}, absenceTimeBlock={}, countUsersToBlock={}", realmId, absenceTimeBlock, countUsersToBlock);
-        }
     }
 
     public List<AutoLockNotification> findNotifications() {
@@ -75,7 +45,6 @@ public class AutoLockNotificationRepository {
         });
         log.info("{}: update notifications = SENT ", DEBUG_STR);
         entityManager.flush();
-
 
         return ret;
     }

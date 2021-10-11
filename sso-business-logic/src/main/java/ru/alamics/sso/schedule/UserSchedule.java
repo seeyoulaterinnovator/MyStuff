@@ -87,11 +87,10 @@ public class UserSchedule {
         if (!TIMER_NAME.equals(timer.getInfo().toString())) {
             return;
         }
-
         findExpiredPassword();
         for (String realm : SETTINGS_REALM_NAMES_SCHEDULE) {
-            notificationInactiveUsers(realm);
             block(realm);
+            notificationInactiveUsers(realm);
         }
         sendEmails();
     }
@@ -109,10 +108,9 @@ public class UserSchedule {
     private void block(String realm) {
         final String DEBUG_STR = "block";
         log.debug("start:{}", DEBUG_STR);
-        long absenceTimeBlock = settingsService.getSettingsValue(SettingConstants.ABSENCE_BLOCKING_DAYS, realm) -
-                settingsService.getSettingsValue(SettingConstants.ABSENCE_NOTIFICATION_DAYS, realm);
+        long absenceTimeBlock = settingsService.getSettingsValue(SettingConstants.ABSENCE_BLOCKING_DAYS, realm);
         if (absenceTimeBlock > -1) {
-            autoLockNotificationRepository.findUsersToBlock(absenceTimeBlock, realm);
+            userHistoryLoginRepository.findUsersToBlock(absenceTimeBlock, realm);
         }
         log.debug("stop:{}", DEBUG_STR);
     }
