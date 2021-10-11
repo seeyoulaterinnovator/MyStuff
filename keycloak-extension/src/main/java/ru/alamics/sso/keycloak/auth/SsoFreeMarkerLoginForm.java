@@ -49,7 +49,7 @@ import static ru.alamics.sso.registration.model.UserConstants.*;
 
 @Slf4j
 public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
-    private static final String HOME_PAGE = "https://newlkb2b.domru.ru";
+    private static final String HOME_PAGE = "https://newlkb2b.dom.ru";
     private static final String REGISTRATION_ONLY_IN_FRAME_ATTRIBUTE = "registrationOnlyInFrame";
 
     private ClientService clientService = null;

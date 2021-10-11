@@ -45,7 +45,7 @@
                   <div class="flex flex-basis-auto items-center">
                     <button id="submit" class="btn btn-main pass-fields" type="submit">${msg('doRegister')}</button>
                   </div>
-                  <span class="flex-basis-auto ml-0 mb-6 sm:text-sm text-xs sm:ml-5 sm:mb-0"><span class="opacity-50">Нажимая кнопку, Вы соглашаетесь </span><a class="reference reference_hoverable" href="https://domru.ru/policy.pdf" target="_blink">с политикой обработки данных</a></span>
+                  <span class="flex-basis-auto ml-0 mb-6 sm:text-sm text-xs sm:ml-5 sm:mb-0"><span class="opacity-50">Нажимая кнопку, Вы соглашаетесь </span><a class="reference reference_hoverable" href="https://dom.ru/policy.pdf" target="_blink">с политикой обработки данных</a></span>
                 </div>
         </form>
 

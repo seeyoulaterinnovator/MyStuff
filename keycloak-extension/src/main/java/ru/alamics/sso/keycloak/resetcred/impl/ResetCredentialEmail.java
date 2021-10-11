@@ -112,7 +112,7 @@ public class ResetCredentialEmail extends ResetCredential {
         }
     }
 
-    private static final String HOME_PAGE = "https://newlkb2b.domru.ru";
+    private static final String HOME_PAGE = "https://newlkb2b.dom.ru";
 
     private String getRedirectUrl(ClientModel client) {
 

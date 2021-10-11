@@ -12,7 +12,7 @@
                     <input name="btoken" value="${redirectHeader}" type="hidden"/>
                 </div>
                 <div class="flex-basis-auto w-full ml-0 text-sm sm:ml-6">
-                    <a id="cancel" href="https://b2b.domru.ru" class="btn w-full" target="_top">Вернуться на главную</a>
+                    <a id="cancel" href="https://b2b.dom.ru" class="btn w-full" target="_top">Вернуться на главную</a>
                 </div>
             </div>
         </form>
