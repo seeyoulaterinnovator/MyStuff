@@ -73,6 +73,7 @@ public class UserHistoryLoginRepository {
                         "where ue.ENABLED = true\n" +
                         "  and ue.REALM_ID = :realm_id\n" +
                         "  and (ulh.date <= :absence or (ulh.date is null and ue.CREATED_TIMESTAMP < :absenceMilis))\n" +
+                        "  and ue.SERVICE_ACCOUNT_CLIENT_LINK is null \n" +
                         "LIMIT 100"
         )
                 .setParameter("absence", absence)
