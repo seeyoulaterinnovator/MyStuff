@@ -34,30 +34,28 @@
                         class="required" data-ng-show="create">*</span></label>
                 <div class="col-md-6">
                     <!-- Characters >,<,/,\ are forbidden in username -->
-                    <input autofocus class="form-control" data-ng-model="user.username" data-ng-readonly="!editUsername"
-                           id="username"
-                           name="username"
-                           ng-pattern="/^[^\<\>\\\/]*$/" required type="text">
+                    <input autofocus class="form-control" data-ng-model="user.username" data-ng-readonly="!editUsername" id="username" name="username"
+                           ng-pattern="/^[^\<\>\\\/]*$/" required type="text" placeholder="Введите логин">
                 </div>
             </div>
 
 
             <div class="form-group">
-                <label class="col-md-2 control-label" for="email">{{:: 'email' | translate}}</label>
-
+                <label class="col-md-2 control-label" for="email">{{:: 'email' | translate}}<span
+                        class="required" data-ng-show="create">*</span></label>
                 <div class="col-md-6">
-                    <input class="form-control" data-ng-model="user.email" id="email" name="email"
-                           type="email">
+                    <input class="form-control" data-ng-model="user.email" id="email" name="email" required type="email" placeholder="Введите email">
                 </div>
             </div>
+
             <div class="form-group">
-                <label class="col-md-2 control-label" for="firstName">{{:: 'first-name' | translate}}</label>
-
+                <label class="col-md-2 control-label" for="firstName">{{:: 'first-name' | translate}}<span
+                        class="required" data-ng-show="create">*</span></label>
                 <div class="col-md-6">
-                    <input class="form-control" data-ng-model="user.firstName" id="firstName" name="firstName"
-                           type="text">
+                    <input class="form-control" data-ng-model="user.firstName" id="firstName" required name="firstName" type="text" placeholder="Введите ваше ФИО">
                 </div>
             </div>
+
             <div class="form-group">
                 <label class="col-md-2 control-label" for="lastName">{{:: 'last-name' | translate}}</label>
 
@@ -78,6 +76,7 @@
                 </div>
                 <kc-tooltip>{{:: 'user-enabled.tooltip' | translate}}</kc-tooltip>
             </div>
+
             <div class="form-group clearfix block" data-ng-show="realm.bruteForceProtected && !create">
                 <label class="col-md-2 control-label"
                        for="temporarilyDisabled">{{:: 'user-temporarily-locked' | translate}}</label>
@@ -94,6 +93,7 @@
                     </button>
                 </div>
             </div>
+
             <div class="form-group clearfix block" data-ng-show="!create && user.federationLink">
                 <label class="col-md-2 control-label">{{:: 'federation-link' | translate}}</label>
                 <div class="col-md-6">
@@ -101,6 +101,7 @@
                 </div>
                 <kc-tooltip>{{:: 'user-link.tooltip' | translate}}</kc-tooltip>
             </div>
+
             <div class="form-group clearfix block" data-ng-show="!create && user.origin">
                 <label class="col-md-2 control-label">{{:: 'user-origin-link' | translate}}</label>
                 <div class="col-md-6">
