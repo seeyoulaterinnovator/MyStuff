@@ -30,7 +30,6 @@ public class ValidateUsernameOrPhone extends ValidateUsername {
             AuthenticationExecutionModel.Requirement.REQUIRED
     };
 
-    @SneakyThrows
     @Override
     public void authenticate(AuthenticationFlowContext context) {
         String username = retrieveUsername(context);
