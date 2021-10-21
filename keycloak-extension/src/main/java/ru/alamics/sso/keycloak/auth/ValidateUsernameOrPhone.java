@@ -1,26 +1,29 @@
 package ru.alamics.sso.keycloak.auth;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAuthenticator;
-import org.keycloak.authentication.authenticators.directgrant.AbstractDirectGrantAuthenticator;
+import org.keycloak.authentication.authenticators.directgrant.ValidateUsername;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
-import org.keycloak.models.*;
+import org.keycloak.models.AuthenticationExecutionModel;
+import org.keycloak.models.ModelDuplicateException;
+import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
-import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.managers.AuthenticationManager;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.util.Util;
 
 import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import java.util.List;
 
-public class ValidateUsernameOrPhone extends AbstractDirectGrantAuthenticator {
+@Slf4j
+public class ValidateUsernameOrPhone extends ValidateUsername {
 
     public static final String PROVIDER_ID = "direct-grant-validate-mail-or-phone";
     public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
@@ -44,8 +47,13 @@ public class ValidateUsernameOrPhone extends AbstractDirectGrantAuthenticator {
         try {
             if (username.startsWith("+7")) {
                 final String phone = username.replaceAll("\\D", "");
-                InitialContext initialContext = new InitialContext();
-                UserFindService userFindService = (UserFindService) initialContext.lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
+                UserFindService userFindService;
+                try {
+                    userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
+                } catch (NamingException e) {
+                    log.error(e.getMessage(), e);
+                    throw new RuntimeException("Something wrong with context");
+                }
                 user = Util.getUserAdapter(context.getSession(), userFindService.getUserByPhone(context.getRealm(), phone));
             } else {
                 user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(), username);
@@ -86,33 +94,8 @@ public class ValidateUsernameOrPhone extends AbstractDirectGrantAuthenticator {
     }
 
     @Override
-    public boolean requiresUser() {
-        return false;
-    }
-
-    @Override
-    public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user) {
-        return false;
-    }
-
-    @Override
-    public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user) {
-
-    }
-
-    @Override
     public String getDisplayType() {
         return "UsernameOrPhone Validation";
-    }
-
-    @Override
-    public String getReferenceCategory() {
-        return null;
-    }
-
-    @Override
-    public boolean isConfigurable() {
-        return false;
     }
 
     @Override
@@ -121,18 +104,8 @@ public class ValidateUsernameOrPhone extends AbstractDirectGrantAuthenticator {
     }
 
     @Override
-    public boolean isUserSetupAllowed() {
-        return false;
-    }
-
-    @Override
     public String getHelpText() {
         return "Validates the Username Or Phone supplied as a 'username' form parameter in direct grant request";
-    }
-
-    @Override
-    public List<ProviderConfigProperty> getConfigProperties() {
-        return null;
     }
 
     @Override
