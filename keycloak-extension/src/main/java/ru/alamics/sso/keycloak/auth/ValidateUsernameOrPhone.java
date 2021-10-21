@@ -43,9 +43,10 @@ public class ValidateUsernameOrPhone extends AbstractDirectGrantAuthenticator {
         UserModel user = null;
         try {
             if (username.startsWith("+7")) {
+                final String phone = username.replaceAll("\\D", "");
                 InitialContext initialContext = new InitialContext();
                 UserFindService userFindService = (UserFindService) initialContext.lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
-                user = Util.getUserAdapter(context.getSession(), userFindService.getUserByPhone(context.getRealm(), username));
+                user = Util.getUserAdapter(context.getSession(), userFindService.getUserByPhone(context.getRealm(), phone));
             } else {
                 user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(), username);
 
