@@ -110,6 +110,9 @@ public class CustomUserResource {
         if (request.getTomsId() == null || request.getTomsId().isEmpty()) {
             return ErrorResponse.error("Поле TomsId должно быть заполнено", Response.Status.BAD_REQUEST);
         }
+        if (request.getName() == null || request.getName().isEmpty()) {
+            return ErrorResponse.error("Поле name должно быть заполнено", Response.Status.BAD_REQUEST);
+        }
 
         return getUserResponse(request, true);
     }
