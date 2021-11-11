@@ -5,10 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
+import org.keycloak.common.ClientConnection;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.UserSessionModel;
+import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.auth.UserRole;
 import ru.alamics.sso.keycloak.facade.CachedUserPostFacade;
@@ -99,6 +102,12 @@ public class AttributesForm implements Authenticator {
     public void action(AuthenticationFlowContext context) {
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
         roleService.setUserPost(context);
+        KeycloakSession session = context.getSession();
+        RealmModel realm = context.getAuthenticationSession().getRealm();
+        session.userCache().clear();
+        UserSessionModel userSession = session.sessions().getUserSession(realm, context.getAuthenticationSession().getParentSession().getId());
+        ClientConnection clientConnection = session.getContext().getConnection();
+        AuthenticationManager.backchannelLogout(session, realm, userSession, session.getContext().getUri(), clientConnection, session.getContext().getRequestHeaders(), true);
         authSession.setAuthNote(AUTH_FORM_SUCCESS, "0");
         context.success();
     }
