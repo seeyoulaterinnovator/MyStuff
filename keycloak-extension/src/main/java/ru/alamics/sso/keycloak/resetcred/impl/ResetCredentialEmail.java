@@ -74,7 +74,9 @@ public class ResetCredentialEmail extends ResetCredential {
         int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
 
         // We send the secret in the email in a link as a query param.
-        authenticationSession.setRedirectUri(getRedirectUrl(authenticationSession.getClient()));
+        if(authenticationSession.getRedirectUri().isEmpty()){
+            authenticationSession.setRedirectUri(getRedirectUrl(authenticationSession.getClient()));
+        }
         String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
         ResetCredentialsActionToken token = new ResetCredentialsActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, authenticationSession.getClient().getClientId());
 
