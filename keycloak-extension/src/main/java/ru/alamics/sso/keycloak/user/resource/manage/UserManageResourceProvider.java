@@ -2,7 +2,6 @@ package ru.alamics.sso.keycloak.user.resource.manage;
 
 import org.keycloak.models.KeycloakContext;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
@@ -11,15 +10,15 @@ public class UserManageResourceProvider implements BaseResourceProvider<UserMana
 
     private final KeycloakSession session;
 
-    public UserManageResourceProvider (KeycloakSession session) {
+    public UserManageResourceProvider(KeycloakSession session) {
         this.session = session;
     }
 
     @Override
-    public UserManageResource getResource () {
+    public UserManageResource getResource() {
         AdminPermissionEvaluator auth = this.initAuthByWorkingRealm(session);
 
-        auth.users().canManage();
+        auth.users().requireManage();
 
         KeycloakContext context = session.getContext();
 

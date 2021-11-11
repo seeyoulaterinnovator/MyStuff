@@ -24,7 +24,7 @@ import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
 
 public class UserPostRealmResourceProvider implements BaseResourceProvider<UserPostResource> {
 
-    private KeycloakSession session;
+    private final KeycloakSession session;
 
     public UserPostRealmResourceProvider(KeycloakSession session) {
         this.session = session;
@@ -34,7 +34,7 @@ public class UserPostRealmResourceProvider implements BaseResourceProvider<UserP
     public UserPostResource getResource() {
         AdminPermissionEvaluator auth = initAuthByWorkingRealm(this.session);
 
-        auth.users().canView();
+        auth.users().requireView();
 
         return new UserPostResource(session, auth);
     }

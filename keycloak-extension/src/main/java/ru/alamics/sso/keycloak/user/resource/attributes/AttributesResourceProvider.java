@@ -12,21 +12,19 @@ import javax.naming.NamingException;
 
 @Slf4j
 public class AttributesResourceProvider implements BaseResourceProvider<AttributesResource> {
-    private KeycloakSession session;
+    private final KeycloakSession session;
 
-    public AttributesResourceProvider (KeycloakSession session) {
+    public AttributesResourceProvider(KeycloakSession session) {
         this.session = session;
     }
 
     @Override
-    public AttributesResource getResource () {
+    public AttributesResource getResource() {
         AdminPermissionEvaluator auth = initAuthByWorkingRealm(session);
+        auth.users().requireManage();
 
-        auth.users().canManage();
-
-        UserFindService userFindService = null;
         try {
-            userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
+            UserFindService userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
             UserAttributeService service = new UserAttributeService(this.session, userFindService);
             return new AttributesResource(service);
         } catch (NamingException e) {
