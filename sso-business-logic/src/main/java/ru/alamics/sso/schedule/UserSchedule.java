@@ -161,12 +161,18 @@ public class UserSchedule {
                 EmailModel.EmailModelBuilder prepareBlockNotification = prepareBlockNotification(realm.getName(), getClientLink(client));
                 prepareBlockNotification.realmModel(realm)
                         .user(userModel);
-                sender.send(prepareBlockNotification.build());
+                long prepare = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_PREPARE, realm.getName());
+                if (prepare > 0) {
+                    sender.send(prepareBlockNotification.build());
+                }
             } else if (notification.getType() == NotificationType.ABSENCE_BLOCKING) {
                 EmailModel.EmailModelBuilder bockNotification = bockNotification();
                 bockNotification.realmModel(realm)
                         .user(userModel);
-                sender.send(bockNotification.build());
+                long blocked = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_BLOCKED, realm.getName());
+                if (blocked > 0) {
+                    sender.send(bockNotification.build());
+                }
                 user.setEnabled(false);
                 createAdminEvent(OperationType.UPDATE, user, realm);
             } else if (notification.getType() == NotificationType.PASSWORD_EXPIRED) {
