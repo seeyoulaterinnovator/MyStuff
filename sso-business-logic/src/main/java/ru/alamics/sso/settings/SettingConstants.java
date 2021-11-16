@@ -10,6 +10,7 @@ public enum SettingConstants {
 
 
 
+
     BLOCK_NOTIFICATION_OF_PREPARE("block.notification.prepare"),
     BLOCK_NOTIFICATION_OF_BLOCKED("block.notification.blocked"),
     BLOCK_NOTIFICATION_OF_UNLOCKING("block.notification.unlocking");
