@@ -1025,4 +1025,17 @@
         </sql>
     </changeSet>
 
+    <changeSet id="62" author="petrov-ny">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="SETTINGS" />
+            <sqlCheck  expectedResult="0">SELECT count(*) FROM SETTINGS WHERE ID ='396f2cf4-469d-11ec-81d3-0242ac130003'</sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('396f2cf4-469d-11ec-81d3-0242ac130003', 'block.notification.prepare', '175', 'value = -1 block', 'user', 'Block notification of prepare', 'DAYS');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('3e358bfc-469d-11ec-81d3-0242ac130003', 'block.notification.blocked', '-1', 'value = -1 block', 'user', 'Block notification of blocked', 'DAYS');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('411dd874-469d-11ec-81d3-0242ac130003', 'block.notification.unlocking', '175', 'value = -1 block', 'user', 'Block notification of unlocking', 'DAYS');
+
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
