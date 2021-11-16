@@ -1032,7 +1032,7 @@
         </preConditions>
         <sql>
             INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('396f2cf4-469d-11ec-81d3-0242ac130003', 'block.notification.warning', '1', 'Values: -1 = block, 1 = unblock', 'user', 'Block notification of warning', 'DAYS');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('3e358bfc-469d-11ec-81d3-0242ac130003', 'block.notification.blocked', '-1', 'Values: -1 = block, 1 = unblock', 'user', 'Block notification of blocked', 'DAYS');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('3e358bfc-469d-11ec-81d3-0242ac130003', 'block.notification.blocked', '1', 'Values: -1 = block, 1 = unblock', 'user', 'Block notification of blocked', 'DAYS');
             INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('411dd874-469d-11ec-81d3-0242ac130003', 'block.notification.unlocking', '1', 'Values: -1 = block, 1 = unblock', 'user', 'Block notification of unlocking', 'DAYS');
 
         </sql>
