@@ -1025,7 +1025,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="62" author="petrov-ny">
+    <changeSet id="64" author="petrov-ny">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="SETTINGS" />
             <sqlCheck  expectedResult="0">SELECT count(*) FROM SETTINGS WHERE ID ='396f2cf4-469d-11ec-81d3-0242ac130003'</sqlCheck>
