@@ -77,8 +77,8 @@ public class SsoUserUpdateEvent extends SsoEvent {
             attributes.put("userLastName", user.getLastName());
 
             if (userNow.isEnabled()) {
-                long unlocked = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_UNLOCKING, realm.getName());
-                if (unlocked > 0) {
+                long blockValue = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_UNLOCKING, realm.getName());
+                if (blockValue > 0) {
                     this.sendEmail(user, realm, "emailEnabledAccountSubject", "mail-enabled-account.ftl", attributes);
                 }
                 this.recordLoginUser(userId);//При разблокировании юзера, логиним его

@@ -158,19 +158,19 @@ public class UserSchedule {
                 client = clientRepository.findClientById(DEFAULT_CLIENT_ID, realm.getName());
             UserModel userModel = new UserAdapter(null, realm, null, user);
             if (notification.getType() == NotificationType.ABSENCE_NOTIFICATION) {
-                EmailModel.EmailModelBuilder prepareBlockNotification = prepareBlockNotification(realm.getName(), getClientLink(client));
-                prepareBlockNotification.realmModel(realm)
-                        .user(userModel);
-                long prepare = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_PREPARE, realm.getName());
-                if (prepare > 0) {
+                long blockValue = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_WARNING, realm.getName());
+                if (blockValue > 0) {
+                    EmailModel.EmailModelBuilder prepareBlockNotification = prepareBlockNotification(realm.getName(), getClientLink(client));
+                    prepareBlockNotification.realmModel(realm)
+                            .user(userModel);
                     sender.send(prepareBlockNotification.build());
                 }
             } else if (notification.getType() == NotificationType.ABSENCE_BLOCKING) {
-                EmailModel.EmailModelBuilder bockNotification = bockNotification();
-                bockNotification.realmModel(realm)
-                        .user(userModel);
-                long blocked = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_BLOCKED, realm.getName());
-                if (blocked > 0) {
+                long blockValue = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_BLOCKED, realm.getName());
+                if (blockValue > 0) {
+                    EmailModel.EmailModelBuilder bockNotification = bockNotification();
+                    bockNotification.realmModel(realm)
+                            .user(userModel);
                     sender.send(bockNotification.build());
                 }
                 user.setEnabled(false);
