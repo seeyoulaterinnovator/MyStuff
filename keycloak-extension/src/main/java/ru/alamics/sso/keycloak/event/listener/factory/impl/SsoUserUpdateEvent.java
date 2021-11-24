@@ -12,6 +12,8 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
+import ru.alamics.sso.settings.SettingConstants;
+import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.stats.LoginHistory;
 
 import javax.persistence.EntityManager;
@@ -25,8 +27,11 @@ public class SsoUserUpdateEvent extends SsoEvent {
 
     private final AdminEvent event;
 
+    private SettingsService settingsService;
+
     SsoUserUpdateEvent(AdminEvent event, KeycloakSession session) {
         super(session);
+        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
         this.event = event;
     }
 
@@ -72,7 +77,10 @@ public class SsoUserUpdateEvent extends SsoEvent {
             attributes.put("userLastName", user.getLastName());
 
             if (userNow.isEnabled()) {
-                this.sendEmail(user, realm, "emailEnabledAccountSubject", "mail-enabled-account.ftl", attributes);
+                long blockValue = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_UNLOCKING, realm.getName());
+                if (blockValue > 0) {
+                    this.sendEmail(user, realm, "emailEnabledAccountSubject", "mail-enabled-account.ftl", attributes);
+                }
                 this.recordLoginUser(userId);//При разблокировании юзера, логиним его
                 return;
             }
