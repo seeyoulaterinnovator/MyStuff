@@ -73,7 +73,7 @@
    align-items: center;
    text-align: center;
    justify-content: center;
-   box-shadow: -8px 8px 8px rgba(0, 0, 0, 0.05);
+   box-shadow: 0px 0px 0px 1px rgb(255 221 0);
 
 &__icon {
    background-image: url("./images/chat-icon.svg");

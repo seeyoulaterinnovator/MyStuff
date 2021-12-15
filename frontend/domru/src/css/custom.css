@@ -22,15 +22,15 @@
 }
 
 .border-b.hoverable {
-  &:hover {
-    border-bottom-color: transparent;
-  }
+&:hover {
+   border-bottom-color: transparent;
+ }
 }
 
 .text-black-50.hoverable {
-  &:hover {
-     color: rgba(0,0,0,.8);
-  }
+&:hover {
+   color: rgba(0,0,0,.8);
+ }
 }
 
 .border-box {
@@ -71,9 +71,9 @@ input[type="number"] {
   color: black;
   opacity: 0.1;
   transition: 0.2s ease-in-out;
-  &:hover {
-    opacity: 0.5;
-  }
+&:hover {
+   opacity: 0.5;
+ }
 }
 
 .text-no-wrap {
@@ -81,26 +81,15 @@ input[type="number"] {
 }
 
 .reset-password {
-  position: relative;
+  color: #2B539B;
   transition: 0.2s ease-in-out;
-  opacity: 0.5;
   cursor: pointer;
-  &::after {
-    transition: 0.2s ease-in-out;
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    height: 1.4px;
-    width: 100%;
-    @apply .bg-black-50;
-  }
-  &:hover {
-    opacity: 1;
-    &:after {
-       @apply .bg-extra;
-    }
-  }
+&:hover {
+   opacity: 0.5;
+&:after {
+   @apply .bg-extra;
+ }
+}
 }
 
 .footer {

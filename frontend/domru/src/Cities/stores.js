@@ -5,8 +5,7 @@ import { STATUS } from './constants.js';
 
 export const city = writable(
   document.getElementById('cities-button').dataset.city ||
-    Cookie.get('CITY') ||
-    'Ярославль',
+  Cookie.get('CITY') || 'Санкт-Петербург',
 );
 
 export const domain = writable(

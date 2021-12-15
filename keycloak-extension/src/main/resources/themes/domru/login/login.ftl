@@ -11,7 +11,7 @@
             <@blocks.contentHeader mainTitle="${msg('doLogIn')}" secondaryTitle=" " secondaryHref=" " withBorder=true />
         </#if>
     <#elseif section = "form">
-        <p class="pb-3 login-title-text">Если у Вас уже есть учетная запись, Вы можете войти</p>
+        <p class="mb-7">Если у Вас уже есть учетная запись, Вы можете войти</p>
         <#if realm.password>
             <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
                   onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
@@ -21,23 +21,23 @@
                         <input class="hidden w-0 h-0" name="withCity" value="TRUE">
                     </#if>
                     <#if usernameEditDisabled??>
-                        <input name="username" id="username" class="field__input" label="${msg('username')}"
+                        <input name="username" id="username" class="field__input" label="${msg('usernameOrEmailPlaceholder')}"
                                placeholder="${msg('usernameOrEmailPlaceholder')}" value="${(login.username!)}"
                                type="text" disabled/>
                     <#else>
-                        <input name="username" id="username" class="field__input" label="${msg('username')}"
+                        <input name="username" id="username" class="field__input" label="${msg('usernameOrEmailPlaceholder')}"
                                placeholder="${msg('usernameOrEmailPlaceholder')}" value="${(login.username!)}"
                                type="text" autofocus autocomplete="off"/>
                     </#if>
-                    <label class="field__label" for="username">${msg("username")}</label>
+                    <label class="field__label" for="username">${msg("usernameOrEmailPlaceholder")}</label>
                 </div>
 
-                <@components.field class="mb-7 sm:mb-8 md:w-full" fieldName="password" label="${msg('password')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true />
+                <@components.field class="mb-7 sm:mb-8 md:w-full" fieldName="password" label="${msg('passwordPlaceholder')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true />
 
                 <div class="flex justify-between w-full items-center">
                     <button id="submit" class="btn btn-main w-1/2 btn-enter" type="submit">Войти</button>
                     <#if realm.resetPasswordAllowed>
-                        <span class="reset-password text-right">
+                        <span class="reset-password">
                             <a href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a>
                         </span>
                     </#if>
