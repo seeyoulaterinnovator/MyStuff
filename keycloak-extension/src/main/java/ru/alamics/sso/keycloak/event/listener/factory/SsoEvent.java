@@ -66,8 +66,8 @@ public abstract class SsoEvent {
             AuthenticationSessionModel authenticationSession = authenticationSessionManager.createAuthenticationSession(realm, false)
                     .createAuthenticationSession(clientModel);
 
-            int validityInSecs = realm.getActionTokenGeneratedByUserLifespan(ResetCredentialsActionToken.TOKEN_TYPE);
-            int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
+            long timeTokenCreateUser = settingsService.getSettingsValue(SettingConstants.TIME_TOKEN_SET_FIRST_PASS, realm.getName());
+            int absoluteExpirationInSecs = (int) (Time.currentTime() + timeTokenCreateUser);
 
             // We send the secret in the email in a link as a query param.
             String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();

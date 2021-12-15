@@ -1133,5 +1133,13 @@
         </sql>
     </changeSet>
 
+    <changeSet id="72" author="petrov-ny">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('f377d3d6-387d-11ec-8d3d-0242ac130003', 'life.token.loginverify.email', '36', 'Email confirmation token lifetime', 'user', 'Token time to verify-email', 'HOURS');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('f751bada-387d-11ec-8d3d-0242ac130003', 'life.token.reset.pass', '36', 'Password reset token lifetime', 'user', 'Token time to reset password', 'HOURS');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('fce3bbd0-387b-11ec-8d3d-0242ac130003', 'life.token.set.first-pass', '36', 'First password token lifetime', 'user', 'Token time to set first password', 'HOURS');
+        </sql>
+    </changeSet>
+
 
 </databaseChangeLog>

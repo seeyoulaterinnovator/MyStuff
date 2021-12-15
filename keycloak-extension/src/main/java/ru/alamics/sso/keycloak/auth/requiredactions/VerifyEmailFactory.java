@@ -24,7 +24,11 @@ import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.theme.Theme;
 import org.keycloak.theme.beans.LinkExpirationFormatterMethod;
 import ru.alamics.sso.schedule.Translator;
+import ru.alamics.sso.settings.SettingConstants;
+import ru.alamics.sso.settings.SettingsService;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriBuilderException;
@@ -74,19 +78,20 @@ public class VerifyEmailFactory extends VerifyEmail {
         RealmModel realm = session.getContext().getRealm();
         UriInfo uriInfo = session.getContext().getUri();
 
-        int validityInSecs = realm.getActionTokenGeneratedByUserLifespan(VerifyEmailActionToken.TOKEN_TYPE);
-        int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
-
-        String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authSession).getEncodedId();
-        VerifyEmailActionToken token = new VerifyEmailActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, user.getEmail(), authSession.getClient().getClientId());
-        UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
-                authSession.getClient().getClientId(), authSession.getTabId());
-        String link = builder.build(realm.getName()).toString();
-        long expirationInMinutes = TimeUnit.SECONDS.toMinutes(validityInSecs);
-
-        String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(validityInSecs);
-
         try {
+            SettingsService settingsService = (SettingsService) new InitialContext().lookup("java:global/domru-sso/" + SettingsService.class.getSimpleName());
+            int timeTokenVerifyEmail = (int) settingsService.getSettingsValue(SettingConstants.TIME_TOKEN_VERIFY_EMAIL, realm.getName());
+            int absoluteExpirationInSecs = Time.currentTime() + timeTokenVerifyEmail;
+
+            String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authSession).getEncodedId();
+            VerifyEmailActionToken token = new VerifyEmailActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, user.getEmail(), authSession.getClient().getClientId());
+            UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
+                    authSession.getClient().getClientId(), authSession.getTabId());
+            String link = builder.build(realm.getName()).toString();
+            long expirationInMinutes = TimeUnit.SECONDS.toMinutes(timeTokenVerifyEmail);
+
+            String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(timeTokenVerifyEmail);
+
             EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class)
                     .setAuthenticationSession(authSession)
                     .setRealm(realm)
@@ -94,7 +99,7 @@ public class VerifyEmailFactory extends VerifyEmail {
                     .setAttribute("expTime", expirationStrRus);
 
             if (user.isEmailVerified()) {
-                sendAuthorizationEmail(emailTemplateProvider, user, link, validityInSecs, session);
+                sendAuthorizationEmail(emailTemplateProvider, user, link, timeTokenVerifyEmail, session);
             } else {
                 emailTemplateProvider.sendVerifyEmail(link, expirationInMinutes);
             }
@@ -102,6 +107,9 @@ public class VerifyEmailFactory extends VerifyEmail {
         } catch (EmailException e) {
             log.error("Failed to send verification email", e);
             event.error(Errors.EMAIL_SEND_FAILED);
+        } catch (NamingException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Something wrong with context");
         }
 
         return forms.setAttribute("mail", user.getEmail()).createResponse(UserModel.RequiredAction.VERIFY_EMAIL);

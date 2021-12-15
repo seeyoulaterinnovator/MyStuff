@@ -10,6 +10,6 @@
     <#assign email= user.getEmail()>
   </#if>
 
-    ${kcSanitize(msg("passwordResetBodyHtml",link, linkExpiration, email, linkExpirationFormatter(linkExpiration)))?no_esc}
+    ${kcSanitize(msg("passwordResetBodyHtml",link, linkExpiration, email, linkExpirationFormatter(linkExpiration), expTime))?no_esc}
   </#if>
 </@template.layout>

@@ -11,6 +11,10 @@ public enum SettingConstants {
     TIMER_INTERVAL_DURATION_PROPERTY("timerIntervalDurationProperty"),
     DEFAULT_REALM_CLIENT_ID("defaultRealmClient"),
 
+    TIME_TOKEN_VERIFY_EMAIL("life.token.loginverify.email"),
+    TIME_TOKEN_RESET_PASSWORD("life.token.reset.pass"),
+    TIME_TOKEN_SET_FIRST_PASS("life.token.set.first-pass"),
+
     BLOCK_NOTIFICATION_OF_WARNING("block.notification.warning"),
     BLOCK_NOTIFICATION_OF_BLOCKED("block.notification.blocked"),
     BLOCK_NOTIFICATION_OF_UNLOCKING("block.notification.unlocking");

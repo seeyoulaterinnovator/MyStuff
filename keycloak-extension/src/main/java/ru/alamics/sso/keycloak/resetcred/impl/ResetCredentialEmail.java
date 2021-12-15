@@ -25,6 +25,7 @@ import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.resetcred.ResetCredential;
 import ru.alamics.sso.keycloak.resetcred.ResetCredentialEmailOrPhoneFactory;
+import ru.alamics.sso.schedule.Translator;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 
@@ -81,8 +82,8 @@ public class ResetCredentialEmail extends ResetCredential {
         }
 
         RealmModel realm = context.getRealm();
-        int validityInSecs = realm.getActionTokenGeneratedByUserLifespan(ResetCredentialsActionToken.TOKEN_TYPE);
-        int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
+        int timeTokenResetPass = (int) settingsService.getSettingsValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm.getName());
+        int absoluteExpirationInSecs = Time.currentTime() + timeTokenResetPass;
 
         // We send the secret in the email in a link as a query param.
         if (authenticationSession.getRedirectUri().isEmpty()) {
@@ -98,14 +99,14 @@ public class ResetCredentialEmail extends ResetCredential {
                 .build()
                 .toString();
 
-        long expirationInMinutes = TimeUnit.SECONDS.toMinutes(validityInSecs);
-
+        String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
         try {
             EmailTemplateProvider template = context.getSession().getProvider(EmailTemplateProvider.class);
             template.setRealm(realm)
                     .setUser(user)
                     .setAuthenticationSession(authenticationSession)
-                    .sendPasswordReset(link, expirationInMinutes);
+                    .setAttribute("expTime", expirationStrRus)
+                    .sendPasswordReset(link, timeTokenResetPass);
 
             event.clone().event(EventType.SEND_RESET_PASSWORD)
                     .user(user)
@@ -124,7 +125,6 @@ public class ResetCredentialEmail extends ResetCredential {
             context.failure(AuthenticationFlowError.INTERNAL_ERROR, challenge);
         }
     }
-
 
     private String getRedirectUrl(ClientModel client) {
 
