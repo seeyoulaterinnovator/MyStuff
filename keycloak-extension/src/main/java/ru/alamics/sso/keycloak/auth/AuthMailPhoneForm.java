@@ -32,6 +32,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
+import static ru.alamics.sso.settings.SettingConstants.*;
 
 @Slf4j
 public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator implements Authenticator {
@@ -166,6 +167,11 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
                 Response challenge = context.form()
                         .setAttribute("redirectTo", redirectTo)
                         .setAttribute("redirectHeader", redirectHeader)
+                        .setAttribute("loginToB2B",settingsService.getSettingsStringValue(LOGIN_TO_B2B,context.getRealm().getId()))
+                        .setAttribute("enter", settingsService.getSettingsStringValue(ENTER,context.getRealm().getId()))
+                        .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER,context.getRealm().getId()))
+                        .setAttribute("backToMainPage",settingsService.getSettingsStringValue(BACK_TO_MAIN_PAGE,context.getRealm().getId()))
+                        .setAttribute("phoneConst",settingsService.getSettingsStringValue(PHONE_CONST,context.getRealm().getId()))
                         .createForm(form);
 
                 context.challenge(challenge);

@@ -72,7 +72,12 @@ public class SettingsService {
     }
 
     public String getSettingsStringValue(final SettingConstants property, final String realmId) {
-        return repository.getSettings(property.getKey(), realmId).getValue();
+        Settings settings = repository.getSettings(property.getKey(), realmId);
+        String value = "no settings";
+        if (settings != null) {
+            value = settings.getValue();
+        }
+        return value;
     }
 
     public SettingsDto getSetting(final SettingConstants property, final String realmId) {

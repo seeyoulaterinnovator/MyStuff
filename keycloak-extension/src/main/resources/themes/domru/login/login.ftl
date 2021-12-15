@@ -6,12 +6,12 @@
     <#if section = "header">
         <#include "templates/required-fields.html">
         <#if !hideRegistration!false>
-            <@blocks.contentHeader mainTitle="${msg('doLogIn')}" secondaryTitle="${msg('registerTitle')}" secondaryHref="${url.registrationUrl}" withBorder=true />
+            <@blocks.contentHeader mainTitle="${doLogIn}" secondaryTitle="${registerTitle}" secondaryHref="${url.registrationUrl}" withBorder=true />
         <#else>
-            <@blocks.contentHeader mainTitle="${msg('doLogIn')}" secondaryTitle=" " secondaryHref=" " withBorder=true />
+            <@blocks.contentHeader mainTitle="${doLogIn}" secondaryTitle=" " secondaryHref=" " withBorder=true />
         </#if>
     <#elseif section = "form">
-        <p class="mb-7">Если у Вас уже есть учетная запись, Вы можете войти</p>
+        <p class="mb-7">${loginTitleText}</p>
         <#if realm.password>
             <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
                   onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
@@ -21,24 +21,24 @@
                         <input class="hidden w-0 h-0" name="withCity" value="TRUE">
                     </#if>
                     <#if usernameEditDisabled??>
-                        <input name="username" id="username" class="field__input" label="${msg('usernameOrEmailPlaceholder')}"
-                               placeholder="${msg('usernameOrEmailPlaceholder')}" value="${(login.username!)}"
+                        <input name="username" id="username" class="field__input" label="${yourlogin}"
+                               placeholder="${usernameOrEmailPlaceholder}" value="${(login.username!)}"
                                type="text" disabled/>
                     <#else>
-                        <input name="username" id="username" class="field__input" label="${msg('usernameOrEmailPlaceholder')}"
-                               placeholder="${msg('usernameOrEmailPlaceholder')}" value="${(login.username!)}"
+                        <input name="username" id="username" class="field__input" label="${yourlogin}"
+                               placeholder="${usernameOrEmailPlaceholder}" value="${(login.username!)}"
                                type="text" autofocus autocomplete="off"/>
                     </#if>
-                    <label class="field__label" for="username">${msg("usernameOrEmailPlaceholder")}</label>
+                    <label class="field__label" for="username">${yourlogin}</label>
                 </div>
 
-                <@components.field class="mb-7 sm:mb-8 md:w-full" fieldName="password" label="${msg('passwordPlaceholder')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true />
+                <@components.field class="mb-7 sm:mb-8 md:w-full" fieldName="password" label="${password}" placeholder="${passwordPlaceholder}" type="password" required=true />
 
                 <div class="flex justify-between w-full items-center">
-                    <button id="submit" class="btn btn-main w-1/2 btn-enter" type="submit">Войти</button>
+                    <button id="submit" class="btn btn-main w-1/2 btn-enter" type="submit">${enter}</button>
                     <#if realm.resetPasswordAllowed>
-                        <span class="reset-password">
-                            <a href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a>
+                        <span class="reset-password text-right">
+                            <a href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
                         </span>
                     </#if>
                 </div>
@@ -47,7 +47,7 @@
         </#if>
         <#if realm.password && social.providers??>
             <div class="flex items-center mt-12">
-                <div class="text-no-wrap mr-6">Войти через: </div>
+                <div class="text-no-wrap mr-6">${loginWith}</div>
                 <ul class="logo-social-providers">
                     <#list social.providers as p>
                         <li class="mr-4">

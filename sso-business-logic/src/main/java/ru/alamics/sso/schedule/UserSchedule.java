@@ -182,7 +182,7 @@ public class UserSchedule {
             } else if (notification.getType() == NotificationType.ABSENCE_BLOCKING) {
                 long blockValue = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_BLOCKED, realm.getName());
                 if (blockValue > 0) {
-                    EmailModel.EmailModelBuilder bockNotification = bockNotification();
+                    EmailModel.EmailModelBuilder bockNotification = bockNotification(realm.getName());
                     bockNotification.realmModel(realm)
                             .user(userModel);
                     sender.send(bockNotification.build());
@@ -190,7 +190,7 @@ public class UserSchedule {
                 user.setEnabled(false);
                 createAdminEvent(OperationType.UPDATE, user, realm);
             } else if (notification.getType() == NotificationType.PASSWORD_EXPIRED) {
-                EmailModel.EmailModelBuilder passwordExpired = passwordExpired(getClientLink(client));
+                EmailModel.EmailModelBuilder passwordExpired = passwordExpired(getClientLink(client), realm.getName());
                 passwordExpired.realmModel(realm)
                         .user(userModel);
                 sender.send(passwordExpired.build());
@@ -200,11 +200,14 @@ public class UserSchedule {
     }
 
 
-    private EmailModel.EmailModelBuilder bockNotification() {
+    private EmailModel.EmailModelBuilder bockNotification(String realmId) {
         final String subject = "Блокирование аккаунта";
         final String template = "block-notification.ftl";
+        Map<String, Object> body = new HashMap<>();
+        body.put("blockNotificationSchedulerHtml",settingsService.getSettingsStringValue(SettingConstants.SCHEDULER_BLOCKING_BODY,realmId));
         return EmailModel.builder()
                 .subject(subject)
+                .bodyAttributes(body)
                 .bodyTemplate(template);
     }
 
@@ -217,15 +220,17 @@ public class UserSchedule {
         String timeToBlock = String.valueOf(
                 blockSetting.getUnit().convert(inactiveBlockTimeout - inactiveNotificationTimeout, TimeUnit.SECONDS));
         Map<String, Object> body = new HashMap<>();
-        body.put("absence", timeToBlock + " " + Translator.getRusTranslateTimeUnit(timeToBlock, blockSetting.getUnit()));
-        body.put("link", link);
+        String valueTime = timeToBlock + " " + Translator.getRusTranslateTimeUnit(timeToBlock, blockSetting.getUnit());
+        String bodyHtml = String.format(settingsService.getSettingsStringValue(SettingConstants.SCHEDULER_BLOCKING_PREPARE_BODY,realm),valueTime,link);
+        body.put("blockPrepareNotificationSchedulerHtml",bodyHtml);
+        body.put("absence", valueTime);
         return EmailModel.builder()
                 .bodyAttributes(body)
                 .subject(subject)
                 .bodyTemplate(template);
     }
 
-    private EmailModel.EmailModelBuilder passwordExpired(String link) {
+    private EmailModel.EmailModelBuilder passwordExpired(String link, String realmId) {
         final String subject = "Истек срок жизни пароля";
         final String template = "password-expires.ftl";
 
@@ -234,6 +239,8 @@ public class UserSchedule {
 
         Map<String, Object> body = new HashMap<>();
         body.put("link", link);
+        String bodyHtml = String.format(settingsService.getSettingsStringValue(SettingConstants.SCHEDULER_PASSWORD_EXPIRES_BODY,realmId),link);
+        body.put("passwordExpiresSchedulerHtml",bodyHtml);
         return EmailModel.builder()
                 .bodyAttributes(body)
                 .subject(subject)

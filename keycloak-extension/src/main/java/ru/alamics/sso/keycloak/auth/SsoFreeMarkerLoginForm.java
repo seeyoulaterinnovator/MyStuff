@@ -78,6 +78,10 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         if (realm != null) {
             attributes.put("realm", new RealmBean(realm));
 
+            if (settingsService == null) {
+                settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+            }
+
             List<IdentityProviderModel> identityProviders = realm.getIdentityProviders();
             identityProviders = LoginFormsUtil.filterIdentityProviders(identityProviders, session, realm, attributes, formData);
             if(Util.isFrame(session)){
@@ -90,6 +94,39 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                 ).collect(Collectors.toList());
             }
             attributes.put("social", new IdentityProviderBean(realm, session, identityProviders, baseUriWithCodeAndClientId));
+
+            attributes.put("usernameOrEmailPlaceholder", settingsService.getSettingsStringValue(USERNAME_OR_EMAIL_PLACEHOLDER,realm.getName()));
+            attributes.put("enter", settingsService.getSettingsStringValue(ENTER,realm.getName()));
+            attributes.put("passwordPlaceholder", settingsService.getSettingsStringValue(PASS_PLACEHOLDER,realm.getName()));
+            attributes.put("doForgotPassword", settingsService.getSettingsStringValue(DO_FORGOT_PASS,realm.getName()));
+            attributes.put("registerTitle", settingsService.getSettingsStringValue(REGISTER_TITLE,realm.getName()));
+            attributes.put("loginTitleText", settingsService.getSettingsStringValue(LOGIN_TITLE_TEXT,realm.getName()));
+            attributes.put("yourlogin", settingsService.getSettingsStringValue(YOUR_LOGIN,realm.getName()));
+            attributes.put("password", settingsService.getSettingsStringValue(PASS,realm.getName()));
+            attributes.put("loginWith", settingsService.getSettingsStringValue(LOGIN_WITH,realm.getName()));
+            attributes.put("doLogIn", settingsService.getSettingsStringValue(DO_LOGIN,realm.getName()));
+            attributes.put("footer", settingsService.getSettingsStringValue(FOOTER,realm.getName()));
+            attributes.put("backToApplication", settingsService.getSettingsStringValue(BACK_TO_APP,realm.getName()));
+            attributes.put("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST,realm.getName()));
+            attributes.put("requiredFields", settingsService.getSettingsStringValue(REQUIRED_FIELDS,realm.getName()));
+
+            attributes.put("confirmLinkIdpReviewProfile", settingsService.getSettingsStringValue(CONFIRM_LINK_IDP_REVIEW_PROFILE,realm.getName()));
+            attributes.put("confirmLinkIdpContinue", settingsService.getSettingsStringValue(CONFIRM_LINK_IDP_CONTINUE,realm.getName()));
+            attributes.put("proceedWithAction", settingsService.getSettingsStringValue(PROCEED_WITH_ACTION,realm.getName()));
+            attributes.put("pageExpiredMsg1", settingsService.getSettingsStringValue(PAGE_EXPIRE_MSG_1,realm.getName()));
+            attributes.put("pageExpiredMsg2", settingsService.getSettingsStringValue(PAGE_EXPIRE_MSG_2,realm.getName()));
+            attributes.put("doClickHere", settingsService.getSettingsStringValue(DO_CLICK_HERE,realm.getName()));
+            attributes.put("doCancel", settingsService.getSettingsStringValue(DO_CANCEL,realm.getName()));
+            attributes.put("username", settingsService.getSettingsStringValue(USERNAME,realm.getName()));
+            attributes.put("phoneOrEmail", settingsService.getSettingsStringValue(PHONE_OR_EMAIL,realm.getName()));
+            attributes.put("next", settingsService.getSettingsStringValue(NEXT,realm.getName()));
+            attributes.put("emailInstruction", settingsService.getSettingsStringValue(EMAIL_INSTRUCTION,realm.getName()));
+            attributes.put("emailForgotContentTitle", settingsService.getSettingsStringValue(EMAIL_FORGOT_CONTENT_TITLE,realm.getName()));
+            attributes.put("usernameOrEmail", settingsService.getSettingsStringValue(USERNAME_OR_EMAIL,realm.getName()));
+            attributes.put("resetPassword", settingsService.getSettingsStringValue(RESET_PASSWORD,realm.getName()));
+            attributes.put("loginProfileTitle", settingsService.getSettingsStringValue(LOGIN_PROFILE_TITLE,realm.getName()));
+            attributes.put("doRegister", settingsService.getSettingsStringValue(DO_REGISTER,realm.getName()));
+            attributes.put("doSubmit", settingsService.getSettingsStringValue(DO_SUBMIT,realm.getName()));
 
             attributes.put("url", new SsoUrlBean(realm, theme, baseUri, this.actionUri, Util.isFrame(session)));
             attributes.put("requiredActionUrl", new RequiredActionUrlFormatterMethod(realm, baseUri));

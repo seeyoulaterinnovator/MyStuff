@@ -43,7 +43,7 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
 
         if (CredentialModel.PASSWORD.equals(credentialType)) {
             user.addRequiredAction(UserModel.RequiredAction.UPDATE_PASSWORD);
-            sendDisableCredentialEmail(realm, user, VALIDITY_IN_SECS, "emailCredentialDisableSubject", "credential-disable-password.ftl", new HashMap<>());
+            sendDisableCredentialEmail(realm, user, VALIDITY_IN_SECS, settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_CREDENTIAL_DISABLE,realm.getName()), "credential-disable-password.ftl", new HashMap<>());
         }
     }
 
@@ -78,6 +78,7 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
         String link = builder.build(realm.getName()).toString();
 
         attributes.put("authHref", link);
+        attributes.put("emailCredentialDisableBodyHtmlCost", settingsService.getSettingsStringValue(EMAIL_CREDENTIAL_DISABLE_ACCOUNT,realm.getName()));
         EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
         try {
             emailTemplateProvider.setRealm(realm)

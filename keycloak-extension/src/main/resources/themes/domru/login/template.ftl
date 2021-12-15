@@ -89,7 +89,13 @@
             </#if>
         </main>
 
-        <#include "templates/footer-copyright.html">
+        <footer id="page-footer" class="w-full fixed bottom-0 footer">
+          <span class="text-main-500">${footer}
+            <script>
+                    document.write(new Date().getFullYear())
+            </script>
+          </span>
+        </footer>
 
         <div id="cities-modal"></div>
     </#if>

@@ -14,11 +14,11 @@
             </thead>
             <tbody>
             <tr ng-repeat="setting in settings" data-ng-if="setting.type=='MESSAGE'">
-                <td class="clip">{{setting.name}}</td>
-                <td class="clip">
+                <td class="clip" title="{{setting.name}}">{{setting.name}}</td>
+                <td class="clip" title="{{setting.value}}">
                     <input class="form-control" type="text" ng-model="setting.value" name="setting-value"/>
                 </td>
-                <td class="clip">{{setting.desc}}</td>
+                <td class="clip" title="{{setting.desc}}">{{setting.desc}}</td>
                 <td class="kc-action-cell" data-ng-click="updateSetting(setting)">{{:: 'save' | translate}}</td>
             </tr>
             </tbody>

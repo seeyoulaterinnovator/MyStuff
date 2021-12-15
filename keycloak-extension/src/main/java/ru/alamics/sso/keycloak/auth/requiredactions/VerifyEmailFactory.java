@@ -23,6 +23,7 @@ import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.theme.Theme;
 import org.keycloak.theme.beans.LinkExpirationFormatterMethod;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.schedule.Translator;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
@@ -39,6 +40,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+
+import static ru.alamics.sso.settings.SettingConstants.ACCOUNT_SUBJECT_VERIFICATION;
+import static ru.alamics.sso.settings.SettingConstants.EMAIL_VERIFICATION_LOGIN_ACCOUNT;
 
 @Slf4j
 public class VerifyEmailFactory extends VerifyEmail {
@@ -99,7 +103,7 @@ public class VerifyEmailFactory extends VerifyEmail {
                     .setAttribute("expTime", expirationStrRus);
 
             if (user.isEmailVerified()) {
-                sendAuthorizationEmail(emailTemplateProvider, user, link, timeTokenVerifyEmail, session);
+                sendAuthorizationEmail(emailTemplateProvider, user, link, timeTokenVerifyEmail, session, realm.getName());
             } else {
                 emailTemplateProvider.sendVerifyEmail(link, expirationInMinutes);
             }
@@ -116,16 +120,19 @@ public class VerifyEmailFactory extends VerifyEmail {
     }
 
     private void sendAuthorizationEmail(EmailTemplateProvider emailTemplateProvider, UserModel user, String link,
-                                        int validityInSecs, KeycloakSession session) throws EmailException {
+                                        int validityInSecs, KeycloakSession session, String reamName) throws EmailException {
 
         long expirationInMinutes = TimeUnit.SECONDS.toMinutes(validityInSecs);
         String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(validityInSecs);
+
+        SettingsService settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
 
         Map<String, Object> attributes = new HashMap<String, Object>();
         attributes.put("user", new ProfileBean(user));
         attributes.put("link", link);
         attributes.put("linkExpiration", expirationInMinutes);
         attributes.put("expTime", expirationStrRus);
+        attributes.put("emailVerificationLoginBodyHtml",settingsService.getSettingsStringValue(EMAIL_VERIFICATION_LOGIN_ACCOUNT,reamName));
 
         try {
             Locale locale = session.getContext().resolveLocale(user);
@@ -135,7 +142,7 @@ public class VerifyEmailFactory extends VerifyEmail {
             throw new EmailException("Failed to template email", e);
         }
 
-        emailTemplateProvider.send("emailVerificationSubject",
+        emailTemplateProvider.send(settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_VERIFICATION,reamName),
                 "email-verification-login.ftl", attributes);
     }
 }

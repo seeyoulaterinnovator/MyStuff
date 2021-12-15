@@ -17,11 +17,11 @@
     <#include 'styles/content-style--default.html' >
   <#elseif section = "body">
 
-  <#assign email=realmName>
-  <#if user?? && user.getEmail??>
-  <#assign email= user.getEmail()>
-  </#if>
- 
-    ${kcSanitize(msg("executeActionsBodyHtml",link, linkExpiration, email, requiredActionsText, linkExpirationFormatter(linkExpiration), time))?no_esc}
+    <#assign email=realmName>
+    <#if user?? && user.getEmail??>
+      <#assign email= user.getEmail()>
+    </#if>
+
+    ${kcSanitize(msg(executeActionsBodyHtml,link, linkExpiration, email, requiredActionsText, linkExpirationFormatter(linkExpiration), time))?no_esc}
   </#if>
 </@template.layout>

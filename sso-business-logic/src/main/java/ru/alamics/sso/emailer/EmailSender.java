@@ -16,7 +16,9 @@ import org.keycloak.theme.Theme;
 import org.keycloak.theme.beans.MessageFormatterMethod;
 import org.keycloak.util.JsonSerialization;
 import ru.alamics.sso.jpa.repository.AdminEventRepository;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.property.ApplicationProperties;
+import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.CustomFreeMarkerUtil;
 
 import javax.annotation.PostConstruct;
@@ -30,6 +32,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import static ru.alamics.sso.settings.SettingConstants.*;
 
 @Stateless
 @Slf4j
@@ -45,6 +49,7 @@ public class EmailSender {
     private BlockingQueue<EmailModel> emailQueue;
     private EmailSenderProvider emailSenderProvider;
     private ExecutorService executorService;
+    private SettingsService settingsService;
     @EJB
     private AdminEventRepository adminEventRepository;
     @EJB
@@ -80,6 +85,8 @@ public class EmailSender {
         this.executorService = Executors.newSingleThreadExecutor();
         executorService.submit(new SendTask());
 
+        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+
         sendInterval = properties.getPropertyLong(SEND_INTERVAL_PROPERTY, 1000, "EmailSender interval: default value used: '%s' = '%s'");
         dontSend = Boolean.parseBoolean(properties.getProperty(DO_NOT_SEND_PROPERTY));
     }
@@ -106,7 +113,7 @@ public class EmailSender {
     }
 
     protected EmailTemplate processTemplate(String subjectKey, List<Object> subjectAttributes, String template, Map<String, Object> attributes,
-                                            Theme theme, Locale locale) throws EmailException {
+                                            Theme theme, Locale locale, String realName) throws EmailException {
         try {
             String textBody;
             String subject = subjectKey;
@@ -119,6 +126,11 @@ public class EmailSender {
             if (theme != null) {
                 attributes.put("properties", theme.getProperties());
             }
+            attributes.put("phoneInMessage",settingsService.getSettingsStringValue(PHONE_IN_MESSAGE,realName));
+            attributes.put("footerInMassage",settingsService.getSettingsStringValue(FOOTER_IN_MESSAGE,realName));
+            attributes.put("customer",settingsService.getSettingsStringValue(CUSTOMER,realName));
+            attributes.put("gratitudeUp",settingsService.getSettingsStringValue(GRATITUDE_UP,realName));
+            attributes.put("gratitudeDown",settingsService.getSettingsStringValue(GRATITUDE_DOWN,realName));
             String textTemplate = String.format("/text/%s", template);
             try {
                 if (theme == null) {
@@ -165,7 +177,7 @@ public class EmailSender {
                     try {
                         EmailTemplate template = processTemplate(emailModel.getSubject(), emailModel.getSubjectAttributes(),
                                 emailModel.getBodyTemplate(), emailModel.getBodyAttributes(),
-                                emailModel.getTheme(), emailModel.getLocale());
+                                emailModel.getTheme(), emailModel.getLocale(),emailModel.getRealmModel().getName());
                         if (!dontSend) {
                             emailSenderProvider.send(emailModel.getRealmModel().getSmtpConfig(), emailModel.getUser(), template.getSubject(), template.getTextBody(), template.getHtmlBody());
                             createEmailEvent(OperationType.ACTION, emailModel, template.subject);

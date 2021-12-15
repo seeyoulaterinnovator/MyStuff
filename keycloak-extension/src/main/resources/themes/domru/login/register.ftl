@@ -5,7 +5,7 @@
 <@layout.registrationLayout displayInfo=true displayCity=false; section >
     <#if section = "header">
         <#include "templates/required-fields.html">
-        <@blocks.contentHeader mainTitle="${msg('registerTitle')}" secondaryTitle="${msg('doLogIn')}" secondaryHref="${url.loginUrl}" withBorder=true />
+        <@blocks.contentHeader mainTitle="${msg(registerTitle)}" secondaryTitle="${msg(doLogIn)}" secondaryHref="${url.loginUrl}" withBorder=true />
     <#elseif section = "form">
         <form id="registrationForm" action="${url.registrationAction}" method="post">
             <#-- В нашем случае firstName – это полное имя -->
@@ -41,7 +41,7 @@
 
             <div class="flex flex-col justify-between sm:flex-row mt-0 xl:mt-2">
                 <div class="flex flex-basis-auto items-center">
-                    <button id="submit" class="btn btn-main reg-fields" type="submit">${msg('doRegister')}</button>
+                    <button id="submit" class="btn btn-main pass-fields" type="submit">${msg(doRegister)}</button>
                 </div>
                 <span class="flex-basis-auto ml-0 mb-6 mt-4 text-xs sm:ml-5 sm:mb-0 agreement"><span class="opacity-50">Нажимая кнопку, Вы соглашаетесь <br></span><a class="reference reference_hoverable" href="https://dom.ru/policy.pdf" target="_blink">с политикой обработки данных</a></span>
             </div>
