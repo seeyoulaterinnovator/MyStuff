@@ -1,5 +1,0 @@
-export const STATUS = {
-  INITIAL: 'INITIAL',
-  SELECTING: 'SELECTING',
-  CONFIRMED: 'CONFIRMED',
-};
