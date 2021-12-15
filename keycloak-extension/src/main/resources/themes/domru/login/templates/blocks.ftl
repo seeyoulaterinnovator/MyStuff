@@ -18,8 +18,6 @@
     <div class="flex flex-col-reverse sm:flex-row">
       <div class="pass-fields">
         <@components.field class="mb-3 sm:mb-4" fieldName="${firstFieldName}" label="${msg('password')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true />
-
-        <@components.field fieldName="${secondFieldName}" label="${msg('passwordConfirm')}" placeholder="${msg('passwordConfirmPlaceholder')}" type="password" required=true />
       </div>
 
       <div class="mx-auto generated-password">
@@ -44,7 +42,7 @@
   <header class="flex justify-between items-center pb-2 sm:pb-3 md:pb-4">
     <h1
             id="page-title"
-            class="<#if withBorder>border-extra border-b-2 md:border-b-3 xl:border-b-4</#if> <#if secondaryTitle != ''>text-3xl</#if>"
+            class="<#if withBorder></#if> <#if secondaryTitle != ''>text-3xl</#if>"
     >
       <b>
         ${mainTitle}
