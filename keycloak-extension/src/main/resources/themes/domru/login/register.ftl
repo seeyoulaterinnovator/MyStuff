@@ -14,7 +14,7 @@
             <#-- Пока бэк не уберет необходимость фамилии, скрою поле и отправлю дефис -->
             <@components.field class="mb-4 sm:mb-4 md:w-full" fieldName="lastName" value="-" label="Фамилия" placeholder="Фамилия" required=true style="display: none" />
 
-            <@components.field class="mb-4 sm:mb-4 md:w-full" fieldName="email" value="${email!''}" label="Эл. почта" placeholder="Ваш адрес эл.почты" required=true type="text" />
+            <@components.field class="mb-4 sm:mb-4 md:w-full" fieldName="email" value="${email!''}" label="Эл. почта" placeholder="Введите эл. почту" required=true type="text" />
 
             <#if !realm.registrationEmailAsUsername>
                 <@components.field class="mb-4 sm:mb-4 md:w-full" fieldName="username" value="${username!''}" label="Имя пользователя" placeholder="Имя пользователя" required=true />
@@ -43,7 +43,7 @@
                 <div class="flex flex-basis-auto items-center">
                     <button id="submit" class="btn btn-main reg-fields" type="submit">${msg(doRegister)}</button>
                 </div>
-                <span class="flex-basis-auto ml-0 mb-6 mt-4 text-xs sm:ml-5 sm:mb-0 agreement"><span class="opacity-50">Нажимая кнопку, Вы соглашаетесь <br></span><a class="reference reference_hoverable" href="https://dom.ru/policy.pdf" target="_blink">с политикой обработки данных</a></span>
+                <span class="flex-basis-auto ml-0 mb-6 mt-4 text-xs sm:ml-5 sm:mb-0 agreement"><span class="opacity-50">Нажимая кнопку, вы соглашаетесь <br></span><a class="reference reference_hoverable" href="https://dom.ru/policy.pdf" target="_blink">с правилами обработки перс. данных</a></span>
             </div>
         </form>
         <#if realm.password && social.providers??>

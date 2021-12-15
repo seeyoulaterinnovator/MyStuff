@@ -3,7 +3,7 @@
 
 <#macro password firstFieldName="password">
   <div id="password-block" class="mb-7 sm:mb-8">
-    <p class="text-black-80">Пароль должен состоять из комбинации букв, цифр, cпецсимволов и быть не менее 8 и не более 16 символов</p>
+    <p class="text-black-80">Пароль должен состоять из комбинации букв, цифр и быть не менее 8 и не более 16 символов</p>
     <div class="flex text-black-50 py-6">
       <div id="letters-password" class="flex flex-1 flex-col mr-6">
         <span class="text-symbols">A-z</span>
