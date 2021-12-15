@@ -134,6 +134,40 @@ public class UserRepository {
         return null;
     }
 
+    public UserEntity getFirstUserByPhoneNumber(String realmId, String phone, String excludedUserId) {
+
+        if (Validation.isBlank(phone))
+            return null;
+
+        String realmName = realmId == null ? "user" : realmId;
+
+        List<UserEntity> users = (List<UserEntity>) em.createNativeQuery(
+                "select * " +
+                        "  from USER_ENTITY ue " +
+                        "  where " +
+                        " ue.REALM_ID = :realmId and " +
+                        "     (:excludedUserId is null or ue.ID <> :excludedUserId) " +
+                        "    and exists ( " +
+                        "      select 1 " +
+                        "      from USER_ATTRIBUTE attr " +
+                        "      where attr.USER_ID = ue.ID " +
+                        "        and attr.NAME = :name " +
+                        "        and attr.VALUE = :phoneNmbr " +
+                        "    )" +
+                        "  limit 1"
+                , UserEntity.class)
+                .setParameter("realmId", realmName)
+                .setParameter("name", "phone")
+                .setParameter("phoneNmbr", phone)
+                .setParameter("excludedUserId", Validation.isBlank(excludedUserId) ? null : excludedUserId)
+                .getResultList();
+
+        if (users != null && !users.isEmpty())
+            return users.get(0);
+
+        return null;
+    }
+
     // TODO медленно, используется с правкой атрибутов
     public UserEntity getFirstUserByPhoneNumber(String phone, String excludedUserId) {
 

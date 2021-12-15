@@ -53,6 +53,14 @@ public class UserFindService {
         return null;
     }
 
+    public UserEntity getUserByPhoneAndExcludedUserId(String realmId, String phone, String excludedUserId) {
+        phone = Util.getCleanUserPhone(phone);
+        if (phone != null) {
+            return userRepository.getFirstUserByPhoneNumber(realmId, phone, excludedUserId);
+        }
+        return null;
+    }
+
     public UserEntity getUserByPhoneAndExcludedUserId(String phone, String excludedUserId) {
         phone = Util.getCleanUserPhone(phone);
         if (phone != null) {

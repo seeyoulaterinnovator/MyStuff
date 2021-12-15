@@ -113,7 +113,7 @@ public class SearchResource {
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response findUserByAttribute(@QueryParam("phone") String phone, @QueryParam("excludedUserId") String excludedUserId) {
+    public Response findUserByAttribute(@QueryParam("phone") String phone,@QueryParam("excludedUserId") String excludedUserId, @QueryParam("realmId") String realmId) {
         if (Validation.isBlank(phone)) {
             return JsonResponse.success().addResult("foundUserId", null).build();
         }
@@ -125,8 +125,7 @@ public class SearchResource {
                             .build()
             );
         }
-        //fixme сквозной поиск по всем реалмам
-        UserEntity user = userFindService.getUserByPhoneAndExcludedUserId(phone, excludedUserId);
+        UserEntity user = userFindService.getUserByPhoneAndExcludedUserId(realmId,phone,excludedUserId);
         return JsonResponse.success().addResult("foundUserId", user == null ? null : user.getId()).build();
     }
 
