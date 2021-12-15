@@ -40,10 +40,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.UserConstants.*;
@@ -83,6 +80,15 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
             List<IdentityProviderModel> identityProviders = realm.getIdentityProviders();
             identityProviders = LoginFormsUtil.filterIdentityProviders(identityProviders, session, realm, attributes, formData);
+            if(Util.isFrame(session)){
+                identityProviders = identityProviders.stream().filter(
+                        model -> {
+                            String systems = model.getConfig().get("systems");
+                            return systems != null &&
+                                    Arrays.stream(systems.split(",")).anyMatch(str ->str.equals(client.getClientId()));
+                        }
+                ).collect(Collectors.toList());
+            }
             attributes.put("social", new IdentityProviderBean(realm, session, identityProviders, baseUriWithCodeAndClientId));
 
             attributes.put("url", new SsoUrlBean(realm, theme, baseUri, this.actionUri, Util.isFrame(session)));

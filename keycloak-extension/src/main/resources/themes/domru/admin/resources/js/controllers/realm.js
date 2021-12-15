@@ -36,6 +36,10 @@ function getAccessObject(Auth, Current) {
             return getAccess(Auth, Current, 'edit-credentials');
         },
 
+        get selectAll(){
+            return getAccess(Auth, Current, 'select-all');
+        },
+
         get editFederatedIdentity(){
             return getAccess(Auth, Current, 'edit-federated-identity');
         },
@@ -807,6 +811,26 @@ module.controller('IdentityProviderTabCtrl', function(Dialog, $scope, Current, N
 module.controller('RealmIdentityProviderCtrl', function($scope, $filter, $upload, $http, $route, realm, instance, providerFactory, IdentityProvider, serverInfo, authFlows, $location, Notifications, Dialog) {
     $scope.realm = angular.copy(realm);
 
+    $scope.systemRoles = [];
+    $scope.systemList = [];
+
+    $scope.changedValue = function (item) {
+        $scope.systemList.splice(0);
+        for (var i = 0; i < item.length; i++) {
+            $scope.systemList.push(item[i]);
+        }
+        console.log($scope.systemList);
+        $scope.identityProvider.config["systems"] = $scope.systemList.join(",");
+        $scope.changed = true;
+    }
+
+    $http.get(authUrl + '/realms/' + realm.realm + '/user-post/system-roles').then(function (data) {
+        let roles = angular.fromJson(data).data.results['system-roles'];
+        roles = roles.filter(role => role.name === 'access_granted').filter((role, index, self) => self.indexOf(role) === index);
+        $scope.systemRoles = roles;
+        console.log($scope.systemRoles);
+    });
+
     $scope.initSamlProvider = function() {
         $scope.nameIdFormats = [
             /*
@@ -880,6 +904,9 @@ module.controller('RealmIdentityProviderCtrl', function($scope, $filter, $upload
             if (provider.id == instance.providerId) {
                 $scope.provider = provider;
             }
+        }
+        if($scope.identityProvider.config["systems"]){
+            $scope.system = $scope.identityProvider.config["systems"].split(',');
         }
     } else {
         $scope.identityProvider = {};
