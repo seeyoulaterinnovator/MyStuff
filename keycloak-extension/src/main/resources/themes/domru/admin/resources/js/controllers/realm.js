@@ -116,6 +116,10 @@ function getAccessObject(Auth, Current) {
             return getAccess(Auth, Current, 'manage-authorization');
         },
 
+        get managerBss(){
+        return getAccess(Auth, Current, 'hide-user-search');
+        },
+
         get impersonation() {
             return getAccess(Auth, Current, 'impersonation');
         }
