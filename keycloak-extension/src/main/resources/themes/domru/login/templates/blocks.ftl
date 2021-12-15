@@ -1,39 +1,34 @@
 <#import "./components.ftl" as components>
 <#import "./svg.ftl" as svg>
 
-<#macro password firstFieldName="password" secondFieldName="password-confirm" >
+<#macro password firstFieldName="password">
   <div id="password-block" class="mb-7 sm:mb-8">
     <p class="text-black-80">Пароль должен состоять из комбинации букв, цифр, cпецсимволов и быть не менее 8 и не более 16 символов</p>
     <div class="flex text-black-50 py-6">
       <div id="letters-password" class="flex flex-1 flex-col mr-6">
         <span class="text-symbols">A-z</span>
-        <span class="text-sm hidden sm:block">Латинские символы с верхним и нижним регистром</span>
+        <span class="text-sm sm:block">Латинские символы с верхним и нижним регистром</span>
       </div>
       <div id="numbers-password" class="flex flex-1 flex-col mr-4">
         <span class="text-symbols">0–9</span>
-        <span class="text-sm hidden sm:block">Цифра или несколько цифр</span>
+        <span class="text-sm sm:block">Цифра или несколько цифр</span>
       </div>
     </div>
 
     <div class="flex flex-col-reverse sm:flex-row">
       <div class="pass-fields">
-        <@components.field class="mb-3 sm:mb-4" fieldName="${firstFieldName}" label="${msg('password')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true />
+        <@components.field class="mb-3 sm:mb-4" fieldName="${firstFieldName}" label="${msg('password')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true value="" />
       </div>
 
       <div class="mx-auto generated-password">
         <button id="generate-password-button" type="button" class="generate-btn">
-          <span class="reference reference-generate-password border-accentBlue text-accentBlue">Сгенерировать</span>
+          <span id="refresh-password-button" class="w-12 h-12 focus:outline-none" type="button">
+            <@svg.reloadButton color="accentBlue"></@svg.reloadButton>
+          </span>
+          <span class="reference reference-generate-password border-accentBlue text-accentBlue pass--hidden-small">Сгенерировать</span>
         </button>
-        <div id="generated-password-container" class=" hidden">
-          <p class="generated-password-text">Не забудьте записать пароль</p>
-          <div class="generated-password-field">
-            <div id="generated-password" class="flex text-base"></div>
-            <button id="refresh-password-button" class="w-12 h-12 focus:outline-none" type="button">
-              <@svg.reloadButton color="accentBlue"></@svg.reloadButton>
-            </button>
-          </div>
-        </div>
       </div>
+
     </div>
   </div>
 </#macro>

@@ -103,9 +103,6 @@ export default (function() {
     // if (!values['password-confirm'].match(VALIDATION_RULES['password_8-16']))
     //   errors.password = 'Пароль не подходит. Попробуйте другой';
 
-    if (values['password-confirm'] !== values.password)
-      errors['password-confirm'] = 'Пароли не совпадают';
-
     if (values.recaptcha === false)
       errors.recaptcha = 'Подтвердите, что Вы не робот';
 

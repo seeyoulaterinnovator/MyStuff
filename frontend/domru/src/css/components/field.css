@@ -45,6 +45,7 @@
 }
 .eye {
   opacity: 0.2;
+  margin-bottom: 10px;
 }
 .field__open:hover .eye {
   opacity: 0.5;
@@ -80,14 +81,22 @@
 
 .field__input:placeholder-shown + .field__label {
   color: transparent;
+  background-color: transparent;
 }
 .field__input:-ms-input-placeholder + .field__label {
   color: transparent;
+  background-color: transparent;
 }
 
 .field__label {
   @apply .text-main;
 
+  position: absolute;
+  top: -6.2px;
+  left: 15px;
+  background-color: white;
+  padding-left: 2px;
+  padding-right: 2px;
   display: flex;
   align-items: center;
   transition: color .3s ease-in-out;
@@ -130,9 +139,9 @@
     min-width: 210px;
   }
 
-  @media (max-width: 479px) {
-    width: 100%;
-  }
+@media (max-width: 479px) {
+  width: 75%;
+}
 }
 
 
@@ -180,8 +189,8 @@
 
 .passw_ok {
   position: absolute;
-  right: 0;
-  top: 3px;
+  right: -12px;
+  top: -10px;
 }
 
 .field-good {

@@ -60,7 +60,7 @@
 
     &:hover {
       background-image: url('./images/social/VK-hover.svg');
-      background-color: #0F6DDB;
+       background-color: #5181B8;
       border-radius: 8px;
     }
   }

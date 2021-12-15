@@ -1,5 +1,5 @@
-import { HIGHLIGHT_VALIDATION_CHARSET, WRONG_PASS_REG, REQUIRED_PASSWORD } from '../constants/passwordCharset.js';
-import { fetchPassword } from './helpers';
+import {HIGHLIGHT_VALIDATION_CHARSET, REQUIRED_PASSWORD, WRONG_PASS_REG} from '../constants/passwordCharset.js';
+import {fetchPassword} from './helpers';
 
 // Привязывает логику к блоку 'password-block'
 export default (
@@ -20,31 +20,24 @@ export default (
   const refreshPasswordButton = document.getElementById(
     'refresh-password-button',
   );
-  const generatedPasswordContainer = document.getElementById(
-    'generated-password-container',
-  );
-  const generatedPassword = document.getElementById('generated-password');
 
   function generatePassword() {
     fetchPassword().then(data => {
-      const password = data.password;
-      generatedPassword.textContent = password;
+      passwordElement.value ='';
+      passwordElement.value = data.password;
+      setPassword(data.password);
+      inputSomePass(passwordElement);
+      checkPasswordConfirmation();
       highlightRules();
     });
   }
 
   generatePasswordButton.addEventListener('click', () => {
-    generatePassword();
-    generatedPasswordContainer.classList.remove('hidden');
-    generatePasswordButton.classList.add('hidden');
-  });
-
-  refreshPasswordButton.addEventListener('click', () => {
-    generatePassword();
     refreshPasswordButton.classList.add('rotate');
     setTimeout(() => {
       refreshPasswordButton.classList.remove('rotate');
     }, 500);
+    generatePassword();
   });
 
   // Красим блоки в разные цвета согласно правилам валидации пароля
@@ -77,40 +70,27 @@ export default (
   passwordElement.addEventListener('input', highlightRules);
 
   function inputSomePass(element) {
-    const elementId = element.id;
-    const passwordRaw = elementId==='password-confirm' ? getConfirmation() : getPassword();
-    const regExp = new RegExp(WRONG_PASS_REG);
+    const passwordRaw = getPassword();
 
-    if (regExp.test(passwordRaw)) {
+    if (WRONG_PASS_REG.test(passwordRaw)) {
       const replacePassword = passwordRaw.replace(WRONG_PASS_REG, '');
-      // element.value = replacePassword;
-      if (elementId==='password-confirm') {
-        setConfirmation(replacePassword);
-      }
-      else {
-        setPassword(replacePassword);
-      }
+      setPassword(replacePassword);
     }
   }
   passwordElement.addEventListener('input', function() { inputSomePass(passwordElement); });
-  passwordConfirmElement.addEventListener('input', function() { inputSomePass(passwordConfirmElement); });
 
   function checkPasswordConfirmation() {
     const password = getPassword();
-    const confirmation = getConfirmation();
     const ok = document.querySelectorAll('.passw_ok');
 
-    if (REQUIRED_PASSWORD.test(password) && confirmation === password) {
+    if (REQUIRED_PASSWORD.test(password)) {
       passwordElement.classList.add('field-good');
-      passwordConfirmElement.classList.add('field-good');
       ok.forEach((img_block) => img_block.classList.remove('hidden'));
     }
     else {
       passwordElement.classList.remove('field-good');
-      passwordConfirmElement.classList.remove('field-good');
       ok.forEach((img_block) => img_block.classList.add('hidden'));
     }
   }
   passwordElement.addEventListener('input', checkPasswordConfirmation);
-  passwordConfirmElement.addEventListener('input', checkPasswordConfirmation);
 };
