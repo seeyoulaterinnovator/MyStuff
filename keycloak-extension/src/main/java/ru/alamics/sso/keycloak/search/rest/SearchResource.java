@@ -7,7 +7,9 @@ import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.annotations.jaxrs.QueryParam;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.RoleModel;
 import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.mapper.DataMapper;
@@ -21,6 +23,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -28,9 +33,12 @@ public class SearchResource {
 
     protected KeycloakSession session;
     private UserFindService userFindService;
+    private AdminAuth adminAuth;
 
-    public SearchResource(KeycloakSession session) {
+    public SearchResource(KeycloakSession session, AdminAuth adminAuth) {
         this.session = session;
+        this.adminAuth = adminAuth;
+
         try {
             this.userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
         } catch (NamingException e) {
@@ -127,17 +135,42 @@ public class SearchResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public List<String> getAccessibleRealms() {
-        return session.realms().getRealms().stream()
-                .filter(o -> {
-                    switch (session.getContext().getRealm().getName()) {
-                        case "master":
-                            return true;
-                        case "manager":
-                            return !o.getName().equalsIgnoreCase("master") &&
-                                    !o.getName().equalsIgnoreCase("manager");
-                    }
-                    return false;
-                })
+        return filterRealmsByRoles(session.realms().getRealms(), adminAuth.getUser().getRoleMappings());
+    }
+
+
+    private List<String> filterRealmsByRoles(List<RealmModel> realms, Set<RoleModel> roles){
+        final Predicate<RealmModel> realmNamesBasedRealmFilterPredicate = realm -> {
+            switch (session.getContext().getRealm().getName()) {
+                case "master":
+                    return true;
+                case "manager":
+                    return !realm.getName().equalsIgnoreCase("master") &&
+                            !realm.getName().equalsIgnoreCase("manager");
+            }
+            return false;
+        };
+
+        final Predicate<RealmModel> rolesBasedRealmFilterPredicate = realm -> roles.stream().anyMatch(role -> {
+            return Objects.equals(role.getName(), "view-" + realm.getName() + "-realm");
+        });
+
+        final Predicate<RealmModel> returnAllRealmFilterPredicate = realm -> true;
+
+        Predicate<RealmModel> filterPredicate;
+
+        if (roles.isEmpty()) {
+            filterPredicate = realmNamesBasedRealmFilterPredicate;
+        } else {
+            if (Objects.equals(session.getContext().getRealm().getName(), "master")){
+                filterPredicate = returnAllRealmFilterPredicate;
+            } else {
+                filterPredicate = rolesBasedRealmFilterPredicate;
+            }
+        }
+
+        return realms.stream()
+                .filter(filterPredicate)
                 .map(RealmModel::getName)
                 .collect(Collectors.toList());
     }
