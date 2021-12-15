@@ -1095,5 +1095,43 @@
         </sql>
     </changeSet>
 
+    <changeSet id="70" author="alimov-ze">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="SETTINGS" />
+            <columnExists tableName="SETTINGS" columnName="NAME"/>
+        </preConditions>
+        <sql>
+            alter table SETTINGS change NAME NAME varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+        <sql>
+            UPDATE SETTINGS SET NAME = 'Время действия кода входящего звонка' WHERE NAME = 'Expire incomig call code';
+            UPDATE SETTINGS SET NAME = 'Время до блокировки из-за отсутствия активности' WHERE NAME = 'Inactive Block timeout';
+            UPDATE SETTINGS SET NAME = 'Время действия кода для электронной почты' WHERE NAME = 'Expire incoming call email code';
+            UPDATE SETTINGS SET NAME = 'Время действия смс / кода Viber' WHERE NAME = 'Expire sms/ Viber code';
+            UPDATE SETTINGS SET NAME = 'Время действия смс / кода Viber' WHERE NAME = 'Expire sms/Viber code';
+            UPDATE SETTINGS SET NAME = 'Время до предупреждения об отсутствии активности' WHERE NAME = 'Inactive notification timeout';
+            UPDATE SETTINGS SET NAME = 'Отключить уведомление о предупреждении' WHERE NAME = 'Block notification of warning';
+            UPDATE SETTINGS SET NAME = 'Отключить уведомление о блокировке' WHERE NAME = 'Block notification of blocked';
+            UPDATE SETTINGS SET NAME = 'Отключить уведомление о разблокировке' WHERE NAME = 'Block notification of unlocking';
+        </sql>
+    </changeSet>
+
+    <changeSet id="71" author="alimov-ze">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="SETTINGS" />
+            <sqlCheck  expectedResult="0">SELECT count(*) FROM SETTINGS WHERE ID ='3ed7ae90-5427-11ec-bf63-0242ac130002'</sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('3ed7ae90-5427-11ec-bf63-0242ac130002', 'user.expire.incoming.call.code', '30', null, 'S-TELECOM', 'Время действия кода входящего звонка', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('483eaae2-5427-11ec-bf63-0242ac130002', 'user.absence.blocking.days', '180', null, 'S-TELECOM', 'Время до блокировки отсутствия активности', 'DAYS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('4cdb1a40-5427-11ec-bf63-0242ac130002', 'user.expire.incoming.call.email.code', '4', null, 'S-TELECOM', 'Время действия кода входящего звонка для электронной почты', 'MINUTES', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('514bb8e6-5427-11ec-bf63-0242ac130002', 'user.expire.sms-viber.code', '1', null, 'S-TELECOM', 'Время действия смс / кода Viber', 'MINUTES', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('55a0092e-5427-11ec-bf63-0242ac130002', 'user.absence.notifications.days', '175', null, 'S-TELECOM', 'Время до предупреждения отсутствия активности', 'DAYS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('58a17000-568d-11ec-bf63-0242ac130002', 'block.notification.warning', '1', 'Values: -1 = block, 1 = unblock', 'S-TELECOM', 'Отключить уведомление о предупреждении', 'DAYS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('605123f4-568d-11ec-bf63-0242ac130002', 'block.notification.blocked', '1', 'Values: -1 = block, 1 = unblock', 'S-TELECOM', 'Отключить уведомление о блокировке', 'DAYS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('6800d0fe-568d-11ec-bf63-0242ac130002', 'block.notification.unlocking', '1', 'Values: -1 = block, 1 = unblock', 'S-TELECOM', 'Отключить уведомление о разблокировке', 'DAYS', 'REALM');
+        </sql>
+    </changeSet>
+
 
 </databaseChangeLog>
