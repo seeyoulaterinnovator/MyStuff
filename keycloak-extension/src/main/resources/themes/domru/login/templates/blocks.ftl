@@ -5,17 +5,13 @@
   <div id="password-block" class="mb-7 sm:mb-8">
     <p class="text-black-80">Пароль должен состоять из комбинации букв, цифр, cпецсимволов и быть не менее 8 и не более 16 символов</p>
     <div class="flex text-black-50 py-6">
-      <div id="letters-password" class="flex flex-1 flex-col mr-4">
+      <div id="letters-password" class="flex flex-1 flex-col mr-6">
         <span class="text-symbols">A-z</span>
         <span class="text-sm hidden sm:block">Латинские символы с верхним и нижним регистром</span>
       </div>
       <div id="numbers-password" class="flex flex-1 flex-col mr-4">
         <span class="text-symbols">0–9</span>
         <span class="text-sm hidden sm:block">Цифра или несколько цифр</span>
-      </div>
-      <div id="extraChars-password" class="flex flex-1 flex-col">
-        <span class="text-symbols">_ ] [ - . ! #</span>
-        <span class="text-sm hidden sm:block">Возможные спецсимволы </span>
       </div>
     </div>
 
@@ -47,8 +43,8 @@
 <#macro contentHeader mainTitle secondaryTitle="" secondaryHref="" withBorder=false >
   <header class="flex justify-between items-center pb-2 sm:pb-3 md:pb-4">
     <h1
-      id="page-title"
-      class="<#if withBorder>border-extra border-b-2 md:border-b-3 xl:border-b-4</#if> <#if secondaryTitle != ''>text-3xl</#if>"
+            id="page-title"
+            class="<#if withBorder>border-extra border-b-2 md:border-b-3 xl:border-b-4</#if> <#if secondaryTitle != ''>text-3xl</#if>"
     >
       <b>
         ${mainTitle}
@@ -70,8 +66,8 @@
 <#macro verificationHeader mainTitle>
   <header class="pb-2 sm:pb-3 md:pb-4">
     <h1
-      id="page-title"
-      class="verification__title"
+            id="page-title"
+            class="verification__title"
     >
       ${mainTitle}
     </h1>
