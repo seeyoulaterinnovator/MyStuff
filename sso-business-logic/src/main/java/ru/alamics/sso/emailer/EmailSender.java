@@ -58,9 +58,9 @@ public class EmailSender {
 
         try {
             emailQueue.put(emailModel);
-            log.info("Success put email into send queue: email={}, send queue size={}", email, getEmailQueueSize());
+            log.info("Success put email into send queue: email={}, subject={}, send queue size={}", email, emailModel.getSubject(), getEmailQueueSize());
         } catch (InterruptedException e) {
-            log.error(String.format("Fail put email into send queue: email=%s, send queue size=%d", email, getEmailQueueSize()), e);
+            log.error(String.format("Fail put email into send queue: email=%s, subject=%s, send queue size=%d", email, emailModel.getSubject(), getEmailQueueSize()), e);
         }
     }
 
@@ -70,37 +70,6 @@ public class EmailSender {
 
     public long getSendInterval() {
         return sendInterval;
-    }
-
-    private class SendTask implements Runnable {
-        @Override
-        public void run() {
-            try {
-                EmailModel emailModel = null;
-                while ((emailModel = emailQueue.take()) != null) {
-                    try {
-                        EmailTemplate template = processTemplate(emailModel.getSubject(), emailModel.getSubjectAttributes(),
-                                emailModel.getBodyTemplate(), emailModel.getBodyAttributes(),
-                                emailModel.getTheme(), emailModel.getLocale());
-                        if (!dontSend) {
-                            emailSenderProvider.send(emailModel.getRealmModel().getSmtpConfig(), emailModel.getUser(), template.getSubject(), template.getTextBody(), template.getHtmlBody());
-                            createEmailEvent(OperationType.ACTION, emailModel, template.subject);
-                        } else {
-                            log.info("FAKE sending to {} due to properties", emailModel.getUser().getEmail());
-                        }
-                        log.info("send to {} is finished. EmailQueueSize={}, SendInterval={}", emailModel.getUser().getEmail(), getEmailQueueSize(), sendInterval);
-                    } catch (Exception e) {
-                        log.error(String.format("send to %s is failed : EmailQueueSize=%d ", emailModel.getUser().getEmail(), getEmailQueueSize()), e);
-                    }
-
-                    Thread.sleep(sendInterval);
-                }
-            } catch (InterruptedException e) {
-                log.error(String.format("'Email sender' task is ended with error : EmailQueueSize=%d ", getEmailQueueSize()), e);
-            } finally {
-                log.error("'Email sender' task is finished. Mailing disabled : EmailQueueSize={}", getEmailQueueSize());
-            }
-        }
     }
 
     @PostConstruct
@@ -185,5 +154,36 @@ public class EmailSender {
         private String subject;
         private String textBody;
         private String htmlBody;
+    }
+
+    private class SendTask implements Runnable {
+        @Override
+        public void run() {
+            try {
+                EmailModel emailModel = null;
+                while ((emailModel = emailQueue.take()) != null) {
+                    try {
+                        EmailTemplate template = processTemplate(emailModel.getSubject(), emailModel.getSubjectAttributes(),
+                                emailModel.getBodyTemplate(), emailModel.getBodyAttributes(),
+                                emailModel.getTheme(), emailModel.getLocale());
+                        if (!dontSend) {
+                            emailSenderProvider.send(emailModel.getRealmModel().getSmtpConfig(), emailModel.getUser(), template.getSubject(), template.getTextBody(), template.getHtmlBody());
+                            createEmailEvent(OperationType.ACTION, emailModel, template.subject);
+                        } else {
+                            log.info("FAKE sending to {} due to properties", emailModel.getUser().getEmail());
+                        }
+                        log.info("send to {} is finished. EmailQueueSize={}, SendInterval={}", emailModel.getUser().getEmail(), getEmailQueueSize(), sendInterval);
+                    } catch (Exception e) {
+                        log.error(String.format("send to %s is failed : EmailQueueSize=%d ", emailModel.getUser().getEmail(), getEmailQueueSize()), e);
+                    }
+
+                    Thread.sleep(sendInterval);
+                }
+            } catch (InterruptedException e) {
+                log.error(String.format("'Email sender' task is ended with error : EmailQueueSize=%d ", getEmailQueueSize()), e);
+            } finally {
+                log.error("'Email sender' task is finished. Mailing disabled : EmailQueueSize={}", getEmailQueueSize());
+            }
+        }
     }
 }
