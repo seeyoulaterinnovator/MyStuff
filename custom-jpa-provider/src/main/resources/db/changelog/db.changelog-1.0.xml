@@ -1038,4 +1038,47 @@
         </sql>
     </changeSet>
 
+    <changeSet id="65" author="petrov-ny">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_IMPORT_USERS_REPORT_REALM_ID"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_IMPORT_USERS_REPORT_REALM_ID
+            on IMPORT_USERS_REPORT(realm_id);
+        </sql>
+    </changeSet>
+    <changeSet id="66" author="petrov-ny">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="IDX_IMPORT_USERS_REPORT_STATUS"/></not>
+        </preConditions>
+        <sql>
+            create index IDX_IMPORT_USERS_REPORT_STATUS
+            on IMPORT_USERS_REPORT(status);
+        </sql>
+    </changeSet>
+
+    <changeSet id="67" author="petrov-ny">
+        <addColumn tableName="SETTINGS">
+            <column name="TYPE" type="varchar(16)"/>
+        </addColumn>
+        <sql>
+
+            update SETTINGS set TYPE = 'REALM' where EXT_ID = 'user.absence.blocking.days';
+            update SETTINGS set TYPE = 'REALM' where EXT_ID = 'user.expire.incoming.call.code';
+            update SETTINGS set TYPE = 'REALM' where EXT_ID = 'user.absence.notifications.days';
+            update SETTINGS set TYPE = 'REALM' where EXT_ID = 'user.expire.sms-viber.code';
+            update SETTINGS set TYPE = 'REALM' where EXT_ID = 'user.expire.incoming.call.email.code';
+            update SETTINGS set TYPE = 'REALM' where EXT_ID = 'block.notification.warning';
+            update SETTINGS set TYPE = 'REALM' where EXT_ID = 'block.notification.blocked';
+            update SETTINGS set TYPE = 'REALM' where EXT_ID = 'block.notification.unlocking';
+
+        </sql>
+    </changeSet>
+
+    <changeSet id="68" author="petrov-ny">
+        <sql>
+            ALTER TABLE SETTINGS modify VALUE TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

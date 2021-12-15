@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.alamics.sso.jpa.entity.common.SettingType;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -39,4 +40,8 @@ public class Settings implements Serializable {
     @Column(name = "unit")
     @Enumerated(EnumType.STRING)
     private TimeUnit unit;
+
+    @Column(name = "type")
+    @Enumerated(EnumType.STRING)
+    private SettingType type;
 }

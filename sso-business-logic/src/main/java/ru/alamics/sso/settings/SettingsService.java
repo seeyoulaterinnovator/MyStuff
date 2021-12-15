@@ -42,6 +42,7 @@ public class SettingsService {
                 .extId(settings.getExtId())
                 .realmId(settings.getRealmId())
                 .unit(settings.getUnit())
+                .type(settings.getType())
                 .build();
 
         return DataMapper.toDto(repository.save(settingsToSave));
@@ -59,6 +60,10 @@ public class SettingsService {
             }
         }
         return ret;
+    }
+
+    public String getSettingsStringValue(final SettingConstants property, final String realmId) {
+        return repository.getSettings(property.getKey(), realmId).getValue();
     }
 
     public SettingsDto getSetting(final SettingConstants property, final String realmId) {

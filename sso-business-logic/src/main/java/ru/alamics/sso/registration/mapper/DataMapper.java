@@ -2,7 +2,6 @@ package ru.alamics.sso.registration.mapper;
 
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.jpa.entity.*;
-import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.registration.dto.*;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
 import ru.alamics.sso.settings.SettingsDto;
@@ -10,7 +9,6 @@ import ru.alamics.sso.user.model.ImportUsersDataModel;
 import ru.alamics.sso.user.model.ImportUsersReportModel;
 import ru.alamics.sso.user.web.UserSearch;
 
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -127,6 +125,7 @@ public class DataMapper {
                 .value(settings.getValue())
                 .realmId(settings.getRealmId())
                 .unit(settings.getUnit())
+                .type(settings.getType())
                 .build();
     }
 
