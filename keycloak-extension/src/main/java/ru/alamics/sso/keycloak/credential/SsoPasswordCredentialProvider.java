@@ -16,19 +16,25 @@ import org.keycloak.services.Urls;
 import org.keycloak.services.managers.AuthenticationSessionManager;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.settings.SettingsService;
 
 import javax.ws.rs.core.UriBuilder;
 import java.util.HashMap;
 import java.util.Map;
 
+import static ru.alamics.sso.settings.SettingConstants.*;
+
 @Slf4j
 public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
-    private final static String CLIENT_ID = "lkb2b";
     private final static String DEFAULT_CLIENT_ID = "account";
     private final static int VALIDITY_IN_SECS = 259200;
 
+    private SettingsService settingsService;
+
     public SsoPasswordCredentialProvider(KeycloakSession session) {
         super(session);
+        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
     }
 
     @Override
@@ -52,7 +58,9 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
 
     private void sendDisableCredentialEmail(RealmModel realm, UserModel user, int expirationTime, String subject, String template, Map<String, Object> attributes) {
 
-        ClientModel clientModel = session.clientStorageManager().getClientByClientId(CLIENT_ID, realm);
+
+        String clientId = settingsService.getSettingsStringValue(DEFAULT_REALM_CLIENT_ID, realm.getName());
+        ClientModel clientModel = session.clientStorageManager().getClientByClientId(clientId, realm);
         if (clientModel == null)
             clientModel = session.clientStorageManager().getClientByClientId(DEFAULT_CLIENT_ID, realm);
         clientModel.setAttribute(OIDCConfigAttributes.EXCLUDE_SESSION_STATE_FROM_AUTH_RESPONSE, "true");

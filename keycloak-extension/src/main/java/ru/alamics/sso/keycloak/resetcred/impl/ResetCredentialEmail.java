@@ -25,7 +25,11 @@ import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.resetcred.ResetCredential;
 import ru.alamics.sso.keycloak.resetcred.ResetCredentialEmailOrPhoneFactory;
+import ru.alamics.sso.settings.SettingConstants;
+import ru.alamics.sso.settings.SettingsService;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.util.Objects;
@@ -36,9 +40,16 @@ public class ResetCredentialEmail extends ResetCredential {
 
     private final ClientService clientService;
 
+    private final SettingsService settingsService;
+
     public ResetCredentialEmail(KeycloakSession session, AuthenticationFlowContext context) {
         super(session, context);
-
+        try {
+            this.settingsService = (SettingsService) new InitialContext().lookup("java:global/domru-sso/" + SettingsService.class.getSimpleName());
+        } catch (NamingException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Something wrong with context ResetCredentialEmail");
+        }
         this.clientService = (ClientService) Lookup.lookup(ClientService.class);
     }
 
@@ -74,7 +85,7 @@ public class ResetCredentialEmail extends ResetCredential {
         int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
 
         // We send the secret in the email in a link as a query param.
-        if(authenticationSession.getRedirectUri().isEmpty()){
+        if (authenticationSession.getRedirectUri().isEmpty()) {
             authenticationSession.setRedirectUri(getRedirectUrl(authenticationSession.getClient()));
         }
         String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
@@ -114,7 +125,6 @@ public class ResetCredentialEmail extends ResetCredential {
         }
     }
 
-    private static final String HOME_PAGE = "https://newlkb2b.dom.ru";
 
     private String getRedirectUrl(ClientModel client) {
 
@@ -123,6 +133,6 @@ public class ResetCredentialEmail extends ResetCredential {
         if (redirectUrl != null)
             return redirectUrl;
 
-        return HOME_PAGE;
+        return settingsService.getSettingsStringValue(SettingConstants.HOME_PAGE,client.getRealm().getId());
     }
 }

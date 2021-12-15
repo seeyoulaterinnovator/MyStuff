@@ -1081,4 +1081,19 @@
         </sql>
     </changeSet>
 
+    <changeSet id="69" author="petrov-ny">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="SETTINGS" />
+            <sqlCheck  expectedResult="0">SELECT count(*) FROM SETTINGS WHERE ID ='8f918776-5426-11ec-bf63-0242ac130002'</sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT INTO sso.SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('8f918776-5426-11ec-bf63-0242ac130002', 'homePageSystem', 'https://newlkb2b.dom.ru', null, 'user', 'Home page', null, 'APP');
+            INSERT INTO sso.SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('b91073d4-5668-11ec-bf63-0242ac130002', 'homePageSystem', 'https://newlkb2b.dom.ru', null, 'S-TELECOM', 'Home page', null, 'APP');
+            INSERT INTO sso.SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('c540ed46-5433-11ec-bf63-0242ac130002', 'defaultRealmClient', 'lkb2b', null, 'user', 'Default clientId realm', null, 'APP');
+            INSERT INTO sso.SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('bfc34dfa-5668-11ec-bf63-0242ac130002', 'defaultRealmClient', null, null, 'S-TELECOM', 'Default clientId realm', null, 'APP');
+            INSERT INTO sso.SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('9e4f8fb6-5425-11ec-bf63-0242ac130002', 'timerIntervalDurationProperty', '5', null, 'master', 'Timer schedule', 'MINUTES', 'REALM');
+        </sql>
+    </changeSet>
+
+
 </databaseChangeLog>

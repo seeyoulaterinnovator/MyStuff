@@ -24,6 +24,8 @@ import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.registration.rias.RiasService;
 import ru.alamics.sso.registration.rias.model.RiasLogin;
 import ru.alamics.sso.registration.service.UserFindService;
+import ru.alamics.sso.settings.SettingConstants;
+import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -36,7 +38,6 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
 
     private final static String RIAS_REDIRECT_PROPERTY = "riasLogin.redirect.url";
     // TODO
-    private final static String LKB2B_ID = "lkb2b";
     private final static String B2B_ID = "b2b";
     private final static String DMP_ID = "dmp-kc-sit";
     private final static String CONSOLE_ID = "security-admin-console";
@@ -48,12 +49,15 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
     private final UserFindService userFindService;
 
     private final ApplicationProperties properties;
+    private  SettingsService settingsService;
 
     public AuthMailPhoneForm(RiasService riasService, UserFindService userFindService) {
         this.riasService = riasService;
         this.userFindService = userFindService;
 
         this.properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+
+        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
     }
 
     @Override
@@ -218,7 +222,8 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
                     }
                     return false;
                 }
-                if ((LKB2B_ID.equals(cm.getClientId()) || CONSOLE_ID.equals(cm.getClientId())) && checkAuthRias(context, REDIRECT_TO_RIAS_FORM)) {
+                String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, context.getRealm().getName());
+                if ((defaultClientRealm.equals(cm.getClientId()) || CONSOLE_ID.equals(cm.getClientId())) && checkAuthRias(context, REDIRECT_TO_RIAS_FORM)) {
                     return false;
                 }
             }

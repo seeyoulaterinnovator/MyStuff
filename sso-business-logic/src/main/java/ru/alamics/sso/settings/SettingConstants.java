@@ -7,6 +7,10 @@ public enum SettingConstants {
     EXPIRE_INCOMING_CALL_CODE("user.expire.incoming.call.code"),
     EXPIRE_INCOMING_CALL_EMAIL_CODE("user.expire.incoming.call.email.code"),
 
+    HOME_PAGE("homePageSystem"),
+    TIMER_INTERVAL_DURATION_PROPERTY("timerIntervalDurationProperty"),
+    DEFAULT_REALM_CLIENT_ID("defaultRealmClient"),
+
     BLOCK_NOTIFICATION_OF_WARNING("block.notification.warning"),
     BLOCK_NOTIFICATION_OF_BLOCKED("block.notification.blocked"),
     BLOCK_NOTIFICATION_OF_UNLOCKING("block.notification.unlocking");

@@ -32,6 +32,7 @@ import ru.alamics.sso.keycloak.auth.model.AuthType;
 import ru.alamics.sso.keycloak.auth.model.SsoUrlBean;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.model.FormConstants;
+import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -46,13 +47,14 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.UserConstants.*;
+import static ru.alamics.sso.settings.SettingConstants.*;
 
 @Slf4j
 public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
-    private static final String HOME_PAGE = "https://newlkb2b.dom.ru";
     private static final String REGISTRATION_ONLY_IN_FRAME_ATTRIBUTE = "registrationOnlyInFrame";
 
     private ClientService clientService = null;
+    private SettingsService settingsService = null;
 
     public SsoFreeMarkerLoginForm(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
@@ -60,6 +62,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         attributes.put("redirectUrl", getRedirectUrl());
         attributes.put("hideRegistration", isHideRegistration());
 
+        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
         clientService = (ClientService) Lookup.lookup(ClientService.class);
     }
 
@@ -144,7 +147,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             return redirectUri;
         }
 
-        return HOME_PAGE;
+        return settingsService.getSettingsStringValue(HOME_PAGE,realm.getName());
     }
 
     private String getHash(String fileName) {

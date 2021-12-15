@@ -16,6 +16,7 @@ import org.keycloak.util.JsonSerialization;
 import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.emailer.EmailModel;
 import ru.alamics.sso.emailer.EmailSender;
+import ru.alamics.sso.jpa.entity.AppProperty;
 import ru.alamics.sso.jpa.entity.AutoLockNotification;
 import ru.alamics.sso.jpa.entity.common.NotificationType;
 import ru.alamics.sso.jpa.repository.*;
@@ -28,11 +29,9 @@ import ru.alamics.sso.settings.SettingsService;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.*;
+import javax.ejb.Timer;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -42,10 +41,8 @@ import java.util.concurrent.TimeUnit;
 public class UserSchedule {
     private static final String TIMER_NAME = "User Schedule Timer";
     private static final long DEFAULT_INTERVAL_DURATION = 300000;
-    private final static String[] SETTINGS_REALM_NAMES_SCHEDULE = {"user", "manager"};
-    private final static String CLIENT_ID = "lkb2b";
+    private final static String[] SETTINGS_REALM_NAMES_SCHEDULE = {"user", "manager","S-TELECOM"};
     private final static String DEFAULT_CLIENT_ID = "account";
-    private final static String TIMER_INTERVAL_DURATION_PROPERTY = "application.schedule.user.milliseconds";
     @EJB
     private EmailSender sender;
     @EJB
@@ -69,17 +66,34 @@ public class UserSchedule {
     @EJB
     private ClientService сlientService;
 
+    private Timer timer;
+
     @PostConstruct
     private void init() {
         final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
+        long initialDuration = Math.round(Math.random() * getTime());
 
-        final long intervalDuration = properties.getPropertyLong(TIMER_INTERVAL_DURATION_PROPERTY, DEFAULT_INTERVAL_DURATION, "UserSchedule: default value used: '%s' = '%s'");
+        timer = timerService.createIntervalTimer(initialDuration, getTime(), timerConfig);
+        log.info("Timer:{} is created, interval duration value = {} ms, initial duration value = {} ms ", TIMER_NAME, getTime(), initialDuration);
+    }
 
-        // пробую развести по времени начало
-        long initialDuration = Math.round(Math.random() * intervalDuration);
+    public void changeScheduleTimer() {
+        final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
+        long initialDuration = Math.round(Math.random() * getTime());
 
-        timerService.createIntervalTimer(initialDuration, intervalDuration, timerConfig);
-        log.info("Timer:{} is created, interval duration value = {} ms, initial duration value = {} ms ", TIMER_NAME, intervalDuration, initialDuration);
+        timer.cancel();
+        timer = timerService.createIntervalTimer(initialDuration, getTime(), timerConfig);
+        log.info("Timer:{} is created, interval duration value = {} ms, initial duration value = {} ms ", TIMER_NAME, getTime(), initialDuration);
+    }
+
+    private long getTime(){
+        long intervalDuration = settingsService.getSettingsValue(SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY, "master") * 1000;
+
+        if (intervalDuration == 0) {
+            intervalDuration = DEFAULT_INTERVAL_DURATION;
+        }
+
+        return intervalDuration;
     }
 
     @Timeout
@@ -153,7 +167,7 @@ public class UserSchedule {
         for (AutoLockNotification notification : autoLockNotifications) {
             UserEntity user = notification.getUser();
             RealmModel realm = realmRepository.findRealmById(user.getRealmId());
-            ClientEntity client = clientRepository.findClientById(CLIENT_ID, realm.getName());
+            ClientEntity client = clientRepository.findClientById(settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, realm.getName()), realm.getName());
             if (client == null)
                 client = clientRepository.findClientById(DEFAULT_CLIENT_ID, realm.getName());
             UserModel userModel = new UserAdapter(null, realm, null, user);
