@@ -23,19 +23,21 @@ const onwarn = warning => {
   console.warn(`(!) ${warning.message}`);
 };
 
+const build = require('./path').build;
+
 export default {
   input: 'src/main.js',
   output: {
     sourcemap: true,
     format: 'iife',
     name: 'app',
-    file: 'build/bundle.min.js',
+    file: `${build}/bundle.min.js`,
   },
   plugins: [
     copy({
       targets: [
-        { src: 'src/assets/images/*', dest: 'build/images' },
-        { src: 'src/assets/fonts/*', dest: 'build/fonts' },
+        { src: 'src/assets/images/*', dest: `${build}/images` },
+        { src: 'src/assets/fonts/*', dest: `${build}/fonts` },
       ],
       copyOnce: !production,
     }),
@@ -51,7 +53,7 @@ export default {
     svelte({
       dev: !production,
       css: css => {
-        css.write('build/svelte.css');
+        css.write(`${build}/svelte.css`);
       },
     }),
 
@@ -71,33 +73,33 @@ export default {
 
     // compile to good old IE11 compatible ES5
     production &&
-      babel({
-        extensions: ['.js', '.mjs', '.html', '.svelte'],
-        runtimeHelpers: true,
-        exclude: ['node_modules/@babel/**', 'node_modules/core-js/**'],
-        presets: [
-          [
-            '@babel/preset-env',
-            {
-              targets: {
-                ie: '11',
-              },
-              useBuiltIns: 'usage',
-              corejs: 3,
+    babel({
+      extensions: ['.js', '.mjs', '.html', '.svelte'],
+      runtimeHelpers: true,
+      exclude: ['node_modules/@babel/**', 'node_modules/core-js/**'],
+      presets: [
+        [
+          '@babel/preset-env',
+          {
+            targets: {
+              ie: '11',
             },
-          ],
+            useBuiltIns: 'usage',
+            corejs: 3,
+          },
         ],
-        plugins: [
-          'transform-custom-element-classes',
-          '@babel/plugin-syntax-dynamic-import',
-          [
-            '@babel/plugin-transform-runtime',
-            {
-              useESModules: true,
-            },
-          ],
+      ],
+      plugins: [
+        'transform-custom-element-classes',
+        '@babel/plugin-syntax-dynamic-import',
+        [
+          '@babel/plugin-transform-runtime',
+          {
+            useESModules: true,
+          },
         ],
-      }),
+      ],
+    }),
 
     // If we're building for production (npm run build
     // instead of npm run dev), minify

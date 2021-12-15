@@ -1,5 +1,12 @@
+const template = require('./path').template;
+
 const purgecss = require('@fullhuman/postcss-purgecss')({
-  content: ['../**/*.html', '../**/*.ftl', 'src/**/*.svelte', 'src/**/*.js'],
+  content: [
+    `${template}/**/*.html`,
+    `${template}/**/*.ftl`,
+    'src/**/*.svelte',
+    'src/**/*.js'
+  ],
   whitelistPatterns: [/^logo/, /service/],
 
   defaultExtractor: content => content.match(/[A-Za-z0-9-_:/]+/g) || [],

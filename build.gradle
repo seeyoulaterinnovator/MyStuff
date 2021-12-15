@@ -55,8 +55,8 @@ subprojects {
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
-    }    
-    
+    }
+
     dependencies {
         annotationProcessor "org.projectlombok:lombok:$lombokVersion"
         compileOnly "org.projectlombok:lombok:$lombokVersion"
@@ -121,8 +121,7 @@ task deploy {
     def jarModuleXml = new File("$toolsDir", "module.xml")
     def themesFolder = tasks.getByPath(':keycloak-extension:processResources').getDestinationDir().getAbsolutePath() + '/themes'
     def blacklistFolder = tasks.getByPath(':keycloak-extension:processResources').getDestinationDir().getAbsolutePath() + '/standalone'
-    def nodeModules = new File(themesFolder, "/domru/login/resources/node_modules")
-    
+
     def deployDir = System.getenv('KEYCLOAK_DEPLOY_DIR') != null ? System.getenv('KEYCLOAK_DEPLOY_DIR'): "$rootProject.buildDir/deploy"
     def archiveTargetFolder = deployDir + '/standalone/deployments'
     def themesTargetFolder = deployDir + '/themes'
@@ -134,8 +133,6 @@ task deploy {
 
     doLast {
 
-        delete nodeModules
-        
         copy {
             from file(warArchive)
             into(archiveTargetFolder)
@@ -157,7 +154,7 @@ task deploy {
             rename { String fileName ->
                 fileName = "custom-jpa.jar"
             }
-        }        
+        }
         copy {
             from file(jarModuleXml)
             into(jarModuleFolder)

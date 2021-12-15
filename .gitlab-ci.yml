@@ -97,14 +97,19 @@ back:war:
   when: on_success
   except:
     - master
+  variables:
+    NODE_BUILD_PATH: build
   script:
     - currentdir=`pwd`
-    - cd keycloak-extension/src/main/resources/themes/domru/login/resources
+    # domru theme
+    - cd frontend/domru
     - cp /opt/npmrc .npmrc
     - npm install
     - npm run build
-    - rm -rf node_modules
+    - mkdir -p ../../keycloak-extension/src/main/resources/themes/domru/login/resources
+    - cp -r -f build ../../keycloak-extension/src/main/resources/themes/domru/login/resources
     - cd $currentdir
+    # deploy
     - mkdir -p .ci_status
     - ./gradlew :deploy -Dorg.gradle.java.home=/usr/java/jdk1.8.0
     - touch .ci_status/war_built
