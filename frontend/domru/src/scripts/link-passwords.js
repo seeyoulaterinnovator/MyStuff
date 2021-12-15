@@ -21,10 +21,13 @@ export default (
     'refresh-password-button',
   );
 
+  const generatedPassword = document.getElementById('generated-password');
+
   function generatePassword() {
     fetchPassword().then(data => {
       passwordElement.value ='';
       passwordElement.value = data.password;
+      generatedPassword.textContent = data.password;
       setPassword(data.password);
       inputSomePass(passwordElement);
       checkPasswordConfirmation();
@@ -33,11 +36,19 @@ export default (
   }
 
   generatePasswordButton.addEventListener('click', () => {
+    generatePassword();
     refreshPasswordButton.classList.add('rotate');
     setTimeout(() => {
       refreshPasswordButton.classList.remove('rotate');
     }, 500);
+  });
+
+  refreshPasswordButton.addEventListener('click', () => {
     generatePassword();
+    refreshPasswordButton.classList.add('rotate');
+    setTimeout(() => {
+      refreshPasswordButton.classList.remove('rotate');
+    }, 500);
   });
 
   // Красим блоки в разные цвета согласно правилам валидации пароля

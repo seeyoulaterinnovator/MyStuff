@@ -2,32 +2,32 @@
   display: flex;
   flex-direction: column;
 
-  &--required {
-    .field__label::before {
-      width: 8px;
-      height: 8px;
+&--required {
+.field__label::before {
+  width: 8px;
+  height: 8px;
 
-      margin-right: 4px;
+  margin-right: 4px;
 
-      vertical-align: middle;
+  vertical-align: middle;
 
-      border-radius: 50%;
+  border-radius: 50%;
 
-      content: '';
+  content: '';
 
-      @apply .bg-extra;
-    }
-  }
+  @apply .bg-extra;
+}
+}
 
-  &--error {
-    .field__input {
-      @apply .border-accentRed;
-    }
-  }
+&--error {
+.field__input {
+  @apply .border-accentRed;
+}
+}
 
-  &--row {
-    flex-direction: row;
-  }
+&--row {
+   flex-direction: row;
+ }
 }
 
 .field__container {
@@ -56,27 +56,27 @@
 
   height: 40px;
   transition: border-color 0.1s ease-in;
-  @media (min-width: 1199px) {
-    height: 48px;
-  }
+@media (min-width: 1199px) {
+  height: 48px;
+}
 
-  &:hover
-  {
-    @apply .border-accentBlue-700;
-  }
-  &:focus
-  {
-    @apply .border-extra-700;
-  }
+&:hover
+ {
+   @apply .border-accentBlue-700;
+ }
+&:focus
+ {
+   @apply .border-extra-700;
+ }
 
-  &::placeholder {
-    font-size: 16px;
-    color: black ;
-    opacity: 0.5;
-    @media (min-width: 1200px) {
-      font-size: 17px;
-    }
-  }
+&::placeholder {
+   font-size: 16px;
+   color: black ;
+   opacity: 0.5;
+@media (min-width: 1200px) {
+  font-size: 17px;
+}
+}
 }
 
 .field__input:placeholder-shown + .field__label {
@@ -104,9 +104,9 @@
   font-size: 10px;
   line-height: 13px;
 
-  @media (min-width: 640px) {
-    font-size: 13px;
-  }
+@media (min-width: 640px) {
+  font-size: 13px;
+}
 }
 
 .field__error-message {
@@ -118,26 +118,41 @@
 }
 
 .pass-fields {
+  min-width: 270px;
+  max-width: 270px;
+
+@media (max-width: 1199px) {
+  min-width: 235px;
+  max-width: 245px;
+}
+
+@media (max-width: 479px) {
+  width: 85%;
+  max-width: 100%;
+}
+}
+
+.reg-fields {
   min-width: 225px;
   max-width: 225px;
 
-  @media (max-width: 1199px) {
-    min-width: 210px;
-    max-width: 210px;
-  }
+@media (max-width: 1199px) {
+  min-width: 210px;
+  max-width: 210px;
+}
 
-  @media (max-width: 479px) {
-    width: 100%;
-    max-width: 100%;
-  }
+@media (max-width: 479px) {
+  width: 100%;
+  max-width: 100%;
+}
 }
 
 .pass-fields--change-pass {
   min-width: unset;
 
-  @media (max-width: 1199px) {
-    min-width: 210px;
-  }
+@media (max-width: 1199px) {
+  min-width: 210px;
+}
 
 @media (max-width: 479px) {
   width: 75%;
@@ -148,21 +163,21 @@
 .field__input--city {
   width: 384px;
 
-  @media (max-width: 1199px) {
-    width: 280px;
-  }
+@media (max-width: 1199px) {
+  width: 280px;
+}
 
-  @media (max-width: 959px) {
-    width: 288px;
-  }
+@media (max-width: 959px) {
+  width: 288px;
+}
 
-  @media (max-width: 639px) {
-    width: 231px;
-  }
+@media (max-width: 639px) {
+  width: 231px;
+}
 
-  @media (max-width: 479px) {
-    width: 240px;
-  }
+@media (max-width: 479px) {
+  width: 240px;
+}
 }
 
 .generated-password-text {
@@ -171,9 +186,9 @@
   white-space: nowrap;
   opacity: 0.5;
 
-  @media (max-width: 1199px) {
-    font-size: 14px;
-  }
+@media (max-width: 1199px) {
+  font-size: 14px;
+}
 }
 
 .generated-password-field {
@@ -181,9 +196,9 @@
   justify-content: space-between;
   align-items: center;
   height: 48px;
-  @media (max-width: 1199px) {
-    height: 40px;
-  }
+@media (max-width: 1199px) {
+  height: 40px;
+}
 }
 
 

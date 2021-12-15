@@ -14,18 +14,17 @@
         <span class="text-sm sm:block">Цифра или несколько цифр</span>
       </div>
     </div>
-
-    <div class="flex flex-col-reverse sm:flex-row">
+    <p class="text-black-80 mb-8 mt-8">Не забудьте записать пароль <span id="generated-password" class="text-base"></span></p>
+    <div class="flex sm:flex-row">
       <div class="pass-fields">
         <@components.field class="mb-3 sm:mb-4" fieldName="${firstFieldName}" label="${msg('password')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true value="" />
       </div>
-
-      <div class="mx-auto generated-password">
-        <button id="generate-password-button" type="button" class="generate-btn">
-          <span id="refresh-password-button" class="w-12 h-12 focus:outline-none" type="button">
-            <@svg.reloadButton color="accentBlue"></@svg.reloadButton>
-          </span>
-          <span class="reference reference-generate-password border-accentBlue text-accentBlue pass--hidden-small">Сгенерировать</span>
+      <div class="mx-auto generated-password btn-group flex">
+        <button id="refresh-password-button" class="w-12 h-12 focus:outline-none flex-child" type="button">
+          <@svg.reloadButton color="accentBlue"></@svg.reloadButton>
+        </button>
+        <button id="generate-password-button" type="button" class="generate-btn focus:outline-none pass--hidden-small flex-child">
+          <span class="reference reference-generate-password border-accentBlue text-accentBlue">ГЕНЕРИРОВАТЬ</span>
         </button>
       </div>
 

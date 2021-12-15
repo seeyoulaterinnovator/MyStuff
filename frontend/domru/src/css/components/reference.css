@@ -1,51 +1,53 @@
 .reference {
   transition: 0.2s ease-in-out;
-  border-bottom-width: 1px;
-  border-bottom-style: dashed;
-  &-generate-password {
-    display: inline-block;
-    font-size: 16px;
-    @media screen and (min-width: 1199px) {
-      font-size: 18px;
-    }
-  }
-  &_hoverable {
-   color: black;
-   opacity: .5;
-   border-bottom-color: black;
-    &:hover {
-      opacity: .8;
-    }
-  }
+  color: #2B539B;
+&-generate-password {
+   display: inline-block;
+   font-size: 16px;
+@media screen and (min-width: 1199px) {
+  font-size: 18px;
+}
+}
+&_hoverable {
+   opacity: 1;
+ }
 }
 
 .generate-btn {
-  margin-left: 62px;
-  padding-top: 30px;
-  &:hover {
-    .reference {
-      border-bottom-color: transparent;
-    }
-  }
+  padding-bottom: 15px;
+&:hover {
+.reference {
+  border-bottom-color: transparent;
+}
+}
+}
+
+.agreement {
+  padding-bottom: 15px;
 }
 
 .generated-password {
-  margin-left: 44px;
+  margin-left: 20px;
 }
 
 @media screen and (max-width: 1199px){
   .generate-btn {
-    margin-left: 74px;
+    padding-bottom: 9px
   }
 
   .generated-password {
+    margin-top: -4px;
     margin-left: 24px;
   }
 }
 
+.show-small-tell {
+  display: none;
+}
+
 @media screen and (max-width: 639px){
   .generate-btn {
-    padding-top: 27px;
+    padding-bottom: 13px;
   }
 }
 
@@ -55,7 +57,17 @@
     width: 20%;
   }
 
+  .show-small-tell {
+    display: block;
+  }
+
   .pass--hidden-small {
     display: none;
+  }
+
+  .generated-password {
+    margin: 0 0 30px;
+    margin-left: 20px;
+    margin-top: -5px;
   }
 }
