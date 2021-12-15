@@ -61,14 +61,6 @@ public class UserFindService {
         return null;
     }
 
-    public UserEntity getUserByPhoneAndExcludedUserId(String phone, String excludedUserId) {
-        phone = Util.getCleanUserPhone(phone);
-        if (phone != null) {
-            return userRepository.getFirstUserByPhoneNumber(phone, excludedUserId);
-        }
-        return null;
-    }
-
     public List<UserSearchDto> getUsersByParametersWithoutGrouping(
             String realm,
             String search,

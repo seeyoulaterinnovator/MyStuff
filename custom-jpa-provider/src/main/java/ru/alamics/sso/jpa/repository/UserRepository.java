@@ -168,28 +168,6 @@ public class UserRepository {
         return null;
     }
 
-    // TODO медленно, используется с правкой атрибутов
-    public UserEntity getFirstUserByPhoneNumber(String phone, String excludedUserId) {
-
-        if (Validation.isBlank(phone))
-            return null;
-
-        List<UserEntity> users = em.createQuery("select u from UserEntity u " +
-                "join u.attributes attr " +
-                "  where attr.name = :name " +
-                "       and (:excludedUserId is null or u.id <> :excludedUserId) " +
-                "       and attr.value = :phoneNmbr", UserEntity.class)
-                .setParameter("name", "phone")
-                .setParameter("phoneNmbr", phone)
-                .setParameter("excludedUserId", Validation.isBlank(excludedUserId) ? null : excludedUserId)
-                .setMaxResults(1)
-                .getResultList();
-        if (users != null && users.size() > 0) {
-            return users.get(0);
-        }
-        return null;
-    }
-
     // TODO медленно, используется при импорте
     public UserEntity getFirstUserByPhone(String phone) {
         List<UserEntity> users = em.createQuery(
