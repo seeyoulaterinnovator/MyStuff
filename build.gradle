@@ -178,6 +178,9 @@ task deploy {
         ant.replaceregexp(match:'hash=', replace:'hash='+currentTime, flags:'g', byline:true) {
             fileset(dir: themesTargetFolder + '/domru/login', includes: 'template.ftl')
         }
+        ant.replaceregexp(match:'hash=', replace:'hash='+currentTime, flags:'g', byline:true) {
+            fileset(dir: themesTargetFolder + '/stelecom/login', includes: 'template.ftl')
+        }
     }
 }
 

@@ -1,0 +1,29 @@
+{
+  "extends": "stylelint-config-rational-order",
+  "plugins": [
+    "stylelint-order",
+    "stylelint-config-rational-order/plugin",
+    "stylelint-a11y"
+  ],
+  "rules": {
+    "indentation": 2,
+    "selector-pseudo-class-no-unknown": [
+      true,
+      {
+        "ignorePseudoClasses": ["global"]
+      }
+    ],
+    "color-hex-case": "upper",
+    "string-quotes": "single",
+    "order/properties-order": [],
+    "plugin/rational-order": [
+      true,
+      {
+        "border-in-box-model": false,
+        "empty-line-between-groups": true
+      }
+    ],
+    "a11y/no-outline-none": true,
+    "a11y/selector-pseudo-class-focus": true
+  }
+}

@@ -1,0 +1,32 @@
+.error {
+  &-img {
+    position: fixed;
+    z-index: -1;
+    bottom: -5vh;
+    left: 2vw;
+    width: 138vw;
+    height: auto;
+    max-height: 100%;
+    max-width: none;
+
+    @media (min-width: 639px) {
+      left: -3vw;
+      width: 57vw;
+    }
+
+    @media (min-width: 959px) {
+      bottom: -10vh;
+      left: -3vw;
+      width: 61vw;
+    }
+  }
+
+  &-btn {
+    padding-left: 1rem;
+    padding-right: 1rem;
+
+    @media (min-width: 639px) {
+      width: fit-content;
+    }
+  }
+}
