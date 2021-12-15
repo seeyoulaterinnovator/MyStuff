@@ -1,6 +1,6 @@
 <style>
     .content {
-        color: #000000cc;
+        color: #000000ff;
         font-size: 18px;
         line-height: normal;
         margin: 0;
@@ -18,6 +18,10 @@
         font-style: italic;
     }
 
+    hr {
+        margin-bottom: 24px;
+    }
+
     .content p {
         padding-top: 20px;
     }
@@ -28,7 +32,7 @@
         text-decoration-line: underline;
         text-overflow: ellipsis;
         font-size: 20px;
-        color: #6688c9;
+        color: #007bfbff;
 
         /* not working in Yandex Mail */
         overflow-wrap: normal;
@@ -41,7 +45,7 @@
 
     .mail-wrapper {
         width: 100%;
-        background-color: #f3f3f3;
+        background-color: #ffffffff;
         text-align: center;
     }
 
@@ -51,9 +55,11 @@
         margin: 0 auto;
         box-sizing: border-box;
         font-family: Arial, sans-serif;
-        color: #000000;
+        color: #000000ff;
         display: inline-table;
         text-align: left;
+        line-height: 18px;
+        font-size: 14px;
     }
 
     .mail-text--bold {
@@ -73,24 +79,18 @@
 
     .contacts {
         text-decoration: none;
-    }
-
-    .contacts__img {
-        height: 30px;
-        max-height: 30px;
-        width: auto;
-        padding-top: 7px;
+        color: #007bfbff;
     }
 
     .contact__number {
-        font-size: 16px;
-        line-height: 20px;
-        letter-spacing: -1px;
-        opacity: 0.5;
-        color: #000000;
-        padding-top: 4px;
-        height: 24px;
-        padding-bottom: 2px;
+        font-size: 20px;
+        line-height: 25px;
+        margin-bottom: 4px;
+    }
+
+    .contact__link {
+        font-size: 12px;
+        line-height: 16px;
     }
 
     .mail-container__footer {
@@ -98,10 +98,6 @@
         font-size: 14px;
         line-height: 18px;
         opacity: 0.8;
-    }
-
-    .mail-text--copyright {
-        padding-top: 31px;
     }
 
     .mail-text--additional {
@@ -117,22 +113,12 @@
     }
 
     .mail-text--light-gray {
-        color: #5050504d;
+        color: #0000007f;
         font-size: 12px;
-        line-height: 25px;
+        line-height: 16px;
     }
 
-    @media all and (min-width: 420px) {
-        .logo,
-        .contacts__img {
-            max-height: 48px;
-            height: 48px;
-        }
-        .contact__number {
-            padding-left: 5px;
-            font-size: 20px;
-            height: 48px;
-        }
+    .mail-text--copyright {
+        margin-bottom: 8px;
     }
-
 </style>
