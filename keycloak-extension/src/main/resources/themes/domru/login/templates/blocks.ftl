@@ -17,7 +17,7 @@
     <p class="text-black-80 mb-8 mt-8">Не забудьте записать пароль <span id="generated-password" class="text-base"></span></p>
     <div class="flex sm:flex-row">
       <div class="pass-fields">
-        <@components.field class="mb-3 sm:mb-4" fieldName="${firstFieldName}" label="${msg('password')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true value="" />
+        <@components.field class="mb-3 sm:mb-4" fieldName="${firstFieldName}" label="${msg('password')}" placeholder="${msg(passwordPlaceholder)}" type="password" required=true value="" />
       </div>
       <div class="mx-auto generated-password btn-group flex">
         <button id="refresh-password-button" class="w-12 h-12 focus:outline-none flex-child" type="button">

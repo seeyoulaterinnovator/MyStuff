@@ -29,7 +29,7 @@
                                placeholder="${usernameOrEmailPlaceholder}" value="${(login.username!)}"
                                type="text" autofocus autocomplete="off"/>
                     </#if>
-                    <label class="field__label" for="username">${yourlogin}</label>
+                    <label class="field__label" for="username">${usernameOrEmailPlaceholder}</label>
                 </div>
 
                 <@components.field class="mb-7 sm:mb-8 md:w-full" fieldName="password" label="${password}" placeholder="${passwordPlaceholder}" type="password" required=true />
@@ -37,7 +37,7 @@
                 <div class="flex justify-between w-full items-center">
                     <button id="submit" class="btn btn-main w-1/2 btn-enter" type="submit">${enter}</button>
                     <#if realm.resetPasswordAllowed>
-                        <span class="reset-password text-right">
+                        <span class="reset-password">
                             <a href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
                         </span>
                     </#if>
