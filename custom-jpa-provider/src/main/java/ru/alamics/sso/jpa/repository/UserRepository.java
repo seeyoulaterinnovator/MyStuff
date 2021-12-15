@@ -311,8 +311,9 @@ public class UserRepository {
             int pageNum,
             int pageSize
     ) {
-        if (search != null && !search.isEmpty())
-            search = "%" + search + "%";
+        if (search != null && !search.isEmpty()) {
+            search = "%" + search.replace("-", "\\-") + "%";
+        }
 
         Query query = em.createQuery(
                 "select distinct new ru.alamics.sso.jpa.model.UserSummaryView(UE.id, " +

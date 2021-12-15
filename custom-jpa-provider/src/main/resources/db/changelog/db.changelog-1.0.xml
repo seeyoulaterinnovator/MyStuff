@@ -1141,5 +1141,16 @@
         </sql>
     </changeSet>
 
+    <changeSet id="73" author="petrov-ny">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="APP_PROPERTIES" />
+            <sqlCheck  expectedResult="0">SELECT count(*) FROM APP_PROPERTIES WHERE NAME ='db.non.mysql'</sqlCheck>
+        </preConditions>
+        <!--    for specific db usage    -->
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('db.non.mysql', '1');
+        </sql>
+    </changeSet>
+
 
 </databaseChangeLog>
