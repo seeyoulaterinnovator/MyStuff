@@ -1291,4 +1291,24 @@
         </sql>
     </changeSet>
 
+    <changeSet id="76" author="petrov-ny">
+        <sql>
+
+            update SETTINGS set TYPE = 'REALM' where EXT_ID = 'life.token.loginverify.email';
+            update SETTINGS set TYPE = 'REALM' where EXT_ID = 'life.token.reset.pass';
+            update SETTINGS set TYPE = 'REALM' where EXT_ID = 'life.token.set.first-pass';
+
+        </sql>
+    </changeSet>
+
+    <changeSet id="77" author="petrov-ny">
+        <sql>
+
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('d8b1b38a-5da5-11ec-bf63-0242ac130002', 'life.token.loginverify.email', '36', 'Email confirmation token lifetime', 'S-TELECOM', 'Token time to verify-email', 'HOURS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('ddbfebd0-5da5-11ec-bf63-0242ac130002', 'life.token.reset.pass', '36', 'Password reset token lifetime', 'S-TELECOM', 'Token time to reset password', 'HOURS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('e1267c58-5da5-11ec-bf63-0242ac130002', 'life.token.set.first-pass', '36', 'First password token lifetime', 'S-TELECOM', 'Token time to set first password', 'HOURS', 'REALM');
+
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
