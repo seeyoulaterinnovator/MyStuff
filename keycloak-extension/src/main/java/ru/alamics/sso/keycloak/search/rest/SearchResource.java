@@ -22,6 +22,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -159,7 +160,17 @@ public class SearchResource {
 
         Predicate<RealmModel> filterPredicate;
 
-        if (roles.isEmpty()) {
+        List<String> viewRolesRealm = new ArrayList<>();
+
+        for (RealmModel realm: realms) {
+            for (RoleModel role: roles) {
+                if(Objects.equals(role.getName(), "view-" + realm.getName() + "-realm")){
+                    viewRolesRealm.add(role.getName());
+                }
+            }
+        }
+
+        if (viewRolesRealm.isEmpty()) {
             filterPredicate = realmNamesBasedRealmFilterPredicate;
         } else {
             if (Objects.equals(session.getContext().getRealm().getName(), "master")){
