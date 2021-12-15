@@ -1,5 +1,7 @@
 package ru.alamics.sso.keycloak.search.rest;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.annotations.jaxrs.QueryParam;
@@ -130,12 +132,9 @@ public class SearchResource {
                     switch (session.getContext().getRealm().getName()) {
                         case "master":
                             return true;
-                        case "user":
                         case "manager":
-                            if (o.getName().equalsIgnoreCase("user")) {
-                                return true;
-                            }
-                            return false;
+                            return !o.getName().equalsIgnoreCase("master") &&
+                                    !o.getName().equalsIgnoreCase("manager");
                     }
                     return false;
                 })
