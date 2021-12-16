@@ -106,6 +106,7 @@ public class AttributesForm implements Authenticator {
         form.setAttribute("roleUser",settingsService.getSettingsStringValue(SettingConstants.ROLE_USER,context.getRealm().getId()));
         form.setAttribute("footer",settingsService.getSettingsStringValue(SettingConstants.FOOTER,context.getRealm().getId()));
         form.setAttribute("phoneConst",settingsService.getSettingsStringValue(SettingConstants.PHONE_CONST,context.getRealm().getId()));
+        form.setAttribute("phoneConstLink",settingsService.getSettingsStringValue(SettingConstants.PHONE_CONST_LINK,context.getRealm().getId()));
 
         return form.createForm(FORM);
     }

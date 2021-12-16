@@ -128,6 +128,11 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             attributes.put("doRegister", settingsService.getSettingsStringValue(DO_REGISTER,realm.getName()));
             attributes.put("doSubmit", settingsService.getSettingsStringValue(DO_SUBMIT,realm.getName()));
 
+            attributes.put("placeholderUsername", settingsService.getSettingsStringValue(PLACEHOLDER_USERNAME,realm.getName()));
+            attributes.put("placeholderEmail", settingsService.getSettingsStringValue(PLACEHOLDER_EMAIL,realm.getName()));
+            attributes.put("placeholderPhone", settingsService.getSettingsStringValue(PLACEHOLDER_PHONE,realm.getName()));
+            attributes.put("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK,realm.getName()));
+
             attributes.put("url", new SsoUrlBean(realm, theme, baseUri, this.actionUri, Util.isFrame(session)));
             attributes.put("requiredActionUrl", new RequiredActionUrlFormatterMethod(realm, baseUri));
 

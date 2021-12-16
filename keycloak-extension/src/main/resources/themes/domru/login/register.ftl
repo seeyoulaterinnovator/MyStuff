@@ -9,18 +9,18 @@
     <#elseif section = "form">
         <form id="registrationForm" action="${url.registrationAction}" method="post">
             <#-- В нашем случае firstName – это полное имя -->
-            <@components.field class="mb-4 sm:mb-4 md:w-full" fieldName="firstName" value="${firstName!''}" label="Как к Вам обращаться?" placeholder="Как к Вам обращаться?" required=true />
+            <@components.field class="mb-4 sm:mb-4 md:w-full" fieldName="firstName" value="${firstName!''}" label="${placeholderUsername}" placeholder="${placeholderUsername}" required=true />
 
             <#-- Пока бэк не уберет необходимость фамилии, скрою поле и отправлю дефис -->
             <@components.field class="mb-4 sm:mb-4 md:w-full" fieldName="lastName" value="-" label="Фамилия" placeholder="Фамилия" required=true style="display: none" />
 
-            <@components.field class="mb-4 sm:mb-4 md:w-full" fieldName="email" value="${email!''}" label="Эл. почта" placeholder="Введите эл. почту" required=true type="text" />
+            <@components.field class="mb-4 sm:mb-4 md:w-full" fieldName="email" value="${email!''}" label="${placeholderEmail}" placeholder="${placeholderEmail}" required=true type="text" />
 
             <#if !realm.registrationEmailAsUsername>
                 <@components.field class="mb-4 sm:mb-4 md:w-full" fieldName="username" value="${username!''}" label="Имя пользователя" placeholder="Имя пользователя" required=true />
             </#if>
 
-            <@components.field class="mb-4 sm:mb-4 md:w-full" fieldName="phone" value="${phone!''}" label="Телефон" placeholder="Введите номер телефона" required=true />
+            <@components.field class="mb-4 sm:mb-4 md:w-full" fieldName="phone" value="${phone!''}" label="${placeholderPhone}" placeholder="${placeholderPhone}" required=true />
 
 
             <#if passwordRequired>

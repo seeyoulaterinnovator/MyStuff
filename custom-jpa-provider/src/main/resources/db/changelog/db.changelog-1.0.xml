@@ -1311,4 +1311,31 @@
         </sql>
     </changeSet>
 
+    <changeSet id="78" author="petrov-ny">
+        <sql>
+
+            UPDATE SETTINGS SET VALUE = 'Если у вас уже есть учетная запись, вы можете войти' WHERE ID = '7f952302-c816-480f-877c-9d6d6077fd14';
+            UPDATE SETTINGS SET VALUE = 'Если у вас уже есть учетная запись, вы можете войти' WHERE ID = '81a57a49-4a45-450a-9c6c-321913d687b2';
+            UPDATE SETTINGS SET VALUE = '8 800 550 0479' WHERE ID = '55e19c6c-59aa-11ec-bf63-0242ac130002';
+            UPDATE SETTINGS SET VALUE = '8 800 550 0479' WHERE ID = 'd45647ba-5a4e-11ec-bf63-0242ac130002';
+
+        </sql>
+    </changeSet>
+
+    <changeSet id="79" author="petrov-ny">
+        <sql>
+            <![CDATA[
+                INSERT INTO sso.SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('680bfca0-5e3e-11ec-bf63-0242ac130002', 'placeholderUsername', 'Как к Вам обращаться?', null, 'user', 'Placeholder поля ввести имя', null, 'FRONT');
+                INSERT INTO sso.SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('6d620190-5e3e-11ec-bf63-0242ac130002', 'placeholderEmail', 'Введите эл. почту', null, 'user', 'Placeholder поля ввода email', null, 'FRONT');
+                INSERT INTO sso.SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('70be6946-5e3e-11ec-bf63-0242ac130002', 'placeholderPhone', 'Введите номер телефона', null, 'user', 'Placeholder поля ввода номера телефона', null, 'FRONT');
+                INSERT INTO sso.SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('88013332-5e47-11ec-bf63-0242ac130002', 'phoneConstLink', 'tel:88005500479', null, 'user', 'Ссылка номера телефона', null, 'FRONT');
+
+                INSERT INTO sso.SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('73f1f254-5e3e-11ec-bf63-0242ac130002', 'placeholderUsername', 'Как к Вам обращаться?', null, 'master', 'Placeholder поля ввести имя', null, 'FRONT');
+                INSERT INTO sso.SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('77c7c926-5e3e-11ec-bf63-0242ac130002', 'placeholderEmail', 'Введите эл. почту', null, 'master', 'Placeholder поля ввода email', null, 'FRONT');
+                INSERT INTO sso.SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('7b5be626-5e3e-11ec-bf63-0242ac130002', 'placeholderPhone', 'Введите номер телефона', null, 'master', 'Placeholder поля ввода номера телефона', null, 'FRONT');
+                INSERT INTO sso.SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('84239e80-5e47-11ec-bf63-0242ac130002', 'phoneConstLink', 'tel:88005500479', null, 'master', 'Ссылка номера телефона', null, 'FRONT');
+            ]]>
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

@@ -32,7 +32,7 @@
                     <label class="field__label" for="username">${usernameOrEmailPlaceholder}</label>
                 </div>
 
-                <@components.field class="mb-7 sm:mb-8 md:w-full" fieldName="password" label="${password}" placeholder="${passwordPlaceholder}" type="password" required=true />
+                <@components.field class="mb-7 sm:mb-8 md:w-full" fieldName="password" label="${passwordPlaceholder}" placeholder="${passwordPlaceholder}" type="password" required=true />
 
                 <div class="flex justify-between w-full items-center">
                     <button id="submit" class="btn btn-main w-1/2 btn-enter" type="submit">${enter}</button>

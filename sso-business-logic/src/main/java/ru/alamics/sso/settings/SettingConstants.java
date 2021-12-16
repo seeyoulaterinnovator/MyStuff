@@ -47,6 +47,10 @@ public enum SettingConstants {
     SEND_BY_EMAIL("sendByEmail"),
     PHONE_CONST("phoneConst"),
     REQUIRED_FIELDS("requiredFields"),
+    PLACEHOLDER_USERNAME("placeholderUsername"),
+    PLACEHOLDER_EMAIL("placeholderEmail"),
+    PLACEHOLDER_PHONE("placeholderPhone"),
+    PHONE_CONST_LINK("phoneConstLink"),
 
     //Заголовок сообщений
 
