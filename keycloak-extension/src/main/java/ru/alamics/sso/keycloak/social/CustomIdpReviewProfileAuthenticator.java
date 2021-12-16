@@ -168,9 +168,6 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
 
     private List<FormMessage> getValidationErrorList(AuthenticationFlowContext context, RealmModel realm, MultivaluedMap<String, String> formData) {
         List<FormMessage> errors = Validation.validateUpdateProfileForm(realm, formData);
-        if (Validation.isBlank(formData.getFirst(FormConstants.FIELD_ORG_NAME))) {
-            errors.add(new FormMessage(FormConstants.FIELD_ORG_NAME, "missingOrgNameMessage"));
-        }
         if (Validation.isBlank(formData.getFirst(FormConstants.FIELD_PHONE))) {
             errors.add(new FormMessage(FormConstants.FIELD_PHONE, "missingPhoneNumberMessage"));
         }
