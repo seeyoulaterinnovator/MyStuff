@@ -12,7 +12,8 @@
 
 # Frontend
 node_modules/
+package-lock.json
 .vscode
 .cache
-/keycloak-extension/src/main/resources/themes/domru/login/resources/build/
-
+/keycloak-extension/src/main/resources/themes/*/login/resources/build/
+/frontend/*/build/

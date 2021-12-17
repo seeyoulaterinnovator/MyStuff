@@ -24,19 +24,21 @@ import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.registration.rias.RiasService;
 import ru.alamics.sso.registration.rias.model.RiasLogin;
 import ru.alamics.sso.registration.service.UserFindService;
+import ru.alamics.sso.settings.SettingConstants;
+import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
+import static ru.alamics.sso.settings.SettingConstants.*;
 
 @Slf4j
 public class AuthMailPhoneWithRiasForm extends AbstractUsernameFormAuthenticator implements Authenticator {
 
     private final static String RIAS_REDIRECT_PROPERTY = "riasLogin.redirect.url";
     // TODO
-    private final static String LKB2B_ID = "lkb2b";
     private final static String B2B_ID = "b2b";
     private final static String DMP_ID = "dmp-kc-sit";
     private final static String CONSOLE_ID = "security-admin-console";
@@ -48,12 +50,15 @@ public class AuthMailPhoneWithRiasForm extends AbstractUsernameFormAuthenticator
     private final UserFindService userFindService;
 
     private final ApplicationProperties properties;
+    private  SettingsService settingsService;
 
     public AuthMailPhoneWithRiasForm(RiasService riasService, UserFindService userFindService) {
         this.riasService = riasService;
         this.userFindService = userFindService;
 
         this.properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+
+        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
     }
 
     @Override
@@ -162,6 +167,12 @@ public class AuthMailPhoneWithRiasForm extends AbstractUsernameFormAuthenticator
                 Response challenge = context.form()
                         .setAttribute("redirectTo", redirectTo)
                         .setAttribute("redirectHeader", redirectHeader)
+                        .setAttribute("loginToB2B",settingsService.getSettingsStringValue(LOGIN_TO_B2B,context.getRealm().getId()))
+                        .setAttribute("enter", settingsService.getSettingsStringValue(ENTER,context.getRealm().getId()))
+                        .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER,context.getRealm().getId()))
+                        .setAttribute("backToMainPage",settingsService.getSettingsStringValue(BACK_TO_MAIN_PAGE,context.getRealm().getId()))
+                        .setAttribute("phoneConst",settingsService.getSettingsStringValue(PHONE_CONST,context.getRealm().getId()))
+                        .setAttribute("phoneConstLink",settingsService.getSettingsStringValue(PHONE_CONST_LINK,context.getRealm().getId()))
                         .createForm(form);
 
                 context.challenge(challenge);
@@ -218,7 +229,8 @@ public class AuthMailPhoneWithRiasForm extends AbstractUsernameFormAuthenticator
                     }
                     return false;
                 }
-                if ((LKB2B_ID.equals(cm.getClientId()) || CONSOLE_ID.equals(cm.getClientId())) && checkAuthRias(context, REDIRECT_TO_RIAS_FORM)) {
+                String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, context.getRealm().getName());
+                if ((defaultClientRealm.equals(cm.getClientId()) || CONSOLE_ID.equals(cm.getClientId())) && checkAuthRias(context, REDIRECT_TO_RIAS_FORM)) {
                     return false;
                 }
             }

@@ -1,0 +1,180 @@
+<div class="col-sm-9 col-md-10 col-sm-push-3 col-md-push-2">
+    <ol class="breadcrumb">
+        <li><a href="#/realms/{{realm.realm}}/users">{{:: 'users' | translate}}</a></li>
+        <li data-ng-hide="create">{{user.username}}</li>
+        <li data-ng-show="create">{{:: 'add-user' | translate}}</li>
+    </ol>
+
+    <kc-tabs-user></kc-tabs-user>
+
+    <form class="form-horizontal"
+          kc-read-only="!(create || user.access.manage && auth.authz.realm === 'master' || user.access.manage && access.editDetails)"
+          name="userForm"
+          novalidate>
+
+        <fieldset class="border-top">
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="id">{{:: 'id' | translate}}</label>
+                <div class="col-md-6">
+                    <input autofocus class="form-control" data-ng-model="user.id" data-ng-readonly="true" id="id"
+                           name="id"
+                           type="text">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="id">{{:: 'created-at' | translate}}</label>
+                <div class="col-md-6">
+                    {{user.createdTimestamp | date:'shortDate'}}&nbsp;{{user.createdTimestamp | date:'mediumTime'}}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="username">{{:: 'username' | translate}} <span
+                        class="required" data-ng-show="create">*</span></label>
+                <div class="col-md-6">
+                    <!-- Characters >,<,/,\ are forbidden in username -->
+                    <input autofocus class="form-control" data-ng-model="user.username" data-ng-readonly="!editUsername" id="username" name="username"
+                           ng-pattern="/^[^\<\>\\\/]*$/" required type="text" placeholder="Введите логин">
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="email">{{:: 'email' | translate}}<span
+                        class="required" data-ng-show="create">*</span></label>
+                <div class="col-md-6">
+                    <input class="form-control" data-ng-model="user.email" id="email" name="email" required type="email" placeholder="Введите email">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="firstName">{{:: 'first-name' | translate}}<span
+                        class="required" data-ng-show="create">*</span></label>
+                <div class="col-md-6">
+                    <input class="form-control" data-ng-model="user.firstName" id="firstName" required name="firstName" type="text" placeholder="Введите ФИО">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="lastName">{{:: 'last-name' | translate}}</label>
+
+                <div class="col-md-6">
+                    <input class="form-control" data-ng-model="user.lastName" id="lastName" name="lastName"
+                           type="text">
+                </div>
+            </div>
+
+            <div class="form-group clearfix block">
+                <label class="col-md-2 control-label" for="userEnabled">{{:: 'user-enabled' | translate}}</label>
+                <div class="col-md-6">
+                    <input id="userEnabled" name="userEnabled"
+                           ng-disabled="!(create || user.access.manage && auth.authz.realm === 'master' || user.access.manage && access.editDetails)"
+                           ng-model="user.enabled"
+                           off-text="{{:: 'offText' | translate}}"
+                           on-text="{{:: 'onText' | translate}}" onoffswitch/>
+                </div>
+                <kc-tooltip>{{:: 'user-enabled.tooltip' | translate}}</kc-tooltip>
+            </div>
+
+            <div class="form-group clearfix block" data-ng-show="realm.bruteForceProtected && !create">
+                <label class="col-md-2 control-label"
+                       for="temporarilyDisabled">{{:: 'user-temporarily-locked' | translate}}</label>
+                <div class="col-md-1">
+                    <input data-ng-disabled="true" data-ng-readonly="true" id="temporarilyDisabled"
+                           name="temporarilyDisabled" ng-model="temporarilyDisabled"
+                           off-text="{{:: 'offText' | translate}}"
+                           on-text="{{:: 'onText' | translate}}" onoffswitch/>
+                </div>
+                <kc-tooltip>{{:: 'user-temporarily-locked.tooltip' | translate}}</kc-tooltip>
+                <div class="col-sm-2">
+                    <button class="btn btn-default" data-ng-click="unlockUser()" data-ng-show="temporarilyDisabled"
+                            type="submit">{{:: 'unlock-user' | translate}}
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group clearfix block" data-ng-show="!create && user.federationLink">
+                <label class="col-md-2 control-label">{{:: 'federation-link' | translate}}</label>
+                <div class="col-md-6">
+                    <a href="{{federationLink}}">{{federationLinkName}}</a>
+                </div>
+                <kc-tooltip>{{:: 'user-link.tooltip' | translate}}</kc-tooltip>
+            </div>
+
+            <div class="form-group clearfix block" data-ng-show="!create && user.origin">
+                <label class="col-md-2 control-label">{{:: 'user-origin-link' | translate}}</label>
+                <div class="col-md-6">
+                    <a href="{{originLink}}">{{originName}}</a>
+                </div>
+                <kc-tooltip>{{:: 'user-origin.tooltip' | translate}}</kc-tooltip>
+            </div>
+            <div class="form-group clearfix block">
+                <label class="col-md-2 control-label" for="emailVerified">{{:: 'email-verified' | translate}}</label>
+                <div class="col-md-6">
+                    <input id="emailVerified" name="emailVerified"
+                           ng-disabled="!(create || user.access.manage && auth.authz.realm === 'master' || user.access.manage && access.editDetails)"
+                           ng-model="user.emailVerified"
+                           off-text="{{:: 'offText' | translate}}"
+                           on-text="{{:: 'onText' | translate}}" onoffswitch/>
+                </div>
+                <kc-tooltip>{{:: 'email-verified.tooltip' | translate}}</kc-tooltip>
+            </div>
+            <div class="form-group clearfix">
+                <label class="col-md-2 control-label"
+                       for="reqActions">{{:: 'required-user-actions' | translate}}</label>
+
+                <div class="col-md-6">
+                    <select data-placeholder="{{:: 'select-an-action.placeholder' | translate}}" id="reqActions"
+                            multiple
+                            ng-model="user.requiredActions" ui-select2>
+                        <option ng-repeat="action in userReqActionList" value="{{action.alias}}">{{action.name}}
+                        </option>
+                    </select>
+                </div>
+                <kc-tooltip>{{:: 'required-user-actions.tooltip' | translate}}</kc-tooltip>
+            </div>
+
+            <div class="form-group clearfix" data-ng-if="realm.internationalizationEnabled">
+                <label class="col-md-2 control-label" for="locale">{{:: 'locale' | translate}}</label>
+                <div class="col-md-6">
+                    <div>
+                        <select class="form-control" id="locale"
+                                ng-model="user.attributes.locale"
+                                ng-options="o as o for o in realm.supportedLocales">
+                            <option disabled selected value="">{{:: 'select-one.placeholder' | translate}}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group clearfix" data-ng-hide="create || !access.impersonation">
+                <label class="col-md-2 control-label" for="impersonate">{{:: 'impersonate-user' | translate}}</label>
+
+                <div class="col-md-6">
+                    <button class="btn btn-default" data-ng-click="impersonate()" data-ng-show="access.impersonation"
+                            id="impersonate" kc-read-only-ignore>{{:: 'impersonate' | translate}}
+                    </button>
+                </div>
+                <kc-tooltip>{{:: 'impersonate-user.tooltip' | translate}}</kc-tooltip>
+            </div>
+
+        </fieldset>
+
+        <div class="form-group">
+            <div class="col-md-10 col-md-offset-2" data-ng-show="create && access.manageUsers">
+                <button data-ng-show="changed" kc-save>{{:: 'save' | translate}}</button>
+                <button data-ng-click="cancel()" kc-cancel>{{:: 'cancel' | translate}}</button>
+            </div>
+
+            <div class="col-md-10 col-md-offset-2"
+                 data-ng-show="!create && (user.access.manage && (auth.authz.realm === 'master' || access.editDetails))">
+                <button data-ng-disabled="!changed" kc-save>{{:: 'save' | translate}}</button>
+                <button data-ng-disabled="!changed" kc-reset>{{:: 'cancel' | translate}}</button>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<kc-menu></kc-menu>

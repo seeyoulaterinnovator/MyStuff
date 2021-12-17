@@ -9,16 +9,16 @@
 
         <div class="table-wrapper">
             <#if posts?size gt 1>
-                <h1 class="title">Выбрать организацию</h1>
+                <h1 class="title">${chooseOrganization}</h1>
             <#else>
-                <h1 class="title" style="visibility: hidden">Выбрать организацию</h1>
+                <h1 class="title" style="visibility: hidden">${chooseOrganization}</h1>
             </#if>
 
             <div id="post" class="table overflow-x-hidden overflow-y-auto">
                 <div class="trow theader">
-                    <div class="org-cell">Организация</div>
+                    <div class="org-cell">${organization}</div>
                     <#--                    <div class="org-cell">Уникальный номер</div>-->
-                    <div class="role-cell">Роль пользователя</div>
+                    <div class="role-cell">${roleUser}</div>
                 </div>
                 <#list posts as post>
                     <#assign firstRow = post?index == 0>

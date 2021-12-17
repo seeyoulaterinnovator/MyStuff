@@ -12,28 +12,35 @@ import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.settings.SettingConstants;
+import ru.alamics.sso.settings.SettingsService;
 
 @Slf4j
 public class SsoUpdatePassword extends UpdatePassword {
-    private final static String CLIENT_ID = "lkb2b";
     private final static String DEFAULT_CLIENT_ID = "account";
+
+    private SettingsService settingsService;
 
     @Override
     public void processAction(RequiredActionContext context) {
         super.processAction(context);
 
         setRedirectAfterAction(context);
+
+        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
     }
 
     private void setRedirectAfterAction(RequiredActionContext context) {
         final KeycloakSession session = context.getSession();
         final AuthenticationSessionModel currentAuthenticationSession = context.getAuthenticationSession();
 
-        ClientModel client = session.clientStorageManager().getClientByClientId(CLIENT_ID, currentAuthenticationSession.getRealm());
+        String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, context.getRealm().getId());
+
+        ClientModel client = session.clientStorageManager().getClientByClientId(defaultClientRealm, currentAuthenticationSession.getRealm());
         if (client == null)
             client = session.clientStorageManager().getClientByClientId(DEFAULT_CLIENT_ID, currentAuthenticationSession.getRealm());
         if (client == null) {
-            log.error("Redirect after UPDATE_PASSWORD is not setup: clientId={} not found", CLIENT_ID);
+            log.error("Redirect after UPDATE_PASSWORD is not setup: clientId={} not found", defaultClientRealm);
             return;
         }
 
@@ -47,7 +54,7 @@ public class SsoUpdatePassword extends UpdatePassword {
         final ClientService clientService = (ClientService) Lookup.lookup(ClientService.class);
 
         if (clientService == null) {
-            log.error("ClientService failed lookup. Redirect by clientId={} is not possible", CLIENT_ID);
+            log.error("ClientService failed lookup. Redirect by clientId={} is not possible", defaultClientRealm);
             return;
         }
 

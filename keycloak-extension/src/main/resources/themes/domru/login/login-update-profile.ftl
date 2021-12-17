@@ -5,7 +5,7 @@
 <@layout.registrationLayout; section>
     <#if section = "header">
         <#include "templates/required-fields.html">
-        <@blocks.contentHeader mainTitle="${msg('loginProfileTitle')}"/>
+        <@blocks.contentHeader mainTitle="${msg(loginProfileTitle)}"/>
 
     <#elseif section = "form">
 
@@ -36,10 +36,10 @@
 
                 <div id="kc-form-buttons" class="${properties.kcFormButtonsClass!}">
                     <#if isAppInitiatedAction??>
-                    <input class="btn btn-main w-full mb-2" id="update-profile-submit" type="submit" value="${msg('doRegister')}" />
-                    <button class="btn btn-main w-full" type="submit" name="cancel-aia" value="true" />${msg("doCancel")}</button>
+                        <input class="btn btn-main w-full mb-2" id="update-profile-submit" type="submit" value="${msg(doRegister)}" />
+                        <button class="btn btn-main w-full" type="submit" name="cancel-aia" value="true" />${msg(doCancel)}</button>
                     <#else>
-                        <button class="btn btn-main pass-fields" type="submit" id="update-profile-submit" />${msg("doSubmit")}</button>
+                        <button class="btn btn-main pass-fields" type="submit" id="update-profile-submit" />${msg(doSubmit)}</button>
                     </#if>
                 </div>
             </div>

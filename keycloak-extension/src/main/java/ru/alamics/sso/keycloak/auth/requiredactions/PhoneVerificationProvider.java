@@ -7,6 +7,7 @@ import org.keycloak.email.EmailException;
 import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.models.UserModel;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.User;
@@ -15,6 +16,7 @@ import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.phone.SmsCodeGenerator;
 import ru.alamics.sso.registration.phone.UserPhoneVerifier;
 import ru.alamics.sso.registration.phone.exception.*;
+import ru.alamics.sso.settings.SettingsService;
 
 import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
@@ -24,6 +26,7 @@ import java.util.Map;
 
 import static ru.alamics.sso.keycloak.auth.TwoStepVerificationFactory.VERIFY_PHONE_FTL;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.*;
+import static ru.alamics.sso.settings.SettingConstants.*;
 
 @Slf4j
 public class PhoneVerificationProvider implements RequiredActionProvider {
@@ -36,10 +39,13 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     private final ActivationCodeType activationCodeType;
     private final EmailTemplateProvider emailTemplateProvider;
 
+    private SettingsService settingsService;
+
     public PhoneVerificationProvider(UserPhoneVerifier userPhoneVerifier, ActivationCodeType activationCodeType, EmailTemplateProvider emailTemplateProvider) {
         this.userPhoneVerifier = userPhoneVerifier;
         this.activationCodeType = activationCodeType;
         this.emailTemplateProvider = emailTemplateProvider;
+        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
         ActivationCodeType.init();
     }
 
@@ -86,6 +92,9 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     .setAttribute("lengthCode", authContext.getActivationCodeType().getLengthCode())
                     .setAttribute("activationCodeType", authContext.getActivationCodeType().name())
                     .setAttribute("enableRepeatCall", enableRepeatCall)
+                    .setAttribute("sendAgain", settingsService.getSettingsStringValue(SEND_AGAIN,context.getRealm().getId()))
+                    .setAttribute("sendByEmail", settingsService.getSettingsStringValue(SEND_BY_EMAIL,context.getRealm().getId()))
+                    .setAttribute("doSubmit", settingsService.getSettingsStringValue(DO_SUBMIT,context.getRealm().getId()))
                     .createForm(VERIFY_PHONE_FTL);
 
             context.challenge(challenge);
@@ -169,6 +178,9 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                         .setAttribute("lengthCode", activationCodeType.getLengthCode())
                         .setAttribute("userPhone", user.getPhone())
                         .setAttribute("userEmail", user.getEmail())
+                        .setAttribute("sendAgain", settingsService.getSettingsStringValue(SEND_AGAIN,context.getRealm().getId()))
+                        .setAttribute("sendByEmail", settingsService.getSettingsStringValue(SEND_BY_EMAIL,context.getRealm().getId()))
+                        .setAttribute("doSubmit", settingsService.getSettingsStringValue(DO_SUBMIT,context.getRealm().getId()))
                         .setAttribute("enableRepeatCall", authSession.getAuthNote(NEED_SEND_EMAIL_CODE) == null)
                         .createForm(VERIFY_PHONE_FTL);
                 context.challenge(challenge);

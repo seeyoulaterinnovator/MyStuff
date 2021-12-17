@@ -1,0 +1,77 @@
+<style>
+  .content {
+    color: #000000ff;
+    font-size: 18px;
+    line-height: normal;
+  }
+
+  .content__heading {
+    font-weight: bold;
+    font-size: 18px;
+  }
+
+  .content__additional {
+    color: #000000ff;
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .content p {
+    padding-top: 16px;
+    font-size: 18px;
+    line-height: 24px;
+  }
+
+  .content ul {
+    padding: 8px 0 0 36px;
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .content ul > li {
+    position: relative;
+    padding-top: 8px;
+  }
+
+  .content ul > li:before {
+    content: '';
+    display: inline-block;
+    vertical-align: baseline;
+    position: absolute;
+    left: -16px;
+    width: 8px;
+    height: 8px;
+    background-color: #0Cb779;;
+  }
+
+  .content dl {
+    padding: 16px 0 0;
+  }
+
+  .content dl > dt {
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .content dl > dd {
+    font-size: 18px;
+    line-height: 24px;
+  }
+
+  .content a {
+    display: block;
+    overflow: hidden;
+    text-decoration-line: underline;
+    text-overflow: ellipsis;
+    font-size: 20px;
+    color: #007bfbff;
+
+    /* not working in Yandex Mail */
+    overflow-wrap: normal;
+    word-wrap: initial;
+  }
+
+  .no_block {
+      display: inline !important;
+  }
+</style>

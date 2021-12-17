@@ -54,7 +54,7 @@
         <tr>
             <th colspan="14">
                 <div class="form-inline">
-                    <div class="form-group form-inline">
+                    <div class="form-group form-inline" data-ng-hide="access.hideUserSearch">
                         <div class="form-group">
                             <div class="input-group-addon">
                                 <input type="text" placeholder="{{:: 'search.placeholder' | translate}}"
@@ -83,15 +83,14 @@
                                        onkeydown="if (event.keyCode == 13) document.getElementById('searchUsers').click()">
                             </div>
                         </div>
+                        <button id="searchUsers" class="btn btn-default" ng-click="firstPage()">Search users</button>
+                        <button id="viewAllUsers" class="btn btn-default" ng-click="query.search = ''; query.searchByUserId = ''; query.searchByTomsId = ''; query.searchByPhone = ''; firstPage()">{{::
+                                'view-all-users' | translate}}
+                        </button>
+                        <select class="form-control" name="realmsSelect" ng-model="query.searchRealm" ng-change="changeSearchRealm()"
+                                ng-options="x for x in userRealms">
+                        </select>
                     </div>
-                    <button id="searchUsers" class="btn btn-default" ng-click="firstPage()">Search users</button>
-                    <button id="viewAllUsers" class="btn btn-default" ng-click="query.search = ''; query.searchByUserId = ''; query.searchByTomsId = ''; query.searchByPhone = ''; firstPage()">{{::
-                        'view-all-users' | translate}}
-                    </button>
-                    <select class="form-control" name="realmsSelect" ng-model="query.searchRealm" ng-change="changeSearchRealm()"
-                            ng-options="x for x in userRealms">
-                    </select>
-
                     <div class="pull-right" data-ng-show="access.viewUsers && query.searchRealm == 'user'" >
                         <button data-ng-click="selectedSendLogin()" class="btn btn-default">Send Login</button>
                         <button data-ng-click="selectedSendLoginAndResetPassword()" class="btn btn-default">Send Login And Reset Password</button>

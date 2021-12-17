@@ -16,7 +16,10 @@ import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.theme.Theme;
 import ru.alamics.sso.emailer.EmailModel;
 import ru.alamics.sso.emailer.EmailSender;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
+import ru.alamics.sso.settings.SettingConstants;
+import ru.alamics.sso.settings.SettingsService;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -28,16 +31,17 @@ import java.util.Map;
 
 @Slf4j
 public abstract class SsoEvent {
-    private final static String CLIENT_ID = "lkb2b";
     private final static String DEFAULT_CLIENT_ID = "account";
 
     private final KeycloakSession session;
     private final EmailSender emailSender;
+    private SettingsService settingsService;
 
     public SsoEvent(KeycloakSession session) {
         this.session = session;
         try {
             this.emailSender = (EmailSender) new InitialContext().lookup("java:global/domru-sso/" + EmailSender.class.getSimpleName());
+            settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
         } catch (NamingException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
@@ -48,11 +52,12 @@ public abstract class SsoEvent {
 
     protected void sendEmail(UserModel user, RealmModel realm, String subject, String template, Map<String, Object> attributes) {
         try {
-            ClientModel clientModel = session.clientStorageManager().getClientByClientId(CLIENT_ID, realm);
+            String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, realm.getId());
+            ClientModel clientModel = session.clientStorageManager().getClientByClientId(defaultClientRealm, realm);
             if (clientModel == null)
                 clientModel = session.clientStorageManager().getClientByClientId(DEFAULT_CLIENT_ID, realm);
             if (clientModel == null) {
-                log.error("Failed to send email: {}", "have no client=\"" + CLIENT_ID + "\" to redirect!");
+                log.error("Failed to send email: {}", "have no client=\"" + defaultClientRealm + "\" to redirect!");
                 return;
             }
 
@@ -61,8 +66,8 @@ public abstract class SsoEvent {
             AuthenticationSessionModel authenticationSession = authenticationSessionManager.createAuthenticationSession(realm, false)
                     .createAuthenticationSession(clientModel);
 
-            int validityInSecs = realm.getActionTokenGeneratedByUserLifespan(ResetCredentialsActionToken.TOKEN_TYPE);
-            int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
+            long timeTokenCreateUser = settingsService.getSettingsValue(SettingConstants.TIME_TOKEN_SET_FIRST_PASS, realm.getName());
+            int absoluteExpirationInSecs = (int) (Time.currentTime() + timeTokenCreateUser);
 
             // We send the secret in the email in a link as a query param.
             String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();

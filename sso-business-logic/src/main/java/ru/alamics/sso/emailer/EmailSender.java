@@ -16,7 +16,9 @@ import org.keycloak.theme.Theme;
 import org.keycloak.theme.beans.MessageFormatterMethod;
 import org.keycloak.util.JsonSerialization;
 import ru.alamics.sso.jpa.repository.AdminEventRepository;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.property.ApplicationProperties;
+import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.CustomFreeMarkerUtil;
 
 import javax.annotation.PostConstruct;
@@ -30,6 +32,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import static ru.alamics.sso.settings.SettingConstants.*;
 
 @Stateless
 @Slf4j
@@ -45,6 +49,7 @@ public class EmailSender {
     private BlockingQueue<EmailModel> emailQueue;
     private EmailSenderProvider emailSenderProvider;
     private ExecutorService executorService;
+    private SettingsService settingsService;
     @EJB
     private AdminEventRepository adminEventRepository;
     @EJB
@@ -58,9 +63,9 @@ public class EmailSender {
 
         try {
             emailQueue.put(emailModel);
-            log.info("Success put email into send queue: email={}, send queue size={}", email, getEmailQueueSize());
+            log.info("Success put email into send queue: email={}, subject={}, send queue size={}", email, emailModel.getSubject(), getEmailQueueSize());
         } catch (InterruptedException e) {
-            log.error(String.format("Fail put email into send queue: email=%s, send queue size=%d", email, getEmailQueueSize()), e);
+            log.error(String.format("Fail put email into send queue: email=%s, subject=%s, send queue size=%d", email, emailModel.getSubject(), getEmailQueueSize()), e);
         }
     }
 
@@ -72,37 +77,6 @@ public class EmailSender {
         return sendInterval;
     }
 
-    private class SendTask implements Runnable {
-        @Override
-        public void run() {
-            try {
-                EmailModel emailModel = null;
-                while ((emailModel = emailQueue.take()) != null) {
-                    try {
-                        EmailTemplate template = processTemplate(emailModel.getSubject(), emailModel.getSubjectAttributes(),
-                                emailModel.getBodyTemplate(), emailModel.getBodyAttributes(),
-                                emailModel.getTheme(), emailModel.getLocale());
-                        if (!dontSend) {
-                            emailSenderProvider.send(emailModel.getRealmModel().getSmtpConfig(), emailModel.getUser(), template.getSubject(), template.getTextBody(), template.getHtmlBody());
-                            createEmailEvent(OperationType.ACTION, emailModel, template.subject);
-                        } else {
-                            log.info("FAKE sending to {} due to properties", emailModel.getUser().getEmail());
-                        }
-                        log.info("send to {} is finished. EmailQueueSize={}, SendInterval={}", emailModel.getUser().getEmail(), getEmailQueueSize(), sendInterval);
-                    } catch (Exception e) {
-                        log.error(String.format("send to %s is failed : EmailQueueSize=%d ", emailModel.getUser().getEmail(), getEmailQueueSize()), e);
-                    }
-
-                    Thread.sleep(sendInterval);
-                }
-            } catch (InterruptedException e) {
-                log.error(String.format("'Email sender' task is ended with error : EmailQueueSize=%d ", getEmailQueueSize()), e);
-            } finally {
-                log.error("'Email sender' task is finished. Mailing disabled : EmailQueueSize={}", getEmailQueueSize());
-            }
-        }
-    }
-
     @PostConstruct
     public void init() {
         this.emailSenderProvider = new DefaultEmailSenderProvider(null);
@@ -110,6 +84,8 @@ public class EmailSender {
         this.freeMarkerUtil = new FreeMarkerUtil();
         this.executorService = Executors.newSingleThreadExecutor();
         executorService.submit(new SendTask());
+
+        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
 
         sendInterval = properties.getPropertyLong(SEND_INTERVAL_PROPERTY, 1000, "EmailSender interval: default value used: '%s' = '%s'");
         dontSend = Boolean.parseBoolean(properties.getProperty(DO_NOT_SEND_PROPERTY));
@@ -137,7 +113,7 @@ public class EmailSender {
     }
 
     protected EmailTemplate processTemplate(String subjectKey, List<Object> subjectAttributes, String template, Map<String, Object> attributes,
-                                            Theme theme, Locale locale) throws EmailException {
+                                            Theme theme, Locale locale, String realName) throws EmailException {
         try {
             String textBody;
             String subject = subjectKey;
@@ -150,6 +126,11 @@ public class EmailSender {
             if (theme != null) {
                 attributes.put("properties", theme.getProperties());
             }
+            attributes.put("phoneInMessage",settingsService.getSettingsStringValue(PHONE_IN_MESSAGE,realName));
+            attributes.put("footerInMassage",settingsService.getSettingsStringValue(FOOTER_IN_MESSAGE,realName));
+            attributes.put("customer",settingsService.getSettingsStringValue(CUSTOMER,realName));
+            attributes.put("gratitudeUp",settingsService.getSettingsStringValue(GRATITUDE_UP,realName));
+            attributes.put("gratitudeDown",settingsService.getSettingsStringValue(GRATITUDE_DOWN,realName));
             String textTemplate = String.format("/text/%s", template);
             try {
                 if (theme == null) {
@@ -185,5 +166,36 @@ public class EmailSender {
         private String subject;
         private String textBody;
         private String htmlBody;
+    }
+
+    private class SendTask implements Runnable {
+        @Override
+        public void run() {
+            try {
+                EmailModel emailModel = null;
+                while ((emailModel = emailQueue.take()) != null) {
+                    try {
+                        EmailTemplate template = processTemplate(emailModel.getSubject(), emailModel.getSubjectAttributes(),
+                                emailModel.getBodyTemplate(), emailModel.getBodyAttributes(),
+                                emailModel.getTheme(), emailModel.getLocale(),emailModel.getRealmModel().getName());
+                        if (!dontSend) {
+                            emailSenderProvider.send(emailModel.getRealmModel().getSmtpConfig(), emailModel.getUser(), template.getSubject(), template.getTextBody(), template.getHtmlBody());
+                            createEmailEvent(OperationType.ACTION, emailModel, template.subject);
+                        } else {
+                            log.info("FAKE sending to {} due to properties", emailModel.getUser().getEmail());
+                        }
+                        log.info("send to {} is finished. EmailQueueSize={}, SendInterval={}", emailModel.getUser().getEmail(), getEmailQueueSize(), sendInterval);
+                    } catch (Exception e) {
+                        log.error(String.format("send to %s is failed : EmailQueueSize=%d ", emailModel.getUser().getEmail(), getEmailQueueSize()), e);
+                    }
+
+                    Thread.sleep(sendInterval);
+                }
+            } catch (InterruptedException e) {
+                log.error(String.format("'Email sender' task is ended with error : EmailQueueSize=%d ", getEmailQueueSize()), e);
+            } finally {
+                log.error("'Email sender' task is finished. Mailing disabled : EmailQueueSize={}", getEmailQueueSize());
+            }
+        }
     }
 }

@@ -15,7 +15,10 @@ import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.auth.UserRole;
 import ru.alamics.sso.keycloak.facade.CachedUserPostFacade;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.dto.UserPostResponse;
+import ru.alamics.sso.settings.SettingConstants;
+import ru.alamics.sso.settings.SettingsService;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -36,6 +39,8 @@ public class AttributesForm implements Authenticator {
     private final UserRole roleService;
     private CachedUserPostFacade cachedUserPostFacade;
 
+    private SettingsService settingsService;
+
     public AttributesForm(UserRole roleService) {
         this.roleService = roleService;
         try {
@@ -44,6 +49,7 @@ public class AttributesForm implements Authenticator {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Something wrong with context");
         }
+        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
     }
 
     @Override
@@ -94,6 +100,13 @@ public class AttributesForm implements Authenticator {
         if (!posts.isEmpty()) {
             form.setAttribute("posts", posts);
         }
+
+        form.setAttribute("chooseOrganization",settingsService.getSettingsStringValue(SettingConstants.CHOOSE_ON_ORGANIZATION,context.getRealm().getId()));
+        form.setAttribute("organization",settingsService.getSettingsStringValue(SettingConstants.ORGANIZATION,context.getRealm().getId()));
+        form.setAttribute("roleUser",settingsService.getSettingsStringValue(SettingConstants.ROLE_USER,context.getRealm().getId()));
+        form.setAttribute("footer",settingsService.getSettingsStringValue(SettingConstants.FOOTER,context.getRealm().getId()));
+        form.setAttribute("phoneConst",settingsService.getSettingsStringValue(SettingConstants.PHONE_CONST,context.getRealm().getId()));
+        form.setAttribute("phoneConstLink",settingsService.getSettingsStringValue(SettingConstants.PHONE_CONST_LINK,context.getRealm().getId()));
 
         return form.createForm(FORM);
     }

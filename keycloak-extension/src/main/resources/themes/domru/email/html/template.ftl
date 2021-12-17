@@ -2,9 +2,9 @@
   <!DOCTYPE html>
   <html xmlns="http://www.w3.org/1999/xhtml" lang="ru">
   <head>
-      <#include 'styles/template-style.html' >
+    <#include 'styles/template-style.html' >
 
-      <#nested "style">
+    <#nested "style">
   </head>
   <body>
   <table class="mail-wrapper">
@@ -26,7 +26,7 @@
                     </a>
                   </td>
                   <td style="text-align: right;">
-                    <a href="tel:88003339000" class="contacts">
+                    <a href="${phoneConstLink}" class="contacts">
                       <table margin="0" padding="0" cellpadding="0" cellspacing="0" style="vertical-align: center; text-align: right; display: inline-table;">
                         <tr>
                           <td style="vertical-align: center;">
@@ -37,7 +37,7 @@
                           </td>
                           <td style="width: 5px;"> </td>
                           <td class="contact__number">
-                            8&nbsp;800&nbsp;333&nbsp;9000
+                            ${phoneInMessage}
                           </td>
                         </tr>
                       </table>
@@ -49,14 +49,14 @@
 
               <div class="mail-container__content content">
                 <div class="content">
-                  <h2 class="content__heading">Уважаемый Клиент!</h2>
-                    <#nested "body">
+                  <h2 class="content__heading">${customer}</h2>
+                  <#nested "body">
                 </div>
               </div>
               <div class="mail-container__footer">
-                <p class="mail-text--bold">Благодарим Вас!</p>
-                <p>За выбор услуг «Дом.ru Бизнес» для Вашей компании.</p>
-                <p class="mail-text--copyright mail-text--light-gray">© АО «ЭР-Телеком Холдинг» 2011-${.now?string.yyyy}</p>
+                <p class="mail-text--bold">${gratitudeUp}</p>
+                <p>${gratitudeDown}</p>
+                <p class="mail-text--copyright mail-text--light-gray">${footerInMassage}${.now?string.yyyy}</p>
               </div>
             </td>
           </tr>

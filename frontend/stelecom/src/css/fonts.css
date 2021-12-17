@@ -1,0 +1,62 @@
+@font-face {
+  font-weight: 500;
+  font-family: 'Inter';
+  font-style: normal;
+  src: url('./fonts/Inter-Medium.eot');
+  src: url('./fonts/Inter-Medium.eot?#iefix') format('embedded-opentype'),
+    url('./fonts/Inter-Medium.woff2') format('woff2'),
+    url('./fonts/Inter-Medium.woff') format('woff');
+}
+
+@font-face {
+  font-weight: bold;
+  font-family: 'Inter';
+  font-style: normal;
+  src: url('./fonts/Inter-Bold.eot');
+  src: url('./fonts/Inter-Bold.eot?#iefix') format('embedded-opentype'),
+    url('./fonts/Inter-Bold.woff2') format('woff2'),
+    url('./fonts/Inter-Bold.woff') format('woff');
+}
+
+@font-face {
+  font-weight: normal;
+  font-family: 'Inter';
+  font-style: normal;
+  src: url('./fonts/Inter-Regular.eot');
+  src: url('./fonts/Inter-Regular.eot?#iefix') format('embedded-opentype'),
+    url('./fonts/Inter-Regular.woff2') format('woff2'),
+    url('./fonts/Inter-Regular.woff') format('woff');
+}
+
+@font-face {
+  font-weight: 300;
+  font-family: 'Inter';
+  font-style: italic;
+  src: url('./fonts/Inter-LightItalic.eot');
+  src: url('./fonts/Inter-LightItalic.eot?#iefix') format('embedded-opentype'),
+    url('./fonts/Inter-LightItalic.woff2') format('woff2'),
+    url('./fonts/Inter-LightItalic.woff') format('woff');
+}
+
+@font-face {
+  font-weight: 300;
+  font-family: 'Inter';
+  font-style: normal;
+  src: url('./fonts/Inter-Light.eot');
+  src: url('./fonts/Inter-Light.eot?#iefix') format('embedded-opentype'),
+    url('./fonts/Inter-Light.woff2') format('woff2'),
+    url('./fonts/Inter-Light.woff') format('woff');
+}
+
+/* Фоллбэк, если не придут шрифты чата dom.ru */
+@font-face {
+  font-family: 'RobotoRegular';
+  src: url('./fonts/RobotoRegular.woff2') format('woff');
+}
+
+@font-face {
+  font-weight: 400;
+  font-family: icomoon;
+  font-style: normal;
+  src: url('./fonts/icomoon.woff') format('woff');
+}

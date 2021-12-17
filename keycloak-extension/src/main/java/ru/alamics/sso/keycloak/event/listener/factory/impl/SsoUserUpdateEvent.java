@@ -22,8 +22,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static ru.alamics.sso.settings.SettingConstants.*;
+
 @Slf4j
 public class SsoUserUpdateEvent extends SsoEvent {
+
+    private static final String BODY_TEMPLATE_DISABLE = "mail-disabled-account.ftl";
+    private static final String BODY_TEMPLATE_ENABLE = "mail-enabled-account.ftl";
 
     private final AdminEvent event;
 
@@ -76,15 +81,18 @@ public class SsoUserUpdateEvent extends SsoEvent {
             attributes.put("userFirstName", user.getFirstName());
             attributes.put("userLastName", user.getLastName());
 
+            attributes.put("emailEnabledAccountBodyHtml", settingsService.getSettingsStringValue(EMAIL_ENABLE_ACCOUNT, realm.getName()));
+            attributes.put("emailDisabledAccountBodyHtml", settingsService.getSettingsStringValue(EMAIL_DISABLE_ACCOUNT, realm.getName()));
+
             if (userNow.isEnabled()) {
                 long blockValue = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_UNLOCKING, realm.getName());
                 if (blockValue > 0) {
-                    this.sendEmail(user, realm, "emailEnabledAccountSubject", "mail-enabled-account.ftl", attributes);
+                    this.sendEmail(user, realm, settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_ENABLE, realm.getName()), BODY_TEMPLATE_ENABLE, attributes);
                 }
                 this.recordLoginUser(userId);//При разблокировании юзера, логиним его
                 return;
             }
-            this.sendEmail(user, realm, "emailDisabledAccountSubject", "mail-disabled-account.ftl", attributes);
+            this.sendEmail(user, realm, settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_DISABLE, realm.getName()), BODY_TEMPLATE_DISABLE, attributes);
         } catch (Exception e) {
             log.error("Error ", e);
         }

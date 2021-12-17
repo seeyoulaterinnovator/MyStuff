@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.Settings;
 import ru.alamics.sso.jpa.repository.SettingsRepository;
 import ru.alamics.sso.registration.mapper.DataMapper;
+import ru.alamics.sso.schedule.UserSchedule;
 
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
@@ -19,6 +20,8 @@ public class SettingsService {
 
     @EJB
     private SettingsRepository repository;
+    @EJB
+    private UserSchedule userSchedule;
 
     public List<SettingsDto> getRealmSettings(final String realmId) {
 
@@ -42,9 +45,16 @@ public class SettingsService {
                 .extId(settings.getExtId())
                 .realmId(settings.getRealmId())
                 .unit(settings.getUnit())
+                .type(settings.getType())
                 .build();
 
-        return DataMapper.toDto(repository.save(settingsToSave));
+
+        Settings save = repository.save(settingsToSave);
+        //При вызове метода save с Админконсоли для времени шедулера мы обновляем таймер
+        if(SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY.getKey().equals(save.getExtId())){
+            userSchedule.changeScheduleTimer();
+        }
+        return DataMapper.toDto(save);
     }
 
     public long getSettingsValue(final SettingConstants property, final String realmId) {
@@ -59,6 +69,15 @@ public class SettingsService {
             }
         }
         return ret;
+    }
+
+    public String getSettingsStringValue(final SettingConstants property, final String realmId) {
+        Settings settings = repository.getSettings(property.getKey(), realmId);
+        String value = "no settings";
+        if (settings != null) {
+            value = settings.getValue();
+        }
+        return value;
     }
 
     public SettingsDto getSetting(final SettingConstants property, final String realmId) {

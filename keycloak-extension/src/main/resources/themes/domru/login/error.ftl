@@ -3,10 +3,10 @@
 
 <@layout.registrationLayout displayMessage=false; section>
     <#if section = "header">
-        <#--  ${msg("errorTitle")}  -->
+    <#--  ${msg("errorTitle")}  -->
     <#elseif section = "form">
-        <#if client?? && client.baseUrl?has_content> 
-          <#assign backHref="${client.baseUrl}" backMessage="${kcSanitize(msg('backToApplication'))?no_esc}" >
+        <#if client?? && client.baseUrl?has_content>
+            <#assign backHref="${client.baseUrl}" backMessage="${kcSanitize(msg(backToApplication))?no_esc}" >
         </#if>
 
         <#if message.summary?contains('Page not found') || message.summary?contains('Неверный параметр')  >
@@ -16,7 +16,7 @@
         <#else>
             ${message.summary}
             <#if client?? && client.baseUrl?has_content>
-                <p><a id="backToApplication" href="${client.baseUrl}">${kcSanitize(msg("backToApplication"))?no_esc}</a></p>
+                <p><a id="backToApplication" href="${client.baseUrl}">${kcSanitize(msg(backToApplication))?no_esc}</a></p>
             </#if>
         </#if>
     </#if>

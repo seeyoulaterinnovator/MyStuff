@@ -300,7 +300,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             if ($scope.query.searchRealm === '' || !$scope.userRealms.some(function (realm) {
                 return realm === $scope.query.searchRealm
             })) {
-                if (realm.realm === 'manager' && $scope.userRealms.length === 1) {
+                if (realm.realm === 'manager' && $scope.userRealms.includes('manager') === false) {
                     $scope.query.searchRealm = $scope.userRealms[0];
                 } else {
                     $scope.query.searchRealm = realm.realm;
@@ -995,7 +995,7 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
     };
 
     $scope.GetPhoneCheckerResult = function () {
-        return $http.get(authUrl + '/realms/' + realm.realm + '/users-info/attribute?phone=' + $scope.GetPhoneAttr() + '&excludedUserId=' + $scope.user.id)
+        return $http.get(authUrl + '/realms/' + realm.realm + '/users-info/attribute?phone=' + $scope.GetPhoneAttr() + '&excludedUserId=' + $scope.user.id + '&realmId=' + realm.realm)
             .then(function (response) {
                 return angular.fromJson(response).data.results['foundUserId'];
             });

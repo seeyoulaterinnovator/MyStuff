@@ -55,8 +55,6 @@ public class AuthLinkResource {
         AuthenticationSessionModel authenticationSession = rootAuthenticationSessionModel.createAuthenticationSession(clientModel);
         //log.info("got authenticationSession " + authenticationSession.toString());
 
-
-
         int validityInSecs = realm.getActionTokenGeneratedByUserLifespan(ResetCredentialsActionToken.TOKEN_TYPE);
         int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
 

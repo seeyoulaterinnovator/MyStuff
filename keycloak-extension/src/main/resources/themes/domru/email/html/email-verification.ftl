@@ -5,9 +5,9 @@
         <#include 'styles/content-style--default.html' >
     <#elseif section = "body">
         <#assign email=realmName>
-            <#if user?? && user.getEmail??>
-                <#assign email= user.getEmail()>
-            </#if>
-        ${kcSanitize(msg("emailVerificationBodyHtml",link, linkExpiration, email, linkExpirationFormatter(linkExpiration), expTime))?no_esc}
+        <#if user?? && user.getEmail??>
+            <#assign email= user.getEmail()>
+        </#if>
+        ${kcSanitize(msg(emailVerificationBodyHtml,link, linkExpiration, email, linkExpirationFormatter(linkExpiration), expTime))?no_esc}
     </#if>
 </@template.layout>

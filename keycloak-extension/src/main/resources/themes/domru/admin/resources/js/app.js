@@ -2062,8 +2062,35 @@ module.config([ '$routeProvider', function($routeProvider) {
             },
             controller : 'ServerInfoCtrl'
         })
-        .when('/realms/:realm/custom-settings-general', {
+        .when('/realms/:realm/custom-settings/general', {
             templateUrl : resourceUrl + '/partials/custom-settings-general.html',
+            resolve : {
+                realm: function (RealmLoader) {
+                    return RealmLoader();
+                }
+            },
+            controller : 'CustomTabCtrl'
+        })
+        .when('/realms/:realm/custom-settings/front', {
+            templateUrl : resourceUrl + '/partials/custom-settings-front.html',
+            resolve : {
+                realm: function (RealmLoader) {
+                    return RealmLoader();
+                }
+            },
+            controller : 'CustomTabCtrl'
+        })
+        .when('/realms/:realm/custom-settings/message', {
+            templateUrl : resourceUrl + '/partials/custom-settings-message.html',
+            resolve : {
+                realm: function (RealmLoader) {
+                    return RealmLoader();
+                }
+            },
+            controller : 'CustomTabCtrl'
+        })
+        .when('/realms/:realm/custom-settings/application', {
+            templateUrl : resourceUrl + '/partials/custom-settings-application.html',
             resolve : {
                 realm: function (RealmLoader) {
                     return RealmLoader();
@@ -2609,6 +2636,15 @@ module.directive('kcTabsUser', function () {
         restrict: 'E',
         replace: true,
         templateUrl: resourceUrl + '/templates/kc-tabs-user.html'
+    }
+});
+
+module.directive('kcTabsSettings', function () {
+    return {
+        scope: true,
+        restrict: 'E',
+        replace: true,
+        templateUrl: resourceUrl + '/templates/kc-tabs-settings.html'
     }
 });
 
