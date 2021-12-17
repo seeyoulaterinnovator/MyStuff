@@ -1,4 +1,5 @@
-ru.alamics.sso.keycloak.auth.AuthMailPhoneFormFactory
+ru.alamics.sso.keycloak.auth.form.rias.AuthMailPhoneWithRiasFormFactory
+ru.alamics.sso.keycloak.auth.form.AuthMailPhoneFormFactory
 ru.alamics.sso.keycloak.auth.TwoStepVerificationFactory
 ru.alamics.sso.keycloak.auth.post.AttributesFormFactory
 ru.alamics.sso.keycloak.resetcred.ResetCredentialEmailOrPhoneFactory

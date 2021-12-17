@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.auth;
+package ru.alamics.sso.keycloak.auth.form.rias;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.Config;
@@ -22,13 +22,13 @@ import javax.persistence.EntityManager;
 import java.util.List;
 
 @Slf4j
-public class AuthMailPhoneFormFactory implements AuthenticatorFactory, DisplayTypeAuthenticatorFactory {
+public class AuthMailPhoneWithRiasFormFactory implements AuthenticatorFactory, DisplayTypeAuthenticatorFactory {
 
     public static final String PROVIDER_ID = "auth-mail-phone-password-form";
     public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED
     };
-    public static AuthMailPhoneForm SINGLETON = null;
+    public static AuthMailPhoneWithRiasForm SINGLETON = null;
 
     @Override
     public Authenticator create(KeycloakSession session) {
@@ -50,7 +50,7 @@ public class AuthMailPhoneFormFactory implements AuthenticatorFactory, DisplayTy
         }
 
         log.info("Creating AuthMailPhoneForm");
-        SINGLETON = new AuthMailPhoneForm(riasService, userFindService);
+        SINGLETON = new AuthMailPhoneWithRiasForm(riasService, userFindService);
 
         return SINGLETON;
     }

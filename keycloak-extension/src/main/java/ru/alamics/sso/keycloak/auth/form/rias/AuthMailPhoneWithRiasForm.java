@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.auth;
+package ru.alamics.sso.keycloak.auth.form.rias;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
@@ -32,7 +32,7 @@ import javax.ws.rs.core.Response;
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 
 @Slf4j
-public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator implements Authenticator {
+public class AuthMailPhoneWithRiasForm extends AbstractUsernameFormAuthenticator implements Authenticator {
 
     private final static String RIAS_REDIRECT_PROPERTY = "riasLogin.redirect.url";
     // TODO
@@ -49,7 +49,7 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
 
     private final ApplicationProperties properties;
 
-    public AuthMailPhoneForm(RiasService riasService, UserFindService userFindService) {
+    public AuthMailPhoneWithRiasForm(RiasService riasService, UserFindService userFindService) {
         this.riasService = riasService;
         this.userFindService = userFindService;
 
