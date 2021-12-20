@@ -24,7 +24,7 @@ import java.util.List;
 @Slf4j
 public class AuthMailPhoneWithRiasFormFactory implements AuthenticatorFactory, DisplayTypeAuthenticatorFactory {
 
-    public static final String PROVIDER_ID = "auth-mail-phone-password-form";
+    public static final String PROVIDER_ID = "auth-mail-phone-pass-with-RIAS-form";
     public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED
     };
@@ -99,12 +99,12 @@ public class AuthMailPhoneWithRiasFormFactory implements AuthenticatorFactory, D
 
     @Override
     public String getDisplayType() {
-        return "(Phone or Mail) and Password Form";
+        return "(Phone or Mail) and Password Form with RIAS";
     }
 
     @Override
     public String getHelpText() {
-        return "Validates a username and password from login form. Username can be phone or mail";
+        return "Проверка логина и пароля для формы входа. Логин может быть телефоном или Email";
     }
 
     @Override

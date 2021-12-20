@@ -19,7 +19,7 @@ import java.util.List;
 
 public class AuthMailPhoneFormFactory implements AuthenticatorFactory, DisplayTypeAuthenticatorFactory {
 
-    public static final String PROVIDER_ID = "auth-mail-phone-pass-no-rias-form";
+    public static final String PROVIDER_ID = "auth-mail-phone-pass-form";
     public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED
     };
@@ -42,7 +42,7 @@ public class AuthMailPhoneFormFactory implements AuthenticatorFactory, DisplayTy
 
     @Override
     public String getDisplayType() {
-        return "(Phone or Mail) and Password Form no RIAS";
+        return "(Phone or Mail) and Password Form";
     }
 
     @Override
@@ -74,7 +74,7 @@ public class AuthMailPhoneFormFactory implements AuthenticatorFactory, DisplayTy
 
     @Override
     public String getHelpText() {
-        return "Validates a username and password from login form. Username can be phone or mail";
+        return "Проверка логина и пароля для формы входа. Логин может быть телефоном или Email";
     }
 
     @Override
