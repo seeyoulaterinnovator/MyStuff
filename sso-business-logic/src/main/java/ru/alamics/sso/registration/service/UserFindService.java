@@ -88,9 +88,9 @@ public class UserFindService {
     ) {
         List<UserSummaryView> users = null;
 
-        if (properties.getProperty("db.non.mysql") != null) {
+        if (properties.getProperty("db.non.mysql") != null ) {
             log.info("getUsersByParameters non mysql");
-            users = userRepository.findUsersByParameters(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
+            users = userRepository.findUsersByParameters(realm, search, searchUser,searchPhone, searchToms, sortField, sortAsc, pageNum, pageSize);
 
         } else if (!Util.isEmpty(searchPhone)) {
             log.info("getUsersByParameters phone");
