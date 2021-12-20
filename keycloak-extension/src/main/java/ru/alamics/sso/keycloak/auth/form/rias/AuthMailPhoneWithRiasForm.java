@@ -172,6 +172,7 @@ public class AuthMailPhoneWithRiasForm extends AbstractUsernameFormAuthenticator
                         .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER,context.getRealm().getId()))
                         .setAttribute("backToMainPage",settingsService.getSettingsStringValue(BACK_TO_MAIN_PAGE,context.getRealm().getId()))
                         .setAttribute("phoneConst",settingsService.getSettingsStringValue(PHONE_CONST,context.getRealm().getId()))
+                        .setAttribute("homePage",settingsService.getSettingsStringValue(HOME_PAGE,context.getRealm().getId()))
                         .setAttribute("phoneConstLink",settingsService.getSettingsStringValue(PHONE_CONST_LINK,context.getRealm().getId()))
                         .createForm(form);
 

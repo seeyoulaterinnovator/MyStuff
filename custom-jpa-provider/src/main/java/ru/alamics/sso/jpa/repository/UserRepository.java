@@ -305,6 +305,7 @@ public class UserRepository {
             String realm,
             String search,
             String searchUser,
+            String searchPhone,
             String searchToms,
             String sortField,
             boolean sortAsc,
@@ -313,6 +314,10 @@ public class UserRepository {
     ) {
         if (search != null && !search.isEmpty()) {
             search = "%" + search.replace("-", "\\-") + "%";
+        }
+
+        if (searchPhone != null && !searchPhone.isEmpty()) {
+            searchPhone = searchPhone + "%";
         }
 
         Query query = em.createQuery(
@@ -329,15 +334,16 @@ public class UserRepository {
                         "WHERE UE.realmId = :realm\n" +
                         "and (:search is null or :search = '' or (UE.email LIKE :search OR\n" +
                         "                                         UE.firstName LIKE :search OR\n" +
-                        "                                         UA.value LIKE :search OR\n" +
                         "                                         UE.username LIKE :search ))\n" +
                         "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser)\n" +
                         "and (:searchToms is null or :searchToms = '' or UP.customer.id = :searchToms)\n" +
+                        "and (:searchPhone is null or :searchPhone = '' or UA.value LIKE :searchPhone)\n" +
                         getSort(sortField, sortAsc)
                 , UserSummaryView.class)
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
+                .setParameter("searchPhone", searchPhone)
                 .setParameter("realm", realm);
 
         pageNum = Math.max(1, pageNum);

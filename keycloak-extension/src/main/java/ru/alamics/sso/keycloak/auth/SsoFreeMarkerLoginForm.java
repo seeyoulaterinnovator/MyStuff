@@ -108,6 +108,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             attributes.put("footer", settingsService.getSettingsStringValue(FOOTER,realm.getName()));
             attributes.put("backToApplication", settingsService.getSettingsStringValue(BACK_TO_APP,realm.getName()));
             attributes.put("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST,realm.getName()));
+            attributes.put("homePage", settingsService.getSettingsStringValue(HOME_PAGE,realm.getName()));
             attributes.put("requiredFields", settingsService.getSettingsStringValue(REQUIRED_FIELDS,realm.getName()));
 
             attributes.put("confirmLinkIdpReviewProfile", settingsService.getSettingsStringValue(CONFIRM_LINK_IDP_REVIEW_PROFILE,realm.getName()));
