@@ -4,16 +4,24 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.requiredactions.UpdatePassword;
-import org.keycloak.models.ClientModel;
-import org.keycloak.models.KeycloakSession;
+import org.keycloak.events.Details;
+import org.keycloak.events.Errors;
+import org.keycloak.events.EventBuilder;
+import org.keycloak.events.EventType;
+import org.keycloak.models.*;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.Urls;
 import org.keycloak.services.managers.AuthenticationManager;
+import org.keycloak.services.messages.Messages;
+import org.keycloak.services.validation.Validation;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
+
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 
 @Slf4j
 public class SsoUpdatePassword extends UpdatePassword {
@@ -23,16 +31,57 @@ public class SsoUpdatePassword extends UpdatePassword {
 
     @Override
     public void processAction(RequiredActionContext context) {
-        super.processAction(context);
+        EventBuilder event = context.getEvent();
+        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
+        event.event(EventType.UPDATE_PASSWORD);
+        String passwordNew = formData.getFirst("password-new");
+
+        EventBuilder errorEvent = event.clone().event(EventType.UPDATE_PASSWORD_ERROR)
+                .client(context.getAuthenticationSession().getClient())
+                .user(context.getAuthenticationSession().getAuthenticatedUser());
+
+        if (Validation.isBlank(passwordNew)) {
+            Response challenge = context.form()
+                    .setAttribute("username", context.getAuthenticationSession().getAuthenticatedUser().getUsername())
+                    .setError(Messages.MISSING_PASSWORD)
+                    .createResponse(UserModel.RequiredAction.UPDATE_PASSWORD);
+            context.challenge(challenge);
+            errorEvent.error(Errors.PASSWORD_MISSING);
+            return;
+        }
+
+        try {
+            context.getSession().userCredentialManager().updateCredential(context.getRealm(), context.getUser(), UserCredentialModel.password(passwordNew, false));
+            context.success();
+        } catch (ModelException me) {
+            errorEvent.detail(Details.REASON, me.getMessage()).error(Errors.PASSWORD_REJECTED);
+            Response challenge = context.form()
+                    .setAttribute("username", context.getAuthenticationSession().getAuthenticatedUser().getUsername())
+                    .setError(me.getMessage(), me.getParameters())
+                    .createResponse(UserModel.RequiredAction.UPDATE_PASSWORD);
+            context.challenge(challenge);
+            return;
+        } catch (Exception ape) {
+            errorEvent.detail(Details.REASON, ape.getMessage()).error(Errors.PASSWORD_REJECTED);
+            Response challenge = context.form()
+                    .setAttribute("username", context.getAuthenticationSession().getAuthenticatedUser().getUsername())
+                    .setError(ape.getMessage())
+                    .createResponse(UserModel.RequiredAction.UPDATE_PASSWORD);
+            context.challenge(challenge);
+            return;
+        }
 
         setRedirectAfterAction(context);
 
-        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
     }
 
     private void setRedirectAfterAction(RequiredActionContext context) {
         final KeycloakSession session = context.getSession();
         final AuthenticationSessionModel currentAuthenticationSession = context.getAuthenticationSession();
+
+        if (settingsService == null) {
+            settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+        }
 
         String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, context.getRealm().getId());
 
