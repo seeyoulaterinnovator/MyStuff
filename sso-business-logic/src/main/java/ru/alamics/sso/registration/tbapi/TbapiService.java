@@ -13,8 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_DMP_NAME;
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_TOMS_NAME;
+import static ru.alamics.sso.registration.model.UserConstants.*;
 
 @Slf4j
 public class TbapiService {
@@ -24,9 +23,11 @@ public class TbapiService {
 
     private final static String TBAPI_ERROR_FLAG = "businessErrorCode";
     private final static String TBAPI_ERROR_DETAIL = "userMessage";
-    private final TbapiRemoteService remoteService;
+
     // jackson serialize
     ObjectMapper jacksonMapper = new ObjectMapper();
+
+    private final TbapiRemoteService remoteService;
 
     public TbapiService(TbapiRemoteService remoteService) {
         this.remoteService = remoteService;
@@ -39,8 +40,10 @@ public class TbapiService {
         request.setEmail(user.getEmail());
         request.setPhoneNumber(user.getPhone());
 
-        request.setLegalName(user.getName());
-        request.setName(user.getName());
+        List<String> orgg = user.getAttributes().get(ATTR_ORG_NAME);// TODO
+        String orgName = orgg == null ? null : orgg.get(0);
+        request.setLegalName(orgName);
+        request.setName(orgName);
 
         try {
             String attrStr = jacksonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(request);
