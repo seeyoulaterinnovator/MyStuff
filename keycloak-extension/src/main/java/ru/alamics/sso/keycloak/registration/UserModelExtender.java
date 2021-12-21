@@ -24,27 +24,29 @@ import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
 import javax.ws.rs.core.MultivaluedMap;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static ru.alamics.sso.registration.model.FormConstants.*;
+import static ru.alamics.sso.registration.model.UserConstants.ATTR_ORG_NAME;
 
 public class UserModelExtender implements FormAction, FormActionFactory {
 
     private static final Logger log = Logger.getLogger(UserModelExtender.class);
 
     private static final String TBAPI_CHECK_DATA = "tbapi_check_data";
+
+    // jackson serialize
+    ObjectMapper jacksonMapper = new ObjectMapper();
+
     private static final String PROVIDER_ID = "registration-user-extension";
+
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
             AuthenticationExecutionModel.Requirement.DISABLED
     };
+
     private final TbapiService tbapiService;
     private final UserExtension userExtension;
-    // jackson serialize
-    ObjectMapper jacksonMapper = new ObjectMapper();
 
     public UserModelExtender() {
         tbapiService = new TbapiService(new TbapiServiceRestImpl());
@@ -80,6 +82,13 @@ public class UserModelExtender implements FormAction, FormActionFactory {
                     .email(formData.getFirst(FIELD_EMAIL))
                     .phone(formData.getFirst(FIELD_PHONE))
                     .build();
+
+            String orgName = formData.getFirst(FIELD_ORG_NAME);
+            // TODO на стандартной верстке нет поля организации
+            if (orgName == null) {
+                orgName = formData.getFirst(FIELD_LAST_NAME);
+            }
+            user.getAttributes().put(ATTR_ORG_NAME, Collections.singletonList(orgName));
 
             Map<String, Object> attributes = tbapiService.registerUser(user, new TbapiConnectConfig(TbapiConnect.REGISTRATION));
 
