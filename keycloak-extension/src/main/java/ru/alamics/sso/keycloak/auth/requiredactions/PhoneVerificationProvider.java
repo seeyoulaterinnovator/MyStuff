@@ -95,6 +95,10 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     .setAttribute("sendAgain", settingsService.getSettingsStringValue(SEND_AGAIN,context.getRealm().getId()))
                     .setAttribute("sendByEmail", settingsService.getSettingsStringValue(SEND_BY_EMAIL,context.getRealm().getId()))
                     .setAttribute("doSubmit", settingsService.getSettingsStringValue(DO_SUBMIT,context.getRealm().getId()))
+                    .setAttribute("homePage", settingsService.getSettingsStringValue(HOME_PAGE,context.getRealm().getId()))
+                    .setAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST,context.getRealm().getId()))
+                    .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER,context.getRealm().getId()))
+                    .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK,context.getRealm().getId()))
                     .createForm(VERIFY_PHONE_FTL);
 
             context.challenge(challenge);
@@ -117,6 +121,14 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         Map<String, Object> attributes = new HashMap<>();
 
         attributes.put("code", code);
+        attributes.put("phoneInMessage",settingsService.getSettingsStringValue(PHONE_IN_MESSAGE,context.getRealm().getId()));
+        attributes.put("footerInMassage",settingsService.getSettingsStringValue(FOOTER_IN_MESSAGE,context.getRealm().getId()));
+        attributes.put("customer",settingsService.getSettingsStringValue(CUSTOMER,context.getRealm().getId()));
+        attributes.put("gratitudeUp",settingsService.getSettingsStringValue(GRATITUDE_UP,context.getRealm().getId()));
+        attributes.put("gratitudeDown",settingsService.getSettingsStringValue(GRATITUDE_DOWN,context.getRealm().getId()));
+        attributes.put("phoneConstLink",settingsService.getSettingsStringValue(PHONE_CONST_LINK,context.getRealm().getId()));
+        attributes.put("homePage",settingsService.getSettingsStringValue(HOME_PAGE,context.getRealm().getId()));
+        attributes.put("emailVerificationAuthBodyHtml", settingsService.getSettingsStringValue(EMAIL_VERIFICATION_AUTH_ACCOUNT,context.getRealm().getId()));
         emailTemplateProvider
                 .setRealm(context.getRealm())
                 .setUser(context.getUser())
@@ -181,6 +193,10 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                         .setAttribute("sendAgain", settingsService.getSettingsStringValue(SEND_AGAIN,context.getRealm().getId()))
                         .setAttribute("sendByEmail", settingsService.getSettingsStringValue(SEND_BY_EMAIL,context.getRealm().getId()))
                         .setAttribute("doSubmit", settingsService.getSettingsStringValue(DO_SUBMIT,context.getRealm().getId()))
+                        .setAttribute("homePage", settingsService.getSettingsStringValue(HOME_PAGE,context.getRealm().getId()))
+                        .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK,context.getRealm().getId()))
+                        .setAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST,context.getRealm().getId()))
+                        .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER,context.getRealm().getId()))
                         .setAttribute("enableRepeatCall", authSession.getAuthNote(NEED_SEND_EMAIL_CODE) == null)
                         .createForm(VERIFY_PHONE_FTL);
                 context.challenge(challenge);

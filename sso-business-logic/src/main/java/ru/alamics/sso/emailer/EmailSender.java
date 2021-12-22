@@ -131,6 +131,8 @@ public class EmailSender {
             attributes.put("customer",settingsService.getSettingsStringValue(CUSTOMER,realName));
             attributes.put("gratitudeUp",settingsService.getSettingsStringValue(GRATITUDE_UP,realName));
             attributes.put("gratitudeDown",settingsService.getSettingsStringValue(GRATITUDE_DOWN,realName));
+            attributes.put("phoneConstLink",settingsService.getSettingsStringValue(PHONE_CONST_LINK,realName));
+            attributes.put("homePage",settingsService.getSettingsStringValue(HOME_PAGE,realName));
             String textTemplate = String.format("/text/%s", template);
             try {
                 if (theme == null) {
