@@ -111,6 +111,7 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
             attributes.put("customer", settingsService.getSettingsStringValue(CUSTOMER,realm.getName()));
             attributes.put("gratitudeUp", settingsService.getSettingsStringValue(GRATITUDE_UP,realm.getName()));
             attributes.put("gratitudeDown", settingsService.getSettingsStringValue(GRATITUDE_DOWN,realm.getName()));
+            attributes.put("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK,realm.getName()));
             String subject = new MessageFormat(rb.getProperty(subjectKey, subjectKey), locale).format(subjectAttributes.toArray());
             String textTemplate = String.format("text/%s", template);
             String textBody;
