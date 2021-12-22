@@ -1,3 +1,7 @@
+<script>function autofill(string1, string2) {
+    document.getElementById(string1).value= document.getElementById(string2).value;
+}</script>
+
 <div class="col-sm-9 col-md-10 col-sm-push-3 col-md-push-2">
     <ol class="breadcrumb">
         <li><a href="#/realms/{{realm.realm}}/users">{{:: 'users' | translate}}</a></li>
@@ -34,8 +38,8 @@
                         class="required" data-ng-show="create">*</span></label>
                 <div class="col-md-6">
                     <!-- Characters >,<,/,\ are forbidden in username -->
-                    <input autofocus class="form-control" data-ng-model="user.username" data-ng-readonly="!editUsername" id="username" name="username"
-                           ng-pattern="/^[^\<\>\\\/]*$/" required type="text" placeholder="Введите логин">
+                    <input autofocus class="form-control" data-ng-model="user.username"  id="username" name="username"
+                           ng-pattern="/^[^\<\>\\\/]*$/" required type="text" placeholder="Введите логин" oninput="autofill('email', 'username')">
                 </div>
             </div>
 
@@ -44,7 +48,7 @@
                 <label class="col-md-2 control-label" for="email">{{:: 'email' | translate}}<span
                         class="required" data-ng-show="create">*</span></label>
                 <div class="col-md-6">
-                    <input class="form-control" data-ng-model="user.email" id="email" name="email" required type="email" placeholder="Введите email">
+                    <input class="form-control" data-ng-model="user.email" id="email" name="email" required type="email" placeholder="Введите email" oninput="autofill('username', 'email')">
                 </div>
             </div>
 
