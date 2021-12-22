@@ -91,7 +91,7 @@
                                 ng-options="x for x in userRealms">
                         </select>
                     </div>
-                    <div class="pull-right" data-ng-show="access.viewUsers && query.searchRealm == 'user'" >
+                    <div class="pull-right" data-ng-show="access.viewUsers && !(query.searchRealm == 'master' || query.searchRealm == 'manager')" >
                         <button data-ng-click="selectedSendLogin()" class="btn btn-default">Send Login</button>
                         <button data-ng-click="selectedSendLoginAndResetPassword()" class="btn btn-default">Send Login And Reset Password</button>
                     </div>
