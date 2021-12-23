@@ -48,7 +48,7 @@
                 <button class="btn btn-main w-full md:w-3/7 mr-0 md:mr-4" name="accept" id="accept" type="submit">${doSubmit}</button>
 
                 <div id="timer" class="text-main-600 text-center md:text-right text-sm flex items-center my-6 md:my-0 justify-center md:justify-start">
-                    Пароль действует <span id="timer-time" class="px-1 text-black text-5/3em"></span> мин
+                    Пароль действует <span id="timer-time" class="px-1 text-black text-5/3em"></span> мм:cc
                 </div>
                 <#if lengthCode==6>
                     <button class="hidden border-b hoverable border-dashed text-black-50 text-center md:text-right my-6 md:my-0" name="resend" id="resend" type="submit" >${sendAgain}</button>

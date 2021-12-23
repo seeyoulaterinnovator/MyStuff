@@ -19,10 +19,10 @@ public class Translator {
         if (time > 0 && time % 60 == 0) {
             unit = TimeUnit.MINUTES;
             time = time / 60;
-            if (time % 60 == 0) {
+            if (time > 60) {
                 unit = TimeUnit.HOURS;
                 time = time / 60;
-                if (time % 24 == 0) {
+                if (time > 24) {
                     unit = TimeUnit.DAYS;
                     time = time / 24;
                 }
