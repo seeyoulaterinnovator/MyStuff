@@ -1338,4 +1338,12 @@
         </sql>
     </changeSet>
 
+    <changeSet id="80" author="petrov-ny">
+        <sql>
+            <![CDATA[
+                UPDATE SETTINGS SET VALUE = '<p>Был создан запрос на изменение пароля от Вашей учетной записи {2}. Если это были Вы, пройдите по ссылке</p><p><a href="{0}">Изменить пароль</a></p><p>Эта ссылка устареет через {1}.</p><p class="content__additional">Если Вы не хотите сбрасывать пароль, просто проигнорируйте это письмо и ничего не изменится.</p>' WHERE ID = 'deeec109-9620-4f7b-9063-cfd44d682353';
+            ]]>
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
