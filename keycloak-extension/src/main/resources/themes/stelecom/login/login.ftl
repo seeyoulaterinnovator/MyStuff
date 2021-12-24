@@ -11,7 +11,7 @@
             <@blocks.contentHeader mainTitle="${msg('doLogIn')}" secondaryTitle=" " secondaryHref=" " withBorder=true />
         </#if>
     <#elseif section = "form">
-        <p class="pb-3 login-title-text">Если у Вас уже есть учетная запись, Вы можете войти</p>
+        <p class="pb-3 login-title-text">Если у вас уже есть учетная запись, вы можете войти</p>
         <#if realm.password>
             <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
                   onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
@@ -35,7 +35,7 @@
                 <@components.field class="mb-7 sm:mb-8 md:w-full" fieldName="password" label="${msg('password')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true />
 
                 <div class="flex justify-between w-full items-center">
-                    <button id="submit" class="btn btn-main w-1/2 btn-enter" type="submit">Войти</button>
+                    <button id="submit" class="btn btn-main btn-enter" type="submit">Войти</button>
                     <#if realm.resetPasswordAllowed>
                         <span class="reset-password text-right">
                             <a href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a>

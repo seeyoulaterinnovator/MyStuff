@@ -40,7 +40,7 @@ export default (function() {
   // Нужно так делать на каждой форме, где есть imask
   formElement.addEventListener('submit', () => {
     usernameElement.value = dynamicMask.unmaskedValue;
-    cityElement.value = Cookie.get('city-domain') || 'yar';
+    cityElement.value = Cookie.get('city-domain') || 'interzet';
     return true;
   });
 

@@ -48,7 +48,7 @@
     url('./fonts/Inter-Light.woff') format('woff');
 }
 
-/* Фоллбэк, если не придут шрифты чата dom.ru */
+/* Фоллбэк, если не придут шрифты чата */
 @font-face {
   font-family: 'RobotoRegular';
   src: url('./fonts/RobotoRegular.woff2') format('woff');

@@ -10,7 +10,7 @@ export const city = writable(
 );
 
 export const domain = writable(
-  Cookie.get('city-domain') || 'yar');
+  Cookie.get('city-domain') || 'interzet');
 
 const isFirstVisit =
   Cookie.get('VISITED') === '0' || typeof Cookie.get('VISITED') === 'undefined';
