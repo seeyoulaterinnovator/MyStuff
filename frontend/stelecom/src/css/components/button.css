@@ -1,8 +1,8 @@
 .btn {
-  @apply .block .uppercase .tracking-wider .p-4 .rounded-lg .shadow;
+  @apply .block .uppercase .tracking-wider .px-5 .rounded-lg .shadow .font-normal;
 
+  min-width: fit-content;
   height: 40px;
-  padding: 0;
   transition: 0.2s ease-in-out;
 
   @media (min-width: 1199px) {

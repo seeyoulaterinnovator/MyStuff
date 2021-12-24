@@ -62,7 +62,7 @@
                             <#if message.type = 'info'><span
                                     class="text-black">${kcSanitize(message.summary)?no_esc}</span></#if>
                             <#if message.type = 'warning' && displayWarningMessage><span
-                                    class="text-extra">${kcSanitize(message.summary)?no_esc}</span></#if>
+                                    class="text-black">${kcSanitize(message.summary)?no_esc}</span></#if>
                             <#if message.type = 'success' && message.summary != msg('emailSentMessage')>
                                 <span class="text-accentGreen">${kcSanitize(message.summary)?no_esc}</span>
                             </#if>

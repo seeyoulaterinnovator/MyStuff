@@ -5,10 +5,7 @@ import {fetchPassword} from './helpers';
 export default (
   getPassword,
   setPassword,
-  getConfirmation,
-  setConfirmation,
   passwordElement = document.getElementById('password'),
-  passwordConfirmElement = document.getElementById('password-confirm')
 ) => {
   const passwordBlock = document.getElementById('password-block');
   if (!passwordBlock) return;
@@ -25,13 +22,9 @@ export default (
 
   function generatePassword() {
     fetchPassword().then(data => {
-      passwordConfirmElement.value = passwordElement.value ='';
-      passwordConfirmElement.value = passwordElement.value = data.password;
       generatedPassword.textContent = data.password;
       setPassword(data.password);
       inputSomePass(passwordElement);
-      inputSomePass(passwordConfirmElement);
-      checkPasswordConfirmation();
       highlightRules();
     });
   }
@@ -83,39 +76,14 @@ export default (
 
   function inputSomePass(element) {
     const elementId = element.id;
-    const passwordRaw = elementId==='password-confirm' ? getConfirmation() : getPassword();
+    const passwordRaw = getPassword();
     const regExp = new RegExp(WRONG_PASS_REG);
 
     if (regExp.test(passwordRaw)) {
       const replacePassword = passwordRaw.replace(WRONG_PASS_REG, '');
       // element.value = replacePassword;
-      if (elementId==='password-confirm') {
-        setConfirmation(replacePassword);
-      }
-      else {
-        setPassword(replacePassword);
-      }
+      setPassword(replacePassword);
     }
   }
   passwordElement.addEventListener('input', function() { inputSomePass(passwordElement); });
-  passwordConfirmElement.addEventListener('input', function() { inputSomePass(passwordConfirmElement); });
-
-  function checkPasswordConfirmation() {
-    const password = getPassword();
-    const confirmation = getConfirmation();
-    const ok = document.querySelectorAll('.passw_ok');
-
-    if (REQUIRED_PASSWORD.test(password) && confirmation === password) {
-      passwordElement.classList.add('field-good');
-      passwordConfirmElement.classList.add('field-good');
-      ok.forEach((img_block) => img_block.classList.remove('hidden'));
-    }
-    else {
-      passwordElement.classList.remove('field-good');
-      passwordConfirmElement.classList.remove('field-good');
-      ok.forEach((img_block) => img_block.classList.add('hidden'));
-    }
-  }
-  passwordElement.addEventListener('input', checkPasswordConfirmation);
-  passwordConfirmElement.addEventListener('input', checkPasswordConfirmation);
 };

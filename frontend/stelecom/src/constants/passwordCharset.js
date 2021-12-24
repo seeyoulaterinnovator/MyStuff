@@ -5,7 +5,7 @@ export const PASSWORD_CHARSET = {
   extraChars: '!@#$%^&*',
 };
 
-export const WRONG_PASS_REG = /([^A-Za-z0-9!@#$%^&]+)/g;
+export const WRONG_PASS_REG = /([^A-Za-z0-9!@#$%^&*]+)/g;
 
 export const REQUIRED_PASSWORD = /^(?=.{8,16}$)(?=.*[A-Z])(?=.*\d)[0-9a-zA-Z!@#$%^&*].*$/
 

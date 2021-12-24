@@ -13,9 +13,9 @@
 
     .content__additional {
         color: #505050cc;
-        font-size: 12px;
-        line-height: 14px;
-        font-style: italic;
+        font-size: 12px !important;
+        line-height: 16px !important;
+        letter-spacing: 0.02em;
     }
 
     hr {
@@ -45,11 +45,12 @@
 
     .mail-wrapper {
         width: 100%;
-        background-color: #ffffffff;
+        background-color: #ffffff;
         text-align: center;
     }
 
     .mail-container {
+        background-color: #ffffff;
         max-width: 600px;
         padding: 32px 24px 32px 32px;
         margin: 0 auto;
@@ -62,19 +63,20 @@
         font-size: 14px;
     }
 
-    .mail-text--bold {
-        font-weight: bold;
-    }
-
     .mail-container__header {
         width: 100%;
         padding-bottom: 24px;
     }
 
-    .logo {
-        height: 30px;
-        max-height: 30px;
-        width: auto;
+    .logo-text-wrapper {
+        text-decoration: none;
+        color: black;
+        font-weight: bold;
+        font-size: 20px;
+    }
+
+    .logo-text-wrapper span {
+        font-weight: normal;
     }
 
     .contacts {
@@ -112,9 +114,19 @@
         padding-bottom: 12px;
     }
 
+    .mail-text--bold {
+        color: #000000;
+        opacity: 0.8;
+        font-size: 14px;
+        line-height: 18px;
+        font-weight: bold;
+    }
+
     .mail-text--light-gray {
-        color: #0000007f;
+        color: #000000;
+        opacity: 0.5;
         font-size: 12px;
+        font-weight: normal;
         line-height: 16px;
     }
 

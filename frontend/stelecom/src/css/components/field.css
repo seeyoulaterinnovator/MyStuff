@@ -87,23 +87,26 @@
   }
 }
 
-.field__input:placeholder-shown + .field__label {
-  &:before {
-    margin-right: 0;
-  }
-
-  & > span {
-    display: none;
-  }
+.field__input:-webkit-autofill + .field__label
+{
+  background-color: #cfdbf3;
+  color: #000;
 }
-.field__input:-ms-input-placeholder + .field__label {
-  &:before {
-    margin-right: 0;
-  }
 
-  & > span {
-    display: none;
-  }
+.field__input:autofill + .field__label
+{
+  background-color: #cfdbf3;
+  color: #000;
+}
+
+.field__input:-ms-input-placeholder + .field__label
+{
+  display: none;
+}
+
+.field__input:placeholder-shown + .field__label
+{
+  display: none;
 }
 
 .field__label {

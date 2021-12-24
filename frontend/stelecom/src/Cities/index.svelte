@@ -46,7 +46,7 @@
             id="location-selection-window">
         <header id="cities-header" class="flex items-center pb-4 px-4 sm:px-6 lg:px-8 xl:px-6">
             <div id="cities-header-div" class="w-full flex justify-between items-center">
-                <a id="cities-header-logo" href="https://newlkb2b.dom.ru/" class={$status === STATUS.SELECTING && 'hidden sm:block'}>
+                <a id="cities-header-logo" href="https://lkb2b.stelecom.ru/" class={$status === STATUS.SELECTING && 'hidden sm:block'}>
                     <div class="h-30px w-120px md:h-10 md:w-40 xl:h-16 xl:w-64 bg-contain bg-no-repeat logo logo--base" />
                 </a>
 

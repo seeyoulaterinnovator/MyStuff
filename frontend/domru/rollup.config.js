@@ -53,7 +53,7 @@ export default {
     svelte({
       dev: !production,
       css: css => {
-        css.write(`${build}/svelte.css`);
+        css.write('svelte.css');
       },
     }),
 

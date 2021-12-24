@@ -1,6 +1,15 @@
+.reference-outer-text {
+  @apply .font-light;
+  color: #7585A1;
+
+}
+
 .reference {
+  @apply .font-light;
+
   transition: 0.2s ease-in-out;
-  color: #2B539B;
+  color: #007BFB;
+
   &-generate-password {
     display: inline-block;
     font-size: 16px;
@@ -8,8 +17,24 @@
       font-size: 18px;
     }
   }
+
   &_hoverable {
    opacity: 1;
+  }
+}
+
+.reference, .reference-outer-text {
+  letter-spacing: 0.04em;
+  font-size: 12.5px;
+
+  @media (max-width: 640px) {
+    letter-spacing: 0.055em;
+    font-size: 11.5px;
+  }
+
+  @media (max-width: 320px) {
+    letter-spacing: 0.06em;
+    font-size: 10.5px;
   }
 }
 
@@ -23,6 +48,7 @@
 }
 
 .agreement {
+  min-width: 250px;
   padding-bottom: 15px;
 }
 
