@@ -13,8 +13,8 @@ import java.io.Writer;
 
 public class CustomFreeMarkerUtil {
 
-    private final static String THEME_DOMRU = "../../../../../../themes/domru/email";
-    private final static String THEME_STELECOM = "../../../../../../themes/stelecom/email";
+    private final static String THEME_DOMRU = "/themes/domru/email";
+    private final static String THEME_STELECOM = "/themes/stelecom/email";
     private final static String DOMRU = "user";
     private final static String STELECOM = "S-TELECOM";
 
@@ -38,7 +38,7 @@ public class CustomFreeMarkerUtil {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_23);
         cfg.setLocalizedLookup(false);
         cfg.setDefaultEncoding("UTF-8");
-        String pathTheme = "../../../../../../keycloak-extension/src/main/resources/themes/domru/email";
+        String pathTheme = "/themes/domru/email";
         for (String realm : REALM_NAMES) {
             if (realm.equals(realmName)) {
                 switch (realm) {
