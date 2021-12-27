@@ -12,11 +12,20 @@ import java.io.Writer;
 
 
 public class CustomFreeMarkerUtil {
-    private CustomFreeMarkerUtil() { }
 
-    public static String processTemplate(Object data, String templateName) throws FreeMarkerException {
+    private final static String THEME_DOMRU = "../../../../../../themes/domru/email";
+    private final static String THEME_STELECOM = "../../../../../../themes/stelecom/email";
+    private final static String DOMRU = "user";
+    private final static String STELECOM = "S-TELECOM";
+
+    private final static String[] REALM_NAMES = {"user", "S-TELECOM"};
+
+    private CustomFreeMarkerUtil() {
+    }
+
+    public static String processTemplate(Object data, String templateName, String realmName) throws FreeMarkerException {
         try {
-            Template template = getTemplate(templateName);
+            Template template = getTemplate(templateName, realmName);
             Writer out = new StringWriter();
             template.process(data, out);
             return out.toString();
@@ -25,11 +34,25 @@ public class CustomFreeMarkerUtil {
         }
     }
 
-    private static Template getTemplate(final String templateName) throws IOException {
+    private static Template getTemplate(final String templateName, String realmName) throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_23);
         cfg.setLocalizedLookup(false);
         cfg.setDefaultEncoding("UTF-8");
-        ClassTemplateLoader ctl = new ClassTemplateLoader(CustomFreeMarkerUtil.class, "/templates/mail");
+        String pathTheme = "../../../../../../keycloak-extension/src/main/resources/themes/domru/email";
+        for (String realm : REALM_NAMES) {
+            if (realm.equals(realmName)) {
+                switch (realm) {
+                    case DOMRU:
+                        pathTheme = THEME_DOMRU;
+                        break;
+                    case STELECOM:
+                        pathTheme = THEME_STELECOM;
+                        break;
+                }
+            }
+        }
+
+        ClassTemplateLoader ctl = new ClassTemplateLoader(CustomFreeMarkerUtil.class, pathTheme);
         cfg.setTemplateLoader(ctl);
 
         if (templateName.toLowerCase().endsWith(".ftl")) {

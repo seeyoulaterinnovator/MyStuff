@@ -136,7 +136,7 @@ public class EmailSender {
             String textTemplate = String.format("/text/%s", template);
             try {
                 if (theme == null) {
-                    textBody = CustomFreeMarkerUtil.processTemplate(attributes, textTemplate);
+                    textBody = CustomFreeMarkerUtil.processTemplate(attributes, textTemplate, realName);
                 } else {
                     textBody = freeMarkerUtil.processTemplate(attributes, textTemplate, theme);
                 }
@@ -147,7 +147,7 @@ public class EmailSender {
             String htmlBody;
             try {
                 if (theme == null) {
-                    htmlBody = CustomFreeMarkerUtil.processTemplate(attributes, htmlTemplate);
+                    htmlBody = CustomFreeMarkerUtil.processTemplate(attributes, htmlTemplate, realName);
                 } else {
                     htmlBody = freeMarkerUtil.processTemplate(attributes, htmlTemplate, theme);
                 }
