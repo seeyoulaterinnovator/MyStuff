@@ -1346,4 +1346,20 @@
         </sql>
     </changeSet>
 
+    <changeSet id="81" author="petrov-ny">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('92e1e9a0-679c-11ec-90d6-0242ac120003', 'emailResetPasswordSubject', 'Ваш пароль для входа в Личный кабинет сброшен', null, 'S-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('96ee0d76-679c-11ec-90d6-0242ac120003', 'executeActionsSubject', 'Обновление Вашей учетной записи', null, 'S-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('9b9fd5c0-679c-11ec-90d6-0242ac120003', 'emailAccountDataSubject', 'Создан аккаунт', null, 'S-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('a1776012-679c-11ec-90d6-0242ac120003', 'emailDisabledAccountSubject', 'Ваша учетная запись заблокирована', null, 'S-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('a8087b0a-679c-11ec-90d6-0242ac120003', 'emailVerificationSubject', 'Подтверждение E-mail', null, 'S-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('ab9f6bca-679c-11ec-90d6-0242ac120003', 'emailSendLoginSubject', 'Ваш логин для входа в Личный кабинет', null, 'S-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('b1517c16-679c-11ec-90d6-0242ac120003', 'emailCredentialDisableSubject', 'Обновление Вашей учетной записи', null, 'S-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('b65b3c56-679c-11ec-90d6-0242ac120003', 'emailVerificationAuthSubject', 'Подтверждение данных', null, 'S-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('ba3023b4-679c-11ec-90d6-0242ac120003', 'passwordResetSubject', 'Сброс пароля', null, 'S-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('bee526ac-679c-11ec-90d6-0242ac120003', 'identityProviderLinkSubject', 'Ссылка {0}', null, 'S-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('c272e516-679c-11ec-90d6-0242ac120003', 'emailEnabledAccountSubject', 'Ваша учетная запись разблокирована', null, 'S-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
