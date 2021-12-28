@@ -1,7 +1,7 @@
 import IMask from 'imask';
-import { createForm } from 'final-form';
+import {createForm} from 'final-form';
 
-import { isEmpty } from './helpers';
+import {isEmpty} from './helpers';
 
 import VALIDATION_RULES from '../constants/validationRules.js';
 
@@ -16,7 +16,6 @@ export default (function() {
   const firstName = document.getElementById('firstName');
   const emailField = document.getElementById('email');
   const phoneField = document.getElementById('phone');
-  const lastName = document.getElementById('lastName');
 
   // Маска для поля ввода телефона
   const phoneMask = IMask(document.getElementById('phone'), {
@@ -51,7 +50,6 @@ export default (function() {
       firstName: firstName && firstName.value || '',
       email: emailField && emailField.value || '',
       phone: phoneField && phoneField.value || '',
-      lastName: lastName && lastName.value || '-',
     },
     validate,
     validateOnBlur: false,

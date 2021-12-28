@@ -43,10 +43,8 @@ import ru.alamics.sso.util.Util;
 
 import javax.ws.rs.core.MultivaluedMap;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Pattern;
 
 import static org.keycloak.authentication.forms.RegistrationRecaptcha.G_RECAPTCHA_RESPONSE;
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_ORG_NAME;
@@ -58,6 +56,8 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
     private static final String SITE_SECRET_VAL = "idpReview.siteSecretValue";
     private static final String RECAPTCHA_URL = "idpReview.recaptcha.url";
     private static final String RECAPTCHA_VERIFY_URL = "idpReview.recaptcha.siteVerify";
+
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("[a-zA-Z0-9!#$%&'*+/=?^_`{|}~.-]+@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*");
 
     private final TbapiService tbapiService;
     private final UserExtension userExtension;
@@ -167,7 +167,18 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
     }
 
     private List<FormMessage> getValidationErrorList(AuthenticationFlowContext context, RealmModel realm, MultivaluedMap<String, String> formData) {
-        List<FormMessage> errors = Validation.validateUpdateProfileForm(realm, formData);
+        List<FormMessage> errors = new ArrayList<>();
+
+        if (Validation.isBlank(formData.getFirst(FormConstants.FIELD_FIRST_NAME))) {
+            errors.add(new FormMessage(FormConstants.FIELD_FIRST_NAME, Messages.MISSING_FIRST_NAME));
+        }
+
+        if (Validation.isBlank(formData.getFirst(FormConstants.FIELD_EMAIL))) {
+            errors.add(new FormMessage(FormConstants.FIELD_PHONE, Messages.MISSING_EMAIL));
+        } else if (!isEmailValid(formData.getFirst(FormConstants.FIELD_EMAIL))) {
+            errors.add(new FormMessage(FormConstants.FIELD_EMAIL, Messages.INVALID_EMAIL));
+        }
+
         if (Validation.isBlank(formData.getFirst(FormConstants.FIELD_PHONE))) {
             errors.add(new FormMessage(FormConstants.FIELD_PHONE, "missingPhoneNumberMessage"));
         }
@@ -209,6 +220,10 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
     private void fillUserContextFromTbApi(MultivaluedMap<String, String> formData, SerializedBrokeredIdentityContext userCtx) throws TbapiRegisterException {
         User user = getTbApiUser(formData);
         user.getAttributes().forEach(userCtx::setAttribute);
+    }
+
+    public static boolean isEmailValid(String email) {
+        return EMAIL_PATTERN.matcher(email).matches();
     }
 
     private User getTbApiUser(MultivaluedMap<String, String> formData) throws TbapiRegisterException {
