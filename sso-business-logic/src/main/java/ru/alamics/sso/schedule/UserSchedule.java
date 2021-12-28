@@ -16,7 +16,6 @@ import org.keycloak.util.JsonSerialization;
 import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.emailer.EmailModel;
 import ru.alamics.sso.emailer.EmailSender;
-import ru.alamics.sso.jpa.entity.AppProperty;
 import ru.alamics.sso.jpa.entity.AutoLockNotification;
 import ru.alamics.sso.jpa.entity.common.NotificationType;
 import ru.alamics.sso.jpa.repository.*;
@@ -41,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 public class UserSchedule {
     private static final String TIMER_NAME = "User Schedule Timer";
     private static final long DEFAULT_INTERVAL_DURATION = 300000;
-    private final static String[] SETTINGS_REALM_NAMES_SCHEDULE = {"user", "manager","S-TELECOM"};
+    private final static String[] SETTINGS_REALM_NAMES_SCHEDULE = {"user", "manager", "S-TELECOM"};
     private final static String DEFAULT_CLIENT_ID = "account";
     @EJB
     private EmailSender sender;
@@ -86,7 +85,7 @@ public class UserSchedule {
         log.info("Timer:{} is created, interval duration value = {} ms, initial duration value = {} ms ", TIMER_NAME, getTime(), initialDuration);
     }
 
-    private long getTime(){
+    private long getTime() {
         long intervalDuration = settingsService.getSettingsValue(SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY, "master") * 1000;
 
         if (intervalDuration == 0) {
@@ -204,7 +203,7 @@ public class UserSchedule {
         final String subject = "Блокирование аккаунта";
         final String template = "block-notification.ftl";
         Map<String, Object> body = new HashMap<>();
-        body.put("blockNotificationSchedulerHtml",settingsService.getSettingsStringValue(SettingConstants.SCHEDULER_BLOCKING_BODY,realmId));
+        body.put("blockNotificationSchedulerHtml", settingsService.getSettingsStringValue(SettingConstants.SCHEDULER_BLOCKING_BODY, realmId));
         return EmailModel.builder()
                 .subject(subject)
                 .bodyAttributes(body)
@@ -239,8 +238,8 @@ public class UserSchedule {
 
         Map<String, Object> body = new HashMap<>();
         body.put("link", link);
-        String bodyHtml = String.format(settingsService.getSettingsStringValue(SettingConstants.SCHEDULER_PASSWORD_EXPIRES_BODY,realmId),link);
-        body.put("passwordExpiresSchedulerHtml",bodyHtml);
+        String bodyHtml = String.format(settingsService.getSettingsStringValue(SettingConstants.SCHEDULER_PASSWORD_EXPIRES_BODY, realmId), link);
+        body.put("passwordExpiresSchedulerHtml", bodyHtml);
         return EmailModel.builder()
                 .bodyAttributes(body)
                 .subject(subject)
