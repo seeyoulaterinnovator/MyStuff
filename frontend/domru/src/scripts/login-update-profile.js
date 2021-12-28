@@ -16,6 +16,7 @@ export default (function() {
   const firstName = document.getElementById('firstName');
   const emailField = document.getElementById('email');
   const phoneField = document.getElementById('phone');
+  const lastName = document.getElementById('lastName');
 
   // Маска для поля ввода телефона
   const phoneMask = IMask(document.getElementById('phone'), {
@@ -50,6 +51,7 @@ export default (function() {
       firstName: firstName && firstName.value || '',
       email: emailField && emailField.value || '',
       phone: phoneField && phoneField.value || '',
+      lastName: lastName && lastName.value || '-',
     },
     validate,
     validateOnBlur: false,

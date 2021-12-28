@@ -1362,4 +1362,10 @@
         </sql>
     </changeSet>
 
+    <changeSet id="82" author="petrov-ny">
+        <sql>
+                UPDATE SETTINGS SET VALUE = 'https://lkb2b.stelecom.ru' WHERE ID = 'b91073d4-5668-11ec-bf63-0242ac130002';
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

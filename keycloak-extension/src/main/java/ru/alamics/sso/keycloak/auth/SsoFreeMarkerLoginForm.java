@@ -61,6 +61,11 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
         settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
         clientService = (ClientService) Lookup.lookup(ClientService.class);
+
+        attributes.put("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST,realm.getName()));
+        attributes.put("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK,realm.getName()));
+        attributes.put("footer", settingsService.getSettingsStringValue(FOOTER,realm.getName()));
+
     }
 
     @Override
@@ -105,9 +110,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             attributes.put("password", settingsService.getSettingsStringValue(PASS,realm.getName()));
             attributes.put("loginWith", settingsService.getSettingsStringValue(LOGIN_WITH,realm.getName()));
             attributes.put("doLogIn", settingsService.getSettingsStringValue(DO_LOGIN,realm.getName()));
-            attributes.put("footer", settingsService.getSettingsStringValue(FOOTER,realm.getName()));
             attributes.put("backToApplication", settingsService.getSettingsStringValue(BACK_TO_APP,realm.getName()));
-            attributes.put("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST,realm.getName()));
             attributes.put("homePage", settingsService.getSettingsStringValue(HOME_PAGE,realm.getName()));
             attributes.put("requiredFields", settingsService.getSettingsStringValue(REQUIRED_FIELDS,realm.getName()));
 
@@ -132,7 +135,6 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             attributes.put("placeholderUsername", settingsService.getSettingsStringValue(PLACEHOLDER_USERNAME,realm.getName()));
             attributes.put("placeholderEmail", settingsService.getSettingsStringValue(PLACEHOLDER_EMAIL,realm.getName()));
             attributes.put("placeholderPhone", settingsService.getSettingsStringValue(PLACEHOLDER_PHONE,realm.getName()));
-            attributes.put("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK,realm.getName()));
 
             attributes.put("url", new SsoUrlBean(realm, theme, baseUri, this.actionUri, Util.isFrame(session)));
             attributes.put("requiredActionUrl", new RequiredActionUrlFormatterMethod(realm, baseUri));
@@ -188,6 +190,10 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         // не успевает иначе
         if (clientService == null) {
             clientService = (ClientService) Lookup.lookup(ClientService.class);
+        }
+
+        if (settingsService == null) {
+            settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
         }
 
         String redirectUri = clientService.findMainRedirectUri(client);
