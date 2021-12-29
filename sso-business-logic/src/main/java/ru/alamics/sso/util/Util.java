@@ -32,6 +32,11 @@ public class Util {
         return queryParameters != null && (queryParameters.get(I_FRAME) != null || queryParameters.get(HIDDEN_HEADER) != null);
     }
 
+    public static String getFormatNumber(String rawPhone) {
+        return String.format("+%s %s %s %s %s", rawPhone.charAt(0), rawPhone.substring(1, 4), rawPhone.substring(4, 7), rawPhone.substring(7, 9),
+                rawPhone.substring(9, 11));
+    }
+
     public static boolean isFrameByReferer(KeycloakSession session) {
         //Признак того, что вызов формы ведется в iframe
         String referer = session.getContext().getRequestHeaders().getHeaderString("referer");
