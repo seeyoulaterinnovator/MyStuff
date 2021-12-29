@@ -28,7 +28,7 @@
                 <th>dmp</th>
                 <th>role</th>
                 <th>system</th>
-                <th data-ng-show="access.manageUsers && (auth.authz.realm === 'master' || access.editCustomer)">
+                <th data-ng-show="access.manageUsers && (auth.authz.realm === 'master' || access.buttonDeleteCustomer || access.buttonAddCustomer">
                     {{:: 'actions' | translate}}
                 </th>
             </tr>
@@ -106,11 +106,11 @@
                 </td>
                 <td class="kc-action-cell"
                     data-ng-click="removeUserPost(userPost.id)"
-                    data-ng-show="access.manageUsers && (auth.authz.realm === 'master' || access.editCustomer)">
+                    data-ng-show="access.manageUsers && (auth.authz.realm === 'master' || access.buttonDeleteCustomer)">
                     {{:: 'delete' | translate}}
                 </td>
             </tr>
-            <tr data-ng-show="access.manageUsers && (auth.authz.realm === 'master' || access.editCustomer)">
+            <tr data-ng-show="access.manageUsers && (auth.authz.realm === 'master' || access.buttonAddCustomer)">
                 <td></td>
                 <td></td>
                 <td></td>

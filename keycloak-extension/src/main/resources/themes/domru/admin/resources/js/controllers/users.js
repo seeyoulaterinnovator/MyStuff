@@ -123,13 +123,19 @@ module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, c
 
 });
 
-module.controller('UserSessionsCtrl', function ($scope, realm, user, sessions, UserSessions, UserLogout,
+module.controller('UserSessionsCtrl', function ($scope, $http, realm, user, UserSessions, UserLogout,
                                                 UserSessionLogout, Notifications, $location) {
+                                                    
     $scope.realm = realm;
     $scope.user = user;
-    $scope.sessions = sessions;
     $scope.query = {};
     $scope.query.searchRealm = realm.realm;
+
+    let id = user.id;
+    $http.get(`${authUrl}/realms/${realm.realm}/sessions/${id}?searchRealm=${$location.search().searchRealm}`).then(function (data) {
+        $scope.sessions = data.data;
+    })
+
     if ($location.search().searchRealm) {
         $scope.query.searchRealm = $location.search().searchRealm;
     }
