@@ -47,7 +47,6 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import static org.keycloak.authentication.forms.RegistrationRecaptcha.G_RECAPTCHA_RESPONSE;
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_ORG_NAME;
 
 @Slf4j
 public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthenticator {
@@ -58,6 +57,8 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
     private static final String RECAPTCHA_VERIFY_URL = "idpReview.recaptcha.siteVerify";
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("[a-zA-Z0-9!#$%&'*+/=?^_`{|}~.-]+@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*");
+
+    private final static String DEFAULT_USER_LASTNAME = " ";
 
     private final TbapiService tbapiService;
     private final UserExtension userExtension;
@@ -142,7 +143,7 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
         String username = realm.isRegistrationEmailAsUsername() ? formData.getFirst(UserModel.EMAIL) : formData.getFirst(UserModel.USERNAME);
         userCtx.setUsername(username);
         userCtx.setFirstName(formData.getFirst(UserModel.FIRST_NAME));
-        userCtx.setLastName(formData.getFirst(UserModel.LAST_NAME));
+        userCtx.setLastName(DEFAULT_USER_LASTNAME);
 
         String phone = Util.getCleanUserPhone(formData.getFirst(FormConstants.FIELD_PHONE));
         if (phone != null)
@@ -235,14 +236,6 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
                 .email(formData.getFirst(FormConstants.FIELD_EMAIL))
                 .phone(phone)
                 .build();
-
-        String orgName = formData.getFirst(FormConstants.FIELD_ORG_NAME);
-
-        if (orgName == null) {
-            orgName = formData.getFirst(FormConstants.FIELD_LAST_NAME);
-        }
-        user.getAttributes().put(ATTR_ORG_NAME, Collections.singletonList(orgName));
-
 
         Map<String, Object> attributes = tbapiService.registerUser(user, new TbapiConnectConfig(TbapiConnect.REGISTRATION));
 
