@@ -8,10 +8,10 @@
     loginUrl,
   } from './stores.js';
 
-  const element = document.querySelector('.alert .text-accentRed');
+  const alert = document.querySelector('.alert .text-accentRed');
 
-  if (element) {
-    const hasBadEmail = element.classList.contains('bad_email');
+  if (alert) {
+    const hasBadEmail = alert.classList.contains('bad_email');
     const hasRegistration = window.location.href.includes('registration');
     const hasUpdateProfile = window.location.href.includes('UPDATE_PROFILE');
     isAccountExists.set(hasBadEmail);
@@ -20,19 +20,33 @@
 
     if (hasBadEmail && (hasRegistration || hasUpdateProfile)) {
       show.set(true);
-      text.set(element.innerText);
-      element.parentElement.remove();
+      text.set(alert.innerText);
+      alert.parentElement.remove();
+    }
+  }
+
+  const email = document.getElementsByName('email');
+
+  if (email && email.value) {
+    if ($isUpdateProfile) {
+      text.set(`Пользователь с электронной почтой ${email.value} уже существует. Хотите обновить учетную запись пользователя?`);
+    } else if ($isRegistration) {
+      text.set(``);
     }
   }
 
   function handleHide() {
     show.set(false);
   }
+
+  function handleClick(e) {
+    e.stopPropagation();
+  }
 </script>
 
 {#if $show}
-  <div class="message__fade" on:click={handleHide}>
-    <div class="message">
+  <div class="message__fade flex justify-center items-center" on:click={handleHide}>
+    <div class="message" on:click={handleClick}>
       <div class="message__title flex flex-row justify-between items-center gap-4">
         <span>
           {#if $isRegistration || $isUpdateProfile}
@@ -52,11 +66,11 @@
             Войти
           </a>
           {#if $isAccountExists}
-            <button class="btn w-full md:w-auto" on:click={handleHide}>
+            <button class="btn text-extra w-full md:w-auto" on:click={handleHide}>
               Указать другой адрес
             </button>
           {:else}
-            <button class="btn w-full md:w-auto" on:click={handleHide}>
+            <button class="btn text-extra w-full md:w-auto" on:click={handleHide}>
               Отмена
             </button>
           {/if}
@@ -64,11 +78,11 @@
           <a href="{$loginUrl}" class="btn btn-main w-full md:w-auto" on:click={handleHide}>
             Обновить
           </a>
-          <button class="btn w-full md:w-auto" on:click={handleHide}>
+          <button class="btn text-extra w-full md:w-auto" on:click={handleHide}>
             Изменить данные
           </button>
         {:else}
-          <button class="btn w-full md:w-auto" on:click={handleHide}>
+          <button class="btn text-extra w-full md:w-auto" on:click={handleHide}>
             Спасибо
           </button>
         {/if}

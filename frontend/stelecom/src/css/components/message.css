@@ -1,11 +1,6 @@
 .message {
   padding: 32px 24px 40px;
-  position: absolute;
-  width: fit-content;
   max-width: 424px;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
   background: #FFFFFF;
   box-shadow: 0 16px 64px rgba(43, 83, 155, 0.16);
   border-radius: 12px;
@@ -18,11 +13,22 @@
     font-family: Inter, sans-serif;
     font-style: normal;
     font-weight: 300;
-    font-size: 17.5px;
-    line-height: 24px;
+    font-size: 15.5px;
+    line-height: 21px;
     color: #000000;
     mix-blend-mode: normal;
-    margin-bottom: 40px;
+    margin-bottom: 32px;
+
+    @media (min-width: 768px) {
+      font-size: 16.5px;
+      line-height: 23px;
+    }
+
+    @media (min-width: 1200px) {
+      font-size: 17.5px;
+      line-height: 24px;
+      margin-bottom: 40px;
+    }
   }
 
   &__fade {
@@ -40,11 +46,21 @@
     font-family: Inter, sans-serif;
     font-style: normal;
     font-weight: 600;
-    font-size: 26px;
-    line-height: 33px;
+    font-size: 22px;
+    line-height: 27px;
     color: #000000;
     mix-blend-mode: normal;
     margin-bottom: 16px;
+
+    @media (min-width: 768px) {
+      font-size: 23px;
+      line-height: 30px;
+    }
+
+    @media (min-width: 1200px) {
+      font-size: 26px;
+      line-height: 33px;
+    }
   }
 
   &__btn {
@@ -59,5 +75,11 @@
       box-shadow: none;
       outline: none;
     }
+  }
+
+  .btn:not(&__btn) {
+    font-size: 15.5px;
+    line-height: 21px;
+    letter-spacing: 0.6px;
   }
 }
