@@ -12,7 +12,6 @@
 
     import Confirmation from './Confirmation.svelte';
     import Selection from './Selection.svelte';
-    import PhoneButton from './PhoneButton.svelte';
 
     import './selection';
     import {selectCity, setAllSelected, setSelectedCity} from "./selection";
@@ -90,10 +89,6 @@
                           </g>
                       </svg>
                   </button>
-              {/if}
-
-              {#if $status === STATUS.INITIAL}
-                  <PhoneButton />
               {/if}
             </div>
         </header>

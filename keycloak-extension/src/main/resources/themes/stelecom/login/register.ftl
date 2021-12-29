@@ -41,7 +41,7 @@
 
                 <div class="flex flex-col justify-between sm:flex-row mt-0 xl:mt-2">
                   <div class="flex flex-basis-auto items-center">
-                    <button id="submit" class="btn btn-main reg-fields px-0" type="submit">${msg('doRegister')}</button>
+                    <button id="submit" class="btn btn-main px-0" type="submit">${msg('doRegister')}</button>
                   </div>
                   <span class="flex-basis-auto ml-0 mb-6 mt-4 text-xs sm:ml-5 sm:mb-0 agreement"><span class="reference-outer-text">Нажимая кнопку, вы соглашаетесь <br></span><a class="reference reference_hoverable" href="https://lkb2b.stelecom.ru/policy.pdf" target="_blink">с правилами обработки перс. данных</a></span>
                 </div>
