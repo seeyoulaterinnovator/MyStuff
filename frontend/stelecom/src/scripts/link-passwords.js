@@ -86,4 +86,21 @@ export default (
     }
   }
   passwordElement.addEventListener('input', function() { inputSomePass(passwordElement); });
+
+  function checkPasswordConfirmation() {
+    const password = getPassword();
+    const ok = document.querySelectorAll('.passw_ok');
+
+    if (REQUIRED_PASSWORD.test(password)) {
+      passwordElement.classList.add('field-good');
+      ok.forEach((img_block) => img_block.classList.remove('hidden'));
+      generatedPassword.textContent = password;
+    }
+    else {
+      passwordElement.classList.remove('field-good');
+      generatedPassword.textContent = '';
+      ok.forEach((img_block) => img_block.classList.add('hidden'));
+    }
+  }
+  passwordElement.addEventListener('input', checkPasswordConfirmation);
 };

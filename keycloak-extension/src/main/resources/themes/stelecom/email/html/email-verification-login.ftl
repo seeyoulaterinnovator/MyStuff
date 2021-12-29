@@ -7,4 +7,3 @@
         ${kcSanitize(msg("emailVerificationLoginBodyHtml",link, linkExpiration, realmName, linkExpirationFormatter(linkExpiration), expTime))?no_esc}
     </#if>
 </@template.layout>
-
