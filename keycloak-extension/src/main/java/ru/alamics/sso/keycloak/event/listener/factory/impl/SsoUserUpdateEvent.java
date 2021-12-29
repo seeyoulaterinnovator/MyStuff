@@ -15,6 +15,7 @@ import ru.alamics.sso.registration.model.UserEntityRepresentation;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.stats.LoginHistory;
+import ru.alamics.sso.util.Util;
 
 import javax.persistence.EntityManager;
 import java.util.HashMap;
@@ -80,6 +81,11 @@ public class SsoUserUpdateEvent extends SsoEvent {
             attributes.put("userName", user.getUsername());
             attributes.put("userFirstName", user.getFirstName());
             attributes.put("userLastName", user.getLastName());
+
+            List<String> phones = user.getAttribute("phone");
+            if (!phones.isEmpty()) {
+                attributes.put("phone", Util.getFormatNumber(phones.get(0)));
+            }
 
             attributes.put("emailEnabledAccountBodyHtml", settingsService.getSettingsStringValue(EMAIL_ENABLE_ACCOUNT, realm.getName()));
             attributes.put("emailDisabledAccountBodyHtml", settingsService.getSettingsStringValue(EMAIL_DISABLE_ACCOUNT, realm.getName()));

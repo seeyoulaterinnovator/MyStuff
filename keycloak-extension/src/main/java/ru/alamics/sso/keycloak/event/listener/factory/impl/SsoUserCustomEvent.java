@@ -11,6 +11,7 @@ import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
 import ru.alamics.sso.settings.SettingsService;
+import ru.alamics.sso.util.Util;
 
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +58,7 @@ public class SsoUserCustomEvent extends SsoEvent {
                 attributes.put("emailResetPasswordBodyHtml", messageService.getSettingsStringValue(EMAIL_RESET_PASSWORD_ACCOUNT,realm.getName()));
                 List<String> phones = user.getAttribute("phone");
                 if (!phones.isEmpty()) {
-                    attributes.put("phone", phones.get(0));
+                    attributes.put("phone", Util.getFormatNumber(phones.get(0)));
                 }
                 if (userRepresentation.getRequiredActions().contains(UserEntityRepresentation.SEND_LOGIN)) {
                     this.sendEmail(user, realm, messageService.getSettingsStringValue(ACCOUNT_SUBJECT_SEND_LOGIN, realm.getName()), BODY_TEMPLATE_LOGIN_SEND, attributes);
