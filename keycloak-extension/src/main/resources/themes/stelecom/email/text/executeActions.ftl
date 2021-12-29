@@ -4,7 +4,7 @@
   <#if requiredActions??>
     <#list requiredActions>
       <#items as reqActionItem>
-        ${msg("requiredAction.${reqActionItem}")}<#sep>, 
+        ${msg("requiredAction.${reqActionItem}")}<#sep>,
       </#items>
     </#list>
   <#else>
