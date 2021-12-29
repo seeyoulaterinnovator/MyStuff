@@ -20,6 +20,9 @@
                     <#--                    <div class="org-cell">Уникальный номер</div>-->
                     <div class="role-cell">Роль пользователя</div>
                 </div>
+                <div class="trow theader-mobile">
+                    <div class="cell-header-mobile">Организация / Роль пользователя</div>
+                </div>
                 <#list posts as post>
                     <#assign firstRow = post?index == 0>
                     <div class="${firstRow?then('selected', '')} trow titems">
