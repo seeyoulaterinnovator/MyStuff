@@ -21,18 +21,18 @@
                         <input class="hidden w-0 h-0" name="withCity" value="TRUE">
                     </#if>
                     <#if usernameEditDisabled??>
-                        <input name="username" id="username" class="field__input" label="${msg('username')}"
+                        <input name="username" id="username" class="field__input" label="${msg('usernameOrEmailPlaceholder')}"
                                placeholder="${msg('usernameOrEmailPlaceholder')}" value="${(login.username!)}"
                                type="text" disabled/>
                     <#else>
-                        <input name="username" id="username" class="field__input" label="${msg('username')}"
+                        <input name="username" id="username" class="field__input" label="${msg('usernameOrEmailPlaceholder')}"
                                placeholder="${msg('usernameOrEmailPlaceholder')}" value="${(login.username!)}"
                                type="text" autofocus autocomplete="off"/>
                     </#if>
-                    <label class="field__label" for="username">${msg("username")}</label>
+                    <label class="field__label" for="username">${msg("usernameOrEmailPlaceholder")}</label>
                 </div>
 
-                <@components.field class="mb-7 sm:mb-8 md:w-full" fieldName="password" label="${msg('password')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true />
+                <@components.field class="mb-7 sm:mb-8 md:w-full" fieldName="password" label="${msg('passwordPlaceholder')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true />
 
                 <div class="flex justify-between w-full items-center">
                     <button id="submit" class="btn btn-main btn-enter" type="submit">Войти</button>
