@@ -4,7 +4,9 @@ export const text = writable('');
 
 export const show = writable(false);
 
-export const isAccountExists = writable(false);
+export const isBadEmail = writable(false);
+
+export const isBadPhone = writable(false);
 
 export const isRegistration = writable(false);
 

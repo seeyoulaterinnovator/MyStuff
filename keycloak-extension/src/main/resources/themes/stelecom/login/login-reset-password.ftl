@@ -11,15 +11,7 @@
             <input name="city" id="city" class="city_hidden_input" type="text" />
             <div class="field field__container field--required mb-4 md:w-full">
                 <input name="username" id="username" class="field__input" placeholder="${msg('usernameOrEmailPlaceholder')}" type="text" autofocus />
-                <label class="field__label" for="username">
-                    <#if !realm.loginWithEmailAllowed>
-                        ${msg("username")}
-                    <#elseif !realm.registrationEmailAsUsername>
-                        ${msg("usernameOrEmail")}
-                    <#else>
-                        ${msg("phoneOrEmail")}
-                    </#if>
-                </label>
+                <label class="field__label" for="username">${msg('usernameOrEmailPlaceholder')}</label>
             </div>
 
             <div class="flex flex-col justify-between sm:flex-row xl:mt-12 md:mt-8 mt-7">

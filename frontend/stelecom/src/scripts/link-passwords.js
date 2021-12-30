@@ -22,9 +22,10 @@ export default (
 
   function generatePassword() {
     fetchPassword().then(data => {
-      generatedPassword.textContent = data.password;
-      setPassword(data.password);
-      inputSomePass(passwordElement);
+      passwordElement.value = '' + data.password;
+      generatedPassword.textContent = '' + data.password;
+      setPassword('' + data.password);
+      inputSomePass();
       highlightRules();
     });
   }
@@ -74,33 +75,17 @@ export default (
   }
   passwordElement.addEventListener('input', highlightRules);
 
-  function inputSomePass(element) {
-    const elementId = element.id;
+  function inputSomePass() {
     const passwordRaw = getPassword();
-    const regExp = new RegExp(WRONG_PASS_REG);
-
-    if (regExp.test(passwordRaw)) {
+    if (WRONG_PASS_REG.test(passwordRaw)) {
       const replacePassword = passwordRaw.replace(WRONG_PASS_REG, '');
-      // element.value = replacePassword;
       setPassword(replacePassword);
     }
   }
-  passwordElement.addEventListener('input', function() { inputSomePass(passwordElement); });
-
-  function checkPasswordConfirmation() {
-    const password = getPassword();
-    const ok = document.querySelectorAll('.passw_ok');
-
-    if (REQUIRED_PASSWORD.test(password)) {
-      passwordElement.classList.add('field-good');
-      ok.forEach((img_block) => img_block.classList.remove('hidden'));
-      generatedPassword.textContent = password;
-    }
-    else {
-      passwordElement.classList.remove('field-good');
+  passwordElement.addEventListener('input', function() {
+    inputSomePass();
+    if (generatedPassword.textContent && passwordElement.value !== generatedPassword.textContent) {
       generatedPassword.textContent = '';
-      ok.forEach((img_block) => img_block.classList.add('hidden'));
     }
-  }
-  passwordElement.addEventListener('input', checkPasswordConfirmation);
+  });
 };
