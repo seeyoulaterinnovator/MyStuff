@@ -25,14 +25,14 @@
     }
   }
 
-  const email = document.getElementsByName('email');
+  const email = document.getElementsByName('email')[0];
 
   if (email && email.value) {
     if ($isUpdateProfile) {
       text.set(`Пользователь с электронной почтой ${email.value} уже существует. Хотите обновить учетную запись пользователя?`);
-    } else if ($isRegistration) {
-      text.set(``);
     }
+
+    email.value = '';
   }
 
   function handleHide() {
