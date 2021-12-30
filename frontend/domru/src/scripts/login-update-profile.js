@@ -1,7 +1,7 @@
 import IMask from 'imask';
-import { createForm } from 'final-form';
+import {createForm} from 'final-form';
 
-import { isEmpty } from './helpers';
+import {isEmpty} from './helpers';
 
 import VALIDATION_RULES from '../constants/validationRules.js';
 
