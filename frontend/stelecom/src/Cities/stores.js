@@ -1,12 +1,12 @@
-import { writable } from 'svelte/store';
+import {writable} from 'svelte/store';
 import Cookie from 'js-cookie';
 
-import { STATUS } from './constants.js';
+import {STATUS} from './constants.js';
 
 export const city = writable(
   document.getElementById('cities-button').dataset.city ||
-    Cookie.get('CITY') ||
-    'Санкт-Петербург',
+  Cookie.get('CITY') ||
+  'Москва',
 );
 
 export const domain = writable(
