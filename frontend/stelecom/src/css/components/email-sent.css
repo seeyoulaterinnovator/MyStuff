@@ -50,7 +50,7 @@
   width: 100%;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 768px) {
   .btn--thanks {
     width: fit-content;
   }
