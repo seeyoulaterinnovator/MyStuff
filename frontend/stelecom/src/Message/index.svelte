@@ -4,35 +4,41 @@
     text,
     isRegistration,
     isUpdateProfile,
-    isAccountExists,
+    isBadEmail,
+    isBadPhone,
     loginUrl,
   } from './stores.js';
 
+  const hasRegistration = window.location.href.includes('registration');
+  const hasUpdateProfile = window.location.href.includes('UPDATE_PROFILE');
   const alert = document.querySelector('.alert .text-accentRed');
+  const hasAlert = !!alert;
+  const hasBadEmail = hasAlert && alert.classList.contains('bad_email');
+  const hasBadPhone = hasAlert && alert.classList.contains('bad_phone');
+  const newText = hasAlert ? alert.innerText : '';
+  const emailElement = document.getElementsByName('email')[0];
 
-  if (alert) {
-    const hasBadEmail = alert.classList.contains('bad_email');
-    const hasRegistration = window.location.href.includes('registration');
-    const hasUpdateProfile = window.location.href.includes('UPDATE_PROFILE');
-    isAccountExists.set(hasBadEmail);
-    isRegistration.set(hasRegistration);
-    isUpdateProfile.set(hasUpdateProfile);
+  let email = '';
 
-    if (hasBadEmail && (hasRegistration || hasUpdateProfile)) {
-      show.set(true);
-      text.set(alert.innerText);
-      alert.parentElement.remove();
-    }
+  if (emailElement) {
+    email = emailElement ? emailElement.value : '';
+    emailElement.value = '';
   }
 
-  const email = document.getElementsByName('email')[0];
+  hasAlert && alert.parentElement.remove();
 
-  if (email && email.value) {
-    if ($isUpdateProfile) {
-      text.set(`Пользователь с электронной почтой ${email.value} уже существует. Хотите обновить учетную запись пользователя?`);
-    }
+  show.set(hasAlert);
+  isBadEmail.set(hasBadEmail);
+  isBadPhone.set(hasBadPhone);
+  isRegistration.set(hasRegistration);
+  isUpdateProfile.set(hasUpdateProfile);
 
-    email.value = '';
+  if (hasBadEmail && hasUpdateProfile && email) {
+    text.set(`Пользователь с электронной почтой ${email} уже существует. Хотите обновить учетную запись пользователя?`);
+  } else if (hasBadPhone && !hasBadEmail) {
+    text.set(`Номер мобильного телефона уже используется в другой учетной записи. Если Вы уже регистрировались, попробуйте войти в свою учетную запись, либо укажите другой номер телефона. Регистрация временно недоступна, попробуйте повторить попытку позже`);
+  } else {
+    text.set(newText);
   }
 
   function handleHide() {
@@ -49,7 +55,7 @@
     <div class="message" on:click={handleClick}>
       <div class="message__title flex flex-row justify-between items-center gap-4">
         <span>
-          {#if $isRegistration || $isUpdateProfile}
+          {#if $isBadEmail || $isBadPhone}
             Учетная запись существует
           {:else}
             Ошибка
@@ -65,9 +71,13 @@
           <a href="{$loginUrl}" class="btn btn-main w-full md:w-auto" on:click={handleHide}>
             Войти
           </a>
-          {#if $isAccountExists}
+          {#if $isBadEmail}
             <button class="btn text-extra w-full md:w-auto" on:click={handleHide}>
               Указать другой адрес
+            </button>
+          {:else if $isBadPhone}
+            <button class="btn text-extra w-full md:w-auto" on:click={handleHide}>
+              Указать другой номер
             </button>
           {:else}
             <button class="btn text-extra w-full md:w-auto" on:click={handleHide}>

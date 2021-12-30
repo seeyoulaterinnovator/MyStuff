@@ -38,10 +38,22 @@
 
 .text--far {
   padding-bottom: 35px;
+  opacity: 1;
+
+  span {
+    display: block;
+    margin-bottom: 8px;
+  }
 }
 
 .btn--thanks {
-  width: 203px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .btn--thanks {
+    width: fit-content;
+  }
 }
 
 @media screen and (max-width: 1199px) {
@@ -119,9 +131,5 @@
 @media screen and (max-width: 479px) {
   .ok {
     margin-bottom: 16px;
-  }
-
-  .btn--thanks {
-    width: 100%;
   }
 }
