@@ -56,7 +56,8 @@
                 <label class="col-md-2 control-label" for="firstName">{{:: 'first-name' | translate}}<span
                         class="required" data-ng-show="create">*</span></label>
                 <div class="col-md-6">
-                    <input class="form-control" data-ng-model="user.firstName" id="firstName" required name="firstName" type="text" placeholder="Введите ФИО">
+                    <input class="form-control" data-ng-model="user.firstName" id="firstName" required name="firstName"
+                           type="text" placeholder="Введите ФИО">
                 </div>
             </div>
 
@@ -131,7 +132,8 @@
                 <div class="col-md-6">
                     <select data-placeholder="{{:: 'select-an-action.placeholder' | translate}}" id="reqActions"
                             multiple
-                            ng-model="user.requiredActions" ui-select2>
+                            ng-model="user.requiredActions" ui-select2
+                            data-ng-disabled="!(user.access.manage && (auth.authz.realm === 'master' || access.requiredActions))">
                         <option ng-repeat="action in userReqActionList" value="{{action.alias}}">{{action.name}}
                         </option>
                     </select>
