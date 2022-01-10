@@ -168,3 +168,8 @@ input[type="number"] {
 .city_hidden_input {
   display: none;
 }
+
+.field::placeholder {
+  font-weight: 300;
+  color: #8494A5;
+}
