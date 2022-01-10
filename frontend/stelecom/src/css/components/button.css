@@ -114,3 +114,9 @@ a.btn {
     box-sizing: border-box;
   }
 }
+
+@media (max-width: 320px) {
+  .btn-enter {
+    width: 134px;
+  }
+}

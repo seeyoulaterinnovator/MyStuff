@@ -46,24 +46,18 @@ export default (function() {
     .slice(0, codeNumbers.value || 6)
     .map(index => document.getElementById(`smscode-${index}`));
 
-  inputs.forEach(input => {
+  inputs.forEach((input, index) => {
     input.addEventListener('input', () => {
       setButtonAvailability(validate, submitElement);
 
       jumpToNextInput(input);
       cutRedundant(input);
+      clearEmptyInputsHighlights();
+      highlightCurrentInput(input, index);
     });
 
     input.addEventListener('keypress', event => {
       checkNumeric(event);
-    });
-
-    input.addEventListener('focus', () => {
-      highlightNext(input);
-    });
-
-    input.addEventListener('blur', () => {
-      clearHighlights();
     });
   });
 
@@ -96,14 +90,47 @@ export default (function() {
     }
   }
 
-  function highlightNext(input) {
-    const currentInput = input.nextElementSibling;
-    if (currentInput) currentInput.classList.add('border-accentBlue');
+  function highlightCurrentInput(currentInput, index) {
+    if (isInputsFilled(currentInput)) {
+      return highlightInputsWithGreen();
+    }
+
+    if (currentInput) {
+      const borderText = '1px solid ';
+
+      switch (index) {
+        case 0:
+          currentInput.style.border = borderText + "#0CB779";
+          break;
+        case 1:
+          currentInput.style.border = borderText + "#FF372B";
+          break;
+        case 2:
+          currentInput.style.border = borderText + "#0FC8F9";
+          break;
+        default:
+          highlightInputsWithGreen();
+          break;
+      }
+    }
   }
 
-  function clearHighlights() {
+  function highlightInputsWithGreen() {
+    inputs.forEach(input => input.style.border = '1px solid #0CB779');
+  }
+
+  function clearEmptyInputsHighlights() {
     inputs.forEach(input => {
-      input.classList.remove('border-accentBlue');
+      if (!input.value) {
+        input.style.border = "1px solid #E2E8F0";
+      }
+    })
+  }
+
+  function isInputsFilled(exceptInput) {
+    return inputs.every(input => {
+      if (input.id === exceptInput.id) return true;
+      return input.value;
     });
   }
 
