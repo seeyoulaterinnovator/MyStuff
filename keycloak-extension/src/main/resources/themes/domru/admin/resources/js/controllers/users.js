@@ -1086,6 +1086,16 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
     };
 
     $scope.addAttribute = function () {
+        if ($scope.newAttribute.key === 'phone'){
+            if (!Number($scope.newAttribute.value)){
+                Notifications.error('Некорректный номер телефона');
+                return;
+            }
+            if($scope.newAttribute.value.length !== 11){
+                Notifications.error("Некорректная длина номера телефона");
+                return;
+            }
+        }
         $scope.user.attributes[$scope.newAttribute.key] = $scope.newAttribute.value;
         delete $scope.newAttribute;
     };
