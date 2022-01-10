@@ -1023,7 +1023,7 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
                 var id = l.substring(l.lastIndexOf("/") + 1);
 
                 $location.url("/realms/" + realm.realm + "/users/" + id + "?searchRealm=" + $scope.query.searchRealm);
-                Notifications.success("The user has been created.");
+                Notifications.success("Пользователь создан");
             });
         } else {
             if ($scope.GetPhoneAttr() === '') {
@@ -1034,12 +1034,21 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
                     $scope.changed = false;
                     convertAttributeValuesToString($scope.user);
                     user = angular.copy($scope.user);
-                    Notifications.success("Your changes have been saved to the user.");
+                    Notifications.success("Ваши изменения были сохранены.");
                 });
             } else {
                 $scope.GetPhoneCheckerResult().then(function (result) {
+                    var phone = $scope.GetPhoneAttr();
                     if (result != null) {
-                        Notifications.error("The user phone number not unique");
+                        Notifications.error("Номер телефона уже используется");
+                        return;
+                    }
+                    if (!Number(phone)){
+                        Notifications.error('Некорректный номер телефона');
+                        return;
+                    }
+                    if(('' + phone).length !== 11){
+                        Notifications.error("Некорректная длина номера телефона");
                         return;
                     }
                     User.update({
@@ -1049,7 +1058,7 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
                         $scope.changed = false;
                         convertAttributeValuesToString($scope.user);
                         user = angular.copy($scope.user);
-                        Notifications.success("Your changes have been saved to the user.");
+                        Notifications.success("Ваши изменения были сохранены.");
                     });
                 });
             }
