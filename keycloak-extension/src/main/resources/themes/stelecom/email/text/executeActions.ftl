@@ -1,5 +1,4 @@
 <#ftl output_format="plainText">
-
 <#assign requiredActionsText>
   <#if requiredActions??>
     <#list requiredActions>
@@ -10,5 +9,4 @@
   <#else>
   </#if>
 </#assign>
-
 ${msg("executeActionsBody",link, linkExpiration, realmName, requiredActionsText, linkExpirationFormatter(linkExpiration))}

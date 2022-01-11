@@ -3,6 +3,7 @@
 <@template.layout ; section>
     <#if section = "style">
         <#include 'styles/content-style--default.html' >
+        <title>${kcSanitize(msg("emailResetPasswordSubject"))}</title>
     <#elseif section = "body">
         ${kcSanitize(msg("emailResetPasswordBodyHtml",authHref))?no_esc}
         <#if phone??>
