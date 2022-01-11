@@ -10,6 +10,7 @@
         <#else>
             ${kcSanitize(msg(emailLoginHtml, userName))?no_esc}
         </#if>
+        ${kcSanitize(msg("login"))?no_esc}
         ${kcSanitize(msg(emailPasswordFooterHtml))?no_esc}
     </#if>
 </@template.layout>
