@@ -89,6 +89,9 @@ public class SsoUserUpdateEvent extends SsoEvent {
 
             attributes.put("emailEnabledAccountBodyHtml", settingsService.getSettingsStringValue(EMAIL_ENABLE_ACCOUNT, realm.getName()));
             attributes.put("emailDisabledAccountBodyHtml", settingsService.getSettingsStringValue(EMAIL_DISABLE_ACCOUNT, realm.getName()));
+            attributes.put("emailLoginAndPhoneHtml", settingsService.getSettingsStringValue(EMAIL_LOGIN_AND_PHONE_ACCOUNT, realm.getName()));
+            attributes.put("emailLoginHtml", settingsService.getSettingsStringValue(EMAIL_LOGIN_ACCOUNT, realm.getName()));
+            attributes.put("emailPasswordFooterHtml", settingsService.getSettingsStringValue(EMAIL_PASSWORD_FOOTER_ACCOUNT, realm.getName()));
 
             if (userNow.isEnabled()) {
                 long blockValue = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_UNLOCKING, realm.getName());
