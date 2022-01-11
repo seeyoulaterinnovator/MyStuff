@@ -3,6 +3,7 @@
 <@template.layout ; section>
     <#if section = "style">
         <#include 'styles/content-style--default.html' >
+        <title>${kcSanitize(msg("emailSendLoginSubject"))}</title>
     <#elseif section = "body">
         ${kcSanitize(msg("emailSendLoginBodyHtml"))?no_esc}
         <#if phone??>

@@ -3,6 +3,7 @@
 <@template.layout ; section>
   <#if section = "style">
     <#include 'styles/content-style--default.html' >
+    <title>${kcSanitize(msg("emailExpiresPasswordDataSubject"))}</title>
   <#elseif section = "body">
 
   <#assign email=realmName>

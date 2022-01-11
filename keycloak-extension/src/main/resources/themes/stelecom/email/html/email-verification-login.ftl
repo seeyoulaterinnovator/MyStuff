@@ -3,6 +3,7 @@
 <@template.layout ; section>
     <#if section = "style">
         <#include 'styles/content-style--default.html' >
+        <title>${kcSanitize(msg("emailVerificationSubject"))}</title>
     <#elseif section = "body">
         ${kcSanitize(msg("emailVerificationLoginBodyHtml",link, linkExpiration, realmName, linkExpirationFormatter(linkExpiration), expTime))?no_esc}
     </#if>
