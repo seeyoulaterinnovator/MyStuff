@@ -51,8 +51,6 @@ export default (
     const password = getPassword();
 
     for (let category in HIGHLIGHT_VALIDATION_CHARSET) {
-      const ruleElement = document.getElementById(`${category}-password`);
-
       let ruleAccepted = typeof HIGHLIGHT_VALIDATION_CHARSET[category] === 'string'
         && [...password].some(character => [...HIGHLIGHT_VALIDATION_CHARSET[category]].includes(character));
 
@@ -64,12 +62,15 @@ export default (
         })
       }
 
-      if (ruleAccepted) {
-        ruleElement.classList.remove('text-accentRed');
-        ruleElement.classList.add('text-accentGreen');
-      } else {
-        ruleElement.classList.remove('text-accentGreen');
-        ruleElement.classList.add('text-accentRed');
+      const ruleElement = document.getElementById(`${category}-password`);
+      if (ruleElement) {
+        if (ruleAccepted) {
+          ruleElement.classList.remove('text-accentRed');
+          ruleElement.classList.add('text-accentGreen');
+        } else {
+          ruleElement.classList.remove('text-accentGreen');
+          ruleElement.classList.add('text-accentRed');
+        }
       }
     }
   }

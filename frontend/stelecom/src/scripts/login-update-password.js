@@ -137,6 +137,10 @@ export default (function() {
     // passwordElement.value = password;
     // setButtonAvailability(validate, submitElement);
     form.getFieldState('password-new').change(password);
+    passwordElement.dispatchEvent(new Event('input', {
+      'bubbles': true,
+      'cancelable': true
+    }));
   }
 
   linkPasswords(getPassword, setPassword, passwordElement);
