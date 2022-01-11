@@ -26,6 +26,10 @@
   }
 }
 
+.transparent-bg {
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
 @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
   .cities-column {
     width: calc((100vw - 4.9rem) /4);

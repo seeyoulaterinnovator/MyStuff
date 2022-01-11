@@ -21,7 +21,7 @@
                 </div>
                 <div class="flex-basis-auto w-full ml-0 text-sm sm:ml-6">
                     <#--  <button id="cancel" class="btn w-full" type="button">${msg("doCancel")}</button>  -->
-                    <a id="cancel" href="${redirectUrl}" class="btn w-full">${msg("doCancel")}</a>
+                    <a id="cancel" href="${redirectUrl}" class="btn btn-cancel w-full">${msg("doCancel")}</a>
                 </div>
             </div>
         </form>
