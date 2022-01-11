@@ -17,12 +17,19 @@
   const hasBadPhone = hasAlert && alert.classList.contains('bad_phone');
   const newText = hasAlert ? alert.innerText : '';
   const emailElement = document.getElementsByName('email')[0];
+  const phoneElement = document.getElementsByName('phone')[0];
 
   let email = '';
+  let phone = '';
 
   if (emailElement) {
     email = emailElement ? emailElement.value : '';
     emailElement.value = '';
+  }
+
+  if (phoneElement) {
+    phone = phoneElement ? phoneElement.value : '';
+    phoneElement.value = '';
   }
 
   hasAlert && alert.parentElement.remove();
@@ -32,13 +39,38 @@
   isBadPhone.set(hasBadPhone);
   isRegistration.set(hasRegistration);
   isUpdateProfile.set(hasUpdateProfile);
+  text.set(newText);
 
-  if (hasBadEmail && hasUpdateProfile && email) {
-    text.set(`Пользователь с электронной почтой ${email} уже существует. Хотите обновить учетную запись пользователя?`);
-  } else if (hasBadPhone && !hasBadEmail) {
-    text.set(`Номер мобильного телефона уже используется в другой учетной записи. Если Вы уже регистрировались, попробуйте войти в свою учетную запись, либо укажите другой номер телефона. Регистрация временно недоступна, попробуйте повторить попытку позже`);
-  } else {
-    text.set(newText);
+  if (hasRegistration) {
+    if (hasBadEmail && hasBadPhone) {
+      text.set('Адрес электронной почты и номер мобильного телефона уже используется в другой учетной записи. Если Вы уже регистрировались, попробуйте войти в свою учетную запись, либо укажите другой адрес электронной почты и номер мобильного телефона.');
+    } else if (hasBadEmail) {
+      text.set('Адрес электронной почты уже используется в другой учетной записи. Если Вы уже регистрировались, попробуйте войти в свою учетную запись, либо укажите другой адрес электронной почты.');
+    } else if (hasBadPhone) {
+      text.set('Номер мобильного телефона уже используется в другой учетной записи. Если Вы уже регистрировались, попробуйте войти в свою учетную запись, либо укажите другой номер мобильного телефона.');
+    } else {
+      text.set('Регистрация временно не доступна попробуйте повторить попытку позже.');
+    }
+  } else if (hasUpdateProfile) {
+    if (hasBadEmail && hasBadPhone) {
+      if (email && phone) {
+        text.set(`Пользователь с электронной почтой ${email} и номером мобильного телефона ${phone} уже существует. Хотите обновить учетную запись пользователя?`);
+      } else {
+        text.set('Пользователь с указанной электронной почтой и номером мобильного телефона уже существует. Хотите обновить учетную запись пользователя?');
+      }
+    } else if (hasBadEmail) {
+      if (email) {
+        text.set(`Пользователь с электронной почтой ${email} уже существует. Хотите обновить учетную запись пользователя?`);
+      } else {
+        text.set('Пользователь с указанной электронной почтой уже существует. Хотите обновить учетную запись пользователя?');
+      }
+    } else if (hasBadPhone) {
+      if (phone) {
+        text.set(`Пользователь с номером мобильного телефона ${phone} уже существует. Хотите обновить учетную запись пользователя?`);
+      } else {
+        text.set('Пользователь с указанным номером мобильного телефона уже существует. Хотите обновить учетную запись пользователя?');
+      }
+    }
   }
 
   function handleHide() {
