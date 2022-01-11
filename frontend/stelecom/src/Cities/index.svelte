@@ -41,7 +41,7 @@
 
 {#if $showModal}
     <div
-            class="flex flex-col fixed w-screen bg-white inset-0 py-4 md:py-6 xl:py-8 {$status === STATUS.INITIAL && 'opacity-90'} scrollable-container overflow-x-hidden overflow-y-auto"
+            class="flex flex-col fixed transparent-bg w-screen inset-0 py-4 md:py-6 xl:py-8 scrollable-container overflow-x-hidden overflow-y-auto"
             id="location-selection-window">
         <header id="cities-header" class="flex items-center pb-4 px-4 sm:px-6 lg:px-8 xl:px-6">
             <div id="cities-header-div" class="w-full flex justify-between items-center">

@@ -53,6 +53,10 @@
   }
 }
 
+.btn-cancel {
+  color: #007BFB;
+}
+
 .btn-sell {
   @apply .bg-accentBlue .text-white;
 

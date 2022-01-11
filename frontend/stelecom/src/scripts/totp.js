@@ -97,20 +97,19 @@ export default (function() {
 
     if (currentInput) {
       const borderText = '1px solid ';
+      const codeLength = codeNumbers.value;
 
-      switch (index) {
-        case 0:
-          currentInput.style.border = borderText + "#0CB779";
-          break;
-        case 1:
-          currentInput.style.border = borderText + "#FF372B";
-          break;
-        case 2:
-          currentInput.style.border = borderText + "#0FC8F9";
-          break;
-        default:
-          highlightInputsWithGreen();
-          break;
+      if (index === 0 || (index === 3 && codeLength == 6)) {
+        currentInput.style.border = borderText + "#0CB779";
+      }
+      else if (index === 1 || (index === 4 && codeLength == 6)) {
+        currentInput.style.border = borderText + "#FF372B";
+      }
+      else if (index === 2) {
+        currentInput.style.border = borderText + "#0FC8F9";
+      }
+      else if (index === 3 && codeLength == 4 || index === 5 && codeLength == 6) {
+        highlightInputsWithGreen();
       }
     }
   }
