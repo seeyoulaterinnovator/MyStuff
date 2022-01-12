@@ -98,6 +98,7 @@ public enum SettingConstants {
     EMAIL_IDENTITY_PROVIDER("identityProviderLinkBodyHtml"),
     EMAIL_RESET("passwordResetBodyHtml"),
     EMAIL_DATE_ACCOUNT("emailAccountDataBodyHtml"),
+    EMAIL_LINK_PASSWORD("linkPassword"),
 
     SCHEDULER_BLOCKING_BODY("blockNotificationSchedulerHtml"),
     SCHEDULER_BLOCKING_PREPARE_BODY("blockPrepareNotificationSchedulerHtml"),

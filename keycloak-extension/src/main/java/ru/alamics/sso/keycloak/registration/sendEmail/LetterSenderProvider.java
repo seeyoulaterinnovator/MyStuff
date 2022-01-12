@@ -12,12 +12,13 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.settings.SettingsService;
+import ru.alamics.sso.util.Util;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import static ru.alamics.sso.settings.SettingConstants.ACCOUNT_SUBJECT;
-import static ru.alamics.sso.settings.SettingConstants.EMAIL_CREATE_ACCOUNT;
+import static ru.alamics.sso.settings.SettingConstants.*;
 
 @Slf4j
 public class LetterSenderProvider implements FormAction {
@@ -44,17 +45,29 @@ public class LetterSenderProvider implements FormAction {
     public void success(FormContext context) {
         log.info("start sendEmailRegistration");
         EmailTemplateProvider emailTemplateProvider = context.getSession().getProvider(EmailTemplateProvider.class);
+
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("userName", context.getUser().getUsername());
-        attributes.put("emailAccountCreateBodyHtml", settingsService.getSettingsStringValue(EMAIL_CREATE_ACCOUNT,context.getRealm().getName()));
+
+        List<String> phones = context.getUser().getAttribute("phone");
+        if (!phones.isEmpty()) {
+            attributes.put("phone", Util.getFormatNumber(phones.get(0)));
+        }
+
+        attributes.put("emailAccountCreateBodyHtml", settingsService.getSettingsStringValue(EMAIL_CREATE_ACCOUNT, context.getRealm().getName()));
+
+        attributes.put("linkPassword", settingsService.getSettingsStringValue(EMAIL_LINK_PASSWORD, context.getRealm().getName()));
+
+        attributes.put("emailLoginAndPhoneHtml", settingsService.getSettingsStringValue(EMAIL_LOGIN_AND_PHONE_ACCOUNT, context.getRealm().getName()));
+        attributes.put("emailLoginHtml", settingsService.getSettingsStringValue(EMAIL_LOGIN_ACCOUNT, context.getRealm().getName()));
         try {
             String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, context.getRealm().getName());
             emailTemplateProvider
                     .setRealm(context.getRealm())
                     .setUser(context.getUser())
                     .send(subject, BODY_TEMPLATE, attributes);
-        } catch (EmailException e){
-            log.error("EmailException : {}",e);
+        } catch (EmailException e) {
+            log.error("EmailException : {}", e);
         }
     }
 

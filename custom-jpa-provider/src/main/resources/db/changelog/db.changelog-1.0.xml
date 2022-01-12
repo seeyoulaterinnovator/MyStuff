@@ -1418,4 +1418,21 @@
         </sql>
     </changeSet>
 
+    <changeSet id="84" author="petrov-ny">
+        <sql>
+            <![CDATA[
+                UPDATE SETTINGS SET VALUE = '<p>Для Вас создана учетная запись для входа в Личный кабинет «Дом.ru Бизнес».</p>' WHERE EXT_ID = 'emailAccountCreateBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p>Для Вас создана учетная запись для входа в Личный кабинет «Дом.ru Бизнес».</p>' WHERE EXT_ID = 'emailAccountDataBodyHtml';
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet id="85" author="petrov-ny">
+        <sql>
+            <![CDATA[
+                INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('68344238-73aa-11ec-90d6-0242ac120003', 'linkPassword', '<p class = "margin_block">Перейдите по ссылке и установите пароль.</p><p class = "block_link"><a href="{0}">Установить пароль</a></p>', null, 'user', 'Установить пароль', null, 'MESSAGE');
+             ]]>
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
