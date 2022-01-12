@@ -39,7 +39,16 @@
                         <input class="btn btn-main w-full mb-2" id="update-profile-submit" type="submit" value="${msg(doRegister)}" />
                         <button class="btn btn-main w-full" type="submit" name="cancel-aia" value="true" />${msg(doCancel)}</button>
                     <#else>
-                        <button class="btn btn-main pass-fields" type="submit" id="update-profile-submit" />${msg(doSubmit)}</button>
+                        <div class="flex flex-col sm:flex-row mt-0 xl:mt-2">
+                            <div class="flex flex-basis-auto items-center">
+                                <button class="btn btn-main w-full" type="submit" id="update-profile-submit"/>
+                                ${msg(doSubmit)}</button>
+                            </div>
+                            <span class="flex-basis-auto ml-0 mb-6 mt-4 text-xs sm:ml-5 sm:mb-0 agreement"><span
+                                        class="opacity-50">Нажимая кнопку, вы соглашаетесь <br></span><a
+                                        class="reference reference_hoverable" href="https://dom.ru/policy.pdf"
+                                        target="_blink">с правилами обработки перс. данных</a></span>
+                        </div>
                     </#if>
                 </div>
             </div>
