@@ -62,6 +62,7 @@ public class MigrationService {
         log.info("importing users from file {} in progress", reportModel.getName());
         long migrationStarts = new Date().getTime();
 
+        reportModel.setStatus(ImportUsersReportStatus.IN_PROGRESS);
         int createdUsers = reportModel.getCountCreatedUsers();
         int countClones = reportModel.getCountClones();
         int processedUsers = 0;
@@ -128,7 +129,10 @@ public class MigrationService {
 
                     importReportService.updateImportUsersData(data);
                     processedUsers++;
-                    if (processedUsers % 500 == 0) {
+                    if (processedUsers % 50 == 0) {
+                        reportModel.setCountClones(countClones);
+                        reportModel.setCountCreatedUsers(createdUsers);
+                        importReportService.updateReport(reportModel);
                         log.info("ProcessedUsers " + processedUsers);
                     }
                 }
@@ -146,7 +150,6 @@ public class MigrationService {
             log.info(String.format("importing users from file %s is done: countUsers=%s, countCreatedUsers=%s, countClones=%s ",
                     reportModel.getName(), reportModel.getCountImportUsers(), reportModel.getCountCreatedUsers(),
                     reportModel.getCountClones()));
-
         } catch (RepeatNextTimeException rte) {
 
             log.info("Interrupted by timeout, processed " + processedUsers);

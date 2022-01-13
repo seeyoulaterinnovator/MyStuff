@@ -3,7 +3,8 @@ package ru.alamics.sso.jpa.entity.common;
 public enum ImportUsersReportStatus {
     DONE("DONE"),
     IN_PROGRESS("IN PROGRESS"),
-    AWAITING("AWAITING");
+    AWAITING("AWAITING"),
+    UPLOADING("UPLOADING");
 
     private String discription;
 
