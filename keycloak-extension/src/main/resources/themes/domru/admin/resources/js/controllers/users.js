@@ -2520,6 +2520,17 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
             if (response.status === 200) {
                 Notifications.success("Upload import users file success! Please, refresh 'import users' page");
             }
+            $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/importUsersReports').then(function (data) {
+                $scope.ImportReports = angular.fromJson(data).data.results['importUsersReports'];
+            });
+            var timeout = setInterval(function() {
+                $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/importUsersReports').then(function (data) {
+                    $scope.ImportReports = angular.fromJson(data).data.results['importUsersReports'];
+                });
+                if ($scope.ImportReports[0].status == "DONE") {
+                    clearInterval(timeout);
+                }
+            }, 1000);
         }).catch(error => {
             if (error.status === 400) {
                 Notifications.error(error.data.message);
