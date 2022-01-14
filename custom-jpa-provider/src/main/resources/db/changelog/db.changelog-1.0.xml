@@ -1435,4 +1435,11 @@
         </sql>
     </changeSet>
 
+    <changeSet id="86" author="petrov-ny">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('20b2346a-753a-11ec-90d6-0242ac120003', 'tokenDaData', '100545f52c511755273b4d79c618832bf181765c', null, 'master', 'Токен DaData', null, 'APP');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('2480de70-753a-11ec-90d6-0242ac120003', 'urlDaDataRequestLocationIp', 'https://suggestions.dadata.ru/suggestions/api/4_1/rs/iplocate/address', null, 'master', 'URL DaData для запроса адреса по IP', null, 'APP');
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
