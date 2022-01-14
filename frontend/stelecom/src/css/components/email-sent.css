@@ -50,12 +50,6 @@
   width: 100%;
 }
 
-@media (min-width: 768px) {
-  .btn--thanks {
-    width: fit-content;
-  }
-}
-
 @media screen and (max-width: 1199px) {
   .ok {
     width: 78px;
@@ -105,6 +99,11 @@
   }
 }
 
+@media (min-width: 640px) {
+  .btn--thanks {
+    width: fit-content;
+  }
+}
 
 @media screen and (max-width: 639px) {
   .ok {
