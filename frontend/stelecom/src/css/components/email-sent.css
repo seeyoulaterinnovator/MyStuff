@@ -17,9 +17,9 @@
 
 .text__title {
   font-weight: bold;
-  font-size: 36px;
-  line-height: 42px;
-  padding-bottom: 35px;
+  font-size: 44px;
+  line-height: 52px;
+  padding-bottom: 24px;
   opacity: 1;
   margin-top: 12px;
 }
@@ -37,8 +37,11 @@
 }
 
 .text--far {
+  @apply .font-light;
+
   padding-bottom: 35px;
   opacity: 1;
+  line-height: 30px;
 
   span {
     display: block;
@@ -68,8 +71,8 @@
   }
 
   .text__title {
-    font-size: 36px;
-    line-height: 42px;
+    font-size: 44px;
+    line-height: 52px;
     margin-top: 0;
   }
 
@@ -121,14 +124,22 @@
   }
 
   .text__title {
-    font-size: 27px;
-    line-height: 32px;
-    padding-bottom: 7px;
+    font-size: 33px;
+    line-height: 40px;
+    padding-bottom: 18px;
   }
 }
 
 @media screen and (max-width: 479px) {
   .ok {
     margin-bottom: 16px;
+  }
+}
+
+@media screen and (max-width: 319px) {
+  .text__title {
+    font-size: 31px;
+    line-height: 34px;
+    padding-bottom: 18px;
   }
 }
