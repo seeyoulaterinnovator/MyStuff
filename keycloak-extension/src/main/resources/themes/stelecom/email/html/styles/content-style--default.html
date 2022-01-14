@@ -17,24 +17,29 @@
   line-height: 16px !important;
 }
 
-.content p {
+.content p,
+.content__p {
   padding-top: 16px !important;
   font-size: 18px !important;
   line-height: 24px !important;
 }
 
-.content ul {
+.content ul,
+.content__ul {
   padding: 8px 0 0 36px !important;
   font-size: 12px !important;
   line-height: 16px !important;
+  list-style: none !important;
 }
 
-.content ul > li {
+.content ul > li,
+.content__ul-li {
   position: relative !important;
   padding-top: 8px !important;
 }
 
-.content ul > li:before {
+.content ul > li:before,
+.content__ul-li:before {
   content: '' !important;
   display: inline-block !important;
   vertical-align: baseline !important;
@@ -45,23 +50,27 @@
   background-color: #0Cb779 !important;
 }
 
-.content dl {
+.content dl,
+.content__dl {
   padding: 16px 0 0 !important;
 }
 
-.content dl > dt {
+.content dl > dt,
+.content__dl-dt {
   font-size: 12px !important;
   line-height: 16px !important;
 }
 
-.content dl > dd {
+.content dl > dd,
+.content__dl-dd {
   font-size: 18px !important;
   line-height: 24px !important;
   font-weight: bold !important;
   margin: 0 !important;
 }
 
-.content a {
+.content a,
+.content__a {
   display: block !important;
   overflow: hidden !important;
   text-decoration-line: underline !important;
@@ -75,6 +84,7 @@
 }
 
 .content a.no_block,
+.content__a.no_block,
 .no_block {
     display: inline !important;
     white-space: nowrap;
