@@ -135,8 +135,8 @@ public class CitiesResource {
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     public Response getCityTitle() {
         String ipAddress = session.getContext().getConnection().getRemoteAddr();
-        String url = settingsService.getSettingsStringValue(SettingConstants.URL_GEO_LOCATION, "master");
-        String token = settingsService.getSettingsStringValue(SettingConstants.TOKEN_GEO_LOCATION, "master");
+        String url = settingsService.getSettingsStringValue(SettingConstants.URL_DADATA_REQUEST_LOCATION_IP, "master");
+        String token = settingsService.getSettingsStringValue(SettingConstants.TOKEN_DADATA, "master");
 
         ResteasyWebTarget wt = client.target(url)
                 .queryParam("ip", ipAddress)
