@@ -13,7 +13,7 @@ export const domain = writable(
 const isFirstVisit =
   Cookie.get('VISITED') === '0' || typeof Cookie.get('VISITED') === 'undefined';
 
-isFirstVisit && fetch('/auth/realms/user/cities/title')
+isFirstVisit && fetch('/auth/realms/user/cities/current')
   .then(response => response.json())
   .then(json => {
     json.results?.title && city.set(json.results.title);

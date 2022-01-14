@@ -131,12 +131,12 @@ public class CitiesResource {
     }
 
     @GET
-    @Path("/title")
+    @Path("/current")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     public Response getCityTitle() {
         String ipAddress = session.getContext().getConnection().getRemoteAddr();
-        String url = settingsService.getSettingsStringValue(SettingConstants.URL_GEO_LOCATION,"master");
-        String token = settingsService.getSettingsStringValue(SettingConstants.TOKEN_GEO_LOCATION,"master");
+        String url = settingsService.getSettingsStringValue(SettingConstants.URL_GEO_LOCATION, "master");
+        String token = settingsService.getSettingsStringValue(SettingConstants.TOKEN_GEO_LOCATION, "master");
 
         ResteasyWebTarget wt = client.target(url)
                 .queryParam("ip", ipAddress)
@@ -147,19 +147,18 @@ public class CitiesResource {
                 .header("Authorization", "TOKEN " + token)
                 .get(String.class);
 
-        String title = "";
-
         try {
             Map jsonObject = JsonSerialization.readValue(json, Map.class);
             ObjectNode objectNode = JsonSerialization.createObjectNode(jsonObject);
-            title = objectNode.findValue("city").textValue();
+            String title = objectNode.findValue("city").textValue();
+            return JsonResponse.success()
+                    .addResult("title", title)
+                    .build();
         } catch (Exception err) {
-            log.info("Location token not received");
+            log.error("Error during location deserialization: ", err);
         }
 
-        return JsonResponse.success()
-                .addResult("title", title)
-                .build();
+        return null;
 
     }
 }
