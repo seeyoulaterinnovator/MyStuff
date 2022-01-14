@@ -41,7 +41,7 @@ public class CitiesResource {
     private static final ReentrantLock lock = new ReentrantLock();
     private static final AtomicLong updated = new AtomicLong(0);
 
-    private static final String TOKEN = "af99ee7d5076c5d5efd38fc213761d69452e11c4";
+    private static final String TOKEN = "100545f52c511755273b4d79c618832bf181765c";
     private static final String URL = "https://suggestions.dadata.ru/suggestions/api/4_1/rs/iplocate/address";
     private static final String LANGUAGE = "ru";
 
