@@ -4,11 +4,7 @@
 <@layout.registrationLayout displayMessage=false displayCity=false; section>
     <#if section = "header">
         <#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон -->
-        <#if lengthCode==6>
-            <@blocks.verificationHeader mainTitle="Вам выслан одноразовый пароль на номер:" />
-        <#else>
-            <@blocks.verificationHeader mainTitle="Подтвердить" />
-        </#if>
+        <@blocks.verificationHeader mainTitle="Подтвердить" />
     <#elseif section = "form">
         <#if lengthCode==4 && !enableRepeatCall && userEmail??>
             <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4">
