@@ -4,8 +4,7 @@ import Cookie from 'js-cookie';
 import { STATUS } from './constants.js';
 
 export const city = writable(
-  document.getElementById('cities-button').dataset.city ||
-  Cookie.get('CITY') || 'Санкт-Петербург',
+  document.getElementById('cities-button').dataset.city || Cookie.get('CITY') || ''
 );
 
 export const domain = writable(
@@ -14,10 +13,22 @@ export const domain = writable(
 const isFirstVisit =
   Cookie.get('VISITED') === '0' || typeof Cookie.get('VISITED') === 'undefined';
 
+isFirstVisit && fetch('/auth/realms/user/cities/title')
+  .then(response => response.json())
+  .then(json => {
+    json.results?.title && city.set(json.results.title);
+    showModal.set(isFirstVisit);
+  })
+  .catch(error => {
+    console.log(error);
+    city.set('Санкт-Петербург');
+    showModal.set(isFirstVisit);
+  });
+
 export const status = writable(
   isFirstVisit ? STATUS.INITIAL : STATUS.SELECTING,
 );
-export const showModal = writable(isFirstVisit);
+export const showModal = writable(false);
 export const editingStarted = writable(false);
 export const allCities = writable([]);
 
