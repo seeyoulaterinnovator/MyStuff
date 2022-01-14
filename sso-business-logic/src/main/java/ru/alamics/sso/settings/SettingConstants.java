@@ -112,6 +112,9 @@ public enum SettingConstants {
     TIME_TOKEN_RESET_PASSWORD("life.token.reset.pass"),
     TIME_TOKEN_SET_FIRST_PASS("life.token.set.first-pass"),
 
+    TOKEN_GEO_LOCATION("tokenGeoLocation"),
+    URL_GEO_LOCATION("urlGeoLocation"),
+
     BLOCK_NOTIFICATION_OF_WARNING("block.notification.warning"),
     BLOCK_NOTIFICATION_OF_BLOCKED("block.notification.blocked"),
     BLOCK_NOTIFICATION_OF_UNLOCKING("block.notification.unlocking");

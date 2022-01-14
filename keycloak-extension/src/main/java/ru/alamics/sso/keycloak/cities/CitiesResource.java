@@ -14,6 +14,8 @@ import ru.alamics.sso.keycloak.cities.model.CityMigration;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.property.ApplicationProperties;
+import ru.alamics.sso.settings.SettingConstants;
+import ru.alamics.sso.settings.SettingsService;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -41,18 +43,21 @@ public class CitiesResource {
     private static final ReentrantLock lock = new ReentrantLock();
     private static final AtomicLong updated = new AtomicLong(0);
 
-    private static final String TOKEN = "100545f52c511755273b4d79c618832bf181765c";
-    private static final String URL = "https://suggestions.dadata.ru/suggestions/api/4_1/rs/iplocate/address";
     private static final String LANGUAGE = "ru";
 
     private static String url;
     private static List<CityMigration> cityList = new ArrayList<>();
+
+    private SettingsService settingsService;
 
     protected KeycloakSession session;
 
     public CitiesResource(KeycloakSession session) {
         this.session = session;
         ApplicationProperties properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+
+        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+
         if (url == null && properties != null) {
             url = properties.getProperty(CITIES_URL);
         }
@@ -130,14 +135,16 @@ public class CitiesResource {
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     public Response getCityTitle() {
         String ipAddress = session.getContext().getConnection().getRemoteAddr();
+        String url = settingsService.getSettingsStringValue(SettingConstants.URL_GEO_LOCATION,"master");
+        String token = settingsService.getSettingsStringValue(SettingConstants.TOKEN_GEO_LOCATION,"master");
 
-        ResteasyWebTarget wt = client.target(URL)
+        ResteasyWebTarget wt = client.target(url)
                 .queryParam("ip", ipAddress)
                 .queryParam("languege", LANGUAGE);
 
         String json = wt.request(MediaType.APPLICATION_JSON)
                 .header("Accept", "application/json")
-                .header("Authorization", "TOKEN " + TOKEN)
+                .header("Authorization", "TOKEN " + token)
                 .get(String.class);
 
         String title = "";
@@ -145,10 +152,9 @@ public class CitiesResource {
         try {
             Map jsonObject = JsonSerialization.readValue(json, Map.class);
             ObjectNode objectNode = JsonSerialization.createObjectNode(jsonObject);
-            title = objectNode.findValue("value").textValue();
-            title = title.substring(2);
+            title = objectNode.findValue("city").textValue();
         } catch (Exception err) {
-
+            log.info("Location token not received");
         }
 
         return JsonResponse.success()
