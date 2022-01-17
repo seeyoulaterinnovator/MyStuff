@@ -23,7 +23,7 @@
                   </td>
                   <td style="text-align: right;">
                     <a href="tel:84951459555" class="contacts contact__number">
-                      +7(495)145 9555
+                      <font size="+2">+7(495)145 9555</font>
                     </a><br>
                     <a href="http://lkb2b.stelecom.ru" class="contacts contact__link">
                       lkb2b.stelecom.ru
@@ -31,7 +31,7 @@
                   </td>
                 </tr>
               </table>
-              <hr />
+              <hr class="mail-wrapper__hr" />
               <div class="mail-container__content content">
                 <div class="content">
                   <h2 class="content__heading">Уважаемый Клиент!</h2>
@@ -39,9 +39,9 @@
                 </div>
               </div>
               <div class="mail-container__footer">
-                <p class="mail-text--copyright mail-text--bold">С уважением, С-Телеком!</p>
-                <p class="mail-text--copyright mail-text--light-gray">Данное письмо отправлено с адреса, предназначенного только для рассылок. Пожалуйста, не отвечайте на это письмо. В случае возникновения вопросов Вы можете обратиться к персональному менеджеру, контактные данные есть в «личном кабинете» или по телефону +7(495)145 9555 (звонок бесплатный).</p>
-                <p class="mail-text--copyright mail-text--light-gray">© OOO «С-Телеком» 2021-${.now?string.yyyy}</p>
+                <p class="mail-text--copyright mail-text--bold"><font color="#7c7c7c" size="+1"><b>С уважением, С-Телеком!</b></font></p>
+                <p class="mail-text--copyright mail-text--light-gray"><font color="#bcbcbc">Данное письмо отправлено с адреса, предназначенного только для рассылок. Пожалуйста, не отвечайте на это письмо. В случае возникновения вопросов Вы можете обратиться к персональному менеджеру, контактные данные есть в «личном кабинете» или по телефону +7(495)145 9555 (звонок бесплатный).</font></p>
+                <p class="mail-text--copyright mail-text--light-gray"><font color="#bcbcbc">© OOO «С-Телеком» 2021-${.now?string.yyyy}</font></p>
               </div>
             </td>
           </tr>

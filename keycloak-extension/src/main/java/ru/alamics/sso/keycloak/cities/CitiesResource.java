@@ -1,16 +1,21 @@
 package ru.alamics.sso.keycloak.cities;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.plugins.providers.StringTextStar;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.util.JsonSerialization;
 import ru.alamics.sso.keycloak.cities.model.CityMigration;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.property.ApplicationProperties;
+import ru.alamics.sso.settings.SettingConstants;
+import ru.alamics.sso.settings.SettingsService;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -20,6 +25,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
@@ -36,14 +42,22 @@ public class CitiesResource {
     private static final long CACHE_TIME = 60 * 60 * 1000; // 1h
     private static final ReentrantLock lock = new ReentrantLock();
     private static final AtomicLong updated = new AtomicLong(0);
+
+    private static final String LANGUAGE = "ru";
+
     private static String url;
     private static List<CityMigration> cityList = new ArrayList<>();
+
+    private SettingsService settingsService;
 
     protected KeycloakSession session;
 
     public CitiesResource(KeycloakSession session) {
         this.session = session;
         ApplicationProperties properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+
+        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+
         if (url == null && properties != null) {
             url = properties.getProperty(CITIES_URL);
         }
@@ -114,5 +128,37 @@ public class CitiesResource {
         return JsonResponse.success()
                 .addResult("cities", cityList)
                 .build();
+    }
+
+    @GET
+    @Path("/current")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    public Response getCityTitle() {
+        String ipAddress = session.getContext().getConnection().getRemoteAddr();
+        String url = settingsService.getSettingsStringValue(SettingConstants.URL_DADATA_REQUEST_LOCATION_IP, "master");
+        String token = settingsService.getSettingsStringValue(SettingConstants.TOKEN_DADATA, "master");
+
+        ResteasyWebTarget wt = client.target(url)
+                .queryParam("ip", ipAddress)
+                .queryParam("languege", LANGUAGE);
+
+        String json = wt.request(MediaType.APPLICATION_JSON)
+                .header("Accept", "application/json")
+                .header("Authorization", "TOKEN " + token)
+                .get(String.class);
+
+        try {
+            Map jsonObject = JsonSerialization.readValue(json, Map.class);
+            ObjectNode objectNode = JsonSerialization.createObjectNode(jsonObject);
+            String title = objectNode.findValue("city").textValue();
+            return JsonResponse.success()
+                    .addResult("title", title)
+                    .build();
+        } catch (Exception err) {
+            log.error("Error during location deserialization: ", err);
+        }
+
+        return null;
+
     }
 }
