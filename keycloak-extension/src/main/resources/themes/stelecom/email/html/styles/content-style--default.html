@@ -38,18 +38,6 @@
   padding-top: 8px !important;
 }
 
-.content ul > li:before,
-.content__ul-li:before {
-  content: '' !important;
-  display: inline-block !important;
-  vertical-align: baseline !important;
-  position: absolute !important;
-  left: -16px !important;
-  width: 8px !important;
-  height: 8px !important;
-  background-color: #0Cb779 !important;
-}
-
 .content dl,
 .content__dl {
   padding: 16px 0 0 !important;
@@ -86,13 +74,29 @@
 .content a.no_block,
 .content__a.no_block,
 .no_block {
-    display: inline !important;
-    white-space: nowrap;
+  display: inline !important;
+  white-space: nowrap;
 }
 
 .login {
-    font-size: 18px !important;
-    color: #000000 !important;
-    font-weight: bold !important;
+  font-size: 18px !important;
+  color: #000000 !important;
+  font-weight: bold !important;
 }
 </style>
+
+<!--[if gte mso 9]><!-->
+<style type="text/css">
+.content ul > li:before,
+.content__ul-li:before {
+  content: '' !important;
+  display: inline-block !important;
+  vertical-align: baseline !important;
+  position: absolute !important;
+  left: -16px !important;
+  width: 8px !important;
+  height: 8px !important;
+  background-color: #0Cb779 !important;
+}
+</style>
+<!--<![endif]-->
