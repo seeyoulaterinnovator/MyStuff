@@ -58,6 +58,11 @@ public class ImportReportService {
         importUsersReportRepository.updateReport(report.getId(), report.getStatus(), report.getCountClones(), report.getCountCreatedUsers());
     }
 
+    public void updateUploaded(String id) {
+
+        importUsersReportRepository.setReportStatus(id, ImportUsersReportStatus.AWAITING);
+    }
+
     public void updateImportUsersData(ImportUsersDataModel data) {
 
         ImportUsersDataEntity entity = importUsersReportRepository.findImportUsersDataById(data.getId());
