@@ -9,12 +9,12 @@ public class UserManageProviderFactory implements BaseResourceProviderFactory {
 
 
     @Override
-    public RealmResourceProvider create (KeycloakSession session) {
+    public RealmResourceProvider create(KeycloakSession session) {
         return new UserManageResourceProvider(session);
     }
 
     @Override
-    public String getId () {
+    public String getId() {
         return ID;
     }
 }

@@ -19,7 +19,6 @@ package ru.alamics.sso.keycloak.cities;
 
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.resource.RealmResourceProvider;
-import ru.alamics.sso.keycloak.create.rest.CustomRestResource;
 
 
 public class CitiesRealmResourceProvider implements RealmResourceProvider {

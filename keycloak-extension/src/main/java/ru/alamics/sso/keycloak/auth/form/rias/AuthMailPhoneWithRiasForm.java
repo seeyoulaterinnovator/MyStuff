@@ -50,7 +50,7 @@ public class AuthMailPhoneWithRiasForm extends AbstractUsernameFormAuthenticator
     private final UserFindService userFindService;
 
     private final ApplicationProperties properties;
-    private  SettingsService settingsService;
+    private SettingsService settingsService;
 
     public AuthMailPhoneWithRiasForm(RiasService riasService, UserFindService userFindService) {
         this.riasService = riasService;
@@ -167,13 +167,13 @@ public class AuthMailPhoneWithRiasForm extends AbstractUsernameFormAuthenticator
                 Response challenge = context.form()
                         .setAttribute("redirectTo", redirectTo)
                         .setAttribute("redirectHeader", redirectHeader)
-                        .setAttribute("loginToB2B",settingsService.getSettingsStringValue(LOGIN_TO_B2B,context.getRealm().getId()))
-                        .setAttribute("enter", settingsService.getSettingsStringValue(ENTER,context.getRealm().getId()))
-                        .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER,context.getRealm().getId()))
-                        .setAttribute("backToMainPage",settingsService.getSettingsStringValue(BACK_TO_MAIN_PAGE,context.getRealm().getId()))
-                        .setAttribute("phoneConst",settingsService.getSettingsStringValue(PHONE_CONST,context.getRealm().getId()))
-                        .setAttribute("homePage",settingsService.getSettingsStringValue(HOME_PAGE,context.getRealm().getId()))
-                        .setAttribute("phoneConstLink",settingsService.getSettingsStringValue(PHONE_CONST_LINK,context.getRealm().getId()))
+                        .setAttribute("loginToB2B", settingsService.getSettingsStringValue(LOGIN_TO_B2B, context.getRealm().getId()))
+                        .setAttribute("enter", settingsService.getSettingsStringValue(ENTER, context.getRealm().getId()))
+                        .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER, context.getRealm().getId()))
+                        .setAttribute("backToMainPage", settingsService.getSettingsStringValue(BACK_TO_MAIN_PAGE, context.getRealm().getId()))
+                        .setAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, context.getRealm().getId()))
+                        .setAttribute("homePage", settingsService.getSettingsStringValue(HOME_PAGE, context.getRealm().getId()))
+                        .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()))
                         .createForm(form);
 
                 context.challenge(challenge);

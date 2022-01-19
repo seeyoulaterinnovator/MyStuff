@@ -18,7 +18,7 @@ public class PasswordPolicyProvider {
 
     private final KeycloakSession session;
 
-    public PasswordPolicyProvider (KeycloakSession session) {
+    public PasswordPolicyProvider(KeycloakSession session) {
         this.session = session;
     }
 

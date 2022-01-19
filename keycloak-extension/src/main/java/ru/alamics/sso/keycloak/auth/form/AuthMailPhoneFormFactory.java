@@ -83,7 +83,6 @@ public class AuthMailPhoneFormFactory implements AuthenticatorFactory, DisplayTy
     }
 
 
-
     @Override
     public void init(Config.Scope scope) {
 

@@ -34,6 +34,38 @@ public class SsoBlacklistPasswordPolicyProviderFactory implements PasswordPolicy
 
     private Config.Scope config;
 
+    private static Path detectBlacklistsBasePath(Config.Scope config) {
+
+        String pathFromSysProperty = System.getProperty(SYSTEM_PROPERTY);
+        if (pathFromSysProperty != null) {
+            return ensureExists(Paths.get(pathFromSysProperty));
+        }
+
+        String pathFromSpiConfig = config.get(BLACKLISTS_PATH_PROPERTY);
+        if (pathFromSpiConfig != null) {
+            return ensureExists(Paths.get(pathFromSpiConfig));
+        }
+
+        String pathFromJbossDataPath = System.getProperty(JBOSS_SERVER_DATA_DIR) + "/" + PASSWORD_BLACKLISTS_FOLDER;
+        if (!Files.exists(Paths.get(pathFromJbossDataPath))) {
+            if (!Paths.get(pathFromJbossDataPath).toFile().mkdirs()) {
+                log.error("Could not create folder for password blacklists: {}", pathFromJbossDataPath);
+            }
+        }
+        return ensureExists(Paths.get(pathFromJbossDataPath));
+    }
+
+    private static Path ensureExists(Path path) {
+
+        Objects.requireNonNull(path, "path");
+
+        if (Files.exists(path)) {
+            return path;
+        }
+
+        throw new IllegalStateException("Password blacklists location does not exist: " + path);
+    }
+
     @Override
     public PasswordPolicyProvider create(KeycloakSession session) {
         if (this.blacklistsBasePath == null) {
@@ -98,38 +130,6 @@ public class SsoBlacklistPasswordPolicyProviderFactory implements PasswordPolicy
             pbl.lazyInit();
             return pbl;
         });
-    }
-
-    private static Path detectBlacklistsBasePath(Config.Scope config) {
-
-        String pathFromSysProperty = System.getProperty(SYSTEM_PROPERTY);
-        if (pathFromSysProperty != null) {
-            return ensureExists(Paths.get(pathFromSysProperty));
-        }
-
-        String pathFromSpiConfig = config.get(BLACKLISTS_PATH_PROPERTY);
-        if (pathFromSpiConfig != null) {
-            return ensureExists(Paths.get(pathFromSpiConfig));
-        }
-
-        String pathFromJbossDataPath = System.getProperty(JBOSS_SERVER_DATA_DIR) + "/" + PASSWORD_BLACKLISTS_FOLDER;
-        if (!Files.exists(Paths.get(pathFromJbossDataPath))) {
-            if (!Paths.get(pathFromJbossDataPath).toFile().mkdirs()) {
-                log.error("Could not create folder for password blacklists: {}", pathFromJbossDataPath);
-            }
-        }
-        return ensureExists(Paths.get(pathFromJbossDataPath));
-    }
-
-    private static Path ensureExists(Path path) {
-
-        Objects.requireNonNull(path, "path");
-
-        if (Files.exists(path)) {
-            return path;
-        }
-
-        throw new IllegalStateException("Password blacklists location does not exist: " + path);
     }
 
 }

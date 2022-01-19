@@ -23,7 +23,8 @@ public class LetterSenderFactory implements FormActionFactory {
     };
 
     @Override
-    public String getDisplayType() { return "Send Registration Letter";
+    public String getDisplayType() {
+        return "Send Registration Letter";
     }
 
     @Override

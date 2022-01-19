@@ -3,7 +3,6 @@ package ru.alamics.sso.keycloak.auth.requiredactions;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.services.messages.Messages;
-import org.keycloak.services.validation.Validation;
 
 import javax.ws.rs.core.MultivaluedMap;
 import java.util.ArrayList;
@@ -19,7 +18,7 @@ public class SsoFormValidation {
     // Actually allow same emails like angular. See ValidationTest.testEmailValidation()
     private static final Pattern EMAIL_PATTERN = Pattern.compile("[a-zA-Z0-9!#$%&'*+/=?^_`{|}~.-]+@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*");
 
-    private static void addError(List<FormMessage> errors, String field, String message){
+    private static void addError(List<FormMessage> errors, String field, String message) {
         errors.add(new FormMessage(field, message));
     }
 

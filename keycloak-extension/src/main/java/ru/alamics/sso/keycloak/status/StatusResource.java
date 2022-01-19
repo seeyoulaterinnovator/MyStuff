@@ -5,7 +5,6 @@ import org.jboss.resteasy.annotations.cache.NoCache;
 import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
-import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.status.StatusService;
 
 import javax.ws.rs.GET;
@@ -19,11 +18,10 @@ import java.util.concurrent.atomic.AtomicLong;
 @Slf4j
 public class StatusResource {
 
-    protected KeycloakSession session;
-    private StatusService statusService;
-
     private static AtomicLong healthUpdated = new AtomicLong(0);
     private static AtomicBoolean healthStatus = new AtomicBoolean(false);
+    protected KeycloakSession session;
+    private StatusService statusService;
 
     public StatusResource(KeycloakSession session) {
         this.session = session;
@@ -63,7 +61,7 @@ public class StatusResource {
 
         } finally {
             long complete = System.currentTimeMillis();
-            log.info("Health check {}, {} ms {}", curStatus?"OK":"FAIL", (complete - start), cached?"cached":"");
+            log.info("Health check {}, {} ms {}", curStatus ? "OK" : "FAIL", (complete - start), cached ? "cached" : "");
         }
     }
 

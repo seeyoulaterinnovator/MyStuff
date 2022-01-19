@@ -17,8 +17,6 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
@@ -41,11 +39,6 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
 
     private URI uri;
 
-    @PostConstruct
-    private void init() {
-        uri = URI.create(properties.getProperty(RIAS_API_URI));
-    }
-
     public RiasUserExistsCheckImpl() {
     }
 
@@ -57,6 +50,11 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
 
         this.properties = properties;
         this.uri = uri;
+    }
+
+    @PostConstruct
+    private void init() {
+        uri = URI.create(properties.getProperty(RIAS_API_URI));
     }
 
     public boolean checkParam(String param) throws RiasCheckException {

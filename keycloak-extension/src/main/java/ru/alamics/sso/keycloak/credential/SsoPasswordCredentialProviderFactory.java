@@ -7,7 +7,7 @@ import org.keycloak.models.KeycloakSession;
 public class SsoPasswordCredentialProviderFactory extends PasswordCredentialProviderFactory {
 
     @Override
-    public PasswordCredentialProvider create (KeycloakSession session) {
+    public PasswordCredentialProvider create(KeycloakSession session) {
         return new SsoPasswordCredentialProvider(session);
     }
 }

@@ -111,11 +111,11 @@ public class SsoUserUpdateEvent extends SsoEvent {
     private AdminEventEntity findAdminEvent(String userId) {
         EntityManager em = this.getSession().getProvider(JpaConnectionProvider.class).getEntityManager();
         List<AdminEventEntity> adminEventEntities = em.createQuery("" +
-                "select ae " +
-                "from AdminEventEntity ae " +
-                "where ae.representation like concat('%', :userId, '%') " +
-                "and ae.operationType in ('CREATE', 'UPDATE') " +
-                "order by ae.time DESC ", AdminEventEntity.class)
+                        "select ae " +
+                        "from AdminEventEntity ae " +
+                        "where ae.representation like concat('%', :userId, '%') " +
+                        "and ae.operationType in ('CREATE', 'UPDATE') " +
+                        "order by ae.time DESC ", AdminEventEntity.class)
                 .setParameter("userId", userId)
                 .getResultList();
         if (adminEventEntities == null || adminEventEntities.isEmpty() || adminEventEntities.size() == 1) {

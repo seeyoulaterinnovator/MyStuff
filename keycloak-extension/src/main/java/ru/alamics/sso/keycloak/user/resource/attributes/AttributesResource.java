@@ -4,11 +4,10 @@ import lombok.Data;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.AttributeFormatException;
 import ru.alamics.sso.registration.FoundException;
+import ru.alamics.sso.user.UserAttributeService;
 import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.user.web.AttributeRequest;
-import ru.alamics.sso.user.UserAttributeService;
 
-import javax.validation.ValidationException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -20,7 +19,7 @@ public class AttributesResource {
 
     private final UserAttributeService service;
 
-    public AttributesResource (UserAttributeService service) {
+    public AttributesResource(UserAttributeService service) {
         this.service = service;
     }
 
@@ -29,9 +28,9 @@ public class AttributesResource {
     public Response createAttributes(@PathParam("user_id") String userId, List<AttributeRequest> attributeRequests) {
         try {
             return JsonResponse.success()
-                .addResult("user", UserMapper.toDto(service.createAttributes(userId, attributeRequests)))
-                .build();
-        }  catch (FoundException e) {
+                    .addResult("user", UserMapper.toDto(service.createAttributes(userId, attributeRequests)))
+                    .build();
+        } catch (FoundException e) {
             return JsonResponse.error(Response.Status.CONFLICT).message(e.getMessage()).build();
         } catch (AttributeFormatException e) {
             return JsonResponse.error(Response.Status.BAD_REQUEST).message(e.getMessage()).build();
@@ -45,7 +44,7 @@ public class AttributesResource {
             return JsonResponse.success()
                     .addResult("user", UserMapper.toDto(service.patchAttributes(userId, attributeRequests)))
                     .build();
-        }  catch (FoundException e) {
+        } catch (FoundException e) {
             return JsonResponse.error(Response.Status.CONFLICT).message(e.getMessage()).build();
         } catch (AttributeFormatException e) {
             return JsonResponse.error(Response.Status.BAD_REQUEST).message(e.getMessage()).build();
@@ -59,7 +58,6 @@ public class AttributesResource {
                 .addResult("user", UserMapper.toDto(service.deleteAttributes(userId, attributeRequests.getAttributes())))
                 .build();
     }
-
 
 
     @Data

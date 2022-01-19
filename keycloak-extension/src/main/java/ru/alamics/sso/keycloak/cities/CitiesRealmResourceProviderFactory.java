@@ -22,7 +22,6 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.resource.RealmResourceProvider;
 import org.keycloak.services.resource.RealmResourceProviderFactory;
-import ru.alamics.sso.keycloak.cities.CitiesRealmResourceProvider;
 
 public class CitiesRealmResourceProviderFactory implements RealmResourceProviderFactory {
 

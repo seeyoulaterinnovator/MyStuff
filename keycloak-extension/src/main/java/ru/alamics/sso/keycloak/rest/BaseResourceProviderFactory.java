@@ -7,17 +7,17 @@ import org.keycloak.services.resource.RealmResourceProviderFactory;
 public interface BaseResourceProviderFactory extends RealmResourceProviderFactory {
 
     @Override
-    default void init (Config.Scope config) {
+    default void init(Config.Scope config) {
 
     }
 
     @Override
-    default void postInit (KeycloakSessionFactory factory) {
+    default void postInit(KeycloakSessionFactory factory) {
 
     }
 
     @Override
-    default void close () {
+    default void close() {
 
     }
 }

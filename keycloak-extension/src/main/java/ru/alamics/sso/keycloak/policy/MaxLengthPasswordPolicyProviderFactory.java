@@ -10,47 +10,47 @@ public class MaxLengthPasswordPolicyProviderFactory implements PasswordPolicyPro
     protected static final String ID = "max-length";
 
     @Override
-    public String getDisplayName () {
+    public String getDisplayName() {
         return "Maximum Length";
     }
 
     @Override
-    public String getConfigType () {
+    public String getConfigType() {
         return PasswordPolicyProvider.INT_CONFIG_TYPE;
     }
 
     @Override
-    public String getDefaultConfigValue () {
+    public String getDefaultConfigValue() {
         return "16";
     }
 
     @Override
-    public boolean isMultiplSupported () {
+    public boolean isMultiplSupported() {
         return false;
     }
 
     @Override
-    public PasswordPolicyProvider create (KeycloakSession session) {
+    public PasswordPolicyProvider create(KeycloakSession session) {
         return new MaxLengthPasswordPolicyProvider(session);
     }
 
     @Override
-    public void init (Config.Scope config) {
+    public void init(Config.Scope config) {
 
     }
 
     @Override
-    public void postInit (KeycloakSessionFactory factory) {
+    public void postInit(KeycloakSessionFactory factory) {
 
     }
 
     @Override
-    public void close () {
+    public void close() {
 
     }
 
     @Override
-    public String getId () {
+    public String getId() {
         return ID;
     }
 }

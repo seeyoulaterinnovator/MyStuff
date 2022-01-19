@@ -71,6 +71,10 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
         properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
     }
 
+    public static boolean isEmailValid(String email) {
+        return EMAIL_PATTERN.matcher(email).matches();
+    }
+
     @Override
     protected void authenticateImpl(AuthenticationFlowContext context, SerializedBrokeredIdentityContext userCtx, BrokeredIdentityContext brokerContext) {
         IdentityProviderModel idpConfig = brokerContext.getIdpConfig();
@@ -221,10 +225,6 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
     private void fillUserContextFromTbApi(MultivaluedMap<String, String> formData, SerializedBrokeredIdentityContext userCtx) throws TbapiRegisterException {
         User user = getTbApiUser(formData);
         user.getAttributes().forEach(userCtx::setAttribute);
-    }
-
-    public static boolean isEmailValid(String email) {
-        return EMAIL_PATTERN.matcher(email).matches();
     }
 
     private User getTbApiUser(MultivaluedMap<String, String> formData) throws TbapiRegisterException {
