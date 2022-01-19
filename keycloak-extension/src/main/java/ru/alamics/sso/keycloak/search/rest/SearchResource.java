@@ -1,7 +1,5 @@
 package ru.alamics.sso.keycloak.search.rest;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.annotations.jaxrs.QueryParam;
@@ -139,7 +137,7 @@ public class SearchResource {
     }
 
 
-    private List<String> filterRealmsByRoles(List<RealmModel> realms, Set<RoleModel> roles){
+    private List<String> filterRealmsByRoles(List<RealmModel> realms, Set<RoleModel> roles) {
         final Predicate<RealmModel> realmNamesBasedRealmFilterPredicate = realm -> {
             switch (session.getContext().getRealm().getName()) {
                 case "master":
@@ -161,9 +159,9 @@ public class SearchResource {
 
         List<String> viewRolesRealm = new ArrayList<>();
 
-        for (RealmModel realm: realms) {
-            for (RoleModel role: roles) {
-                if(Objects.equals(role.getName(), "view-" + realm.getName() + "-realm")){
+        for (RealmModel realm : realms) {
+            for (RoleModel role : roles) {
+                if (Objects.equals(role.getName(), "view-" + realm.getName() + "-realm")) {
                     viewRolesRealm.add(role.getName());
                 }
             }
@@ -172,7 +170,7 @@ public class SearchResource {
         if (viewRolesRealm.isEmpty()) {
             filterPredicate = realmNamesBasedRealmFilterPredicate;
         } else {
-            if (Objects.equals(session.getContext().getRealm().getName(), "master")){
+            if (Objects.equals(session.getContext().getRealm().getName(), "master")) {
                 filterPredicate = returnAllRealmFilterPredicate;
             } else {
                 filterPredicate = rolesBasedRealmFilterPredicate;

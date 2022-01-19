@@ -157,8 +157,9 @@ public class UserServiceImpl implements UserService {
         List<ImportUsersDataModel> dataList = impF.getDataList(file);
 
         // create report
-        importUsersReportService.createImportUsersReportAsync(realm, Util.getFileName(content), dataList);
+        String id = importUsersReportService.createImportUsersReportAsync(realm, Util.getFileName(content), dataList);
 
+        importReportService.updateUploaded(id);
         log.info("Upload import users file success");
     }
 

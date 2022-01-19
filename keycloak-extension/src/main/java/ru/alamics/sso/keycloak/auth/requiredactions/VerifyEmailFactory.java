@@ -132,7 +132,7 @@ public class VerifyEmailFactory extends VerifyEmail {
         attributes.put("link", link);
         attributes.put("linkExpiration", expirationInMinutes);
         attributes.put("expTime", expirationStrRus);
-        attributes.put("emailVerificationLoginBodyHtml",settingsService.getSettingsStringValue(EMAIL_VERIFICATION_LOGIN_ACCOUNT,reamName));
+        attributes.put("emailVerificationLoginBodyHtml", settingsService.getSettingsStringValue(EMAIL_VERIFICATION_LOGIN_ACCOUNT, reamName));
 
         try {
             Locale locale = session.getContext().resolveLocale(user);
@@ -142,7 +142,7 @@ public class VerifyEmailFactory extends VerifyEmail {
             throw new EmailException("Failed to template email", e);
         }
 
-        emailTemplateProvider.send(settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_VERIFICATION,reamName),
+        emailTemplateProvider.send(settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_VERIFICATION, reamName),
                 "email-verification-login.ftl", attributes);
     }
 }

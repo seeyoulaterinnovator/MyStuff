@@ -25,9 +25,8 @@ import static ru.alamics.sso.registration.model.FormConstants.FIELD_PHONE;
 
 public class RiasCheckProvider implements FormAction {
 
-    private final RiasService riasService;
-
     public static final String RIAS_REJECTED = "rias.rejected";
+    private final RiasService riasService;
 
     public RiasCheckProvider(RiasService riasService) {
         this.riasService = riasService;

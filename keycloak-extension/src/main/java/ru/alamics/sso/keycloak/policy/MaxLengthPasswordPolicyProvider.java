@@ -12,29 +12,29 @@ public class MaxLengthPasswordPolicyProvider implements PasswordPolicyProvider {
 
     private KeycloakSession session;
 
-    public MaxLengthPasswordPolicyProvider (KeycloakSession session) {
+    public MaxLengthPasswordPolicyProvider(KeycloakSession session) {
         this.session = session;
     }
 
     @Override
-    public PolicyError validate (RealmModel realm, UserModel user, String password) {
+    public PolicyError validate(RealmModel realm, UserModel user, String password) {
         return validate(user.getUsername(), password);
     }
 
     @Override
-    public PolicyError validate (String user, String password) {
+    public PolicyError validate(String user, String password) {
         KeycloakContext context = session.getContext();
         int max = context.getRealm().getPasswordPolicy().getPolicyConfig(MaxLengthPasswordPolicyProviderFactory.ID);
         return password.length() > max ? new PolicyError(ERROR_MESSAGE, max) : null;
     }
 
     @Override
-    public Object parseConfig (String value) {
+    public Object parseConfig(String value) {
         return parseInteger(value, 16);
     }
 
     @Override
-    public void close () {
+    public void close() {
 
     }
 }

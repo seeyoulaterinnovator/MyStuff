@@ -122,6 +122,75 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
         return uriBuilder;
     }
 
+    @Override
+    protected String getDefaultScopes() {
+        return DEFAULT_SCOPE;
+    }
+
+    @Override
+    public Object callback(RealmModel realm, AuthenticationCallback callback, EventBuilder event) {
+        return new Endpoint(callback, realm, event);
+    }
+
+    private BrokeredIdentityContext extractIdentityFromProfile(JsonNode profile, String userId) {
+        log.info("profile={}", profile);
+        BrokeredIdentityContext user = new BrokeredIdentityContext(userId);
+
+//        String email = getJsonProperty(profile, "email");
+//
+//        user.setEmail(email);
+
+
+        String firstName = getJsonProperty(profile, "firstName");
+        String lastName = getJsonProperty(profile, "lastName");
+        String middleName = getJsonProperty(profile, "middleName");
+
+        String username = firstName + " " + lastName;
+        if (!Validation.isBlank(middleName)) {
+            username += " " + middleName;
+        }
+        user.setName(firstName + lastName);
+        user.setFirstName(username);
+        user.setLastName("-");
+        user.setUsername(username);
+        user.getContextData().put("firstName", username);
+
+        user.setIdpConfig(getConfig());
+        user.setIdp(this);
+
+        AbstractJsonUserAttributeMapper.storeUserProfileForMapper(user, profile, getConfig().getAlias());
+
+        return user;
+    }
+
+    @Override
+    public BrokeredIdentityContext getFederatedIdentity(String response) {
+        String accessToken = extractTokenFromResponse(response, getAccessTokenResponseParameter());
+
+        if (accessToken == null) {
+            throw new IdentityBrokerException("No access token available in OAuth server response: " + response);
+        }
+
+        BrokeredIdentityContext context = doGetFederatedIdentity(accessToken);
+        context.getContextData().put(FEDERATED_ACCESS_TOKEN, accessToken);
+        return context;
+    }
+
+    @Override
+    protected BrokeredIdentityContext doGetFederatedIdentity(String accessToken) {
+        try {
+            DecodedToken decodedToken = DecodedToken.getDecoded(accessToken);
+            log.info("decodedToken = {}", decodedToken);
+
+            JsonNode jsonNodeProfile = SimpleHttp.doGet(getConfig().getUserInfoUrl() + decodedToken.getUserId(), session)
+                    .header("Authorization", "Bearer " + accessToken)
+                    .asJson();
+            return extractIdentityFromProfile(jsonNodeProfile, decodedToken.getUserId());
+        } catch (Exception e) {
+            throw new IdentityBrokerException("Could not obtain user profile from esia.", e);
+        }
+    }
+
     protected class Endpoint {
         protected AuthenticationCallback callback;
         protected RealmModel realm;
@@ -209,75 +278,6 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
                     .param(OAUTH2_PARAMETER_CODE, authorizationCode)
                     .param(OAUTH2_PARAMETER_GRANT_TYPE, OAUTH2_GRANT_TYPE_AUTHORIZATION_CODE)
                     .param("token_type", "Bearer");
-        }
-    }
-
-    @Override
-    protected String getDefaultScopes() {
-        return DEFAULT_SCOPE;
-    }
-
-    @Override
-    public Object callback(RealmModel realm, AuthenticationCallback callback, EventBuilder event) {
-        return new Endpoint(callback, realm, event);
-    }
-
-    private BrokeredIdentityContext extractIdentityFromProfile(JsonNode profile, String userId) {
-        log.info("profile={}", profile);
-        BrokeredIdentityContext user = new BrokeredIdentityContext(userId);
-
-//        String email = getJsonProperty(profile, "email");
-//
-//        user.setEmail(email);
-
-
-        String firstName = getJsonProperty(profile, "firstName");
-        String lastName = getJsonProperty(profile, "lastName");
-        String middleName = getJsonProperty(profile, "middleName");
-
-        String username = firstName + " " + lastName;
-        if (!Validation.isBlank(middleName)) {
-            username += " " + middleName;
-        }
-        user.setName(firstName + lastName);
-        user.setFirstName(username);
-        user.setLastName("-");
-        user.setUsername(username);
-        user.getContextData().put("firstName", username);
-
-        user.setIdpConfig(getConfig());
-        user.setIdp(this);
-
-        AbstractJsonUserAttributeMapper.storeUserProfileForMapper(user, profile, getConfig().getAlias());
-
-        return user;
-    }
-
-    @Override
-    public BrokeredIdentityContext getFederatedIdentity(String response) {
-        String accessToken = extractTokenFromResponse(response, getAccessTokenResponseParameter());
-
-        if (accessToken == null) {
-            throw new IdentityBrokerException("No access token available in OAuth server response: " + response);
-        }
-
-        BrokeredIdentityContext context = doGetFederatedIdentity(accessToken);
-        context.getContextData().put(FEDERATED_ACCESS_TOKEN, accessToken);
-        return context;
-    }
-
-    @Override
-    protected BrokeredIdentityContext doGetFederatedIdentity(String accessToken) {
-        try {
-            DecodedToken decodedToken = DecodedToken.getDecoded(accessToken);
-            log.info("decodedToken = {}", decodedToken);
-
-            JsonNode jsonNodeProfile = SimpleHttp.doGet(getConfig().getUserInfoUrl() + decodedToken.getUserId(), session)
-                    .header("Authorization", "Bearer " + accessToken)
-                    .asJson();
-            return extractIdentityFromProfile(jsonNodeProfile, decodedToken.getUserId());
-        } catch (Exception e) {
-            throw new IdentityBrokerException("Could not obtain user profile from esia.", e);
         }
     }
 }

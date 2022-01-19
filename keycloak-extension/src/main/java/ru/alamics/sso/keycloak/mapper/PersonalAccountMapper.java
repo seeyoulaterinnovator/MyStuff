@@ -21,10 +21,8 @@ import java.util.List;
 public class PersonalAccountMapper extends AbstractOIDCProtocolMapper implements OIDCAccessTokenMapper, OIDCIDTokenMapper, UserInfoTokenMapper {
 
     public static final String POST_PERSONAL_ACCOUNT = "post.personal.account";
-
+    public static final String PROVIDER_ID = "personal-account-mapper";
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<ProviderConfigProperty>();
-    private UserPostService userPostService;
-    private PersonalAccountService paService;
 
     static {
         ProviderConfigProperty multiValued = new ProviderConfigProperty();
@@ -42,8 +40,38 @@ public class PersonalAccountMapper extends AbstractOIDCProtocolMapper implements
         OIDCAttributeMapperHelper.addIncludeInTokensConfig(configProperties, PersonalAccountMapper.class);
     }
 
-    public static final String PROVIDER_ID = "personal-account-mapper";
+    private UserPostService userPostService;
+    private PersonalAccountService paService;
 
+    public static void addJsonTypeConfig(List<ProviderConfigProperty> configProperties) {
+        ProviderConfigProperty property = new ProviderConfigProperty();
+        property.setName(OIDCAttributeMapperHelper.JSON_TYPE);
+        property.setLabel(OIDCAttributeMapperHelper.JSON_TYPE);
+        List<String> types = new ArrayList<>();
+        //types.add("String");
+        types.add("JSON");
+        //types.add("long");
+        //types.add("int");
+        //types.add("boolean");
+        property.setType(ProviderConfigProperty.LIST_TYPE);
+        property.setOptions(types);
+        property.setHelpText(OIDCAttributeMapperHelper.JSON_TYPE_TOOLTIP);
+        configProperties.add(property);
+    }
+
+    public static ProtocolMapperModel createClaimMapper(String name,
+                                                        String userAttribute,
+                                                        String tokenClaimName, String claimType,
+                                                        boolean accessToken, boolean idToken) {
+        return OIDCAttributeMapperHelper.createClaimMapper(name, userAttribute,
+                tokenClaimName, claimType,
+                accessToken, idToken,
+                PROVIDER_ID);
+    }
+
+    public static Object getModelValue(PersonalAccountPostModel accountModel) {
+        return accountModel;
+    }
 
     public List<ProviderConfigProperty> getConfigProperties() {
         return configProperties;
@@ -69,22 +97,6 @@ public class PersonalAccountMapper extends AbstractOIDCProtocolMapper implements
         return "Map a personal account list of user post to a token claim.";
     }
 
-    public static void addJsonTypeConfig(List<ProviderConfigProperty> configProperties) {
-        ProviderConfigProperty property = new ProviderConfigProperty();
-        property.setName(OIDCAttributeMapperHelper.JSON_TYPE);
-        property.setLabel(OIDCAttributeMapperHelper.JSON_TYPE);
-        List<String> types = new ArrayList<>();
-        //types.add("String");
-        types.add("JSON");
-        //types.add("long");
-        //types.add("int");
-        //types.add("boolean");
-        property.setType(ProviderConfigProperty.LIST_TYPE);
-        property.setOptions(types);
-        property.setHelpText(OIDCAttributeMapperHelper.JSON_TYPE_TOOLTIP);
-        configProperties.add(property);
-    }
-
     protected void setClaim(IDToken token, ProtocolMapperModel mappingModel, UserSessionModel userSession) {
 
         UserModel user = userSession.getUser();
@@ -94,16 +106,6 @@ public class PersonalAccountMapper extends AbstractOIDCProtocolMapper implements
 
         Object propertyValue = getModelValue(accountModel);
         OIDCAttributeMapperHelper.mapClaim(token, mappingModel, propertyValue);
-    }
-
-    public static ProtocolMapperModel createClaimMapper(String name,
-                                                        String userAttribute,
-                                                        String tokenClaimName, String claimType,
-                                                        boolean accessToken, boolean idToken) {
-        return OIDCAttributeMapperHelper.createClaimMapper(name, userAttribute,
-                tokenClaimName, claimType,
-                accessToken, idToken,
-                PROVIDER_ID);
     }
 
     private PersonalAccountPostModel getUserPost(UserModel user) {
@@ -116,10 +118,6 @@ public class PersonalAccountMapper extends AbstractOIDCProtocolMapper implements
             log.error(e.getMessage(), e);
             return null;
         }
-    }
-
-    public static Object getModelValue(PersonalAccountPostModel accountModel) {
-        return accountModel;
     }
 
 }

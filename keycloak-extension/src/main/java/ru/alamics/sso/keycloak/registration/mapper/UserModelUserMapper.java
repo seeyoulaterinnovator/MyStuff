@@ -7,7 +7,10 @@ import ru.alamics.sso.util.Util;
 
 import javax.ws.rs.core.MultivaluedMap;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.FormConstants.FIELD_PHONE;

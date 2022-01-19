@@ -2529,6 +2529,11 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
         $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/importUsersReports').then(function (data) {
             $scope.ImportReports = angular.fromJson(data).data.results['importUsersReports'];
         });
+        var timeout = setInterval(function() {
+            $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/importUsersReports').then(function (data) {
+                $scope.ImportReports = angular.fromJson(data).data.results['importUsersReports'];
+            });
+        }, 1000);
     };
 
     $scope.importFileAsync = function (files) {

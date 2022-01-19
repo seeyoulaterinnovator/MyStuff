@@ -15,7 +15,7 @@ import java.util.List;
 
 @LocalBean
 @Stateless
-@TransactionAttribute(TransactionAttributeType.REQUIRED)
+@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 public class ImportUsersReportRepository {
 
     @PersistenceContext
@@ -100,7 +100,6 @@ public class ImportUsersReportRepository {
 
         refreshEntityById(id, ImportUsersReportEntity.class);
     }
-
     public <T> T findEntityById(String id, Class<T> clazz) {
         return em.find(clazz, id);
     }

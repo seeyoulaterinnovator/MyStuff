@@ -9,12 +9,12 @@ public class PersonalAccountProviderFactory implements BaseResourceProviderFacto
     private static final String ID = "personal-account";
 
     @Override
-    public RealmResourceProvider create (KeycloakSession session) {
+    public RealmResourceProvider create(KeycloakSession session) {
         return new PersonalAccountResourceProvider(session);
     }
 
     @Override
-    public String getId () {
+    public String getId() {
         return ID;
     }
 }

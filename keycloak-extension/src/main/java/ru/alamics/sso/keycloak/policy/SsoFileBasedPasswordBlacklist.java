@@ -43,6 +43,10 @@ public class SsoFileBasedPasswordBlacklist implements BlacklistPasswordPolicyPro
         }
     }
 
+    private static BufferedReader newReader(Path path) throws IOException {
+        return new BufferedReader(Files.newBufferedReader(path), BUFFER_SIZE_IN_BYTES);
+    }
+
     public String getName() {
         return name;
     }
@@ -92,9 +96,5 @@ public class SsoFileBasedPasswordBlacklist implements BlacklistPasswordPolicyPro
         try (BufferedReader br = newReader(path)) {
             return br.lines().count();
         }
-    }
-
-    private static BufferedReader newReader(Path path) throws IOException {
-        return new BufferedReader(Files.newBufferedReader(path), BUFFER_SIZE_IN_BYTES);
     }
 }

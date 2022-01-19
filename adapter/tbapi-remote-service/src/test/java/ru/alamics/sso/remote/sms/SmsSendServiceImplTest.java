@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -60,6 +59,7 @@ class SmsSendServiceImplTest {
     void resetWireMock() {
         server.resetMappings();
     }
+
     @Test
     void sensSms() {
 

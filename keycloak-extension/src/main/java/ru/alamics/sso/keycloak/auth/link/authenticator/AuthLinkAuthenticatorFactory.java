@@ -14,12 +14,11 @@ import java.util.List;
 @Deprecated
 public class AuthLinkAuthenticatorFactory implements AuthenticatorFactory {
 
+    public static final String ID = "auth-link-authenticator";
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.ALTERNATIVE,
             AuthenticationExecutionModel.Requirement.DISABLED
     };
-
-    public static final String ID = "auth-link-authenticator";
 
     @Override
     public String getDisplayType() {

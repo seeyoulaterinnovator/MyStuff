@@ -8,9 +8,7 @@ import org.keycloak.authentication.actiontoken.DefaultActionTokenKey;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.protocol.LoginProtocol;
 import org.keycloak.services.managers.AuthenticationManager;
-import org.keycloak.sessions.AuthenticationSessionModel;
 
 @Slf4j
 @Deprecated

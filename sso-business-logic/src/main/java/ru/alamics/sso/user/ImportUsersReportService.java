@@ -20,15 +20,16 @@ public class ImportUsersReportService {
     @EJB
     private ImportReportService importReportService;
 
-    public void createImportUsersReportAsync(RealmModel realm, String filename, List<ImportUsersDataModel> dataList) {
+    public String  createImportUsersReportAsync(RealmModel realm, String filename, List<ImportUsersDataModel> dataList) {
 
         ImportUsersReportModel importUsersReport = UserMapper.toImportUsersReportEntity(realm.getName(), filename, dataList);
-        importUsersReport.setStatus(ImportUsersReportStatus.AWAITING);
-        importUsersReport.setFiletype(Util.getFileExtByFilename(filename));
 
+        importUsersReport.setFiletype(Util.getFileExtByFilename(filename));
+        importUsersReport.setStatus(ImportUsersReportStatus.UPLOADING);
         String reportId = importReportService.saveImportUsersReport(importUsersReport);
         importUsersReport.setId(reportId);
         importReportService.saveImportUsersData(reportId, dataList); // TODO really need?
+        return reportId;
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)

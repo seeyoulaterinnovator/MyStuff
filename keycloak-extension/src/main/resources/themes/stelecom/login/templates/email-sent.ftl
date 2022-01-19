@@ -8,7 +8,7 @@
           </p>
         </#if>
         <#if buttonExist>
-          <a class="btn btn-main text-center btn--thanks" href="${backHref}">Спасибо</a>
+          <a class="btn btn-main text-center btn--thanks" href="${redirectUrl}">Спасибо</a>
         </#if>
     </div>
   </div>

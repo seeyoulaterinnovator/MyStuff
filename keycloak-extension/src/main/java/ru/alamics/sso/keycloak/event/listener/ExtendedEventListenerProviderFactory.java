@@ -1,7 +1,6 @@
 package ru.alamics.sso.keycloak.event.listener;
 
 import org.keycloak.Config;
-import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.events.EventListenerProviderFactory;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
