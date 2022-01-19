@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.cities;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -9,7 +8,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.plugins.providers.StringTextStar;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.util.JsonSerialization;
+import ru.alamics.sso.keycloak.cities.model.CityDadataModel;
 import ru.alamics.sso.keycloak.cities.model.CityMigration;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
@@ -25,7 +24,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
@@ -47,10 +45,8 @@ public class CitiesResource {
 
     private static String url;
     private static List<CityMigration> cityList = new ArrayList<>();
-
-    private SettingsService settingsService;
-
     protected KeycloakSession session;
+    private SettingsService settingsService;
 
     public CitiesResource(KeycloakSession session) {
         this.session = session;
@@ -142,23 +138,30 @@ public class CitiesResource {
                 .queryParam("ip", ipAddress)
                 .queryParam("languege", LANGUAGE);
 
-        String json = wt.request(MediaType.APPLICATION_JSON)
+        Response response = wt.request(MediaType.APPLICATION_JSON)
                 .header("Accept", "application/json")
                 .header("Authorization", "TOKEN " + token)
-                .get(String.class);
+                .get();
 
-        try {
-            Map jsonObject = JsonSerialization.readValue(json, Map.class);
-            ObjectNode objectNode = JsonSerialization.createObjectNode(jsonObject);
-            String title = objectNode.findValue("city").textValue();
+        CityDadataModel cityDadataModel = response.readEntity(CityDadataModel.class);
+
+        if (cityDadataModel == null) {
             return JsonResponse.success()
-                    .addResult("title", title)
+                    .addResult("title", null)
                     .build();
-        } catch (Exception err) {
-            log.error("Error during location deserialization: ", err);
         }
 
-        return null;
+        String title = cityDadataModel.getLocation().getData().getCity();
+
+        CityMigration cm = CitiesResource.getCityMigrationByCity(title);
+
+        if (cm == null) {
+            title = null;
+        }
+
+        return JsonResponse.success()
+                .addResult("title", title)
+                .build();
 
     }
 }
