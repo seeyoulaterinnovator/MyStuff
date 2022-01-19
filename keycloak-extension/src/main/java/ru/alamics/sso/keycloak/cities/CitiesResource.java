@@ -24,7 +24,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -151,10 +150,7 @@ public class CitiesResource {
             CityMigration city = getCityMigrationByCity(title);
 
             if (city == null) {
-                RegionCities region = Arrays.stream(RegionCities.values())
-                        .filter(regionCities -> regionCities.getRegion().equals(regionIsoCode))
-                        .findFirst()
-                        .orElse(null);
+                RegionCities region = RegionCities.findRegionByIsoCode(regionIsoCode);
                 city = region == null ? null : getCityMigrationByCity(region.getDefaultCity());
             }
 
