@@ -16,7 +16,6 @@ public class CityDadataModel {
 
         private String value;
 
-        @JsonIgnoreProperties(ignoreUnknown = true)
         private DataModel data;
 
         @Data
