@@ -1,7 +1,6 @@
 package ru.alamics.sso.keycloak.status;
 
 import org.keycloak.models.KeycloakSession;
-import ru.alamics.sso.keycloak.cities.CitiesResource;
 
 import javax.ws.rs.Path;
 

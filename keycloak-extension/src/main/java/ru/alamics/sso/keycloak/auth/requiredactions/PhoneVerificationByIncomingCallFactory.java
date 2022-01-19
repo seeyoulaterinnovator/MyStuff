@@ -19,7 +19,8 @@ public class PhoneVerificationByIncomingCallFactory implements RequiredActionFac
 
     public static final String PROVIDER_ID = "incoming_call_phone_verificator";
 
-    public PhoneVerificationByIncomingCallFactory() {}
+    public PhoneVerificationByIncomingCallFactory() {
+    }
 
     @Override
     public RequiredActionProvider create(KeycloakSession session) {

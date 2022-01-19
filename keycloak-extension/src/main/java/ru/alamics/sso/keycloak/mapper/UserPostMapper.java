@@ -31,7 +31,10 @@ import ru.alamics.sso.registration.service.UserPostService;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -44,8 +47,8 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAccessTokenMapper, OIDCIDTokenMapper, UserInfoTokenMapper {
+    public static final String PROVIDER_ID = "user-post-mapper";
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<ProviderConfigProperty>();
-    private UserPostService userPostService;
 
     static {
         ProviderConfigProperty property;
@@ -65,8 +68,39 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
         OIDCAttributeMapperHelper.addAttributeConfig(configProperties, UserPropertyMapper.class);
     }
 
-    public static final String PROVIDER_ID = "user-post-mapper";
+    private UserPostService userPostService;
 
+    public static ProtocolMapperModel createClaimMapper(String name,
+                                                        String userAttribute,
+                                                        String tokenClaimName, String claimType,
+                                                        boolean accessToken, boolean idToken) {
+        return OIDCAttributeMapperHelper.createClaimMapper(name, userAttribute,
+                tokenClaimName, claimType,
+                accessToken, idToken,
+                PROVIDER_ID);
+    }
+
+    public static Object getUserModelValue(UserPostResponse userPost, String propertyName) {
+        switch (UserPostPropertyType.valueOf(propertyName)) {
+            case POST_ID:
+                return userPost.getId();
+            case TOMS_ID:
+                return userPost.getTomsId();
+            case DMP_ID:
+                return userPost.getDmpId();
+            case ROLE:
+                return userPost.getUserRole() == null ? "" : userPost.getUserRole().getName();
+            case SYSTEMS:
+                if (userPost.getSystemRoles() == null)
+                    return Collections.EMPTY_LIST;
+
+                return userPost.getSystemRoles().stream()
+                        .filter(o -> o != null && o.getExternalSystem() != null)
+                        .map(o -> o.getExternalSystem().getName())
+                        .collect(Collectors.toList());
+        }
+        return "";
+    }
 
     public List<ProviderConfigProperty> getConfigProperties() {
         return configProperties;
@@ -102,16 +136,6 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
         OIDCAttributeMapperHelper.mapClaim(token, mappingModel, propertyValue);
     }
 
-    public static ProtocolMapperModel createClaimMapper(String name,
-                                                        String userAttribute,
-                                                        String tokenClaimName, String claimType,
-                                                        boolean accessToken, boolean idToken) {
-        return OIDCAttributeMapperHelper.createClaimMapper(name, userAttribute,
-                tokenClaimName, claimType,
-                accessToken, idToken,
-                PROVIDER_ID);
-    }
-
     private UserPostResponse getUserPost(UserModel user) {
         List<UserPostResponse> userPost;
         try {
@@ -123,27 +147,5 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
         }
         return userPost.stream().filter(o -> o.isSelected()).findFirst()
                 .orElse(null);
-    }
-
-    public static Object getUserModelValue(UserPostResponse userPost, String propertyName) {
-        switch (UserPostPropertyType.valueOf(propertyName)) {
-            case POST_ID:
-                return userPost.getId();
-            case TOMS_ID:
-                return userPost.getTomsId();
-            case DMP_ID:
-                return userPost.getDmpId();
-            case ROLE:
-                return userPost.getUserRole() == null? "" : userPost.getUserRole().getName();
-            case SYSTEMS:
-                if (userPost.getSystemRoles() == null)
-                    return Collections.EMPTY_LIST;
-
-                return userPost.getSystemRoles().stream()
-                        .filter(o -> o != null && o.getExternalSystem() != null)
-                        .map(o -> o.getExternalSystem().getName())
-                        .collect(Collectors.toList());
-        }
-        return "";
     }
 }

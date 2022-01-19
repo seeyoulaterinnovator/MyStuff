@@ -1,7 +1,6 @@
 package ru.alamics.sso.keycloak.create.rest;
 
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import ru.alamics.sso.registration.service.UserFindService;
 
@@ -13,7 +12,7 @@ public class CustomRestResource {
     private UserFindService userFindService;
     private AdminPermissionEvaluator auth;
 
-    public CustomRestResource (KeycloakSession session, AdminPermissionEvaluator auth) {
+    public CustomRestResource(KeycloakSession session, AdminPermissionEvaluator auth) {
         this.session = session;
         this.auth = auth;
     }

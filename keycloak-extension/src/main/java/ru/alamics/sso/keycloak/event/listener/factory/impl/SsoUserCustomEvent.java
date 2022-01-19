@@ -51,11 +51,11 @@ public class SsoUserCustomEvent extends SsoEvent {
             if (user != null && user.getEmail() != null) {
                 Map<String, Object> attributes = new HashMap<>();
                 attributes.put("userName", user.getUsername());
-                attributes.put("emailSendLoginBodyHtml", messageService.getSettingsStringValue(EMAIL_SEND_LOGIN_ACCOUNT,realm.getName()));
-                attributes.put("emailLoginAndPhoneHtml", messageService.getSettingsStringValue(EMAIL_LOGIN_AND_PHONE_ACCOUNT,realm.getName()));
-                attributes.put("emailLoginHtml", messageService.getSettingsStringValue(EMAIL_LOGIN_ACCOUNT,realm.getName()));
-                attributes.put("emailPasswordFooterHtml", messageService.getSettingsStringValue(EMAIL_PASSWORD_FOOTER_ACCOUNT,realm.getName()));
-                attributes.put("emailResetPasswordBodyHtml", messageService.getSettingsStringValue(EMAIL_RESET_PASSWORD_ACCOUNT,realm.getName()));
+                attributes.put("emailSendLoginBodyHtml", messageService.getSettingsStringValue(EMAIL_SEND_LOGIN_ACCOUNT, realm.getName()));
+                attributes.put("emailLoginAndPhoneHtml", messageService.getSettingsStringValue(EMAIL_LOGIN_AND_PHONE_ACCOUNT, realm.getName()));
+                attributes.put("emailLoginHtml", messageService.getSettingsStringValue(EMAIL_LOGIN_ACCOUNT, realm.getName()));
+                attributes.put("emailPasswordFooterHtml", messageService.getSettingsStringValue(EMAIL_PASSWORD_FOOTER_ACCOUNT, realm.getName()));
+                attributes.put("emailResetPasswordBodyHtml", messageService.getSettingsStringValue(EMAIL_RESET_PASSWORD_ACCOUNT, realm.getName()));
                 List<String> phones = user.getAttribute("phone");
                 if (!phones.isEmpty()) {
                     attributes.put("phone", Util.getFormatNumber(phones.get(0)));
@@ -67,7 +67,7 @@ public class SsoUserCustomEvent extends SsoEvent {
                     SsoPasswordCredentialProvider a = new SsoPasswordCredentialProvider(session);
                     a.disableCredentialType(realm, user, CredentialModel.PASSWORD,
                             12 * 60 * 60,
-                            messageService.getSettingsStringValue(ACCOUNT_SUBJECT_RESET_PASSWORD,realm.getName()), BODY_TEMPLATE_PASSWORD_RESET_WITH_LOGIN, attributes);
+                            messageService.getSettingsStringValue(ACCOUNT_SUBJECT_RESET_PASSWORD, realm.getName()), BODY_TEMPLATE_PASSWORD_RESET_WITH_LOGIN, attributes);
                     //this.sendEmail(user, realm, "emailResetPasswordSubject", "mail-password-reset-with-login.ftl", attributes);
                 }
             } else {

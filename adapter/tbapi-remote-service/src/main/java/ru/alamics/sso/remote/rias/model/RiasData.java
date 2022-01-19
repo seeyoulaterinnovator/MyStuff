@@ -15,20 +15,20 @@ public class RiasData {
         return this.status;
     }
 
-    public RiasResult getResult() {
-        return this.result;
-    }
-
-    public RiasMessage getMessages() {
-        return this.messages;
-    }
-
     public void setStatus(Integer status) {
         this.status = status;
     }
 
+    public RiasResult getResult() {
+        return this.result;
+    }
+
     public void setResult(RiasResult result) {
         this.result = result;
+    }
+
+    public RiasMessage getMessages() {
+        return this.messages;
     }
 
     public void setMessages(RiasMessage messages) {

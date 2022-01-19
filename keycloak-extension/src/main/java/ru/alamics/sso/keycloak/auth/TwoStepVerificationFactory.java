@@ -22,7 +22,7 @@ public class TwoStepVerificationFactory implements Authenticator, AuthenticatorF
     public static final String NOTE_AUTH_TYPE_NAME = "note_auth_type_name";
     public static final String NOTE_AUTH_TYPE_DESC = "note_auth_type_DESC";
 
-    public static final String TWO_STEP_VERIFICATION_TYPES = "two.step.verification.types" ;
+    public static final String TWO_STEP_VERIFICATION_TYPES = "two.step.verification.types";
     private static final String PROVIDER_ID = "two-step-verification";
 
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
@@ -31,6 +31,16 @@ public class TwoStepVerificationFactory implements Authenticator, AuthenticatorF
     };
 
     private static final List<ProviderConfigProperty> CONFIG_PROPERTIES = Arrays.asList(getTwoStepVerificationTypes());
+
+    private static ProviderConfigProperty getTwoStepVerificationTypes() {
+        ProviderConfigProperty property = new ProviderConfigProperty();
+        property.setName(TWO_STEP_VERIFICATION_TYPES);
+        property.setLabel("2-step verification types");
+        property.setHelpText("");
+        property.setOptions(Arrays.stream(AuthType.values()).map(Enum::name).collect(Collectors.toList()));
+        property.setType(ProviderConfigProperty.LIST_TYPE);
+        return property;
+    }
 
     @Override
     public List<ProviderConfigProperty> getConfigProperties() {
@@ -126,15 +136,5 @@ public class TwoStepVerificationFactory implements Authenticator, AuthenticatorF
 
     @Override
     public void close() {
-    }
-
-    private static ProviderConfigProperty getTwoStepVerificationTypes() {
-        ProviderConfigProperty property = new ProviderConfigProperty();
-        property.setName(TWO_STEP_VERIFICATION_TYPES);
-        property.setLabel("2-step verification types");
-        property.setHelpText("");
-        property.setOptions(Arrays.stream(AuthType.values()).map(Enum::name).collect(Collectors.toList()));
-        property.setType(ProviderConfigProperty.LIST_TYPE);
-        return property;
     }
 }

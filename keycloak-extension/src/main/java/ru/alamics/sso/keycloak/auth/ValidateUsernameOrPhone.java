@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.auth;
 
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;

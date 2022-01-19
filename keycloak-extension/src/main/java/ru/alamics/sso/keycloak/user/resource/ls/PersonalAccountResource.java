@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.user.resource.ls;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import ru.alamics.sso.keycloak.response.JsonResponse;

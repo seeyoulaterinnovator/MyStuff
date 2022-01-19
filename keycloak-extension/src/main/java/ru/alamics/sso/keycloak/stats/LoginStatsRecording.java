@@ -10,7 +10,7 @@ import ru.alamics.sso.stats.LoginHistory;
 import java.util.Objects;
 
 @Slf4j
-public class LoginStatsRecording implements RequiredActionProvider  {
+public class LoginStatsRecording implements RequiredActionProvider {
 
     private final LoginHistory loginHistoryService;
 
@@ -19,7 +19,7 @@ public class LoginStatsRecording implements RequiredActionProvider  {
     }
 
     @Override
-    public void evaluateTriggers (RequiredActionContext context) {
+    public void evaluateTriggers(RequiredActionContext context) {
         final String DEBUG_STR = "evaluateTriggers";
         UserModel user = context.getUser();
         Objects.requireNonNull(user);
@@ -29,16 +29,16 @@ public class LoginStatsRecording implements RequiredActionProvider  {
     }
 
     @Override
-    public void requiredActionChallenge (RequiredActionContext context) {
+    public void requiredActionChallenge(RequiredActionContext context) {
         context.success();
     }
 
     @Override
-    public void processAction (RequiredActionContext context) {
+    public void processAction(RequiredActionContext context) {
     }
 
     @Override
-    public void close () {
+    public void close() {
 
     }
 

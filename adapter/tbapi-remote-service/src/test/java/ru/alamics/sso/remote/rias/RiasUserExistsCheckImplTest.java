@@ -1,34 +1,26 @@
 package ru.alamics.sso.remote.rias;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import org.assertj.core.api.Assertions;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.alamics.sso.property.ApplicationProperties;
-import ru.alamics.sso.registration.phone.SmsConfig;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.remote.ApplicationPropertiesMock;
-import ru.alamics.sso.remote.sms.SmsSendServiceImpl;
 
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Properties;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 class RiasUserExistsCheckImplTest {
 
-    private static WireMockServer server;
-
-    private static RiasUserExistsCheckImpl service;
-
     public static final String PATH = "/cgi-bin/ppo/excells/web_cabinet.get_info_unauth";
+    private static WireMockServer server;
+    private static RiasUserExistsCheckImpl service;
 
     @BeforeAll
     static void initWireMock() {

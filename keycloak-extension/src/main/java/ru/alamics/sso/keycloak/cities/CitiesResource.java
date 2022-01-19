@@ -47,10 +47,8 @@ public class CitiesResource {
 
     private static String url;
     private static List<CityMigration> cityList = new ArrayList<>();
-
-    private SettingsService settingsService;
-
     protected KeycloakSession session;
+    private SettingsService settingsService;
 
     public CitiesResource(KeycloakSession session) {
         this.session = session;

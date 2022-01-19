@@ -24,6 +24,7 @@ public class SsoFreeMarkerFormsFactory implements LoginFormsProviderFactory {
     public void postInit(KeycloakSessionFactory factory) {
 
     }
+
     @Override
     public void close() {
         freeMarker = null;
