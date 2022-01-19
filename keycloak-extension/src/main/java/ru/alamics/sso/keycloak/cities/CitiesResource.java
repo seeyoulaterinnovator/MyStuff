@@ -9,6 +9,7 @@ import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.cities.model.CityDadataModel;
 import ru.alamics.sso.keycloak.cities.model.CityMigration;
+import ru.alamics.sso.keycloak.cities.model.RegionCities;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.property.ApplicationProperties;
@@ -145,7 +146,14 @@ public class CitiesResource {
         String title = null;
         if (cityDadataModel != null) {
             title = cityDadataModel.getLocation().getData().getCity();
+            String regionIsoCode = cityDadataModel.getLocation().getData().getRegionIsoCode();
             CityMigration city = getCityMigrationByCity(title);
+
+            if (city == null) {
+                RegionCities region = RegionCities.findRegionByIsoCode(regionIsoCode);
+                city = region == null ? null : getCityMigrationByCity(region.getDefaultCity());
+            }
+
             title = city == null ? null : title;
         }
 
