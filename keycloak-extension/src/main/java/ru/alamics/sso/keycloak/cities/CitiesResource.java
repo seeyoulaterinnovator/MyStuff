@@ -1,15 +1,13 @@
 package ru.alamics.sso.keycloak.cities;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.plugins.providers.StringTextStar;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.util.JsonSerialization;
+import ru.alamics.sso.keycloak.cities.model.CityDadataModel;
 import ru.alamics.sso.keycloak.cities.model.CityMigration;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
@@ -21,11 +19,11 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
@@ -43,7 +41,7 @@ public class CitiesResource {
     private static final ReentrantLock lock = new ReentrantLock();
     private static final AtomicLong updated = new AtomicLong(0);
 
-    private static final String LANGUAGE = "ru";
+    private static final String LANGUAGE_RU = "ru";
 
     private static String url;
     private static List<CityMigration> cityList = new ArrayList<>();
@@ -136,27 +134,24 @@ public class CitiesResource {
         String url = settingsService.getSettingsStringValue(SettingConstants.URL_DADATA_REQUEST_LOCATION_IP, "master");
         String token = settingsService.getSettingsStringValue(SettingConstants.TOKEN_DADATA, "master");
 
-        ResteasyWebTarget wt = client.target(url)
+        CityDadataModel cityDadataModel = client.target(url)
                 .queryParam("ip", ipAddress)
-                .queryParam("languege", LANGUAGE);
+                .queryParam("language", LANGUAGE_RU)
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, "TOKEN " + token)
+                .get(CityDadataModel.class);
 
-        String json = wt.request(MediaType.APPLICATION_JSON)
-                .header("Accept", "application/json")
-                .header("Authorization", "TOKEN " + token)
-                .get(String.class);
-
-        try {
-            Map jsonObject = JsonSerialization.readValue(json, Map.class);
-            ObjectNode objectNode = JsonSerialization.createObjectNode(jsonObject);
-            String title = objectNode.findValue("city").textValue();
-            return JsonResponse.success()
-                    .addResult("title", title)
-                    .build();
-        } catch (Exception err) {
-            log.error("Error during location deserialization: ", err);
+        String title = null;
+        if (cityDadataModel != null) {
+            title = cityDadataModel.getLocation().getData().getCity();
+            CityMigration city = getCityMigrationByCity(title);
+            title = city == null ? null : title;
         }
 
-        return null;
+        return JsonResponse.success()
+                .addResult("title", title)
+                .build();
 
     }
 }

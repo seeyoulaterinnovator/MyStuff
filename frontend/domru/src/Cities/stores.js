@@ -1,7 +1,7 @@
-import { writable } from 'svelte/store';
+import {writable} from 'svelte/store';
 import Cookie from 'js-cookie';
 
-import { STATUS } from './constants.js';
+import {STATUS} from './constants.js';
 
 export const city = writable(
   document.getElementById('cities-button').dataset.city || Cookie.get('CITY') || ''
@@ -16,12 +16,12 @@ const isFirstVisit =
 isFirstVisit && fetch('/auth/realms/user/cities/current')
   .then(response => response.json())
   .then(json => {
-    json.results?.title && city.set(json.results.title);
+    json.results?.title == null ? city.set("Пермь") : city.set(json.results.title);
     showModal.set(isFirstVisit);
   })
   .catch(error => {
     console.log(error);
-    city.set('Санкт-Петербург');
+    city.set('Пермь');
     showModal.set(isFirstVisit);
   });
 
