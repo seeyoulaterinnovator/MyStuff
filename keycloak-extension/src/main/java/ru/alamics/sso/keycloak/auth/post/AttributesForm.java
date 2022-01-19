@@ -35,6 +35,7 @@ import static ru.alamics.sso.registration.model.UserConstants.*;
 
 @Slf4j
 public class AttributesForm implements Authenticator {
+    private final static String DMP_ID = "dmp-kc-sit";
     private static final String FORM = "attributes.ftl";
     private final UserRole roleService;
     private CachedUserPostFacade cachedUserPostFacade;
@@ -123,6 +124,12 @@ public class AttributesForm implements Authenticator {
         ClientConnection clientConnection = session.getContext().getConnection();
         AuthenticationManager.backchannelLogout(session, realm, userSession, session.getContext().getUri(), clientConnection, session.getContext().getRequestHeaders(), true);
         authSession.setAuthNote(AUTH_FORM_SUCCESS, "0");
+
+        String iframe = context.getUriInfo().getQueryParameters().getFirst(I_FRAME);
+        String clientId = session.getContext().getClient().getClientId();
+        if (iframe != null && DMP_ID.equals(clientId)) {
+            authSession.setAuthNote(END_AFTER_REQUIRED_ACTIONS, "1");
+        }
         context.success();
     }
 
