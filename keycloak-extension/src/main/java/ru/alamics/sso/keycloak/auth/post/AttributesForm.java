@@ -123,7 +123,6 @@ public class AttributesForm implements Authenticator {
         ClientConnection clientConnection = session.getContext().getConnection();
         AuthenticationManager.backchannelLogout(session, realm, userSession, session.getContext().getUri(), clientConnection, session.getContext().getRequestHeaders(), true);
         authSession.setAuthNote(AUTH_FORM_SUCCESS, "0");
-        authSession.setAuthNote(END_AFTER_REQUIRED_ACTIONS, "1");
         context.success();
     }
 
