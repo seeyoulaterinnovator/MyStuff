@@ -9,6 +9,7 @@ import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.cities.model.CityDadataModel;
 import ru.alamics.sso.keycloak.cities.model.CityMigration;
+import ru.alamics.sso.keycloak.cities.model.RegionCities;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.property.ApplicationProperties;
@@ -23,6 +24,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -145,7 +147,17 @@ public class CitiesResource {
         String title = null;
         if (cityDadataModel != null) {
             title = cityDadataModel.getLocation().getData().getCity();
+            String regionIsoCode = cityDadataModel.getLocation().getData().getRegionIsoCode();
             CityMigration city = getCityMigrationByCity(title);
+
+            if (city == null) {
+                RegionCities region = Arrays.stream(RegionCities.values())
+                        .filter(regionCities -> regionCities.getRegion().equals(regionIsoCode))
+                        .findFirst()
+                        .orElse(null);
+                city = region == null ? null : getCityMigrationByCity(region.getDefaultCity());
+            }
+
             title = city == null ? null : title;
         }
 

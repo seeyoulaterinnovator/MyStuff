@@ -16,12 +16,12 @@ const isFirstVisit =
 isFirstVisit && fetch('/auth/realms/user/cities/current')
   .then(response => response.json())
   .then(json => {
-    json.results?.title == null ? city.set("Пермь") : city.set(json.results.title);
+    json.results?.title == null ? city.set("Москва") : city.set(json.results.title);
     showModal.set(isFirstVisit);
   })
   .catch(error => {
     console.log(error);
-    city.set('Пермь');
+    city.set('Москва');
     showModal.set(isFirstVisit);
   });
 

@@ -1,6 +1,7 @@
 package ru.alamics.sso.keycloak.cities.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 
@@ -23,6 +24,8 @@ public class CityDadataModel {
         public class DataModel {
 
             private String city;
+            @JsonProperty("region_iso_code")
+            private String regionIsoCode;
 
         }
 
