@@ -15,7 +15,7 @@ import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.managers.ClientSessionCode;
 import org.keycloak.services.resources.LoginActionsService;
 import org.keycloak.sessions.AuthenticationSessionModel;
-import ru.alamics.sso.keycloak.auth.AuthBaseClass;
+import ru.alamics.sso.keycloak.auth.AbstractAuthenticator;
 import ru.alamics.sso.util.Util;
 
 import javax.ws.rs.core.Context;
@@ -23,7 +23,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Map;
 
-public class RestRequiredActionsAuthenticator extends AuthBaseClass {
+public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
 
     private final KeycloakSession session;
     private final RealmModel realm;

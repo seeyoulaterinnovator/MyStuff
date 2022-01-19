@@ -4,11 +4,11 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
-import ru.alamics.sso.keycloak.auth.AuthFactoryBaseClass;
+import ru.alamics.sso.keycloak.auth.AbstractAuthenticatorFactory;
 
 import static org.keycloak.models.AuthenticationExecutionModel.Requirement.*;
 
-public class RestRequiredActionsAuthFactory extends AuthFactoryBaseClass {
+public class RestRequiredActionsAuthFactory extends AbstractAuthenticatorFactory {
 
     public static final String ID = "rest-actions";
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {REQUIRED, OPTIONAL, DISABLED};
