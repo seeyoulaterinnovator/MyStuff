@@ -17,7 +17,7 @@ public class CityDadataModel {
         private String value;
 
         @JsonIgnoreProperties(ignoreUnknown = true)
-        private CityDadataModel.LocationModel.DataModel data;
+        private DataModel data;
 
         @Data
         @JsonIgnoreProperties(ignoreUnknown = true)
