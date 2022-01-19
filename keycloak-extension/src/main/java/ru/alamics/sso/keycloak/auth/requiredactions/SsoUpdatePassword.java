@@ -96,6 +96,9 @@ public class SsoUpdatePassword extends UpdatePassword {
         //т.к. при старте новой сессии задается этот параметр = true, редирект после прохожения всего флоу не происходит
         currentAuthenticationSession.setAuthNote(AuthenticationManager.END_AFTER_REQUIRED_ACTIONS, null);
 
+//        FIXME: ломает следующий за восстановлением пароля required action
+//        currentAuthenticationSession.setAction(AuthenticationSessionModel.Action.AUTHENTICATE.name());
+
         currentAuthenticationSession.setProtocol(OIDCLoginProtocol.LOGIN_PROTOCOL);
 
 
