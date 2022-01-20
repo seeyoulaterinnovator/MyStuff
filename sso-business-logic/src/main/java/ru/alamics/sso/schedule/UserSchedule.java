@@ -117,7 +117,7 @@ public class UserSchedule {
         log.debug("start:{}", DEBUG_STR);
         long absenceTimeNotification = settingsService.getSettingsValue(SettingConstants.ABSENCE_NOTIFICATION_DAYS, realm);
         if (absenceTimeNotification > -1) {
-            userHistoryLoginRepositoryиьр.findInactiveUsers(absenceTimeNotification, realm);
+            userHistoryLoginRepository.findInactiveUsers(absenceTimeNotification, realm);
         }
         log.debug("stop:{}", DEBUG_STR);
     }
