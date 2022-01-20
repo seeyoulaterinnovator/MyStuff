@@ -48,16 +48,15 @@
                         Вам на почту отправлены данные по восстановлению пароля
                     </#if>
                 </@emailSent.defaultTemplate>
+            <#elseif displayMessage && message?has_content && message.summary == msg('emailSendErrorMessage')>
+                <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}" success = false; section>
+                    <#if section = "header">
+                        Восстановление пароля
+                    <#elseif section = "description">
+                        Не получается отправить письмо. Учетная запись не существует.
+                    </#if>
+                </@emailSent.defaultTemplate>
             <#else>
-                <#if displayMessage && message?has_content && message.summary == msg('emailSendErrorMessage')>
-                    <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}" success = false; section>
-                        <#if section = "header">
-                            Восстановление пароля
-                        <#elseif section = "description">
-                            Не получается отправить письмо. Учетная запись не существует.
-                        </#if>
-                    </@emailSent.defaultTemplate>
-                </#if>
 
                 <#nested "header">
 
