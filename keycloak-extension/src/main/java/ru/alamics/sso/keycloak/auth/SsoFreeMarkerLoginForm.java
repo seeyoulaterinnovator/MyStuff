@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.auth;
 
+import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
@@ -67,6 +68,14 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         attributes.put("footer", settingsService.getSettingsStringValue(FOOTER, realm.getName()));
         attributes.put("homePage", settingsService.getSettingsStringValue(HOME_PAGE, realm.getName()));
 
+    }
+
+    @Override
+    protected Response createResponse(LoginFormsPages page) {
+        Response restResponse = createRestResponse();
+        return restResponse != null
+                ? restResponse
+                : super.createResponse(page);
     }
 
     @Override
@@ -241,25 +250,27 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         return ret;
     }
 
+    private Response createRestResponse() {
+        if (Util.isPasswordGrandType(session)) {
+            if (!(accessCode == null || execution == null || authenticationSession == null)) {
+                return Response.ok(ImmutableMap.of(
+                        "session_state", authenticationSession.getParentSession().getId(),
+                        "access_code", accessCode,
+                        "execution", execution,
+                        "tab_id", authenticationSession.getTabId()), MediaType.APPLICATION_JSON_TYPE).build();
+            }
+
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        return null;
+    }
+
     @Override
     public Response createForm(String form) {
-        Theme theme;
-        try {
-            theme = super.getTheme();
-        } catch (IOException e) {
-            log.error("Failed to create theme", e);
-            return Response.serverError().build();
-        }
-
-        Locale locale = session.getContext().resolveLocale(user);
-        Properties messagesBundle = handleThemeResources(theme, locale);
-
-        handleMessages(locale, messagesBundle);
-
-        UriBuilder uriBuilder = prepareBaseUriBuilder(false);
-        createCommonAttributes(theme, locale, messagesBundle, uriBuilder, null);
-
-        return processTemplate(theme, form, locale);
+        Response restResponse = createRestResponse();
+        return restResponse != null
+                ? restResponse
+                : super.createForm(form);
     }
 
     @Override

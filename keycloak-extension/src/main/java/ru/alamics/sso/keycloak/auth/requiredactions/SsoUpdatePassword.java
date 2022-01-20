@@ -98,7 +98,6 @@ public class SsoUpdatePassword extends UpdatePassword {
 
 //        FIXME: ломает следующий за восстановлением пароля required action
 //        currentAuthenticationSession.setAction(AuthenticationSessionModel.Action.AUTHENTICATE.name());
-
         currentAuthenticationSession.setProtocol(OIDCLoginProtocol.LOGIN_PROTOCOL);
 
 
