@@ -1,4 +1,4 @@
-<#macro defaultTemplate email="" backHref="/" buttonExist=true isVerified=false>
+<#macro defaultTemplate email="" backHref="/" buttonExist=true isVerified=false success = true>
   <div class="container">
     <div class="mr-33">
       <svg class="ok" viewBox="0 0 104 104" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -14,7 +14,11 @@
           </p>
         </#if>
         <#if buttonExist>
-          <a class="btn btn-main text-center btn--thanks" href="${backHref}">Спасибо</a>
+            <#if success>
+                <a class="btn btn-main text-center btn--thanks" href="${backHref}">Спасибо</a>
+            <#else>
+                <a class="btn btn-main text-center btn--thanks" href="${backHref}">На главную</a>
+            </#if>
         </#if>
     </div>
   </div>

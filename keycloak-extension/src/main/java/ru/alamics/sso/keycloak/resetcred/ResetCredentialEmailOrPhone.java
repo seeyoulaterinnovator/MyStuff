@@ -73,7 +73,11 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
             }
         }
 
-        context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT));
+        if (user != null) {
+            context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT));
+        } else {
+            context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT_ERROR));
+        }
 
         authenticationSession.setAuthNote("RESET_TYPE", resetType.name());
         ResetFactory factory = new ResetFactoryImpl(this.session, context);
