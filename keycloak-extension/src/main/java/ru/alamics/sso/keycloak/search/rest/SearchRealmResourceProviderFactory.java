@@ -25,11 +25,11 @@ import org.keycloak.services.resource.RealmResourceProviderFactory;
 
 public class SearchRealmResourceProviderFactory implements RealmResourceProviderFactory {
 
-    public static final String ID = "users-info";
+    private static final String PROVIDER_ID = "users-info";
 
     @Override
     public String getId() {
-        return ID;
+        return PROVIDER_ID;
     }
 
     @Override

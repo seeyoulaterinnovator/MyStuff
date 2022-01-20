@@ -47,7 +47,10 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAccessTokenMapper, OIDCIDTokenMapper, UserInfoTokenMapper {
-    public static final String PROVIDER_ID = "user-post-mapper";
+    private static final String PROVIDER_ID = "user-post-mapper";
+    private static final String DISPLAY_NAME = "User Post";
+    private static final String HELP_TEXT = "Map a built in user property (email, firstName, lastName) to a token claim.";
+
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<ProviderConfigProperty>();
 
     static {
@@ -113,7 +116,7 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
 
     @Override
     public String getDisplayType() {
-        return "User Post";
+        return DISPLAY_NAME;
     }
 
     @Override
@@ -123,7 +126,7 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
 
     @Override
     public String getHelpText() {
-        return "Map a built in user property (email, firstName, lastName) to a token claim.";
+        return HELP_TEXT;
     }
 
     protected void setClaim(IDToken token, ProtocolMapperModel mappingModel, UserSessionModel userSession) {

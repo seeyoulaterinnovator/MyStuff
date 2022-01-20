@@ -5,7 +5,7 @@ import org.keycloak.services.resource.RealmResourceProvider;
 import ru.alamics.sso.keycloak.rest.BaseResourceProviderFactory;
 
 public class CustomSessionsFactory implements BaseResourceProviderFactory {
-    private static final String ID = "sessions";
+    private static final String PROVIDER_ID = "sessions";
 
     @Override
     public RealmResourceProvider create(KeycloakSession session) {
@@ -14,6 +14,6 @@ public class CustomSessionsFactory implements BaseResourceProviderFactory {
 
     @Override
     public String getId() {
-        return ID;
+        return PROVIDER_ID;
     }
 }

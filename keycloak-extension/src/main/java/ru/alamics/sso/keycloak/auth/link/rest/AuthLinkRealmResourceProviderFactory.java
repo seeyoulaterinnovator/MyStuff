@@ -8,11 +8,11 @@ import org.keycloak.services.resource.RealmResourceProviderFactory;
 
 public class AuthLinkRealmResourceProviderFactory implements RealmResourceProviderFactory {
 
-    public static final String ID = "auth-link";
+    private static final String PROVIDER_ID = "auth-link";
 
     @Override
     public String getId() {
-        return ID;
+        return PROVIDER_ID;
     }
 
     @Override

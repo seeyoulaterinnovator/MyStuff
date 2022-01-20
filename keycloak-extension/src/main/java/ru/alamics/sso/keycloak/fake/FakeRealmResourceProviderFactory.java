@@ -8,11 +8,11 @@ import org.keycloak.services.resource.RealmResourceProviderFactory;
 
 public class FakeRealmResourceProviderFactory implements RealmResourceProviderFactory {
 
-    public static final String ID = "fake";
+    private static final String PROVIDER_ID = "fake";
 
     @Override
     public String getId() {
-        return ID;
+        return PROVIDER_ID;
     }
 
     @Override

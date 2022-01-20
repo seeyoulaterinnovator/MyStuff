@@ -13,6 +13,8 @@ import javax.persistence.EntityManager;
 @Slf4j
 public class CustomJpaProviderFactory implements UserProviderFactory {
 
+    private static final String PROVIDER_ID = "customjpa";
+
     @Override
     public UserProvider create(KeycloakSession session) {
         EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
@@ -36,6 +38,6 @@ public class CustomJpaProviderFactory implements UserProviderFactory {
 
     @Override
     public String getId() {
-        return "customjpa";
+        return PROVIDER_ID;
     }
 }

@@ -20,8 +20,12 @@ import java.util.List;
 @Slf4j
 public class PersonalAccountMapper extends AbstractOIDCProtocolMapper implements OIDCAccessTokenMapper, OIDCIDTokenMapper, UserInfoTokenMapper {
 
-    public static final String POST_PERSONAL_ACCOUNT = "post.personal.account";
-    public static final String PROVIDER_ID = "personal-account-mapper";
+    private static final String POST_PERSONAL_ACCOUNT = "post.personal.account";
+
+    private static final String PROVIDER_ID = "personal-account-mapper";
+    private static final String DISPLAY_NAME = "Personal Account";
+    private static final String HELP_TEXT = "Map a personal account list of user post to a token claim.";
+
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<ProviderConfigProperty>();
 
     static {
@@ -84,7 +88,7 @@ public class PersonalAccountMapper extends AbstractOIDCProtocolMapper implements
 
     @Override
     public String getDisplayType() {
-        return "Personal Account";
+        return DISPLAY_NAME;
     }
 
     @Override
@@ -94,7 +98,7 @@ public class PersonalAccountMapper extends AbstractOIDCProtocolMapper implements
 
     @Override
     public String getHelpText() {
-        return "Map a personal account list of user post to a token claim.";
+        return HELP_TEXT;
     }
 
     protected void setClaim(IDToken token, ProtocolMapperModel mappingModel, UserSessionModel userSession) {

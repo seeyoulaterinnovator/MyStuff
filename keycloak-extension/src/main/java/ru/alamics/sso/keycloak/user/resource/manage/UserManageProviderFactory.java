@@ -5,7 +5,7 @@ import org.keycloak.services.resource.RealmResourceProvider;
 import ru.alamics.sso.keycloak.rest.BaseResourceProviderFactory;
 
 public class UserManageProviderFactory implements BaseResourceProviderFactory {
-    private static final String ID = "manage";
+    private static final String PROVIDER_ID = "manage";
 
 
     @Override
@@ -15,6 +15,6 @@ public class UserManageProviderFactory implements BaseResourceProviderFactory {
 
     @Override
     public String getId() {
-        return ID;
+        return PROVIDER_ID;
     }
 }

@@ -23,7 +23,7 @@ public class SsoBlacklistPasswordPolicyProvider implements PasswordPolicyProvide
     @Override
     public PolicyError validate(String username, String password) {
 
-        Object policyConfig = context.getRealm().getPasswordPolicy().getPolicyConfig(SsoBlacklistPasswordPolicyProviderFactory.ID);
+        Object policyConfig = context.getRealm().getPasswordPolicy().getPolicyConfig(SsoBlacklistPasswordPolicyProviderFactory.PROVIDER_ID);
         if (policyConfig == null) {
             return null;
         }

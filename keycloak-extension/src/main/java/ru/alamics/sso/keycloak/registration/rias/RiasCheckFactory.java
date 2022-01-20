@@ -19,6 +19,8 @@ import java.util.List;
 public class RiasCheckFactory implements FormActionFactory {
 
     private static final String PROVIDER_ID = "rias_checker";
+    private static final String DISPLAY_NAME = "Registration Rias checker";
+    private static final String HELP_TEXT = "Get help text";
 
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
@@ -31,7 +33,7 @@ public class RiasCheckFactory implements FormActionFactory {
 
     @Override
     public String getDisplayType() {
-        return "Registration Rias checker";
+        return DISPLAY_NAME;
     }
 
     @Override
@@ -56,7 +58,7 @@ public class RiasCheckFactory implements FormActionFactory {
 
     @Override
     public String getHelpText() {
-        return "Get help text";
+        return HELP_TEXT;
     }
 
     @Override

@@ -6,7 +6,7 @@ import ru.alamics.sso.keycloak.rest.BaseResourceProviderFactory;
 
 public class PersonalAccountProviderFactory implements BaseResourceProviderFactory {
 
-    private static final String ID = "personal-account";
+    private static final String PROVIDER_ID = "personal-account";
 
     @Override
     public RealmResourceProvider create(KeycloakSession session) {
@@ -15,6 +15,6 @@ public class PersonalAccountProviderFactory implements BaseResourceProviderFacto
 
     @Override
     public String getId() {
-        return ID;
+        return PROVIDER_ID;
     }
 }

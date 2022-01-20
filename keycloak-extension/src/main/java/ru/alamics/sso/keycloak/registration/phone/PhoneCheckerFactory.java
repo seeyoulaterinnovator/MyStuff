@@ -19,6 +19,8 @@ import java.util.List;
 public class PhoneCheckerFactory implements FormActionFactory {
 
     private static final String PROVIDER_ID = "phone_checker";
+    private static final String DISPLAY_NAME = "Registration Phone checker";
+    private static final String HELP_TEXT = "Get help text";
 
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
@@ -28,7 +30,7 @@ public class PhoneCheckerFactory implements FormActionFactory {
 
     @Override
     public String getDisplayType() {
-        return "Registration Phone checker";
+        return DISPLAY_NAME;
     }
 
     @Override
@@ -53,7 +55,7 @@ public class PhoneCheckerFactory implements FormActionFactory {
 
     @Override
     public String getHelpText() {
-        return "Get help text";
+        return HELP_TEXT;
     }
 
     @Override

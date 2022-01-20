@@ -32,7 +32,7 @@ public class CustomJpaEntityProvider implements org.keycloak.connections.jpa.ent
 
     @Override
     public String getFactoryId() {
-        return CustomJpaProviderFactory.ID;
+        return CustomJpaProviderFactory.PROVIDER_ID;
     }
 
     @Override

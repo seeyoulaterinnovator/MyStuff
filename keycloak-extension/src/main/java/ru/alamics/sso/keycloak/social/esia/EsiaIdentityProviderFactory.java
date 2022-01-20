@@ -9,11 +9,12 @@ import org.keycloak.models.KeycloakSession;
 @Slf4j
 public class EsiaIdentityProviderFactory extends AbstractIdentityProviderFactory<EsiaIdentityProvider> implements SocialIdentityProviderFactory<EsiaIdentityProvider> {
 
-    public static final String PROVIDER_ID = "esia";
+    private static final String PROVIDER_ID = "esia";
+    private static final String DISPLAY_NAME = "Esia";
 
     @Override
     public String getName() {
-        return "Esia";
+        return DISPLAY_NAME;
     }
 
     @Override

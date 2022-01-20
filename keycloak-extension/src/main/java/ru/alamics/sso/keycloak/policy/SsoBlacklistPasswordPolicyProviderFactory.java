@@ -18,17 +18,16 @@ import java.util.concurrent.ConcurrentMap;
 @Slf4j
 public class SsoBlacklistPasswordPolicyProviderFactory implements PasswordPolicyProviderFactory {
 
-    public static final String ID = "ssoPasswordBlacklist";
+    protected static final String PROVIDER_ID = "ssoPasswordBlacklist";
+    private static final String DISPLAY_NAME = "Sso Password Blacklist";
 
-    public static final String SYSTEM_PROPERTY = "keycloak.password.blacklists.path";
+    private static final String SYSTEM_PROPERTY = "keycloak.password.blacklists.path";
+    private static final String BLACKLISTS_PATH_PROPERTY = "blacklistsPath";
 
-    public static final String BLACKLISTS_PATH_PROPERTY = "blacklistsPath";
+    private static final String JBOSS_SERVER_DATA_DIR = "jboss.server.data.dir";
+    private static final String PASSWORD_BLACKLISTS_FOLDER = "password-blacklists/";
 
-    public static final String JBOSS_SERVER_DATA_DIR = "jboss.server.data.dir";
-
-    public static final String PASSWORD_BLACKLISTS_FOLDER = "password-blacklists/";
-
-    private ConcurrentMap<String, SsoFileBasedPasswordBlacklist> blacklistRegistry = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, SsoFileBasedPasswordBlacklist> blacklistRegistry = new ConcurrentHashMap<>();
 
     private volatile Path blacklistsBasePath;
 
@@ -93,7 +92,7 @@ public class SsoBlacklistPasswordPolicyProviderFactory implements PasswordPolicy
 
     @Override
     public String getDisplayName() {
-        return "Sso Password Blacklist";
+        return DISPLAY_NAME;
     }
 
     @Override
@@ -113,7 +112,7 @@ public class SsoBlacklistPasswordPolicyProviderFactory implements PasswordPolicy
 
     @Override
     public String getId() {
-        return ID;
+        return PROVIDER_ID;
     }
 
     public BlacklistPasswordPolicyProviderFactory.PasswordBlacklist resolvePasswordBlacklist(String blacklistName) {

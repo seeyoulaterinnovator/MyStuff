@@ -36,7 +36,11 @@ public class UserModelExtender implements FormAction, FormActionFactory {
     private static final Logger log = Logger.getLogger(UserModelExtender.class);
 
     private static final String TBAPI_CHECK_DATA = "tbapi_check_data";
+
     private static final String PROVIDER_ID = "registration-user-extension";
+    private static final String DISPLAY_NAME = "Registration user extension";
+    private static final String HELP_TEXT = "Common help text";
+
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
             AuthenticationExecutionModel.Requirement.DISABLED
@@ -153,7 +157,7 @@ public class UserModelExtender implements FormAction, FormActionFactory {
 
     @Override
     public String getDisplayType() {
-        return "Registration user extension";
+        return DISPLAY_NAME;
     }
 
     @Override
@@ -178,7 +182,7 @@ public class UserModelExtender implements FormAction, FormActionFactory {
 
     @Override
     public String getHelpText() {
-        return "Common help text";
+        return HELP_TEXT;
     }
 
     @Override

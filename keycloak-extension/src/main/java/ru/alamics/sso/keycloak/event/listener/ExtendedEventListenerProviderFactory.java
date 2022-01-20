@@ -7,6 +7,8 @@ import org.keycloak.models.KeycloakSessionFactory;
 
 public class ExtendedEventListenerProviderFactory implements EventListenerProviderFactory {
 
+    private static final String PROVIDER_ID = "ExtendedListener";
+
     @Override
     public ExtendedEventListenerProvider create(KeycloakSession session) {
         return new ExtendedEventListenerProvider(session);
@@ -28,6 +30,6 @@ public class ExtendedEventListenerProviderFactory implements EventListenerProvid
 
     @Override
     public String getId() {
-        return "ExtendedListener";
+        return PROVIDER_ID;
     }
 }

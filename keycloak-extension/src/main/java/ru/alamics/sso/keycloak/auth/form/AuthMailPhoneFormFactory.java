@@ -19,12 +19,14 @@ import java.util.List;
 
 public class AuthMailPhoneFormFactory implements AuthenticatorFactory, DisplayTypeAuthenticatorFactory {
 
-    public static final String PROVIDER_ID = "auth-mail-phone-pass-form";
-    public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
+    private static final String PROVIDER_ID = "auth-mail-phone-pass-form";
+    private static final String DISPLAY_NAME = "(Phone or Mail) and Password Form";
+    private static final String HELP_TEXT = "Проверка логина и пароля для формы входа. Логин может быть телефоном или Email";
+    private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED
     };
 
-    public static AuthMailPhoneForm SINGLETON = null;
+    private static AuthMailPhoneForm SINGLETON = null;
 
     @Override
     public Authenticator create(KeycloakSession keycloakSession) {
@@ -42,7 +44,7 @@ public class AuthMailPhoneFormFactory implements AuthenticatorFactory, DisplayTy
 
     @Override
     public String getDisplayType() {
-        return "(Phone or Mail) and Password Form";
+        return DISPLAY_NAME;
     }
 
     @Override
@@ -74,7 +76,7 @@ public class AuthMailPhoneFormFactory implements AuthenticatorFactory, DisplayTy
 
     @Override
     public String getHelpText() {
-        return "Проверка логина и пароля для формы входа. Логин может быть телефоном или Email";
+        return HELP_TEXT;
     }
 
     @Override

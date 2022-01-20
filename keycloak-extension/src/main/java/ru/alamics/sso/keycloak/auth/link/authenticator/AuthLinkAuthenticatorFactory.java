@@ -14,7 +14,9 @@ import java.util.List;
 @Deprecated
 public class AuthLinkAuthenticatorFactory implements AuthenticatorFactory {
 
-    public static final String ID = "auth-link-authenticator";
+    private static final String PROVIDER_ID = "auth-link-authenticator";
+    private static final String DISPLAY_NAME = "Auth Link Authenticator";
+    private static final String HELP_TEXT = "Auth Link Authenticator";
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.ALTERNATIVE,
             AuthenticationExecutionModel.Requirement.DISABLED
@@ -22,7 +24,7 @@ public class AuthLinkAuthenticatorFactory implements AuthenticatorFactory {
 
     @Override
     public String getDisplayType() {
-        return "Auth Link Authenticator";
+        return DISPLAY_NAME;
     }
 
     @Override
@@ -47,7 +49,7 @@ public class AuthLinkAuthenticatorFactory implements AuthenticatorFactory {
 
     @Override
     public String getHelpText() {
-        return "Auth Link Authenticator";
+        return HELP_TEXT;
     }
 
     @Override
@@ -69,7 +71,7 @@ public class AuthLinkAuthenticatorFactory implements AuthenticatorFactory {
 
     @Override
     public String getId() {
-        return ID;
+        return PROVIDER_ID;
     }
 
     public List<ProviderConfigProperty> getConfigProperties() {

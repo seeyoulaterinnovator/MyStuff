@@ -14,7 +14,9 @@ import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 
 public class PostLoginSocialVoid implements Authenticator, AuthenticatorFactory {
 
-    public static final String PROVIDER_ID = "post-login-social-void";
+    private static final String PROVIDER_ID = "post-login-social-void";
+    private static final String DISPLAY_NAME = "Post Login Social Void";
+    private static final String HELP_TEXT = "";
 
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
@@ -23,7 +25,7 @@ public class PostLoginSocialVoid implements Authenticator, AuthenticatorFactory 
 
     @Override
     public String getDisplayType() {
-        return "Post Login Social Void";
+        return DISPLAY_NAME;
     }
 
     @Override
@@ -48,7 +50,7 @@ public class PostLoginSocialVoid implements Authenticator, AuthenticatorFactory 
 
     @Override
     public String getHelpText() {
-        return "";
+        return HELP_TEXT;
     }
 
     @Override

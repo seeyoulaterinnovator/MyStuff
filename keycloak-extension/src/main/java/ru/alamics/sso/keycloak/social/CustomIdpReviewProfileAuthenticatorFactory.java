@@ -12,6 +12,7 @@ import java.util.List;
 
 public class CustomIdpReviewProfileAuthenticatorFactory extends IdpReviewProfileAuthenticatorFactory {
     private static final String PROVIDER_ID = "custom-idp-review-profile";
+    private static final String DISPLAY_NAME = "Review Profile (custom)";
 
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<ProviderConfigProperty>();
 
@@ -53,6 +54,6 @@ public class CustomIdpReviewProfileAuthenticatorFactory extends IdpReviewProfile
 
     @Override
     public String getDisplayType() {
-        return "Review Profile (custom)";
+        return DISPLAY_NAME;
     }
 }

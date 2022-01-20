@@ -8,11 +8,12 @@ import org.keycloak.models.KeycloakSession;
 
 public class VkIdentityProviderFactory extends AbstractIdentityProviderFactory<VkIdentityProvider> implements SocialIdentityProviderFactory<VkIdentityProvider> {
 
-    public static final String PROVIDER_ID = "vkontakte";
+    protected static final String PROVIDER_ID = "vkontakte";
+    private static final String DISPLAY_NAME = "VK";
 
     @Override
     public String getName() {
-        return "VK";
+        return DISPLAY_NAME;
     }
 
     @Override
