@@ -56,24 +56,32 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
         String username = authenticationSession.getAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME);
 
-        //Если пользак есть в кейклоке, то автоматом по мылу он уже будет
-        if (user == null) {
-            //Если ввели вместо мыла телефон
-            UserEntity userFind = findUserByConvertUsernameToPhone(context.getRealm(), username);
+        UserEntity userFind = null;
 
-            if (userFind == null && checkRias(context)) {
-                return;
-            }
+        RealmModel realm = context.getRealm();
 
-            if (userFind != null) {
+        if (user == null && realm.isLoginWithEmailAllowed() && username.contains("@")) {
+            user = context.getSession().users().getUserByEmail(username, realm);
+        }
+
+        if (user == null && username.startsWith("+7")) {
+            userFind = findUserByConvertUsernameToPhone(realm, username);
+            if (userFind != null && userFind.isEnabled()) {
                 user = context.getSession().users().getUserById(userFind.getId(), context.getSession().realms().getRealm(userFind.getRealmId()));
                 username = userFind.getUsername();
                 authenticationSession.setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, userFind.getEmail());
                 context.getHttpRequest().getDecodedFormParameters().replace("username", Collections.singletonList(userFind.getEmail()));
             }
         }
+        if (user == null && userFind == null && checkRias(context)) {
+            return;
+        }
 
-        context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT));
+        if (userFind != null && !userFind.isEnabled() || user != null && !user.isEnabled()) {
+            context.forkWithErrorMessage(new FormMessage(Messages.ACCOUNT_DISABLED));
+        } else {
+            context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT));
+        }
 
         authenticationSession.setAuthNote("RESET_TYPE", resetType.name());
         ResetFactory factory = new ResetFactoryImpl(this.session, context);
