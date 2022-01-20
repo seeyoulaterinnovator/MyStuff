@@ -73,6 +73,8 @@ public class ViberSendServiceImpl implements ViberSendService {
 
         URI uri = smsConfig.getUrl();
 
+        log.info(String.format("Api %s, Sending VIBER code to number: %s", uri.getHost(), phone));
+
         try {
             ResteasyWebTarget webTarget = client.target(uri)
                     .queryParams(getConfigForQuery())

@@ -75,6 +75,8 @@ public class SmsSendServiceImpl implements SmsSendService {
 
         URI uri = smsConfig.getUrl();
 
+        log.info(String.format("Api %s, Sending SMS code to number: %s", uri.getHost(), phone));
+
         // TODO https://stackoverflow.com/questions/53760939/processingexception-resteasy003145-unable-to-find-a-messagebodyreader-of-conte?noredirect=1&lq=1
         ClientInvocationBuilder builder = (ClientInvocationBuilder) client.register(StringTextStar.class)
                 .target(uri)
