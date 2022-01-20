@@ -210,7 +210,6 @@ public class UserMapper {
         ImportResponse importResponse = new ImportResponse();
         importResponse.getCreatedUsers().set(importUserReport.getCountCreatedUsers());
         importResponse.getCountClones().set(importUserReport.getCountClones());
-        // TODO ?
         for (ImportUsersDataModel data : dataList) {
             importResponse.addCreatedUserIds(data.getEmail(), data.getUserId());
 

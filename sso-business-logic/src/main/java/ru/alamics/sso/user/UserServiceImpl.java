@@ -29,16 +29,14 @@ import java.util.List;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
-    protected KeycloakSession session;
     private final AdminAuth auth;
     private final RealmModel realm;
-    // TODO rename these three
     private final ImportUsersReportService importUsersReportService;
     private final ImportReportService importReportService;
     private final ImportService importService;
-
     private final ExportWorker exportWorker;
     private final UserExtService userExtService;
+    protected KeycloakSession session;
 
     public UserServiceImpl(KeycloakSession session, AdminAuth auth) {
         this.auth = auth;

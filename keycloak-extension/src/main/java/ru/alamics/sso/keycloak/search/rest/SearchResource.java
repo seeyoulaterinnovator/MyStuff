@@ -31,9 +31,9 @@ import java.util.stream.Collectors;
 public class SearchResource {
 
     public static final String VIEW_ROLE_PATTERN = "view-%s-realm";
-    protected KeycloakSession session;
     private final UserFindService userFindService;
     private final AdminAuth adminAuth;
+    protected KeycloakSession session;
 
     public SearchResource(KeycloakSession session, AdminAuth adminAuth) {
         this.session = session;
@@ -51,7 +51,6 @@ public class SearchResource {
         return String.format(VIEW_ROLE_PATTERN, realm.getName());
     }
 
-    // TODO может быть работать через кэш ?
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
@@ -71,7 +70,6 @@ public class SearchResource {
                 .build();
     }
 
-    // TODO 2 раза ходит в бд за списком и за кол-вом
     @GET
     @Path("/search")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")

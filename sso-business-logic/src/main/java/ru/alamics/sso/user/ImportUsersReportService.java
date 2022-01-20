@@ -24,7 +24,7 @@ public class ImportUsersReportService {
         importUsersReport.setStatus(ImportUsersReportStatus.UPLOADING);
         String reportId = importReportService.saveImportUsersReport(importUsersReport);
         importUsersReport.setId(reportId);
-        importReportService.saveImportUsersData(reportId, dataList); // TODO really need?
+        importReportService.saveImportUsersData(reportId, dataList);
         return reportId;
     }
 
@@ -37,7 +37,7 @@ public class ImportUsersReportService {
 
         String reportId = importReportService.saveImportUsersReport(importUsersReport);
         importUsersReport.setId(reportId);
-        importReportService.saveImportUsersData(reportId, dataList); // TODO really need?
+        importReportService.saveImportUsersData(reportId, dataList);
 
         return importUsersReport;
     }

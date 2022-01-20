@@ -72,7 +72,6 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
         String valuesV = Util.encodeUTF8(param + "," + timestamp + "," + properties.getProperty(CLIENT_NAME) + "," + secretHash);
 
 
-        // TODO Entity<RiasData> => response.close() ?
         RiasData response;
 
         try {

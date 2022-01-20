@@ -13,18 +13,16 @@ public class CtlImpl implements FileModel {
 
     public static final String UTF8_BOM = "\uFEFF";
     private static final int COUNT_ROW_INDENT = 2;
+    private final String ext;
     private List<String[]> rows;
     private CSVReader csvReader;
     private CSVWriter csvWriter;
     private ByteArrayOutputStream byteArrayOutputStream;
 
-    private final String ext;
-
     public CtlImpl(String fileExtension, InputStream inputStream) throws IOException {
         CSVParser parser = new CSVParserBuilder().withSeparator(';').withIgnoreLeadingWhiteSpace(true).withIgnoreQuotations(true).build();
         csvReader = new CSVReaderBuilder(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).withCSVParser(parser).build();
 
-        // TODO ???
         this.rows = csvReader.readAll();
         //rows.removeAll(rows.stream().limit(COUNT_ROW_INDENT).skip(1).collect(Collectors.toList()));
 

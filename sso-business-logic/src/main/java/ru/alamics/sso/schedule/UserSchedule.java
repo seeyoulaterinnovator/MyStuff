@@ -250,9 +250,6 @@ public class UserSchedule {
         final String subject = "Истек срок жизни пароля";
         final String template = "password-expires.ftl";
 
-        // TODO тут неплохо было бы ставить ссылку сразу на окно восстановления пароля через new ResetCredentialsActionToken
-        // TODO но нужна KeycloakSession или реализовывать сериализацию токена
-
         Map<String, Object> body = new HashMap<>();
         body.put("link", link);
         String bodyHtml = String.format(settingsService.getSettingsStringValue(SettingConstants.SCHEDULER_PASSWORD_EXPIRES_BODY, realmId), link);

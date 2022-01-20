@@ -34,7 +34,6 @@ public class MigrationImportFormat implements ImportFormat {
     }
 
     public void checkStructure(FileModel file) throws FileServiceException {
-        // TODO
     }
 
     public List<ImportUsersDataModel> getDataList(FileModel file) {

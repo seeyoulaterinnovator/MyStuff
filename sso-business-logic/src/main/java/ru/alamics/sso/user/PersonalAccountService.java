@@ -36,7 +36,6 @@ public class PersonalAccountService {
             throw new NotFoundException("Post not found");
     }
 
-    // TODO cache
     public PersonalAccountPostModel getAccountModel(final String postId) throws NotFoundException {
 
         checkPost(postId);

@@ -35,7 +35,6 @@ public class AutoLockNotificationRepository {
                 .setMaxResults(100)
                 .getResultList();
 
-        // TODO set SENT only after successful send
         ret.forEach(lock -> {
             lock.setStatus(NotificationStatus.SENT);
             lock.setSendedAt(LocalDateTime.now());

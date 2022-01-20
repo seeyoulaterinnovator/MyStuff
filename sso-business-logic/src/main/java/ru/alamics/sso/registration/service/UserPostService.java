@@ -137,7 +137,6 @@ public class UserPostService {
         if (userPost == null) {
             throw new NotFoundException("Должность не найдена");
         }
-        // TODO практически константа
         ExternalSystemRoleEntity externalSystemRole = userPostRepository.findExternalSystemRole(externalSystemRoleRequest.getSystemRoleId());
         if (externalSystemRole == null) {
             throw new NotFoundException("Доступ в систему не найден");

@@ -131,7 +131,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
 
         String city = context.getHttpRequest().getDecodedFormParameters().getFirst(FormConstants.FIELD_CITY);
         if (Validation.isBlank(city)) {
-            city = "yar"; // TODO с фронта не приходит город
+            city = "yar";
         }
 
         location += "?citydomain=" + city;

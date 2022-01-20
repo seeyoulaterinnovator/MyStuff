@@ -39,7 +39,7 @@ import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 @LocalBean
 public class MigrationService {
 
-    private final static Long DEFAULT_ROLE_ID = 1L;   //Соответствует роли LPR // TODO но это не точно
+    private final static Long DEFAULT_ROLE_ID = 1L;   //Соответствует роли LPR, но это не точно
     private final static String DEFAULT_ROLE_STR = "LPR";
 
     @EJB

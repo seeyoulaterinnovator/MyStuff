@@ -103,7 +103,7 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
             uriBuilder.queryParam(OAuth2Constants.ACR_VALUES, acr);
         }
         String forwardParameterConfig = getConfig().getForwardParameters() != null ? getConfig().getForwardParameters() : "";
-        List<String> forwardParameters = Arrays.asList(forwardParameterConfig.split("\\s*,\\s*"));
+        String[] forwardParameters = forwardParameterConfig.split("\\s*,\\s*");
         for (String forwardParameter : forwardParameters) {
             String name = AuthorizationEndpoint.LOGIN_SESSION_NOTE_ADDITIONAL_REQ_PARAMS_PREFIX + forwardParameter.trim();
             String parameter = request.getAuthenticationSession().getClientNote(name);
@@ -114,7 +114,6 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
 
         uuidToState.put(uuid.toString(), request.getState().getEncoded());
         /*
-            TODO после перехода на новый Keycloak
             AuthenticationSessionModel asm = session.getContext().getAuthenticationSession();
             asm.setAuthNote(uuid.toString(), request.getState().getEncoded());
         */
@@ -245,7 +244,7 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
                     federatedIdentity.setIdp(EsiaIdentityProvider.this);
                     federatedIdentity.setCode(uuidToState.remove(state));
 
-                    /*  TODO после перехода на новый Keycloak
+                    /*
                         AuthenticationSessionModel asm = session.getContext().getAuthenticationSession();
                         federatedIdentity.setCode(asm.getAuthNote(state));
                         asm.removeAuthNote(state);

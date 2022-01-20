@@ -272,7 +272,7 @@ public class CustomUserResource {
         log.info("Download import users template");
         try {
             if (type.equalsIgnoreCase("xlsx")) {
-                byte[] bytes = IOUtils.toByteArray(CustomUserResource.class.getResourceAsStream("/template/template.xlsx")); // TODO check. replaced from .getResourceAsStream(<>).readAllBytes();
+                byte[] bytes = IOUtils.toByteArray(CustomUserResource.class.getResourceAsStream("/template/template.xlsx"));
                 Response.ResponseBuilder response = Response.ok(bytes);
                 response.header("Content-Disposition", "attachment; filename=\"template.xlsx" + "\"");
                 response.header("filename", "template.xlsx");
@@ -280,7 +280,7 @@ public class CustomUserResource {
                 return response.build();
             }
 
-            byte[] bytes = IOUtils.toByteArray(CustomUserResource.class.getResourceAsStream("/template/template.csv")); // TODO check. replaced
+            byte[] bytes = IOUtils.toByteArray(CustomUserResource.class.getResourceAsStream("/template/template.csv"));
             Response.ResponseBuilder response = Response.ok(bytes);
             response.header("Content-Disposition", "attachment; filename=\"template.csv" + "\"");
             response.header("filename", "template.csv");

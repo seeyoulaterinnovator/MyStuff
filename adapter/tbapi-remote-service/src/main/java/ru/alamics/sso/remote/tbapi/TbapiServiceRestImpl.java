@@ -67,7 +67,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
 
         TbapiResponse responseData = null;
         try (Response response = target
-                .register(ResteasyJackson2Provider.class) // TODO
+                .register(ResteasyJackson2Provider.class)
                 .register(StringTextStar.class)
                 .request()
                 .accept(MediaType.APPLICATION_JSON)

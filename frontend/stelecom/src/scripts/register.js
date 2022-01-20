@@ -32,8 +32,6 @@ export default (function() {
     .querySelectorAll('.field__open')
     .forEach(eye => eye.addEventListener('click', setVisiblePass(eye), false));
 
-  // @todo
-
   // Wrong email and/or phone number
   let wrongEmail = document.querySelector('.bad_email');
   let wrongPhone = document.querySelector('.bad_phone');
