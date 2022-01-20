@@ -6,6 +6,7 @@ import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.AuthenticatorFactory;
 import org.keycloak.models.*;
 import org.keycloak.provider.ProviderConfigProperty;
+import ru.alamics.sso.util.Util;
 
 import java.util.List;
 
@@ -84,7 +85,7 @@ public class PostLoginSocialVoid implements Authenticator, AuthenticatorFactory 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
 
-        context.getAuthenticationSession().setAuthNote(AUTH_FORM_SUCCESS, "1");
+        context.getAuthenticationSession().setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
         context.success();
     }
 

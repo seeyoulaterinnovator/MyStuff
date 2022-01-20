@@ -2,9 +2,7 @@ package ru.alamics.sso.schedule;
 
 
 import lombok.extern.slf4j.Slf4j;
-import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
 import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
-import ru.alamics.sso.jpa.repository.*;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.user.ImportReportService;
 import ru.alamics.sso.user.ImportService;
@@ -13,12 +11,13 @@ import ru.alamics.sso.user.model.RepeatNextTimeException;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.ejb.*;
-import javax.ejb.Timer;
+import javax.ejb.DependsOn;
+import javax.ejb.EJB;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
-import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Startup
@@ -42,6 +41,16 @@ public class ImportSchedule {
 
     @Resource
     private ManagedScheduledExecutorService scheduler;
+
+    public static void checkTimeout(Long scheduleStart) throws RepeatNextTimeException {
+
+        if (scheduleStart == null)
+            return;
+
+        long now = System.currentTimeMillis();
+        if (now - scheduleStart > MAX_TIMEOUT_MILLI)
+            throw new RepeatNextTimeException();
+    }
 
     @PostConstruct
     private void init() {
@@ -71,15 +80,5 @@ public class ImportSchedule {
             importService.createImportUsers(reportModel, null, scheduleStart, null, null);
             importReportService.updateReport(reportModel);
         }
-    }
-
-    public static void checkTimeout(Long scheduleStart) throws RepeatNextTimeException {
-
-        if (scheduleStart == null)
-            return;
-
-        long now = System.currentTimeMillis();
-        if (now - scheduleStart > MAX_TIMEOUT_MILLI)
-            throw new RepeatNextTimeException();
     }
 }

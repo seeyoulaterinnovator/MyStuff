@@ -2,14 +2,16 @@ package ru.alamics.sso.jpa.repository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
-import org.hibernate.annotations.QueryHints;
 import ru.alamics.sso.jpa.entity.status.CheckTableEntity;
 
 import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
-import javax.persistence.*;
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.OptimisticLockException;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 
@@ -27,17 +29,17 @@ public class StatusRepository {
             log.info("Checking nodeName " + nodeName);
             try {
                 Object name = em
-                    .createNativeQuery("SELECT name FROM CHECK_TABLE WHERE name = :nodeName ")
-                    .setParameter("nodeName", nodeName)
-                    .getSingleResult();
+                        .createNativeQuery("SELECT name FROM CHECK_TABLE WHERE name = :nodeName ")
+                        .setParameter("nodeName", nodeName)
+                        .getSingleResult();
 
             } catch (NoResultException ignored) {
 
                 log.info("Inserting nodeName " + nodeName);
                 em
-                    .createNativeQuery("INSERT INTO CHECK_TABLE (name, updated) VALUES (:nodeName , CURRENT_TIMESTAMP());")
-                    .setParameter("nodeName", nodeName)
-                    .executeUpdate();
+                        .createNativeQuery("INSERT INTO CHECK_TABLE (name, updated) VALUES (:nodeName , CURRENT_TIMESTAMP());")
+                        .setParameter("nodeName", nodeName)
+                        .executeUpdate();
             }
 
         } catch (Exception e) {

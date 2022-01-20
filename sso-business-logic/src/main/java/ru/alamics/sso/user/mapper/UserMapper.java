@@ -1,6 +1,5 @@
 package ru.alamics.sso.user.mapper;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.keycloak.authentication.FormContext;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;

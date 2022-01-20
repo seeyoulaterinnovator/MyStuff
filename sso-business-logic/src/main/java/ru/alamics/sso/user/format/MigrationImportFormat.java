@@ -4,38 +4,11 @@ import ru.alamics.sso.user.FileServiceException;
 import ru.alamics.sso.user.filetype.FileModel;
 import ru.alamics.sso.user.model.ImportUsersDataModel;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 public class MigrationImportFormat implements ImportFormat {
 
-
-    public void checkStructure(FileModel file) throws FileServiceException
-    {
-        // TODO
-    }
-
-    public List<ImportUsersDataModel> getDataList(FileModel file) {
-
-        // чищу весь хэдер
-        /*
-        for (Iterator<String[]> it = file.getRows().iterator(); it.hasNext();) {
-            String[] line = it.next();
-
-            if (line == null || line.length == 0)
-                continue;
-
-            if (line[0].equalsIgnoreCase("BEGINDATA")) {
-                it.remove();
-                break;
-            }
-            it.remove();
-        }
-        */
-
-        return toUserRequestList(file.getRows());
-    }
 
     private static ImportUsersDataModel toUserImport(String[] row) {
 
@@ -58,5 +31,30 @@ public class MigrationImportFormat implements ImportFormat {
         List<ImportUsersDataModel> userImports = new LinkedList<>();
         rows.forEach(o -> userImports.add(toUserImport(o)));
         return userImports;
+    }
+
+    public void checkStructure(FileModel file) throws FileServiceException {
+        // TODO
+    }
+
+    public List<ImportUsersDataModel> getDataList(FileModel file) {
+
+        // чищу весь хэдер
+        /*
+        for (Iterator<String[]> it = file.getRows().iterator(); it.hasNext();) {
+            String[] line = it.next();
+
+            if (line == null || line.length == 0)
+                continue;
+
+            if (line[0].equalsIgnoreCase("BEGINDATA")) {
+                it.remove();
+                break;
+            }
+            it.remove();
+        }
+        */
+
+        return toUserRequestList(file.getRows());
     }
 }

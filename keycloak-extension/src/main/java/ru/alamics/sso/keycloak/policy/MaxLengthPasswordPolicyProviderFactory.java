@@ -7,6 +7,7 @@ import org.keycloak.policy.PasswordPolicyProvider;
 import org.keycloak.policy.PasswordPolicyProviderFactory;
 
 public class MaxLengthPasswordPolicyProviderFactory implements PasswordPolicyProviderFactory {
+    public static final String MAX_PASSWORD_LENGTH = "16";
     protected static final String ID = "max-length";
 
     @Override
@@ -21,7 +22,7 @@ public class MaxLengthPasswordPolicyProviderFactory implements PasswordPolicyPro
 
     @Override
     public String getDefaultConfigValue() {
-        return "16";
+        return MAX_PASSWORD_LENGTH;
     }
 
     @Override

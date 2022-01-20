@@ -6,7 +6,6 @@ import ru.alamics.sso.registration.phone.port.ViberSendService;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Slf4j

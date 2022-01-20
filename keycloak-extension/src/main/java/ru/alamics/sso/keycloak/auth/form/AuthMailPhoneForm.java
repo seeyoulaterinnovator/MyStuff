@@ -45,7 +45,7 @@ public class AuthMailPhoneForm extends AbstractUsernameFormAuthenticator impleme
         if (!validateUserAndPassword(context, formData)) {
             return;
         }
-        context.getAuthenticationSession().setAuthNote(AUTH_FORM_SUCCESS, "1");
+        context.getAuthenticationSession().setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
         context.success();
     }
 

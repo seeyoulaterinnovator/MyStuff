@@ -1,7 +1,6 @@
 package ru.alamics.sso.user;
 
 import javassist.NotFoundException;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.KeycloakSession;
@@ -25,25 +24,21 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 @Slf4j
 public class UserServiceImpl implements UserService {
 
     protected KeycloakSession session;
-    private AdminAuth auth;
-    private RealmModel realm;
+    private final AdminAuth auth;
+    private final RealmModel realm;
     // TODO rename these three
-    private ImportUsersReportService importUsersReportService;
-    private ImportReportService importReportService;
-    private ImportService importService;
+    private final ImportUsersReportService importUsersReportService;
+    private final ImportReportService importReportService;
+    private final ImportService importService;
 
-    private ExportWorker exportWorker;
-    private UserExtService userExtService;
+    private final ExportWorker exportWorker;
+    private final UserExtService userExtService;
 
     public UserServiceImpl(KeycloakSession session, AdminAuth auth) {
         this.auth = auth;

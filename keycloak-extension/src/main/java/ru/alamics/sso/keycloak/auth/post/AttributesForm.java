@@ -18,6 +18,7 @@ import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
+import ru.alamics.sso.util.Util;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -30,16 +31,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.keycloak.services.managers.AuthenticationManager.END_AFTER_REQUIRED_ACTIONS;
 import static ru.alamics.sso.registration.model.UserConstants.*;
 
 @Slf4j
 public class AttributesForm implements Authenticator {
     private static final String FORM = "attributes.ftl";
     private final UserRole roleService;
-    private CachedUserPostFacade cachedUserPostFacade;
+    private final CachedUserPostFacade cachedUserPostFacade;
 
-    private SettingsService settingsService;
+    private final SettingsService settingsService;
 
     public AttributesForm(UserRole roleService) {
         this.roleService = roleService;
@@ -64,7 +64,7 @@ public class AttributesForm implements Authenticator {
         String frame = uriInfo.getQueryParameters().getFirst(I_FRAME);
         Map<String, String> redirectUriQueryParams = extractQueryParamsFromRedirectUri(queryParams.getFirst(REDIRECT_URI));
         String redirectIframe = redirectUriQueryParams.get(I_FRAME);
-        boolean isAuth = "1".equals(authSession.getAuthNote(AUTH_FORM_SUCCESS));//it`s magick
+        boolean isAuth = Util.TRUE_STR.equals(authSession.getAuthNote(AUTH_FORM_SUCCESS));//it`s magick
 
         if (frame != null || isAuth || redirectIframe != null) {
             UserModel user = context.getUser();
@@ -122,7 +122,7 @@ public class AttributesForm implements Authenticator {
         UserSessionModel userSession = session.sessions().getUserSession(realm, context.getAuthenticationSession().getParentSession().getId());
         ClientConnection clientConnection = session.getContext().getConnection();
         AuthenticationManager.backchannelLogout(session, realm, userSession, session.getContext().getUri(), clientConnection, session.getContext().getRequestHeaders(), true);
-        authSession.setAuthNote(AUTH_FORM_SUCCESS, "0");
+        authSession.setAuthNote(AUTH_FORM_SUCCESS, Util.FALSE_STR);
         context.success();
     }
 

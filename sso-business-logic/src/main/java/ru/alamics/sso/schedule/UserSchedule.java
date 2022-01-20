@@ -19,6 +19,7 @@ import ru.alamics.sso.emailer.EmailSender;
 import ru.alamics.sso.jpa.entity.AutoLockNotification;
 import ru.alamics.sso.jpa.entity.common.NotificationType;
 import ru.alamics.sso.jpa.repository.*;
+import ru.alamics.sso.keycloak.GeneralRealm;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.settings.SettingConstants;
@@ -89,7 +90,7 @@ public class UserSchedule {
     }
 
     private long getTime() {
-        long intervalDuration = settingsService.getSettingsValue(SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY, "master") * 1000;
+        long intervalDuration = settingsService.getSettingsValue(SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY, GeneralRealm.MASTER) * 1000;
 
         if (intervalDuration == 0) {
             intervalDuration = DEFAULT_INTERVAL_DURATION;
@@ -116,7 +117,7 @@ public class UserSchedule {
         log.debug("start:{}", DEBUG_STR);
         long absenceTimeNotification = settingsService.getSettingsValue(SettingConstants.ABSENCE_NOTIFICATION_DAYS, realm);
         if (absenceTimeNotification > -1) {
-            userHistoryLoginRepository.findInactiveUsers(absenceTimeNotification, realm);
+            userHistoryLoginRepositoryиьр.findInactiveUsers(absenceTimeNotification, realm);
         }
         log.debug("stop:{}", DEBUG_STR);
     }

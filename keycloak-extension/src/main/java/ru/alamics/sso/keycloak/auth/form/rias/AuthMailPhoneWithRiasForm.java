@@ -50,7 +50,7 @@ public class AuthMailPhoneWithRiasForm extends AbstractUsernameFormAuthenticator
     private final UserFindService userFindService;
 
     private final ApplicationProperties properties;
-    private SettingsService settingsService;
+    private final SettingsService settingsService;
 
     public AuthMailPhoneWithRiasForm(RiasService riasService, UserFindService userFindService) {
         this.riasService = riasService;
@@ -71,7 +71,7 @@ public class AuthMailPhoneWithRiasForm extends AbstractUsernameFormAuthenticator
         if (!validateForm(context, formData)) {
             return;
         }
-        context.getAuthenticationSession().setAuthNote(AUTH_FORM_SUCCESS, "1");
+        context.getAuthenticationSession().setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
         context.success();
     }
 

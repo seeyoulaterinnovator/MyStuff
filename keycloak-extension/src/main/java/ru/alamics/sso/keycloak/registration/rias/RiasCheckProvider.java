@@ -15,6 +15,7 @@ import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.rias.RiasService;
+import ru.alamics.sso.util.Util;
 
 import javax.ws.rs.core.MultivaluedMap;
 import java.util.ArrayList;
@@ -72,7 +73,7 @@ public class RiasCheckProvider implements FormAction {
         if (!errors.isEmpty()) {
             context.error(eventError);
             context.validationError(formData, errors);
-            context.getAuthenticationSession().setAuthNote(RIAS_REJECTED, "1");
+            context.getAuthenticationSession().setAuthNote(RIAS_REJECTED, Util.TRUE_STR);
         } else {
             context.success();
         }
