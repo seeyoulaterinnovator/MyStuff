@@ -136,7 +136,7 @@ public class CitiesResource {
         String url = settingsService.getSettingsStringValue(SettingConstants.URL_DADATA_REQUEST_LOCATION_IP, GeneralRealm.MASTER);
         String token = settingsService.getSettingsStringValue(SettingConstants.TOKEN_DADATA, GeneralRealm.MASTER);
 
-        log.debug(String.format("Sending request with address %s to dadata", ipAddress));
+        log.info(String.format("Sending request with address %s to dadata", ipAddress));
 
         CityDadataModel cityDadataModel = client.target(url)
                 .queryParam("ip", ipAddress)
@@ -148,11 +148,16 @@ public class CitiesResource {
 
         String title = null;
         if (cityDadataModel != null) {
-            title = cityDadataModel.getLocation().getData().getCity();
-            String regionIsoCode = cityDadataModel.getLocation().getData().getRegionIsoCode();
+            String regionIsoCode = null;
+            if (cityDadataModel.getLocation() != null) {
+                if (cityDadataModel.getLocation().getData() != null) {
+                    title = cityDadataModel.getLocation().getData().getCity();
+                    regionIsoCode = cityDadataModel.getLocation().getData().getRegionIsoCode();
+                }
+            }
             CityMigration city = getCityMigrationByCity(title);
 
-            if (city == null) {
+            if (city == null && regionIsoCode != null) {
                 RegionCities region = RegionCities.findRegionByIsoCode(regionIsoCode);
                 city = region == null ? null : getCityMigrationByCity(region.getDefaultCity());
             }
