@@ -135,7 +135,7 @@ public class CitiesResource {
         String url = settingsService.getSettingsStringValue(SettingConstants.URL_DADATA_REQUEST_LOCATION_IP, "master");
         String token = settingsService.getSettingsStringValue(SettingConstants.TOKEN_DADATA, "master");
 
-        log.debug(String.format("Sending request with address %s to dadata", ipAddress));
+        log.info(String.format("Sending request with address %s to dadata", ipAddress));
 
         CityDadataModel cityDadataModel = client.target(url)
                 .queryParam("ip", ipAddress)
@@ -147,11 +147,16 @@ public class CitiesResource {
 
         String title = null;
         if (cityDadataModel != null) {
-            title = cityDadataModel.getLocation().getData().getCity();
-            String regionIsoCode = cityDadataModel.getLocation().getData().getRegionIsoCode();
+            String regionIsoCode = null;
+            if (cityDadataModel.getLocation() != null) {
+                title = cityDadataModel.getLocation().getData().getCity();
+                if (cityDadataModel.getLocation().getData() != null) {
+                    regionIsoCode = cityDadataModel.getLocation().getData().getRegionIsoCode();
+                }
+            }
             CityMigration city = getCityMigrationByCity(title);
 
-            if (city == null) {
+            if (city == null && regionIsoCode != null) {
                 RegionCities region = RegionCities.findRegionByIsoCode(regionIsoCode);
                 city = region == null ? null : getCityMigrationByCity(region.getDefaultCity());
             }
