@@ -30,7 +30,7 @@ import ru.alamics.sso.registration.service.UserFindService;
 @Slf4j
 public class CustomUserRealmResourceProviderFactory implements BaseResourceProviderFactory, BaseResourceProvider {
 
-    public static final String ID = "users-toms";
+    private static final String PROVIDER_ID = "users-toms";
 
     private KeycloakSession session;
     private UserFindService userFindService;
@@ -38,7 +38,7 @@ public class CustomUserRealmResourceProviderFactory implements BaseResourceProvi
 
     @Override
     public String getId() {
-        return ID;
+        return PROVIDER_ID;
     }
 
     @Override

@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 import ru.alamics.sso.jpa.entity.common.ImportUsersDataStatus;
-import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 
 import javax.persistence.*;
 
@@ -15,7 +14,7 @@ import javax.persistence.*;
 public class ImportUsersDataEntity {
     @Id
     @GeneratedValue(generator = "system-uuid")
-    @GenericGenerator(name="system-uuid", strategy = "uuid")
+    @GenericGenerator(name = "system-uuid", strategy = "uuid")
     private String id;
 
     //@ManyToOne(targetEntity = ImportUsersReportEntity.class, fetch = FetchType.LAZY)

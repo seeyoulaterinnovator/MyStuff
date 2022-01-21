@@ -2,16 +2,11 @@ package ru.alamics.sso.registration.phone;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.registration.phone.exception.SmsSendException;
-import ru.alamics.sso.registration.phone.model.Sms;
 import ru.alamics.sso.registration.phone.model.SmsDeliveryStatus;
-import ru.alamics.sso.registration.phone.model.SmsStatus;
-import ru.alamics.sso.registration.phone.port.SmsRepository;
 import ru.alamics.sso.registration.phone.port.SmsSendService;
-import ru.alamics.sso.registration.phone.port.SmsStatusRepository;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Slf4j

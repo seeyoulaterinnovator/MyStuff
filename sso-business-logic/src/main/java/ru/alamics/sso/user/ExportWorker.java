@@ -4,15 +4,14 @@ import org.keycloak.models.RealmModel;
 import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.service.UserFindService;
-import ru.alamics.sso.user.mapper.UserMapper;
-import ru.alamics.sso.user.model.DownloadUserRequest;
 import ru.alamics.sso.user.filetype.FileFactory;
 import ru.alamics.sso.user.filetype.FileModel;
+import ru.alamics.sso.user.mapper.UserMapper;
+import ru.alamics.sso.user.model.DownloadUserRequest;
 import ru.alamics.sso.user.model.ImportUsersDataModel;
 import ru.alamics.sso.user.model.UserParameter;
 import ru.alamics.sso.user.web.UserSearchDto;
 
-import javax.activation.UnsupportedDataTypeException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -21,10 +20,10 @@ import java.util.stream.Collectors;
 
 public class ExportWorker {
 
-    private RealmModel realm;
+    private final RealmModel realm;
 
-    private UserFindService userFindService;
-    private ImportReportService importReportService;
+    private final UserFindService userFindService;
+    private final ImportReportService importReportService;
 
     public ExportWorker(RealmModel realm) {
         this.realm = realm;
@@ -63,18 +62,18 @@ public class ExportWorker {
         List<ImportUsersDataModel> dataList = importReportService.getDataList(importUsersReport.getId());
 
         dataList.forEach(o -> {
-                    List<String> list = new LinkedList<>();
-                    list.add(o.getFirstName());
-                    list.add(o.getEmail());
-                    list.add(o.getPhone());
-                    list.add(o.getTomsId());
-                    list.add(o.getDmpId());
-                    list.add(o.getRole());
-                    list.add(o.getSystems());
-                    list.add(String.valueOf(o.isCreated()));
-                    list.add(o.getErrors());
-                    file.addRow(list);
-                });
+            List<String> list = new LinkedList<>();
+            list.add(o.getFirstName());
+            list.add(o.getEmail());
+            list.add(o.getPhone());
+            list.add(o.getTomsId());
+            list.add(o.getDmpId());
+            list.add(o.getRole());
+            list.add(o.getSystems());
+            list.add(String.valueOf(o.isCreated()));
+            list.add(o.getErrors());
+            file.addRow(list);
+        });
         return file;
     }
 }

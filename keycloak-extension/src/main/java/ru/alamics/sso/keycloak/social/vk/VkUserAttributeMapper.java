@@ -5,6 +5,7 @@ import org.keycloak.broker.oidc.mappers.AbstractJsonUserAttributeMapper;
 public class VkUserAttributeMapper extends AbstractJsonUserAttributeMapper {
 
     private static final String[] cp = new String[]{VkIdentityProviderFactory.PROVIDER_ID};
+    private static final String MAPPER_ID = "vk-user-attribute-mapper";
 
     @Override
     public String[] getCompatibleProviders() {
@@ -13,6 +14,6 @@ public class VkUserAttributeMapper extends AbstractJsonUserAttributeMapper {
 
     @Override
     public String getId() {
-        return "vk-user-attribute-mapper";
+        return MAPPER_ID;
     }
 }

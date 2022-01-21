@@ -16,6 +16,8 @@ import java.util.List;
 public class UserPostCreatorFactory implements FormActionFactory {
 
     private static final String PROVIDER_ID = "user_post_creator";
+    private static final String DISPLAY_NAME = "Registration UserPost Creator";
+    private static final String HELP_TEXT = "Get help text";
 
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
@@ -24,7 +26,7 @@ public class UserPostCreatorFactory implements FormActionFactory {
 
     @Override
     public String getDisplayType() {
-        return "Registration UserPost Creator";
+        return DISPLAY_NAME;
     }
 
     @Override
@@ -49,7 +51,7 @@ public class UserPostCreatorFactory implements FormActionFactory {
 
     @Override
     public String getHelpText() {
-        return "Get help text";
+        return HELP_TEXT;
     }
 
     @Override

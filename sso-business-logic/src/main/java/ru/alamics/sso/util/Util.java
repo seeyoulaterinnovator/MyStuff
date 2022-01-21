@@ -1,8 +1,8 @@
 package ru.alamics.sso.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.OAuth2Constants;
-import lombok.extern.slf4j.Slf4j;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.jose.jws.JWSInput;
 import org.keycloak.jose.jws.JWSInputException;
@@ -31,6 +31,9 @@ import static ru.alamics.sso.registration.model.UserConstants.I_FRAME;
 
 @Slf4j
 public class Util {
+
+    public static String TRUE_STR = "1";
+    public static String FALSE_STR = "0";
 
     public static boolean isPasswordGrandType(KeycloakSession session) {
         HttpRequest contextObject = session.getContext().getContextObject(HttpRequest.class);

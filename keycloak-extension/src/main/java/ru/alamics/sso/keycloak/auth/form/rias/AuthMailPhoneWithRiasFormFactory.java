@@ -24,11 +24,14 @@ import java.util.List;
 @Slf4j
 public class AuthMailPhoneWithRiasFormFactory implements AuthenticatorFactory, DisplayTypeAuthenticatorFactory {
 
-    public static final String PROVIDER_ID = "auth-mail-phone-pass-with-RIAS-form";
-    public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
+    private static final String PROVIDER_ID = "auth-mail-phone-pass-with-RIAS-form";
+    private static final String DISPLAY_NAME = "(Phone or Mail) and Password Form with RIAS";
+    private static final String HELP_TEXT = "Проверка логина и пароля для формы входа. Логин может быть телефоном или Email";
+    private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED
     };
-    public static AuthMailPhoneWithRiasForm SINGLETON = null;
+
+    private static AuthMailPhoneWithRiasForm SINGLETON = null;
 
     @Override
     public Authenticator create(KeycloakSession session) {
@@ -99,12 +102,12 @@ public class AuthMailPhoneWithRiasFormFactory implements AuthenticatorFactory, D
 
     @Override
     public String getDisplayType() {
-        return "(Phone or Mail) and Password Form with RIAS";
+        return DISPLAY_NAME;
     }
 
     @Override
     public String getHelpText() {
-        return "Проверка логина и пароля для формы входа. Логин может быть телефоном или Email";
+        return HELP_TEXT;
     }
 
     @Override

@@ -64,7 +64,7 @@ public class ResetCredentialEmail extends ResetCredential {
         String actionTokenUserId = authenticationSession.getAuthNote(DefaultActionTokenKey.ACTION_TOKEN_USER_ID);
 
         if (actionTokenUserId != null && Objects.equals(user.getId(), actionTokenUserId)) {
-            log.debug("Forget-password triggered when reauthenticating user after authentication via action token. Skipping {} screen and using user {} ", ResetCredentialEmailOrPhoneFactory.ID, user.getUsername());
+            log.debug("Forget-password triggered when reauthenticating user after authentication via action token. Skipping {} screen and using user {} ", ResetCredentialEmailOrPhoneFactory.PROVIDER_ID, user.getUsername());
             context.success();
             return;
         }

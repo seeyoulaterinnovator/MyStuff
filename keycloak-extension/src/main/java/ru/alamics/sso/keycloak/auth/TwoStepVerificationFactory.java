@@ -17,13 +17,14 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class TwoStepVerificationFactory implements Authenticator, AuthenticatorFactory {
-    public static final String VERIFY_PHONE_FTL = "verifyPhone.ftl";
+    private static final String NOTE_AUTH_TYPE_NAME = "note_auth_type_name";
+    private static final String NOTE_AUTH_TYPE_DESC = "note_auth_type_DESC";
+    private static final String TWO_STEP_VERIFICATION_TYPES = "two.step.verification.types";
 
-    public static final String NOTE_AUTH_TYPE_NAME = "note_auth_type_name";
-    public static final String NOTE_AUTH_TYPE_DESC = "note_auth_type_DESC";
-
-    public static final String TWO_STEP_VERIFICATION_TYPES = "two.step.verification.types";
     private static final String PROVIDER_ID = "two-step-verification";
+    private static final String DISPLAY_NAME = "Two step verification";
+    private static final String HELP_TEXT = "Two step verification";
+    private static final String REFERENCE_CATEGORY = "two-step-verification-reference";
 
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
@@ -92,17 +93,17 @@ public class TwoStepVerificationFactory implements Authenticator, AuthenticatorF
 
     @Override
     public String getHelpText() {
-        return "Two step verification";
+        return HELP_TEXT;
     }
 
     @Override
     public String getDisplayType() {
-        return "Two step verification";
+        return DISPLAY_NAME;
     }
 
     @Override
     public String getReferenceCategory() {
-        return "two-step-verification-reference";
+        return REFERENCE_CATEGORY;
     }
 
     @Override

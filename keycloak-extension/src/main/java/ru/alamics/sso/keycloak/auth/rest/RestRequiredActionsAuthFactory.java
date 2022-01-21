@@ -10,10 +10,10 @@ import static org.keycloak.models.AuthenticationExecutionModel.Requirement.*;
 
 public class RestRequiredActionsAuthFactory extends AbstractAuthenticatorFactory {
 
-    public static final String ID = "rest-actions";
-    private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {REQUIRED, OPTIONAL, DISABLED};
-    private static final String HELP_TEXT = "";
+    private static final String PROVIDER_ID = "rest-actions";
     private static final String DISPLAY_TYPE = "REST Actions";
+    private static final String HELP_TEXT = "";
+    private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {REQUIRED, OPTIONAL, DISABLED};
 
     @Override
     public String getDisplayType() {
@@ -40,7 +40,7 @@ public class RestRequiredActionsAuthFactory extends AbstractAuthenticatorFactory
 
     @Override
     public String getId() {
-        return ID;
+        return PROVIDER_ID;
     }
 
 }

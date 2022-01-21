@@ -7,6 +7,7 @@ import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.port.RiasApiService;
+import ru.alamics.sso.remote.rias.model.RiasCheckStatus;
 import ru.alamics.sso.remote.rias.model.RiasData;
 import ru.alamics.sso.util.Util;
 
@@ -71,7 +72,6 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
         String valuesV = Util.encodeUTF8(param + "," + timestamp + "," + properties.getProperty(CLIENT_NAME) + "," + secretHash);
 
 
-        // TODO Entity<RiasData> => response.close() ?
         RiasData response;
 
         try {
@@ -86,20 +86,20 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
             throw new RiasCheckException(wae);
         }
 
-        if (response.getStatus() == 0)
+        if (response.getStatus() == RiasCheckStatus.DATA_NOT_FOUND)
             throw new RiasCheckException(response.getMessages().getCode() + ": " + response.getMessages().getText());
 
-        else if (response.getStatus() == 1)
-            if (response.getResult().getCheckProfileData() == 0)
+        else if (response.getStatus() == RiasCheckStatus.DATA_FOUND)
+            if (response.getResult().getCheckProfileData() == RiasCheckStatus.DATA_NOT_FOUND)
                 return false;
 
-            else if (response.getResult().getCheckProfileData() == 1)
+            else if (response.getResult().getCheckProfileData() == RiasCheckStatus.DATA_FOUND)
                 return true;
 
-            else if (response.getResult().getCheckProfileData() == -1)
+            else if (response.getResult().getCheckProfileData() == RiasCheckStatus.EMPTY_DATA_FOR_CHECK)
                 throw new RiasCheckException("Checked data is empty: check_profile_data = " + response.getResult().getCheckProfileData());
 
-            else if (response.getResult().getCheckProfileData() == -2)
+            else if (response.getResult().getCheckProfileData() == RiasCheckStatus.INVALID_DATA_FOR_CHECK)
                 throw new RiasCheckException("Checked data is invalid: check_profile_data = " + response.getResult().getCheckProfileData());
 
             else

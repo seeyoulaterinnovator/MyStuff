@@ -61,7 +61,6 @@ public class PersonalAccountResource {
 
     // добавить лс для должности
     // PATCH
-    // TODO убирать дубли
     @PATCH
     @Path("/{postId}/add")
     public Response add(@PathParam("postId") String postId, List<String> paList) {

@@ -7,8 +7,6 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.plugins.providers.StringTextStar;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
-import ru.alamics.sso.registration.model.User;
-import ru.alamics.sso.registration.tbapi.TbapiService;
 import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.tbapi.model.TbapiRequest;
@@ -27,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_ORG_NAME;
-
 @Slf4j
 @Stateless(name = "TbapiRemoteService")
 public class TbapiServiceRestImpl implements TbapiRemoteService {
@@ -41,34 +37,6 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
             .disableTrustManager();
 
     private static final ResteasyClient client = clientBuilder.build();
-
-    public static void main(String[] args) {
-
-        TbapiConnectConfig connectConfig = new TbapiConnectConfig();
-
-        connectConfig.setHost("10.121.10.30");
-        connectConfig.setPort(26800);
-        connectConfig.setAppname("SSP");
-        connectConfig.setUsername("anonymous");
-        connectConfig.setPath("/api/v1/customerManagement/customerAccount");
-        connectConfig.setSecure(false);
-
-        User user = User.builder()
-                .name("sdfs22dfsdf")
-                .email("sdf22ds@gfsdgdfg.ru")
-                .phone("71116460466")
-                .build();
-
-        String orgName = "dfgd22fgdfg";
-        user.getAttributes().put(ATTR_ORG_NAME, Collections.singletonList(orgName));
-
-        try {
-            Map<String, Object> attributes = new TbapiService(new TbapiServiceRestImpl()).registerUser(user, connectConfig);
-            System.out.println(attributes);
-        } catch (TbapiRegisterException e) {
-            e.printStackTrace();
-        }
-    }
 
     @Override
     public TbapiResponse createCustomer(TbapiRequest request, TbapiConnectConfig connectConfig) throws TbapiRegisterException {
@@ -91,7 +59,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
                 .build();
 
         log.info("TBAPI request to {}", uri.toString());
-        log.info("TBAPI config {}", connectConfig.toString());
+        log.info("TBAPI config {}", connectConfig);
 
         ResteasyWebTarget target = client.target(uri);
 
@@ -99,7 +67,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
 
         TbapiResponse responseData = null;
         try (Response response = target
-                .register(ResteasyJackson2Provider.class) // TODO
+                .register(ResteasyJackson2Provider.class)
                 .register(StringTextStar.class)
                 .request()
                 .accept(MediaType.APPLICATION_JSON)

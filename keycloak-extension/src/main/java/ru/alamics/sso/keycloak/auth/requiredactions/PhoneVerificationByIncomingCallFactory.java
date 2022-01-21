@@ -18,6 +18,7 @@ import javax.naming.NamingException;
 public class PhoneVerificationByIncomingCallFactory implements RequiredActionFactory, DisplayTypeRequiredActionFactory {
 
     public static final String PROVIDER_ID = "incoming_call_phone_verificator";
+    private static final String DISPLAY_TEXT = "Phone Verification (incoming call)";
 
     public PhoneVerificationByIncomingCallFactory() {
     }
@@ -65,7 +66,7 @@ public class PhoneVerificationByIncomingCallFactory implements RequiredActionFac
 
     @Override
     public String getDisplayText() {
-        return "Phone Verification (incoming call)";
+        return DISPLAY_TEXT;
     }
 
     @Override

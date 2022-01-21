@@ -147,7 +147,6 @@ task deploy {
                 fileName = "custom-jpa.jar"
             }
         }
-        // TODO сюда не надо бы лишний раз копировать но ломается CI/CD на прод
         copy {
             from file(jarArchive)
             into(archiveTargetFolder)

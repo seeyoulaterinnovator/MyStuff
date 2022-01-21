@@ -28,13 +28,11 @@ import javax.ws.rs.core.Response;
 public class UserPostResource {
 
     private final UserRole userRole;
-    private KeycloakSession session;
-    private UserPostService userPostService;
-    private CachedUserPostFacade cachedUserPostFacade;
-    private UserPostFacade userPostFacade;
-    private AdminPermissionEvaluator auth;
-
-    // TODO кэш?
+    private final KeycloakSession session;
+    private final UserPostService userPostService;
+    private final CachedUserPostFacade cachedUserPostFacade;
+    private final UserPostFacade userPostFacade;
+    private final AdminPermissionEvaluator auth;
 
     public UserPostResource(KeycloakSession session, AdminPermissionEvaluator auth) {
         this.session = session;

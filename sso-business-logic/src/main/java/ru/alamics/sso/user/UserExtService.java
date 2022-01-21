@@ -39,14 +39,14 @@ import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 @Slf4j
 public class UserExtService {
 
-    private final static Long DEFAULT_ROLE_ID = 1L;   //Соответствует роли LPR // TODO но это не точно
+    private final static Long DEFAULT_ROLE_ID = 1L;   //Соответствует роли LPR, но это не точно
 
-    private AdminAuth auth;
-    private KeycloakSession session;
-    private RealmModel realm;
+    private final AdminAuth auth;
+    private final KeycloakSession session;
+    private final RealmModel realm;
 
-    private UserFindService userFindService;
-    private UserPostFacade userPostFacade;
+    private final UserFindService userFindService;
+    private final UserPostFacade userPostFacade;
 
     public UserExtService(KeycloakSession session, AdminAuth auth) {
 
@@ -56,27 +56,6 @@ public class UserExtService {
 
         this.userFindService = (UserFindService) Lookup.lookup(UserFindService.class);
         this.userPostFacade = (UserPostFacade) Lookup.lookup(UserPostFacade.class);
-    }
-
-    private void commit() {
-        if (session.getTransactionManager().isActive()) {
-            session.getTransactionManager().commit();
-        }
-    }
-
-    // TODO ConcurrentModificationException etc. еще конфликтует с checkOnExistUserByEmailAndUsername()
-    private synchronized UserModel createUser(UserRequest userRequest) {
-        try {
-            userRequest.setPhone(Util.getCleanUserPhone(userRequest.getPhone()));
-
-            UserModel user = session.users().addUser(realm, userRequest.getEmail());
-            updateUserFromRequest(user, userRequest, realm, session, false);
-            return user;
-        } finally {
-            if (session.getTransactionManager().isActive()) {
-                session.getTransactionManager().setRollbackOnly();
-            }
-        }
     }
 
     private static void updateUserFromRequest(UserModel user, UserRequest
@@ -114,6 +93,26 @@ public class UserExtService {
         String phone = Util.getCleanUserPhone(request.getPhone());
         if (phone != null)
             user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(phone));
+    }
+
+    private void commit() {
+        if (session.getTransactionManager().isActive()) {
+            session.getTransactionManager().commit();
+        }
+    }
+
+    private synchronized UserModel createUser(UserRequest userRequest) {
+        try {
+            userRequest.setPhone(Util.getCleanUserPhone(userRequest.getPhone()));
+
+            UserModel user = session.users().addUser(realm, userRequest.getEmail());
+            updateUserFromRequest(user, userRequest, realm, session, false);
+            return user;
+        } finally {
+            if (session.getTransactionManager().isActive()) {
+                session.getTransactionManager().setRollbackOnly();
+            }
+        }
     }
 
     public UserModel createUser(UserRequest request, boolean bss) throws FoundException, NotFoundException, FoundUserPostException, NotValidException {

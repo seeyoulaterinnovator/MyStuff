@@ -7,12 +7,15 @@ import org.keycloak.policy.PasswordPolicyProvider;
 import org.keycloak.policy.PasswordPolicyProviderFactory;
 
 public class MaxLengthPasswordPolicyProviderFactory implements PasswordPolicyProviderFactory {
-    protected static final String ID = "max-length";
+    protected static final String PROVIDER_ID = "max-length";
+    private static final String MAX_PASSWORD_LENGTH = "16";
+    private static final String DISPLAY_NAME = "Maximum Length";
 
     @Override
     public String getDisplayName() {
-        return "Maximum Length";
+        return DISPLAY_NAME;
     }
+
 
     @Override
     public String getConfigType() {
@@ -21,7 +24,7 @@ public class MaxLengthPasswordPolicyProviderFactory implements PasswordPolicyPro
 
     @Override
     public String getDefaultConfigValue() {
-        return "16";
+        return MAX_PASSWORD_LENGTH;
     }
 
     @Override
@@ -51,6 +54,6 @@ public class MaxLengthPasswordPolicyProviderFactory implements PasswordPolicyPro
 
     @Override
     public String getId() {
-        return ID;
+        return PROVIDER_ID;
     }
 }

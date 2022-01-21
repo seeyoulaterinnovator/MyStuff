@@ -16,7 +16,8 @@ import java.util.List;
 public class LetterSenderFactory implements FormActionFactory {
 
     private static final String PROVIDER_ID = "letter_sender";
-
+    private static final String DISPLAY_NAME = "Send Registration Letter";
+    private static final String HELP_TEXT = "Get help text";
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
             AuthenticationExecutionModel.Requirement.DISABLED
@@ -24,7 +25,7 @@ public class LetterSenderFactory implements FormActionFactory {
 
     @Override
     public String getDisplayType() {
-        return "Send Registration Letter";
+        return DISPLAY_NAME;
     }
 
     @Override
@@ -49,7 +50,7 @@ public class LetterSenderFactory implements FormActionFactory {
 
     @Override
     public String getHelpText() {
-        return "Get help text";
+        return HELP_TEXT;
     }
 
     @Override

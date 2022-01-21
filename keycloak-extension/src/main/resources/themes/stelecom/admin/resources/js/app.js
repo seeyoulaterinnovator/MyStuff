@@ -2243,7 +2243,6 @@ module.directive('onoffswitch', function() {
             kcOnText: '@onText',
             kcOffText: '@offText'
         },
-        // TODO - The same code acts differently when put into the templateURL. Find why and move the code there.
         //templateUrl: "templates/kc-switch.html",
         template: "<span><div class='onoffswitch' tabindex='0'><input type='checkbox' ng-model='ngModel' ng-disabled='ngDisabled' class='onoffswitch-checkbox' name='{{name}}' id='{{id}}'><label for='{{id}}' class='onoffswitch-label'><span class='onoffswitch-inner'><span class='onoffswitch-active'>{{kcOnText}}</span><span class='onoffswitch-inactive'>{{kcOffText}}</span></span><span class='onoffswitch-switch'></span></label></div></span>",
         compile: function(element, attrs) {
@@ -2291,7 +2290,6 @@ module.directive('onoffswitchstring', function() {
             kcOnText: '@onText',
             kcOffText: '@offText'
         },
-        // TODO - The same code acts differently when put into the templateURL. Find why and move the code there.
         //templateUrl: "templates/kc-switch.html",
         template: '<span><div class="onoffswitch" tabindex="0"><input type="checkbox" ng-true-value="\'true\'" ng-false-value="\'false\'" ng-model="ngModel" ng-disabled="ngDisabled" class="onoffswitch-checkbox" name="kc{{name}}" id="kc{{id}}"><label for="kc{{id}}" class="onoffswitch-label"><span class="onoffswitch-inner"><span class="onoffswitch-active">{{kcOnText}}</span><span class="onoffswitch-inactive">{{kcOffText}}</span></span><span class="onoffswitch-switch"></span></label></div></span>',
         compile: function(element, attrs) {
@@ -2334,7 +2332,6 @@ module.directive('onoffswitchvalue', function() {
             kcOnText: '@onText',
             kcOffText: '@offText'
         },
-        // TODO - The same code acts differently when put into the templateURL. Find why and move the code there.
         //templateUrl: "templates/kc-switch.html",
         template: "<span><div class='onoffswitch' tabindex='0'><input type='checkbox' ng-true-value='{{trueValue}}' ng-false-value='{{falseValue}}' ng-model='ngModel' ng-disabled='ngDisabled' class='onoffswitch-checkbox' name='{{name}}' id='{{id}}'><label for='{{id}}' class='onoffswitch-label'><span class='onoffswitch-inner'><span class='onoffswitch-active'>{{kcOnText}}</span><span class='onoffswitch-inactive'>{{kcOffText}}</span></span><span class='onoffswitch-switch'></span></label></div></span>",
         compile: function(element, attrs) {

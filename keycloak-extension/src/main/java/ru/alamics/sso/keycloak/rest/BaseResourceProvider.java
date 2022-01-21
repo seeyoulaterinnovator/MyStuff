@@ -37,7 +37,7 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
         RealmModel realmFromRequest = Optional.ofNullable(realmManager.getRealmByName(realmFromRequestName))
                 .orElseThrow(() -> new NotAuthorizedException("Unknown realm in path param"));
 
-        session.getContext().setRealm(realmFromRequest);//FIXME Ставим контексте в реалме, тот в котором работает пользователь
+        session.getContext().setRealm(realmFromRequest);
 
         return AdminPermissions.evaluator(session, realmFromRequest, auth);
     }
@@ -62,7 +62,7 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
         RealmManager realmManager = new RealmManager(session);
         RealmModel realmFromToken = Optional.ofNullable(realmManager.getRealmByName(realmName))
                 .orElseThrow(() -> new NotAuthorizedException("Unknown realm in token"));
-        return AdminPermissions.evaluator(session, realmFromToken, auth); //fixme нет возврата сессии обратно
+        return AdminPermissions.evaluator(session, realmFromToken, auth);
     }
 
     default AdminAuth initAdminAuth(KeycloakSession session) {
@@ -84,7 +84,7 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
         RealmModel realmFromToken = Optional.ofNullable(realmManager.getRealmByName(realmName))
                 .orElseThrow(() -> new NotAuthorizedException("Unknown realm in token"));
 
-        session.getContext().setRealm(realmFromToken);//FIXME Подставляем реалм из его токена и валидируем относительно его реалма, иначе authResult кинет NPE, мб возможно сделать аккауратней
+        session.getContext().setRealm(realmFromToken);
 
         AuthenticationManager.AuthResult authResult = Optional.ofNullable(appAuthManager.authenticateBearerToken(session, realmFromToken))
                 .orElseThrow(() -> new NotAuthorizedException("Bearer"));

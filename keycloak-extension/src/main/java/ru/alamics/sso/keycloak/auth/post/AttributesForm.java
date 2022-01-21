@@ -18,6 +18,7 @@ import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
+import ru.alamics.sso.util.Util;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -38,9 +39,9 @@ public class AttributesForm implements Authenticator {
     private final static String DMP_ID = "dmp-kc-sit";
     private static final String FORM = "attributes.ftl";
     private final UserRole roleService;
-    private CachedUserPostFacade cachedUserPostFacade;
+    private final CachedUserPostFacade cachedUserPostFacade;
 
-    private SettingsService settingsService;
+    private final SettingsService settingsService;
 
     public AttributesForm(UserRole roleService) {
         this.roleService = roleService;
@@ -65,7 +66,7 @@ public class AttributesForm implements Authenticator {
         String frame = uriInfo.getQueryParameters().getFirst(I_FRAME);
         Map<String, String> redirectUriQueryParams = extractQueryParamsFromRedirectUri(queryParams.getFirst(REDIRECT_URI));
         String redirectIframe = redirectUriQueryParams.get(I_FRAME);
-        boolean isAuth = "1".equals(authSession.getAuthNote(AUTH_FORM_SUCCESS));//it`s magick
+        boolean isAuth = Util.TRUE_STR.equals(authSession.getAuthNote(AUTH_FORM_SUCCESS));//it`s magick
 
         if (frame != null || isAuth || redirectIframe != null) {
             UserModel user = context.getUser();
@@ -123,12 +124,12 @@ public class AttributesForm implements Authenticator {
         UserSessionModel userSession = session.sessions().getUserSession(realm, context.getAuthenticationSession().getParentSession().getId());
         ClientConnection clientConnection = session.getContext().getConnection();
         AuthenticationManager.backchannelLogout(session, realm, userSession, session.getContext().getUri(), clientConnection, session.getContext().getRequestHeaders(), true);
-        authSession.setAuthNote(AUTH_FORM_SUCCESS, "0");
+        authSession.setAuthNote(AUTH_FORM_SUCCESS, Util.FALSE_STR);
 
         String iframe = context.getUriInfo().getQueryParameters().getFirst(I_FRAME);
         String clientId = session.getContext().getClient().getClientId();
         if (iframe != null && DMP_ID.equals(clientId)) {
-            authSession.setAuthNote(END_AFTER_REQUIRED_ACTIONS, "1");
+            authSession.setAuthNote(END_AFTER_REQUIRED_ACTIONS, Util.TRUE_STR);
         }
         context.success();
     }

@@ -81,13 +81,9 @@ public class ViberSendServiceImpl implements ViberSendService {
                     .queryParam("to", Util.getCleanUserPhone(phone))
                     .queryParam("text", Util.encodeCharset(text, smsConfig.getCharset()));
 
-            //System.out.println(webTarget.getUri());
-
             String response = webTarget
                     .request()
                     .get(String.class);
-
-            //System.out.println(response);
 
             return response;
 

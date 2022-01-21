@@ -1,14 +1,10 @@
 package ru.alamics.sso.user;
 
 import org.keycloak.models.RealmModel;
-import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
-import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
 import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
-import ru.alamics.sso.jpa.repository.ImportUsersReportRepository;
 import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.user.model.ImportUsersDataModel;
 import ru.alamics.sso.user.model.ImportUsersReportModel;
-import ru.alamics.sso.user.web.ImportUsersReportDto;
 import ru.alamics.sso.util.Util;
 
 import javax.ejb.*;
@@ -20,7 +16,7 @@ public class ImportUsersReportService {
     @EJB
     private ImportReportService importReportService;
 
-    public String  createImportUsersReportAsync(RealmModel realm, String filename, List<ImportUsersDataModel> dataList) {
+    public String createImportUsersReportAsync(RealmModel realm, String filename, List<ImportUsersDataModel> dataList) {
 
         ImportUsersReportModel importUsersReport = UserMapper.toImportUsersReportEntity(realm.getName(), filename, dataList);
 
@@ -28,7 +24,7 @@ public class ImportUsersReportService {
         importUsersReport.setStatus(ImportUsersReportStatus.UPLOADING);
         String reportId = importReportService.saveImportUsersReport(importUsersReport);
         importUsersReport.setId(reportId);
-        importReportService.saveImportUsersData(reportId, dataList); // TODO really need?
+        importReportService.saveImportUsersData(reportId, dataList);
         return reportId;
     }
 
@@ -41,7 +37,7 @@ public class ImportUsersReportService {
 
         String reportId = importReportService.saveImportUsersReport(importUsersReport);
         importUsersReport.setId(reportId);
-        importReportService.saveImportUsersData(reportId, dataList); // TODO really need?
+        importReportService.saveImportUsersData(reportId, dataList);
 
         return importUsersReport;
     }

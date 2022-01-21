@@ -5,7 +5,7 @@ import org.keycloak.services.resource.RealmResourceProvider;
 import ru.alamics.sso.keycloak.rest.BaseResourceProviderFactory;
 
 public class PasswordPolicyResourceProviderFactory implements BaseResourceProviderFactory {
-    private final static String ID = "password-policy";
+    private final static String PROVIDER_ID = "password-policy";
 
     @Override
     public RealmResourceProvider create(KeycloakSession session) {
@@ -14,6 +14,6 @@ public class PasswordPolicyResourceProviderFactory implements BaseResourceProvid
 
     @Override
     public String getId() {
-        return ID;
+        return PROVIDER_ID;
     }
 }

@@ -38,7 +38,6 @@ import static ru.alamics.sso.settings.SettingConstants.*;
 public class AuthMailPhoneWithRiasForm extends AbstractUsernameFormAuthenticator implements Authenticator {
 
     private final static String RIAS_REDIRECT_PROPERTY = "riasLogin.redirect.url";
-    // TODO
     private final static String B2B_ID = "b2b";
     private final static String DMP_ID = "dmp-kc-sit";
     private final static String CONSOLE_ID = "security-admin-console";
@@ -50,7 +49,7 @@ public class AuthMailPhoneWithRiasForm extends AbstractUsernameFormAuthenticator
     private final UserFindService userFindService;
 
     private final ApplicationProperties properties;
-    private SettingsService settingsService;
+    private final SettingsService settingsService;
 
     public AuthMailPhoneWithRiasForm(RiasService riasService, UserFindService userFindService) {
         this.riasService = riasService;
@@ -71,7 +70,7 @@ public class AuthMailPhoneWithRiasForm extends AbstractUsernameFormAuthenticator
         if (!validateForm(context, formData)) {
             return;
         }
-        context.getAuthenticationSession().setAuthNote(AUTH_FORM_SUCCESS, "1");
+        context.getAuthenticationSession().setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
         context.success();
     }
 
@@ -140,7 +139,7 @@ public class AuthMailPhoneWithRiasForm extends AbstractUsernameFormAuthenticator
         log.info("RIAS auth, got city = " + city);
 
         if (Validation.isBlank(city)) {
-            city = "yar"; // TODO с фронта не приходит город
+            city = "yar";
         }
 
         String domain = null;

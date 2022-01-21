@@ -19,6 +19,7 @@ import ru.alamics.sso.emailer.EmailSender;
 import ru.alamics.sso.jpa.entity.AutoLockNotification;
 import ru.alamics.sso.jpa.entity.common.NotificationType;
 import ru.alamics.sso.jpa.repository.*;
+import ru.alamics.sso.keycloak.GeneralRealm;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.settings.SettingConstants;
@@ -89,7 +90,7 @@ public class UserSchedule {
     }
 
     private long getTime() {
-        long intervalDuration = settingsService.getSettingsValue(SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY, "master") * 1000;
+        long intervalDuration = settingsService.getSettingsValue(SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY, GeneralRealm.MASTER) * 1000;
 
         if (intervalDuration == 0) {
             intervalDuration = DEFAULT_INTERVAL_DURATION;
@@ -248,9 +249,6 @@ public class UserSchedule {
     private EmailModel.EmailModelBuilder passwordExpired(String link, String realmId) {
         final String subject = "Истек срок жизни пароля";
         final String template = "password-expires.ftl";
-
-        // TODO тут неплохо было бы ставить ссылку сразу на окно восстановления пароля через new ResetCredentialsActionToken
-        // TODO но нужна KeycloakSession или реализовывать сериализацию токена
 
         Map<String, Object> body = new HashMap<>();
         body.put("link", link);

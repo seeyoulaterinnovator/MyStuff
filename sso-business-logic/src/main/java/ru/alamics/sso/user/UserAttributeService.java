@@ -5,9 +5,7 @@ import org.keycloak.models.KeycloakContext;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-
 import org.keycloak.models.jpa.entities.UserEntity;
-import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import ru.alamics.sso.registration.AttributeFormatException;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.model.UserConstants;
@@ -16,7 +14,6 @@ import ru.alamics.sso.user.web.AttributeRequest;
 import ru.alamics.sso.util.validator.NotValidException;
 import ru.alamics.sso.util.validator.PhoneValidator;
 
-import javax.validation.ValidationException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;

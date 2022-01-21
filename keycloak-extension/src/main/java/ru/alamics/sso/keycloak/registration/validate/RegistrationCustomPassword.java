@@ -17,11 +17,11 @@ import java.util.List;
 
 public class RegistrationCustomPassword extends RegistrationPassword {
 
-    public static final String PROVIDER_ID = "registration-custom-password";
+    private static final String DISPLAY_NAME = "Password Custom Validation";
 
     @Override
     public String getDisplayType() {
-        return "Password Custom Validation";
+        return DISPLAY_NAME;
     }
 
     @Override

@@ -18,9 +18,6 @@ import ru.alamics.sso.util.esia.X509CertificateFactory;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.Security;
@@ -30,6 +27,9 @@ import java.util.List;
 
 @Slf4j
 public class Signer {
+    private static KeyPair kp;
+    private static X509CertificateHolder certHolder;
+
     private static X509CertificateHolder getCert() {
         return Signer.certHolder;
     }
@@ -74,9 +74,6 @@ public class Signer {
 
     }
 
-    private static KeyPair kp;
-    private static X509CertificateHolder certHolder;
-
 //    private static final Path keyPath = Paths.get(Signer.class.getClassLoader().getResource("cert/cert.key").getFile()); //путь к приватоному ключу ЕСИА
 //    private static final Path certPath = Paths.get(Signer.class.getClassLoader().getResource("cert/cert.csr").getFile()); //путь к сертификату ЕСИА
 
@@ -89,10 +86,8 @@ public class Signer {
 
             kp = PrivateKeyFactory.generateKeyPair(privatePath);
             certHolder = X509CertificateFactory.generateHolder(publicPath);
-        } catch (FileNotFoundException e) {
-            System.out.println(e);
         } catch (IOException | CertificateException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
     }
 }

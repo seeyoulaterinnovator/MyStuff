@@ -67,7 +67,6 @@ public class ImportReportService {
 
         ImportUsersDataEntity entity = importUsersReportRepository.findImportUsersDataById(data.getId());
 
-        // TODO попадает ли в отчет
         if (entity == null) {
             log.info("updateImportUsersData dataEntity = " + data.getId() + ", entity " + entity);
             return;

@@ -56,7 +56,7 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
         }
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
         authSession.setClientNote(OIDCLoginProtocol.RESPONSE_TYPE_PARAM, OIDCResponseType.NONE);
-        authSession.setRedirectUri(""); //fixme костыль, redirect url в REST не используем, при null падает NPE
+        authSession.setRedirectUri(""); //костыль, redirect url в REST не используем, при null падает NPE
         Response response = AuthenticationManager.nextActionAfterAuthentication(session, authSession, clientConnection, request, session.getContext().getUri(), event);
         Object entity = response.getEntity();
         if (!(entity instanceof AccessTokenResponse)) {
@@ -69,7 +69,7 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
                 context.failure(AuthenticationFlowError.FORK_FLOW);
                 return;
             }
-            context.getExecution().setId(execution); //fixme костыль, возможно можно лучше
+            context.getExecution().setId(execution); //костыль, возможно можно лучше
             ClientSessionCode<AuthenticationSessionModel> accessCode = new ClientSessionCode<>(session, realm, authSession);
             accessCode.setAction(AuthenticationSessionModel.Action.REQUIRED_ACTIONS.name());
             authSession.setAuthNote(AuthenticationProcessor.CURRENT_FLOW_PATH, LoginActionsService.REQUIRED_ACTION);

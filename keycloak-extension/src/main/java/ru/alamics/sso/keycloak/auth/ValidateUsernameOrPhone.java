@@ -24,8 +24,10 @@ import javax.ws.rs.core.Response;
 @Slf4j
 public class ValidateUsernameOrPhone extends ValidateUsername {
 
-    public static final String PROVIDER_ID = "direct-grant-validate-mail-or-phone";
-    public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
+    private static final String PROVIDER_ID = "direct-grant-validate-mail-or-phone";
+    private static final String DISPLAY_NAME = "UsernameOrPhone Validation";
+    private static final String HELP_TEXT = "Validates the Username Or Phone supplied as a 'username' form parameter in direct grant request";
+    private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED
     };
 
@@ -93,7 +95,7 @@ public class ValidateUsernameOrPhone extends ValidateUsername {
 
     @Override
     public String getDisplayType() {
-        return "UsernameOrPhone Validation";
+        return DISPLAY_NAME;
     }
 
     @Override
@@ -103,7 +105,7 @@ public class ValidateUsernameOrPhone extends ValidateUsername {
 
     @Override
     public String getHelpText() {
-        return "Validates the Username Or Phone supplied as a 'username' form parameter in direct grant request";
+        return HELP_TEXT;
     }
 
     @Override

@@ -88,7 +88,7 @@ class SmsSendServiceImplTest {
             assertThat(result.substring(0, 1)).isEqualTo("0");
 
         } catch (SmsSendException e) {
-            // TODO тест шлет runtime 404
+            System.out.println(e);
         }
     }
 }

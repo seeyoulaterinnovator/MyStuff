@@ -1,6 +1,5 @@
 package ru.alamics.sso.user.mapper;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.keycloak.authentication.FormContext;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
@@ -211,7 +210,6 @@ public class UserMapper {
         ImportResponse importResponse = new ImportResponse();
         importResponse.getCreatedUsers().set(importUserReport.getCountCreatedUsers());
         importResponse.getCountClones().set(importUserReport.getCountClones());
-        // TODO ?
         for (ImportUsersDataModel data : dataList) {
             importResponse.addCreatedUserIds(data.getEmail(), data.getUserId());
 

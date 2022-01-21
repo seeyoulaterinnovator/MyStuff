@@ -24,12 +24,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-import static ru.alamics.sso.keycloak.auth.TwoStepVerificationFactory.VERIFY_PHONE_FTL;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.*;
 import static ru.alamics.sso.settings.SettingConstants.*;
 
 @Slf4j
 public class PhoneVerificationProvider implements RequiredActionProvider {
+    private static final String VERIFY_PHONE_FTL = "verifyPhone.ftl";
 
     private static final String NEED_SEND_EMAIL_CODE = "NEED_SEND_EMAIL_CODE";
     private static final String subject = "emailVerificationAuthSubject";
@@ -39,7 +39,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     private final ActivationCodeType activationCodeType;
     private final EmailTemplateProvider emailTemplateProvider;
 
-    private SettingsService settingsService;
+    private final SettingsService settingsService;
 
     public PhoneVerificationProvider(UserPhoneVerifier userPhoneVerifier, ActivationCodeType activationCodeType, EmailTemplateProvider emailTemplateProvider) {
         this.userPhoneVerifier = userPhoneVerifier;

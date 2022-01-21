@@ -2,12 +2,11 @@ package ru.alamics.sso.schedule;
 
 import java.util.concurrent.TimeUnit;
 
-// TODO make like linkExpirationFormatter
 public class Translator {
-    private final static String[]  DECLENSIONS_DAYS = {"день", "дня", "дней"};
-    private final static String[]  DECLENSIONS_HOURS = {"час", "часа", "часов"};
-    private final static String[]  DECLENSIONS_MINUTES = {"минуту", "минуты", "минут"};
-    private final static String[]  DECLENSIONS_SECONDS = {"секунду", "секунды", "секунд"};
+    private final static String[] DECLENSIONS_DAYS = {"день", "дня", "дней"};
+    private final static String[] DECLENSIONS_HOURS = {"час", "часа", "часов"};
+    private final static String[] DECLENSIONS_MINUTES = {"минуту", "минуты", "минут"};
+    private final static String[] DECLENSIONS_SECONDS = {"секунду", "секунды", "секунд"};
 
     public static String getRusTranslateTimeUnit(String value, TimeUnit unit) {
         int time = Integer.parseInt(value);
@@ -31,7 +30,7 @@ public class Translator {
         return time + " " + getRusTimeUnit(time, unit);
     }
 
-    private static String getRusTimeUnit(int time, TimeUnit unit){
+    private static String getRusTimeUnit(int time, TimeUnit unit) {
         switch (unit) {
             case DAYS:
                 return getDeclantion(time, DECLENSIONS_DAYS);

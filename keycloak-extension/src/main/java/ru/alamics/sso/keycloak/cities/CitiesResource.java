@@ -7,6 +7,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.plugins.providers.StringTextStar;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.keycloak.models.KeycloakSession;
+import ru.alamics.sso.keycloak.GeneralRealm;
 import ru.alamics.sso.keycloak.cities.model.CityDadataModel;
 import ru.alamics.sso.keycloak.cities.model.CityMigration;
 import ru.alamics.sso.keycloak.cities.model.RegionCities;
@@ -47,7 +48,7 @@ public class CitiesResource {
     private static String url;
     private static List<CityMigration> cityList = new ArrayList<>();
     protected KeycloakSession session;
-    private SettingsService settingsService;
+    private final SettingsService settingsService;
 
     public CitiesResource(KeycloakSession session) {
         this.session = session;
@@ -132,8 +133,8 @@ public class CitiesResource {
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     public Response getCityTitle() {
         String ipAddress = session.getContext().getConnection().getRemoteAddr();
-        String url = settingsService.getSettingsStringValue(SettingConstants.URL_DADATA_REQUEST_LOCATION_IP, "master");
-        String token = settingsService.getSettingsStringValue(SettingConstants.TOKEN_DADATA, "master");
+        String url = settingsService.getSettingsStringValue(SettingConstants.URL_DADATA_REQUEST_LOCATION_IP, GeneralRealm.MASTER);
+        String token = settingsService.getSettingsStringValue(SettingConstants.TOKEN_DADATA, GeneralRealm.MASTER);
 
         log.debug(String.format("Sending request with address %s to dadata", ipAddress));
 

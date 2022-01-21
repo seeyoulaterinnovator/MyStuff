@@ -80,8 +80,6 @@ public class RiasUserLoginImpl implements RiasLoginService {
                     .queryParam("timestamp$c", timestamp)
                     .queryParam("client_secret", secretHash);
 
-            //System.out.println(wt.getUri());
-
             response = wt.request(MediaType.APPLICATION_XML)
                     .get();
 
@@ -95,7 +93,6 @@ public class RiasUserLoginImpl implements RiasLoginService {
         }
 
         log.info("login response: " + result);
-        //System.out.println("login response: " + result);
 
         return result;
     }

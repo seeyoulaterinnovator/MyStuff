@@ -17,7 +17,9 @@ import java.util.List;
 
 @Slf4j
 public class AttributesFormFactory implements AuthenticatorFactory {
-    public static final String PROVIDER_ID = "attributes-form";
+    private static final String PROVIDER_ID = "attributes-form";
+    private static final String DISPLAY_NAME = "User selection post form";
+    private static final String HELP_TEXT = "";
 
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
@@ -26,7 +28,7 @@ public class AttributesFormFactory implements AuthenticatorFactory {
 
     @Override
     public String getDisplayType() {
-        return "User selection post form";
+        return DISPLAY_NAME;
     }
 
     @Override
@@ -51,7 +53,7 @@ public class AttributesFormFactory implements AuthenticatorFactory {
 
     @Override
     public String getHelpText() {
-        return "";
+        return HELP_TEXT;
     }
 
     @Override
