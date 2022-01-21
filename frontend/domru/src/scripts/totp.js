@@ -99,16 +99,16 @@ export default (function() {
       const borderText = '1px solid ';
       const codeLength = codeNumbers.value;
 
-      if (index === 0 || (index === 3 && codeLength === 6)) {
+      if (index === 0 || (index === 3 && codeLength == 6)) {
         currentInput.style.border = borderText + "#0CB779";
       }
-      else if (index === 1 || (index === 4 && codeLength === 6)) {
+      else if (index === 1 || (index === 4 && codeLength == 6)) {
         currentInput.style.border = borderText + "#FF372B";
       }
       else if (index === 2) {
         currentInput.style.border = borderText + "#0FC8F9";
       }
-      else if (index === 3 && codeLength === 4 || index === 5 && codeLength === 6) {
+      else if (index === 3 && codeLength == 4 || index === 5 && codeLength == 6) {
         highlightInputsWithGreen();
       }
     }
