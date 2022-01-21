@@ -14,6 +14,12 @@
   </@defaultErrorTemplate>
 </#macro>
 
+<#macro codeAll backHref="/" backMessage="Попробовать снова" >
+  <@allErrorTemplate heading="Что-то пошло не так" backHref=backHref backMessage=backMessage >
+    Регистрация временно недоступна, попробуйте повторить попытку позже
+  </@allErrorTemplate>
+</#macro>
+
 <#macro defaultErrorTemplate heading img backHref backMessage>
   <div class="text-center">
     <h1 class="mb-10">${heading}</h1>

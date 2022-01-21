@@ -8,17 +8,15 @@
         </div>
 
         <div class="table-wrapper">
-            <#if posts?size gt 1>
-                <h1 class="title">${chooseOrganization}</h1>
-            <#else>
-                <h1 class="title" style="visibility: hidden">${chooseOrganization}</h1>
-            </#if>
-
+            <h1 class="title">${chooseOrganization}</h1>
             <div id="post" class="table overflow-x-hidden overflow-y-auto">
                 <div class="trow theader">
                     <div class="org-cell">${organization}</div>
                     <#--                    <div class="org-cell">Уникальный номер</div>-->
                     <div class="role-cell">${roleUser}</div>
+                </div>
+                <div class="trow theader-mobile">
+                    <div class="cell-header-mobile">Организация / Роль пользователя</div>
                 </div>
                 <#list posts as post>
                     <#assign firstRow = post?index == 0>

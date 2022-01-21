@@ -136,6 +136,8 @@ public class CitiesResource {
         String url = settingsService.getSettingsStringValue(SettingConstants.URL_DADATA_REQUEST_LOCATION_IP, GeneralRealm.MASTER);
         String token = settingsService.getSettingsStringValue(SettingConstants.TOKEN_DADATA, GeneralRealm.MASTER);
 
+        log.debug(String.format("Sending request with address %s to dadata", ipAddress));
+
         CityDadataModel cityDadataModel = client.target(url)
                 .queryParam("ip", ipAddress)
                 .queryParam("language", LANGUAGE_RU)
