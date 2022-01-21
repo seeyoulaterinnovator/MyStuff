@@ -13,9 +13,9 @@
     <#-- В нашем случае firstName – это полное имя -->
         <@components.field class="mb-4 md:w-full" fieldName="firstName"value="${(user.firstName!'')}" label="Как к Вам обращаться?" placeholder="Как к Вам обращаться?" required=true />
 
-        <@components.field class="mb-4 md:w-full" fieldName="email" value="${(user.email!'')}" label="Эл. почта" placeholder="Ваш адрес эл.почты" required=true type="text" />
+        <@components.field class="mb-4 md:w-full" fieldName="email" value="${(user.email!'')}" label="Эл. почта" placeholder="Введите эл. почту" required=true type="text" />
 
-        <@components.field class="mb-4 md:w-full" fieldName="phone" label="Ваш телефон" placeholder="+7 (XXX) XXX - XX - XX" required=true />
+        <@components.field class="mb-4 md:w-full" fieldName="phone" label="Ваш телефон" placeholder="Введите номер телефона" required=true />
 
 
             <#if recaptchaRequired??>

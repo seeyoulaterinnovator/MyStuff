@@ -7,10 +7,10 @@
         <#nested "style">
     </head>
     <body>
-    <table class="mail-wrapper">
+    <table class="mail-wrapper" style="background-color: #ffffff;margin:0;text-align:center;width:100%;">
         <tr>
             <td>
-                <table class="mail-container">
+                <table class="mail-container" style="box-sizing: border-box; color:#000000;display:inline-table;font-family:'arial' , sans-serif;margin:0 auto 0 auto;max-width:600px;padding:40px 24px 40px 24px;text-align:left;">
                     <tr>
                         <td>
                             <table margin="0" padding="0" cellpadding="0" cellspacing="0" class="mail-container__header"
@@ -100,9 +100,9 @@
                                         </td>
                                     </tr>
                                 </table>
-                                <p class="mail-text-title mail-text--bold">${gratitudeUp}</p>
-                                <p class="mail-text--translucent mail-text--light-gray">${gratitudeDown?no_esc}</p>
-                                <p class="mail-text--translucent mail-text--light-gray">${footerInMassage}${.now?string.yyyy}</p>
+                                <p class="mail-text-title mail-text--bold" style="font-weight:bold;margin:40px 0 16px 0">${gratitudeUp}</p>
+                                <p class="mail-text--translucent mail-text--light-gray" style="color:rgba( 0 , 0 , 0 , 0.5 );font-size:12px;line-height:16px;margin:8px 0 0 0">${gratitudeDown?no_esc}</p>
+                                <p class="mail-text--translucent mail-text--light-gray" style="color:rgba( 0 , 0 , 0 , 0.5 );font-size:12px;line-height:16px;margin:8px 0 0 0">${footerInMassage}${.now?string.yyyy}</p>
                             </div>
                         </td>
                     </tr>

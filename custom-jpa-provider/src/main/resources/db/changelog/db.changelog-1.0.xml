@@ -1442,4 +1442,18 @@
         </sql>
     </changeSet>
 
+    <changeSet id="87" author="petrov-ny">
+        <sql>
+            <![CDATA[
+                UPDATE SETTINGS SET VALUE = '<p>Ваша учетная запись для входа в Личный кабинет «Дом.ru Бизнес» <font color="red">будет заблокирована через %s</font>.</p><p>Для предотвращения блокировки учетной записи, просим Вас войти в <a class="no_block" href="%s">Личный кабинет</a> до истечения указанного срока.</p>' WHERE EXT_ID = 'blockPrepareNotificationSchedulerHtml';
+                UPDATE SETTINGS SET VALUE = '<p>Ваша учетная запись для входа в Личный кабинет «Дом.ru Бизнес» <font color="red">заблокирована</font>. Доступ к услугам при этом не блокируется.</p><p> Вы не использовали свою учетную запись в течении длительного времени. Чтобы восстановить доступ к учетной записи, обратитесь к своему персональному менеджеру или оставьте заявку в чате <a class="no_block" href="https://newlkb2b.dom.ru">Личного кабинета</a>, или по телефону <br> <a class="no_block" href="tel:88003339000">8 800 333 9000</a>.</p>' WHERE EXT_ID = 'blockNotificationSchedulerHtml';
+                UPDATE SETTINGS SET VALUE = '<p>Ваша учетная запись для входа в Личный кабинет «Дом.ru Бизнес» <font color="red">заблокирована</font>. Доступ к услугам при этом не блокируется.</p> <p>Чтобы восстановить доступ к учетной записи, обратитесь к своему персональному менеджеру или оставьте заявку в чате <a class="no_block" href="https://newlkb2b.dom.ru">Личного кабинета</a>, или по телефону <a class="no_block" href="tel:88003339000">8 800 333 9000</a>.</p>' WHERE EXT_ID = 'emailDisabledAccountBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p>Ваша учетная запись для входа в <a class="no_block" href="https://newlkb2b.dom.ru">Личный кабинет</a> «Дом.ru Бизнес» <font color="green">разблокирована</font>.</p>' WHERE EXT_ID = 'emailEnabledAccountBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p>Был создан запрос на изменение пароля от Вашей учетной записи <span class="no_block">{2}</span>. Если это были Вы, пройдите по ссылке</p><p class = "block_link"><a href="{0}">Изменить пароль</a></p><p class = "small_text">Эта ссылка устареет через  {1}.</p><p class="small_text">Если Вы не хотите сбрасывать пароль, просто проигнорируйте это письмо и ничего не изменится.</p>' WHERE EXT_ID = 'passwordResetBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p>Мы не храним ваши пароли.</p><p>Если вы забыли свой пароль или у вас не получается войти в Личный кабинет - воспользуйтесь формой восстановления пароля по ссылке <a class="no_block" href="https://newlkb2b.dom.ru">«Забыли пароль?»</a></p><p><ul class = "instruction content__ul"><li class = "small_text instruction_text content__ul-li">Для восстановления данных укажите ваш логин</li><li class = "small_text content__ul-li">На ваш адрес электронной почты будет отправлена ссылка для восстановления пароля.<br>Срок действия ссылки 5 минут</li></ul></p>' WHERE EXT_ID = 'emailPasswordFooterHtml';
+                UPDATE SETTINGS SET VALUE = 'Обновление информации учетной записи' WHERE EXT_ID = 'loginProfileTitle';
+            ]]>
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

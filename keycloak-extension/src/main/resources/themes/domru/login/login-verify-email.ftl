@@ -5,9 +5,10 @@
     <#if section = "form">
     <@emailSent.defaultTemplate email="${mail!}" buttonExist=true; section>
         <#if section = "header">
-        Подтверждение данных
+            Подтверждение данных
         <#elseif section = "description">
-        Вам на почту отправлены инструкции для авторизации
+            На почту: ${mail!} <br/>
+            Отправлены инструкции для авторизации
         </#if>
     </@emailSent.defaultTemplate>
     </#if>
