@@ -19,7 +19,6 @@ import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
-import ru.alamics.sso.util.Util;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -32,6 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.keycloak.services.managers.AuthenticationManager.END_AFTER_REQUIRED_ACTIONS;
 import static ru.alamics.sso.registration.model.UserConstants.*;
 
 @Slf4j
@@ -129,7 +129,7 @@ public class AttributesForm implements Authenticator {
         String iframe = context.getUriInfo().getQueryParameters().getFirst(I_FRAME);
         String clientId = session.getContext().getClient().getClientId();
         if (iframe != null && DMP_ID.equals(clientId)) {
-            authSession.setAuthNote(END_AFTER_REQUIRED_ACTIONS, Util.FALSE_TRUE);
+            authSession.setAuthNote(END_AFTER_REQUIRED_ACTIONS, Util.TRUE_STR);
         }
         context.success();
     }
