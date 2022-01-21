@@ -16,7 +16,6 @@ import org.keycloak.util.JsonSerialization;
 import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.emailer.EmailModel;
 import ru.alamics.sso.emailer.EmailSender;
-import ru.alamics.sso.jpa.entity.AppProperty;
 import ru.alamics.sso.jpa.entity.AutoLockNotification;
 import ru.alamics.sso.jpa.entity.common.NotificationType;
 import ru.alamics.sso.jpa.repository.*;
@@ -25,13 +24,16 @@ import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsDto;
 import ru.alamics.sso.settings.SettingsService;
+import ru.alamics.sso.util.Util;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.*;
-import javax.ejb.Timer;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -41,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 public class UserSchedule {
     private static final String TIMER_NAME = "User Schedule Timer";
     private static final long DEFAULT_INTERVAL_DURATION = 300000;
-    private final static String[] SETTINGS_REALM_NAMES_SCHEDULE = {"user", "manager","S-TELECOM"};
+    private final static String[] SETTINGS_REALM_NAMES_SCHEDULE = {"user", "manager", "S-TELECOM"};
     private final static String DEFAULT_CLIENT_ID = "account";
     @EJB
     private EmailSender sender;
@@ -86,7 +88,7 @@ public class UserSchedule {
         log.info("Timer:{} is created, interval duration value = {} ms, initial duration value = {} ms ", TIMER_NAME, getTime(), initialDuration);
     }
 
-    private long getTime(){
+    private long getTime() {
         long intervalDuration = settingsService.getSettingsValue(SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY, "master") * 1000;
 
         if (intervalDuration == 0) {
@@ -174,7 +176,7 @@ public class UserSchedule {
             if (notification.getType() == NotificationType.ABSENCE_NOTIFICATION) {
                 long blockValue = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_WARNING, realm.getName());
                 if (blockValue > 0) {
-                    EmailModel.EmailModelBuilder prepareBlockNotification = prepareBlockNotification(realm.getName(), getClientLink(client));
+                    EmailModel.EmailModelBuilder prepareBlockNotification = prepareBlockNotification(userModel, realm.getName(), getClientLink(client));
                     prepareBlockNotification.realmModel(realm)
                             .user(userModel);
                     sender.send(prepareBlockNotification.build());
@@ -182,7 +184,7 @@ public class UserSchedule {
             } else if (notification.getType() == NotificationType.ABSENCE_BLOCKING) {
                 long blockValue = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_BLOCKED, realm.getName());
                 if (blockValue > 0) {
-                    EmailModel.EmailModelBuilder bockNotification = bockNotification(realm.getName());
+                    EmailModel.EmailModelBuilder bockNotification = bockNotification(userModel, realm.getName());
                     bockNotification.realmModel(realm)
                             .user(userModel);
                     sender.send(bockNotification.build());
@@ -200,18 +202,24 @@ public class UserSchedule {
     }
 
 
-    private EmailModel.EmailModelBuilder bockNotification(String realmId) {
+    private EmailModel.EmailModelBuilder bockNotification(UserModel userModel, String realmId) {
         final String subject = "Блокирование аккаунта";
         final String template = "block-notification.ftl";
         Map<String, Object> body = new HashMap<>();
-        body.put("blockNotificationSchedulerHtml",settingsService.getSettingsStringValue(SettingConstants.SCHEDULER_BLOCKING_BODY,realmId));
+        body.put("userName", userModel.getUsername());
+        List<String> phones = userModel.getAttribute("phone");
+        if (!phones.isEmpty()) {
+            String formatNumber = Util.getFormatNumber(phones.get(0));
+            body.put("phone", formatNumber);
+        }
+        body.put("blockNotificationSchedulerHtml", settingsService.getSettingsStringValue(SettingConstants.SCHEDULER_BLOCKING_BODY, realmId));
         return EmailModel.builder()
                 .subject(subject)
                 .bodyAttributes(body)
                 .bodyTemplate(template);
     }
 
-    private EmailModel.EmailModelBuilder prepareBlockNotification(String realm, String link) {
+    private EmailModel.EmailModelBuilder prepareBlockNotification(UserModel userModel, String realm, String link) {
         final String subject = "Предупреждение о блокирование аккаунта";
         final String template = "block-prepare-notification.ftl";
         SettingsDto blockSetting = settingsService.getSetting(SettingConstants.ABSENCE_BLOCKING_DAYS, realm);
@@ -221,9 +229,16 @@ public class UserSchedule {
                 blockSetting.getUnit().convert(inactiveBlockTimeout - inactiveNotificationTimeout, TimeUnit.SECONDS));
         Map<String, Object> body = new HashMap<>();
         String valueTime = timeToBlock + " " + Translator.getRusTranslateTimeUnit(timeToBlock, blockSetting.getUnit());
-        String bodyHtml = String.format(settingsService.getSettingsStringValue(SettingConstants.SCHEDULER_BLOCKING_PREPARE_BODY,realm),valueTime,link);
-        body.put("blockPrepareNotificationSchedulerHtml",bodyHtml);
+        String bodyHtml = String.format(settingsService.getSettingsStringValue(SettingConstants.SCHEDULER_BLOCKING_PREPARE_BODY, realm), valueTime, link);
+        body.put("blockPrepareNotificationSchedulerHtml", bodyHtml);
         body.put("absence", valueTime);
+        body.put("link", link);
+        body.put("userName", userModel.getUsername());
+        List<String> phones = userModel.getAttribute("phone");
+        if (!phones.isEmpty()) {
+            String formatNumber = Util.getFormatNumber(phones.get(0));
+            body.put("phone", formatNumber);
+        }
         return EmailModel.builder()
                 .bodyAttributes(body)
                 .subject(subject)
@@ -239,8 +254,8 @@ public class UserSchedule {
 
         Map<String, Object> body = new HashMap<>();
         body.put("link", link);
-        String bodyHtml = String.format(settingsService.getSettingsStringValue(SettingConstants.SCHEDULER_PASSWORD_EXPIRES_BODY,realmId),link);
-        body.put("passwordExpiresSchedulerHtml",bodyHtml);
+        String bodyHtml = String.format(settingsService.getSettingsStringValue(SettingConstants.SCHEDULER_PASSWORD_EXPIRES_BODY, realmId), link);
+        body.put("passwordExpiresSchedulerHtml", bodyHtml);
         return EmailModel.builder()
                 .bodyAttributes(body)
                 .subject(subject)

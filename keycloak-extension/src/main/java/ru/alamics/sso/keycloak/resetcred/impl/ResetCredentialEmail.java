@@ -34,7 +34,6 @@ import javax.naming.NamingException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class ResetCredentialEmail extends ResetCredential {
@@ -133,6 +132,6 @@ public class ResetCredentialEmail extends ResetCredential {
         if (redirectUrl != null)
             return redirectUrl;
 
-        return settingsService.getSettingsStringValue(SettingConstants.HOME_PAGE,client.getRealm().getId());
+        return settingsService.getSettingsStringValue(SettingConstants.HOME_PAGE, client.getRealm().getId());
     }
 }

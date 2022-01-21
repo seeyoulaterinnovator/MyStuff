@@ -8,7 +8,6 @@ export default (
   getConfirmation,
   setConfirmation,
   passwordElement = document.getElementById('password'),
-  passwordConfirmElement = document.getElementById('password-confirm')
 ) => {
   const passwordBlock = document.getElementById('password-block');
   if (!passwordBlock) return;
@@ -82,7 +81,6 @@ export default (
 
   function inputSomePass(element) {
     const passwordRaw = getPassword();
-
     if (WRONG_PASS_REG.test(passwordRaw)) {
       const replacePassword = passwordRaw.replace(WRONG_PASS_REG, '');
       setPassword(replacePassword);
@@ -97,9 +95,11 @@ export default (
     if (REQUIRED_PASSWORD.test(password)) {
       passwordElement.classList.add('field-good');
       ok.forEach((img_block) => img_block.classList.remove('hidden'));
+      generatedPassword.textContent = password;
     }
     else {
       passwordElement.classList.remove('field-good');
+      generatedPassword.textContent = '';
       ok.forEach((img_block) => img_block.classList.add('hidden'));
     }
   }

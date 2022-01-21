@@ -10,11 +10,11 @@
         <#elseif brokerContext?? && brokerContext.email??>
                 <#assign email= brokerContext.email>
         </#if>
-        <@emailSent.defaultTemplate email="${email!}" buttonExist=false; section>
+        <@emailSent.defaultTemplate email="${email!}" buttonExist=true; section>
             <#if section = "header">
-              Подтверждение данных
+                Подтверждение данных
             <#elseif section = "description">
-              Вам на почту отправлены инструкции для связывания аккаунтов
+                Вам на почту отправлены инструкции для связывания аккаунтов
             </#if>
         </@emailSent.defaultTemplate>
     </#if>

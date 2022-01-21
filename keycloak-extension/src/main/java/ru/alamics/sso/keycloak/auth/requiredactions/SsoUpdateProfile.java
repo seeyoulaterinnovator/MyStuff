@@ -1,9 +1,7 @@
 package ru.alamics.sso.keycloak.auth.requiredactions;
 
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.RequiredActionContext;
-import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.authentication.requiredactions.UpdateProfile;
 import org.keycloak.events.Details;
 import org.keycloak.events.EventBuilder;
@@ -97,7 +95,6 @@ public class SsoUpdateProfile extends UpdateProfile {
             UserModel userByEmail = session.users().getUserByEmail(email, realm);
             // check for duplicated email
             if (userByEmail != null && !userByEmail.getId().equals(user.getId())) {
-                formData.remove("email");
                 Response challenge = context.form()
                         .setError(Messages.EMAIL_EXISTS)
                         .setFormData(formData)

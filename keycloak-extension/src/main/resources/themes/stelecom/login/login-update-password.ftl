@@ -11,10 +11,10 @@
 
             <div class="flex flex-col justify-between sm:flex-row xl:mt-12 md:mt-8 mt-7">
                 <div class="flex-basis-auto w-full mb-2 sm:mb-0">
-                    <button id="submit" class="btn btn-main w-full pass-fields pass-fields--change-pass" type="submit">Сменить пароль</button>
+                    <button id="submit" class="btn btn-main w-full" type="submit">Сменить пароль</button>
                 </div>
                 <div class="flex-basis-auto w-full ml-0 text-sm sm:ml-6">
-                    <a id="cancel" href="${redirectUrl}" class="btn w-full">${msg("doCancel")}</a>
+                    <a id="cancel" href="${redirectUrl}" class="btn text-extra w-full">${msg("doCancel")}</a>
                 </div>
             </div>
         </form>

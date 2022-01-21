@@ -1,12 +1,9 @@
 package ru.alamics.sso.keycloak.settings;
 
-import okhttp3.internal.framed.Settings;
-import org.apache.http.HttpStatus;
 import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.settings.SettingsDto;
 import ru.alamics.sso.settings.SettingsService;
-import ru.alamics.sso.user.mapper.UserMapper;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

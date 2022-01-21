@@ -7,12 +7,12 @@ public class PasswordPolicyResourceProvider implements BaseResourceProvider<Pass
 
     private final KeycloakSession session;
 
-    public PasswordPolicyResourceProvider (KeycloakSession session) {
+    public PasswordPolicyResourceProvider(KeycloakSession session) {
         this.session = session;
     }
 
     @Override
-    public PasswordPolicyProvider getResource () {
+    public PasswordPolicyProvider getResource() {
         return new PasswordPolicyProvider(session);
     }
 }

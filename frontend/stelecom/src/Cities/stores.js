@@ -1,16 +1,16 @@
-import { writable } from 'svelte/store';
+import {writable} from 'svelte/store';
 import Cookie from 'js-cookie';
 
-import { STATUS } from './constants.js';
+import {STATUS} from './constants.js';
 
 export const city = writable(
   document.getElementById('cities-button').dataset.city ||
-    Cookie.get('CITY') ||
-    'Санкт-Петербург',
+  Cookie.get('CITY') ||
+  'Москва',
 );
 
 export const domain = writable(
-  Cookie.get('city-domain') || 'yar');
+  Cookie.get('city-domain') || 'interzet');
 
 const isFirstVisit =
   Cookie.get('VISITED') === '0' || typeof Cookie.get('VISITED') === 'undefined';

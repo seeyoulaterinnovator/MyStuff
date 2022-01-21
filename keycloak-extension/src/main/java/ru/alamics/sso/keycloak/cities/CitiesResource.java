@@ -7,15 +7,20 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.plugins.providers.StringTextStar;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.keycloak.models.KeycloakSession;
+import ru.alamics.sso.keycloak.cities.model.CityDadataModel;
 import ru.alamics.sso.keycloak.cities.model.CityMigration;
+import ru.alamics.sso.keycloak.cities.model.RegionCities;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.property.ApplicationProperties;
+import ru.alamics.sso.settings.SettingConstants;
+import ru.alamics.sso.settings.SettingsService;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -36,14 +41,20 @@ public class CitiesResource {
     private static final long CACHE_TIME = 60 * 60 * 1000; // 1h
     private static final ReentrantLock lock = new ReentrantLock();
     private static final AtomicLong updated = new AtomicLong(0);
+
+    private static final String LANGUAGE_RU = "ru";
+
     private static String url;
     private static List<CityMigration> cityList = new ArrayList<>();
-
     protected KeycloakSession session;
+    private SettingsService settingsService;
 
     public CitiesResource(KeycloakSession session) {
         this.session = session;
         ApplicationProperties properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+
+        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+
         if (url == null && properties != null) {
             url = properties.getProperty(CITIES_URL);
         }
@@ -114,5 +125,43 @@ public class CitiesResource {
         return JsonResponse.success()
                 .addResult("cities", cityList)
                 .build();
+    }
+
+    @GET
+    @Path("/current")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    public Response getCityTitle() {
+        String ipAddress = session.getContext().getConnection().getRemoteAddr();
+        String url = settingsService.getSettingsStringValue(SettingConstants.URL_DADATA_REQUEST_LOCATION_IP, "master");
+        String token = settingsService.getSettingsStringValue(SettingConstants.TOKEN_DADATA, "master");
+
+        log.debug(String.format("Sending request with address %s to dadata", ipAddress));
+
+        CityDadataModel cityDadataModel = client.target(url)
+                .queryParam("ip", ipAddress)
+                .queryParam("language", LANGUAGE_RU)
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, "TOKEN " + token)
+                .get(CityDadataModel.class);
+
+        String title = null;
+        if (cityDadataModel != null) {
+            title = cityDadataModel.getLocation().getData().getCity();
+            String regionIsoCode = cityDadataModel.getLocation().getData().getRegionIsoCode();
+            CityMigration city = getCityMigrationByCity(title);
+
+            if (city == null) {
+                RegionCities region = RegionCities.findRegionByIsoCode(regionIsoCode);
+                city = region == null ? null : getCityMigrationByCity(region.getDefaultCity());
+            }
+
+            title = city == null ? null : title;
+        }
+
+        return JsonResponse.success()
+                .addResult("title", title)
+                .build();
+
     }
 }

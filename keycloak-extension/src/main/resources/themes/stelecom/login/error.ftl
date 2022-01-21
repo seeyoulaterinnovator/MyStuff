@@ -5,7 +5,7 @@
     <#if section = "header">
         <#--  ${msg("errorTitle")}  -->
     <#elseif section = "form">
-        <#if client?? && client.baseUrl?has_content> 
+        <#if client?? && client.baseUrl?has_content>
           <#assign backHref="${client.baseUrl}" backMessage="${kcSanitize(msg('backToApplication'))?no_esc}" >
         </#if>
 

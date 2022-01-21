@@ -21,11 +21,11 @@
                         <input class="hidden w-0 h-0" name="withCity" value="TRUE">
                     </#if>
                     <#if usernameEditDisabled??>
-                        <input name="username" id="username" class="field__input" label="${yourlogin}"
+                        <input name="username" id="username" class="field__input" label="${usernameOrEmailPlaceholder}"
                                placeholder="${usernameOrEmailPlaceholder}" value="${(login.username!)}"
                                type="text" disabled/>
                     <#else>
-                        <input name="username" id="username" class="field__input" label="${yourlogin}"
+                        <input name="username" id="username" class="field__input" label="${usernameOrEmailPlaceholder}"
                                placeholder="${usernameOrEmailPlaceholder}" value="${(login.username!)}"
                                type="text" autofocus autocomplete="off"/>
                     </#if>

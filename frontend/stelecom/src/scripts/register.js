@@ -81,7 +81,6 @@ export default (function() {
       email: emailField && emailField.value || '',
       phone: phoneField && phoneField.value || '',
       password: '',
-      'password-confirm': '',
     },
     validate,
     validateOnBlur: false,
@@ -99,9 +98,6 @@ export default (function() {
 
     if (!values.password.match(VALIDATION_RULES['password_8-16']))
       errors.password = 'Пароль не подходит';
-
-    // if (!values['password-confirm'].match(VALIDATION_RULES['password_8-16']))
-    //   errors.password = 'Пароль не подходит. Попробуйте другой';
 
     if (values.recaptcha === false)
       errors.recaptcha = 'Подтвердите, что Вы не робот';
@@ -253,14 +249,6 @@ export default (function() {
   }
   function setPassword(password) {
     form.getFieldState('password').change(password);
-    // form.getFieldState('password-confirm').change(password);
-    // form.getFieldState('password-confirm').blur();
   }
-  function getConfirmation() {
-    return form.getFieldState('password-confirm').value;
-  }
-  function setConfirmation(confirmation) {
-    form.getFieldState('password-confirm').change(confirmation);
-  }
-  linkPasswords(getPassword, setPassword, getConfirmation, setConfirmation, document.getElementById('password'), document.getElementById('password-confirm'));
+  linkPasswords(getPassword, setPassword, document.getElementById('password'));
 })();

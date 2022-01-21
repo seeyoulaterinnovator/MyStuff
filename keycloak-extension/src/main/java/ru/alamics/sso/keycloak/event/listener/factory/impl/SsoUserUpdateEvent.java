@@ -15,6 +15,7 @@ import ru.alamics.sso.registration.model.UserEntityRepresentation;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.stats.LoginHistory;
+import ru.alamics.sso.util.Util;
 
 import javax.persistence.EntityManager;
 import java.util.HashMap;
@@ -81,8 +82,16 @@ public class SsoUserUpdateEvent extends SsoEvent {
             attributes.put("userFirstName", user.getFirstName());
             attributes.put("userLastName", user.getLastName());
 
+            List<String> phones = user.getAttribute("phone");
+            if (!phones.isEmpty()) {
+                attributes.put("phone", Util.getFormatNumber(phones.get(0)));
+            }
+
             attributes.put("emailEnabledAccountBodyHtml", settingsService.getSettingsStringValue(EMAIL_ENABLE_ACCOUNT, realm.getName()));
             attributes.put("emailDisabledAccountBodyHtml", settingsService.getSettingsStringValue(EMAIL_DISABLE_ACCOUNT, realm.getName()));
+            attributes.put("emailLoginAndPhoneHtml", settingsService.getSettingsStringValue(EMAIL_LOGIN_AND_PHONE_ACCOUNT, realm.getName()));
+            attributes.put("emailLoginHtml", settingsService.getSettingsStringValue(EMAIL_LOGIN_ACCOUNT, realm.getName()));
+            attributes.put("emailPasswordFooterHtml", settingsService.getSettingsStringValue(EMAIL_PASSWORD_FOOTER_ACCOUNT, realm.getName()));
 
             if (userNow.isEnabled()) {
                 long blockValue = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_UNLOCKING, realm.getName());
@@ -102,11 +111,11 @@ public class SsoUserUpdateEvent extends SsoEvent {
     private AdminEventEntity findAdminEvent(String userId) {
         EntityManager em = this.getSession().getProvider(JpaConnectionProvider.class).getEntityManager();
         List<AdminEventEntity> adminEventEntities = em.createQuery("" +
-                "select ae " +
-                "from AdminEventEntity ae " +
-                "where ae.representation like concat('%', :userId, '%') " +
-                "and ae.operationType in ('CREATE', 'UPDATE') " +
-                "order by ae.time DESC ", AdminEventEntity.class)
+                        "select ae " +
+                        "from AdminEventEntity ae " +
+                        "where ae.representation like concat('%', :userId, '%') " +
+                        "and ae.operationType in ('CREATE', 'UPDATE') " +
+                        "order by ae.time DESC ", AdminEventEntity.class)
                 .setParameter("userId", userId)
                 .getResultList();
         if (adminEventEntities == null || adminEventEntities.isEmpty() || adminEventEntities.size() == 1) {

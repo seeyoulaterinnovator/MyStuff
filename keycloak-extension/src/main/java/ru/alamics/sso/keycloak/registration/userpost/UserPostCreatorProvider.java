@@ -48,7 +48,7 @@ public class UserPostCreatorProvider implements FormAction {
         if (userPostRequest != null && userPostRequest.getTomsId() != null) {
             userPostRequest.setRoleId(ROLE_ID);
             userPostRequest.setSelected(true);
-            
+
             try {
                 cachedUserPostFacade.addUserPostAndSystemRole(userPostRequest);
             } catch (NotFoundException | FoundUserPostException | NotValidException e) {

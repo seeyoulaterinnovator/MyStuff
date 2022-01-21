@@ -86,21 +86,7 @@ public class UserFindService {
             Integer pageNum,
             Integer pageSize
     ) {
-        List<UserSummaryView> users = null;
-
-        if (properties.getProperty("db.non.mysql") != null) {
-            log.info("getUsersByParameters non mysql");
-            users = userRepository.findUsersByParameters(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
-
-        } else if (!Util.isEmpty(searchPhone)) {
-            log.info("getUsersByParameters phone");
-            users = userRepository.findUsersByPhone(realm, searchPhone, sortField, sortAsc, pageNum, pageSize);
-
-        } else {
-            log.info("getUsersByParameters name");
-            users = userRepository.findUsersByName(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
-            // TODO в users[n] нет телефона
-        }
+        List<UserSummaryView> users = userRepository.findUsersByParameters(realm, search, searchUser, searchPhone, searchToms, sortField, sortAsc, pageNum, pageSize);
 
         if (users.isEmpty()) {
             return Collections.emptyList();

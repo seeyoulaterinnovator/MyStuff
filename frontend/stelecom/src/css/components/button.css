@@ -1,9 +1,21 @@
 .btn {
-  @apply .block .uppercase .tracking-wider .p-4 .rounded-lg .shadow;
+  @apply .block .uppercase .tracking-wider .px-2 .rounded-lg .shadow .font-normal;
 
+  min-width: fit-content;
   height: 40px;
-  padding: 0;
   transition: 0.2s ease-in-out;
+
+  @media (min-width: 480px) {
+    @apply .px-3;
+  }
+
+  @media (min-width: 640px) {
+    @apply .px-4;
+  }
+
+  @media (min-width: 960px) {
+    @apply .px-5;
+  }
 
   @media (min-width: 1199px) {
     height: 48px;
@@ -39,6 +51,10 @@
   &:active {
     @apply .bg-extra-700-hover;
   }
+}
+
+.btn-cancel {
+  color: #007BFB;
 }
 
 .btn-sell {
@@ -100,5 +116,11 @@ a.btn {
   .btn.btn-enter {
     max-width: 136px;
     box-sizing: border-box;
+  }
+}
+
+@media (max-width: 320px) {
+  .btn-enter {
+    width: 134px;
   }
 }

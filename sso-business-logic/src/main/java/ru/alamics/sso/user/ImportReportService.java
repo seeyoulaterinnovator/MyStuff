@@ -60,7 +60,7 @@ public class ImportReportService {
 
     public void updateUploaded(String id) {
 
-        importUsersReportRepository.setReportStatus(id,ImportUsersReportStatus.AWAITING);
+        importUsersReportRepository.setReportStatus(id, ImportUsersReportStatus.AWAITING);
     }
 
     public void updateImportUsersData(ImportUsersDataModel data) {

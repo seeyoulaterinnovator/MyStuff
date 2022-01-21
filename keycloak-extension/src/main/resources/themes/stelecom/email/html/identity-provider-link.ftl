@@ -3,6 +3,7 @@
 <@template.layout ; section>
     <#if section = "style">
         <#include 'styles/content-style--default.html' >
+        <title>${kcSanitize(msg("identityProviderLinkSubject", customer))}</title>
     <#elseif section = "body">
         <#assign email=realmName>
         <#if user?? && user.getEmail??>

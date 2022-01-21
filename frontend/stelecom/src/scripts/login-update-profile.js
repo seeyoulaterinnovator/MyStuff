@@ -126,7 +126,7 @@ export default (function() {
     const reCaptcha = document.querySelector(".g-recaptcha");
     const reCaptchaWidth = 304;
     const containerWidth = document.getElementById('update-profile-submit').offsetWidth;
-    if(reCaptchaWidth !== containerWidth) {
+    if(reCaptcha && reCaptchaWidth !== containerWidth) {
       const captchaScale = containerWidth / reCaptchaWidth;
       reCaptcha.style.transform = 'scale('+captchaScale+')';
     }

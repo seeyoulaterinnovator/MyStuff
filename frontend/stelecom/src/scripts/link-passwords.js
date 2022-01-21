@@ -5,10 +5,7 @@ import {fetchPassword} from './helpers';
 export default (
   getPassword,
   setPassword,
-  getConfirmation,
-  setConfirmation,
   passwordElement = document.getElementById('password'),
-  passwordConfirmElement = document.getElementById('password-confirm')
 ) => {
   const passwordBlock = document.getElementById('password-block');
   if (!passwordBlock) return;
@@ -25,13 +22,10 @@ export default (
 
   function generatePassword() {
     fetchPassword().then(data => {
-      passwordConfirmElement.value = passwordElement.value ='';
-      passwordConfirmElement.value = passwordElement.value = data.password;
-      generatedPassword.textContent = data.password;
-      setPassword(data.password);
-      inputSomePass(passwordElement);
-      inputSomePass(passwordConfirmElement);
-      checkPasswordConfirmation();
+      passwordElement.value = '' + data.password;
+      generatedPassword.textContent = '' + data.password;
+      setPassword('' + data.password);
+      inputSomePass();
       highlightRules();
     });
   }
@@ -57,8 +51,6 @@ export default (
     const password = getPassword();
 
     for (let category in HIGHLIGHT_VALIDATION_CHARSET) {
-      const ruleElement = document.getElementById(`${category}-password`);
-
       let ruleAccepted = typeof HIGHLIGHT_VALIDATION_CHARSET[category] === 'string'
         && [...password].some(character => [...HIGHLIGHT_VALIDATION_CHARSET[category]].includes(character));
 
@@ -70,52 +62,31 @@ export default (
         })
       }
 
-      if (ruleAccepted) {
-        ruleElement.classList.remove('text-accentRed');
-        ruleElement.classList.add('text-accentGreen');
-      } else {
-        ruleElement.classList.remove('text-accentGreen');
-        ruleElement.classList.add('text-accentRed');
+      const ruleElement = document.getElementById(`${category}-password`);
+      if (ruleElement) {
+        if (ruleAccepted) {
+          ruleElement.classList.remove('text-accentRed');
+          ruleElement.classList.add('text-accentGreen');
+        } else {
+          ruleElement.classList.remove('text-accentGreen');
+          ruleElement.classList.add('text-accentRed');
+        }
       }
     }
   }
   passwordElement.addEventListener('input', highlightRules);
 
-  function inputSomePass(element) {
-    const elementId = element.id;
-    const passwordRaw = elementId==='password-confirm' ? getConfirmation() : getPassword();
-    const regExp = new RegExp(WRONG_PASS_REG);
-
-    if (regExp.test(passwordRaw)) {
+  function inputSomePass() {
+    const passwordRaw = getPassword();
+    if (WRONG_PASS_REG.test(passwordRaw)) {
       const replacePassword = passwordRaw.replace(WRONG_PASS_REG, '');
-      // element.value = replacePassword;
-      if (elementId==='password-confirm') {
-        setConfirmation(replacePassword);
-      }
-      else {
-        setPassword(replacePassword);
-      }
+      setPassword(replacePassword);
     }
   }
-  passwordElement.addEventListener('input', function() { inputSomePass(passwordElement); });
-  passwordConfirmElement.addEventListener('input', function() { inputSomePass(passwordConfirmElement); });
-
-  function checkPasswordConfirmation() {
-    const password = getPassword();
-    const confirmation = getConfirmation();
-    const ok = document.querySelectorAll('.passw_ok');
-
-    if (REQUIRED_PASSWORD.test(password) && confirmation === password) {
-      passwordElement.classList.add('field-good');
-      passwordConfirmElement.classList.add('field-good');
-      ok.forEach((img_block) => img_block.classList.remove('hidden'));
+  passwordElement.addEventListener('input', function() {
+    inputSomePass();
+    if (generatedPassword.textContent && passwordElement.value !== generatedPassword.textContent) {
+      generatedPassword.textContent = '';
     }
-    else {
-      passwordElement.classList.remove('field-good');
-      passwordConfirmElement.classList.remove('field-good');
-      ok.forEach((img_block) => img_block.classList.add('hidden'));
-    }
-  }
-  passwordElement.addEventListener('input', checkPasswordConfirmation);
-  passwordConfirmElement.addEventListener('input', checkPasswordConfirmation);
+  });
 };

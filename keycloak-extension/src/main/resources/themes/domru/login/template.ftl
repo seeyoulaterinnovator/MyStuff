@@ -45,7 +45,8 @@
                     <#if section = "header">
                         Восстановление пароля
                     <#elseif section = "description">
-                        Вам на почту отправлены данные по восстановлению пароля
+                        <span>На почту: ${login.username!}</span>
+                        Отправлены данные по восстановлению пароля
                     </#if>
                 </@emailSent.defaultTemplate>
             <#elseif displayMessage && message?has_content && message.summary == msg('emailSendErrorMessage')>
@@ -67,24 +68,40 @@
                 <div class="py-2 sm:py-3 lg:py-4">
                     <#if displayMessage && message?has_content>
                         <div class="alert pb-4">
-                            <#if message.type = 'info'><span
-                                    class="text-black">${kcSanitize(message.summary)?no_esc}</span></#if>
-                            <#if message.type = 'warning' && displayWarningMessage><span
-                                    class="text-extra">${kcSanitize(message.summary)?no_esc}</span></#if>
+                            <#if message.type = 'info'>
+                                <span class="text-black">
+                                    ${kcSanitize(message.summary)?no_esc}
+                                </span>
+                            </#if>
+                            <#if message.type = 'warning' && displayWarningMessage>
+                                <span class="text-black">
+                                    ${kcSanitize(message.summary)?no_esc}
+                                </span>
+                            </#if>
                             <#if message.type = 'success' && message.summary != msg('emailSentMessage')>
-                                <span class="text-accentGreen">${kcSanitize(message.summary)?no_esc}</span>
+                                <span class="text-accentGreen">
+                                    ${kcSanitize(message.summary)?no_esc}
+                                </span>
                             </#if>
                             <#if message.type = 'error'>
                                 <#if message.summary?contains('Номер мобильного телефона уже используется в другой учетной записи.')>
                                     <#if message.summary?contains(msg('emailExistsMessage'))>
-                                        <span class="text-accentRed bad_phone bad_email">${kcSanitize(message.summary)?no_esc}</span>
+                                        <span class="text-accentRed bad_phone bad_email hidden">
+                                            ${kcSanitize(message.summary)?no_esc}
+                                        </span>
                                     <#else>
-                                        <span class="text-accentRed bad_phone">${kcSanitize(message.summary)?no_esc}</span>
+                                        <span class="text-accentRed bad_phone hidden">
+                                            ${kcSanitize(message.summary)?no_esc}
+                                        </span>
                                     </#if>
                                 <#elseif message.summary == msg('emailExistsMessage')>
-                                    <span class="text-accentRed bad_email">${kcSanitize(message.summary)?no_esc}</span>
+                                    <span class="text-accentRed bad_email hidden">
+                                        ${kcSanitize(message.summary)?no_esc}
+                                    </span>
                                 <#else>
-                                    <span class="text-accentRed">${kcSanitize(message.summary)?no_esc}</span>
+                                    <span class="text-accentRed hidden">
+                                        ${kcSanitize(message.summary)?no_esc}
+                                    </span>
                                 </#if>
                             </#if>
                         </div>
@@ -97,9 +114,24 @@
             </#if>
         </main>
 
-        <#include "templates/footer-copyright.html">
+        <footer id="page-footer" class="w-full fixed bottom-0 footer">
+            <a href="${phoneConstLink}" class= "show-small-tell">
+                <div class="flex h-6 items-center">
+                    <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5.03341 4.12902C5.2853 3.87713 5.6937 3.87713 5.9456 4.12902L7.99182 6.17524C8.38346 6.56688 8.38346 7.20186 7.99182 7.5935C7.48302 8.1023 7.28745 8.84622 7.47635 9.53884C7.89974 11.0913 9.11969 12.3112 10.6721 12.7346C11.3648 12.9235 12.1087 12.728 12.6175 12.2192C13.0091 11.8275 13.6441 11.8275 14.0357 12.2192L15.3419 13.5253C15.6933 13.8768 15.6933 14.4466 15.3419 14.798C14.4689 15.6711 13.4536 16.2352 12.4491 16.4008C11.4571 16.5642 10.4516 16.3447 9.54609 15.6075C8.8175 15.0142 7.95941 14.2451 6.96264 13.2483C5.83397 12.1197 4.95756 11.1292 4.27924 10.2838C2.78739 8.42446 3.23894 5.92349 5.03341 4.12902Z" stroke="#222222"/>
+                    </svg>
+                    <span class="phone-number">${phoneConst}</span>
+                </div>
+            </a>
+            <span class="text-main-500">${footer}
+                <script>
+                        document.write(new Date().getFullYear())
+                </script>
+            </span>
+        </footer>
 
         <div id="cities-modal"></div>
+        <div id="message-modal" data-login-url="${url.loginRestartFlowUrl}"></div>
     </#if>
 
     <#if properties.scripts?has_content>

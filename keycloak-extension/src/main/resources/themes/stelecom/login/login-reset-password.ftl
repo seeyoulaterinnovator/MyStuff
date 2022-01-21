@@ -11,15 +11,7 @@
             <input name="city" id="city" class="city_hidden_input" type="text" />
             <div class="field field__container field--required mb-4 md:w-full">
                 <input name="username" id="username" class="field__input" placeholder="${msg('usernameOrEmailPlaceholder')}" type="text" autofocus />
-                <label class="field__label" for="username">
-                    <#if !realm.loginWithEmailAllowed>
-                        ${msg("username")}
-                    <#elseif !realm.registrationEmailAsUsername>
-                        ${msg("usernameOrEmail")}
-                    <#else>
-                        ${msg("phoneOrEmail")}
-                    </#if>
-                </label>
+                <label class="field__label" for="username">${msg('usernameOrEmailPlaceholder')}</label>
             </div>
 
             <div class="flex flex-col justify-between sm:flex-row xl:mt-12 md:mt-8 mt-7">
@@ -29,7 +21,7 @@
                 </div>
                 <div class="flex-basis-auto w-full ml-0 text-sm sm:ml-6">
                     <#--  <button id="cancel" class="btn w-full" type="button">${msg("doCancel")}</button>  -->
-                    <a id="cancel" href="${redirectUrl}" class="btn w-full">${msg("doCancel")}</a>
+                    <a id="cancel" href="${redirectUrl}" class="btn text-extra btn-cancel w-full">${msg("doCancel")}</a>
                 </div>
             </div>
         </form>

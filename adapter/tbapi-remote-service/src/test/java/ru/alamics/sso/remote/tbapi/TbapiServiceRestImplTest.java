@@ -9,8 +9,6 @@ import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.tbapi.model.TbapiRequest;
 import ru.alamics.sso.registration.tbapi.model.TbapiResponse;
 
-import java.util.Map;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,8 +34,7 @@ class TbapiServiceRestImplTest {
     }
 
     @Test
-    void createCustomer() throws TbapiRegisterException
-    {
+    void createCustomer() throws TbapiRegisterException {
 
         server.stubFor(post(urlEqualTo("/api/v1/leadManagement/lead"))
                 .withHeader("Accept", equalTo("application/json"))

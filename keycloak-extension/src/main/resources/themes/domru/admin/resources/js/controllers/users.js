@@ -123,13 +123,19 @@ module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, c
 
 });
 
-module.controller('UserSessionsCtrl', function ($scope, realm, user, sessions, UserSessions, UserLogout,
+module.controller('UserSessionsCtrl', function ($scope, $http, realm, user, UserSessions, UserLogout,
                                                 UserSessionLogout, Notifications, $location) {
+                                                    
     $scope.realm = realm;
     $scope.user = user;
-    $scope.sessions = sessions;
     $scope.query = {};
     $scope.query.searchRealm = realm.realm;
+
+    let id = user.id;
+    $http.get(`${authUrl}/realms/${realm.realm}/sessions/${id}?searchRealm=${$location.search().searchRealm}`).then(function (data) {
+        $scope.sessions = data.data;
+    })
+
     if ($location.search().searchRealm) {
         $scope.query.searchRealm = $location.search().searchRealm;
     }
@@ -1017,7 +1023,7 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
                 var id = l.substring(l.lastIndexOf("/") + 1);
 
                 $location.url("/realms/" + realm.realm + "/users/" + id + "?searchRealm=" + $scope.query.searchRealm);
-                Notifications.success("The user has been created.");
+                Notifications.success("Пользователь создан");
             });
         } else {
             if ($scope.GetPhoneAttr() === '') {
@@ -1028,12 +1034,21 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
                     $scope.changed = false;
                     convertAttributeValuesToString($scope.user);
                     user = angular.copy($scope.user);
-                    Notifications.success("Your changes have been saved to the user.");
+                    Notifications.success("Ваши изменения были сохранены.");
                 });
             } else {
                 $scope.GetPhoneCheckerResult().then(function (result) {
+                    var phone = $scope.GetPhoneAttr();
                     if (result != null) {
-                        Notifications.error("The user phone number not unique");
+                        Notifications.error("Номер телефона уже используется");
+                        return;
+                    }
+                    if (!Number(phone)){
+                        Notifications.error('Некорректный номер телефона');
+                        return;
+                    }
+                    if(('' + phone).length !== 11){
+                        Notifications.error("Некорректная длина номера телефона");
                         return;
                     }
                     User.update({
@@ -1043,7 +1058,7 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
                         $scope.changed = false;
                         convertAttributeValuesToString($scope.user);
                         user = angular.copy($scope.user);
-                        Notifications.success("Your changes have been saved to the user.");
+                        Notifications.success("Ваши изменения были сохранены.");
                     });
                 });
             }
@@ -1080,6 +1095,16 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
     };
 
     $scope.addAttribute = function () {
+        if ($scope.newAttribute.key === 'phone'){
+            if (!Number($scope.newAttribute.value)){
+                Notifications.error('Некорректный номер телефона');
+                return;
+            }
+            if($scope.newAttribute.value.length !== 11){
+                Notifications.error("Некорректная длина номера телефона");
+                return;
+            }
+        }
         $scope.user.attributes[$scope.newAttribute.key] = $scope.newAttribute.value;
         delete $scope.newAttribute;
     };

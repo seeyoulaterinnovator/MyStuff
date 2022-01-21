@@ -1,7 +1,7 @@
 import linkPasswords from './link-passwords.js';
 import { createForm } from 'final-form';
 
-import { setButtonAvailability, isEmpty } from './helpers.js';
+import { isEmpty } from './helpers.js';
 
 import VALIDATION_RULES from '../constants/validationRules.js';
 
@@ -11,11 +11,9 @@ export default (function() {
 
   const submitElement = document.getElementById('submit');
   const passwordElement = document.getElementById('password-new');
-  const passwordConfirmElement = document.getElementById('password-confirm');
   submitElement.disabled = true;
 
   let isPasswordExists = false;
-  let isPasswordConfirmExists = false;
   let arePasswordsEqual = false;
 
   // Создаем объект формы с помощью final-form
@@ -24,7 +22,6 @@ export default (function() {
     onSubmit: () => {},
     initialValues: {
       'password-new': '',
-      'password-confirm': '',
     },
     validate,
     validateOnBlur: true,
@@ -44,13 +41,8 @@ export default (function() {
     if (!values['password-new'].match(VALIDATION_RULES['password_8-16']))
       errors['password-new'] = 'Пароль не подходит';
 
-    if (values['password-confirm'] !== values['password-new'])
-      errors['password-confirm'] = 'Пароли не совпадают';
-
     checkExistence();
     // isPasswordExists = passwordElement.value !== '';
-    // isPasswordConfirmExists = passwordConfirmElement.value !== '';
-    // arePasswordsEqual = passwordElement.value === passwordConfirmElement.value;
 
     return errors;
   }
@@ -143,25 +135,18 @@ export default (function() {
   }
   function setPassword(password) {
     // passwordElement.value = password;
-    // passwordConfirmElement.value = password;
     // setButtonAvailability(validate, submitElement);
     form.getFieldState('password-new').change(password);
-  }
-  function getConfirmation() {
-    return form.getFieldState('password-confirm').value;
-  }
-  function setConfirmation(confirmation) {
-    form.getFieldState('password-confirm').change(confirmation);
+    passwordElement.dispatchEvent(new Event('input', {
+      'bubbles': true,
+      'cancelable': true
+    }));
   }
 
-  linkPasswords(getPassword, setPassword, getConfirmation, setConfirmation, passwordElement, passwordConfirmElement);
+  linkPasswords(getPassword, setPassword, passwordElement);
 
   passwordElement.addEventListener('input', () => {
-    submitElement.disabled = !isEmpty(validate({'password-new': getPassword(), 'password-confirm': getConfirmation()}));
-  });
-
-  passwordConfirmElement.addEventListener('input', () => {
-    submitElement.disabled = !isEmpty(validate({'password-new': getPassword(), 'password-confirm': getConfirmation()}));
+    submitElement.disabled = !isEmpty(validate({'password-new': getPassword()}));
   });
 
 })();

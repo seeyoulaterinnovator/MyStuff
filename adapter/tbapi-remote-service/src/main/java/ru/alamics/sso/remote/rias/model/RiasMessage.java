@@ -13,12 +13,12 @@ public class RiasMessage {
         return this.code;
     }
 
-    public String getText() {
-        return this.text;
-    }
-
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public String getText() {
+        return this.text;
     }
 
     public void setText(String text) {

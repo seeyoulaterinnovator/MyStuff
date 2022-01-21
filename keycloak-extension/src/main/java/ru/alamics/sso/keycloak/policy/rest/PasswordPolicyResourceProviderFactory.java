@@ -8,12 +8,12 @@ public class PasswordPolicyResourceProviderFactory implements BaseResourceProvid
     private final static String ID = "password-policy";
 
     @Override
-    public RealmResourceProvider create (KeycloakSession session) {
+    public RealmResourceProvider create(KeycloakSession session) {
         return new PasswordPolicyResourceProvider(session);
     }
 
     @Override
-    public String getId () {
+    public String getId() {
         return ID;
     }
 }

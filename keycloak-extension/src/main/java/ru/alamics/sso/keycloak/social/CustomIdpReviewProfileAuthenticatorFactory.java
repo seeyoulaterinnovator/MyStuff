@@ -1,15 +1,12 @@
 package ru.alamics.sso.keycloak.social;
 
 import org.keycloak.authentication.Authenticator;
-import org.keycloak.authentication.FormActionFactory;
-import org.keycloak.authentication.authenticators.broker.IdpReviewProfileAuthenticator;
 import org.keycloak.authentication.authenticators.broker.IdpReviewProfileAuthenticatorFactory;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 

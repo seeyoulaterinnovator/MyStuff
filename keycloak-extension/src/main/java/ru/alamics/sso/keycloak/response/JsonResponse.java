@@ -2,7 +2,6 @@ package ru.alamics.sso.keycloak.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Builder;
 import lombok.Data;
 
 import javax.ws.rs.core.MediaType;
@@ -24,7 +23,7 @@ public class JsonResponse implements ResponseBuilder, Serializable {
     @JsonIgnore
     private Response.Status httpStatus;
 
-    public JsonResponse(){
+    public JsonResponse() {
     }
 
     private JsonResponse(ResponseStatus status, Response.Status httpStatus) {

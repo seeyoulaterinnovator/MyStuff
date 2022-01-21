@@ -9,7 +9,7 @@ public abstract class ResetFactory {
     protected KeycloakSession session;
     protected AuthenticationFlowContext context;
 
-    ResetFactory (KeycloakSession session, AuthenticationFlowContext context) {
+    ResetFactory(KeycloakSession session, AuthenticationFlowContext context) {
         this.session = session;
         this.context = context;
     }

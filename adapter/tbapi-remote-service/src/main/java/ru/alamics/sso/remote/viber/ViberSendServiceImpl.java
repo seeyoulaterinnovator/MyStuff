@@ -19,30 +19,32 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Stateless(name = "ViberSender")
 public class ViberSendServiceImpl implements ViberSendService {
-    @Resource(lookup = "java:global/domru-sso/ApplicationProperties")
-    private ApplicationProperties properties;
-
     private static final String SEND_URI = "viberSender.uri";
     private static final String SMSC_NAME = "viberSender.smscName";
     private static final String USERNAME = "viberSender.username";
     private static final String PASSWORD = "viberSender.password";
     private static final String SENDER_NAME = "viberSender.senderName";
     private static final String TIMEOUT = "viberSender.timeout";
-
     private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
             .connectTimeout(3, TimeUnit.SECONDS)
             .readTimeout(10, TimeUnit.SECONDS);
-
     private static final ResteasyClient client = clientBuilder.build();
     private static SmsConfig smsConfig;
+    @Resource(lookup = "java:global/domru-sso/ApplicationProperties")
+    private ApplicationProperties properties;
+
+    public ViberSendServiceImpl() {
+    }
+
+    public ViberSendServiceImpl(SmsConfig config) {
+        smsConfig = config;
+    }
 
     @PostConstruct
     private void init() {
@@ -60,13 +62,6 @@ public class ViberSendServiceImpl implements ViberSendService {
                 .build();
     }
 
-    public ViberSendServiceImpl() {
-    }
-
-    public ViberSendServiceImpl(SmsConfig config) {
-        smsConfig = config;
-    }
-
     @Override
     public String sendMsg(String phone, String text) throws ViberSendException {
 
@@ -77,6 +72,8 @@ public class ViberSendServiceImpl implements ViberSendService {
         }
 
         URI uri = smsConfig.getUrl();
+
+        log.info(String.format("Api %s, Sending VIBER code to number: %s", uri.getHost(), phone));
 
         try {
             ResteasyWebTarget webTarget = client.target(uri)

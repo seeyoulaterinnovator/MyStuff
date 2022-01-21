@@ -20,32 +20,33 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Stateless(name = "SmsSender")
 public class SmsSendServiceImpl implements SmsSendService {
-    @Resource(lookup = "java:global/domru-sso/ApplicationProperties")
-    private ApplicationProperties properties;
-
     private static final String SEND_URI = "smsSender.uri";
     private static final String SMSC_NAME = "smsSender.smscName";
     private static final String USERNAME = "smsSender.username";
     private static final String PASSWORD = "smsSender.password";
     private static final String SENDER_NAME = "smsSender.senderName";
     private static final String TIMEOUT = "smsSender.timeout";
-
     private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
             .connectTimeout(3, TimeUnit.SECONDS)
             .readTimeout(10, TimeUnit.SECONDS);
-
     private static final ResteasyClient client = clientBuilder.build();
-
     private static SmsConfig smsConfig;
+    @Resource(lookup = "java:global/domru-sso/ApplicationProperties")
+    private ApplicationProperties properties;
+
+    public SmsSendServiceImpl() {
+
+    }
+
+    public SmsSendServiceImpl(SmsConfig smsConfig) {
+        this.smsConfig = smsConfig;
+    }
 
     @PostConstruct
     private void init() {
@@ -63,14 +64,6 @@ public class SmsSendServiceImpl implements SmsSendService {
                 .build();
     }
 
-    public SmsSendServiceImpl() {
-
-    }
-
-    public SmsSendServiceImpl(SmsConfig smsConfig) {
-        this.smsConfig = smsConfig;
-    }
-
     @Override
     public String sendSms(String phone, String text) throws SmsSendException {
 
@@ -81,6 +74,8 @@ public class SmsSendServiceImpl implements SmsSendService {
         }
 
         URI uri = smsConfig.getUrl();
+
+        log.info(String.format("Api %s, Sending SMS code to number: %s", uri.getHost(), phone));
 
         // TODO https://stackoverflow.com/questions/53760939/processingexception-resteasy003145-unable-to-find-a-messagebodyreader-of-conte?noredirect=1&lq=1
         ClientInvocationBuilder builder = (ClientInvocationBuilder) client.register(StringTextStar.class)

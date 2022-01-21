@@ -1,5 +1,7 @@
 package ru.alamics.sso.util;
 
+import org.jboss.resteasy.spi.HttpRequest;
+import org.keycloak.OAuth2Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.jose.jws.JWSInput;
@@ -8,6 +10,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.services.managers.RealmManager;
 import org.keycloak.services.validation.Validation;
@@ -19,6 +22,8 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import static ru.alamics.sso.registration.model.UserConstants.HIDDEN_HEADER;
@@ -27,9 +32,24 @@ import static ru.alamics.sso.registration.model.UserConstants.I_FRAME;
 @Slf4j
 public class Util {
 
+    public static boolean isPasswordGrandType(KeycloakSession session) {
+        HttpRequest contextObject = session.getContext().getContextObject(HttpRequest.class);
+        MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
+        if (!isEmpty(parameters)) {
+            return OAuth2Constants.PASSWORD.equals(parameters.getFirst(OIDCLoginProtocol.GRANT_TYPE_PARAM));
+        } else {
+            return false;
+        }
+    }
+
     public static boolean isFrameByCurrentRequest(KeycloakSession session) {
         MultivaluedMap<String, String> queryParameters = session.getContext().getUri().getQueryParameters();
         return queryParameters != null && (queryParameters.get(I_FRAME) != null || queryParameters.get(HIDDEN_HEADER) != null);
+    }
+
+    public static String getFormatNumber(String rawPhone) {
+        return String.format("+%s %s %s %s %s", rawPhone.charAt(0), rawPhone.substring(1, 4), rawPhone.substring(4, 7), rawPhone.substring(7, 9),
+                rawPhone.substring(9, 11));
     }
 
     public static boolean isFrameByReferer(KeycloakSession session) {
@@ -54,8 +74,15 @@ public class Util {
     }
 
     public static boolean isEmpty(String val) {
-
         return val == null || val.length() == 0;
+    }
+
+    public static boolean isEmpty(Collection<?> collection) {
+        return collection == null || collection.isEmpty();
+    }
+
+    public static boolean isEmpty(Map<?, ?> collection) {
+        return collection == null || collection.isEmpty();
     }
 
     public static String encodeUTF8(String str) {

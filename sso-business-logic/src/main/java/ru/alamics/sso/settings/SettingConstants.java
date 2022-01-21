@@ -1,5 +1,10 @@
 package ru.alamics.sso.settings;
 
+/*
+    Большая часть текста была перенесена из
+    файла messages_ru.properties далее эти поля можно будет менять через
+    Админ консоль
+ */
 public enum SettingConstants {
     ABSENCE_BLOCKING_DAYS("user.absence.blocking.days"),
     ABSENCE_NOTIFICATION_DAYS("user.absence.notifications.days"),
@@ -7,6 +12,7 @@ public enum SettingConstants {
     EXPIRE_INCOMING_CALL_CODE("user.expire.incoming.call.code"),
     EXPIRE_INCOMING_CALL_EMAIL_CODE("user.expire.incoming.call.email.code"),
 
+    //Переменные страниц
 
     ENTER("enter"),
     PASS_PLACEHOLDER("passwordPlaceholder"),
@@ -52,7 +58,7 @@ public enum SettingConstants {
     PLACEHOLDER_PHONE("placeholderPhone"),
     PHONE_CONST_LINK("phoneConstLink"),
 
-    //Заголовок сообщений
+    //Заголовоки сообщений
 
     ACCOUNT_SUBJECT("emailAccountDataSubject"),
     ACCOUNT_SUBJECT_ENABLE("emailEnabledAccountSubject"),
@@ -92,6 +98,7 @@ public enum SettingConstants {
     EMAIL_IDENTITY_PROVIDER("identityProviderLinkBodyHtml"),
     EMAIL_RESET("passwordResetBodyHtml"),
     EMAIL_DATE_ACCOUNT("emailAccountDataBodyHtml"),
+    EMAIL_LINK_PASSWORD("linkPassword"),
 
     SCHEDULER_BLOCKING_BODY("blockNotificationSchedulerHtml"),
     SCHEDULER_BLOCKING_PREPARE_BODY("blockPrepareNotificationSchedulerHtml"),
@@ -104,6 +111,9 @@ public enum SettingConstants {
     TIME_TOKEN_VERIFY_EMAIL("life.token.loginverify.email"),
     TIME_TOKEN_RESET_PASSWORD("life.token.reset.pass"),
     TIME_TOKEN_SET_FIRST_PASS("life.token.set.first-pass"),
+
+    TOKEN_DADATA("tokenDaData"),
+    URL_DADATA_REQUEST_LOCATION_IP("urlDaDataRequestLocationIp"),
 
     BLOCK_NOTIFICATION_OF_WARNING("block.notification.warning"),
     BLOCK_NOTIFICATION_OF_BLOCKED("block.notification.blocked"),

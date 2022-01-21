@@ -3,7 +3,7 @@
 
 <@layout.registrationLayout  displayMessage=false displayCity=false; section>
     <#if section = "form">
-    <@emailSent.defaultTemplate email="${mail!}" buttonExist=false; section>
+    <@emailSent.defaultTemplate email="${mail!}" buttonExist=true; section>
         <#if section = "header">
         Подтверждение данных
         <#elseif section = "description">

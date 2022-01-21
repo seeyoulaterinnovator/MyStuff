@@ -1,7 +1,7 @@
 import IMask from 'imask';
-import { createForm } from 'final-form';
+import {createForm} from 'final-form';
 
-import { isEmpty } from './helpers';
+import {isEmpty} from './helpers';
 
 import VALIDATION_RULES from '../constants/validationRules.js';
 
@@ -126,7 +126,7 @@ export default (function() {
     const reCaptcha = document.querySelector(".g-recaptcha");
     const reCaptchaWidth = 304;
     const containerWidth = document.getElementById('update-profile-submit').offsetWidth;
-    if(reCaptchaWidth !== containerWidth) {
+    if(reCaptcha && reCaptchaWidth !== containerWidth) {
       const captchaScale = containerWidth / reCaptchaWidth;
       reCaptcha.style.transform = 'scale('+captchaScale+')';
     }

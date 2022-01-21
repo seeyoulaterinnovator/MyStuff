@@ -26,7 +26,8 @@ public class RiasCheckFactory implements FormActionFactory {
     };
 
 
-    public RiasCheckFactory(){}
+    public RiasCheckFactory() {
+    }
 
     @Override
     public String getDisplayType() {

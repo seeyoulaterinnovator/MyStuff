@@ -7,7 +7,6 @@ import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import ru.alamics.sso.keycloak.response.JsonResponse;
-import ru.alamics.sso.registration.model.UserEntityRepresentation;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;

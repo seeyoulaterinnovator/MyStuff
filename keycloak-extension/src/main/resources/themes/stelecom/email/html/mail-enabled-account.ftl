@@ -3,6 +3,7 @@
 <@template.layout ; section>
   <#if section = "style">
     <#include 'styles/content-style--default.html' >
+    <title>${kcSanitize(msg("emailEnabledAccountSubject"))}</title>
   <#elseif section = "body">
     ${kcSanitize(msg("emailEnabledAccountBodyHtml", userName, userFirstName, userLastName, accountLink))?no_esc}
   </#if>

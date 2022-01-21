@@ -20,7 +20,8 @@ public class PhoneVerificationBySmsFactory implements RequiredActionFactory, Dis
 
     public static final String PROVIDER_ID = "phone_verificator_sms";
 
-    public PhoneVerificationBySmsFactory() {}
+    public PhoneVerificationBySmsFactory() {
+    }
 
     @Override
     public RequiredActionProvider create(KeycloakSession session) {

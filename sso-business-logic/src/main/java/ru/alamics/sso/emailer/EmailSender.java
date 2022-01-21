@@ -113,7 +113,7 @@ public class EmailSender {
     }
 
     protected EmailTemplate processTemplate(String subjectKey, List<Object> subjectAttributes, String template, Map<String, Object> attributes,
-                                            Theme theme, Locale locale, String realName) throws EmailException {
+                                            Theme theme, Locale locale, String realmName) throws EmailException {
         try {
             String textBody;
             String subject = subjectKey;
@@ -126,15 +126,17 @@ public class EmailSender {
             if (theme != null) {
                 attributes.put("properties", theme.getProperties());
             }
-            attributes.put("phoneInMessage",settingsService.getSettingsStringValue(PHONE_IN_MESSAGE,realName));
-            attributes.put("footerInMassage",settingsService.getSettingsStringValue(FOOTER_IN_MESSAGE,realName));
-            attributes.put("customer",settingsService.getSettingsStringValue(CUSTOMER,realName));
-            attributes.put("gratitudeUp",settingsService.getSettingsStringValue(GRATITUDE_UP,realName));
-            attributes.put("gratitudeDown",settingsService.getSettingsStringValue(GRATITUDE_DOWN,realName));
+            attributes.put("phoneInMessage",settingsService.getSettingsStringValue(PHONE_IN_MESSAGE,realmName));
+            attributes.put("footerInMassage",settingsService.getSettingsStringValue(FOOTER_IN_MESSAGE,realmName));
+            attributes.put("customer",settingsService.getSettingsStringValue(CUSTOMER,realmName));
+            attributes.put("gratitudeUp",settingsService.getSettingsStringValue(GRATITUDE_UP,realmName));
+            attributes.put("gratitudeDown",settingsService.getSettingsStringValue(GRATITUDE_DOWN,realmName));
+            attributes.put("phoneConstLink",settingsService.getSettingsStringValue(PHONE_CONST_LINK,realmName));
+            attributes.put("homePage",settingsService.getSettingsStringValue(HOME_PAGE,realmName));
             String textTemplate = String.format("/text/%s", template);
             try {
                 if (theme == null) {
-                    textBody = CustomFreeMarkerUtil.processTemplate(attributes, textTemplate);
+                    textBody = CustomFreeMarkerUtil.processTemplate(attributes, textTemplate, realmName);
                 } else {
                     textBody = freeMarkerUtil.processTemplate(attributes, textTemplate, theme);
                 }
@@ -145,7 +147,7 @@ public class EmailSender {
             String htmlBody;
             try {
                 if (theme == null) {
-                    htmlBody = CustomFreeMarkerUtil.processTemplate(attributes, htmlTemplate);
+                    htmlBody = CustomFreeMarkerUtil.processTemplate(attributes, htmlTemplate, realmName);
                 } else {
                     htmlBody = freeMarkerUtil.processTemplate(attributes, htmlTemplate, theme);
                 }

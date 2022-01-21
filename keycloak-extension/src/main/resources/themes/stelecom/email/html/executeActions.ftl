@@ -15,6 +15,7 @@
 <@template.layout ; section>
   <#if section = "style">
     <#include 'styles/content-style--default.html' >
+    <title>${kcSanitize(msg("executeActionsSubject"))}</title>
   <#elseif section = "body">
 
   <#assign email=realmName>

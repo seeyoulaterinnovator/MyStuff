@@ -1338,4 +1338,108 @@
         </sql>
     </changeSet>
 
+    <changeSet id="80" author="petrov-ny">
+        <sql>
+            <![CDATA[
+                UPDATE SETTINGS SET VALUE = '<p>Был создан запрос на изменение пароля от Вашей учетной записи {2}. Если это были Вы, пройдите по ссылке</p><p><a href="{0}">Изменить пароль</a></p><p>Эта ссылка устареет через {1}.</p><p class="content__additional">Если Вы не хотите сбрасывать пароль, просто проигнорируйте это письмо и ничего не изменится.</p>' WHERE ID = 'deeec109-9620-4f7b-9063-cfd44d682353';
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet id="81" author="petrov-ny">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('92e1e9a0-679c-11ec-90d6-0242ac120003', 'emailResetPasswordSubject', 'Ваш пароль для входа в Личный кабинет
+            сброшен', null, 'S-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('96ee0d76-679c-11ec-90d6-0242ac120003', 'executeActionsSubject', 'Обновление Вашей учетной записи', null,
+            'S-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('9b9fd5c0-679c-11ec-90d6-0242ac120003', 'emailAccountDataSubject', 'Создан аккаунт', null, 'S-TELECOM',
+            'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('a1776012-679c-11ec-90d6-0242ac120003', 'emailDisabledAccountSubject', 'Ваша учетная запись заблокирована',
+            null, 'S-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('a8087b0a-679c-11ec-90d6-0242ac120003', 'emailVerificationSubject', 'Подтверждение E-mail', null,
+            'S-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('ab9f6bca-679c-11ec-90d6-0242ac120003', 'emailSendLoginSubject', 'Ваш логин для входа в Личный кабинет',
+            null, 'S-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('b1517c16-679c-11ec-90d6-0242ac120003', 'emailCredentialDisableSubject', 'Обновление Вашей учетной записи',
+            null, 'S-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('b65b3c56-679c-11ec-90d6-0242ac120003', 'emailVerificationAuthSubject', 'Подтверждение данных', null,
+            'S-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('ba3023b4-679c-11ec-90d6-0242ac120003', 'passwordResetSubject', 'Сброс пароля', null, 'S-TELECOM',
+            'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('bee526ac-679c-11ec-90d6-0242ac120003', 'identityProviderLinkSubject', 'Ссылка {0}', null, 'S-TELECOM',
+            'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('c272e516-679c-11ec-90d6-0242ac120003', 'emailEnabledAccountSubject', 'Ваша учетная запись разблокирована',
+            null, 'S-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+        </sql>
+    </changeSet>
+
+    <changeSet id="82" author="petrov-ny">
+        <sql>
+            UPDATE SETTINGS SET VALUE = 'https://lkb2b.stelecom.ru' WHERE ID = 'b91073d4-5668-11ec-bf63-0242ac130002';
+        </sql>
+    </changeSet>
+
+    <changeSet id="83" author="petrov-ny">
+        <sql>
+            <![CDATA[
+                UPDATE SETTINGS SET VALUE = 'С уважением, Дом.ru Бизнес!' WHERE EXT_ID = 'GratitudeUp';
+                UPDATE SETTINGS SET VALUE = 'Данное письмо отправлено с адреса, предназначенного
+            только для рассылок. Пожалуйста, не отвечайте на это письмо. В случае возникновения
+            вопросов Вы можете обратиться к персональному менеджеру, контактные данные есть в
+            «личном кабинете» или по телефону <br> 8-800-333-90-00 (звонок бесплатный).' WHERE EXT_ID = 'gratitudeDown';
+            UPDATE SETTINGS SET VALUE = '<p>Была создана учетная запись <a class="no_block" href="mailto:{2}">{2}</a>. Если это были Вы, пройдите по ссылке для подтверждения вашего email.</p><p class = "block_link" ><a href="{0}">Подтвердить E-mail</a></p><p class = "small_text">Эта ссылка устареет через {4}.</p><p class="content__additional small_text">Если Вы не создавали учетную запись, просто проигнорируйте это письмо.</p>' WHERE EXT_ID = 'emailVerificationBodyHtml';
+            UPDATE SETTINGS SET VALUE = '<p>Подтвердите Вашу учетную запись для входа в Личный кабинет «Дом.ru Бизнес» по ссылке.Срок действия ссылки {4}.</p><p class = "block_link"><a href="{0}">Подтвердить учетную запись</a></p>' WHERE EXT_ID = 'emailVerificationLoginBodyHtml';
+            UPDATE SETTINGS SET VALUE = '<p>Был создан запрос на связь Вашей учетной записи <a class="no_block" href="mailto:{1}">{1}</a> с учетной записью пользователя {2} {0}. После объединения учетных записей Вы можете войти в Личный кабинет «Дом.ru Бизнес» <a class="no_block" href="mailto:{1}">{1}</a> через {0}. Если это были Вы, пройдите по ссылке, чтобы связать учетные записи.</p><p class = "block_link"><a href="{3}">Связать учетные данные</a></p><p class="small_text">Эта ссылка устареет через 24 часа.</p><p class="small_text">Если Вы не хотите объединять учетные записи, проигнорируйте это письмо.</p>' WHERE EXT_ID = 'identityProviderLinkBodyHtml';
+            UPDATE SETTINGS SET VALUE = '<p>Был создан запрос на изменение пароля от Вашей учетной записи {2}. Если это были Вы, пройдите по ссылке</p><p class = "block_link"><a href="{0}">Изменить пароль</a></p><p class = "small_text">Эта ссылка устареет через  {1}.</p><p class="small_text">Если Вы не хотите сбрасывать пароль, просто проигнорируйте это письмо и ничего не изменится.</p>' WHERE EXT_ID = 'passwordResetBodyHtml';
+            UPDATE SETTINGS SET VALUE = '<p>Код для подтверждения данных Вашей учетной записи Личного кабинета «Дом.ru Бизнес»:</p><p class = "text_bolid margin_block">{0}</p>' WHERE EXT_ID = 'emailVerificationAuthBodyHtml';
+            UPDATE SETTINGS SET VALUE = '<p>Для Вас создана учетная запись для входа в Личный кабинет «Дом.ru Бизнес».</p><p class = "small_text margin_block">Ваш логин:<br><span class = "text_bolid"><a class="no_block" href="{0}">{0}</a></span></p><p class = "margin_block">Перейдите по ссылке и установите пароль.</p><p class = "block_link"><a href="{3}">Установить пароль</a></p>' WHERE EXT_ID = 'emailAccountDataBodyHtml';
+            UPDATE SETTINGS SET VALUE = '<p>Для Вас создана учетная запись для входа в Личный кабинет «Дом.ru Бизнес».</p><p class = "small_text margin_block">Ваш логин:<br><span class = "text_bolid"><a class="no_block" href="{0}">{0}</a></span></p>' WHERE EXT_ID = 'emailAccountCreateBodyHtml';
+            UPDATE SETTINGS SET VALUE = '<p>Ваша учетная запись для входа в <a class="no_block" href="https://newlkb2b.dom.ru">Личный кабинет</a> «Дом.ru Бизнес» <span class = "text_green">разблокирована</span>.</p>' WHERE EXT_ID = 'emailEnabledAccountBodyHtml';
+            UPDATE SETTINGS SET VALUE = '<p>Ваша учетная запись для входа в Личный кабинет «Дом.ru Бизнес» <span class = "text_red">заблокирована</span>. Доступ к услугам при этом не блокируется.</p> <p>Чтобы восстановить доступ к учетной записи, обратитесь к своему персональному менеджеру или оставьте заявку в чате <a class="no_block" href="https://newlkb2b.dom.ru">Личного кабинета</a>, или по телефону <a class="no_block" href="tel:88003339000">8 800 333 9000</a>.</p>' WHERE EXT_ID = 'emailDisabledAccountBodyHtml';
+            UPDATE SETTINGS SET VALUE = '<p>Для авторизации в <a class="no_block" href="https://newlkb2b.dom.ru">Личном кабинете</a> необходимо указать логин и пароль, установленный Вами при регистрации в Личном кабинете.</p>' WHERE EXT_ID = 'emailSendLoginBodyHtml';
+            UPDATE SETTINGS SET VALUE = '<p>Пароль вашей учетной записи был сброшен.</p><p>Установите новый пароль по <a class="no_block" href="{0}">ссылке</a>, чтобы завершить процесс и восстановить доступ к личному кабинету.</p><p class = "small_text block_timer">Срок действия ссылки 12 часов.</p>' WHERE EXT_ID = 'emailResetPasswordBodyHtml';
+            UPDATE SETTINGS SET VALUE = '<p>Мы не храним ваши пароли.</p><p>Если вы забыли свой пароль или у вас не получается войти в Личный кабинет - воспользуйтесь формой восстановления пароля по ссылке <a class="no_block" href="https://newlkb2b.dom.ru">«Забыли пароль?»</a></p><p><ul class = "instruction"><li class = "small_text instruction_text"><span class = "squares">&#11200;</span>Для восстановления данных укажите ваш логин</li><li class = "small_text"><span class = "squares">&#11200;</span>На ваш адрес электронной почты будет отправлена ссылка для восстановления пароля.<br>Срок действия ссылки 5 минут</li></ul></p>' WHERE EXT_ID = 'emailPasswordFooterHtml';
+            UPDATE SETTINGS SET VALUE = '<p class = "small_text login_data ">Ваш логин:<br><span class = "text_bolid">{0}</span><br><span class = "small_text">или</span><br><span class = "text_bolid">{1}</span></p>' WHERE EXT_ID = 'emailLoginAndPhoneHtml';
+            UPDATE SETTINGS SET VALUE = '<p class = "small_text login_data">Ваш логин:<br><span class = "text_bolid">{0}</span></p>' WHERE EXT_ID = 'emailLoginHtml';
+            UPDATE SETTINGS SET VALUE = '<p>Ваша учетная запись для входа в Личный кабинет «Дом.ru Бизнес» <span class = "text_red">будет заблокирована через %s</span>.</p><p>Для предотвращения блокировки учетной записи, просим Вас войти в <a class="no_block" href="%s">Личный кабинет</a> до истечения указанного срока.</p>' WHERE EXT_ID = 'blockPrepareNotificationSchedulerHtml';
+            UPDATE SETTINGS SET VALUE = '<p>Ваша учетная запись для входа в Личный кабинет «Дом.ru Бизнес» <span class = "text_red">заблокирована</span>. Доступ к услугам при этом не блокируется.</p><p> Вы не использовали свою учетную запись в течении длительного времени. Чтобы восстановить доступ к учетной записи, обратитесь к своему персональному менеджеру или оставьте заявку в чате <a class="no_block" href="https://newlkb2b.dom.ru">Личного кабинета</a>, или по телефону <br> <a class="no_block" href="tel:88003339000">8 800 333 9000</a>.</p>' WHERE EXT_ID = 'blockNotificationSchedulerHtml';
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet id="84" author="petrov-ny">
+        <sql>
+            <![CDATA[
+                UPDATE SETTINGS SET VALUE = '<p>Для Вас создана учетная запись для входа в Личный кабинет «Дом.ru Бизнес».</p>' WHERE EXT_ID = 'emailAccountCreateBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p>Для Вас создана учетная запись для входа в Личный кабинет «Дом.ru Бизнес».</p>' WHERE EXT_ID = 'emailAccountDataBodyHtml';
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet id="85" author="petrov-ny">
+        <sql>
+            <![CDATA[
+                INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('68344238-73aa-11ec-90d6-0242ac120003', 'linkPassword', '<p class = "margin_block">Перейдите по ссылке и установите пароль.</p><p class = "block_link"><a href="{0}">Установить пароль</a></p>', null, 'user', 'Установить пароль', null, 'MESSAGE');
+             ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet id="86" author="petrov-ny">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('20b2346a-753a-11ec-90d6-0242ac120003', 'tokenDaData', '100545f52c511755273b4d79c618832bf181765c', null, 'master', 'Токен DaData', null, 'APP');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('2480de70-753a-11ec-90d6-0242ac120003', 'urlDaDataRequestLocationIp', 'https://suggestions.dadata.ru/suggestions/api/4_1/rs/iplocate/address', null, 'master', 'URL DaData для запроса адреса по IP', null, 'APP');
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

@@ -2,7 +2,6 @@ package ru.alamics.sso.keycloak.auth.post;
 
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.common.ClientConnection;
@@ -31,10 +30,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.keycloak.services.managers.AuthenticationManager.END_AFTER_REQUIRED_ACTIONS;
 import static ru.alamics.sso.registration.model.UserConstants.*;
 
 @Slf4j
 public class AttributesForm implements Authenticator {
+    private final static String DMP_ID = "dmp-kc-sit";
     private static final String FORM = "attributes.ftl";
     private final UserRole roleService;
     private CachedUserPostFacade cachedUserPostFacade;
@@ -101,12 +102,13 @@ public class AttributesForm implements Authenticator {
             form.setAttribute("posts", posts);
         }
 
-        form.setAttribute("chooseOrganization",settingsService.getSettingsStringValue(SettingConstants.CHOOSE_ON_ORGANIZATION,context.getRealm().getId()));
-        form.setAttribute("organization",settingsService.getSettingsStringValue(SettingConstants.ORGANIZATION,context.getRealm().getId()));
-        form.setAttribute("roleUser",settingsService.getSettingsStringValue(SettingConstants.ROLE_USER,context.getRealm().getId()));
-        form.setAttribute("footer",settingsService.getSettingsStringValue(SettingConstants.FOOTER,context.getRealm().getId()));
-        form.setAttribute("phoneConst",settingsService.getSettingsStringValue(SettingConstants.PHONE_CONST,context.getRealm().getId()));
-        form.setAttribute("phoneConstLink",settingsService.getSettingsStringValue(SettingConstants.PHONE_CONST_LINK,context.getRealm().getId()));
+        form.setAttribute("chooseOrganization", settingsService.getSettingsStringValue(SettingConstants.CHOOSE_ON_ORGANIZATION, context.getRealm().getId()));
+        form.setAttribute("organization", settingsService.getSettingsStringValue(SettingConstants.ORGANIZATION, context.getRealm().getId()));
+        form.setAttribute("roleUser", settingsService.getSettingsStringValue(SettingConstants.ROLE_USER, context.getRealm().getId()));
+        form.setAttribute("footer", settingsService.getSettingsStringValue(SettingConstants.FOOTER, context.getRealm().getId()));
+        form.setAttribute("phoneConst", settingsService.getSettingsStringValue(SettingConstants.PHONE_CONST, context.getRealm().getId()));
+        form.setAttribute("phoneConstLink", settingsService.getSettingsStringValue(SettingConstants.PHONE_CONST_LINK, context.getRealm().getId()));
+        form.setAttribute("homePage", settingsService.getSettingsStringValue(SettingConstants.HOME_PAGE, context.getRealm().getId()));
 
         return form.createForm(FORM);
     }
@@ -122,6 +124,12 @@ public class AttributesForm implements Authenticator {
         ClientConnection clientConnection = session.getContext().getConnection();
         AuthenticationManager.backchannelLogout(session, realm, userSession, session.getContext().getUri(), clientConnection, session.getContext().getRequestHeaders(), true);
         authSession.setAuthNote(AUTH_FORM_SUCCESS, "0");
+
+        String iframe = context.getUriInfo().getQueryParameters().getFirst(I_FRAME);
+        String clientId = session.getContext().getClient().getClientId();
+        if (iframe != null && DMP_ID.equals(clientId)) {
+            authSession.setAuthNote(END_AFTER_REQUIRED_ACTIONS, "1");
+        }
         context.success();
     }
 

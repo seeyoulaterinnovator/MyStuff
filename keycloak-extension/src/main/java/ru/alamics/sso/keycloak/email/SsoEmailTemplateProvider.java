@@ -22,7 +22,6 @@ import java.text.MessageFormat;
 import java.util.*;
 
 import static ru.alamics.sso.settings.SettingConstants.*;
-import static ru.alamics.sso.settings.SettingConstants.GRATITUDE_DOWN;
 
 public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider implements EmailTemplateProvider {
 
@@ -46,9 +45,9 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
 
         attributes.put("realmName", getRealmName());
         attributes.put("time", Translator.getRusTranslateTimeUnitBySec(((int) expirationInMinutes) * 60));
-        attributes.put("executeActionsBodyHtml", settingsService.getSettingsStringValue(EMAIL_ACTIONS_ACCOUNT,realm.getName()));
+        attributes.put("executeActionsBodyHtml", settingsService.getSettingsStringValue(EMAIL_ACTIONS_ACCOUNT, realm.getName()));
 
-        send(settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_ACTIONS,realm.getName()), BODY_TEMPLATE_EXECUTE_ACTIONS, attributes);
+        send(settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_ACTIONS, realm.getName()), BODY_TEMPLATE_EXECUTE_ACTIONS, attributes);
     }
 
     @Override
@@ -58,9 +57,9 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
         addLinkInfoIntoAttributes(link, expirationInMinutes, attributes);
 
         attributes.put("realmName", getRealmName());
-        attributes.put("emailVerificationBodyHtml", settingsService.getSettingsStringValue(SettingConstants.EMAIL_VERIFICATION_ACCOUNT,realm.getName()));
+        attributes.put("emailVerificationBodyHtml", settingsService.getSettingsStringValue(SettingConstants.EMAIL_VERIFICATION_ACCOUNT, realm.getName()));
 
-        send(settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_VERIFICATION,realm.getName()), BODY_TEMPLATE_EMAIL_VERIFICATION, attributes);
+        send(settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_VERIFICATION, realm.getName()), BODY_TEMPLATE_EMAIL_VERIFICATION, attributes);
     }
 
     @Override
@@ -77,10 +76,10 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
 
         attributes.put("identityProviderContext", brokerContext);
         attributes.put("identityProviderAlias", idpAlias);
-        attributes.put("identityProviderLinkBodyHtml", settingsService.getSettingsStringValue(EMAIL_IDENTITY_PROVIDER,realm.getName()));
+        attributes.put("identityProviderLinkBodyHtml", settingsService.getSettingsStringValue(EMAIL_IDENTITY_PROVIDER, realm.getName()));
 
-        List<Object> subjectAttrs = Arrays.<Object> asList(idpAlias);
-        send(settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_PROVIDER_LINK,realm.getName()), subjectAttrs, BODY_TEMPLATE_IDENTITY_PROVIDER_LINK, attributes);
+        List<Object> subjectAttrs = Arrays.<Object>asList(idpAlias);
+        send(settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_PROVIDER_LINK, realm.getName()), subjectAttrs, BODY_TEMPLATE_IDENTITY_PROVIDER_LINK, attributes);
     }
 
     @Override
@@ -91,10 +90,10 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
 
         attributes.put("realmName", getRealmName());
 
-        attributes.put("passwordResetBodyHtml", settingsService.getSettingsStringValue(EMAIL_RESET,realm.getName()));
+        attributes.put("passwordResetBodyHtml", settingsService.getSettingsStringValue(EMAIL_RESET, realm.getName()));
 
 
-        send(settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_RESET,realm.getName()), BODY_TEMPLATE_PASS_RESET, attributes);
+        send(settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_RESET, realm.getName()), BODY_TEMPLATE_PASS_RESET, attributes);
     }
 
     @Override
@@ -106,11 +105,13 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
             Properties rb = theme.getMessages(locale);
             attributes.put("msg", new MessageFormatterMethod(locale, rb));
             attributes.put("properties", theme.getProperties());
-            attributes.put("phoneInMessage", settingsService.getSettingsStringValue(PHONE_IN_MESSAGE,realm.getName()));
-            attributes.put("footerInMassage", settingsService.getSettingsStringValue(FOOTER_IN_MESSAGE,realm.getName()));
-            attributes.put("customer", settingsService.getSettingsStringValue(CUSTOMER,realm.getName()));
-            attributes.put("gratitudeUp", settingsService.getSettingsStringValue(GRATITUDE_UP,realm.getName()));
-            attributes.put("gratitudeDown", settingsService.getSettingsStringValue(GRATITUDE_DOWN,realm.getName()));
+            attributes.put("phoneInMessage", settingsService.getSettingsStringValue(PHONE_IN_MESSAGE, realm.getName()));
+            attributes.put("footerInMassage", settingsService.getSettingsStringValue(FOOTER_IN_MESSAGE, realm.getName()));
+            attributes.put("customer", settingsService.getSettingsStringValue(CUSTOMER, realm.getName()));
+            attributes.put("gratitudeUp", settingsService.getSettingsStringValue(GRATITUDE_UP, realm.getName()));
+            attributes.put("gratitudeDown", settingsService.getSettingsStringValue(GRATITUDE_DOWN, realm.getName()));
+            attributes.put("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, realm.getName()));
+            attributes.put("homePage", settingsService.getSettingsStringValue(HOME_PAGE, realm.getName()));
             String subject = new MessageFormat(rb.getProperty(subjectKey, subjectKey), locale).format(subjectAttributes.toArray());
             String textTemplate = String.format("text/%s", template);
             String textBody;

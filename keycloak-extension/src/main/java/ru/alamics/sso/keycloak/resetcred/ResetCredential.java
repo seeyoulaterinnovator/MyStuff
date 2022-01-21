@@ -8,7 +8,7 @@ public abstract class ResetCredential {
     protected KeycloakSession session;
     protected AuthenticationFlowContext context;
 
-    protected ResetCredential (KeycloakSession session, AuthenticationFlowContext context) {
+    protected ResetCredential(KeycloakSession session, AuthenticationFlowContext context) {
         this.session = session;
         this.context = context;
     }

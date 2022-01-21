@@ -1,9 +1,9 @@
 <#import "./components.ftl" as components>
 <#import "./svg.ftl" as svg>
 
-<#macro password firstFieldName="password" secondFieldName="password-confirm">
+<#macro password firstFieldName="password">
   <div id="password-block" class="mb-7 sm:mb-8">
-    <p class="text-black-80">Пароль должен состоять из комбинации букв, цифр, cпецсимволов и быть не менее 8 и не более 16 символов</p>
+    <p class="text-black">Пароль должен состоять из комбинации букв, цифр и быть не менее 8 и не более 16 символов</p>
     <div class="flex text-black-50 py-6">
       <div id="letters-password" class="flex flex-1 flex-col mr-6">
         <span class="text-symbols">A-z</span>
@@ -17,8 +17,7 @@
     <p class="text-black-80 mb-8 mt-8">Не забудьте записать пароль <span id="generated-password" class="text-base"></span></p>
     <div class="flex sm:flex-row">
       <div class="pass-fields">
-        <@components.field class="mb-3 sm:mb-4" fieldName="${firstFieldName}" label="${msg('password')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true value="" />
-        <@components.field class="mb-3 sm:mb-4" fieldName="${secondFieldName}" label="${msg('passwordConfirm')}" placeholder="${msg('passwordConfirmPlaceholder')}" type="password" required=true value="" />
+        <@components.field class="mb-3 sm:mb-4" fieldName="${firstFieldName}" label="${msg('passwordPlaceholder')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true value="" />
       </div>
       <div class="mx-auto generated-password btn-group flex">
         <button id="refresh-password-button" class="w-12 h-12 focus:outline-none flex-child" type="button">
@@ -57,7 +56,7 @@
 </#macro>
 
 <#macro verificationHeader mainTitle>
-  <header class="pb-2 sm:pb-3 md:pb-4">
+  <header>
     <h1
       id="page-title"
       class="verification__title"

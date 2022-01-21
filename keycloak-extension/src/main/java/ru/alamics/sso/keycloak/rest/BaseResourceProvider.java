@@ -20,10 +20,11 @@ import java.util.Optional;
 public interface BaseResourceProvider<T> extends RealmResourceProvider {
 
     @Override
-    T getResource ();
+    T getResource();
 
     @Override
-    default void close () { }
+    default void close() {
+    }
 
     default AdminPermissionEvaluator initAuthByWorkingRealm(KeycloakSession session) {
         KeycloakContext context = session.getContext();
@@ -64,7 +65,7 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
         return AdminPermissions.evaluator(session, realmFromToken, auth); //fixme нет возврата сессии обратно
     }
 
-    default AdminAuth initAdminAuth(KeycloakSession session){
+    default AdminAuth initAdminAuth(KeycloakSession session) {
         KeycloakContext context = session.getContext();
         AppAuthManager appAuthManager = new AppAuthManager();
         String tokenString = Optional.ofNullable(appAuthManager.extractAuthorizationHeaderToken(context.getRequestHeaders())).orElseThrow(() -> new NotAuthorizedException("Bearer"));

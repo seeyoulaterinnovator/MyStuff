@@ -3,7 +3,8 @@
 <@template.layout ; section>
     <#if section = "style">
         <#include 'styles/content-style--default.html' >
+        <title>${kcSanitize(msg("emailExpiresPasswordDataSubject"))}</title>
     <#elseif section = "body">
-        ${blockNotificationSchedulerHtml?no_esc}
+        ${kcSanitize(msg("emailExpiresPasswordDataBodyHtml", link))?no_esc}
     </#if>
 </@template.layout>

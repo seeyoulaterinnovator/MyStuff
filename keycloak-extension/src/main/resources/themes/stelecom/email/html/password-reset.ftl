@@ -3,6 +3,7 @@
 <@template.layout ; section>
   <#if section = "style">
     <#include 'styles/content-style--default.html' >
+    <title>${kcSanitize(msg("emailExpiresPasswordDataSubject"))}</title>
   <#elseif section = "body">
 
   <#assign email=realmName>
@@ -10,6 +11,6 @@
     <#assign email= user.getEmail()>
   </#if>
 
-    ${kcSanitize(msg("passwordResetBodyHtml",link, linkExpiration, email, linkExpirationFormatter(linkExpiration)))?no_esc}
+    ${kcSanitize(msg("passwordResetBodyHtml",link, expTime, email, linkExpirationFormatter(linkExpiration)))?no_esc}
   </#if>
 </@template.layout>
