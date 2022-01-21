@@ -149,8 +149,8 @@ public class CitiesResource {
         if (cityDadataModel != null) {
             String regionIsoCode = null;
             if (cityDadataModel.getLocation() != null) {
-                title = cityDadataModel.getLocation().getData().getCity();
                 if (cityDadataModel.getLocation().getData() != null) {
+                    title = cityDadataModel.getLocation().getData().getCity();
                     regionIsoCode = cityDadataModel.getLocation().getData().getRegionIsoCode();
                 }
             }
