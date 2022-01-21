@@ -57,7 +57,7 @@ public class ResetCredentialEmail extends ResetCredential {
     public void reset(UserModel user, String username) {
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
         if (user == null) {
-            context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT));
+            context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT_ERROR));
             return;
         }
 
