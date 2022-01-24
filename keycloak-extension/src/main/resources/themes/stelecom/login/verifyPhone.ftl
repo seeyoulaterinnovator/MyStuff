@@ -27,9 +27,9 @@
         <form id="totpForm" action="${url.loginAction}" method="POST">
         <#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон -->
         <p class="pb-2 sm:pb-3 md:pb-4 text-accentRed"> ${error!}<p>
-            <div class="flex w-full xl:pb-37px md:pb-10 sm:pb-8 pb-4">
+            <div class="flex justify-between w-full xl:pb-37px md:pb-10 sm:pb-8 pb-4">
                 <#list 1..lengthCode as x>
-                    <input placeholder="-" maxlength="1" id="smscode-${x}" name="smscode-${x}" class="verification__code text-center align-middle text-3xl w-10 h-10 sm:w-14 sm:h-14 border rounded-lg focus:border-extra outline-none" autocomplete="off" />
+                    <input placeholder="-" maxlength="1" id="smscode-${x}" name="smscode-${x}" class="text-center align-middle text-3xl w-10 h-10 sm:w-14 sm:h-14 border rounded-lg focus:border-extra outline-none" autocomplete="off" />
                 </#list>
             </div>
             <input id="codeNumbers" name="codeNumbers" class="hidden" value="${lengthCode!}" />
