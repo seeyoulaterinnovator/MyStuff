@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 public class UserSchedule {
     private static final String TIMER_NAME = "User Schedule Timer";
     private static final long DEFAULT_INTERVAL_DURATION = 300000;
-    private final static String[] SETTINGS_REALM_NAMES_SCHEDULE = {"user", "manager", "S-TELECOM"};
+
     private final static String DEFAULT_CLIENT_ID = "account";
     @EJB
     private EmailSender sender;
@@ -105,9 +105,12 @@ public class UserSchedule {
             return;
         }
         findExpiredPassword();
-        for (String realm : SETTINGS_REALM_NAMES_SCHEDULE) {
-            block(realm);
-            notificationInactiveUsers(realm);
+
+        for (RealmModel model : realmRepository.getAllRealms()) {
+            if (model.getAttribute("realmInSchedule", false)) {
+                block(model.getId());
+                notificationInactiveUsers(model.getId());
+            }
         }
         sendEmails();
     }

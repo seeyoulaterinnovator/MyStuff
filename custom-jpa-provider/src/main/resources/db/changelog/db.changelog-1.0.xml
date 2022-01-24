@@ -1456,4 +1456,11 @@
         </sql>
     </changeSet>
 
+    <changeSet id="88" author="petrov-ny">
+        <sql>
+            INSERT INTO REALM_ATTRIBUTE (NAME, VALUE, REALM_ID) VALUE ('realmInSchedule', 'true', 'user');
+            INSERT INTO REALM_ATTRIBUTE (NAME, VALUE, REALM_ID) VALUE ('realmInSchedule', 'true', 'manager');
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
