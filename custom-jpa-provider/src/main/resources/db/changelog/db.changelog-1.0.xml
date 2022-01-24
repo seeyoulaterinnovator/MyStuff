@@ -1463,4 +1463,21 @@
         </sql>
     </changeSet>
 
+    <changeSet id="89" author="petrov-ny">
+        <sql>
+            <![CDATA[
+                UPDATE SETTINGS SET VALUE = 'Обновление данных' WHERE EXT_ID = 'loginProfileTitle';
+                UPDATE SETTINGS SET VALUE = '<p>Был создан запрос на изменение пароля от Вашей учетной записи <a href="mailto:{2}" class="content__a no_block">{2}</a>. Если это были Вы, пройдите по ссылке</p><p class = "block_link"><a href="{0}">Изменить пароль</a></p><p class = "small_text">Эта ссылка устареет через  {1}.</p><p class="small_text">Если Вы не хотите сбрасывать пароль, просто проигнорируйте это письмо и ничего не изменится.</p>' WHERE EXT_ID = 'passwordResetBodyHtml';
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet id="90" author="petrov-ny">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('5e120a06-7cfb-11ec-90d6-0242ac120003', 'doAccept', 'Обновить', null, 'user', 'Кнопка обновления', null, 'FRONT');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('6926eb82-7cfb-11ec-90d6-0242ac120003', 'doAccept', 'Обновить', null, 'master', 'Кнопка обновления', null, 'FRONT');
+        </sql>
+    </changeSet>
+
+
 </databaseChangeLog>

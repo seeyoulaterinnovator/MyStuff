@@ -14,7 +14,7 @@
                     <button id="submit" class="btn btn-main w-full pass-fields pass-fields--change-pass" type="submit">${msg(resetPassword)}</button>
                 </div>
                 <div class="flex-basis-auto w-full ml-0 text-sm sm:ml-6">
-                    <a id="cancel" href="${redirectUrl}" class="btn w-full accentBlue-900">${msg(doCancel)}</a>
+                    <a id="cancel" href="${redirectUrl}" class="btn w-full text-accentBlue-900">${msg(doCancel)}</a>
                 </div>
             </div>
         </form>
