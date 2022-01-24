@@ -8,6 +8,8 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Stateless
@@ -26,6 +28,20 @@ public class RealmRepository {
         if (realm == null) return null;
         RealmAdapter adapter = new RealmAdapter(null, em, realm);
         return adapter;
+    }
+
+    public List<RealmModel> getAllRealm() {
+        List<RealmEntity> realmsEntities = em.createQuery("select realm from RealmEntity realm", RealmEntity.class)
+                .getResultList();
+
+        List<RealmModel> realmModels = new ArrayList<>();
+
+        for (RealmEntity entity : realmsEntities) {
+            RealmAdapter adapter = new RealmAdapter(null, em, entity);
+            realmModels.add(adapter);
+        }
+
+        return realmModels;
     }
 
     public RealmEntity findRealmEntityById(final String id) {
