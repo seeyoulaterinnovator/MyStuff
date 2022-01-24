@@ -23,6 +23,7 @@ public enum SettingConstants {
     PASS("password"),
     LOGIN_WITH("loginWith"),
     DO_LOGIN("doLogIn"),
+    DO_ACCEPT("doAccept"),
     FOOTER("footer"),
     USERNAME_OR_EMAIL_PLACEHOLDER("usernameOrEmailPlaceholder"),
     CHOOSE_ON_ORGANIZATION("chooseOrganization"),

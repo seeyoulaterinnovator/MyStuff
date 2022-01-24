@@ -149,6 +149,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             //Update profile
             attributes.put("loginProfileTitle", settingsService.getSettingsStringValue(LOGIN_PROFILE_TITLE, realm.getName()));
             attributes.put("doSubmit", settingsService.getSettingsStringValue(DO_SUBMIT, realm.getName()));
+            attributes.put("doAccept", settingsService.getSettingsStringValue(DO_ACCEPT, realm.getName()));
             //Общие поля Update profile и register
             attributes.put("doRegister", settingsService.getSettingsStringValue(DO_REGISTER, realm.getName()));
             //Info page

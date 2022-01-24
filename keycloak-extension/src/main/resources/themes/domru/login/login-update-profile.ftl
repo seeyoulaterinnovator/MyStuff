@@ -41,7 +41,7 @@
                     <#else>
                         <div class="flex flex-col sm:flex-row mt-0 xl:mt-2">
                             <div class="flex flex-basis-auto items-center">
-                                <button class="btn btn-main w-full" type="submit" id="update-profile-submit" />${msg(doSubmit)}</button>
+                                <button class="btn btn-main w-full" type="submit" id="update-profile-submit" />${msg(doAccept)}</button>
                             </div>
                             <span class="flex-basis-auto ml-0 mb-6 mt-4 text-xs sm:ml-5 sm:mb-0 agreement"><span class="opacity-50">Нажимая кнопку, вы соглашаетесь <br></span><a class="reference reference_hoverable" href="https://dom.ru/policy.pdf" target="_blink">с правилами обработки перс. данных</a></span>
                         </div>
