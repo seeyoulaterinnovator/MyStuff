@@ -29,10 +29,12 @@ import ru.alamics.sso.util.Util;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.ejb.Timer;
 import javax.ejb.*;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -42,7 +44,6 @@ import java.util.concurrent.TimeUnit;
 public class UserSchedule {
     private static final String TIMER_NAME = "User Schedule Timer";
     private static final long DEFAULT_INTERVAL_DURATION = 300000;
-    private final static List<String> SETTINGS_REALM_NAMES_SCHEDULE = new ArrayList<>(Arrays.asList("user", "manager"));
 
     private final static String DEFAULT_CLIENT_ID = "account";
     @EJB
@@ -105,23 +106,11 @@ public class UserSchedule {
         }
         findExpiredPassword();
 
-        List<String> realmNames = new ArrayList<>();
-
-        List<RealmModel> allRealm = realmRepository.getAllRealm();
-
-        for (RealmModel model : allRealm) {
-            Boolean realmInSchedule = model.getAttribute("realmInSchedule", false);
-            if (realmInSchedule) {
-                realmNames.add(model.getId());
+        for (RealmModel model : realmRepository.getAllRealm()) {
+            if (model.getAttribute("realmInSchedule", false)) {
+                block(model.getId());
+                notificationInactiveUsers(model.getId());
             }
-        }
-        if (realmNames.isEmpty()) {
-            realmNames.addAll(SETTINGS_REALM_NAMES_SCHEDULE);
-        }
-
-        for (String realm : realmNames) {
-            block(realm);
-            notificationInactiveUsers(realm);
         }
         sendEmails();
     }
