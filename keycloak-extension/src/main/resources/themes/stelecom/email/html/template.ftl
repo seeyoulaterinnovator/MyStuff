@@ -8,10 +8,10 @@
   <#nested "style">
 </head>
 <body>
-  <table class="mail-wrapper">
+  <table class="mail-wrapper" style="background-color: #ffffff;margin:0;text-align:center;width:100%;">
     <tr>
       <td>
-        <table class="mail-container">
+        <table class="mail-container" style="box-sizing: border-box; color:#000000;display:inline-table;font-family:'arial' , sans-serif;margin:0 auto 0 auto;max-width:600px;padding:40px 24px 40px 24px;text-align:left;">
           <tr>
             <td>
               <table margin="0" padding="0" cellpadding="0" cellspacing="0" class="mail-container__header" width="100%">
