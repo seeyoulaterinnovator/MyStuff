@@ -106,7 +106,7 @@ public class UserSchedule {
         }
         findExpiredPassword();
 
-        for (RealmModel model : realmRepository.getAllRealm()) {
+        for (RealmModel model : realmRepository.getAllRealms()) {
             if (model.getAttribute("realmInSchedule", false)) {
                 block(model.getId());
                 notificationInactiveUsers(model.getId());
