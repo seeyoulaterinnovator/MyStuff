@@ -1479,5 +1479,13 @@
         </sql>
     </changeSet>
 
+    <changeSet id="91" author="petrov-ny">
+        <sql>
+            <![CDATA[
+                UPDATE SETTINGS SET VALUE = 'Обновить данные' WHERE EXT_ID = 'loginProfileTitle';
+            ]]>
+        </sql>
+    </changeSet>
+
 
 </databaseChangeLog>
