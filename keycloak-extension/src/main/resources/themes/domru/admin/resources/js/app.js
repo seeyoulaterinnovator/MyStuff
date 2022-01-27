@@ -2075,6 +2075,15 @@ module.config(['$routeProvider', function ($routeProvider) {
             },
             controller: 'CustomTabCtrl'
         })
+        .when('/realms/:realm/custom-settings/emailer', {
+            templateUrl: resourceUrl + '/partials/custom-settings-emailer.html',
+            resolve: {
+                realm: function (RealmLoader) {
+                    return RealmLoader();
+                }
+            },
+            controller: 'CustomTabCtrl'
+        })
         .when('/realms/:realm/custom-settings/front', {
             templateUrl: resourceUrl + '/partials/custom-settings-front.html',
             resolve: {
@@ -3037,7 +3046,7 @@ module.filter('capitalize', function () {
         for (var i = 0; i < splittedWords.length; i++) {
             splittedWords[i] = splittedWords[i].charAt(0).toUpperCase() + splittedWords[i].slice(1);
         }
-        ;
+
         return splittedWords.join(" ");
     };
 });

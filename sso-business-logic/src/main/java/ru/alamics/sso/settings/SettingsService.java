@@ -51,13 +51,13 @@ public class SettingsService {
 
         Settings save = repository.save(settingsToSave);
         //При вызове метода save с Админконсоли для времени шедулера мы обновляем таймер
-        if(SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY.getKey().equals(save.getExtId())){
+        if (SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY.getKey().equals(save.getExtId())) {
             userSchedule.changeScheduleTimer();
         }
         return DataMapper.toDto(save);
     }
 
-    public long getSettingsValue(final SettingConstants property, final String realmId) {
+    public long getSettingsLongValue(final SettingConstants property, final String realmId) {
         final String keyName = property.getKey();
         Settings settings = repository.getSettings(keyName, realmId);
         long ret = -1;
@@ -78,6 +78,17 @@ public class SettingsService {
             value = settings.getValue();
         }
         return value;
+    }
+
+    public Integer getSettingsIntegerValue(final SettingConstants property, final String realmId, Integer defValue, String logDefault) {
+        Settings settings = repository.getSettings(property.getKey(), realmId);
+        try {
+            return Integer.parseInt(settings.getValue());
+        } catch (NumberFormatException nfe) {
+            if (logDefault != null)
+                log.info(logDefault, property.getKey(), defValue);
+            return defValue;
+        }
     }
 
     public SettingsDto getSetting(final SettingConstants property, final String realmId) {

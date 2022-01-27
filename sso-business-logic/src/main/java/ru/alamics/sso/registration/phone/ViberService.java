@@ -15,22 +15,14 @@ public class ViberService {
     @EJB
     private ViberSendService viberSendService;
 
-    public void sendMsg(String userId, String phone, String text) throws ViberSendException {
+    public void sendMsg(String phone, String text, String realmId) throws ViberSendException {
 
         String id = UUID.randomUUID().toString();
 
-        /*
-        Sms sms = Sms.builder()
-                .id(id)
-                .phone(phone)
-                .sendTime(LocalDateTime.now())
-                .userId(userId)
-                .build();
-        */
 
         String resp = null;
         try {
-            resp = viberSendService.sendMsg(phone, text);
+            resp = viberSendService.sendMsg(phone, text, realmId);
         } finally {
             log.info("Sent msg to viber: {}, text: {}, id: {}, resp: {}", phone, text, id, resp);
         }

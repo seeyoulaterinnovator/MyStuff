@@ -4,6 +4,6 @@ import ru.alamics.sso.registration.phone.exception.SmsSendException;
 
 public interface SmsSendService {
 
-    String sendSms(String phone, String text) throws SmsSendException;
+    String sendSms(String phone, String text, String realmId) throws SmsSendException;
 
 }

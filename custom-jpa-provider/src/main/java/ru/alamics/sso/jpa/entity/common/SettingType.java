@@ -5,15 +5,16 @@ public enum SettingType {
     REALM("REALM"),
     FRONT("FRONT"),
     APP("APP"),
+    EMAIL("EMAIL"),
     MESSAGE("MESSAGE");
 
-    private String type;
+    private final String type;
 
     SettingType(String type) {
         this.type = type;
     }
 
-    public String getType(){
+    public String getType() {
         return type;
     }
 }

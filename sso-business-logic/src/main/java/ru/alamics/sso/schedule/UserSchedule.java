@@ -90,7 +90,7 @@ public class UserSchedule {
     }
 
     private long getTime() {
-        long intervalDuration = settingsService.getSettingsValue(SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY, GeneralRealm.MASTER) * 1000;
+        long intervalDuration = settingsService.getSettingsLongValue(SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY, GeneralRealm.MASTER) * 1000;
 
         if (intervalDuration == 0) {
             intervalDuration = DEFAULT_INTERVAL_DURATION;
@@ -118,7 +118,7 @@ public class UserSchedule {
     private void notificationInactiveUsers(String realm) {
         final String DEBUG_STR = "findNotifications";
         log.debug("start:{}", DEBUG_STR);
-        long absenceTimeNotification = settingsService.getSettingsValue(SettingConstants.ABSENCE_NOTIFICATION_DAYS, realm);
+        long absenceTimeNotification = settingsService.getSettingsLongValue(SettingConstants.ABSENCE_NOTIFICATION_DAYS, realm);
         if (absenceTimeNotification > -1) {
             userHistoryLoginRepository.findInactiveUsers(absenceTimeNotification, realm);
         }
@@ -128,7 +128,7 @@ public class UserSchedule {
     private void block(String realm) {
         final String DEBUG_STR = "block";
         log.debug("start:{}", DEBUG_STR);
-        long absenceTimeBlock = settingsService.getSettingsValue(SettingConstants.ABSENCE_BLOCKING_DAYS, realm);
+        long absenceTimeBlock = settingsService.getSettingsLongValue(SettingConstants.ABSENCE_BLOCKING_DAYS, realm);
         if (absenceTimeBlock > -1) {
             userHistoryLoginRepository.findUsersToBlock(absenceTimeBlock, realm);
         }
@@ -178,7 +178,7 @@ public class UserSchedule {
                 client = clientRepository.findClientById(DEFAULT_CLIENT_ID, realm.getName());
             UserModel userModel = new UserAdapter(null, realm, null, user);
             if (notification.getType() == NotificationType.ABSENCE_NOTIFICATION) {
-                long blockValue = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_WARNING, realm.getName());
+                long blockValue = settingsService.getSettingsLongValue(SettingConstants.BLOCK_NOTIFICATION_OF_WARNING, realm.getName());
                 if (blockValue > 0) {
                     EmailModel.EmailModelBuilder prepareBlockNotification = prepareBlockNotification(userModel, realm.getName(), getClientLink(client));
                     prepareBlockNotification.realmModel(realm)
@@ -186,7 +186,7 @@ public class UserSchedule {
                     sender.send(prepareBlockNotification.build());
                 }
             } else if (notification.getType() == NotificationType.ABSENCE_BLOCKING) {
-                long blockValue = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_BLOCKED, realm.getName());
+                long blockValue = settingsService.getSettingsLongValue(SettingConstants.BLOCK_NOTIFICATION_OF_BLOCKED, realm.getName());
                 if (blockValue > 0) {
                     EmailModel.EmailModelBuilder bockNotification = bockNotification(userModel, realm.getName());
                     bockNotification.realmModel(realm)
@@ -227,8 +227,8 @@ public class UserSchedule {
         final String subject = "Предупреждение о блокирование аккаунта";
         final String template = "block-prepare-notification.ftl";
         SettingsDto blockSetting = settingsService.getSetting(SettingConstants.ABSENCE_BLOCKING_DAYS, realm);
-        long inactiveBlockTimeout = settingsService.getSettingsValue(SettingConstants.ABSENCE_BLOCKING_DAYS, realm);
-        long inactiveNotificationTimeout = settingsService.getSettingsValue(SettingConstants.ABSENCE_NOTIFICATION_DAYS, realm);
+        long inactiveBlockTimeout = settingsService.getSettingsLongValue(SettingConstants.ABSENCE_BLOCKING_DAYS, realm);
+        long inactiveNotificationTimeout = settingsService.getSettingsLongValue(SettingConstants.ABSENCE_NOTIFICATION_DAYS, realm);
         String timeToBlock = String.valueOf(
                 blockSetting.getUnit().convert(inactiveBlockTimeout - inactiveNotificationTimeout, TimeUnit.SECONDS));
         Map<String, Object> body = new HashMap<>();

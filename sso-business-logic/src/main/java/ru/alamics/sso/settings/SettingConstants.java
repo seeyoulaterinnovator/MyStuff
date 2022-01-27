@@ -12,6 +12,23 @@ public enum SettingConstants {
     EXPIRE_INCOMING_CALL_CODE("user.expire.incoming.call.code"),
     EXPIRE_INCOMING_CALL_EMAIL_CODE("user.expire.incoming.call.email.code"),
 
+
+    //параметры шлюзов сообщений СМС и Viber
+    SEND_URI_SMS("smsSender.uri"),
+    SMSC_NAME_SMS("smsSender.smscName"),
+    USERNAME_SMS("smsSender.username"),
+    PASSWORD_SMS("smsSender.password"),
+    SENDER_NAME_SMS("smsSender.senderName"),
+    TIMEOUT_SMS("smsSender.timeout"),
+
+    SEND_URI_VIBER("viberSender.uri"),
+    SMSC_NAME_VIBER("viberSender.smscName"),
+    USERNAME_VIBER("viberSender.username"),
+    PASSWORD_VIBER("viberSender.password"),
+    SENDER_NAME_VIBER("viberSender.senderName"),
+    TIMEOUT_VIBER("viberSender.timeout"),
+
+
     //Переменные страниц
 
     ENTER("enter"),
@@ -120,7 +137,7 @@ public enum SettingConstants {
     BLOCK_NOTIFICATION_OF_BLOCKED("block.notification.blocked"),
     BLOCK_NOTIFICATION_OF_UNLOCKING("block.notification.unlocking");
 
-    private String key;
+    private final String key;
 
     SettingConstants(String key) {
         this.key = key;

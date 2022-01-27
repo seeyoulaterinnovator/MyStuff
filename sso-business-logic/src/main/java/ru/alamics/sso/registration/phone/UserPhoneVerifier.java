@@ -34,7 +34,7 @@ public class UserPhoneVerifier {
 
     public AuthContext sendValidationSms(User user,
                                          AuthContext context,
-                                         ActivationCodeType codeType) throws UserPhoneEmpty, PhoneCallException, SmsSendException, ViberSendException {
+                                         ActivationCodeType codeType, String realmId) throws UserPhoneEmpty, PhoneCallException, SmsSendException, ViberSendException {
         if (user.getPhone() == null || user.getPhone().isEmpty())
             throw new UserPhoneEmpty();
 
@@ -42,7 +42,7 @@ public class UserPhoneVerifier {
         if (context.getHashProperty() == null || !context.getExpirationTime().isAfter(LocalDateTime.now())) {
             log.info("Нет хэша для кода. Повторить получение кода");
 
-            String code = generateCode(user, codeType, context);
+            String code = generateCode(user, codeType, context, realmId);
 
             if (code != null) {
                 return AuthContext.builder()
@@ -56,16 +56,15 @@ public class UserPhoneVerifier {
         return context;
     }
 
-    private String generateCode(User user, ActivationCodeType codeType, AuthContext context)
-            throws PhoneCallException, SmsSendException, ViberSendException
-    {
-        if ( ActivationCodeType.CODE_TO_SMS.equals(codeType)) {
+    private String generateCode(User user, ActivationCodeType codeType, AuthContext context, String realmId)
+            throws PhoneCallException, SmsSendException, ViberSendException {
+        if (ActivationCodeType.CODE_TO_SMS.equals(codeType)) {
             String code = SmsCodeGenerator.getCode(codeType.getLengthCode());
 
             try {
-                viberService.sendMsg(user.getId(), user.getPhone(), code);
+                viberService.sendMsg(user.getPhone(), code, realmId);
             } finally {
-                smsService.sendSms(user.getId(), user.getPhone(), code);
+                smsService.sendSms(user.getPhone(), code, realmId);
             }
 
             return code;
@@ -76,8 +75,7 @@ public class UserPhoneVerifier {
     }
 
     public void verifyPhone(User user, AuthContext authContext, String smsCode, ActivationCodeType activationCodeType)
-            throws WrongSmsCode
-    {
+            throws WrongSmsCode {
         String savedHash = authContext.getHashProperty();
         LocalDateTime expirationDate = authContext.getExpirationTime();
 

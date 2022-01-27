@@ -33,7 +33,7 @@ public class SsoUserUpdateEvent extends SsoEvent {
 
     private final AdminEvent event;
 
-    private SettingsService settingsService;
+    private final SettingsService settingsService;
 
     SsoUserUpdateEvent(AdminEvent event, KeycloakSession session) {
         super(session);
@@ -94,7 +94,7 @@ public class SsoUserUpdateEvent extends SsoEvent {
             attributes.put("emailPasswordFooterHtml", settingsService.getSettingsStringValue(EMAIL_PASSWORD_FOOTER_ACCOUNT, realm.getName()));
 
             if (userNow.isEnabled()) {
-                long blockValue = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_UNLOCKING, realm.getName());
+                long blockValue = settingsService.getSettingsLongValue(SettingConstants.BLOCK_NOTIFICATION_OF_UNLOCKING, realm.getName());
                 if (blockValue > 0) {
                     this.sendEmail(user, realm, settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_ENABLE, realm.getName()), BODY_TEMPLATE_ENABLE, attributes);
                 }
@@ -111,11 +111,11 @@ public class SsoUserUpdateEvent extends SsoEvent {
     private AdminEventEntity findAdminEvent(String userId) {
         EntityManager em = this.getSession().getProvider(JpaConnectionProvider.class).getEntityManager();
         List<AdminEventEntity> adminEventEntities = em.createQuery("" +
-                        "select ae " +
-                        "from AdminEventEntity ae " +
-                        "where ae.representation like concat('%', :userId, '%') " +
-                        "and ae.operationType in ('CREATE', 'UPDATE') " +
-                        "order by ae.time DESC ", AdminEventEntity.class)
+                "select ae " +
+                "from AdminEventEntity ae " +
+                "where ae.representation like concat('%', :userId, '%') " +
+                "and ae.operationType in ('CREATE', 'UPDATE') " +
+                "order by ae.time DESC ", AdminEventEntity.class)
                 .setParameter("userId", userId)
                 .getResultList();
         if (adminEventEntities == null || adminEventEntities.isEmpty() || adminEventEntities.size() == 1) {

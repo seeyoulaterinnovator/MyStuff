@@ -22,24 +22,14 @@ public class SmsService {
     @EJB
     private SmsSendService smsSendService;
 
-    public void sendSms(String userId, String phone, String text) throws SmsSendException {
+    public void sendSms(String phone, String text, String realmId) throws SmsSendException {
         String id = UUID.randomUUID().toString();
 
-        /*
-        Sms sms = Sms.builder()
-                .id(id)
-                .phone(phone)
-                .sendTime(LocalDateTime.now())
-                .userId(userId)
-                .build();
-        */
-
-//        smsRepository.save(sms);
 
         String response = null;
 
         try {
-            response = smsSendService.sendSms(phone, text);
+            response = smsSendService.sendSms(phone, text, realmId);
         } finally {
             log.info("Sent sms to phone: {}, text: {}, id: {}, resp: {}", phone, text, id, response);
         }

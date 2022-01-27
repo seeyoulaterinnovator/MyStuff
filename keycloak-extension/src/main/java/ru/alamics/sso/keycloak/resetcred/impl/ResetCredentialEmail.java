@@ -81,7 +81,7 @@ public class ResetCredentialEmail extends ResetCredential {
         }
 
         RealmModel realm = context.getRealm();
-        int timeTokenResetPass = (int) settingsService.getSettingsValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm.getName());
+        int timeTokenResetPass = (int) settingsService.getSettingsLongValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm.getName());
         int absoluteExpirationInSecs = Time.currentTime() + timeTokenResetPass;
 
         // We send the secret in the email in a link as a query param.

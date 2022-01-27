@@ -25,6 +25,7 @@ class SmsSendServiceImplTest {
     public static final String SMSC_NAME = "smsc_name";
     public static final String PHONE = "89824699045";
     public static final String TEXT = "test";
+    public static final String REALM_ID = "user";
     public static final String PATH = "/cgi-bin/sendsms";
     private static WireMockServer server;
 
@@ -83,7 +84,7 @@ class SmsSendServiceImplTest {
                 )
         );
         try {
-            String result = service.sendSms(PHONE, TEXT);
+            String result = service.sendSms(PHONE, TEXT, REALM_ID);
 
             assertThat(result.substring(0, 1)).isEqualTo("0");
 

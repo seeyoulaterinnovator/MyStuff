@@ -78,7 +78,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                         .build();
                 enableRepeatCall = false;
             } else {
-                authContext = userPhoneVerifier.sendValidationSms(user, authContext, activationCodeType);
+                authContext = userPhoneVerifier.sendValidationSms(user, authContext, activationCodeType, context.getRealm().getId());
             }
 
             authSession.setAuthNote(PHONE_KEY_HASH, authContext.getHashProperty());
