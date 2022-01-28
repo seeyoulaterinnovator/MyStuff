@@ -1,6 +1,5 @@
 package ru.alamics.sso.user;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.common.util.Time;
 import org.keycloak.events.admin.OperationType;
@@ -30,6 +29,7 @@ import ru.alamics.sso.util.validator.NotValidException;
 import ru.alamics.sso.util.validator.PhoneValidator;
 
 import javax.ejb.*;
+import javax.ws.rs.NotFoundException;
 import java.util.*;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
@@ -335,7 +335,7 @@ public class ImportService {
         adminEventRepository.save(adminEvent);
     }
 
-    private void addUserPost(UserEntity user, ImportUsersDataModel data) throws NotFoundException, FoundUserPostException, NotValidException {
+    private void addUserPost(UserEntity user, ImportUsersDataModel data) throws FoundUserPostException, NotValidException {
         UserPostRequest userPostRequest = new UserPostRequest();
         userPostRequest.setUserId(user.getId());
         userPostRequest.setTomsId(data.getTomsId());
@@ -347,7 +347,7 @@ public class ImportService {
         addSystemRoles(data, userPostResponse.getId());
     }
 
-    private void addSystemRoles(ImportUsersDataModel userImport, String userPostId) throws javassist.NotFoundException {
+    private void addSystemRoles(ImportUsersDataModel userImport, String userPostId) {
         if (userImport.getSystems() == null || userImport.getSystems().isEmpty()) {
             return;
         }

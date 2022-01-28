@@ -1,6 +1,5 @@
 package ru.alamics.sso.user;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.common.util.Time;
 import org.keycloak.events.admin.OperationType;
@@ -27,6 +26,7 @@ import ru.alamics.sso.util.validator.ValidatorBuilder;
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import javax.ws.rs.NotFoundException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;

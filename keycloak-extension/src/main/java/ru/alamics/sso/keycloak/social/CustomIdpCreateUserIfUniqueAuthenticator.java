@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.social;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.authenticators.broker.IdpCreateUserIfUniqueAuthenticator;
@@ -22,6 +21,7 @@ import ru.alamics.sso.util.validator.NotValidException;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.ws.rs.NotFoundException;
 
 @Slf4j
 public class CustomIdpCreateUserIfUniqueAuthenticator extends IdpCreateUserIfUniqueAuthenticator {

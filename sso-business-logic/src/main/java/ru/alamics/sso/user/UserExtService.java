@@ -1,6 +1,5 @@
 package ru.alamics.sso.user;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.events.admin.OperationType;
@@ -24,6 +23,7 @@ import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.util.Util;
 import ru.alamics.sso.util.validator.NotValidException;
 
+import javax.ws.rs.NotFoundException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;

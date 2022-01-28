@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.facade;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.infinispan.Cache;
 import ru.alamics.sso.keycloak.lookup.Lookup;
@@ -13,6 +12,7 @@ import ru.alamics.sso.util.validator.NotValidException;
 
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
+import javax.ws.rs.NotFoundException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -23,17 +23,12 @@ import java.util.stream.Collectors;
 public class UserPostFacade {
     private static final String CUSTOMER_CACHE_LIFESPAN_IN_DB_PROPERTY = "user.post.cache.db.lifespan.days";
     private static final int CUSTOMER_CACHE_LIFESPAN_IN_DB = 1;
-
-    private int customerCacheLifespanInDb;
-
-    private CustomerRequestService customerRequestService;
-
     @Resource(lookup = "infinispan/custom_container/customer_cache")
     protected Cache<String, String> customerCache;
-
     protected UserPostService userPostService;
-
     protected ApplicationProperties properties;
+    private final int customerCacheLifespanInDb;
+    private final CustomerRequestService customerRequestService;
 
     public UserPostFacade() {
 

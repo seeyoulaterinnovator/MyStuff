@@ -11,6 +11,7 @@ import ru.alamics.sso.keycloak.auth.model.AuthType;
 import ru.alamics.sso.registration.model.UserConstants;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,7 +32,7 @@ public class TwoStepVerificationFactory implements Authenticator, AuthenticatorF
             AuthenticationExecutionModel.Requirement.DISABLED
     };
 
-    private static final List<ProviderConfigProperty> CONFIG_PROPERTIES = Arrays.asList(getTwoStepVerificationTypes());
+    private static final List<ProviderConfigProperty> CONFIG_PROPERTIES = Collections.singletonList(getTwoStepVerificationTypes());
 
     private static ProviderConfigProperty getTwoStepVerificationTypes() {
         ProviderConfigProperty property = new ProviderConfigProperty();
@@ -62,8 +63,10 @@ public class TwoStepVerificationFactory implements Authenticator, AuthenticatorF
                 context.getUser().addRequiredAction(providerName);
             }
         }
-        context.getAuthenticationSession().setAuthNote(NOTE_AUTH_TYPE_NAME, authType.name());
-        context.getAuthenticationSession().setAuthNote(NOTE_AUTH_TYPE_DESC, authType.getDescription());
+        if (authType != null) {
+            context.getAuthenticationSession().setAuthNote(NOTE_AUTH_TYPE_NAME, authType.name());
+            context.getAuthenticationSession().setAuthNote(NOTE_AUTH_TYPE_DESC, authType.getDescription());
+        }
 
         context.success();
     }

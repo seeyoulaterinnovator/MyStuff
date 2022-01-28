@@ -1,6 +1,5 @@
 package ru.alamics.sso.registration.service;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.keycloak.models.jpa.entities.UserEntity;
@@ -19,6 +18,7 @@ import ru.alamics.sso.util.validator.TomsIdValidator;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ws.rs.NotFoundException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

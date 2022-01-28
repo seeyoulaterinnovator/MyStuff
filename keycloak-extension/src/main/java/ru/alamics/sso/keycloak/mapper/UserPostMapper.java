@@ -17,7 +17,6 @@
 
 package ru.alamics.sso.keycloak.mapper;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.ProtocolMapperModel;
 import org.keycloak.models.UserModel;
@@ -31,6 +30,7 @@ import ru.alamics.sso.registration.service.UserPostService;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.ws.rs.NotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.auth.post;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
@@ -22,6 +21,7 @@ import ru.alamics.sso.util.Util;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;

@@ -16,8 +16,6 @@ import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
@@ -77,7 +75,7 @@ public class ViberSendServiceImpl implements ViberSendService {
 
         try {
             ResteasyWebTarget webTarget = client.target(uri)
-                    .queryParams(getConfigForQuery())
+                    .queryParams(getConfigForQuery(smsConfig))
                     .queryParam("to", Util.getCleanUserPhone(phone))
                     .queryParam("text", Util.encodeCharset(text, smsConfig.getCharset()));
 
@@ -92,21 +90,5 @@ public class ViberSendServiceImpl implements ViberSendService {
 
             throw new ViberSendException(wae);
         }
-    }
-
-    private MultivaluedMap<String, Object> getConfigForQuery() {
-
-        MultivaluedHashMap<String, Object> map = new MultivaluedHashMap<>();
-        map.add("smsc", smsConfig.getSmsCenterName());
-        map.add("username", smsConfig.getUsername());
-        map.add("password", smsConfig.getPassword());
-        map.add("from", smsConfig.getSenderName());
-        map.add("validity", smsConfig.getTimeout());
-        map.add("priority", smsConfig.getPriority().getPriorityAsInt());
-        map.add("dlr-mask", smsConfig.getReportsMask());
-        map.add("coding", smsConfig.getEncoding().getPriorityAsInt());
-        map.add("charset", smsConfig.getCharset());
-
-        return map;
     }
 }

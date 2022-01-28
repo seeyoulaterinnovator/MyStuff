@@ -17,8 +17,6 @@ import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
@@ -65,7 +63,7 @@ public class SmsSendServiceImpl implements SmsSendService {
     }
 
     @Override
-    public String sendSms(String phone, String text) throws SmsSendException {
+    public String sendMsg(String phone, String text) throws SmsSendException {
 
         // локально и на дэве фиксированный код и не отправляю смс
         if (!StandResolver.isBattle()) {
@@ -79,7 +77,7 @@ public class SmsSendServiceImpl implements SmsSendService {
 
         ClientInvocationBuilder builder = (ClientInvocationBuilder) client.register(StringTextStar.class)
                 .target(uri)
-                .queryParams(getConfigForQuery())
+                .queryParams(getConfigForQuery(smsConfig))
                 .queryParam("to", Util.getCleanUserPhone(phone))
                 .queryParam("text", Util.encodeCharset(text, smsConfig.getCharset()))
                 .request();
@@ -91,21 +89,5 @@ public class SmsSendServiceImpl implements SmsSendService {
 
             throw new SmsSendException(wae);
         }
-    }
-
-    private MultivaluedMap<String, Object> getConfigForQuery() {
-
-        MultivaluedHashMap<String, Object> map = new MultivaluedHashMap<>();
-        map.add("smsc", smsConfig.getSmsCenterName());
-        map.add("username", smsConfig.getUsername());
-        map.add("password", smsConfig.getPassword());
-        map.add("from", smsConfig.getSenderName());
-        map.add("validity", smsConfig.getTimeout());
-        map.add("priority", smsConfig.getPriority().getPriorityAsInt());
-        map.add("dlr-mask", smsConfig.getReportsMask());
-        map.add("coding", smsConfig.getEncoding().getPriorityAsInt());
-        map.add("charset", smsConfig.getCharset());
-
-        return map;
     }
 }

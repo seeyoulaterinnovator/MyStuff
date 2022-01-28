@@ -2,8 +2,8 @@ package ru.alamics.sso.registration.phone.port;
 
 import ru.alamics.sso.registration.phone.exception.SmsSendException;
 
-public interface SmsSendService {
+public interface SmsSendService extends MessageService {
 
-    String sendSms(String phone, String text) throws SmsSendException;
+    String sendMsg(String phone, String text) throws SmsSendException;
 
 }

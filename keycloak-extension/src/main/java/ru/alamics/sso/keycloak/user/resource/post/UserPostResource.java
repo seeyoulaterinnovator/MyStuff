@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.user.resource.post;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.keycloak.models.KeycloakSession;

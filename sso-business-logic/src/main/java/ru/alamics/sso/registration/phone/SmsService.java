@@ -39,7 +39,7 @@ public class SmsService {
         String response = null;
 
         try {
-            response = smsSendService.sendSms(phone, text);
+            response = smsSendService.sendMsg(phone, text);
         } finally {
             log.info("Sent sms to phone: {}, text: {}, id: {}, resp: {}", phone, text, id, response);
         }
