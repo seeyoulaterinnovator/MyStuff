@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.create.rest;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.annotations.cache.NoCache;
@@ -388,7 +387,7 @@ public class CustomUserResource {
     public RoleMapperResource getRoleMappings(@PathParam("id") String id) {
         EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
         UserEntity userEntity = em.find(UserEntity.class, id);
-        if (userEntity == null) throw new org.jboss.resteasy.spi.NotFoundException("User not found");
+        if (userEntity == null) throw new NotFoundException("User not found");
         UserModel user = new UserAdapter(session, realm, em, userEntity);
 
         AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
@@ -430,25 +429,7 @@ public class CustomUserResource {
     @Path("credential/reset-with-send-login")
     @POST
     public Response sendLoginAndResetPassword(List<String> ids) {
-        KeycloakContext context = session.getContext();
-        AdminEventBuilder eventBuilder = new AdminEventBuilder(context.getRealm(), auth.adminAuth(), session, context.getConnection());
-        eventBuilder.resource(ResourceType.USER);
-        UserProvider userProvider = session.users();
-
-        if (ids != null) {
-            for (String id : ids) {
-                UserModel user = userProvider.getUserById(id, realm);
-                if (user != null) {
-                    UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
-                    rep.getRequiredActions().add(UserEntityRepresentation.SEND_LOGIN_AND_RESET_PASSWORD);
-                    eventBuilder.operation(OperationType.ACTION)
-                            .resourcePath(session.getContext().getUri())
-                            .representation(rep)
-                            .realm(realm)
-                            .success();
-                }
-            }
-        }
+        sendLogin(ids, UserEntityRepresentation.SEND_LOGIN_AND_RESET_PASSWORD);
         return JsonResponse.success()
                 .httpStatus(Response.Status.NO_CONTENT)
                 .build();
@@ -457,16 +438,23 @@ public class CustomUserResource {
     @Path("/send/login")
     @POST
     public Response sendLogin(List<String> ids) {
+        sendLogin(ids, UserEntityRepresentation.SEND_LOGIN);
+        return JsonResponse.success()
+                .httpStatus(Response.Status.NO_CONTENT)
+                .build();
+    }
+
+    private void sendLogin(List<String> ids, final String requiredAction) {
         KeycloakContext context = session.getContext();
         AdminEventBuilder eventBuilder = new AdminEventBuilder(context.getRealm(), auth.adminAuth(), session, context.getConnection());
-        UserProvider userProvider = session.users();
         eventBuilder.resource(ResourceType.USER);
+        UserProvider userProvider = session.users();
         if (ids != null) {
             for (String id : ids) {
                 UserModel user = userProvider.getUserById(id, realm);
                 if (user != null) {
                     UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
-                    rep.getRequiredActions().add(UserEntityRepresentation.SEND_LOGIN);
+                    rep.getRequiredActions().add(requiredAction);
                     eventBuilder.operation(OperationType.ACTION)
                             .resourcePath(session.getContext().getUri())
                             .representation(rep)
@@ -475,9 +463,6 @@ public class CustomUserResource {
                 }
             }
         }
-        return JsonResponse.success()
-                .httpStatus(Response.Status.NO_CONTENT)
-                .build();
     }
 
 }

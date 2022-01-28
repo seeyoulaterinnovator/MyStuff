@@ -28,7 +28,7 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
 
     default AdminPermissionEvaluator initAuthByWorkingRealm(KeycloakSession session) {
         KeycloakContext context = session.getContext();
-        AdminAuth auth = initAdminAuth(session);
+        InitSession initSession = initAdminAuth(session);
 
         RealmManager realmManager = new RealmManager(session);
         KeycloakUriInfo uri = context.getUri();
@@ -39,33 +39,15 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
 
         session.getContext().setRealm(realmFromRequest);
 
-        return AdminPermissions.evaluator(session, realmFromRequest, auth);
+        return AdminPermissions.evaluator(session, realmFromRequest, initSession.getAdminAuth());
     }
 
     default AdminPermissionEvaluator initAuth(KeycloakSession session) {
-        AdminAuth auth = initAdminAuth(session);
-
-        KeycloakContext context = session.getContext();
-        AppAuthManager appAuthManager = new AppAuthManager();
-        String tokenString = Optional.ofNullable(appAuthManager.extractAuthorizationHeaderToken(context.getRequestHeaders())).orElseThrow(() -> new NotAuthorizedException("Bearer"));
-        AccessToken token;
-        try {
-            JWSInput input = new JWSInput(tokenString);
-            token = input.readJsonContent(AccessToken.class);
-        } catch (JWSInputException e) {
-            throw new NotAuthorizedException("Bearer token format error");
-        }
-
-        String issuer = Optional.ofNullable(token.getIssuer()).orElseThrow(() -> new RuntimeException("empty issuer"));
-        String realmName = issuer.substring(issuer.lastIndexOf('/') + 1);
-
-        RealmManager realmManager = new RealmManager(session);
-        RealmModel realmFromToken = Optional.ofNullable(realmManager.getRealmByName(realmName))
-                .orElseThrow(() -> new NotAuthorizedException("Unknown realm in token"));
-        return AdminPermissions.evaluator(session, realmFromToken, auth);
+        InitSession initSession = initAdminAuth(session);
+        return AdminPermissions.evaluator(session, initSession.getRealmFromToken(), initSession.getAdminAuth());
     }
 
-    default AdminAuth initAdminAuth(KeycloakSession session) {
+    default InitSession initAdminAuth(KeycloakSession session) {
         KeycloakContext context = session.getContext();
         AppAuthManager appAuthManager = new AppAuthManager();
         String tokenString = Optional.ofNullable(appAuthManager.extractAuthorizationHeaderToken(context.getRequestHeaders())).orElseThrow(() -> new NotAuthorizedException("Bearer"));
@@ -99,6 +81,6 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
             throw new ForbiddenException();
         }
 
-        return auth;
+        return new InitSession(session, realmFromToken, auth);
     }
 }

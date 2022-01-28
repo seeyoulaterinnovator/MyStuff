@@ -57,9 +57,8 @@ public class UserPhoneVerifier {
     }
 
     private String generateCode(User user, ActivationCodeType codeType, AuthContext context)
-            throws PhoneCallException, SmsSendException, ViberSendException
-    {
-        if ( ActivationCodeType.CODE_TO_SMS.equals(codeType)) {
+            throws PhoneCallException, SmsSendException, ViberSendException {
+        if (ActivationCodeType.CODE_TO_SMS.equals(codeType)) {
             String code = SmsCodeGenerator.getCode(codeType.getLengthCode());
 
             try {
@@ -76,8 +75,7 @@ public class UserPhoneVerifier {
     }
 
     public void verifyPhone(User user, AuthContext authContext, String smsCode, ActivationCodeType activationCodeType)
-            throws WrongSmsCode
-    {
+            throws WrongSmsCode {
         String savedHash = authContext.getHashProperty();
         LocalDateTime expirationDate = authContext.getExpirationTime();
 

@@ -1,6 +1,5 @@
 package ru.alamics.sso.user;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.PersonalAccountPostEntity;
 import ru.alamics.sso.jpa.entity.UserPostEntity;
@@ -11,6 +10,7 @@ import ru.alamics.sso.user.model.PersonalAccountPostModel;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ws.rs.NotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 

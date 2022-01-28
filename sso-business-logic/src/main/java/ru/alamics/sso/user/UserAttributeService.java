@@ -1,6 +1,5 @@
 package ru.alamics.sso.user;
 
-import org.jboss.resteasy.spi.NotFoundException;
 import org.keycloak.models.KeycloakContext;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -14,6 +13,7 @@ import ru.alamics.sso.user.web.AttributeRequest;
 import ru.alamics.sso.util.validator.NotValidException;
 import ru.alamics.sso.util.validator.PhoneValidator;
 
+import javax.ws.rs.NotFoundException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;

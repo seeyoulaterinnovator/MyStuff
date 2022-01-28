@@ -31,21 +31,7 @@ public class UserManageResource {
     @Path("/block")
     @POST
     public Response blockUsers(List<String> ids) {
-        UserProvider userProvider = getUsers();
-        if (ids != null) {
-            ids.forEach(id -> {
-                UserModel user = userProvider.getUserById(id, realm);
-                if (user != null) {
-                    user.setEnabled(false);
-                    UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
-                    eventBuilder.operation(OperationType.UPDATE)
-                            .resourcePath(session.getContext().getUri())
-                            .representation(rep)
-                            .realm(realm)
-                            .success();
-                }
-            });
-        }
+        changeUserBlockState(ids, false);
         return JsonResponse.success()
                 .httpStatus(Response.Status.NO_CONTENT)
                 .build();
@@ -54,28 +40,11 @@ public class UserManageResource {
     @Path("/unlock")
     @POST
     public Response unlockUsers(List<String> ids) {
-        UserProvider userProvider = getUsers();
-        if (ids != null) {
-            ids.forEach(id -> {
-                UserModel user = userProvider.getUserById(id, realm);
-                if (user != null) {
-                    user.setEnabled(true);
-                    UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
-                    eventBuilder.operation(OperationType.UPDATE)
-                            .resourcePath(session.getContext().getUri())
-                            .representation(rep)
-                            .realm(realm)
-                            .success();
-                }
-            });
-        }
-
-
+        changeUserBlockState(ids, true);
         return JsonResponse.success()
                 .httpStatus(Response.Status.NO_CONTENT)
                 .build();
     }
-
 
     @Path("/credential/reset")
     @POST
@@ -90,6 +59,24 @@ public class UserManageResource {
         return JsonResponse.success()
                 .httpStatus(Response.Status.NO_CONTENT)
                 .build();
+    }
+
+    private void changeUserBlockState(List<String> ids, boolean unlocking) {
+        UserProvider userProvider = getUsers();
+        if (ids != null) {
+            ids.forEach(id -> {
+                UserModel user = userProvider.getUserById(id, realm);
+                if (user != null) {
+                    user.setEnabled(unlocking);
+                    UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
+                    eventBuilder.operation(OperationType.UPDATE)
+                            .resourcePath(session.getContext().getUri())
+                            .representation(rep)
+                            .realm(realm)
+                            .success();
+                }
+            });
+        }
     }
 
     private UserProvider getUsers() {
