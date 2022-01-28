@@ -36,7 +36,7 @@ class SmsSendServiceImplTest {
         server = new WireMockServer(wireMockConfig().dynamicPort());
         server.start();
 
-        SmsConfig smsConfig = SmsConfig.builder()
+        SmsConfig.builder()
                 .url(new ResteasyUriBuilder()
                         .scheme("http")
                         .host("127.0.0.1")
@@ -53,7 +53,7 @@ class SmsSendServiceImplTest {
                 .encoding(SmsConfig.Encoding.UCS2)
                 .charset(StandardCharsets.UTF_8)
                 .build();
-        service = new SmsSendServiceImpl(smsConfig);
+        service = new SmsSendServiceImpl();
     }
 
     @AfterEach

@@ -31,7 +31,6 @@ public class ViberSendServiceImpl implements ViberSendService {
             .connectTimeout(3, TimeUnit.SECONDS)
             .readTimeout(10, TimeUnit.SECONDS);
     private static final ResteasyClient client = clientBuilder.build();
-    private SmsConfig smsConfig;
 
     @Resource(lookup = "java:global/domru-sso/SettingsService")
     private SettingsService settingsService;
@@ -48,7 +47,7 @@ public class ViberSendServiceImpl implements ViberSendService {
             return "0: Accepted for delivery";
         }
 
-        createSmsConfig(realmId);
+        SmsConfig smsConfig = createSmsConfig(realmId);
 
         URI uri = URI.create(settingsService.getSettingsStringValue(SEND_URI_VIBER, realmId));
 
@@ -56,7 +55,7 @@ public class ViberSendServiceImpl implements ViberSendService {
 
         try {
             ResteasyWebTarget webTarget = client.target(uri)
-                    .queryParams(getConfigForQuery())
+                    .queryParams(getConfigForQuery(smsConfig))
                     .queryParam("to", Util.getCleanUserPhone(phone))
                     .queryParam("text", Util.encodeCharset(text, smsConfig.getCharset()));
 
@@ -71,8 +70,8 @@ public class ViberSendServiceImpl implements ViberSendService {
         }
     }
 
-    private void createSmsConfig(String realmId) {
-        smsConfig = SmsConfig.builder()
+    private SmsConfig createSmsConfig(String realmId) {
+        return SmsConfig.builder()
                 .smsCenterName(settingsService.getSettingsStringValue(SMSC_NAME_VIBER, realmId))
                 .username(settingsService.getSettingsStringValue(USERNAME_VIBER, realmId))
                 .password(settingsService.getSettingsStringValue(PASSWORD_VIBER, realmId))
@@ -85,7 +84,7 @@ public class ViberSendServiceImpl implements ViberSendService {
                 .build();
     }
 
-    private MultivaluedMap<String, Object> getConfigForQuery() {
+    private MultivaluedMap<String, Object> getConfigForQuery(SmsConfig smsConfig) {
 
         MultivaluedHashMap<String, Object> map = new MultivaluedHashMap<>();
         map.add("smsc", smsConfig.getSmsCenterName());
