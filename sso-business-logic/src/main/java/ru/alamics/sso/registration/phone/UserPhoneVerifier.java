@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.phone.exception.*;
+import ru.alamics.sso.registration.phone.model.MessageRequest;
+import ru.alamics.sso.registration.phone.model.MessengerType;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 
 import javax.ejb.EJB;
@@ -19,22 +21,20 @@ public class UserPhoneVerifier {
     public static final String COUNT_REPEAT = "count_repeat";
 
     @EJB
-    private SmsService smsService;
-    @EJB
-    private ViberService viberService;
+    private MessageService messageService;
     @EJB
     private PhoneCallerRemoteService phoneCallerService;
 
     public UserPhoneVerifier() {
     }
 
-    public UserPhoneVerifier(SmsService smsService) {
-        this.smsService = smsService;
+    public UserPhoneVerifier(MessageService smsService) {
+        this.messageService = smsService;
     }
 
     public AuthContext sendValidationSms(User user,
                                          AuthContext context,
-                                         ActivationCodeType codeType, String realmId) throws UserPhoneEmpty, PhoneCallException, SmsSendException, ViberSendException {
+                                         ActivationCodeType codeType, String realmId) throws UserPhoneEmpty, PhoneCallException, SendMessageExceprion, ViberSendException {
         if (user.getPhone() == null || user.getPhone().isEmpty())
             throw new UserPhoneEmpty();
 
@@ -57,14 +57,22 @@ public class UserPhoneVerifier {
     }
 
     private String generateCode(User user, ActivationCodeType codeType, AuthContext context, String realmId)
-            throws PhoneCallException, SmsSendException, ViberSendException {
+            throws PhoneCallException, SendMessageExceprion {
         if (ActivationCodeType.CODE_TO_SMS.equals(codeType)) {
             String code = SmsCodeGenerator.getCode(codeType.getLengthCode());
 
+            MessageRequest messageRequest = MessageRequest.builder()
+                    .userPhone(user.getPhone())
+                    .text(code)
+                    .realmId(realmId)
+                    .build();
+
             try {
-                viberService.sendMsg(user.getPhone(), code, realmId);
+                messageRequest.setMessengerName(MessengerType.VIBER);
+                messageService.sendMsg(messageRequest);
             } finally {
-                smsService.sendSms(user.getPhone(), code, realmId);
+                messageRequest.setMessengerName(MessengerType.SMS);
+                messageService.sendMsg(messageRequest);
             }
 
             return code;

@@ -7,7 +7,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.alamics.sso.registration.phone.SmsConfig;
-import ru.alamics.sso.registration.phone.exception.SmsSendException;
+import ru.alamics.sso.registration.phone.exception.SendMessageExceprion;
+import ru.alamics.sso.registration.phone.model.MessageRequest;
+import ru.alamics.sso.registration.phone.model.MessengerType;
+import ru.alamics.sso.remote.message.SendMessageServiceImpl;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -26,10 +29,11 @@ class SmsSendServiceImplTest {
     public static final String PHONE = "89824699045";
     public static final String TEXT = "test";
     public static final String REALM_ID = "user";
+    public static final MessengerType MESSENGER_TYPE = MessengerType.SMS;
     public static final String PATH = "/cgi-bin/sendsms";
     private static WireMockServer server;
 
-    private static SmsSendServiceImpl service;
+    private static SendMessageServiceImpl service;
 
     @BeforeAll
     static void initWireMock() {
@@ -53,7 +57,7 @@ class SmsSendServiceImplTest {
                 .encoding(SmsConfig.Encoding.UCS2)
                 .charset(StandardCharsets.UTF_8)
                 .build();
-        service = new SmsSendServiceImpl();
+        service = new SendMessageServiceImpl();
     }
 
     @AfterEach
@@ -84,11 +88,18 @@ class SmsSendServiceImplTest {
                 )
         );
         try {
-            String result = service.sendSms(PHONE, TEXT, REALM_ID);
+            MessageRequest messageRequest = MessageRequest.builder()
+                    .userPhone(PHONE)
+                    .messengerName(MESSENGER_TYPE)
+                    .realmId(REALM_ID)
+                    .text(TEXT)
+                    .build();
+
+            String result = service.sendSms(messageRequest);
 
             assertThat(result.substring(0, 1)).isEqualTo("0");
 
-        } catch (SmsSendException e) {
+        } catch (SendMessageExceprion e) {
             System.out.println(e);
         }
     }
