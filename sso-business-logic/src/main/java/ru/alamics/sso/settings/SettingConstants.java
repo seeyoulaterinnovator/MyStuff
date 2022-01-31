@@ -28,6 +28,8 @@ public enum SettingConstants {
     SENDER_NAME_VIBER("viberSender.senderName"),
     TIMEOUT_VIBER("viberSender.timeout"),
 
+
+    //Составные параметры переменных для шлюза
     SEND_URI(".uri"),
     SMSC_NAME(".smscName"),
     USERNAME_SENDER(".username"),
