@@ -11,6 +11,7 @@ import ru.alamics.sso.registration.phone.model.MessageRequest;
 import ru.alamics.sso.registration.phone.model.MessengerType;
 import ru.alamics.sso.registration.phone.port.SendMessageService;
 import ru.alamics.sso.settings.SettingsService;
+import ru.alamics.sso.util.StandResolver;
 import ru.alamics.sso.util.Util;
 
 import javax.annotation.Resource;
@@ -46,11 +47,11 @@ public class SendMessageServiceImpl implements SendMessageService {
     @Override
     public String sendSms(MessageRequest messageRequest) throws SendMessageException {
 
-//        // локально и на дэве фиксированный код и не отправляю смс
-//        if (!StandResolver.isBattle()) {
-//            log.info("Stand {}, do not sending sms", StandResolver.ENV);
-//            return "0: Accepted for delivery";
-//        }
+        // локально и на дэве фиксированный код и не отправляю смс
+        if (!StandResolver.isBattle()) {
+            log.info("Stand {}, do not sending sms", StandResolver.ENV);
+            return "0: Accepted for delivery";
+        }
 
         SmsConfig smsConfig = createSmsConfig(messageRequest.getRealmId(), messageRequest.getMessengerName());
 
