@@ -5,6 +5,6 @@ import ru.alamics.sso.registration.phone.model.MessageRequest;
 
 public interface SendMessageService {
 
-    String sendSms(MessageRequest messageRequest) throws SendMessageException;
+    String sendMsg(MessageRequest messageRequest) throws SendMessageException;
 
 }

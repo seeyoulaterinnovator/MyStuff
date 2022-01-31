@@ -1,16 +1,16 @@
 package ru.alamics.sso.registration.phone.port;
 
-import ru.alamics.sso.registration.phone.SmsConfig;
+import ru.alamics.sso.registration.phone.MsgConfig;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
 public interface MessageService {
 
-    default MultivaluedMap<String, Object> getConfigForQuery(SmsConfig smsConfig) {
+    default MultivaluedMap<String, Object> getConfigForQuery(MsgConfig smsConfig) {
 
         MultivaluedHashMap<String, Object> map = new MultivaluedHashMap<>();
-        map.add("smsc", smsConfig.getSmsCenterName());
+        map.add("smsc", smsConfig.getMsgCenterName());
         map.add("username", smsConfig.getUsername());
         map.add("password", smsConfig.getPassword());
         map.add("from", smsConfig.getSenderName());

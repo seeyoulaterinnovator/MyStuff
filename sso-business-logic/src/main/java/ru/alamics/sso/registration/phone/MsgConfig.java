@@ -10,11 +10,11 @@ import java.nio.charset.Charset;
 
 @Data
 @Builder
-public class SmsConfig {
+public class MsgConfig {
 
     private URI url;
 
-    private String smsCenterName;
+    private String msgCenterName;
 
     private String username;
 
@@ -49,7 +49,7 @@ public class SmsConfig {
     public MultivaluedMap<String, Object> getConfigForQuery() {
 
         MultivaluedHashMap<String, Object> map = new MultivaluedHashMap<>();
-        map.add("smsc", getSmsCenterName());
+        map.add("smsc", getMsgCenterName());
         map.add("username", getUsername());
         map.add("password", getPassword());
         map.add("from", getSenderName());

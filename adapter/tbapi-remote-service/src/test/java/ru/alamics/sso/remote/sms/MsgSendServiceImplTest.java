@@ -6,7 +6,7 @@ import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import ru.alamics.sso.registration.phone.SmsConfig;
+import ru.alamics.sso.registration.phone.MsgConfig;
 import ru.alamics.sso.registration.phone.exception.SendMessageException;
 import ru.alamics.sso.registration.phone.model.MessageRequest;
 import ru.alamics.sso.registration.phone.model.MessengerType;
@@ -20,7 +20,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SmsSendServiceImplTest {
+class MsgSendServiceImplTest {
 
     public static final String USERNAME = "kannel_user";
     public static final String PASSWORD = "kannel_user";
@@ -40,21 +40,21 @@ class SmsSendServiceImplTest {
         server = new WireMockServer(wireMockConfig().dynamicPort());
         server.start();
 
-        SmsConfig.builder()
+        MsgConfig.builder()
                 .url(new ResteasyUriBuilder()
                         .scheme("http")
                         .host("127.0.0.1")
                         .port(server.port())
                         .path(PATH)
                         .build())
-                .smsCenterName(SMSC_NAME)
+                .msgCenterName(SMSC_NAME)
                 .username(USERNAME)
                 .password(PASSWORD)
                 .senderName(SENDER_NAME)
                 .timeout(5)
-                .priority(SmsConfig.Priority.HIGH)
-                .reportsMask(SmsConfig.ReportsConfig.DELIVERED_TO_PHONE)
-                .encoding(SmsConfig.Encoding.UCS2)
+                .priority(MsgConfig.Priority.HIGH)
+                .reportsMask(MsgConfig.ReportsConfig.DELIVERED_TO_PHONE)
+                .encoding(MsgConfig.Encoding.UCS2)
                 .charset(StandardCharsets.UTF_8)
                 .build();
         service = new SendMessageServiceImpl();
@@ -74,9 +74,9 @@ class SmsSendServiceImplTest {
         map.put("password", equalTo(PASSWORD));
         map.put("from", equalTo(SENDER_NAME));
         map.put("validity", equalTo(String.valueOf(5)));
-        map.put("priority", equalTo(String.valueOf(SmsConfig.Priority.HIGH.getPriorityAsInt())));
-        map.put("dlr-mask", equalTo(String.valueOf(SmsConfig.ReportsConfig.DELIVERED_TO_PHONE)));
-        map.put("coding", equalTo(String.valueOf(SmsConfig.Encoding.UCS2.getPriorityAsInt())));
+        map.put("priority", equalTo(String.valueOf(MsgConfig.Priority.HIGH.getPriorityAsInt())));
+        map.put("dlr-mask", equalTo(String.valueOf(MsgConfig.ReportsConfig.DELIVERED_TO_PHONE)));
+        map.put("coding", equalTo(String.valueOf(MsgConfig.Encoding.UCS2.getPriorityAsInt())));
         map.put("charset", equalTo(StandardCharsets.UTF_8.name()));
 
         server.stubFor(post(urlPathEqualTo(PATH))
@@ -95,7 +95,7 @@ class SmsSendServiceImplTest {
                     .text(TEXT)
                     .build();
 
-            String result = service.sendSms(messageRequest);
+            String result = service.sendMsg(messageRequest);
 
             assertThat(result.substring(0, 1)).isEqualTo("0");
 

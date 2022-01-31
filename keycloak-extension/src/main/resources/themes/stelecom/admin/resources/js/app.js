@@ -2078,8 +2078,8 @@ module.config(['$routeProvider', function ($routeProvider) {
             },
             controller: 'CustomTabCtrl'
         })
-        .when('/realms/:realm/custom-settings-emailer', {
-            templateUrl: resourceUrl + '/partials/custom-settings-emailer.html',
+        .when('/realms/:realm/custom-settings-gateway', {
+            templateUrl: resourceUrl + '/partials/custom-settings-gateway.html',
             resolve: {
                 realm: function (RealmLoader) {
                     return RealmLoader();

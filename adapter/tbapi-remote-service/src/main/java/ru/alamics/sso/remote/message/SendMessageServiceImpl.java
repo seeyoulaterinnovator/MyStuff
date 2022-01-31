@@ -5,7 +5,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.internal.ClientInvocationBuilder;
 import org.jboss.resteasy.plugins.providers.StringTextStar;
-import ru.alamics.sso.registration.phone.SmsConfig;
+import ru.alamics.sso.registration.phone.MsgConfig;
 import ru.alamics.sso.registration.phone.exception.SendMessageException;
 import ru.alamics.sso.registration.phone.model.MessageRequest;
 import ru.alamics.sso.registration.phone.port.SendMessageService;
@@ -40,7 +40,7 @@ public class SendMessageServiceImpl implements SendMessageService {
     }
 
     @Override
-    public String sendSms(MessageRequest messageRequest) throws SendMessageException {
+    public String sendMsg(MessageRequest messageRequest) throws SendMessageException {
 
         // локально и на дэве фиксированный код и не отправляю смс
         if (!StandResolver.isBattle()) {
@@ -48,40 +48,38 @@ public class SendMessageServiceImpl implements SendMessageService {
             return "0: Accepted for delivery";
         }
 
-        SmsConfig smsConfig = createSmsConfig(messageRequest.getRealmId(), messageRequest.getMessengerName().getType());
+        MsgConfig msgConfig = createMsgConfig(messageRequest.getRealmId(), messageRequest.getMessengerName().getType());
 
-        URI uri = smsConfig.getUrl();
+        URI uri = msgConfig.getUrl();
 
         log.info(String.format("Api %s, Sending %s code to number: %s", uri.getHost(), messageRequest.getMessengerName().toString(), messageRequest.getUserPhone()));
 
         ClientInvocationBuilder builder = (ClientInvocationBuilder) client.register(StringTextStar.class)
                 .target(uri)
-                .queryParams(smsConfig.getConfigForQuery())
+                .queryParams(msgConfig.getConfigForQuery())
                 .queryParam("to", Util.getCleanUserPhone(messageRequest.getUserPhone()))
-                .queryParam("text", Util.encodeCharset(messageRequest.getText(), smsConfig.getCharset()))
+                .queryParam("text", Util.encodeCharset(messageRequest.getText(), msgConfig.getCharset()))
                 .request();
         try {
             return builder.get(String.class);
-
         } catch (ProcessingException | WebApplicationException wae) {
             log.error(wae.getMessage(), wae);
-
             throw new SendMessageException(wae);
         }
     }
 
-    private SmsConfig createSmsConfig(String realmId, String type) {
+    private MsgConfig createMsgConfig(String realmId, String type) {
 
-        return SmsConfig.builder()
+        return MsgConfig.builder()
                 .url(URI.create(settingsService.getSettingsStringValue(type + SEND_URI.getKey(), realmId)))
-                .smsCenterName(settingsService.getSettingsStringValue(type + SMSC_NAME.getKey(), realmId))
+                .msgCenterName(settingsService.getSettingsStringValue(type + SMSC_NAME.getKey(), realmId))
                 .username(settingsService.getSettingsStringValue(type + USERNAME_SENDER.getKey(), realmId))
                 .password(settingsService.getSettingsStringValue(type + PASSWORD.getKey(), realmId))
                 .senderName(settingsService.getSettingsStringValue(type + SENDER_NAME.getKey(), realmId))
-                .timeout(settingsService.getSettingsIntegerValue(type + TIMEOUT.getKey(), realmId, 1440, "SmsSendServiceImpl: default value used: '%s' = '%s'"))
-                .priority(SmsConfig.Priority.LOWEST)
-                .reportsMask(SmsConfig.ReportsConfig.DELIVERED_TO_PHONE)
-                .encoding(SmsConfig.Encoding.UCS2)
+                .timeout(settingsService.getSettingsIntegerValue(type + TIMEOUT.getKey(), realmId, 1440, "MsgSendServiceImpl: default value used: '%s' = '%s'"))
+                .priority(MsgConfig.Priority.LOWEST)
+                .reportsMask(MsgConfig.ReportsConfig.DELIVERED_TO_PHONE)
+                .encoding(MsgConfig.Encoding.UCS2)
                 .charset(StandardCharsets.UTF_8)
                 .build();
     }

@@ -28,11 +28,11 @@ public class UserPhoneVerifier {
     public UserPhoneVerifier() {
     }
 
-    public UserPhoneVerifier(MessageService smsService) {
-        this.messageService = smsService;
+    public UserPhoneVerifier(MessageService msgService) {
+        this.messageService = msgService;
     }
 
-    public AuthContext sendValidationSms(User user,
+    public AuthContext sendValidationMsg(User user,
                                          AuthContext context,
                                          ActivationCodeType codeType, String realmId) throws UserPhoneEmpty, PhoneCallException, SendMessageException, ViberSendException {
         if (user.getPhone() == null || user.getPhone().isEmpty())

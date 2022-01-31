@@ -14,18 +14,14 @@ import java.util.UUID;
 public class MessageService {
 
     @EJB
-    private SendMessageService smsSendService;
+    private SendMessageService msgSendService;
 
     public void sendMsg(MessageRequest messageRequest) throws SendMessageException {
         String response = null;
-
-
         try {
-            response = smsSendService.sendSms(messageRequest);
+            response = msgSendService.sendMsg(messageRequest);
         } finally {
             String id = UUID.randomUUID().toString();
-
-
             String phone = messageRequest.getUserPhone();
             String text = messageRequest.getText();
             String messengerName = messageRequest.getMessengerName().toString();
