@@ -2,8 +2,8 @@ package ru.alamics.sso.registration.phone.model;
 
 public enum MessengerType {
 
-    SMS("SMS"),
-    VIBER("Viber");
+    SMS("smsSender"),
+    VIBER("viberSender");
 
     private final String type;
 

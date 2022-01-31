@@ -34,7 +34,7 @@ public class UserPhoneVerifier {
 
     public AuthContext sendValidationSms(User user,
                                          AuthContext context,
-                                         ActivationCodeType codeType, String realmId) throws UserPhoneEmpty, PhoneCallException, SendMessageExceprion, ViberSendException {
+                                         ActivationCodeType codeType, String realmId) throws UserPhoneEmpty, PhoneCallException, SendMessageException, ViberSendException {
         if (user.getPhone() == null || user.getPhone().isEmpty())
             throw new UserPhoneEmpty();
 
@@ -57,7 +57,7 @@ public class UserPhoneVerifier {
     }
 
     private String generateCode(User user, ActivationCodeType codeType, AuthContext context, String realmId)
-            throws PhoneCallException, SendMessageExceprion {
+            throws PhoneCallException, SendMessageException {
         if (ActivationCodeType.CODE_TO_SMS.equals(codeType)) {
             String code = SmsCodeGenerator.getCode(codeType.getLengthCode());
 

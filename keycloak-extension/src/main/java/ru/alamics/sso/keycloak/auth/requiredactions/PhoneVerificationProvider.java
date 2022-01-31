@@ -109,7 +109,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             log.info("ignore... PhoneCallException {}", e.getMessage());
         } catch (EmailException e) {
             log.info("ignore... EmailException {}", e.getMessage());
-        } catch (SendMessageExceprion se) {
+        } catch (SendMessageException se) {
             log.info("ignore... SmsSendException {}", se.getMessage());
         } catch (ViberSendException ve) {
             log.info("ignore... ViberSendException {}", ve.getMessage());

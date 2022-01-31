@@ -7,7 +7,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.alamics.sso.registration.phone.SmsConfig;
-import ru.alamics.sso.registration.phone.exception.SendMessageExceprion;
+import ru.alamics.sso.registration.phone.exception.SendMessageException;
 import ru.alamics.sso.registration.phone.model.MessageRequest;
 import ru.alamics.sso.registration.phone.model.MessengerType;
 import ru.alamics.sso.remote.message.SendMessageServiceImpl;
@@ -99,7 +99,7 @@ class SmsSendServiceImplTest {
 
             assertThat(result.substring(0, 1)).isEqualTo("0");
 
-        } catch (SendMessageExceprion e) {
+        } catch (SendMessageException e) {
             System.out.println(e);
         }
     }
