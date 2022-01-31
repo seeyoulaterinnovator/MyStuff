@@ -3,12 +3,36 @@ package ru.alamics.sso.registration.phone;
 import lombok.Builder;
 import lombok.Data;
 
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
 import java.nio.charset.Charset;
 
 @Data
 @Builder
-public class SmsConfig {
+public class MsgConfig {
+
+    private URI url;
+
+    private String msgCenterName;
+
+    private String username;
+
+    private String password;
+
+    private String senderName;
+
+    private Integer timeout;
+
+    private byte reportsMask;
+
+    private Encoding encoding;
+
+    private Charset charset;
+
+    private Priority priority;
+
+    private String reportBackUrl;
 
     public class ReportsConfig {
         private ReportsConfig() {
@@ -20,6 +44,22 @@ public class SmsConfig {
         public static final byte DELIVERED_TO_SMSC = 0b1 << 3;
         public static final byte NON_DELIVERED_TO_SMSC = 0b1 << 4;
 
+    }
+
+    public MultivaluedMap<String, Object> getConfigForQuery() {
+
+        MultivaluedHashMap<String, Object> map = new MultivaluedHashMap<>();
+        map.add("smsc", getMsgCenterName());
+        map.add("username", getUsername());
+        map.add("password", getPassword());
+        map.add("from", getSenderName());
+        map.add("validity", getTimeout());
+        map.add("priority", getPriority().getPriorityAsInt());
+        map.add("dlr-mask", getReportsMask());
+        map.add("coding", getEncoding().getPriorityAsInt());
+        map.add("charset", getCharset());
+
+        return map;
     }
 
     public enum Encoding {
@@ -49,27 +89,5 @@ public class SmsConfig {
             return priorityNum;
         }
     }
-
-    private URI url;
-
-    private String smsCenterName;
-
-    private String username;
-
-    private String password;
-
-    private String senderName;
-
-    private Integer timeout;
-
-    private byte reportsMask;
-
-    private Encoding encoding;
-
-    private Charset charset;
-
-    private Priority priority;
-
-    private String reportBackUrl;
 
 }

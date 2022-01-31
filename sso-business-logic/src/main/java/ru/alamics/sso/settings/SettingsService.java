@@ -51,13 +51,13 @@ public class SettingsService {
 
         Settings save = repository.save(settingsToSave);
         //При вызове метода save с Админконсоли для времени шедулера мы обновляем таймер
-        if(SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY.getKey().equals(save.getExtId())){
+        if (SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY.getKey().equals(save.getExtId())) {
             userSchedule.changeScheduleTimer();
         }
         return DataMapper.toDto(save);
     }
 
-    public long getSettingsValue(final SettingConstants property, final String realmId) {
+    public long getSettingsLongValue(final SettingConstants property, final String realmId) {
         final String keyName = property.getKey();
         Settings settings = repository.getSettings(keyName, realmId);
         long ret = -1;
@@ -71,13 +71,32 @@ public class SettingsService {
         return ret;
     }
 
-    public String getSettingsStringValue(final SettingConstants property, final String realmId) {
-        Settings settings = repository.getSettings(property.getKey(), realmId);
+    public String getSettingsStringValue(final String property, final String realmId) {
+        Settings settings = repository.getSettings(property, realmId);
         String value = "no settings";
         if (settings != null) {
             value = settings.getValue();
         }
         return value;
+    }
+
+    public String getSettingsStringValue(final SettingConstants property, final String realmId) {
+            return getSettingsStringValue(property.getKey(),realmId);
+    }
+
+    public Integer getSettingsIntegerValue(final String property, final String realmId, Integer defValue, String logDefault) {
+        Settings settings = repository.getSettings(property, realmId);
+        try {
+            return Integer.parseInt(settings.getValue());
+        } catch (NumberFormatException nfe) {
+            if (logDefault != null)
+                log.info(logDefault, property, defValue);
+            return defValue;
+        }
+    }
+
+    public Integer getSettingsIntegerValue(final SettingConstants property, final String realmId, Integer defValue, String logDefault) {
+            return getSettingsIntegerValue(property.getKey(), realmId, defValue, logDefault);
     }
 
     public SettingsDto getSetting(final SettingConstants property, final String realmId) {

@@ -14,7 +14,12 @@
         </li>
         <li data-ng-class="(
                         path[2] == 'custom-settings-application'
-                        ) && 'active'"><a href="#/realms/{{realm.realm}}/custom-settings/application">Application settings</a>
+                        ) && 'active'"><a href="#/realms/{{realm.realm}}/custom-settings/application">Application
+            settings</a>
+        </li>
+        <li data-ng-class="(
+                        path[2] == 'custom-settings-gateway'
+                        ) && 'active'"><a href="#/realms/{{realm.realm}}/custom-settings/gateway">Sender gateway</a>
         </li>
     </ul>
 </div>

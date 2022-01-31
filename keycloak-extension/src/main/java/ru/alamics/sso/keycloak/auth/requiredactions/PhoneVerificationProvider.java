@@ -78,7 +78,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                         .build();
                 enableRepeatCall = false;
             } else {
-                authContext = userPhoneVerifier.sendValidationSms(user, authContext, activationCodeType);
+                authContext = userPhoneVerifier.sendValidationMsg(user, authContext, activationCodeType, context.getRealm().getId());
             }
 
             authSession.setAuthNote(PHONE_KEY_HASH, authContext.getHashProperty());
@@ -109,7 +109,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             log.info("ignore... PhoneCallException {}", e.getMessage());
         } catch (EmailException e) {
             log.info("ignore... EmailException {}", e.getMessage());
-        } catch (SmsSendException se) {
+        } catch (SendMessageException se) {
             log.info("ignore... SmsSendException {}", se.getMessage());
         } catch (ViberSendException ve) {
             log.info("ignore... ViberSendException {}", ve.getMessage());

@@ -35,7 +35,7 @@ public abstract class SsoEvent {
 
     private final KeycloakSession session;
     private final EmailSender emailSender;
-    private SettingsService settingsService;
+    private final SettingsService settingsService;
 
     public SsoEvent(KeycloakSession session) {
         this.session = session;
@@ -66,7 +66,7 @@ public abstract class SsoEvent {
             AuthenticationSessionModel authenticationSession = authenticationSessionManager.createAuthenticationSession(realm, false)
                     .createAuthenticationSession(clientModel);
 
-            long timeTokenCreateUser = settingsService.getSettingsValue(SettingConstants.TIME_TOKEN_SET_FIRST_PASS, realm.getName());
+            long timeTokenCreateUser = settingsService.getSettingsLongValue(SettingConstants.TIME_TOKEN_SET_FIRST_PASS, realm.getName());
             int absoluteExpirationInSecs = (int) (Time.currentTime() + timeTokenCreateUser);
 
             // We send the secret in the email in a link as a query param.

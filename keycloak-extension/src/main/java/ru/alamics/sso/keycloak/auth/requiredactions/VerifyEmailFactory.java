@@ -84,7 +84,7 @@ public class VerifyEmailFactory extends VerifyEmail {
 
         try {
             SettingsService settingsService = (SettingsService) new InitialContext().lookup("java:global/domru-sso/" + SettingsService.class.getSimpleName());
-            int timeTokenVerifyEmail = (int) settingsService.getSettingsValue(SettingConstants.TIME_TOKEN_VERIFY_EMAIL, realm.getName());
+            int timeTokenVerifyEmail = (int) settingsService.getSettingsLongValue(SettingConstants.TIME_TOKEN_VERIFY_EMAIL, realm.getName());
             int absoluteExpirationInSecs = Time.currentTime() + timeTokenVerifyEmail;
 
             String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authSession).getEncodedId();

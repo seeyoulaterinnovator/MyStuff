@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
     <changeSet author="tretyakov-da" id="1">
         <createTable tableName="USER_LOGIN_HISTORY">
@@ -146,7 +146,8 @@
                              references="USER_POST(ID)"/>
             </column>
             <column name="EXT_SYSTEM_ROLE_ID" type="bigint">
-                <constraints nullable="false" foreignKeyName="FK_EXT_SYSTEM_ROLE_USER_POST" references="EXT_SYSTEM_ROLE(ID)"/>
+                <constraints nullable="false" foreignKeyName="FK_EXT_SYSTEM_ROLE_USER_POST"
+                             references="EXT_SYSTEM_ROLE(ID)"/>
             </column>
         </createTable>
         <addPrimaryKey tableName="USERPOST_EXT_SYSTEM_ROLE" columnNames="USER_POST_ID, EXT_SYSTEM_ROLE_ID"
@@ -154,17 +155,17 @@
     </changeSet>
 
     <changeSet author="strukov-av" id="12">
-       <sql>
-           ALTER TABLE USER_POST
-           DROP CONSTRAINT FK_USER_USER_POST
-       </sql>
         <sql>
-           ALTER TABLE USER_POST
-           ADD CONSTRAINT FK_USER_USER_POST
-           FOREIGN KEY (USER_ID)
-           REFERENCES USER_ENTITY (ID)
-           ON DELETE CASCADE
-       </sql>
+            ALTER TABLE USER_POST
+            DROP CONSTRAINT FK_USER_USER_POST
+        </sql>
+        <sql>
+            ALTER TABLE USER_POST
+            ADD CONSTRAINT FK_USER_USER_POST
+            FOREIGN KEY (USER_ID)
+            REFERENCES USER_ENTITY (ID)
+            ON DELETE CASCADE
+        </sql>
     </changeSet>
 
     <changeSet author="strukov-av" id="13">
@@ -194,15 +195,20 @@
             <column name="REALM_ID" type="varchar(256)"/>
         </createTable>
         <sql>
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('7b2e4a18-32ce-43e9-b2dd-680bbb61a78d', 'user.absence.blocking.days', '15', null, 'user');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('df4fa86e-ec19-4f63-b274-4ee25086c20f', 'user.absence.notifications.days', '15', null, 'user');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('7b2e4a18-32ce-43e9-b2dd-680bbb61a78d',
+            'user.absence.blocking.days', '15', null, 'user');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('df4fa86e-ec19-4f63-b274-4ee25086c20f',
+            'user.absence.notifications.days', '15', null, 'user');
         </sql>
     </changeSet>
     <changeSet id="15" author="strukov-av">
         <sql>
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('bc5a3cd8-aecf-4f84-8f5f-caf5d44dc5a5', 'user.expire.sms-viber.code', '300', null, 'user');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('52b6892e-d950-45ff-843f-a564321545de', 'user.expire.incoming.call.code', '20', null, 'user');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('95047368-931d-4b1b-82be-077c6eb10d6d', 'user.expire.incoming.call.email.code', '300', null, 'user');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('bc5a3cd8-aecf-4f84-8f5f-caf5d44dc5a5',
+            'user.expire.sms-viber.code', '300', null, 'user');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('52b6892e-d950-45ff-843f-a564321545de',
+            'user.expire.incoming.call.code', '20', null, 'user');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, realm_id) VALUES ('95047368-931d-4b1b-82be-077c6eb10d6d',
+            'user.expire.incoming.call.email.code', '300', null, 'user');
         </sql>
     </changeSet>
     <changeSet id="16" author="tretyakov-da">
@@ -212,7 +218,8 @@
         <sql>
             update SETTINGS set NAME = 'Expire sms/ Viber code' where EXT_ID = 'user.expire.sms-viber.code';
             update SETTINGS set NAME = 'Expire incomig call code' where EXT_ID = 'user.expire.incoming.call.code';
-            update SETTINGS set NAME = 'Expire incoming call email code' where EXT_ID = 'user.expire.incoming.call.email.code';
+            update SETTINGS set NAME = 'Expire incoming call email code' where EXT_ID =
+            'user.expire.incoming.call.email.code';
             update SETTINGS set NAME = 'Inactive Block timeout' where EXT_ID = 'user.absence.blocking.days';
             update SETTINGS set NAME = 'Inactive notification timeout' where EXT_ID = 'user.absence.notifications.days';
         </sql>
@@ -220,10 +227,11 @@
 
     <changeSet id="17" author="tretyakov-da">
         <preConditions onFail="MARK_RAN">
-            <dbms type="mysql" />
+            <dbms type="mysql"/>
         </preConditions>
         <sql>
-            alter table ADMIN_EVENT_ENTITY change `REPRESENTATION` `REPRESENTATION` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            alter table ADMIN_EVENT_ENTITY change `REPRESENTATION` `REPRESENTATION` TEXT CHARACTER SET utf8mb4 COLLATE
+            utf8mb4_unicode_ci;
             alter table SETTINGS change `DESC` `DESC` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
             alter table SETTINGS change VALUE VALUE TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
         </sql>
@@ -249,7 +257,7 @@
 
     <changeSet id="20" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <dbms type="mysql" />
+            <dbms type="mysql"/>
         </preConditions>
         <sql>
             ALTER TABLE EXTERNAL_SYSTEM CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -258,33 +266,42 @@
 
     <changeSet id="21" author="strukov-av">
         <sql>
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('a55bbe18-7943-405d-a611-6ac576c6834d', 'user.absence.notifications.days', '15', null, 'manager', 'Inactive notification timeout', 'DAYS');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('268c9896-cade-48e5-8fd5-ae2ea5824068', 'user.absence.blocking.days', '15', null, 'manager', 'Inactive Block timeout', 'DAYS');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES
+            ('a55bbe18-7943-405d-a611-6ac576c6834d', 'user.absence.notifications.days', '15', null, 'manager', 'Inactive
+            notification timeout', 'DAYS');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES
+            ('268c9896-cade-48e5-8fd5-ae2ea5824068', 'user.absence.blocking.days', '15', null, 'manager', 'Inactive
+            Block timeout', 'DAYS');
         </sql>
     </changeSet>
     <changeSet id="22" author="dautova-lr">
         <preConditions onFail="MARK_RAN">
-            <dbms type="mysql" />
+            <dbms type="mysql"/>
         </preConditions>
         <sql>
-            alter table EVENT_ENTITY change DETAILS_JSON DETAILS_JSON varchar(2550) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            alter table EVENT_ENTITY change DETAILS_JSON DETAILS_JSON varchar(2550) CHARACTER SET utf8mb4 COLLATE
+            utf8mb4_unicode_ci;
         </sql>
     </changeSet>
 
     <changeSet id="23" author="dautova-lr">
         <preConditions onFail="MARK_RAN">
-            <dbms type="mysql" />
+            <dbms type="mysql"/>
         </preConditions>
         <sql>
-            ALTER TABLE FEDERATED_IDENTITY CHANGE FEDERATED_USERNAME FEDERATED_USERNAME varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-            ALTER TABLE FEDERATED_IDENTITY CHANGE FEDERATED_USER_ID FEDERATED_USER_ID varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            ALTER TABLE FEDERATED_IDENTITY CHANGE FEDERATED_USERNAME FEDERATED_USERNAME varchar(255) CHARACTER SET
+            utf8mb4 COLLATE utf8mb4_unicode_ci;
+            ALTER TABLE FEDERATED_IDENTITY CHANGE FEDERATED_USER_ID FEDERATED_USER_ID varchar(255) CHARACTER SET utf8mb4
+            COLLATE utf8mb4_unicode_ci;
         </sql>
     </changeSet>
 
     <changeSet id="24_1" author="strukov-av" dbms="mssql">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="USER_POST" />
-            <not><columnExists tableName="USER_POST" columnName="SELECTED" /></not>
+            <tableExists tableName="USER_POST"/>
+            <not>
+                <columnExists tableName="USER_POST" columnName="SELECTED"/>
+            </not>
         </preConditions>
         <sql>
             ALTER TABLE USER_POST ADD SELECTED BIT DEFAULT B'0'
@@ -293,8 +310,10 @@
 
     <changeSet id="24_2" author="strukov-av" dbms="h2">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="USER_POST" />
-            <not><columnExists tableName="USER_POST" columnName="SELECTED" /></not>
+            <tableExists tableName="USER_POST"/>
+            <not>
+                <columnExists tableName="USER_POST" columnName="SELECTED"/>
+            </not>
         </preConditions>
         <sql>
             alter table USER_POST add SELECTED boolean default false;
@@ -303,8 +322,10 @@
 
     <changeSet id="24_3" author="plyusnin-da" dbms="mysql">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="USER_POST" />
-            <not><columnExists tableName="USER_POST" columnName="SELECTED" /></not>
+            <tableExists tableName="USER_POST"/>
+            <not>
+                <columnExists tableName="USER_POST" columnName="SELECTED"/>
+            </not>
         </preConditions>
         <sql>
             ALTER TABLE USER_POST ADD SELECTED BIT DEFAULT B'0'
@@ -313,7 +334,9 @@
 
     <changeSet id="25" author="strukov-av">
         <preConditions onFail="MARK_RAN">
-            <not> <tableExists tableName="IMPORT_USERS_REPORT"></tableExists> </not>
+            <not>
+                <tableExists tableName="IMPORT_USERS_REPORT"></tableExists>
+            </not>
         </preConditions>
         <createTable tableName="IMPORT_USERS_REPORT">
             <column name="id" type="varchar(36)">
@@ -344,14 +367,17 @@
 
     <changeSet id="26" author="strukov-av">
         <preConditions onFail="MARK_RAN">
-            <not> <tableExists tableName="IMPORT_USERS_DATA"></tableExists> </not>
+            <not>
+                <tableExists tableName="IMPORT_USERS_DATA"></tableExists>
+            </not>
         </preConditions>
         <createTable tableName="IMPORT_USERS_DATA">
             <column name="id" type="varchar(36)">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="import_id" type="varchar(36)">
-                <constraints nullable="false" foreignKeyName="FK_IMPORT_DATA_IMPORT_REPORT" references="IMPORT_USERS_REPORT(id)"/>
+                <constraints nullable="false" foreignKeyName="FK_IMPORT_DATA_IMPORT_REPORT"
+                             references="IMPORT_USERS_REPORT(id)"/>
             </column>
             <column name="first_name" type="varchar(255)"></column>
             <column name="email" type="varchar(255)"></column>
@@ -367,26 +393,27 @@
 
     <changeSet id="27" author="strukov-av">
         <preConditions onFail="MARK_RAN">
-            <dbms type="mysql" />
+            <dbms type="mysql"/>
             <tableExists tableName="IMPORT_USERS_DATA"></tableExists>
         </preConditions>
         <sql>
-            ALTER TABLE IMPORT_USERS_DATA CHANGE FIRST_NAME FIRST_NAME varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            ALTER TABLE IMPORT_USERS_DATA CHANGE FIRST_NAME FIRST_NAME varchar(255) CHARACTER SET utf8mb4 COLLATE
+            utf8mb4_unicode_ci;
         </sql>
     </changeSet>
 
     <changeSet id="28" author="strukov-av">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="IMPORT_USERS_REPORT" />
+            <tableExists tableName="IMPORT_USERS_REPORT"/>
             <columnExists tableName="IMPORT_USERS_REPORT" columnName="IS_DONE"/>
         </preConditions>
-        <dropColumn tableName="IMPORT_USERS_REPORT" columnName="IS_DONE" />
+        <dropColumn tableName="IMPORT_USERS_REPORT" columnName="IS_DONE"/>
         <addColumn tableName="IMPORT_USERS_REPORT">
             <column name="STATUS" type="varchar(255)" defaultValue="AWAITING">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
-        <update tableName="IMPORT_USERS_REPORT" >
+        <update tableName="IMPORT_USERS_REPORT">
             <column name="STATUS" value="DONE">
             </column>
         </update>
@@ -394,20 +421,23 @@
 
     <changeSet id="29" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <dbms type="mysql" />
+            <dbms type="mysql"/>
             <tableExists tableName="IDP_MAPPER_CONFIG"></tableExists>
             <tableExists tableName="ADMIN_EVENT_ENTITY"></tableExists>
         </preConditions>
         <sql>
             ALTER TABLE IDP_MAPPER_CONFIG CHANGE VALUE VALUE longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-            ALTER TABLE ADMIN_EVENT_ENTITY CHANGE RESOURCE_PATH RESOURCE_PATH varchar(2550) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            ALTER TABLE ADMIN_EVENT_ENTITY CHANGE RESOURCE_PATH RESOURCE_PATH varchar(2550) CHARACTER SET utf8mb4
+            COLLATE utf8mb4_unicode_ci;
         </sql>
     </changeSet>
 
     <changeSet id="30" author="strukov-av">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="IMPORT_USERS_DATA" />
-            <not> <columnExists tableName="IMPORT_USERS_REPORT" columnName="USER_ID"/> </not>
+            <tableExists tableName="IMPORT_USERS_DATA"/>
+            <not>
+                <columnExists tableName="IMPORT_USERS_REPORT" columnName="USER_ID"/>
+            </not>
         </preConditions>
         <addColumn tableName="IMPORT_USERS_DATA">
             <column name="USER_ID" type="varchar(36)"/>
@@ -416,13 +446,15 @@
 
     <changeSet id="31" author="strukov-av">
         <preConditions onFail="MARK_RAN">
-            <not> <tableExists tableName="CUSTOMER" /> </not>
+            <not>
+                <tableExists tableName="CUSTOMER"/>
+            </not>
         </preConditions>
         <createTable tableName="CUSTOMER">
             <column name="id" type="varchar(30)">
-                <constraints nullable="false" primaryKey="true" />
+                <constraints nullable="false" primaryKey="true"/>
             </column>
-            <column name="name" type="varchar(1024)" />
+            <column name="name" type="varchar(1024)"/>
             <column name="update_time" type="timestamp">
                 <constraints nullable="false"/>
             </column>
@@ -431,14 +463,14 @@
 
     <changeSet id="32_mysql" author="strukov-av" dbms="mysql">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="CUSTOMER" />
-            <tableExists tableName="USER_POST" />
+            <tableExists tableName="CUSTOMER"/>
+            <tableExists tableName="USER_POST"/>
             <not>
-                <foreignKeyConstraintExists foreignKeyTableName="USER_POST" foreignKeyName="FK_USER_POST_TO_CUSTOMER" />
+                <foreignKeyConstraintExists foreignKeyTableName="USER_POST" foreignKeyName="FK_USER_POST_TO_CUSTOMER"/>
             </not>
         </preConditions>
 
-        <modifyDataType tableName="USER_POST" columnName="TOMS_ID" newDataType="varchar(30)" />
+        <modifyDataType tableName="USER_POST" columnName="TOMS_ID" newDataType="varchar(30)"/>
 
         <sql>
             ALTER TABLE CUSTOMER CHANGE ID ID varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -448,19 +480,19 @@
 
         <addForeignKeyConstraint baseTableName="USER_POST" baseColumnNames="TOMS_ID"
                                  constraintName="FK_USER_POST_TO_CUSTOMER"
-                                 referencedTableName="CUSTOMER" referencedColumnNames="ID" />
+                                 referencedTableName="CUSTOMER" referencedColumnNames="ID"/>
     </changeSet>
 
     <changeSet id="32_h2" author="strukov-av" dbms="h2">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="CUSTOMER" />
-            <tableExists tableName="USER_POST" />
+            <tableExists tableName="CUSTOMER"/>
+            <tableExists tableName="USER_POST"/>
             <not>
-                <foreignKeyConstraintExists foreignKeyTableName="USER_POST" foreignKeyName="FK_USER_POST_TO_CUSTOMER" />
+                <foreignKeyConstraintExists foreignKeyTableName="USER_POST" foreignKeyName="FK_USER_POST_TO_CUSTOMER"/>
             </not>
         </preConditions>
 
-        <modifyDataType tableName="USER_POST" columnName="TOMS_ID" newDataType="varchar(30)" />
+        <modifyDataType tableName="USER_POST" columnName="TOMS_ID" newDataType="varchar(30)"/>
 
         <sql>
             insert into CUSTOMER(ID, UPDATE_TIME) select distinct p.TOMS_ID, CURRENT_TIMESTAMP from USER_POST p;
@@ -468,12 +500,14 @@
 
         <addForeignKeyConstraint baseTableName="USER_POST" baseColumnNames="TOMS_ID"
                                  constraintName="FK_USER_POST_TO_CUSTOMER"
-                                 referencedTableName="CUSTOMER" referencedColumnNames="ID" />
+                                 referencedTableName="CUSTOMER" referencedColumnNames="ID"/>
     </changeSet>
 
     <changeSet id="33" author="strukov-av">
         <preConditions onFail="MARK_RAN">
-            <not> <tableExists tableName="APP_PROPERTIES" /> </not>
+            <not>
+                <tableExists tableName="APP_PROPERTIES"/>
+            </not>
         </preConditions>
         <createTable tableName="APP_PROPERTIES">
             <column name="name" type="varchar(255)">
@@ -487,7 +521,8 @@
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.secure', 'false');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.auth.appname', 'SSO');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.auth.username', 'anonymous');
-            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.find.path', '/api/v1/customerManagement/customerAccounts/names');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.find.path',
+            '/api/v1/customerManagement/customerAccounts/names');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.request.max.size', '10');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.request.interval.milliseconds', '10000');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.request.load.coeff', '100');
@@ -496,23 +531,27 @@
 
     <changeSet id="34" author="strukov-av">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="APP_PROPERTIES" />
+            <tableExists tableName="APP_PROPERTIES"/>
         </preConditions>
 
         <!--    PhoneCaller properties    -->
         <sql>
-            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('phoneCaller.uri.perm', 'http://LoGSsOIn:1LoGSsOPaSsERTH777@call-auth.cc-perm.ertelecom.ru/sso_call.php');
-            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('phoneCaller.uri.voronezh', 'http://LoGSsOIn:1LoGSsOPaSsERTH777@call-auth.cc-voronezh.ertelecom.ru/sso_call.php');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('phoneCaller.uri.perm',
+            'http://LoGSsOIn:1LoGSsOPaSsERTH777@call-auth.cc-perm.ertelecom.ru/sso_call.php');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('phoneCaller.uri.voronezh',
+            'http://LoGSsOIn:1LoGSsOPaSsERTH777@call-auth.cc-voronezh.ertelecom.ru/sso_call.php');
         </sql>
         <!--    RiasApi properties    -->
         <sql>
-            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasApi.uri', 'https://hq-dev.db.ertelecom.ru:443/cgi-bin/ppo/excells/web_cabinet.get_info_unauth');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasApi.uri',
+            'https://hq-dev.db.ertelecom.ru:443/cgi-bin/ppo/excells/web_cabinet.get_info_unauth');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasApi.client.name', 'SSO');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasApi.client.salt', 'W2NHAYTWrfEG9fDw2MAt2TuuM7VK2K7H');
         </sql>
         <!--    SmsSender properties    -->
         <sql>
-            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('smsSender.uri', 'http://smsgw.ertelecom.ru:13003/cgi-bin/sendsms');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('smsSender.uri',
+            'http://smsgw.ertelecom.ru:13003/cgi-bin/sendsms');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('smsSender.smscName', 'rapporto_gold');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('smsSender.username', 'ertelecom');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('smsSender.password', 'P10BxzA6Z1BRM');
@@ -521,7 +560,8 @@
         </sql>
         <!--    ViberSender properties    -->
         <sql>
-            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.uri', 'http://smsgw-prior.ertelecom.ru:13003/cgi-bin/sendsms');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.uri',
+            'http://smsgw-prior.ertelecom.ru:13003/cgi-bin/sendsms');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.smscName', 'rapporto_viber');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.username', 'ertelecom');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('viberSender.password', 'P10BxzA6Z1BRM');
@@ -532,11 +572,12 @@
 
     <changeSet id="35" author="strukov-av">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="APP_PROPERTIES" />
+            <tableExists tableName="APP_PROPERTIES"/>
         </preConditions>
         <!--    RiasLogin properties    -->
         <sql>
-            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('cities.url', 'https://master.lk-backend.b2bweb.t2.ertelecom.ru/site/domains');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('cities.url',
+            'https://master.lk-backend.b2bweb.t2.ertelecom.ru/site/domains');
         </sql>
         <!--    RiasLogin properties    -->
         <sql>
@@ -544,7 +585,8 @@
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.defCity', 'perm-dev');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.domain', 'db.ertelecom.ru');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.port', '443');
-            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.path', '/cgi-bin/ppo/es_webface/open_auth.authorize_password');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.path',
+            '/cgi-bin/ppo/es_webface/open_auth.authorize_password');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.client.name', 'WEB_CABINET_B2B');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.client.salt', 'kad14duh534u2h3j2mmi8dyla9dze');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasLogin.grantType', 'password');
@@ -552,7 +594,8 @@
 
         <!--    Esia properties    -->
         <sql>
-            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('esia.domain.url', 'https://esia-portal1.test.gosuslugi.ru');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('esia.domain.url',
+            'https://esia-portal1.test.gosuslugi.ru');
         </sql>
 
         <!--    vk properties    -->
@@ -566,16 +609,20 @@
 
         <!--    CustomIdpReview properties    -->
         <sql>
-            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('idpReview.siteKey', '6LfQG68UAAAAAOowA30NhSf4_VjiuH_KeT8bN3_B');
-            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('idpReview.siteSecretValue', '6LfQG68UAAAAAH8quIVwZ_8Cizgwi6CqjPIP5a3w');
-            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('idpReview.recaptcha.url', 'https://www.google.com/recaptcha/api.js?hl=');
-            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('idpReview.recaptcha.siteVerify', 'https://www.google.com/recaptcha/api/siteverify');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('idpReview.siteKey',
+            '6LfQG68UAAAAAOowA30NhSf4_VjiuH_KeT8bN3_B');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('idpReview.siteSecretValue',
+            '6LfQG68UAAAAAH8quIVwZ_8Cizgwi6CqjPIP5a3w');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('idpReview.recaptcha.url',
+            'https://www.google.com/recaptcha/api.js?hl=');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('idpReview.recaptcha.siteVerify',
+            'https://www.google.com/recaptcha/api/siteverify');
         </sql>
     </changeSet>
 
     <changeSet id="36" author="strukov-av">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="APP_PROPERTIES" />
+            <tableExists tableName="APP_PROPERTIES"/>
         </preConditions>
         <!--    Schedule properties    -->
         <sql>
@@ -596,11 +643,12 @@
 
     <changeSet id="37" author="strukov-av">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="APP_PROPERTIES" />
+            <tableExists tableName="APP_PROPERTIES"/>
         </preConditions>
         <!--    delete properties    -->
         <sql>
-            DELETE FROM APP_PROPERTIES WHERE NAME IN ('tbapi.host', 'tbapi.port', 'tbapi.secure', 'tbapi.auth.appname', 'tbapi.auth.username')
+            DELETE FROM APP_PROPERTIES WHERE NAME IN ('tbapi.host', 'tbapi.port', 'tbapi.secure', 'tbapi.auth.appname',
+            'tbapi.auth.username')
         </sql>
 
         <!--    add   -->
@@ -610,7 +658,8 @@
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.registration.secure', 'false');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.registration.auth.appname', 'SSP');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.registration.auth.username', 'anonymous');
-            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.registration.find.path', '/api/v1/customerManagement/customerAccount');
+            INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.registration.find.path',
+            '/api/v1/customerManagement/customerAccount');
 
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.host', '10.121.10.41');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('tbapi.customer.port', '26800');
@@ -622,7 +671,7 @@
 
     <changeSet id="38" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <dbms type="mysql" />
+            <dbms type="mysql"/>
             <tableExists tableName="CUSTOMER"></tableExists>
         </preConditions>
         <sql>
@@ -635,7 +684,8 @@
             <tableExists tableName="REALM_ATTRIBUTE"></tableExists>
         </preConditions>
         <sql>
-            alter table REALM_ATTRIBUTE change VALUE VALUE varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            alter table REALM_ATTRIBUTE change VALUE VALUE varchar(2000) CHARACTER SET utf8mb4 COLLATE
+            utf8mb4_unicode_ci;
         </sql>
     </changeSet>
 
@@ -644,7 +694,7 @@
             <tableExists tableName="REALM_ATTRIBUTE"></tableExists>
         </preConditions>
 
-        <modifyDataType tableName="REALM_ATTRIBUTE" columnName="VALUE" newDataType="varchar(2000)" />
+        <modifyDataType tableName="REALM_ATTRIBUTE" columnName="VALUE" newDataType="varchar(2000)"/>
     </changeSet>
 
     <changeSet id="40" author="strukov-av">
@@ -659,7 +709,9 @@
 
     <changeSet id="40_1" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <not><indexExists indexName="IDX_USER_POST_ROLE_ID"/></not>
+            <not>
+                <indexExists indexName="IDX_USER_POST_ROLE_ID"/>
+            </not>
         </preConditions>
         <sql>
             create index IDX_USER_POST_ROLE_ID
@@ -669,7 +721,9 @@
 
     <changeSet id="40_2" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <not><indexExists indexName="IDX_USER_POST_TOMS_ID"/></not>
+            <not>
+                <indexExists indexName="IDX_USER_POST_TOMS_ID"/>
+            </not>
         </preConditions>
         <sql>
             create index IDX_USER_POST_TOMS_ID
@@ -679,7 +733,9 @@
 
     <changeSet id="40_3" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <not><indexExists indexName="IDX_USER_POST_USER_ID"/></not>
+            <not>
+                <indexExists indexName="IDX_USER_POST_USER_ID"/>
+            </not>
         </preConditions>
         <sql>
             create index IDX_USER_POST_USER_ID
@@ -689,7 +745,9 @@
 
     <changeSet id="40_4" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <not><indexExists indexName="IDX_USER_POST_ROLE_NAME"/></not>
+            <not>
+                <indexExists indexName="IDX_USER_POST_ROLE_NAME"/>
+            </not>
         </preConditions>
         <sql>
             create index IDX_USER_POST_ROLE_NAME
@@ -699,7 +757,9 @@
 
     <changeSet id="40_5" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <not><indexExists indexName="IDX_EXT_SYSTEM_NAME"/></not>
+            <not>
+                <indexExists indexName="IDX_EXT_SYSTEM_NAME"/>
+            </not>
         </preConditions>
         <sql>
             create index IDX_EXT_SYSTEM_NAME
@@ -709,7 +769,9 @@
 
     <changeSet id="40_6" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <not><indexExists indexName="IDX_EXT_SYSTEM_ROLE_ID"/></not>
+            <not>
+                <indexExists indexName="IDX_EXT_SYSTEM_ROLE_ID"/>
+            </not>
         </preConditions>
         <sql>
             create index IDX_EXT_SYSTEM_ROLE_ID
@@ -719,7 +781,9 @@
 
     <changeSet id="40_7" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <not><indexExists indexName="IDX_EXT_SYS_ROLE_USER_POST_ID"/></not>
+            <not>
+                <indexExists indexName="IDX_EXT_SYS_ROLE_USER_POST_ID"/>
+            </not>
         </preConditions>
         <sql>
             create index IDX_EXT_SYS_ROLE_USER_POST_ID
@@ -729,7 +793,9 @@
 
     <changeSet id="40_8" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <not><indexExists indexName="IDX_EXT_SYS_ROLE_ID"/></not>
+            <not>
+                <indexExists indexName="IDX_EXT_SYS_ROLE_ID"/>
+            </not>
         </preConditions>
         <sql>
             create index IDX_EXT_SYS_ROLE_ID
@@ -739,11 +805,13 @@
 
     <changeSet id="41_p" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <not><indexExists indexName="IDX_USER_ENTITY_SERVICE_REALM"/></not>
+            <not>
+                <indexExists indexName="IDX_USER_ENTITY_SERVICE_REALM"/>
+            </not>
         </preConditions>
         <sql>
             create index IDX_USER_ENTITY_SERVICE_REALM
-              on USER_ENTITY (SERVICE_ACCOUNT_CLIENT_LINK, REALM_ID);
+            on USER_ENTITY (SERVICE_ACCOUNT_CLIENT_LINK, REALM_ID);
         </sql>
     </changeSet>
 
@@ -754,13 +822,15 @@
 
         <modifyDataType tableName="IMPORT_USERS_DATA"
                         columnName="DMP_ID"
-                        newDataType="varchar(255)" />
+                        newDataType="varchar(255)"/>
     </changeSet>
 
     <changeSet id="42" author="strukov-av">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="USER_POST_ROLE" />
-            <not><columnExists tableName="USER_POST_ROLE" columnName="DESCRIPTION"/></not>
+            <tableExists tableName="USER_POST_ROLE"/>
+            <not>
+                <columnExists tableName="USER_POST_ROLE" columnName="DESCRIPTION"/>
+            </not>
         </preConditions>
 
         <addColumn tableName="USER_POST_ROLE">
@@ -770,17 +840,18 @@
 
     <changeSet id="42_mysql" author="strukov-av" dbms="mysql">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="USER_POST_ROLE" />
+            <tableExists tableName="USER_POST_ROLE"/>
             <columnExists tableName="USER_POST_ROLE" columnName="DESCRIPTION"/>
         </preConditions>
         <sql>
-            alter table USER_POST_ROLE change DESCRIPTION DESCRIPTION varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            alter table USER_POST_ROLE change DESCRIPTION DESCRIPTION varchar(255) CHARACTER SET utf8mb4 COLLATE
+            utf8mb4_unicode_ci;
         </sql>
     </changeSet>
 
     <changeSet id="42_update" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="USER_POST_ROLE" />
+            <tableExists tableName="USER_POST_ROLE"/>
             <columnExists tableName="USER_POST_ROLE" columnName="DESCRIPTION"/>
         </preConditions>
         <sql>
@@ -793,31 +864,37 @@
 
     <changeSet id="42_p" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <not><indexExists indexName="IDX_USER_ATTRIBUTE_NAME_VALUE"/></not>
+            <not>
+                <indexExists indexName="IDX_USER_ATTRIBUTE_NAME_VALUE"/>
+            </not>
         </preConditions>
         <sql>
             create index IDX_USER_ATTRIBUTE_NAME_VALUE
-                on USER_ATTRIBUTE (NAME, VALUE);
+            on USER_ATTRIBUTE (NAME, VALUE);
         </sql>
     </changeSet>
 
     <changeSet id="43_p" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <not><indexExists indexName="AUTO_LOCK_NOTIFICATION_SORT2"/></not>
+            <not>
+                <indexExists indexName="AUTO_LOCK_NOTIFICATION_SORT2"/>
+            </not>
         </preConditions>
         <sql>
             CREATE INDEX AUTO_LOCK_NOTIFICATION_SORT2
-                ON AUTO_LOCK_NOTIFICATION (TYPE, USER_ID)
+            ON AUTO_LOCK_NOTIFICATION (TYPE, USER_ID)
         </sql>
     </changeSet>
 
     <changeSet id="44_p" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <not> <tableExists tableName="CHECK_TABLE" /> </not>
+            <not>
+                <tableExists tableName="CHECK_TABLE"/>
+            </not>
         </preConditions>
         <createTable tableName="CHECK_TABLE">
             <column name="name" type="varchar(100)">
-                <constraints nullable="false" primaryKey="true" />
+                <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="updated" type="timestamp"/>
         </createTable>
@@ -825,8 +902,10 @@
 
     <changeSet id="45_p" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="AUTO_LOCK_NOTIFICATION" />
-            <not><columnExists tableName="AUTO_LOCK_NOTIFICATION" columnName="version"/></not>
+            <tableExists tableName="AUTO_LOCK_NOTIFICATION"/>
+            <not>
+                <columnExists tableName="AUTO_LOCK_NOTIFICATION" columnName="version"/>
+            </not>
         </preConditions>
 
         <addColumn tableName="AUTO_LOCK_NOTIFICATION">
@@ -836,8 +915,10 @@
 
     <changeSet id="46_p" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="CHECK_TABLE" />
-            <not><columnExists tableName="CHECK_TABLE" columnName="version"/></not>
+            <tableExists tableName="CHECK_TABLE"/>
+            <not>
+                <columnExists tableName="CHECK_TABLE" columnName="version"/>
+            </not>
         </preConditions>
 
         <addColumn tableName="CHECK_TABLE">
@@ -847,7 +928,7 @@
 
     <changeSet id="47_p" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="AUTO_LOCK_NOTIFICATION" />
+            <tableExists tableName="AUTO_LOCK_NOTIFICATION"/>
             <columnExists tableName="AUTO_LOCK_NOTIFICATION" columnName="version"/>
         </preConditions>
         <sql>
@@ -857,7 +938,7 @@
 
     <changeSet id="48_p" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="CHECK_TABLE" />
+            <tableExists tableName="CHECK_TABLE"/>
             <columnExists tableName="CHECK_TABLE" columnName="version"/>
         </preConditions>
         <sql>
@@ -867,8 +948,10 @@
 
     <changeSet id="49_p" author="plyusnin-da" dbms="mysql">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="USER_ATTRIBUTE" />
-            <not><indexExists indexName="IDX_USER_ATTR_FULLTEXT"/></not>
+            <tableExists tableName="USER_ATTRIBUTE"/>
+            <not>
+                <indexExists indexName="IDX_USER_ATTR_FULLTEXT"/>
+            </not>
         </preConditions>
         <sql>
             CREATE FULLTEXT INDEX IDX_USER_ATTR_FULLTEXT ON USER_ATTRIBUTE(VALUE);
@@ -877,7 +960,7 @@
 
     <changeSet id="50_p" author="plyusnin-da" dbms="mysql">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="USER_ENTITY" />
+            <tableExists tableName="USER_ENTITY"/>
             <columnExists tableName="USER_ENTITY" columnName="EMAIL"/>
         </preConditions>
         <sql>
@@ -887,28 +970,32 @@
 
     <changeSet id="51_p" author="plyusnin-da" dbms="mysql">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="USER_ENTITY" />
+            <tableExists tableName="USER_ENTITY"/>
             <columnExists tableName="USER_ENTITY" columnName="FIRST_NAME"/>
         </preConditions>
         <sql>
-            alter table USER_ENTITY change FIRST_NAME FIRST_NAME varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            alter table USER_ENTITY change FIRST_NAME FIRST_NAME varchar(255) CHARACTER SET utf8mb4 COLLATE
+            utf8mb4_unicode_ci;
         </sql>
     </changeSet>
 
     <changeSet id="52_p" author="plyusnin-da" dbms="mysql">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="USER_ENTITY" />
+            <tableExists tableName="USER_ENTITY"/>
             <columnExists tableName="USER_ENTITY" columnName="USERNAME"/>
         </preConditions>
         <sql>
-            alter table USER_ENTITY change USERNAME USERNAME varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            alter table USER_ENTITY change USERNAME USERNAME varchar(255) CHARACTER SET utf8mb4 COLLATE
+            utf8mb4_unicode_ci;
         </sql>
     </changeSet>
 
     <changeSet id="53_p" author="plyusnin-da" dbms="mysql">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="USER_ENTITY" />
-            <not><indexExists indexName="IDX_USER_FULLTEXT"/></not>
+            <tableExists tableName="USER_ENTITY"/>
+            <not>
+                <indexExists indexName="IDX_USER_FULLTEXT"/>
+            </not>
         </preConditions>
         <sql>
             CREATE FULLTEXT INDEX IDX_USER_FULLTEXT ON USER_ENTITY(EMAIL, FIRST_NAME, USERNAME);
@@ -917,25 +1004,25 @@
 
     <changeSet id="54_p" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="AUTO_LOCK_NOTIFICATION" />
-            <columnExists tableName="AUTO_LOCK_NOTIFICATION" columnName="version" />
+            <tableExists tableName="AUTO_LOCK_NOTIFICATION"/>
+            <columnExists tableName="AUTO_LOCK_NOTIFICATION" columnName="version"/>
         </preConditions>
         <addNotNullConstraint
-            columnDataType="bigint"
-            columnName="version"
-            defaultNullValue="0"
-            tableName="AUTO_LOCK_NOTIFICATION"/>
+                columnDataType="bigint"
+                columnName="version"
+                defaultNullValue="0"
+                tableName="AUTO_LOCK_NOTIFICATION"/>
         <addDefaultValue
-            columnDataType="bigint"
-            columnName="version"
-            defaultValueNumeric="0"
-            tableName="AUTO_LOCK_NOTIFICATION"/>
+                columnDataType="bigint"
+                columnName="version"
+                defaultValueNumeric="0"
+                tableName="AUTO_LOCK_NOTIFICATION"/>
     </changeSet>
 
     <changeSet id="55_p" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="CHECK_TABLE" />
-            <columnExists tableName="CHECK_TABLE" columnName="version" />
+            <tableExists tableName="CHECK_TABLE"/>
+            <columnExists tableName="CHECK_TABLE" columnName="version"/>
         </preConditions>
         <addNotNullConstraint
                 columnDataType="bigint"
@@ -951,7 +1038,9 @@
 
     <changeSet id="56" author="strukov-av">
         <preConditions onFail="MARK_RAN">
-            <not> <tableExists tableName="MAIN_REDIRECT_URIS" /> </not>
+            <not>
+                <tableExists tableName="MAIN_REDIRECT_URIS"/>
+            </not>
         </preConditions>
         <createTable tableName="MAIN_REDIRECT_URIS">
             <column name="client_id" type="varchar(36)">
@@ -967,7 +1056,7 @@
 
     <changeSet id="57" author="strukov-av" dbms="mysql">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="MAIN_REDIRECT_URIS" />
+            <tableExists tableName="MAIN_REDIRECT_URIS"/>
             <columnExists tableName="MAIN_REDIRECT_URIS" columnName="URI"/>
         </preConditions>
         <sql>
@@ -977,7 +1066,7 @@
 
     <changeSet id="58_p" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="IMPORT_USERS_REPORT" />
+            <tableExists tableName="IMPORT_USERS_REPORT"/>
         </preConditions>
         <addColumn tableName="IMPORT_USERS_REPORT">
             <column name="file_type" type="varchar(50)" defaultValue="csv"/>
@@ -986,7 +1075,7 @@
 
     <changeSet id="59_p" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="IMPORT_USERS_DATA" />
+            <tableExists tableName="IMPORT_USERS_DATA"/>
         </preConditions>
         <addColumn tableName="IMPORT_USERS_DATA">
             <column name="STATUS" type="varchar(255)" defaultValue="AWAITING">
@@ -997,25 +1086,30 @@
 
     <changeSet id="60_p" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <not> <tableExists tableName="PERSONAL_ACCOUNT_POST" /> </not>
+            <not>
+                <tableExists tableName="PERSONAL_ACCOUNT_POST"/>
+            </not>
         </preConditions>
         <createTable tableName="PERSONAL_ACCOUNT_POST">
             <column name="post_id" type="varchar(36)">
-                <constraints nullable="false" primaryKey="true" />
+                <constraints nullable="false" primaryKey="true"/>
             </column>
         </createTable>
     </changeSet>
 
     <changeSet id="61_p" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <not> <tableExists tableName="PERSONAL_ACCOUNT" /> </not>
+            <not>
+                <tableExists tableName="PERSONAL_ACCOUNT"/>
+            </not>
         </preConditions>
         <createTable tableName="PERSONAL_ACCOUNT">
             <column name="uuid" type="varchar(36)">
-                <constraints nullable="false" primaryKey="true" />
+                <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="post_id" type="varchar(36)">
-                <constraints nullable="false" foreignKeyName="FK_PERSONAL_ACCOUNT_POST" references="PERSONAL_ACCOUNT_POST(post_id)"/>
+                <constraints nullable="false" foreignKeyName="FK_PERSONAL_ACCOUNT_POST"
+                             references="PERSONAL_ACCOUNT_POST(post_id)"/>
             </column>
             <column name="value" type="varchar(100)"/>
         </createTable>
@@ -1027,20 +1121,30 @@
 
     <changeSet id="64" author="petrov-ny">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="SETTINGS" />
-            <sqlCheck  expectedResult="0">SELECT count(*) FROM SETTINGS WHERE ID ='396f2cf4-469d-11ec-81d3-0242ac130003'</sqlCheck>
+            <tableExists tableName="SETTINGS"/>
+            <sqlCheck expectedResult="0">SELECT count(*) FROM SETTINGS WHERE ID
+                ='396f2cf4-469d-11ec-81d3-0242ac130003'
+            </sqlCheck>
         </preConditions>
         <sql>
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('396f2cf4-469d-11ec-81d3-0242ac130003', 'block.notification.warning', '1', 'Values: -1 = block, 1 = unblock', 'user', 'Block notification of warning', 'DAYS');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('3e358bfc-469d-11ec-81d3-0242ac130003', 'block.notification.blocked', '1', 'Values: -1 = block, 1 = unblock', 'user', 'Block notification of blocked', 'DAYS');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('411dd874-469d-11ec-81d3-0242ac130003', 'block.notification.unlocking', '1', 'Values: -1 = block, 1 = unblock', 'user', 'Block notification of unlocking', 'DAYS');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES
+            ('396f2cf4-469d-11ec-81d3-0242ac130003', 'block.notification.warning', '1', 'Values: -1 = block, 1 =
+            unblock', 'user', 'Block notification of warning', 'DAYS');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES
+            ('3e358bfc-469d-11ec-81d3-0242ac130003', 'block.notification.blocked', '1', 'Values: -1 = block, 1 =
+            unblock', 'user', 'Block notification of blocked', 'DAYS');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES
+            ('411dd874-469d-11ec-81d3-0242ac130003', 'block.notification.unlocking', '1', 'Values: -1 = block, 1 =
+            unblock', 'user', 'Block notification of unlocking', 'DAYS');
 
         </sql>
     </changeSet>
 
     <changeSet id="65" author="petrov-ny">
         <preConditions onFail="MARK_RAN">
-            <not><indexExists indexName="IDX_IMPORT_USERS_REPORT_REALM_ID"/></not>
+            <not>
+                <indexExists indexName="IDX_IMPORT_USERS_REPORT_REALM_ID"/>
+            </not>
         </preConditions>
         <sql>
             create index IDX_IMPORT_USERS_REPORT_REALM_ID
@@ -1049,7 +1153,9 @@
     </changeSet>
     <changeSet id="66" author="petrov-ny">
         <preConditions onFail="MARK_RAN">
-            <not><indexExists indexName="IDX_IMPORT_USERS_REPORT_STATUS"/></not>
+            <not>
+                <indexExists indexName="IDX_IMPORT_USERS_REPORT_STATUS"/>
+            </not>
         </preConditions>
         <sql>
             create index IDX_IMPORT_USERS_REPORT_STATUS
@@ -1083,21 +1189,33 @@
 
     <changeSet id="69" author="petrov-ny">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="SETTINGS" />
-            <sqlCheck  expectedResult="0">SELECT count(*) FROM SETTINGS WHERE ID ='8f918776-5426-11ec-bf63-0242ac130002'</sqlCheck>
+            <tableExists tableName="SETTINGS"/>
+            <sqlCheck expectedResult="0">SELECT count(*) FROM SETTINGS WHERE ID
+                ='8f918776-5426-11ec-bf63-0242ac130002'
+            </sqlCheck>
         </preConditions>
         <sql>
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('8f918776-5426-11ec-bf63-0242ac130002', 'homePageSystem', 'https://newlkb2b.dom.ru', null, 'user', 'Home page', null, 'APP');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('b91073d4-5668-11ec-bf63-0242ac130002', 'homePageSystem', 'https://newlkb2b.dom.ru', null, 'S-TELECOM', 'Home page', null, 'APP');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('c540ed46-5433-11ec-bf63-0242ac130002', 'defaultRealmClient', 'lkb2b', null, 'user', 'Default clientId realm', null, 'APP');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('bfc34dfa-5668-11ec-bf63-0242ac130002', 'defaultRealmClient', null, null, 'S-TELECOM', 'Default clientId realm', null, 'APP');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('9e4f8fb6-5425-11ec-bf63-0242ac130002', 'timerIntervalDurationProperty', '5', null, 'master', 'Timer schedule', 'MINUTES', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('8f918776-5426-11ec-bf63-0242ac130002', 'homePageSystem', 'https://newlkb2b.dom.ru', null, 'user', 'Home
+            page', null, 'APP');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('b91073d4-5668-11ec-bf63-0242ac130002', 'homePageSystem', 'https://newlkb2b.dom.ru', null, 'S-TELECOM',
+            'Home page', null, 'APP');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('c540ed46-5433-11ec-bf63-0242ac130002', 'defaultRealmClient', 'lkb2b', null, 'user', 'Default clientId
+            realm', null, 'APP');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('bfc34dfa-5668-11ec-bf63-0242ac130002', 'defaultRealmClient', null, null, 'S-TELECOM', 'Default clientId
+            realm', null, 'APP');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('9e4f8fb6-5425-11ec-bf63-0242ac130002', 'timerIntervalDurationProperty', '5', null, 'master', 'Timer
+            schedule', 'MINUTES', 'REALM');
         </sql>
     </changeSet>
 
     <changeSet id="70" author="alimov-ze">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="SETTINGS" />
+            <tableExists tableName="SETTINGS"/>
             <columnExists tableName="SETTINGS" columnName="NAME"/>
         </preConditions>
         <sql>
@@ -1105,46 +1223,76 @@
         </sql>
         <sql>
             UPDATE SETTINGS SET NAME = 'Время действия кода входящего звонка' WHERE NAME = 'Expire incomig call code';
-            UPDATE SETTINGS SET NAME = 'Время до блокировки из-за отсутствия активности' WHERE NAME = 'Inactive Block timeout';
-            UPDATE SETTINGS SET NAME = 'Время действия кода для электронной почты' WHERE NAME = 'Expire incoming call email code';
+            UPDATE SETTINGS SET NAME = 'Время до блокировки из-за отсутствия активности' WHERE NAME = 'Inactive Block
+            timeout';
+            UPDATE SETTINGS SET NAME = 'Время действия кода для электронной почты' WHERE NAME = 'Expire incoming call
+            email code';
             UPDATE SETTINGS SET NAME = 'Время действия смс / кода Viber' WHERE NAME = 'Expire sms/ Viber code';
             UPDATE SETTINGS SET NAME = 'Время действия смс / кода Viber' WHERE NAME = 'Expire sms/Viber code';
-            UPDATE SETTINGS SET NAME = 'Время до предупреждения об отсутствии активности' WHERE NAME = 'Inactive notification timeout';
-            UPDATE SETTINGS SET NAME = 'Отключить уведомление о предупреждении' WHERE NAME = 'Block notification of warning';
-            UPDATE SETTINGS SET NAME = 'Отключить уведомление о блокировке' WHERE NAME = 'Block notification of blocked';
-            UPDATE SETTINGS SET NAME = 'Отключить уведомление о разблокировке' WHERE NAME = 'Block notification of unlocking';
+            UPDATE SETTINGS SET NAME = 'Время до предупреждения об отсутствии активности' WHERE NAME = 'Inactive
+            notification timeout';
+            UPDATE SETTINGS SET NAME = 'Отключить уведомление о предупреждении' WHERE NAME = 'Block notification of
+            warning';
+            UPDATE SETTINGS SET NAME = 'Отключить уведомление о блокировке' WHERE NAME = 'Block notification of
+            blocked';
+            UPDATE SETTINGS SET NAME = 'Отключить уведомление о разблокировке' WHERE NAME = 'Block notification of
+            unlocking';
         </sql>
     </changeSet>
 
     <changeSet id="71" author="alimov-ze">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="SETTINGS" />
-            <sqlCheck  expectedResult="0">SELECT count(*) FROM SETTINGS WHERE ID ='3ed7ae90-5427-11ec-bf63-0242ac130002'</sqlCheck>
+            <tableExists tableName="SETTINGS"/>
+            <sqlCheck expectedResult="0">SELECT count(*) FROM SETTINGS WHERE ID
+                ='3ed7ae90-5427-11ec-bf63-0242ac130002'
+            </sqlCheck>
         </preConditions>
         <sql>
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('3ed7ae90-5427-11ec-bf63-0242ac130002', 'user.expire.incoming.call.code', '30', null, 'S-TELECOM', 'Время действия кода входящего звонка', 'SECONDS', 'REALM');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('483eaae2-5427-11ec-bf63-0242ac130002', 'user.absence.blocking.days', '180', null, 'S-TELECOM', 'Время до блокировки отсутствия активности', 'DAYS', 'REALM');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('4cdb1a40-5427-11ec-bf63-0242ac130002', 'user.expire.incoming.call.email.code', '4', null, 'S-TELECOM', 'Время действия кода входящего звонка для электронной почты', 'MINUTES', 'REALM');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('514bb8e6-5427-11ec-bf63-0242ac130002', 'user.expire.sms-viber.code', '1', null, 'S-TELECOM', 'Время действия смс / кода Viber', 'MINUTES', 'REALM');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('55a0092e-5427-11ec-bf63-0242ac130002', 'user.absence.notifications.days', '175', null, 'S-TELECOM', 'Время до предупреждения отсутствия активности', 'DAYS', 'REALM');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('58a17000-568d-11ec-bf63-0242ac130002', 'block.notification.warning', '1', 'Values: -1 = block, 1 = unblock', 'S-TELECOM', 'Отключить уведомление о предупреждении', 'DAYS', 'REALM');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('605123f4-568d-11ec-bf63-0242ac130002', 'block.notification.blocked', '1', 'Values: -1 = block, 1 = unblock', 'S-TELECOM', 'Отключить уведомление о блокировке', 'DAYS', 'REALM');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('6800d0fe-568d-11ec-bf63-0242ac130002', 'block.notification.unlocking', '1', 'Values: -1 = block, 1 = unblock', 'S-TELECOM', 'Отключить уведомление о разблокировке', 'DAYS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('3ed7ae90-5427-11ec-bf63-0242ac130002', 'user.expire.incoming.call.code', '30', null, 'S-TELECOM', 'Время
+            действия кода входящего звонка', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('483eaae2-5427-11ec-bf63-0242ac130002', 'user.absence.blocking.days', '180', null, 'S-TELECOM', 'Время до
+            блокировки отсутствия активности', 'DAYS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('4cdb1a40-5427-11ec-bf63-0242ac130002', 'user.expire.incoming.call.email.code', '4', null, 'S-TELECOM',
+            'Время действия кода входящего звонка для электронной почты', 'MINUTES', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('514bb8e6-5427-11ec-bf63-0242ac130002', 'user.expire.sms-viber.code', '1', null, 'S-TELECOM', 'Время
+            действия смс / кода Viber', 'MINUTES', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('55a0092e-5427-11ec-bf63-0242ac130002', 'user.absence.notifications.days', '175', null, 'S-TELECOM', 'Время
+            до предупреждения отсутствия активности', 'DAYS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('58a17000-568d-11ec-bf63-0242ac130002', 'block.notification.warning', '1', 'Values: -1 = block, 1 =
+            unblock', 'S-TELECOM', 'Отключить уведомление о предупреждении', 'DAYS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('605123f4-568d-11ec-bf63-0242ac130002', 'block.notification.blocked', '1', 'Values: -1 = block, 1 =
+            unblock', 'S-TELECOM', 'Отключить уведомление о блокировке', 'DAYS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('6800d0fe-568d-11ec-bf63-0242ac130002', 'block.notification.unlocking', '1', 'Values: -1 = block, 1 =
+            unblock', 'S-TELECOM', 'Отключить уведомление о разблокировке', 'DAYS', 'REALM');
         </sql>
     </changeSet>
 
     <changeSet id="72" author="petrov-ny">
         <sql>
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('f377d3d6-387d-11ec-8d3d-0242ac130003', 'life.token.loginverify.email', '36', 'Email confirmation token lifetime', 'user', 'Token time to verify-email', 'HOURS');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('f751bada-387d-11ec-8d3d-0242ac130003', 'life.token.reset.pass', '36', 'Password reset token lifetime', 'user', 'Token time to reset password', 'HOURS');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES ('fce3bbd0-387b-11ec-8d3d-0242ac130003', 'life.token.set.first-pass', '36', 'First password token lifetime', 'user', 'Token time to set first password', 'HOURS');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES
+            ('f377d3d6-387d-11ec-8d3d-0242ac130003', 'life.token.loginverify.email', '36', 'Email confirmation token
+            lifetime', 'user', 'Token time to verify-email', 'HOURS');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES
+            ('f751bada-387d-11ec-8d3d-0242ac130003', 'life.token.reset.pass', '36', 'Password reset token lifetime',
+            'user', 'Token time to reset password', 'HOURS');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT) VALUES
+            ('fce3bbd0-387b-11ec-8d3d-0242ac130003', 'life.token.set.first-pass', '36', 'First password token lifetime',
+            'user', 'Token time to set first password', 'HOURS');
         </sql>
     </changeSet>
 
     <changeSet id="73" author="petrov-ny">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="APP_PROPERTIES" />
-            <sqlCheck  expectedResult="0">SELECT count(*) FROM APP_PROPERTIES WHERE NAME ='db.non.mysql'</sqlCheck>
+            <tableExists tableName="APP_PROPERTIES"/>
+            <sqlCheck expectedResult="0">SELECT count(*) FROM APP_PROPERTIES WHERE NAME ='db.non.mysql'</sqlCheck>
         </preConditions>
         <!--    for specific db usage    -->
         <sql>
@@ -1304,9 +1452,15 @@
     <changeSet id="77" author="petrov-ny">
         <sql>
 
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('d8b1b38a-5da5-11ec-bf63-0242ac130002', 'life.token.loginverify.email', '36', 'Email confirmation token lifetime', 'S-TELECOM', 'Token time to verify-email', 'HOURS', 'REALM');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('ddbfebd0-5da5-11ec-bf63-0242ac130002', 'life.token.reset.pass', '36', 'Password reset token lifetime', 'S-TELECOM', 'Token time to reset password', 'HOURS', 'REALM');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('e1267c58-5da5-11ec-bf63-0242ac130002', 'life.token.set.first-pass', '36', 'First password token lifetime', 'S-TELECOM', 'Token time to set first password', 'HOURS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('d8b1b38a-5da5-11ec-bf63-0242ac130002', 'life.token.loginverify.email', '36', 'Email confirmation token
+            lifetime', 'S-TELECOM', 'Token time to verify-email', 'HOURS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('ddbfebd0-5da5-11ec-bf63-0242ac130002', 'life.token.reset.pass', '36', 'Password reset token lifetime',
+            'S-TELECOM', 'Token time to reset password', 'HOURS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('e1267c58-5da5-11ec-bf63-0242ac130002', 'life.token.set.first-pass', '36', 'First password token lifetime',
+            'S-TELECOM', 'Token time to set first password', 'HOURS', 'REALM');
 
         </sql>
     </changeSet>
@@ -1314,8 +1468,10 @@
     <changeSet id="78" author="petrov-ny">
         <sql>
 
-            UPDATE SETTINGS SET VALUE = 'Если у вас уже есть учетная запись, вы можете войти' WHERE ID = '7f952302-c816-480f-877c-9d6d6077fd14';
-            UPDATE SETTINGS SET VALUE = 'Если у вас уже есть учетная запись, вы можете войти' WHERE ID = '81a57a49-4a45-450a-9c6c-321913d687b2';
+            UPDATE SETTINGS SET VALUE = 'Если у вас уже есть учетная запись, вы можете войти' WHERE ID =
+            '7f952302-c816-480f-877c-9d6d6077fd14';
+            UPDATE SETTINGS SET VALUE = 'Если у вас уже есть учетная запись, вы можете войти' WHERE ID =
+            '81a57a49-4a45-450a-9c6c-321913d687b2';
             UPDATE SETTINGS SET VALUE = '8 800 550 0479' WHERE ID = '55e19c6c-59aa-11ec-bf63-0242ac130002';
             UPDATE SETTINGS SET VALUE = '8 800 550 0479' WHERE ID = 'd45647ba-5a4e-11ec-bf63-0242ac130002';
 
@@ -1437,8 +1593,13 @@
 
     <changeSet id="86" author="petrov-ny">
         <sql>
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('20b2346a-753a-11ec-90d6-0242ac120003', 'tokenDaData', '100545f52c511755273b4d79c618832bf181765c', null, 'master', 'Токен DaData', null, 'APP');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('2480de70-753a-11ec-90d6-0242ac120003', 'urlDaDataRequestLocationIp', 'https://suggestions.dadata.ru/suggestions/api/4_1/rs/iplocate/address', null, 'master', 'URL DaData для запроса адреса по IP', null, 'APP');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('20b2346a-753a-11ec-90d6-0242ac120003', 'tokenDaData', '100545f52c511755273b4d79c618832bf181765c', null,
+            'master', 'Токен DaData', null, 'APP');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('2480de70-753a-11ec-90d6-0242ac120003', 'urlDaDataRequestLocationIp',
+            'https://suggestions.dadata.ru/suggestions/api/4_1/rs/iplocate/address', null, 'master', 'URL DaData для
+            запроса адреса по IP', null, 'APP');
         </sql>
     </changeSet>
 
@@ -1474,8 +1635,12 @@
 
     <changeSet id="90" author="petrov-ny">
         <sql>
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('5e120a06-7cfb-11ec-90d6-0242ac120003', 'doAccept', 'Обновить', null, 'user', 'Кнопка обновления', null, 'FRONT');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('6926eb82-7cfb-11ec-90d6-0242ac120003', 'doAccept', 'Обновить', null, 'master', 'Кнопка обновления', null, 'FRONT');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('5e120a06-7cfb-11ec-90d6-0242ac120003', 'doAccept', 'Обновить', null, 'user', 'Кнопка обновления', null,
+            'FRONT');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('6926eb82-7cfb-11ec-90d6-0242ac120003', 'doAccept', 'Обновить', null, 'master', 'Кнопка обновления', null,
+            'FRONT');
         </sql>
     </changeSet>
 
@@ -1484,6 +1649,93 @@
             <![CDATA[
                 UPDATE SETTINGS SET VALUE = 'Обновить данные' WHERE EXT_ID = 'loginProfileTitle';
             ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet id="92" author="petrov-ny">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('e37d8f66-7f77-11ec-a8a3-0242ac120002', 'smsSender.uri', 'http://smsgw.ertelecom.ru:13003/cgi-bin/sendsms',
+            'SMS', 'user', 'Url', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('efb0b966-7f77-11ec-a8a3-0242ac120002', 'smsSender.smscName', 'rapporto_gold', 'SMS', 'user', 'Название
+            соединения', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('f4f69184-7f77-11ec-a8a3-0242ac120002', 'smsSender.username', 'ertelecom', 'SMS', 'user', 'ПОЛЬЗОВАТЕЛЬ ОТ
+            KANNEL', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('6654ab36-7f5a-11ec-a8a3-0242ac120002', 'smsSender.password', 'P10BxzA6Z1BRM', 'SMS', 'user', 'ПАРОЛЬ ОТ
+            KANNEL', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('4a911d7c-7f77-11ec-a8a3-0242ac120002', 'smsSender.senderName', 'Domru', 'SMS', 'user', 'Имя отправителя',
+            null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('0099eff4-7f78-11ec-a8a3-0242ac120002', 'smsSender.timeout', '1440', 'SMS', 'user', 'Задержка', null,
+            'EMAIL');
+
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('06ee02c8-7f78-11ec-a8a3-0242ac120002', 'viberSender.uri',
+            'http://smsgw-prior.ertelecom.ru:13003/cgi-bin/sendsms', 'Viber', 'user', 'Url',null , 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('0cf926ac-7f78-11ec-a8a3-0242ac120002', 'viberSender.smscName', 'rapporto_viber', 'Viber', 'user',
+            'Название
+            соединения', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('13fa5282-7f78-11ec-a8a3-0242ac120002', 'viberSender.username', 'ertelecom', 'Viber', 'user', 'ПОЛЬЗОВАТЕЛЬ
+            ОТ
+            KANNEL', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('1a1afeb4-7f78-11ec-a8a3-0242ac120002', 'viberSender.password', 'P10BxzA6Z1BRM', 'Viber', 'user', 'ПАРОЛЬ
+            ОТ
+            KANNEL', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('1faea380-7f78-11ec-a8a3-0242ac120002', 'viberSender.senderName', 'Domru', 'Viber', 'user', 'Имя
+            отправителя',
+            null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('258e7546-7f78-11ec-a8a3-0242ac120002', 'viberSender.timeout', '5', 'Viber', 'user', 'Задержка', null,
+            'EMAIL');
+
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('5b939f72-7f5a-11ec-a8a3-0242ac120002', 'smsSender.uri',
+            'http://smsgw.ertelecom.ru:13003/cgi-bin/sendsms?smsc=', 'SMS', 'S-TELECOM', 'Url', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('5f3e9190-7f5a-11ec-a8a3-0242ac120002', 'smsSender.smscName', 'rapporto_gold_stelecom', 'SMS', 'S-TELECOM',
+            'Название соединения', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('62bb4976-7f5a-11ec-a8a3-0242ac120002', 'smsSender.username', 'ertelecom', 'SMS', 'S-TELECOM',
+            'ПОЛЬЗОВАТЕЛЬ
+            ОТ KANNEL', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('506b5a28-7f77-11ec-a8a3-0242ac120002', 'smsSender.password', 'P10BxzA6Z1BRM', 'SMS', 'S-TELECOM', 'ПАРОЛЬ
+            ОТ KANNEL', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('56e3962c-7f77-11ec-a8a3-0242ac120002', 'smsSender.senderName', 'С-Телеком Бизнес', 'SMS', 'S-TELECOM',
+            'Имя
+            отправителя', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('6d7dd086-7f5a-11ec-a8a3-0242ac120002', 'smsSender.timeout', '1440', 'SMS', 'S-TELECOM', 'Задержка', null,
+            'EMAIL');
+
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('7dacbb9c-7f6a-11ec-a8a3-0242ac120002', 'viberSender.uri',
+            'http://smsgw-prior.ertelecom.ru:13003/cgi-bin/sendsms', 'Viber', 'S-TELECOM', 'Url', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('82ac4432-7f6a-11ec-a8a3-0242ac120002', 'viberSender.smscName', 'rapporto_viber', 'Viber', 'S-TELECOM',
+            'Название соединения', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('8640ba06-7f6a-11ec-a8a3-0242ac120002', 'viberSender.username', 'ertelecom', 'Viber', 'S-TELECOM',
+            'ПОЛЬЗОВАТЕЛЬ ОТ KANNEL', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('8bb3c370-7f6a-11ec-a8a3-0242ac120002', 'viberSender.password', 'P10BxzA6Z1BRM', 'Viber', 'S-TELECOM',
+            'ПАРОЛЬ
+            ОТ KANNEL', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('8f8dac40-7f6a-11ec-a8a3-0242ac120002', 'viberSender.senderName', 'Domru', 'Viber', 'S-TELECOM', 'Имя
+            отправителя', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('9428a944-7f6a-11ec-a8a3-0242ac120002', 'viberSender.timeout', '5', 'Viber', 'S-TELECOM', 'Задержка', null,
+            'EMAIL');
         </sql>
     </changeSet>
 

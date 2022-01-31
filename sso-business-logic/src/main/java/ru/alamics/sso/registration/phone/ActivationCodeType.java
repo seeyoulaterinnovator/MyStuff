@@ -17,7 +17,7 @@ public enum ActivationCodeType {
 
     private final int lengthCode;
     private long expiredSeconds;
-    private SettingConstants propertyConstant;
+    private final SettingConstants propertyConstant;
 
     ActivationCodeType(int lengthCode, long expiredSeconds, SettingConstants propertyConstant) {
         this.lengthCode = lengthCode;
@@ -36,6 +36,23 @@ public enum ActivationCodeType {
         return null;
     }
 
+    public static void init() {
+        try {
+            InitialContext context = new InitialContext();
+            SettingsService settingsService = (SettingsService) context.lookup("java:global/domru-sso/" + SettingsService.class.getSimpleName());
+            for (ActivationCodeType activationCodeType : ActivationCodeType.values()) {
+                long timeValue = settingsService.getSettingsLongValue(activationCodeType.getPropertyConstant(), "user");
+                if (timeValue <= -1) {
+                    timeValue = 0;
+                }
+                activationCodeType.setExpiredSeconds(timeValue);
+            }
+        } catch (NamingException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Something wrong with context");
+        }
+    }
+
     public int getLengthCode() {
         return lengthCode;
     }
@@ -50,22 +67,5 @@ public enum ActivationCodeType {
 
     public SettingConstants getPropertyConstant() {
         return propertyConstant;
-    }
-
-    public static void init() {
-        try {
-            InitialContext context = new InitialContext();
-            SettingsService settingsService = (SettingsService) context.lookup("java:global/domru-sso/" + SettingsService.class.getSimpleName());
-            for (ActivationCodeType activationCodeType : ActivationCodeType.values()) {
-                long timeValue = settingsService.getSettingsValue(activationCodeType.getPropertyConstant(), "user");
-                if (timeValue <= -1) {
-                    timeValue = 0;
-                }
-                activationCodeType.setExpiredSeconds(timeValue);
-            }
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context");
-        }
     }
 }

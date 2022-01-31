@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.phone.exception.*;
+import ru.alamics.sso.registration.phone.model.MessageRequest;
+import ru.alamics.sso.registration.phone.model.MessengerType;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 
 import javax.ejb.EJB;
@@ -19,22 +21,20 @@ public class UserPhoneVerifier {
     public static final String COUNT_REPEAT = "count_repeat";
 
     @EJB
-    private SmsService smsService;
-    @EJB
-    private ViberService viberService;
+    private MessageService messageService;
     @EJB
     private PhoneCallerRemoteService phoneCallerService;
 
     public UserPhoneVerifier() {
     }
 
-    public UserPhoneVerifier(SmsService smsService) {
-        this.smsService = smsService;
+    public UserPhoneVerifier(MessageService msgService) {
+        this.messageService = msgService;
     }
 
-    public AuthContext sendValidationSms(User user,
+    public AuthContext sendValidationMsg(User user,
                                          AuthContext context,
-                                         ActivationCodeType codeType) throws UserPhoneEmpty, PhoneCallException, SmsSendException, ViberSendException {
+                                         ActivationCodeType codeType, String realmId) throws UserPhoneEmpty, PhoneCallException, SendMessageException, ViberSendException {
         if (user.getPhone() == null || user.getPhone().isEmpty())
             throw new UserPhoneEmpty();
 
@@ -42,7 +42,7 @@ public class UserPhoneVerifier {
         if (context.getHashProperty() == null || !context.getExpirationTime().isAfter(LocalDateTime.now())) {
             log.info("Нет хэша для кода. Повторить получение кода");
 
-            String code = generateCode(user, codeType, context);
+            String code = generateCode(user, codeType, context, realmId);
 
             if (code != null) {
                 return AuthContext.builder()
@@ -56,15 +56,23 @@ public class UserPhoneVerifier {
         return context;
     }
 
-    private String generateCode(User user, ActivationCodeType codeType, AuthContext context)
-            throws PhoneCallException, SmsSendException, ViberSendException {
+    private String generateCode(User user, ActivationCodeType codeType, AuthContext context, String realmId)
+            throws PhoneCallException, SendMessageException {
         if (ActivationCodeType.CODE_TO_SMS.equals(codeType)) {
             String code = SmsCodeGenerator.getCode(codeType.getLengthCode());
 
+            MessageRequest messageRequest = MessageRequest.builder()
+                    .userPhone(user.getPhone())
+                    .text(code)
+                    .realmId(realmId)
+                    .build();
+
             try {
-                viberService.sendMsg(user.getId(), user.getPhone(), code);
+                messageRequest.setMessengerName(MessengerType.VIBER);
+                messageService.sendMsg(messageRequest);
             } finally {
-                smsService.sendSms(user.getId(), user.getPhone(), code);
+                messageRequest.setMessengerName(MessengerType.SMS);
+                messageService.sendMsg(messageRequest);
             }
 
             return code;
