@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.registration.userpost;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormContext;
@@ -17,11 +16,12 @@ import ru.alamics.sso.util.validator.NotValidException;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.ws.rs.NotFoundException;
 
 @Slf4j
 public class UserPostCreatorProvider implements FormAction {
     public static final Long ROLE_ID = 1L;     //Соотаветсвует ЛПР
-    private CachedUserPostFacade cachedUserPostFacade;
+    private final CachedUserPostFacade cachedUserPostFacade;
 
     public UserPostCreatorProvider() {
         try {

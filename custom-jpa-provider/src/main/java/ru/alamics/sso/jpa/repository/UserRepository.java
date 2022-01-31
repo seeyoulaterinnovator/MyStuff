@@ -83,55 +83,7 @@ public class UserRepository {
             return null;
 
         String realmName = realmModel == null ? "user" : realmModel.getId();
-
-        // запрос в таком виде выполняется больше секунды на более 100т юзерах
-        // с нормальным индексом уже без разницы на 6кк - 60мс, rows 1
-        /*
-        List<UserEntity> users1 = em.createQuery("select u from UserEntity u join u.attributes attr \n" +
-                "  where u.realmId = :realmId " +
-                "       and attr.name = :name " +
-                "       and (:excludedUserId is null or u.id <> :excludedUserId) " +
-                "       and attr.value = :phoneNmbr", UserEntity.class)
-                .setParameter("realmId", realmModel == null ? "user" : realmModel.getId())
-                .setParameter("name", "phone")
-                .setParameter("phoneNmbr", phone)
-                .setParameter("excludedUserId", Validation.isBlank(excludedUserId) ? null : excludedUserId)
-                .getResultList();
-        */
-
-        List<UserEntity> users = (List<UserEntity>) em.createNativeQuery(
-                        "select * " +
-                                "  from USER_ENTITY ue " +
-                                "  where " +
-                                " ue.REALM_ID = :realmId and " +
-                                "     (:excludedUserId is null or ue.ID <> :excludedUserId) " +
-                                "    and exists ( " +
-                                "      select 1 " +
-                                "      from USER_ATTRIBUTE attr " +
-                                "      where attr.USER_ID = ue.ID " +
-                                "        and attr.NAME = :name " +
-                                "        and attr.VALUE = :phoneNmbr " +
-                                "    )" +
-                                "  limit 1"
-                        , UserEntity.class)
-                .setParameter("realmId", realmName)
-                .setParameter("name", "phone")
-                .setParameter("phoneNmbr", phone)
-                .setParameter("excludedUserId", Validation.isBlank(excludedUserId) ? null : excludedUserId)
-                .getResultList();
-
-        if (users != null && !users.isEmpty())
-            return users.get(0);
-        /*
-        if (users != null && users.size() > 0) {
-
-            for (UserEntity ue : users) {
-                if (ue.getRealmId().equalsIgnoreCase(realmName))
-                    return ue;
-            }
-        }
-        */
-        return null;
+        return this.getFirstUserByPhoneNumber(realmName, phone, excludedUserId);
     }
 
     public UserEntity getFirstUserByPhoneNumber(String realmId, String phone, String excludedUserId) {
@@ -208,7 +160,6 @@ public class UserRepository {
         return null;
     }
 
-    @Deprecated
     public List<Tuple> getTupleUsersByParametersWithoutGrouping(
             String realm,
             String search,
