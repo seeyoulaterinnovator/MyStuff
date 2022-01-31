@@ -8,7 +8,6 @@ import org.jboss.resteasy.plugins.providers.StringTextStar;
 import ru.alamics.sso.registration.phone.SmsConfig;
 import ru.alamics.sso.registration.phone.exception.SendMessageException;
 import ru.alamics.sso.registration.phone.model.MessageRequest;
-import ru.alamics.sso.registration.phone.model.MessengerType;
 import ru.alamics.sso.registration.phone.port.SendMessageService;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.StandResolver;
@@ -22,6 +21,8 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
+import static ru.alamics.sso.settings.SettingConstants.*;
+
 
 @Slf4j
 @Stateless(name = "MessageSender")
@@ -31,12 +32,6 @@ public class SendMessageServiceImpl implements SendMessageService {
             .connectTimeout(3, TimeUnit.SECONDS)
             .readTimeout(10, TimeUnit.SECONDS);
     private static final ResteasyClient client = clientBuilder.build();
-    private static final String SEND_URI = ".uri";
-    private static final String SMSC_NAME = ".smscName";
-    private static final String USERNAME_SENDER = ".username";
-    private static final String PASSWORD = ".password";
-    private static final String SENDER_NAME = ".senderName";
-    private static final String TIMEOUT = ".timeout";
 
     @Resource(lookup = "java:global/domru-sso/SettingsService")
     private SettingsService settingsService;
@@ -53,7 +48,7 @@ public class SendMessageServiceImpl implements SendMessageService {
             return "0: Accepted for delivery";
         }
 
-        SmsConfig smsConfig = createSmsConfig(messageRequest.getRealmId(), messageRequest.getMessengerName());
+        SmsConfig smsConfig = createSmsConfig(messageRequest.getRealmId(), messageRequest.getMessengerName().getType());
 
         URI uri = smsConfig.getUrl();
 
@@ -75,15 +70,15 @@ public class SendMessageServiceImpl implements SendMessageService {
         }
     }
 
-    private SmsConfig createSmsConfig(String realmId, MessengerType type) {
+    private SmsConfig createSmsConfig(String realmId, String type) {
 
         return SmsConfig.builder()
-                .url(URI.create(settingsService.getSettingsStringValue(type.getType() + SEND_URI, realmId)))
-                .smsCenterName(settingsService.getSettingsStringValue(type.getType() + SMSC_NAME, realmId))
-                .username(settingsService.getSettingsStringValue(type.getType() + USERNAME_SENDER, realmId))
-                .password(settingsService.getSettingsStringValue(type.getType() + PASSWORD, realmId))
-                .senderName(settingsService.getSettingsStringValue(type.getType() + SENDER_NAME, realmId))
-                .timeout(settingsService.getSettingsIntegerValue(type.getType() + TIMEOUT, realmId, 1440, "SmsSendServiceImpl: default value used: '%s' = '%s'"))
+                .url(URI.create(settingsService.getSettingsStringValue(type + SEND_URI.getKey(), realmId)))
+                .smsCenterName(settingsService.getSettingsStringValue(type + SMSC_NAME.getKey(), realmId))
+                .username(settingsService.getSettingsStringValue(type + USERNAME_SENDER.getKey(), realmId))
+                .password(settingsService.getSettingsStringValue(type + PASSWORD.getKey(), realmId))
+                .senderName(settingsService.getSettingsStringValue(type + SENDER_NAME.getKey(), realmId))
+                .timeout(settingsService.getSettingsIntegerValue(type + TIMEOUT.getKey(), realmId, 1440, "SmsSendServiceImpl: default value used: '%s' = '%s'"))
                 .priority(SmsConfig.Priority.LOWEST)
                 .reportsMask(SmsConfig.ReportsConfig.DELIVERED_TO_PHONE)
                 .encoding(SmsConfig.Encoding.UCS2)
