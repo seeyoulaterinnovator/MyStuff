@@ -95,6 +95,20 @@ public class DataMapper {
         return externalSystemDtos;
     }
 
+    public static MessengerDto toMessengerDto(MessengerEntity messengerEntity) {
+        return MessengerDto.builder()
+                .id(messengerEntity.getId())
+                .name(messengerEntity.getName())
+                .label(messengerEntity.getLabel())
+                .build();
+    }
+
+    public static List<MessengerDto> toMessengerDtos(List<MessengerEntity> messengerEntities) {
+        List<MessengerDto> MessengerDtos = new LinkedList<>();
+        messengerEntities.forEach(o -> MessengerDtos.add(toMessengerDto(o)));
+        return MessengerDtos;
+    }
+
     public static ExternalSystemRoleDto toExternalSystemRoleDto(ExternalSystemRoleEntity externalSystemRole) {
         return ExternalSystemRoleDto.builder()
                 .id(externalSystemRole.getId())

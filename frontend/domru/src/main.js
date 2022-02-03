@@ -30,6 +30,7 @@ import './css/components/customers.css';
 import './css/components/verification.css';
 import './css/components/chat.css';
 import './css/components/message.css';
+import './css/components/error.css';
 
 const app = new App({
   target: document.body,

@@ -1680,10 +1680,28 @@ module.controller('RealmSMTPSettingsCtrl', function ($scope, Current, Realm, rea
 
     $scope.realm = realm;
 
+    $scope.typeMessages = [];
+    $scope.messagers = [];
+
+    $scope.changedValue = function (item) {
+        $scope.messagers.splice(0);
+        for (var i = 0; i < item.length; i++) {
+            $scope.messagers.push(item[i]);
+        }
+        $scope.realm.smtpServer["messenger"] = $scope.messagers.join(",");
+        $scope.changed = true;
+    }
+
+    $http.get(authUrl + '/realms/' + realm.realm + '/messenger').then(function (data) {
+        $scope.typeMessages = angular.fromJson(data).data.results['messengers'];
+    });
+
     if ($scope.realm.smtpServer) {
         $scope.realm.smtpServer = typeObject($scope.realm.smtpServer);
+        if ($scope.realm.smtpServer["messenger"]) {
+            $scope.messengerType = $scope.realm.smtpServer["messenger"].split(',');
+        }
     }
-    ;
 
     var oldCopy = angular.copy($scope.realm);
     $scope.changed = false;
@@ -1706,6 +1724,9 @@ module.controller('RealmSMTPSettingsCtrl', function ($scope, Current, Realm, rea
 
     $scope.reset = function () {
         $scope.realm = angular.copy(oldCopy);
+        if ($scope.realm.smtpServer["messenger"]) {
+            $scope.messengerType = $scope.realm.smtpServer["messenger"].split(',');
+        }
         $scope.changed = false;
     };
 

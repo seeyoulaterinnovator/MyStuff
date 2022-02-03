@@ -1,9 +1,13 @@
 package ru.alamics.sso.registration.phone;
 
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.models.RealmModel;
 import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.User;
-import ru.alamics.sso.registration.phone.exception.*;
+import ru.alamics.sso.registration.phone.exception.PhoneCallException;
+import ru.alamics.sso.registration.phone.exception.SendMessageException;
+import ru.alamics.sso.registration.phone.exception.UserPhoneEmpty;
+import ru.alamics.sso.registration.phone.exception.WrongSmsCode;
 import ru.alamics.sso.registration.phone.model.MessageRequest;
 import ru.alamics.sso.registration.phone.model.MessengerType;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
@@ -34,7 +38,7 @@ public class UserPhoneVerifier {
 
     public AuthContext sendValidationMsg(User user,
                                          AuthContext context,
-                                         ActivationCodeType codeType, String realmId) throws UserPhoneEmpty, PhoneCallException, SendMessageException, ViberSendException {
+                                         ActivationCodeType codeType, RealmModel realm) throws UserPhoneEmpty, PhoneCallException, SendMessageException {
         if (user.getPhone() == null || user.getPhone().isEmpty())
             throw new UserPhoneEmpty();
 
@@ -42,7 +46,7 @@ public class UserPhoneVerifier {
         if (context.getHashProperty() == null || !context.getExpirationTime().isAfter(LocalDateTime.now())) {
             log.info("Нет хэша для кода. Повторить получение кода");
 
-            String code = generateCode(user, codeType, context, realmId);
+            String code = generateCode(user, codeType, context, realm);
 
             if (code != null) {
                 return AuthContext.builder()
@@ -56,7 +60,7 @@ public class UserPhoneVerifier {
         return context;
     }
 
-    private String generateCode(User user, ActivationCodeType codeType, AuthContext context, String realmId)
+    private String generateCode(User user, ActivationCodeType codeType, AuthContext context, RealmModel realm)
             throws PhoneCallException, SendMessageException {
         if (ActivationCodeType.CODE_TO_SMS.equals(codeType)) {
             String code = SmsCodeGenerator.getCode(codeType.getLengthCode());
@@ -64,14 +68,13 @@ public class UserPhoneVerifier {
             MessageRequest messageRequest = MessageRequest.builder()
                     .userPhone(user.getPhone())
                     .text(code)
-                    .realmId(realmId)
+                    .realmId(realm.getId())
                     .build();
 
-            try {
-                messageRequest.setMessengerName(MessengerType.VIBER);
-                messageService.sendMsg(messageRequest);
-            } finally {
-                messageRequest.setMessengerName(MessengerType.SMS);
+            String listMessenger = realm.getSmtpConfig().get("messenger");
+
+            for (String messenger: listMessenger.split(",")) {
+                messageRequest.setMessengerName(MessengerType.valueOf(messenger));
                 messageService.sendMsg(messageRequest);
             }
 

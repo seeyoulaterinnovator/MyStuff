@@ -1739,5 +1739,53 @@
         </sql>
     </changeSet>
 
+    <changeSet id="93" author="petrov-ny">
+        <sql>
+            DELETE FROM SETTINGS WHERE ID='9428a944-7f6a-11ec-a8a3-0242ac120002';
+            DELETE FROM SETTINGS WHERE ID='8f8dac40-7f6a-11ec-a8a3-0242ac120002';
+            DELETE FROM SETTINGS WHERE ID='8bb3c370-7f6a-11ec-a8a3-0242ac120002';
+            DELETE FROM SETTINGS WHERE ID='8640ba06-7f6a-11ec-a8a3-0242ac120002';
+            DELETE FROM SETTINGS WHERE ID='82ac4432-7f6a-11ec-a8a3-0242ac120002';
+            DELETE FROM SETTINGS WHERE ID='7dacbb9c-7f6a-11ec-a8a3-0242ac120002';
+        </sql>
+    </changeSet>
+
+    <changeSet id="94" author="petrov-ny">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="MESSENGER_TYPE"/>
+            </not>
+        </preConditions>
+        <createTable tableName="MESSENGER_TYPE">
+            <column name="ID" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="NAME" type="TEXT"/>
+            <column name="LABEL" type="TEXT"/>
+        </createTable>
+
+    </changeSet>
+
+    <changeSet id="95" author="petrov-ny">
+        <sql>
+            ALTER TABLE MESSENGER_TYPE modify NAME TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            ALTER TABLE MESSENGER_TYPE modify LABEL TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
+    </changeSet>
+
+    <changeSet id="96" author="petrov-ny">
+        <sql>
+            INSERT INTO MESSENGER_TYPE (ID, NAME, LABEL) VALUES ('cf521eb6-83f6-11ec-a8a3-0242ac120002', 'VIBER', 'Мессенджер Viber');
+            INSERT INTO MESSENGER_TYPE (ID, NAME, LABEL) VALUES ('d3fa614e-83f6-11ec-a8a3-0242ac120002', 'SMS', 'Мессенджер сообщение на телефон');
+        </sql>
+    </changeSet>
+
+    <changeSet id="97" author="petrov-ny">
+        <sql>
+            INSERT INTO REALM_SMTP_CONFIG (REALM_ID, VALUE, NAME) VALUES ('user', 'VIBER,SMS', 'messenger');
+            INSERT INTO REALM_SMTP_CONFIG (REALM_ID, VALUE, NAME) VALUES ('S-TELECOM', 'SMS', 'messenger');
+        </sql>
+    </changeSet>
+
 
 </databaseChangeLog>

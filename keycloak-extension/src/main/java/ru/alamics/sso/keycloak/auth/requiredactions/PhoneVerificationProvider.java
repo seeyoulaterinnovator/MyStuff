@@ -15,7 +15,10 @@ import ru.alamics.sso.registration.phone.ActivationCodeType;
 import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.phone.SmsCodeGenerator;
 import ru.alamics.sso.registration.phone.UserPhoneVerifier;
-import ru.alamics.sso.registration.phone.exception.*;
+import ru.alamics.sso.registration.phone.exception.PhoneCallException;
+import ru.alamics.sso.registration.phone.exception.SendMessageException;
+import ru.alamics.sso.registration.phone.exception.UserPhoneEmpty;
+import ru.alamics.sso.registration.phone.exception.WrongSmsCode;
 import ru.alamics.sso.settings.SettingsService;
 
 import javax.ws.rs.core.Response;
@@ -78,7 +81,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                         .build();
                 enableRepeatCall = false;
             } else {
-                authContext = userPhoneVerifier.sendValidationMsg(user, authContext, activationCodeType, context.getRealm().getId());
+                authContext = userPhoneVerifier.sendValidationMsg(user, authContext, activationCodeType, context.getRealm());
             }
 
             authSession.setAuthNote(PHONE_KEY_HASH, authContext.getHashProperty());
@@ -110,9 +113,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         } catch (EmailException e) {
             log.info("ignore... EmailException {}", e.getMessage());
         } catch (SendMessageException se) {
-            log.info("ignore... SmsSendException {}", se.getMessage());
-        } catch (ViberSendException ve) {
-            log.info("ignore... ViberSendException {}", ve.getMessage());
+            log.info("ignore... MsgSendException {}", se.getMessage());
         }
     }
 

@@ -13,7 +13,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr data-ng-if="setting.type=='EMAIL'" ng-repeat="setting in settings">
+            <tr data-ng-if="setting.type=='EMAIL'" ng-repeat="setting in settings | orderBy:'desc'">
                 <td class="clip" title="{{setting.name}}">{{setting.name}}</td>
                 <td class="clip" title="{{setting.value}}">
                     <input class="form-control" name="setting-value" ng-model="setting.value" type="text"/>
