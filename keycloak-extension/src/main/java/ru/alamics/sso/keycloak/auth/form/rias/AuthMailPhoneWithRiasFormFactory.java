@@ -1,28 +1,23 @@
 package ru.alamics.sso.keycloak.auth.form.rias;
 
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.Config;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.Authenticator;
-import org.keycloak.authentication.AuthenticatorFactory;
 import org.keycloak.authentication.DisplayTypeAuthenticatorFactory;
 import org.keycloak.authentication.authenticators.console.ConsoleUsernamePasswordAuthenticator;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.UserCredentialModel;
-import org.keycloak.provider.ProviderConfigProperty;
+import ru.alamics.sso.keycloak.auth.AbstractAuthenticatorFactory;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.rias.RiasService;
 import ru.alamics.sso.registration.service.UserFindService;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.persistence.EntityManager;
-import java.util.List;
 
 @Slf4j
-public class AuthMailPhoneWithRiasFormFactory implements AuthenticatorFactory, DisplayTypeAuthenticatorFactory {
+public class AuthMailPhoneWithRiasFormFactory extends AbstractAuthenticatorFactory implements DisplayTypeAuthenticatorFactory {
 
     private static final String PROVIDER_ID = "auth-mail-phone-pass-with-RIAS-form";
     private static final String DISPLAY_NAME = "(Phone or Mail) and Password Form with RIAS";
@@ -39,18 +34,9 @@ public class AuthMailPhoneWithRiasFormFactory implements AuthenticatorFactory, D
         EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
 
         log.info("Get RiasAuthProvider");
-        RiasService riasService;
-        UserFindService userFindService;
-        try {
-            InitialContext context = new InitialContext();
-
-            riasService = (RiasService) context.lookup("java:global/domru-sso/" + RiasService.class.getSimpleName());
-            userFindService = (UserFindService) context.lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
-            log.info("Got riasService from context");
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context");
-        }
+        RiasService riasService = Lookup.lookup(RiasService.class);
+        log.info("Got riasService from context");
+        UserFindService userFindService = Lookup.lookup(UserFindService.class);
 
         log.info("Creating AuthMailPhoneForm");
         SINGLETON = new AuthMailPhoneWithRiasForm(riasService, userFindService);
@@ -66,21 +52,6 @@ public class AuthMailPhoneWithRiasFormFactory implements AuthenticatorFactory, D
     }
 
     @Override
-    public void init(Config.Scope config) {
-
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-
-    }
-
-    @Override
-    public void close() {
-
-    }
-
-    @Override
     public String getId() {
         return PROVIDER_ID;
     }
@@ -90,10 +61,6 @@ public class AuthMailPhoneWithRiasFormFactory implements AuthenticatorFactory, D
         return UserCredentialModel.PASSWORD;
     }
 
-    @Override
-    public boolean isConfigurable() {
-        return false;
-    }
 
     @Override
     public AuthenticationExecutionModel.Requirement[] getRequirementChoices() {
@@ -110,13 +77,4 @@ public class AuthMailPhoneWithRiasFormFactory implements AuthenticatorFactory, D
         return HELP_TEXT;
     }
 
-    @Override
-    public List<ProviderConfigProperty> getConfigProperties() {
-        return null;
-    }
-
-    @Override
-    public boolean isUserSetupAllowed() {
-        return false;
-    }
 }

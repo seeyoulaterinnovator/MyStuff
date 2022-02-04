@@ -40,13 +40,13 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
     ResetCredentialEmailOrPhone(KeycloakSession session) {
         this.session = session;
 
-        riasApiService = (RiasApiService) Lookup.lookup(RiasApiService.class);
+        riasApiService = Lookup.lookup(RiasApiService.class);
         log.info("Got riasService from context");
 
-        userFindService = (UserFindService) Lookup.lookup(UserFindService.class);
+        userFindService = Lookup.lookup(UserFindService.class);
         log.info("Got userFindService from context");
 
-        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        properties = Lookup.lookup(ApplicationProperties.class);
     }
 
     @Override

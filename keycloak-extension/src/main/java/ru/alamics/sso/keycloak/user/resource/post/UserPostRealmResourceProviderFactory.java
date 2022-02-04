@@ -17,13 +17,11 @@
 
 package ru.alamics.sso.keycloak.user.resource.post;
 
-import org.keycloak.Config.Scope;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.resource.RealmResourceProvider;
-import org.keycloak.services.resource.RealmResourceProviderFactory;
+import ru.alamics.sso.keycloak.rest.BaseResourceProviderFactory;
 
-public class UserPostRealmResourceProviderFactory implements RealmResourceProviderFactory {
+public class UserPostRealmResourceProviderFactory implements BaseResourceProviderFactory {
 
     private static final String PROVIDER_ID = "user-post";
 
@@ -37,15 +35,4 @@ public class UserPostRealmResourceProviderFactory implements RealmResourceProvid
         return new UserPostRealmResourceProvider(session);
     }
 
-    @Override
-    public void init(Scope config) {
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-    }
-
-    @Override
-    public void close() {
-    }
 }

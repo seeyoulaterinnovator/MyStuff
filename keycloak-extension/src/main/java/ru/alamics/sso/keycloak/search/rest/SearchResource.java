@@ -10,13 +10,12 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.keycloak.GeneralRealm;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.user.web.UserSearch;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -38,13 +37,7 @@ public class SearchResource {
     public SearchResource(KeycloakSession session, AdminAuth adminAuth) {
         this.session = session;
         this.adminAuth = adminAuth;
-
-        try {
-            this.userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context");
-        }
+        this.userFindService = Lookup.lookup(UserFindService.class);
     }
 
     private static String formatViewRole(RealmModel realm) {

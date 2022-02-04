@@ -29,8 +29,6 @@ import ru.alamics.sso.schedule.Translator;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.util.Objects;
@@ -44,13 +42,8 @@ public class ResetCredentialEmail extends ResetCredential {
 
     public ResetCredentialEmail(KeycloakSession session, AuthenticationFlowContext context) {
         super(session, context);
-        try {
-            this.settingsService = (SettingsService) new InitialContext().lookup("java:global/domru-sso/" + SettingsService.class.getSimpleName());
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context ResetCredentialEmail");
-        }
-        this.clientService = (ClientService) Lookup.lookup(ClientService.class);
+        this.settingsService = Lookup.lookup(SettingsService.class);
+        this.clientService = Lookup.lookup(ClientService.class);
     }
 
     @Override

@@ -17,13 +17,11 @@
 
 package ru.alamics.sso.keycloak.cities;
 
-import org.keycloak.Config.Scope;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.resource.RealmResourceProvider;
-import org.keycloak.services.resource.RealmResourceProviderFactory;
+import ru.alamics.sso.keycloak.rest.BaseResourceProviderFactory;
 
-public class CitiesRealmResourceProviderFactory implements RealmResourceProviderFactory {
+public class CitiesRealmResourceProviderFactory implements BaseResourceProviderFactory {
 
     private static final String PROVIDER_ID = "cities";
 
@@ -37,15 +35,4 @@ public class CitiesRealmResourceProviderFactory implements RealmResourceProvider
         return new CitiesRealmResourceProvider(session);
     }
 
-    @Override
-    public void init(Scope config) {
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-    }
-
-    @Override
-    public void close() {
-    }
 }

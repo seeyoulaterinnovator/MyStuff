@@ -1,22 +1,17 @@
 package ru.alamics.sso.keycloak.auth.requiredactions;
 
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.Config;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.DisplayTypeRequiredActionFactory;
-import org.keycloak.authentication.RequiredActionFactory;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.KeycloakSessionFactory;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.phone.ActivationCodeType;
 import ru.alamics.sso.registration.phone.UserPhoneVerifier;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
 @Slf4j
-public class PhoneVerificationBySmsFactory implements RequiredActionFactory, DisplayTypeRequiredActionFactory {
+public class PhoneVerificationBySmsFactory extends AbstractRequiredActionFactory implements DisplayTypeRequiredActionFactory {
 
     public static final String PROVIDER_ID = "phone_verificator_sms";
     private static final String DISPLAY_TEXT = "Phone Verification (sms)";
@@ -38,26 +33,10 @@ public class PhoneVerificationBySmsFactory implements RequiredActionFactory, Dis
 
     private RequiredActionProvider createProvider(KeycloakSession session) {
         log.info("Creating provider for PhoneVerificationBySmsFactory");
-        UserPhoneVerifier userPhoneVerifier;
-        try {
-            InitialContext context = new InitialContext();
-
-            userPhoneVerifier = (UserPhoneVerifier) context.lookup("java:global/domru-sso/" + UserPhoneVerifier.class.getSimpleName());
-            log.info("Got userPhoneVerifier1 from context");
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context");
-        }
+        UserPhoneVerifier userPhoneVerifier = Lookup.lookup(UserPhoneVerifier.class);
+        log.info("Got userPhoneVerifier1 from context");
 
         return new PhoneVerificationProvider(userPhoneVerifier, ActivationCodeType.CODE_TO_SMS, session.getProvider(EmailTemplateProvider.class));
-    }
-
-    @Override
-    public void init(Config.Scope config) {
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
     }
 
     @Override
@@ -71,7 +50,4 @@ public class PhoneVerificationBySmsFactory implements RequiredActionFactory, Dis
         return DISPLAY_TEXT;
     }
 
-    @Override
-    public void close() {
-    }
 }

@@ -47,14 +47,14 @@ public class CitiesResource {
 
     private static String url;
     private static List<CityMigration> cityList = new ArrayList<>();
-    protected KeycloakSession session;
     private final SettingsService settingsService;
+    protected KeycloakSession session;
 
     public CitiesResource(KeycloakSession session) {
         this.session = session;
-        ApplicationProperties properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        ApplicationProperties properties = Lookup.lookup(ApplicationProperties.class);
 
-        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+        this.settingsService = Lookup.lookup(SettingsService.class);
 
         if (url == null && properties != null) {
             url = properties.getProperty(CITIES_URL);

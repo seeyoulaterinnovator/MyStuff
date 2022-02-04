@@ -31,7 +31,7 @@ public class SsoUserCustomEvent extends SsoEvent {
 
     public SsoUserCustomEvent(AdminEvent event, KeycloakSession session) {
         super(session);
-        messageService = (SettingsService) Lookup.lookup(SettingsService.class);
+        messageService = Lookup.lookup(SettingsService.class);
         this.event = event;
     }
 

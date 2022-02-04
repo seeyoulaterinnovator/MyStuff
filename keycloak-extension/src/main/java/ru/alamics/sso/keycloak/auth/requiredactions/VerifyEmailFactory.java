@@ -28,8 +28,6 @@ import ru.alamics.sso.schedule.Translator;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriBuilderException;
@@ -83,7 +81,7 @@ public class VerifyEmailFactory extends VerifyEmail {
         UriInfo uriInfo = session.getContext().getUri();
 
         try {
-            SettingsService settingsService = (SettingsService) new InitialContext().lookup("java:global/domru-sso/" + SettingsService.class.getSimpleName());
+            SettingsService settingsService = Lookup.lookup(SettingsService.class);
             int timeTokenVerifyEmail = (int) settingsService.getSettingsLongValue(SettingConstants.TIME_TOKEN_VERIFY_EMAIL, realm.getName());
             int absoluteExpirationInSecs = Time.currentTime() + timeTokenVerifyEmail;
 
@@ -111,9 +109,6 @@ public class VerifyEmailFactory extends VerifyEmail {
         } catch (EmailException e) {
             log.error("Failed to send verification email", e);
             event.error(Errors.EMAIL_SEND_FAILED);
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context");
         }
 
         return forms.setAttribute("mail", user.getEmail()).createResponse(UserModel.RequiredAction.VERIFY_EMAIL);

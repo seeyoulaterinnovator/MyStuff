@@ -25,7 +25,7 @@ public class StatusResource {
 
     public StatusResource(KeycloakSession session) {
         this.session = session;
-        this.statusService = (StatusService) Lookup.lookup(StatusService.class);
+        this.statusService = Lookup.lookup(StatusService.class);
     }
 
     @GET

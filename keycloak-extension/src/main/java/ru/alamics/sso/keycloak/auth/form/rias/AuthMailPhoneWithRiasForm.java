@@ -48,9 +48,9 @@ public class AuthMailPhoneWithRiasForm extends AbstractAuthMailPhoneForm {
         super(userFindService);
         this.riasService = riasService;
 
-        this.properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        this.properties = Lookup.lookup(ApplicationProperties.class);
 
-        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+        settingsService = Lookup.lookup(SettingsService.class);
     }
 
     @Override

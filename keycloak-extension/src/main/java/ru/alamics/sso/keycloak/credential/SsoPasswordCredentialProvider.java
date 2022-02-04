@@ -34,7 +34,7 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
 
     public SsoPasswordCredentialProvider(KeycloakSession session) {
         super(session);
-        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+        settingsService = Lookup.lookup(SettingsService.class);
     }
 
     @Override

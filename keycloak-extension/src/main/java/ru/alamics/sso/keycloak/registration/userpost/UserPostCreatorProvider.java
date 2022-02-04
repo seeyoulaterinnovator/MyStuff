@@ -9,13 +9,12 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.keycloak.facade.CachedUserPostFacade;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.util.validator.NotValidException;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.ws.rs.NotFoundException;
 
 @Slf4j
@@ -24,12 +23,7 @@ public class UserPostCreatorProvider implements FormAction {
     private final CachedUserPostFacade cachedUserPostFacade;
 
     public UserPostCreatorProvider() {
-        try {
-            this.cachedUserPostFacade = (CachedUserPostFacade) new InitialContext().lookup("java:global/domru-sso/" + CachedUserPostFacade.class.getSimpleName());
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context");
-        }
+        this.cachedUserPostFacade = Lookup.lookup(CachedUserPostFacade.class);
     }
 
     @Override

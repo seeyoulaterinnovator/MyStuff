@@ -19,8 +19,6 @@ import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -45,13 +43,8 @@ public class AttributesForm implements Authenticator {
 
     public AttributesForm(UserRole roleService) {
         this.roleService = roleService;
-        try {
-            this.cachedUserPostFacade = (CachedUserPostFacade) new InitialContext().lookup("java:global/domru-sso/" + CachedUserPostFacade.class.getSimpleName());
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context");
-        }
-        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+        this.cachedUserPostFacade = Lookup.lookup(CachedUserPostFacade.class);
+        this.settingsService = Lookup.lookup(SettingsService.class);
     }
 
     @Override

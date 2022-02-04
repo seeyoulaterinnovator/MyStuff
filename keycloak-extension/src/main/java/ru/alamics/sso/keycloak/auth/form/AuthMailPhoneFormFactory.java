@@ -1,23 +1,17 @@
 package ru.alamics.sso.keycloak.auth.form;
 
-import org.keycloak.Config;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.Authenticator;
-import org.keycloak.authentication.AuthenticatorFactory;
 import org.keycloak.authentication.DisplayTypeAuthenticatorFactory;
 import org.keycloak.authentication.authenticators.console.ConsoleUsernamePasswordAuthenticator;
 import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.UserCredentialModel;
-import org.keycloak.provider.ProviderConfigProperty;
+import ru.alamics.sso.keycloak.auth.AbstractAuthenticatorFactory;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.service.UserFindService;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import java.util.List;
-
-public class AuthMailPhoneFormFactory implements AuthenticatorFactory, DisplayTypeAuthenticatorFactory {
+public class AuthMailPhoneFormFactory extends AbstractAuthenticatorFactory implements DisplayTypeAuthenticatorFactory {
 
     private static final String PROVIDER_ID = "auth-mail-phone-pass-form";
     private static final String DISPLAY_NAME = "(Phone or Mail) and Password Form";
@@ -30,12 +24,7 @@ public class AuthMailPhoneFormFactory implements AuthenticatorFactory, DisplayTy
 
     @Override
     public Authenticator create(KeycloakSession keycloakSession) {
-        UserFindService userFindService;
-        try {
-            userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
-        } catch (NamingException e) {
-            throw new RuntimeException("Something wrong with context");
-        }
+        UserFindService userFindService = Lookup.lookup(UserFindService.class);
 
         SINGLETON = new AuthMailPhoneForm(userFindService);
 
@@ -52,19 +41,10 @@ public class AuthMailPhoneFormFactory implements AuthenticatorFactory, DisplayTy
         return UserCredentialModel.PASSWORD;
     }
 
-    @Override
-    public boolean isConfigurable() {
-        return false;
-    }
 
     @Override
     public AuthenticationExecutionModel.Requirement[] getRequirementChoices() {
         return REQUIREMENT_CHOICES;
-    }
-
-    @Override
-    public boolean isUserSetupAllowed() {
-        return false;
     }
 
     @Override
@@ -77,27 +57,6 @@ public class AuthMailPhoneFormFactory implements AuthenticatorFactory, DisplayTy
     @Override
     public String getHelpText() {
         return HELP_TEXT;
-    }
-
-    @Override
-    public List<ProviderConfigProperty> getConfigProperties() {
-        return null;
-    }
-
-
-    @Override
-    public void init(Config.Scope scope) {
-
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory keycloakSessionFactory) {
-
-    }
-
-    @Override
-    public void close() {
-
     }
 
     @Override

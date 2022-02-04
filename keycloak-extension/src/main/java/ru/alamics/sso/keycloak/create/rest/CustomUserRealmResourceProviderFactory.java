@@ -25,7 +25,6 @@ import org.keycloak.services.resource.RealmResourceProvider;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
 import ru.alamics.sso.keycloak.rest.BaseResourceProviderFactory;
-import ru.alamics.sso.registration.service.UserFindService;
 
 @Slf4j
 public class CustomUserRealmResourceProviderFactory implements BaseResourceProviderFactory, BaseResourceProvider {
@@ -33,7 +32,6 @@ public class CustomUserRealmResourceProviderFactory implements BaseResourceProvi
     private static final String PROVIDER_ID = "users-toms";
 
     private KeycloakSession session;
-    private UserFindService userFindService;
     private AdminPermissionEvaluator auth;
 
     @Override

@@ -45,7 +45,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         this.userPhoneVerifier = userPhoneVerifier;
         this.activationCodeType = activationCodeType;
         this.emailTemplateProvider = emailTemplateProvider;
-        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+        this.settingsService = Lookup.lookup(SettingsService.class);
         ActivationCodeType.init();
     }
 
