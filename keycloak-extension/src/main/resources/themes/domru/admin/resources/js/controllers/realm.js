@@ -1688,6 +1688,7 @@ module.controller('RealmSMTPSettingsCtrl', function ($scope, Current, Realm, rea
         for (var i = 0; i < item.length; i++) {
             $scope.messagers.push(item[i]);
         }
+        Notifications.success("Не забудьте проверить настройки шлюза во вкладке 'Additional settings' -> 'Sender gateway'");
         $scope.realm.smtpServer["messenger"] = $scope.messagers.join(",");
         $scope.changed = true;
     }
@@ -1718,7 +1719,7 @@ module.controller('RealmSMTPSettingsCtrl', function ($scope, Current, Realm, rea
         $scope.changed = false;
         Realm.update(realmCopy, function () {
             $location.url("/realms/" + realm.realm + "/smtp-settings");
-            Notifications.success("Your changes have been saved to the realm.");
+            Notifications.success("Ваши изменения были сохранены");
         });
     };
 
