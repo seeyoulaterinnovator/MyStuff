@@ -41,7 +41,7 @@ public class MessengerResource {
     @NoCache
     public Response getAll() {
         return JsonResponse.success()
-                .addResult("messengers", messengerService.getAllMessenger())
+                .addResult("messengers", messengerService.getAllMessengers())
                 .build();
     }
 }

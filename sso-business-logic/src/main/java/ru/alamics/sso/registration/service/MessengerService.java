@@ -16,7 +16,7 @@ public class MessengerService {
     @EJB
     private MessengerRepository messengerRepository;
 
-    public List<MessengerDto> getAllMessenger() {
+    public List<MessengerDto> getAllMessengers() {
         return DataMapper.toMessengerDtos(messengerRepository.getAllMessenger());
     }
 

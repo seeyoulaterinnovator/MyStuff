@@ -18,9 +18,7 @@ public class MessengerRepository {
     private EntityManager em;
 
     public List<MessengerEntity> getAllMessenger() {
-        return em.createQuery(
-                "select mes " +
-                        "from MessengerEntity mes", MessengerEntity.class)
+        return em.createQuery("select mes from MessengerEntity mes", MessengerEntity.class)
                 .getResultList();
     }
 

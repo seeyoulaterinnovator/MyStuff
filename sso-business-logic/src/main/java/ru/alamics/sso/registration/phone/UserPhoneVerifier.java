@@ -23,6 +23,7 @@ public class UserPhoneVerifier {
     public static final String PHONE_KEY_HASH = "phone_key_hash";
     public static final String EXPIRATION_TIME = "expiration_time";
     public static final String COUNT_REPEAT = "count_repeat";
+    public static final String MESSENGER = "messenger";
 
     @EJB
     private MessageService messageService;
@@ -71,9 +72,9 @@ public class UserPhoneVerifier {
                     .realmId(realm.getId())
                     .build();
 
-            String listMessenger = realm.getSmtpConfig().get("messenger");
+            String[] listMessenger = realm.getSmtpConfig().get(MESSENGER).split(",");
 
-            for (String messenger: listMessenger.split(",")) {
+            for (String messenger: listMessenger) {
                 messageRequest.setMessengerName(MessengerType.valueOf(messenger));
                 messageService.sendMsg(messageRequest);
             }

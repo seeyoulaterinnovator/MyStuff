@@ -104,9 +104,9 @@ public class DataMapper {
     }
 
     public static List<MessengerDto> toMessengerDtos(List<MessengerEntity> messengerEntities) {
-        List<MessengerDto> MessengerDtos = new LinkedList<>();
-        messengerEntities.forEach(o -> MessengerDtos.add(toMessengerDto(o)));
-        return MessengerDtos;
+        return messengerEntities.stream()
+                .map(DataMapper::toMessengerDto)
+                .collect(Collectors.toList());
     }
 
     public static ExternalSystemRoleDto toExternalSystemRoleDto(ExternalSystemRoleEntity externalSystemRole) {
