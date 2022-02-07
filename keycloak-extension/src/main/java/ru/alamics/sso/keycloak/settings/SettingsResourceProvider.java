@@ -15,7 +15,7 @@ public class SettingsResourceProvider implements BaseResourceProvider<SettingsRe
 
     @Override
     public SettingsResource getResource() {
-        SettingsService service = (SettingsService) Lookup.lookup(SettingsService.class);
+        SettingsService service = Lookup.lookup(SettingsService.class);
         return new SettingsResource(session, service);
     }
 }

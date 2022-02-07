@@ -68,7 +68,7 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
     public CustomIdpReviewProfileAuthenticator() {
         tbapiService = new TbapiService(new TbapiServiceRestImpl());
         userExtension = new UserExtension();
-        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        properties = Lookup.lookup(ApplicationProperties.class);
     }
 
     public static boolean isEmailValid(String email) {

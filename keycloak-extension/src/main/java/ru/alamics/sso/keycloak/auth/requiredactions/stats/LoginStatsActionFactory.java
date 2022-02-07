@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.stats;
+package ru.alamics.sso.keycloak.auth.requiredactions.stats;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.Config;

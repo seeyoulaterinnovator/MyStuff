@@ -28,7 +28,7 @@ public class LetterSenderProvider implements FormAction {
     private SettingsService settingsService;
 
     public LetterSenderProvider() {
-        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+        settingsService = Lookup.lookup(SettingsService.class);
     }
 
     @Override
