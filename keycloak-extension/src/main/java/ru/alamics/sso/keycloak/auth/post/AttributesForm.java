@@ -29,7 +29,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.keycloak.services.managers.AuthenticationManager.END_AFTER_REQUIRED_ACTIONS;
 import static ru.alamics.sso.registration.model.UserConstants.*;
 
 @Slf4j
@@ -121,8 +120,9 @@ public class AttributesForm implements Authenticator {
 
         String iframe = context.getUriInfo().getQueryParameters().getFirst(I_FRAME);
         String clientId = session.getContext().getClient().getClientId();
-        if (iframe != null && DMP_ID.equals(clientId)) {
-            authSession.setAuthNote(END_AFTER_REQUIRED_ACTIONS, Util.TRUE_STR);
+        if (userSession != null && iframe != null && DMP_ID.equals(clientId)) {
+            context.challenge(context.form().createForm("success-login.ftl"));
+            return;
         }
         context.success();
     }

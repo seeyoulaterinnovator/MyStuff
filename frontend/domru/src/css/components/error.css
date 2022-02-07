@@ -1,23 +1,23 @@
 .error {
-&-heading {
-   font-size: 44px;
-   line-height: 52px;
-   letter-spacing: -2px;
-   color: rgba(0, 0, 0, 0.8);
-   margin-bottom: 20px;
-   font-weight: 800;
+    &-heading {
+       font-size: 44px;
+       line-height: 52px;
+       letter-spacing: -2px;
+       color: rgba(0, 0, 0, 0.8);
+       margin-bottom: 20px;
+       font-weight: 800;
 
-@media (max-width: 1200px) {
-  font-size: 33px;
-  line-height: 40px;
-  letter-spacing: -1px;
-  margin-bottom: 18px;
-}
+    @media (max-width: 1200px) {
+      font-size: 33px;
+      line-height: 40px;
+      letter-spacing: -1px;
+      margin-bottom: 18px;
+    }
 
-@media (max-width: 320px) {
-  font-size: 31px;
-  margin-bottom: 18px;
-}
+    @media (max-width: 320px) {
+      font-size: 31px;
+      margin-bottom: 18px;
+    }
 }
 
 &-img {
@@ -30,16 +30,16 @@
    max-height: 100%;
    max-width: none;
 
-@media (min-width: 639px) {
-  left: -3vw;
-  width: 57vw;
-}
+  @media (min-width: 639px) {
+    left: -3vw;
+    width: 57vw;
+  }
 
-@media (min-width: 959px) {
-  bottom: -10vh;
-  left: -3vw;
-  width: 61vw;
-}
+  @media (min-width: 959px) {
+    bottom: -10vh;
+    left: -3vw;
+    width: 61vw;
+  }
 }
 
 &-btn {
