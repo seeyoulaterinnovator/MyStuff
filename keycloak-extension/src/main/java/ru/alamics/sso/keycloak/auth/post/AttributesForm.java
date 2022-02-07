@@ -127,7 +127,7 @@ public class AttributesForm implements Authenticator {
 
         String iframe = context.getUriInfo().getQueryParameters().getFirst(I_FRAME);
         String clientId = session.getContext().getClient().getClientId();
-        if (userSession == null && iframe != null && DMP_ID.equals(clientId)) {
+        if (userSession != null && iframe != null && DMP_ID.equals(clientId)) {
             context.challenge(context.form().createForm("success-login.ftl"));
             return;
         }
