@@ -55,7 +55,7 @@
             <div class="col-md-6">
                 <select data-placeholder="Add messenger" id="sendMessage" ng-change="changedValue(messengerType)"
                         multiple ng-model="messengerType" ui-select2>
-                    <option ng-repeat="messenger in typeMessages">{{messenger.name}}</option>
+                    <option ng-repeat="messenger in typeMessengers">{{messenger.name}}</option>
                 </select>
             </div>
             <kc-tooltip>Выберите через какой messenger будут отправляться сообщения</kc-tooltip>

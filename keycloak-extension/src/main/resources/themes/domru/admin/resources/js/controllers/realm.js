@@ -1680,22 +1680,22 @@ module.controller('RealmSMTPSettingsCtrl', function ($scope, Current, Realm, rea
 
     $scope.realm = realm;
 
-    $scope.typeMessages = [];
-    $scope.messagers = [];
+    $scope.typeMessengers = [];
+    $http.get(authUrl + '/realms/' + realm.realm + '/messenger').then(function (data) {
+        $scope.typeMessengers = angular.fromJson(data).data.results['messengers'];
+    });
+
+    $scope.messengers = [];
 
     $scope.changedValue = function (item) {
-        $scope.messagers.splice(0);
+        $scope.messengers.splice(0);
         for (var i = 0; i < item.length; i++) {
-            $scope.messagers.push(item[i]);
+            $scope.messengers.push(item[i]);
         }
         Notifications.success("Не забудьте проверить настройки шлюза во вкладке 'Additional settings' -> 'Sender gateway'");
-        $scope.realm.smtpServer["messenger"] = $scope.messagers.join(",");
+        $scope.realm.smtpServer["messenger"] = $scope.messengers.join(",");
         $scope.changed = true;
     }
-
-    $http.get(authUrl + '/realms/' + realm.realm + '/messenger').then(function (data) {
-        $scope.typeMessages = angular.fromJson(data).data.results['messengers'];
-    });
 
     if ($scope.realm.smtpServer) {
         $scope.realm.smtpServer = typeObject($scope.realm.smtpServer);
@@ -1725,9 +1725,8 @@ module.controller('RealmSMTPSettingsCtrl', function ($scope, Current, Realm, rea
 
     $scope.reset = function () {
         $scope.realm = angular.copy(oldCopy);
-        if ($scope.realm.smtpServer["messenger"]) {
-            $scope.messengerType = $scope.realm.smtpServer["messenger"].split(',');
-        }
+        $scope.messengerType = angular.copy(oldCopy.smtpServer["messenger"].split(','));
+        window.location.reload();
         $scope.changed = false;
     };
 

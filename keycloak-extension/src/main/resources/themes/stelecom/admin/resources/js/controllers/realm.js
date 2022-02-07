@@ -1594,31 +1594,53 @@ module.controller('RealmSMTPSettingsCtrl', function($scope, Current, Realm, real
 
     $scope.realm = realm;
 
+    $scope.typeMessengers = [];
+    $http.get(authUrl + '/realms/' + realm.realm + '/messenger').then(function (data) {
+        $scope.typeMessengers = angular.fromJson(data).data.results['messengers'];
+    });
+
+    $scope.messengers = [];
+
+    $scope.changedValue = function (item) {
+        $scope.messengers.splice(0);
+        for (var i = 0; i < item.length; i++) {
+            $scope.messengers.push(item[i]);
+        }
+        Notifications.success("Не забудьте проверить настройки шлюза во вкладке 'Additional settings' -> 'Sender gateway'");
+        $scope.realm.smtpServer["messenger"] = $scope.messengers.join(",");
+        $scope.changed = true;
+    }
+
     if ($scope.realm.smtpServer) {
         $scope.realm.smtpServer = typeObject($scope.realm.smtpServer);
-    };
+        if ($scope.realm.smtpServer["messenger"]) {
+            $scope.messengerType = $scope.realm.smtpServer["messenger"].split(',');
+        }
+    }
 
     var oldCopy = angular.copy($scope.realm);
     $scope.changed = false;
 
-    $scope.$watch('realm', function() {
+    $scope.$watch('realm', function () {
         if (!angular.equals($scope.realm, oldCopy)) {
             $scope.changed = true;
         }
     }, true);
 
-    $scope.save = function() {
+    $scope.save = function () {
         var realmCopy = angular.copy($scope.realm);
         realmCopy['smtpServer'] = detypeObject(realmCopy.smtpServer);
         $scope.changed = false;
         Realm.update(realmCopy, function () {
             $location.url("/realms/" + realm.realm + "/smtp-settings");
-            Notifications.success("Your changes have been saved to the realm.");
+            Notifications.success("Ваши изменения были сохранены");
         });
     };
 
-    $scope.reset = function() {
+    $scope.reset = function () {
         $scope.realm = angular.copy(oldCopy);
+        $scope.messengerType = angular.copy(oldCopy.smtpServer["messenger"].split(','));
+        window.location.reload();
         $scope.changed = false;
     };
 
