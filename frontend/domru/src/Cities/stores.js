@@ -17,18 +17,16 @@ isFirstVisit && fetch('/auth/realms/user/cities/current')
   .then(response => response.json())
   .then(json => {
     json.results?.title == null ? city.set("Москва") : city.set(json.results.title);
-    showModal.set(isFirstVisit);
   })
   .catch(error => {
     console.log(error);
     city.set('Москва');
-    showModal.set(isFirstVisit);
   });
 
 export const status = writable(
   isFirstVisit ? STATUS.INITIAL : STATUS.SELECTING,
 );
-export const showModal = writable(false);
+export const showModal = writable(isFirstVisit);
 export const editingStarted = writable(false);
 export const allCities = writable([]);
 
