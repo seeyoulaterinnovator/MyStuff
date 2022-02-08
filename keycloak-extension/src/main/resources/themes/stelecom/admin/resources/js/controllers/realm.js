@@ -1638,10 +1638,7 @@ module.controller('RealmSMTPSettingsCtrl', function($scope, Current, Realm, real
     };
 
     $scope.reset = function () {
-        $scope.realm = angular.copy(oldCopy);
-        $scope.messengerType = angular.copy(oldCopy.smtpServer["messenger"].split(','));
         window.location.reload();
-        $scope.changed = false;
     };
 
     var initSMTPTest = function() {
