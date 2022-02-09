@@ -34,7 +34,7 @@ public class UserFindService {
 
     public UserFindService() {
 
-        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        properties = Lookup.lookup(ApplicationProperties.class);
     }
 
     public UserEntity getUserByPhone(RealmModel realm, String phone) {

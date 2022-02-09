@@ -37,11 +37,11 @@ public class CustomerRequestService {
 
     public CustomerRequestService() {
 
-        TbapiRemoteService tbapiRemoteService = (TbapiRemoteService) Lookup.lookup(TbapiRemoteService.class);
+        TbapiRemoteService tbapiRemoteService = Lookup.lookup(TbapiRemoteService.class);
 
         tbapiService = new TbapiService(tbapiRemoteService);
-        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
-        customerService = (CustomerService) Lookup.lookup(CustomerService.class);
+        properties = Lookup.lookup(ApplicationProperties.class);
+        customerService = Lookup.lookup(CustomerService.class);
         tbapiRequestMaxSize = properties.getPropertyInt(TBAPI_REQUEST_MAX_SIZE_PROPERTY, TBAPI_REQUEST_MAX_SIZE, "CustomerRequestService: default value used: '%s' = '%s'");
         loadCoeff = properties.getPropertyInt(LOAD_COEFF_PROPERTY, LOAD_COEFF_DEFAULT, "CustomerRequestService: default value used: '%s' = '%s'");
 

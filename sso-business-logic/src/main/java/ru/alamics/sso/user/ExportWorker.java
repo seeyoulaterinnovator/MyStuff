@@ -28,8 +28,8 @@ public class ExportWorker {
     public ExportWorker(RealmModel realm) {
         this.realm = realm;
 
-        this.userFindService = (UserFindService) Lookup.lookup(UserFindService.class);
-        this.importReportService = (ImportReportService) Lookup.lookup(ImportReportService.class);
+        this.userFindService = Lookup.lookup(UserFindService.class);
+        this.importReportService = Lookup.lookup(ImportReportService.class);
     }
 
     public byte[] exportUsers(DownloadUserRequest userRequest) throws IOException {
