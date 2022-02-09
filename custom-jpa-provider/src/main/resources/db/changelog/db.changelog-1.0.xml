@@ -1776,5 +1776,11 @@
         </sql>
     </changeSet>
 
+    <changeSet id="97" author="petrov-ny">
+        <sql>
+            UPDATE SETTINGS SET VALUE = 'http://smsgw.ertelecom.ru:13003/cgi-bin/sendsms' WHERE ID = '5b939f72-7f5a-11ec-a8a3-0242ac120002';
+        </sql>
+    </changeSet>
+
 
 </databaseChangeLog>
