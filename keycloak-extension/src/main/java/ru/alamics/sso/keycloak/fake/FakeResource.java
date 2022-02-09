@@ -1,9 +1,7 @@
 package ru.alamics.sso.keycloak.fake;
 
 import org.keycloak.models.KeycloakSession;
-import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
-import ru.alamics.sso.property.ApplicationProperties;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -18,7 +16,6 @@ public class FakeResource {
     public FakeResource(KeycloakSession session) {
 
         this.session = session;
-        ApplicationProperties properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
     }
 
     @POST

@@ -85,7 +85,7 @@ public class EmailSender {
         this.executorService = Executors.newSingleThreadExecutor();
         executorService.submit(new SendTask());
 
-        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+        settingsService = Lookup.lookup(SettingsService.class);
 
         sendInterval = properties.getPropertyLong(SEND_INTERVAL_PROPERTY, 1000, "EmailSender interval: default value used: '%s' = '%s'");
         dontSend = Boolean.parseBoolean(properties.getProperty(DO_NOT_SEND_PROPERTY));

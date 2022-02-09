@@ -212,11 +212,11 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
         // не успевает иначе
         if (clientService == null) {
-            clientService = (ClientService) Lookup.lookup(ClientService.class);
+            clientService = Lookup.lookup(ClientService.class);
         }
 
         if (settingsService == null) {
-            settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+            settingsService = Lookup.lookup(SettingsService.class);
         }
 
         String redirectUri = clientService.findMainRedirectUri(client);

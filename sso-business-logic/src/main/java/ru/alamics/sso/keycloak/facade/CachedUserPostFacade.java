@@ -22,7 +22,7 @@ import java.util.Set;
 @Stateless
 public class CachedUserPostFacade extends UserPostFacade {
 
-    private final CustomCache<UserPostResponse> cache;
+    private final UserPostCache cache;
 
     public CachedUserPostFacade() {
         cache = Lookup.lookup(UserPostCache.class);

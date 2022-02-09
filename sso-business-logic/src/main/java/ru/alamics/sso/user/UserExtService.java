@@ -54,8 +54,8 @@ public class UserExtService {
         this.session = session;
         this.realm = session.getContext().getRealm();
 
-        this.userFindService = (UserFindService) Lookup.lookup(UserFindService.class);
-        this.userPostFacade = (UserPostFacade) Lookup.lookup(UserPostFacade.class);
+        this.userFindService = Lookup.lookup(UserFindService.class);
+        this.userPostFacade = Lookup.lookup(UserPostFacade.class);
     }
 
     private static void updateUserFromRequest(UserModel user, UserRequest

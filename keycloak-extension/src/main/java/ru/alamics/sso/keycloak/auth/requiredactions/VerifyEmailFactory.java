@@ -120,7 +120,7 @@ public class VerifyEmailFactory extends VerifyEmail {
         long expirationInMinutes = TimeUnit.SECONDS.toMinutes(validityInSecs);
         String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(validityInSecs);
 
-        SettingsService settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+        SettingsService settingsService = Lookup.lookup(SettingsService.class);
 
         Map<String, Object> attributes = new HashMap<String, Object>();
         attributes.put("user", new ProfileBean(user));
