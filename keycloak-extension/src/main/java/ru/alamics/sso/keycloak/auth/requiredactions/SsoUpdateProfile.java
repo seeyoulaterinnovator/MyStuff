@@ -71,7 +71,7 @@ public class SsoUpdateProfile extends UpdateProfile {
             user.setFirstName(firstName);
         }
 
-        final UserFindService userFindService = (UserFindService) Lookup.lookup(UserFindService.class);
+        final UserFindService userFindService = Lookup.lookup(UserFindService.class);
 
         if (userFindService == null) {
             log.error("UserFindService failed lookup");

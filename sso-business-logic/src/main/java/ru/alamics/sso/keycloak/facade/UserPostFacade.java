@@ -32,10 +32,10 @@ public class UserPostFacade {
 
     public UserPostFacade() {
 
-        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        properties = Lookup.lookup(ApplicationProperties.class);
 
-        userPostService = (UserPostService) Lookup.lookup(UserPostService.class);
-        customerRequestService = (CustomerRequestService) Lookup.lookup(CustomerRequestService.class);
+        userPostService = Lookup.lookup(UserPostService.class);
+        customerRequestService = Lookup.lookup(CustomerRequestService.class);
 
         customerCacheLifespanInDb = properties.getPropertyInt(CUSTOMER_CACHE_LIFESPAN_IN_DB_PROPERTY, CUSTOMER_CACHE_LIFESPAN_IN_DB, "UserPostFacade: default value used: '{}' = '{}'");
     }

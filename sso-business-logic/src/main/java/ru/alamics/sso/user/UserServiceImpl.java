@@ -43,9 +43,9 @@ public class UserServiceImpl implements UserService {
         this.session = session;
         this.realm = session.getContext().getRealm();
 
-        this.importUsersReportService = (ImportUsersReportService) Lookup.lookup(ImportUsersReportService.class);
-        this.importReportService = (ImportReportService) Lookup.lookup(ImportReportService.class);
-        this.importService = (ImportService) Lookup.lookup(ImportService.class);
+        this.importUsersReportService = Lookup.lookup(ImportUsersReportService.class);
+        this.importReportService = Lookup.lookup(ImportReportService.class);
+        this.importService = Lookup.lookup(ImportService.class);
 
         this.exportWorker = new ExportWorker(realm);
         this.userExtService = new UserExtService(session, auth);

@@ -22,10 +22,10 @@ import java.util.Set;
 @Stateless
 public class CachedUserPostFacade extends UserPostFacade {
 
-    private final CustomCache<UserPostResponse> cache;
+    private final UserPostCache cache;
 
     public CachedUserPostFacade() {
-        cache = (CustomCache<UserPostResponse>) Lookup.lookup(UserPostCache.class);
+        cache = Lookup.lookup(UserPostCache.class);
     }
 
     public List<UserPostResponse> findByUserId(String userId) throws NotFoundException {
