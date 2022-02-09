@@ -1,7 +1,10 @@
 package ru.alamics.sso.remote.rias.model;
 
+import lombok.ToString;
+
 import javax.xml.bind.annotation.XmlElement;
 
+@ToString
 public class RiasResult {
 
     private Integer checkProfileData;
@@ -39,7 +42,4 @@ public class RiasResult {
         return result;
     }
 
-    public String toString() {
-        return "RiasResult(checkProfileData=" + this.getCheckProfileData() + ")";
-    }
 }

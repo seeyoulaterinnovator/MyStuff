@@ -56,17 +56,7 @@ public class StatusRepository {
             ent.setUpdateTime(LocalDateTime.now());
 
             em.unwrap(Session.class).update(ent);
-            //em.merge(ent);
 
-            // em.flush(); // no need if value is cached. but uncomment if there is exceptions "Row was updated or deleted by another transaction"
-
-            /*
-            em
-                .createNativeQuery("UPDATE CHECK_TABLE SET updated = CURRENT_TIMESTAMP() WHERE name = :nodeName")
-                .setParameter("nodeName", nodeName)
-                .setHint(QueryHints.NATIVE_LOCKMODE, LockModeType.NONE)
-                .executeUpdate();
-            */
         } catch (OptimisticLockException oe) {
             log.info("OptimisticLockException " + oe.getMessage());
         } catch (Exception e) {

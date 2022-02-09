@@ -6,7 +6,7 @@ public enum ImportUsersReportStatus {
     AWAITING("AWAITING"),
     UPLOADING("UPLOADING");
 
-    private String discription;
+    private final String discription;
 
     ImportUsersReportStatus(String discription) {
         this.discription = discription;

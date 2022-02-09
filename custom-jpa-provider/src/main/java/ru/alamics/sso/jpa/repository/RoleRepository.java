@@ -18,20 +18,16 @@ import java.util.stream.Collectors;
 @LocalBean
 public class RoleRepository {
 
-
     @PersistenceContext
     private EntityManager em;
 
-
     public RoleEntity findRoleEntityByName(final String roleName, final String realmId) {
 
-        List<RoleEntity> ret = em.createQuery("select re from RoleEntity re where re.name =:roleName and re.realm.id =:realmId", RoleEntity.class)
+        return em.createQuery("select re from RoleEntity re where re.name =:roleName and re.realm.id =:realmId", RoleEntity.class)
                 .setParameter("roleName", roleName)
                 .setParameter("realmId", realmId)
-                .getResultList();
-
-
-        return ret.isEmpty() ? null : ret.get(0);
+                .getResultList()
+                .get(0);
     }
 
     public RoleEntity save(final RoleEntity entity) {
@@ -58,19 +54,17 @@ public class RoleRepository {
             return Collections.emptyList();
         }
 
-        List<RoleEntity> ret = em.createQuery("select re from RoleEntity re where re.name in :roleNames and re.realmId =:realmId", RoleEntity.class)
+        return em.createQuery("select re from RoleEntity re where re.name in :roleNames and re.realmId =:realmId", RoleEntity.class)
                 .setParameter("roleNames", names)
                 .setParameter("realmId", realmId)
                 .getResultList();
-
-
-        return ret;
     }
 
     public void unbindRolesToUserByNames(final UserEntity user, final Set<String> roleNames) {
-        List<RoleEntity> roles = findRolesByNames(new ArrayList<>(roleNames), user.getRealmId());
 
-        List<String> roleIds = roles.stream().map(RoleEntity::getId).collect(Collectors.toList());
+        List<String> roleIds = findRolesByNames(new ArrayList<>(roleNames), user.getRealmId()).stream()
+                .map(RoleEntity::getId)
+                .collect(Collectors.toList());
 
         if (!roleIds.isEmpty()) {
             em.createQuery("delete from UserRoleMappingEntity where user =:user and roleId in :roles")
@@ -82,22 +76,20 @@ public class RoleRepository {
 
     public RoleEntity findClientRoleEntity(final String roleName, final String realmId, final ClientEntity clientEntity) {
 
-        List<RoleEntity> ret = em.createQuery("select re from RoleEntity re where re.name =:roleName and re.realmId =:realmId and re.client =:client", RoleEntity.class)
+        return em.createQuery("select re from RoleEntity re where re.name =:roleName and re.realmId =:realmId and re.client =:client", RoleEntity.class)
                 .setParameter("roleName", roleName)
                 .setParameter("realmId", realmId)
                 .setParameter("client", clientEntity)
-                .getResultList();
-
-
-        return ret.isEmpty() ? null : ret.get(0);
+                .getResultList()
+                .get(0);
     }
 
     public ClientEntity findClientByName(final String name, final String realmId) {
-        List<ClientEntity> ret = em.createQuery("select c from ClientEntity c where c.clientId =:name and c.realm.id =:realmId", ClientEntity.class)
+
+        return em.createQuery("select c from ClientEntity c where c.clientId =:name and c.realm.id =:realmId", ClientEntity.class)
                 .setParameter("name", name)
                 .setParameter("realmId", realmId)
-                .getResultList();
-        return ret.isEmpty() ? null : ret.get(0);
-
+                .getResultList()
+                .get(0);
     }
 }

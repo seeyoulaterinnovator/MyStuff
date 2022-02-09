@@ -66,18 +66,6 @@ public class ImportUsersReportRepository {
         em.flush();
     }
 
-    public ImportUsersReportEntity updateImportUsersReport(ImportUsersReportEntity importUsersReportEntity) {
-        //em.merge(importUsersReportEntity);
-        //em.flush();
-        return importUsersReportEntity;
-    }
-
-    public ImportUsersDataEntity updateImportUsersData(ImportUsersDataEntity entity) {
-        //em.merge(entity);
-        //em.flush();
-        return entity;
-    }
-
     public void setReportStatus(String id, ImportUsersReportStatus status) {
 
         em.createQuery("update ImportUsersReportEntity rep set rep.status = :status where rep.id = :id")

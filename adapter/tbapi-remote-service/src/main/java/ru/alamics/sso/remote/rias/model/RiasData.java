@@ -1,8 +1,13 @@
 package ru.alamics.sso.remote.rias.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "data")
+@Setter
+@Getter
 public class RiasData {
 
     private Integer status;
@@ -10,30 +15,6 @@ public class RiasData {
     private RiasResult result;
 
     private RiasMessage messages;
-
-    public Integer getStatus() {
-        return this.status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public RiasResult getResult() {
-        return this.result;
-    }
-
-    public void setResult(RiasResult result) {
-        this.result = result;
-    }
-
-    public RiasMessage getMessages() {
-        return this.messages;
-    }
-
-    public void setMessages(RiasMessage messages) {
-        this.messages = messages;
-    }
 
     public boolean equals(final Object o) {
         if (o == this) return true;

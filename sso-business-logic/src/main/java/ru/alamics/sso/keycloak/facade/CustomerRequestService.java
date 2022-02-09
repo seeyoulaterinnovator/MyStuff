@@ -37,7 +37,7 @@ public class CustomerRequestService {
 
     public CustomerRequestService() {
 
-        TbapiRemoteService tbapiRemoteService = (TbapiRemoteService) Lookup.lookup(TbapiRemoteService.class);
+        TbapiRemoteService tbapiRemoteService = Lookup.lookup(TbapiRemoteService.class);
 
         tbapiService = new TbapiService(tbapiRemoteService);
         properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);

@@ -94,7 +94,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             attributes.put("realm", new RealmBean(realm));
 
             if (settingsService == null) {
-                settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+                settingsService = Lookup.lookup(SettingsService.class);
             }
 
             List<IdentityProviderModel> identityProviders = realm.getIdentityProviders();

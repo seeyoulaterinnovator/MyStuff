@@ -1,29 +1,19 @@
 package ru.alamics.sso.remote.rias.model;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+@NoArgsConstructor
+@Getter
+@Setter
+@ToString
 public class RiasMessage {
 
     private String code;
 
     private String text;
-
-    public RiasMessage() {
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getText() {
-        return this.text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
 
     public boolean equals(final Object o) {
         if (o == this) return true;
@@ -53,7 +43,4 @@ public class RiasMessage {
         return result;
     }
 
-    public String toString() {
-        return "RiasMessage(code=" + this.getCode() + ", text=" + this.getText() + ")";
-    }
 }
