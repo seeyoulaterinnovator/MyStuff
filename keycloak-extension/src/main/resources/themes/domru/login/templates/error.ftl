@@ -10,7 +10,7 @@
     <@defaultErrorTemplate heading="Нет связи с сервером, но мы обязательно её восстановим" img="${url.resourcesPath}/build/images/500.png" backHref=backHref backMessage=backMessage >
         Провайдер домашнего интернета, телевидения и телефона в Перми Дом.ru.
         Подождите немного и попробуйте обновить страницу еще раз, или перейдите
-        <a href="${backHref}">на главную страницу</a>.
+        <a href="${url.loginUrl}">на главную страницу</a>.
     </@defaultErrorTemplate>
 </#macro>
 
