@@ -1,11 +1,12 @@
 package ru.alamics.sso.keycloak.auth;
 
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.Config;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
-import org.keycloak.authentication.AuthenticatorFactory;
-import org.keycloak.models.*;
+import org.keycloak.models.AuthenticationExecutionModel;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.provider.ProviderConfigProperty;
 import ru.alamics.sso.keycloak.auth.model.AuthType;
 import ru.alamics.sso.registration.model.UserConstants;
@@ -17,7 +18,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class TwoStepVerificationFactory implements Authenticator, AuthenticatorFactory {
+public class TwoStepVerificationFactory extends AbstractAuthenticatorFactory implements Authenticator {
     private static final String NOTE_AUTH_TYPE_NAME = "note_auth_type_name";
     private static final String NOTE_AUTH_TYPE_DESC = "note_auth_type_DESC";
     private static final String TWO_STEP_VERIFICATION_TYPES = "two.step.verification.types";
@@ -87,14 +88,6 @@ public class TwoStepVerificationFactory implements Authenticator, AuthenticatorF
     }
 
     @Override
-    public void init(Config.Scope config) {
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-    }
-
-    @Override
     public String getHelpText() {
         return HELP_TEXT;
     }
@@ -120,11 +113,6 @@ public class TwoStepVerificationFactory implements Authenticator, AuthenticatorF
     }
 
     @Override
-    public boolean isUserSetupAllowed() {
-        return false;
-    }
-
-    @Override
     public boolean requiresUser() {
         return false;
     }
@@ -138,7 +126,4 @@ public class TwoStepVerificationFactory implements Authenticator, AuthenticatorF
     public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user) {
     }
 
-    @Override
-    public void close() {
-    }
 }

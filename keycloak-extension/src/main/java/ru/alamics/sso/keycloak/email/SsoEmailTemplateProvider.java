@@ -34,7 +34,7 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
 
     public SsoEmailTemplateProvider(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
-        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+        settingsService = Lookup.lookup(SettingsService.class);
     }
 
     @Override

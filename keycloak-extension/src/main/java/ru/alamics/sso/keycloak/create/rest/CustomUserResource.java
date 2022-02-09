@@ -27,6 +27,7 @@ import org.keycloak.services.resources.admin.RoleMapperResource;
 import org.keycloak.services.resources.admin.UsersResource;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.utils.ProfileHelper;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
@@ -43,8 +44,6 @@ import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.util.validator.NotValidException;
 
 import javax.activation.UnsupportedDataTypeException;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
@@ -77,12 +76,8 @@ public class CustomUserResource {
         this.auth = auth;
         auth.users().requireManage();
         this.userService = new UserServiceImpl(session, auth.adminAuth());
-        try {
-            this.importReportService = (ImportReportService) new InitialContext().lookup("java:global/domru-sso/" + ImportReportService.class.getSimpleName());
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context");
-        }
+        this.importReportService = Lookup.lookup(ImportReportService.class);
+
         this.realm = session.getContext().getRealm();
     }
 

@@ -1,18 +1,17 @@
 package ru.alamics.sso.keycloak.auth.social;
 
-import org.keycloak.Config;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
-import org.keycloak.authentication.AuthenticatorFactory;
-import org.keycloak.models.*;
-import org.keycloak.provider.ProviderConfigProperty;
+import org.keycloak.models.AuthenticationExecutionModel;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
+import ru.alamics.sso.keycloak.auth.AbstractAuthenticatorFactory;
 import ru.alamics.sso.util.Util;
-
-import java.util.List;
 
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 
-public class PostLoginSocialVoid implements Authenticator, AuthenticatorFactory {
+public class PostLoginSocialVoid extends AbstractAuthenticatorFactory implements Authenticator {
 
     private static final String PROVIDER_ID = "post-login-social-void";
     private static final String DISPLAY_NAME = "Post Login Social Void";
@@ -29,23 +28,8 @@ public class PostLoginSocialVoid implements Authenticator, AuthenticatorFactory 
     }
 
     @Override
-    public String getReferenceCategory() {
-        return null;
-    }
-
-    @Override
-    public boolean isConfigurable() {
-        return false;
-    }
-
-    @Override
     public AuthenticationExecutionModel.Requirement[] getRequirementChoices() {
         return REQUIREMENT_CHOICES;
-    }
-
-    @Override
-    public boolean isUserSetupAllowed() {
-        return false;
     }
 
     @Override
@@ -54,29 +38,9 @@ public class PostLoginSocialVoid implements Authenticator, AuthenticatorFactory 
     }
 
     @Override
-    public List<ProviderConfigProperty> getConfigProperties() {
-        return null;
-    }
-
-    @Override
     public Authenticator create(KeycloakSession session) {
 
         return this;
-    }
-
-    @Override
-    public void init(Config.Scope config) {
-
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-
-    }
-
-    @Override
-    public void close() {
-
     }
 
     @Override

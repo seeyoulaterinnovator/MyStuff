@@ -2,15 +2,16 @@ package ru.alamics.sso.keycloak.registration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jboss.logging.Logger;
-import org.keycloak.Config;
 import org.keycloak.authentication.FormAction;
-import org.keycloak.authentication.FormActionFactory;
 import org.keycloak.authentication.FormContext;
 import org.keycloak.authentication.ValidationContext;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
-import org.keycloak.models.*;
+import org.keycloak.models.AuthenticationExecutionModel;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.provider.ProviderConfigProperty;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
@@ -31,7 +32,7 @@ import java.util.Map;
 
 import static ru.alamics.sso.registration.model.FormConstants.*;
 
-public class UserModelExtender implements FormAction, FormActionFactory {
+public class UserModelExtender extends AbstractFormActionFactory implements FormAction {
 
     private static final Logger log = Logger.getLogger(UserModelExtender.class);
 
@@ -151,33 +152,13 @@ public class UserModelExtender implements FormAction, FormActionFactory {
     }
 
     @Override
-    public void close() {
-        // nothing to do here
-    }
-
-    @Override
     public String getDisplayType() {
         return DISPLAY_NAME;
     }
 
     @Override
-    public String getReferenceCategory() {
-        return null;
-    }
-
-    @Override
-    public boolean isConfigurable() {
-        return false;
-    }
-
-    @Override
     public AuthenticationExecutionModel.Requirement[] getRequirementChoices() {
         return REQUIREMENT_CHOICES;
-    }
-
-    @Override
-    public boolean isUserSetupAllowed() {
-        return false;
     }
 
     @Override
@@ -194,16 +175,6 @@ public class UserModelExtender implements FormAction, FormActionFactory {
     public FormAction create(KeycloakSession session) {
         log.info("Creating UserModelExtender");
         return this;
-    }
-
-    @Override
-    public void init(Config.Scope config) {
-        // nothing to do here
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-        // nothing to do here
     }
 
     @Override

@@ -2,9 +2,8 @@ package ru.alamics.sso.registration.tbapi.model;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.property.ApplicationProperties;
-
-import javax.naming.InitialContext;
 
 @Slf4j
 @Data
@@ -18,11 +17,12 @@ public class TbapiConnectConfig {
     private String path;
     private boolean secure;
 
-    public TbapiConnectConfig() {}
-    
+    public TbapiConnectConfig() {
+    }
+
     public TbapiConnectConfig(TbapiConnect connect) {
         try {
-            ApplicationProperties properties = (ApplicationProperties) new InitialContext().lookup("java:global/domru-sso/" + ApplicationProperties.class.getSimpleName());
+            ApplicationProperties properties = Lookup.lookup(ApplicationProperties.class);
             host = properties.getProperty(connect.getHost());
             ip = properties.getProperty(connect.getIp());
 

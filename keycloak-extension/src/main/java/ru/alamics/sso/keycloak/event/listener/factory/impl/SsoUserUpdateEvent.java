@@ -37,7 +37,7 @@ public class SsoUserUpdateEvent extends SsoEvent {
 
     SsoUserUpdateEvent(AdminEvent event, KeycloakSession session) {
         super(session);
-        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+        settingsService = Lookup.lookup(SettingsService.class);
         this.event = event;
     }
 
@@ -129,7 +129,7 @@ public class SsoUserUpdateEvent extends SsoEvent {
         UserEntity entity = new UserEntity();
         entity.setId(userId);
 
-        LoginHistory loginHistoryService = (LoginHistory) Lookup.lookup(LoginHistory.class);
+        LoginHistory loginHistoryService = Lookup.lookup(LoginHistory.class);
         Optional.ofNullable(loginHistoryService).ifPresent(loginHistory -> {
             loginHistory.create(entity);
         });

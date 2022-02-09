@@ -30,7 +30,7 @@ public class SsoUserCreateEvent extends SsoEvent {
 
     SsoUserCreateEvent(AdminEvent event, KeycloakSession session) {
         super(session);
-        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+        settingsService = Lookup.lookup(SettingsService.class);
 
         this.event = event;
     }

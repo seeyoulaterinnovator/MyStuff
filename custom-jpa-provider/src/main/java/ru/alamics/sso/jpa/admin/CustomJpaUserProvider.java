@@ -7,13 +7,14 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.JpaUserProvider;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.UserEntity;
-import ru.alamics.sso.jpa.entity.UserLoginHistory;
 import ru.alamics.sso.jpa.entity.AutoLockNotification;
+import ru.alamics.sso.jpa.entity.UserLoginHistory;
 import ru.alamics.sso.jpa.entity.UserPostEntity;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
 
 @Slf4j
 public class CustomJpaUserProvider extends JpaUserProvider {
@@ -58,7 +59,7 @@ public class CustomJpaUserProvider extends JpaUserProvider {
     }
 
     @Override
-    public boolean removeUser (RealmModel realm, UserModel user) {
+    public boolean removeUser(RealmModel realm, UserModel user) {
         log.info("remove user starts");
         UserEntity userEntity = em.find(UserEntity.class, user.getId());
         if (userEntity == null) return false;

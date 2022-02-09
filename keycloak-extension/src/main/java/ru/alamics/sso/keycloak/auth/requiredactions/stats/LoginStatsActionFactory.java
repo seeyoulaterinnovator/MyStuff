@@ -1,16 +1,15 @@
-package ru.alamics.sso.keycloak.stats;
+package ru.alamics.sso.keycloak.auth.requiredactions.stats;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.Config;
-import org.keycloak.authentication.RequiredActionFactory;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.KeycloakSessionFactory;
+import ru.alamics.sso.keycloak.auth.requiredactions.AbstractRequiredActionFactory;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.stats.LoginHistory;
 
 @Slf4j
-public class LoginStatsActionFactory implements RequiredActionFactory {
+public class LoginStatsActionFactory extends AbstractRequiredActionFactory {
     private static final String PROVIDER_ID = "login_stats_recordings";
     private static final String RECORD_LOGIN_STATISTICS_ACTION = "Record Login Statistics Action";
 
@@ -21,23 +20,12 @@ public class LoginStatsActionFactory implements RequiredActionFactory {
 
     @Override
     public RequiredActionProvider create(KeycloakSession session) {
-        LoginHistory login = (LoginHistory) Lookup.lookup(LoginHistory.class);
-        return new LoginStatsRecording(login);
+        return new LoginStatsRecording(Lookup.lookup(LoginHistory.class));
     }
 
     @Override
     public void init(Config.Scope config) {
         log.debug("Creating IdM Keycloak extension {}:", this);
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-
-    }
-
-    @Override
-    public void close() {
-
     }
 
     @Override

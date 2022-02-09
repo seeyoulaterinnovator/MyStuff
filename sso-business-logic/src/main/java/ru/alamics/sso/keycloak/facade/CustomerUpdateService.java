@@ -33,13 +33,13 @@ public class CustomerUpdateService {
     private ConcurrentLinkedQueue<ScheduledFuture> tasksPool = new ConcurrentLinkedQueue<>();
 
     public CustomerUpdateService() {
-        customerRequestService = (CustomerRequestService) Lookup.lookup(CustomerRequestService.class);
+        customerRequestService = Lookup.lookup(CustomerRequestService.class);
     }
 
     @PostConstruct
     private void init() {
 
-        ApplicationProperties properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        ApplicationProperties properties = Lookup.lookup(ApplicationProperties.class);
         tbapiRequestInterval = properties.getPropertyLong(TBAPI_REQUEST_INTERVAL_PROPERTY, TBAPI_REQUEST_INTERVAL_DEFAULT, "CustomerUpdateService: default value used: '%s' = '%s'");
         log.info("tbapiRequestInterval set to value={}", tbapiRequestInterval);
 

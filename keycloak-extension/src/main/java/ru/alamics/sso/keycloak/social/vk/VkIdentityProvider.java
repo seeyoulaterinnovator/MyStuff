@@ -93,7 +93,7 @@ public class VkIdentityProvider extends AbstractOAuth2IdentityProvider<OAuth2Ide
 
     @Override
     protected String getDefaultScopes() {
-        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        properties = Lookup.lookup(ApplicationProperties.class);
         return properties.getProperty(DEFAULT_SCOPE);
     }
 

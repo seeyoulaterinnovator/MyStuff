@@ -21,8 +21,6 @@ import ru.alamics.sso.registration.model.UserEntityRepresentation;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
@@ -39,13 +37,8 @@ public abstract class SsoEvent {
 
     public SsoEvent(KeycloakSession session) {
         this.session = session;
-        try {
-            this.emailSender = (EmailSender) new InitialContext().lookup("java:global/domru-sso/" + EmailSender.class.getSimpleName());
-            settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context");
-        }
+        this.emailSender = Lookup.lookup(EmailSender.class);
+        settingsService = Lookup.lookup(SettingsService.class);
     }
 
     public abstract void execute();

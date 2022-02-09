@@ -8,14 +8,13 @@ import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluato
 import ru.alamics.sso.auth.UserRole;
 import ru.alamics.sso.keycloak.facade.CachedUserPostFacade;
 import ru.alamics.sso.keycloak.facade.UserPostFacade;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostEditRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.service.UserPostService;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
@@ -36,15 +35,11 @@ public class UserPostResource {
     public UserPostResource(KeycloakSession session, AdminPermissionEvaluator auth) {
         this.session = session;
         this.auth = auth;
-        try {
-            this.userRole = (UserRole) new InitialContext().lookup("java:global/domru-sso/" + UserRole.class.getSimpleName());
-            this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
-            this.cachedUserPostFacade = (CachedUserPostFacade) new InitialContext().lookup("java:global/domru-sso/" + CachedUserPostFacade.class.getSimpleName());
-            this.userPostFacade = (UserPostFacade) new InitialContext().lookup("java:global/domru-sso/" + UserPostFacade.class.getSimpleName());
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context");
-        }
+        this.userRole = Lookup.lookup(UserRole.class);
+        this.userPostService = Lookup.lookup(UserPostService.class);
+        this.cachedUserPostFacade = Lookup.lookup(CachedUserPostFacade.class);
+        this.userPostFacade = Lookup.lookup(UserPostFacade.class);
+
     }
 
     @PUT

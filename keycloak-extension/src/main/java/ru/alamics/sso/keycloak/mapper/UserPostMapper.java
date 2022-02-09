@@ -25,12 +25,10 @@ import org.keycloak.protocol.ProtocolMapperUtils;
 import org.keycloak.protocol.oidc.mappers.*;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.IDToken;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserPostService;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.ws.rs.NotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -140,15 +138,8 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
     }
 
     private UserPostResponse getUserPost(UserModel user) {
-        List<UserPostResponse> userPost;
-        try {
-            this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
-            userPost = userPostService.getUserPost(user.getId());
-        } catch (NamingException | NotFoundException e) {
-            log.error(e.getMessage(), e);
-            return null;
-        }
-        return userPost.stream().filter(o -> o.isSelected()).findFirst()
+        this.userPostService = Lookup.lookup(UserPostService.class);
+        return userPostService.getUserPost(user.getId()).stream().filter(o -> o.isSelected()).findFirst()
                 .orElse(null);
     }
 }

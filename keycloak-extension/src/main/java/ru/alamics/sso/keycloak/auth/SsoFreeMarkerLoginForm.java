@@ -60,8 +60,8 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         attributes.put("redirectUrl", getRedirectUrl());
         attributes.put("hideRegistration", isHideRegistration());
 
-        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
-        clientService = (ClientService) Lookup.lookup(ClientService.class);
+        settingsService = Lookup.lookup(SettingsService.class);
+        clientService =  Lookup.lookup(ClientService.class);
 
         attributes.put("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, realm.getName()));
         attributes.put("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, realm.getName()));

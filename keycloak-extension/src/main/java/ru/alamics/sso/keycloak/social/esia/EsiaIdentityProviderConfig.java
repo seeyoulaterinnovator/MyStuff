@@ -14,7 +14,7 @@ public class EsiaIdentityProviderConfig extends OAuth2IdentityProviderConfig {
 
     public EsiaIdentityProviderConfig(IdentityProviderModel model) {
         super(model);
-        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        properties = Lookup.lookup(ApplicationProperties.class);
     }
 
     public String getEsiaDomainUrl() {

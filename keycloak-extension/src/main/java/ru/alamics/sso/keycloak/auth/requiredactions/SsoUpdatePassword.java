@@ -80,7 +80,7 @@ public class SsoUpdatePassword extends UpdatePassword {
         final AuthenticationSessionModel currentAuthenticationSession = context.getAuthenticationSession();
 
         if (settingsService == null) {
-            settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+            settingsService = Lookup.lookup(SettingsService.class);
         }
 
         String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, context.getRealm().getId());
@@ -101,7 +101,7 @@ public class SsoUpdatePassword extends UpdatePassword {
         currentAuthenticationSession.setProtocol(OIDCLoginProtocol.LOGIN_PROTOCOL);
 
 
-        final ClientService clientService = (ClientService) Lookup.lookup(ClientService.class);
+        final ClientService clientService = Lookup.lookup(ClientService.class);
 
         if (clientService == null) {
             log.error("ClientService failed lookup. Redirect by clientId={} is not possible", defaultClientRealm);

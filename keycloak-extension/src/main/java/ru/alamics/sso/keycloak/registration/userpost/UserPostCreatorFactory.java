@@ -1,19 +1,17 @@
 package ru.alamics.sso.keycloak.registration.userpost;
 
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.Config;
 import org.keycloak.authentication.FormAction;
-import org.keycloak.authentication.FormActionFactory;
 import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderConfigProperty;
+import ru.alamics.sso.keycloak.registration.AbstractFormActionFactory;
 
 import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
-public class UserPostCreatorFactory implements FormActionFactory {
+public class UserPostCreatorFactory extends AbstractFormActionFactory {
 
     private static final String PROVIDER_ID = "user_post_creator";
     private static final String DISPLAY_NAME = "Registration UserPost Creator";
@@ -30,23 +28,8 @@ public class UserPostCreatorFactory implements FormActionFactory {
     }
 
     @Override
-    public String getReferenceCategory() {
-        return null;
-    }
-
-    @Override
-    public boolean isConfigurable() {
-        return false;
-    }
-
-    @Override
     public AuthenticationExecutionModel.Requirement[] getRequirementChoices() {
         return REQUIREMENT_CHOICES;
-    }
-
-    @Override
-    public boolean isUserSetupAllowed() {
-        return false;
     }
 
     @Override
@@ -63,21 +46,6 @@ public class UserPostCreatorFactory implements FormActionFactory {
     public FormAction create(KeycloakSession session) {
         log.info("Creating UserPostCreatorProvider");
         return new UserPostCreatorProvider();
-    }
-
-    @Override
-    public void init(Config.Scope config) {
-
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-
-    }
-
-    @Override
-    public void close() {
-
     }
 
     @Override

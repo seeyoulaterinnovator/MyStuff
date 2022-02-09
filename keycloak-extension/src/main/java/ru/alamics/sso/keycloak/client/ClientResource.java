@@ -53,7 +53,7 @@ public class ClientResource {
         this.adminEvent = new AdminEventBuilder(realm, adminAuth, session, session.getContext().getConnection())
                 .realm(realm).resource(ResourceType.CLIENT);
 
-        this.service = (ClientService) Lookup.lookup(ClientService.class);
+        this.service = Lookup.lookup(ClientService.class);
     }
 
     @GET

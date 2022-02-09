@@ -8,12 +8,11 @@ import org.keycloak.protocol.ProtocolMapperUtils;
 import org.keycloak.protocol.oidc.mappers.*;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.IDToken;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.user.PersonalAccountService;
 import ru.alamics.sso.user.model.PersonalAccountPostModel;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,14 +113,9 @@ public class PersonalAccountMapper extends AbstractOIDCProtocolMapper implements
 
     private PersonalAccountPostModel getUserPost(UserModel user) {
 
-        try {
-            this.paService = (PersonalAccountService) new InitialContext().lookup("java:global/domru-sso/" + PersonalAccountService.class.getSimpleName());
-            return paService.getActivePAByUser(user.getId());
+        this.paService = Lookup.lookup(PersonalAccountService.class);
+        return paService.getActivePAByUser(user.getId());
 
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            return null;
-        }
     }
 
 }

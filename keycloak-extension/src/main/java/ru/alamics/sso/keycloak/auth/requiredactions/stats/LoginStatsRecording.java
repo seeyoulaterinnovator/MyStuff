@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.stats;
+package ru.alamics.sso.keycloak.auth.requiredactions.stats;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.RequiredActionContext;
@@ -37,15 +37,14 @@ public class LoginStatsRecording implements RequiredActionProvider {
     public void processAction(RequiredActionContext context) {
     }
 
-    @Override
-    public void close() {
-
-    }
-
     private void recordRecentLogin(UserModel model) {
         UserEntity entity = new UserEntity();
         entity.setId(model.getId());
         loginHistoryService.create(entity);
     }
 
+    @Override
+    public void close() {
+
+    }
 }
