@@ -31,6 +31,6 @@
     <p class="mb-8 text-sm">
         <#nested>
     </p>
-    <a class="btn swr-button swr-button-desktop" href="${backHref}">На главную</a>
-    <a class="btn swr-button swr-button-tablet" href="${backHref}">Спасибо</a>
+    <a class="btn swr-button swr-button-desktop" href="${url.loginUrl}">На главную</a>
+    <a class="btn swr-button swr-button-tablet" href="${url.loginUrl}">Спасибо</a>
 </#macro>
