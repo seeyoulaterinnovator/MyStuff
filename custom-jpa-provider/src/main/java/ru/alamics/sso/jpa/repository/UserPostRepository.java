@@ -6,7 +6,7 @@ import ru.alamics.sso.jpa.entity.ExternalSystemEntity;
 import ru.alamics.sso.jpa.entity.ExternalSystemRoleEntity;
 import ru.alamics.sso.jpa.entity.UserPostEntity;
 import ru.alamics.sso.jpa.entity.UserPostRoleEntity;
-import ru.alamics.sso.util.Util;
+import ru.alamics.sso.jpa.util.Util;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -118,7 +118,7 @@ public class UserPostRepository {
                         "where sys.name = :sysName", ExternalSystemRoleEntity.class)
                 .setParameter("sysName", sysName)
                 .getResultList();
-        return Util.nullOrGet(result,0);
+        return Util.nullOrGet(result, 0);
     }
 
     public UserPostRoleEntity getUserPostRole(String name) {
@@ -128,7 +128,7 @@ public class UserPostRepository {
                         "where role.name = :name", UserPostRoleEntity.class)
                 .setParameter("name", name)
                 .getResultList();
-        return Util.nullOrGet(result,0);
+        return Util.nullOrGet(result, 0);
     }
 
     public List<UserPostEntity> findUserPostsByUser(final UserEntity user) {
@@ -146,7 +146,7 @@ public class UserPostRepository {
 
         try {
             return new ArrayList<>(findUserPostsByUser(em.find(UserEntity.class, userId)));
-        } catch (NotFoundException e){
+        } catch (NotFoundException e) {
             log.info("User not found by id={}", userId);
             throw new NotFoundException("User not found");
         }

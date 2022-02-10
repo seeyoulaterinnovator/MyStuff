@@ -5,7 +5,7 @@ import org.keycloak.models.jpa.entities.ClientEntity;
 import org.keycloak.models.jpa.entities.RoleEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.jpa.entities.UserRoleMappingEntity;
-import ru.alamics.sso.util.Util;
+import ru.alamics.sso.jpa.util.Util;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;

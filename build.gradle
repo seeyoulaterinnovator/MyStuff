@@ -173,7 +173,7 @@ task deploy {
 
 
         //setup hash to front resources
-        def currentTime = new Date().format('yyyyMMddHHmmss');
+        def currentTime = new Date().format('yyyyMMddHHmmss')
         ant.replaceregexp(match:'hash=', replace:'hash='+currentTime, flags:'g', byline:true) {
             fileset(dir: themesTargetFolder + '/domru/login', includes: 'template.ftl')
         }
