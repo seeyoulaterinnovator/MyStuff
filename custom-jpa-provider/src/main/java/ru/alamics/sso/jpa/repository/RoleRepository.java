@@ -5,6 +5,7 @@ import org.keycloak.models.jpa.entities.ClientEntity;
 import org.keycloak.models.jpa.entities.RoleEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.jpa.entities.UserRoleMappingEntity;
+import ru.alamics.sso.util.Util;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -23,11 +24,13 @@ public class RoleRepository {
 
     public RoleEntity findRoleEntityByName(final String roleName, final String realmId) {
 
-        return em.createQuery("select re from RoleEntity re where re.name =:roleName and re.realm.id =:realmId", RoleEntity.class)
+        List<RoleEntity> resultList = em.createQuery("select re from RoleEntity re where re.name =:roleName and re.realm.id =:realmId", RoleEntity.class)
                 .setParameter("roleName", roleName)
                 .setParameter("realmId", realmId)
-                .getResultList()
-                .get(0);
+                .getResultList();
+
+        return Util.nullOrGet(resultList, 0);
+
     }
 
     public RoleEntity save(final RoleEntity entity) {
@@ -76,20 +79,24 @@ public class RoleRepository {
 
     public RoleEntity findClientRoleEntity(final String roleName, final String realmId, final ClientEntity clientEntity) {
 
-        return em.createQuery("select re from RoleEntity re where re.name =:roleName and re.realmId =:realmId and re.client =:client", RoleEntity.class)
+        List<RoleEntity> resultList = em.createQuery("select re from RoleEntity re where re.name =:roleName and re.realmId =:realmId and re.client =:client", RoleEntity.class)
                 .setParameter("roleName", roleName)
                 .setParameter("realmId", realmId)
                 .setParameter("client", clientEntity)
-                .getResultList()
-                .get(0);
+                .getResultList();
+
+        return Util.nullOrGet(resultList, 0);
+
     }
 
     public ClientEntity findClientByName(final String name, final String realmId) {
 
-        return em.createQuery("select c from ClientEntity c where c.clientId =:name and c.realm.id =:realmId", ClientEntity.class)
+        List<ClientEntity> resultList = em.createQuery("select c from ClientEntity c where c.clientId =:name and c.realm.id =:realmId", ClientEntity.class)
                 .setParameter("name", name)
                 .setParameter("realmId", realmId)
-                .getResultList()
-                .get(0);
+                .getResultList();
+
+        return Util.nullOrGet(resultList, 0);
+
     }
 }

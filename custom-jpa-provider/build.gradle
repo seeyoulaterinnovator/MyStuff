@@ -5,6 +5,10 @@ java {
 
 dependencies {
 
+    implementation (
+            project(':sso-business-logic'),
+    )
+
     implementation "org.keycloak:keycloak-core:$keycloakVersion"
     implementation "org.keycloak:keycloak-services:$keycloakVersion"
     implementation "org.keycloak:keycloak-server-spi:$keycloakVersion"

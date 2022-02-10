@@ -23,6 +23,7 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -184,5 +185,9 @@ public class Util {
         }
 
         return sb.toString();
+    }
+
+    public static <S, T extends List<S>> S nullOrGet(T list, int index) {
+        return isEmpty(list) || list.size() <= index ? null : list.get(index);
     }
 }

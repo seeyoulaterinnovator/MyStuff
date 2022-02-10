@@ -37,7 +37,7 @@ public enum AuthType {
     private String description;
     private String[] requiredActionNames;
 
-    AuthType(String requiredActionNames[], String description) {
+    AuthType(String[] requiredActionNames, String description) {
         this.description = description;
         this.requiredActionNames = requiredActionNames;
     }
