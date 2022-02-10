@@ -22,11 +22,9 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import static ru.alamics.sso.jpa.util.CollectionUtils.isEmpty;
 import static ru.alamics.sso.registration.model.UserConstants.HIDDEN_HEADER;
 import static ru.alamics.sso.registration.model.UserConstants.I_FRAME;
 
@@ -75,18 +73,6 @@ public class Util {
 
     public static boolean isFrame(KeycloakSession session) {
         return isFrameByCurrentRequest(session) || isFrameByReferer(session);
-    }
-
-    public static boolean isEmpty(String val) {
-        return val == null || val.length() == 0;
-    }
-
-    public static boolean isEmpty(Collection<?> collection) {
-        return collection == null || collection.isEmpty();
-    }
-
-    public static boolean isEmpty(Map<?, ?> collection) {
-        return collection == null || collection.isEmpty();
     }
 
     public static String encodeUTF8(String str) {
@@ -187,7 +173,4 @@ public class Util {
         return sb.toString();
     }
 
-    public static <S, T extends List<S>> S nullOrGet(T list, int index) {
-        return isEmpty(list) || list.size() <= index ? null : list.get(index);
-    }
 }

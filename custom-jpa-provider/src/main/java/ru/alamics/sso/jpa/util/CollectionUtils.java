@@ -1,13 +1,19 @@
 package ru.alamics.sso.jpa.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.resteasy.spi.HttpRequest;
+import org.keycloak.OAuth2Constants;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.protocol.oidc.OIDCLoginProtocol;
+import org.keycloak.services.validation.Validation;
 
+import javax.ws.rs.core.MultivaluedMap;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
-public class Util {
+public class CollectionUtils {
 
     public static boolean isEmpty(String val) {
         return val == null || val.length() == 0;

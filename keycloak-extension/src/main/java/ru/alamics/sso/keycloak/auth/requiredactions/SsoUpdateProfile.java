@@ -15,7 +15,7 @@ import org.keycloak.services.resources.AttributeFormDataProcessor;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.service.UserFindService;
-import ru.alamics.sso.util.Util;
+import ru.alamics.sso.jpa.util.CollectionUtils;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -63,9 +63,9 @@ public class SsoUpdateProfile extends UpdateProfile {
             oldPhone = phones.get(0);
         }
 
-        boolean emailChanged = !(Util.isEmpty(oldEmail) || oldEmail.equals(email));
-        boolean phoneChanged = !(Util.isEmpty(oldPhone) || oldPhone.equals(phone));
-        boolean firstNameChanged = !(Util.isEmpty(oldFirstName) || oldFirstName.equals(firstName));
+        boolean emailChanged = !(CollectionUtils.isEmpty(oldEmail) || oldEmail.equals(email));
+        boolean phoneChanged = !(CollectionUtils.isEmpty(oldPhone) || oldPhone.equals(phone));
+        boolean firstNameChanged = !(CollectionUtils.isEmpty(oldFirstName) || oldFirstName.equals(firstName));
 
         if (firstNameChanged) {
             user.setFirstName(firstName);

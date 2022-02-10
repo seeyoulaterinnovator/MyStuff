@@ -17,6 +17,7 @@ import org.keycloak.services.resources.LoginActionsService;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.keycloak.auth.AbstractAuthenticator;
 import ru.alamics.sso.util.Util;
+import ru.alamics.sso.jpa.util.CollectionUtils;
 
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -50,7 +51,7 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
             context.attempted();
             return;
         }
-        if (Util.isEmpty(context.getUser().getRequiredActions())) {
+        if (CollectionUtils.isEmpty(context.getUser().getRequiredActions())) {
             context.success();
             return;
         }
@@ -65,7 +66,7 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
                 return;
             }
             String execution = ((Map<String, String>) entity).get("execution");
-            if (Util.isEmpty(execution)) {
+            if (CollectionUtils.isEmpty(execution)) {
                 context.failure(AuthenticationFlowError.FORK_FLOW);
                 return;
             }

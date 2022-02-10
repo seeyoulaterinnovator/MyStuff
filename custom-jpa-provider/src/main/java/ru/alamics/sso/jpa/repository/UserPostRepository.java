@@ -6,7 +6,7 @@ import ru.alamics.sso.jpa.entity.ExternalSystemEntity;
 import ru.alamics.sso.jpa.entity.ExternalSystemRoleEntity;
 import ru.alamics.sso.jpa.entity.UserPostEntity;
 import ru.alamics.sso.jpa.entity.UserPostRoleEntity;
-import ru.alamics.sso.jpa.util.Util;
+import ru.alamics.sso.jpa.util.CollectionUtils;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -118,7 +118,7 @@ public class UserPostRepository {
                         "where sys.name = :sysName", ExternalSystemRoleEntity.class)
                 .setParameter("sysName", sysName)
                 .getResultList();
-        return Util.nullOrGet(result, 0);
+        return CollectionUtils.nullOrGet(result, 0);
     }
 
     public UserPostRoleEntity getUserPostRole(String name) {
@@ -128,7 +128,7 @@ public class UserPostRepository {
                         "where role.name = :name", UserPostRoleEntity.class)
                 .setParameter("name", name)
                 .getResultList();
-        return Util.nullOrGet(result, 0);
+        return CollectionUtils.nullOrGet(result, 0);
     }
 
     public List<UserPostEntity> findUserPostsByUser(final UserEntity user) {

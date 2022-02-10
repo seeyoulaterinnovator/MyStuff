@@ -5,7 +5,7 @@ import org.keycloak.models.jpa.entities.ClientEntity;
 import org.keycloak.models.jpa.entities.RoleEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.jpa.entities.UserRoleMappingEntity;
-import ru.alamics.sso.jpa.util.Util;
+import ru.alamics.sso.jpa.util.CollectionUtils;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -29,7 +29,7 @@ public class RoleRepository {
                 .setParameter("realmId", realmId)
                 .getResultList();
 
-        return Util.nullOrGet(resultList, 0);
+        return CollectionUtils.nullOrGet(resultList, 0);
 
     }
 
@@ -85,7 +85,7 @@ public class RoleRepository {
                 .setParameter("client", clientEntity)
                 .getResultList();
 
-        return Util.nullOrGet(resultList, 0);
+        return CollectionUtils.nullOrGet(resultList, 0);
 
     }
 
@@ -96,7 +96,7 @@ public class RoleRepository {
                 .setParameter("realmId", realmId)
                 .getResultList();
 
-        return Util.nullOrGet(resultList, 0);
+        return CollectionUtils.nullOrGet(resultList, 0);
 
     }
 }

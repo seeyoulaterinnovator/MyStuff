@@ -6,6 +6,7 @@ import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.model.RiasLogin;
 import ru.alamics.sso.registration.rias.port.RiasApiService;
 import ru.alamics.sso.registration.rias.port.RiasLoginService;
+import ru.alamics.sso.jpa.util.CollectionUtils;
 import ru.alamics.sso.util.Util;
 
 import javax.ejb.EJB;
@@ -32,7 +33,7 @@ public class RiasService {
     public boolean checkEmail(User user) {
 
         String email = user.getEmail();
-        if (Util.isEmpty(email))
+        if (CollectionUtils.isEmpty(email))
             return false;
 
         try {
@@ -48,7 +49,7 @@ public class RiasService {
     public boolean checkPhone(User user) {
 
         String phone = user.getPhone();
-        if (Util.isEmpty(phone))
+        if (CollectionUtils.isEmpty(phone))
             return false;
 
         try {

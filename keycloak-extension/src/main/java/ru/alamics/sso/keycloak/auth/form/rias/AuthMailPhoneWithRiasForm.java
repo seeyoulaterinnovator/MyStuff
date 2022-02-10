@@ -22,6 +22,7 @@ import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
+import ru.alamics.sso.jpa.util.CollectionUtils;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -67,7 +68,7 @@ public class AuthMailPhoneWithRiasForm extends AbstractAuthMailPhoneForm {
             boolean checkInRiasIfNotFound = context.getRealm().getAttribute("checkInRiasIfNotFound", false);
             if (checkInRiasIfNotFound && Util.isFrame(context.getSession()) && (B2B_ID.equals(cm.getClientId()) || DMP_ID.equals(cm.getClientId()))) {
                 String withCity = context.getHttpRequest().getDecodedFormParameters().getFirst(FormConstants.WITH_CITY);
-                if (Util.isEmpty(withCity) || !withCity.equals("TRUE")) {
+                if (CollectionUtils.isEmpty(withCity) || !withCity.equals("TRUE")) {
                     context.form().setAttribute(FormConstants.WITH_CITY, "TRUE");
                     context.challenge(context.form().createLogin());
                 } else if (!checkAuthRias(context, CHOOSE_REDIRECT_TO_LK_FORM)) {
