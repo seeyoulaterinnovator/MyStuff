@@ -15,10 +15,6 @@ import java.util.Map;
 @Slf4j
 public class CollectionUtils {
 
-    public static boolean isEmpty(String val) {
-        return val == null || val.length() == 0;
-    }
-
     public static boolean isEmpty(Collection<?> collection) {
         return collection == null || collection.isEmpty();
     }

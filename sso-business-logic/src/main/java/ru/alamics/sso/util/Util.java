@@ -14,6 +14,7 @@ import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.services.managers.RealmManager;
 import org.keycloak.services.validation.Validation;
+import ru.alamics.sso.jpa.util.CollectionUtils;
 
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.MultivaluedMap;
@@ -24,7 +25,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
-import static ru.alamics.sso.jpa.util.CollectionUtils.isEmpty;
 import static ru.alamics.sso.registration.model.UserConstants.HIDDEN_HEADER;
 import static ru.alamics.sso.registration.model.UserConstants.I_FRAME;
 
@@ -37,7 +37,7 @@ public class Util {
     public static boolean isPasswordGrandType(KeycloakSession session) {
         HttpRequest contextObject = session.getContext().getContextObject(HttpRequest.class);
         MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
-        if (!isEmpty(parameters)) {
+        if (!CollectionUtils.isEmpty(parameters)) {
             return OAuth2Constants.PASSWORD.equals(parameters.getFirst(OIDCLoginProtocol.GRANT_TYPE_PARAM));
         } else {
             return false;
@@ -154,6 +154,10 @@ public class Util {
             }
         }
         return "unknown";
+    }
+
+    public static boolean isEmpty(String val) {
+        return val == null || val.length() == 0;
     }
 
     public static String join(Iterable<String> iterable, String separator) {
