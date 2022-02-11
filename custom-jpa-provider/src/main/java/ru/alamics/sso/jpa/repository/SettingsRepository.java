@@ -36,11 +36,9 @@ public class SettingsRepository {
 
     public List<Settings> findRealmSettings(final String realmId) {
 
-        List<Settings> ret = em.createQuery("select s from Settings s where s.realmId =:realmId", Settings.class)
+        return em.createQuery("select s from Settings s where s.realmId =:realmId", Settings.class)
                 .setParameter("realmId", realmId)
                 .getResultList();
-
-        return ret;
     }
 
     public void deleteSetting(final String settingId) {

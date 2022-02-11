@@ -11,6 +11,7 @@ import ru.alamics.sso.registration.phone.exception.PhoneCallException;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 import ru.alamics.sso.util.Util;
 
+
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;

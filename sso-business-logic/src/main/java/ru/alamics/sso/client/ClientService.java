@@ -5,6 +5,7 @@ import org.keycloak.models.ClientModel;
 import org.keycloak.models.jpa.entities.ClientEntity;
 import ru.alamics.sso.jpa.entity.MainRedirectUri;
 import ru.alamics.sso.jpa.repository.ClientRepository;
+import ru.alamics.sso.jpa.util.CollectionUtils;
 import ru.alamics.sso.util.Util;
 
 import javax.ejb.EJB;

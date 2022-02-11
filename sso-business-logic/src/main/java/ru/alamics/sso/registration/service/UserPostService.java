@@ -191,7 +191,7 @@ public class UserPostService {
         if (userPostRole == null) {
             throw new NotFoundException("Роль не найдена");
         }
-        return userPostRepository.getUserPostRole(name).getId();
+        return userPostRole.getId();
     }
 
     public Long getExternalSystemRoleId(String sysName) throws NotFoundException {

@@ -1,5 +1,6 @@
 package ru.alamics.sso.remote.rias;
 
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -24,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Stateless(name = "RiasApiService")
+@NoArgsConstructor
 public class RiasUserExistsCheckImpl implements RiasApiService {
     private static final String RIAS_API_URI = "riasApi.uri";
     private static final String CLIENT_NAME = "riasApi.client.name";
@@ -39,9 +41,6 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
     private ApplicationProperties properties;
 
     private URI uri;
-
-    public RiasUserExistsCheckImpl() {
-    }
 
     public RiasUserExistsCheckImpl(URI uri) {
         this.uri = uri;

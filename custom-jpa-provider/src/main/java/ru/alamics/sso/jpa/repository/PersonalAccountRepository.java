@@ -27,16 +27,7 @@ public class PersonalAccountRepository {
     public PersonalAccountPostEntity getAccount(final String postId) {
 
         return em.find(PersonalAccountPostEntity.class, postId);
-        /*
-        List<PersonalAccountEntity> list = em.createQuery(
-                "select pa " +
-                        "from PersonalAccountEntity pa " +
-                        "where pa.postId = :postId ", PersonalAccountEntity.class)
-                .setParameter("postId", postId)
-                .getResultList();
 
-        return list;
-        */
     }
 
     public void setAccountList(final String postId, List<String> paList) {
@@ -116,17 +107,5 @@ public class PersonalAccountRepository {
             em.flush();
         }
 
-        /*
-        // write all pending changes to the DB
-        em.flush();
-        // remove all entities from the persistence context
-        em.clear();
-
-        // bulk update
-        em.createQuery("delete from PersonalAccountEntity where postId =: postId")
-                .setParameter("postId", postId)
-                .executeUpdate();
-
-         */
     }
 }

@@ -34,23 +34,23 @@ public class ImportReportService {
 
     public List<ImportUsersReportModel> getReportListByStatus(ImportUsersReportStatus status) {
 
-        List<ImportUsersReportEntity> list = importUsersReportRepository.getReportListByStatus(status);
-
-        return list.stream().map(DataMapper::toReportModel).collect(Collectors.toList());
+        return importUsersReportRepository.getReportListByStatus(status).stream()
+                .map(DataMapper::toReportModel)
+                .collect(Collectors.toList());
     }
 
     public List<ImportUsersDataModel> getDataList(String reportId) {
 
-        List<ImportUsersDataEntity> list = importUsersReportRepository.getDataByReportId(reportId);
-
-        return list.stream().map(DataMapper::toDataModel).collect(Collectors.toList());
+        return importUsersReportRepository.getDataByReportId(reportId).stream()
+                .map(DataMapper::toDataModel)
+                .collect(Collectors.toList());
     }
 
     public List<ImportUsersDataModel> getDataListAwaiting(String reportId) {
 
-        List<ImportUsersDataEntity> list = importUsersReportRepository.getDataByReportIdAndStatus(reportId, ImportUsersDataStatus.AWAITING);
-
-        return list.stream().map(DataMapper::toDataModel).collect(Collectors.toList());
+        return importUsersReportRepository.getDataByReportIdAndStatus(reportId, ImportUsersDataStatus.AWAITING).stream()
+                .map(DataMapper::toDataModel)
+                .collect(Collectors.toList());
     }
 
     public void updateReport(ImportUsersReportModel report) {
@@ -82,7 +82,6 @@ public class ImportReportService {
         entity.setErrors(data.getErrors());
         entity.setStatus(data.getStatus());
 
-        importUsersReportRepository.updateImportUsersData(entity);
     }
 
     public String saveImportUsersReport(ImportUsersReportModel report) {

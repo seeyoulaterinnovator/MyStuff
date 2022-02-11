@@ -21,7 +21,7 @@ public class StatusResource {
     private static AtomicLong healthUpdated = new AtomicLong(0);
     private static AtomicBoolean healthStatus = new AtomicBoolean(false);
     protected KeycloakSession session;
-    private StatusService statusService;
+    private final StatusService statusService;
 
     public StatusResource(KeycloakSession session) {
         this.session = session;
