@@ -33,7 +33,7 @@ public class RiasService {
     public boolean checkEmail(User user) {
 
         String email = user.getEmail();
-        if (CollectionUtils.isEmpty(email))
+        if (Util.isEmpty(email))
             return false;
 
         try {
@@ -49,7 +49,7 @@ public class RiasService {
     public boolean checkPhone(User user) {
 
         String phone = user.getPhone();
-        if (CollectionUtils.isEmpty(phone))
+        if (Util.isEmpty(phone))
             return false;
 
         try {

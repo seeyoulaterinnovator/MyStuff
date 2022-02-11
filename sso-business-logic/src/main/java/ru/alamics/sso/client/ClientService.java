@@ -6,6 +6,7 @@ import org.keycloak.models.jpa.entities.ClientEntity;
 import ru.alamics.sso.jpa.entity.MainRedirectUri;
 import ru.alamics.sso.jpa.repository.ClientRepository;
 import ru.alamics.sso.jpa.util.CollectionUtils;
+import ru.alamics.sso.util.Util;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -65,7 +66,7 @@ public class ClientService {
                     rediUrl = rediUrl.substring(0, rediUrl.length() - 1);
                 }
 
-                if (!CollectionUtils.isEmpty(rediUrl)) {
+                if (!Util.isEmpty(rediUrl)) {
                     res = rediUrl;
                     break;
                 }

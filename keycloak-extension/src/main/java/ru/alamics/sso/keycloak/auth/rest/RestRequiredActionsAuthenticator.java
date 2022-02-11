@@ -66,7 +66,7 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
                 return;
             }
             String execution = ((Map<String, String>) entity).get("execution");
-            if (CollectionUtils.isEmpty(execution)) {
+            if (Util.isEmpty(execution)) {
                 context.failure(AuthenticationFlowError.FORK_FLOW);
                 return;
             }
