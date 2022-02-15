@@ -125,7 +125,7 @@ module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, c
 
 module.controller('UserSessionsCtrl', function ($scope, $http, realm, user, UserSessions, UserLogout,
                                                 UserSessionLogout, Notifications, $location) {
-                                                    
+
     $scope.realm = realm;
     $scope.user = user;
     $scope.query = {};
@@ -535,32 +535,18 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
     $scope.selectedSendLogin = function () {
-        if (checkSelect()) return false;
         let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
         $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/send/login`, userForResetPassword).then(response => {
             Notifications.success("Login has been sent");
         })
-
     };
 
     $scope.selectedSendLoginAndResetPassword = function () {
-        if (checkSelect()) return false;
         let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
         $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/credential/reset-with-send-login`, userForResetPassword).then(response => {
             Notifications.success("Login has been sent and password reset");
         })
     };
-
-    function checkSelect() {
-        let error = false;
-        $scope.users.filter(user => user.active).forEach((user) => {
-            if (!user.enabled){
-                error = true;
-                Notifications.error("Вы выбрали заблокированного пользователя c username " + user.username);
-            }
-        })
-        return error;
-    }
 
     $scope.selectedBlockUsers = function () {
         let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
@@ -1057,11 +1043,11 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
                         Notifications.error("Номер телефона уже используется");
                         return;
                     }
-                    if (!Number(phone)){
+                    if (!Number(phone)) {
                         Notifications.error('Некорректный номер телефона');
                         return;
                     }
-                    if(('' + phone).length !== 11){
+                    if (('' + phone).length !== 11) {
                         Notifications.error("Некорректная длина номера телефона");
                         return;
                     }
@@ -1109,12 +1095,12 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
     };
 
     $scope.addAttribute = function () {
-        if ($scope.newAttribute.key === 'phone'){
-            if (!Number($scope.newAttribute.value)){
+        if ($scope.newAttribute.key === 'phone') {
+            if (!Number($scope.newAttribute.value)) {
                 Notifications.error('Некорректный номер телефона');
                 return;
             }
-            if($scope.newAttribute.value.length !== 11){
+            if ($scope.newAttribute.value.length !== 11) {
                 Notifications.error("Некорректная длина номера телефона");
                 return;
             }
@@ -2543,7 +2529,7 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
         $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/importUsersReports').then(function (data) {
             $scope.ImportReports = angular.fromJson(data).data.results['importUsersReports'];
         });
-        var timeout = setInterval(function() {
+        var timeout = setInterval(function () {
             $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/importUsersReports').then(function (data) {
                 $scope.ImportReports = angular.fromJson(data).data.results['importUsersReports'];
             });
