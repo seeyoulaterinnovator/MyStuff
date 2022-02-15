@@ -78,6 +78,19 @@ public class CitiesResource {
         return null;
     }
 
+    public static CityMigration checkMigrationCityByCity(String city) {
+
+        if (city == null)
+            return null;
+
+        for (CityMigration cm : cityList) {
+            if (city.equalsIgnoreCase(cm.getName()))
+                return cm;
+        }
+
+        return null;
+    }
+
     public static CityMigration getCityMigrationByDomain(String domain) {
 
         if (domain == null)
@@ -155,11 +168,11 @@ public class CitiesResource {
                     regionIsoCode = cityDadataModel.getLocation().getData().getRegionIsoCode();
                 }
             }
-            CityMigration city = getCityMigrationByCity(title);
+            CityMigration city = checkMigrationCityByCity(title);
 
             if (city == null && regionIsoCode != null) {
                 RegionCities region = RegionCities.findRegionByIsoCode(regionIsoCode);
-                city = region == null ? null : getCityMigrationByCity(region.getDefaultCity());
+                city = region == null ? null : checkMigrationCityByCity(region.getDefaultCity());
             }
 
             title = city == null ? null : title;

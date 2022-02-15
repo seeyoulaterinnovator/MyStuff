@@ -125,7 +125,7 @@ module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, c
 
 module.controller('UserSessionsCtrl', function ($scope, $http, realm, user, UserSessions, UserLogout,
                                                 UserSessionLogout, Notifications, $location) {
-                                                    
+
     $scope.realm = realm;
     $scope.user = user;
     $scope.query = {};
@@ -965,7 +965,7 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
         }
     }
     // ID - Name map for required actions. IDs are enum names.
-    RequiredActions.query({realm: realm.realm}, function (data) {
+    RequiredActions.query({realm: $scope.query.searchRealm}, function (data) {
         $scope.userReqActionList = [];
         for (var i = 0; i < data.length; i++) {
             console.log("listed required action: " + data[i].name);
@@ -1043,11 +1043,11 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
                         Notifications.error("Номер телефона уже используется");
                         return;
                     }
-                    if (!Number(phone)){
+                    if (!Number(phone)) {
                         Notifications.error('Некорректный номер телефона');
                         return;
                     }
-                    if(('' + phone).length !== 11){
+                    if (('' + phone).length !== 11) {
                         Notifications.error("Некорректная длина номера телефона");
                         return;
                     }
@@ -1095,12 +1095,12 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
     };
 
     $scope.addAttribute = function () {
-        if ($scope.newAttribute.key === 'phone'){
-            if (!Number($scope.newAttribute.value)){
+        if ($scope.newAttribute.key === 'phone') {
+            if (!Number($scope.newAttribute.value)) {
                 Notifications.error('Некорректный номер телефона');
                 return;
             }
-            if($scope.newAttribute.value.length !== 11){
+            if ($scope.newAttribute.value.length !== 11) {
                 Notifications.error("Некорректная длина номера телефона");
                 return;
             }
@@ -2529,7 +2529,7 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
         $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/importUsersReports').then(function (data) {
             $scope.ImportReports = angular.fromJson(data).data.results['importUsersReports'];
         });
-        var timeout = setInterval(function() {
+        var timeout = setInterval(function () {
             $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/importUsersReports').then(function (data) {
                 $scope.ImportReports = angular.fromJson(data).data.results['importUsersReports'];
             });
