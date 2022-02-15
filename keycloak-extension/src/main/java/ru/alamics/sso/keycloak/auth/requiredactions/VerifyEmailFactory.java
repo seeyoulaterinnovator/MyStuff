@@ -82,7 +82,7 @@ public class VerifyEmailFactory extends VerifyEmail {
 
         try {
             SettingsService settingsService = Lookup.lookup(SettingsService.class);
-            int timeTokenVerifyEmail = (int) settingsService.getSettingsLongValue(SettingConstants.TIME_TOKEN_VERIFY_EMAIL, realm.getName());
+            int timeTokenVerifyEmail = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_VERIFY_EMAIL, realm.getName());
             int absoluteExpirationInSecs = Time.currentTime() + timeTokenVerifyEmail;
 
             String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authSession).getEncodedId();

@@ -71,6 +71,10 @@ public class SettingsService {
         return ret;
     }
 
+    public int getSettingsIntValue(final SettingConstants property, final String realmId) {
+        return (int) getSettingsLongValue(property, realmId);
+    }
+
     public String getSettingsStringValue(final String property, final String realmId) {
         Settings settings = repository.getSettings(property, realmId);
         String value = "no settings";
@@ -81,7 +85,7 @@ public class SettingsService {
     }
 
     public String getSettingsStringValue(final SettingConstants property, final String realmId) {
-            return getSettingsStringValue(property.getKey(),realmId);
+        return getSettingsStringValue(property.getKey(), realmId);
     }
 
     public Integer getSettingsIntegerValue(final String property, final String realmId, Integer defValue, String logDefault) {
@@ -96,7 +100,7 @@ public class SettingsService {
     }
 
     public Integer getSettingsIntegerValue(final SettingConstants property, final String realmId, Integer defValue, String logDefault) {
-            return getSettingsIntegerValue(property.getKey(), realmId, defValue, logDefault);
+        return getSettingsIntegerValue(property.getKey(), realmId, defValue, logDefault);
     }
 
     public SettingsDto getSetting(final SettingConstants property, final String realmId) {
