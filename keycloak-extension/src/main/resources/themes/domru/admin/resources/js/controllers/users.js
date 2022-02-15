@@ -535,18 +535,33 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
     $scope.selectedSendLogin = function () {
-        let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
-        $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/send/login`, userForResetPassword).then(response => {
-            Notifications.success("Login has been sent");
-        })
+        if (checkSelect()) {
+            let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
+            $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/send/login`, userForResetPassword).then(response => {
+                Notifications.success("Login has been sent");
+            })
+        }
     };
 
     $scope.selectedSendLoginAndResetPassword = function () {
-        let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
-        $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/credential/reset-with-send-login`, userForResetPassword).then(response => {
-            Notifications.success("Login has been sent and password reset");
-        })
+        if (checkSelect()) {
+            let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
+            $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/credential/reset-with-send-login`, userForResetPassword).then(response => {
+                Notifications.success("Login has been sent and password reset");
+            })
+        }
     };
+
+    function checkSelect() {
+        let users = $scope.users.filter(user => user.active);
+        for (let i = 0; i < users.length; i++) {
+            if (!users[i].enabled) {
+                Notifications.error("Вы выбрали заблокированного пользователя c username " + users[i].username);
+                return false;
+            }
+        }
+        return true;
+    }
 
     $scope.selectedBlockUsers = function () {
         let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
