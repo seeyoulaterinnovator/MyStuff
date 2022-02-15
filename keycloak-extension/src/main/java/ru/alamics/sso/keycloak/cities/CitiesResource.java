@@ -78,7 +78,7 @@ public class CitiesResource {
         return null;
     }
 
-    public static CityMigration checkMigrationCityByCity(String city) {
+    public static CityMigration getCityMigrationByName(String city) {
 
         if (city == null)
             return null;
@@ -168,11 +168,11 @@ public class CitiesResource {
                     regionIsoCode = cityDadataModel.getLocation().getData().getRegionIsoCode();
                 }
             }
-            CityMigration city = checkMigrationCityByCity(title);
+            CityMigration city = getCityMigrationByName(title);
 
             if (city == null && regionIsoCode != null) {
                 RegionCities region = RegionCities.findRegionByIsoCode(regionIsoCode);
-                city = region == null ? null : checkMigrationCityByCity(region.getDefaultCity());
+                city = region == null ? null : getCityMigrationByName(region.getDefaultCity());
             }
 
             title = city == null ? null : title;
