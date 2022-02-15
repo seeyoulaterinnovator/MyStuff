@@ -58,7 +58,7 @@ public class SsoUserCustomEvent extends SsoEvent {
                 attributes.put("emailLoginHtml", settingsService.getSettingsStringValue(EMAIL_LOGIN_ACCOUNT, realm.getName()));
                 attributes.put("emailPasswordFooterHtml", settingsService.getSettingsStringValue(EMAIL_PASSWORD_FOOTER_ACCOUNT, realm.getName()));
                 attributes.put("emailResetPasswordBodyHtml", settingsService.getSettingsStringValue(EMAIL_RESET_PASSWORD_ACCOUNT, realm.getName()));
-                int timeTokenResetPass = (int) settingsService.getSettingsLongValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm.getName());
+                int timeTokenResetPass = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm.getName());
                 String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
                 attributes.put("expTimePass", expirationStrRusPass);
                 List<String> phones = user.getAttribute("phone");
@@ -68,7 +68,7 @@ public class SsoUserCustomEvent extends SsoEvent {
                 if (userRepresentation.getRequiredActions().contains(UserEntityRepresentation.SEND_LOGIN)) {
                     this.sendEmail(user, realm, settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_SEND_LOGIN, realm.getName()), BODY_TEMPLATE_LOGIN_SEND, attributes);
                 } else if (userRepresentation.getRequiredActions().contains(UserEntityRepresentation.SEND_LOGIN_AND_RESET_PASSWORD)) {
-                    int timeTokenResetPassAndLogin = (int) settingsService.getSettingsLongValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD_AND_LOGIN, realm.getName());
+                    int timeTokenResetPassAndLogin = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD_AND_LOGIN, realm.getName());
                     String expirationStrRusPassAndLogin = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPassAndLogin);
                     attributes.put("expTimePassAndLogin", expirationStrRusPassAndLogin);
 

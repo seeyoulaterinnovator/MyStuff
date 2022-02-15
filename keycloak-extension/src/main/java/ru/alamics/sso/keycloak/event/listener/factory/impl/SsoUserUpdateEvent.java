@@ -93,7 +93,7 @@ public class SsoUserUpdateEvent extends SsoEvent {
             attributes.put("emailLoginAndPhoneHtml", settingsService.getSettingsStringValue(EMAIL_LOGIN_AND_PHONE_ACCOUNT, realm.getName()));
             attributes.put("emailLoginHtml", settingsService.getSettingsStringValue(EMAIL_LOGIN_ACCOUNT, realm.getName()));
             attributes.put("emailPasswordFooterHtml", settingsService.getSettingsStringValue(EMAIL_PASSWORD_FOOTER_ACCOUNT, realm.getName()));
-            int timeTokenResetPass = (int) settingsService.getSettingsLongValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm.getName());
+            int timeTokenResetPass = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm.getName());
             String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
             attributes.put("expTimePass", expirationStrRusPass);
 
