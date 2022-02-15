@@ -12,6 +12,7 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
+import ru.alamics.sso.schedule.Translator;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.stats.LoginHistory;
@@ -92,6 +93,9 @@ public class SsoUserUpdateEvent extends SsoEvent {
             attributes.put("emailLoginAndPhoneHtml", settingsService.getSettingsStringValue(EMAIL_LOGIN_AND_PHONE_ACCOUNT, realm.getName()));
             attributes.put("emailLoginHtml", settingsService.getSettingsStringValue(EMAIL_LOGIN_ACCOUNT, realm.getName()));
             attributes.put("emailPasswordFooterHtml", settingsService.getSettingsStringValue(EMAIL_PASSWORD_FOOTER_ACCOUNT, realm.getName()));
+            int timeTokenResetPass = (int) settingsService.getSettingsLongValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm.getName());
+            String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
+            attributes.put("expTimePass", expirationStrRusPass);
 
             if (userNow.isEnabled()) {
                 long blockValue = settingsService.getSettingsLongValue(SettingConstants.BLOCK_NOTIFICATION_OF_UNLOCKING, realm.getName());

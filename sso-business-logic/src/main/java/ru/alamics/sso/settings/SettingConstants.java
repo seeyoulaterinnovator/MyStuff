@@ -137,6 +137,7 @@ public enum SettingConstants {
 
     TIME_TOKEN_VERIFY_EMAIL("life.token.loginverify.email"),
     TIME_TOKEN_RESET_PASSWORD("life.token.reset.pass"),
+    TIME_TOKEN_RESET_PASSWORD_AND_LOGIN("life.token.reset.pass.login"),
     TIME_TOKEN_SET_FIRST_PASS("life.token.set.first-pass"),
 
     TOKEN_DADATA("tokenDaData"),

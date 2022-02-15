@@ -1782,5 +1782,23 @@
         </sql>
     </changeSet>
 
+    <changeSet id="98" author="petrov-ny">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('965eb12a-8e26-11ec-b909-0242ac120002', 'life.token.reset.pass.login', '12', 'время токена обновить пароль', 'user', 'Send login and reset password', 'HOURS',
+            'REALM');
+        </sql>
+    </changeSet>
+
+    <changeSet id="99" author="petrov-ny">
+        <sql>
+            <![CDATA[
+                UPDATE SETTINGS SET VALUE = '<p>Пароль вашей учетной записи был сброшен.</p><p>Установите новый пароль по <a class="no_block" href="{0}">ссылке</a>, чтобы завершить процесс и восстановить доступ к личному кабинету.</p><p class = "small_text block_timer">Срок действия ссылки {1}.</p>' WHERE EXT_ID = 'emailResetPasswordBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p>Мы не храним ваши пароли.</p><p>Если вы забыли свой пароль или у вас не получается войти в Личный кабинет - воспользуйтесь формой восстановления пароля по ссылке <a class="no_block" href="https://newlkb2b.dom.ru">«Забыли пароль?»</a></p><p><ul class = "instruction content__ul"><li class = "small_text instruction_text content__ul-li">Для восстановления данных укажите ваш логин</li><li class = "small_text content__ul-li">На ваш адрес электронной почты будет отправлена ссылка для восстановления пароля.<br>Срок действия ссылки {0}</li></ul></p>' WHERE EXT_ID = 'emailPasswordFooterHtml';
+            ]]>
+        </sql>
+    </changeSet>
+
+
 
 </databaseChangeLog>
