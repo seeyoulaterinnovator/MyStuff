@@ -48,14 +48,15 @@ public class UserPostRepository {
     }
 
     public UserPostEntity findUserPostByUserIdAndTomsId(String userId, String tomsId) {
-        return em.createQuery(
+        List<UserPostEntity> result = em.createQuery(
                 "select ac " +
                         "from UserPostEntity ac " +
                         "where ac.customer.id = :toms_id " +
                         "and ac.user.id = :userId", UserPostEntity.class)
                 .setParameter("userId", userId)
                 .setParameter("toms_id", tomsId)
-                .getSingleResult();
+                .getResultList();
+        return CollectionUtils.nullOrGet(result, 0);
 
     }
 

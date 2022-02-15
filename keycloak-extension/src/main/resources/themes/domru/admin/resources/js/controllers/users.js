@@ -535,18 +535,32 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
     $scope.selectedSendLogin = function () {
+        if (checkSelect()) return false;
         let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
         $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/send/login`, userForResetPassword).then(response => {
             Notifications.success("Login has been sent");
         })
+
     };
 
     $scope.selectedSendLoginAndResetPassword = function () {
+        if (checkSelect()) return false;
         let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
         $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/credential/reset-with-send-login`, userForResetPassword).then(response => {
             Notifications.success("Login has been sent and password reset");
         })
     };
+
+    function checkSelect() {
+        let error = false;
+        $scope.users.filter(user => user.active).forEach((user) => {
+            if (!user.enabled){
+                error = true;
+                Notifications.error("Вы выбрали заблокированного пользователя c username " + user.username);
+            }
+        })
+        return error;
+    }
 
     $scope.selectedBlockUsers = function () {
         let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
@@ -965,7 +979,7 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
         }
     }
     // ID - Name map for required actions. IDs are enum names.
-    RequiredActions.query({realm: realm.realm}, function (data) {
+    RequiredActions.query({realm: $scope.query.searchRealm}, function (data) {
         $scope.userReqActionList = [];
         for (var i = 0; i < data.length; i++) {
             console.log("listed required action: " + data[i].name);
