@@ -16,6 +16,7 @@ import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
+import ru.alamics.sso.util.StandResolver;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -149,7 +150,9 @@ public class CitiesResource {
         String url = settingsService.getSettingsStringValue(SettingConstants.URL_DADATA_REQUEST_LOCATION_IP, GeneralRealm.MASTER);
         String token = settingsService.getSettingsStringValue(SettingConstants.TOKEN_DADATA, GeneralRealm.MASTER);
 
-        getCities();
+        if (StandResolver.isBattle()) {
+            getCities();
+        }
 
         log.info(String.format("Sending request with address %s to dadata", ipAddress));
 
