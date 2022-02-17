@@ -14,9 +14,29 @@
     </@defaultErrorTemplate>
 </#macro>
 
-<#macro codeAll backHref="/" backMessage="Попробовать снова" >
+<#macro codeAll backHref backMessage="Попробовать снова" >
     <@defaultErrorTemplate heading="Что-то пошло не так" backHref=backHref img ="" backMessage=backMessage >
         Регистрация временно недоступна, попробуйте повторить попытку позже
+    </@defaultErrorTemplate>
+</#macro>
+
+<#macro code403 backHref backMessage="Попробовать снова" >
+    <@defaultErrorTemplate heading="Что-то пошло не так" backHref=backHref img ="" backMessage=backMessage >
+        Ваша учетная запись заблокирована. Обратитесь в службу технической подджержки.
+    </@defaultErrorTemplate>
+</#macro>
+
+<#macro code40401 backHref backMessage="Попробовать снова" >
+    <@defaultErrorTemplate heading="Что-то пошло не так" backHref=backHref img ="" backMessage=backMessage >
+        Ссылка устарела. Для совершения дальнейших действий необходимо авторизоваться или
+        воспользоваться функцией 'Забыли пароль?'
+    </@defaultErrorTemplate>
+</#macro>
+
+<#macro code40402 backHref backMessage="Попробовать снова" >
+    <@defaultErrorTemplate heading="Что-то пошло не так" backHref=backHref img ="" backMessage=backMessage >
+        Ссылка устарела. Для совершения дальнейших действий необходимо авторизоваться или
+        воспользоваться функцией 'Забыли пароль?'
     </@defaultErrorTemplate>
 </#macro>
 
@@ -31,6 +51,6 @@
     <p class="mb-8 text-sm">
         <#nested>
     </p>
-    <a class="btn swr-button swr-button-desktop" href="${url.loginUrl}">На главную</a>
-    <a class="btn swr-button swr-button-tablet" href="${url.loginUrl}">Спасибо</a>
+    <a class="btn swr-button swr-button-desktop" href="${backHref}">На главную</a>
+    <a class="btn swr-button swr-button-tablet" href="${backHref}">Спасибо</a>
 </#macro>

@@ -1799,6 +1799,14 @@
         </sql>
     </changeSet>
 
+    <changeSet id="100" author="petrov-ny">
+        <sql>
+            <![CDATA[
+                UPDATE SETTINGS SET VALUE = '<p class = "margin_block">Перейдите по ссылке и установите пароль. Время действия ссылки {1}</p><p class = "block_link"><a href="{0}">Установить пароль</a></p>' WHERE EXT_ID = 'linkPassword';
+             ]]>
+        </sql>
+    </changeSet>
+
 
 
 </databaseChangeLog>

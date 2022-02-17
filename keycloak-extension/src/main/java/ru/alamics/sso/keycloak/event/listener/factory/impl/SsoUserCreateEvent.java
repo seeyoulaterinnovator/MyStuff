@@ -61,7 +61,7 @@ public class SsoUserCreateEvent extends SsoEvent {
                 attributes.put("userLastName", userModel.getLastName());
 
                 List<String> phones = userModel.getAttribute("phone");
-                if (!phones.isEmpty()) {
+                if (!phones.isEmpty() && phones.get(0).length() == 11) {
                     attributes.put("phone", Util.getFormatNumber(phones.get(0)));
                 }
 

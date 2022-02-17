@@ -18,6 +18,7 @@ import ru.alamics.sso.emailer.EmailModel;
 import ru.alamics.sso.emailer.EmailSender;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
+import ru.alamics.sso.schedule.Translator;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 
@@ -59,8 +60,8 @@ public abstract class SsoEvent {
             AuthenticationSessionModel authenticationSession = authenticationSessionManager.createAuthenticationSession(realm, false)
                     .createAuthenticationSession(clientModel);
 
-            long timeTokenCreateUser = settingsService.getSettingsLongValue(SettingConstants.TIME_TOKEN_SET_FIRST_PASS, realm.getName());
-            int absoluteExpirationInSecs = (int) (Time.currentTime() + timeTokenCreateUser);
+            int timeTokenCreateUser = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_SET_FIRST_PASS, realm.getName());
+            int absoluteExpirationInSecs = Time.currentTime() + timeTokenCreateUser;
 
             // We send the secret in the email in a link as a query param.
             String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
@@ -73,6 +74,9 @@ public abstract class SsoEvent {
                     clientModel.getClientId(), authenticationSession.getTabId());
             String link = builder.build(realm.getName()).toString();
             attributes.put("accountLink", link);
+
+            String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenCreateUser);
+            attributes.put("expTimePass", expirationStrRusPass);
 
             emailSender.send(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
                     session.theme().getTheme(Theme.Type.EMAIL), session.getContext().resolveLocale(user)));
