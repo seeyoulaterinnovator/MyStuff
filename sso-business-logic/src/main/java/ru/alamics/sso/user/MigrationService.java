@@ -181,7 +181,7 @@ public class MigrationService {
         ValidatorBuilder vb = new ValidatorBuilder().setEmail(email).setPhone(phone).build();
         StringValidator.process(vb);
 
-        UserEntity byPhone = getUserByPhone(phone);
+        UserEntity byPhone = getUserByPhone(realmId, phone);
         UserEntity byEmail = getUserByEmailAndUsername(realmId, email);
 
         if (byPhone != null && byPhone.equals(byEmail)) {
@@ -211,8 +211,8 @@ public class MigrationService {
         }
     }
 
-    private UserEntity getUserByPhone(String phone) {
-        return userRepository.getFirstUserByPhone(phone);
+    private UserEntity getUserByPhone(String realmId, String phone) {
+        return userRepository.getFirstUserByPhoneNumber(realmId, phone, null);
     }
 
     private UserEntity getUserByEmailAndUsername(String realmId, String email) {

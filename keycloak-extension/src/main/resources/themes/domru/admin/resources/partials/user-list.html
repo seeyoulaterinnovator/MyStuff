@@ -114,7 +114,8 @@
                                data-ng-show="access.viewRealm && (access.buttonImportFileCSV || auth.authz.realm === 'master')">
                             Import File<i class="pficon pficon-import"></i></label>
                         <input id="import-file-csv" type="file" class="hidden" accept=".csv, .xls, .xlsx, .ctl"
-                               data-ng-show="access.viewRealm && (access.buttonImportFileCSV || auth.authz.realm === 'master')">
+                               data-ng-show="access.viewRealm && (access.buttonImportFileCSV || auth.authz.realm === 'master')"
+                               onchange="angular.element(this).scope().importFileCommon(this.files)">
 
                         <button data-ng-click="exportCSV()" class="btn btn-default"
                                 data-ng-show="access.buttonExportCSV || auth.authz.realm === 'master'">Export CSV
