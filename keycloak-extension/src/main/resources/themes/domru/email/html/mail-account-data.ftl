@@ -10,6 +10,6 @@
     <#else>
       ${kcSanitize(msg(emailLoginHtml, userName))?no_esc}
     </#if>
-    ${kcSanitize(msg(linkPassword, accountLink))?no_esc}
+    ${kcSanitize(msg(linkPassword, accountLink, expTimePass))?no_esc}
   </#if>
 </@template.layout>

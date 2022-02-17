@@ -92,8 +92,9 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
 
         attributes.put("passwordResetBodyHtml", settingsService.getSettingsStringValue(EMAIL_RESET, realm.getName()));
 
-
-        send(settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_RESET, realm.getName()), BODY_TEMPLATE_PASS_RESET, attributes);
+        if (user.isEnabled()) {
+            send(settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_RESET, realm.getName()), BODY_TEMPLATE_PASS_RESET, attributes);
+        }
     }
 
     @Override

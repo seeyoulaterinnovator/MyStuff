@@ -62,7 +62,7 @@ public class SsoUserCustomEvent extends SsoEvent {
                 String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
                 attributes.put("expTimePass", expirationStrRusPass);
                 List<String> phones = user.getAttribute("phone");
-                if (!phones.isEmpty()) {
+                if (!phones.isEmpty() && phones.get(0).length() == 11) {
                     attributes.put("phone", Util.getFormatNumber(phones.get(0)));
                 }
                 if (userRepresentation.getRequiredActions().contains(UserEntityRepresentation.SEND_LOGIN)) {

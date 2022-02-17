@@ -212,10 +212,13 @@ public class UserSchedule {
         Map<String, Object> body = new HashMap<>();
         body.put("userName", userModel.getUsername());
         List<String> phones = userModel.getAttribute("phone");
-        if (!phones.isEmpty()) {
+        if (!phones.isEmpty() && phones.get(0).length() == 11) {
             String formatNumber = Util.getFormatNumber(phones.get(0));
             body.put("phone", formatNumber);
         }
+        int timeTokenResetPass = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realmId);
+        String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
+        body.put("expTimePass", expirationStrRusPass);
         body.put("blockNotificationSchedulerHtml", settingsService.getSettingsStringValue(SettingConstants.SCHEDULER_BLOCKING_BODY, realmId));
         return EmailModel.builder()
                 .subject(subject)
@@ -238,8 +241,13 @@ public class UserSchedule {
         body.put("absence", valueTime);
         body.put("link", link);
         body.put("userName", userModel.getUsername());
+
+        int timeTokenResetPass = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm);
+        String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
+        body.put("expTimePass", expirationStrRusPass);
+
         List<String> phones = userModel.getAttribute("phone");
-        if (!phones.isEmpty()) {
+        if (!phones.isEmpty() && phones.get(0).length() == 11) {
             String formatNumber = Util.getFormatNumber(phones.get(0));
             body.put("phone", formatNumber);
         }
