@@ -244,7 +244,7 @@ public class ImportService {
 
         FoundException foundException = new FoundException();
         try {
-            checkOnExistUserByPhone(phone);
+            checkOnExistUserByPhone(realmId, phone);
         } catch (FoundException e) {
             foundException.addResult("error1", e.getMessage());
         }
@@ -259,8 +259,8 @@ public class ImportService {
         }
     }
 
-    private void checkOnExistUserByPhone(String phone) throws FoundException {
-        UserEntity user = userRepository.getFirstUserByPhone(phone);
+    private void checkOnExistUserByPhone(String realmId, String phone) throws FoundException {
+        UserEntity user = userRepository.getFirstUserByPhoneNumber(realmId,phone,null);
 
         if (user != null) {
             log.error("User exists with same phone {}", phone);
