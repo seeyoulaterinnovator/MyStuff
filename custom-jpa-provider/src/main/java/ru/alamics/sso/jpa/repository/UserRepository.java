@@ -94,20 +94,20 @@ public class UserRepository {
         String realmName = realmId == null ? "user" : realmId;
 
         List<UserEntity> users = (List<UserEntity>) em.createNativeQuery(
-                        "select * " +
-                                "  from USER_ENTITY ue " +
-                                "  where " +
-                                " ue.REALM_ID = :realmId and " +
-                                "     (:excludedUserId is null or ue.ID <> :excludedUserId) " +
-                                "    and exists ( " +
-                                "      select 1 " +
-                                "      from USER_ATTRIBUTE attr " +
-                                "      where attr.USER_ID = ue.ID " +
-                                "        and attr.NAME = :name " +
-                                "        and attr.VALUE = :phoneNmbr " +
-                                "    )" +
-                                "  limit 1"
-                        , UserEntity.class)
+                "select * " +
+                        "  from USER_ENTITY ue " +
+                        "  where " +
+                        " ue.REALM_ID = :realmId and " +
+                        "     (:excludedUserId is null or ue.ID <> :excludedUserId) " +
+                        "    and exists ( " +
+                        "      select 1 " +
+                        "      from USER_ATTRIBUTE attr " +
+                        "      where attr.USER_ID = ue.ID " +
+                        "        and attr.NAME = :name " +
+                        "        and attr.VALUE = :phoneNmbr " +
+                        "    )" +
+                        "  limit 1"
+                , UserEntity.class)
                 .setParameter("realmId", realmName)
                 .setParameter("name", "phone")
                 .setParameter("phoneNmbr", phone)
@@ -122,10 +122,10 @@ public class UserRepository {
 
     public UserEntity getFirstUserByPhone(String phone) {
         List<UserEntity> users = em.createQuery(
-                        "select u from UserEntity u " +
-                                "join u.attributes attr \n" +
-                                "  where attr.name = :name " +
-                                "       and attr.value = :phoneNmbr", UserEntity.class)
+                "select u from UserEntity u " +
+                        "join u.attributes attr \n" +
+                        "  where attr.name = :name " +
+                        "       and attr.value = :phoneNmbr", UserEntity.class)
                 .setParameter("name", "phone")
                 .setParameter("phoneNmbr", phone)
                 .setMaxResults(1)
@@ -138,7 +138,7 @@ public class UserRepository {
 
     public UserEntity getFirstUserByEmail(String realmId, String email) {
         List<UserEntity> users = em.createQuery("select u from UserEntity u \n" +
-                        "  where u.realmId = :realmId and u.email = :email ", UserEntity.class)
+                "  where u.realmId = :realmId and u.email = :email ", UserEntity.class)
                 .setParameter("realmId", realmId)
                 .setParameter("email", email)
                 .getResultList();
@@ -150,7 +150,7 @@ public class UserRepository {
 
     public UserEntity getFirstUserByUsername(String realmId, String username) {
         List<UserEntity> users = em.createQuery("select u from UserEntity u \n" +
-                        "  where u.realmId = :realmId and u.username = :username ", UserEntity.class)
+                "  where u.realmId = :realmId and u.username = :username ", UserEntity.class)
                 .setParameter("realmId", realmId)
                 .setParameter("username", username)
                 .getResultList();
@@ -219,8 +219,8 @@ public class UserRepository {
                 getLimit(pageNum, pageSize);
 
         Query query = em.createNativeQuery(
-                        queryStr
-                        , Tuple.class)
+                queryStr
+                , Tuple.class)
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
@@ -231,18 +231,18 @@ public class UserRepository {
 
     public long getTotalUsersByParameters(String realm, String search, String searchUser, String searchToms) {
         Query query = em.createQuery(
-                        "select count(UE)  " +
-                                "from UserEntity UE\n" +
-                                "         left join UserAttributeEntity UA on UE = UA.user AND UA.name = 'phone'\n" +
-                                "         left join UserPostEntity UP on UE = UP.user \n" +
-                                "WHERE UE.realmId = :realm\n" +
-                                "and (:search is null or :search = '' or (UE.email LIKE CONCAT('%', :search, '%') OR\n" +
-                                "                                         UE.firstName LIKE CONCAT('%', :search, '%') OR\n" +
-                                "                                         UE.lastName LIKE CONCAT('%', :search, '%') OR\n" +
-                                "                                         UE.username LIKE CONCAT('%', :search, '%') OR\n" +
-                                "                                         UA.value LIKE CONCAT('%', :search, '%')))\n" +
-                                "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser)\n" +
-                                "and (:searchToms is null or :searchToms = '' or UP.customer.id = :searchToms)\n")
+                "select count(UE)  " +
+                        "from UserEntity UE\n" +
+                        "         left join UserAttributeEntity UA on UE = UA.user AND UA.name = 'phone'\n" +
+                        "         left join UserPostEntity UP on UE = UP.user \n" +
+                        "WHERE UE.realmId = :realm\n" +
+                        "and (:search is null or :search = '' or (UE.email LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                                         UE.firstName LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                                         UE.lastName LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                                         UE.username LIKE CONCAT('%', :search, '%') OR\n" +
+                        "                                         UA.value LIKE CONCAT('%', :search, '%')))\n" +
+                        "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser)\n" +
+                        "and (:searchToms is null or :searchToms = '' or UP.customer.id = :searchToms)\n")
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
@@ -271,25 +271,25 @@ public class UserRepository {
         }
 
         Query query = em.createQuery(
-                        "select distinct new ru.alamics.sso.jpa.model.UserSummaryView(UE.id, " +
-                                "                                                         UE.username," +
-                                "                                                         UE.firstName, " +
-                                "                                                         UE.lastName, " +
-                                "                                                         UE.email, " +
-                                "                                                         UA.value, " +
-                                "                                                         UE.enabled) " +
-                                "from UserEntity UE\n" +
-                                "         left join UserAttributeEntity UA on UE = UA.user AND UA.name = 'phone'\n" +
-                                "         left join UserPostEntity UP on UE = UP.user \n" +
-                                "WHERE UE.realmId = :realm\n" +
-                                "and (:search is null or :search = '' or (UE.email LIKE :search OR\n" +
-                                "                                         UE.firstName LIKE :search OR\n" +
-                                "                                         UE.username LIKE :search ))\n" +
-                                "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser)\n" +
-                                "and (:searchToms is null or :searchToms = '' or UP.customer.id = :searchToms)\n" +
-                                "and (:searchPhone is null or :searchPhone = '' or UA.value LIKE :searchPhone)\n" +
-                                getSort(sortField, sortAsc)
-                        , UserSummaryView.class)
+                "select distinct new ru.alamics.sso.jpa.model.UserSummaryView(UE.id, " +
+                        "                                                         UE.username," +
+                        "                                                         UE.firstName, " +
+                        "                                                         UE.lastName, " +
+                        "                                                         UE.email, " +
+                        "                                                         UA.value, " +
+                        "                                                         UE.enabled) " +
+                        "from UserEntity UE\n" +
+                        "         left join UserAttributeEntity UA on UE = UA.user AND UA.name = 'phone'\n" +
+                        "         left join UserPostEntity UP on UE = UP.user \n" +
+                        "WHERE UE.realmId = :realm\n" +
+                        "and (:search is null or :search = '' or (UE.email LIKE :search OR\n" +
+                        "                                         UE.firstName LIKE :search OR\n" +
+                        "                                         UE.username LIKE :search ))\n" +
+                        "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser)\n" +
+                        "and (:searchToms is null or :searchToms = '' or UP.customer.id = :searchToms)\n" +
+                        "and (:searchPhone is null or :searchPhone = '' or UA.value LIKE :searchPhone)\n" +
+                        getSort(sortField, sortAsc)
+                , UserSummaryView.class)
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
@@ -323,25 +323,25 @@ public class UserRepository {
         }
 
         Query query = em.createNativeQuery(
-                        "select UE.id, " +
-                                "         UE.USERNAME," +
-                                "         UE.FIRST_NAME, " +
-                                "         UE.LAST_NAME, " +
-                                "         UE.EMAIL, " +
-                                "         UA.VALUE as PHONE, " +
-                                "         UE.ENABLED " +
-                                "from USER_ENTITY UE \n" +
-                                "left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone' \n" +
-                                "WHERE UE.REALM_ID = :realm \n" +
-                                "  and (:search is null or :search = '' or MATCH(UE.EMAIL, UE.FIRST_NAME, UE.USERNAME) AGAINST(:search IN BOOLEAN MODE)) \n" +
-                                "  and (:searchUser is null or :searchUser = '' or UE.id = :searchUser) \n" +
-                                "  and (:searchToms is null or :searchToms = '' or exists(" +
-                                "    select UP.id \n" +
-                                "    from USER_POST UP \n" +
-                                "    where UP.USER_ID = UE.ID and UP.TOMS_ID = :searchToms) \n" +
-                                "  ) \n" +
-                                getSort(sortField, sortAsc)
-                        , USER_SUMMARY_MAPPER_NAME)
+                "select UE.id, " +
+                        "         UE.USERNAME," +
+                        "         UE.FIRST_NAME, " +
+                        "         UE.LAST_NAME, " +
+                        "         UE.EMAIL, " +
+                        "         UA.VALUE as PHONE, " +
+                        "         UE.ENABLED " +
+                        "from USER_ENTITY UE \n" +
+                        "left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone' \n" +
+                        "WHERE UE.REALM_ID = :realm \n" +
+                        "  and (:search is null or :search = '' or MATCH(UE.EMAIL, UE.FIRST_NAME, UE.USERNAME) AGAINST(:search IN BOOLEAN MODE)) \n" +
+                        "  and (:searchUser is null or :searchUser = '' or UE.id = :searchUser) \n" +
+                        "  and (:searchToms is null or :searchToms = '' or exists(" +
+                        "    select UP.id \n" +
+                        "    from USER_POST UP \n" +
+                        "    where UP.USER_ID = UE.ID and UP.TOMS_ID = :searchToms) \n" +
+                        "  ) \n" +
+                        getSort(sortField, sortAsc)
+                , USER_SUMMARY_MAPPER_NAME)
                 .setParameter("search", fullTextSearch)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
@@ -368,20 +368,20 @@ public class UserRepository {
             searchPhone = searchPhone + "*";
 
         Query query = em.createNativeQuery(
-                        "select UE.id, " +
-                                "        UE.USERNAME," +
-                                "        UE.FIRST_NAME, " +
-                                "        UE.LAST_NAME, " +
-                                "        UE.EMAIL, " +
-                                "        UA.VALUE as PHONE, " +
-                                "        UE.ENABLED " +
-                                "from USER_ENTITY UE \n" +
-                                "join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID \n" +
-                                "where UE.REALM_ID = :realm \n" +
-                                "  and UA.NAME = 'phone' \n" +
-                                "  and MATCH(UA.VALUE) AGAINST(:searchPhone IN BOOLEAN MODE) \n" +
-                                getSort(sortField, sortAsc)
-                        , USER_SUMMARY_MAPPER_NAME)
+                "select UE.id, " +
+                        "        UE.USERNAME," +
+                        "        UE.FIRST_NAME, " +
+                        "        UE.LAST_NAME, " +
+                        "        UE.EMAIL, " +
+                        "        UA.VALUE as PHONE, " +
+                        "        UE.ENABLED " +
+                        "from USER_ENTITY UE \n" +
+                        "join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID \n" +
+                        "where UE.REALM_ID = :realm \n" +
+                        "  and UA.NAME = 'phone' \n" +
+                        "  and MATCH(UA.VALUE) AGAINST(:searchPhone IN BOOLEAN MODE) \n" +
+                        getSort(sortField, sortAsc)
+                , USER_SUMMARY_MAPPER_NAME)
                 .setParameter("searchPhone", searchPhone)
                 .setParameter("realm", realm);
 

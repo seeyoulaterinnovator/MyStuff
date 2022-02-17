@@ -260,7 +260,7 @@ public class ImportService {
     }
 
     private void checkOnExistUserByPhone(String realmId, String phone) throws FoundException {
-        UserEntity user = userRepository.getFirstUserByPhoneNumber(realmId,phone,null);
+        UserEntity user = userRepository.getFirstUserByPhoneNumber(realmId, phone, null);
 
         if (user != null) {
             log.error("User exists with same phone {}", phone);
