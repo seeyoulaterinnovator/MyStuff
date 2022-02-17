@@ -9,7 +9,9 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.UserSessionModel;
+import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.managers.AuthenticationManager;
+import org.keycloak.services.managers.AuthenticationSessionManager;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.auth.UserRole;
 import ru.alamics.sso.keycloak.facade.CachedUserPostFacade;
@@ -122,9 +124,12 @@ public class AttributesForm implements Authenticator {
         String clientId = session.getContext().getClient().getClientId();
         if (userSession != null && iframe != null && DMP_ID.equals(clientId)) {
             context.challenge(context.form().createForm("success-login.ftl"));
-            return;
+            UserModel user = context.getUser();
+            UserSessionModel newAuthSession = session.sessions().createUserSession(realm, user, user.getUsername(), clientConnection.getRemoteAddr(), "code", false, null, null);
+            AuthenticationManager.createLoginCookie(session, realm, user, newAuthSession, context.getUriInfo(), clientConnection);
+        } else {
+            context.success();
         }
-        context.success();
     }
 
     @Override
