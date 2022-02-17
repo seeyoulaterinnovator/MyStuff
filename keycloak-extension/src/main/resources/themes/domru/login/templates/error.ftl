@@ -35,8 +35,7 @@
 
 <#macro code40402 backHref backMessage="Попробовать снова" >
     <@defaultErrorTemplate heading="Что-то пошло не так" backHref=backHref img ="" backMessage=backMessage >
-        Ссылка устарела. Для совершения дальнейших действий необходимо авторизоваться или
-        воспользоваться функцией 'Забыли пароль?'
+        Ссылка устарела. Необходимо обратиться к специалисту технической поддержки для получения новой ссылки.
     </@defaultErrorTemplate>
 </#macro>
 
