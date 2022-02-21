@@ -90,6 +90,9 @@ public class CustomUserResource {
         if (request.getPhone() == null || request.getPhone().isEmpty()) {
             return ErrorResponse.error("Phone is required attribute.", Response.Status.BAD_REQUEST);
         }
+        if (request.getEmail() == null || request.getEmail().isEmpty()) {
+            return ErrorResponse.error("Поле Email должно быть заполнено", Response.Status.BAD_REQUEST);
+        }
         if (validateEmail(request.getEmail())) {
             return ErrorResponse.error("Поле Email невалидно", Response.Status.BAD_REQUEST);
         }
