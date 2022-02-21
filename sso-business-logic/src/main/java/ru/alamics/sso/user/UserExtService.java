@@ -174,7 +174,7 @@ public class UserExtService {
         }
 
 
-        if (bss) {
+        if (request.getTomsId() != null && !request.getTomsId().isEmpty()) {
             addUserPostLPR(user, request);
         }
 

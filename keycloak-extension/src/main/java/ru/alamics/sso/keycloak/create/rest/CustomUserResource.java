@@ -59,6 +59,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static org.keycloak.models.ImpersonationSessionNote.IMPERSONATOR_ID;
 import static org.keycloak.models.ImpersonationSessionNote.IMPERSONATOR_USERNAME;
@@ -89,6 +90,9 @@ public class CustomUserResource {
         if (request.getPhone() == null || request.getPhone().isEmpty()) {
             return ErrorResponse.error("Phone is required attribute.", Response.Status.BAD_REQUEST);
         }
+        if (validateEmail(request.getEmail())) {
+            return ErrorResponse.error("Поле Email невалидно", Response.Status.BAD_REQUEST);
+        }
         return getUserResponse(request, false);
     }
 
@@ -106,8 +110,18 @@ public class CustomUserResource {
         if (request.getName() == null || request.getName().isEmpty()) {
             return ErrorResponse.error("Поле name должно быть заполнено", Response.Status.BAD_REQUEST);
         }
+        if (request.getEmail() == null || request.getEmail().isEmpty()) {
+            return ErrorResponse.error("Поле Email должно быть заполнено", Response.Status.BAD_REQUEST);
+        }
+        if (validateEmail(request.getEmail())) {
+            return ErrorResponse.error("Поле Email невалидно", Response.Status.BAD_REQUEST);
+        }
 
         return getUserResponse(request, true);
+    }
+
+    private boolean validateEmail(String email) {
+        return !Pattern.matches("^([\\w-+]+(?:\\.[\\w-+]+)*)@((?:[\\w-]+\\.)*\\w[\\w-]{0,66})\\.([a-z]{2,6}(?:\\.[a-z]{2})?)", email);
     }
 
     private Response getUserResponse(UserRequest request, boolean bss) {
