@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService {
         final List<ImportUsersDataEntity> importUsersData = importReportService.findImportUsersDataByImportId(importId);
         for (ImportUsersDataEntity importData : importUsersData) {
             String id = importData.getUserId();
-            if (id == null || id.isEmpty()) {
+            if (id == null || id.isEmpty() || !importData.isCreated()) {
                 continue;
             }
             UserModel user = session.users().getUserById(id, realm);

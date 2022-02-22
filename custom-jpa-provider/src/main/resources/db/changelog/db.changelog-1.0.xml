@@ -1807,6 +1807,15 @@
         </sql>
     </changeSet>
 
+    <changeSet id="101" author="petrov-ny">
+        <sql>
+            <![CDATA[
+                INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('e9d2d0d0-9302-11ec-b909-0242ac120002', 'emailAccountDataBodyHtml', '<p class="content__p">Для Вас создана учетная запись для входа в Личный кабинет «С-Телеком Бизнес».</p><dl class="content__dl"><dt class="content__dl-dt">Логин:</dt><dd class="content__dl-dd"><b>{0}</b></dt></dl><p>Перейдите по ссылке и установите пароль.</p><p><a class="content__a" href="{3}">Установить пароль</a></p>', null, 'S-TELECOM', 'Сообщение о создании УЗ', null, 'MESSAGE');
+                INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('1988e36e-9303-11ec-b909-0242ac120002', 'emailAccountCreateBodyHtml', '<p class="content__p">Для Вас создана учетная запись для входа в Личный кабинет «С-Телеком Бизнес».</p><dl class="content__dl"><dt class="content__dl-dt">Логин:</dt><dd class="content__dl-dd"><b>{0}</b></dd></dl>', null, 'S-TELECOM', 'Сообщение о создании УЗ', null, 'MESSAGE');
+            ]]>
+        </sql>
+    </changeSet>
+
 
 
 </databaseChangeLog>

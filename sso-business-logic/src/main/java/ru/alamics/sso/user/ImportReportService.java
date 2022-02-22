@@ -82,6 +82,8 @@ public class ImportReportService {
         entity.setErrors(data.getErrors());
         entity.setStatus(data.getStatus());
 
+        importUsersReportRepository.updateImportUsersData(entity);
+
     }
 
     public String saveImportUsersReport(ImportUsersReportModel report) {

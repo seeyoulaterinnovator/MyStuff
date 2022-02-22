@@ -5,6 +5,6 @@
     <#include 'styles/content-style--default.html' >
     <title>${kcSanitize(msg("emailAccountDataSubject"))}</title>
   <#elseif section = "body">
-    ${kcSanitize(msg("emailAccountDataBodyHtml", userName, userFirstName, userLastName, accountLink))?no_esc}
+    ${kcSanitize(msg(emailAccountDataBodyHtml, userName, userFirstName, userLastName, accountLink))?no_esc}
   </#if>
 </@template.layout>

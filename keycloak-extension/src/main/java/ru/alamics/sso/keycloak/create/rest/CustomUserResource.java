@@ -41,6 +41,7 @@ import ru.alamics.sso.user.filetype.XlsxImpl;
 import ru.alamics.sso.user.model.DownloadUserRequest;
 import ru.alamics.sso.user.model.UserParameter;
 import ru.alamics.sso.user.model.UserRequest;
+import ru.alamics.sso.util.Util;
 import ru.alamics.sso.util.validator.NotValidException;
 
 import javax.activation.UnsupportedDataTypeException;
@@ -59,6 +60,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static org.keycloak.models.ImpersonationSessionNote.IMPERSONATOR_ID;
 import static org.keycloak.models.ImpersonationSessionNote.IMPERSONATOR_USERNAME;
@@ -86,8 +88,14 @@ public class CustomUserResource {
     @NoCache
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUser(final UserRequest request, final HttpHeaders headers) {
-        if (request.getPhone() == null || request.getPhone().isEmpty()) {
-            return ErrorResponse.error("Phone is required attribute.", Response.Status.BAD_REQUEST);
+        if (Util.isEmpty(request.getPhone())) {
+            return ErrorResponse.error("Поле Phone должно быть заполнено", Response.Status.BAD_REQUEST);
+        }
+        if (Util.isEmpty(request.getEmail())) {
+            return ErrorResponse.error("Поле Email должно быть заполнено", Response.Status.BAD_REQUEST);
+        }
+        if (!validateEmail(request.getEmail())) {
+            return ErrorResponse.error("Поле Email невалидно", Response.Status.BAD_REQUEST);
         }
         return getUserResponse(request, false);
     }
@@ -97,17 +105,27 @@ public class CustomUserResource {
     @NoCache
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUserBss(final UserRequest request, final HttpHeaders headers) {
-        if (request.getPhone() == null || request.getPhone().isEmpty()) {
-            return ErrorResponse.error("Поле Телефон должно быть заполнено", Response.Status.BAD_REQUEST);
+        if (Util.isEmpty(request.getPhone())) {
+            return ErrorResponse.error("Поле Phone должно быть заполнено", Response.Status.BAD_REQUEST);
         }
-        if (request.getTomsId() == null || request.getTomsId().isEmpty()) {
+        if (Util.isEmpty(request.getTomsId())) {
             return ErrorResponse.error("Поле TomsId должно быть заполнено", Response.Status.BAD_REQUEST);
         }
-        if (request.getName() == null || request.getName().isEmpty()) {
+        if (Util.isEmpty(request.getName())) {
             return ErrorResponse.error("Поле name должно быть заполнено", Response.Status.BAD_REQUEST);
+        }
+        if (Util.isEmpty(request.getEmail())) {
+            return ErrorResponse.error("Поле Email должно быть заполнено", Response.Status.BAD_REQUEST);
+        }
+        if (!validateEmail(request.getEmail())) {
+            return ErrorResponse.error("Поле Email невалидно", Response.Status.BAD_REQUEST);
         }
 
         return getUserResponse(request, true);
+    }
+
+    private boolean validateEmail(String email) {
+        return Pattern.matches(Util.REGEX_EMAIL, email);
     }
 
     private Response getUserResponse(UserRequest request, boolean bss) {
