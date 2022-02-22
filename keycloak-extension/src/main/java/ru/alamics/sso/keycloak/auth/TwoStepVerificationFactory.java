@@ -56,7 +56,8 @@ public class TwoStepVerificationFactory extends AbstractAuthenticatorFactory imp
         String type = config.get(TWO_STEP_VERIFICATION_TYPES);
         AuthType authType = AuthType.getByString(type);
 
-        AuthType.REQUIRED_ACTIONS.forEach(x -> context.getUser().removeRequiredAction(x));
+//        Залочили по скольку удаляет обязательные действия пользователя кроме конфига Two Steep
+//        AuthType.REQUIRED_ACTIONS.forEach(x -> context.getUser().removeRequiredAction(x));
 
         String disable = context.getUser().getFirstAttribute(UserConstants.DISABLE_TWO_STEP_AUTH);
         if (authType != null && (disable == null || disable.isEmpty())) {
