@@ -73,11 +73,11 @@ public class UserServiceImpl implements UserService {
     public void activateImportUsersFromReport(String importId) {
         final List<ImportUsersDataEntity> importUsersData = importReportService.findImportUsersDataByImportId(importId);
         for (ImportUsersDataEntity importData : importUsersData) {
-            String email = importData.getEmail();
-            if (email == null || email.isEmpty()) {
+            String id = importData.getUserId();
+            if (id == null || id.isEmpty() || !importData.isCreated()) {
                 continue;
             }
-            UserModel user = session.users().getUserByUsername(email.trim(), realm);
+            UserModel user = session.users().getUserById(id, realm);
             if (user == null || user.isEnabled()) {
                 continue;
             }

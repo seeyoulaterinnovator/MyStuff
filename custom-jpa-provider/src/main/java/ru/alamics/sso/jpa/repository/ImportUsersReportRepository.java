@@ -66,6 +66,20 @@ public class ImportUsersReportRepository {
         em.flush();
     }
 
+    public void updateImportUsersData(ImportUsersDataEntity entity) {
+
+        em.createQuery("update ImportUsersDataEntity data " +
+                "set data.status = :status, data.isCreated = :isCreated, data.userId = :userId where data.id = :id")
+                .setParameter("id", entity.getId())
+                .setParameter("status", entity.getStatus())
+                .setParameter("isCreated", entity.isCreated())
+                .setParameter("userId", entity.getUserId())
+                .executeUpdate();
+
+        refreshEntityById(entity.getId(), ImportUsersDataEntity.class);
+
+    }
+
     public void setReportStatus(String id, ImportUsersReportStatus status) {
 
         em.createQuery("update ImportUsersReportEntity rep set rep.status = :status where rep.id = :id")

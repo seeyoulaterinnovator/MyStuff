@@ -34,6 +34,8 @@ public class Util {
     public static String TRUE_STR = "1";
     public static String FALSE_STR = "0";
 
+    public static final String REGEX_EMAIL = "^[\\w-+.]+@\\w[\\w-.]{0,66}\\.[a-z]{2,16}$";
+
     public static boolean isPasswordGrandType(KeycloakSession session) {
         HttpRequest contextObject = session.getContext().getContextObject(HttpRequest.class);
         MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
