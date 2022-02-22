@@ -89,12 +89,12 @@ public class CustomUserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUser(final UserRequest request, final HttpHeaders headers) {
         if (Util.isEmpty(request.getPhone())) {
-            return ErrorResponse.error("Phone is required attribute.", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле Phone должно быть заполнено", Response.Status.BAD_REQUEST);
         }
         if (Util.isEmpty(request.getEmail())) {
             return ErrorResponse.error("Поле Email должно быть заполнено", Response.Status.BAD_REQUEST);
         }
-        if (validateEmail(request.getEmail())) {
+        if (!validateEmail(request.getEmail())) {
             return ErrorResponse.error("Поле Email невалидно", Response.Status.BAD_REQUEST);
         }
         return getUserResponse(request, false);
@@ -106,7 +106,7 @@ public class CustomUserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUserBss(final UserRequest request, final HttpHeaders headers) {
         if (Util.isEmpty(request.getPhone())) {
-            return ErrorResponse.error("Поле Телефон должно быть заполнено", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле Phone должно быть заполнено", Response.Status.BAD_REQUEST);
         }
         if (Util.isEmpty(request.getTomsId())) {
             return ErrorResponse.error("Поле TomsId должно быть заполнено", Response.Status.BAD_REQUEST);
@@ -117,7 +117,7 @@ public class CustomUserResource {
         if (Util.isEmpty(request.getEmail())) {
             return ErrorResponse.error("Поле Email должно быть заполнено", Response.Status.BAD_REQUEST);
         }
-        if (validateEmail(request.getEmail())) {
+        if (!validateEmail(request.getEmail())) {
             return ErrorResponse.error("Поле Email невалидно", Response.Status.BAD_REQUEST);
         }
 
@@ -125,7 +125,7 @@ public class CustomUserResource {
     }
 
     private boolean validateEmail(String email) {
-        return !Pattern.matches(Util.REGEX_EMAIL, email);
+        return Pattern.matches(Util.REGEX_EMAIL, email);
     }
 
     private Response getUserResponse(UserRequest request, boolean bss) {
