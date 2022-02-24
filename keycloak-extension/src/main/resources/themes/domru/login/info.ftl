@@ -37,7 +37,11 @@
                         }
                     </script>
                 <#elseif client.baseUrl??>
-                    <p><a href="${client.baseUrl}">${kcSanitize(msg(backToApplication))?no_esc}</a></p>
+                    <#if !hideRegistration!false>
+                        <p>Для окончания авторизации перезагрузите страницу</p>
+                    <#else>
+                        <p><a href="${client.baseUrl}">${kcSanitize(msg(backToApplication))?no_esc}</a></p>
+                    </#if>
                 </#if>
             </#if>
         </div>

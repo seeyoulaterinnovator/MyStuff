@@ -180,6 +180,13 @@
             }, 150);
         }
     </script>
+    <script>
+        window.addEventListener('click', function (e) {
+            if (e.target.tagName.toLowerCase() == "button" || e.target.tagName.toLowerCase() == "a"){
+                e.target.style.pointerEvents = 'none';
+            }
+        })
+    </script>
     <!--<script src="${url.resourcesPath}/build/iframeResizer.contentWindow.min.js" async></script> -->
     </body>
     </html>
