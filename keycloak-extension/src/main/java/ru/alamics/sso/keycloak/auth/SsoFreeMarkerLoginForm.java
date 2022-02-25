@@ -59,7 +59,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
         attributes.put("redirectUrl", getRedirectUrl());
         attributes.put("hideRegistration", isHideRegistration());
-        attributes.put("iframe", isFrame());
+        attributes.put("iframe", Util.isFrame(session));
 
         settingsService = Lookup.lookup(SettingsService.class);
         clientService =  Lookup.lookup(ClientService.class);
@@ -207,13 +207,6 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         final boolean isIframe = Util.isFrame(session);
 
         return registrationOnlyInFrame && !isIframe;
-    }
-
-    private boolean isFrame() {
-
-        final boolean isIframe = Util.isFrame(session);
-
-        return isIframe;
     }
 
     private String getRedirectUrl() {

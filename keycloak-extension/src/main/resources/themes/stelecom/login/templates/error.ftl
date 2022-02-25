@@ -25,14 +25,14 @@
   </@defaultErrorTemplate>
 </#macro>
 
-<#macro code40401 backHref backMessage="Попробовать снова" >
+<#macro code404_auth_or_reset backHref backMessage="Попробовать снова" >
   <@defaultErrorTemplate heading="Что-то пошло не так" backHref=backHref img ="" backMessage=backMessage >
     Ссылка устарела. Для совершения дальнейших действий необходимо авторизоваться или
     воспользоваться функцией 'Забыли пароль?'
   </@defaultErrorTemplate>
 </#macro>
 
-<#macro code40402 backHref backMessage="Попробовать снова" >
+<#macro code404_auth backHref backMessage="Попробовать снова" >
   <@defaultErrorTemplate heading="Что-то пошло не так" backHref=backHref img ="" backMessage=backMessage >
     Ссылка устарела. Необходимо обратиться к специалисту технической поддержки для получения новой ссылки.
   </@defaultErrorTemplate>
