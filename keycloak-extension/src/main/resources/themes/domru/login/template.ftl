@@ -182,7 +182,7 @@
     </script>
     <script>
         window.addEventListener('click', function (e) {
-            if (!(e.target.classList.contains("repeat"))){
+            if (!(e.target.classList.contains("allowDoubleClick"))){
                 if (e.target.tagName.toLowerCase() == "button" || e.target.tagName.toLowerCase() == "a"){
                     e.target.style.pointerEvents = 'none';
                 }

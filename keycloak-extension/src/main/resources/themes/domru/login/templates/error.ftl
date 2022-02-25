@@ -32,7 +32,7 @@
     </@defaultErrorTemplate>
 </#macro>
 
-<#macro code404_auth backHref backMessage="Попробовать снова" >
+<#macro code404_tech_support backHref backMessage="Попробовать снова" >
     <@defaultErrorTemplate heading="Что-то пошло не так" backHref=backHref img ="" backMessage=backMessage >
         Ссылка устарела. Необходимо обратиться к специалисту технической поддержки для получения новой ссылки.
     </@defaultErrorTemplate>

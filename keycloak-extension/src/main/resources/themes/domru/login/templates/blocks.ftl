@@ -20,10 +20,10 @@
         <@components.field class="mb-3 sm:mb-4" fieldName="${firstFieldName}" label="${msg('password')}" placeholder="${msg(passwordPlaceholder)}" type="password" required=true value="" />
       </div>
       <div class="mx-auto generated-password btn-group flex">
-        <button id="refresh-password-button" class="w-12 h-12 focus:outline-none flex-child repeat" type="button">
+        <button id="refresh-password-button" class="w-12 h-12 focus:outline-none flex-child allowDoubleClick" type="button">
           <@svg.reloadButton color="accentBlue"></@svg.reloadButton>
         </button>
-        <button id="generate-password-button" type="button" class="generate-btn focus:outline-none pass--hidden-small flex-child repeat">
+        <button id="generate-password-button" type="button" class="generate-btn focus:outline-none pass--hidden-small flex-child allowDoubleClick">
           <span class="reference reference-generate-password border-accentBlue text-accentBlue">ГЕНЕРИРОВАТЬ</span>
         </button>
       </div>
