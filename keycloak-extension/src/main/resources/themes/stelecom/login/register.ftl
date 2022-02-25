@@ -43,7 +43,7 @@
                   <div class="flex flex-basis-auto items-center">
                     <button id="submit" class="btn btn-main w-100" type="submit">${msg('doRegister')}</button>
                   </div>
-                  <span class="flex-basis-auto ml-0 mb-6 mt-4 text-xs sm:ml-5 sm:mb-0 agreement"><span class="reference-outer-text">Нажимая кнопку, вы соглашаетесь <br></span><a class="reference reference_hoverable" href="https://lkb2b.stelecom.ru/policy.pdf" target="_blink">с правилами обработки перс. данных</a></span>
+                  <span class="flex-basis-auto ml-0 mb-6 mt-4 text-xs sm:ml-5 sm:mb-0 agreement"><span class="reference-outer-text">Нажимая кнопку, вы соглашаетесь <br></span><a class="reference reference_hoverable" href="https://lkb2b.stelecom.ru/policy1.pdf" target="_blink">с правилами обработки перс. данных</a></span>
                 </div>
         </form>
         <#if realm.password && social.providers??>
