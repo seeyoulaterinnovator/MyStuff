@@ -37,7 +37,7 @@
                         }
                     </script>
                 <#elseif client.baseUrl??>
-                    <#if !hideRegistration!false>
+                    <#if iframe = true>
                         <p>Для окончания авторизации перезагрузите страницу</p>
                     <#else>
                         <p><a href="${client.baseUrl}">${kcSanitize(msg(backToApplication))?no_esc}</a></p>
