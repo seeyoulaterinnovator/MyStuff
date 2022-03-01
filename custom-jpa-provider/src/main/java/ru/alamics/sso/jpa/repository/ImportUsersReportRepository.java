@@ -69,10 +69,11 @@ public class ImportUsersReportRepository {
     public void updateImportUsersData(ImportUsersDataEntity entity) {
 
         em.createQuery("update ImportUsersDataEntity data " +
-                "set data.status = :status, data.isCreated = :isCreated, data.userId = :userId where data.id = :id")
+                "set data.status = :status, data.isCreated = :isCreated, data.userId = :userId, data.errors = : errors where data.id = :id")
                 .setParameter("id", entity.getId())
                 .setParameter("status", entity.getStatus())
                 .setParameter("isCreated", entity.isCreated())
+                .setParameter("errors", entity.getErrors())
                 .setParameter("userId", entity.getUserId())
                 .executeUpdate();
 
