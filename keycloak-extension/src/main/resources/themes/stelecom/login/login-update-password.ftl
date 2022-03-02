@@ -14,7 +14,7 @@
                     <button id="submit" class="btn btn-main w-full" type="submit">Сменить пароль</button>
                 </div>
                 <div class="flex-basis-auto w-full ml-0 text-sm sm:ml-6">
-                    <a id="cancel" href="${redirectUrl}" class="btn text-extra w-full">${msg("doCancel")}</a>
+                    <a id="cancel" href="${url.loginUrl}" class="btn text-extra w-full">${msg("doCancel")}</a>
                 </div>
             </div>
         </form>

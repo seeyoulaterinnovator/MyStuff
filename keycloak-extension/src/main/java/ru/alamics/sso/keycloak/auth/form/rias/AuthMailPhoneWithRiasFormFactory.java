@@ -5,7 +5,6 @@ import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.DisplayTypeAuthenticatorFactory;
 import org.keycloak.authentication.authenticators.console.ConsoleUsernamePasswordAuthenticator;
-import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserCredentialModel;
@@ -13,8 +12,6 @@ import ru.alamics.sso.keycloak.auth.AbstractAuthenticatorFactory;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.rias.RiasService;
 import ru.alamics.sso.registration.service.UserFindService;
-
-import javax.persistence.EntityManager;
 
 @Slf4j
 public class AuthMailPhoneWithRiasFormFactory extends AbstractAuthenticatorFactory implements DisplayTypeAuthenticatorFactory {
@@ -30,8 +27,6 @@ public class AuthMailPhoneWithRiasFormFactory extends AbstractAuthenticatorFacto
 
     @Override
     public Authenticator create(KeycloakSession session) {
-
-        EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
 
         log.info("Get RiasAuthProvider");
         RiasService riasService = Lookup.lookup(RiasService.class);

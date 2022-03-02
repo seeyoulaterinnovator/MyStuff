@@ -9,9 +9,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.UserSessionModel;
-import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.managers.AuthenticationManager;
-import org.keycloak.services.managers.AuthenticationSessionManager;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.auth.UserRole;
 import ru.alamics.sso.keycloak.facade.CachedUserPostFacade;
@@ -39,11 +37,10 @@ public class AttributesForm implements Authenticator {
     private static final String FORM = "attributes.ftl";
     private final UserRole roleService;
     private final CachedUserPostFacade cachedUserPostFacade;
-
     private final SettingsService settingsService;
 
-    public AttributesForm(UserRole roleService) {
-        this.roleService = roleService;
+    public AttributesForm() {
+        this.roleService = Lookup.lookup(UserRole.class);
         this.cachedUserPostFacade = Lookup.lookup(CachedUserPostFacade.class);
         this.settingsService = Lookup.lookup(SettingsService.class);
     }
@@ -63,10 +60,9 @@ public class AttributesForm implements Authenticator {
         boolean isAuth = Util.TRUE_STR.equals(authSession.getAuthNote(AUTH_FORM_SUCCESS));//it`s magick
 
         if (frame != null || isAuth || redirectIframe != null) {
-            UserModel user = context.getUser();
-            List<UserPostResponse> attributes = null;
+            List<UserPostResponse> attributes;
             try {
-                attributes = cachedUserPostFacade.findByUserId(user.getId());
+                attributes = cachedUserPostFacade.findByUserId(context.getUser().getId());
             } catch (NotFoundException e) {
                 attributes = Collections.emptyList();
             }
@@ -80,8 +76,7 @@ public class AttributesForm implements Authenticator {
             if (attributes.isEmpty()) {
                 context.success();
             } else {
-                Response challenge = createForm(context, attributes);
-                context.challenge(challenge);
+                context.challenge(createForm(context, attributes));
             }
         } else {
             context.success();

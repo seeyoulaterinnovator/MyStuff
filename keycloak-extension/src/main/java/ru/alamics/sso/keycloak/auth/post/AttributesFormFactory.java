@@ -4,9 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
-import ru.alamics.sso.auth.UserRole;
 import ru.alamics.sso.keycloak.auth.AbstractAuthenticatorFactory;
-import ru.alamics.sso.keycloak.lookup.Lookup;
 
 
 @Slf4j
@@ -37,7 +35,7 @@ public class AttributesFormFactory extends AbstractAuthenticatorFactory {
 
     @Override
     public Authenticator create(KeycloakSession session) {
-        return new AttributesForm(Lookup.lookup(UserRole.class));
+        return new AttributesForm();
     }
 
     @Override

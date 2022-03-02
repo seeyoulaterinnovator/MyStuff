@@ -1,7 +1,9 @@
 package ru.alamics.sso.keycloak.auth.link.token;
 
+import org.keycloak.TokenVerifier;
 import org.keycloak.authentication.actiontoken.AbstractActionTokenHander;
 import org.keycloak.authentication.actiontoken.ActionTokenContext;
+import org.keycloak.authentication.actiontoken.TokenUtils;
 import org.keycloak.authentication.actiontoken.verifyemail.VerifyEmailActionToken;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
@@ -19,6 +21,7 @@ import org.keycloak.sessions.AuthenticationSessionModel;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.util.Objects;
 
 public class CustomVerifyEmailActionTokenHandler extends AbstractActionTokenHander<VerifyEmailActionToken> {
 
@@ -33,10 +36,19 @@ public class CustomVerifyEmailActionTokenHandler extends AbstractActionTokenHand
     }
 
     @Override
+    public TokenVerifier.Predicate<? super VerifyEmailActionToken>[] getVerifiers(ActionTokenContext<VerifyEmailActionToken> tokenContext) {
+        return TokenUtils.predicates(
+                TokenUtils.checkThat(
+                        t -> Objects.equals(t.getEmail(), tokenContext.getAuthenticationSession().getAuthenticatedUser().getEmail()),
+                        Errors.INVALID_EMAIL, getDefaultErrorMessage()
+                )
+        );
+    }
+
+    @Override
     public Response handleToken(VerifyEmailActionToken token, ActionTokenContext<VerifyEmailActionToken> tokenContext) {
         UserModel user = tokenContext.getAuthenticationSession().getAuthenticatedUser();
         EventBuilder event = tokenContext.getEvent();
-
 
         event.event(EventType.VERIFY_EMAIL).detail(Details.EMAIL, user.getEmail());
 

@@ -55,16 +55,13 @@ public abstract class AbstractAuthMailPhoneForm extends AbstractUsernameFormAuth
         String loginHint = context.getAuthenticationSession().getClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM);
         String rememberMeUsername = AuthenticationManager.getRememberMeUsername(context.getRealm(), context.getHttpRequest().getHttpHeaders());
 
-        if (loginHint != null || rememberMeUsername != null) {
-            if (loginHint != null) {
-                formData.add(AuthenticationManager.FORM_USERNAME, loginHint);
-            } else {
-                formData.add(AuthenticationManager.FORM_USERNAME, rememberMeUsername);
-                formData.add("rememberMe", "on");
-            }
+        if (loginHint != null) {
+            formData.add(AuthenticationManager.FORM_USERNAME, loginHint);
+        } else if (rememberMeUsername != null) {
+            formData.add(AuthenticationManager.FORM_USERNAME, rememberMeUsername);
+            formData.add("rememberMe", "on");
         }
-        Response challengeResponse = challenge(context, formData);
-        context.challenge(challengeResponse);
+        context.challenge(challenge(context, formData));
     }
 
     @Override
