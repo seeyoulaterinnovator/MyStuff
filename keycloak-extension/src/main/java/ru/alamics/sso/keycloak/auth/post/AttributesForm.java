@@ -9,9 +9,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.UserSessionModel;
-import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.managers.AuthenticationManager;
-import org.keycloak.services.managers.AuthenticationSessionManager;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.auth.UserRole;
 import ru.alamics.sso.keycloak.facade.CachedUserPostFacade;
@@ -32,6 +30,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.UserConstants.*;
+import static ru.alamics.sso.util.Util.CLIENT_B2B;
 
 @Slf4j
 public class AttributesForm implements Authenticator {
@@ -104,7 +103,8 @@ public class AttributesForm implements Authenticator {
         form.setAttribute("phoneConst", settingsService.getSettingsStringValue(SettingConstants.PHONE_CONST, context.getRealm().getId()));
         form.setAttribute("phoneConstLink", settingsService.getSettingsStringValue(SettingConstants.PHONE_CONST_LINK, context.getRealm().getId()));
         form.setAttribute("homePage", settingsService.getSettingsStringValue(SettingConstants.HOME_PAGE, context.getRealm().getId()));
-
+        form.setAttribute("actionIsEmpty", context.getUser().getRequiredActions() == null);
+        form.setAttribute("clientIsB2B", CLIENT_B2B.equals(context.getAuthenticationSession().getClient().getClientId()));
         return form.createForm(FORM);
     }
 

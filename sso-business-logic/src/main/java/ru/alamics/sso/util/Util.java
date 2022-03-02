@@ -33,6 +33,7 @@ public class Util {
 
     public static String TRUE_STR = "1";
     public static String FALSE_STR = "0";
+    public final static String CLIENT_B2B = "b2b";
 
     public static final String REGEX_EMAIL = "^[\\w-+.]+@\\w[\\w-.]{0,66}\\.[a-z]{2,16}$";
 
