@@ -27,7 +27,11 @@
             <#if skipLink??>
             <#else>
                 <#if pageRedirectUri??>
-                    <p><a href="${pageRedirectUri}">${kcSanitize(msg(backToApplication))?no_esc}</a></p>
+                    <#if iframe = true>
+                        <p>Для окончания авторизации перезагрузите страницу</p>
+                    <#else>
+                        <p><a href="${pageRedirectUri}">${kcSanitize(msg(backToApplication))?no_esc}</a></p>
+                    </#if>
                 <#elseif actionUri??>
                     <p><a href="${actionUri}" id="action">${kcSanitize(msg(proceedWithAction))?no_esc}</a></p>
                     <script>
