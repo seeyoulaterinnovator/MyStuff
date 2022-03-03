@@ -248,8 +248,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     @Override
     public LoginFormsProvider setActionUri(URI actionUri) {
         URI uri = addQueryParams(actionUri);
-        LoginFormsProvider ret = super.setActionUri(uri);
-        return ret;
+        return super.setActionUri(uri);
     }
 
     private Response createRestResponse() {
@@ -297,20 +296,23 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
     private URI addQueryParams(URI src) {
         UriBuilder builder = UriBuilder.fromUri(src);
-        builder = addQueryParamToBuilder(builder);
-        return builder.build();
+        return addQueryParamToBuilder(builder).build();
     }
 
     private UriBuilder addQueryParamToBuilder(UriBuilder builder) {
         MultivaluedMap<String, String> queryParameters = this.session.getContext().getUri().getQueryParameters();
         if (queryParameters != null) {
             queryParameters.forEach((k, v) -> {
-                if (k.equals(HIDDEN_HEADER)) {
-                    builder.queryParam(HIDDEN_HEADER, v.get(0));
-                } else if (k.equals(I_FRAME)) {
-                    builder.queryParam(I_FRAME, v.get(0));
-                } else if (k.equals(CITY)) {
-                    builder.queryParam(CITY, v.get(0));
+                switch (k) {
+                    case HIDDEN_HEADER:
+                        builder.queryParam(HIDDEN_HEADER, v.get(0));
+                        break;
+                    case I_FRAME:
+                        builder.queryParam(I_FRAME, v.get(0));
+                        break;
+                    case CITY:
+                        builder.queryParam(CITY, v.get(0));
+                        break;
                 }
             });
         }
