@@ -38,9 +38,8 @@ public class UserPostRepository {
         return userPost;
     }
 
-    public void remove(String id) {
-        UserPostEntity userPost = em.find(UserPostEntity.class, id);
-        em.remove(userPost);
+    public void remove(UserPostEntity post) {
+        em.remove(post);
     }
 
     public UserPostEntity getUserPost(String id) {

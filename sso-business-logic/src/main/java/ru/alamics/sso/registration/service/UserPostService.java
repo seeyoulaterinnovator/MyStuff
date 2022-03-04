@@ -98,7 +98,7 @@ public class UserPostService {
             throw new NotFoundException("Должность с таким ID не найдена");
         }
         String userId = post.getUser().getId();
-        userPostRepository.remove(id);
+        userPostRepository.remove(post);
         List<UserPostEntity> userPosts = userPostRepository.getAllUserPostByUserId(userId);
         if (userPosts != null) {
             if (userPosts.stream().noneMatch(UserPostEntity::isSelected)){
