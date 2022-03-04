@@ -96,7 +96,15 @@ public class UserPostService {
         if (userPostRepository.getUserPost(id) == null) {
             throw new NotFoundException("Должность с таким ID не найдена");
         }
+        UserPostEntity userPost = userPostRepository.getUserPost(id);
         userPostRepository.remove(id);
+        List<UserPostEntity> userPosts = userPostRepository.getAllUserPostByUserId(userPost.getUser().getId());
+        if (userPosts != null) {
+            if (userPosts.stream().noneMatch(UserPostEntity::isSelected)){
+                UserPostEntity userPostEntity = userPosts.get(0);
+                userPostEntity.setSelected(true);
+            }
+        }
     }
 
     public UserPostResponse get(String id) throws NotFoundException {
