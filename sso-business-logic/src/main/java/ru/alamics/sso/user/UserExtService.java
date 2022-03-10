@@ -224,21 +224,19 @@ public class UserExtService {
                 .success();
     }
 
-    private void addUserPostRole(UserModel userModel, UserRequest request, boolean bss) throws NotFoundException, FoundException, FoundUserPostException, NotValidException {
+    private void addUserPostRole(UserModel userModel, UserRequest request, boolean isBss) throws NotFoundException, FoundException, FoundUserPostException, NotValidException {
 
         UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, request);
 
-        if (bss || request.getRoleId() == null) {
+        if (isBss || request.getRoleId() == null) {
             userPostRequest.setRoleId(DEFAULT_ROLE_ID);
-        }
-        if (request.getRoleId() != null && !bss) {
+        } else {
             UserPostRoleEntity role = userFindService.getRoleEntity(request.getRoleId());
             if (role == null) {
                 throw new NotFoundException("Роль не найдена.");
             }
             userPostRequest.setRoleId(request.getRoleId());
         }
-
         UserPostResponse userPostResponse = userPostFacade.save(userPostRequest);
 
         userPostFacade.getUserPostService().addAllSystemRole(userPostResponse.getId());
