@@ -21,6 +21,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -53,10 +54,10 @@ public class SearchResource {
                                                 @QueryParam("searchToms") String searchToms, @QueryParam("sortField") String sortField,
                                                 @QueryParam("sortAsc") boolean sortAsc, @QueryParam("searchRealm") String searchRealm,
                                                 @DefaultValue("1") @QueryParam("pageNum") int pageNum, @DefaultValue("100") @QueryParam("pageSize") int pageSize) {
+
         session.userCache().clear();
-        if (searchRealm == null || searchRealm.isEmpty()) {
-            searchRealm = "user";
-        }
+        searchRealm = getRealm(searchRealm);
+
         return JsonResponse.success()
                 .addResult("users-info",
                         userFindService.getUsersByParametersWithoutGrouping(searchRealm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize, null))
@@ -73,9 +74,8 @@ public class SearchResource {
                                  @QueryParam("sortField") String sortField, @QueryParam("sortAsc") boolean sortAsc,
                                  @QueryParam("searchRealm") String searchRealm,
                                  @QueryParam("pageNum") int pageNum, @QueryParam("pageSize") int pageSize) {
-        if (searchRealm == null || searchRealm.isEmpty()) {
-            searchRealm = "user";
-        }
+
+        searchRealm = getRealm(searchRealm);
 
         session.userCache().clear();
 
@@ -100,6 +100,17 @@ public class SearchResource {
         log.info("getUsersInfo 4");
 
         return respB;
+    }
+
+    private String getRealm(String searchRealm) {
+        String rawPath = session.getContext().getUri().getAbsolutePath().getRawPath();
+        if (searchRealm == null || searchRealm.isEmpty()) {
+            List<String> path = Arrays.asList(rawPath.split("/"));
+            int realms = path.indexOf("realms");
+            String realm = path.get(realms + 1);
+            searchRealm = realm == null ? "user" : realm;
+        }
+        return searchRealm;
     }
 
     @GET
