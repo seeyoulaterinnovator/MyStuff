@@ -3,6 +3,7 @@ package ru.alamics.sso.registration.service;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.UserEntity;
+import ru.alamics.sso.jpa.entity.UserPostRoleEntity;
 import ru.alamics.sso.jpa.model.UserSummaryView;
 import ru.alamics.sso.jpa.repository.UserPostRepository;
 import ru.alamics.sso.jpa.repository.UserRepository;
@@ -120,5 +121,9 @@ public class UserFindService {
 
     public UserEntity getUserEntity(String userId) {
         return userRepository.findUser(userId);
+    }
+
+    public UserPostRoleEntity getRoleEntity(Long id){
+        return userPostRepository.findUserPostRoleById(id);
     }
 }
