@@ -12,9 +12,10 @@
     target: document.getElementById('cities-modal'),
   });
 
+  if (document.getElementById('cities-button')) {
   const citiesButton = new CitiesButton({
     target: document.getElementById('cities-button'),
-  });
+  });}
 
   const message = new Message({
     target: document.getElementById('message-modal'),
