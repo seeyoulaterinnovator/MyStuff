@@ -180,7 +180,7 @@ public class Util {
 
     public static String getRealm(String searchRealm, String rawPath) {
         if (isEmpty(searchRealm)) {
-            int beginIndex = rawPath.lastIndexOf("/realms/") + "/realms/".length();
+            int beginIndex = rawPath.indexOf("/realms/") + "/realms/".length();
             String realm = rawPath.substring(beginIndex, rawPath.indexOf("/", beginIndex));
             searchRealm = isEmpty(realm) ? "user" : realm;
         }
