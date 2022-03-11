@@ -15,6 +15,7 @@ import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.user.web.UserSearch;
+import ru.alamics.sso.util.Util;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -53,10 +54,12 @@ public class SearchResource {
                                                 @QueryParam("searchToms") String searchToms, @QueryParam("sortField") String sortField,
                                                 @QueryParam("sortAsc") boolean sortAsc, @QueryParam("searchRealm") String searchRealm,
                                                 @DefaultValue("1") @QueryParam("pageNum") int pageNum, @DefaultValue("100") @QueryParam("pageSize") int pageSize) {
+
         session.userCache().clear();
-        if (searchRealm == null || searchRealm.isEmpty()) {
-            searchRealm = "user";
-        }
+        String rawPath = session.getContext().getUri().getAbsolutePath().getRawPath();
+
+        searchRealm = Util.getRealm(searchRealm, rawPath);
+
         return JsonResponse.success()
                 .addResult("users-info",
                         userFindService.getUsersByParametersWithoutGrouping(searchRealm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize, null))
@@ -73,9 +76,9 @@ public class SearchResource {
                                  @QueryParam("sortField") String sortField, @QueryParam("sortAsc") boolean sortAsc,
                                  @QueryParam("searchRealm") String searchRealm,
                                  @QueryParam("pageNum") int pageNum, @QueryParam("pageSize") int pageSize) {
-        if (searchRealm == null || searchRealm.isEmpty()) {
-            searchRealm = "user";
-        }
+        String rawPath = session.getContext().getUri().getAbsolutePath().getRawPath();
+
+        searchRealm = Util.getRealm(searchRealm, rawPath);
 
         session.userCache().clear();
 
