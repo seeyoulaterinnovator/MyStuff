@@ -31,10 +31,9 @@ import static ru.alamics.sso.registration.model.UserConstants.I_FRAME;
 @Slf4j
 public class Util {
 
+    public static final String REGEX_EMAIL = "^[\\w-+.]+@\\w[\\w-.]{0,66}\\.[a-z]{2,16}$";
     public static String TRUE_STR = "1";
     public static String FALSE_STR = "0";
-
-    public static final String REGEX_EMAIL = "^[\\w-+.]+@\\w[\\w-.]{0,66}\\.[a-z]{2,16}$";
 
     public static boolean isPasswordGrandType(KeycloakSession session) {
         HttpRequest contextObject = session.getContext().getContextObject(HttpRequest.class);
@@ -177,6 +176,15 @@ public class Util {
         }
 
         return sb.toString();
+    }
+
+    public static String getRealm(String searchRealm, String rawPath) {
+        if (isEmpty(searchRealm)) {
+            int beginIndex = rawPath.lastIndexOf("/realms/") + "/realms/".length();
+            String realm = rawPath.substring(beginIndex, rawPath.indexOf("/", beginIndex));
+            searchRealm = isEmpty(realm) ? "user" : realm;
+        }
+        return searchRealm;
     }
 
 }

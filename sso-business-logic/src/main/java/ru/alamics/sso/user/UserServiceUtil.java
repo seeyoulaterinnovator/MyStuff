@@ -71,6 +71,6 @@ public class UserServiceUtil {
 
         if (phone == null) return null;
 
-        return phone.replace("\\D","").toLowerCase().trim();
+        return phone.replace("\\D", "");
     }
 }
