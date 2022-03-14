@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.mobile.resource;
 
-import org.jboss.logging.Logger;
 import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.AuthenticationProcessor;
@@ -24,9 +23,14 @@ import org.keycloak.services.util.BrowserHistoryHelper;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.sessions.RootAuthenticationSessionModel;
 
-import javax.ws.rs.*;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilderException;
+import java.io.IOException;
+import java.util.Map;
 
 import static org.jboss.resteasy.spi.ResteasyProviderFactory.getContextData;
 
@@ -37,7 +41,6 @@ public class MobileApplicationResource {
     public static final String FORWARDED_ERROR_MESSAGE_NOTE = "forwardedErrorMessage";
     public static final String SESSION_CODE = "session_code";
     public static final String AUTH_SESSION_ID = "auth_session_id";
-    private static final Logger logger = Logger.getLogger(MobileApplicationResource.class);
     private final KeycloakSession session;
     private final RealmModel realm;
     private final ClientConnection clientConnection;
@@ -64,23 +67,10 @@ public class MobileApplicationResource {
                                          @QueryParam(SESSION_CODE) String code,
                                          @QueryParam(Constants.EXECUTION) String execution,
                                          @QueryParam(Constants.CLIENT_ID) String clientId,
-                                         @QueryParam(Constants.TAB_ID) String tabId) {
-        event.event(EventType.RESET_PASSWORD);
-
-        return resetCredentials(authSessionId, code, execution, clientId, tabId);
-    }
-
-    @Path(RESET_CREDENTIALS_PATH)
-    @GET
-    public Response resetCredentialsGET(@QueryParam(AUTH_SESSION_ID) String authSessionId, // optional, can get from cookie instead
-                                        @QueryParam(SESSION_CODE) String code,
-                                        @QueryParam(Constants.EXECUTION) String execution,
-                                        @QueryParam(Constants.CLIENT_ID) String clientId,
-                                        @QueryParam(Constants.TAB_ID) String tabId) {
+                                         @QueryParam(Constants.TAB_ID) String tabId) throws IOException {
         ClientModel client = realm.getClientByClientId(clientId);
         AuthenticationSessionModel authSession = new AuthenticationSessionManager(session).getCurrentAuthenticationSession(realm, client, tabId);
-
-        // we allow applications to link to reset credentials without going through OAuth or SAML handshakes
+        Response response = null;
         if (authSession == null && code == null) {
             if (!realm.isResetPasswordAllowed()) {
                 event.event(EventType.RESET_PASSWORD);
@@ -88,12 +78,18 @@ public class MobileApplicationResource {
                 return ErrorPage.error(session, authSession, Response.Status.BAD_REQUEST, Messages.RESET_CREDENTIAL_NOT_ALLOWED);
 
             }
-            authSession = createAuthenticationSessionForClient();
-            return processResetCredentials(false, null, authSession, null);
+            response = processResetCredentials(false, null, createAuthenticationSessionForClient(), null);
         }
 
+        Object entity = response.getEntity();
+        String ex = ((Map<String, String>) entity).get("execution");
+        String accessCode = ((Map<String, String>) entity).get("access_code");
+        String sessionState = ((Map<String, String>) entity).get("session_state");
+        String tab = ((Map<String, String>) entity).get("tab_id");
+
         event.event(EventType.RESET_PASSWORD);
-        return resetCredentials(authSessionId, code, execution, clientId, tabId);
+
+        return resetCredentials(sessionState, accessCode, ex, clientId, tab);
     }
 
     protected Response processResetCredentials(boolean actionRequest, String execution, AuthenticationSessionModel authSession, String errorMessage) {
@@ -129,12 +125,6 @@ public class MobileApplicationResource {
             return checks.getResponse();
         }
         final AuthenticationSessionModel authSession = checks.getAuthenticationSession();
-
-        if (!realm.isResetPasswordAllowed()) {
-            event.error(Errors.NOT_ALLOWED);
-            return ErrorPage.error(session, authSession, Response.Status.BAD_REQUEST, Messages.RESET_CREDENTIAL_NOT_ALLOWED);
-
-        }
 
         return processResetCredentials(checks.isActionRequest(), execution, authSession, null);
     }
@@ -182,8 +172,7 @@ public class MobileApplicationResource {
             authSession = processor.getAuthenticationSession(); // Could be changed (eg. Forked flow)
         }
 
-        Response response1 = BrowserHistoryHelper.getInstance().saveResponseAndRedirect(session, authSession, response, action, request);
-        return response1;
+        return BrowserHistoryHelper.getInstance().saveResponseAndRedirect(session, authSession, response, action, request);
     }
 
 }
