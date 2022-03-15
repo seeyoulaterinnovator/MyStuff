@@ -4,7 +4,7 @@ import Cookie from 'js-cookie';
 import {STATUS} from './constants.js';
 
 export const city = writable(
-  document.getElementById('cities-button').dataset.city || Cookie.get('CITY') || ''
+  (document.getElementById('cities-button') && document.getElementById('cities-button').dataset.city) || Cookie.get('CITY') || ''
 );
 
 export const domain = writable(

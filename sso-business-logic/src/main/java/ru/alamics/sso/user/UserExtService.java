@@ -11,6 +11,7 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.provider.ProviderFactory;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
+import ru.alamics.sso.jpa.entity.UserPostRoleEntity;
 import ru.alamics.sso.keycloak.facade.UserPostFacade;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.FoundException;
@@ -175,7 +176,7 @@ public class UserExtService {
 
 
         if (!Util.isEmpty(request.getTomsId())) {
-            addUserPostLPR(user, request);
+            addUserPostRole(user, request, bss);
         }
 
         createAdminEvent(OperationType.CREATE, user);
@@ -223,12 +224,19 @@ public class UserExtService {
                 .success();
     }
 
-    private void addUserPostLPR(UserModel userModel, UserRequest request) throws NotFoundException, FoundException, FoundUserPostException, NotValidException {
+    private void addUserPostRole(UserModel userModel, UserRequest request, boolean isBss) throws NotFoundException, FoundException, FoundUserPostException, NotValidException {
 
         UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, request);
 
-        userPostRequest.setRoleId(DEFAULT_ROLE_ID);
-
+        if (isBss || request.getRoleId() == null) {
+            userPostRequest.setRoleId(DEFAULT_ROLE_ID);
+        } else {
+            UserPostRoleEntity role = userFindService.getRoleEntity(request.getRoleId());
+            if (role == null) {
+                throw new NotFoundException("Роль не найдена.");
+            }
+            userPostRequest.setRoleId(request.getRoleId());
+        }
         UserPostResponse userPostResponse = userPostFacade.save(userPostRequest);
 
         userPostFacade.getUserPostService().addAllSystemRole(userPostResponse.getId());

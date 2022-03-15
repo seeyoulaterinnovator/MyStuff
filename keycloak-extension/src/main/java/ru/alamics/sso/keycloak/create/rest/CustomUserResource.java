@@ -91,7 +91,7 @@ public class CustomUserResource {
         if (Util.isEmpty(request.getPhone())) {
             return ErrorResponse.error("Поле Phone должно быть заполнено", Response.Status.BAD_REQUEST);
         }
-        if (validatePhone(request.getPhone())) {
+        if (!validatePhone(request.getPhone())) {
             return ErrorResponse.error("Поле Phone невалидно", Response.Status.BAD_REQUEST);
         }
         if (Util.isEmpty(request.getEmail())) {
@@ -111,7 +111,7 @@ public class CustomUserResource {
         if (Util.isEmpty(request.getPhone())) {
             return ErrorResponse.error("Поле Phone должно быть заполнено", Response.Status.BAD_REQUEST);
         }
-        if (validatePhone(request.getPhone())) {
+        if (!validatePhone(request.getPhone())) {
             return ErrorResponse.error("Поле Phone невалидно", Response.Status.BAD_REQUEST);
         }
         if (Util.isEmpty(request.getTomsId())) {
@@ -134,7 +134,8 @@ public class CustomUserResource {
         return Pattern.matches(Util.REGEX_EMAIL, email);
     }
     private boolean validatePhone(String phone) {
-        return !phone.matches("[\\d]+") || !phone.startsWith("7") || phone.length() != 11;
+        return (phone.startsWith("+(7)9") && phone.length() == 14 && phone.substring(4).matches("[\\d]+"))
+                || (phone.startsWith("7") && phone.length() == 11 && phone.matches("[\\d]+"));
     }
 
     private Response getUserResponse(UserRequest request, boolean bss) {
