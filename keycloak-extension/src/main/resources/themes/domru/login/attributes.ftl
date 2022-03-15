@@ -150,8 +150,8 @@
         } else {
             window.onunload = function () {
                 window.parent.postMessage('post-selected', '*');
+                console.log("Отправлено тк не B2B");
             };
-            console.log("Отправлено тк не B2B");
         }
 
         var table = document.getElementById('post');
