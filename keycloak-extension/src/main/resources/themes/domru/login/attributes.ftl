@@ -144,8 +144,8 @@
             if (actionIsEmpty) {
                 window.onunload = function () {
                     window.parent.postMessage('post-selected', '*');
+                    console.log("Отправлено тк B2B и Action пуст");
                 };
-                console.log("Отправлено тк B2B и Action пуст");
             }
         } else {
             window.onunload = function () {
