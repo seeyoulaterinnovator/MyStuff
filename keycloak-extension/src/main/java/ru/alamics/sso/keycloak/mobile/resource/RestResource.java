@@ -12,13 +12,12 @@ import org.keycloak.models.*;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.models.utils.SystemClientUtil;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
-import org.keycloak.services.ErrorPage;
+import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.Urls;
 import org.keycloak.services.managers.AuthenticationSessionManager;
 import org.keycloak.services.managers.ClientSessionCode;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.resources.SessionCodeChecks;
-import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.util.BrowserHistoryHelper;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.sessions.RootAuthenticationSessionModel;
@@ -34,7 +33,7 @@ import java.util.Map;
 
 import static org.jboss.resteasy.spi.ResteasyProviderFactory.getContextData;
 
-public class MobileApplicationResource {
+public class RestResource {
 
     public static final String RESET_CREDENTIALS_PATH = "reset-credentials";
     public static final String POST_BROKER_LOGIN_PATH = "post-broker-login";
@@ -48,7 +47,7 @@ public class MobileApplicationResource {
     private final EventBuilder event;
     private final HttpRequest request;
 
-    MobileApplicationResource(KeycloakSession session, AdminEventBuilder eventBuilder) {
+    RestResource(KeycloakSession session) {
         this.session = session;
 
         KeycloakContext context = session.getContext();
@@ -63,33 +62,41 @@ public class MobileApplicationResource {
 
     @Path(RESET_CREDENTIALS_PATH)
     @POST
-    public Response resetCredentialsPOST(@QueryParam(AUTH_SESSION_ID) String authSessionId, // optional, can get from cookie instead
-                                         @QueryParam(SESSION_CODE) String code,
-                                         @QueryParam(Constants.EXECUTION) String execution,
-                                         @QueryParam(Constants.CLIENT_ID) String clientId,
-                                         @QueryParam(Constants.TAB_ID) String tabId) throws IOException {
-        ClientModel client = realm.getClientByClientId(clientId);
-        AuthenticationSessionModel authSession = new AuthenticationSessionManager(session).getCurrentAuthenticationSession(realm, client, tabId);
-        Response response = null;
-        if (authSession == null && code == null) {
-            if (!realm.isResetPasswordAllowed()) {
-                event.event(EventType.RESET_PASSWORD);
-                event.error(Errors.NOT_ALLOWED);
-                return ErrorPage.error(session, authSession, Response.Status.BAD_REQUEST, Messages.RESET_CREDENTIAL_NOT_ALLOWED);
+    public Response resetCred(@QueryParam(AUTH_SESSION_ID) String authSessionId, // optional, can get from cookie instead
+                              @QueryParam(SESSION_CODE) String code,
+                              @QueryParam(Constants.EXECUTION) String execution,
+                              @QueryParam(Constants.CLIENT_ID) String clientId,
+                              @QueryParam(Constants.TAB_ID) String tabId) throws IOException {
 
-            }
-            response = processResetCredentials(false, null, createAuthenticationSessionForClient(), null);
+        Response response = createFlow(clientId, tabId, code);
+
+        if (Response.Status.BAD_REQUEST.equals(response.getStatusInfo()) || Response.Status.NOT_FOUND.equals(response.getStatusInfo())){
+            return response;
         }
 
-        Object entity = response.getEntity();
-        String ex = ((Map<String, String>) entity).get("execution");
-        String accessCode = ((Map<String, String>) entity).get("access_code");
-        String sessionState = ((Map<String, String>) entity).get("session_state");
-        String tab = ((Map<String, String>) entity).get("tab_id");
+        Map<String, String> entity = (Map<String, String>) response.getEntity();
+        String ex = entity.get("execution");
+        String accessCode = entity.get("access_code");
+        String sessionState = entity.get("session_state");
+        String tab = entity.get("tab_id");
 
         event.event(EventType.RESET_PASSWORD);
 
         return resetCredentials(sessionState, accessCode, ex, clientId, tab);
+    }
+
+    private Response createFlow(String clientId, String tabId, String code){
+        ClientModel client = realm.getClientByClientId(clientId);
+        AuthenticationSessionModel authSession = new AuthenticationSessionManager(session).getCurrentAuthenticationSession(realm, client, tabId);
+        if (authSession == null && code == null) {
+            if (!realm.isResetPasswordAllowed()) {
+                event.event(EventType.RESET_PASSWORD);
+                event.error(Errors.NOT_ALLOWED);
+                return ErrorResponse.error(Messages.RESET_CREDENTIAL_NOT_ALLOWED, Response.Status.BAD_REQUEST);
+            }
+            return processResetCredentials(false, null, createAuthenticationSessionForClient(), null);
+        }
+        return ErrorResponse.error("Не удалось запусть flow", Response.Status.NOT_FOUND);
     }
 
     protected Response processResetCredentials(boolean actionRequest, String execution, AuthenticationSessionModel authSession, String errorMessage) {

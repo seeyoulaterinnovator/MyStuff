@@ -5,16 +5,16 @@ import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.auth.AbstractAuthenticatorFactory;
 
-public class ResetCredentialChooseUserMPFactory extends AbstractAuthenticatorFactory {
+public class ResetCredChooseUserRestFactory extends AbstractAuthenticatorFactory {
 
-    public static final String PROVIDER_ID = "reset-cred-choose-user-mp";
+    public static final String PROVIDER_ID = "reset-cred-choose-user-rest";
     public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED
     };
 
     @Override
     public String getDisplayType() {
-        return "Choose User MP";
+        return "Choose User Rest";
     }
 
     @Override
@@ -29,7 +29,7 @@ public class ResetCredentialChooseUserMPFactory extends AbstractAuthenticatorFac
 
     @Override
     public Authenticator create(KeycloakSession session) {
-        return new ResetCredentialChooseUserMP();
+        return new ResetCredChooseUserRest();
     }
 
     @Override

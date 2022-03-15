@@ -13,4 +13,4 @@ ru.alamics.sso.keycloak.client.ClientRealmResourceProviderFactory
 ru.alamics.sso.keycloak.user.resource.ls.PersonalAccountProviderFactory
 ru.alamics.sso.keycloak.user.resource.session.CustomSessionsFactory
 ru.alamics.sso.keycloak.rest.messenger.MessengerResourceFactory
-ru.alamics.sso.keycloak.mobile.resource.MobileApplicationFactory
+ru.alamics.sso.keycloak.mobile.resource.RestFactory

@@ -14,13 +14,10 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
-import org.keycloak.services.validation.Validation;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.property.ApplicationProperties;
-import ru.alamics.sso.registration.model.FormConstants;
-import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.port.RiasApiService;
 import ru.alamics.sso.registration.service.UserFindService;
 
@@ -28,19 +25,15 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.util.Collections;
 
-public class ResetCredentialChooseUserMP implements Authenticator {
+public class ResetCredChooseUserRest implements Authenticator {
 
-    private static final String NEED_SEND_EMAIL_CODE = "NEED_SEND_EMAIL_CODE";
-
-    private static final String RESET_CREDENTIALS_REDIRECT_URL = "reset.credentials.redirect.url";
-    private final static String RESET_CRED_TO_RIAS_FORM = "reset-cred-to-rias.ftl";
-    private static final Logger logger = Logger.getLogger(ResetCredentialChooseUserMP.class);
+    private static final Logger logger = Logger.getLogger(ResetCredChooseUserRest.class);
 
     private final RiasApiService riasApiService;
     private final UserFindService userFindService;
     private final ApplicationProperties properties;
 
-    public ResetCredentialChooseUserMP() {
+    public ResetCredChooseUserRest() {
 
         this.riasApiService = Lookup.lookup(RiasApiService.class);
 
@@ -144,46 +137,6 @@ public class ResetCredentialChooseUserMP implements Authenticator {
         final String phone = username.replaceAll("\\D", "");
 
         return userFindService.getUserByPhone(realm, phone);
-    }
-
-    private boolean checkRias(AuthenticationFlowContext context) {
-        AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
-        String username = authenticationSession.getAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME);
-
-        try {
-            if (username == null)
-                return false;
-
-            if (username.startsWith("+7")) {
-                username = username.replaceAll("\\D", "");
-            }
-            if (!riasApiService.checkParam(username)) {
-                return false;
-            }
-        } catch (RiasCheckException rce) {
-            return false;
-        }
-
-        String location = properties.getProperty(RESET_CREDENTIALS_REDIRECT_URL);
-        if (location == null) {
-            location = "https://lkb2b.dom.ru/recovery";
-        }
-
-        String city = context.getHttpRequest().getDecodedFormParameters().getFirst(FormConstants.FIELD_CITY);
-        if (Validation.isBlank(city)) {
-            city = "yar";
-        }
-
-        location += "?citydomain=" + city;
-
-        Response challenge = context.form()
-                .setAttribute("redirectTo", location)
-                .setAttribute("redirectHeader", username)
-                .createForm(RESET_CRED_TO_RIAS_FORM);
-
-        context.challenge(challenge);
-
-        return true;
     }
 
     @Override
