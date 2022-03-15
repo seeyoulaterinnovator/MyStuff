@@ -1,10 +1,12 @@
 package ru.alamics.sso.keycloak.auth.requiredactions;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.email.EmailException;
 import org.keycloak.email.EmailTemplateProvider;
+import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.UserModel;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.keycloak.lookup.Lookup;
@@ -21,12 +23,14 @@ import ru.alamics.sso.registration.phone.exception.UserPhoneEmpty;
 import ru.alamics.sso.registration.phone.exception.WrongSmsCode;
 import ru.alamics.sso.settings.SettingsService;
 
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
+import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_BY_PHONE_NUMBER;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.*;
 import static ru.alamics.sso.settings.SettingConstants.*;
 
@@ -63,6 +67,11 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
         User user = UserModelUserMapper.mapToUser(context.getUser());
 
+        //Пока костыль чтобы при запросах с МП код от звонка приходил на почту сначало
+        if (activationCodeType.equals(CODE_BY_PHONE_NUMBER) && authSession.getAuthNote("MP") != null) {
+            authSession.setAuthNote(NEED_SEND_EMAIL_CODE, NEED_SEND_EMAIL_CODE);
+        }
+
         AuthContext authContext = AuthContext.builder()
                 .activationCodeType(activationCodeType)
                 .expirationTime(LocalDateTime.now().plusSeconds(activationCodeType.getExpiredSeconds()))
@@ -88,7 +97,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             authSession.setAuthNote(EXPIRATION_TIME, authContext.getExpirationTime().format(DateTimeFormatter.ISO_DATE_TIME));
             authSession.setAuthNote(COUNT_REPEAT, authContext.getCounter().toString());
 
-            Response challenge = context.form()
+            LoginFormsProvider loginFormsProvider = context.form()
                     .setAttribute("userPhone", user.getPhone())
                     .setAttribute("userEmail", user.getEmail())
                     .setAttribute("expirationSeconds", String.valueOf(authContext.getActivationCodeType().getExpiredSeconds()))
@@ -101,10 +110,9 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     .setAttribute("homePage", settingsService.getSettingsStringValue(HOME_PAGE, context.getRealm().getId()))
                     .setAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, context.getRealm().getId()))
                     .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER, context.getRealm().getId()))
-                    .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()))
-                    .createForm(VERIFY_PHONE_FTL);
+                    .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()));
 
-            context.challenge(challenge);
+            context.challenge(createForm(context, loginFormsProvider));
 
         } catch (UserPhoneEmpty userPhoneEmpty) {
             log.info("ignore... userPhoneEmpty");
@@ -116,6 +124,18 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             log.info("ignore... MsgSendException {}", se.getMessage());
         }
     }
+
+    private Response createForm(RequiredActionContext context, LoginFormsProvider loginFormsProvider) {
+        //Костыль тк при запросе с МП не нашел другого способа верификацию отправить по rest
+        String mp = context.getAuthenticationSession().getAuthNote("MP");
+        if (mp != null) {
+            HttpRequest contextObject = context.getSession().getContext().getContextObject(HttpRequest.class);
+            MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
+            parameters.add("grant_type", "password");
+        }
+        return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
+    }
+
 
     private String sendEmail(RequiredActionContext context) throws EmailException {
         String code = SmsCodeGenerator.getCode(ActivationCodeType.CODE_TO_EMAIL.getLengthCode());
@@ -143,6 +163,14 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         log.info("PhoneProcessAction");
 
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
+
+        //Для мобильного приложения Сделал чтобы пока для звонка сначала шло на почту потом на телефон
+        if (context.getHttpRequest().getDecodedFormParameters().containsKey("codeToPhone")) {
+            authSession.removeAuthNote(NEED_SEND_EMAIL_CODE);
+        } else {
+            authSession.setAuthNote(NEED_SEND_EMAIL_CODE, NEED_SEND_EMAIL_CODE);
+        }
+
         /*
         форма принимает код для ввода кода из смс(6 симоволов), 4 цифры номер телефона,
         4 цифры из email
@@ -184,7 +212,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 context.success();
             } catch (WrongSmsCode wrongSmsCode) {
                 log.warn("Wrong sms code");
-                Response challenge = context.form()
+                LoginFormsProvider loginFormsProvider = context.form()
                         .setAttribute("error", "Пароль введен не верно. Проверьте правильность введенных данных")
                         .setError("Введен некорректный код смс или его срок его действия истек")
                         .setAttribute("expirationSeconds", activationCodeType.getExpiredSeconds())
@@ -198,9 +226,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                         .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()))
                         .setAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, context.getRealm().getId()))
                         .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER, context.getRealm().getId()))
-                        .setAttribute("enableRepeatCall", authSession.getAuthNote(NEED_SEND_EMAIL_CODE) == null)
-                        .createForm(VERIFY_PHONE_FTL);
-                context.challenge(challenge);
+                        .setAttribute("enableRepeatCall", authSession.getAuthNote(NEED_SEND_EMAIL_CODE) == null);
+                context.challenge(createForm(context, loginFormsProvider));
             }
         }
     }

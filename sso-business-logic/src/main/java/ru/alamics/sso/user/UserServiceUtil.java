@@ -73,4 +73,11 @@ public class UserServiceUtil {
 
         return phone.replace("\\D", "");
     }
+
+    public static String doCleanPhoneStartWithSeven(String phone) {
+
+        if (phone == null || !phone.startsWith("+7")) return null;
+
+        return phone.replace("\\D", "");
+    }
 }
