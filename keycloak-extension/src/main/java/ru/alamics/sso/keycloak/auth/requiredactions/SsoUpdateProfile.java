@@ -61,6 +61,8 @@ public class SsoUpdateProfile extends UpdateProfile {
         String oldPhone = null;
         if (!phones.isEmpty()) {
             oldPhone = phones.get(0);
+        } else {
+            user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(phone));
         }
 
         boolean emailChanged = !(Util.isEmpty(oldEmail) || oldEmail.equals(email));
