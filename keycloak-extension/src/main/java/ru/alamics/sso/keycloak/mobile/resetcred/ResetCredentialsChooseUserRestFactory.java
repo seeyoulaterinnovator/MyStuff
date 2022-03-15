@@ -7,8 +7,8 @@ import ru.alamics.sso.keycloak.auth.AbstractAuthenticatorFactory;
 
 public class ResetCredentialsChooseUserRestFactory extends AbstractAuthenticatorFactory {
 
-    public static final String DISPLAY_TEXT = "Выбор пользователя Rest";
-    public static final String HELP_TEXT = "Выберите пользователя для сброса учетных данных";
+    public static final String DISPLAY_TEXT = "Найти пользователя Rest";
+    public static final String HELP_TEXT = "Нахождение пользователя по email/phone для сброса пароля";
     public static final String PROVIDER_ID = "reset-cred-choose-user-rest";
     public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED

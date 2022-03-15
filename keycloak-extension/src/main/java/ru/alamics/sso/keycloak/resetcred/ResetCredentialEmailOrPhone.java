@@ -94,7 +94,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
     private UserEntity findUserByConvertUsernameToPhone(RealmModel realm, final String username) {
         String phone = UserServiceUtil.doCleanPhoneStartWithSeven(username);
 
-        return userFindService.getUserByPhone(realm, phone);
+        return phone == null ? null : userFindService.getUserByPhone(realm, phone);
     }
 
     @Override

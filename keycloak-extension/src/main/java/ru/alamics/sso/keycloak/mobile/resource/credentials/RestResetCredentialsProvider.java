@@ -4,21 +4,21 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
 
-public class RestCredentialsProvider implements BaseResourceProvider<RestCredentialsResource> {
+public class RestResetCredentialsProvider implements BaseResourceProvider<RestResetCredentialsResource> {
 
     private final KeycloakSession session;
 
-    public RestCredentialsProvider(KeycloakSession session) {
+    public RestResetCredentialsProvider(KeycloakSession session) {
         this.session = session;
     }
 
     @Override
-    public RestCredentialsResource getResource() {
+    public RestResetCredentialsResource getResource() {
         AdminPermissionEvaluator auth = this.initAuthByWorkingRealm(session);
 
         auth.users().requireManage();
 
-        return new RestCredentialsResource(session);
+        return new RestResetCredentialsResource(session);
     }
 
 }

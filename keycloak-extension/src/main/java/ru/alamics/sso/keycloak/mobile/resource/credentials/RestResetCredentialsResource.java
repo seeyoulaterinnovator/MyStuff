@@ -33,7 +33,7 @@ import java.util.Map;
 
 import static org.jboss.resteasy.spi.ResteasyProviderFactory.getContextData;
 
-public class RestCredentialsResource {
+public class RestResetCredentialsResource {
 
     public static final String RESET_CREDENTIALS_PATH = "reset-credentials";
     public static final String FORWARDED_ERROR_MESSAGE_NOTE = "forwardedErrorMessage";
@@ -46,7 +46,7 @@ public class RestCredentialsResource {
     private final EventBuilder event;
     private final HttpRequest request;
 
-    RestCredentialsResource(KeycloakSession session) {
+    RestResetCredentialsResource(KeycloakSession session) {
         this.session = session;
 
         this.realm = session.getContext().getRealm();
