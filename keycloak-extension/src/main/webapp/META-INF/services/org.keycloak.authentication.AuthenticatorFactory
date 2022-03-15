@@ -9,4 +9,4 @@ ru.alamics.sso.keycloak.social.CustomIdpCreateUserIfUniqueAuthenticatorFactory
 org.keycloak.authentication.authenticators.broker.IdpCreateUserIfUniqueAuthenticatorFactory
 ru.alamics.sso.keycloak.auth.social.PostLoginSocialVoid
 ru.alamics.sso.keycloak.auth.ValidateUsernameOrPhone
-ru.alamics.sso.keycloak.mobile.resetcred.ResetCredChooseUserRestFactory
+ru.alamics.sso.keycloak.mobile.resetcred.ResetCredentialsChooseUserRestFactory

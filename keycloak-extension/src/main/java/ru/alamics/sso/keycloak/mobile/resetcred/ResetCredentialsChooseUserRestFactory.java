@@ -5,8 +5,10 @@ import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.auth.AbstractAuthenticatorFactory;
 
-public class ResetCredChooseUserRestFactory extends AbstractAuthenticatorFactory {
+public class ResetCredentialsChooseUserRestFactory extends AbstractAuthenticatorFactory {
 
+    public static final String DISPLAY_TEXT = "Выбор пользователя Rest";
+    public static final String HELP_TEXT = "Выберите пользователя для сброса учетных данных";
     public static final String PROVIDER_ID = "reset-cred-choose-user-rest";
     public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED
@@ -14,7 +16,7 @@ public class ResetCredChooseUserRestFactory extends AbstractAuthenticatorFactory
 
     @Override
     public String getDisplayType() {
-        return "Choose User Rest";
+        return DISPLAY_TEXT;
     }
 
     @Override
@@ -24,12 +26,12 @@ public class ResetCredChooseUserRestFactory extends AbstractAuthenticatorFactory
 
     @Override
     public String getHelpText() {
-        return "Choose a user to reset credentials for";
+        return HELP_TEXT;
     }
 
     @Override
     public Authenticator create(KeycloakSession session) {
-        return new ResetCredChooseUserRest();
+        return new ResetCredentialsChooseUserRest();
     }
 
     @Override

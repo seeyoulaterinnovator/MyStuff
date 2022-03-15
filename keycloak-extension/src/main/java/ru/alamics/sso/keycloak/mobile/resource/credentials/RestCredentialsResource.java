@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.mobile.resource;
+package ru.alamics.sso.keycloak.mobile.resource.credentials;
 
 import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.OAuth2Constants;
@@ -33,10 +33,9 @@ import java.util.Map;
 
 import static org.jboss.resteasy.spi.ResteasyProviderFactory.getContextData;
 
-public class RestResource {
+public class RestCredentialsResource {
 
     public static final String RESET_CREDENTIALS_PATH = "reset-credentials";
-    public static final String POST_BROKER_LOGIN_PATH = "post-broker-login";
     public static final String FORWARDED_ERROR_MESSAGE_NOTE = "forwardedErrorMessage";
     public static final String SESSION_CODE = "session_code";
     public static final String AUTH_SESSION_ID = "auth_session_id";
@@ -47,11 +46,10 @@ public class RestResource {
     private final EventBuilder event;
     private final HttpRequest request;
 
-    RestResource(KeycloakSession session) {
+    RestCredentialsResource(KeycloakSession session) {
         this.session = session;
 
-        KeycloakContext context = session.getContext();
-        this.realm = context.getRealm();
+        this.realm = session.getContext().getRealm();
 
         this.clientConnection = session.getContext().getConnection();
 
@@ -70,7 +68,7 @@ public class RestResource {
 
         Response response = createFlow(clientId, tabId, code);
 
-        if (Response.Status.BAD_REQUEST.equals(response.getStatusInfo()) || Response.Status.NOT_FOUND.equals(response.getStatusInfo())){
+        if (Response.Status.Family.CLIENT_ERROR.equals(response.getStatusInfo().getFamily())) {
             return response;
         }
 
@@ -85,7 +83,7 @@ public class RestResource {
         return resetCredentials(sessionState, accessCode, ex, clientId, tab);
     }
 
-    private Response createFlow(String clientId, String tabId, String code){
+    private Response createFlow(String clientId, String tabId, String code) {
         ClientModel client = realm.getClientByClientId(clientId);
         AuthenticationSessionModel authSession = new AuthenticationSessionManager(session).getCurrentAuthenticationSession(realm, client, tabId);
         if (authSession == null && code == null) {
@@ -96,7 +94,7 @@ public class RestResource {
             }
             return processResetCredentials(false, null, createAuthenticationSessionForClient(), null);
         }
-        return ErrorResponse.error("Не удалось запусть flow", Response.Status.NOT_FOUND);
+        return ErrorResponse.error("Не удалось создать flow", Response.Status.NOT_FOUND);
     }
 
     protected Response processResetCredentials(boolean actionRequest, String execution, AuthenticationSessionModel authSession, String errorMessage) {

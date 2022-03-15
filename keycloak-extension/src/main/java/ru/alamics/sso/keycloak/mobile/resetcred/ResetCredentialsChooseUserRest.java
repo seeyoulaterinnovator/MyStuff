@@ -3,7 +3,6 @@ package ru.alamics.sso.keycloak.mobile.resetcred;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
-import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.actiontoken.DefaultActionTokenKey;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
 import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAuthenticator;
@@ -15,31 +14,26 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import ru.alamics.sso.keycloak.auth.AbstractAuthenticator;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
-import ru.alamics.sso.property.ApplicationProperties;
-import ru.alamics.sso.registration.rias.port.RiasApiService;
 import ru.alamics.sso.registration.service.UserFindService;
+import ru.alamics.sso.user.UserServiceUtil;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.util.Collections;
 
-public class ResetCredChooseUserRest implements Authenticator {
+public class ResetCredentialsChooseUserRest extends AbstractAuthenticator {
 
-    private static final Logger logger = Logger.getLogger(ResetCredChooseUserRest.class);
+    private static final Logger logger = Logger.getLogger(ResetCredentialsChooseUserRest.class);
 
-    private final RiasApiService riasApiService;
     private final UserFindService userFindService;
-    private final ApplicationProperties properties;
 
-    public ResetCredChooseUserRest() {
-
-        this.riasApiService = Lookup.lookup(RiasApiService.class);
+    public ResetCredentialsChooseUserRest() {
 
         this.userFindService = Lookup.lookup(UserFindService.class);
 
-        this.properties = Lookup.lookup(ApplicationProperties.class);
     }
 
     @Override
@@ -130,33 +124,15 @@ public class ResetCredChooseUserRest implements Authenticator {
     }
 
     private UserEntity findUserByConvertUsernameToPhone(RealmModel realm, final String username) {
-        if (!username.startsWith("+7")) {
-            return null;
-        }
 
-        final String phone = username.replaceAll("\\D", "");
+        String phone = UserServiceUtil.doCleanPhoneStartWithSeven(username);
 
         return userFindService.getUserByPhone(realm, phone);
     }
 
     @Override
-    public boolean requiresUser() {
-        return false;
-    }
-
-    @Override
     public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user) {
         return true;
-    }
-
-    @Override
-    public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user) {
-
-    }
-
-    @Override
-    public void close() {
-
     }
 
 }

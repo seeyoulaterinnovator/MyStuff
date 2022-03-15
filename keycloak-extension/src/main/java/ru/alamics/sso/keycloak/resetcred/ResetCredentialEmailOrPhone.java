@@ -21,6 +21,7 @@ import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.port.RiasApiService;
 import ru.alamics.sso.registration.service.UserFindService;
+import ru.alamics.sso.user.UserServiceUtil;
 
 import javax.ws.rs.core.Response;
 import java.util.Collections;
@@ -91,11 +92,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
     }
 
     private UserEntity findUserByConvertUsernameToPhone(RealmModel realm, final String username) {
-        if (!username.startsWith("+7")) {
-            return null;
-        }
-
-        final String phone = username.replaceAll("\\D", "");
+        String phone = UserServiceUtil.doCleanPhoneStartWithSeven(username);
 
         return userFindService.getUserByPhone(realm, phone);
     }
