@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_BY_PHONE_NUMBER;
+import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_TO_SMS;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.*;
 import static ru.alamics.sso.settings.SettingConstants.*;
 
@@ -67,8 +68,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
         User user = UserModelUserMapper.mapToUser(context.getUser());
 
-        //Пока костыль чтобы при запросах с МП код от звонка приходил на почту сначало
-        if (activationCodeType.equals(CODE_BY_PHONE_NUMBER) && authSession.getAuthNote("MP") != null) {
+        //Пока костыль чтобы при запросах с МП код SMS приходил на почту сначало
+        if (activationCodeType.equals(CODE_TO_SMS) && authSession.getAuthNote("MP") != null) {
             authSession.setAuthNote(NEED_SEND_EMAIL_CODE, NEED_SEND_EMAIL_CODE);
         }
 
@@ -81,11 +82,21 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
         try {
             boolean enableRepeatCall = true;
-            if (authSession.getAuthNote(NEED_SEND_EMAIL_CODE) != null) {
+            if (authSession.getAuthNote(NEED_SEND_EMAIL_CODE) != null && activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
+                String code = SmsCodeGenerator.getCode(ActivationCodeType.CODE_TO_EMAIL.getLengthCode());
                 authContext = AuthContext.builder()
                         .activationCodeType(ActivationCodeType.CODE_TO_EMAIL)
                         .expirationTime(LocalDateTime.now().plusSeconds(ActivationCodeType.CODE_TO_EMAIL.getExpiredSeconds()))
-                        .hashProperty(HashGenerator.getSecretHash(sendEmail(context)))
+                        .hashProperty(HashGenerator.getSecretHash(sendEmail(context, code)))
+                        .counter(getCount(authSession.getAuthNote(COUNT_REPEAT)))
+                        .build();
+                enableRepeatCall = false;
+            } else if (authSession.getAuthNote(NEED_SEND_EMAIL_CODE) != null && activationCodeType.equals(CODE_TO_SMS)) {
+                String code = SmsCodeGenerator.getCode(ActivationCodeType.CODE_TO_SMS.getLengthCode());
+                authContext = AuthContext.builder()
+                        .activationCodeType(ActivationCodeType.CODE_TO_SMS)
+                        .expirationTime(LocalDateTime.now().plusSeconds(ActivationCodeType.CODE_TO_SMS.getExpiredSeconds()))
+                        .hashProperty(HashGenerator.getSecretHash(sendEmail(context, code)))
                         .counter(getCount(authSession.getAuthNote(COUNT_REPEAT)))
                         .build();
                 enableRepeatCall = false;
@@ -137,8 +148,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     }
 
 
-    private String sendEmail(RequiredActionContext context) throws EmailException {
-        String code = SmsCodeGenerator.getCode(ActivationCodeType.CODE_TO_EMAIL.getLengthCode());
+    private String sendEmail(RequiredActionContext context, String code) throws EmailException {
         Map<String, Object> attributes = new HashMap<>();
 
         attributes.put("code", code);
@@ -165,14 +175,14 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
 
         //Для мобильного приложения Сделал чтобы пока для звонка сначала шло на почту потом на телефон
-        if (context.getHttpRequest().getDecodedFormParameters().containsKey("codeToPhone")) {
+        if (context.getHttpRequest().getDecodedFormParameters().containsKey("codeToSMS")) {
             authSession.removeAuthNote(NEED_SEND_EMAIL_CODE);
         } else {
             authSession.setAuthNote(NEED_SEND_EMAIL_CODE, NEED_SEND_EMAIL_CODE);
         }
 
         /*
-        форма принимает код для ввода кода из смс(6 симоволов), 4 цифры номер телефона,
+        форма принимает код для ввода кода из смс(6 симоволов) и 6 из почты, 4 цифры номер телефона,
         4 цифры из email
          */
         if (context.getHttpRequest().getDecodedFormParameters().containsKey("sendEmailCode")) {
