@@ -26,6 +26,8 @@ import java.util.Collections;
 
 public class ResetCredentialsChooseUserRest extends AbstractAuthenticator {
 
+    private static final String NEED_SEND_EMAIL_CODE = "NEED_SEND_EMAIL_CODE";
+
     private static final Logger logger = Logger.getLogger(ResetCredentialsChooseUserRest.class);
 
     private final UserFindService userFindService;
@@ -118,6 +120,7 @@ public class ResetCredentialsChooseUserRest extends AbstractAuthenticator {
         context.setUser(user);
 
         authenticationSession.setAuthNote("MP", "grant_type");
+        authenticationSession.setAuthNote(NEED_SEND_EMAIL_CODE, NEED_SEND_EMAIL_CODE);
 
         context.success();
 

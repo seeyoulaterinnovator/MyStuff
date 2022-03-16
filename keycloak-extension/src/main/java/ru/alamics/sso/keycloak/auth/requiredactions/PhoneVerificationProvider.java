@@ -9,6 +9,7 @@ import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.UserModel;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import org.keycloak.utils.MediaType;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.registration.model.AuthContext;
@@ -67,11 +68,6 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
         User user = UserModelUserMapper.mapToUser(context.getUser());
-
-        //Пока костыль чтобы при запросах с МП код SMS приходил на почту сначало
-        if (activationCodeType.equals(CODE_TO_SMS) && authSession.getAuthNote("MP") != null) {
-            authSession.setAuthNote(NEED_SEND_EMAIL_CODE, NEED_SEND_EMAIL_CODE);
-        }
 
         AuthContext authContext = AuthContext.builder()
                 .activationCodeType(activationCodeType)
@@ -174,24 +170,22 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
 
-        //Для мобильного приложения Сделал чтобы пока для звонка сначала шло на почту потом на телефон
-        if (context.getHttpRequest().getDecodedFormParameters().containsKey("codeToSMS")) {
-            authSession.removeAuthNote(NEED_SEND_EMAIL_CODE);
-        } else {
-            authSession.setAuthNote(NEED_SEND_EMAIL_CODE, NEED_SEND_EMAIL_CODE);
-        }
-
         /*
         форма принимает код для ввода кода из смс(6 симоволов) и 6 из почты, 4 цифры номер телефона,
         4 цифры из email
          */
         if (context.getHttpRequest().getDecodedFormParameters().containsKey("sendEmailCode")) {
-
+            log.info("Sms code send Email");
             authSession.removeAuthNote(PHONE_KEY_HASH);
             authSession.setAuthNote(NEED_SEND_EMAIL_CODE, NEED_SEND_EMAIL_CODE);
 
             requiredActionChallenge(context);
 
+        } else if (context.getHttpRequest().getDecodedFormParameters().containsKey("sendPhoneCode")) {
+            log.info("Sms code send Phone");
+            authSession.removeAuthNote(PHONE_KEY_HASH);
+            authSession.removeAuthNote(NEED_SEND_EMAIL_CODE);
+            requiredActionChallenge(context);
         } else if (context.getHttpRequest().getDecodedFormParameters().containsKey("resend")) {
             log.info("Sms code resend");
 
@@ -237,9 +231,16 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                         .setAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, context.getRealm().getId()))
                         .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER, context.getRealm().getId()))
                         .setAttribute("enableRepeatCall", authSession.getAuthNote(NEED_SEND_EMAIL_CODE) == null);
-                context.challenge(createForm(context, loginFormsProvider));
+                context.challenge(createErrorForm(context, loginFormsProvider));
             }
         }
+    }
+
+    private Response createErrorForm(RequiredActionContext context, LoginFormsProvider loginFormsProvider) {
+        Response response = loginFormsProvider.createForm(VERIFY_PHONE_FTL);
+        Map<String, String> entity = (Map<String, String>) response.getEntity();
+        entity.put("error", "Код введен неверно, попробуйте еще раз");
+        return Response.ok().entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
     }
 
     private Integer getCount(String countStr) {

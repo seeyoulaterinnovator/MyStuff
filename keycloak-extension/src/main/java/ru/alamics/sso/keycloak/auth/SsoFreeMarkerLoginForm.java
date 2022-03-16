@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.auth;
 
-import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
@@ -62,7 +61,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         attributes.put("iframe", Util.isFrame(session));
 
         settingsService = Lookup.lookup(SettingsService.class);
-        clientService =  Lookup.lookup(ClientService.class);
+        clientService = Lookup.lookup(ClientService.class);
 
         attributes.put("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, realm.getName()));
         attributes.put("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, realm.getName()));
@@ -254,11 +253,14 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     private Response createRestResponse() {
         if (Util.isPasswordGrandType(session)) {
             if (!(accessCode == null || execution == null || authenticationSession == null)) {
-                return Response.ok(ImmutableMap.of(
-                        "session_state", authenticationSession.getParentSession().getId(),
-                        "access_code", accessCode,
-                        "execution", execution,
-                        "tab_id", authenticationSession.getTabId()), MediaType.APPLICATION_JSON_TYPE).build();
+                Map<String, String> entity = new HashMap<>();
+
+
+                entity.put("session_state", authenticationSession.getParentSession().getId());
+                entity.put("access_code", accessCode);
+                entity.put("execution", execution);
+                entity.put("tab_id", authenticationSession.getTabId());
+                return Response.ok().entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
             }
 
             return Response.status(Response.Status.BAD_REQUEST).build();
