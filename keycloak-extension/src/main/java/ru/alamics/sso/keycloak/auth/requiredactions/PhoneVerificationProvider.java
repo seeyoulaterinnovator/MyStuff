@@ -239,7 +239,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     private Response createErrorForm(RequiredActionContext context, LoginFormsProvider loginFormsProvider) {
         Response response = loginFormsProvider.createForm(VERIFY_PHONE_FTL);
         Map<String, String> entity = (Map<String, String>) response.getEntity();
-        entity.put("error", "Код введен неверно попробуйте еще раз");
+        entity.put("error", "Код введен неверно, попробуйте еще раз");
         return Response.ok().entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
     }
 
