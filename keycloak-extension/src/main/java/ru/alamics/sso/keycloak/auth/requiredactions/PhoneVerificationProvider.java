@@ -68,11 +68,6 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
         User user = UserModelUserMapper.mapToUser(context.getUser());
 
-        //Пока костыль чтобы при запросах с МП код SMS приходил на почту сначало
-        if (activationCodeType.equals(CODE_TO_SMS) && authSession.getAuthNote("MP") != null) {
-            authSession.setAuthNote(NEED_SEND_EMAIL_CODE, NEED_SEND_EMAIL_CODE);
-        }
-
         AuthContext authContext = AuthContext.builder()
                 .activationCodeType(activationCodeType)
                 .expirationTime(LocalDateTime.now().plusSeconds(activationCodeType.getExpiredSeconds()))
@@ -175,10 +170,10 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
 
         //Для мобильного приложения Сделал чтобы пока для звонка сначала шло на почту потом на телефон
-        if (context.getHttpRequest().getDecodedFormParameters().containsKey("codeToSMS")) {
+        if (context.getHttpRequest().getDecodedFormParameters().containsKey("sendPhoneCode")) {
+            authSession.removeAuthNote(PHONE_KEY_HASH);
             authSession.removeAuthNote(NEED_SEND_EMAIL_CODE);
-        } else {
-            authSession.setAuthNote(NEED_SEND_EMAIL_CODE, NEED_SEND_EMAIL_CODE);
+            requiredActionChallenge(context);
         }
 
         /*
