@@ -44,8 +44,8 @@ public class SsoUpdatePassword extends UpdatePassword {
                 .user(context.getAuthenticationSession().getAuthenticatedUser());
 
         String mp = context.getAuthenticationSession().getAuthNote("MP");
-        if (mp!= null){
-            if (!invalidPass(passwordNew)){
+        if (mp != null) {
+            if (!isValidPassword(passwordNew)) {
                 Response response = context.form().createResponse(UserModel.RequiredAction.UPDATE_PASSWORD);
                 Map<String, String> entity = (Map<String, String>) response.getEntity();
                 entity.put("error", "Пароль не прошел валидацию, попробуйте еще раз");
@@ -130,7 +130,7 @@ public class SsoUpdatePassword extends UpdatePassword {
         currentAuthenticationSession.setClientNote(OIDCLoginProtocol.ISSUER, Urls.realmIssuer(session.getContext().getUri().getBaseUri(), currentAuthenticationSession.getRealm().getName()));
     }
 
-    private boolean invalidPass(String password) {
+    private boolean isValidPassword(String password) {
         return Pattern.matches(Util.REGEX_PASSWORD, password);
     }
 }

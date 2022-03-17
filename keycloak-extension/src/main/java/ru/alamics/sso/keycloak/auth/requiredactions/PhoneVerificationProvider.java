@@ -41,6 +41,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     private static final String VERIFY_PHONE_FTL = "verifyPhone.ftl";
 
     private static final String NEED_SEND_EMAIL_CODE = "NEED_SEND_EMAIL_CODE";
+    private static final String GRANT_TYPE = "grant_type";
+    private static final String ERROR_CODE = "error_code";
     private static final String subject = "emailVerificationAuthSubject";
     private static final String template = "mail-verify-auth.ftl";
 
@@ -135,9 +137,9 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     private Response createForm(RequiredActionContext context, LoginFormsProvider loginFormsProvider) {
         //Костыль тк при запросе с МП не нашел другого способа верификацию отправить по rest
         String mp = context.getAuthenticationSession().getAuthNote("MP");
-        String err_code = context.getAuthenticationSession().getAuthNote("error_code");
+        String errorCode = context.getAuthenticationSession().getAuthNote(ERROR_CODE);
 
-        if (mp != null && err_code != null) {
+        if (mp != null && errorCode != null) {
             Response response = loginFormsProvider.createForm(VERIFY_PHONE_FTL);
             Map<String, String> entity = (Map<String, String>) response.getEntity();
             entity.put("error", "Код введен неверно. Вам выслан новый код");
@@ -146,7 +148,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         if (mp != null) {
             HttpRequest contextObject = context.getSession().getContext().getContextObject(HttpRequest.class);
             MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
-            parameters.add("grant_type", "password");
+            parameters.add(GRANT_TYPE, "password");
         }
         return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
     }
@@ -226,9 +228,9 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 log.warn("Wrong sms code");
                 context.form()
                         .setAttribute("error", "Пароль введен не верно. Вам выслан новый код")
-                        .setError("Введен некорректный код смс или его срок его действия истек");
+                        .setError("Введен некорректный код смс или его срок действия истек");
                 authSession.removeAuthNote(PHONE_KEY_HASH);
-                authSession.setAuthNote("error_code", "error_code");
+                authSession.setAuthNote(ERROR_CODE, ERROR_CODE);
                 requiredActionChallenge(context);
             }
         }
