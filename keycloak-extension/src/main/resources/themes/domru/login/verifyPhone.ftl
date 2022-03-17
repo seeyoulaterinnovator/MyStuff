@@ -33,7 +33,7 @@
             </div>
             <input id="codeNumbers" name="codeNumbers" class="hidden" value="${lengthCode!}" />
             <#if error?has_content>
-                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="0" />
+                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds!}" />
             <#else>
                 <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds!}" />
             </#if>

@@ -19,9 +19,12 @@ import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
+import ru.alamics.sso.util.Util;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 @Slf4j
 public class SsoUpdatePassword extends UpdatePassword {
@@ -39,6 +42,17 @@ public class SsoUpdatePassword extends UpdatePassword {
         EventBuilder errorEvent = event.clone().event(EventType.UPDATE_PASSWORD_ERROR)
                 .client(context.getAuthenticationSession().getClient())
                 .user(context.getAuthenticationSession().getAuthenticatedUser());
+
+        String mp = context.getAuthenticationSession().getAuthNote("MP");
+        if (mp != null) {
+            if (!isValidPassword(passwordNew)) {
+                Response response = context.form().createResponse(UserModel.RequiredAction.UPDATE_PASSWORD);
+                Map<String, String> entity = (Map<String, String>) response.getEntity();
+                entity.put("error", "Пароль не прошел валидацию, попробуйте еще раз");
+                context.challenge(response);
+                return;
+            }
+        }
 
         if (Validation.isBlank(passwordNew)) {
             Response challenge = context.form()
@@ -114,5 +128,9 @@ public class SsoUpdatePassword extends UpdatePassword {
         currentAuthenticationSession.setClientNote(OIDCLoginProtocol.REDIRECT_URI_PARAM, redirectUri);
         currentAuthenticationSession.setClientNote(OIDCLoginProtocol.RESPONSE_TYPE_PARAM, OAuth2Constants.CODE);
         currentAuthenticationSession.setClientNote(OIDCLoginProtocol.ISSUER, Urls.realmIssuer(session.getContext().getUri().getBaseUri(), currentAuthenticationSession.getRealm().getName()));
+    }
+
+    private boolean isValidPassword(String password) {
+        return Pattern.matches(Util.REGEX_PASSWORD, password);
     }
 }

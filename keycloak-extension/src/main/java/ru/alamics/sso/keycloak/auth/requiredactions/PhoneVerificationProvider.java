@@ -41,6 +41,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     private static final String VERIFY_PHONE_FTL = "verifyPhone.ftl";
 
     private static final String NEED_SEND_EMAIL_CODE = "NEED_SEND_EMAIL_CODE";
+    private static final String GRANT_TYPE = "grant_type";
+    private static final String ERROR_CODE = "error_code";
     private static final String subject = "emailVerificationAuthSubject";
     private static final String template = "mail-verify-auth.ftl";
 
@@ -135,10 +137,18 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     private Response createForm(RequiredActionContext context, LoginFormsProvider loginFormsProvider) {
         //Костыль тк при запросе с МП не нашел другого способа верификацию отправить по rest
         String mp = context.getAuthenticationSession().getAuthNote("MP");
+        String errorCode = context.getAuthenticationSession().getAuthNote(ERROR_CODE);
+
+        if (mp != null && errorCode != null) {
+            Response response = loginFormsProvider.createForm(VERIFY_PHONE_FTL);
+            Map<String, String> entity = (Map<String, String>) response.getEntity();
+            entity.put("error", "Код введен неверно. Вам выслан новый код");
+            return Response.ok().entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
+        }
         if (mp != null) {
             HttpRequest contextObject = context.getSession().getContext().getContextObject(HttpRequest.class);
             MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
-            parameters.add("grant_type", "password");
+            parameters.add(GRANT_TYPE, "password");
         }
         return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
     }
@@ -216,33 +226,15 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 context.success();
             } catch (WrongSmsCode wrongSmsCode) {
                 log.warn("Wrong sms code");
-                LoginFormsProvider loginFormsProvider = context.form()
-                        .setAttribute("error", "Пароль введен не верно. Проверьте правильность введенных данных")
-                        .setError("Введен некорректный код смс или его срок его действия истек")
-                        .setAttribute("expirationSeconds", activationCodeType.getExpiredSeconds())
-                        .setAttribute("lengthCode", activationCodeType.getLengthCode())
-                        .setAttribute("userPhone", user.getPhone())
-                        .setAttribute("userEmail", user.getEmail())
-                        .setAttribute("sendAgain", settingsService.getSettingsStringValue(SEND_AGAIN, context.getRealm().getId()))
-                        .setAttribute("sendByEmail", settingsService.getSettingsStringValue(SEND_BY_EMAIL, context.getRealm().getId()))
-                        .setAttribute("doSubmit", settingsService.getSettingsStringValue(DO_SUBMIT, context.getRealm().getId()))
-                        .setAttribute("homePage", settingsService.getSettingsStringValue(HOME_PAGE, context.getRealm().getId()))
-                        .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()))
-                        .setAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, context.getRealm().getId()))
-                        .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER, context.getRealm().getId()))
-                        .setAttribute("enableRepeatCall", authSession.getAuthNote(NEED_SEND_EMAIL_CODE) == null);
-                context.challenge(createErrorForm(context, loginFormsProvider));
+                context.form()
+                        .setAttribute("error", "Пароль введен не верно. Вам выслан новый код")
+                        .setError("Введен некорректный код смс или его срок действия истек");
+                authSession.removeAuthNote(PHONE_KEY_HASH);
+                authSession.setAuthNote(ERROR_CODE, ERROR_CODE);
+                requiredActionChallenge(context);
             }
         }
     }
-
-    private Response createErrorForm(RequiredActionContext context, LoginFormsProvider loginFormsProvider) {
-        Response response = loginFormsProvider.createForm(VERIFY_PHONE_FTL);
-        Map<String, String> entity = (Map<String, String>) response.getEntity();
-        entity.put("error", "Код введен неверно, попробуйте еще раз");
-        return Response.ok().entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
-    }
-
     private Integer getCount(String countStr) {
         if (countStr == null || "null".equals(countStr)) {
             return 0;
