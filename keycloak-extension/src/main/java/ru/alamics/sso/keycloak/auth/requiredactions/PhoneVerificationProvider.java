@@ -135,6 +135,14 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     private Response createForm(RequiredActionContext context, LoginFormsProvider loginFormsProvider) {
         //Костыль тк при запросе с МП не нашел другого способа верификацию отправить по rest
         String mp = context.getAuthenticationSession().getAuthNote("MP");
+        String err_code = context.getAuthenticationSession().getAuthNote("error_code");
+
+        if (mp != null && err_code != null) {
+            Response response = loginFormsProvider.createForm(VERIFY_PHONE_FTL);
+            Map<String, String> entity = (Map<String, String>) response.getEntity();
+            entity.put("error", "Код введен неверно. Вам выслан новый код");
+            return Response.ok().entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
+        }
         if (mp != null) {
             HttpRequest contextObject = context.getSession().getContext().getContextObject(HttpRequest.class);
             MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
@@ -216,38 +224,15 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 context.success();
             } catch (WrongSmsCode wrongSmsCode) {
                 log.warn("Wrong sms code");
-                LoginFormsProvider loginFormsProvider = context.form()
-                        .setAttribute("error", "Пароль введен не верно. Проверьте правильность введенных данных")
-                        .setError("Введен некорректный код смс или его срок его действия истек")
-                        .setAttribute("expirationSeconds", activationCodeType.getExpiredSeconds())
-                        .setAttribute("lengthCode", activationCodeType.getLengthCode())
-                        .setAttribute("userPhone", user.getPhone())
-                        .setAttribute("userEmail", user.getEmail())
-                        .setAttribute("sendAgain", settingsService.getSettingsStringValue(SEND_AGAIN, context.getRealm().getId()))
-                        .setAttribute("sendByEmail", settingsService.getSettingsStringValue(SEND_BY_EMAIL, context.getRealm().getId()))
-                        .setAttribute("doSubmit", settingsService.getSettingsStringValue(DO_SUBMIT, context.getRealm().getId()))
-                        .setAttribute("homePage", settingsService.getSettingsStringValue(HOME_PAGE, context.getRealm().getId()))
-                        .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()))
-                        .setAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, context.getRealm().getId()))
-                        .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER, context.getRealm().getId()))
-                        .setAttribute("enableRepeatCall", authSession.getAuthNote(NEED_SEND_EMAIL_CODE) == null);
-                context.challenge(createErrorForm(context, loginFormsProvider));
+                context.form()
+                        .setAttribute("error", "Пароль введен не верно. Вам выслан новый код")
+                        .setError("Введен некорректный код смс или его срок его действия истек");
+                authSession.removeAuthNote(PHONE_KEY_HASH);
+                authSession.setAuthNote("error_code", "error_code");
+                requiredActionChallenge(context);
             }
         }
     }
-
-    private Response createErrorForm(RequiredActionContext context, LoginFormsProvider loginFormsProvider) {
-        String mp = context.getAuthenticationSession().getAuthNote("MP");
-        if (mp != null) {
-            Response response = loginFormsProvider.createForm(VERIFY_PHONE_FTL);
-            Map<String, String> entity = (Map<String, String>) response.getEntity();
-            entity.put("error", "Код введен неверно, попробуйте еще раз");
-            return Response.ok().entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
-        } else {
-            return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
-        }
-    }
-
     private Integer getCount(String countStr) {
         if (countStr == null || "null".equals(countStr)) {
             return 0;
