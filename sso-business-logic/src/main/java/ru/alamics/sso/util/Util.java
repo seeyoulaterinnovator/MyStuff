@@ -35,6 +35,7 @@ public class Util {
     public static final String REGEX_PASSWORD = "^(?=.{8,16}$)(?=.*[A-Z])(?=.*\\d)[0-9a-zA-Z^&*%$@#\\-!.\\[\\]_].*$";
     public static String TRUE_STR = "1";
     public static String FALSE_STR = "0";
+    public final static String CLIENT_B2B = "b2b";
 
     public static boolean isPasswordGrandType(KeycloakSession session) {
         HttpRequest contextObject = session.getContext().getContextObject(HttpRequest.class);

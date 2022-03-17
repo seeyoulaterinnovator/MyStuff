@@ -45,6 +45,7 @@ import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.UserConstants.*;
 import static ru.alamics.sso.settings.SettingConstants.*;
+import static ru.alamics.sso.util.Util.CLIENT_B2B;
 
 @Slf4j
 public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
@@ -197,6 +198,8 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         }
         if (realm != null && user != null && session != null) {
             attributes.put("authenticatorConfigured", new AuthenticatorConfiguredMethod(realm, user, session));
+            attributes.put("actionIsEmpty", user.getRequiredActions() == null);
+            attributes.put("clientIsB2B", CLIENT_B2B.equals(client.getClientId()));
         }
     }
 

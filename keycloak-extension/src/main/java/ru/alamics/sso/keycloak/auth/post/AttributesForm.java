@@ -30,6 +30,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.UserConstants.*;
+import static ru.alamics.sso.util.Util.CLIENT_B2B;
 
 @Slf4j
 public class AttributesForm implements Authenticator {
@@ -99,7 +100,8 @@ public class AttributesForm implements Authenticator {
         form.setAttribute("phoneConst", settingsService.getSettingsStringValue(SettingConstants.PHONE_CONST, context.getRealm().getId()));
         form.setAttribute("phoneConstLink", settingsService.getSettingsStringValue(SettingConstants.PHONE_CONST_LINK, context.getRealm().getId()));
         form.setAttribute("homePage", settingsService.getSettingsStringValue(SettingConstants.HOME_PAGE, context.getRealm().getId()));
-
+        form.setAttribute("actionIsEmpty", context.getUser().getRequiredActions() == null);
+        form.setAttribute("clientIsB2B", CLIENT_B2B.equals(context.getAuthenticationSession().getClient().getClientId()));
         return form.createForm(FORM);
     }
 

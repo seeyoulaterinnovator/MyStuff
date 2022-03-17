@@ -137,9 +137,22 @@
     </script>
 
     <script>
-        window.onunload = function () {
-            window.parent.postMessage('post-selected', '*');
-        };
+        var actionIsEmpty = ${actionIsEmpty?c};
+        var clientIsB2B = ${clientIsB2B?c};
+
+        if (clientIsB2B) {
+            if (actionIsEmpty) {
+                window.onunload = function () {
+                    window.parent.postMessage('post-selected', '*');
+                    console.log("Отправлено тк B2B и Action пуст");
+                };
+            }
+        } else {
+            window.onunload = function () {
+                window.parent.postMessage('post-selected', '*');
+                console.log("Отправлено тк не B2B");
+            };
+        }
 
         var table = document.getElementById('post');
         Array.from(document.getElementsByClassName('titems')).forEach(function (el, index) {
