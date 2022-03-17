@@ -254,8 +254,6 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         if (Util.isPasswordGrandType(session)) {
             if (!(accessCode == null || execution == null || authenticationSession == null)) {
                 Map<String, String> entity = new HashMap<>();
-
-
                 entity.put("session_state", authenticationSession.getParentSession().getId());
                 entity.put("access_code", accessCode);
                 entity.put("execution", execution);
