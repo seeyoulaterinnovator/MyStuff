@@ -32,6 +32,7 @@ import static ru.alamics.sso.registration.model.UserConstants.I_FRAME;
 public class Util {
 
     public static final String REGEX_EMAIL = "^[\\w-+.]+@\\w[\\w-.]{0,66}\\.[a-z]{2,16}$";
+    public static final String REGEX_PASSWORD = "^(?=.{8,16}$)(?=.*[A-Z])(?=.*\\d)[0-9a-zA-Z^&*%$@#\\-!.\\[\\]_].*$";
     public static String TRUE_STR = "1";
     public static String FALSE_STR = "0";
 
