@@ -1,7 +1,6 @@
 package ru.alamics.sso.jpa.util;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 
 import java.util.Collection;
 import java.util.List;
@@ -27,6 +26,6 @@ public class CollectionUtils {
     }
 
     public static boolean isNotEmpty(String str) {
-        return !StringUtils.isEmpty(str);
+        return !isEmpty(str);
     }
 }
