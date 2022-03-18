@@ -255,6 +255,7 @@ public class UserRepository {
             String realm,
             String search,
             String searchUser,
+            String searchEmail,
             String searchPhone,
             String searchToms,
             String sortField,
@@ -264,6 +265,10 @@ public class UserRepository {
     ) {
         if (search != null && !search.isEmpty()) {
             search = "%" + search.replace("-", "\\-") + "%";
+        }
+
+        if (searchEmail != null && !searchEmail.isEmpty()){
+            search = searchEmail;
         }
 
         if (searchPhone != null && !searchPhone.isEmpty()) {
