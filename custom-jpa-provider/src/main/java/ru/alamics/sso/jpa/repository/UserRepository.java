@@ -1,5 +1,6 @@
 package ru.alamics.sso.jpa.repository;
 
+import org.apache.commons.lang.StringUtils;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.UserAttributeEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
@@ -172,7 +173,7 @@ public class UserRepository {
             List<String> includeOnlyIDs
     ) {
 
-        if (search != null && !search.isEmpty())
+        if (StringUtils.isNotEmpty(search))
             search = "%" + search + "%";
 
         String queryStr = "select GROUP_CONCAT(PA.VALUE) as account,\n" +
@@ -263,15 +264,15 @@ public class UserRepository {
             int pageNum,
             int pageSize
     ) {
-        if (search != null && !search.isEmpty()) {
+        if (StringUtils.isNotEmpty(search)) {
             search = "%" + search.replace("-", "\\-") + "%";
         }
 
-        if (searchEmail != null && !searchEmail.isEmpty()){
+        if (StringUtils.isNotEmpty(searchEmail)) {
             search = searchEmail;
         }
 
-        if (searchPhone != null && !searchPhone.isEmpty()) {
+        if (StringUtils.isNotEmpty(searchPhone)) {
             searchPhone = searchPhone + "%";
         }
 
@@ -323,7 +324,7 @@ public class UserRepository {
 
         String fullTextSearch = null;
 
-        if (search != null && !search.isEmpty()) {
+        if (StringUtils.isNotEmpty(search)) {
             fullTextSearch = convertToFullTextSearchString(search);
         }
 
@@ -369,7 +370,7 @@ public class UserRepository {
             int pageNum,
             int pageSize
     ) {
-        if (searchPhone != null && !searchPhone.isEmpty())
+        if (StringUtils.isNotEmpty(searchPhone))
             searchPhone = searchPhone + "*";
 
         Query query = em.createNativeQuery(
