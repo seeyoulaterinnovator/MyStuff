@@ -100,8 +100,8 @@ public class UserPostService {
         String userId = post.getUser().getId();
         userPostRepository.remove(post);
         List<UserPostEntity> userPosts = userPostRepository.getAllUserPostByUserId(userId);
-        if (userPosts != null) {
-            if (userPosts.stream().noneMatch(UserPostEntity::isSelected)){
+        if (!CollectionUtils.isEmpty(userPosts)) {
+            if (userPosts.stream().noneMatch(UserPostEntity::isSelected)) {
                 UserPostEntity userPostEntity = userPosts.get(0);
                 userPostEntity.setSelected(true);
             }

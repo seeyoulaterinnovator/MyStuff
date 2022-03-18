@@ -168,7 +168,8 @@
             isFramed = true;
         }
         if (isFramed) {
-            window.addEventListener('DOMContentLoaded', function (e) {
+            var x = 0;
+            var intervalID = setInterval(function () {
                 if (document.getElementById('show-cities') != null) {
                     <#if withCity?has_content && withCity == "TRUE">
                     document.getElementById('show-cities').click()
@@ -177,11 +178,11 @@
                     document.getElementById('cities-header-div').classList.replace("justify-between", "justify-center")
                     </#if>
                     document.getElementById('content').style.padding = '0';
-                    document.getElementById('page-header').style.display = 'none';
-                    document.getElementById('page-footer').style.display = 'none';
+                    window.clearInterval(intervalID);
+                } else if (++x > 50) {
                     window.clearInterval(intervalID);
                 }
-            });
+            }, 150);
         }
     </script>
     <script>
