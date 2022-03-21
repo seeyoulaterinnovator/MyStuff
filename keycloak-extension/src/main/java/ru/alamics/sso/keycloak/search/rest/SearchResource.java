@@ -7,6 +7,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.RoleModel;
 import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.representations.idm.RequiredActionProviderRepresentation;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.keycloak.GeneralRealm;
@@ -14,6 +15,7 @@ import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.registration.service.UserFindService;
+import ru.alamics.sso.service.RequiredActionService;
 import ru.alamics.sso.user.web.UserSearch;
 import ru.alamics.sso.util.Util;
 
@@ -33,12 +35,14 @@ public class SearchResource {
     public static final String VIEW_ROLE_PATTERN = "view-%s-realm";
     private final UserFindService userFindService;
     private final AdminAuth adminAuth;
+    private final RequiredActionService requiredActionService;
     protected KeycloakSession session;
 
     public SearchResource(KeycloakSession session, AdminAuth adminAuth) {
         this.session = session;
         this.adminAuth = adminAuth;
         this.userFindService = Lookup.lookup(UserFindService.class);
+        this.requiredActionService = Lookup.lookup(RequiredActionService.class);
     }
 
     private static String formatViewRole(RealmModel realm) {
@@ -147,6 +151,15 @@ public class SearchResource {
                 .filter(getPredicateByViewRoles(userRoles, userViewRoles.isEmpty()))
                 .map(RealmModel::getName)
                 .collect(Collectors.toList());
+    }
+
+    @GET
+    @Path("/required-action")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @NoCache
+    public List<RequiredActionProviderRepresentation> getRequestActionRealms(@QueryParam("realmId") String realmId) {
+        return requiredActionService.getRequiredActions(realmId);
     }
 
     private Predicate<RealmModel> getPredicateByViewRoles(Set<RoleModel> roles, boolean userDontHaveViewRoles) {
