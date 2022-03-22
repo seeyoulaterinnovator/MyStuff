@@ -26,7 +26,7 @@ isFirstVisit && fetch('/auth/realms/user/cities/current')
 export const status = writable(
   isFirstVisit ? STATUS.INITIAL : STATUS.SELECTING,
 );
-export const showModal = writable(isFirstVisit);
+export const showModal = writable(true);
 export const editingStarted = writable(false);
 export const allCities = writable([]);
 
