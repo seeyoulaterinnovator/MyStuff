@@ -8,9 +8,7 @@ import ru.alamics.sso.jpa.repository.RealmRepository;
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Stateless
@@ -21,16 +19,11 @@ public class RequiredActionService {
     @EJB
     private RealmRepository realmRepository;
 
-    private static RequiredActionProviderRepresentation entityToRepresentation(RequiredActionProviderEntity entity){
+    private static RequiredActionProviderRepresentation entityToRepresentation(RequiredActionProviderEntity entity) {
         RequiredActionProviderRepresentation rep = new RequiredActionProviderRepresentation();
         rep.setAlias(entity.getAlias());
         rep.setName(entity.getName());
         rep.setDefaultAction(entity.isDefaultAction());
-        rep.setPriority(entity.getPriority());
-        rep.setEnabled(entity.isEnabled());
-        Map<String, String> config = new HashMap<>();
-        if (entity.getConfig() != null) config.putAll(entity.getConfig());
-        rep.setConfig(config);
         return rep;
     }
 
