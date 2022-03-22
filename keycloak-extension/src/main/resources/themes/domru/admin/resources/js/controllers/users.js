@@ -979,16 +979,8 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
             console.log("user require action: " + user.requiredActions[i]);
         }
     }
-    // ID - Name map for required actions. IDs are enum names.
-    RequiredActions.query({realm: $scope.query.searchRealm}, function (data) {
-        $scope.userReqActionList = [];
-        for (var i = 0; i < data.length; i++) {
-            console.log("listed required action: " + data[i].name);
-            if (data[i].enabled) {
-                var item = data[i];
-                $scope.userReqActionList.push(item);
-            }
-        }
+    $http.get(authUrl + '/realms/' + realm.realm + '/users-info/required-action?realmId=' + $scope.query.searchRealm).then(function (data) {
+        $scope.userReqActionList = angular.fromJson(data).data;
         console.log("---------------------");
         console.log("ng-model: user.requiredActions=" + JSON.stringify($scope.user.requiredActions));
         console.log("---------------------");
