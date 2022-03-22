@@ -10,8 +10,7 @@ export const city = writable(
 export const domain = writable(
   Cookie.get('city-domain') || 'yar');
 
-const isFirstVisit =
-  typeof Cookie.get('VISITED') == "undefined" || !!!Cookie.get('VISITED') || Cookie.get('VISITED') === undefined || Cookie.get('VISITED') == undefined || Cookie.get('VISITED') === '0';
+const isFirstVisit = Cookie.get('VISITED') !== '1';
 
 isFirstVisit && fetch('/auth/realms/user/cities/current')
   .then(response => response.json())
