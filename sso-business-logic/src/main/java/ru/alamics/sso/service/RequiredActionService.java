@@ -19,14 +19,11 @@ public class RequiredActionService {
     @EJB
     private RealmRepository realmRepository;
 
-    private static RequiredActionProviderRepresentation entityToRepresentation(RequiredActionProviderEntity entity){
+    private static RequiredActionProviderRepresentation entityToRepresentation(RequiredActionProviderEntity entity) {
         RequiredActionProviderRepresentation rep = new RequiredActionProviderRepresentation();
         rep.setAlias(entity.getAlias());
         rep.setName(entity.getName());
         rep.setDefaultAction(entity.isDefaultAction());
-        rep.setPriority(entity.getPriority());
-        rep.setEnabled(entity.isEnabled());
-        rep.setConfig(entity.getConfig());
         return rep;
     }
 
