@@ -24,9 +24,17 @@ isFirstVisit && fetch('/auth/realms/user/cities/current')
   });
 
 export const status = writable(
-  isFirstVisit ? STATUS.SELECTING : STATUS.INITIAL,
+  isFirstVisit ? STATUS.INITIAL : STATUS.SELECTING,
 );
-export const showModal = writable(true);
+
+let isFramed = false;
+try {
+  isFramed = window !== window.top || document !== top.document || self.location !== top.location;
+} catch (e) {
+  isFramed = true;
+}
+
+export const showModal = writable(isFramed ? false : isFirstVisit);
 export const editingStarted = writable(false);
 export const allCities = writable([]);
 
