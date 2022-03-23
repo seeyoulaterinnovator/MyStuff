@@ -7,10 +7,12 @@ import org.keycloak.sessions.AuthenticationSessionModel;
 
 public class CustomAuthenticationFlowResolver {
 
+    private final static String RESET_CREDENTIALS = "reset_credential";
+
     public static AuthenticationFlowModel resolveResetCredentialFlow(AuthenticationSessionModel authSession) {
         AuthenticationFlowModel flow = null;
         ClientModel client = authSession.getClient();
-        String clientFlow = client.getAuthenticationFlowBindingOverride(AuthenticationFlowBindings.RESET_CREDENTIALS);
+        String clientFlow = client.getAuthenticationFlowBindingOverride(RESET_CREDENTIALS);
         if (clientFlow != null) {
             flow = authSession.getRealm().getAuthenticationFlowById(clientFlow);
             if (flow == null) {
