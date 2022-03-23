@@ -10,8 +10,7 @@ export const city = writable(
 export const domain = writable(
   Cookie.get('city-domain') || 'yar');
 
-const isFirstVisit =
-  Cookie.get('VISITED') === '0' || typeof Cookie.get('VISITED') === 'undefined';
+const isFirstVisit = !!Cookie.get('VISITED');
 
 isFirstVisit && fetch('/auth/realms/user/cities/current')
   .then(response => response.json())
@@ -26,6 +25,7 @@ isFirstVisit && fetch('/auth/realms/user/cities/current')
 export const status = writable(
   isFirstVisit ? STATUS.INITIAL : STATUS.SELECTING,
 );
+
 export const showModal = writable(isFirstVisit);
 export const editingStarted = writable(false);
 export const allCities = writable([]);
