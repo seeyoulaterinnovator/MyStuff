@@ -160,8 +160,10 @@
     </#if>
 
     <script>
-        <#if message.summary?contains('Неправильное имя пользователя или пароль.')>
-             document.cookie = 'VISITED=0';
+        <#if displayMessage && message?has_content>
+            <#if message.summary?contains('Неправильное имя пользователя или пароль.')>
+                 document.cookie = 'VISITED=0';
+            </#if>
         </#if>
     </script>
 
