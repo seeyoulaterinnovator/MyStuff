@@ -106,7 +106,7 @@
                                     <#if message.summary?contains('Неправильное имя пользователя или пароль.')>
                                         <script>
                                             console.log("куки в теплейт до" + document.cookie);
-                                            var visited0Path = document.cookie = 'VISITED=0; Path=/;';
+                                            var visited0Path = document.cookie = 'VISITED=0;';
                                             console.log("куки в теплейт после " + visited0Path);
                                         </script>
                                     </#if>
