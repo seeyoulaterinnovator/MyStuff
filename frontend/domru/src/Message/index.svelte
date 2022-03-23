@@ -10,7 +10,7 @@
     loginUrl,
   } from './stores.js';
 
-  const hasAuth = window.location.href.includes('openid-connect/auth');
+  const hasAuth = window.location.href.includes('login-actions/authenticate');
   const hasRegistration = window.location.href.includes('registration');
   const hasUpdateProfile = window.location.href.includes('UPDATE_PROFILE');
   const alert = document.querySelector('.alert .text-accentRed');
