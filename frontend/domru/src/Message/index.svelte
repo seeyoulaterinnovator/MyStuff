@@ -21,13 +21,13 @@
   const emailElement = document.getElementsByName('email')[0];
   const phoneElement = document.getElementsByName('phone')[0];
 
-  console.log(Cookie.get('VISITED'));
+  console.log("mess cookie do " +Cookie.get('VISITED'));
 
   if (hasAlert && hasAuth) {
     Cookie.set('VISITED','0');
   }
 
-  console.log(Cookie.get('VISITED'));
+  console.log("mess cookie posle " + Cookie.get('VISITED'));
 
   let email = '';
   let phone = '';
