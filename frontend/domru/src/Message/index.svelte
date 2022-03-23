@@ -24,8 +24,8 @@
   console.log("mess cookie do " +Cookie.get('VISITED'));
 
   if (hasAlert && hasAuth) {
-    Cookies.remove('VISITED', { path: '' })
     Cookie.set('VISITED','0');
+    console.log("mess cookie v " + Cookie.get('VISITED'));
   }
 
   console.log("mess cookie posle " + Cookie.get('VISITED'));
