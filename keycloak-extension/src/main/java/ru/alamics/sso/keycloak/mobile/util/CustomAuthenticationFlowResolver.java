@@ -18,6 +18,6 @@ public class CustomAuthenticationFlowResolver {
             }
             return flow;
         }
-        return authSession.getRealm().getDirectGrantFlow();
+        return authSession.getRealm().getResetCredentialsFlow();
     }
 }
