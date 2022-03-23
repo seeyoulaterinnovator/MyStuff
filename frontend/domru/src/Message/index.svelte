@@ -24,7 +24,7 @@
   console.log("mess cookie do " +Cookie.get('VISITED'));
 
   if (hasAlert && hasAuth) {
-    Cookie.set('VISITED','0');
+    Cookie.set('VISITED','0', , {sameSite: 'None', secure: document.location.protocol === 'https:'});
     console.log("mess cookie v " + Cookie.get('VISITED'));
   }
 
