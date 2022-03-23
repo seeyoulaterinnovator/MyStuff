@@ -21,6 +21,7 @@ import org.keycloak.services.resources.SessionCodeChecks;
 import org.keycloak.services.util.BrowserHistoryHelper;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.sessions.RootAuthenticationSessionModel;
+import ru.alamics.sso.keycloak.mobile.util.CustomAuthenticationFlowResolver;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -100,7 +101,7 @@ public class RestResetCredentialsResource {
     protected Response processResetCredentials(boolean actionRequest, String execution, AuthenticationSessionModel authSession, String errorMessage) {
         AuthenticationProcessor authProcessor = new ResetCredentialsActionTokenHandler.ResetCredsAuthenticationProcessor();
 
-        return processFlow(actionRequest, execution, authSession, RESET_CREDENTIALS_PATH, realm.getResetCredentialsFlow(), errorMessage, authProcessor);
+        return processFlow(actionRequest, execution, authSession, RESET_CREDENTIALS_PATH, CustomAuthenticationFlowResolver.resolveResetCredentialFlow(authSession), errorMessage, authProcessor);
     }
 
     AuthenticationSessionModel createAuthenticationSessionForClient() throws UriBuilderException, IllegalArgumentException {
