@@ -41,7 +41,6 @@ export default (function() {
   formElement.addEventListener('submit', () => {
     usernameElement.value = dynamicMask.unmaskedValue;
     cityElement.value = Cookie.get('city-domain') || 'yar';
-    Cookie.set('VISITED','1', {sameSite: 'None', secure: document.location.protocol === 'https:'});
     return true;
   });
 
