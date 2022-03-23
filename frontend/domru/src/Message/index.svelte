@@ -74,7 +74,6 @@
   }
 
   function handleHide() {
-    Cookie.set('VISITED', '0');
     show.set(false);
   }
 
