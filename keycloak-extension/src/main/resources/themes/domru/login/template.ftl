@@ -71,9 +71,6 @@
 
                 <div class="py-2 sm:py-3 lg:py-4">
                     <#if displayMessage && message?has_content>
-                        <script>
-                            document.cookie = 'VISITED=0; Path=/;';
-                        </script>
                         <div class="alert pb-4">
                             <#if message.type = 'info'>
                                 <span class="text-black">

@@ -1,4 +1,5 @@
 <script>
+  import Cookie from 'js-cookie';
   import {
     show,
     text,
@@ -9,6 +10,7 @@
     loginUrl,
   } from './stores.js';
 
+  const hasAuth = window.location.href.includes('openid-connect/auth');
   const hasRegistration = window.location.href.includes('registration');
   const hasUpdateProfile = window.location.href.includes('UPDATE_PROFILE');
   const alert = document.querySelector('.alert .text-accentRed');
@@ -18,6 +20,10 @@
   const newText = hasAlert ? alert.innerText : '';
   const emailElement = document.getElementsByName('email')[0];
   const phoneElement = document.getElementsByName('phone')[0];
+
+  if (hasAlert && hasAuth) {
+    Cookie.set('VISITED','0');
+  }
 
   let email = '';
   let phone = '';
