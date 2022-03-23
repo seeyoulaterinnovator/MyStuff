@@ -24,6 +24,7 @@
   console.log("mess cookie do " +Cookie.get('VISITED'));
 
   if (hasAlert && hasAuth) {
+    Cookies.remove('VISITED', { path: '' })
     Cookie.set('VISITED','0');
   }
 
