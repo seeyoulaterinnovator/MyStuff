@@ -137,12 +137,6 @@
             </footer>
         </#if>
 
-        <#if message.summary?contains('Неправильное имя пользователя или пароль.')>
-            <script>
-                document.cookie = 'VISITED=0';
-            </script>
-        </#if>
-
         <div id="cities-modal"></div>
         <div id="message-modal" data-login-url="${url.loginRestartFlowUrl}"></div>
     </#if>
@@ -164,6 +158,12 @@
             </#if>
         </#list>
     </#if>
+
+    <script>
+        <#if message.summary?contains('Неправильное имя пользователя или пароль.')>
+             document.cookie = 'VISITED=0';
+        </#if>
+    </script>
 
     <script type="text/javascript">
 
