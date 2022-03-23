@@ -104,6 +104,11 @@
                                     </span>
                                 <#else>
                                     <span class="text-accentRed hidden">
+                                        <#if message.summary?contains('Неправильное имя пользователя или пароль.')>
+                                            <script>
+                                                document.cookie = 'VISITED=0; Path=/;';
+                                            </script>
+                                        </#if>
                                         ${kcSanitize(message.summary)?no_esc}
                                     </span>
                                 </#if>
