@@ -21,10 +21,6 @@
   const emailElement = document.getElementsByName('email')[0];
   const phoneElement = document.getElementsByName('phone')[0];
 
-  if (hasAlert && hasAuth) {
-    Cookie.set('VISITED','0', {sameSite: 'None', secure: document.location.protocol === 'https:'});
-  }
-
   let email = '';
   let phone = '';
 
