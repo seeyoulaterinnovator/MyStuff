@@ -10,11 +10,10 @@ public class CustomAuthenticationFlowResolver {
     private final static String RESET_CREDENTIALS = "reset_credential";
 
     public static AuthenticationFlowModel resolveResetCredentialFlow(AuthenticationSessionModel authSession) {
-        AuthenticationFlowModel flow = null;
         ClientModel client = authSession.getClient();
         String clientFlow = client.getAuthenticationFlowBindingOverride(RESET_CREDENTIALS);
         if (clientFlow != null) {
-            flow = authSession.getRealm().getAuthenticationFlowById(clientFlow);
+            AuthenticationFlowModel flow = authSession.getRealm().getAuthenticationFlowById(clientFlow);
             if (flow == null) {
                 throw new ModelException("Client " + client.getClientId() + " has reset credential flow override, but this flow does not exist");
             }
