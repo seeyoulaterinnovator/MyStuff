@@ -1,5 +1,4 @@
 <script>
-  import Cookie from 'js-cookie';
   import {
     show,
     text,
@@ -10,7 +9,6 @@
     loginUrl,
   } from './stores.js';
 
-  const hasAuth = window.location.href.includes('login-actions/authenticate');
   const hasRegistration = window.location.href.includes('registration');
   const hasUpdateProfile = window.location.href.includes('UPDATE_PROFILE');
   const alert = document.querySelector('.alert .text-accentRed');

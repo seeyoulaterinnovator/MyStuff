@@ -103,7 +103,6 @@
                                         ${kcSanitize(message.summary)?no_esc}
                                     </span>
                                 <#else>
-
                                     <span class="text-accentRed hidden">
                                         ${kcSanitize(message.summary)?no_esc}
                                     </span>
