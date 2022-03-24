@@ -18,7 +18,7 @@ if (hasAlert && hasAuth) {
 export const domain = writable(
   Cookie.get('city-domain') || 'yar');
 
-const isFirstVisit = Cookie.get('VISITED') === '1' ? false : true;
+const isFirstVisit = Cookie.get('VISITED') !== '1';
 
 isFirstVisit && fetch('/auth/realms/user/cities/current')
   .then(response => response.json())
