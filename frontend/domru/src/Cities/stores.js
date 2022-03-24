@@ -11,6 +11,9 @@ window.location.href.includes('login-actions/authenticate') === true ?
   Cookie.set('VISITED', '0', {sameSite: 'None', secure: document.location.protocol === 'https:'}) :
   Cookie.set('VISITED', '1', {sameSite: 'None', secure: document.location.protocol === 'https:'});
 
+Cookie.get('isOk') === '1' ?   Cookie.set('VISITED', '1', {sameSite: 'None', secure: document.location.protocol === 'https:'}) :
+  Cookie.set('VISITED', '0', {sameSite: 'None', secure: document.location.protocol === 'https:'});
+
 export const domain = writable(
   Cookie.get('city-domain') || 'yar');
 
