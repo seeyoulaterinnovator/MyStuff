@@ -159,14 +159,6 @@
         </#list>
     </#if>
 
-    <script>
-        <#if displayMessage && message?has_content>
-            <#if message.summary?contains('Неправильное имя пользователя или пароль.')>
-                 document.cookie = 'VISITED=0';
-            </#if>
-        </#if>
-    </script>
-
     <script type="text/javascript">
 
         let isFramed = false;
