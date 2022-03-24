@@ -72,7 +72,6 @@ public class AuthMailPhoneWithRiasForm extends AbstractAuthMailPhoneForm {
                     context.challenge(context.form().createLogin());
                 } else if (!checkAuthRias(context, CHOOSE_REDIRECT_TO_LK_FORM)) {
                     context.getEvent().error(Errors.USER_NOT_FOUND);
-                    context.form().setAttribute("askCity", "1");
                     context.failureChallenge(AuthenticationFlowError.INVALID_USER, challenge(context, Messages.INVALID_USER));
                 }
                 return false;
