@@ -36,8 +36,12 @@ function getAccessObject(Auth, Current) {
             return getAccess(Auth, Current, 'edit-credentials');
         },
 
-        get selectAll() {
-            return getAccess(Auth, Current, 'select-all');
+        get hideSelectAll() {
+            return getAccess(Auth, Current, 'hide-select-all');
+        },
+
+        get hideUserSearch() {
+            return getAccess(Auth, Current, 'hide-user-search');
         },
 
         get editFederatedIdentity() {

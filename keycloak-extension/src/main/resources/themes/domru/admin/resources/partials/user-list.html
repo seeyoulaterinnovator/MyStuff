@@ -146,7 +146,7 @@
         <tr data-ng-show="searchLoaded && users.length > 0">
             <th class="w-1"></th>
             <th class="w-1">
-                <input type="checkbox" data-ng-click="selectAll()" data-ng-model="selectedAll"> Select
+                <input type="checkbox" data-ng-click="selectAll()" data-ng-model="selectedAll" data-ng-hide="access.hideSelectAll"> Select
             </th>
             <th class="w-3">{{:: 'id' | translate}}</th>
             <th class="w-4">{{:: 'username' | translate}}</th>
