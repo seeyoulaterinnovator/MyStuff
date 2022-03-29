@@ -17,7 +17,7 @@
             </#list>
         </#if>
         <title>${msg("loginTitle",(realm.displayName!''))}</title>
-<#--        Убрал гугл аналитику, но оставил на будующие-->
+<#--        Убрал гугл аналитику, но оставил может еще понадобиться-->
 <#--        <#if environment == "stage" || environment == "production" >-->
 <#--            <#include "templates/google-tag-manager-head.html">-->
 <#--        </#if>-->
@@ -35,7 +35,7 @@
         </#if>
         <#include "templates/sth-went-wrong.html">
     <#else>
-<#--        Убрал гугл аналитику, но оставил на будующие-->
+<#--        Убрал гугл аналитику, но оставил может еще понадобиться-->
 <#--        <#if environment == "stage" || environment == "production" >-->
 <#--            <#include "templates/google-tag-manager-body.html">-->
 <#--        </#if>-->
