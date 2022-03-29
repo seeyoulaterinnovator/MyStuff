@@ -7,6 +7,14 @@ export const city = writable(
   (document.getElementById('cities-button') && document.getElementById('cities-button').dataset.city) || Cookie.get('CITY') || ''
 );
 
+const hasAuth = window.location.href.includes('login-actions/authenticate')
+const alert = document.querySelector('.alert .text-accentRed');
+const hasAlert = !!alert;
+
+if (hasAlert && hasAuth) {
+  Cookie.set('VISITED','0', {sameSite: 'None', secure: document.location.protocol === 'https:'});
+}
+
 export const domain = writable(
   Cookie.get('city-domain') || 'yar');
 
