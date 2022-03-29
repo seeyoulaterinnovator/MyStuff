@@ -279,6 +279,7 @@ domru:voronezh:primary:
     - >
       # themes and text artifacts
       for i in domru stelecom
+      do
         cp -r build/deploy/themes/${i} /usr/local/keycloak/themes
         scp -r build/deploy/themes/${i} sso-app02:/usr/local/keycloak/themes
         scp -r build/deploy/themes/${i} sso-app03:/usr/local/keycloak/themes
@@ -314,6 +315,7 @@ domru:voronezh:secondary:
     - >
       # themes and text artifacts
       for i in domru stelecom
+      do
         scp -r build/deploy/themes/${i} sso-app04:/usr/local/keycloak/themes
         scp -r build/deploy/themes/${i} sso-app05:/usr/local/keycloak/themes
       done
