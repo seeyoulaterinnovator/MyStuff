@@ -1816,6 +1816,26 @@
         </sql>
     </changeSet>
 
-
+    <changeSet id="102" author="petrov-ny">
+        <sql>
+            <![CDATA[
+                UPDATE SETTINGS SET VALUE = 'С уважением, Дом.ру Бизнес!' WHERE EXT_ID = 'GratitudeUp';
+                UPDATE SETTINGS SET VALUE = 'За выбор услуг «Дом.ру Бизнес» для Вашей компании.' WHERE EXT_ID = 'b29969b4-4ab4-4fc3-8e74-4f598bbe4b7f';
+                UPDATE SETTINGS SET VALUE = '<p>Чтобы защитить Ваши персональные данные, пароль к учетной записи для входа в Личный кабинет «Дом.ру Бизнес» был сброшен. Чтобы активировать учетную запись перейдите по ссылке <a href="{0}">«Восстановление пароля»</a> и смените его.</p>' WHERE EXT_ID ='4311bdd8-b4e0-472e-82cb-604b74a99951';
+                UPDATE SETTINGS SET VALUE = '<p>Администратор «Дом.ру Бизнес» просит обновить Вас данные учетной записи <a class="no_block" href="mailto:{2}">{2}</a>. Пройдите по ссылке</p><p><a class="no_block" href="{0}">Обновить данные</a>,</p><p>чтобы начать этот процесс.</p><p>Эта ссылка устареет через {5}.</p>' WHERE EXT_ID = 'fb0d728d-2e50-4556-9e6e-c8d787225496';
+                UPDATE SETTINGS SET VALUE = '<p>Срок действия пароля от учетной записи для входа в Личный кабинет «Дом.ру Бизнес» истёк. Для восстановления пароля Вам необходимо перейти по <a class="no_block" href="%s">ссылке</a> и воспользоваться функцией «Забыли пароль?»</p>' WHERE EXT_ID = '1a4b398e-5a67-11ec-bf63-0242ac130002';
+                UPDATE SETTINGS SET VALUE = '<p>Срок действия пароля от учетной записи для входа в Личный кабинет «Дом.ру Бизнес» истёк. Для восстановления пароля Вам необходимо перейти по <a class="no_block" href="%s">ссылке</a> и воспользоваться функцией «Забыли пароль?»</p>' WHERE EXT_ID = '1d59d0a4-5a67-11ec-bf63-0242ac130002';
+                UPDATE SETTINGS SET VALUE = '<p>Ваша учетная запись для входа в Личный кабинет «Дом.ру Бизнес» <font color="red">будет заблокирована через %s</font>.</p><p>Для предотвращения блокировки учетной записи, просим Вас войти в <a class="no_block" href="%s">Личный кабинет</a> до истечения указанного срока.</p>' WHERE EXT_ID = 'blockPrepareNotificationSchedulerHtml';
+                UPDATE SETTINGS SET VALUE = '<p>Ваша учетная запись для входа в Личный кабинет «Дом.ру Бизнес» <font color="red">заблокирована</font>. Доступ к услугам при этом не блокируется.</p><p> Вы не использовали свою учетную запись в течении длительного времени. Чтобы восстановить доступ к учетной записи, обратитесь к своему персональному менеджеру или оставьте заявку в чате <a class="no_block" href="https://newlkb2b.dom.ru">Личного кабинета</a>, или по телефону <br> <a class="no_block" href="tel:88003339000">8 800 333 9000</a>.</p>' WHERE EXT_ID = 'blockNotificationSchedulerHtml';
+                UPDATE SETTINGS SET VALUE = '<p>Ваша учетная запись для входа в Личный кабинет «Дом.ру Бизнес» <font color="red">заблокирована</font>. Доступ к услугам при этом не блокируется.</p> <p>Чтобы восстановить доступ к учетной записи, обратитесь к своему персональному менеджеру или оставьте заявку в чате <a class="no_block" href="https://newlkb2b.dom.ru">Личного кабинета</a>, или по телефону <a class="no_block" href="tel:88003339000">8 800 333 9000</a>.</p>' WHERE EXT_ID = 'emailDisabledAccountBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p>Ваша учетная запись для входа в <a class="no_block" href="https://newlkb2b.dom.ru">Личный кабинет</a> «Дом.ру Бизнес» <font color="green">разблокирована</font>.</p>' WHERE EXT_ID = 'emailEnabledAccountBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p>Подтвердите Вашу учетную запись для входа в Личный кабинет «Дом.ру Бизнес» по ссылке.Срок действия ссылки {4}.</p><p class = "block_link"><a href="{0}">Подтвердить учетную запись</a></p>' WHERE EXT_ID = 'emailVerificationLoginBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p>Был создан запрос на связь Вашей учетной записи <a class="no_block" href="mailto:{1}">{1}</a> с учетной записью пользователя {2} {0}. После объединения учетных записей Вы можете войти в Личный кабинет «Дом.ру Бизнес» <a class="no_block" href="mailto:{1}">{1}</a> через {0}. Если это были Вы, пройдите по ссылке, чтобы связать учетные записи.</p><p class = "block_link"><a href="{3}">Связать учетные данные</a></p><p class="small_text">Эта ссылка устареет через 24 часа.</p><p class="small_text">Если Вы не хотите объединять учетные записи, проигнорируйте это письмо.</p>' WHERE EXT_ID = 'identityProviderLinkBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p>Код для подтверждения данных Вашей учетной записи Личного кабинета «Дом.ру Бизнес»:</p><p class = "text_bolid margin_block">{0}</p>' WHERE EXT_ID = 'emailVerificationAuthBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p>Для Вас создана учетная запись для входа в Личный кабинет «Дом.ру Бизнес».</p><p class = "small_text margin_block">Ваш логин:<br><span class = "text_bolid"><a class="no_block" href="{0}">{0}</a></span></p><p class = "margin_block">Перейдите по ссылке и установите пароль.</p><p class = "block_link"><a href="{3}">Установить пароль</a></p>' WHERE EXT_ID = 'emailAccountDataBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p>Для Вас создана учетная запись для входа в Личный кабинет «Дом.ру Бизнес».</p><p class = "small_text margin_block">Ваш логин:<br><span class = "text_bolid"><a class="no_block" href="{0}">{0}</a></span></p>' WHERE EXT_ID = 'emailAccountCreateBodyHtml';
+            ]]>
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>

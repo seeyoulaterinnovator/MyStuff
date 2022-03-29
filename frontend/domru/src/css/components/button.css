@@ -1,6 +1,7 @@
 .btn {
   @apply .block .uppercase .tracking-wider .p-4 .rounded-lg .shadow;
 
+  border-radius: 1.5rem;
   height: 40px;
   padding: 0;
   transition: 0.2s ease-in-out;

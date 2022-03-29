@@ -1,6 +1,7 @@
 .logo {
   &--domru {
     background-image: url('./images/domru-logo.svg');
+    width: 200px;
   }
 
   &-social-providers {
@@ -64,4 +65,13 @@
       border-radius: 8px;
     }
   }
+}
+
+@media screen and (max-width: 639px){
+  .logo {
+
+    &--domru {
+       background-image: url('./images/domru-logo-mid.svg');
+     }
+}
 }
