@@ -1,11 +1,9 @@
 package ru.alamics.sso.registration.phone;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
-
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 import static ru.alamics.sso.settings.SettingConstants.*;
 
@@ -16,8 +14,8 @@ public enum ActivationCodeType {
     CODE_TO_SMS(6, 300L, EXPIRE_SMS_VIBER_CODE);
 
     private final int lengthCode;
+    private final SettingConstants propertyConstant;
     private long expiredSeconds;
-    private SettingConstants propertyConstant;
 
     ActivationCodeType(int lengthCode, long expiredSeconds, SettingConstants propertyConstant) {
         this.lengthCode = lengthCode;
@@ -36,6 +34,18 @@ public enum ActivationCodeType {
         return null;
     }
 
+    public static void init() {
+        SettingsService settingsService = Lookup.lookup(SettingsService.class);
+        for (ActivationCodeType activationCodeType : ActivationCodeType.values()) {
+            long timeValue = settingsService.getSettingsLongValue(activationCodeType.getPropertyConstant(), "user");
+            if (timeValue <= -1) {
+                timeValue = 0;
+            }
+            activationCodeType.setExpiredSeconds(timeValue);
+        }
+
+    }
+
     public int getLengthCode() {
         return lengthCode;
     }
@@ -50,22 +60,5 @@ public enum ActivationCodeType {
 
     public SettingConstants getPropertyConstant() {
         return propertyConstant;
-    }
-
-    public static void init() {
-        try {
-            InitialContext context = new InitialContext();
-            SettingsService settingsService = (SettingsService) context.lookup("java:global/domru-sso/" + SettingsService.class.getSimpleName());
-            for (ActivationCodeType activationCodeType : ActivationCodeType.values()) {
-                long timeValue = settingsService.getSettingsValue(activationCodeType.getPropertyConstant(), "user");
-                if (timeValue <= -1) {
-                    timeValue = 0;
-                }
-                activationCodeType.setExpiredSeconds(timeValue);
-            }
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context");
-        }
     }
 }

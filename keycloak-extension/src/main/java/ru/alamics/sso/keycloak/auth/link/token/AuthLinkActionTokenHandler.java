@@ -1,16 +1,12 @@
 package ru.alamics.sso.keycloak.auth.link.token;
 
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.TokenVerifier;
 import org.keycloak.authentication.AuthenticationProcessor;
 import org.keycloak.authentication.actiontoken.AbstractActionTokenHander;
 import org.keycloak.authentication.actiontoken.ActionTokenContext;
-import org.keycloak.authentication.actiontoken.TokenUtils;
-import org.keycloak.authentication.actiontoken.verifyemail.VerifyEmailActionToken;
 import org.keycloak.events.Errors;
 import org.keycloak.events.EventType;
 import org.keycloak.models.ClientSessionContext;
-import org.keycloak.models.UserModel;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.protocol.oidc.utils.RedirectUtils;
 import org.keycloak.services.managers.AuthenticationManager;
@@ -18,11 +14,7 @@ import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionModel;
 
 import javax.ws.rs.core.Response;
-
-import java.util.Objects;
 import java.util.Set;
-
-import static org.keycloak.services.resources.LoginActionsService.AUTHENTICATE_PATH;
 
 @Slf4j
 public class AuthLinkActionTokenHandler extends AbstractActionTokenHander<AuthLinkActionToken> {

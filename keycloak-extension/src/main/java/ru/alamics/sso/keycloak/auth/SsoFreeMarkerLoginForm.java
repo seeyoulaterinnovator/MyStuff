@@ -32,6 +32,7 @@ import ru.alamics.sso.keycloak.auth.model.AuthType;
 import ru.alamics.sso.keycloak.auth.model.SsoUrlBean;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.model.FormConstants;
+import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -39,28 +40,43 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.UserConstants.*;
+import static ru.alamics.sso.settings.SettingConstants.*;
+import static ru.alamics.sso.util.Util.CLIENT_B2B;
 
 @Slf4j
 public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
-    private static final String HOME_PAGE = "https://newlkb2b.dom.ru";
     private static final String REGISTRATION_ONLY_IN_FRAME_ATTRIBUTE = "registrationOnlyInFrame";
 
     private ClientService clientService = null;
+    private SettingsService settingsService = null;
 
     public SsoFreeMarkerLoginForm(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
 
         attributes.put("redirectUrl", getRedirectUrl());
         attributes.put("hideRegistration", isHideRegistration());
+        attributes.put("iframe", Util.isFrame(session));
 
-        clientService = (ClientService) Lookup.lookup(ClientService.class);
+        settingsService = Lookup.lookup(SettingsService.class);
+        clientService = Lookup.lookup(ClientService.class);
+
+        attributes.put("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, realm.getName()));
+        attributes.put("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, realm.getName()));
+        attributes.put("footer", settingsService.getSettingsStringValue(FOOTER, realm.getName()));
+        attributes.put("homePage", settingsService.getSettingsStringValue(HOME_PAGE, realm.getName()));
+
+    }
+
+    @Override
+    protected Response createResponse(LoginFormsPages page) {
+        Response restResponse = createRestResponse();
+        return restResponse != null
+                ? restResponse
+                : super.createResponse(page);
     }
 
     @Override
@@ -78,9 +94,71 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         if (realm != null) {
             attributes.put("realm", new RealmBean(realm));
 
+            if (settingsService == null) {
+                settingsService = Lookup.lookup(SettingsService.class);
+            }
+
             List<IdentityProviderModel> identityProviders = realm.getIdentityProviders();
             identityProviders = LoginFormsUtil.filterIdentityProviders(identityProviders, session, realm, attributes, formData);
+            if (Util.isFrame(session)) {
+                identityProviders = identityProviders.stream().filter(
+                        model -> {
+                            String systems = model.getConfig().get("systems");
+                            return systems != null &&
+                                    Arrays.stream(systems.split(",")).anyMatch(str -> str.equals(client.getClientId()));
+                        }
+                ).collect(Collectors.toList());
+            }
             attributes.put("social", new IdentityProviderBean(realm, session, identityProviders, baseUriWithCodeAndClientId));
+
+            //register page
+            attributes.put("placeholderUsername", settingsService.getSettingsStringValue(PLACEHOLDER_USERNAME, realm.getName()));
+            attributes.put("placeholderEmail", settingsService.getSettingsStringValue(PLACEHOLDER_EMAIL, realm.getName()));
+            attributes.put("placeholderPhone", settingsService.getSettingsStringValue(PLACEHOLDER_PHONE, realm.getName()));
+            //login page
+            attributes.put("loginTitleText", settingsService.getSettingsStringValue(LOGIN_TITLE_TEXT, realm.getName()));
+            attributes.put("yourlogin", settingsService.getSettingsStringValue(YOUR_LOGIN, realm.getName()));
+            attributes.put("passwordPlaceholder", settingsService.getSettingsStringValue(PASS_PLACEHOLDER, realm.getName()));
+            attributes.put("enter", settingsService.getSettingsStringValue(ENTER, realm.getName()));
+            attributes.put("doForgotPassword", settingsService.getSettingsStringValue(DO_FORGOT_PASS, realm.getName()));
+            //Общие поля register и login
+            attributes.put("loginWith", settingsService.getSettingsStringValue(LOGIN_WITH, realm.getName()));
+            attributes.put("doLogIn", settingsService.getSettingsStringValue(DO_LOGIN, realm.getName()));
+            attributes.put("registerTitle", settingsService.getSettingsStringValue(REGISTER_TITLE, realm.getName()));
+            //Login idp link confirm
+            attributes.put("confirmLinkIdpReviewProfile", settingsService.getSettingsStringValue(CONFIRM_LINK_IDP_REVIEW_PROFILE, realm.getName()));
+            attributes.put("confirmLinkIdpContinue", settingsService.getSettingsStringValue(CONFIRM_LINK_IDP_CONTINUE, realm.getName()));
+            //Login idp link email
+            //login page expired
+            attributes.put("pageExpiredMsg1", settingsService.getSettingsStringValue(PAGE_EXPIRE_MSG_1, realm.getName()));
+            attributes.put("pageExpiredMsg2", settingsService.getSettingsStringValue(PAGE_EXPIRE_MSG_2, realm.getName()));
+            attributes.put("doClickHere", settingsService.getSettingsStringValue(DO_CLICK_HERE, realm.getName()));
+            //login reset password
+            attributes.put("username", settingsService.getSettingsStringValue(USERNAME, realm.getName()));
+            attributes.put("usernameOrEmail", settingsService.getSettingsStringValue(USERNAME_OR_EMAIL, realm.getName()));
+            attributes.put("phoneOrEmail", settingsService.getSettingsStringValue(PHONE_OR_EMAIL, realm.getName()));
+            attributes.put("next", settingsService.getSettingsStringValue(NEXT, realm.getName()));
+            attributes.put("emailInstruction", settingsService.getSettingsStringValue(EMAIL_INSTRUCTION, realm.getName()));
+            //Общие поля login и reset password
+            attributes.put("usernameOrEmailPlaceholder", settingsService.getSettingsStringValue(USERNAME_OR_EMAIL_PLACEHOLDER, realm.getName()));
+            //Общие поля reset password и update password
+            attributes.put("emailForgotContentTitle", settingsService.getSettingsStringValue(EMAIL_FORGOT_CONTENT_TITLE, realm.getName()));
+            //Общие поля reset password и update password и Update profile
+            attributes.put("doCancel", settingsService.getSettingsStringValue(DO_CANCEL, realm.getName()));
+            //Update password
+            attributes.put("resetPassword", settingsService.getSettingsStringValue(RESET_PASSWORD, realm.getName()));
+            //Update profile
+            attributes.put("loginProfileTitle", settingsService.getSettingsStringValue(LOGIN_PROFILE_TITLE, realm.getName()));
+            attributes.put("doSubmit", settingsService.getSettingsStringValue(DO_SUBMIT, realm.getName()));
+            attributes.put("doAccept", settingsService.getSettingsStringValue(DO_ACCEPT, realm.getName()));
+            //Общие поля Update profile и register
+            attributes.put("doRegister", settingsService.getSettingsStringValue(DO_REGISTER, realm.getName()));
+            //Info page
+            attributes.put("proceedWithAction", settingsService.getSettingsStringValue(PROCEED_WITH_ACTION, realm.getName()));
+            attributes.put("backToApplication", settingsService.getSettingsStringValue(BACK_TO_APP, realm.getName()));
+
+            attributes.put("password", settingsService.getSettingsStringValue(PASS, realm.getName()));
+            attributes.put("requiredFields", settingsService.getSettingsStringValue(REQUIRED_FIELDS, realm.getName()));
 
             attributes.put("url", new SsoUrlBean(realm, theme, baseUri, this.actionUri, Util.isFrame(session)));
             attributes.put("requiredActionUrl", new RequiredActionUrlFormatterMethod(realm, baseUri));
@@ -120,6 +198,8 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         }
         if (realm != null && user != null && session != null) {
             attributes.put("authenticatorConfigured", new AuthenticatorConfiguredMethod(realm, user, session));
+            attributes.put("actionIsEmpty", user.getRequiredActions() == null);
+            attributes.put("clientIsB2B", CLIENT_B2B.equals(client.getClientId()));
         }
     }
 
@@ -135,7 +215,11 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
         // не успевает иначе
         if (clientService == null) {
-            clientService = (ClientService) Lookup.lookup(ClientService.class);
+            clientService = Lookup.lookup(ClientService.class);
+        }
+
+        if (settingsService == null) {
+            settingsService = Lookup.lookup(SettingsService.class);
         }
 
         String redirectUri = clientService.findMainRedirectUri(client);
@@ -144,7 +228,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             return redirectUri;
         }
 
-        return HOME_PAGE;
+        return settingsService.getSettingsStringValue(HOME_PAGE, realm.getName());
     }
 
     private String getHash(String fileName) {
@@ -166,29 +250,33 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     @Override
     public LoginFormsProvider setActionUri(URI actionUri) {
         URI uri = addQueryParams(actionUri);
-        LoginFormsProvider ret = super.setActionUri(uri);
-        return ret;
+        return super.setActionUri(uri);
+    }
+
+    private Response createRestResponse() {
+        if (Util.isPasswordGrandType(session)) {
+            if (!(accessCode == null || execution == null || authenticationSession == null)) {
+                Map<String, String> entity = new HashMap<>();
+
+
+                entity.put("session_state", authenticationSession.getParentSession().getId());
+                entity.put("access_code", accessCode);
+                entity.put("execution", execution);
+                entity.put("tab_id", authenticationSession.getTabId());
+                return Response.ok().entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
+            }
+
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        return null;
     }
 
     @Override
     public Response createForm(String form) {
-        Theme theme;
-        try {
-            theme = super.getTheme();
-        } catch (IOException e) {
-            log.error("Failed to create theme", e);
-            return Response.serverError().build();
-        }
-
-        Locale locale = session.getContext().resolveLocale(user);
-        Properties messagesBundle = handleThemeResources(theme, locale);
-
-        handleMessages(locale, messagesBundle);
-
-        UriBuilder uriBuilder = prepareBaseUriBuilder(false);
-        createCommonAttributes(theme, locale, messagesBundle, uriBuilder, null);
-
-        return processTemplate(theme, form, locale);
+        Response restResponse = createRestResponse();
+        return restResponse != null
+                ? restResponse
+                : super.createForm(form);
     }
 
     @Override
@@ -213,20 +301,23 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
     private URI addQueryParams(URI src) {
         UriBuilder builder = UriBuilder.fromUri(src);
-        builder = addQueryParamToBuilder(builder);
-        return builder.build();
+        return addQueryParamToBuilder(builder).build();
     }
 
     private UriBuilder addQueryParamToBuilder(UriBuilder builder) {
         MultivaluedMap<String, String> queryParameters = this.session.getContext().getUri().getQueryParameters();
         if (queryParameters != null) {
             queryParameters.forEach((k, v) -> {
-                if (k.equals(HIDDEN_HEADER)) {
-                    builder.queryParam(HIDDEN_HEADER, v.get(0));
-                } else if (k.equals(I_FRAME)) {
-                    builder.queryParam(I_FRAME, v.get(0));
-                } else if (k.equals(CITY)) {
-                    builder.queryParam(CITY, v.get(0));
+                switch (k) {
+                    case HIDDEN_HEADER:
+                        builder.queryParam(HIDDEN_HEADER, v.get(0));
+                        break;
+                    case I_FRAME:
+                        builder.queryParam(I_FRAME, v.get(0));
+                        break;
+                    case CITY:
+                        builder.queryParam(CITY, v.get(0));
+                        break;
                 }
             });
         }

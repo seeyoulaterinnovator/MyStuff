@@ -1,6 +1,5 @@
 package ru.alamics.sso.registration.service;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.keycloak.models.jpa.entities.UserEntity;
@@ -19,6 +18,7 @@ import ru.alamics.sso.util.validator.TomsIdValidator;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ws.rs.NotFoundException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -93,10 +93,19 @@ public class UserPostService {
     }
 
     public void remove(String id) throws NotFoundException {
-        if (userPostRepository.getUserPost(id) == null) {
+        UserPostEntity post = userPostRepository.getUserPost(id);
+        if (post == null) {
             throw new NotFoundException("Должность с таким ID не найдена");
         }
-        userPostRepository.remove(id);
+        String userId = post.getUser().getId();
+        userPostRepository.remove(post);
+        List<UserPostEntity> userPosts = userPostRepository.getAllUserPostByUserId(userId);
+        if (!CollectionUtils.isEmpty(userPosts)) {
+            if (userPosts.stream().noneMatch(UserPostEntity::isSelected)) {
+                UserPostEntity userPostEntity = userPosts.get(0);
+                userPostEntity.setSelected(true);
+            }
+        }
     }
 
     public UserPostResponse get(String id) throws NotFoundException {
@@ -137,7 +146,6 @@ public class UserPostService {
         if (userPost == null) {
             throw new NotFoundException("Должность не найдена");
         }
-        // TODO практически константа
         ExternalSystemRoleEntity externalSystemRole = userPostRepository.findExternalSystemRole(externalSystemRoleRequest.getSystemRoleId());
         if (externalSystemRole == null) {
             throw new NotFoundException("Доступ в систему не найден");
@@ -192,7 +200,7 @@ public class UserPostService {
         if (userPostRole == null) {
             throw new NotFoundException("Роль не найдена");
         }
-        return userPostRepository.getUserPostRole(name).getId();
+        return userPostRole.getId();
     }
 
     public Long getExternalSystemRoleId(String sysName) throws NotFoundException {

@@ -103,7 +103,7 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
             uriBuilder.queryParam(OAuth2Constants.ACR_VALUES, acr);
         }
         String forwardParameterConfig = getConfig().getForwardParameters() != null ? getConfig().getForwardParameters() : "";
-        List<String> forwardParameters = Arrays.asList(forwardParameterConfig.split("\\s*,\\s*"));
+        String[] forwardParameters = forwardParameterConfig.split("\\s*,\\s*");
         for (String forwardParameter : forwardParameters) {
             String name = AuthorizationEndpoint.LOGIN_SESSION_NOTE_ADDITIONAL_REQ_PARAMS_PREFIX + forwardParameter.trim();
             String parameter = request.getAuthenticationSession().getClientNote(name);
@@ -114,102 +114,11 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
 
         uuidToState.put(uuid.toString(), request.getState().getEncoded());
         /*
-            TODO после перехода на новый Keycloak
             AuthenticationSessionModel asm = session.getContext().getAuthenticationSession();
             asm.setAuthNote(uuid.toString(), request.getState().getEncoded());
         */
 
         return uriBuilder;
-    }
-
-    protected class Endpoint {
-        protected AuthenticationCallback callback;
-        protected RealmModel realm;
-        protected EventBuilder event;
-
-        @Context
-        protected ClientConnection clientConnection;
-
-        @Context
-        protected HttpHeaders headers;
-
-        public Endpoint(AuthenticationCallback callback, RealmModel realm, EventBuilder event) {
-            this.callback = callback;
-            this.realm = realm;
-            this.event = event;
-        }
-
-        @GET
-        public Response authResponse(@QueryParam(AbstractOAuth2IdentityProvider.OAUTH2_PARAMETER_STATE) String state,
-                                     @QueryParam(AbstractOAuth2IdentityProvider.OAUTH2_PARAMETER_CODE) String authorizationCode,
-                                     @QueryParam(OAuth2Constants.ERROR) String error) {
-
-            log.info("esia authResponse state={}, authorizationCode={}, error", state, authorizationCode, error);
-            if (error != null) {
-                //logger.error("Failed " + getConfig().getAlias() + " broker login: " + error);
-                if (error.equals(ACCESS_DENIED)) {
-                    logger.error(ACCESS_DENIED + " for broker login " + getConfig().getProviderId());
-                    return callback.cancelled(state);
-                } else {
-                    logger.error(error + " for broker login " + getConfig().getProviderId());
-                    return callback.error(state, Messages.IDENTITY_PROVIDER_UNEXPECTED_ERROR);
-                }
-            }
-
-            try {
-
-                if (authorizationCode != null) {
-                    String response = generateTokenRequest(authorizationCode, state).asString();
-
-                    log.info("response marker = {}", response);
-
-
-                    BrokeredIdentityContext federatedIdentity = getFederatedIdentity(response);
-
-                    if (getConfig().isStoreToken()) {
-                        // make sure that token wasn't already set by getFederatedIdentity();
-                        // want to be able to allow provider to set the token itself.
-                        if (federatedIdentity.getToken() == null) federatedIdentity.setToken(response);
-                    }
-
-                    federatedIdentity.setIdpConfig(getConfig());
-                    federatedIdentity.setIdp(EsiaIdentityProvider.this);
-                    federatedIdentity.setCode(uuidToState.remove(state));
-
-                    /*  TODO после перехода на новый Keycloak
-                        AuthenticationSessionModel asm = session.getContext().getAuthenticationSession();
-                        federatedIdentity.setCode(asm.getAuthNote(state));
-                        asm.removeAuthNote(state);
-                    */
-
-                    return callback.authenticated(federatedIdentity);
-                }
-            } catch (WebApplicationException e) {
-                return e.getResponse();
-            } catch (Exception e) {
-                logger.error("Failed to make identity provider oauth callback", e);
-            }
-            event.event(EventType.LOGIN);
-            event.error(Errors.IDENTITY_PROVIDER_LOGIN_FAILURE);
-            return ErrorPage.error(session, null, Response.Status.BAD_GATEWAY, Messages.IDENTITY_PROVIDER_UNEXPECTED_ERROR);
-        }
-
-        private SimpleHttp generateTokenRequest(String authorizationCode, String state) {
-            final String dateTime = timestampFormat.format(ZonedDateTime.now());
-            final UUID uuid = UUID.randomUUID();
-
-            return SimpleHttp.doPost(getConfig().getTokenUrl(), session)
-                    .param(OAUTH2_PARAMETER_CLIENT_ID, getConfig().getClientId())
-                    .param(OAUTH2_PARAMETER_CLIENT_SECRET,
-                            Signer.signString(getDefaultScopes() + dateTime + getConfig().getClientId() + uuid))
-                    .param(OAUTH2_PARAMETER_REDIRECT_URI, session.getContext().getUri().getAbsolutePath().toString())
-                    .param(OAUTH2_PARAMETER_SCOPE, getDefaultScopes())
-                    .param(OAUTH2_PARAMETER_STATE, uuid.toString())
-                    .param(TIMESTAMP, dateTime)
-                    .param(OAUTH2_PARAMETER_CODE, authorizationCode)
-                    .param(OAUTH2_PARAMETER_GRANT_TYPE, OAUTH2_GRANT_TYPE_AUTHORIZATION_CODE)
-                    .param("token_type", "Bearer");
-        }
     }
 
     @Override
@@ -278,6 +187,96 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
             return extractIdentityFromProfile(jsonNodeProfile, decodedToken.getUserId());
         } catch (Exception e) {
             throw new IdentityBrokerException("Could not obtain user profile from esia.", e);
+        }
+    }
+
+    protected class Endpoint {
+        protected AuthenticationCallback callback;
+        protected RealmModel realm;
+        protected EventBuilder event;
+
+        @Context
+        protected ClientConnection clientConnection;
+
+        @Context
+        protected HttpHeaders headers;
+
+        public Endpoint(AuthenticationCallback callback, RealmModel realm, EventBuilder event) {
+            this.callback = callback;
+            this.realm = realm;
+            this.event = event;
+        }
+
+        @GET
+        public Response authResponse(@QueryParam(AbstractOAuth2IdentityProvider.OAUTH2_PARAMETER_STATE) String state,
+                                     @QueryParam(AbstractOAuth2IdentityProvider.OAUTH2_PARAMETER_CODE) String authorizationCode,
+                                     @QueryParam(OAuth2Constants.ERROR) String error) {
+
+            log.info("esia authResponse state={}, authorizationCode={}, error", state, authorizationCode, error);
+            if (error != null) {
+                //logger.error("Failed " + getConfig().getAlias() + " broker login: " + error);
+                if (error.equals(ACCESS_DENIED)) {
+                    logger.error(ACCESS_DENIED + " for broker login " + getConfig().getProviderId());
+                    return callback.cancelled(state);
+                } else {
+                    logger.error(error + " for broker login " + getConfig().getProviderId());
+                    return callback.error(state, Messages.IDENTITY_PROVIDER_UNEXPECTED_ERROR);
+                }
+            }
+
+            try {
+
+                if (authorizationCode != null) {
+                    String response = generateTokenRequest(authorizationCode, state).asString();
+
+                    log.info("response marker = {}", response);
+
+
+                    BrokeredIdentityContext federatedIdentity = getFederatedIdentity(response);
+
+                    if (getConfig().isStoreToken()) {
+                        // make sure that token wasn't already set by getFederatedIdentity();
+                        // want to be able to allow provider to set the token itself.
+                        if (federatedIdentity.getToken() == null) federatedIdentity.setToken(response);
+                    }
+
+                    federatedIdentity.setIdpConfig(getConfig());
+                    federatedIdentity.setIdp(EsiaIdentityProvider.this);
+                    federatedIdentity.setCode(uuidToState.remove(state));
+
+                    /*
+                        AuthenticationSessionModel asm = session.getContext().getAuthenticationSession();
+                        federatedIdentity.setCode(asm.getAuthNote(state));
+                        asm.removeAuthNote(state);
+                    */
+
+                    return callback.authenticated(federatedIdentity);
+                }
+            } catch (WebApplicationException e) {
+                return e.getResponse();
+            } catch (Exception e) {
+                logger.error("Failed to make identity provider oauth callback", e);
+            }
+            event.event(EventType.LOGIN);
+            event.error(Errors.IDENTITY_PROVIDER_LOGIN_FAILURE);
+            return ErrorPage.error(session, null, Response.Status.BAD_GATEWAY, Messages.IDENTITY_PROVIDER_UNEXPECTED_ERROR);
+        }
+
+        private SimpleHttp generateTokenRequest(String authorizationCode, String state) {
+            final String dateTime = timestampFormat.format(ZonedDateTime.now());
+            final UUID uuid = UUID.randomUUID();
+
+            return SimpleHttp.doPost(getConfig().getTokenUrl(), session)
+                    .param(OAUTH2_PARAMETER_CLIENT_ID, getConfig().getClientId())
+                    .param(OAUTH2_PARAMETER_CLIENT_SECRET,
+                            Signer.signString(getDefaultScopes() + dateTime + getConfig().getClientId() + uuid))
+                    .param(OAUTH2_PARAMETER_REDIRECT_URI, session.getContext().getUri().getAbsolutePath().toString())
+                    .param(OAUTH2_PARAMETER_SCOPE, getDefaultScopes())
+                    .param(OAUTH2_PARAMETER_STATE, uuid.toString())
+                    .param(TIMESTAMP, dateTime)
+                    .param(OAUTH2_PARAMETER_CODE, authorizationCode)
+                    .param(OAUTH2_PARAMETER_GRANT_TYPE, OAUTH2_GRANT_TYPE_AUTHORIZATION_CODE)
+                    .param("token_type", "Bearer");
         }
     }
 }

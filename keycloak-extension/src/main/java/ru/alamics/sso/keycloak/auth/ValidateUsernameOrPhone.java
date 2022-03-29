@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.auth;
 
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -14,19 +13,20 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.managers.AuthenticationManager;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.util.Util;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 @Slf4j
 public class ValidateUsernameOrPhone extends ValidateUsername {
 
-    public static final String PROVIDER_ID = "direct-grant-validate-mail-or-phone";
-    public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
+    private static final String PROVIDER_ID = "direct-grant-validate-mail-or-phone";
+    private static final String DISPLAY_NAME = "UsernameOrPhone Validation";
+    private static final String HELP_TEXT = "Validates the Username Or Phone supplied as a 'username' form parameter in direct grant request";
+    private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED
     };
 
@@ -46,13 +46,8 @@ public class ValidateUsernameOrPhone extends ValidateUsername {
         try {
             if (username.startsWith("+7")) {
                 final String phone = username.replaceAll("\\D", "");
-                UserFindService userFindService;
-                try {
-                    userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
-                } catch (NamingException e) {
-                    log.error(e.getMessage(), e);
-                    throw new RuntimeException("Something wrong with context");
-                }
+                UserFindService userFindService = Lookup.lookup(UserFindService.class);
+
                 user = Util.getUserAdapter(context.getSession(), userFindService.getUserByPhone(context.getRealm(), phone));
             } else {
                 user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(), username);
@@ -94,7 +89,7 @@ public class ValidateUsernameOrPhone extends ValidateUsername {
 
     @Override
     public String getDisplayType() {
-        return "UsernameOrPhone Validation";
+        return DISPLAY_NAME;
     }
 
     @Override
@@ -104,7 +99,7 @@ public class ValidateUsernameOrPhone extends ValidateUsername {
 
     @Override
     public String getHelpText() {
-        return "Validates the Username Or Phone supplied as a 'username' form parameter in direct grant request";
+        return HELP_TEXT;
     }
 
     @Override

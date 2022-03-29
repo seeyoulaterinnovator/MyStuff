@@ -15,8 +15,6 @@ import org.keycloak.models.RealmModel;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.property.ApplicationProperties;
 
-import java.util.Objects;
-
 @Slf4j
 public class VkIdentityProvider extends AbstractOAuth2IdentityProvider<OAuth2IdentityProviderConfig> implements SocialIdentityProvider<OAuth2IdentityProviderConfig> {
     private static final String OAUTH2_PARAMETER_EMAIL = "email";
@@ -95,7 +93,7 @@ public class VkIdentityProvider extends AbstractOAuth2IdentityProvider<OAuth2Ide
 
     @Override
     protected String getDefaultScopes() {
-        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        properties = Lookup.lookup(ApplicationProperties.class);
         return properties.getProperty(DEFAULT_SCOPE);
     }
 

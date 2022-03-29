@@ -2,7 +2,6 @@ package ru.alamics.sso.keycloak.cache.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.infinispan.Cache;
-import ru.alamics.sso.keycloak.cache.CustomCache;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 
 import javax.annotation.Resource;
@@ -19,12 +18,11 @@ import java.util.stream.Collectors;
 @Singleton
 @Startup
 @Slf4j
-public class UserPostCache implements CustomCache<UserPostResponse> {
+public class UserPostCache {
 
     @Resource(lookup = "infinispan/custom_container/user_post_cache")
     private Cache<String, Set<UserPostResponse>> cache;
 
-    @Override
     public void put(String userId, List<UserPostResponse> userPosts) {
         Set<UserPostResponse> posts = cache.get(userId);
         if (posts == null) {
@@ -34,24 +32,20 @@ public class UserPostCache implements CustomCache<UserPostResponse> {
         cache.put(userId, posts);
     }
 
-    @Override
     @Lock(LockType.READ)
     public Set<UserPostResponse> get(String userId) {
         return cache.get(userId);
     }
 
-    @Override
     @Lock(LockType.READ)
     public Set<UserPostResponse> getAll() {
         return cache.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
     }
 
-    @Override
     public void clear() {
         cache.clear();
     }
 
-    @Override
     public void clearById(String userId) {
         Set<UserPostResponse> posts = cache.get(userId);
         if (posts == null) {

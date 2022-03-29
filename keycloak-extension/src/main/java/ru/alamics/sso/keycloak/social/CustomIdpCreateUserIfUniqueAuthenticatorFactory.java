@@ -6,6 +6,7 @@ import org.keycloak.models.KeycloakSession;
 
 public class CustomIdpCreateUserIfUniqueAuthenticatorFactory extends IdpCreateUserIfUniqueAuthenticatorFactory {
     private static final String PROVIDER_ID = "idp-create-user-if-unique-custom";
+    private static final String DISPLAY_NAME = "Create User If Unique (custom)";
 
     @Override
     public Authenticator create(KeycloakSession session) {
@@ -19,6 +20,6 @@ public class CustomIdpCreateUserIfUniqueAuthenticatorFactory extends IdpCreateUs
 
     @Override
     public String getDisplayType() {
-        return "Create User If Unique (custom)";
+        return DISPLAY_NAME;
     }
 }

@@ -8,17 +8,15 @@
         </div>
 
         <div class="table-wrapper">
-            <#if posts?size gt 1>
-                <h1 class="title">Выбрать организацию</h1>
-            <#else>
-                <h1 class="title" style="visibility: hidden">Выбрать организацию</h1>
-            </#if>
-
+            <h1 class="title">${chooseOrganization}</h1>
             <div id="post" class="table overflow-x-hidden overflow-y-auto">
                 <div class="trow theader">
-                    <div class="org-cell">Организация</div>
+                    <div class="org-cell">${organization}</div>
                     <#--                    <div class="org-cell">Уникальный номер</div>-->
-                    <div class="role-cell">Роль пользователя</div>
+                    <div class="role-cell">${roleUser}</div>
+                </div>
+                <div class="trow theader-mobile">
+                    <div class="cell-header-mobile">Организация / Роль пользователя</div>
                 </div>
                 <#list posts as post>
                     <#assign firstRow = post?index == 0>
@@ -139,9 +137,22 @@
     </script>
 
     <script>
-        window.onunload = function () {
-            window.parent.postMessage('post-selected', '*');
-        };
+        var actionIsEmpty = ${actionIsEmpty?c};
+        var clientIsB2B = ${clientIsB2B?c};
+
+        if (clientIsB2B) {
+            if (actionIsEmpty) {
+                window.onunload = function () {
+                    window.parent.postMessage('post-selected', '*');
+                    console.log("Отправлено тк B2B и Action пуст");
+                };
+            }
+        } else {
+            window.onunload = function () {
+                window.parent.postMessage('post-selected', '*');
+                console.log("Отправлено тк не B2B");
+            };
+        }
 
         var table = document.getElementById('post');
         Array.from(document.getElementsByClassName('titems')).forEach(function (el, index) {

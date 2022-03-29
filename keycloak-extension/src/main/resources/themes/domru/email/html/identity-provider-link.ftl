@@ -8,6 +8,6 @@
         <#if user?? && user.getEmail??>
             <#assign email= user.getEmail()>
         </#if>
-        ${kcSanitize(msg("identityProviderLinkBodyHtml", identityProviderAlias, email, identityProviderContext.username, link, linkExpiration, linkExpirationFormatter(linkExpiration)))?no_esc}
+        ${kcSanitize(msg(identityProviderLinkBodyHtml, identityProviderAlias, email, identityProviderContext.username, link, linkExpiration, linkExpirationFormatter(linkExpiration)))?no_esc}
     </#if>
 </@template.layout>

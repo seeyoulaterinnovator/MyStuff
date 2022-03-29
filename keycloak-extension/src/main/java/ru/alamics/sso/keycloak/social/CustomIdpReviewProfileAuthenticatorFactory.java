@@ -1,20 +1,18 @@
 package ru.alamics.sso.keycloak.social;
 
 import org.keycloak.authentication.Authenticator;
-import org.keycloak.authentication.FormActionFactory;
-import org.keycloak.authentication.authenticators.broker.IdpReviewProfileAuthenticator;
 import org.keycloak.authentication.authenticators.broker.IdpReviewProfileAuthenticatorFactory;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class CustomIdpReviewProfileAuthenticatorFactory extends IdpReviewProfileAuthenticatorFactory {
     private static final String PROVIDER_ID = "custom-idp-review-profile";
+    private static final String DISPLAY_NAME = "Review Profile (custom)";
 
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<ProviderConfigProperty>();
 
@@ -56,6 +54,6 @@ public class CustomIdpReviewProfileAuthenticatorFactory extends IdpReviewProfile
 
     @Override
     public String getDisplayType() {
-        return "Review Profile (custom)";
+        return DISPLAY_NAME;
     }
 }

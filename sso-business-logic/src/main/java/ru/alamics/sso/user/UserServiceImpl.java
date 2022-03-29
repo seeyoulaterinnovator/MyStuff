@@ -1,7 +1,5 @@
 package ru.alamics.sso.user;
 
-import javassist.NotFoundException;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.KeycloakSession;
@@ -23,36 +21,31 @@ import ru.alamics.sso.util.validator.NotValidException;
 
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.ws.rs.NotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 @Slf4j
 public class UserServiceImpl implements UserService {
 
+    private final AdminAuth auth;
+    private final RealmModel realm;
+    private final ImportUsersReportService importUsersReportService;
+    private final ImportReportService importReportService;
+    private final ImportService importService;
+    private final ExportWorker exportWorker;
+    private final UserExtService userExtService;
     protected KeycloakSession session;
-    private AdminAuth auth;
-    private RealmModel realm;
-    // TODO rename these three
-    private ImportUsersReportService importUsersReportService;
-    private ImportReportService importReportService;
-    private ImportService importService;
-
-    private ExportWorker exportWorker;
-    private UserExtService userExtService;
 
     public UserServiceImpl(KeycloakSession session, AdminAuth auth) {
         this.auth = auth;
         this.session = session;
         this.realm = session.getContext().getRealm();
 
-        this.importUsersReportService = (ImportUsersReportService) Lookup.lookup(ImportUsersReportService.class);
-        this.importReportService = (ImportReportService) Lookup.lookup(ImportReportService.class);
-        this.importService = (ImportService) Lookup.lookup(ImportService.class);
+        this.importUsersReportService = Lookup.lookup(ImportUsersReportService.class);
+        this.importReportService = Lookup.lookup(ImportReportService.class);
+        this.importService = Lookup.lookup(ImportService.class);
 
         this.exportWorker = new ExportWorker(realm);
         this.userExtService = new UserExtService(session, auth);
@@ -81,7 +74,7 @@ public class UserServiceImpl implements UserService {
         final List<ImportUsersDataEntity> importUsersData = importReportService.findImportUsersDataByImportId(importId);
         for (ImportUsersDataEntity importData : importUsersData) {
             String id = importData.getUserId();
-            if (id == null || id.isEmpty()) {
+            if (id == null || id.isEmpty() || !importData.isCreated()) {
                 continue;
             }
             UserModel user = session.users().getUserById(id, realm);
@@ -157,8 +150,9 @@ public class UserServiceImpl implements UserService {
         List<ImportUsersDataModel> dataList = impF.getDataList(file);
 
         // create report
-        importUsersReportService.createImportUsersReportAsync(realm, Util.getFileName(content), dataList);
+        String id = importUsersReportService.createImportUsersReportAsync(realm, Util.getFileName(content), dataList);
 
+        importReportService.updateUploaded(id);
         log.info("Upload import users file success");
     }
 

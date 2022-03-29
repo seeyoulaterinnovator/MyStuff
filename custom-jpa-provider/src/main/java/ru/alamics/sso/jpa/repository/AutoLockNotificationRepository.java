@@ -6,12 +6,10 @@ import ru.alamics.sso.jpa.entity.common.NotificationStatus;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Stateless
@@ -37,7 +35,6 @@ public class AutoLockNotificationRepository {
                 .setMaxResults(100)
                 .getResultList();
 
-        // TODO set SENT only after successful send
         ret.forEach(lock -> {
             lock.setStatus(NotificationStatus.SENT);
             lock.setSendedAt(LocalDateTime.now());

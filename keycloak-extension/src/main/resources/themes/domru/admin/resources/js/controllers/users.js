@@ -123,13 +123,19 @@ module.controller('UserRoleMappingCtrl', function ($scope, $http, realm, user, c
 
 });
 
-module.controller('UserSessionsCtrl', function ($scope, realm, user, sessions, UserSessions, UserLogout,
+module.controller('UserSessionsCtrl', function ($scope, $http, realm, user, UserSessions, UserLogout,
                                                 UserSessionLogout, Notifications, $location) {
+
     $scope.realm = realm;
     $scope.user = user;
-    $scope.sessions = sessions;
     $scope.query = {};
     $scope.query.searchRealm = realm.realm;
+
+    let id = user.id;
+    $http.get(`${authUrl}/realms/${realm.realm}/sessions/${id}?searchRealm=${$location.search().searchRealm}`).then(function (data) {
+        $scope.sessions = data.data;
+    })
+
     if ($location.search().searchRealm) {
         $scope.query.searchRealm = $location.search().searchRealm;
     }
@@ -300,7 +306,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             if ($scope.query.searchRealm === '' || !$scope.userRealms.some(function (realm) {
                 return realm === $scope.query.searchRealm
             })) {
-                if (realm.realm === 'manager' && $scope.userRealms.length === 1) {
+                if (realm.realm === 'manager' && $scope.userRealms.includes('manager') === false) {
                     $scope.query.searchRealm = $scope.userRealms[0];
                 } else {
                     $scope.query.searchRealm = realm.realm;
@@ -529,18 +535,33 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
     $scope.selectedSendLogin = function () {
-        let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
-        $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/send/login`, userForResetPassword).then(response => {
-            Notifications.success("Login has been sent");
-        })
+        if (checkSelect()) {
+            let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
+            $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/send/login`, userForResetPassword).then(response => {
+                Notifications.success("Login has been sent");
+            })
+        }
     };
 
     $scope.selectedSendLoginAndResetPassword = function () {
-        let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
-        $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/credential/reset-with-send-login`, userForResetPassword).then(response => {
-            Notifications.success("Login has been sent and password reset");
-        })
+        if (checkSelect()) {
+            let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
+            $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/credential/reset-with-send-login`, userForResetPassword).then(response => {
+                Notifications.success("Login has been sent and password reset");
+            })
+        }
     };
+
+    function checkSelect() {
+        let users = $scope.users.filter(user => user.active);
+        for (let i = 0; i < users.length; i++) {
+            if (!users[i].enabled) {
+                Notifications.error("Вы выбрали заблокированного пользователя c username " + users[i].username);
+                return false;
+            }
+        }
+        return true;
+    }
 
     $scope.selectedBlockUsers = function () {
         let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
@@ -958,16 +979,8 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
             console.log("user require action: " + user.requiredActions[i]);
         }
     }
-    // ID - Name map for required actions. IDs are enum names.
-    RequiredActions.query({realm: realm.realm}, function (data) {
-        $scope.userReqActionList = [];
-        for (var i = 0; i < data.length; i++) {
-            console.log("listed required action: " + data[i].name);
-            if (data[i].enabled) {
-                var item = data[i];
-                $scope.userReqActionList.push(item);
-            }
-        }
+    $http.get(authUrl + '/realms/' + realm.realm + '/users-info/required-action?realmId=' + $scope.query.searchRealm).then(function (data) {
+        $scope.userReqActionList = angular.fromJson(data).data;
         console.log("---------------------");
         console.log("ng-model: user.requiredActions=" + JSON.stringify($scope.user.requiredActions));
         console.log("---------------------");
@@ -995,7 +1008,7 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
     };
 
     $scope.GetPhoneCheckerResult = function () {
-        return $http.get(authUrl + '/realms/' + realm.realm + '/users-info/attribute?phone=' + $scope.GetPhoneAttr() + '&excludedUserId=' + $scope.user.id)
+        return $http.get(authUrl + '/realms/' + realm.realm + '/users-info/attribute?phone=' + $scope.GetPhoneAttr() + '&excludedUserId=' + $scope.user.id + '&realmId=' + realm.realm)
             .then(function (response) {
                 return angular.fromJson(response).data.results['foundUserId'];
             });
@@ -1017,7 +1030,7 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
                 var id = l.substring(l.lastIndexOf("/") + 1);
 
                 $location.url("/realms/" + realm.realm + "/users/" + id + "?searchRealm=" + $scope.query.searchRealm);
-                Notifications.success("The user has been created.");
+                Notifications.success("Пользователь создан");
             });
         } else {
             if ($scope.GetPhoneAttr() === '') {
@@ -1028,12 +1041,21 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
                     $scope.changed = false;
                     convertAttributeValuesToString($scope.user);
                     user = angular.copy($scope.user);
-                    Notifications.success("Your changes have been saved to the user.");
+                    Notifications.success("Ваши изменения были сохранены.");
                 });
             } else {
                 $scope.GetPhoneCheckerResult().then(function (result) {
+                    var phone = $scope.GetPhoneAttr();
                     if (result != null) {
-                        Notifications.error("The user phone number not unique");
+                        Notifications.error("Номер телефона уже используется");
+                        return;
+                    }
+                    if (!Number(phone)) {
+                        Notifications.error('Некорректный номер телефона');
+                        return;
+                    }
+                    if (('' + phone).length !== 11) {
+                        Notifications.error("Некорректная длина номера телефона");
                         return;
                     }
                     User.update({
@@ -1043,7 +1065,7 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
                         $scope.changed = false;
                         convertAttributeValuesToString($scope.user);
                         user = angular.copy($scope.user);
-                        Notifications.success("Your changes have been saved to the user.");
+                        Notifications.success("Ваши изменения были сохранены.");
                     });
                 });
             }
@@ -1080,6 +1102,16 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
     };
 
     $scope.addAttribute = function () {
+        if ($scope.newAttribute.key === 'phone') {
+            if (!Number($scope.newAttribute.value)) {
+                Notifications.error('Некорректный номер телефона');
+                return;
+            }
+            if ($scope.newAttribute.value.length !== 11) {
+                Notifications.error("Некорректная длина номера телефона");
+                return;
+            }
+        }
         $scope.user.attributes[$scope.newAttribute.key] = $scope.newAttribute.value;
         delete $scope.newAttribute;
     };
@@ -2504,6 +2536,11 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
         $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/importUsersReports').then(function (data) {
             $scope.ImportReports = angular.fromJson(data).data.results['importUsersReports'];
         });
+        var timeout = setInterval(function () {
+            $http.get(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/importUsersReports').then(function (data) {
+                $scope.ImportReports = angular.fromJson(data).data.results['importUsersReports'];
+            });
+        }, 1000);
     };
 
     $scope.importFileAsync = function (files) {

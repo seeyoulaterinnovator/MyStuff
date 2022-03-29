@@ -32,15 +32,15 @@
     }
 
     .w-1 {
-        width:2%;
+        width: 2%;
     }
 
     .w-3 {
-        width:6%;
+        width: 6%;
     }
 
     .w-4 {
-        width:8%;
+        width: 8%;
     }
 
 </style>
@@ -54,7 +54,7 @@
         <tr>
             <th colspan="14">
                 <div class="form-inline">
-                    <div class="form-group form-inline">
+                    <div class="form-group form-inline" data-ng-hide="access.hideUserSearch">
                         <div class="form-group">
                             <div class="input-group-addon">
                                 <input type="text" placeholder="{{:: 'search.placeholder' | translate}}"
@@ -83,35 +83,61 @@
                                        onkeydown="if (event.keyCode == 13) document.getElementById('searchUsers').click()">
                             </div>
                         </div>
+                        <button id="searchUsers" class="btn btn-default" ng-click="firstPage()">Search users</button>
+                        <button id="viewAllUsers" class="btn btn-default"
+                                ng-click="query.search = ''; query.searchByUserId = ''; query.searchByTomsId = ''; query.searchByPhone = ''; firstPage()">
+                            {{::
+                            'view-all-users' | translate}}
+                        </button>
+                        <select class="form-control" name="realmsSelect" ng-model="query.searchRealm"
+                                ng-change="changeSearchRealm()"
+                                ng-options="x for x in userRealms">
+                        </select>
                     </div>
-                    <button id="searchUsers" class="btn btn-default" ng-click="firstPage()">Search users</button>
-                    <button id="viewAllUsers" class="btn btn-default" ng-click="query.search = ''; query.searchByUserId = ''; query.searchByTomsId = ''; query.searchByPhone = ''; firstPage()">{{::
-                        'view-all-users' | translate}}
-                    </button>
-                    <select class="form-control" name="realmsSelect" ng-model="query.searchRealm" ng-change="changeSearchRealm()"
-                            ng-options="x for x in userRealms">
-                    </select>
-
-                    <div class="pull-right" data-ng-show="access.viewUsers && query.searchRealm == 'user'" >
+                    <div class="pull-right" data-ng-show="access.viewUsers && !(query.searchRealm == 'master' || query.searchRealm == 'manager')" >
                         <button data-ng-click="selectedSendLogin()" class="btn btn-default">Send Login</button>
-                        <button data-ng-click="selectedSendLoginAndResetPassword()" class="btn btn-default">Send Login And Reset Password</button>
+                        <button data-ng-click="selectedSendLoginAndResetPassword()" class="btn btn-default">Send Login
+                            And Reset Password
+                        </button>
                     </div>
                     <div class="pull-right" data-ng-show="!access.hideManageButtons && access.manageUsers">
-                        <button data-ng-click="downloadTemplateCSV()" data-ng-show="access.viewRealm" class="btn btn-default">Download Template CSV</button>
-                        <button data-ng-click="downloadTemplateXlsx()" data-ng-show="access.viewRealm" class="btn btn-default">Download Template Excel</button>
+                        <button data-ng-click="downloadTemplateCSV()"
+                                data-ng-show="access.viewRealm && (access.buttonDownloadTemplateCSV || auth.authz.realm === 'master')"
+                                class="btn btn-default">Download Template CSV
+                        </button>
+                        <button data-ng-click="downloadTemplateXlsx()"
+                                data-ng-show="access.viewRealm && (access.buttonDownloadTemplateXlsx || auth.authz.realm === 'master')"
+                                class="btn btn-default">Download Template Excel
+                        </button>
 
-                        <label for="import-file-csv" class="btn btn-default ng-binding" data-ng-show="access.viewRealm">Import File<i
-                                class="pficon pficon-import"></i></label>
-                        <input id="import-file-csv" type="file" class="hidden" accept=".csv, .xls, .xlsx, .ctl" data-ng-show="access.viewRealm"
+                        <label for="import-file-csv" class="btn btn-default ng-binding"
+                               data-ng-show="access.viewRealm && (access.buttonImportFileCSV || auth.authz.realm === 'master')">
+                            Import File<i class="pficon pficon-import"></i></label>
+                        <input id="import-file-csv" type="file" class="hidden" accept=".csv, .xls, .xlsx, .ctl"
+                               data-ng-show="access.viewRealm && (access.buttonImportFileCSV || auth.authz.realm === 'master')"
                                onchange="angular.element(this).scope().importFileCommon(this.files)">
 
-                        <button data-ng-click="exportCSV()" class="btn btn-default">Export CSV</button>
-                        <button data-ng-click="exportXlsx()" class="btn btn-default">Export Excel</button>
+                        <button data-ng-click="exportCSV()" class="btn btn-default"
+                                data-ng-show="access.buttonExportCSV || auth.authz.realm === 'master'">Export CSV
+                        </button>
+                        <button data-ng-click="exportXlsx()" class="btn btn-default"
+                                data-ng-show="access.buttonExportXlsx || auth.authz.realm === 'master'">Export Excel
+                        </button>
 
-                        <button data-ng-click="selectedResetPassword()" class="btn btn-default">Reset Password</button>
-                        <button data-ng-click="selectedBlockUsers()" class="btn btn-default">Block Users</button>
-                        <button data-ng-click="unlockUsers()" class="btn btn-default">{{:: 'unlock-users' | translate}}</button>
-                        <a id="createUser" class="btn btn-default" href="#/create/user/{{realm.realm}}?searchRealm={{query.searchRealm}}" >{{:: 'add-user' | translate}}</a>
+                        <button data-ng-click="selectedResetPassword()" class="btn btn-default"
+                                data-ng-show="access.buttonResetPassword || auth.authz.realm === 'master'">Reset Password
+                        </button>
+                        <button data-ng-click="selectedBlockUsers()" class="btn btn-default"
+                                data-ng-show="access.buttonBlockUsers || auth.authz.realm === 'master'">Block Users
+                        </button>
+                        <button data-ng-click="unlockUsers()" class="btn btn-default"
+                                data-ng-show="access.buttonUnlockUsers || auth.authz.realm === 'master'">{{:: 'unlock-users' |
+                            translate}}
+                        </button>
+                        <a id="createUser" class="btn btn-default"
+                           href="#/create/user/{{realm.realm}}?searchRealm={{query.searchRealm}}"
+                           data-ng-show="access.buttonAddUser || auth.authz.realm === 'master'">{{:: 'add-user' |
+                            translate}}</a>
                     </div>
                 </div>
             </th>
@@ -120,19 +146,20 @@
         <tr data-ng-show="searchLoaded && users.length > 0">
             <th class="w-1"></th>
             <th class="w-1">
-                <input type="checkbox" data-ng-click="selectAll()" data-ng-model="selectedAll"> Select
+                <input type="checkbox" data-ng-click="selectAll()" data-ng-model="selectedAll" data-ng-hide="access.hideSelectAll"> Select
             </th>
             <th class="w-3">{{:: 'id' | translate}}</th>
             <th class="w-4">{{:: 'username' | translate}}</th>
-            <th class="w-12" data-ng-click="sort(SORT_FIELD_EMAIL)">{{:: 'email' | translate}}  {{sortMarkEmail}}</th>
-            <th class="w-3" data-ng-click="sort(SORT_FIELD_NAME)">{{:: 'first-name' | translate}}  {{sortMarkName}}</th>
+            <th class="w-12" data-ng-click="sort(SORT_FIELD_EMAIL)">{{:: 'email' | translate}} {{sortMarkEmail}}</th>
+            <th class="w-3" data-ng-click="sort(SORT_FIELD_NAME)">{{:: 'first-name' | translate}} {{sortMarkName}}</th>
             <th class="w-1">Enabled</th>
             <th class="w-4">Phone</th>
             <th class="w-4">Organization</th>
             <th class="w-4">Toms Id</th>
             <th class="w-4">Roles</th>
             <th class="w-4">Systems</th>
-            <th class="w-4" colspan="{{serverInfo.featureEnabled('IMPERSONATION') && access.impersonation == true ? '3' : '2'}}">
+            <th class="w-4"
+                colspan="{{serverInfo.featureEnabled('IMPERSONATION') && access.impersonation == true ? '3' : '2'}}">
                 {{:: 'actions' | translate}}
             </th>
         </tr>
@@ -153,8 +180,9 @@
             </td>
             <td class="clip">{{user.phone}}</td>
             <td class="clip" colspan="1" style="padding: 0 0 0 0">
-                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.userPosts.length > 0">
-                    <tr data-ng-repeat="userPost in user.userPosts" >
+                <table class="table nullable__margin table-striped table-bordered w-full"
+                       data-ng-if="user.userPosts.length > 0">
+                    <tr data-ng-repeat="userPost in user.userPosts">
                         <td class="clip inner-table__cell">
                             <li ng-repeat="org in getOrgs(userPost) track by $index" class="role-list clip">
                                 <span>{{org}}</span>
@@ -164,8 +192,9 @@
                 </table>
             </td>
             <td class="clip" colspan="1" style="padding: 0 0 0 0">
-                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.userPosts.length > 0">
-                    <tr data-ng-repeat="userPost in user.userPosts" >
+                <table class="table nullable__margin table-striped table-bordered w-full"
+                       data-ng-if="user.userPosts.length > 0">
+                    <tr data-ng-repeat="userPost in user.userPosts">
                         <td class="clip">
                             <li ng-repeat="tomsId in getTomsIds(userPost) track by $index" class="role-list clip">
                                 {{tomsId}}
@@ -175,8 +204,9 @@
                 </table>
             </td>
             <td class="clip" colspan="1" style="padding: 0 0 0 0">
-                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.userPosts.length > 0">
-                    <tr data-ng-repeat="userPost in user.userPosts" >
+                <table class="table nullable__margin table-striped table-bordered w-full"
+                       data-ng-if="user.userPosts.length > 0">
+                    <tr data-ng-repeat="userPost in user.userPosts">
                         <td class="clip inner-table__cell">
                             <li ng-repeat="roleName in getRoleNames(userPost) track by $index" class="role-list clip">
                                 <span>{{roleName}}</span>
@@ -186,8 +216,9 @@
                 </table>
             </td>
             <td class="clip" colspan="1" style="padding: 0 0 0 0">
-                <table class="table nullable__margin table-striped table-bordered w-full" data-ng-if="user.userPosts.length > 0">
-                    <tr data-ng-repeat="userPost in user.userPosts" >
+                <table class="table nullable__margin table-striped table-bordered w-full"
+                       data-ng-if="user.userPosts.length > 0">
+                    <tr data-ng-repeat="userPost in user.userPosts">
                         <td class="clip inner-table__cell">
                             <li ng-repeat="sysName in getSystemNames(userPost) track by $index" class="role-list clip">
                                 <span>{{sysName}}</span>
@@ -198,7 +229,9 @@
             </td>
             <td class="kc-action-cell" data-ng-click="editUser(user)">{{:: 'edit' | translate}}
             </td>
-            <td data-ng-show="access.createRealm && access.manageRealm && access.manageUsers" class="kc-action-cell" data-ng-click="removeUser(user)">{{:: 'delete' | translate}}</td>
+            <td data-ng-show="access.createRealm && access.manageRealm && access.manageUsers" class="kc-action-cell"
+                data-ng-click="removeUser(user)">{{:: 'delete' | translate}}
+            </td>
         </tr>
         <tr data-ng-show="!users || users.length == 0">
             <td class="text-muted" data-ng-show="!users">{{:: 'users.instruction' | translate}}</td>
@@ -212,13 +245,14 @@
         </tbody>
     </table>
 
-    <div id="loading" >Loading...</div>
+    <div id="loading">Loading...</div>
 
     <!--		Start Pagination -->
-    <div class='pagination-container' >
+    <div class='pagination-container'>
         <nav>
             <ul class="pagination">
-                <select class  ="form-control" name="state" ng-model="pageSize" ng-change="firstPage()" ng-init="pageSize='10'">
+                <select class="form-control" name="state" ng-model="pageSize" ng-change="firstPage()"
+                        ng-init="pageSize='10'">
                     <option selected value="5">5</option>
                     <option value="10">10</option>
                     <option value="20">20</option>
@@ -227,10 +261,10 @@
                     <option value="100">100</option>
                 </select>
 
-                <li data-page="first" >
+                <li data-page="first">
                     <span> << <span class="sr-only">(current)</span></span>
                 </li>
-                <li data-page="prev" >
+                <li data-page="prev">
                     <span> < <span class="sr-only">(current)</span></span>
                 </li>
                 <li data-page="next" id="prev">

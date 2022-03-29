@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.admin.AdminEvent;
-import org.keycloak.models.*;
+import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.event.listener.factory.EventFactory;
 import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
 import ru.alamics.sso.keycloak.event.listener.factory.impl.EventFactoryImpl;
@@ -38,8 +38,6 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
     @Override
     public void close() {
     }
-
-
 
 
 }

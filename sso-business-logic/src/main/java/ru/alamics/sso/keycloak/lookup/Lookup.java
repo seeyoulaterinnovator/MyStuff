@@ -8,12 +8,12 @@ import javax.naming.NamingException;
 @Slf4j
 public class Lookup {
 
-    public static Object lookup(Class clazz) {
+    public static <T> T lookup(Class<T> clazz) {
         try {
-            return new InitialContext().lookup("java:global/domru-sso/" + clazz.getSimpleName());
+            return clazz.cast( new InitialContext().lookup("java:global/domru-sso/" + clazz.getSimpleName()));
         } catch (NamingException e) {
-            log.error("{}:", e);
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Something wrong with context");
         }
-        return null;
     }
 }

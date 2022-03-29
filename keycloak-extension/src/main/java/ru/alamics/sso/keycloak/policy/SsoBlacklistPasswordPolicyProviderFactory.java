@@ -18,87 +18,20 @@ import java.util.concurrent.ConcurrentMap;
 @Slf4j
 public class SsoBlacklistPasswordPolicyProviderFactory implements PasswordPolicyProviderFactory {
 
-    public static final String ID = "ssoPasswordBlacklist";
+    protected static final String PROVIDER_ID = "ssoPasswordBlacklist";
+    private static final String DISPLAY_NAME = "Sso Password Blacklist";
 
-    public static final String SYSTEM_PROPERTY = "keycloak.password.blacklists.path";
+    private static final String SYSTEM_PROPERTY = "keycloak.password.blacklists.path";
+    private static final String BLACKLISTS_PATH_PROPERTY = "blacklistsPath";
 
-    public static final String BLACKLISTS_PATH_PROPERTY = "blacklistsPath";
+    private static final String JBOSS_SERVER_DATA_DIR = "jboss.server.data.dir";
+    private static final String PASSWORD_BLACKLISTS_FOLDER = "password-blacklists/";
 
-    public static final String JBOSS_SERVER_DATA_DIR = "jboss.server.data.dir";
-
-    public static final String PASSWORD_BLACKLISTS_FOLDER = "password-blacklists/";
-
-    private ConcurrentMap<String, SsoFileBasedPasswordBlacklist> blacklistRegistry = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, SsoFileBasedPasswordBlacklist> blacklistRegistry = new ConcurrentHashMap<>();
 
     private volatile Path blacklistsBasePath;
 
     private Config.Scope config;
-
-    @Override
-    public PasswordPolicyProvider create(KeycloakSession session) {
-        if (this.blacklistsBasePath == null) {
-            synchronized (this) {
-                if (this.blacklistsBasePath == null) {
-                    this.blacklistsBasePath = detectBlacklistsBasePath(config);
-                }
-            }
-        }
-        return new SsoBlacklistPasswordPolicyProvider(session.getContext(), this);
-    }
-
-    @Override
-    public void init(Config.Scope config) {
-        this.config = config;
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-    }
-
-    @Override
-    public void close() {
-    }
-
-    @Override
-    public String getDisplayName() {
-        return "Sso Password Blacklist";
-    }
-
-    @Override
-    public String getConfigType() {
-        return PasswordPolicyProvider.STRING_CONFIG_TYPE;
-    }
-
-    @Override
-    public String getDefaultConfigValue() {
-        return "";
-    }
-
-    @Override
-    public boolean isMultiplSupported() {
-        return false;
-    }
-
-    @Override
-    public String getId() {
-        return ID;
-    }
-
-    public BlacklistPasswordPolicyProviderFactory.PasswordBlacklist resolvePasswordBlacklist(String blacklistName) {
-
-        Objects.requireNonNull(blacklistName, "blacklistName");
-
-        String cleanedBlacklistName = blacklistName.trim();
-        if (cleanedBlacklistName.isEmpty()) {
-            throw new IllegalArgumentException("Password blacklist name must not be empty!");
-        }
-
-        return blacklistRegistry.computeIfAbsent(cleanedBlacklistName, (name) -> {
-            SsoFileBasedPasswordBlacklist pbl = new SsoFileBasedPasswordBlacklist(this.blacklistsBasePath, name);
-            pbl.lazyInit();
-            return pbl;
-        });
-    }
 
     private static Path detectBlacklistsBasePath(Config.Scope config) {
 
@@ -130,6 +63,72 @@ public class SsoBlacklistPasswordPolicyProviderFactory implements PasswordPolicy
         }
 
         throw new IllegalStateException("Password blacklists location does not exist: " + path);
+    }
+
+    @Override
+    public PasswordPolicyProvider create(KeycloakSession session) {
+        if (this.blacklistsBasePath == null) {
+            synchronized (this) {
+                if (this.blacklistsBasePath == null) {
+                    this.blacklistsBasePath = detectBlacklistsBasePath(config);
+                }
+            }
+        }
+        return new SsoBlacklistPasswordPolicyProvider(session.getContext(), this);
+    }
+
+    @Override
+    public void init(Config.Scope config) {
+        this.config = config;
+    }
+
+    @Override
+    public void postInit(KeycloakSessionFactory factory) {
+    }
+
+    @Override
+    public void close() {
+    }
+
+    @Override
+    public String getDisplayName() {
+        return DISPLAY_NAME;
+    }
+
+    @Override
+    public String getConfigType() {
+        return PasswordPolicyProvider.STRING_CONFIG_TYPE;
+    }
+
+    @Override
+    public String getDefaultConfigValue() {
+        return "";
+    }
+
+    @Override
+    public boolean isMultiplSupported() {
+        return false;
+    }
+
+    @Override
+    public String getId() {
+        return PROVIDER_ID;
+    }
+
+    public BlacklistPasswordPolicyProviderFactory.PasswordBlacklist resolvePasswordBlacklist(String blacklistName) {
+
+        Objects.requireNonNull(blacklistName, "blacklistName");
+
+        String cleanedBlacklistName = blacklistName.trim();
+        if (cleanedBlacklistName.isEmpty()) {
+            throw new IllegalArgumentException("Password blacklist name must not be empty!");
+        }
+
+        return blacklistRegistry.computeIfAbsent(cleanedBlacklistName, (name) -> {
+            SsoFileBasedPasswordBlacklist pbl = new SsoFileBasedPasswordBlacklist(this.blacklistsBasePath, name);
+            pbl.lazyInit();
+            return pbl;
+        });
     }
 
 }

@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.create.rest;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.annotations.cache.NoCache;
@@ -20,7 +19,6 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.services.ErrorResponse;
-import org.keycloak.services.ForbiddenException;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.resources.account.AccountFormService;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
@@ -29,6 +27,7 @@ import org.keycloak.services.resources.admin.RoleMapperResource;
 import org.keycloak.services.resources.admin.UsersResource;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.utils.ProfileHelper;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
@@ -42,11 +41,10 @@ import ru.alamics.sso.user.filetype.XlsxImpl;
 import ru.alamics.sso.user.model.DownloadUserRequest;
 import ru.alamics.sso.user.model.UserParameter;
 import ru.alamics.sso.user.model.UserRequest;
+import ru.alamics.sso.util.Util;
 import ru.alamics.sso.util.validator.NotValidException;
 
 import javax.activation.UnsupportedDataTypeException;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
@@ -62,6 +60,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static org.keycloak.models.ImpersonationSessionNote.IMPERSONATOR_ID;
 import static org.keycloak.models.ImpersonationSessionNote.IMPERSONATOR_USERNAME;
@@ -79,12 +78,8 @@ public class CustomUserResource {
         this.auth = auth;
         auth.users().requireManage();
         this.userService = new UserServiceImpl(session, auth.adminAuth());
-        try {
-            this.importReportService = (ImportReportService) new InitialContext().lookup("java:global/domru-sso/" + ImportReportService.class.getSimpleName());
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context");
-        }
+        this.importReportService = Lookup.lookup(ImportReportService.class);
+
         this.realm = session.getContext().getRealm();
     }
 
@@ -93,8 +88,17 @@ public class CustomUserResource {
     @NoCache
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUser(final UserRequest request, final HttpHeaders headers) {
-        if (request.getPhone() == null || request.getPhone().isEmpty()) {
-            return ErrorResponse.error("Phone is required attribute.", Response.Status.BAD_REQUEST);
+        if (Util.isEmpty(request.getPhone())) {
+            return ErrorResponse.error("Поле Phone должно быть заполнено", Response.Status.BAD_REQUEST);
+        }
+        if (!validatePhone(request.getPhone())) {
+            return ErrorResponse.error("Поле Phone невалидно", Response.Status.BAD_REQUEST);
+        }
+        if (Util.isEmpty(request.getEmail())) {
+            return ErrorResponse.error("Поле Email должно быть заполнено", Response.Status.BAD_REQUEST);
+        }
+        if (!validateEmail(request.getEmail())) {
+            return ErrorResponse.error("Поле Email невалидно", Response.Status.BAD_REQUEST);
         }
         return getUserResponse(request, false);
     }
@@ -104,17 +108,34 @@ public class CustomUserResource {
     @NoCache
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUserBss(final UserRequest request, final HttpHeaders headers) {
-        if (request.getPhone() == null || request.getPhone().isEmpty()) {
-            return ErrorResponse.error("Поле Телефон должно быть заполнено", Response.Status.BAD_REQUEST);
+        if (Util.isEmpty(request.getPhone())) {
+            return ErrorResponse.error("Поле Phone должно быть заполнено", Response.Status.BAD_REQUEST);
         }
-        if (request.getTomsId() == null || request.getTomsId().isEmpty()) {
+        if (!validatePhone(request.getPhone())) {
+            return ErrorResponse.error("Поле Phone невалидно", Response.Status.BAD_REQUEST);
+        }
+        if (Util.isEmpty(request.getTomsId())) {
             return ErrorResponse.error("Поле TomsId должно быть заполнено", Response.Status.BAD_REQUEST);
         }
-        if (request.getName() == null || request.getName().isEmpty()) {
+        if (Util.isEmpty(request.getName())) {
             return ErrorResponse.error("Поле name должно быть заполнено", Response.Status.BAD_REQUEST);
+        }
+        if (Util.isEmpty(request.getEmail())) {
+            return ErrorResponse.error("Поле Email должно быть заполнено", Response.Status.BAD_REQUEST);
+        }
+        if (!validateEmail(request.getEmail())) {
+            return ErrorResponse.error("Поле Email невалидно", Response.Status.BAD_REQUEST);
         }
 
         return getUserResponse(request, true);
+    }
+
+    private boolean validateEmail(String email) {
+        return Pattern.matches(Util.REGEX_EMAIL, email);
+    }
+    private boolean validatePhone(String phone) {
+        return (phone.startsWith("+(7)9") && phone.length() == 14 && phone.substring(4).matches("[\\d]+"))
+                || (phone.startsWith("7") && phone.length() == 11 && phone.matches("[\\d]+"));
     }
 
     private Response getUserResponse(UserRequest request, boolean bss) {
@@ -273,7 +294,7 @@ public class CustomUserResource {
         log.info("Download import users template");
         try {
             if (type.equalsIgnoreCase("xlsx")) {
-                byte[] bytes = IOUtils.toByteArray(CustomUserResource.class.getResourceAsStream("/template/template.xlsx")); // TODO check. replaced from .getResourceAsStream(<>).readAllBytes();
+                byte[] bytes = IOUtils.toByteArray(CustomUserResource.class.getResourceAsStream("/template/template.xlsx"));
                 Response.ResponseBuilder response = Response.ok(bytes);
                 response.header("Content-Disposition", "attachment; filename=\"template.xlsx" + "\"");
                 response.header("filename", "template.xlsx");
@@ -281,7 +302,7 @@ public class CustomUserResource {
                 return response.build();
             }
 
-            byte[] bytes = IOUtils.toByteArray(CustomUserResource.class.getResourceAsStream("/template/template.csv")); // TODO check. replaced
+            byte[] bytes = IOUtils.toByteArray(CustomUserResource.class.getResourceAsStream("/template/template.csv"));
             Response.ResponseBuilder response = Response.ok(bytes);
             response.header("Content-Disposition", "attachment; filename=\"template.csv" + "\"");
             response.header("filename", "template.csv");
@@ -389,7 +410,7 @@ public class CustomUserResource {
     public RoleMapperResource getRoleMappings(@PathParam("id") String id) {
         EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
         UserEntity userEntity = em.find(UserEntity.class, id);
-        if (userEntity == null) throw new org.jboss.resteasy.spi.NotFoundException("User not found");
+        if (userEntity == null) throw new NotFoundException("User not found");
         UserModel user = new UserAdapter(session, realm, em, userEntity);
 
         AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
@@ -431,25 +452,7 @@ public class CustomUserResource {
     @Path("credential/reset-with-send-login")
     @POST
     public Response sendLoginAndResetPassword(List<String> ids) {
-        KeycloakContext context = session.getContext();
-        AdminEventBuilder eventBuilder = new AdminEventBuilder(context.getRealm(), auth.adminAuth(), session, context.getConnection());
-        eventBuilder.resource(ResourceType.USER);
-        UserProvider userProvider = session.users();
-
-        if (ids != null) {
-            for (String id : ids) {
-                UserModel user = userProvider.getUserById(id, realm);
-                if (user != null) {
-                    UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
-                    rep.getRequiredActions().add(UserEntityRepresentation.SEND_LOGIN_AND_RESET_PASSWORD);
-                    eventBuilder.operation(OperationType.ACTION)
-                            .resourcePath(session.getContext().getUri())
-                            .representation(rep)
-                            .realm(realm)
-                            .success();
-                }
-            }
-        }
+        sendLogin(ids, UserEntityRepresentation.SEND_LOGIN_AND_RESET_PASSWORD);
         return JsonResponse.success()
                 .httpStatus(Response.Status.NO_CONTENT)
                 .build();
@@ -458,16 +461,23 @@ public class CustomUserResource {
     @Path("/send/login")
     @POST
     public Response sendLogin(List<String> ids) {
+        sendLogin(ids, UserEntityRepresentation.SEND_LOGIN);
+        return JsonResponse.success()
+                .httpStatus(Response.Status.NO_CONTENT)
+                .build();
+    }
+
+    private void sendLogin(List<String> ids, final String requiredAction) {
         KeycloakContext context = session.getContext();
         AdminEventBuilder eventBuilder = new AdminEventBuilder(context.getRealm(), auth.adminAuth(), session, context.getConnection());
-        UserProvider userProvider = session.users();
         eventBuilder.resource(ResourceType.USER);
+        UserProvider userProvider = session.users();
         if (ids != null) {
             for (String id : ids) {
                 UserModel user = userProvider.getUserById(id, realm);
                 if (user != null) {
                     UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
-                    rep.getRequiredActions().add(UserEntityRepresentation.SEND_LOGIN);
+                    rep.getRequiredActions().add(requiredAction);
                     eventBuilder.operation(OperationType.ACTION)
                             .resourcePath(session.getContext().getUri())
                             .representation(rep)
@@ -476,9 +486,6 @@ public class CustomUserResource {
                 }
             }
         }
-        return JsonResponse.success()
-                .httpStatus(Response.Status.NO_CONTENT)
-                .build();
     }
 
 }

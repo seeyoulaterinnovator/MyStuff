@@ -4,21 +4,22 @@
 <@layout.registrationLayout displayMessage=false displayCity=false; section>
     <#if section = "header">
         <#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон -->
-        <#if lengthCode==6>
-            <@blocks.verificationHeader mainTitle="Вам выслан одноразовый пароль на номер:" />
-        <#else>
-            <#if enableRepeatCall?? && enableRepeatCall!>
-                <@blocks.verificationHeader mainTitle="Введите последние 4 цифры номера, входящего звонка на номер:" />
-            <#else>
-                <@blocks.verificationHeader mainTitle="Введите код, отправленый Вам на электронную почту:" />
-            </#if>
-        </#if>
+        <@blocks.verificationHeader mainTitle="Подтвердить" />
     <#elseif section = "form">
         <#if lengthCode==4 && !enableRepeatCall && userEmail??>
-            <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4">${userEmail}</h3>
+            <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4">
+                Введите код, отправленый Вам на электронную почту: <br/>
+                ${userEmail}
+            </h3>
         <#elseif userPhone??>
-            <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4" x-ms-format-detection="none">${userPhone?replace('([0-9]{1})([0-9]{3})([0-9]{3})([0-9]{2})([0-9]{2})',
-                '+$1 ($2) $3-$4-$5', 'ri')}</h3>
+            <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4" x-ms-format-detection="none">
+                <#if lengthCode==6>
+                    Вам выслан одноразовый пароль на номер:
+                <#else>
+                    Введите последние 4 цифры номера входящего звонка на номер:
+                </#if>
+                <br/>
+                ${userPhone?replace('([0-9]{1})([0-9]{3})([0-9]{3})([0-9]{2})([0-9]{2})', '+$1 $2 $3 $4 $5', 'ri')}
         </#if>
         <form id="totpe" action="${url.loginAction}" method="POST">
          </form>
@@ -32,31 +33,43 @@
             </div>
             <input id="codeNumbers" name="codeNumbers" class="hidden" value="${lengthCode!}" />
             <#if error?has_content>
-                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="0" />
+                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds!}" />
             <#else>
                 <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds!}" />
             </#if>
 
             <input id="smscode" name="smscode" class="hidden" />
 
-            <div class="flex md:justify-start justify-center w-full items-center text-center md:text-right xl:pb-55px md:pb-10 sm:pb-8 pb-4">
-                <#if lengthCode==4>
-                    <button class="border-b hoverable border-dashed text-black-50 text-right hidden" form="totpe" id="sentCode" name="sendEmailCode" type="submit">Отправить на email</button>
+            <div class="flex md:justify-start justify-start w-full items-center text-left md:text-left xl:pb-55px md:pb-10 sm:pb-8 pb-4">
+                <div id="timer" class="text-black text-center md:text-right flex items-center my-6 md:my-0 justify-center md:justify-start">
+                    Пароль действует <span id="timer-time" class="px-1 text-5/3em" style="font-weight: bolder;"></span> мм:cc
+                </div>
+                <#if enableRepeatCall?? && enableRepeatCall!>
+                    <p class="hidden font-light text-black verification__text" id="resend">
+                        Не приходит пароль?
+                        <span>
+                            <button class="font-light verification__resend" name="resend" type="submit">${sendAgain}</button>
+                        </span>
+                    </p>
                 </#if>
             </div>
-            <div class="sm:block md:flex justify-between w-full items-center text-center md:text-left">
-                <button class="btn btn-main w-full md:w-3/7 mr-0 md:mr-4" name="accept" id="accept" type="submit">Подтвердить</button>
-
-                <div id="timer" class="text-main-600 text-center md:text-right text-sm flex items-center my-6 md:my-0 justify-center md:justify-start">
-                    Пароль действует <span id="timer-time" class="px-1 text-black text-5/3em"></span> мин
-                </div>
-                <#if lengthCode==6>
-                    <button class="hidden border-b hoverable border-dashed text-black-50 text-center md:text-right my-6 md:my-0" name="resend" id="resend" type="submit" >Отправить еще раз</button>
-                <#elseif enableRepeatCall?? && enableRepeatCall!>
-                    <button class="hidden border-b hoverable border-dashed text-black-50 text-center md:text-right my-6 md:my-0" name="resend" id="resend" type="submit" >Позвонить еще раз</button>
+            <div class="sm:block md:flex w-full items-center text-center md:text-left">
+                <button class="btn btn-main verification__btn verification__btn__accept w-full md:w-3/7 mr-0 md:mr-4" name="accept" id="accept" type="submit">${doSubmit}</button>
+                <#if lengthCode==4>
+                    <button class="btn verification__btn verification__btn__send" form="totpe" id="sentCode" name="sendEmailCode" type="submit">Отправить на эл. почту</button>
                 </#if>
-
             </div>
         </form>
     </#if>
+                <script>
+                    var actionIsEmpty = ${actionIsEmpty?c};
+                    var clientIsB2B = ${clientIsB2B?c};
+
+                    if (clientIsB2B && actionIsEmpty) {
+                        window.onunload = function () {
+                            window.parent.postMessage('post-selected', '*');
+                            console.log("Отправлено тк B2B и Action пуст");
+                        };
+                    }
+                </script>
 </@layout.registrationLayout>

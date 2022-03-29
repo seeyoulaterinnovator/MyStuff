@@ -12,9 +12,11 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
+import ru.alamics.sso.schedule.Translator;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.stats.LoginHistory;
+import ru.alamics.sso.util.Util;
 
 import javax.persistence.EntityManager;
 import java.util.HashMap;
@@ -22,16 +24,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static ru.alamics.sso.settings.SettingConstants.*;
+
 @Slf4j
 public class SsoUserUpdateEvent extends SsoEvent {
 
+    private static final String BODY_TEMPLATE_DISABLE = "mail-disabled-account.ftl";
+    private static final String BODY_TEMPLATE_ENABLE = "mail-enabled-account.ftl";
+
     private final AdminEvent event;
 
-    private SettingsService settingsService;
+    private final SettingsService settingsService;
 
     SsoUserUpdateEvent(AdminEvent event, KeycloakSession session) {
         super(session);
-        settingsService = (SettingsService) Lookup.lookup(SettingsService.class);
+        settingsService = Lookup.lookup(SettingsService.class);
         this.event = event;
     }
 
@@ -76,15 +83,29 @@ public class SsoUserUpdateEvent extends SsoEvent {
             attributes.put("userFirstName", user.getFirstName());
             attributes.put("userLastName", user.getLastName());
 
+            List<String> phones = user.getAttribute("phone");
+            if (!phones.isEmpty() && phones.get(0).length() == 11) {
+                attributes.put("phone", Util.getFormatNumber(phones.get(0)));
+            }
+
+            attributes.put("emailEnabledAccountBodyHtml", settingsService.getSettingsStringValue(EMAIL_ENABLE_ACCOUNT, realm.getName()));
+            attributes.put("emailDisabledAccountBodyHtml", settingsService.getSettingsStringValue(EMAIL_DISABLE_ACCOUNT, realm.getName()));
+            attributes.put("emailLoginAndPhoneHtml", settingsService.getSettingsStringValue(EMAIL_LOGIN_AND_PHONE_ACCOUNT, realm.getName()));
+            attributes.put("emailLoginHtml", settingsService.getSettingsStringValue(EMAIL_LOGIN_ACCOUNT, realm.getName()));
+            attributes.put("emailPasswordFooterHtml", settingsService.getSettingsStringValue(EMAIL_PASSWORD_FOOTER_ACCOUNT, realm.getName()));
+            int timeTokenResetPass = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm.getName());
+            String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
+            attributes.put("expTimePass", expirationStrRusPass);
+
             if (userNow.isEnabled()) {
-                long blockValue = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_UNLOCKING, realm.getName());
+                long blockValue = settingsService.getSettingsLongValue(SettingConstants.BLOCK_NOTIFICATION_OF_UNLOCKING, realm.getName());
                 if (blockValue > 0) {
-                    this.sendEmail(user, realm, "emailEnabledAccountSubject", "mail-enabled-account.ftl", attributes);
+                    this.sendEmail(user, realm, settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_ENABLE, realm.getName()), BODY_TEMPLATE_ENABLE, attributes);
                 }
                 this.recordLoginUser(userId);//При разблокировании юзера, логиним его
                 return;
             }
-            this.sendEmail(user, realm, "emailDisabledAccountSubject", "mail-disabled-account.ftl", attributes);
+            this.sendEmail(user, realm, settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_DISABLE, realm.getName()), BODY_TEMPLATE_DISABLE, attributes);
         } catch (Exception e) {
             log.error("Error ", e);
         }
@@ -112,7 +133,7 @@ public class SsoUserUpdateEvent extends SsoEvent {
         UserEntity entity = new UserEntity();
         entity.setId(userId);
 
-        LoginHistory loginHistoryService = (LoginHistory) Lookup.lookup(LoginHistory.class);
+        LoginHistory loginHistoryService = Lookup.lookup(LoginHistory.class);
         Optional.ofNullable(loginHistoryService).ifPresent(loginHistory -> {
             loginHistory.create(entity);
         });

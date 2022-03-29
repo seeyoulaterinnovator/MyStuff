@@ -8,23 +8,24 @@ import org.keycloak.protocol.ProtocolMapperUtils;
 import org.keycloak.protocol.oidc.mappers.*;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.IDToken;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.user.PersonalAccountService;
 import ru.alamics.sso.user.model.PersonalAccountPostModel;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 public class PersonalAccountMapper extends AbstractOIDCProtocolMapper implements OIDCAccessTokenMapper, OIDCIDTokenMapper, UserInfoTokenMapper {
 
-    public static final String POST_PERSONAL_ACCOUNT = "post.personal.account";
+    private static final String POST_PERSONAL_ACCOUNT = "post.personal.account";
+
+    private static final String PROVIDER_ID = "personal-account-mapper";
+    private static final String DISPLAY_NAME = "Personal Account";
+    private static final String HELP_TEXT = "Map a personal account list of user post to a token claim.";
 
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<ProviderConfigProperty>();
-    private UserPostService userPostService;
-    private PersonalAccountService paService;
 
     static {
         ProviderConfigProperty multiValued = new ProviderConfigProperty();
@@ -42,32 +43,8 @@ public class PersonalAccountMapper extends AbstractOIDCProtocolMapper implements
         OIDCAttributeMapperHelper.addIncludeInTokensConfig(configProperties, PersonalAccountMapper.class);
     }
 
-    public static final String PROVIDER_ID = "personal-account-mapper";
-
-
-    public List<ProviderConfigProperty> getConfigProperties() {
-        return configProperties;
-    }
-
-    @Override
-    public String getId() {
-        return PROVIDER_ID;
-    }
-
-    @Override
-    public String getDisplayType() {
-        return "Personal Account";
-    }
-
-    @Override
-    public String getDisplayCategory() {
-        return TOKEN_MAPPER_CATEGORY;
-    }
-
-    @Override
-    public String getHelpText() {
-        return "Map a personal account list of user post to a token claim.";
-    }
+    private UserPostService userPostService;
+    private PersonalAccountService paService;
 
     public static void addJsonTypeConfig(List<ProviderConfigProperty> configProperties) {
         ProviderConfigProperty property = new ProviderConfigProperty();
@@ -85,6 +62,44 @@ public class PersonalAccountMapper extends AbstractOIDCProtocolMapper implements
         configProperties.add(property);
     }
 
+    public static ProtocolMapperModel createClaimMapper(String name,
+                                                        String userAttribute,
+                                                        String tokenClaimName, String claimType,
+                                                        boolean accessToken, boolean idToken) {
+        return OIDCAttributeMapperHelper.createClaimMapper(name, userAttribute,
+                tokenClaimName, claimType,
+                accessToken, idToken,
+                PROVIDER_ID);
+    }
+
+    public static Object getModelValue(PersonalAccountPostModel accountModel) {
+        return accountModel;
+    }
+
+    public List<ProviderConfigProperty> getConfigProperties() {
+        return configProperties;
+    }
+
+    @Override
+    public String getId() {
+        return PROVIDER_ID;
+    }
+
+    @Override
+    public String getDisplayType() {
+        return DISPLAY_NAME;
+    }
+
+    @Override
+    public String getDisplayCategory() {
+        return TOKEN_MAPPER_CATEGORY;
+    }
+
+    @Override
+    public String getHelpText() {
+        return HELP_TEXT;
+    }
+
     protected void setClaim(IDToken token, ProtocolMapperModel mappingModel, UserSessionModel userSession) {
 
         UserModel user = userSession.getUser();
@@ -96,30 +111,11 @@ public class PersonalAccountMapper extends AbstractOIDCProtocolMapper implements
         OIDCAttributeMapperHelper.mapClaim(token, mappingModel, propertyValue);
     }
 
-    public static ProtocolMapperModel createClaimMapper(String name,
-                                                        String userAttribute,
-                                                        String tokenClaimName, String claimType,
-                                                        boolean accessToken, boolean idToken) {
-        return OIDCAttributeMapperHelper.createClaimMapper(name, userAttribute,
-                tokenClaimName, claimType,
-                accessToken, idToken,
-                PROVIDER_ID);
-    }
-
     private PersonalAccountPostModel getUserPost(UserModel user) {
 
-        try {
-            this.paService = (PersonalAccountService) new InitialContext().lookup("java:global/domru-sso/" + PersonalAccountService.class.getSimpleName());
-            return paService.getActivePAByUser(user.getId());
+        this.paService = Lookup.lookup(PersonalAccountService.class);
+        return paService.getActivePAByUser(user.getId());
 
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            return null;
-        }
-    }
-
-    public static Object getModelValue(PersonalAccountPostModel accountModel) {
-        return accountModel;
     }
 
 }

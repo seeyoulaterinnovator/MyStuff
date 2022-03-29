@@ -5,7 +5,7 @@ public enum ImportUsersDataStatus {
     DONE("DONE"),
     AWAITING("AWAITING");
 
-    private String desc;
+    private final String desc;
 
     ImportUsersDataStatus(String desc) {
         this.desc = desc;

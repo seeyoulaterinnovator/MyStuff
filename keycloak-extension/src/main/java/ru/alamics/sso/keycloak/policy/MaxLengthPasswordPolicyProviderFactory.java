@@ -7,50 +7,53 @@ import org.keycloak.policy.PasswordPolicyProvider;
 import org.keycloak.policy.PasswordPolicyProviderFactory;
 
 public class MaxLengthPasswordPolicyProviderFactory implements PasswordPolicyProviderFactory {
-    protected static final String ID = "max-length";
+    protected static final String PROVIDER_ID = "max-length";
+    private static final String MAX_PASSWORD_LENGTH = "16";
+    private static final String DISPLAY_NAME = "Maximum Length";
 
     @Override
-    public String getDisplayName () {
-        return "Maximum Length";
+    public String getDisplayName() {
+        return DISPLAY_NAME;
     }
 
+
     @Override
-    public String getConfigType () {
+    public String getConfigType() {
         return PasswordPolicyProvider.INT_CONFIG_TYPE;
     }
 
     @Override
-    public String getDefaultConfigValue () {
-        return "16";
+    public String getDefaultConfigValue() {
+        return MAX_PASSWORD_LENGTH;
     }
 
     @Override
-    public boolean isMultiplSupported () {
+    public boolean isMultiplSupported() {
         return false;
     }
 
     @Override
-    public PasswordPolicyProvider create (KeycloakSession session) {
+    public PasswordPolicyProvider create(KeycloakSession session) {
         return new MaxLengthPasswordPolicyProvider(session);
     }
 
     @Override
-    public void init (Config.Scope config) {
+    public void init(Config.Scope config) {
 
     }
 
     @Override
-    public void postInit (KeycloakSessionFactory factory) {
+    public void postInit(KeycloakSessionFactory factory) {
 
     }
 
     @Override
-    public void close () {
+    public void close() {
 
     }
 
     @Override
-    public String getId () {
-        return ID;
+    public String getId() {
+        return PROVIDER_ID;
     }
 }

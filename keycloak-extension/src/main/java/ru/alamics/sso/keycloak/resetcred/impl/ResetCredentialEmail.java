@@ -25,35 +25,39 @@ import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.resetcred.ResetCredential;
 import ru.alamics.sso.keycloak.resetcred.ResetCredentialEmailOrPhoneFactory;
+import ru.alamics.sso.schedule.Translator;
+import ru.alamics.sso.settings.SettingConstants;
+import ru.alamics.sso.settings.SettingsService;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class ResetCredentialEmail extends ResetCredential {
 
     private final ClientService clientService;
 
+    private final SettingsService settingsService;
+
     public ResetCredentialEmail(KeycloakSession session, AuthenticationFlowContext context) {
         super(session, context);
-
-        this.clientService = (ClientService) Lookup.lookup(ClientService.class);
+        this.settingsService = Lookup.lookup(SettingsService.class);
+        this.clientService = Lookup.lookup(ClientService.class);
     }
 
     @Override
     public void reset(UserModel user, String username) {
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
         if (user == null) {
-            context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT));
+            context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT_ERROR));
             return;
         }
 
         String actionTokenUserId = authenticationSession.getAuthNote(DefaultActionTokenKey.ACTION_TOKEN_USER_ID);
 
         if (actionTokenUserId != null && Objects.equals(user.getId(), actionTokenUserId)) {
-            log.debug("Forget-password triggered when reauthenticating user after authentication via action token. Skipping {} screen and using user {} ", ResetCredentialEmailOrPhoneFactory.ID, user.getUsername());
+            log.debug("Forget-password triggered when reauthenticating user after authentication via action token. Skipping {} screen and using user {} ", ResetCredentialEmailOrPhoneFactory.PROVIDER_ID, user.getUsername());
             context.success();
             return;
         }
@@ -70,11 +74,11 @@ public class ResetCredentialEmail extends ResetCredential {
         }
 
         RealmModel realm = context.getRealm();
-        int validityInSecs = realm.getActionTokenGeneratedByUserLifespan(ResetCredentialsActionToken.TOKEN_TYPE);
-        int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
+        int timeTokenResetPass = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm.getName());
+        int absoluteExpirationInSecs = Time.currentTime() + timeTokenResetPass;
 
         // We send the secret in the email in a link as a query param.
-        if(authenticationSession.getRedirectUri().isEmpty()){
+        if (authenticationSession.getRedirectUri().isEmpty()) {
             authenticationSession.setRedirectUri(getRedirectUrl(authenticationSession.getClient()));
         }
         String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
@@ -87,14 +91,14 @@ public class ResetCredentialEmail extends ResetCredential {
                 .build()
                 .toString();
 
-        long expirationInMinutes = TimeUnit.SECONDS.toMinutes(validityInSecs);
-
+        String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
         try {
             EmailTemplateProvider template = context.getSession().getProvider(EmailTemplateProvider.class);
             template.setRealm(realm)
                     .setUser(user)
                     .setAuthenticationSession(authenticationSession)
-                    .sendPasswordReset(link, expirationInMinutes);
+                    .setAttribute("expTime", expirationStrRus)
+                    .sendPasswordReset(link, timeTokenResetPass);
 
             event.clone().event(EventType.SEND_RESET_PASSWORD)
                     .user(user)
@@ -114,8 +118,6 @@ public class ResetCredentialEmail extends ResetCredential {
         }
     }
 
-    private static final String HOME_PAGE = "https://newlkb2b.dom.ru";
-
     private String getRedirectUrl(ClientModel client) {
 
         String redirectUrl = clientService.findMainRedirectUri(client);
@@ -123,6 +125,6 @@ public class ResetCredentialEmail extends ResetCredential {
         if (redirectUrl != null)
             return redirectUrl;
 
-        return HOME_PAGE;
+        return settingsService.getSettingsStringValue(SettingConstants.HOME_PAGE, client.getRealm().getId());
     }
 }

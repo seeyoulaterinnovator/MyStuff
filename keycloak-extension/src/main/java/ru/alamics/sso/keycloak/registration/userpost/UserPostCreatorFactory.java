@@ -1,21 +1,21 @@
 package ru.alamics.sso.keycloak.registration.userpost;
 
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.Config;
 import org.keycloak.authentication.FormAction;
-import org.keycloak.authentication.FormActionFactory;
 import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderConfigProperty;
+import ru.alamics.sso.keycloak.registration.AbstractFormActionFactory;
 
 import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
-public class UserPostCreatorFactory implements FormActionFactory {
+public class UserPostCreatorFactory extends AbstractFormActionFactory {
 
     private static final String PROVIDER_ID = "user_post_creator";
+    private static final String DISPLAY_NAME = "Registration UserPost Creator";
+    private static final String HELP_TEXT = "Get help text";
 
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
@@ -24,17 +24,7 @@ public class UserPostCreatorFactory implements FormActionFactory {
 
     @Override
     public String getDisplayType() {
-        return "Registration UserPost Creator";
-    }
-
-    @Override
-    public String getReferenceCategory() {
-        return null;
-    }
-
-    @Override
-    public boolean isConfigurable() {
-        return false;
+        return DISPLAY_NAME;
     }
 
     @Override
@@ -43,13 +33,8 @@ public class UserPostCreatorFactory implements FormActionFactory {
     }
 
     @Override
-    public boolean isUserSetupAllowed() {
-        return false;
-    }
-
-    @Override
     public String getHelpText() {
-        return "Get help text";
+        return HELP_TEXT;
     }
 
     @Override
@@ -61,21 +46,6 @@ public class UserPostCreatorFactory implements FormActionFactory {
     public FormAction create(KeycloakSession session) {
         log.info("Creating UserPostCreatorProvider");
         return new UserPostCreatorProvider();
-    }
-
-    @Override
-    public void init(Config.Scope config) {
-
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-
-    }
-
-    @Override
-    public void close() {
-
     }
 
     @Override

@@ -1,6 +1,5 @@
 package ru.alamics.sso.user;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.events.admin.OperationType;
@@ -12,6 +11,7 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.provider.ProviderFactory;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
+import ru.alamics.sso.jpa.entity.UserPostRoleEntity;
 import ru.alamics.sso.keycloak.facade.UserPostFacade;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.FoundException;
@@ -24,6 +24,7 @@ import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.util.Util;
 import ru.alamics.sso.util.validator.NotValidException;
 
+import javax.ws.rs.NotFoundException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -39,14 +40,14 @@ import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 @Slf4j
 public class UserExtService {
 
-    private final static Long DEFAULT_ROLE_ID = 1L;   //Соответствует роли LPR // TODO но это не точно
+    private final static Long DEFAULT_ROLE_ID = 1L;   //Соответствует роли LPR, но это не точно
 
-    private AdminAuth auth;
-    private KeycloakSession session;
-    private RealmModel realm;
+    private final AdminAuth auth;
+    private final KeycloakSession session;
+    private final RealmModel realm;
 
-    private UserFindService userFindService;
-    private UserPostFacade userPostFacade;
+    private final UserFindService userFindService;
+    private final UserPostFacade userPostFacade;
 
     public UserExtService(KeycloakSession session, AdminAuth auth) {
 
@@ -54,29 +55,8 @@ public class UserExtService {
         this.session = session;
         this.realm = session.getContext().getRealm();
 
-        this.userFindService = (UserFindService) Lookup.lookup(UserFindService.class);
-        this.userPostFacade = (UserPostFacade) Lookup.lookup(UserPostFacade.class);
-    }
-
-    private void commit() {
-        if (session.getTransactionManager().isActive()) {
-            session.getTransactionManager().commit();
-        }
-    }
-
-    // TODO ConcurrentModificationException etc. еще конфликтует с checkOnExistUserByEmailAndUsername()
-    private synchronized UserModel createUser(UserRequest userRequest) {
-        try {
-            userRequest.setPhone(Util.getCleanUserPhone(userRequest.getPhone()));
-
-            UserModel user = session.users().addUser(realm, userRequest.getEmail());
-            updateUserFromRequest(user, userRequest, realm, session, false);
-            return user;
-        } finally {
-            if (session.getTransactionManager().isActive()) {
-                session.getTransactionManager().setRollbackOnly();
-            }
-        }
+        this.userFindService = Lookup.lookup(UserFindService.class);
+        this.userPostFacade = Lookup.lookup(UserPostFacade.class);
     }
 
     private static void updateUserFromRequest(UserModel user, UserRequest
@@ -114,6 +94,26 @@ public class UserExtService {
         String phone = Util.getCleanUserPhone(request.getPhone());
         if (phone != null)
             user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(phone));
+    }
+
+    private void commit() {
+        if (session.getTransactionManager().isActive()) {
+            session.getTransactionManager().commit();
+        }
+    }
+
+    private synchronized UserModel createUser(UserRequest userRequest) {
+        try {
+            userRequest.setPhone(Util.getCleanUserPhone(userRequest.getPhone()));
+
+            UserModel user = session.users().addUser(realm, userRequest.getEmail());
+            updateUserFromRequest(user, userRequest, realm, session, false);
+            return user;
+        } finally {
+            if (session.getTransactionManager().isActive()) {
+                session.getTransactionManager().setRollbackOnly();
+            }
+        }
     }
 
     public UserModel createUser(UserRequest request, boolean bss) throws FoundException, NotFoundException, FoundUserPostException, NotValidException {
@@ -175,8 +175,8 @@ public class UserExtService {
         }
 
 
-        if (bss) {
-            addUserPostLPR(user, request);
+        if (!Util.isEmpty(request.getTomsId())) {
+            addUserPostRole(user, request, bss);
         }
 
         createAdminEvent(OperationType.CREATE, user);
@@ -224,12 +224,19 @@ public class UserExtService {
                 .success();
     }
 
-    private void addUserPostLPR(UserModel userModel, UserRequest request) throws NotFoundException, FoundException, FoundUserPostException, NotValidException {
+    private void addUserPostRole(UserModel userModel, UserRequest request, boolean isBss) throws NotFoundException, FoundException, FoundUserPostException, NotValidException {
 
         UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, request);
 
-        userPostRequest.setRoleId(DEFAULT_ROLE_ID);
-
+        if (isBss || request.getRoleId() == null) {
+            userPostRequest.setRoleId(DEFAULT_ROLE_ID);
+        } else {
+            UserPostRoleEntity role = userFindService.getRoleEntity(request.getRoleId());
+            if (role == null) {
+                throw new NotFoundException("Роль не найдена.");
+            }
+            userPostRequest.setRoleId(request.getRoleId());
+        }
         UserPostResponse userPostResponse = userPostFacade.save(userPostRequest);
 
         userPostFacade.getUserPostService().addAllSystemRole(userPostResponse.getId());

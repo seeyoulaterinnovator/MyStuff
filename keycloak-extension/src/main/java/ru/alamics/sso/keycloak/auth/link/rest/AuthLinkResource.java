@@ -4,11 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.keycloak.authentication.AuthenticationProcessor;
 import org.keycloak.authentication.actiontoken.resetcred.ResetCredentialsActionToken;
-import org.keycloak.authentication.actiontoken.resetcred.ResetCredentialsActionTokenHandler;
-import org.keycloak.authorization.policy.evaluation.Realm;
 import org.keycloak.common.util.Time;
 import org.keycloak.models.ClientModel;
-import org.keycloak.models.Constants;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.services.Urls;
@@ -19,9 +16,11 @@ import org.keycloak.sessions.RootAuthenticationSessionModel;
 import ru.alamics.sso.keycloak.auth.link.token.AuthLinkActionToken;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 
-
 import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
 
 @Slf4j
 public class AuthLinkResource {
@@ -55,8 +54,6 @@ public class AuthLinkResource {
         AuthenticationSessionModel authenticationSession = rootAuthenticationSessionModel.createAuthenticationSession(clientModel);
         //log.info("got authenticationSession " + authenticationSession.toString());
 
-
-
         int validityInSecs = realm.getActionTokenGeneratedByUserLifespan(ResetCredentialsActionToken.TOKEN_TYPE);
         int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
 
@@ -69,8 +66,7 @@ public class AuthLinkResource {
         UriInfo uriInfo = session.getContext().getUri();
 
         UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
-                clientModel.getClientId(), authenticationSession.getTabId())
-        ;
+                clientModel.getClientId(), authenticationSession.getTabId());
 
         String link = builder.build(realm.getName()).toString();
 

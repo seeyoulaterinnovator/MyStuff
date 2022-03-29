@@ -1,0 +1,156 @@
+.scrollable-container {
+  scrollbar-width: thin;
+  scrollbar-color: #F3F3F3;
+}
+
+.scrollable-container::-webkit-scrollbar {
+  width: 2px;
+
+  background-color: #EFEFEF;
+}
+
+.scrollable-container::-webkit-scrollbar-thumb {
+  @apply .bg-extra;
+
+  width: 2px;
+
+  border-radius: 1px;
+}
+
+.hoverable {
+  transition: .2s ease-in-out;
+}
+
+.border-b.hoverable {
+&:hover {
+   border-bottom-color: transparent;
+ }
+}
+
+.text-black-50.hoverable {
+&:hover {
+   color: rgba(0,0,0,.8);
+ }
+}
+
+.border-box {
+  box-sizing: border-box;
+}
+.content-box {
+  box-sizing: content-box;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.service__item::before {
+  @apply .bg-extra !important;
+}
+
+.icon_service-question::before {
+  opacity: 0.5;
+  position: absolute;
+  width: 32px;
+  height: 34px;
+  top: 0;
+  left: 15px;
+  content: url('./images/Chat.svg') !important;
+}
+
+.login-title-text {
+  max-width: 306px;
+}
+
+.text-secondary-title {
+  color: black;
+  opacity: 0.1;
+  transition: 0.2s ease-in-out;
+&:hover {
+   opacity: 0.5;
+ }
+}
+
+.text-no-wrap {
+  white-space: nowrap;
+}
+
+.reset-password {
+  color: #2B539B;
+  transition: 0.2s ease-in-out;
+  cursor: pointer;
+&:hover {
+   opacity: 0.5;
+&:after {
+   @apply .bg-extra;
+ }
+}
+}
+
+.footer {
+  margin: auto 0 35px;
+  padding: 0;
+  max-width: calc(100% - 75px);
+}
+
+@media screen and (max-width: 1199px){
+  .footer {
+    width: 206px;
+  }
+
+  .service__item_main-active {
+    width: 60px;
+  }
+}
+
+@media screen and (max-width: 959px){
+  .footer {
+    margin-bottom: 30px;
+    width: 100%;
+    position: relative;
+  }
+}
+
+@media screen and (max-width: 639px){
+  .login-title-text {
+    max-width: unset;
+  }
+}
+
+@media screen and (max-width: 479px){
+  .footer {
+    margin-bottom: 16px;
+  }
+}
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  body {
+    display: table !important;
+    width: 100%;
+  }
+  .footer {
+    display: table-footer-group;
+  }
+}
+
+.g-recaptcha {
+  transform-origin: 0 0;
+}
+@media (max-width: 479px) {
+  .g-recaptcha {
+    padding-bottom: 1rem;
+  }
+}
+
+#password, #password-new, #password-confirm {
+  padding-right: 3rem;
+}
+
+.city_hidden_input {
+  display: none;
+}

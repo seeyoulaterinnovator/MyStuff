@@ -1,10 +1,7 @@
 package ru.alamics.sso.registration.phone;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.alamics.sso.util.EStand;
 import ru.alamics.sso.util.StandResolver;
-
-import javax.ejb.Stateless;
 
 @Slf4j
 public class SmsCodeGenerator {

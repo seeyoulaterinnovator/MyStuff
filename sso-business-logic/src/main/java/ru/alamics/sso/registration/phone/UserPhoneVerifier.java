@@ -1,9 +1,15 @@
 package ru.alamics.sso.registration.phone;
 
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.models.RealmModel;
 import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.User;
-import ru.alamics.sso.registration.phone.exception.*;
+import ru.alamics.sso.registration.phone.exception.PhoneCallException;
+import ru.alamics.sso.registration.phone.exception.SendMessageException;
+import ru.alamics.sso.registration.phone.exception.UserPhoneEmpty;
+import ru.alamics.sso.registration.phone.exception.WrongSmsCode;
+import ru.alamics.sso.registration.phone.model.MessageRequest;
+import ru.alamics.sso.registration.phone.model.MessengerType;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 
 import javax.ejb.EJB;
@@ -17,24 +23,23 @@ public class UserPhoneVerifier {
     public static final String PHONE_KEY_HASH = "phone_key_hash";
     public static final String EXPIRATION_TIME = "expiration_time";
     public static final String COUNT_REPEAT = "count_repeat";
+    public static final String MESSENGER = "messenger";
 
     @EJB
-    private SmsService smsService;
-    @EJB
-    private ViberService viberService;
+    private MessageService messageService;
     @EJB
     private PhoneCallerRemoteService phoneCallerService;
 
     public UserPhoneVerifier() {
     }
 
-    public UserPhoneVerifier(SmsService smsService) {
-        this.smsService = smsService;
+    public UserPhoneVerifier(MessageService msgService) {
+        this.messageService = msgService;
     }
 
-    public AuthContext sendValidationSms(User user,
+    public AuthContext sendValidationMsg(User user,
                                          AuthContext context,
-                                         ActivationCodeType codeType) throws UserPhoneEmpty, PhoneCallException, SmsSendException, ViberSendException {
+                                         ActivationCodeType codeType, RealmModel realm) throws UserPhoneEmpty, PhoneCallException, SendMessageException {
         if (user.getPhone() == null || user.getPhone().isEmpty())
             throw new UserPhoneEmpty();
 
@@ -42,7 +47,7 @@ public class UserPhoneVerifier {
         if (context.getHashProperty() == null || !context.getExpirationTime().isAfter(LocalDateTime.now())) {
             log.info("Нет хэша для кода. Повторить получение кода");
 
-            String code = generateCode(user, codeType, context);
+            String code = generateCode(user, codeType, context, realm);
 
             if (code != null) {
                 return AuthContext.builder()
@@ -56,16 +61,22 @@ public class UserPhoneVerifier {
         return context;
     }
 
-    private String generateCode(User user, ActivationCodeType codeType, AuthContext context)
-            throws PhoneCallException, SmsSendException, ViberSendException
-    {
-        if ( ActivationCodeType.CODE_TO_SMS.equals(codeType)) {
+    private String generateCode(User user, ActivationCodeType codeType, AuthContext context, RealmModel realm)
+            throws PhoneCallException, SendMessageException {
+        if (ActivationCodeType.CODE_TO_SMS.equals(codeType)) {
             String code = SmsCodeGenerator.getCode(codeType.getLengthCode());
 
-            try {
-                viberService.sendMsg(user.getId(), user.getPhone(), code);
-            } finally {
-                smsService.sendSms(user.getId(), user.getPhone(), code);
+            MessageRequest messageRequest = MessageRequest.builder()
+                    .userPhone(user.getPhone())
+                    .text(code)
+                    .realmId(realm.getId())
+                    .build();
+
+            String[] listMessenger = realm.getSmtpConfig().get(MESSENGER).split(",");
+
+            for (String messenger: listMessenger) {
+                messageRequest.setMessengerName(MessengerType.valueOf(messenger));
+                messageService.sendMsg(messageRequest);
             }
 
             return code;
@@ -76,8 +87,7 @@ public class UserPhoneVerifier {
     }
 
     public void verifyPhone(User user, AuthContext authContext, String smsCode, ActivationCodeType activationCodeType)
-            throws WrongSmsCode
-    {
+            throws WrongSmsCode {
         String savedHash = authContext.getHashProperty();
         LocalDateTime expirationDate = authContext.getExpirationTime();
 

@@ -1,0 +1,53 @@
+<#import "template.ftl" as layout>
+<#import "templates/components.ftl" as components>
+<#import "templates/blocks.ftl" as blocks>
+
+<@layout.registrationLayout; section>
+    <#if section = "header">
+        <#include "templates/required-fields.html">
+        <@blocks.contentHeader mainTitle="${msg('loginProfileTitle')}"/>
+
+    <#elseif section = "form">
+
+        <form id="kc-update-profile-form" class="${properties.kcFormClass!}" action="${url.loginAction}" method="post">
+    <#-- В нашем случае firstName – это полное имя -->
+        <@components.field class="mb-4 md:w-full" fieldName="firstName"value="${(user.firstName!'')}" label="Как к вам обращаться?" placeholder="Как к вам обращаться?" required=true />
+
+        <@components.field class="mb-4 md:w-full" fieldName="email" value="${(user.email!'')}" label="Эл. почта" placeholder="Введите эл. почту" required=true type="text" />
+
+        <@components.field class="mb-4 md:w-full" fieldName="phone" label="Ваш телефон" placeholder="Введите номер телефона" required=true />
+
+
+            <#if recaptchaRequired??>
+                <div class="g-recaptcha w-full mb-4"
+                data-sitekey="${recaptchaSiteKey}"
+                data-callback="recaptchaCallback"
+                data-expired-callback="recaptchaExpiredCallback"
+                data-error-callback="recaptchaErrorCallback"
+                >
+                </div>
+            </#if>
+
+            <div class="${properties.kcFormGroupClass!}">
+                <div id="kc-form-options" class="${properties.kcFormOptionsClass!}">
+                    <div class="${properties.kcFormOptionsWrapperClass!}">
+                    </div>
+                </div>
+
+                <div id="kc-form-buttons" class="${properties.kcFormButtonsClass!}">
+                    <#if isAppInitiatedAction??>
+                        <input class="btn btn-main w-full mb-2" id="update-profile-submit" type="submit" value="${msg('doRegister')}" />
+                        <button class="btn btn-main w-full" type="submit" name="cancel-aia" value="true" />${msg("doCancel")}</button>
+                    <#else>
+                        <div class="flex flex-col sm:flex-row mt-0 xl:mt-2">
+                            <div class="flex flex-basis-auto items-center">
+                                <button class="btn btn-main w-full" type="submit" id="update-profile-submit" />${msg("doAccept")}</button>
+                            </div>
+                            <span class="flex-basis-auto ml-0 mb-6 mt-4 text-xs sm:ml-5 sm:mb-0 agreement"><span class="opacity-50">Нажимая кнопку, вы соглашаетесь <br></span><a class="reference reference_hoverable" href="http://lkb2b.stelecom.ru/policy1.pdf" target="_blink">с правилами обработки перс. данных</a></span>
+                        </div>
+                    </#if>
+                </div>
+            </div>
+        </form>
+    </#if>
+</@layout.registrationLayout>

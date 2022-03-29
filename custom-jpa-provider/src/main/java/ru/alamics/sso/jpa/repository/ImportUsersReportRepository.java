@@ -15,7 +15,7 @@ import java.util.List;
 
 @LocalBean
 @Stateless
-@TransactionAttribute(TransactionAttributeType.REQUIRED)
+@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 public class ImportUsersReportRepository {
 
     @PersistenceContext
@@ -66,16 +66,19 @@ public class ImportUsersReportRepository {
         em.flush();
     }
 
-    public ImportUsersReportEntity updateImportUsersReport(ImportUsersReportEntity importUsersReportEntity) {
-        //em.merge(importUsersReportEntity);
-        //em.flush();
-        return importUsersReportEntity;
-    }
+    public void updateImportUsersData(ImportUsersDataEntity entity) {
 
-    public ImportUsersDataEntity updateImportUsersData(ImportUsersDataEntity entity) {
-        //em.merge(entity);
-        //em.flush();
-        return entity;
+        em.createQuery("update ImportUsersDataEntity data " +
+                "set data.status = :status, data.isCreated = :isCreated, data.userId = :userId, data.errors = : errors where data.id = :id")
+                .setParameter("id", entity.getId())
+                .setParameter("status", entity.getStatus())
+                .setParameter("isCreated", entity.isCreated())
+                .setParameter("errors", entity.getErrors())
+                .setParameter("userId", entity.getUserId())
+                .executeUpdate();
+
+        refreshEntityById(entity.getId(), ImportUsersDataEntity.class);
+
     }
 
     public void setReportStatus(String id, ImportUsersReportStatus status) {
@@ -100,7 +103,6 @@ public class ImportUsersReportRepository {
 
         refreshEntityById(id, ImportUsersReportEntity.class);
     }
-
     public <T> T findEntityById(String id, Class<T> clazz) {
         return em.find(clazz, id);
     }

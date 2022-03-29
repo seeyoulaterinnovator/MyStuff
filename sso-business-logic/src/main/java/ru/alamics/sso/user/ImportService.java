@@ -1,15 +1,12 @@
 package ru.alamics.sso.user;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.authorization.policy.evaluation.Realm;
 import org.keycloak.common.util.Time;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
 import org.keycloak.events.jpa.AdminEventEntity;
 import org.keycloak.models.*;
 import org.keycloak.models.jpa.entities.*;
-import org.keycloak.services.managers.Auth;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.storage.ReadOnlyException;
@@ -32,9 +29,8 @@ import ru.alamics.sso.util.validator.NotValidException;
 import ru.alamics.sso.util.validator.PhoneValidator;
 
 import javax.ejb.*;
+import javax.ws.rs.NotFoundException;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
@@ -129,6 +125,7 @@ public class ImportService {
 
         log.info("doGeneratePasswords done");
     }
+
     public void createAdminEvent(OperationType operationType, UserModel user, RealmModel realm, AdminAuth auth, KeycloakSession session) {
         new AdminEventBuilder(realm, auth, session, session.getContext().getConnection())
                 .realm(realm)
@@ -141,7 +138,7 @@ public class ImportService {
     //@Asynchronous
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart,
-                                            AdminAuth auth, KeycloakSession session) {
+                                  AdminAuth auth, KeycloakSession session) {
 
         if (FileFactory.CTL.equalsIgnoreCase(reportModel.getFiletype())) {
 
@@ -247,7 +244,7 @@ public class ImportService {
 
         FoundException foundException = new FoundException();
         try {
-            checkOnExistUserByPhone(phone);
+            checkOnExistUserByPhone(realmId, phone);
         } catch (FoundException e) {
             foundException.addResult("error1", e.getMessage());
         }
@@ -262,8 +259,8 @@ public class ImportService {
         }
     }
 
-    private void checkOnExistUserByPhone(String phone) throws FoundException {
-        UserEntity user = userRepository.getFirstUserByPhone(phone);
+    private void checkOnExistUserByPhone(String realmId, String phone) throws FoundException {
+        UserEntity user = userRepository.getFirstUserByPhoneNumber(realmId, phone, null);
 
         if (user != null) {
             log.error("User exists with same phone {}", phone);
@@ -338,7 +335,7 @@ public class ImportService {
         adminEventRepository.save(adminEvent);
     }
 
-    private void addUserPost(UserEntity user, ImportUsersDataModel data) throws NotFoundException, FoundUserPostException, NotValidException {
+    private void addUserPost(UserEntity user, ImportUsersDataModel data) throws FoundUserPostException, NotValidException {
         UserPostRequest userPostRequest = new UserPostRequest();
         userPostRequest.setUserId(user.getId());
         userPostRequest.setTomsId(data.getTomsId());
@@ -350,7 +347,7 @@ public class ImportService {
         addSystemRoles(data, userPostResponse.getId());
     }
 
-    private void addSystemRoles(ImportUsersDataModel userImport, String userPostId) throws javassist.NotFoundException {
+    private void addSystemRoles(ImportUsersDataModel userImport, String userPostId) {
         if (userImport.getSystems() == null || userImport.getSystems().isEmpty()) {
             return;
         }
@@ -369,7 +366,7 @@ public class ImportService {
             }
 
             if (!errorSystemNames.isEmpty()) {
-                throw new NotFoundException(String.format("Not found roles for systems: systems=%s", errorSystemNames.toString()));
+                throw new NotFoundException(String.format("Not found roles for systems: systems=%s", errorSystemNames));
             }
         }
     }

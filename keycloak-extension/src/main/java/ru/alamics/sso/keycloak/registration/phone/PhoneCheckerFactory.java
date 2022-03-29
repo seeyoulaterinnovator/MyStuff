@@ -1,24 +1,23 @@
 package ru.alamics.sso.keycloak.registration.phone;
 
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.Config;
 import org.keycloak.authentication.FormAction;
-import org.keycloak.authentication.FormActionFactory;
 import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderConfigProperty;
+import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.keycloak.registration.AbstractFormActionFactory;
 import ru.alamics.sso.registration.service.UserFindService;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
-public class PhoneCheckerFactory implements FormActionFactory {
+public class PhoneCheckerFactory extends AbstractFormActionFactory {
 
     private static final String PROVIDER_ID = "phone_checker";
+    private static final String DISPLAY_NAME = "Registration Phone checker";
+    private static final String HELP_TEXT = "Get help text";
 
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
@@ -28,17 +27,7 @@ public class PhoneCheckerFactory implements FormActionFactory {
 
     @Override
     public String getDisplayType() {
-        return "Registration Phone checker";
-    }
-
-    @Override
-    public String getReferenceCategory() {
-        return null;
-    }
-
-    @Override
-    public boolean isConfigurable() {
-        return false;
+        return DISPLAY_NAME;
     }
 
     @Override
@@ -47,13 +36,8 @@ public class PhoneCheckerFactory implements FormActionFactory {
     }
 
     @Override
-    public boolean isUserSetupAllowed() {
-        return false;
-    }
-
-    @Override
     public String getHelpText() {
-        return "Get help text";
+        return HELP_TEXT;
     }
 
     @Override
@@ -63,31 +47,9 @@ public class PhoneCheckerFactory implements FormActionFactory {
 
     @Override
     public FormAction create(KeycloakSession session) {
-        try {
-            this.userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context");
-        }
-
+        this.userFindService = Lookup.lookup(UserFindService.class);
         log.info("Creating PhoneCheckProvider");
         return new PhoneCheckProvider(userFindService);
-
-    }
-
-    @Override
-    public void init(Config.Scope config) {
-
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-
-    }
-
-    @Override
-    public void close() {
-
     }
 
     @Override

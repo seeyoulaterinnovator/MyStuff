@@ -2,15 +2,16 @@ package ru.alamics.sso.keycloak.registration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jboss.logging.Logger;
-import org.keycloak.Config;
 import org.keycloak.authentication.FormAction;
-import org.keycloak.authentication.FormActionFactory;
 import org.keycloak.authentication.FormContext;
 import org.keycloak.authentication.ValidationContext;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
-import org.keycloak.models.*;
+import org.keycloak.models.AuthenticationExecutionModel;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.provider.ProviderConfigProperty;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
@@ -24,29 +25,31 @@ import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
 import javax.ws.rs.core.MultivaluedMap;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import static ru.alamics.sso.registration.model.FormConstants.*;
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_ORG_NAME;
 
-public class UserModelExtender implements FormAction, FormActionFactory {
+public class UserModelExtender extends AbstractFormActionFactory implements FormAction {
 
     private static final Logger log = Logger.getLogger(UserModelExtender.class);
 
     private static final String TBAPI_CHECK_DATA = "tbapi_check_data";
 
-    // jackson serialize
-    ObjectMapper jacksonMapper = new ObjectMapper();
-
     private static final String PROVIDER_ID = "registration-user-extension";
+    private static final String DISPLAY_NAME = "Registration user extension";
+    private static final String HELP_TEXT = "Common help text";
 
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
             AuthenticationExecutionModel.Requirement.DISABLED
     };
-
     private final TbapiService tbapiService;
     private final UserExtension userExtension;
+    // jackson serialize
+    ObjectMapper jacksonMapper = new ObjectMapper();
 
     public UserModelExtender() {
         tbapiService = new TbapiService(new TbapiServiceRestImpl());
@@ -82,13 +85,6 @@ public class UserModelExtender implements FormAction, FormActionFactory {
                     .email(formData.getFirst(FIELD_EMAIL))
                     .phone(formData.getFirst(FIELD_PHONE))
                     .build();
-
-            String orgName = formData.getFirst(FIELD_ORG_NAME);
-            // TODO на стандартной верстке нет поля организации
-            if (orgName == null) {
-                orgName = formData.getFirst(FIELD_LAST_NAME);
-            }
-            user.getAttributes().put(ATTR_ORG_NAME, Collections.singletonList(orgName));
 
             Map<String, Object> attributes = tbapiService.registerUser(user, new TbapiConnectConfig(TbapiConnect.REGISTRATION));
 
@@ -156,23 +152,8 @@ public class UserModelExtender implements FormAction, FormActionFactory {
     }
 
     @Override
-    public void close() {
-        // nothing to do here
-    }
-
-    @Override
     public String getDisplayType() {
-        return "Registration user extension";
-    }
-
-    @Override
-    public String getReferenceCategory() {
-        return null;
-    }
-
-    @Override
-    public boolean isConfigurable() {
-        return false;
+        return DISPLAY_NAME;
     }
 
     @Override
@@ -181,13 +162,8 @@ public class UserModelExtender implements FormAction, FormActionFactory {
     }
 
     @Override
-    public boolean isUserSetupAllowed() {
-        return false;
-    }
-
-    @Override
     public String getHelpText() {
-        return "Common help text";
+        return HELP_TEXT;
     }
 
     @Override
@@ -199,16 +175,6 @@ public class UserModelExtender implements FormAction, FormActionFactory {
     public FormAction create(KeycloakSession session) {
         log.info("Creating UserModelExtender");
         return this;
-    }
-
-    @Override
-    public void init(Config.Scope config) {
-        // nothing to do here
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-        // nothing to do here
     }
 
     @Override

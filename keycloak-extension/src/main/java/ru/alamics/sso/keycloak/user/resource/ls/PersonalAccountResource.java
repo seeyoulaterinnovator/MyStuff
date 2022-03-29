@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.user.resource.ls;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import ru.alamics.sso.keycloak.response.JsonResponse;
@@ -62,7 +61,6 @@ public class PersonalAccountResource {
 
     // добавить лс для должности
     // PATCH
-    // TODO убирать дубли
     @PATCH
     @Path("/{postId}/add")
     public Response add(@PathParam("postId") String postId, List<String> paList) {

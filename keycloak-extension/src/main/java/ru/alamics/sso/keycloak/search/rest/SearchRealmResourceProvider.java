@@ -19,7 +19,7 @@ package ru.alamics.sso.keycloak.search.rest;
 
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.resource.RealmResourceProvider;
-import org.keycloak.services.resources.admin.AdminAuth;
+import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
 
 
@@ -33,8 +33,10 @@ public class SearchRealmResourceProvider implements RealmResourceProvider, BaseR
 
     @Override
     public Object getResource() {
-        initAuth(session).users().requireView();
-        return new SearchRestResource(session);
+        AdminPermissionEvaluator adminPermissionEvaluator = initAuth(session);
+        adminPermissionEvaluator.users().requireView();
+
+        return new SearchRestResource(session, adminPermissionEvaluator.adminAuth());
     }
 
     @Override

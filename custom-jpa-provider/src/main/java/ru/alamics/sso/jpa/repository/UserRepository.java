@@ -6,6 +6,7 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.jpa.model.UserSummaryView;
+import ru.alamics.sso.jpa.util.CollectionUtils;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -83,21 +84,15 @@ public class UserRepository {
             return null;
 
         String realmName = realmModel == null ? "user" : realmModel.getId();
+        return this.getFirstUserByPhoneNumber(realmName, phone, excludedUserId);
+    }
 
-        // запрос в таком виде выполняется больше секунды на более 100т юзерах
-        // с нормальным индексом уже без разницы на 6кк - 60мс, rows 1
-        /*
-        List<UserEntity> users1 = em.createQuery("select u from UserEntity u join u.attributes attr \n" +
-                "  where u.realmId = :realmId " +
-                "       and attr.name = :name " +
-                "       and (:excludedUserId is null or u.id <> :excludedUserId) " +
-                "       and attr.value = :phoneNmbr", UserEntity.class)
-                .setParameter("realmId", realmModel == null ? "user" : realmModel.getId())
-                .setParameter("name", "phone")
-                .setParameter("phoneNmbr", phone)
-                .setParameter("excludedUserId", Validation.isBlank(excludedUserId) ? null : excludedUserId)
-                .getResultList();
-        */
+    public UserEntity getFirstUserByPhoneNumber(String realmId, String phone, String excludedUserId) {
+
+        if (Validation.isBlank(phone))
+            return null;
+
+        String realmName = realmId == null ? "user" : realmId;
 
         List<UserEntity> users = (List<UserEntity>) em.createNativeQuery(
                 "select * " +
@@ -122,41 +117,10 @@ public class UserRepository {
 
         if (users != null && !users.isEmpty())
             return users.get(0);
-        /*
-        if (users != null && users.size() > 0) {
 
-            for (UserEntity ue : users) {
-                if (ue.getRealmId().equalsIgnoreCase(realmName))
-                    return ue;
-            }
-        }
-        */
         return null;
     }
 
-    // TODO медленно, используется с правкой атрибутов
-    public UserEntity getFirstUserByPhoneNumber(String phone, String excludedUserId) {
-
-        if (Validation.isBlank(phone))
-            return null;
-
-        List<UserEntity> users = em.createQuery("select u from UserEntity u " +
-                "join u.attributes attr " +
-                "  where attr.name = :name " +
-                "       and (:excludedUserId is null or u.id <> :excludedUserId) " +
-                "       and attr.value = :phoneNmbr", UserEntity.class)
-                .setParameter("name", "phone")
-                .setParameter("phoneNmbr", phone)
-                .setParameter("excludedUserId", Validation.isBlank(excludedUserId) ? null : excludedUserId)
-                .setMaxResults(1)
-                .getResultList();
-        if (users != null && users.size() > 0) {
-            return users.get(0);
-        }
-        return null;
-    }
-
-    // TODO медленно, используется при импорте
     public UserEntity getFirstUserByPhone(String phone) {
         List<UserEntity> users = em.createQuery(
                 "select u from UserEntity u " +
@@ -197,7 +161,6 @@ public class UserRepository {
         return null;
     }
 
-    @Deprecated
     public List<Tuple> getTupleUsersByParametersWithoutGrouping(
             String realm,
             String search,
@@ -210,7 +173,7 @@ public class UserRepository {
             List<String> includeOnlyIDs
     ) {
 
-        if (search != null && !search.isEmpty())
+        if (CollectionUtils.isNotEmpty(search))
             search = "%" + search + "%";
 
         String queryStr = "select GROUP_CONCAT(PA.VALUE) as account,\n" +
@@ -293,14 +256,25 @@ public class UserRepository {
             String realm,
             String search,
             String searchUser,
+            String searchEmail,
+            String searchPhone,
             String searchToms,
             String sortField,
             boolean sortAsc,
             int pageNum,
             int pageSize
     ) {
-        if (search != null && !search.isEmpty())
-            search = "%" + search + "%";
+        if (CollectionUtils.isNotEmpty(search)) {
+            search = "%" + search.replace("-", "\\-") + "%";
+        }
+
+        if (CollectionUtils.isNotEmpty(searchEmail)) {
+            search = searchEmail;
+        }
+
+        if (CollectionUtils.isNotEmpty(searchPhone)) {
+            searchPhone = searchPhone + "%";
+        }
 
         Query query = em.createQuery(
                 "select distinct new ru.alamics.sso.jpa.model.UserSummaryView(UE.id, " +
@@ -316,15 +290,16 @@ public class UserRepository {
                         "WHERE UE.realmId = :realm\n" +
                         "and (:search is null or :search = '' or (UE.email LIKE :search OR\n" +
                         "                                         UE.firstName LIKE :search OR\n" +
-                        "                                         UA.value LIKE :search OR\n" +
                         "                                         UE.username LIKE :search ))\n" +
                         "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser)\n" +
                         "and (:searchToms is null or :searchToms = '' or UP.customer.id = :searchToms)\n" +
+                        "and (:searchPhone is null or :searchPhone = '' or UA.value LIKE :searchPhone)\n" +
                         getSort(sortField, sortAsc)
                 , UserSummaryView.class)
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
+                .setParameter("searchPhone", searchPhone)
                 .setParameter("realm", realm);
 
         pageNum = Math.max(1, pageNum);
@@ -349,7 +324,7 @@ public class UserRepository {
 
         String fullTextSearch = null;
 
-        if (search != null && !search.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(search)) {
             fullTextSearch = convertToFullTextSearchString(search);
         }
 
@@ -395,7 +370,7 @@ public class UserRepository {
             int pageNum,
             int pageSize
     ) {
-        if (searchPhone != null && !searchPhone.isEmpty())
+        if (CollectionUtils.isNotEmpty(searchPhone))
             searchPhone = searchPhone + "*";
 
         Query query = em.createNativeQuery(
@@ -466,7 +441,7 @@ public class UserRepository {
 
             listStr.append("'").append(id).append("'");
         }
-        res += listStr.toString() + ")) \n";
+        res += listStr + ")) \n";
 
         return res;
     }
@@ -475,7 +450,6 @@ public class UserRepository {
 
         page = Math.max(1, page);
         limit = Math.max(1, limit);
-        // TODO max limit ?
 
         return " LIMIT " + limit + " OFFSET " + (page - 1) * limit;
     }

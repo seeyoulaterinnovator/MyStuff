@@ -3,6 +3,7 @@ package ru.alamics.sso.registration.service;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.UserEntity;
+import ru.alamics.sso.jpa.entity.UserPostRoleEntity;
 import ru.alamics.sso.jpa.model.UserSummaryView;
 import ru.alamics.sso.jpa.repository.UserPostRepository;
 import ru.alamics.sso.jpa.repository.UserRepository;
@@ -34,7 +35,7 @@ public class UserFindService {
 
     public UserFindService() {
 
-        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        properties = Lookup.lookup(ApplicationProperties.class);
     }
 
     public UserEntity getUserByPhone(RealmModel realm, String phone) {
@@ -53,10 +54,10 @@ public class UserFindService {
         return null;
     }
 
-    public UserEntity getUserByPhoneAndExcludedUserId(String phone, String excludedUserId) {
+    public UserEntity getUserByPhoneAndExcludedUserId(String realmId, String phone, String excludedUserId) {
         phone = Util.getCleanUserPhone(phone);
         if (phone != null) {
-            return userRepository.getFirstUserByPhoneNumber(phone, excludedUserId);
+            return userRepository.getFirstUserByPhoneNumber(realmId, phone, excludedUserId);
         }
         return null;
     }
@@ -79,6 +80,7 @@ public class UserFindService {
             String realm,
             String search,
             String searchUser,
+            String searchEmail,
             String searchToms,
             String searchPhone,
             String sortField,
@@ -86,21 +88,7 @@ public class UserFindService {
             Integer pageNum,
             Integer pageSize
     ) {
-        List<UserSummaryView> users = null;
-
-        if (properties.getProperty("db.non.mysql") != null) {
-            log.info("getUsersByParameters non mysql");
-            users = userRepository.findUsersByParameters(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
-
-        } else if (!Util.isEmpty(searchPhone)) {
-            log.info("getUsersByParameters phone");
-            users = userRepository.findUsersByPhone(realm, searchPhone, sortField, sortAsc, pageNum, pageSize);
-
-        } else {
-            log.info("getUsersByParameters name");
-            users = userRepository.findUsersByName(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize);
-            // TODO в users[n] нет телефона
-        }
+        List<UserSummaryView> users = userRepository.findUsersByParameters(realm, search, searchUser, searchEmail, searchPhone, searchToms, sortField, sortAsc, pageNum, pageSize);
 
         if (users.isEmpty()) {
             return Collections.emptyList();
@@ -134,5 +122,9 @@ public class UserFindService {
 
     public UserEntity getUserEntity(String userId) {
         return userRepository.findUser(userId);
+    }
+
+    public UserPostRoleEntity getRoleEntity(Long id){
+        return userPostRepository.findUserPostRoleById(id);
     }
 }

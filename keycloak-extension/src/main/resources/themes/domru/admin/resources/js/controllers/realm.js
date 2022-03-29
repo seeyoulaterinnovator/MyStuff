@@ -1,5 +1,5 @@
 function getAccess(Auth, Current, role) {
-    if (!Current.realm)return false;
+    if (!Current.realm) return false;
     var realmAccess = Auth.user && Auth.user['realm_access'];
     if (realmAccess) {
         realmAccess = realmAccess[Current.realm.realm];
@@ -12,43 +12,51 @@ function getAccess(Auth, Current, role) {
 
 function getAccessObject(Auth, Current) {
     return {
-        get hideManageButtons(){
+        get hideManageButtons() {
             return getAccess(Auth, Current, 'hide-manage-buttons');
         },
 
-        get editAttributes(){
+        get editAttributes() {
             return getAccess(Auth, Current, 'edit-attributes');
         },
 
-        get editSessions(){
+        get editSessions() {
             return getAccess(Auth, Current, 'edit-sessions');
         },
 
-        get editRoleMappings(){
+        get editRoleMappings() {
             return getAccess(Auth, Current, 'edit-role-mappings');
         },
 
-        get editConsents(){
+        get editConsents() {
             return getAccess(Auth, Current, 'edit-consents');
         },
 
-        get editCredentials(){
+        get editCredentials() {
             return getAccess(Auth, Current, 'edit-credentials');
         },
 
-        get editFederatedIdentity(){
+        get hideSelectAll() {
+            return getAccess(Auth, Current, 'hide-select-all');
+        },
+
+        get hideUserSearch() {
+            return getAccess(Auth, Current, 'hide-user-search');
+        },
+
+        get editFederatedIdentity() {
             return getAccess(Auth, Current, 'edit-federated-identity');
         },
 
-        get editCustomer(){
+        get editCustomer() {
             return getAccess(Auth, Current, 'edit-customer');
         },
 
-        get editGroups(){
+        get editGroups() {
             return getAccess(Auth, Current, 'edit-groups');
         },
 
-        get editDetails(){
+        get editDetails() {
             return getAccess(Auth, Current, 'edit-details');
         },
 
@@ -91,6 +99,53 @@ function getAccessObject(Auth, Current) {
         get viewAuthorization() {
             return getAccess(Auth, Current, 'view-authorization') || this.manageAuthorization;
         },
+        get buttonDownloadTemplateCSV() {
+            return getAccess(Auth, Current, 'button-download-template-csv');
+        },
+
+        get buttonDownloadTemplateXlsx() {
+            return getAccess(Auth, Current, 'button-download-template-xlsx');
+        },
+
+        get buttonImportFileCSV() {
+            return getAccess(Auth, Current, 'button-import-file-csv');
+        },
+
+        get buttonExportCSV() {
+            return getAccess(Auth, Current, 'button-export-csv');
+        },
+
+        get buttonExportXlsx() {
+            return getAccess(Auth, Current, 'button-export-xlsx');
+        },
+
+        get buttonResetPassword() {
+            return getAccess(Auth, Current, 'button-reset-password');
+        },
+
+        get buttonBlockUsers() {
+            return getAccess(Auth, Current, 'button-block-users');
+        },
+
+        get buttonUnlockUsers() {
+            return getAccess(Auth, Current, 'button-unlock-users');
+        },
+
+        get buttonAddUser() {
+            return getAccess(Auth, Current, 'button-add-user');
+        },
+
+        get requiredActions() {
+            return getAccess(Auth, Current, 'required-actions');
+        },
+
+        get buttonDeleteCustomer() {
+            return getAccess(Auth, Current, 'button-delete-customer');
+        },
+
+        get buttonAddCustomer() {
+            return getAccess(Auth, Current, 'button-add-customer');
+        },
 
         get manageRealm() {
             return getAccess(Auth, Current, 'manage-realm');
@@ -116,6 +171,10 @@ function getAccessObject(Auth, Current) {
             return getAccess(Auth, Current, 'manage-authorization');
         },
 
+        get managerBss() {
+            return getAccess(Auth, Current, 'hide-user-search');
+        },
+
         get impersonation() {
             return getAccess(Auth, Current, 'impersonation');
         }
@@ -123,7 +182,7 @@ function getAccessObject(Auth, Current) {
 }
 
 
-module.controller('GlobalCtrl', function($scope, $http, Auth, Current, $location, Notifications, ServerInfo) {
+module.controller('GlobalCtrl', function ($scope, $http, Auth, Current, $location, Notifications, ServerInfo) {
     $scope.authUrl = authUrl;
     $scope.resourceUrl = resourceUrl;
     $scope.auth = Auth;
@@ -131,17 +190,17 @@ module.controller('GlobalCtrl', function($scope, $http, Auth, Current, $location
 
     $scope.access = getAccessObject(Auth, Current);
 
-    $scope.$watch(function() {
+    $scope.$watch(function () {
         return $location.path();
-    }, function() {
+    }, function () {
         $scope.fragment = $location.path();
         $scope.path = $location.path().substring(1).split("/");
     });
 });
 
-module.controller('HomeCtrl', function(Realm, Auth, Current, $location) {
+module.controller('HomeCtrl', function (Realm, Auth, Current, $location) {
 
-    Realm.query(null, function(realms) {
+    Realm.query(null, function (realms) {
         var realm;
         if (realms.length == 1) {
             realm = realms[0];
@@ -157,7 +216,7 @@ module.controller('HomeCtrl', function(Realm, Auth, Current, $location) {
             Current.realm = realm;
             var access = getAccessObject(Auth, Current);
             if (access.viewRealm || access.manageRealm) {
-                $location.url('/realms/' + realm.realm );
+                $location.url('/realms/' + realm.realm);
             } else if (access.queryClients) {
                 $location.url('/realms/' + realm.realm + "/clients");
             } else if (access.viewIdentityProviders) {
@@ -175,10 +234,10 @@ module.controller('HomeCtrl', function(Realm, Auth, Current, $location) {
     });
 });
 
-module.controller('RealmTabCtrl', function(Dialog, $scope, Current, Realm, Notifications, $location) {
-    $scope.removeRealm = function() {
-        Dialog.confirmDelete(Current.realm.realm, 'realm', function() {
-            Realm.remove({ id : Current.realm.realm }, function() {
+module.controller('RealmTabCtrl', function (Dialog, $scope, Current, Realm, Notifications, $location) {
+    $scope.removeRealm = function () {
+        Dialog.confirmDelete(Current.realm.realm, 'realm', function () {
+            Realm.remove({id: Current.realm.realm}, function () {
                 Current.realms = Realm.query();
                 Notifications.success("The realm has been deleted.");
                 $location.url("/");
@@ -187,40 +246,40 @@ module.controller('RealmTabCtrl', function(Dialog, $scope, Current, Realm, Notif
     };
 });
 
-module.controller('ServerInfoCtrl', function($scope, ServerInfo) {
+module.controller('ServerInfoCtrl', function ($scope, ServerInfo) {
     ServerInfo.reload();
 
     $scope.serverInfo = ServerInfo.get();
 
-    $scope.$watch($scope.serverInfo, function() {
+    $scope.$watch($scope.serverInfo, function () {
         $scope.providers = [];
-        for(var spi in $scope.serverInfo.providers) {
+        for (var spi in $scope.serverInfo.providers) {
             var p = angular.copy($scope.serverInfo.providers[spi]);
             p.name = spi;
             $scope.providers.push(p)
         }
     });
 
-    $scope.serverInfoReload = function() {
+    $scope.serverInfoReload = function () {
         ServerInfo.reload();
     }
 });
 
-module.controller('RealmListCtrl', function($scope, Realm, Current) {
+module.controller('RealmListCtrl', function ($scope, Realm, Current) {
     $scope.realms = Realm.query();
     Current.realms = $scope.realms;
 });
 
-module.controller('RealmDropdownCtrl', function($scope, Realm, Current, Auth, $location) {
+module.controller('RealmDropdownCtrl', function ($scope, Realm, Current, Auth, $location) {
 //    Current.realms = Realm.get();
     $scope.current = Current;
 
-    $scope.changeRealm = function(selectedRealm) {
+    $scope.changeRealm = function (selectedRealm) {
         $location.url("/realms/" + selectedRealm);
     }
 });
 
-module.controller('RealmCreateCtrl', function($scope, Current, Realm, $upload, $http, $location, $route, Dialog, Notifications, Auth, $modal) {
+module.controller('RealmCreateCtrl', function ($scope, Current, Realm, $upload, $http, $location, $route, Dialog, Notifications, Auth, $modal) {
     console.log('RealmCreateCtrl');
 
     Current.realm = null;
@@ -234,12 +293,12 @@ module.controller('RealmCreateCtrl', function($scope, Current, Realm, $upload, $
 
     var oldCopy = angular.copy($scope.realm);
 
-    $scope.importFile = function($fileContent){
+    $scope.importFile = function ($fileContent) {
         $scope.realm = angular.copy(JSON.parse($fileContent));
         $scope.importing = true;
     };
 
-    $scope.viewImportDetails = function() {
+    $scope.viewImportDetails = function () {
         $modal.open({
             templateUrl: resourceUrl + '/partials/modal/view-object.html',
             controller: 'ObjectModalCtrl',
@@ -251,43 +310,43 @@ module.controller('RealmCreateCtrl', function($scope, Current, Realm, $upload, $
         })
     };
 
-    $scope.$watch('realm', function() {
+    $scope.$watch('realm', function () {
         if (!angular.equals($scope.realm, oldCopy)) {
             $scope.changed = true;
         }
     }, true);
 
-    $scope.$watch('realm.realm', function() {
-	    $scope.realm.id = $scope.realm.realm;
+    $scope.$watch('realm.realm', function () {
+        $scope.realm.id = $scope.realm.realm;
     }, true);
 
-    $scope.save = function() {
+    $scope.save = function () {
         var realmCopy = angular.copy($scope.realm);
-        Realm.create(realmCopy, function() {
+        Realm.create(realmCopy, function () {
             Notifications.success("The realm has been created.");
 
-            Auth.refreshPermissions(function() {
-                $scope.$apply(function() {
+            Auth.refreshPermissions(function () {
+                $scope.$apply(function () {
                     $location.url("/realms/" + realmCopy.realm);
                 });
             });
         });
     };
 
-    $scope.cancel = function() {
+    $scope.cancel = function () {
         $location.url("/");
     };
 
-    $scope.reset = function() {
+    $scope.reset = function () {
         $route.reload();
     }
 });
 
-module.controller('ObjectModalCtrl', function($scope, object) {
+module.controller('ObjectModalCtrl', function ($scope, object) {
     $scope.object = object;
 });
 
-module.controller('RealmDetailCtrl', function($scope, Current, Realm, realm, serverInfo, $http, $location, $window, Dialog, Notifications, Auth) {
+module.controller('RealmDetailCtrl', function ($scope, Current, Realm, realm, serverInfo, $http, $location, $window, Dialog, Notifications, Auth) {
     $scope.createRealm = !realm.realm;
     $scope.serverInfo = serverInfo;
     $scope.realmName = realm.realm;
@@ -312,24 +371,24 @@ module.controller('RealmDetailCtrl', function($scope, Current, Realm, realm, ser
 
     $scope.changed = $scope.create;
 
-    $scope.$watch('realm', function() {
+    $scope.$watch('realm', function () {
         if (!angular.equals($scope.realm, oldCopy)) {
             $scope.changed = true;
         }
     }, true);
-    $scope.$watch('realmName', function() {
+    $scope.$watch('realmName', function () {
         if (!angular.equals($scope.realmName, oldCopy.realm)) {
             $scope.changed = true;
         }
     }, true);
 
-    $scope.save = function() {
+    $scope.save = function () {
         var realmCopy = angular.copy($scope.realm);
         realmCopy.realm = $scope.realmName;
         $scope.changed = false;
         var nameChanged = !angular.equals($scope.realmName, oldCopy.realm);
         var oldName = oldCopy.realm;
-        Realm.update({ id : oldCopy.realm}, realmCopy, function () {
+        Realm.update({id: oldCopy.realm}, realmCopy, function () {
             var data = Realm.query(function () {
                 Current.realms = data;
                 for (var i = 0; i < Current.realms.length; i++) {
@@ -368,12 +427,12 @@ module.controller('RealmDetailCtrl', function($scope, Current, Realm, realm, ser
         });
     };
 
-    $scope.reset = function() {
+    $scope.reset = function () {
         $scope.realm = angular.copy(oldCopy);
         $scope.changed = false;
     };
 
-    $scope.cancel = function() {
+    $scope.cancel = function () {
         window.history.back();
     };
 });
@@ -383,60 +442,66 @@ function genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $r
     $scope.serverInfo = serverInfo;
     $scope.registrationAllowed = $scope.realm.registrationAllowed;
 
-	$scope.setRegistrationOnlyInFrame = function(){
-		$scope.registrationOnlyInFrame = $scope.realm.attributes['registrationOnlyInFrame'] == 'true';
-	}
-	$scope.setCheckInRiasIfNotFound = function(){
-		$scope.checkInRiasIfNotFound = $scope.realm.attributes['checkInRiasIfNotFound'] == 'true';
-	}
+    $scope.setRegistrationOnlyInFrame = function () {
+        $scope.registrationOnlyInFrame = $scope.realm.attributes['registrationOnlyInFrame'] == 'true';
+    }
+    $scope.setCheckInRiasIfNotFound = function () {
+        $scope.checkInRiasIfNotFound = $scope.realm.attributes['checkInRiasIfNotFound'] == 'true';
+    }
+    $scope.setRealmInSchedule = function () {
+        $scope.realmInSchedule = $scope.realm.attributes['realmInSchedule'] == 'true';
+    }
 
-	$scope.setCheckInRiasIfNotFound();
-	$scope.setRegistrationOnlyInFrame();
+    $scope.setCheckInRiasIfNotFound();
+    $scope.setRegistrationOnlyInFrame();
+    $scope.setRealmInSchedule();
 
     var oldCopy = angular.copy($scope.realm);
 
     $scope.changed = false;
 
-    $scope.$watch('realm', function() {
+    $scope.$watch('realm', function () {
         if (!angular.equals($scope.realm, oldCopy)) {
             $scope.changed = true;
         }
     }, true);
 
-    $scope.save = function() {
-		$scope.realm.attributes.registrationOnlyInFrame = $scope.registrationOnlyInFrame;
-		$scope.realm.attributes.checkInRiasIfNotFound = $scope.checkInRiasIfNotFound;
+    $scope.save = function () {
+        $scope.realm.attributes.registrationOnlyInFrame = $scope.registrationOnlyInFrame;
+        $scope.realm.attributes.checkInRiasIfNotFound = $scope.checkInRiasIfNotFound;
+        $scope.realm.attributes.realmInSchedule = $scope.realmInSchedule;
         var realmCopy = angular.copy($scope.realm);
         console.log('updating realm...');
         $scope.changed = false;
         console.log('oldCopy.realm - ' + oldCopy.realm);
-        Realm.update({ id : oldCopy.realm}, realmCopy, function () {
+        Realm.update({id: oldCopy.realm}, realmCopy, function () {
             $route.reload();
             Notifications.success("Your changes have been saved to the realm.");
             $scope.registrationAllowed = $scope.realm.registrationAllowed;
         });
     };
 
-    $scope.reset = function() {
+    $scope.reset = function () {
         $scope.realm = angular.copy(oldCopy);
         $scope.setRegistrationOnlyInFrame();
         $scope.setCheckInRiasIfNotFound();
+        $scope.setRealmInSchedule();
         $scope.changed = false;
     };
 
-    $scope.cancel = function() {
+    $scope.cancel = function () {
         $route.reload();
     };
 
 }
 
-module.controller('DefenseHeadersCtrl', function($scope, Current, Realm, realm, serverInfo, $http, $route, Dialog, Notifications) {
+module.controller('DefenseHeadersCtrl', function ($scope, Current, Realm, realm, serverInfo, $http, $route, Dialog, Notifications) {
     genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $route, Dialog, Notifications, "/realms/" + realm.realm + "/defense/headers");
 });
 
-module.controller('RealmLoginSettingsCtrl', function($scope, Current, Realm, realm, serverInfo, $http, $route, Dialog, Notifications) {
+module.controller('RealmLoginSettingsCtrl', function ($scope, Current, Realm, realm, serverInfo, $http, $route, Dialog, Notifications) {
     // KEYCLOAK-5474: Make sure duplicateEmailsAllowed is disabled if loginWithEmailAllowed
-    $scope.$watch('realm.loginWithEmailAllowed', function() {
+    $scope.$watch('realm.loginWithEmailAllowed', function () {
         if ($scope.realm.loginWithEmailAllowed) {
             $scope.realm.duplicateEmailsAllowed = false;
         }
@@ -445,20 +510,20 @@ module.controller('RealmLoginSettingsCtrl', function($scope, Current, Realm, rea
     genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $route, Dialog, Notifications, "/realms/" + realm.realm + "/login-settings");
 });
 
-module.controller('RealmOtpPolicyCtrl', function($scope, Current, Realm, realm, serverInfo, $http, $route, Dialog, Notifications) {
-    $scope.optionsDigits = [ 6, 8 ];
+module.controller('RealmOtpPolicyCtrl', function ($scope, Current, Realm, realm, serverInfo, $http, $route, Dialog, Notifications) {
+    $scope.optionsDigits = [6, 8];
 
     genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $route, Dialog, Notifications, "/realms/" + realm.realm + "/authentication/otp-policy");
 });
 
 
-module.controller('RealmThemeCtrl', function($scope, Current, Realm, realm, serverInfo, $http, $route, Dialog, Notifications) {
+module.controller('RealmThemeCtrl', function ($scope, Current, Realm, realm, serverInfo, $http, $route, Dialog, Notifications) {
     genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $route, Dialog, Notifications, "/realms/" + realm.realm + "/theme-settings");
 
     $scope.supportedLocalesOptions = {
-        'multiple' : true,
-        'simple_tags' : true,
-        'tags' : []
+        'multiple': true,
+        'simple_tags': true,
+        'tags': []
     };
 
     updateSupported();
@@ -511,40 +576,40 @@ module.controller('RealmThemeCtrl', function($scope, Current, Realm, realm, serv
     $scope.$watch('realm.internationalizationEnabled', updateSupported);
 });
 
-module.controller('RealmCacheCtrl', function($scope, realm, RealmClearUserCache, RealmClearRealmCache, RealmClearKeysCache, Notifications) {
+module.controller('RealmCacheCtrl', function ($scope, realm, RealmClearUserCache, RealmClearRealmCache, RealmClearKeysCache, Notifications) {
     $scope.realm = angular.copy(realm);
 
-    $scope.clearUserCache = function() {
-        RealmClearUserCache.save({ realm: realm.realm}, function () {
+    $scope.clearUserCache = function () {
+        RealmClearUserCache.save({realm: realm.realm}, function () {
             Notifications.success("User cache cleared");
         });
     }
 
-    $scope.clearRealmCache = function() {
-        RealmClearRealmCache.save({ realm: realm.realm}, function () {
-           Notifications.success("Realm cache cleared");
+    $scope.clearRealmCache = function () {
+        RealmClearRealmCache.save({realm: realm.realm}, function () {
+            Notifications.success("Realm cache cleared");
         });
     }
 
-    $scope.clearKeysCache = function() {
-        RealmClearKeysCache.save({ realm: realm.realm}, function () {
-           Notifications.success("Public keys cache cleared");
+    $scope.clearKeysCache = function () {
+        RealmClearKeysCache.save({realm: realm.realm}, function () {
+            Notifications.success("Public keys cache cleared");
         });
     }
 
 
 });
 
-module.controller('RealmPasswordPolicyCtrl', function($scope, Realm, realm, $http, $location, $route, Dialog, Notifications, serverInfo) {
-    var parse = function(policyString) {
+module.controller('RealmPasswordPolicyCtrl', function ($scope, Realm, realm, $http, $location, $route, Dialog, Notifications, serverInfo) {
+    var parse = function (policyString) {
         var policies = [];
-        if (!policyString || policyString.length == 0){
+        if (!policyString || policyString.length == 0) {
             return policies;
         }
 
         var policyArray = policyString.split(" and ");
 
-        for (var i = 0; i < policyArray.length; i ++){
+        for (var i = 0; i < policyArray.length; i++) {
             var policyToken = policyArray[i];
             var id;
             var value;
@@ -569,7 +634,7 @@ module.controller('RealmPasswordPolicyCtrl', function($scope, Realm, realm, $htt
         return policies;
     };
 
-    var toString = function(policies) {
+    var toString = function (policies) {
         if (!policies || policies.length == 0) {
             return "";
         }
@@ -591,11 +656,11 @@ module.controller('RealmPasswordPolicyCtrl', function($scope, Realm, realm, $htt
     $scope.policy = parse(realm.passwordPolicy);
     var oldCopy = angular.copy($scope.policy);
 
-    $scope.$watch('policy', function() {
-        $scope.changed = ! angular.equals($scope.policy, oldCopy);
+    $scope.$watch('policy', function () {
+        $scope.changed = !angular.equals($scope.policy, oldCopy);
     }, true);
 
-    $scope.addPolicy = function(policy){
+    $scope.addPolicy = function (policy) {
         policy.value = policy.defaultValue;
         if (!$scope.policy) {
             $scope.policy = [];
@@ -603,11 +668,11 @@ module.controller('RealmPasswordPolicyCtrl', function($scope, Realm, realm, $htt
         $scope.policy.push(policy);
     }
 
-    $scope.removePolicy = function(index){
+    $scope.removePolicy = function (index) {
         $scope.policy.splice(index, 1);
     }
 
-    $scope.save = function() {
+    $scope.save = function () {
         $scope.realm.passwordPolicy = toString($scope.policy);
         console.log($scope.realm.passwordPolicy);
 
@@ -617,7 +682,7 @@ module.controller('RealmPasswordPolicyCtrl', function($scope, Realm, realm, $htt
         });
     };
 
-    $scope.reset = function() {
+    $scope.reset = function () {
         $route.reload();
     };
 });
@@ -785,14 +850,13 @@ module.controller('RealmDefaultRolesCtrl', function ($scope, Realm, realm, clien
 });
 
 
-
-module.controller('IdentityProviderTabCtrl', function(Dialog, $scope, Current, Notifications, $location) {
-    $scope.removeIdentityProvider = function() {
-        Dialog.confirmDelete($scope.identityProvider.alias, 'provider', function() {
+module.controller('IdentityProviderTabCtrl', function (Dialog, $scope, Current, Notifications, $location) {
+    $scope.removeIdentityProvider = function () {
+        Dialog.confirmDelete($scope.identityProvider.alias, 'provider', function () {
             $scope.identityProvider.$remove({
-                realm : Current.realm.realm,
-                alias : $scope.identityProvider.alias
-            }, function() {
+                realm: Current.realm.realm,
+                alias: $scope.identityProvider.alias
+            }, function () {
                 $location.url("/realms/" + Current.realm.realm + "/identity-provider-settings");
                 Notifications.success("The identity provider has been deleted.");
             });
@@ -800,10 +864,30 @@ module.controller('IdentityProviderTabCtrl', function(Dialog, $scope, Current, N
     };
 });
 
-module.controller('RealmIdentityProviderCtrl', function($scope, $filter, $upload, $http, $route, realm, instance, providerFactory, IdentityProvider, serverInfo, authFlows, $location, Notifications, Dialog) {
+module.controller('RealmIdentityProviderCtrl', function ($scope, $filter, $upload, $http, $route, realm, instance, providerFactory, IdentityProvider, serverInfo, authFlows, $location, Notifications, Dialog) {
     $scope.realm = angular.copy(realm);
 
-    $scope.initSamlProvider = function() {
+    $scope.systemRoles = [];
+    $scope.systemList = [];
+
+    $scope.changedValue = function (item) {
+        $scope.systemList.splice(0);
+        for (var i = 0; i < item.length; i++) {
+            $scope.systemList.push(item[i]);
+        }
+        console.log($scope.systemList);
+        $scope.identityProvider.config["systems"] = $scope.systemList.join(",");
+        $scope.changed = true;
+    }
+
+    $http.get(authUrl + '/realms/' + realm.realm + '/user-post/system-roles').then(function (data) {
+        let roles = angular.fromJson(data).data.results['system-roles'];
+        roles = roles.filter(role => role.name === 'access_granted').filter((role, index, self) => self.indexOf(role) === index);
+        $scope.systemRoles = roles;
+        console.log($scope.systemRoles);
+    });
+
+    $scope.initSamlProvider = function () {
         $scope.nameIdFormats = [
             /*
             {
@@ -877,6 +961,9 @@ module.controller('RealmIdentityProviderCtrl', function($scope, $filter, $upload
                 $scope.provider = provider;
             }
         }
+        if ($scope.identityProvider.config["systems"]) {
+            $scope.system = $scope.identityProvider.config["systems"].split(',');
+        }
     } else {
         $scope.identityProvider = {};
         $scope.identityProvider.config = {};
@@ -892,7 +979,7 @@ module.controller('RealmIdentityProviderCtrl', function($scope, $filter, $upload
 
     $scope.changed = $scope.newIdentityProvider;
 
-    $scope.$watch('identityProvider', function() {
+    $scope.$watch('identityProvider', function () {
         if (!angular.equals($scope.identityProvider, instance)) {
             $scope.changed = true;
         }
@@ -908,16 +995,16 @@ module.controller('RealmIdentityProviderCtrl', function($scope, $filter, $upload
     removeUsedSocial();
 
     $scope.authFlows = [];
-    for (var i=0 ; i<authFlows.length ; i++) {
+    for (var i = 0; i < authFlows.length; i++) {
         if (authFlows[i].providerId == 'basic-flow') {
             $scope.authFlows.push(authFlows[i]);
         }
     }
 
     $scope.postBrokerAuthFlows = [];
-    var emptyFlow = { alias: "" };
+    var emptyFlow = {alias: ""};
     $scope.postBrokerAuthFlows.push(emptyFlow);
-    for (var i=0 ; i<$scope.authFlows.length ; i++) {
+    for (var i = 0; i < $scope.authFlows.length; i++) {
         $scope.postBrokerAuthFlows.push($scope.authFlows[i]);
     }
 
@@ -925,9 +1012,9 @@ module.controller('RealmIdentityProviderCtrl', function($scope, $filter, $upload
         $scope.identityProvider.postBrokerLoginFlowAlias = $scope.postBrokerAuthFlows[0].alias;
     }
 
-    $scope.$watch(function() {
+    $scope.$watch(function () {
         return $location.path();
-    }, function() {
+    }, function () {
         $scope.path = $location.path().substring(1).split("/");
     });
 
@@ -936,24 +1023,24 @@ module.controller('RealmIdentityProviderCtrl', function($scope, $filter, $upload
     $scope.importFile = false;
     $scope.importUrl = false;
 
-    $scope.onFileSelect = function($files) {
+    $scope.onFileSelect = function ($files) {
         $scope.importFile = true;
         $scope.files = $files;
     };
 
-    $scope.clearFileSelect = function() {
+    $scope.clearFileSelect = function () {
         $scope.importUrl = false;
         $scope.importFile = false;
         $scope.files = null;
     };
 
-    var setConfig = function(data) {
+    var setConfig = function (data) {
         for (var key in data) {
             $scope.identityProvider.config[key] = data[key];
         }
     }
 
-    $scope.uploadFile = function() {
+    $scope.uploadFile = function () {
         if (!$scope.identityProvider.alias) {
             Notifications.error("You must specify an alias");
             return;
@@ -974,19 +1061,19 @@ module.controller('RealmIdentityProviderCtrl', function($scope, $filter, $upload
                 //fileFormDataName: myFile,
                 /* customize how data is added to formData. See #40#issuecomment-28612000 for example */
                 //formDataAppender: function(formData, key, val){}
-            }).progress(function(evt) {
+            }).progress(function (evt) {
                 console.log('percent: ' + parseInt(100.0 * evt.loaded / evt.total));
-            }).then(function(response) {
+            }).then(function (response) {
                 setConfig(response.data);
                 $scope.clearFileSelect();
                 Notifications.success("The IDP metadata has been loaded from file.");
-            }).catch(function() {
+            }).catch(function () {
                 Notifications.error("The file can not be uploaded. Please verify the file.");
             });
         }
     };
 
-    $scope.importFrom = function() {
+    $scope.importFrom = function () {
         if (!$scope.identityProvider.alias) {
             Notifications.error("You must specify an alias");
             return;
@@ -996,24 +1083,24 @@ module.controller('RealmIdentityProviderCtrl', function($scope, $filter, $upload
             providerId: providerFactory.id
         }
         $http.post(authUrl + '/admin/realms/' + realm.realm + '/identity-provider/import-config', input)
-            .then(function(response) {
+            .then(function (response) {
                 setConfig(response.data);
                 $scope.fromUrl.data = '';
                 $scope.importUrl = false;
                 Notifications.success("Imported config information from url.");
-            }).catch(function() {
-                Notifications.error("Config can not be imported. Please verify the url.");
-            });
+            }).catch(function () {
+            Notifications.error("Config can not be imported. Please verify the url.");
+        });
     };
-    $scope.$watch('fromUrl.data', function(newVal, oldVal){
+    $scope.$watch('fromUrl.data', function (newVal, oldVal) {
         if ($scope.fromUrl.data && $scope.fromUrl.data.length > 0) {
             $scope.importUrl = true;
-        } else{
+        } else {
             $scope.importUrl = false;
         }
     });
 
-    $scope.$watch('configuredProviders', function(configuredProviders) {
+    $scope.$watch('configuredProviders', function (configuredProviders) {
         if (configuredProviders) {
             $scope.configuredProviders = angular.copy(configuredProviders);
 
@@ -1031,13 +1118,13 @@ module.controller('RealmIdentityProviderCtrl', function($scope, $filter, $upload
         }
     }, true);
 
-    $scope.callbackUrl = encodeURI($location.absUrl().replace(/\/admin.*/, "/realms/") + realm.realm + "/broker/") ;
+    $scope.callbackUrl = encodeURI($location.absUrl().replace(/\/admin.*/, "/realms/") + realm.realm + "/broker/");
 
-    $scope.addProvider = function(provider) {
+    $scope.addProvider = function (provider) {
         $location.url("/create/identity-provider/" + realm.realm + "/" + provider.id);
     };
 
-    $scope.save = function() {
+    $scope.save = function () {
         if ($scope.newIdentityProvider) {
             if (!$scope.identityProvider.alias) {
                 Notifications.error("You must specify an alias");
@@ -1060,7 +1147,7 @@ module.controller('RealmIdentityProviderCtrl', function($scope, $filter, $upload
         }
     };
 
-    $scope.cancel = function() {
+    $scope.cancel = function () {
         if ($scope.newIdentityProvider) {
             $location.url("/realms/" + realm.realm + "/identity-provider-settings");
         } else {
@@ -1069,21 +1156,21 @@ module.controller('RealmIdentityProviderCtrl', function($scope, $filter, $upload
     };
 
 
-    $scope.reset = function() {
+    $scope.reset = function () {
         $scope.identityProvider = {};
         $scope.configuredProviders = angular.copy($scope.realm.identityProviders);
     };
 
-    $scope.showPassword = function(flag) {
+    $scope.showPassword = function (flag) {
         $scope.hidePassword = flag;
     };
 
-    $scope.removeIdentityProvider = function(identityProvider) {
-        Dialog.confirmDelete(identityProvider.alias, 'provider', function() {
+    $scope.removeIdentityProvider = function (identityProvider) {
+        Dialog.confirmDelete(identityProvider.alias, 'provider', function () {
             IdentityProvider.remove({
-                realm : realm.realm,
-                alias : identityProvider.alias
-            }, function() {
+                realm: realm.realm,
+                alias: identityProvider.alias
+            }, function () {
                 $route.reload();
                 Notifications.success("The identity provider has been deleted.");
             });
@@ -1108,31 +1195,31 @@ module.controller('RealmIdentityProviderCtrl', function($scope, $filter, $upload
 
 });
 
-module.controller('RealmIdentityProviderExportCtrl', function(realm, identityProvider, $scope, $http, IdentityProviderExport) {
+module.controller('RealmIdentityProviderExportCtrl', function (realm, identityProvider, $scope, $http, IdentityProviderExport) {
     $scope.realm = realm;
     $scope.identityProvider = identityProvider;
     $scope.download = null;
     $scope.exported = "";
     $scope.exportedType = "";
 
-    var url = IdentityProviderExport.url({realm: realm.realm, alias: identityProvider.alias}) ;
-    $http.get(url).then(function(response) {
+    var url = IdentityProviderExport.url({realm: realm.realm, alias: identityProvider.alias});
+    $http.get(url).then(function (response) {
         $scope.exportedType = response.headers('Content-Type');
         $scope.exported = response.data;
     });
 
-    $scope.download = function() {
+    $scope.download = function () {
         var suffix = "txt";
         if ($scope.exportedType == 'application/xml') {
             suffix = 'xml';
         } else if ($scope.exportedType == 'application/json') {
             suffix = 'json';
         }
-        saveAs(new Blob([$scope.exported], { type: $scope.exportedType }), 'keycloak.' + suffix);
+        saveAs(new Blob([$scope.exported], {type: $scope.exportedType}), 'keycloak.' + suffix);
     }
 });
 
-module.controller('RealmTokenDetailCtrl', function($scope, Realm, realm, $http, $location, $route, Dialog, Notifications, TimeUnit, TimeUnit2, serverInfo) {
+module.controller('RealmTokenDetailCtrl', function ($scope, Realm, realm, $http, $location, $route, Dialog, Notifications, TimeUnit, TimeUnit2, serverInfo) {
     $scope.realm = realm;
     $scope.serverInfo = serverInfo;
     $scope.actionTokenProviders = $scope.serverInfo.providers.actionTokenHandler.providers;
@@ -1156,7 +1243,7 @@ module.controller('RealmTokenDetailCtrl', function($scope, Realm, realm, $http, 
     var oldCopy = angular.copy($scope.realm);
     $scope.changed = false;
 
-    $scope.$watch('realm', function() {
+    $scope.$watch('realm', function () {
         if (!angular.equals($scope.realm, oldCopy)) {
             $scope.changed = true;
         }
@@ -1187,11 +1274,11 @@ module.controller('RealmTokenDetailCtrl', function($scope, Realm, realm, $http, 
         }
     }, true);
 
-    $scope.changeRevokeRefreshToken = function() {
+    $scope.changeRevokeRefreshToken = function () {
 
     };
 
-    $scope.save = function() {
+    $scope.save = function () {
         $scope.realm.accessTokenLifespan = $scope.realm.accessTokenLifespan.toSeconds();
         $scope.realm.accessTokenLifespanForImplicitFlow = $scope.realm.accessTokenLifespanForImplicitFlow.toSeconds();
         $scope.realm.ssoSessionIdleTimeout = $scope.realm.ssoSessionIdleTimeout.toSeconds();
@@ -1220,24 +1307,25 @@ module.controller('RealmTokenDetailCtrl', function($scope, Realm, realm, $http, 
         $scope.actionTokenAttribute.unit = 'Minutes';
     }
 
-    $scope.reset = function() {
+    $scope.reset = function () {
         $route.reload();
     };
 });
 
-module.controller('ViewKeyCtrl', function($scope, key) {
+module.controller('ViewKeyCtrl', function ($scope, key) {
     $scope.key = key;
 });
 
-module.controller('RealmKeysCtrl', function($scope, Realm, realm, $http, $route, $location, Dialog, Notifications, serverInfo, keys, Components, $modal) {
+module.controller('RealmKeysCtrl', function ($scope, Realm, realm, $http, $route, $location, Dialog, Notifications, serverInfo, keys, Components, $modal) {
     $scope.realm = angular.copy(realm);
     $scope.keys = keys.keys;
     $scope.active = {};
 
-    Components.query({realm: realm.realm,
+    Components.query({
+        realm: realm.realm,
         parent: realm.id,
         type: 'org.keycloak.keys.KeyProvider'
-    }, function(data) {
+    }, function (data) {
         for (var i = 0; i < keys.keys.length; i++) {
             for (var j = 0; j < data.length; j++) {
                 if (keys.keys[i].providerId == data[j].id) {
@@ -1255,7 +1343,7 @@ module.controller('RealmKeysCtrl', function($scope, Realm, realm, $http, $route,
         }
     });
 
-    $scope.viewKey = function(key) {
+    $scope.viewKey = function (key) {
         $modal.open({
             templateUrl: resourceUrl + '/partials/modal/view-key.html',
             controller: 'ViewKeyCtrl',
@@ -1268,16 +1356,17 @@ module.controller('RealmKeysCtrl', function($scope, Realm, realm, $http, $route,
     }
 });
 
-module.controller('RealmKeysProvidersCtrl', function($scope, Realm, realm, $http, $route, $location, Dialog, Notifications, serverInfo, Components, $modal) {
+module.controller('RealmKeysProvidersCtrl', function ($scope, Realm, realm, $http, $route, $location, Dialog, Notifications, serverInfo, Components, $modal) {
     $scope.realm = angular.copy(realm);
     $scope.enableUpload = false;
 
     $scope.providers = serverInfo.componentTypes['org.keycloak.keys.KeyProvider'];
 
-    Components.query({realm: realm.realm,
+    Components.query({
+        realm: realm.realm,
         parent: realm.id,
         type: 'org.keycloak.keys.KeyProvider'
-    }, function(data) {
+    }, function (data) {
         $scope.instances = data;
 
         for (var i = 0; i < $scope.instances.length; i++) {
@@ -1289,16 +1378,16 @@ module.controller('RealmKeysProvidersCtrl', function($scope, Realm, realm, $http
         }
     });
 
-    $scope.addProvider = function(provider) {
+    $scope.addProvider = function (provider) {
         $location.url("/create/keys/" + realm.realm + "/providers/" + provider.id);
     };
 
-    $scope.removeInstance = function(instance) {
-        Dialog.confirmDelete(instance.name, 'key provider', function() {
+    $scope.removeInstance = function (instance) {
+        Dialog.confirmDelete(instance.name, 'key provider', function () {
             Components.remove({
-                realm : realm.realm,
-                componentId : instance.id
-            }, function() {
+                realm: realm.realm,
+                componentId: instance.id
+            }, function () {
                 $route.reload();
                 Notifications.success("The provider has been deleted.");
             });
@@ -1306,7 +1395,7 @@ module.controller('RealmKeysProvidersCtrl', function($scope, Realm, realm, $http
     };
 });
 
-module.controller('GenericKeystoreCtrl', function($scope, $location, Notifications, $route, Dialog, realm, serverInfo, instance, providerId, Components) {
+module.controller('GenericKeystoreCtrl', function ($scope, $location, Notifications, $route, Dialog, realm, serverInfo, instance, providerId, Components) {
     $scope.create = !instance.providerId;
     $scope.realm = realm;
 
@@ -1354,17 +1443,17 @@ module.controller('GenericKeystoreCtrl', function($scope, $location, Notificatio
         }
     }
 
-    $scope.$watch('instance', function() {
+    $scope.$watch('instance', function () {
         if (!angular.equals($scope.instance, instance)) {
             $scope.changed = true;
         }
 
     }, true);
 
-    $scope.save = function() {
+    $scope.save = function () {
         $scope.changed = false;
         if ($scope.create) {
-            Components.save({realm: realm.realm}, $scope.instance,  function (data, headers) {
+            Components.save({realm: realm.realm}, $scope.instance, function (data, headers) {
                 var l = headers().location;
                 var id = l.substring(l.lastIndexOf("/") + 1);
 
@@ -1372,21 +1461,22 @@ module.controller('GenericKeystoreCtrl', function($scope, $location, Notificatio
                 Notifications.success("The provider has been created.");
             });
         } else {
-            Components.update({realm: realm.realm,
+            Components.update({
+                    realm: realm.realm,
                     componentId: instance.id
                 },
-                $scope.instance,  function () {
+                $scope.instance, function () {
                     $route.reload();
                     Notifications.success("The provider has been updated.");
                 });
         }
     };
 
-    $scope.reset = function() {
+    $scope.reset = function () {
         $route.reload();
     };
 
-    $scope.cancel = function() {
+    $scope.cancel = function () {
         if ($scope.create) {
             $location.url("/realms/" + realm.realm + "/keys");
         } else {
@@ -1395,17 +1485,17 @@ module.controller('GenericKeystoreCtrl', function($scope, $location, Notificatio
     };
 });
 
-module.controller('RealmSessionStatsCtrl', function($scope, realm, stats, RealmClientSessionStats, RealmLogoutAll, Notifications) {
+module.controller('RealmSessionStatsCtrl', function ($scope, realm, stats, RealmClientSessionStats, RealmLogoutAll, Notifications) {
     $scope.realm = realm;
     $scope.stats = stats;
 
-    $scope.logoutAll = function() {
-        RealmLogoutAll.save({realm : realm.realm}, function (globalReqResult) {
+    $scope.logoutAll = function () {
+        RealmLogoutAll.save({realm: realm.realm}, function (globalReqResult) {
             var successCount = globalReqResult.successRequests ? globalReqResult.successRequests.length : 0;
-            var failedCount  = globalReqResult.failedRequests ? globalReqResult.failedRequests.length : 0;
+            var failedCount = globalReqResult.failedRequests ? globalReqResult.failedRequests.length : 0;
 
             if (failedCount > 0) {
-                var msgStart = successCount>0 ? 'Successfully logout all users under: ' + globalReqResult.successRequests + ' . ' : '';
+                var msgStart = successCount > 0 ? 'Successfully logout all users under: ' + globalReqResult.successRequests + ' . ' : '';
                 Notifications.error(msgStart + 'Failed to logout users under: ' + globalReqResult.failedRequests + '. Verify availability of failed hosts and try again');
             } else {
                 window.location.reload();
@@ -1415,10 +1505,10 @@ module.controller('RealmSessionStatsCtrl', function($scope, realm, stats, RealmC
 });
 
 
-module.controller('RealmRevocationCtrl', function($scope, Realm, RealmPushRevocation, realm, $http, $location, Dialog, Notifications) {
+module.controller('RealmRevocationCtrl', function ($scope, Realm, RealmPushRevocation, realm, $http, $location, Dialog, Notifications) {
     $scope.realm = angular.copy(realm);
 
-    var setNotBefore = function() {
+    var setNotBefore = function () {
         if ($scope.realm.notBefore == 0) {
             $scope.notBefore = "None";
         } else {
@@ -1428,36 +1518,36 @@ module.controller('RealmRevocationCtrl', function($scope, Realm, RealmPushRevoca
 
     setNotBefore();
 
-    var reset = function() {
-        Realm.get({ id : realm.realm }, function(updated) {
+    var reset = function () {
+        Realm.get({id: realm.realm}, function (updated) {
             $scope.realm = updated;
             setNotBefore();
         })
 
     };
 
-    $scope.clear = function() {
-        Realm.update({ realm: realm.realm, notBefore : 0 }, function () {
+    $scope.clear = function () {
+        Realm.update({realm: realm.realm, notBefore: 0}, function () {
             $scope.notBefore = "None";
             Notifications.success('Not Before cleared for realm.');
             reset();
         });
     }
-    $scope.setNotBeforeNow = function() {
-        Realm.update({ realm: realm.realm, notBefore : new Date().getTime()/1000}, function () {
+    $scope.setNotBeforeNow = function () {
+        Realm.update({realm: realm.realm, notBefore: new Date().getTime() / 1000}, function () {
             Notifications.success('Not Before set for realm.');
             reset();
         });
     }
-    $scope.pushRevocation = function() {
-        RealmPushRevocation.save({ realm: realm.realm}, function (globalReqResult) {
+    $scope.pushRevocation = function () {
+        RealmPushRevocation.save({realm: realm.realm}, function (globalReqResult) {
             var successCount = globalReqResult.successRequests ? globalReqResult.successRequests.length : 0;
-            var failedCount  = globalReqResult.failedRequests ? globalReqResult.failedRequests.length : 0;
+            var failedCount = globalReqResult.failedRequests ? globalReqResult.failedRequests.length : 0;
 
-            if (successCount==0 && failedCount==0) {
+            if (successCount == 0 && failedCount == 0) {
                 Notifications.warn('No push sent. No admin URI configured or no registered cluster nodes available');
             } else if (failedCount > 0) {
-                var msgStart = successCount>0 ? 'Successfully push notBefore to: ' + globalReqResult.successRequests + ' . ' : '';
+                var msgStart = successCount > 0 ? 'Successfully push notBefore to: ' + globalReqResult.successRequests + ' . ' : '';
                 Notifications.error(msgStart + 'Failed to push notBefore to: ' + globalReqResult.failedRequests + '. Verify availability of failed hosts and try again');
             } else {
                 Notifications.success('Successfully push notBefore to all configured clients');
@@ -1468,9 +1558,9 @@ module.controller('RealmRevocationCtrl', function($scope, Realm, RealmPushRevoca
 });
 
 
-module.controller('RoleTabCtrl', function(Dialog, $scope, Current, Notifications, $location) {
-    $scope.removeRole = function() {
-        Dialog.confirmDelete($scope.role.name, 'role', function() {
+module.controller('RoleTabCtrl', function (Dialog, $scope, Current, Notifications, $location) {
+    $scope.removeRole = function () {
+        Dialog.confirmDelete($scope.role.name, 'role', function () {
             RoleById.remove({
                 realm: realm.realm,
                 role: $scope.role.id
@@ -1483,18 +1573,18 @@ module.controller('RoleTabCtrl', function(Dialog, $scope, Current, Notifications
 });
 
 
-module.controller('RoleListCtrl', function($scope, $route, Dialog, Notifications, realm, roles, RoleById, filterFilter) {
+module.controller('RoleListCtrl', function ($scope, $route, Dialog, Notifications, realm, roles, RoleById, filterFilter) {
     $scope.realm = realm;
     $scope.roles = roles;
     $scope.currentPage = 1;
     $scope.currentPageInput = 1;
     $scope.pageSize = 20;
-    $scope.numberOfPages = Math.ceil($scope.roles.length/$scope.pageSize);
+    $scope.numberOfPages = Math.ceil($scope.roles.length / $scope.pageSize);
 
     $scope.$watch('searchQuery', function (newVal, oldVal) {
         $scope.filtered = filterFilter($scope.roles, {name: newVal});
         $scope.totalItems = $scope.filtered.length;
-        $scope.numberOfPages = Math.ceil($scope.totalItems/$scope.pageSize);
+        $scope.numberOfPages = Math.ceil($scope.totalItems / $scope.pageSize);
         $scope.currentPage = 1;
         $scope.currentPageInput = 1;
     }, true);
@@ -1513,16 +1603,16 @@ module.controller('RoleListCtrl', function($scope, $route, Dialog, Notifications
 });
 
 
-module.controller('RoleDetailCtrl', function($scope, realm, role, roles, clients,
-                                             Role, ClientRole, RoleById, RoleRealmComposites, RoleClientComposites,
-                                             $http, $location, Dialog, Notifications, RealmRoleRemover, ComponentUtils) {
+module.controller('RoleDetailCtrl', function ($scope, realm, role, roles, clients,
+                                              Role, ClientRole, RoleById, RoleRealmComposites, RoleClientComposites,
+                                              $http, $location, Dialog, Notifications, RealmRoleRemover, ComponentUtils) {
     $scope.realm = realm;
     $scope.role = angular.copy(role);
     $scope.create = !role.name;
 
     $scope.changed = $scope.create;
 
-    $scope.save = function() {
+    $scope.save = function () {
         convertAttributeValuesToLists();
         console.log('save');
         if ($scope.create) {
@@ -1533,7 +1623,7 @@ module.controller('RoleDetailCtrl', function($scope, realm, role, roles, clients
                 convertAttributeValuesToString($scope.role);
                 role = angular.copy($scope.role);
 
-                Role.get({ realm: realm.realm, role: role.name }, function(role) {
+                Role.get({realm: realm.realm, role: role.name}, function (role) {
                     var id = role.id;
                     $location.url("/realms/" + realm.realm + "/roles/" + id);
                     Notifications.success("The role has been created.");
@@ -1544,7 +1634,7 @@ module.controller('RoleDetailCtrl', function($scope, realm, role, roles, clients
         }
     };
 
-    $scope.remove = function() {
+    $scope.remove = function () {
         RealmRoleRemover.remove($scope.role, realm, Dialog, $location, Notifications);
     };
 
@@ -1552,12 +1642,12 @@ module.controller('RoleDetailCtrl', function($scope, realm, role, roles, clients
         $location.url("/realms/" + realm.realm + "/roles");
     };
 
-    $scope.addAttribute = function() {
+    $scope.addAttribute = function () {
         $scope.role.attributes[$scope.newAttribute.key] = $scope.newAttribute.value;
         delete $scope.newAttribute;
     }
 
-    $scope.removeAttribute = function(key) {
+    $scope.removeAttribute = function (key) {
         delete $scope.role.attributes[key];
     }
 
@@ -1587,52 +1677,71 @@ module.controller('RoleDetailCtrl', function($scope, realm, role, roles, clients
         $http, $location, Notifications, Dialog, ComponentUtils);
 });
 
-module.controller('RealmSMTPSettingsCtrl', function($scope, Current, Realm, realm, $http, $location, Dialog, Notifications, RealmSMTPConnectionTester) {
+module.controller('RealmSMTPSettingsCtrl', function ($scope, Current, Realm, realm, $http, $location, Dialog, Notifications, RealmSMTPConnectionTester) {
     console.log('RealmSMTPSettingsCtrl');
 
-    var booleanSmtpAtts = ["auth","ssl","starttls"];
+    var booleanSmtpAtts = ["auth", "ssl", "starttls"];
 
     $scope.realm = realm;
 
+    $scope.typeMessengers = [];
+    $http.get(authUrl + '/realms/' + realm.realm + '/messenger').then(function (data) {
+        $scope.typeMessengers = angular.fromJson(data).data.results['messengers'];
+    });
+
+    $scope.messengers = [];
+
+    $scope.changedValue = function (item) {
+        $scope.messengers.splice(0);
+        for (var i = 0; i < item.length; i++) {
+            $scope.messengers.push(item[i]);
+        }
+        Notifications.success("Не забудьте проверить настройки шлюза во вкладке 'Additional settings' -> 'Sender gateway'");
+        $scope.realm.smtpServer["messenger"] = $scope.messengers.join(",");
+        $scope.changed = true;
+    }
+
     if ($scope.realm.smtpServer) {
         $scope.realm.smtpServer = typeObject($scope.realm.smtpServer);
-    };
+        if ($scope.realm.smtpServer["messenger"]) {
+            $scope.messengerType = $scope.realm.smtpServer["messenger"].split(',');
+        }
+    }
 
     var oldCopy = angular.copy($scope.realm);
     $scope.changed = false;
 
-    $scope.$watch('realm', function() {
+    $scope.$watch('realm', function () {
         if (!angular.equals($scope.realm, oldCopy)) {
             $scope.changed = true;
         }
     }, true);
 
-    $scope.save = function() {
+    $scope.save = function () {
         var realmCopy = angular.copy($scope.realm);
         realmCopy['smtpServer'] = detypeObject(realmCopy.smtpServer);
         $scope.changed = false;
         Realm.update(realmCopy, function () {
             $location.url("/realms/" + realm.realm + "/smtp-settings");
-            Notifications.success("Your changes have been saved to the realm.");
+            Notifications.success("Ваши изменения были сохранены");
         });
     };
 
-    $scope.reset = function() {
-        $scope.realm = angular.copy(oldCopy);
-        $scope.changed = false;
+    $scope.reset = function () {
+        window.location.reload();
     };
 
-    var initSMTPTest = function() {
+    var initSMTPTest = function () {
         return {
             realm: $scope.realm.realm,
             config: JSON.stringify(realm.smtpServer)
         };
     };
 
-    $scope.testConnection = function() {
-        RealmSMTPConnectionTester.send(initSMTPTest(), function() {
+    $scope.testConnection = function () {
+        RealmSMTPConnectionTester.send(initSMTPTest(), function () {
             Notifications.success("SMTP connection successful. E-mail was sent!");
-        }, function(errorResponse) {
+        }, function (errorResponse) {
             if (error.data.errorMessage) {
                 Notifications.error(error.data.errorMessage);
             } else {
@@ -1642,13 +1751,13 @@ module.controller('RealmSMTPSettingsCtrl', function($scope, Current, Realm, real
     };
 
     /* Convert string attributes containing a boolean to actual boolean type + convert an integer string (port) to integer. */
-    function typeObject(obj){
-        for (var att in obj){
+    function typeObject(obj) {
+        for (var att in obj) {
             if (booleanSmtpAtts.indexOf(att) < 0)
                 continue;
-            if (obj[att] === "true"){
+            if (obj[att] === "true") {
                 obj[att] = true;
-            } else if (obj[att] === "false"){
+            } else if (obj[att] === "false") {
                 obj[att] = false;
             }
         }
@@ -1659,13 +1768,13 @@ module.controller('RealmSMTPSettingsCtrl', function($scope, Current, Realm, real
     }
 
     /* Convert all non-string values to strings to invert changes caused by the typeObject function. */
-    function detypeObject(obj){
-        for (var att in obj){
+    function detypeObject(obj) {
+        for (var att in obj) {
             if (booleanSmtpAtts.indexOf(att) < 0)
                 continue;
-            if (obj[att] === true){
+            if (obj[att] === true) {
                 obj[att] = "true";
-            } else if (obj[att] === false){
+            } else if (obj[att] === false) {
                 obj[att] = "false"
             }
         }
@@ -1676,7 +1785,7 @@ module.controller('RealmSMTPSettingsCtrl', function($scope, Current, Realm, real
     }
 });
 
-module.controller('RealmEventsConfigCtrl', function($scope, eventsConfig, RealmEventsConfig, RealmEvents, RealmAdminEvents, realm, serverInfo, $location, Notifications, TimeUnit, Dialog) {
+module.controller('RealmEventsConfigCtrl', function ($scope, eventsConfig, RealmEventsConfig, RealmEvents, RealmAdminEvents, realm, serverInfo, $location, Notifications, TimeUnit, Dialog) {
     $scope.realm = realm;
 
     $scope.eventsConfig = eventsConfig;
@@ -1701,13 +1810,13 @@ module.controller('RealmEventsConfigCtrl', function($scope, eventsConfig, RealmE
     var oldCopy = angular.copy($scope.eventsConfig);
     $scope.changed = false;
 
-    $scope.$watch('eventsConfig', function() {
+    $scope.$watch('eventsConfig', function () {
         if (!angular.equals($scope.eventsConfig, oldCopy)) {
             $scope.changed = true;
         }
     }, true);
 
-    $scope.save = function() {
+    $scope.save = function () {
         $scope.changed = false;
 
         var copy = angular.copy($scope.eventsConfig)
@@ -1716,36 +1825,36 @@ module.controller('RealmEventsConfigCtrl', function($scope, eventsConfig, RealmE
         copy.eventsExpiration = TimeUnit.toSeconds($scope.eventsConfig.eventsExpiration, $scope.eventsConfig.expirationUnit);
 
         RealmEventsConfig.update({
-            id : realm.realm
+            id: realm.realm
         }, copy, function () {
             $location.url("/realms/" + realm.realm + "/events-settings");
             Notifications.success("Your changes have been saved to the realm.");
         });
     };
 
-    $scope.reset = function() {
+    $scope.reset = function () {
         $scope.eventsConfig = angular.copy(oldCopy);
         $scope.changed = false;
     };
 
-    $scope.clearEvents = function() {
-        Dialog.confirmDelete($scope.realm.realm, 'events', function() {
-            RealmEvents.remove({ id : $scope.realm.realm }, function() {
+    $scope.clearEvents = function () {
+        Dialog.confirmDelete($scope.realm.realm, 'events', function () {
+            RealmEvents.remove({id: $scope.realm.realm}, function () {
                 Notifications.success("The events has been cleared.");
             });
         });
     };
 
-    $scope.clearAdminEvents = function() {
-        Dialog.confirmDelete($scope.realm.realm, 'admin-events', function() {
-            RealmAdminEvents.remove({ id : $scope.realm.realm }, function() {
+    $scope.clearAdminEvents = function () {
+        Dialog.confirmDelete($scope.realm.realm, 'admin-events', function () {
+            RealmAdminEvents.remove({id: $scope.realm.realm}, function () {
                 Notifications.success("The admin events has been cleared.");
             });
         });
     };
 });
 
-module.controller('RealmEventsCtrl', function($scope, RealmEvents, realm, serverInfo) {
+module.controller('RealmEventsCtrl', function ($scope, RealmEvents, realm, serverInfo) {
     $scope.realm = realm;
     $scope.page = 0;
 
@@ -1756,53 +1865,53 @@ module.controller('RealmEventsCtrl', function($scope, RealmEvents, realm, server
     };
 
     $scope.query = {
-        id : realm.realm,
-        max : 5,
-        first : 0
+        id: realm.realm,
+        max: 5,
+        first: 0
     }
 
-    $scope.disablePaste = function(e) {
+    $scope.disablePaste = function (e) {
         e.preventDefault();
         return false;
     }
 
-    $scope.update = function() {
-    	$scope.query.first = 0;
+    $scope.update = function () {
+        $scope.query.first = 0;
         for (var i in $scope.query) {
             if ($scope.query[i] === '') {
                 delete $scope.query[i];
-           }
+            }
         }
         $scope.events = RealmEvents.query($scope.query);
     }
 
-    $scope.reset = function() {
-    	$scope.query.first = 0;
-    	$scope.query.max = 5;
-    	$scope.query.type = '';
-    	$scope.query.client = '';
-    	$scope.query.user = '';
-    	$scope.query.dateFrom = '';
-    	$scope.query.dateTo = '';
+    $scope.reset = function () {
+        $scope.query.first = 0;
+        $scope.query.max = 5;
+        $scope.query.type = '';
+        $scope.query.client = '';
+        $scope.query.user = '';
+        $scope.query.dateFrom = '';
+        $scope.query.dateTo = '';
 
-    	$scope.update();
+        $scope.update();
     }
 
-    $scope.queryUpdate = function() {
+    $scope.queryUpdate = function () {
         for (var i in $scope.query) {
             if ($scope.query[i] === '') {
                 delete $scope.query[i];
-           }
+            }
         }
         $scope.events = RealmEvents.query($scope.query);
     }
 
-    $scope.firstPage = function() {
+    $scope.firstPage = function () {
         $scope.query.first = 0;
         $scope.queryUpdate();
     }
 
-    $scope.previousPage = function() {
+    $scope.previousPage = function () {
         $scope.query.first -= parseInt($scope.query.max);
         if ($scope.query.first < 0) {
             $scope.query.first = 0;
@@ -1810,7 +1919,7 @@ module.controller('RealmEventsCtrl', function($scope, RealmEvents, realm, server
         $scope.queryUpdate();
     }
 
-    $scope.nextPage = function() {
+    $scope.nextPage = function () {
         $scope.query.first += parseInt($scope.query.max);
         $scope.queryUpdate();
     }
@@ -1818,14 +1927,14 @@ module.controller('RealmEventsCtrl', function($scope, RealmEvents, realm, server
     $scope.update();
 });
 
-module.controller('RealmAdminEventsCtrl', function($scope, RealmAdminEvents, realm, serverInfo, $modal, $filter) {
+module.controller('RealmAdminEventsCtrl', function ($scope, RealmAdminEvents, realm, serverInfo, $modal, $filter) {
     $scope.realm = realm;
     $scope.page = 0;
 
     $scope.query = {
-    	id : realm.realm,
-        max : 5,
-        first : 0
+        id: realm.realm,
+        max: 5,
+        first: 0
     };
 
     $scope.adminEnabledEventOperationsOptions = {
@@ -1840,52 +1949,52 @@ module.controller('RealmAdminEventsCtrl', function($scope, RealmAdminEvents, rea
         'tags': serverInfo.enums['resourceType']
     };
 
-    $scope.disablePaste = function(e) {
+    $scope.disablePaste = function (e) {
         e.preventDefault();
         return false;
     }
 
-    $scope.update = function() {
-    	$scope.query.first = 0;
+    $scope.update = function () {
+        $scope.query.first = 0;
         for (var i in $scope.query) {
             if ($scope.query[i] === '') {
                 delete $scope.query[i];
-           }
+            }
         }
         $scope.events = RealmAdminEvents.query($scope.query);
     };
 
-    $scope.reset = function() {
-    	$scope.query.first = 0;
-    	$scope.query.max = 5;
-    	$scope.query.operationTypes = '';
-    	$scope.query.resourceTypes = '';
-    	$scope.query.resourcePath = '';
-    	$scope.query.authRealm = '';
-    	$scope.query.authClient = '';
-    	$scope.query.authUser = '';
-    	$scope.query.authIpAddress = '';
-    	$scope.query.dateFrom = '';
-    	$scope.query.dateTo = '';
+    $scope.reset = function () {
+        $scope.query.first = 0;
+        $scope.query.max = 5;
+        $scope.query.operationTypes = '';
+        $scope.query.resourceTypes = '';
+        $scope.query.resourcePath = '';
+        $scope.query.authRealm = '';
+        $scope.query.authClient = '';
+        $scope.query.authUser = '';
+        $scope.query.authIpAddress = '';
+        $scope.query.dateFrom = '';
+        $scope.query.dateTo = '';
 
-    	$scope.update();
+        $scope.update();
     };
 
-    $scope.queryUpdate = function() {
+    $scope.queryUpdate = function () {
         for (var i in $scope.query) {
             if ($scope.query[i] === '') {
                 delete $scope.query[i];
-           }
+            }
         }
         $scope.events = RealmAdminEvents.query($scope.query);
     }
 
-    $scope.firstPage = function() {
+    $scope.firstPage = function () {
         $scope.query.first = 0;
         $scope.queryUpdate();
     }
 
-    $scope.previousPage = function() {
+    $scope.previousPage = function () {
         $scope.query.first -= parseInt($scope.query.max);
         if ($scope.query.first < 0) {
             $scope.query.first = 0;
@@ -1893,14 +2002,14 @@ module.controller('RealmAdminEventsCtrl', function($scope, RealmAdminEvents, rea
         $scope.queryUpdate();
     }
 
-    $scope.nextPage = function() {
+    $scope.nextPage = function () {
         $scope.query.first += parseInt($scope.query.max);
         $scope.queryUpdate();
     }
 
     $scope.update();
 
-    $scope.viewRepresentation = function(event) {
+    $scope.viewRepresentation = function (event) {
         $modal.open({
             templateUrl: resourceUrl + '/partials/modal/realm-events-admin-representation.html',
             controller: 'RealmAdminEventsModalCtrl',
@@ -1912,7 +2021,7 @@ module.controller('RealmAdminEventsCtrl', function($scope, RealmAdminEvents, rea
         })
     }
 
-    $scope.viewAuth = function(event) {
+    $scope.viewAuth = function (event) {
         $modal.open({
             templateUrl: resourceUrl + '/partials/modal/realm-events-admin-auth.html',
             controller: 'RealmAdminEventsModalCtrl',
@@ -1925,11 +2034,11 @@ module.controller('RealmAdminEventsCtrl', function($scope, RealmAdminEvents, rea
     }
 });
 
-module.controller('RealmAdminEventsModalCtrl', function($scope, $filter, event) {
+module.controller('RealmAdminEventsModalCtrl', function ($scope, $filter, event) {
     $scope.event = event;
 });
 
-module.controller('RealmBruteForceCtrl', function($scope, Realm, realm, $http, $location, Dialog, Notifications, TimeUnit, $route) {
+module.controller('RealmBruteForceCtrl', function ($scope, Realm, realm, $http, $location, Dialog, Notifications, TimeUnit, $route) {
     console.log('RealmBruteForceCtrl');
 
     $scope.realm = realm;
@@ -1949,13 +2058,13 @@ module.controller('RealmBruteForceCtrl', function($scope, Realm, realm, $http, $
     var oldCopy = angular.copy($scope.realm);
     $scope.changed = false;
 
-    $scope.$watch('realm', function() {
+    $scope.$watch('realm', function () {
         if (!angular.equals($scope.realm, oldCopy)) {
             $scope.changed = true;
         }
     }, true);
 
-    $scope.save = function() {
+    $scope.save = function () {
         var realmCopy = angular.copy($scope.realm);
         delete realmCopy["waitIncrementUnit"];
         delete realmCopy["waitIncrement"];
@@ -1979,44 +2088,44 @@ module.controller('RealmBruteForceCtrl', function($scope, Realm, realm, $http, $
         });
     };
 
-    $scope.reset = function() {
+    $scope.reset = function () {
         $route.reload();
     };
 });
 
 
-module.controller('IdentityProviderMapperListCtrl', function($scope, realm, identityProvider, mapperTypes, mappers) {
+module.controller('IdentityProviderMapperListCtrl', function ($scope, realm, identityProvider, mapperTypes, mappers) {
     $scope.realm = realm;
     $scope.identityProvider = identityProvider;
     $scope.mapperTypes = mapperTypes;
     $scope.mappers = mappers;
 });
 
-module.controller('IdentityProviderMapperCtrl', function($scope, realm,  identityProvider, mapperTypes, mapper, IdentityProviderMapper, Notifications, Dialog, $location) {
+module.controller('IdentityProviderMapperCtrl', function ($scope, realm, identityProvider, mapperTypes, mapper, IdentityProviderMapper, Notifications, Dialog, $location) {
     $scope.realm = realm;
     $scope.identityProvider = identityProvider;
     $scope.create = false;
     $scope.mapper = angular.copy(mapper);
     $scope.changed = false;
     $scope.mapperType = mapperTypes[mapper.identityProviderMapper];
-    $scope.$watch(function() {
+    $scope.$watch(function () {
         return $location.path();
-    }, function() {
+    }, function () {
         $scope.path = $location.path().substring(1).split("/");
     });
 
-    $scope.$watch('mapper', function() {
+    $scope.$watch('mapper', function () {
         if (!angular.equals($scope.mapper, mapper)) {
             $scope.changed = true;
         }
     }, true);
 
-    $scope.save = function() {
+    $scope.save = function () {
         IdentityProviderMapper.update({
-            realm : realm.realm,
+            realm: realm.realm,
             alias: identityProvider.alias,
-            mapperId : mapper.id
-        }, $scope.mapper, function() {
+            mapperId: mapper.id
+        }, $scope.mapper, function () {
             $scope.changed = false;
             mapper = angular.copy($scope.mapper);
             $location.url("/realms/" + realm.realm + '/identity-provider-mappers/' + identityProvider.alias + "/mappers/" + mapper.id);
@@ -2024,19 +2133,23 @@ module.controller('IdentityProviderMapperCtrl', function($scope, realm,  identit
         });
     };
 
-    $scope.reset = function() {
+    $scope.reset = function () {
         $scope.mapper = angular.copy(mapper);
         $scope.changed = false;
     };
 
-    $scope.cancel = function() {
+    $scope.cancel = function () {
         //$location.url("/realms");
         window.history.back();
     };
 
-    $scope.remove = function() {
-        Dialog.confirmDelete($scope.mapper.name, 'mapper', function() {
-            IdentityProviderMapper.remove({ realm: realm.realm, alias: mapper.identityProviderAlias, mapperId : $scope.mapper.id }, function() {
+    $scope.remove = function () {
+        Dialog.confirmDelete($scope.mapper.name, 'mapper', function () {
+            IdentityProviderMapper.remove({
+                realm: realm.realm,
+                alias: mapper.identityProviderAlias,
+                mapperId: $scope.mapper.id
+            }, function () {
                 Notifications.success("The mapper has been deleted.");
                 $location.url("/realms/" + realm.realm + '/identity-provider-mappers/' + identityProvider.alias + "/mappers");
             });
@@ -2045,27 +2158,27 @@ module.controller('IdentityProviderMapperCtrl', function($scope, realm,  identit
 
 });
 
-module.controller('IdentityProviderMapperCreateCtrl', function($scope, realm, identityProvider, mapperTypes, IdentityProviderMapper, Notifications, Dialog, $location) {
+module.controller('IdentityProviderMapperCreateCtrl', function ($scope, realm, identityProvider, mapperTypes, IdentityProviderMapper, Notifications, Dialog, $location) {
     $scope.realm = realm;
     $scope.identityProvider = identityProvider;
     $scope.create = true;
-    $scope.mapper = { identityProviderAlias: identityProvider.alias, config: {}};
+    $scope.mapper = {identityProviderAlias: identityProvider.alias, config: {}};
     $scope.mapperTypes = mapperTypes;
 
     // make first type the default
     $scope.mapperType = mapperTypes[Object.keys(mapperTypes)[0]];
 
-    $scope.$watch(function() {
+    $scope.$watch(function () {
         return $location.path();
-    }, function() {
+    }, function () {
         $scope.path = $location.path().substring(1).split("/");
     });
 
-    $scope.save = function() {
+    $scope.save = function () {
         $scope.mapper.identityProviderMapper = $scope.mapperType.id;
         IdentityProviderMapper.save({
-            realm : realm.realm, alias: identityProvider.alias
-        }, $scope.mapper, function(data, headers) {
+            realm: realm.realm, alias: identityProvider.alias
+        }, $scope.mapper, function (data, headers) {
             var l = headers().location;
             var id = l.substring(l.lastIndexOf("/") + 1);
             $location.url("/realms/" + realm.realm + '/identity-provider-mappers/' + identityProvider.alias + "/mappers/" + id);
@@ -2073,7 +2186,7 @@ module.controller('IdentityProviderMapperCreateCtrl', function($scope, realm, id
         });
     };
 
-    $scope.cancel = function() {
+    $scope.cancel = function () {
         //$location.url("/realms");
         window.history.back();
     };
@@ -2081,10 +2194,10 @@ module.controller('IdentityProviderMapperCreateCtrl', function($scope, realm, id
 
 });
 
-module.controller('RealmFlowBindingCtrl', function($scope, flows, Current, Realm, realm, serverInfo, $http, $route, Dialog, Notifications) {
+module.controller('RealmFlowBindingCtrl', function ($scope, flows, Current, Realm, realm, serverInfo, $http, $route, Dialog, Notifications) {
     $scope.flows = [];
     $scope.clientFlows = [];
-    for (var i=0 ; i<flows.length ; i++) {
+    for (var i = 0; i < flows.length; i++) {
         if (flows[i].providerId == 'client-flow') {
             $scope.clientFlows.push(flows[i]);
         } else {
@@ -2098,9 +2211,9 @@ module.controller('RealmFlowBindingCtrl', function($scope, flows, Current, Realm
 });
 
 
-module.controller('CreateFlowCtrl', function($scope, realm,
-                                             AuthenticationFlows,
-                                             Notifications, $location) {
+module.controller('CreateFlowCtrl', function ($scope, realm,
+                                              AuthenticationFlows,
+                                              Notifications, $location) {
     console.debug('CreateFlowCtrl');
     $scope.realm = realm;
     $scope.flow = {
@@ -2111,20 +2224,20 @@ module.controller('CreateFlowCtrl', function($scope, realm,
         builtIn: false
     }
 
-    $scope.save = function() {
-        AuthenticationFlows.save({realm: realm.realm, flow: ""}, $scope.flow, function() {
+    $scope.save = function () {
+        AuthenticationFlows.save({realm: realm.realm, flow: ""}, $scope.flow, function () {
             $location.url("/realms/" + realm.realm + "/authentication/flows/" + $scope.flow.alias);
             Notifications.success("Flow Created.");
         })
     }
-    $scope.cancel = function() {
+    $scope.cancel = function () {
         $location.url("/realms/" + realm.realm + "/authentication/flows");
     };
 });
 
-module.controller('CreateExecutionFlowCtrl', function($scope, realm, parentFlow, formProviders,
-                                                      CreateExecutionFlow,
-                                                      Notifications, $location) {
+module.controller('CreateExecutionFlowCtrl', function ($scope, realm, parentFlow, formProviders,
+                                                       CreateExecutionFlow,
+                                                       Notifications, $location) {
     $scope.realm = realm;
     $scope.formProviders = formProviders;
 
@@ -2139,21 +2252,21 @@ module.controller('CreateExecutionFlowCtrl', function($scope, realm, parentFlow,
         $scope.provider = formProviders[0];
     }
 
-    $scope.save = function() {
+    $scope.save = function () {
         $scope.flow.provider = $scope.provider.id;
-        CreateExecutionFlow.save({realm: realm.realm, alias: parentFlow.alias}, $scope.flow, function() {
+        CreateExecutionFlow.save({realm: realm.realm, alias: parentFlow.alias}, $scope.flow, function () {
             $location.url("/realms/" + realm.realm + "/authentication/flows");
             Notifications.success("Flow Created.");
         })
     }
-    $scope.cancel = function() {
+    $scope.cancel = function () {
         $location.url("/realms/" + realm.realm + "/authentication/flows");
     };
 });
 
-module.controller('CreateExecutionCtrl', function($scope, realm, parentFlow, formActionProviders, authenticatorProviders, clientAuthenticatorProviders,
-                                                      CreateExecution,
-                                                      Notifications, $location) {
+module.controller('CreateExecutionCtrl', function ($scope, realm, parentFlow, formActionProviders, authenticatorProviders, clientAuthenticatorProviders,
+                                                   CreateExecution,
+                                                   Notifications, $location) {
     $scope.realm = realm;
     $scope.parentFlow = parentFlow;
 
@@ -2170,26 +2283,25 @@ module.controller('CreateExecutionCtrl', function($scope, realm, parentFlow, for
         $scope.provider = $scope.providers[0];
     }
 
-    $scope.save = function() {
+    $scope.save = function () {
         var execution = {
             provider: $scope.provider.id
         }
-        CreateExecution.save({realm: realm.realm, alias: parentFlow.alias}, execution, function() {
+        CreateExecution.save({realm: realm.realm, alias: parentFlow.alias}, execution, function () {
             $location.url("/realms/" + realm.realm + "/authentication/flows");
             Notifications.success("Execution Created.");
         })
     }
-    $scope.cancel = function() {
+    $scope.cancel = function () {
         $location.url("/realms/" + realm.realm + "/authentication/flows");
     };
 });
 
 
-
-module.controller('AuthenticationFlowsCtrl', function($scope, $route, realm, flows, selectedFlow, LastFlowSelected, Dialog,
-                                                      AuthenticationFlows, AuthenticationFlowsCopy, AuthenticationFlowExecutions,
-                                                      AuthenticationExecution, AuthenticationExecutionRaisePriority, AuthenticationExecutionLowerPriority,
-                                                      $modal, Notifications, CopyDialog, $location) {
+module.controller('AuthenticationFlowsCtrl', function ($scope, $route, realm, flows, selectedFlow, LastFlowSelected, Dialog,
+                                                       AuthenticationFlows, AuthenticationFlowsCopy, AuthenticationFlowExecutions,
+                                                       AuthenticationExecution, AuthenticationExecutionRaisePriority, AuthenticationExecutionLowerPriority,
+                                                       $modal, Notifications, CopyDialog, $location) {
     $scope.realm = realm;
     $scope.flows = flows;
 
@@ -2213,16 +2325,16 @@ module.controller('AuthenticationFlowsCtrl', function($scope, $route, realm, flo
         }
     }
 
-    $scope.selectFlow = function(flow) {
+    $scope.selectFlow = function (flow) {
         $location.url("/realms/" + realm.realm + '/authentication/flows/' + flow.alias);
     };
 
-    var setupForm = function() {
-        AuthenticationFlowExecutions.query({realm: realm.realm, alias: $scope.flow.alias}, function(data) {
+    var setupForm = function () {
+        AuthenticationFlowExecutions.query({realm: realm.realm, alias: $scope.flow.alias}, function (data) {
             $scope.executions = data;
             $scope.choicesmax = 0;
             $scope.levelmax = 0;
-            for (var i = 0; i < $scope.executions.length; i++ ) {
+            for (var i = 0; i < $scope.executions.length; i++) {
                 var execution = $scope.executions[i];
                 if (execution.requirementChoices.length > $scope.choicesmax) {
                     $scope.choicesmax = execution.requirementChoices.length;
@@ -2236,7 +2348,7 @@ module.controller('AuthenticationFlowsCtrl', function($scope, $route, realm, flo
                 $scope.levelmaxempties.push(j);
 
             }
-            for (var i = 0; i < $scope.executions.length; i++ ) {
+            for (var i = 0; i < $scope.executions.length; i++) {
                 var execution = $scope.executions[i];
                 execution.empties = [];
                 for (j = 0; j < $scope.choicesmax - execution.requirementChoices.length; j++) {
@@ -2254,29 +2366,29 @@ module.controller('AuthenticationFlowsCtrl', function($scope, $route, realm, flo
         })
     };
 
-    $scope.copyFlow = function() {
-        CopyDialog.open('Copy Authentication Flow', $scope.flow.alias, function(name) {
+    $scope.copyFlow = function () {
+        CopyDialog.open('Copy Authentication Flow', $scope.flow.alias, function (name) {
             AuthenticationFlowsCopy.save({realm: realm.realm, alias: $scope.flow.alias}, {
-               newName: name
-            }, function() {
+                newName: name
+            }, function () {
                 $location.url("/realms/" + realm.realm + '/authentication/flows/' + name);
                 Notifications.success("Flow copied.");
             })
         })
     };
 
-    $scope.deleteFlow = function() {
-        Dialog.confirmDelete($scope.flow.alias, 'flow', function() {
+    $scope.deleteFlow = function () {
+        Dialog.confirmDelete($scope.flow.alias, 'flow', function () {
             $scope.removeFlow();
         });
     };
 
-    $scope.removeFlow = function() {
+    $scope.removeFlow = function () {
         console.log('Remove flow:' + $scope.flow.alias);
         if (realm.browserFlow == $scope.flow.alias) {
             Notifications.error("Cannot remove flow, it is currently being used as the browser flow.");
 
-        }  else if (realm.registrationFlow == $scope.flow.alias) {
+        } else if (realm.registrationFlow == $scope.flow.alias) {
             Notifications.error("Cannot remove flow, it is currently being used as the registration flow.");
 
         } else if (realm.directGrantFlow == $scope.flow.alias) {
@@ -2300,48 +2412,48 @@ module.controller('AuthenticationFlowsCtrl', function($scope, $route, realm, flo
 
     };
 
-    $scope.addFlow = function() {
+    $scope.addFlow = function () {
         $location.url("/realms/" + realm.realm + '/authentication/flows/' + $scope.flow.id + '/create/flow/execution/' + $scope.flow.id);
 
     }
 
-    $scope.addSubFlow = function(execution) {
+    $scope.addSubFlow = function (execution) {
         $location.url("/realms/" + realm.realm + '/authentication/flows/' + execution.flowId + '/create/flow/execution/' + $scope.flow.alias);
 
     }
 
-    $scope.addSubFlowExecution = function(execution) {
+    $scope.addSubFlowExecution = function (execution) {
         $location.url("/realms/" + realm.realm + '/authentication/flows/' + execution.flowId + '/create/execution/' + $scope.flow.alias);
 
     }
 
-    $scope.addExecution = function() {
+    $scope.addExecution = function () {
         $location.url("/realms/" + realm.realm + '/authentication/flows/' + $scope.flow.id + '/create/execution/' + $scope.flow.id);
 
     }
 
-    $scope.createFlow = function() {
+    $scope.createFlow = function () {
         $location.url("/realms/" + realm.realm + '/authentication/create/flow');
     }
 
-    $scope.updateExecution = function(execution) {
+    $scope.updateExecution = function (execution) {
         var copy = angular.copy(execution);
         delete copy.empties;
         delete copy.levels;
         delete copy.preLevels;
         delete copy.postLevels;
-        AuthenticationFlowExecutions.update({realm: realm.realm, alias: $scope.flow.alias}, copy, function() {
+        AuthenticationFlowExecutions.update({realm: realm.realm, alias: $scope.flow.alias}, copy, function () {
             Notifications.success("Auth requirement updated");
             setupForm();
         });
 
     };
 
-    $scope.removeExecution = function(execution) {
+    $scope.removeExecution = function (execution) {
         console.log('removeExecution: ' + execution.id);
         var exeOrFlow = execution.authenticationFlow ? 'flow' : 'execution';
-        Dialog.confirmDelete(execution.displayName, exeOrFlow, function() {
-            AuthenticationExecution.remove({realm: realm.realm, execution: execution.id}, function() {
+        Dialog.confirmDelete(execution.displayName, exeOrFlow, function () {
+            AuthenticationExecution.remove({realm: realm.realm, execution: execution.id}, function () {
                 Notifications.success("The " + exeOrFlow + " was removed.");
                 setupForm();
             });
@@ -2349,15 +2461,15 @@ module.controller('AuthenticationFlowsCtrl', function($scope, $route, realm, flo
 
     }
 
-    $scope.raisePriority = function(execution) {
-        AuthenticationExecutionRaisePriority.save({realm: realm.realm, execution: execution.id}, function() {
+    $scope.raisePriority = function (execution) {
+        AuthenticationExecutionRaisePriority.save({realm: realm.realm, execution: execution.id}, function () {
             Notifications.success("Priority raised");
             setupForm();
         })
     }
 
-    $scope.lowerPriority = function(execution) {
-        AuthenticationExecutionLowerPriority.save({realm: realm.realm, execution: execution.id}, function() {
+    $scope.lowerPriority = function (execution) {
+        AuthenticationExecutionLowerPriority.save({realm: realm.realm, execution: execution.id}, function () {
             Notifications.success("Priority lowered");
             setupForm();
         })
@@ -2372,16 +2484,16 @@ module.controller('AuthenticationFlowsCtrl', function($scope, $route, realm, flo
     }
 });
 
-module.controller('RequiredActionsCtrl', function($scope, realm, unregisteredRequiredActions,
-                                                  $modal, $route,
-                                                  RegisterRequiredAction, RequiredActions, RequiredActionRaisePriority, RequiredActionLowerPriority, Notifications) {
+module.controller('RequiredActionsCtrl', function ($scope, realm, unregisteredRequiredActions,
+                                                   $modal, $route,
+                                                   RegisterRequiredAction, RequiredActions, RequiredActionRaisePriority, RequiredActionLowerPriority, Notifications) {
     console.log('RequiredActionsCtrl');
     $scope.realm = realm;
     $scope.unregisteredRequiredActions = unregisteredRequiredActions;
     $scope.requiredActions = [];
-    var setupRequiredActionsForm = function() {
+    var setupRequiredActionsForm = function () {
         console.log('setupRequiredActionsForm');
-        RequiredActions.query({realm: realm.realm}, function(data) {
+        RequiredActions.query({realm: realm.realm}, function (data) {
             $scope.requiredActions = [];
             for (var i = 0; i < data.length; i++) {
                 $scope.requiredActions.push(data[i]);
@@ -2389,36 +2501,36 @@ module.controller('RequiredActionsCtrl', function($scope, realm, unregisteredReq
         });
     };
 
-    $scope.updateRequiredAction = function(action) {
-        RequiredActions.update({realm: realm.realm, alias: action.alias}, action, function() {
+    $scope.updateRequiredAction = function (action) {
+        RequiredActions.update({realm: realm.realm, alias: action.alias}, action, function () {
             Notifications.success("Required action updated");
             setupRequiredActionsForm();
         });
     }
 
-    $scope.raisePriority = function(action) {
-        RequiredActionRaisePriority.save({realm: realm.realm, alias: action.alias}, function() {
+    $scope.raisePriority = function (action) {
+        RequiredActionRaisePriority.save({realm: realm.realm, alias: action.alias}, function () {
             Notifications.success("Required action's priority raised");
             setupRequiredActionsForm();
         })
     }
 
-    $scope.lowerPriority = function(action) {
-        RequiredActionLowerPriority.save({realm: realm.realm, alias: action.alias}, function() {
+    $scope.lowerPriority = function (action) {
+        RequiredActionLowerPriority.save({realm: realm.realm, alias: action.alias}, function () {
             Notifications.success("Required action's priority lowered");
             setupRequiredActionsForm();
         })
     }
 
-    $scope.register = function() {
-        var controller = function($scope, $modalInstance) {
+    $scope.register = function () {
+        var controller = function ($scope, $modalInstance) {
             $scope.unregisteredRequiredActions = unregisteredRequiredActions;
             $scope.selected = {
                 selected: $scope.unregisteredRequiredActions[0]
             }
             $scope.ok = function () {
                 $modalInstance.close();
-                RegisterRequiredAction.save({realm: realm.realm}, $scope.selected.selected, function() {
+                RegisterRequiredAction.save({realm: realm.realm}, $scope.selected.selected, function () {
                     $route.reload();
                 });
             };
@@ -2429,8 +2541,7 @@ module.controller('RequiredActionsCtrl', function($scope, realm, unregisteredReq
         $modal.open({
             templateUrl: resourceUrl + '/partials/modal/unregistered-required-action-selector.html',
             controller: controller,
-            resolve: {
-            }
+            resolve: {}
         });
     }
 
@@ -2439,8 +2550,8 @@ module.controller('RequiredActionsCtrl', function($scope, realm, unregisteredReq
 
 });
 
-module.controller('AuthenticationConfigCtrl', function($scope, realm, flow, configType, config, AuthenticationConfig, Notifications,
-                                              Dialog, $location, ComponentUtils) {
+module.controller('AuthenticationConfigCtrl', function ($scope, realm, flow, configType, config, AuthenticationConfig, Notifications,
+                                                        Dialog, $location, ComponentUtils) {
     $scope.realm = realm;
     $scope.flow = flow;
     $scope.configType = configType;
@@ -2448,26 +2559,26 @@ module.controller('AuthenticationConfigCtrl', function($scope, realm, flow, conf
     $scope.config = angular.copy(config);
     $scope.changed = false;
 
-    $scope.$watch(function() {
+    $scope.$watch(function () {
         return $location.path();
-    }, function() {
+    }, function () {
         $scope.path = $location.path().substring(1).split("/");
     });
 
-    $scope.$watch('config', function() {
+    $scope.$watch('config', function () {
         if (!angular.equals($scope.config, config)) {
             $scope.changed = true;
         }
     }, true);
 
-    $scope.save = function() {
+    $scope.save = function () {
         var configCopy = angular.copy($scope.config);
         ComponentUtils.convertAllListValuesToMultivaluedString(configType.properties, configCopy.config);
 
         AuthenticationConfig.update({
-            realm : realm.realm,
-            config : config.id
-        }, configCopy, function() {
+            realm: realm.realm,
+            config: config.id
+        }, configCopy, function () {
             $scope.changed = false;
             config = angular.copy($scope.config);
             $location.url("/realms/" + realm.realm + '/authentication/flows/' + flow.id + '/config/' + configType.providerId + "/" + config.id);
@@ -2475,19 +2586,19 @@ module.controller('AuthenticationConfigCtrl', function($scope, realm, flow, conf
         });
     };
 
-    $scope.reset = function() {
+    $scope.reset = function () {
         $scope.config = angular.copy(config);
         $scope.changed = false;
     };
 
-    $scope.cancel = function() {
+    $scope.cancel = function () {
         //$location.url("/realms");
         window.history.back();
     };
 
-    $scope.remove = function() {
-        Dialog.confirmDelete($scope.config.alias, 'config', function() {
-            AuthenticationConfig.remove({ realm: realm.realm, config : $scope.config.id }, function() {
+    $scope.remove = function () {
+        Dialog.confirmDelete($scope.config.alias, 'config', function () {
+            AuthenticationConfig.remove({realm: realm.realm, config: $scope.config.id}, function () {
                 Notifications.success("The config has been deleted.");
                 $location.url("/realms/" + realm.realm + '/authentication/flows/' + flow.id);
             });
@@ -2496,8 +2607,8 @@ module.controller('AuthenticationConfigCtrl', function($scope, realm, flow, conf
 
 });
 
-module.controller('AuthenticationConfigCreateCtrl', function($scope, realm, flow, configType, execution, AuthenticationExecutionConfig,
-                                                    Notifications, Dialog, $location, ComponentUtils) {
+module.controller('AuthenticationConfigCreateCtrl', function ($scope, realm, flow, configType, execution, AuthenticationExecutionConfig,
+                                                              Notifications, Dialog, $location, ComponentUtils) {
     $scope.realm = realm;
     $scope.flow = flow;
     $scope.create = true;
@@ -2505,7 +2616,7 @@ module.controller('AuthenticationConfigCreateCtrl', function($scope, realm, flow
 
     var defaultConfig = {};
     if (configType && Array.isArray(configType.properties)) {
-        for(var i = 0; i < configType.properties.length; i++) {
+        for (var i = 0; i < configType.properties.length; i++) {
             var property = configType.properties[i];
             if (property && property.name) {
                 defaultConfig[property.name] = property.defaultValue;
@@ -2513,22 +2624,22 @@ module.controller('AuthenticationConfigCreateCtrl', function($scope, realm, flow
         }
     }
 
-    $scope.config = { config: defaultConfig};
+    $scope.config = {config: defaultConfig};
 
-    $scope.$watch(function() {
+    $scope.$watch(function () {
         return $location.path();
-    }, function() {
+    }, function () {
         $scope.path = $location.path().substring(1).split("/");
     });
 
-    $scope.save = function() {
+    $scope.save = function () {
         var configCopy = angular.copy($scope.config);
         ComponentUtils.convertAllListValuesToMultivaluedString(configType.properties, configCopy.config);
 
         AuthenticationExecutionConfig.save({
-            realm : realm.realm,
+            realm: realm.realm,
             execution: execution
-        }, configCopy, function(data, headers) {
+        }, configCopy, function (data, headers) {
             var l = headers().location;
             var id = l.substring(l.lastIndexOf("/") + 1);
             var url = "/realms/" + realm.realm + '/authentication/flows/' + flow.id + '/config/' + configType.providerId + "/" + id;
@@ -2538,19 +2649,19 @@ module.controller('AuthenticationConfigCreateCtrl', function($scope, realm, flow
         });
     };
 
-    $scope.cancel = function() {
+    $scope.cancel = function () {
         //$location.url("/realms");
         window.history.back();
     };
 });
 
-module.controller('ClientInitialAccessCtrl', function($scope, realm, clientInitialAccess, ClientInitialAccess, Dialog, Notifications, $route, $location) {
+module.controller('ClientInitialAccessCtrl', function ($scope, realm, clientInitialAccess, ClientInitialAccess, Dialog, Notifications, $route, $location) {
     $scope.realm = realm;
     $scope.clientInitialAccess = clientInitialAccess;
 
-    $scope.remove = function(id) {
-        Dialog.confirmDelete(id, 'initial access token', function() {
-            ClientInitialAccess.remove({ realm: realm.realm, id: id }, function() {
+    $scope.remove = function (id) {
+        Dialog.confirmDelete(id, 'initial access token', function () {
+            ClientInitialAccess.remove({realm: realm.realm, id: id}, function () {
                 Notifications.success("The initial access token was deleted.");
                 $route.reload();
             });
@@ -2558,28 +2669,28 @@ module.controller('ClientInitialAccessCtrl', function($scope, realm, clientIniti
     }
 });
 
-module.controller('ClientInitialAccessCreateCtrl', function($scope, realm, ClientInitialAccess, TimeUnit, Dialog, $location, $translate) {
+module.controller('ClientInitialAccessCreateCtrl', function ($scope, realm, ClientInitialAccess, TimeUnit, Dialog, $location, $translate) {
     $scope.expirationUnit = 'Days';
     $scope.expiration = TimeUnit.toUnit(0, $scope.expirationUnit);
     $scope.count = 1;
     $scope.realm = realm;
 
-    $scope.save = function() {
+    $scope.save = function () {
         var expiration = TimeUnit.toSeconds($scope.expiration, $scope.expirationUnit);
         ClientInitialAccess.save({
             realm: realm.realm
-        }, { expiration: expiration, count: $scope.count}, function (data) {
+        }, {expiration: expiration, count: $scope.count}, function (data) {
             console.debug(data);
             $scope.id = data.id;
             $scope.token = data.token;
         });
     };
 
-    $scope.cancel = function() {
+    $scope.cancel = function () {
         $location.url('/realms/' + realm.realm + '/client-registration/client-initial-access');
     };
 
-    $scope.done = function() {
+    $scope.done = function () {
         var btns = {
             ok: {
                 label: $translate.instant('continue'),
@@ -2593,18 +2704,18 @@ module.controller('ClientInitialAccessCreateCtrl', function($scope, realm, Clien
 
         var title = $translate.instant('initial-access-token.confirm.title');
         var message = $translate.instant('initial-access-token.confirm.text');
-        Dialog.open(title, message, btns, function() {
+        Dialog.open(title, message, btns, function () {
             $location.url('/realms/' + realm.realm + '/client-registration/client-initial-access');
         });
     };
 });
 
-module.controller('ClientRegPoliciesCtrl', function($scope, realm, clientRegistrationPolicyProviders, policies, Dialog, Notifications, Components, $route, $location) {
+module.controller('ClientRegPoliciesCtrl', function ($scope, realm, clientRegistrationPolicyProviders, policies, Dialog, Notifications, Components, $route, $location) {
     $scope.realm = realm;
     $scope.providers = clientRegistrationPolicyProviders;
     $scope.anonPolicies = [];
     $scope.authPolicies = [];
-    for (var i=0 ; i<policies.length ; i++) {
+    for (var i = 0; i < policies.length; i++) {
         var policy = policies[i];
         if (policy.subType === 'anonymous') {
             $scope.anonPolicies.push(policy);
@@ -2615,21 +2726,21 @@ module.controller('ClientRegPoliciesCtrl', function($scope, realm, clientRegistr
         }
     }
 
-    $scope.addProvider = function(authType, provider) {
+    $scope.addProvider = function (authType, provider) {
         console.log('Add provider: authType ' + authType + ', providerId: ' + provider.id);
         $location.url("/realms/" + realm.realm + "/client-registration/client-reg-policies/create/" + authType + '/' + provider.id);
     };
 
-    $scope.getInstanceLink = function(instance) {
+    $scope.getInstanceLink = function (instance) {
         return "/realms/" + realm.realm + "/client-registration/client-reg-policies/" + instance.providerId + "/" + instance.id;
     }
 
-    $scope.removeInstance = function(instance) {
-        Dialog.confirmDelete(instance.name, 'client registration policy', function() {
+    $scope.removeInstance = function (instance) {
+        Dialog.confirmDelete(instance.name, 'client registration policy', function () {
             Components.remove({
-                realm : realm.realm,
-                componentId : instance.id
-            }, function() {
+                realm: realm.realm,
+                componentId: instance.id
+            }, function () {
                 $route.reload();
                 Notifications.success("The policy has been deleted.");
             });
@@ -2638,12 +2749,12 @@ module.controller('ClientRegPoliciesCtrl', function($scope, realm, clientRegistr
 
 });
 
-module.controller('ClientRegPolicyDetailCtrl', function($scope, realm, clientRegistrationPolicyProviders, instance, Dialog, Notifications, Components, ComponentUtils, $route, $location) {
+module.controller('ClientRegPolicyDetailCtrl', function ($scope, realm, clientRegistrationPolicyProviders, instance, Dialog, Notifications, Components, ComponentUtils, $route, $location) {
     $scope.realm = realm;
     $scope.instance = instance;
     $scope.providerTypes = clientRegistrationPolicyProviders;
 
-    for (var i=0 ; i<$scope.providerTypes.length ; i++) {
+    for (var i = 0; i < $scope.providerTypes.length; i++) {
         var providerType = $scope.providerTypes[i];
         if (providerType.id === instance.providerId) {
             $scope.providerType = providerType;
@@ -2663,9 +2774,9 @@ module.controller('ClientRegPolicyDetailCtrl', function($scope, realm, clientReg
         }
 
         if (configProperty.defaultValue) {
-            return [ configProperty.defaultValue ];
+            return [configProperty.defaultValue];
         } else {
-            return [ '' ];
+            return [''];
         }
     }
 
@@ -2691,30 +2802,31 @@ module.controller('ClientRegPolicyDetailCtrl', function($scope, realm, clientReg
     var oldCopy = angular.copy($scope.instance);
     $scope.changed = false;
 
-    $scope.$watch('instance', function() {
+    $scope.$watch('instance', function () {
         if (!angular.equals($scope.instance, oldCopy)) {
             $scope.changed = true;
         }
     }, true);
 
-    $scope.reset = function() {
+    $scope.reset = function () {
         $route.reload();
     };
 
-    $scope.save = function() {
+    $scope.save = function () {
         $scope.changed = false;
         if ($scope.create) {
-            Components.save({realm: realm.realm}, $scope.instance,  function (data, headers) {
+            Components.save({realm: realm.realm}, $scope.instance, function (data, headers) {
                 var l = headers().location;
                 var id = l.substring(l.lastIndexOf("/") + 1);
                 $location.url("/realms/" + realm.realm + "/client-registration/client-reg-policies/" + $scope.instance.providerId + "/" + id);
                 Notifications.success("The policy has been created.");
             });
         } else {
-            Components.update({realm: realm.realm,
+            Components.update({
+                    realm: realm.realm,
                     componentId: instance.id
                 },
-                $scope.instance,  function () {
+                $scope.instance, function () {
                     $route.reload();
                     Notifications.success("The policy has been updated.");
                 });
@@ -2723,8 +2835,8 @@ module.controller('ClientRegPolicyDetailCtrl', function($scope, realm, clientReg
 
 });
 
-module.controller('RealmImportCtrl', function($scope, realm, $route,
-                                              Notifications, $modal, $resource) {
+module.controller('RealmImportCtrl', function ($scope, realm, $route,
+                                               Notifications, $modal, $resource) {
     $scope.rawContent = {};
     $scope.fileContent = {
         enabled: true
@@ -2740,7 +2852,7 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
     $scope.importIdentityProviders = false;
     $scope.importRealmRoles = false;
     $scope.importClientRoles = false;
-    $scope.ifResourceExists='FAIL';
+    $scope.ifResourceExists = 'FAIL';
     $scope.isMultiRealm = false;
     $scope.results = {};
     $scope.currentPage = 0;
@@ -2748,7 +2860,7 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
 
     var oldCopy = angular.copy($scope.fileContent);
 
-    $scope.importFile = function($fileContent){
+    $scope.importFile = function ($fileContent) {
         var parsed;
         try {
             parsed = JSON.parse($fileContent);
@@ -2773,13 +2885,13 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
         }
     };
 
-    $scope.hasResults = function() {
+    $scope.hasResults = function () {
         return (Object.keys($scope.results).length > 0) &&
-                ($scope.results.results !== undefined) &&
-                ($scope.results.results.length > 0);
+            ($scope.results.results !== undefined) &&
+            ($scope.results.results.length > 0);
     }
 
-    $scope.resultsPage = function() {
+    $scope.resultsPage = function () {
         if (!$scope.hasResults()) return {};
         return $scope.results.results.slice(startIndex(), endIndex());
     }
@@ -2804,19 +2916,19 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
         $scope.importClientRoles = $scope.hasClientRoles();
     }
 
-    $scope.setFirstPage = function() {
+    $scope.setFirstPage = function () {
         $scope.currentPage = 0;
     }
 
-    $scope.setNextPage = function() {
+    $scope.setNextPage = function () {
         $scope.currentPage++;
     }
 
-    $scope.setPreviousPage = function() {
+    $scope.setPreviousPage = function () {
         $scope.currentPage--;
     }
 
-    $scope.hasNext = function() {
+    $scope.hasNext = function () {
         if (!$scope.hasResults()) return false;
         var length = $scope.results.results.length;
         //console.log('length=' + length);
@@ -2825,12 +2937,12 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
         return length > endIndex;
     }
 
-    $scope.hasPrevious = function() {
+    $scope.hasPrevious = function () {
         if (!$scope.hasResults()) return false;
         return $scope.currentPage > 0;
     }
 
-    $scope.viewImportDetails = function() {
+    $scope.viewImportDetails = function () {
         $modal.open({
             templateUrl: resourceUrl + '/partials/modal/view-object.html',
             controller: 'ObjectModalCtrl',
@@ -2842,33 +2954,33 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
         })
     };
 
-    $scope.hasArray = function(section) {
+    $scope.hasArray = function (section) {
         return ($scope.fileContent !== 'undefined') &&
-               ($scope.fileContent.hasOwnProperty(section)) &&
-               ($scope.fileContent[section] instanceof Array) &&
-               ($scope.fileContent[section].length > 0);
+            ($scope.fileContent.hasOwnProperty(section)) &&
+            ($scope.fileContent[section] instanceof Array) &&
+            ($scope.fileContent[section].length > 0);
     }
 
-    $scope.hasRealmRoles = function() {
+    $scope.hasRealmRoles = function () {
         return $scope.hasRoles() &&
-               ($scope.fileContent.roles.hasOwnProperty('realm')) &&
-               ($scope.fileContent.roles.realm instanceof Array) &&
-               ($scope.fileContent.roles.realm.length > 0);
+            ($scope.fileContent.roles.hasOwnProperty('realm')) &&
+            ($scope.fileContent.roles.realm instanceof Array) &&
+            ($scope.fileContent.roles.realm.length > 0);
     }
 
-    $scope.hasRoles = function() {
+    $scope.hasRoles = function () {
         return ($scope.fileContent !== 'undefined') &&
-               ($scope.fileContent.hasOwnProperty('roles')) &&
-               ($scope.fileContent.roles !== 'undefined');
+            ($scope.fileContent.hasOwnProperty('roles')) &&
+            ($scope.fileContent.roles !== 'undefined');
     }
 
-    $scope.hasClientRoles = function() {
+    $scope.hasClientRoles = function () {
         return $scope.hasRoles() &&
-               ($scope.fileContent.roles.hasOwnProperty('client')) &&
-               (Object.keys($scope.fileContent.roles.client).length > 0);
+            ($scope.fileContent.roles.hasOwnProperty('client')) &&
+            (Object.keys($scope.fileContent.roles.client).length > 0);
     }
 
-    $scope.itemCount = function(section) {
+    $scope.itemCount = function (section) {
         if (!$scope.importing) return 0;
         if ($scope.hasRealmRoles() && (section === 'roles.realm')) return $scope.fileContent.roles.realm.length;
         if ($scope.hasClientRoles() && (section === 'roles.client')) return clientRolesCount($scope.fileContent.roles.client);
@@ -2878,7 +2990,7 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
         return $scope.fileContent[section].length;
     }
 
-    clientRolesCount = function(clientRoles) {
+    clientRolesCount = function (clientRoles) {
         var total = 0;
         for (var clientName in clientRoles) {
             total += clientRoles[clientName].length;
@@ -2886,27 +2998,27 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
         return total;
     }
 
-    $scope.hasResources = function() {
+    $scope.hasResources = function () {
         return ($scope.importUsers && $scope.hasArray('users')) ||
-               ($scope.importGroups && $scope.hasArray('groups')) ||
-               ($scope.importClients && $scope.hasArray('clients')) ||
-               ($scope.importIdentityProviders && $scope.hasArray('identityProviders')) ||
-               ($scope.importRealmRoles && $scope.hasRealmRoles()) ||
-               ($scope.importClientRoles && $scope.hasClientRoles());
+            ($scope.importGroups && $scope.hasArray('groups')) ||
+            ($scope.importClients && $scope.hasArray('clients')) ||
+            ($scope.importIdentityProviders && $scope.hasArray('identityProviders')) ||
+            ($scope.importRealmRoles && $scope.hasRealmRoles()) ||
+            ($scope.importClientRoles && $scope.hasClientRoles());
     }
 
-    $scope.nothingToImport = function() {
+    $scope.nothingToImport = function () {
         Notifications.error('No resources specified to import.');
     }
 
-    $scope.$watch('fileContent', function() {
+    $scope.$watch('fileContent', function () {
         if (!angular.equals($scope.fileContent, oldCopy)) {
             $scope.changed = true;
         }
         setOnOffSwitchDefaults();
     }, true);
 
-    $scope.successMessage = function() {
+    $scope.successMessage = function () {
         var message = $scope.results.added + ' records added. ';
         if ($scope.ifResourceExists === 'SKIP') {
             message += $scope.results.skipped + ' records skipped.'
@@ -2917,7 +3029,7 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
         return message;
     }
 
-    $scope.save = function() {
+    $scope.save = function () {
         var json = angular.copy($scope.fileContent);
         json.ifResourceExists = $scope.ifResourceExists;
         if (!$scope.importUsers) delete json.users;
@@ -2931,9 +3043,9 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
         }
 
         var importFile = $resource(authUrl + '/admin/realms/' + realm.realm + '/partialImport');
-        $scope.results = importFile.save(json, function() {
+        $scope.results = importFile.save(json, function () {
             Notifications.success($scope.successMessage());
-        }, function(error) {
+        }, function (error) {
             if (error.data.errorMessage) {
                 Notifications.error(error.data.errorMessage);
             } else {
@@ -2942,19 +3054,19 @@ module.controller('RealmImportCtrl', function($scope, realm, $route,
         });
     };
 
-    $scope.reset = function() {
+    $scope.reset = function () {
         $route.reload();
     }
 
 });
 
-module.controller('RealmExportCtrl', function($scope, realm, $http,
-                                              $httpParamSerializer, Notifications, Dialog) {
+module.controller('RealmExportCtrl', function ($scope, realm, $http,
+                                               $httpParamSerializer, Notifications, Dialog) {
     $scope.realm = realm;
     $scope.exportGroupsAndRoles = false;
     $scope.exportClients = false;
 
-    $scope.export = function() {
+    $scope.export = function () {
         if ($scope.exportGroupsAndRoles || $scope.exportClients) {
             Dialog.confirm('Export', 'This operation may make server unresponsive for a while.\n\nAre you sure you want to proceed?', download);
         } else {
@@ -2975,12 +3087,12 @@ module.controller('RealmExportCtrl', function($scope, realm, $http,
             exportUrl += '?' + $httpParamSerializer(params);
         }
         $http.post(exportUrl)
-            .then(function(response) {
+            .then(function (response) {
                 var download = angular.fromJson(response.data);
                 download = angular.toJson(download, true);
-                saveAs(new Blob([download], { type: 'application/json' }), 'realm-export.json');
-            }).catch(function() {
-                Notifications.error("Sorry, something went wrong.");
-            });
+                saveAs(new Blob([download], {type: 'application/json'}), 'realm-export.json');
+            }).catch(function () {
+            Notifications.error("Sorry, something went wrong.");
+        });
     }
 });

@@ -1,14 +1,14 @@
 package ru.alamics.sso.jpa.entity.provider;
 
+import org.keycloak.connections.jpa.entityprovider.JpaEntityProvider;
 import ru.alamics.sso.jpa.entity.*;
 import ru.alamics.sso.jpa.entity.provider.factory.CustomJpaProviderFactory;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class CustomJpaEntityProvider implements org.keycloak.connections.jpa.entityprovider.JpaEntityProvider {
+public class CustomJpaEntityProvider implements JpaEntityProvider {
     private static final String CHANGE_LOG = "db/changelog/db.changelog-master.xml";
-
 
     @Override
     public List<Class<?>> getEntities() {
@@ -32,7 +32,7 @@ public class CustomJpaEntityProvider implements org.keycloak.connections.jpa.ent
 
     @Override
     public String getFactoryId() {
-        return CustomJpaProviderFactory.ID;
+        return CustomJpaProviderFactory.PROVIDER_ID;
     }
 
     @Override

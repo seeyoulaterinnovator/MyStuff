@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.facade;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.keycloak.cache.CustomCache;
 import ru.alamics.sso.keycloak.cache.impl.UserPostCache;
@@ -13,16 +12,20 @@ import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.util.validator.NotValidException;
 
 import javax.ejb.Stateless;
-import java.util.*;
+import javax.ws.rs.NotFoundException;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Stateless
 public class CachedUserPostFacade extends UserPostFacade {
 
-    private CustomCache<UserPostResponse> cache;
+    private final UserPostCache cache;
 
     public CachedUserPostFacade() {
-        cache = (CustomCache<UserPostResponse>) Lookup.lookup(UserPostCache.class);
+        cache = Lookup.lookup(UserPostCache.class);
     }
 
     public List<UserPostResponse> findByUserId(String userId) throws NotFoundException {

@@ -6,6 +6,7 @@ import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.model.RiasLogin;
 import ru.alamics.sso.registration.rias.port.RiasApiService;
 import ru.alamics.sso.registration.rias.port.RiasLoginService;
+import ru.alamics.sso.jpa.util.CollectionUtils;
 import ru.alamics.sso.util.Util;
 
 import javax.ejb.EJB;

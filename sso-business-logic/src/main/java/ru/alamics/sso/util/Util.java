@@ -1,6 +1,8 @@
 package ru.alamics.sso.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.resteasy.spi.HttpRequest;
+import org.keycloak.OAuth2Constants;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.jose.jws.JWSInput;
 import org.keycloak.jose.jws.JWSInputException;
@@ -8,9 +10,11 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.services.managers.RealmManager;
 import org.keycloak.services.validation.Validation;
+import ru.alamics.sso.jpa.util.CollectionUtils;
 
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.MultivaluedMap;
@@ -27,9 +31,30 @@ import static ru.alamics.sso.registration.model.UserConstants.I_FRAME;
 @Slf4j
 public class Util {
 
+    public static final String REGEX_EMAIL = "^[\\w-+.]+@\\w[\\w-.]{0,66}\\.[a-z]{2,16}$";
+    public static final String REGEX_PASSWORD = "^(?=.{8,16}$)(?=.*[A-Z])(?=.*\\d)[0-9a-zA-Z^&*%$@#\\-!.\\[\\]_].*$";
+    public static String TRUE_STR = "1";
+    public static String FALSE_STR = "0";
+    public final static String CLIENT_B2B = "b2b";
+
+    public static boolean isPasswordGrandType(KeycloakSession session) {
+        HttpRequest contextObject = session.getContext().getContextObject(HttpRequest.class);
+        MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
+        if (!CollectionUtils.isEmpty(parameters)) {
+            return OAuth2Constants.PASSWORD.equals(parameters.getFirst(OIDCLoginProtocol.GRANT_TYPE_PARAM));
+        } else {
+            return false;
+        }
+    }
+
     public static boolean isFrameByCurrentRequest(KeycloakSession session) {
         MultivaluedMap<String, String> queryParameters = session.getContext().getUri().getQueryParameters();
         return queryParameters != null && (queryParameters.get(I_FRAME) != null || queryParameters.get(HIDDEN_HEADER) != null);
+    }
+
+    public static String getFormatNumber(String rawPhone) {
+        return String.format("+%s %s %s %s %s", rawPhone.charAt(0), rawPhone.substring(1, 4), rawPhone.substring(4, 7), rawPhone.substring(7, 9),
+                rawPhone.substring(9, 11));
     }
 
     public static boolean isFrameByReferer(KeycloakSession session) {
@@ -51,11 +76,6 @@ public class Util {
 
     public static boolean isFrame(KeycloakSession session) {
         return isFrameByCurrentRequest(session) || isFrameByReferer(session);
-    }
-
-    public static boolean isEmpty(String val) {
-
-        return val == null || val.length() == 0;
     }
 
     public static String encodeUTF8(String str) {
@@ -139,6 +159,10 @@ public class Util {
         return "unknown";
     }
 
+    public static boolean isEmpty(String val) {
+        return val == null || val.length() == 0;
+    }
+
     public static String join(Iterable<String> iterable, String separator) {
         StringBuilder sb = new StringBuilder();
         boolean isFirst = true;
@@ -155,4 +179,14 @@ public class Util {
 
         return sb.toString();
     }
+
+    public static String getRealm(String searchRealm, String rawPath) {
+        if (isEmpty(searchRealm)) {
+            int beginIndex = rawPath.indexOf("/realms/") + "/realms/".length();
+            String realm = rawPath.substring(beginIndex, rawPath.indexOf("/", beginIndex));
+            searchRealm = isEmpty(realm) ? "user" : realm;
+        }
+        return searchRealm;
+    }
+
 }

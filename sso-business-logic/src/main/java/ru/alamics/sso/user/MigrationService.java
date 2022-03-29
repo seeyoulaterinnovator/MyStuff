@@ -1,6 +1,5 @@
 package ru.alamics.sso.user;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.common.util.Time;
 import org.keycloak.events.admin.OperationType;
@@ -27,6 +26,7 @@ import ru.alamics.sso.util.validator.ValidatorBuilder;
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import javax.ws.rs.NotFoundException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,7 +39,7 @@ import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 @LocalBean
 public class MigrationService {
 
-    private final static Long DEFAULT_ROLE_ID = 1L;   //Соответствует роли LPR // TODO но это не точно
+    private final static Long DEFAULT_ROLE_ID = 1L;   //Соответствует роли LPR, но это не точно
     private final static String DEFAULT_ROLE_STR = "LPR";
 
     @EJB
@@ -62,6 +62,7 @@ public class MigrationService {
         log.info("importing users from file {} in progress", reportModel.getName());
         long migrationStarts = new Date().getTime();
 
+        reportModel.setStatus(ImportUsersReportStatus.IN_PROGRESS);
         int createdUsers = reportModel.getCountCreatedUsers();
         int countClones = reportModel.getCountClones();
         int processedUsers = 0;
@@ -128,7 +129,10 @@ public class MigrationService {
 
                     importReportService.updateImportUsersData(data);
                     processedUsers++;
-                    if (processedUsers % 500 == 0) {
+                    if (processedUsers % 50 == 0) {
+                        reportModel.setCountClones(countClones);
+                        reportModel.setCountCreatedUsers(createdUsers);
+                        importReportService.updateReport(reportModel);
                         log.info("ProcessedUsers " + processedUsers);
                     }
                 }
@@ -146,7 +150,6 @@ public class MigrationService {
             log.info(String.format("importing users from file %s is done: countUsers=%s, countCreatedUsers=%s, countClones=%s ",
                     reportModel.getName(), reportModel.getCountImportUsers(), reportModel.getCountCreatedUsers(),
                     reportModel.getCountClones()));
-
         } catch (RepeatNextTimeException rte) {
 
             log.info("Interrupted by timeout, processed " + processedUsers);
@@ -178,7 +181,7 @@ public class MigrationService {
         ValidatorBuilder vb = new ValidatorBuilder().setEmail(email).setPhone(phone).build();
         StringValidator.process(vb);
 
-        UserEntity byPhone = getUserByPhone(phone);
+        UserEntity byPhone = getUserByPhone(realmId, phone);
         UserEntity byEmail = getUserByEmailAndUsername(realmId, email);
 
         if (byPhone != null && byPhone.equals(byEmail)) {
@@ -208,8 +211,8 @@ public class MigrationService {
         }
     }
 
-    private UserEntity getUserByPhone(String phone) {
-        return userRepository.getFirstUserByPhone(phone);
+    private UserEntity getUserByPhone(String realmId, String phone) {
+        return userRepository.getFirstUserByPhoneNumber(realmId, phone, null);
     }
 
     private UserEntity getUserByEmailAndUsername(String realmId, String email) {

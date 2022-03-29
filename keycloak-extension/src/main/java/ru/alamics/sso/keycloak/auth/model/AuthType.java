@@ -29,10 +29,15 @@ public enum AuthType {
             "На указанный номер телефона будет выслано сообщение в Viber и СМС с одноразовым паролем"
     );
 
+    public static List<String> REQUIRED_ACTIONS = Arrays.asList(
+            UserModel.RequiredAction.VERIFY_EMAIL.toString(),
+            PhoneVerificationByIncomingCallFactory.PROVIDER_ID,
+            PhoneVerificationBySmsFactory.PROVIDER_ID
+    );
     private String description;
     private String[] requiredActionNames;
 
-    AuthType(String requiredActionNames[], String description) {
+    AuthType(String[] requiredActionNames, String description) {
         this.description = description;
         this.requiredActionNames = requiredActionNames;
     }
@@ -73,10 +78,4 @@ public enum AuthType {
     public String[] getRequiredActionNames() {
         return requiredActionNames;
     }
-
-    public static List<String> REQUIRED_ACTIONS = Arrays.asList(
-            UserModel.RequiredAction.VERIFY_EMAIL.toString(),
-            PhoneVerificationByIncomingCallFactory.PROVIDER_ID,
-            PhoneVerificationBySmsFactory.PROVIDER_ID
-    );
 }

@@ -20,14 +20,15 @@ import java.util.Optional;
 public interface BaseResourceProvider<T> extends RealmResourceProvider {
 
     @Override
-    T getResource ();
+    T getResource();
 
     @Override
-    default void close () { }
+    default void close() {
+    }
 
     default AdminPermissionEvaluator initAuthByWorkingRealm(KeycloakSession session) {
         KeycloakContext context = session.getContext();
-        AdminAuth auth = initAdminAuth(session);
+        InitSession initSession = initAdminAuth(session);
 
         RealmManager realmManager = new RealmManager(session);
         KeycloakUriInfo uri = context.getUri();
@@ -36,35 +37,17 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
         RealmModel realmFromRequest = Optional.ofNullable(realmManager.getRealmByName(realmFromRequestName))
                 .orElseThrow(() -> new NotAuthorizedException("Unknown realm in path param"));
 
-        session.getContext().setRealm(realmFromRequest);//FIXME Ставим контексте в реалме, тот в котором работает пользователь
+        session.getContext().setRealm(realmFromRequest);
 
-        return AdminPermissions.evaluator(session, realmFromRequest, auth);
+        return AdminPermissions.evaluator(session, realmFromRequest, initSession.getAdminAuth());
     }
 
     default AdminPermissionEvaluator initAuth(KeycloakSession session) {
-        AdminAuth auth = initAdminAuth(session);
-
-        KeycloakContext context = session.getContext();
-        AppAuthManager appAuthManager = new AppAuthManager();
-        String tokenString = Optional.ofNullable(appAuthManager.extractAuthorizationHeaderToken(context.getRequestHeaders())).orElseThrow(() -> new NotAuthorizedException("Bearer"));
-        AccessToken token;
-        try {
-            JWSInput input = new JWSInput(tokenString);
-            token = input.readJsonContent(AccessToken.class);
-        } catch (JWSInputException e) {
-            throw new NotAuthorizedException("Bearer token format error");
-        }
-
-        String issuer = Optional.ofNullable(token.getIssuer()).orElseThrow(() -> new RuntimeException("empty issuer"));
-        String realmName = issuer.substring(issuer.lastIndexOf('/') + 1);
-
-        RealmManager realmManager = new RealmManager(session);
-        RealmModel realmFromToken = Optional.ofNullable(realmManager.getRealmByName(realmName))
-                .orElseThrow(() -> new NotAuthorizedException("Unknown realm in token"));
-        return AdminPermissions.evaluator(session, realmFromToken, auth); //fixme нет возврата сессии обратно
+        InitSession initSession = initAdminAuth(session);
+        return AdminPermissions.evaluator(session, initSession.getRealmFromToken(), initSession.getAdminAuth());
     }
 
-    default AdminAuth initAdminAuth(KeycloakSession session){
+    default InitSession initAdminAuth(KeycloakSession session) {
         KeycloakContext context = session.getContext();
         AppAuthManager appAuthManager = new AppAuthManager();
         String tokenString = Optional.ofNullable(appAuthManager.extractAuthorizationHeaderToken(context.getRequestHeaders())).orElseThrow(() -> new NotAuthorizedException("Bearer"));
@@ -83,7 +66,7 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
         RealmModel realmFromToken = Optional.ofNullable(realmManager.getRealmByName(realmName))
                 .orElseThrow(() -> new NotAuthorizedException("Unknown realm in token"));
 
-        session.getContext().setRealm(realmFromToken);//FIXME Подставляем реалм из его токена и валидируем относительно его реалма, иначе authResult кинет NPE, мб возможно сделать аккауратней
+        session.getContext().setRealm(realmFromToken);
 
         AuthenticationManager.AuthResult authResult = Optional.ofNullable(appAuthManager.authenticateBearerToken(session, realmFromToken))
                 .orElseThrow(() -> new NotAuthorizedException("Bearer"));
@@ -98,6 +81,6 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
             throw new ForbiddenException();
         }
 
-        return auth;
+        return new InitSession(session, realmFromToken, auth);
     }
 }

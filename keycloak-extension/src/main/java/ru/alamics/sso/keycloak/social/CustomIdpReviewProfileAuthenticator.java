@@ -43,13 +43,10 @@ import ru.alamics.sso.util.Util;
 
 import javax.ws.rs.core.MultivaluedMap;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Pattern;
 
 import static org.keycloak.authentication.forms.RegistrationRecaptcha.G_RECAPTCHA_RESPONSE;
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_ORG_NAME;
 
 @Slf4j
 public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthenticator {
@@ -59,6 +56,10 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
     private static final String RECAPTCHA_URL = "idpReview.recaptcha.url";
     private static final String RECAPTCHA_VERIFY_URL = "idpReview.recaptcha.siteVerify";
 
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("[a-zA-Z0-9!#$%&'*+/=?^_`{|}~.-]+@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*");
+
+    private final static String DEFAULT_USER_LASTNAME = " ";
+
     private final TbapiService tbapiService;
     private final UserExtension userExtension;
 
@@ -67,7 +68,11 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
     public CustomIdpReviewProfileAuthenticator() {
         tbapiService = new TbapiService(new TbapiServiceRestImpl());
         userExtension = new UserExtension();
-        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        properties = Lookup.lookup(ApplicationProperties.class);
+    }
+
+    public static boolean isEmailValid(String email) {
+        return EMAIL_PATTERN.matcher(email).matches();
     }
 
     @Override
@@ -142,7 +147,7 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
         String username = realm.isRegistrationEmailAsUsername() ? formData.getFirst(UserModel.EMAIL) : formData.getFirst(UserModel.USERNAME);
         userCtx.setUsername(username);
         userCtx.setFirstName(formData.getFirst(UserModel.FIRST_NAME));
-        userCtx.setLastName(formData.getFirst(UserModel.LAST_NAME));
+        userCtx.setLastName(DEFAULT_USER_LASTNAME);
 
         String phone = Util.getCleanUserPhone(formData.getFirst(FormConstants.FIELD_PHONE));
         if (phone != null)
@@ -167,10 +172,18 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
     }
 
     private List<FormMessage> getValidationErrorList(AuthenticationFlowContext context, RealmModel realm, MultivaluedMap<String, String> formData) {
-        List<FormMessage> errors = Validation.validateUpdateProfileForm(realm, formData);
-        if (Validation.isBlank(formData.getFirst(FormConstants.FIELD_ORG_NAME))) {
-            errors.add(new FormMessage(FormConstants.FIELD_ORG_NAME, "missingOrgNameMessage"));
+        List<FormMessage> errors = new ArrayList<>();
+
+        if (Validation.isBlank(formData.getFirst(FormConstants.FIELD_FIRST_NAME))) {
+            errors.add(new FormMessage(FormConstants.FIELD_FIRST_NAME, Messages.MISSING_FIRST_NAME));
         }
+
+        if (Validation.isBlank(formData.getFirst(FormConstants.FIELD_EMAIL))) {
+            errors.add(new FormMessage(FormConstants.FIELD_PHONE, Messages.MISSING_EMAIL));
+        } else if (!isEmailValid(formData.getFirst(FormConstants.FIELD_EMAIL))) {
+            errors.add(new FormMessage(FormConstants.FIELD_EMAIL, Messages.INVALID_EMAIL));
+        }
+
         if (Validation.isBlank(formData.getFirst(FormConstants.FIELD_PHONE))) {
             errors.add(new FormMessage(FormConstants.FIELD_PHONE, "missingPhoneNumberMessage"));
         }
@@ -223,14 +236,6 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
                 .email(formData.getFirst(FormConstants.FIELD_EMAIL))
                 .phone(phone)
                 .build();
-
-        String orgName = formData.getFirst(FormConstants.FIELD_ORG_NAME);
-
-        if (orgName == null) {
-            orgName = formData.getFirst(FormConstants.FIELD_LAST_NAME);
-        }
-        user.getAttributes().put(ATTR_ORG_NAME, Collections.singletonList(orgName));
-
 
         Map<String, Object> attributes = tbapiService.registerUser(user, new TbapiConnectConfig(TbapiConnect.REGISTRATION));
 

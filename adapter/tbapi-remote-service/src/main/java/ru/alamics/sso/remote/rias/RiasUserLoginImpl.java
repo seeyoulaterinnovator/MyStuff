@@ -20,8 +20,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
@@ -35,10 +33,6 @@ public class RiasUserLoginImpl implements RiasLoginService {
             .readTimeout(10, TimeUnit.SECONDS);
 
     private static final ResteasyClient client = clientBuilder.build();
-
-    @Resource(lookup = "java:global/domru-sso/ApplicationProperties")
-    private ApplicationProperties properties;
-
     private static final String AUTH_SCHEME = "riasLogin.scheme";
     private static final String AUTH_DEF_CITY = "riasLogin.defCity";
     private static final String AUTH_DOMAIN = "riasLogin.domain";
@@ -47,8 +41,11 @@ public class RiasUserLoginImpl implements RiasLoginService {
     private static final String CLIENT_NAME = "riasLogin.client.name";
     private static final String CLIENT_SALT = "riasLogin.client.salt";
     private static final String GRANT_TYPE = "riasLogin.grantType";
+    @Resource(lookup = "java:global/domru-sso/ApplicationProperties")
+    private ApplicationProperties properties;
 
-    public RiasUserLoginImpl() {}
+    public RiasUserLoginImpl() {
+    }
 
     public RiasLogin loginUser(String domain, String username, String password) throws RiasCheckException {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
@@ -83,8 +80,6 @@ public class RiasUserLoginImpl implements RiasLoginService {
                     .queryParam("timestamp$c", timestamp)
                     .queryParam("client_secret", secretHash);
 
-            //System.out.println(wt.getUri());
-
             response = wt.request(MediaType.APPLICATION_XML)
                     .get();
 
@@ -98,7 +93,6 @@ public class RiasUserLoginImpl implements RiasLoginService {
         }
 
         log.info("login response: " + result);
-        //System.out.println("login response: " + result);
 
         return result;
     }

@@ -21,6 +21,7 @@ import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.port.RiasApiService;
 import ru.alamics.sso.registration.service.UserFindService;
+import ru.alamics.sso.user.UserServiceUtil;
 
 import javax.ws.rs.core.Response;
 import java.util.Collections;
@@ -40,13 +41,13 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
     ResetCredentialEmailOrPhone(KeycloakSession session) {
         this.session = session;
 
-        riasApiService = (RiasApiService) Lookup.lookup(RiasApiService.class);
+        riasApiService = Lookup.lookup(RiasApiService.class);
         log.info("Got riasService from context");
 
-        userFindService = (UserFindService) Lookup.lookup(UserFindService.class);
+        userFindService = Lookup.lookup(UserFindService.class);
         log.info("Got userFindService from context");
 
-        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        properties = Lookup.lookup(ApplicationProperties.class);
     }
 
     @Override
@@ -56,24 +57,33 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
         String username = authenticationSession.getAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME);
 
-        //Если пользак есть в кейклоке, то автоматом по мылу он уже будет
-        if (user == null) {
-            //Если ввели вместо мыла телефон
-            UserEntity userFind = findUserByConvertUsernameToPhone(context.getRealm(), username);
+        UserEntity userFind = null;
 
-            if (userFind == null && checkRias(context)) {
-                return;
-            }
+        RealmModel realm = context.getRealm();
 
-            if (userFind != null) {
+        if (user == null && realm.isLoginWithEmailAllowed() && username.contains("@")) {
+            user = context.getSession().users().getUserByEmail(username, realm);
+        }
+
+        if (user == null && username.startsWith("+7")) {
+            userFind = findUserByConvertUsernameToPhone(realm, username);
+            if (userFind != null && userFind.isEnabled()) {
                 user = context.getSession().users().getUserById(userFind.getId(), context.getSession().realms().getRealm(userFind.getRealmId()));
                 username = userFind.getUsername();
                 authenticationSession.setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, userFind.getEmail());
                 context.getHttpRequest().getDecodedFormParameters().replace("username", Collections.singletonList(userFind.getEmail()));
             }
         }
+        if (user == null && userFind == null && checkRias(context)) {
+            context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT_ERROR));
+            return;
+        }
 
-        context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT));
+        if (userFind != null && !userFind.isEnabled() || user != null && !user.isEnabled()) {
+            context.forkWithErrorMessage(new FormMessage(Messages.ACCOUNT_DISABLED));
+        } else {
+            context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT));
+        }
 
         authenticationSession.setAuthNote("RESET_TYPE", resetType.name());
         ResetFactory factory = new ResetFactoryImpl(this.session, context);
@@ -82,13 +92,9 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
     }
 
     private UserEntity findUserByConvertUsernameToPhone(RealmModel realm, final String username) {
-        if (!username.startsWith("+7")) {
-            return null;
-        }
+        String phone = UserServiceUtil.doCleanPhoneStartWithSeven(username);
 
-        final String phone = username.replaceAll("\\D", "");
-
-        return userFindService.getUserByPhone(realm, phone);
+        return phone == null ? null : userFindService.getUserByPhone(realm, phone);
     }
 
     @Override
@@ -123,7 +129,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
 
         String city = context.getHttpRequest().getDecodedFormParameters().getFirst(FormConstants.FIELD_CITY);
         if (Validation.isBlank(city)) {
-            city = "yar"; // TODO с фронта не приходит город
+            city = "yar";
         }
 
         location += "?citydomain=" + city;

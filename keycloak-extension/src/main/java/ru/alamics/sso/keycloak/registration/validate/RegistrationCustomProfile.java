@@ -15,11 +15,11 @@ import java.util.List;
 
 public class RegistrationCustomProfile extends RegistrationProfile {
 
-    public static final String PROVIDER_ID = "registration-custom-profile-action";
+    private static final String DISPLAY_NAME = "Profile Custom Validation";
 
     @Override
     public String getDisplayType() {
-        return "Profile Custom Validation";
+        return DISPLAY_NAME;
     }
 
     @Override

@@ -19,11 +19,13 @@ import ru.alamics.sso.emailer.EmailSender;
 import ru.alamics.sso.jpa.entity.AutoLockNotification;
 import ru.alamics.sso.jpa.entity.common.NotificationType;
 import ru.alamics.sso.jpa.repository.*;
+import ru.alamics.sso.keycloak.GeneralRealm;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsDto;
 import ru.alamics.sso.settings.SettingsService;
+import ru.alamics.sso.util.Util;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -42,10 +44,8 @@ import java.util.concurrent.TimeUnit;
 public class UserSchedule {
     private static final String TIMER_NAME = "User Schedule Timer";
     private static final long DEFAULT_INTERVAL_DURATION = 300000;
-    private final static String[] SETTINGS_REALM_NAMES_SCHEDULE = {"user", "manager"};
-    private final static String CLIENT_ID = "lkb2b";
+
     private final static String DEFAULT_CLIENT_ID = "account";
-    private final static String TIMER_INTERVAL_DURATION_PROPERTY = "application.schedule.user.milliseconds";
     @EJB
     private EmailSender sender;
     @EJB
@@ -69,17 +69,34 @@ public class UserSchedule {
     @EJB
     private ClientService сlientService;
 
+    private Timer timer;
+
     @PostConstruct
     private void init() {
         final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
+        long initialDuration = Math.round(Math.random() * getTime());
 
-        final long intervalDuration = properties.getPropertyLong(TIMER_INTERVAL_DURATION_PROPERTY, DEFAULT_INTERVAL_DURATION, "UserSchedule: default value used: '%s' = '%s'");
+        timer = timerService.createIntervalTimer(initialDuration, getTime(), timerConfig);
+        log.info("Timer:{} is created, interval duration value = {} ms, initial duration value = {} ms ", TIMER_NAME, getTime(), initialDuration);
+    }
 
-        // пробую развести по времени начало
-        long initialDuration = Math.round(Math.random() * intervalDuration);
+    public void changeScheduleTimer() {
+        final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
+        long initialDuration = Math.round(Math.random() * getTime());
 
-        timerService.createIntervalTimer(initialDuration, intervalDuration, timerConfig);
-        log.info("Timer:{} is created, interval duration value = {} ms, initial duration value = {} ms ", TIMER_NAME, intervalDuration, initialDuration);
+        timer.cancel();
+        timer = timerService.createIntervalTimer(initialDuration, getTime(), timerConfig);
+        log.info("Timer:{} is created, interval duration value = {} ms, initial duration value = {} ms ", TIMER_NAME, getTime(), initialDuration);
+    }
+
+    private long getTime() {
+        long intervalDuration = settingsService.getSettingsLongValue(SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY, GeneralRealm.MASTER) * 1000;
+
+        if (intervalDuration == 0) {
+            intervalDuration = DEFAULT_INTERVAL_DURATION;
+        }
+
+        return intervalDuration;
     }
 
     @Timeout
@@ -88,9 +105,12 @@ public class UserSchedule {
             return;
         }
         findExpiredPassword();
-        for (String realm : SETTINGS_REALM_NAMES_SCHEDULE) {
-            block(realm);
-            notificationInactiveUsers(realm);
+
+        for (RealmModel model : realmRepository.getAllRealms()) {
+            if (model.getAttribute("realmInSchedule", false)) {
+                block(model.getId());
+                notificationInactiveUsers(model.getId());
+            }
         }
         sendEmails();
     }
@@ -98,7 +118,7 @@ public class UserSchedule {
     private void notificationInactiveUsers(String realm) {
         final String DEBUG_STR = "findNotifications";
         log.debug("start:{}", DEBUG_STR);
-        long absenceTimeNotification = settingsService.getSettingsValue(SettingConstants.ABSENCE_NOTIFICATION_DAYS, realm);
+        long absenceTimeNotification = settingsService.getSettingsLongValue(SettingConstants.ABSENCE_NOTIFICATION_DAYS, realm);
         if (absenceTimeNotification > -1) {
             userHistoryLoginRepository.findInactiveUsers(absenceTimeNotification, realm);
         }
@@ -108,7 +128,7 @@ public class UserSchedule {
     private void block(String realm) {
         final String DEBUG_STR = "block";
         log.debug("start:{}", DEBUG_STR);
-        long absenceTimeBlock = settingsService.getSettingsValue(SettingConstants.ABSENCE_BLOCKING_DAYS, realm);
+        long absenceTimeBlock = settingsService.getSettingsLongValue(SettingConstants.ABSENCE_BLOCKING_DAYS, realm);
         if (absenceTimeBlock > -1) {
             userHistoryLoginRepository.findUsersToBlock(absenceTimeBlock, realm);
         }
@@ -153,22 +173,22 @@ public class UserSchedule {
         for (AutoLockNotification notification : autoLockNotifications) {
             UserEntity user = notification.getUser();
             RealmModel realm = realmRepository.findRealmById(user.getRealmId());
-            ClientEntity client = clientRepository.findClientById(CLIENT_ID, realm.getName());
+            ClientEntity client = clientRepository.findClientById(settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, realm.getName()), realm.getName());
             if (client == null)
                 client = clientRepository.findClientById(DEFAULT_CLIENT_ID, realm.getName());
             UserModel userModel = new UserAdapter(null, realm, null, user);
             if (notification.getType() == NotificationType.ABSENCE_NOTIFICATION) {
-                long blockValue = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_WARNING, realm.getName());
+                long blockValue = settingsService.getSettingsLongValue(SettingConstants.BLOCK_NOTIFICATION_OF_WARNING, realm.getName());
                 if (blockValue > 0) {
-                    EmailModel.EmailModelBuilder prepareBlockNotification = prepareBlockNotification(realm.getName(), getClientLink(client));
+                    EmailModel.EmailModelBuilder prepareBlockNotification = prepareBlockNotification(userModel, realm.getName(), getClientLink(client));
                     prepareBlockNotification.realmModel(realm)
                             .user(userModel);
                     sender.send(prepareBlockNotification.build());
                 }
             } else if (notification.getType() == NotificationType.ABSENCE_BLOCKING) {
-                long blockValue = settingsService.getSettingsValue(SettingConstants.BLOCK_NOTIFICATION_OF_BLOCKED, realm.getName());
+                long blockValue = settingsService.getSettingsLongValue(SettingConstants.BLOCK_NOTIFICATION_OF_BLOCKED, realm.getName());
                 if (blockValue > 0) {
-                    EmailModel.EmailModelBuilder bockNotification = bockNotification();
+                    EmailModel.EmailModelBuilder bockNotification = bockNotification(userModel, realm.getName());
                     bockNotification.realmModel(realm)
                             .user(userModel);
                     sender.send(bockNotification.build());
@@ -176,7 +196,7 @@ public class UserSchedule {
                 user.setEnabled(false);
                 createAdminEvent(OperationType.UPDATE, user, realm);
             } else if (notification.getType() == NotificationType.PASSWORD_EXPIRED) {
-                EmailModel.EmailModelBuilder passwordExpired = passwordExpired(getClientLink(client));
+                EmailModel.EmailModelBuilder passwordExpired = passwordExpired(getClientLink(client), realm.getName());
                 passwordExpired.realmModel(realm)
                         .user(userModel);
                 sender.send(passwordExpired.build());
@@ -186,40 +206,65 @@ public class UserSchedule {
     }
 
 
-    private EmailModel.EmailModelBuilder bockNotification() {
+    private EmailModel.EmailModelBuilder bockNotification(UserModel userModel, String realmId) {
         final String subject = "Блокирование аккаунта";
         final String template = "block-notification.ftl";
+        Map<String, Object> body = new HashMap<>();
+        body.put("userName", userModel.getUsername());
+        List<String> phones = userModel.getAttribute("phone");
+        if (!phones.isEmpty() && phones.get(0).length() == 11) {
+            String formatNumber = Util.getFormatNumber(phones.get(0));
+            body.put("phone", formatNumber);
+        }
+        int timeTokenResetPass = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realmId);
+        String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
+        body.put("expTimePass", expirationStrRusPass);
+        body.put("blockNotificationSchedulerHtml", settingsService.getSettingsStringValue(SettingConstants.SCHEDULER_BLOCKING_BODY, realmId));
         return EmailModel.builder()
                 .subject(subject)
+                .bodyAttributes(body)
                 .bodyTemplate(template);
     }
 
-    private EmailModel.EmailModelBuilder prepareBlockNotification(String realm, String link) {
+    private EmailModel.EmailModelBuilder prepareBlockNotification(UserModel userModel, String realm, String link) {
         final String subject = "Предупреждение о блокирование аккаунта";
         final String template = "block-prepare-notification.ftl";
         SettingsDto blockSetting = settingsService.getSetting(SettingConstants.ABSENCE_BLOCKING_DAYS, realm);
-        long inactiveBlockTimeout = settingsService.getSettingsValue(SettingConstants.ABSENCE_BLOCKING_DAYS, realm);
-        long inactiveNotificationTimeout = settingsService.getSettingsValue(SettingConstants.ABSENCE_NOTIFICATION_DAYS, realm);
+        long inactiveBlockTimeout = settingsService.getSettingsLongValue(SettingConstants.ABSENCE_BLOCKING_DAYS, realm);
+        long inactiveNotificationTimeout = settingsService.getSettingsLongValue(SettingConstants.ABSENCE_NOTIFICATION_DAYS, realm);
         String timeToBlock = String.valueOf(
                 blockSetting.getUnit().convert(inactiveBlockTimeout - inactiveNotificationTimeout, TimeUnit.SECONDS));
         Map<String, Object> body = new HashMap<>();
-        body.put("absence", timeToBlock + " " + Translator.getRusTranslateTimeUnit(timeToBlock, blockSetting.getUnit()));
+        String valueTime = timeToBlock + " " + Translator.getRusTranslateTimeUnit(timeToBlock, blockSetting.getUnit());
+        String bodyHtml = String.format(settingsService.getSettingsStringValue(SettingConstants.SCHEDULER_BLOCKING_PREPARE_BODY, realm), valueTime, link);
+        body.put("blockPrepareNotificationSchedulerHtml", bodyHtml);
+        body.put("absence", valueTime);
         body.put("link", link);
+        body.put("userName", userModel.getUsername());
+
+        int timeTokenResetPass = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm);
+        String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
+        body.put("expTimePass", expirationStrRusPass);
+
+        List<String> phones = userModel.getAttribute("phone");
+        if (!phones.isEmpty() && phones.get(0).length() == 11) {
+            String formatNumber = Util.getFormatNumber(phones.get(0));
+            body.put("phone", formatNumber);
+        }
         return EmailModel.builder()
                 .bodyAttributes(body)
                 .subject(subject)
                 .bodyTemplate(template);
     }
 
-    private EmailModel.EmailModelBuilder passwordExpired(String link) {
+    private EmailModel.EmailModelBuilder passwordExpired(String link, String realmId) {
         final String subject = "Истек срок жизни пароля";
         final String template = "password-expires.ftl";
 
-        // TODO тут неплохо было бы ставить ссылку сразу на окно восстановления пароля через new ResetCredentialsActionToken
-        // TODO но нужна KeycloakSession или реализовывать сериализацию токена
-
         Map<String, Object> body = new HashMap<>();
         body.put("link", link);
+        String bodyHtml = String.format(settingsService.getSettingsStringValue(SettingConstants.SCHEDULER_PASSWORD_EXPIRES_BODY, realmId), link);
+        body.put("passwordExpiresSchedulerHtml", bodyHtml);
         return EmailModel.builder()
                 .bodyAttributes(body)
                 .subject(subject)

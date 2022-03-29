@@ -1,36 +1,49 @@
 package ru.alamics.sso.keycloak.auth;
 
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.Config;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
-import org.keycloak.authentication.AuthenticatorFactory;
-import org.keycloak.models.*;
+import org.keycloak.models.AuthenticationExecutionModel;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.provider.ProviderConfigProperty;
 import ru.alamics.sso.keycloak.auth.model.AuthType;
 import ru.alamics.sso.registration.model.UserConstants;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class TwoStepVerificationFactory implements Authenticator, AuthenticatorFactory {
-    public static final String VERIFY_PHONE_FTL = "verifyPhone.ftl";
+public class TwoStepVerificationFactory extends AbstractAuthenticatorFactory implements Authenticator {
+    private static final String NOTE_AUTH_TYPE_NAME = "note_auth_type_name";
+    private static final String NOTE_AUTH_TYPE_DESC = "note_auth_type_DESC";
+    private static final String TWO_STEP_VERIFICATION_TYPES = "two.step.verification.types";
 
-    public static final String NOTE_AUTH_TYPE_NAME = "note_auth_type_name";
-    public static final String NOTE_AUTH_TYPE_DESC = "note_auth_type_DESC";
-
-    public static final String TWO_STEP_VERIFICATION_TYPES = "two.step.verification.types" ;
     private static final String PROVIDER_ID = "two-step-verification";
+    private static final String DISPLAY_NAME = "Two step verification";
+    private static final String HELP_TEXT = "Two step verification";
+    private static final String REFERENCE_CATEGORY = "two-step-verification-reference";
 
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
             AuthenticationExecutionModel.Requirement.DISABLED
     };
 
-    private static final List<ProviderConfigProperty> CONFIG_PROPERTIES = Arrays.asList(getTwoStepVerificationTypes());
+    private static final List<ProviderConfigProperty> CONFIG_PROPERTIES = Collections.singletonList(getTwoStepVerificationTypes());
+
+    private static ProviderConfigProperty getTwoStepVerificationTypes() {
+        ProviderConfigProperty property = new ProviderConfigProperty();
+        property.setName(TWO_STEP_VERIFICATION_TYPES);
+        property.setLabel("2-step verification types");
+        property.setHelpText("");
+        property.setOptions(Arrays.stream(AuthType.values()).map(Enum::name).collect(Collectors.toList()));
+        property.setType(ProviderConfigProperty.LIST_TYPE);
+        return property;
+    }
 
     @Override
     public List<ProviderConfigProperty> getConfigProperties() {
@@ -43,7 +56,8 @@ public class TwoStepVerificationFactory implements Authenticator, AuthenticatorF
         String type = config.get(TWO_STEP_VERIFICATION_TYPES);
         AuthType authType = AuthType.getByString(type);
 
-        AuthType.REQUIRED_ACTIONS.forEach(x -> context.getUser().removeRequiredAction(x));
+//        Залочили по скольку удаляет обязательные действия пользователя кроме конфига Two Steep
+//        AuthType.REQUIRED_ACTIONS.forEach(x -> context.getUser().removeRequiredAction(x));
 
         String disable = context.getUser().getFirstAttribute(UserConstants.DISABLE_TWO_STEP_AUTH);
         if (authType != null && (disable == null || disable.isEmpty())) {
@@ -51,8 +65,10 @@ public class TwoStepVerificationFactory implements Authenticator, AuthenticatorF
                 context.getUser().addRequiredAction(providerName);
             }
         }
-        context.getAuthenticationSession().setAuthNote(NOTE_AUTH_TYPE_NAME, authType.name());
-        context.getAuthenticationSession().setAuthNote(NOTE_AUTH_TYPE_DESC, authType.getDescription());
+        if (authType != null) {
+            context.getAuthenticationSession().setAuthNote(NOTE_AUTH_TYPE_NAME, authType.name());
+            context.getAuthenticationSession().setAuthNote(NOTE_AUTH_TYPE_DESC, authType.getDescription());
+        }
 
         context.success();
     }
@@ -73,26 +89,18 @@ public class TwoStepVerificationFactory implements Authenticator, AuthenticatorF
     }
 
     @Override
-    public void init(Config.Scope config) {
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-    }
-
-    @Override
     public String getHelpText() {
-        return "Two step verification";
+        return HELP_TEXT;
     }
 
     @Override
     public String getDisplayType() {
-        return "Two step verification";
+        return DISPLAY_NAME;
     }
 
     @Override
     public String getReferenceCategory() {
-        return "two-step-verification-reference";
+        return REFERENCE_CATEGORY;
     }
 
     @Override
@@ -103,11 +111,6 @@ public class TwoStepVerificationFactory implements Authenticator, AuthenticatorF
     @Override
     public AuthenticationExecutionModel.Requirement[] getRequirementChoices() {
         return REQUIREMENT_CHOICES;
-    }
-
-    @Override
-    public boolean isUserSetupAllowed() {
-        return false;
     }
 
     @Override
@@ -124,17 +127,4 @@ public class TwoStepVerificationFactory implements Authenticator, AuthenticatorF
     public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user) {
     }
 
-    @Override
-    public void close() {
-    }
-
-    private static ProviderConfigProperty getTwoStepVerificationTypes() {
-        ProviderConfigProperty property = new ProviderConfigProperty();
-        property.setName(TWO_STEP_VERIFICATION_TYPES);
-        property.setLabel("2-step verification types");
-        property.setHelpText("");
-        property.setOptions(Arrays.stream(AuthType.values()).map(Enum::name).collect(Collectors.toList()));
-        property.setType(ProviderConfigProperty.LIST_TYPE);
-        return property;
-    }
 }

@@ -22,25 +22,21 @@ import org.keycloak.Config.Scope;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.resource.RealmResourceProvider;
-import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
-import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
 import ru.alamics.sso.keycloak.rest.BaseResourceProviderFactory;
-import ru.alamics.sso.registration.service.UserFindService;
 
 @Slf4j
 public class CustomUserRealmResourceProviderFactory implements BaseResourceProviderFactory, BaseResourceProvider {
 
-    public static final String ID = "users-toms";
+    private static final String PROVIDER_ID = "users-toms";
 
     private KeycloakSession session;
-    private UserFindService userFindService;
     private AdminPermissionEvaluator auth;
 
     @Override
     public String getId() {
-        return ID;
+        return PROVIDER_ID;
     }
 
     @Override

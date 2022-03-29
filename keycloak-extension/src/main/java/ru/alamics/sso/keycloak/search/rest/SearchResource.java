@@ -5,39 +5,50 @@ import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.annotations.jaxrs.QueryParam;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.RoleModel;
 import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.representations.idm.RequiredActionProviderRepresentation;
+import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.validation.Validation;
+import ru.alamics.sso.keycloak.GeneralRealm;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.registration.service.UserFindService;
+import ru.alamics.sso.service.RequiredActionService;
 import ru.alamics.sso.user.web.UserSearch;
+import ru.alamics.sso.util.Util;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Slf4j
 public class SearchResource {
 
+    public static final String VIEW_ROLE_PATTERN = "view-%s-realm";
+    private final UserFindService userFindService;
+    private final AdminAuth adminAuth;
+    private final RequiredActionService requiredActionService;
     protected KeycloakSession session;
-    private UserFindService userFindService;
 
-    public SearchResource(KeycloakSession session) {
+    public SearchResource(KeycloakSession session, AdminAuth adminAuth) {
         this.session = session;
-        try {
-            this.userFindService = (UserFindService) new InitialContext().lookup("java:global/domru-sso/" + UserFindService.class.getSimpleName());
-        } catch (NamingException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Something wrong with context");
-        }
+        this.adminAuth = adminAuth;
+        this.userFindService = Lookup.lookup(UserFindService.class);
+        this.requiredActionService = Lookup.lookup(RequiredActionService.class);
     }
 
-    // TODO может быть работать через кэш ?
+    private static String formatViewRole(RealmModel realm) {
+        return String.format(VIEW_ROLE_PATTERN, realm.getName());
+    }
+
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
@@ -47,36 +58,38 @@ public class SearchResource {
                                                 @QueryParam("searchToms") String searchToms, @QueryParam("sortField") String sortField,
                                                 @QueryParam("sortAsc") boolean sortAsc, @QueryParam("searchRealm") String searchRealm,
                                                 @DefaultValue("1") @QueryParam("pageNum") int pageNum, @DefaultValue("100") @QueryParam("pageSize") int pageSize) {
+
         session.userCache().clear();
-        if (searchRealm == null || searchRealm.isEmpty()) {
-            searchRealm = "user";
-        }
+        String rawPath = session.getContext().getUri().getAbsolutePath().getRawPath();
+
+        searchRealm = Util.getRealm(searchRealm, rawPath);
+
         return JsonResponse.success()
                 .addResult("users-info",
                         userFindService.getUsersByParametersWithoutGrouping(searchRealm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize, null))
                 .build();
     }
 
-    // TODO 2 раза ходит в бд за списком и за кол-вом
     @GET
     @Path("/search")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response getUsersInfo(@QueryParam("search") String search, @QueryParam("searchUser") String searchUser,
+                                 @QueryParam("searchEmail") String searchEmail,
                                  @QueryParam("searchToms") String searchToms, @QueryParam("searchPhone") String searchPhone,
                                  @QueryParam("sortField") String sortField, @QueryParam("sortAsc") boolean sortAsc,
                                  @QueryParam("searchRealm") String searchRealm,
                                  @QueryParam("pageNum") int pageNum, @QueryParam("pageSize") int pageSize) {
-        if (searchRealm == null || searchRealm.isEmpty()) {
-            searchRealm = "user";
-        }
+        String rawPath = session.getContext().getUri().getAbsolutePath().getRawPath();
+
+        searchRealm = Util.getRealm(searchRealm, rawPath);
 
         session.userCache().clear();
 
         log.info("getUsersInfo 1");
 
-        List<UserSearch> users = userFindService.getUsersByParameters(searchRealm, search, searchUser, searchToms, searchPhone, sortField, sortAsc, pageNum, pageSize);
+        List<UserSearch> users = userFindService.getUsersByParameters(searchRealm, search, searchUser, searchEmail, searchToms, searchPhone, sortField, sortAsc, pageNum, pageSize);
 
         log.info("getUsersInfo 2");
 
@@ -102,7 +115,7 @@ public class SearchResource {
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response findUserByAttribute(@QueryParam("phone") String phone, @QueryParam("excludedUserId") String excludedUserId) {
+    public Response findUserByAttribute(@QueryParam("phone") String phone, @QueryParam("excludedUserId") String excludedUserId, @QueryParam("realmId") String realmId) {
         if (Validation.isBlank(phone)) {
             return JsonResponse.success().addResult("foundUserId", null).build();
         }
@@ -114,8 +127,7 @@ public class SearchResource {
                             .build()
             );
         }
-        //fixme сквозной поиск по всем реалмам
-        UserEntity user = userFindService.getUserByPhoneAndExcludedUserId(phone, excludedUserId);
+        UserEntity user = userFindService.getUserByPhoneAndExcludedUserId(realmId, phone, excludedUserId);
         return JsonResponse.success().addResult("foundUserId", user == null ? null : user.getId()).build();
     }
 
@@ -125,21 +137,50 @@ public class SearchResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public List<String> getAccessibleRealms() {
-        return session.realms().getRealms().stream()
-                .filter(o -> {
-                    switch (session.getContext().getRealm().getName()) {
-                        case "master":
-                            return true;
-                        case "user":
-                        case "manager":
-                            if (o.getName().equalsIgnoreCase("user")) {
-                                return true;
-                            }
-                            return false;
-                    }
-                    return false;
-                })
+        final List<RealmModel> realms = session.realms().getRealms();
+        final Set<RoleModel> userRoles = adminAuth.getUser().getRoleMappings();
+        List<String> userViewRoles = new ArrayList<>();
+        for (RealmModel realm : realms) {
+            for (RoleModel role : userRoles) {
+                if (String.format(VIEW_ROLE_PATTERN, realm.getName()).equalsIgnoreCase(role.getName())) {
+                    userViewRoles.add(role.getName());
+                }
+            }
+        }
+        return realms.stream()
+                .filter(getPredicateByViewRoles(userRoles, userViewRoles.isEmpty()))
                 .map(RealmModel::getName)
                 .collect(Collectors.toList());
+    }
+
+    @GET
+    @Path("/required-action")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @NoCache
+    public List<RequiredActionProviderRepresentation> getRequestActionRealms(@QueryParam("realmId") String realmId) {
+        return requiredActionService.getRequiredActions(realmId);
+    }
+
+    private Predicate<RealmModel> getPredicateByViewRoles(Set<RoleModel> roles, boolean userDontHaveViewRoles) {
+        final String currentRealm = session.getContext().getRealm().getName();
+        if (userDontHaveViewRoles) {
+            return realm -> {
+                switch (currentRealm) {
+                    case GeneralRealm.MASTER:
+                        return true;
+                    case GeneralRealm.MANAGER:
+                        return GeneralRealm.REALMS.stream().noneMatch(realm.getName()::equalsIgnoreCase);
+                }
+                return false;
+            };
+        } else {
+            if (GeneralRealm.MASTER.equalsIgnoreCase(currentRealm)) {
+                return realm -> true;
+            } else {
+                return realm -> roles.stream()
+                        .anyMatch(role -> formatViewRole(realm).equalsIgnoreCase(role.getName()));
+            }
+        }
     }
 }

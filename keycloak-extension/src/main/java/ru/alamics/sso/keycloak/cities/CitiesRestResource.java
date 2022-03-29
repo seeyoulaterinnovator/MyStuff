@@ -1,7 +1,6 @@
 package ru.alamics.sso.keycloak.cities;
 
 import org.keycloak.models.KeycloakSession;
-import ru.alamics.sso.keycloak.create.rest.CustomUserResource;
 
 import javax.ws.rs.Path;
 

@@ -17,7 +17,6 @@
 
 package ru.alamics.sso.keycloak.mapper;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.ProtocolMapperModel;
 import org.keycloak.models.UserModel;
@@ -26,12 +25,14 @@ import org.keycloak.protocol.ProtocolMapperUtils;
 import org.keycloak.protocol.oidc.mappers.*;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.IDToken;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserPostService;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -44,8 +45,11 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAccessTokenMapper, OIDCIDTokenMapper, UserInfoTokenMapper {
+    private static final String PROVIDER_ID = "user-post-mapper";
+    private static final String DISPLAY_NAME = "User Post";
+    private static final String HELP_TEXT = "Map a built in user property (email, firstName, lastName) to a token claim.";
+
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<ProviderConfigProperty>();
-    private UserPostService userPostService;
 
     static {
         ProviderConfigProperty property;
@@ -65,8 +69,39 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
         OIDCAttributeMapperHelper.addAttributeConfig(configProperties, UserPropertyMapper.class);
     }
 
-    public static final String PROVIDER_ID = "user-post-mapper";
+    private UserPostService userPostService;
 
+    public static ProtocolMapperModel createClaimMapper(String name,
+                                                        String userAttribute,
+                                                        String tokenClaimName, String claimType,
+                                                        boolean accessToken, boolean idToken) {
+        return OIDCAttributeMapperHelper.createClaimMapper(name, userAttribute,
+                tokenClaimName, claimType,
+                accessToken, idToken,
+                PROVIDER_ID);
+    }
+
+    public static Object getUserModelValue(UserPostResponse userPost, String propertyName) {
+        switch (UserPostPropertyType.valueOf(propertyName)) {
+            case POST_ID:
+                return userPost.getId();
+            case TOMS_ID:
+                return userPost.getTomsId();
+            case DMP_ID:
+                return userPost.getDmpId();
+            case ROLE:
+                return userPost.getUserRole() == null ? "" : userPost.getUserRole().getName();
+            case SYSTEMS:
+                if (userPost.getSystemRoles() == null)
+                    return Collections.EMPTY_LIST;
+
+                return userPost.getSystemRoles().stream()
+                        .filter(o -> o != null && o.getExternalSystem() != null)
+                        .map(o -> o.getExternalSystem().getName())
+                        .collect(Collectors.toList());
+        }
+        return "";
+    }
 
     public List<ProviderConfigProperty> getConfigProperties() {
         return configProperties;
@@ -79,7 +114,7 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
 
     @Override
     public String getDisplayType() {
-        return "User Post";
+        return DISPLAY_NAME;
     }
 
     @Override
@@ -89,7 +124,7 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
 
     @Override
     public String getHelpText() {
-        return "Map a built in user property (email, firstName, lastName) to a token claim.";
+        return HELP_TEXT;
     }
 
     protected void setClaim(IDToken token, ProtocolMapperModel mappingModel, UserSessionModel userSession) {
@@ -102,48 +137,9 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
         OIDCAttributeMapperHelper.mapClaim(token, mappingModel, propertyValue);
     }
 
-    public static ProtocolMapperModel createClaimMapper(String name,
-                                                        String userAttribute,
-                                                        String tokenClaimName, String claimType,
-                                                        boolean accessToken, boolean idToken) {
-        return OIDCAttributeMapperHelper.createClaimMapper(name, userAttribute,
-                tokenClaimName, claimType,
-                accessToken, idToken,
-                PROVIDER_ID);
-    }
-
     private UserPostResponse getUserPost(UserModel user) {
-        List<UserPostResponse> userPost;
-        try {
-            this.userPostService = (UserPostService) new InitialContext().lookup("java:global/domru-sso/" + UserPostService.class.getSimpleName());
-            userPost = userPostService.getUserPost(user.getId());
-        } catch (NamingException | NotFoundException e) {
-            log.error(e.getMessage(), e);
-            return null;
-        }
-        return userPost.stream().filter(o -> o.isSelected()).findFirst()
+        this.userPostService = Lookup.lookup(UserPostService.class);
+        return userPostService.getUserPost(user.getId()).stream().filter(o -> o.isSelected()).findFirst()
                 .orElse(null);
-    }
-
-    public static Object getUserModelValue(UserPostResponse userPost, String propertyName) {
-        switch (UserPostPropertyType.valueOf(propertyName)) {
-            case POST_ID:
-                return userPost.getId();
-            case TOMS_ID:
-                return userPost.getTomsId();
-            case DMP_ID:
-                return userPost.getDmpId();
-            case ROLE:
-                return userPost.getUserRole() == null? "" : userPost.getUserRole().getName();
-            case SYSTEMS:
-                if (userPost.getSystemRoles() == null)
-                    return Collections.EMPTY_LIST;
-
-                return userPost.getSystemRoles().stream()
-                        .filter(o -> o != null && o.getExternalSystem() != null)
-                        .map(o -> o.getExternalSystem().getName())
-                        .collect(Collectors.toList());
-        }
-        return "";
     }
 }

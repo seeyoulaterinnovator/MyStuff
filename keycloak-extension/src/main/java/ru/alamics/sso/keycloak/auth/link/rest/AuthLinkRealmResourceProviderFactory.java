@@ -1,18 +1,16 @@
 package ru.alamics.sso.keycloak.auth.link.rest;
 
-import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.resource.RealmResourceProvider;
-import org.keycloak.services.resource.RealmResourceProviderFactory;
+import ru.alamics.sso.keycloak.rest.BaseResourceProviderFactory;
 
-public class AuthLinkRealmResourceProviderFactory implements RealmResourceProviderFactory {
+public class AuthLinkRealmResourceProviderFactory implements BaseResourceProviderFactory {
 
-    public static final String ID = "auth-link";
+    private static final String PROVIDER_ID = "auth-link";
 
     @Override
     public String getId() {
-        return ID;
+        return PROVIDER_ID;
     }
 
     @Override
@@ -21,15 +19,4 @@ public class AuthLinkRealmResourceProviderFactory implements RealmResourceProvid
         return new AuthLinkRealmResourceProvider(session);
     }
 
-    @Override
-    public void init(Config.Scope config) {
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-    }
-
-    @Override
-    public void close() {
-    }
 }

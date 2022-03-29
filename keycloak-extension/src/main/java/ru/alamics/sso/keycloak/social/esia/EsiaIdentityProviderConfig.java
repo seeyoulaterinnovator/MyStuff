@@ -8,12 +8,13 @@ import ru.alamics.sso.property.ApplicationProperties;
 
 public class EsiaIdentityProviderConfig extends OAuth2IdentityProviderConfig {
 
-    private ApplicationProperties properties;
     private final static String ESIA_DOMAIN_URL = "esia.domain.url";
+
+    private ApplicationProperties properties;
 
     public EsiaIdentityProviderConfig(IdentityProviderModel model) {
         super(model);
-        properties = (ApplicationProperties) Lookup.lookup(ApplicationProperties.class);
+        properties = Lookup.lookup(ApplicationProperties.class);
     }
 
     public String getEsiaDomainUrl() {

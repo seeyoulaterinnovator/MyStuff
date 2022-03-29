@@ -5,6 +5,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.services.resources.LoginActionsService;
 import org.keycloak.services.resources.RealmsResource;
 import org.keycloak.theme.Theme;
+import ru.alamics.sso.util.Util;
 
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
@@ -12,9 +13,9 @@ import java.net.URI;
 import static ru.alamics.sso.registration.model.UserConstants.I_FRAME;
 
 public class SsoUrlBean extends UrlBean {
-    private URI baseURI;
-    private RealmModel realm;
-    private boolean isFrame;
+    private final URI baseURI;
+    private final RealmModel realm;
+    private final boolean isFrame;
 
     public SsoUrlBean(RealmModel realm, Theme theme, URI baseURI, URI actionUri, boolean isFrame) {
         super(realm, theme, baseURI, actionUri);
@@ -32,7 +33,7 @@ public class SsoUrlBean extends UrlBean {
 
         if (isFrame) {
             //Установка отметки, что вызов происходит в iframe. Необходимо при переходах между вкладками логина и регистрации внутри iframe
-            builder.queryParam(I_FRAME, "1");
+            builder.queryParam(I_FRAME, Util.TRUE_STR);
         }
 
         return builder.build(realm.getName())

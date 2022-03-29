@@ -8,6 +8,8 @@ import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.theme.FreeMarkerUtil;
 
 public class SsoFreeMarkerFormsFactory implements LoginFormsProviderFactory {
+    private static final String PROVIDER_ID = "freemarker";
+
     private FreeMarkerUtil freeMarker;
 
     @Override
@@ -24,6 +26,7 @@ public class SsoFreeMarkerFormsFactory implements LoginFormsProviderFactory {
     public void postInit(KeycloakSessionFactory factory) {
 
     }
+
     @Override
     public void close() {
         freeMarker = null;
@@ -31,7 +34,7 @@ public class SsoFreeMarkerFormsFactory implements LoginFormsProviderFactory {
 
     @Override
     public String getId() {
-        return "freemarker";
+        return PROVIDER_ID;
     }
 
 }

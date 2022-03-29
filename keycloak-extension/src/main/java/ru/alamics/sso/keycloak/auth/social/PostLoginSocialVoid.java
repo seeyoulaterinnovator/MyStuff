@@ -1,89 +1,57 @@
 package ru.alamics.sso.keycloak.auth.social;
 
-import org.keycloak.Config;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
-import org.keycloak.authentication.AuthenticatorFactory;
-import org.keycloak.models.*;
-import org.keycloak.provider.ProviderConfigProperty;
-
-import java.util.List;
+import org.keycloak.models.AuthenticationExecutionModel;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
+import ru.alamics.sso.keycloak.auth.AbstractAuthenticatorFactory;
+import ru.alamics.sso.util.Util;
 
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 
-public class PostLoginSocialVoid implements Authenticator, AuthenticatorFactory {
+public class PostLoginSocialVoid extends AbstractAuthenticatorFactory implements Authenticator {
 
-    public static final String PROVIDER_ID = "post-login-social-void";
+    private static final String PROVIDER_ID = "post-login-social-void";
+    private static final String DISPLAY_NAME = "Post Login Social Void";
+    private static final String HELP_TEXT = "";
 
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
             AuthenticationExecutionModel.Requirement.DISABLED
     };
+
     @Override
-    public String getDisplayType () {
-        return "Post Login Social Void";
+    public String getDisplayType() {
+        return DISPLAY_NAME;
     }
 
     @Override
-    public String getReferenceCategory () {
-        return null;
-    }
-
-    @Override
-    public boolean isConfigurable () {
-        return false;
-    }
-
-    @Override
-    public AuthenticationExecutionModel.Requirement[] getRequirementChoices () {
+    public AuthenticationExecutionModel.Requirement[] getRequirementChoices() {
         return REQUIREMENT_CHOICES;
     }
 
     @Override
-    public boolean isUserSetupAllowed () {
-        return false;
+    public String getHelpText() {
+        return HELP_TEXT;
     }
 
     @Override
-    public String getHelpText () {
-        return "";
-    }
-
-    @Override
-    public List<ProviderConfigProperty> getConfigProperties () {
-        return null;
-    }
-
-    @Override
-    public Authenticator create (KeycloakSession session) {
+    public Authenticator create(KeycloakSession session) {
 
         return this;
     }
 
     @Override
-    public void init (Config.Scope config) {
-
-    }
-
-    @Override
-    public void postInit (KeycloakSessionFactory factory) {
-
-    }
-
-    @Override
-    public void close () {
-
-    }
-
-    @Override
-    public String getId () {
+    public String getId() {
         return PROVIDER_ID;
     }
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
 
-        context.getAuthenticationSession().setAuthNote(AUTH_FORM_SUCCESS, "1");
+        context.getAuthenticationSession().setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
         context.success();
     }
 

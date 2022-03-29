@@ -1,14 +1,22 @@
 <style>
     .content {
-        color: #000000cc;
+        width: 100%;
+        color: rgb(0, 0, 0);
         font-size: 18px;
-        line-height: normal;
+        line-height: 24px;
         margin: 0;
+    }
+
+    .message_link {
+        padding-left: 8px;
+        font-size: 12px;
+        line-height: 16px;
     }
 
     .content__heading {
         font-weight: bold;
         font-size: 18px;
+        margin-bottom: 18px;
     }
 
     .content__additional {
@@ -18,17 +26,12 @@
         font-style: italic;
     }
 
-    .content p {
-        padding-top: 20px;
-    }
-
     .content a {
         display: block;
         overflow: hidden;
         text-decoration-line: underline;
         text-overflow: ellipsis;
         font-size: 20px;
-        color: #6688c9;
 
         /* not working in Yandex Mail */
         overflow-wrap: normal;
@@ -41,13 +44,13 @@
 
     .mail-wrapper {
         width: 100%;
-        background-color: #f3f3f3;
+        background-color: #FFFFFF;
         text-align: center;
     }
 
     .mail-container {
         max-width: 600px;
-        padding: 32px 24px 32px 32px;
+        padding: 40px 24px 40px 24px;
         margin: 0 auto;
         box-sizing: border-box;
         font-family: Arial, sans-serif;
@@ -56,8 +59,29 @@
         text-align: left;
     }
 
-    .mail-text--bold {
+    .mail-text-title {
+        margin-top: 40px;
+        margin-bottom: 16px;
         font-weight: bold;
+    }
+
+    .messegers {
+        margin-top: 16px;
+    }
+
+    .messeger {
+        vertical-align: middle;
+    }
+
+    .message_block {
+        padding-bottom: 9px;
+    }
+
+    .mail-text--translucent {
+        margin-top: 8px;
+        font-size: 12px;
+        line-height: 16px;
+        color: rgba(0, 0, 0, 0.5);
     }
 
     .mail-container__header {
@@ -66,12 +90,18 @@
     }
 
     .logo {
-        height: 30px;
-        max-height: 30px;
+        height: 40px;
+        max-height: 40px;
         width: auto;
     }
 
+    .hr_color {
+        background: #D5DDEB;
+        margin-bottom: 24px;
+    }
+
     .contacts {
+        color: rgb(43, 83, 155);
         text-decoration: none;
     }
 
@@ -83,11 +113,9 @@
     }
 
     .contact__number {
-        font-size: 16px;
+        font-size: 20px;
         line-height: 20px;
         letter-spacing: -1px;
-        opacity: 0.5;
-        color: #000000;
         padding-top: 4px;
         height: 24px;
         padding-bottom: 2px;
@@ -101,7 +129,15 @@
     }
 
     .mail-text--copyright {
-        padding-top: 31px;
+    }
+
+    .system {
+        font-size: 12px;
+        line-height: 16px;
+    }
+
+    .system_link {
+        color: rgb(43, 83, 155);
     }
 
     .mail-text--additional {
@@ -119,7 +155,6 @@
     .mail-text--light-gray {
         color: #5050504d;
         font-size: 12px;
-        line-height: 25px;
     }
 
     @media all and (min-width: 420px) {
@@ -128,6 +163,7 @@
             max-height: 48px;
             height: 48px;
         }
+
         .contact__number {
             padding-left: 5px;
             font-size: 20px;

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.alamics.sso.jpa.entity.common.SettingType;
 
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
@@ -23,4 +24,5 @@ public class SettingsDto implements Serializable {
     private String desc;
     private String realmId;
     private TimeUnit unit;
+    private SettingType type;
 }

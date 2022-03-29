@@ -1,5 +1,6 @@
 package ru.alamics.sso.remote.rias;
 
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -7,6 +8,7 @@ import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.port.RiasApiService;
+import ru.alamics.sso.remote.rias.model.RiasCheckStatus;
 import ru.alamics.sso.remote.rias.model.RiasData;
 import ru.alamics.sso.util.Util;
 
@@ -17,14 +19,13 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Stateless(name = "RiasApiService")
+@NoArgsConstructor
 public class RiasUserExistsCheckImpl implements RiasApiService {
     private static final String RIAS_API_URI = "riasApi.uri";
     private static final String CLIENT_NAME = "riasApi.client.name";
@@ -41,14 +42,6 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
 
     private URI uri;
 
-    @PostConstruct
-    private void init() {
-        uri = URI.create(properties.getProperty(RIAS_API_URI));
-    }
-
-    public RiasUserExistsCheckImpl() {
-    }
-
     public RiasUserExistsCheckImpl(URI uri) {
         this.uri = uri;
     }
@@ -57,6 +50,11 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
 
         this.properties = properties;
         this.uri = uri;
+    }
+
+    @PostConstruct
+    private void init() {
+        uri = URI.create(properties.getProperty(RIAS_API_URI));
     }
 
     public boolean checkParam(String param) throws RiasCheckException {
@@ -73,7 +71,6 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
         String valuesV = Util.encodeUTF8(param + "," + timestamp + "," + properties.getProperty(CLIENT_NAME) + "," + secretHash);
 
 
-        // TODO Entity<RiasData> => response.close() ?
         RiasData response;
 
         try {
@@ -88,20 +85,20 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
             throw new RiasCheckException(wae);
         }
 
-        if (response.getStatus() == 0)
+        if (response.getStatus() == RiasCheckStatus.DATA_NOT_FOUND)
             throw new RiasCheckException(response.getMessages().getCode() + ": " + response.getMessages().getText());
 
-        else if (response.getStatus() == 1)
-            if (response.getResult().getCheckProfileData() == 0)
+        else if (response.getStatus() == RiasCheckStatus.DATA_FOUND)
+            if (response.getResult().getCheckProfileData() == RiasCheckStatus.DATA_NOT_FOUND)
                 return false;
 
-            else if (response.getResult().getCheckProfileData() == 1)
+            else if (response.getResult().getCheckProfileData() == RiasCheckStatus.DATA_FOUND)
                 return true;
 
-            else if (response.getResult().getCheckProfileData() == -1)
+            else if (response.getResult().getCheckProfileData() == RiasCheckStatus.EMPTY_DATA_FOR_CHECK)
                 throw new RiasCheckException("Checked data is empty: check_profile_data = " + response.getResult().getCheckProfileData());
 
-            else if (response.getResult().getCheckProfileData() == -2)
+            else if (response.getResult().getCheckProfileData() == RiasCheckStatus.INVALID_DATA_FOR_CHECK)
                 throw new RiasCheckException("Checked data is invalid: check_profile_data = " + response.getResult().getCheckProfileData());
 
             else

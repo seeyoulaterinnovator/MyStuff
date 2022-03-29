@@ -91,6 +91,16 @@
                 <kc-tooltip>{{:: 'hide-on-login-page.tooltip' | translate}}</kc-tooltip>
             </div>
             <div class="form-group">
+                <label class="col-md-2 control-label" for="showInSystems">Show the Iframe to systems</label>
+                <div class="col-md-6">
+                    <select data-placeholder="Add system" id="showInSystems" ng-change="changedValue(system)"
+                            multiple ng-model="system" ui-select2>
+                        <option ng-repeat="systemRole in systemRoles">{{systemRole.externalSystem.name}}</option>
+                    </select>
+                </div>
+                <kc-tooltip>Select the client for which we will display social media icons</kc-tooltip>
+            </div>
+            <div class="form-group">
                 <label class="col-md-2 control-label" for="guiOrder">{{:: 'gui-order' | translate}}</label>
                 <div class="col-md-6">
                     <input class="form-control" id="guiOrder" type="text" ng-model="identityProvider.config.guiOrder">
