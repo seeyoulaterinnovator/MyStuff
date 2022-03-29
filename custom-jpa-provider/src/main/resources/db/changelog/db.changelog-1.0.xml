@@ -1617,13 +1617,6 @@
         </sql>
     </changeSet>
 
-    <changeSet id="88" author="petrov-ny">
-        <sql>
-            INSERT INTO REALM_ATTRIBUTE (NAME, VALUE, REALM_ID) VALUE ('realmInSchedule', 'true', 'user');
-            INSERT INTO REALM_ATTRIBUTE (NAME, VALUE, REALM_ID) VALUE ('realmInSchedule', 'true', 'manager');
-        </sql>
-    </changeSet>
-
     <changeSet id="89" author="petrov-ny">
         <sql>
             <![CDATA[
@@ -1766,13 +1759,6 @@
         <sql>
             INSERT INTO MESSENGER_TYPE (ID, NAME, LABEL) VALUES ('cf521eb6-83f6-11ec-a8a3-0242ac120002', 'VIBER', 'Сообщение на Viber');
             INSERT INTO MESSENGER_TYPE (ID, NAME, LABEL) VALUES ('d3fa614e-83f6-11ec-a8a3-0242ac120002', 'SMS', 'Сообщение на телефон');
-        </sql>
-    </changeSet>
-
-    <changeSet id="96" author="petrov-ny">
-        <sql>
-            INSERT INTO REALM_SMTP_CONFIG (REALM_ID, VALUE, NAME) VALUES ('user', 'VIBER,SMS', 'messenger');
-            INSERT INTO REALM_SMTP_CONFIG (REALM_ID, VALUE, NAME) VALUES ('S-TELECOM', 'SMS', 'messenger');
         </sql>
     </changeSet>
 
