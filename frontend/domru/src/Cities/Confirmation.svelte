@@ -1,15 +1,37 @@
 <script>
   import Cookie from 'js-cookie';
-  import { status, city, showModal } from './stores.js';
-  import { STATUS } from './constants.js';
+  import {allCities, city, showModal, status} from './stores.js';
+  import {STATUS} from './constants.js';
+  import {onMount} from 'svelte';
+  import axios from 'axios';
+
+  onMount(() => {
+    const url = '/auth/realms/user/cities';
+
+    axios
+      .get(url)
+      .then(response => {
+        const respCities = response.data.results.cities || []; //citiesJson.results.cities || [];
+        const replacedCities = respCities.map(city => city.name === 'Холдинг' ? {
+          ...city,
+          name: 'Федеральный Клиент',
+        } : city);
+        allCities.set(replacedCities);
+      })
+      .catch(error => console.error('Error:', error));
+  });
 
   function handleConfirm() {
+    console.log($allCities)
+    const cityDomain = $allCities.find(obj => obj.name === $city).city;
+    Cookie.set('city-domain', cityDomain, {sameSite: 'None', secure: document.location.protocol === 'https:'});
     Cookie.set('VISITED', '1', {sameSite: 'None', secure: document.location.protocol === 'https:'});
     showModal.set(false);
     status.set(STATUS.CONFIRMED);
   }
 
   function handleReject() {
+    console.log(allCities)
     Cookie.set('VISITED', '1', {sameSite: 'None', secure: document.location.protocol === 'https:'});
     status.set(STATUS.SELECTING);
   }
