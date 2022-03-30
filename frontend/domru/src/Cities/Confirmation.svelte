@@ -1,7 +1,25 @@
 <script>
   import Cookie from 'js-cookie';
-  import { status, city, showModal, allCities } from './stores.js';
-  import { STATUS } from './constants.js';
+  import {allCities, city, showModal, status} from './stores.js';
+  import {STATUS} from './constants.js';
+  import {onMount} from 'svelte';
+  import axios from 'axios';
+
+  onMount(() => {
+    const url = '/auth/realms/user/cities';
+
+    axios
+      .get(url)
+      .then(response => {
+        const respCities = response.data.results.cities || []; //citiesJson.results.cities || [];
+        const replacedCities = respCities.map(city => city.name === 'Холдинг' ? {
+          ...city,
+          name: 'Федеральный Клиент',
+        } : city);
+        allCities.set(replacedCities);
+      })
+      .catch(error => console.error('Error:', error));
+  });
 
   function handleConfirm() {
     console.log($allCities)
