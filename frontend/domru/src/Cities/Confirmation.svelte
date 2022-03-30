@@ -1,9 +1,11 @@
 <script>
   import Cookie from 'js-cookie';
-  import { status, city, showModal } from './stores.js';
+  import { status, city, showModal, allCities } from './stores.js';
   import { STATUS } from './constants.js';
 
   function handleConfirm() {
+    const cityDomain = $allCities.find(obj => obj.name === $city).city;
+    Cookie.set('city-domain', cityDomain, {sameSite: 'None', secure: document.location.protocol === 'https:'});
     Cookie.set('VISITED', '1', {sameSite: 'None', secure: document.location.protocol === 'https:'});
     showModal.set(false);
     status.set(STATUS.CONFIRMED);
