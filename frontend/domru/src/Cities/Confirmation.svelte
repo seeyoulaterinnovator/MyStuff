@@ -4,6 +4,7 @@
   import { STATUS } from './constants.js';
 
   function handleConfirm() {
+    console.log($allCities)
     const cityDomain = $allCities.find(obj => obj.name === $city).city;
     Cookie.set('city-domain', cityDomain, {sameSite: 'None', secure: document.location.protocol === 'https:'});
     Cookie.set('VISITED', '1', {sameSite: 'None', secure: document.location.protocol === 'https:'});
@@ -12,6 +13,7 @@
   }
 
   function handleReject() {
+    console.log(allCities)
     Cookie.set('VISITED', '1', {sameSite: 'None', secure: document.location.protocol === 'https:'});
     status.set(STATUS.SELECTING);
   }
