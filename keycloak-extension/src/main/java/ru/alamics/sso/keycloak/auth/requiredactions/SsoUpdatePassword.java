@@ -98,17 +98,19 @@ public class SsoUpdatePassword extends UpdatePassword {
         }
 
         ClientModel client = session.getContext().getClient();
-        String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, context.getRealm().getId());
 
-        if (client == null){
-            client = session.clientStorageManager().getClientByClientId(defaultClientRealm, currentAuthenticationSession.getRealm());
-        }
-        if (client == null)
-            client = session.clientStorageManager().getClientByClientId(DEFAULT_CLIENT_ID, currentAuthenticationSession.getRealm());
         if (client == null) {
-            log.error("Redirect after UPDATE_PASSWORD is not setup: clientId={} not found", defaultClientRealm);
-            return;
+            String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, context.getRealm().getId());
+            client = session.clientStorageManager().getClientByClientId(defaultClientRealm, currentAuthenticationSession.getRealm());
+            if (client == null) {
+                client = session.clientStorageManager().getClientByClientId(DEFAULT_CLIENT_ID, currentAuthenticationSession.getRealm());
+                if (client == null) {
+                    log.error("Redirect after UPDATE_PASSWORD is not setup: clientId={} not found", defaultClientRealm);
+                    return;
+                }
+            }
         }
+
 
         //т.к. при старте новой сессии задается этот параметр = true, редирект после прохожения всего флоу не происходит
         currentAuthenticationSession.setAuthNote(AuthenticationManager.END_AFTER_REQUIRED_ACTIONS, null);
