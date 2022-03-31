@@ -39,19 +39,4 @@ public class SsoUrlBean extends UrlBean {
         return builder.build(realm.getName())
                 .toString();
     }
-
-    @Override
-    public String getLoginUrl() {
-        UriBuilder builder = UriBuilder.fromUri(baseURI)
-                .path(RealmsResource.class)
-                .path(RealmsResource.class, "getLoginActionsService")
-                .path(LoginActionsService.class, "authenticate");
-
-        if (isFrame) {
-            builder.queryParam(I_FRAME, Util.TRUE_STR);
-        }
-
-        return builder.build(realm.getName())
-                .toString();
-    }
 }
