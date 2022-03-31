@@ -121,7 +121,7 @@ public class SsoUpdatePassword extends UpdatePassword {
         final ClientService clientService = Lookup.lookup(ClientService.class);
 
         if (clientService == null) {
-            log.error("ClientService failed lookup. Redirect by clientId={} is not possible", defaultClientRealm);
+            log.error("ClientService failed lookup. Redirect by clientId={} is not possible", client.getClientId());
             return;
         }
 
