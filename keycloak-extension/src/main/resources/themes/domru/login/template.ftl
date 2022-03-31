@@ -138,7 +138,7 @@
         </#if>
 
         <div id="cities-modal"></div>
-        <div id="message-modal" data-login-url="${url.loginRestartFlowUrl}"></div>
+        <div id="message-modal" data-login-url="${url.loginUrl}"></div>
     </#if>
 
     <#if properties.scripts?has_content>
@@ -179,7 +179,6 @@
                     document.getElementById('content').style.padding = '0';
                     document.getElementById('page-header').style.display = 'none';
                     document.getElementById('page-footer').style.display = 'none';
-                    window.clearInterval(intervalID);
                 }
             });
         }
