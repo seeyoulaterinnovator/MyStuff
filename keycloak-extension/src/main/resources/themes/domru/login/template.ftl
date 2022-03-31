@@ -138,7 +138,7 @@
         </#if>
 
         <div id="cities-modal"></div>
-        <div id="message-modal" data-login-url="${url.loginRestartFlowUrl}"></div>
+        <div id="message-modal" data-login-url="${url.loginUrl}"></div>
     </#if>
 
     <#if properties.scripts?has_content>
