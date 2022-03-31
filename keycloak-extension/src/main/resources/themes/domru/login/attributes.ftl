@@ -137,11 +137,11 @@
     </script>
 
     <script>
-        var actionIsEmpty = ${actionIsEmpty?c};
         var clientIsB2B = ${clientIsB2B?c};
+        var actionIsNull = ${actionIsNull?c};
 
         if (clientIsB2B) {
-            if (actionIsEmpty) {
+            if (actionIsNull) {
                 window.onunload = function () {
                     window.parent.postMessage('post-selected', '*');
                     console.log("Отправлено тк B2B и Action пуст");
