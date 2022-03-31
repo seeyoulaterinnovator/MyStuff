@@ -17,6 +17,7 @@ import org.keycloak.services.validation.Validation;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
@@ -97,6 +98,17 @@ public class SsoUpdatePassword extends UpdatePassword {
         }
 
         ClientModel client = session.getContext().getClient();
+        String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, context.getRealm().getId());
+
+        if (client == null){
+            client = session.clientStorageManager().getClientByClientId(defaultClientRealm, currentAuthenticationSession.getRealm());
+        }
+        if (client == null)
+            client = session.clientStorageManager().getClientByClientId(DEFAULT_CLIENT_ID, currentAuthenticationSession.getRealm());
+        if (client == null) {
+            log.error("Redirect after UPDATE_PASSWORD is not setup: clientId={} not found", defaultClientRealm);
+            return;
+        }
 
         //т.к. при старте новой сессии задается этот параметр = true, редирект после прохожения всего флоу не происходит
         currentAuthenticationSession.setAuthNote(AuthenticationManager.END_AFTER_REQUIRED_ACTIONS, null);
@@ -105,10 +117,11 @@ public class SsoUpdatePassword extends UpdatePassword {
 //        currentAuthenticationSession.setAction(AuthenticationSessionModel.Action.AUTHENTICATE.name());
         currentAuthenticationSession.setProtocol(OIDCLoginProtocol.LOGIN_PROTOCOL);
 
+
         final ClientService clientService = Lookup.lookup(ClientService.class);
 
         if (clientService == null) {
-            log.error("ClientService failed lookup. Redirect by clientId={} is not possible", client.getClientId());
+            log.error("ClientService failed lookup. Redirect by clientId={} is not possible", defaultClientRealm);
             return;
         }
 
