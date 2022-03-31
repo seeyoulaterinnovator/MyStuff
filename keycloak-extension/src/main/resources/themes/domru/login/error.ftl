@@ -19,6 +19,8 @@
             <@errorPage.code404_auth_or_reset backHref="${redirectUrl}" backMessage=backMessage />
         <#elseif message.summary?contains('Ссылка устарела. Для совершения дальнейших действий необходимо авторизоваться или воспользоваться функцией "Забыли пароль?"')>
             <@errorPage.code404_tech_support backHref="${redirectUrl}" backMessage=backMessage />
+        <#elseif message.summary?contains('Произошла ошибка. Пожалуйста, войдите в систему снова через ваше приложение.')>
+            <@errorPage.code400 backHref="${redirectUrl}" backMessage=backMessage iframe="${iframe?c}"/>
         <#else>
             <@errorPage.codeAll backHref="${url.loginUrl}" backMessage=backMessage />
         </#if>
