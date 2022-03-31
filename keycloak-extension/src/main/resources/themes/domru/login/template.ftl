@@ -179,7 +179,6 @@
                     document.getElementById('content').style.padding = '0';
                     document.getElementById('page-header').style.display = 'none';
                     document.getElementById('page-footer').style.display = 'none';
-                    window.clearInterval(intervalID);
                 }
             });
         }
