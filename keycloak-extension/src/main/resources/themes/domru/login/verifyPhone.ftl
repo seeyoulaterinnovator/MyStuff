@@ -61,15 +61,15 @@
             </div>
         </form>
     </#if>
-                <script>
-                    var actionIsEmpty = ${actionIsEmpty?c};
-                    var clientIsB2B = ${clientIsB2B?c};
+        <script>
+            var actionIsEmpty = ${actionIsEmpty?c};
+            var clientIsB2B = ${clientIsB2B?c};
 
-                    if (clientIsB2B && actionIsEmpty) {
-                        window.onunload = function () {
-                            window.parent.postMessage('post-selected', '*');
-                            console.log("Отправлено тк B2B и Action пуст");
-                        };
-                    }
-                </script>
+            if (clientIsB2B == "true" && actionIsEmpty == "true") {
+                window.onunload = function () {
+                    window.parent.postMessage('post-selected', '*');
+                    console.log("Отправлено тк B2B и Action пуст");
+                };
+            }
+        </script>
 </@layout.registrationLayout>
