@@ -140,8 +140,8 @@
         var clientIsB2B = ${clientIsB2B?c};
         var actionIsNull = ${actionIsNull?c};
 
-        if (clientIsB2B) {
-            if (actionIsNull) {
+        if (clientIsB2B === true) {
+            if (actionIsNull === true) {
                 window.onunload = function () {
                     window.parent.postMessage('post-selected', '*');
                     console.log("Отправлено тк B2B и Action пуст");
