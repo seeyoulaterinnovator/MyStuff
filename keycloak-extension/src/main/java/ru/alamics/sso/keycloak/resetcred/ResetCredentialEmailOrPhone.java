@@ -32,6 +32,8 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
 
     private static final String RESET_CREDENTIALS_REDIRECT_URL = "reset.credentials.redirect.url";
     private final static String RESET_CRED_TO_RIAS_FORM = "reset-cred-to-rias.ftl";
+    private final static String CLIENT_ID_B2B = "b2b";
+    private final static String CLIENT_ID_DMP_KC_SIT = "dmp-kc-sit";
 
     private final KeycloakSession session;
     private final RiasApiService riasApiService;
@@ -113,7 +115,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
 
         String clientId = context.getSession().getContext().getClient().getClientId();
 
-        if ("b2b".equals(clientId) || "dmp-kc-sit".equals(clientId)){
+            if (CLIENT_ID_B2B.equals(clientId) || CLIENT_ID_DMP_KC_SIT.equals(clientId)){
             return false;
         }
 
