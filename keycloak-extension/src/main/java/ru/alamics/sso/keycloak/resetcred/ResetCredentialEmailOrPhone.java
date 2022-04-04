@@ -111,6 +111,12 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
         String username = authenticationSession.getAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME);
 
+        String clientId = context.getSession().getContext().getClient().getClientId();
+
+        if ("b2b".equals(clientId) || "dmp-kc-sit".equals(clientId)){
+            return false;
+        }
+
         try {
             if (username == null)
                 return false;

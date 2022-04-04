@@ -80,6 +80,8 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
                     .request(MediaType.APPLICATION_XML)
                     .get(RiasData.class);
 
+            log.info("login response: " + response);
+
         } catch (ProcessingException | WebApplicationException wae) {
             throw new RiasCheckException(wae);
         }
