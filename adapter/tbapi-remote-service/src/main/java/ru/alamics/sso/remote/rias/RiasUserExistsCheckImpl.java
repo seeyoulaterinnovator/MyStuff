@@ -70,6 +70,9 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
         String namesV = Util.encodeUTF8("data_for_check$c,timestamp,client,client_secret");
         String valuesV = Util.encodeUTF8(param + "," + timestamp + "," + properties.getProperty(CLIENT_NAME) + "," + secretHash);
 
+        log.info("paramsV = " + paramsV);
+        log.info("namesV = " + namesV);
+        log.info("valuesV = " + valuesV);
 
         RiasData response;
 
@@ -80,6 +83,8 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
                     .queryParam("param_values_arr$c", valuesV)
                     .request(MediaType.APPLICATION_XML)
                     .get(RiasData.class);
+
+            log.info("response result {}, status {}, message {}", response.getResult(), response.getStatus(), response.getMessages());
 
         } catch (ProcessingException | WebApplicationException wae) {
             throw new RiasCheckException(wae);
