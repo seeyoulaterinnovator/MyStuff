@@ -74,7 +74,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
                 context.getHttpRequest().getDecodedFormParameters().replace("username", Collections.singletonList(userFind.getEmail()));
             }
         }
-        if (user == null && userFind == null && checkRias(context)) {
+        if (user == null && userFind == null && !checkRias(context)) {
             context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT_ERROR));
             return;
         }
