@@ -18,7 +18,7 @@
                 <div class="field field__container field--required mb-3 sm:mb-4 md:w-full">
                     <input class="hidden w-0 h-0" id="domain-login" name="city">
                     <#if withCity?has_content && withCity == "TRUE">
-                        <input class="hidden w-0 h-0" name="withCity" value="TRUE">
+                        <input id = "withCity" class="hidden w-0 h-0" name="withCity" value="TRUE">
                     </#if>
                     <#if usernameEditDisabled??>
                         <input name="username" id="username" class="field__input" label="${usernameOrEmailPlaceholder}"

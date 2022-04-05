@@ -10,8 +10,5 @@
     <#else>
       ${kcSanitize(msg(emailLoginHtml, userName))?no_esc}
     </#if>
-    <#if accountLink??>
-      ${kcSanitize(msg(linkPassword, accountLink, expTimePass))?no_esc}
-    </#if>
   </#if>
 </@template.layout>

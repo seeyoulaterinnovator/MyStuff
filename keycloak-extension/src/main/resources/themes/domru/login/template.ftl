@@ -17,10 +17,10 @@
             </#list>
         </#if>
         <title>${msg("loginTitle",(realm.displayName!''))}</title>
-
-        <#if environment == "stage" || environment == "production" >
-            <#include "templates/google-tag-manager-head.html">
-        </#if>
+<#--        Убрал гугл аналитику, но оставил может еще понадобиться-->
+<#--        <#if environment == "stage" || environment == "production" >-->
+<#--            <#include "templates/google-tag-manager-head.html">-->
+<#--        </#if>-->
 
         <#if properties.styles?has_content>
             <#list properties.styles?split(' ') as style>
@@ -35,9 +35,10 @@
         </#if>
         <#include "templates/sth-went-wrong.html">
     <#else>
-        <#if environment == "stage" || environment == "production" >
-            <#include "templates/google-tag-manager-body.html">
-        </#if>
+<#--        Убрал гугл аналитику, но оставил может еще понадобиться-->
+<#--        <#if environment == "stage" || environment == "production" >-->
+<#--            <#include "templates/google-tag-manager-body.html">-->
+<#--        </#if>-->
 
         <#if iframe == false>
             <@header.defaultTemplate withCity=displayCity></@header.defaultTemplate>
@@ -137,7 +138,7 @@
         </#if>
 
         <div id="cities-modal"></div>
-        <div id="message-modal" data-login-url="${url.loginRestartFlowUrl}"></div>
+        <div id="message-modal" data-login-url="${url.loginUrl}"></div>
     </#if>
 
     <#if properties.scripts?has_content>
@@ -178,7 +179,6 @@
                     document.getElementById('content').style.padding = '0';
                     document.getElementById('page-header').style.display = 'none';
                     document.getElementById('page-footer').style.display = 'none';
-                    window.clearInterval(intervalID);
                 }
             });
         }
