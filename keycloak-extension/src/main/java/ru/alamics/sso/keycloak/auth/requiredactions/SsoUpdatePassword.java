@@ -97,15 +97,20 @@ public class SsoUpdatePassword extends UpdatePassword {
             settingsService = Lookup.lookup(SettingsService.class);
         }
 
-        String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, context.getRealm().getId());
+        ClientModel client = session.getContext().getClient();
 
-        ClientModel client = session.clientStorageManager().getClientByClientId(defaultClientRealm, currentAuthenticationSession.getRealm());
-        if (client == null)
-            client = session.clientStorageManager().getClientByClientId(DEFAULT_CLIENT_ID, currentAuthenticationSession.getRealm());
         if (client == null) {
-            log.error("Redirect after UPDATE_PASSWORD is not setup: clientId={} not found", defaultClientRealm);
-            return;
+            String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, context.getRealm().getId());
+            client = session.clientStorageManager().getClientByClientId(defaultClientRealm, currentAuthenticationSession.getRealm());
+            if (client == null) {
+                client = session.clientStorageManager().getClientByClientId(DEFAULT_CLIENT_ID, currentAuthenticationSession.getRealm());
+                if (client == null) {
+                    log.error("Redirect after UPDATE_PASSWORD is not setup: clientId={} not found", defaultClientRealm);
+                    return;
+                }
+            }
         }
+
 
         //т.к. при старте новой сессии задается этот параметр = true, редирект после прохожения всего флоу не происходит
         currentAuthenticationSession.setAuthNote(AuthenticationManager.END_AFTER_REQUIRED_ACTIONS, null);
@@ -118,7 +123,7 @@ public class SsoUpdatePassword extends UpdatePassword {
         final ClientService clientService = Lookup.lookup(ClientService.class);
 
         if (clientService == null) {
-            log.error("ClientService failed lookup. Redirect by clientId={} is not possible", defaultClientRealm);
+            log.error("ClientService failed lookup. Redirect by clientId={} is not possible", client.getClientId());
             return;
         }
 

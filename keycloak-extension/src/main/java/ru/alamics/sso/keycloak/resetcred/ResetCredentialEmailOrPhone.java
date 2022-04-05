@@ -32,6 +32,8 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
 
     private static final String RESET_CREDENTIALS_REDIRECT_URL = "reset.credentials.redirect.url";
     private final static String RESET_CRED_TO_RIAS_FORM = "reset-cred-to-rias.ftl";
+    private final static String CLIENT_ID_B2B = "b2b";
+    private final static String CLIENT_ID_DMP_KC_SIT = "dmp-kc-sit";
 
     private final KeycloakSession session;
     private final RiasApiService riasApiService;
@@ -75,6 +77,10 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
             }
         }
         if (user == null && userFind == null && checkRias(context)) {
+            return;
+        }
+
+        if (user == null && userFind == null && !checkRias(context)) {
             context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT_ERROR));
             return;
         }
@@ -106,6 +112,12 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
     private boolean checkRias(AuthenticationFlowContext context) {
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
         String username = authenticationSession.getAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME);
+
+        String clientId = context.getSession().getContext().getClient().getClientId();
+
+            if (CLIENT_ID_B2B.equals(clientId) || CLIENT_ID_DMP_KC_SIT.equals(clientId)){
+            return false;
+        }
 
         try {
             if (username == null)

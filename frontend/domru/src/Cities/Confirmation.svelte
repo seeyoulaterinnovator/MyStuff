@@ -26,6 +26,7 @@
     const cityDomain = $allCities.find(obj => obj.name === $city).city;
     Cookie.set('city-domain', cityDomain, {sameSite: 'None', secure: document.location.protocol === 'https:'});
     Cookie.set('VISITED', '1', {sameSite: 'None', secure: document.location.protocol === 'https:'});
+    Cookie.set('changeCity', '1', {sameSite: 'None', secure: document.location.protocol === 'https:'});
     showModal.set(false);
     status.set(STATUS.CONFIRMED);
   }
@@ -33,6 +34,7 @@
   function handleReject() {
     console.log(allCities)
     Cookie.set('VISITED', '1', {sameSite: 'None', secure: document.location.protocol === 'https:'});
+    Cookie.set('changeCity', '1', {sameSite: 'None', secure: document.location.protocol === 'https:'});
     status.set(STATUS.SELECTING);
   }
 </script>
