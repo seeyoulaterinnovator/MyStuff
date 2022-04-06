@@ -67,18 +67,14 @@ public class AuthMailPhoneWithRiasForm extends AbstractAuthMailPhoneForm {
             boolean checkInRiasIfNotFound = context.getRealm().getAttribute("checkInRiasIfNotFound", false);
             if (checkInRiasIfNotFound && Util.isFrame(context.getSession()) && (B2B_ID.equals(cm.getClientId()) || DMP_ID.equals(cm.getClientId()))) {
                 String withCity = context.getHttpRequest().getDecodedFormParameters().getFirst(FormConstants.WITH_CITY);
-                String showModal = context.getHttpRequest().getDecodedFormParameters().getFirst("showModal");
                 if (Util.isEmpty(withCity) || !withCity.equals("TRUE")) {
-                    context.form().setAttribute(FormConstants.WITH_CITY, "TRUE");
-                    if (Util.isEmpty(showModal)){
-                        context.form().setAttribute("showModal", "TRUE");
-                    } else {
-                        context.form().setAttribute("showModal", "FALSE");
-                    }
+                    context.form().setAttribute(, "TRUE");
+                    context.form().setAttribute("showModal", "TRUE");
                     context.challenge(context.form().createLogin());
                 } else if (!checkAuthRias(context, CHOOSE_REDIRECT_TO_LK_FORM)) {
                     context.getEvent().error(Errors.USER_NOT_FOUND);
                     context.form().setAttribute("showModal", "FALSE");
+                    context.form().setAttribute(FormConstants.WITH_CITY, "TRUE");
                     context.failureChallenge(AuthenticationFlowError.INVALID_USER, challenge(context, Messages.INVALID_USER));
                 }
                 return false;
