@@ -76,12 +76,31 @@ input[type="number"] {
  }
 }
 
+.text-with-login {
+  font-weight: 350;
+  font-size: 17px;
+}
+
+.text-3xl{
+  font-size: 46px;
+
+    @media screen and (max-width: 639px) {
+      font-size: 35px;
+    }
+
+    @media screen and (max-width: 479px) {
+      font-size: 30px;
+    }
+}
+
 .text-no-wrap {
   white-space: nowrap;
 }
 
 .reset-password {
   color: #2B539B;
+  font-weight: 350;
+  font-size: 17px;
   transition: 0.2s ease-in-out;
   cursor: pointer;
 &:hover {

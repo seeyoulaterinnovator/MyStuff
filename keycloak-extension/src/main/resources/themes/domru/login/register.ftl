@@ -4,7 +4,6 @@
 
 <@layout.registrationLayout displayInfo=true displayCity=false; section >
     <#if section = "header">
-        <#include "templates/required-fields.html">
         <@blocks.contentHeader mainTitle="${msg(registerTitle)}" secondaryTitle="${msg(doLogIn)}" secondaryHref="${url.loginUrl}" withBorder=true />
     <#elseif section = "form">
         <form id="registrationForm" action="${url.registrationAction}" method="post">
@@ -48,7 +47,7 @@
         </form>
         <#if realm.password && social.providers??>
             <div class="flex items-center mt-12">
-                <div class="text-no-wrap mr-6">${loginWith}</div>
+                <div class="text-no-wrap text-with-login mr-6">${loginWith}</div>
                 <ul class="logo-social-providers">
                     <#list social.providers as p>
                         <li class="mr-4">

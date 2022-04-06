@@ -4,7 +4,6 @@
 
 <@layout.registrationLayout displayInfo=social.displayInfo displayWide=(realm.password && social.providers??); section>
     <#if section = "header">
-        <#include "templates/required-fields.html">
         <#if !hideRegistration!false>
             <@blocks.contentHeader mainTitle="${doLogIn}" secondaryTitle="${registerTitle}" secondaryHref="${url.registrationUrl}" withBorder=true />
         <#else>
@@ -47,7 +46,7 @@
         </#if>
         <#if realm.password && social.providers??>
             <div class="flex items-center mt-12">
-                <div class="text-no-wrap mr-6">${loginWith}</div>
+                <div class="text-no-wrap text-with-login mr-6">${loginWith}</div>
                 <ul class="logo-social-providers">
                     <#list social.providers as p>
                         <li class="mr-4">

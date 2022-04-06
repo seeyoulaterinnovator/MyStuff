@@ -38,7 +38,7 @@
 }
 
 .btn-main {
-  @apply .bg-extra .text-black;
+  @apply .bg-extra .text-white;
 
   &:hover,
   &:active {

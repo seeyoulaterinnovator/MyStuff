@@ -80,6 +80,9 @@ module.exports = {
           '80': '#000000cc',
           default: '#000000',
         },
+        white: {
+          default: '#FFFFFF',
+        },
         main: {
           '100': '#fafafa',
           '200': '#f8f8f8',
@@ -95,18 +98,18 @@ module.exports = {
           '100': '#ff8a8a',
           '300': '#ff4e53',
           '500': '#f5272d',
-          '700': '#e31e24',
-          '700-hover': '#e31e24',
+          '700': '#C51F1F',
+          '700-hover': '#C51F1F',
           '900': '#b3002b',
-          default: '#e31e24',
+          default: '#C51F1F',
         },
         accentRed: {
           '100': '#ff8a8a',
           '300': '#ff4e53',
           '500': '#f5272d',
-          '700': '#e31e24',
+          '700': '#C51F1F',
           '900': '#b3002b',
-          default: '#e31e24',
+          default: '#C51F1F',
         },
         accentBlue: {
           '100': '#b0cbff',
@@ -116,6 +119,7 @@ module.exports = {
           '700-hover': '#7496D9',
           '700-20': '#6889c933',
           '900': '#1d45a1',
+          '1000': '#0357F1',
           default: '#6688c9',
         },
         accentGreen: {

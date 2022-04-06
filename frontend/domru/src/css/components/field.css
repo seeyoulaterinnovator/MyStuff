@@ -15,7 +15,6 @@
 
   content: '';
 
-  @apply .bg-extra;
 }
 }
 
@@ -66,7 +65,7 @@
  }
 &:focus
  {
-   @apply .border-extra-700;
+   @apply .border-accentBlue-1000;
  }
 
 &::placeholder {
