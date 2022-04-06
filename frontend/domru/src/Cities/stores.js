@@ -7,9 +7,9 @@ export const city = writable(
   (document.getElementById('cities-button') && document.getElementById('cities-button').dataset.city) || Cookie.get('CITY') || ''
 );
 
-if (document.getElementById('withCity') && document.getElementById('withCity').value === 'TRUE'){
+if (document.getElementById('showModalIframe') && document.getElementById('showModalIframe').value === 'TRUE'){
   Cookie.set('VISITED', '0', {sameSite: 'None', secure: document.location.protocol === 'https:'});
-  document.getElementById('withCity').value = 'FALSE';
+  document.getElementById('showModalIframe').value = 'FALSE';
 }
 
 export const domain = writable(
