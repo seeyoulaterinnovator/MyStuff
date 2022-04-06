@@ -17,8 +17,8 @@
                   onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
                 <div class="field field__container field--required mb-3 sm:mb-4 md:w-full">
                     <input class="hidden w-0 h-0" id="domain-login" name="city">
-                    <#if withCity?has_content && withCity == "TRUE">
-                        <input id = "withCity" class="hidden w-0 h-0" name="withCity" value="TRUE">
+                    <#if withCity?has_content>
+                        <input id = "withCity" class="hidden w-0 h-0" name="withCity" value="${withCity}">
                     </#if>
                     <#if usernameEditDisabled??>
                         <input name="username" id="username" class="field__input" label="${usernameOrEmailPlaceholder}"
