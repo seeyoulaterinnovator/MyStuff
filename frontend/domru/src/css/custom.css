@@ -84,7 +84,7 @@ input[type="number"] {
 .text-3xl{
   font-size: 46px;
 
-    @media screen and (max-width: 639px) {
+    @media screen and (max-width: 640px) {
       font-size: 35px;
     }
 
@@ -135,7 +135,7 @@ input[type="number"] {
   }
 }
 
-@media screen and (max-width: 639px){
+@media screen and (max-width: 640px){
   .login-title-text {
     max-width: unset;
   }
@@ -172,4 +172,22 @@ input[type="number"] {
 
 .city_hidden_input {
   display: none;
+}
+
+.titleAllPage {
+  font-size: 46px;
+  line-height: 52px;
+}
+
+@media (max-width: 640px) {
+  .titleAllPage {
+    font-size: 35px;
+    line-height: 40px;
+  }
+}
+
+.textTimer{
+  opacity: 0.8;
+  font-weight: 500;
+  line-height: 24px;
 }

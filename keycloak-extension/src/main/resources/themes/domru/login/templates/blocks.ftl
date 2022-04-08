@@ -21,10 +21,10 @@
       </div>
       <div class="mx-auto generated-password btn-group flex">
         <button id="refresh-password-button" class="w-12 h-12 focus:outline-none flex-child allowDoubleClick" type="button">
-          <@svg.reloadButton color="accentBlue"></@svg.reloadButton>
+          <@svg.reloadButton color="accentBlue-1100"></@svg.reloadButton>
         </button>
         <button id="generate-password-button" type="button" class="generate-btn focus:outline-none pass--hidden-small flex-child allowDoubleClick">
-          <span class="reference reference-generate-password border-accentBlue text-accentBlue">ГЕНЕРИРОВАТЬ</span>
+          <span class="reference reference-generate-password border-accentBlue text-accentBlue-1100">ГЕНЕРИРОВАТЬ</span>
         </button>
       </div>
 
@@ -38,7 +38,7 @@
             id="page-title"
             class="<#if withBorder></#if> <#if secondaryTitle != ''>text-3xl</#if>"
     >
-      <b>
+      <b <#if secondaryTitle == ''>class="titleAllPage"</#if>>
         ${mainTitle}
       </b>
     </h1>

@@ -42,11 +42,11 @@
                 <div class="flex flex-basis-auto items-center">
                     <button id="submit" class="btn btn-main reg-fields" type="submit">${msg(doRegister)}</button>
                 </div>
-                <span class="flex-basis-auto ml-0 mb-6 mt-4 text-xs sm:ml-5 sm:mb-0 agreement"><span class="opacity-50">Нажимая кнопку, вы соглашаетесь <br></span><a class="reference reference_hoverable allowDoubleClick" href="https://dom.ru/policy.pdf" target="_blink">с правилами обработки перс. данных</a></span>
+                <span class="flex-basis-auto ml-0 mb-6 mt-4 text-xs sm:ml-5 sm:mb-0 agreement"><span class="opacity-50" style="font-weight: 350;">Нажимая кнопку, вы соглашаетесь <br></span><a class="reference reference_hoverable allowDoubleClick"  style="font-weight: 350;" href="https://dom.ru/policy.pdf" target="_blink">с правилами обработки перс. данных</a></span>
             </div>
         </form>
         <#if realm.password && social.providers??>
-            <div class="flex items-center mt-12">
+            <div class="flex items-center mt-4">
                 <div class="text-no-wrap text-with-login mr-6">${loginWith}</div>
                 <ul class="logo-social-providers">
                     <#list social.providers as p>
