@@ -45,9 +45,9 @@ p {
 &__title {
    font-family: Inter, sans-serif;
    font-style: normal;
-   font-weight: 600;
-   font-size: 22px;
-   line-height: 27px;
+   font-weight: 500;
+   font-size: 27px;
+   line-height: 33px;
    color: #000000;
    mix-blend-mode: normal;
    margin-bottom: 16px;
@@ -78,7 +78,7 @@ p {
 }
 
 .btn:not(&__btn) {
-  font-size: 15.5px;
+  font-size: 16px;
   line-height: 21px;
   letter-spacing: 0.6px;
   padding-left: 16px;

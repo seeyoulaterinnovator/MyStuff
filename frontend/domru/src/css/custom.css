@@ -76,12 +76,31 @@ input[type="number"] {
  }
 }
 
+.text-with-login {
+  font-weight: 350;
+  font-size: 17px;
+}
+
+.text-3xl{
+  font-size: 46px;
+
+    @media screen and (max-width: 640px) {
+      font-size: 35px;
+    }
+
+    @media screen and (max-width: 479px) {
+      font-size: 30px;
+    }
+}
+
 .text-no-wrap {
   white-space: nowrap;
 }
 
 .reset-password {
   color: #2B539B;
+  font-weight: 350;
+  font-size: 17px;
   transition: 0.2s ease-in-out;
   cursor: pointer;
 &:hover {
@@ -116,7 +135,7 @@ input[type="number"] {
   }
 }
 
-@media screen and (max-width: 639px){
+@media screen and (max-width: 640px){
   .login-title-text {
     max-width: unset;
   }
@@ -153,4 +172,22 @@ input[type="number"] {
 
 .city_hidden_input {
   display: none;
+}
+
+.titleAllPage {
+  font-size: 46px;
+  line-height: 52px;
+}
+
+@media (max-width: 640px) {
+  .titleAllPage {
+    font-size: 35px;
+    line-height: 40px;
+  }
+}
+
+.textTimer{
+  opacity: 0.8;
+  font-weight: 500;
+  line-height: 24px;
 }

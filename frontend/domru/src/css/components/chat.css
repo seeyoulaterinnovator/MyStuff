@@ -48,8 +48,8 @@
   position: fixed;
   bottom: 30px;
   right: 20px;
-  height: 45px;
-  width: 45px;
+  height: 48px;
+  width: 48px;
   cursor: pointer;
   z-index: 201;
   border-radius: 35px;
@@ -65,22 +65,22 @@
  }
 
 &__circle {
-   background-color: #FFDD00;
+   background-color: #C51F1F;
    border-radius: 50%;
-   height: 45px;
-   width: 45px;
+   height: 48px;
+   width: 48px;
    display: flex;
    align-items: center;
    text-align: center;
    justify-content: center;
-   box-shadow: 0px 0px 0px 1px rgb(255 221 0);
+   box-shadow: 0px 0px 0px 1px rgb(197,31,31);
 
 &__icon {
    background-image: url("./images/chat-icon.svg");
    background-repeat: no-repeat;
-   margin-top: 5px;
-   height: 20px;
-   width: 20px;
+   margin-top: 1px;
+   height: 25px;
+   width: 25px;
    background-size: contain;
  }
 }

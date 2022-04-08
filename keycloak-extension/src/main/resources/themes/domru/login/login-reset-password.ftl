@@ -3,7 +3,6 @@
 
 <@layout.registrationLayout displayInfo=true displayCity=true; section>
     <#if section = "header">
-        <#include "templates/required-fields.html">
 
         <@blocks.contentHeader mainTitle="${msg(emailForgotContentTitle)}" />
     <#elseif section = "form">
