@@ -45,7 +45,7 @@
   display: none;
 }
 
-@media screen and (max-width: 639px){
+@media screen and (max-width: 640px){
   .generate-btn {
     padding-bottom: 13px;
   }

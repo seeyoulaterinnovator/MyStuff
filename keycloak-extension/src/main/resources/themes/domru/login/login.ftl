@@ -4,7 +4,6 @@
 
 <@layout.registrationLayout displayInfo=social.displayInfo displayWide=(realm.password && social.providers??); section>
     <#if section = "header">
-        <#include "templates/required-fields.html">
         <#if !hideRegistration!false>
             <@blocks.contentHeader mainTitle="${doLogIn}" secondaryTitle="${registerTitle}" secondaryHref="${url.registrationUrl}" withBorder=true />
         <#else>
@@ -19,6 +18,9 @@
                     <input class="hidden w-0 h-0" id="domain-login" name="city">
                     <#if withCity?has_content && withCity == "TRUE">
                         <input id = "withCity" class="hidden w-0 h-0" name="withCity" value="TRUE">
+                    </#if>
+                    <#if showModal?has_content>
+                        <input id = "showModalIframe" class="hidden w-0 h-0" name="showModal" value="${showModal}">
                     </#if>
                     <#if usernameEditDisabled??>
                         <input name="username" id="username" class="field__input" label="${usernameOrEmailPlaceholder}"
@@ -35,7 +37,7 @@
                 <@components.field class="mb-7 sm:mb-8 md:w-full" fieldName="password" label="${passwordPlaceholder}" placeholder="${passwordPlaceholder}" type="password" required=true />
 
                 <div class="flex justify-between w-full items-center">
-                    <button id="submit" class="btn btn-main w-1/2 btn-enter" type="submit">${enter}</button>
+                    <button id="submit" class="btn btn-main btn-enter" type="submit">${enter}</button>
                     <#if realm.resetPasswordAllowed>
                         <span class="reset-password">
                             <a href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
@@ -47,7 +49,7 @@
         </#if>
         <#if realm.password && social.providers??>
             <div class="flex items-center mt-12">
-                <div class="text-no-wrap mr-6">${loginWith}</div>
+                <div class="text-no-wrap text-with-login mr-6">${loginWith}</div>
                 <ul class="logo-social-providers">
                     <#list social.providers as p>
                         <li class="mr-4">

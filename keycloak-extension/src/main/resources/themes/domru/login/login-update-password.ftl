@@ -3,7 +3,6 @@
 
 <@layout.registrationLayout displayInfo=true displayCity=false displayWarningMessage=false; section>
     <#if section = "header">
-        <#include "templates/required-fields.html">
         <@blocks.contentHeader mainTitle="${msg(emailForgotContentTitle)}" />
     <#elseif section = "form">
         <form id="loginUpdatePasswordForm" action="${url.loginAction}" method="post">

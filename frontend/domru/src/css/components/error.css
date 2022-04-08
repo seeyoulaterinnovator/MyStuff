@@ -55,12 +55,8 @@
 .error-background {
   position: fixed;
   z-index: -1;
-  object-fit: cover;
-  object-position: left top;
   left: 10px;
   right: 0;
-  bottom: -35px;
-  height: 260px;
 
 @media (min-width: 768px) {
   left: -25px;

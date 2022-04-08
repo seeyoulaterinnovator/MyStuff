@@ -69,11 +69,11 @@ export default (
       }
 
       if (ruleAccepted) {
-        ruleElement.classList.remove('text-accentRed');
-        ruleElement.classList.add('text-accentGreen');
+        ruleElement.classList.remove('text-accentRed-1000');
+        ruleElement.classList.add('text-accentGreen-1000');
       } else {
-        ruleElement.classList.remove('text-accentGreen');
-        ruleElement.classList.add('text-accentRed');
+        ruleElement.classList.remove('text-accentGreen-1000');
+        ruleElement.classList.add('text-accentRed-1000');
       }
     }
   }

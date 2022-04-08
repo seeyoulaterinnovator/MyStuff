@@ -42,7 +42,7 @@
   }
 }
 
-@media screen and (max-width: 639px){
+@media screen and (max-width: 640px){
   .confirm__btns {
     flex-direction: row;
     margin-top: 28px;
