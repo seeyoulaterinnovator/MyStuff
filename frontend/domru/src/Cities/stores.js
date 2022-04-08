@@ -7,10 +7,15 @@ export const city = writable(
   (document.getElementById('cities-button') && document.getElementById('cities-button').dataset.city) || Cookie.get('CITY') || ''
 );
 
+if (document.getElementById('showModalIframe') && document.getElementById('showModalIframe').value === 'TRUE'){
+  Cookie.set('VISITED', '0', {sameSite: 'None', secure: document.location.protocol === 'https:'});
+  document.getElementById('showModalIframe').value = 'FALSE';
+}
+
 export const domain = writable(
   Cookie.get('city-domain') || 'yar');
 
-const isFirstVisit = Cookie.get('VISITED') !== '1' || (document.getElementById('withCity') && Cookie.get('changeCity') === undefined);
+const isFirstVisit = Cookie.get('VISITED') !== '1';
 
 isFirstVisit && fetch('/auth/realms/user/cities/current')
   .then(response => response.json())

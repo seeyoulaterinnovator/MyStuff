@@ -19,6 +19,9 @@
                     <#if withCity?has_content && withCity == "TRUE">
                         <input id = "withCity" class="hidden w-0 h-0" name="withCity" value="TRUE">
                     </#if>
+                    <#if showModal?has_content>
+                        <input id = "showModalIframe" class="hidden w-0 h-0" name="showModal" value="${showModal}">
+                    </#if>
                     <#if usernameEditDisabled??>
                         <input name="username" id="username" class="field__input" label="${usernameOrEmailPlaceholder}"
                                placeholder="${usernameOrEmailPlaceholder}" value="${(login.username!)}"
