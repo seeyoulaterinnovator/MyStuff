@@ -9,9 +9,9 @@
         </#if>
         <#if buttonExist>
             <#if success>
-                <a class="btn btn-main text-center btn--thanks" href="${url.loginRestartFlowUrl}">Спасибо</a>
+                <a class="btn btn-main text-center btn--thanks" href="${url.loginUrl}">Спасибо</a>
             <#else>
-                <a class="btn btn-main text-center btn--thanks" href="${url.loginRestartFlowUrl}">На главную</a>
+                <a class="btn btn-main text-center btn--thanks" href="${url.loginUrl}">На главную</a>
             </#if>
         </#if>
     </div>

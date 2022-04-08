@@ -1802,6 +1802,12 @@
         </sql>
     </changeSet>
 
-
+    <changeSet id="103" author="petrov-ny">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('30b76ff0-b5af-11ec-b909-0242ac120002', 'backToMainPage', 'вернуться', null, 'user', 'Кнопка возвращения в систему', null,
+            'FRONT');
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>
