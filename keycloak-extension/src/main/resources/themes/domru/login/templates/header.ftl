@@ -2,7 +2,7 @@
   <header id="page-header" class="flex items-center">
     <div class="w-full flex justify-between">
       <a href="${(homePage)!"https://newlkb2b.dom.ru"}">
-        <div class="h-30px w-200px bg-contain bg-no-repeat logo logo--domru"></div>
+        <div class="bg-contain bg-no-repeat logo logo--domru"></div>
       </a>
       <div class="flex items-center xl:items-start">
         <div id="cities-button" class=${withCity ? string("sm:mr-10", "sm:mr-10")} data-city=""></div>
