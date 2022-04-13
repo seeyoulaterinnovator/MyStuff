@@ -1,9 +1,9 @@
 .verification {
 &__title {
-   font-size: 36px;
-   line-height: 42px;
-   letter-spacing: -1px;
    font-weight: 700;
+   font-size: 46px;
+   line-height: 52px;
+   letter-spacing: -1px;
 @media (max-width: 959px) {
   font-size: 32px;
   line-height: 38px;
@@ -16,10 +16,10 @@
 }
 
 &__sub {
+   font-weight: 350;
    font-size: 18px;
-   line-height: 25px;
+   line-height: 24px;
    letter-spacing: -1px;
-   font-weight: 300;
 
 @media (max-width: 1200px) {
   font-size: 18px;
