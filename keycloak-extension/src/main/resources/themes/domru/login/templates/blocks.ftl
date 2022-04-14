@@ -3,7 +3,7 @@
 
 <#macro password firstFieldName="password">
   <div id="password-block" class="mb-7 sm:mb-8">
-    <p class="text-black-80">Пароль должен состоять из комбинации букв, цифр и быть не менее 8 и не более 16 символов</p>
+    <p class="text-black">Пароль должен состоять из комбинации букв, цифр и быть не менее 8 и не более 16 символов</p>
     <div class="flex text-black-50 py-6">
       <div id="letters-password" class="flex flex-1 flex-col mr-6">
         <span class="text-symbols">A-z</span>
@@ -14,7 +14,7 @@
         <span class="text-sm sm:block">Цифра или несколько цифр</span>
       </div>
     </div>
-    <p class="text-black-80 mb-8 mt-8">Не забудьте записать пароль <span id="generated-password" class="text-base"></span></p>
+    <p class="text-black mb-8 mt-8">Не забудьте записать пароль <span id="generated-password" class="text-base"></span></p>
     <div class="flex sm:flex-row">
       <div class="pass-fields">
         <@components.field class="mb-3 sm:mb-4" fieldName="${firstFieldName}" label="${msg('password')}" placeholder="${msg(passwordPlaceholder)}" type="password" required=true value="" />
