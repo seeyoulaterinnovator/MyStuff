@@ -770,9 +770,11 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
         //$scope.users = [];
 
-        console.log("query.search: " + $scope.query.search);
+        var search = $scope.query.search.replaceAll('+','%2b') ;
+
+        console.log("query.search: " + search);
         $http.get(`${authUrl}/realms/user/users-info/search?` +
-            `searchRealm=${$scope.query.searchRealm}&search=${$scope.query.search}` +
+            `searchRealm=${$scope.query.searchRealm}&search=${search}` +
             `&searchUser=${$scope.query.searchByUserId}&searchToms=${$scope.query.searchByTomsId}&searchPhone=${$scope.query.searchByPhone}` +
             `&pageNum=${$scope.pages.number}&pageSize=${$scope.pageSize}` +
             `&sortAsc=${sortAsc}&sortField=${currentSortField}`).then(function (data) {

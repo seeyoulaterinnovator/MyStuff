@@ -19,7 +19,7 @@
       <div class="pass-fields">
         <@components.field class="mb-3 sm:mb-4" fieldName="${firstFieldName}" label="${msg('password')}" placeholder="${msg(passwordPlaceholder)}" type="password" required=true value="" />
       </div>
-      <div class="mx-auto generated-password btn-group flex">
+      <div class="mx-auto generated-password fill-current btn-group flex">
         <button id="refresh-password-button" class="w-12 h-12 focus:outline-none flex-child allowDoubleClick" type="button">
           <@svg.reloadButton color="accentBlue-1100"></@svg.reloadButton>
         </button>

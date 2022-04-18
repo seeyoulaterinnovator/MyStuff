@@ -14,18 +14,19 @@
         line-height: 19px;
       }
   }
-&_hoverable {
-   opacity: 1;
- }
+  &_hoverable {
+     opacity: 1;
+     color: #2B539B;
+   }
 }
 
 .generate-btn {
-  padding-bottom: 15px;
-&:hover {
-.reference {
-  border-bottom-color: transparent;
-}
-}
+    padding-bottom: 15px;
+      &:hover {
+      .reference {
+        border-bottom-color: transparent;
+      }
+  }
 }
 
 .agreement {
