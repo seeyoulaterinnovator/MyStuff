@@ -21,13 +21,13 @@
             </div>
 
             <div class="flex flex-col justify-between sm:flex-row mt-4 xl:mt-6 sm:mt-4">
-                <div class="flex-basis-auto w-full mb-2 sm:mb-0">
+                <div class="flex-basis-auto w-full mb-6 sm:mb-0">
                     <#--  <button id="submit" class="btn btn-main w-full" type="submit">${msg("doSubmit")}</button>  -->
                     <button id="submit" class="btn btn-main w-full" type="submit">${msg(next)}</button>
                 </div>
                 <div class="flex-basis-auto w-full ml-0 text-sm sm:ml-6">
                     <#--  <button id="cancel" class="btn w-full" type="button">${msg("doCancel")}</button>  -->
-                    <a id="cancel" href="${url.loginUrl}" class="btn btn-cancel text-accentBlue-1000 w-full">${msg(doCancel)}</a>
+                    <a id="cancel" href="${url.loginUrl}" class="btn btn-cancel text-accentBlue-1100 w-full">${msg(doCancel)}</a>
                 </div>
             </div>
         </form>

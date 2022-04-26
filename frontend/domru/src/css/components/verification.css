@@ -1,132 +1,150 @@
 .verification {
-&__title {
-   font-weight: 700;
-   font-size: 46px;
-   line-height: 52px;
-   letter-spacing: -1px;
-@media (max-width: 959px) {
-  font-size: 32px;
-  line-height: 38px;
+  &__title {
+     font-weight: 700;
+     font-size: 46px;
+     line-height: 52px;
+     letter-spacing: -1px;
+    @media (max-width: 640px) {
+      font-size: 35px;
+      line-height: 40px;
+    }
+    @media (max-width: 320px) {
+      font-size: 33px;
+      line-height: 100%;
+    }
+  }
+
+  &__sub {
+      font-weight: 350;
+      font-size: 18px;
+      line-height: 24px;
+     letter-spacing: -1px;
+
+    @media (max-width: 640px) {
+      font-size: 17px;
+      line-height: 23px;
+    }
+    @media (max-width: 320px) {
+      font-size: 16px;
+      line-height: 130%;
+    }
+  }
+
+  &__btn__send {
+     color: #2B539B;
+     margin-left: 30px;
+     min-width: 253px;
+     padding: 0;
+
+    @media (max-width: 640px) {
+      margin-left: 8px;
+    }
+
+    @media (max-width: 640px) {
+      margin-top: 18px;
+      margin-left: 0;
+    }
+
+    @media (max-width: 320px) {
+      margin-top: 18px;
+      margin-left: 0;
+      min-width: 100%;
+    }
+  }
+
+  &__btn__accept {
+     min-width: 196px;
+  }
+
+  &__btn {
+     min-height: 48px;
+
+    @media (max-width: 640px) {
+      min-height: 44px;
+    }
+
+    @media (max-width: 320px) {
+      width: 100%;
+    }
+  }
+
+  &__code {
+     margin-right: 32px;
+     font-size: 21.5px;
+
+    @media (max-width: 640px) {
+      margin-right: 24px;
+      font-size: 19.5px;
+      width: 56px !important;
+      height: 56px !important;
+    }
+
+    @media (max-width: 320px) {
+      margin-right: 14px;
+      font-size: 18.5px;
+    }
+  }
+
+  &__err {
+     font-size: 12.5px;
+
+    @media (max-width: 641px) {
+      font-size: 11.5px;
+    }
+
+    @media (max-width: 320px) {
+      font-size: 10.5px;
+    }
+  }
+
+  &__text {
+     color: #000000;
+     font-size: 18px;
+
+    @media (max-width: 640px) {
+      font-size: 16.5px;
+    }
+
+    @media (max-width: 320px) {
+      font-size: 15.5px;
+      margin-bottom: 24px;
+      margin-top: 16px;
+    }
+  }
+
+  &__resend {
+     color: #2B539B !important;
+     opacity: 0.8;
+     margin-left: 5px;
+
+    @media (max-width: 320px) {
+      margin-left: 0;
+      margin-top: 10px;
+    }
+  }
 }
 
-@media (max-width: 640px) {
-  font-size: 27px;
-  line-height: 32px;
-}
+.verification__error__text{
+  font-weight: 350;
+  font-size: 13px;
+  line-height: 16px;
+  letter-spacing: 0.04em;
+  @media screen and @media (max-width: 640px) {
+    font-size: 12px;
+    line-height: 15px;
+    letter-spacing: 0.055em;
+  }
+  @media screen and @media (max-width: 320px) {
+    font-size: 11px;
+    line-height: 15px;
+    letter-spacing: 0.06em;
+  }
 }
 
-&__sub {
-   font-weight: 350;
-   font-size: 18px;
-   line-height: 24px;
-   letter-spacing: -1px;
-
-@media (max-width: 1200px) {
-  font-size: 18px;
-  line-height: 28px;
-}
-
-@media (max-width: 641px) {
-  font-size: 16.5px;
+.verification__timer__text{
+  font-weight: 350;
+  font-size: 17px;
   line-height: 23px;
-  letter-spacing: -0.5px;
-}
-
-@media (max-width: 320px) {
-  font-size: 16px;
-}
-}
-
-&__btn__send {
-   color: #2B539B;
-   margin-left: 30px;
-   min-width: 253px;
-   padding: 0;
-
-@media (max-width: 640px) {
-  margin-left: 8px;
-}
-
-@media (max-width: 640px) {
-  margin-top: 18px;
-  margin-left: 0;
-}
-
-@media (max-width: 320px) {
-  margin-top: 18px;
-  margin-left: 0;
-  min-width: 100%;
-}
-}
-
-&__btn__accept {
-   min-width: 196px;
- }
-
-&__btn {
-   min-height: 48px;
-
-@media (max-width: 641px) {
-  min-height: 44px;
-}
-
-@media (max-width: 641px) {
-  width: 100%;
-}
-}
-
-&__code {
-   margin-right: 32px;
-   font-size: 21.5px;
-
-@media (max-width: 641px) {
-  margin-right: 24px;
-  font-size: 19.5px;
-  width: 56px !important;
-  height: 56px !important;
-}
-
-@media (max-width: 320px) {
-  margin-right: 14px;
-  font-size: 18.5px;
-}
-}
-
-&__err {
-   font-size: 12.5px;
-
-@media (max-width: 641px) {
-  font-size: 11.5px;
-}
-
-@media (max-width: 320px) {
-  font-size: 10.5px;
-}
-}
-
-&__text {
-   color: #000000;
-   font-size: 18px;
-
-@media (max-width: 641px) {
-  font-size: 16.5px;
-}
-
-@media (max-width: 320px) {
-  font-size: 15.5px;
-  margin-bottom: 24px;
-  margin-top: 16px;
-}
-}
-
-&__resend {
-   color: #2B539B !important;
-   opacity: 0.8;
-   margin-left: 5px;
-
-@media (max-width: 320px) {
-  margin-left: 0;
-  margin-top: 10px;
-}
-}
+  color: #000000;
+  opacity: 0.8;
 }

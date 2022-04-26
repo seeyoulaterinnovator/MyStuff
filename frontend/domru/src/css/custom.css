@@ -118,7 +118,7 @@ input[type="number"] {
   transition: 0.2s ease-in-out;
   cursor: pointer;
 &:hover {
-   opacity: 0.5;
+   color: #0357F1;
 &:after {
    @apply .bg-extra;
  }
@@ -199,9 +199,15 @@ input[type="number"] {
     line-height: 40px;
   }
 }
+@media (max-width: 320px) {
+  .titleAllPage {
+    font-size: 33px;
+    line-height: 33px;
+  }
+}
 
 .textTimer{
-  opacity: 0.8;
   font-weight: 500;
+  font-size: 18px;
   line-height: 24px;
 }

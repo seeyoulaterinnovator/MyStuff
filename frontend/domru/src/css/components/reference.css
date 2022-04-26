@@ -3,12 +3,12 @@
   color: #2B539B;
   &-generate-password {
      display: inline-block;
-      @media screen and (min-width: 1199px) {
+      @media screen and (max-width: 1200px) {
         font-weight: 400;
         font-size: 16px;
         line-height: 21px;
       }
-      @media screen and (min-width: 639px) {
+      @media screen and (max-width: 640px) {
         font-weight: 400;
         font-size: 15px;
         line-height: 19px;
