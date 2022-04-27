@@ -3,6 +3,7 @@ package ru.alamics.sso.registration.service;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.keycloak.models.jpa.entities.UserEntity;
+import ru.alamics.sso.jpa.entity.ExternalSystemEntity;
 import ru.alamics.sso.jpa.entity.ExternalSystemRoleEntity;
 import ru.alamics.sso.jpa.entity.UserPostEntity;
 import ru.alamics.sso.jpa.entity.UserPostRoleEntity;
@@ -136,8 +137,8 @@ public class UserPostService {
         return DataMapper.toExternalSystemDtos(userPostRepository.getAllExternalSystem());
     }
 
-    public List<String> getAllExternalSystemLabels() {
-        return userPostRepository.getAllExternalSystem().stream().map(m -> m.getLabel()).collect(Collectors.toList());
+    public List<String> getAllExternalSystemLabels(String realmId) {
+        return userPostRepository.getAllExternalSystem().stream().filter(it -> realmId.equals(it.getName())).map(ExternalSystemEntity::getLabel).collect(Collectors.toList());
     }
 
     public UserPostResponse addSystemRole(ExternalSystemRoleRequest externalSystemRoleRequest) throws NotFoundException {

@@ -306,7 +306,7 @@ public class MigrationService {
 
         if (modified) {
             userImport.setRole(DEFAULT_ROLE_STR);
-            userImport.setSystems(Util.join(userPostService.getAllExternalSystemLabels(), ","));
+            userImport.setSystems(Util.join(userPostService.getAllExternalSystemLabels(user.getRealmId()), ","));
         }
 
         return modified;
