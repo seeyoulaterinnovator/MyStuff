@@ -42,7 +42,7 @@
                             <div class="flex flex-basis-auto items-center max-w-[40%]">
                                 <button class="btn btn-main w-full" type="submit" id="update-profile-submit" />${msg(doAccept)}</button>
                             </div>
-                            <span class="flex-basis-auto ml-2 mb-6 mt-4 text-xs sm:ml-5 sm:mb-0 agreement"><span class="opacity-50">Нажимая кнопку, вы соглашаетесь <br></span><a class="reference reference_hoverable allowDoubleClick" href="https://dom.ru/policy.pdf" target="_blink">с правилами обработки перс. данных</a></span>
+                            <span class="flex-basis-auto ml-2 mb-6 mt-4 text-xs sm:ml-5 sm:mb-0 agreement"><span class="opacity-50">Нажимая кнопку, вы соглашаетесь <br></span><a class="reference reference_hoverable allowDoubleClick item_hover" href="https://dom.ru/policy.pdf" target="_blink">с правилами обработки перс. данных</a></span>
                         </div>
                     </#if>
                 </div>

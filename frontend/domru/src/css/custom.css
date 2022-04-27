@@ -77,8 +77,20 @@ input[type="number"] {
    }
 }
 
-.fill-current:hover {
+.item_hover:hover {
   color: #0357F1;
+}
+.generated_hover:hover svg{
+  color: #0357F1;
+}
+.generated_hover:hover span{
+  color: #0357F1;
+}
+.generated_hover:active svg{
+  color: #2B539B;
+}
+.generated_hover:active span{
+  color: #2B539B;
 }
 
 .text-with-login {
