@@ -18,15 +18,12 @@ import java.util.List;
 @Slf4j
 public class PersonalAccountService {
 
-    //private final KeycloakSession session;
-
     @EJB
     private PersonalAccountRepository paRepository;
     @EJB
     private UserPostRepository userPostRepository;
 
     public PersonalAccountService(/*KeycloakSession session*/) {
-        //this.session = session;
     }
 
     private void checkPost(final String postId) throws NotFoundException {

@@ -78,8 +78,6 @@ public class AuthLinkActionTokenHandler extends AbstractActionTokenHander<AuthLi
                 tokenContext.getClientConnection(),
                 tokenContext.getEvent());
 
-        //log.info(clientSessionCtx.getClientSession().getUserSession().toString());
-
         return AuthenticationManager.redirectAfterSuccessfulFlow(
                 tokenContext.getSession(),
                 tokenContext.getRealm(),
