@@ -110,13 +110,14 @@ public class UserPostRepository {
                 .getResultList();
     }
 
-    public ExternalSystemRoleEntity getExternalSystemRole(String sysName) {
+    public ExternalSystemRoleEntity getExternalSystemRole(String sysName, String realmId) {
         List<ExternalSystemRoleEntity> result = em.createQuery(
                 "select role " +
                         "from ExternalSystemRoleEntity role \n" +
                         "join ExternalSystemEntity sys on role.externalSystem = sys.id \n" +
-                        "where sys.name = :sysName", ExternalSystemRoleEntity.class)
+                        "where sys.name = :sysName and sys.realmId = :realmId ", ExternalSystemRoleEntity.class)
                 .setParameter("sysName", sysName)
+                .setParameter("realmId", realmId)
                 .getResultList();
         return CollectionUtils.nullOrGet(result, 0);
     }

@@ -880,8 +880,10 @@ module.controller('RealmIdentityProviderCtrl', function ($scope, $filter, $uploa
         $scope.changed = true;
     }
 
-    $http.get(authUrl + '/realms/' + realm.realm + '/user-post/system-roles').then(function (data) {
-        $scope.systemRoles = angular.fromJson(data).data.results['system-roles'];
+    $http.get(authUrl + '/realms/' + realm.realm + '/user-post/system-roles?realmId=' + realm.realm).then(function (data) {
+        let roles = angular.fromJson(data).data.results['system-roles'];
+        roles = roles.filter(role => role.name === 'access_granted').filter((role, index, self) => self.indexOf(role) === index);
+        $scope.systemRoles = roles;
         console.log($scope.systemRoles);
     });
 

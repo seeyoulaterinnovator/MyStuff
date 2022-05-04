@@ -172,9 +172,9 @@ public class UserPostResource {
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response getAllSystemRoles() {
+    public Response getAllSystemRoles(@QueryParam("realmId") String realmId) {
         return JsonResponse.success()
-                .addResult("system-roles", userPostService.getAllExternalSystemRoleDTO())
+                .addResult("system-roles", userPostService.getAllExternalSystemRoleDTO(realmId))
                 .build();
     }
 

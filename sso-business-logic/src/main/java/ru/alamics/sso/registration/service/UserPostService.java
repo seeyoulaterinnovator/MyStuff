@@ -129,8 +129,8 @@ public class UserPostService {
         return DataMapper.toUserPostRoleDtoList(userPostRepository.getAllUserPostRoles());
     }
 
-    public List<ExternalSystemRoleDto> getAllExternalSystemRoleDTO() {
-        return DataMapper.toExternalSystemRoleDtos(userPostRepository.getAllExternalSystemRole());
+    public List<ExternalSystemRoleDto> getAllExternalSystemRoleDTO(String realmId) {
+        return DataMapper.toExternalSystemRoleDtos(userPostRepository.getAllExternalSystemRole().stream().filter(it -> realmId.equals(it.getRealmId())).collect(Collectors.toList()));
     }
 
     public List<ExternalSystemDto> getExternalSystems() {
@@ -138,7 +138,7 @@ public class UserPostService {
     }
 
     public List<String> getAllExternalSystemLabels(String realmId) {
-        return userPostRepository.getAllExternalSystem().stream().filter(it -> realmId.equals(it.getName())).map(ExternalSystemEntity::getLabel).collect(Collectors.toList());
+        return userPostRepository.getAllExternalSystem().stream().filter(it -> realmId.equals(it.getRealmId())).map(ExternalSystemEntity::getLabel).collect(Collectors.toList());
     }
 
     public UserPostResponse addSystemRole(ExternalSystemRoleRequest externalSystemRoleRequest) throws NotFoundException {
@@ -204,8 +204,8 @@ public class UserPostService {
         return userPostRole.getId();
     }
 
-    public Long getExternalSystemRoleId(String sysName) throws NotFoundException {
-        ExternalSystemRoleEntity externalSystemRole = userPostRepository.getExternalSystemRole(sysName);
+    public Long getExternalSystemRoleId(String sysName, String realmId) throws NotFoundException {
+        ExternalSystemRoleEntity externalSystemRole = userPostRepository.getExternalSystemRole(sysName, realmId);
         if (externalSystemRole == null) {
             throw new NotFoundException("Роль клиента не найдена");
         }
