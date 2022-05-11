@@ -1822,6 +1822,14 @@
         </sql>
     </changeSet>
 
+    <changeSet id="108" author="petrov-ny">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('ea9dd138-d103-11ec-9d64-0242ac120002', 'life.token.reset.pass.login', '12', 'время токена обновить пароль', 'S-TELECOM', 'Send login and reset password', 'HOURS',
+            'REALM');
+        </sql>
+    </changeSet>
+
     <changeSet id="103" author="petrov-ny">
         <sql>
             INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
