@@ -20,6 +20,9 @@ public class ExternalSystemRoleEntity {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "realm_id")
+    private String realmId;
+
     @ManyToOne
     @JoinColumn(name = "system_id")
     private ExternalSystemEntity externalSystem;
