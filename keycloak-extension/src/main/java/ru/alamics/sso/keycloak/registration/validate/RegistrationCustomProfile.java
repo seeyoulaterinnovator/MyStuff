@@ -35,11 +35,6 @@ public class RegistrationCustomProfile extends RegistrationProfile {
         }
 
         // empty is ok
-        /*
-        if (Validation.isBlank(formData.getFirst((RegistrationPage.FIELD_LAST_NAME)))) {
-            errors.add(new FormMessage(RegistrationPage.FIELD_LAST_NAME, Messages.MISSING_LAST_NAME));
-        }
-        */
         formData.remove(RegistrationPage.FIELD_LAST_NAME);
         formData.add(RegistrationPage.FIELD_LAST_NAME, " ");
 

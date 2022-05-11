@@ -150,8 +150,6 @@ public class ImportService {
 
         doGeneratePasswords(dataList, auth, session);
 
-        //if (cf != null)
-        //    cf.complete("");
     }
 
     private void importUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart) {
