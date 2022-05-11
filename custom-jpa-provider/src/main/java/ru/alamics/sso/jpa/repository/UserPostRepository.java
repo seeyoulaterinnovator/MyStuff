@@ -154,13 +154,15 @@ public class UserPostRepository {
 
     }
 
-    public List<ExternalSystemEntity> getAllExternalSystem() {
-        return em.createQuery("select sys from ExternalSystemEntity sys", ExternalSystemEntity.class)
+    public List<ExternalSystemEntity> getAllExternalSystemForRealm(String realmId) {
+        return em.createQuery("select sys from ExternalSystemEntity sys where sys.realmId =:realm_id ", ExternalSystemEntity.class)
+                .setParameter("realm_id", realmId)
                 .getResultList();
     }
 
-    public List<ExternalSystemRoleEntity> getAllExternalSystemRole() {
-        return em.createQuery("select role from ExternalSystemRoleEntity role", ExternalSystemRoleEntity.class)
+    public List<ExternalSystemRoleEntity> getAllExternalSystemRoleForRealm(String realmId) {
+        return em.createQuery("select role from ExternalSystemRoleEntity role where role.realmId =:realm_id ", ExternalSystemRoleEntity.class)
+                .setParameter("realm_id", realmId)
                 .getResultList();
     }
 

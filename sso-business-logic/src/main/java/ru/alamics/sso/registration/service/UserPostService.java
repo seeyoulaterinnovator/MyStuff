@@ -130,15 +130,15 @@ public class UserPostService {
     }
 
     public List<ExternalSystemRoleDto> getAllExternalSystemRoleDTO(String realmId) {
-        return DataMapper.toExternalSystemRoleDtos(userPostRepository.getAllExternalSystemRole().stream().filter(it -> realmId.equals(it.getRealmId())).collect(Collectors.toList()));
+        return DataMapper.toExternalSystemRoleDtos(userPostRepository.getAllExternalSystemRoleForRealm(realmId));
     }
 
-    public List<ExternalSystemDto> getExternalSystems() {
-        return DataMapper.toExternalSystemDtos(userPostRepository.getAllExternalSystem());
+    public List<ExternalSystemDto> getExternalSystemsForRealm(String realmId) {
+        return DataMapper.toExternalSystemDtos(userPostRepository.getAllExternalSystemForRealm(realmId));
     }
 
-    public List<String> getAllExternalSystemLabels(String realmId) {
-        return userPostRepository.getAllExternalSystem().stream().filter(it -> realmId.equals(it.getRealmId())).map(ExternalSystemEntity::getLabel).collect(Collectors.toList());
+    public List<String> getAllExternalSystemLabelsForRealm(String realmId) {
+        return userPostRepository.getAllExternalSystemForRealm(realmId).stream().map(ExternalSystemEntity::getLabel).collect(Collectors.toList());
     }
 
     public UserPostResponse addSystemRole(ExternalSystemRoleRequest externalSystemRoleRequest) throws NotFoundException {
@@ -162,7 +162,7 @@ public class UserPostService {
         return DataMapper.toUserPostResponse(userPostRepository.update(userPost));
     }
 
-    public UserPostResponse addAllSystemRole(String postId) throws NotFoundException {
+    public UserPostResponse addAllSystemRole(String postId, String realmId) throws NotFoundException {
 
         UserPostEntity userPost = userPostRepository.getUserPost(postId);
         if (userPost == null) {
@@ -174,7 +174,7 @@ public class UserPostService {
             systemRoles = new HashSet<>();
         }
 
-        systemRoles.addAll(userPostRepository.getAllExternalSystemRole());
+        systemRoles.addAll(userPostRepository.getAllExternalSystemRoleForRealm(realmId));
         userPost.setSystemRoles(systemRoles);
 
         return DataMapper.toUserPostResponse(userPostRepository.update(userPost));
@@ -216,7 +216,9 @@ public class UserPostService {
 
         UserPostResponse userPost = save(userPostRequest);
 
-        addAllSystemRole(userPost.getId());
+        UserEntity user = userRepository.findUser(userPostRequest.getUserId());
+
+        addAllSystemRole(userPost.getId(), user.getRealmId());
 
         return userPost;
     }

@@ -14,6 +14,7 @@ import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostEditRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.service.UserPostService;
+import ru.alamics.sso.util.Util;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -184,8 +185,11 @@ public class UserPostResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public Response getAllSystems() {
+        String rawPath = session.getContext().getUri().getAbsolutePath().getRawPath();
+
+        String realmId = Util.getRealm(null, rawPath);
         return JsonResponse.success()
-                .addResult("systems", userPostService.getExternalSystems())
+                .addResult("systems", userPostService.getExternalSystemsForRealm(realmId))
                 .build();
     }
 
