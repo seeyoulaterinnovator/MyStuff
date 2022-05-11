@@ -1836,7 +1836,7 @@
         </addColumn>
         <sql>
 
-            update EXT_SYSTEM_ROLE set realm_id = 'user' where NAME = 'access_granted';
+            update EXT_SYSTEM_ROLE set realm_id = 'user';
 
         </sql>
     </changeSet>
@@ -1847,14 +1847,7 @@
         </addColumn>
         <sql>
 
-            update EXTERNAL_SYSTEM set realm_id = 'user' where NAME = 'lkb2b';
-            update EXTERNAL_SYSTEM set realm_id = 'user' where NAME = 'dmp-kc-sit';
-            update EXTERNAL_SYSTEM set realm_id = 'user' where NAME = 'forpost';
-            update EXTERNAL_SYSTEM set realm_id = 'user' where NAME = 'itglobal';
-            update EXTERNAL_SYSTEM set realm_id = 'user' where NAME = 'oats';
-            update EXTERNAL_SYSTEM set realm_id = 'user' where NAME = 'b2b';
-            update EXTERNAL_SYSTEM set realm_id = 'user' where NAME = 'app_b2b';
-            update EXTERNAL_SYSTEM set realm_id = 'user' where NAME = 'ec-dev';
+            update EXTERNAL_SYSTEM set realm_id = 'user';
 
         </sql>
     </changeSet>
