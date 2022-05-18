@@ -9,7 +9,7 @@
 }
 
 .text {
-  font-weight: 350;
+  font-weight: 400;
   font-size: 18px;
   line-height: 24px;
   color: #000;
@@ -50,11 +50,6 @@
     width: 78px;
     height: 78px;
     margin-right: 28px;
-  }
-
-  .text {
-    font-size: 15px;
-    line-height: 19px;
   }
 
   .text__email {
@@ -120,12 +115,6 @@
     font-size: 33px;
     line-height: 33px;
     padding-bottom: 18px;
-  }
-  .text {
-    font-weight: 350;
-    font-size: 18px;
-    line-height: 24px;
-    color: #222222;
   }
 
   .btn--thanks {

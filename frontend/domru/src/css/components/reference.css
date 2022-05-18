@@ -3,9 +3,9 @@
   color: #2B539B;
   &-generate-password {
      display: inline-block;
+     font-size: 16px;
       @media screen and (max-width: 1200px) {
         font-weight: 400;
-        font-size: 16px;
         line-height: 21px;
       }
       @media screen and (max-width: 640px) {

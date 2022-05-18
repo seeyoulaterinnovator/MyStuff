@@ -42,7 +42,7 @@
 
             <div class="flex md:justify-start justify-start w-full items-center text-left md:text-left xl:pb-55px md:pb-10 sm:pb-8 pb-4">
                 <div id="timer" class="text-black text-center md:text-right flex items-center my-6 md:my-0 justify-center md:justify-start verification__timer__text">
-                    Пароль действует <span id="timer-time" class="px-1 textTimer"></span><span style="font-weight: 350;font-size: 13px;line-height: 16px;color: #7585A1;opacity: 0.8;">мм:cc</span>
+                    Пароль действует <span id="timer-time" class="px-2 textTimer"></span><span style="font-weight: 400;font-size: 13px;line-height: 16px;letter-spacing: 0.05em;color: #92A5B2;opacity: 0.8;">мм:cc</span>
                 </div>
                 <#if enableRepeatCall?? && enableRepeatCall!>
                     <p class="hidden font-light text-black verification__text" id="resend">

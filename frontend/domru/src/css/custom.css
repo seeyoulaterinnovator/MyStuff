@@ -219,7 +219,8 @@ input[type="number"] {
 }
 
 .textTimer{
-  font-weight: 500;
+  font-weight: 700;
   font-size: 18px;
   line-height: 24px;
+  opacity: 0.8;
 }

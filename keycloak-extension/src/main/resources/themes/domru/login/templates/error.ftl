@@ -81,8 +81,8 @@
             <p class="error-custom-text mb-8 text-sm">
                 <#nested>
             </p>
-            <a class="btn swr-button swr-button-desktop" href="${backHref}">На главную</a>
-            <a class="btn swr-button swr-button-tablet" href="${backHref}">Спасибо</a>
+            <a class="btn btn-main swr-button swr-button-desktop" href="${backHref}">На главную</a>
+            <a class="btn btn-main swr-button swr-button-tablet" href="${backHref}">Спасибо</a>
         </div>
 
     </div>
