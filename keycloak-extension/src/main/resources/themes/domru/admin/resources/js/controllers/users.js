@@ -1008,7 +1008,16 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
     };
 
     $scope.GetPhoneCheckerResult = function () {
-        return $http.get(authUrl + '/realms/' + realm.realm + '/users-info/attribute?phone=' + $scope.GetPhoneAttr() + '&excludedUserId=' + $scope.user.id + '&realmId=' + realm.realm)
+
+        let realmName = '';
+
+        if (realm.realm == "manager"){
+            realmName = $scope.query.searchRealm;
+        } else {
+            realmName = realm.realm;
+        }
+
+        return $http.get(authUrl + '/realms/' + realm.realm + '/users-info/attribute?phone=' + $scope.GetPhoneAttr() + '&excludedUserId=' + $scope.user.id + '&realmId=' + realmName)
             .then(function (response) {
                 return angular.fromJson(response).data.results['foundUserId'];
             });
