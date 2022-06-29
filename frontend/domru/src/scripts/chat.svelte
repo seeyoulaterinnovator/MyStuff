@@ -14,12 +14,14 @@
     isOpen = !isOpen
   };
 
+  const host = location.hostname;
+
   onMount(() => {
     const chat = new ErChat({
       nickname: 'Пользователь',
       subject: 'Вопросы со страницы авторизации',
       city: Cookie.get('city-domain') || 'yar',
-      isProd: true
+      isProd: !(host.includes('sso-balancer') || host.includes('localhost'))
     });
     chat.attach(chatContent);
   });
