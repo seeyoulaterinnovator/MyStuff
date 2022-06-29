@@ -14,14 +14,12 @@
     isOpen = !isOpen
   };
 
-  const host = location.hostname;
-
   onMount(() => {
     const chat = new ErChat({
       nickname: 'Пользователь',
       subject: 'Вопросы со страницы авторизации',
       city: Cookie.get('city-domain') || 'yar',
-      isProd: !(host.includes('sso-balancer') || host.includes('localhost'))
+      isProd: process.env.SVELTE_APP_ENVIRONMENT === 'production'
     });
     chat.attach(chatContent);
   });
