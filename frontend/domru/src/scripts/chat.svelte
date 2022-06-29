@@ -6,7 +6,7 @@
   let chatContent;
   let chatWrapper;
   let isOpen = false;
-  let showChat = isFramed === undefined || isFramed === false;
+  let showChat = process.env.SVELTE_APP_ENVIRONMENT && ( isFramed === undefined || isFramed === false);
 
   console.log("isFramed s " + isFramed);
 
