@@ -1,0 +1,231 @@
+@font-face {
+  font-family: 'pass';
+  font-style: normal;
+  font-weight: 400;
+  src: url(data:application/font-woff;charset=utf-8;base64,d09GRgABAAAAAATsAA8AAAAAB2QAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAABGRlRNAAABWAAAABwAAAAcg9+z70dERUYAAAF0AAAAHAAAAB4AJwANT1MvMgAAAZAAAAA/AAAAYH7AkBhjbWFwAAAB0AAAAFkAAAFqZowMx2N2dCAAAAIsAAAABAAAAAQAIgKIZ2FzcAAAAjAAAAAIAAAACAAAABBnbHlmAAACOAAAALkAAAE0MwNYJ2hlYWQAAAL0AAAAMAAAADYPA2KgaGhlYQAAAyQAAAAeAAAAJAU+ATJobXR4AAADRAAAABwAAAAcCPoA6mxvY2EAAANgAAAAEAAAABAA5gFMbWF4cAAAA3AAAAAaAAAAIAAKAE9uYW1lAAADjAAAARYAAAIgB4hZ03Bvc3QAAASkAAAAPgAAAE5Ojr8ld2ViZgAABOQAAAAGAAAABuK7WtIAAAABAAAAANXulPUAAAAA1viLwQAAAADW+JM4eNpjYGRgYOABYjEgZmJgBEI2IGYB8xgAA+AANXjaY2BifMg4gYGVgYVBAwOeYEAFjMgcp8yiFAYHBl7VP8wx/94wpDDHMIoo2DP8B8kx2TLHACkFBkYA8/IL3QB42mNgYGBmgGAZBkYGEEgB8hjBfBYGDyDNx8DBwMTABmTxMigoKKmeV/3z/z9YJTKf8f/X/4/vP7pldosLag4SYATqhgkyMgEJJnQFECcMOGChndEAfOwRuAAAAAAiAogAAQAB//8AD3jaY2BiUGJgYDRiWsXAzMDOoLeRkUHfZhM7C8Nbo41srHdsNjEzAZkMG5lBwqwg4U3sbIx/bDYxgsSNBRUF1Y0FlZUYBd6dOcO06m+YElMa0DiGJIZUxjuM9xjkGRhU2djZlJXU1UDQ1MTcDASNjcTFQFBUBGjYEkkVMJCU4gcCKRTeHCk+fn4+KSllsJiUJEhMUgrMUQbZk8bgz/iA8SRR9qzAY087FjEYD2QPDDAzMFgyAwC39TCRAAAAeNpjYGRgYADid/fqneL5bb4yyLMwgMC1H90HIfRkCxDN+IBpFZDiYGAC8QBbSwuceNpjYGRgYI7594aBgcmOAQgYHzAwMqACdgBbWQN0AAABdgAiAAAAAAAAAAABFAAAAj4AYgI+AGYB9AAAAAAAKgAqACoAKgBeAJIAmnjaY2BkYGBgZ1BgYGIAAUYGBNADEQAFQQBaAAB42o2PwUrDQBCGvzVV9GAQDx485exBY1CU3PQgVgIFI9prlVqDwcZNC/oSPoKP4HNUfQLfxYN/NytCe5GwO9/88+/MBAh5I8C0VoAtnYYNa8oaXpAn9RxIP/XcIqLreZENnjwvyfPieVVdXj2H7DHxPJH/2/M7sVn3/MGyOfb8SWjOGv4K2DRdctpkmtqhos+D6ISh4kiUUXDj1Fr3Bc/Oc0vPqec6A8aUyu1cdTaPZvyXyqz6Fm5axC7bxHOv/r/dnbSRXCk7+mpVrOqVtFqdp3NKxaHUgeod9cm40rtrzfrt2OyQa8fppCO9tk7d1x0rpiQcuDuRkjjtkHt16ctbuf/radZY52/PnEcphXpZOcofiEZNcQAAeNpjYGIAg///GBgZsAF2BgZGJkZmBmaGdkYWRla29JzKggxD9tK8TAMDAxc2D0MLU2NjENfI1M0ZACUXCrsAAAABWtLiugAA) format('woff');
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+
+  &--required {
+    /*.field__label::before {*/
+    /*  width: 8px;*/
+    /*  height: 8px;*/
+
+    /*  margin-right: 4px;*/
+
+    /*  vertical-align: middle;*/
+
+    /*  border-radius: 50%;*/
+
+    /*  content: '';*/
+
+    /*  @apply .bg-extra;*/
+    /*}*/
+  }
+
+  &--error {
+    .field__input {
+      @apply .border-accentRed;
+    }
+  }
+
+  &--row {
+    flex-direction: row;
+  }
+}
+
+.field__container {
+  display: flex;
+  flex-flow: column-reverse;
+  position: relative;
+}
+
+.field__open {
+  cursor:pointer;
+  position: absolute;
+  right: 10px;
+  transform: translateY(-50%);
+  top: 63%;
+}
+.eye {
+  opacity: 0.2;
+  margin-bottom: 10px;
+}
+.field__open:hover .eye {
+  opacity: 0.5;
+}
+
+.field__input {
+  @apply .rounded-lg .pt-2 .pb-3 .px-3 .text-black .outline-none;
+
+  border-radius: 0;
+
+  border-bottom: 2px solid #000000;
+  box-shadow: inset 0 0 0 50px #fff;
+  height: 40px;
+  transition: border-color 0.1s ease-in;
+  @media (min-width: 1199px) {
+    height: 48px;
+  }
+
+  &:hover
+  {
+    @apply .border-extra;
+  }
+  &:focus
+  {
+    @apply .border-extra;
+  }
+
+  &::placeholder {
+     color: rgba(0, 0, 0, 0.6);
+     font-size: 16px;
+     line-height: 20px;
+    @media (min-width: 1200px) {
+      font-size: 17px;
+    }
+  }
+}
+
+.field__input:placeholder-shown + .field__label {
+  color: transparent;
+  background-color: transparent;
+}
+.field__input:-ms-input-placeholder + .field__label {
+  color: transparent;
+  background-color: transparent;
+}
+
+.field__input[type=password]:not(:placeholder-shown) {
+  font-family: 'pass', sans-serif;
+}
+
+.field__label {
+  @apply .text-main;
+
+  position: absolute;
+  top: -6.2px;
+  background-color: white;
+  padding-left: 2px;
+  padding-right: 2px;
+  display: flex;
+  align-items: center;
+  transition: color .3s ease-in-out;
+  margin-bottom: 3px;
+  font-size: 10px;
+  line-height: 13px;
+
+  @media (min-width: 640px) {
+    font-size: 13px;
+  }
+}
+
+.field__error-message {
+  @apply .text-accentRed;
+  height: 0;
+  font-size: 13px;
+  line-height: 13px;
+  text-align: right;
+}
+
+.pass-fields {
+  min-width: 270px;
+  max-width: 270px;
+
+  @media (max-width: 1199px) {
+    min-width: 235px;
+    max-width: 245px;
+  }
+
+  @media (max-width: 479px) {
+    width: 85%;
+    max-width: 100%;
+  }
+}
+
+.reg-fields {
+  min-width: 225px;
+  max-width: 225px;
+
+@media (max-width: 1199px) {
+  min-width: 210px;
+  max-width: 210px;
+}
+
+@media (max-width: 479px) {
+  width: 100%;
+  max-width: 100%;
+}
+}
+
+.pass-fields--change-pass {
+  min-width: unset;
+
+  @media (max-width: 1199px) {
+    min-width: 210px;
+  }
+
+  @media (max-width: 479px) {
+    width: 100%;
+  }
+}
+
+
+.field__input--city {
+  width: 384px;
+
+  @media (max-width: 1199px) {
+    width: 280px;
+  }
+
+  @media (max-width: 959px) {
+    width: 288px;
+  }
+
+  @media (max-width: 639px) {
+    width: 231px;
+  }
+
+  @media (max-width: 479px) {
+    width: 240px;
+  }
+}
+
+.generated-password-text {
+  font-size: 15px;
+  line-height: 1rem;
+  white-space: nowrap;
+  opacity: 0.5;
+
+  @media (max-width: 1199px) {
+    font-size: 14px;
+  }
+}
+
+.generated-password-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 48px;
+  @media (max-width: 1199px) {
+    height: 40px;
+  }
+}
+
+
+.passw_ok {
+  position: absolute;
+  right: -12px;
+  top: -10px;
+}
+
+.field-good {
+  @apply .border-accentGreen-700;
+}
+
+.timer_minutes {
+  color: rgba(0, 0, 0, 1);
+}

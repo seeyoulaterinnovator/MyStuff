@@ -1,0 +1,133 @@
+.btn {
+  @apply .block .uppercase .tracking-wider .px-2 .rounded-lg .shadow .font-normal;
+
+  border-radius: 2em;
+
+
+  min-width: fit-content;
+  height: 44px;
+  transition: 0.2s ease-in-out;
+
+  @media (min-width: 480px) {
+    @apply .px-3;
+  }
+
+  @media (min-width: 640px) {
+    @apply .px-4;
+  }
+
+  @media (min-width: 960px) {
+    @apply .px-5;
+  }
+
+  @media (min-width: 1199px) {
+    height: 48px;
+  }
+
+  &:disabled {
+    @apply .opacity-40 .cursor-not-allowed;
+    &:hover {
+       transform: none;
+       @apply .shadow;
+    }
+  }
+
+  &:hover {
+    transform: translate(1px, -1px);
+    @apply .shadow-md;
+  }
+
+  &:focus {
+    @apply .outline-none;
+  }
+
+  &:active {
+    transform: translate(0, 0);
+    @apply .shadow-inner;
+  }
+}
+
+.btn-border{
+  border: 2px solid #4F4BFE;
+}
+
+.btn-main {
+  @apply .bg-extra .text-white;
+
+  &:hover,
+  &:active {
+    @apply .bg-extra-700-hover;
+  }
+}
+
+.btn-cancel {
+  color: #007BFB;
+}
+
+.btn-sell {
+  @apply .bg-accentBlue .text-white;
+
+  &:hover,
+  &:active {
+    @apply .bg-accentBlue-700-hover;
+  }
+}
+
+.btn__choose {
+  width: 203px;
+  box-sizing: border-box;
+
+  @media screen and (max-width: 959px) {
+    width: 96px;
+  }
+
+  @media screen and (max-width: 639px) {
+    width: 88px;
+  }
+
+  @media screen and (max-width: 479px) {
+    display: none;
+  }
+}
+
+.phone-icon {
+  width: 29px;
+  height: 29px;
+
+  @media screen and (max-width: 639px) {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.city-icon {
+  width: 23px;
+  height: 23px;
+}
+
+a.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media screen and (max-width: 479px) {
+  .btn {
+    font-size: 13px;
+  }
+
+  .btn.w-1\/2 {
+    width: 100%;
+  }
+
+  .btn.btn-enter {
+    max-width: 136px;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 320px) {
+  .btn-enter {
+    width: 134px;
+  }
+}
