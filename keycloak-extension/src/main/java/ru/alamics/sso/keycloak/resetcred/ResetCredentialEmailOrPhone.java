@@ -11,6 +11,7 @@ import org.keycloak.models.utils.FormMessage;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import ru.alamics.sso.jpa.entity.common.BlockType;
 import ru.alamics.sso.keycloak.auth.AbstractAuthenticator;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.resetcred.factory.ResetFactory;
@@ -25,6 +26,7 @@ import ru.alamics.sso.user.UserServiceUtil;
 
 import javax.ws.rs.core.Response;
 import java.util.Collections;
+import java.util.Objects;
 
 
 @Slf4j
@@ -69,8 +71,9 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
 
         if (user == null && username.startsWith("+7")) {
             userFind = findUserByConvertUsernameToPhone(realm, username);
-            if (userFind != null && userFind.isEnabled()) {
+            if (userFind != null && !userFind.getAttributes().stream().anyMatch(it -> it.getName().equals(BlockType.MANAGER_BLOCK.getType()))) {
                 user = context.getSession().users().getUserById(userFind.getId(), context.getSession().realms().getRealm(userFind.getRealmId()));
+                Objects.requireNonNull(user).setEnabled(true);
                 username = userFind.getUsername();
                 authenticationSession.setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, userFind.getEmail());
                 context.getHttpRequest().getDecodedFormParameters().replace("username", Collections.singletonList(userFind.getEmail()));
@@ -85,9 +88,14 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
             return;
         }
 
-        if (userFind != null && !userFind.isEnabled() || user != null && !user.isEnabled()) {
+        if (userFind != null && Objects.requireNonNull(userFind).getAttributes()
+                .stream().anyMatch(it -> it.getName().equals(BlockType.MANAGER_BLOCK.getType()))
+                || user != null
+                && !user.getAttribute(BlockType.MANAGER_BLOCK.getType()).isEmpty()) {
+
             context.forkWithErrorMessage(new FormMessage(Messages.ACCOUNT_DISABLED));
         } else {
+            Objects.requireNonNull(user).setEnabled(true);
             context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT));
         }
 
@@ -115,7 +123,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
 
         String clientId = context.getSession().getContext().getClient().getClientId();
 
-            if (CLIENT_ID_B2B.equals(clientId) || CLIENT_ID_DMP_KC_SIT.equals(clientId)){
+        if (CLIENT_ID_B2B.equals(clientId) || CLIENT_ID_DMP_KC_SIT.equals(clientId)) {
             return false;
         }
 

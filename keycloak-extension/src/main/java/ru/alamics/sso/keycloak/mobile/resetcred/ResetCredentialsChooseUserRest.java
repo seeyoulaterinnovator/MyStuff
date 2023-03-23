@@ -14,6 +14,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import ru.alamics.sso.jpa.entity.common.BlockType;
 import ru.alamics.sso.keycloak.auth.AbstractAuthenticator;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
@@ -23,6 +24,7 @@ import ru.alamics.sso.user.UserServiceUtil;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.util.Collections;
+import java.util.Objects;
 
 public class ResetCredentialsChooseUserRest extends AbstractAuthenticator {
 
@@ -95,7 +97,7 @@ public class ResetCredentialsChooseUserRest extends AbstractAuthenticator {
 
         if (user == null && username.startsWith("+7")) {
             userFind = findUserByConvertUsernameToPhone(realm, username);
-            if (userFind != null && userFind.isEnabled()) {
+            if (userFind != null && !userFind.getAttributes().stream().anyMatch(it -> it.getName().equals(BlockType.MANAGER_BLOCK.getType()))) {
                 user = context.getSession().users().getUserById(userFind.getId(), context.getSession().realms().getRealm(userFind.getRealmId()));
                 username = userFind.getUsername();
                 authenticationSession.setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, userFind.getEmail());
@@ -111,14 +113,17 @@ public class ResetCredentialsChooseUserRest extends AbstractAuthenticator {
             return;
         }
 
-        if (userFind != null && !userFind.isEnabled() || user != null && !user.isEnabled()) {
+        if (userFind != null && Objects.requireNonNull(userFind).getAttributes()
+                .stream().anyMatch(it -> it.getName().equals(BlockType.MANAGER_BLOCK.getType()))
+                || user != null
+                && !user.getAttribute(BlockType.MANAGER_BLOCK.getType()).isEmpty()) {
             Response challenge = JsonResponse.fail().message("Пользователь заблокирован").build();
             context.failureChallenge(AuthenticationFlowError.USER_DISABLED, challenge);
             return;
         }
-
         context.setUser(user);
 
+        Objects.requireNonNull(user).setEnabled(true);
         authenticationSession.setAuthNote("MP", "grant_type");
         authenticationSession.setAuthNote(NEED_SEND_EMAIL_CODE, NEED_SEND_EMAIL_CODE);
 
