@@ -22,6 +22,7 @@ import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.port.RiasApiService;
 import ru.alamics.sso.registration.service.UserFindService;
+import ru.alamics.sso.user.UserAttributeService;
 import ru.alamics.sso.user.UserServiceUtil;
 
 import javax.ws.rs.core.Response;
@@ -41,6 +42,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
     private final RiasApiService riasApiService;
     private final UserFindService userFindService;
     private final ApplicationProperties properties;
+    private final UserAttributeService attributeService;
 
     ResetCredentialEmailOrPhone(KeycloakSession session) {
         this.session = session;
@@ -52,6 +54,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
         log.info("Got userFindService from context");
 
         properties = Lookup.lookup(ApplicationProperties.class);
+        attributeService = new UserAttributeService(session, userFindService);
     }
 
     @Override
@@ -71,7 +74,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
 
         if (user == null && username.startsWith("+7")) {
             userFind = findUserByConvertUsernameToPhone(realm, username);
-            if (userFind != null && !userFind.getAttributes().stream().anyMatch(it -> it.getName().equals(BlockType.MANAGER_BLOCK.getType()))) {
+            if (userFind != null && userFind.getAttributes().stream().noneMatch(it -> it.getName().equals(BlockType.MANAGER_BLOCK.getType()))) {
                 user = context.getSession().users().getUserById(userFind.getId(), context.getSession().realms().getRealm(userFind.getRealmId()));
                 Objects.requireNonNull(user).setEnabled(true);
                 username = userFind.getUsername();
@@ -96,6 +99,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
             context.forkWithErrorMessage(new FormMessage(Messages.ACCOUNT_DISABLED));
         } else {
             Objects.requireNonNull(user).setEnabled(true);
+            attributeService.deleteAttributes(user.getId(), Collections.singletonList(BlockType.SYSTEM_BLOCK.getType()));
             context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT));
         }
 

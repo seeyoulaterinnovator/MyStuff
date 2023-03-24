@@ -94,7 +94,7 @@ public class UserManageResource {
     private void addManagerBlockAttribute(UserModel user) {
         if (!user.isEnabled()) {
             try {
-                if (!Objects.isNull(user.getAttribute(BlockType.SYSTEM_BLOCK.getType()))) {
+                if (Objects.nonNull(user.getAttribute(BlockType.SYSTEM_BLOCK.getType()))) {
                     attributeService.deleteAttributes(user.getId(), Collections.singletonList(BlockType.SYSTEM_BLOCK.getType()));
                 }
                 attributeService.createAttributes(user.getId(),
@@ -106,7 +106,7 @@ public class UserManageResource {
         } else {
             attributeService.deleteAttributes(user.getId(), Collections.singletonList(BlockType.MANAGER_BLOCK.getType()));
 
-            if (!Objects.isNull(user.getAttribute(BlockType.SYSTEM_BLOCK.getType()))) {
+            if (Objects.nonNull(user.getAttribute(BlockType.SYSTEM_BLOCK.getType()))) {
                 attributeService.deleteAttributes(user.getId(), Collections.singletonList(BlockType.SYSTEM_BLOCK.getType()));
             }
         }
