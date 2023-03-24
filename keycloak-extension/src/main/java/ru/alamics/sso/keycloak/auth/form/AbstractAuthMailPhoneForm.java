@@ -18,6 +18,7 @@ import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.messages.Messages;
+import ru.alamics.sso.jpa.entity.common.BlockType;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.util.Util;
 
@@ -117,6 +118,9 @@ public abstract class AbstractAuthMailPhoneForm extends AbstractUsernameFormAuth
 
         if (!validatePassword(context, user, inputData)) {
             return false;
+        }
+        if(user.getAttribute(BlockType.MANAGER_BLOCK.getType()).isEmpty()) {
+            user.setEnabled(true);
         }
 
         if (!enabledUser(context, user)) {
