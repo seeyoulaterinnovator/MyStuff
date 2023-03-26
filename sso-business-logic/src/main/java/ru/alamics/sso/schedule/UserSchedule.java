@@ -144,6 +144,7 @@ public class UserSchedule {
             try {
                 String passwordPolicy = realm.getPasswordPolicy(); // forceExpiredPasswordChange(365) and passwordBlacklist(black_list_password.txt)
                 if (Objects.nonNull(passwordPolicy)) {
+                    //int charNumbs = PasswordPolicy.FORCE_EXPIRED_ID.length() + 3;
                     int index = passwordPolicy.indexOf(PasswordPolicy.FORCE_EXPIRED_ID);
                     if (index >= 0) {
                         int endOfPassPolicyIndex = passwordPolicy.indexOf(")", index);

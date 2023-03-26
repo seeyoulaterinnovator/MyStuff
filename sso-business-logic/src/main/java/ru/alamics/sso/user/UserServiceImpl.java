@@ -100,6 +100,9 @@ public class UserServiceImpl implements UserService {
         // create report
         ImportUsersReportModel importUsersReport = importUsersReportService.createImportUsersReport(realm, Util.getFileName(content), dataList);
 
+
+        //List<Future<String>> asyncList = new ArrayList<>();
+
         int wndw = 200;
 
         int first = 0;
@@ -109,10 +112,21 @@ public class UserServiceImpl implements UserService {
         while (first < dataList.size()) {
             List<ImportUsersDataModel> dataListBuffer = dataList.subList(first, Math.min(last, dataList.size()));
 
+            //CompletableFuture<String> cf = new CompletableFuture<>();
+            //asyncList.add(cf);
+
             importService.createImportUsers(importUsersReport, dataListBuffer, null, auth, session);
             first = last;
             last += wndw;
         }
+
+        /*
+        long countDone = -1;
+        while (asyncList.size() > countDone) {
+            countDone = asyncList.stream().filter(f -> (f.isCancelled() || f.isDone())).count();
+            Thread.sleep(100);
+        }
+        */
 
         importUsersReport.setStatus(ImportUsersReportStatus.DONE);
         importUsersReportService.updateReportStatus(importUsersReport);

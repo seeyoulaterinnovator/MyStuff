@@ -25,7 +25,7 @@
          </form>
         <form id="totpForm" action="${url.loginAction}" method="POST">
         <#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон -->
-        <p class="pb-2 sm:pb-3 md:pb-4 mt-6 xl:mt-8 sm:mt-6 text-accentRed-1100 verification__error__text"> ${error!}<p>
+        <p class="pb-2 sm:pb-3 md:pb-4 text-accentRed-1100"> ${error!}<p>
             <div class="flex justify-between w-full xl:pb-37px md:pb-10 sm:pb-8 pb-4">
                 <#list 1..lengthCode as x>
                     <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;" name="smscode-${x}" class="text-center align-middle w-10 h-10 sm:w-14 sm:h-14 border rounded-lg focus:border-extra outline-none" autocomplete="off" />
@@ -41,8 +41,8 @@
             <input id="smscode" name="smscode" class="hidden" />
 
             <div class="flex md:justify-start justify-start w-full items-center text-left md:text-left xl:pb-55px md:pb-10 sm:pb-8 pb-4">
-                <div id="timer" class="text-black text-center md:text-right flex items-center my-6 md:my-0 justify-center md:justify-start verification__timer__text">
-                    Пароль действует <span id="timer-time" class="px-2 textTimer"></span><span style="font-weight: 400;font-size: 13px;line-height: 16px;letter-spacing: 0.05em;color: #92A5B2;opacity: 0.8;">мм:cc</span>
+                <div id="timer" class="text-black text-center md:text-right flex items-center my-6 md:my-0 justify-center md:justify-start">
+                    Пароль действует <span id="timer-time" class="px-1 textTimer"></span><span style="font-weight: 350;font-size: 13px;line-height: 16px;color: #7585A1;opacity: 0.8;">мм:cc</span>
                 </div>
                 <#if enableRepeatCall?? && enableRepeatCall!>
                     <p class="hidden font-light text-black verification__text" id="resend">

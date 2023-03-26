@@ -9,17 +9,17 @@
 }
 
 .text {
-  font-weight: 400;
-  font-size: 18px;
-  line-height: 24px;
+  font-size: 17px;
+  line-height: 22px;
   color: #000;
+  opacity: 0.5;
 }
 
 .text__title {
-  font-weight: 700;
-  font-size: 46px;
-  line-height: 52px;
-  padding-bottom: 24px;
+  font-weight: bold;
+  font-size: 36px;
+  line-height: 42px;
+  padding-bottom: 35px;
   opacity: 1;
   margin-top: 12px;
 }
@@ -37,12 +37,11 @@
 }
 
 .text--far {
-  padding-bottom: 40px;
+  padding-bottom: 35px;
 }
 
 .btn--thanks {
-  width: 120px;
-  height: 48px;
+  width: 203px;
 }
 
 @media screen and (max-width: 1199px) {
@@ -50,6 +49,11 @@
     width: 78px;
     height: 78px;
     margin-right: 28px;
+  }
+
+  .text {
+    font-size: 15px;
+    line-height: 19px;
   }
 
   .text__email {
@@ -78,6 +82,15 @@
     margin-right: 0;
   }
 
+  .text__title {
+    font-size: 32px;
+    line-height: 38px;
+    padding-bottom: 15px;
+  }
+
+  .text--far {
+    padding-bottom: 30px;
+  }
 }
 
 
@@ -86,39 +99,29 @@
     margin-bottom: 12px;
   }
 
+  .text {
+    font-size: 14px;
+    line-height: 19px;
+  }
+
   .text__email {
-    font-weight: 350;
-    font-size: 18px;
-    line-height: 24px;
+    font-size: 16px;
+    line-height: 20px;
   }
 
   .text__title {
-    font-weight: 700;
-    font-size: 35px;
-    line-height: 40px;
-    padding-bottom: 18px;
+    font-size: 27px;
+    line-height: 32px;
+    padding-bottom: 7px;
   }
-
-  .btn--thanks {
-    height: 44px;
-  }
-
 }
 
-@media screen and (max-width: 321px) {
+@media screen and (max-width: 479px) {
   .ok {
     margin-bottom: 16px;
   }
 
-  .text__title {
-    font-weight: 700;
-    font-size: 33px;
-    line-height: 33px;
-    padding-bottom: 18px;
-  }
-
   .btn--thanks {
-    height: 44px;
     width: 100%;
   }
 }

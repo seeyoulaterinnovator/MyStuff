@@ -19,9 +19,6 @@ export default (
   const refreshPasswordButton = document.getElementById(
     'refresh-password-button',
   );
-  const refreshPasswordLoader = document.getElementById(
-    'refresh-password-loader',
-  );
 
   const generatedPassword = document.getElementById('generated-password');
 
@@ -39,17 +36,17 @@ export default (
 
   generatePasswordButton.addEventListener('click', () => {
     generatePassword();
-    refreshPasswordLoader.classList.add('rotate');
+    refreshPasswordButton.classList.add('rotate');
     setTimeout(() => {
-      refreshPasswordLoader.classList.remove('rotate');
+      refreshPasswordButton.classList.remove('rotate');
     }, 500);
   });
 
   refreshPasswordButton.addEventListener('click', () => {
     generatePassword();
-    refreshPasswordLoader.classList.add('rotate');
+    refreshPasswordButton.classList.add('rotate');
     setTimeout(() => {
-      refreshPasswordLoader.classList.remove('rotate');
+      refreshPasswordButton.classList.remove('rotate');
     }, 500);
   });
 

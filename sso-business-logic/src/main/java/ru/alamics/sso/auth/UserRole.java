@@ -75,7 +75,7 @@ public class UserRole {
         postRoleNames.addAll(postRepository.getAllUserPostRoles().stream()
                 .map(UserPostRoleEntity::getName).collect(Collectors.toSet()));
 
-        postRoleNames.addAll(postRepository.getAllExternalSystemRoleForRealm(user.getRealmId()).stream()
+        postRoleNames.addAll(postRepository.getAllExternalSystemRole().stream()
                 .map(ExternalSystemRoleEntity::getName).collect(Collectors.toSet()));
 
         roleRepository.unbindRolesToUserByNames(user, postRoleNames);

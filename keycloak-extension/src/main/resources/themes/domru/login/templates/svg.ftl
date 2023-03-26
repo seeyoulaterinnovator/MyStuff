@@ -1,4 +1,4 @@
-<#macro reloadButton color="black" width=16 height=16>
+<#macro reloadButton color="black" width=32 height=32>
   <svg
     width=${width}
     height=${height}
@@ -7,7 +7,6 @@
     xmlns="http://www.w3.org/2000/svg"
     style="display: initial;"
     class="fill-current text-${color}"
-    id="refresh-password-loader"
   >
     <path
       fill-rule="evenodd"

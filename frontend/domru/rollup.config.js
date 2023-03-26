@@ -6,11 +6,9 @@ import json from 'rollup-plugin-json';
 import svelte from 'rollup-plugin-svelte';
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
-import {terser} from 'rollup-plugin-terser';
+import { terser } from 'rollup-plugin-terser';
 import postcss from 'rollup-plugin-postcss';
 import babel from 'rollup-plugin-babel';
-import includeEnv from "svelte-environment-variables";
-import replace from '@rollup/plugin-replace';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -36,10 +34,6 @@ export default {
     file: `${build}/bundle.min.js`,
   },
   plugins: [
-    replace({
-      ...includeEnv()
-    }),
-
     copy({
       targets: [
         { src: 'src/assets/images/*', dest: `${build}/images` },

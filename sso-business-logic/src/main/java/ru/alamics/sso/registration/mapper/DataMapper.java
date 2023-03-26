@@ -85,7 +85,6 @@ public class DataMapper {
         return ExternalSystemDto.builder()
                 .id(externalSystem.getId())
                 .name(externalSystem.getName())
-                .realmId(externalSystem.getRealmId())
                 .label(externalSystem.getLabel())
                 .build();
     }
@@ -122,8 +121,9 @@ public class DataMapper {
         if (externalSystemRoles == null || externalSystemRoles.isEmpty()) {
             return null;
         }
-        return externalSystemRoles.stream()
+        List<ExternalSystemRoleDto> externalSystemDtos = externalSystemRoles.stream()
                 .map(DataMapper::toExternalSystemRoleDto).collect(Collectors.toList());
+        return externalSystemDtos;
     }
 
 

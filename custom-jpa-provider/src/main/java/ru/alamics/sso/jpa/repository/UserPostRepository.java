@@ -110,14 +110,13 @@ public class UserPostRepository {
                 .getResultList();
     }
 
-    public ExternalSystemRoleEntity getExternalSystemRole(String sysName, String realmId) {
+    public ExternalSystemRoleEntity getExternalSystemRole(String sysName) {
         List<ExternalSystemRoleEntity> result = em.createQuery(
                 "select role " +
                         "from ExternalSystemRoleEntity role \n" +
                         "join ExternalSystemEntity sys on role.externalSystem = sys.id \n" +
-                        "where sys.name = :sysName and sys.realmId = :realmId ", ExternalSystemRoleEntity.class)
+                        "where sys.name = :sysName", ExternalSystemRoleEntity.class)
                 .setParameter("sysName", sysName)
-                .setParameter("realmId", realmId)
                 .getResultList();
         return CollectionUtils.nullOrGet(result, 0);
     }
@@ -154,15 +153,13 @@ public class UserPostRepository {
 
     }
 
-    public List<ExternalSystemEntity> getAllExternalSystemForRealm(String realmId) {
-        return em.createQuery("select sys from ExternalSystemEntity sys where sys.realmId =:realm_id ", ExternalSystemEntity.class)
-                .setParameter("realm_id", realmId)
+    public List<ExternalSystemEntity> getAllExternalSystem() {
+        return em.createQuery("select sys from ExternalSystemEntity sys", ExternalSystemEntity.class)
                 .getResultList();
     }
 
-    public List<ExternalSystemRoleEntity> getAllExternalSystemRoleForRealm(String realmId) {
-        return em.createQuery("select role from ExternalSystemRoleEntity role where role.realmId =:realm_id ", ExternalSystemRoleEntity.class)
-                .setParameter("realm_id", realmId)
+    public List<ExternalSystemRoleEntity> getAllExternalSystemRole() {
+        return em.createQuery("select role from ExternalSystemRoleEntity role", ExternalSystemRoleEntity.class)
                 .getResultList();
     }
 

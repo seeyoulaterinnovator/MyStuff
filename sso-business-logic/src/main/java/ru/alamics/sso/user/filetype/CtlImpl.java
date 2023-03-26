@@ -24,6 +24,7 @@ public class CtlImpl implements FileModel {
         csvReader = new CSVReaderBuilder(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).withCSVParser(parser).build();
 
         this.rows = csvReader.readAll();
+        //rows.removeAll(rows.stream().limit(COUNT_ROW_INDENT).skip(1).collect(Collectors.toList()));
 
         Optional.ofNullable(this.rows).orElseGet(Collections::emptyList)
                 .forEach(row -> IntStream.range(0, row.length)

@@ -302,11 +302,11 @@ public class MigrationService {
             postId = e.getPostId();
         }
 
-        userPostService.addAllSystemRole(postId, user.getRealmId());
+        userPostService.addAllSystemRole(postId);
 
         if (modified) {
             userImport.setRole(DEFAULT_ROLE_STR);
-            userImport.setSystems(Util.join(userPostService.getAllExternalSystemLabelsForRealm(user.getRealmId()), ","));
+            userImport.setSystems(Util.join(userPostService.getAllExternalSystemLabels(), ","));
         }
 
         return modified;

@@ -47,6 +47,8 @@ public class RiasCheckProvider implements FormAction {
         context.getEvent().detail(Details.REGISTER_METHOD, "form");
         String eventError = Errors.INVALID_REGISTRATION;
 
+
+//        User user = mapper.mapToUser(context.getUser());
         User user = User.builder()
                 .email(formData.getFirst(FIELD_EMAIL))
                 .phone(formData.getFirst(FIELD_PHONE))

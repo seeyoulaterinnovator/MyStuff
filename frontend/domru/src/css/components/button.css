@@ -2,28 +2,24 @@
   @apply .block .uppercase .tracking-wider .p-4 .rounded-lg .shadow;
 
   border-radius: 8px;
-  height: 48px;
+  height: 40px;
   padding: 0;
+  transition: 0.2s ease-in-out;
+
 
   @media (min-width: 1199px) {
-  }
-
-  @media screen and (max-width: 640px) {
-    height: 44px;
-  }
-
-  @media screen and (max-width: 320px) {
-    height: 44px;
   }
 
   &:disabled {
     @apply .opacity-40 .cursor-not-allowed;
     &:hover {
+       transform: none;
        @apply .shadow;
     }
   }
 
   &:hover {
+    transform: translate(1px, -1px);
     @apply .shadow-md;
   }
 
@@ -32,6 +28,7 @@
   }
 
   &:active {
+    transform: translate(0, 0);
     @apply .shadow-inner;
   }
 }
@@ -43,13 +40,10 @@
 .btn-main {
   @apply .bg-extra .text-white;
 
-  &:hover:not(:disabled) {
-    @apply .bg-accentRed-100;
-   }
-}
-
-.btn-main:active:not(:disabled){
-  background-color: #C51F1F;
+  &:hover,
+  &:active {
+    @apply .bg-extra-700-hover;
+  }
 }
 
 .btn-sell {
@@ -70,7 +64,7 @@
   }
 
   @media screen and (max-width: 640px) {
-
+    width: 88px;
   }
 
   @media screen and (max-width: 479px) {
@@ -100,7 +94,7 @@ a.btn {
 }
 
 .btn-enter {
-  padding: 13.5px 19px 13.5px;
+  padding: 9.5px 19px 13.5px 19px;
 
   @media screen and (max-width: 479px){
     width: 50%;

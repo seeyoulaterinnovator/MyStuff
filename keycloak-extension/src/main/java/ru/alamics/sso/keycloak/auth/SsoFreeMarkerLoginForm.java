@@ -51,6 +51,12 @@ import static ru.alamics.sso.util.Util.CLIENT_B2B;
 public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     private static final String REGISTRATION_ONLY_IN_FRAME_ATTRIBUTE = "registrationOnlyInFrame";
 
+    private static final String AUTH_VIA_SMS = "loginViaSms";
+
+    private static final String AUTH_VIA_EMAIL_OR_USERNAME_AND_PASSWORD = "loginViaEmailOrUsernameAndPassword";
+
+    private static final String AUTH_VIA_PHONE_CALL = "loginViaPhoneCall";
+
     private ClientService clientService = null;
     private SettingsService settingsService = null;
 
@@ -59,6 +65,9 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
         attributes.put("redirectUrl", getRedirectUrl());
         attributes.put("hideRegistration", isHideRegistration());
+        attributes.put("loginViaSms", isLoginViaSms());
+        attributes.put("loginViaEmailOrUsernameAndPassword", isLoginViaEmailOrUsernameAndPassword());
+        attributes.put("loginViaPhoneCall", isLoginViaPhoneCall());
         attributes.put("iframe", Util.isFrame(session));
 
         settingsService = Lookup.lookup(SettingsService.class);
@@ -210,6 +219,21 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         final boolean isIframe = Util.isFrame(session);
 
         return registrationOnlyInFrame && !isIframe;
+    }
+
+    private boolean isLoginViaSms() {
+
+        return realm.getAttribute(AUTH_VIA_SMS, false);
+    }
+
+    private boolean isLoginViaEmailOrUsernameAndPassword() {
+
+        return realm.getAttribute(AUTH_VIA_EMAIL_OR_USERNAME_AND_PASSWORD, false);
+    }
+
+    private boolean isLoginViaPhoneCall() {
+
+        return realm.getAttribute(AUTH_VIA_PHONE_CALL, false);
     }
 
     private String getRedirectUrl() {

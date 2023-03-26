@@ -49,6 +49,12 @@ public class VerifyEmailFactory extends VerifyEmail {
     public void requiredActionChallenge(RequiredActionContext context) {
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
 
+//        if (context.getUser().isEmailVerified()) {
+//            context.success();
+//            authSession.removeAuthNote(Constants.VERIFY_EMAIL_KEY);
+//            return;
+//        }
+
         String email = context.getUser().getEmail();
         if (Validation.isBlank(email)) {
             context.ignore();

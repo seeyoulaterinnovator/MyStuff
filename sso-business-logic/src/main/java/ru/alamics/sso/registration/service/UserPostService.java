@@ -3,7 +3,6 @@ package ru.alamics.sso.registration.service;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.keycloak.models.jpa.entities.UserEntity;
-import ru.alamics.sso.jpa.entity.ExternalSystemEntity;
 import ru.alamics.sso.jpa.entity.ExternalSystemRoleEntity;
 import ru.alamics.sso.jpa.entity.UserPostEntity;
 import ru.alamics.sso.jpa.entity.UserPostRoleEntity;
@@ -129,16 +128,16 @@ public class UserPostService {
         return DataMapper.toUserPostRoleDtoList(userPostRepository.getAllUserPostRoles());
     }
 
-    public List<ExternalSystemRoleDto> getAllExternalSystemRoleDTO(String realmId) {
-        return DataMapper.toExternalSystemRoleDtos(userPostRepository.getAllExternalSystemRoleForRealm(realmId));
+    public List<ExternalSystemRoleDto> getAllExternalSystemRoleDTO() {
+        return DataMapper.toExternalSystemRoleDtos(userPostRepository.getAllExternalSystemRole());
     }
 
-    public List<ExternalSystemDto> getExternalSystemsForRealm(String realmId) {
-        return DataMapper.toExternalSystemDtos(userPostRepository.getAllExternalSystemForRealm(realmId));
+    public List<ExternalSystemDto> getExternalSystems() {
+        return DataMapper.toExternalSystemDtos(userPostRepository.getAllExternalSystem());
     }
 
-    public List<String> getAllExternalSystemLabelsForRealm(String realmId) {
-        return userPostRepository.getAllExternalSystemForRealm(realmId).stream().map(ExternalSystemEntity::getLabel).collect(Collectors.toList());
+    public List<String> getAllExternalSystemLabels() {
+        return userPostRepository.getAllExternalSystem().stream().map(m -> m.getLabel()).collect(Collectors.toList());
     }
 
     public UserPostResponse addSystemRole(ExternalSystemRoleRequest externalSystemRoleRequest) throws NotFoundException {
@@ -162,7 +161,7 @@ public class UserPostService {
         return DataMapper.toUserPostResponse(userPostRepository.update(userPost));
     }
 
-    public UserPostResponse addAllSystemRole(String postId, String realmId) throws NotFoundException {
+    public UserPostResponse addAllSystemRole(String postId) throws NotFoundException {
 
         UserPostEntity userPost = userPostRepository.getUserPost(postId);
         if (userPost == null) {
@@ -174,7 +173,7 @@ public class UserPostService {
             systemRoles = new HashSet<>();
         }
 
-        systemRoles.addAll(userPostRepository.getAllExternalSystemRoleForRealm(realmId));
+        systemRoles.addAll(userPostRepository.getAllExternalSystemRole());
         userPost.setSystemRoles(systemRoles);
 
         return DataMapper.toUserPostResponse(userPostRepository.update(userPost));
@@ -204,8 +203,8 @@ public class UserPostService {
         return userPostRole.getId();
     }
 
-    public Long getExternalSystemRoleId(String sysName, String realmId) throws NotFoundException {
-        ExternalSystemRoleEntity externalSystemRole = userPostRepository.getExternalSystemRole(sysName, realmId);
+    public Long getExternalSystemRoleId(String sysName) throws NotFoundException {
+        ExternalSystemRoleEntity externalSystemRole = userPostRepository.getExternalSystemRole(sysName);
         if (externalSystemRole == null) {
             throw new NotFoundException("Роль клиента не найдена");
         }
@@ -216,9 +215,7 @@ public class UserPostService {
 
         UserPostResponse userPost = save(userPostRequest);
 
-        UserEntity user = userRepository.findUser(userPostRequest.getUserId());
-
-        addAllSystemRole(userPost.getId(), user.getRealmId());
+        addAllSystemRole(userPost.getId());
 
         return userPost;
     }
