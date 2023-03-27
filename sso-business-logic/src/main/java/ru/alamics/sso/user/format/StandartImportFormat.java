@@ -85,7 +85,6 @@ public class StandartImportFormat implements ImportFormat {
                     userImport.setRole(row[i]);
                     break;
                 case 6:
-                    //userImport.setSystemNames(Arrays.asList(row[i].replaceAll("\\s", "").split(",")));
                     userImport.setSystems(row[i]);
                     break;
             }

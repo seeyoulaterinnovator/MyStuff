@@ -6,7 +6,7 @@
   let chatContent;
   let chatWrapper;
   let isOpen = false;
-  let showChat = isFramed === undefined || isFramed === false;
+  let showChat = process.env.SVELTE_APP_ENVIRONMENT && ( isFramed === undefined || isFramed === false);
 
   console.log("isFramed s " + isFramed);
 
@@ -19,7 +19,7 @@
       nickname: 'Пользователь',
       subject: 'Вопросы со страницы авторизации',
       city: Cookie.get('city-domain') || 'yar',
-      isProd: true
+      isProd: process.env.SVELTE_APP_ENVIRONMENT === 'production'
     });
     chat.attach(chatContent);
   });

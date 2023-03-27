@@ -38,22 +38,6 @@ public class MigrationImportFormat implements ImportFormat {
 
     public List<ImportUsersDataModel> getDataList(FileModel file) {
 
-        // чищу весь хэдер
-        /*
-        for (Iterator<String[]> it = file.getRows().iterator(); it.hasNext();) {
-            String[] line = it.next();
-
-            if (line == null || line.length == 0)
-                continue;
-
-            if (line[0].equalsIgnoreCase("BEGINDATA")) {
-                it.remove();
-                break;
-            }
-            it.remove();
-        }
-        */
-
         return toUserRequestList(file.getRows());
     }
 }

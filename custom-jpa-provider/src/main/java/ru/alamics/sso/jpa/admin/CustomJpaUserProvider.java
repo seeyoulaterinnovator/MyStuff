@@ -77,9 +77,6 @@ public class CustomJpaUserProvider extends JpaUserProvider {
         em.createNamedQuery("deleteUserConsentClientScopesByUser").setParameter("user", user).executeUpdate();
         em.createNamedQuery("deleteUserConsentsByUser").setParameter("user", user).executeUpdate();
 
-        //em.createNativeQuery("delete from USERPOST_EXT_SYSTEM_ROLE where USER_POST_ID in (select id from USER_POST where USER_ID =:user_id)")
-        //        .setParameter("user_id", user.getId()).executeUpdate();
-
         removePostSystem(user);
 
         em.createNativeQuery(UserPostEntity.DELETE_BY_USER_SQL).setParameter("user", user).executeUpdate();

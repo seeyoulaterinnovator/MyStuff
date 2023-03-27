@@ -104,15 +104,15 @@
             Войти
           </a>
           {#if $isBadEmail}
-            <button class="btn text-accentBlue w-full md:w-auto" on:click={handleHide}>
+            <button class="btn text-accentBlue-1100 w-full md:w-auto" on:click={handleHide}>
               Указать другой адрес
             </button>
           {:else if $isBadPhone}
-            <button class="btn text-accentBlue w-full md:w-auto" on:click={handleHide}>
+            <button class="btn text-accentBlue-1100 w-full md:w-auto" on:click={handleHide}>
               Указать другой номер
             </button>
           {:else}
-            <button class="btn text-accentBlue w-full md:w-auto" on:click={handleHide}>
+            <button class="btn text-accentBlue-1100 w-full md:w-auto" on:click={handleHide}>
               Отмена
             </button>
           {/if}
@@ -120,7 +120,7 @@
           <a href="{$loginUrl}" class="btn btn-main w-full md:w-auto" on:click={handleHide}>
             Обновить
           </a>
-          <button class="btn text-accentBlue w-full md:w-auto" on:click={handleHide}>
+          <button class="btn text-accentBlue-1100 w-full md:w-auto" on:click={handleHide}>
             Изменить данные
           </button>
         {:else}

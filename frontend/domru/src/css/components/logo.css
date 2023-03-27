@@ -2,6 +2,7 @@
   &--domru {
     background-image: url('./images/domru-logo.svg');
     width: 200px;
+    height: 20px;
   }
 
   &-social-providers {
@@ -72,6 +73,8 @@
 
     &--domru {
        background-image: url('./images/domru-logo-mid.svg');
+       width: 130px;
+       height: 20px;
      }
 }
 }

@@ -48,11 +48,8 @@ public class AuthLinkResource {
 
         log.info("Request for auth link, user " + userId + ", client " + clientId);
 
-        //log.info("got client " + clientModel.getId() + " " + clientModel.getName() + " " + clientModel.getClientId());
-
         RootAuthenticationSessionModel rootAuthenticationSessionModel = session.authenticationSessions().createRootAuthenticationSession(realm);
         AuthenticationSessionModel authenticationSession = rootAuthenticationSessionModel.createAuthenticationSession(clientModel);
-        //log.info("got authenticationSession " + authenticationSession.toString());
 
         int validityInSecs = realm.getActionTokenGeneratedByUserLifespan(ResetCredentialsActionToken.TOKEN_TYPE);
         int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
