@@ -1828,8 +1828,8 @@
             ('30b76ff0-b5af-11ec-b909-0242ac120002', 'backToMainPage', 'вернуться', null, 'user', 'Кнопка возвращения в систему', null,
             'FRONT');
         </sql>
-
     </changeSet>
+
     <changeSet id="105" author="slabunov-yv">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="REALM_ATTRIBUTE"></tableExists>

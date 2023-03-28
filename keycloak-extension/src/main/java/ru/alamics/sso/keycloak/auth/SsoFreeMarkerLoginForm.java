@@ -172,6 +172,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             attributes.put("url", new SsoUrlBean(realm, theme, baseUri, this.actionUri, Util.isFrame(session)));
             attributes.put("requiredActionUrl", new RequiredActionUrlFormatterMethod(realm, baseUri));
 
+
             if (realm.isInternationalizationEnabled()) {
                 UriBuilder b;
                 if (page != null) {

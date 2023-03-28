@@ -2,6 +2,7 @@ package ru.alamics.sso.keycloak.auth.form;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
+import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
@@ -61,6 +62,7 @@ public abstract class AbstractAuthMailPhoneForm extends AbstractUsernameFormAuth
             formData.add(AuthenticationManager.FORM_USERNAME, rememberMeUsername);
             formData.add("rememberMe", "on");
         }
+
         context.challenge(challenge(context, formData));
     }
 
@@ -142,12 +144,26 @@ public abstract class AbstractAuthMailPhoneForm extends AbstractUsernameFormAuth
         return false;
     }
 
-    protected Response challenge(AuthenticationFlowContext context, MultivaluedMap<String, String> formData) {
+    protected Response challenge(AuthenticationFlowContext context, MultivaluedMap<String, String> formData) { // createForm=challenge
         LoginFormsProvider forms = context.form();
+
+        HttpRequest httpRequest = context.getHttpRequest();
+
+        MultivaluedMap<String, String> stringStringMultivaluedMap = httpRequest.getDecodedFormParameters();
+
+        forms.setAttribute("isSwitcherOn", getCurrentSwitcherStatus(httpRequest));
 
         if (formData.size() > 0) forms.setFormData(formData);
 
         return forms.createLogin();
+    }
+
+    protected boolean getCurrentSwitcherStatus(HttpRequest httpRequest) {
+
+        if (httpRequest.getDecodedFormParameters().containsKey("off")) {
+            return false;
+        }
+        else return httpRequest.getDecodedFormParameters().containsKey("on");
     }
 
     @Override

@@ -461,7 +461,7 @@ function genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $r
     $scope.setCheckInRiasIfNotFound = function () {
         $scope.checkInRiasIfNotFound = $scope.realm.attributes['checkInRiasIfNotFound'] == 'true';
     }
-    $scope.setRealmInSchedule = function () {
+    $scope.setRealmInSchedule = function () {``
         $scope.realmInSchedule = $scope.realm.attributes['realmInSchedule'] == 'true';
     }
 
