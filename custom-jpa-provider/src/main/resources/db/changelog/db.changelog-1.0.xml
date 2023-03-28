@@ -1822,11 +1822,88 @@
         </sql>
     </changeSet>
 
+    <changeSet id="108" author="petrov-ny">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('ea9dd138-d103-11ec-9d64-0242ac120002', 'life.token.reset.pass.login', '12', 'Время токена "обновить пароль"', 'S-TELECOM', 'Send login and reset password', 'HOURS',
+            'REALM');
+        </sql>
+    </changeSet>
+
     <changeSet id="103" author="petrov-ny">
         <sql>
             INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
             ('30b76ff0-b5af-11ec-b909-0242ac120002', 'backToMainPage', 'вернуться', null, 'user', 'Кнопка возвращения в систему', null,
             'FRONT');
+        </sql>
+    </changeSet>
+
+    <changeSet id="104" author="petrov-ny">
+        <addColumn tableName="EXT_SYSTEM_ROLE">
+            <column name="REALM_ID" type="varchar(16)"/>
+        </addColumn>
+        <sql>
+
+            update EXT_SYSTEM_ROLE set realm_id = 'user';
+
+        </sql>
+    </changeSet>
+
+    <changeSet id="105" author="petrov-ny">
+        <addColumn tableName="EXTERNAL_SYSTEM">
+            <column name="REALM_ID" type="varchar(16)"/>
+        </addColumn>
+        <sql>
+
+            update EXTERNAL_SYSTEM set realm_id = 'user';
+
+        </sql>
+    </changeSet>
+
+    <changeSet id="106" author="petrov-ny">
+        <sql>
+
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (20, 'lkb2b', 'Личный кабинет Дом.ru Бизнес', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (21, 'dmp-kc-sit', 'Личный кабинет цифровых продуктов', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (22, 'forpost', 'Видеонаблюдение', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (23, 'itglobal', 'Виртуальный ЦОД', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (24, 'oats', 'Облачная телефония', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (25, 'wifi', 'Cервис управления услугами wifi', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (26, 'app_b2b', 'МП Дом.Ру Бизнес', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (27, 'b2b', 'Основной сайт b2b', 'S-TELECOM');
+
+        </sql>
+    </changeSet>
+
+    <changeSet id="107" author="petrov-ny">
+        <sql>
+
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (20, 'access_granted', 20, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (21, 'access_granted', 21, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (22, 'access_granted', 22, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (23, 'access_granted', 23, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (24, 'access_granted', 24, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (25, 'access_granted', 25, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (26, 'access_granted', 26, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (27, 'access_granted', 27, 'S-TELECOM');
+
+        </sql>
+    </changeSet>
+
+    <changeSet id="108" author="zhakov-mv">
+        <sql>
+            INSERT INTO USER_ATTRIBUTE (NAME, VALUE, USER_ID, ID)
+            SELECT CASE
+                       when ae.RESOURCE_PATH = 'autoblock'
+                           OR ae.RESOURCE_PATH != 'manage/block' then 'system-block'
+                       when ae.RESOURCE_PATH != 'autoblock'
+                       OR ae.RESOURCE_PATH = 'manage/block' then 'manager-block' end AS NAME,
+       MAX(ae.ADMIN_EVENT_TIME) AS VALUE,
+       JSON_VALUE(ae.REPRESENTATION, '$.id') AS USER_ID,
+       UUID() as ID
+            FROM ADMIN_EVENT_ENTITY ae
+                INNER JOIN USER_ENTITY ue ON JSON_VALUE(ae.REPRESENTATION, '$.id') = ue.ID COLLATE utf8mb4_unicode_ci
+            group by USER_ID;
         </sql>
     </changeSet>
 
