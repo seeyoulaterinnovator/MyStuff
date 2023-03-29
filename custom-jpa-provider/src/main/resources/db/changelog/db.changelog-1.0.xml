@@ -1890,22 +1890,22 @@
         </sql>
     </changeSet>
 
-    <changeSet id="108" author="zhakov-mv">
+    <changeSet id="115" author="zhakov-mv">
         <sql>
-            INSERT INTO USER_ATTRIBUTE (NAME, VALUE, USER_ID, ID)
+            INSERT IGNORE INTO USER_ATTRIBUTE (NAME, VALUE, USER_ID, ID)
             SELECT
                 CASE
                     WHEN ae.RESOURCE_PATH = 'autoblock' THEN 'system-block'
                     WHEN ae.RESOURCE_PATH = 'manage/block' THEN 'manager-block'
-                      END                               AS NAME,
-                MAX(ae.ADMIN_EVENT_TIME)              AS VALUE,
+                    ELSE 'manager-block'
+                    END                               AS NAME,
+                MAX(FROM_UNIXTIME(ae.ADMIN_EVENT_TIME / 1000))              AS VALUE,
                 JSON_VALUE(ae.REPRESENTATION, '$.id') AS USER_ID,
                 UUID()                                AS ID
                     FROM ADMIN_EVENT_ENTITY ae
                             INNER JOIN USER_ENTITY u ON JSON_VALUE(ae.REPRESENTATION, '$.id') = u.ID
                                 COLLATE utf8mb4_unicode_ci
-                    WHERE ae.RESOURCE_PATH IN ('autoblock', 'manage/block')
-                    and ENABLED = false
+                    WHERE ENABLED = false
                     GROUP BY USER_ID;
         </sql>
     </changeSet>
