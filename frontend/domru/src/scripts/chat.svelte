@@ -3,10 +3,17 @@
   import { onMount } from 'svelte';
   import Cookie from 'js-cookie';
 
+  // TODO: find way to use environment variables
+  // TIP: `process` is NodeJS global variable
+  let SVELTE_APP_ENVIRONMENT = 'develop';
+  if (typeof process !== 'undefined') {
+    SVELTE_APP_ENVIRONMENT = process.env.SVELTE_APP_ENVIRONMENT
+  }
+
   let chatContent;
   let chatWrapper;
   let isOpen = false;
-  let showChat = process.env.SVELTE_APP_ENVIRONMENT && ( isFramed === undefined || isFramed === false);
+  let showChat = SVELTE_APP_ENVIRONMENT === 'production' && ( isFramed === undefined || isFramed === false);
 
   console.log("isFramed s " + isFramed);
 
@@ -19,7 +26,7 @@
       nickname: 'Пользователь',
       subject: 'Вопросы со страницы авторизации',
       city: Cookie.get('city-domain') || 'yar',
-      isProd: process.env.SVELTE_APP_ENVIRONMENT === 'production'
+      isProd: SVELTE_APP_ENVIRONMENT === 'production'
     });
     chat.attach(chatContent);
   });
