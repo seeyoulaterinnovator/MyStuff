@@ -13,7 +13,7 @@
   let chatContent;
   let chatWrapper;
   let isOpen = false;
-  let showChat = SVELTE_APP_ENVIRONMENT && ( isFramed === undefined || isFramed === false);
+  let showChat = SVELTE_APP_ENVIRONMENT === 'production' && ( isFramed === undefined || isFramed === false);
 
   console.log("isFramed s " + isFramed);
 
