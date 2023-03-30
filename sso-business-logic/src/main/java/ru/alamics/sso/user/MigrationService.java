@@ -56,7 +56,7 @@ public class MigrationService {
     private UserPostService userPostService;
     @EJB
     private ImportReportService importReportService;
-
+    //add account to customer here
     public void createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart) {
 
         log.info("importing users from file {} in progress", reportModel.getName());
@@ -225,7 +225,7 @@ public class MigrationService {
 
         return userRepository.getFirstUserByUsername(realmId, email);
     }
-
+    //here
     private UserEntity createUser(String realmId, ImportUsersDataModel importUserData) {
 
         UserEntity user = new UserEntity();
