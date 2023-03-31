@@ -770,9 +770,11 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
         //$scope.users = [];
 
+        var search = $scope.query.search.replaceAll('+','%2b') ;
+
         console.log("query.search: " + $scope.query.search);
         $http.get(`${authUrl}/realms/user/users-info/search?` +
-            `searchRealm=${$scope.query.searchRealm}&search=${$scope.query.search}` +
+            `searchRealm=${$scope.query.searchRealm}&search=${search}` +
             `&searchUser=${$scope.query.searchByUserId}&searchToms=${$scope.query.searchByTomsId}&searchPhone=${$scope.query.searchByPhone}` +
             `&pageNum=${$scope.pages.number}&pageSize=${$scope.pageSize}` +
             `&sortAsc=${sortAsc}&sortField=${currentSortField}`).then(function (data) {
@@ -1008,7 +1010,16 @@ module.controller('UserDetailCtrl', function ($scope, realm, user, BruteForceUse
     };
 
     $scope.GetPhoneCheckerResult = function () {
-        return $http.get(authUrl + '/realms/' + realm.realm + '/users-info/attribute?phone=' + $scope.GetPhoneAttr() + '&excludedUserId=' + $scope.user.id + '&realmId=' + realm.realm)
+
+        let realmName = '';
+
+        if (realm.realm == "manager"){
+            realmName = $scope.query.searchRealm;
+        } else {
+            realmName = realm.realm;
+        }
+
+        return $http.get(authUrl + '/realms/' + realm.realm + '/users-info/attribute?phone=' + $scope.GetPhoneAttr() + '&excludedUserId=' + $scope.user.id + '&realmId=' + realmName)
             .then(function (response) {
                 return angular.fromJson(response).data.results['foundUserId'];
             });
@@ -2416,7 +2427,7 @@ module.controller('UserCustomerCtrl', function ($scope, realm, user, $location, 
             $scope.customerRoles = angular.fromJson(data).data.results.roles;
         });
 
-        $http.get(authUrl + '/realms/' + realm.realm + '/user-post/system-roles').then(function (data) {
+        $http.get(authUrl + '/realms/' + realm.realm + '/user-post/system-roles?realmId=' + realm.realm).then(function (data) {
             let roles = angular.fromJson(data).data.results['system-roles'];
             roles = roles.filter(role => role.name === 'access_granted').filter((role, index, self) => self.indexOf(role) === index);
             $scope.systemRoles = roles;

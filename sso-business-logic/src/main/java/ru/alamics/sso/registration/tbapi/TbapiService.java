@@ -35,7 +35,6 @@ public class TbapiService {
     public Map<String, Object> registerUser(User user, TbapiConnectConfig connectConfig) throws TbapiRegisterException {
 
         TbapiRequest request = new TbapiRequest();
-        //.id(user.getId())
         request.setEmail(user.getEmail());
         request.setPhoneNumber(user.getPhone());
 

@@ -12,6 +12,7 @@ public class ExternalSystemDto implements Serializable {
     private Long id;
     private String name;
     private String label;
+    private String realmId;
     // падает сериализация. для кластера
     //private Set<ExternalSystemRoleDto> systemRoles;
 
@@ -20,11 +21,12 @@ public class ExternalSystemDto implements Serializable {
     public ExternalSystemDto() {
     }
 
-    @java.beans.ConstructorProperties({"id", "name", "label"})
-    ExternalSystemDto(Long id, String name, String label) {
+    @java.beans.ConstructorProperties({"id", "name", "label", "realmId"})
+    ExternalSystemDto(Long id, String name, String label, String realmId) {
         this.id = id;
         this.name = name;
         this.label = label;
+        this.realmId = realmId;
     }
 
     public static ExternalSystemDtoBuilder builder() {
@@ -32,7 +34,7 @@ public class ExternalSystemDto implements Serializable {
     }
 
     public ExternalSystemDtoBuilder toBuilder() {
-        return new ExternalSystemDtoBuilder().id(this.id).name(this.name).label(this.label);
+        return new ExternalSystemDtoBuilder().id(this.id).name(this.name).label(this.label).realmId(this.realmId);
     }
 
     @JsonPOJOBuilder(withPrefix = "")
@@ -40,6 +42,7 @@ public class ExternalSystemDto implements Serializable {
         private Long id;
         private String name;
         private String label;
+        private String realmId;
 
         ExternalSystemDtoBuilder() {
         }
@@ -59,12 +62,17 @@ public class ExternalSystemDto implements Serializable {
             return this;
         }
 
+        public ExternalSystemDtoBuilder realmId(String realmId) {
+            this.realmId = realmId;
+            return this;
+        }
+
         public ExternalSystemDto build() {
-            return new ExternalSystemDto(id, name, label);
+            return new ExternalSystemDto(id, name, label, realmId);
         }
 
         public String toString() {
-            return "ExternalSystemDto.ExternalSystemDtoBuilder(id=" + this.id + ", name=" + this.name + ", label=" + this.label + ")";
+            return "ExternalSystemDto.ExternalSystemDtoBuilder(id=" + this.id + ", name=" + this.name + ", label=" + this.label + ", realmId=" + this.realmId + ")";
         }
     }
 }
