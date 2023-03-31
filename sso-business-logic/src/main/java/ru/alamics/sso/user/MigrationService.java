@@ -16,6 +16,7 @@ import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.schedule.ImportSchedule;
 import ru.alamics.sso.user.model.ImportUsersDataModel;
 import ru.alamics.sso.user.model.ImportUsersReportModel;
+import ru.alamics.sso.user.model.PersonalAccountModel;
 import ru.alamics.sso.user.model.RepeatNextTimeException;
 import ru.alamics.sso.util.Util;
 import ru.alamics.sso.util.validator.AllNotValidException;
@@ -27,10 +28,7 @@ import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.ws.rs.NotFoundException;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
@@ -56,6 +54,8 @@ public class MigrationService {
     private UserPostService userPostService;
     @EJB
     private ImportReportService importReportService;
+    @EJB
+    private PersonalAccountService personalAccountService;
     //add account to customer here
     public void createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart) {
 
@@ -96,10 +96,10 @@ public class MigrationService {
                         user.setFirstName(data.getFirstName());
                     }
                     data.setUserId(user.getId());
-
                     checkToms(data);
 
                     modified = addUserPost(user, data);
+                    //todo here
 
                 } catch (AllNotValidException av) {
 
@@ -308,7 +308,17 @@ public class MigrationService {
             userImport.setRole(DEFAULT_ROLE_STR);
             userImport.setSystems(Util.join(userPostService.getAllExternalSystemLabels(), ","));
         }
-
+        addPersonalAccount(postId ,userImport);
         return modified;
+    }
+    private void addPersonalAccount(String postId,ImportUsersDataModel userImport) {
+        String accountNumber = userImport.getPersonalAccount();
+
+        if (Objects.isNull(accountNumber)) accountNumber = "";
+
+        if (!personalAccountService.getAccountModel(postId).getAccounts()
+                .stream().map(PersonalAccountModel::getValue).toString().equals(accountNumber)) {
+            personalAccountService.addAccountList(postId, List.of(accountNumber));
+        }
     }
 }
