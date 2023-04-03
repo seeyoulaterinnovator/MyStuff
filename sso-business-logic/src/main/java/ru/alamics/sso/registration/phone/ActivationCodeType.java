@@ -11,7 +11,7 @@ import static ru.alamics.sso.settings.SettingConstants.*;
 public enum ActivationCodeType {
     CODE_TO_EMAIL(4, 300L, EXPIRE_INCOMING_CALL_EMAIL_CODE),
     CODE_BY_PHONE_NUMBER(4, 20L, EXPIRE_INCOMING_CALL_CODE),
-    CODE_TO_SMS(6, 300L, EXPIRE_SMS_VIBER_CODE);
+    CODE_TO_SMS(4, 300L, EXPIRE_SMS_VIBER_CODE);
 
     private final int lengthCode;
     private final SettingConstants propertyConstant;

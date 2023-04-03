@@ -19,6 +19,7 @@ import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.messages.Messages;
+import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.util.Util;
 
@@ -144,26 +145,12 @@ public abstract class AbstractAuthMailPhoneForm extends AbstractUsernameFormAuth
         return false;
     }
 
-    protected Response challenge(AuthenticationFlowContext context, MultivaluedMap<String, String> formData) { // createForm=challenge
+    protected Response challenge(AuthenticationFlowContext context, MultivaluedMap<String, String> formData) {
         LoginFormsProvider forms = context.form();
-
-        HttpRequest httpRequest = context.getHttpRequest();
-
-        MultivaluedMap<String, String> stringStringMultivaluedMap = httpRequest.getDecodedFormParameters();
-
-        forms.setAttribute("isSwitcherOn", getCurrentSwitcherStatus(httpRequest));
 
         if (formData.size() > 0) forms.setFormData(formData);
 
         return forms.createLogin();
-    }
-
-    protected boolean getCurrentSwitcherStatus(HttpRequest httpRequest) {
-
-        if (httpRequest.getDecodedFormParameters().containsKey("off")) {
-            return false;
-        }
-        else return httpRequest.getDecodedFormParameters().containsKey("on");
     }
 
     @Override

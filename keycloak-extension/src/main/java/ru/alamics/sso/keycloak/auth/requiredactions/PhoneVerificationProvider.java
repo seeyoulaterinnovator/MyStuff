@@ -8,6 +8,7 @@ import org.keycloak.email.EmailException;
 import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.UserModel;
+import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaType;
 import ru.alamics.sso.keycloak.lookup.Lookup;
@@ -40,6 +41,8 @@ import static ru.alamics.sso.settings.SettingConstants.*;
 public class PhoneVerificationProvider implements RequiredActionProvider {
     private static final String VERIFY_PHONE_FTL = "verifyPhone.ftl";
 
+    private static final String SECOND_PHASE_LOGIN = "login.ftl";
+
     private static final String NEED_SEND_EMAIL_CODE = "NEED_SEND_EMAIL_CODE";
     private static final String GRANT_TYPE = "grant_type";
     private static final String ERROR_CODE = "error_code";
@@ -66,6 +69,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
     @Override
     public void requiredActionChallenge(RequiredActionContext context) {
+
         log.info("PhoneRequiredActionChallenge");
 
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
@@ -119,7 +123,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     .setAttribute("homePage", settingsService.getSettingsStringValue(HOME_PAGE, context.getRealm().getId()))
                     .setAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, context.getRealm().getId()))
                     .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER, context.getRealm().getId()))
-                    .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()));
+                    .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()))
+                    .setAttribute("secondPhaseLogin", isLoginSecondPhaseActivated(context));
 
             context.challenge(createForm(context, loginFormsProvider));
 
@@ -132,6 +137,11 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         } catch (SendMessageException se) {
             log.info("ignore... MsgSendException {}", se.getMessage());
         }
+    }
+
+    private boolean isLoginSecondPhaseActivated(RequiredActionContext context) {
+        return context.getAuthenticationSession().getAuthNote("smsButton") != null
+                || (context.getAuthenticationSession().getAuthNote("phoneCallButton") != null);
     }
 
     private Response createForm(RequiredActionContext context, LoginFormsProvider loginFormsProvider) {
@@ -150,7 +160,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
             parameters.add(GRANT_TYPE, "password");
         }
-        return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
+
+        return isLoginSecondPhaseActivated(context) ? loginFormsProvider.createForm(SECOND_PHASE_LOGIN) : loginFormsProvider.createForm(VERIFY_PHONE_FTL);
     }
 
 
@@ -220,10 +231,18 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 userPhoneVerifier.verifyPhone(user, authContext, code, activationCodeType);
 
                 UserModelUserMapper.mergeUserInto(user, model);
+
                 authSession.removeAuthNote(PHONE_KEY_HASH);
                 authSession.removeAuthNote(EXPIRATION_TIME);
                 authSession.removeAuthNote(COUNT_REPEAT);
+
+                model.addRequiredAction("incoming_call_phone_verificator");
+
+//                AuthenticationManager.finishedRequiredActions()
+   //            context.getUser().addRequiredAction("incoming_call_phone_verificator");
+
                 context.success();
+
             } catch (WrongSmsCode wrongSmsCode) {
                 log.warn("Wrong sms code");
                 context.form()
@@ -235,6 +254,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             }
         }
     }
+
     private Integer getCount(String countStr) {
         if (countStr == null || "null".equals(countStr)) {
             return 0;

@@ -16,16 +16,16 @@ export default (function() {
   const usernameElement = document.getElementById('username');
   submitElement.disabled = true;
 
-  const dynamicMask = IMask(usernameElement, {
-    mask: [
-      {
-        mask: '+{7} (000) 000-00-00',
-      },
-      {
-        mask: /^\S*@?\S*$/,
-      },
-    ],
-  });
+  // const dynamicMask = IMask(usernameElement, {
+  //   mask: [
+  //     {
+  //       mask: '+{7} (000) 000-00-00',
+  //     },
+  //     {
+  //       mask: /^\S*@?\S*$/,
+  //     },
+  //   ],
+  // });
 
   usernameElement.addEventListener('input', () => {
     setButtonAvailability(validate, submitElement);

@@ -1,6 +1,7 @@
 ru.alamics.sso.keycloak.auth.form.rias.AuthMailPhoneWithRiasFormFactory
 ru.alamics.sso.keycloak.auth.form.AuthMailPhoneFormFactory
 ru.alamics.sso.keycloak.auth.TwoStepVerificationFactory
+ru.alamics.sso.keycloak.auth.form.newForms.newAuthReqActions.TwoStepAuthFactory
 ru.alamics.sso.keycloak.auth.post.AttributesFormFactory
 ru.alamics.sso.keycloak.resetcred.ResetCredentialEmailOrPhoneFactory
 ru.alamics.sso.keycloak.auth.rest.RestRequiredActionsAuthFactory
@@ -10,3 +11,4 @@ org.keycloak.authentication.authenticators.broker.IdpCreateUserIfUniqueAuthentic
 ru.alamics.sso.keycloak.auth.social.PostLoginSocialVoid
 ru.alamics.sso.keycloak.auth.ValidateUsernameOrPhone
 ru.alamics.sso.keycloak.mobile.resetcred.ResetCredentialsChooseUserRestFactory
+ru.alamics.sso.keycloak.auth.form.newForms.NewAuthMailPhoneFormFactory
