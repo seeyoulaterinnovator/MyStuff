@@ -9,7 +9,7 @@ module.exports = {
       xxl: '1440px',
     },
     fontFamily: {
-      body: ['Inter', 'Arial', 'sans-serif'],
+      body: ['Inter', 'Arial', 'Suisse Intl'],
     },
     extend: {
       fontSize: {

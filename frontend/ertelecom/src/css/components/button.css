@@ -1,5 +1,6 @@
 .btn {
-  @apply .block .uppercase .tracking-wider .px-2 .rounded-lg .shadow .font-normal;
+  @apply .block .tracking-wider .px-2 .rounded-lg .shadow .font-normal;
+  font-family: Golos,serif;
 
   border-radius: 2em;
 
@@ -8,23 +9,9 @@
   height: 44px;
   transition: 0.2s ease-in-out;
 
-  @media (min-width: 480px) {
-    @apply .px-3;
-  }
+  padding: 12px 20px;
 
-  @media (min-width: 640px) {
-    @apply .px-4;
-  }
-
-  @media (min-width: 960px) {
-    @apply .px-5;
-  }
-
-  @media (min-width: 1199px) {
-    height: 48px;
-  }
-
-  &:disabled {
+&:disabled {
     @apply .opacity-40 .cursor-not-allowed;
     &:hover {
        transform: none;

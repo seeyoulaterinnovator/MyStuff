@@ -45,6 +45,7 @@
 }
 
 .er-chat-label {
+  background: #FFFFFF;
   overflow: hidden;
   position: fixed;
   bottom: 30px;

@@ -94,7 +94,7 @@
         </header>
 
       {#if $status === STATUS.INITIAL}
-          <div class="flex flex-1 items-center justify-center content-box h-full mt-4 xl:mt-17 custom-scroll flex-col">
+          <div class="flex flex-1 justify-center select-city-confirmation content-box flex-col">
               <Confirmation />
           </div>
       {:else if $status === STATUS.SELECTING}
