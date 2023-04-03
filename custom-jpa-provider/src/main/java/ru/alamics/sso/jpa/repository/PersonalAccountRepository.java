@@ -10,10 +10,10 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Stateless
 @LocalBean
@@ -66,12 +66,16 @@ public class PersonalAccountRepository {
 
         if (paList == null)
             paList = new ArrayList<>();
-
+        //todo удалять дубликаты лицевых счетов
         Set<PersonalAccountEntity> paEnList = new HashSet<>();
         for (String pa : paList) {
-            PersonalAccountEntity en = new PersonalAccountEntity(null, pe, pa);
-            paEnList.add(en);
-            em.persist(en);
+            String[] accountsNumber = pa.split(",");
+            for (String acn : Arrays.stream(accountsNumber)
+                    .distinct().collect(Collectors.toList())) {
+                PersonalAccountEntity en = new PersonalAccountEntity(null, pe, acn);
+                paEnList.add(en);
+                em.persist(en);
+            }
         }
 
         if (pe.getAccounts() != null)

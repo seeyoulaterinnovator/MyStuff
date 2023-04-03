@@ -19,7 +19,6 @@ public class MigrationImportFormat implements ImportFormat {
         if (row.length > 3) userImport.setFirstName(row[3]);
         if (row.length > 4) userImport.setPhone(row[4]);
         if (row.length > 5) userImport.setCleanPassword(row[5]);
-        //todo парсить строку, доставать каждый лицевой счет и записывать по одному
         if (row.length > 6) userImport.setPersonalAccount(row[6]);
 
         userImport.setCreated(false);

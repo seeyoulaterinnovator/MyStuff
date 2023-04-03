@@ -23,6 +23,11 @@ public class PersonalAccountEntity {
     @JoinColumn(name = "post_id")
     private PersonalAccountPostEntity post;
 
-    @Column(name = "value")
+    @Column(name = "value", unique = true)
     private String value;
+
+    public PersonalAccountEntity(String uuid, PersonalAccountPostEntity post) {
+        this.uuid = uuid;
+        this.post = post;
+    }
 }

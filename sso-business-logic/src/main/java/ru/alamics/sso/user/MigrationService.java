@@ -29,6 +29,7 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.ws.rs.NotFoundException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
@@ -316,9 +317,10 @@ public class MigrationService {
 
         if (Objects.isNull(accountNumber)) accountNumber = "";
 
-        if (!personalAccountService.getAccountModel(postId).getAccounts()
+        /*if (!personalAccountService.getAccountModel(postId).getAccounts()
                 .stream().map(PersonalAccountModel::getValue).toString().equals(accountNumber)) {
-            personalAccountService.addAccountList(postId, List.of(accountNumber));
-        }
+
+        }*/
+        personalAccountService.addAccountList(postId, List.of(accountNumber));
     }
 }
