@@ -23,7 +23,7 @@ public class PersonalAccountEntity {
     @JoinColumn(name = "post_id")
     private PersonalAccountPostEntity post;
 
-    @Column(name = "value", unique = true)
+    @Column(name = "value")
     private String value;
 
     public PersonalAccountEntity(String uuid, PersonalAccountPostEntity post) {
