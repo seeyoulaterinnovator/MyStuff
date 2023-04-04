@@ -309,7 +309,7 @@ public class MigrationService {
     }
     private void addPersonalAccount(String postId,ImportUsersDataModel userImport) {
         String accountNumber = userImport.getPersonalAccount();
-        //11 джаву хочется
+
         List<String> accNumList = new ArrayList<>();
         accNumList.add(accountNumber);
         if (Objects.nonNull(accountNumber)) personalAccountService.addAccountList(postId, accNumList);
