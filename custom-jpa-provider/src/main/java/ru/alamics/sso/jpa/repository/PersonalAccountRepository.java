@@ -9,6 +9,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
 import javax.persistence.PersistenceContext;
 import java.util.*;
 import java.util.function.Function;
@@ -74,7 +75,13 @@ public class PersonalAccountRepository {
                     .distinct().collect(Collectors.toList())) {
                 PersonalAccountEntity en = new PersonalAccountEntity(null, pe, acn);
                 paEnList.add(en);
-                em.persist(en);
+                em.createNativeQuery("INSERT INTO PERSONAL_ACCOUNT (uuid, post_id, value) " +
+                                "SELECT :id, :post, :val " +
+                                "FROM DUAL " +
+                                "WHERE NOT EXISTS (SELECT value FROM PERSONAL_ACCOUNT WHERE value = :val);")
+                        .setParameter("id", String.valueOf(UUID.randomUUID()))
+                        .setParameter("post", pe.getPostId())
+                        .setParameter("val", acn);
             }
         }
 

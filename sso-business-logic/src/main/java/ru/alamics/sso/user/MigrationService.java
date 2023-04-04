@@ -315,12 +315,7 @@ public class MigrationService {
     private void addPersonalAccount(String postId,ImportUsersDataModel userImport) {
         String accountNumber = userImport.getPersonalAccount();
 
-        if (Objects.isNull(accountNumber)) accountNumber = "";
-
-        /*if (!personalAccountService.getAccountModel(postId).getAccounts()
-                .stream().map(PersonalAccountModel::getValue).toString().equals(accountNumber)) {
-
-        }*/
-        personalAccountService.addAccountList(postId, List.of(accountNumber));
+        if (Objects.nonNull(accountNumber)) personalAccountService.addAccountList(postId,
+                List.of(accountNumber));
     }
 }

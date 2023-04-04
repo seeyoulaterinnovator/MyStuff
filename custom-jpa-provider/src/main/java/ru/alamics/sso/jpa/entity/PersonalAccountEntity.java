@@ -25,9 +25,4 @@ public class PersonalAccountEntity {
 
     @Column(name = "value")
     private String value;
-
-    public PersonalAccountEntity(String uuid, PersonalAccountPostEntity post) {
-        this.uuid = uuid;
-        this.post = post;
-    }
 }
