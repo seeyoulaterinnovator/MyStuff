@@ -16,7 +16,6 @@ import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.schedule.ImportSchedule;
 import ru.alamics.sso.user.model.ImportUsersDataModel;
 import ru.alamics.sso.user.model.ImportUsersReportModel;
-import ru.alamics.sso.user.model.PersonalAccountModel;
 import ru.alamics.sso.user.model.RepeatNextTimeException;
 import ru.alamics.sso.util.Util;
 import ru.alamics.sso.util.validator.AllNotValidException;
@@ -29,7 +28,6 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.ws.rs.NotFoundException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
@@ -311,8 +309,9 @@ public class MigrationService {
     }
     private void addPersonalAccount(String postId,ImportUsersDataModel userImport) {
         String accountNumber = userImport.getPersonalAccount();
-
-        if (Objects.nonNull(accountNumber)) personalAccountService.addAccountList(postId,
-                List.of(accountNumber));
+        //11 джаву хочется
+        List<String> accNumList = new ArrayList<>();
+        accNumList.add(accountNumber);
+        if (Objects.nonNull(accountNumber)) personalAccountService.addAccountList(postId, accNumList);
     }
 }
