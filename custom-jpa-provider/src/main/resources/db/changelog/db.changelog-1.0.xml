@@ -1002,6 +1002,20 @@
         </sql>
     </changeSet>
 
+    <changeSet id="120" author="zhakov-mv">
+        <sql>
+            CREATE TABLE IF NOT EXISTS BLACK_LIST (
+                id VARCHAR(36) not null,
+                ip VARCHAR(24) not null,
+                user_login VARCHAR(128) null,
+                created timestamp not null,
+                unblocked timestamp null,
+                block_duration bigint null,
+                block_count int null
+            );
+        </sql>
+    </changeSet>
+
     <changeSet id="54_p" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="AUTO_LOCK_NOTIFICATION"/>
