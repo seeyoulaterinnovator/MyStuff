@@ -1,6 +1,7 @@
 package ru.alamics.sso.user;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.keycloak.common.util.Time;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.jpa.AdminEventEntity;
@@ -309,9 +310,10 @@ public class MigrationService {
     }
     private void addPersonalAccount(String postId,ImportUsersDataModel userImport) {
         String accountNumber = userImport.getPersonalAccount();
+        if (StringUtils.isEmpty(accountNumber)) { return; }
 
-        List<String> accNumList = new ArrayList<>();
+        List<String> accNumList = new LinkedList<>();
         accNumList.add(accountNumber);
-        if (Objects.nonNull(accountNumber)) personalAccountService.addAccountList(postId, accNumList);
+        personalAccountService.addAccountList(postId, accNumList);
     }
 }

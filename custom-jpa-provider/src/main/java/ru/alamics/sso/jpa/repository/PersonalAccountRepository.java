@@ -63,7 +63,7 @@ public class PersonalAccountRepository {
 
 
         if (paList == null)
-            paList = new ArrayList<>();
+            paList = new LinkedList<>();
         Set<PersonalAccountEntity> paEnList = new HashSet<>();
         for (String pa : paList) {
             String[] accountsNumber = pa.split(",");
