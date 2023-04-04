@@ -19,6 +19,6 @@
   <p class="confirm__title">Вы находитесь в г. {$city}?</p>
   <div class="flex confirm__btns">
     <button class="btn btn-main confirm__btn" on:click={handleConfirm}>Да</button>
-    <button class="btn disabled confirm__btn" on:click={handleReject}>Выбрать другой</button>
+    <button class="btn disabled confirm__btn btn__change_city" on:click={handleReject}>Выбрать другой</button>
   </div>
 </div>

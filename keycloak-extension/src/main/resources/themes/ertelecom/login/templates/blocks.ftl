@@ -33,7 +33,7 @@
 </#macro>
 
 <#macro contentHeader mainTitle secondaryTitle="" secondaryHref="" withBorder=false >
-  <header class="flex justify-between items-center pb-2 sm:pb-3 md:pb-4">
+  <header class="flex justify-between items-center sm:pb-3 md:pb-4">
     <h1
             id="page-title"
             class="<#if withBorder></#if> <#if secondaryTitle != ''>text-with-two</#if>"

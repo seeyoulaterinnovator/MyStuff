@@ -26,6 +26,12 @@
 }
 
 .confirm__btn:first-child {
+  margin-right: 24px;
+  margin-bottom: 0;
+}
+.btn__change_city{
+  color: #4F4BFE;
+  border: 2px solid #4F4BFE;
 }
 
 @media screen and (max-width: 1199px){

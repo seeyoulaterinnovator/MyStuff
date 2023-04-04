@@ -1,6 +1,6 @@
 .btn {
   @apply .block .tracking-wider .px-2 .rounded-lg .shadow .font-normal;
-  font-family: Golos,serif;
+  font-family: Golos,sans-serif;
 
   border-radius: 2em;
 
