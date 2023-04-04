@@ -183,7 +183,6 @@ public class CustomUserResource {
                 .addResult("user-parameters", UserParameter.values())
                 .build();
     }
-    //то
     @POST
     @Path("/uploadUsers")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -260,7 +259,6 @@ public class CustomUserResource {
                 .addResult("importUsersReports", importReportService.findImportUsersReportsByRealmId(session.getContext().getRealm().getName()))
                 .build();
     }
-    //не тот
     @POST
     @Path("/uploadImportUsersFile")
     @Consumes(MediaType.MULTIPART_FORM_DATA)

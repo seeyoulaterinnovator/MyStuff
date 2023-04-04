@@ -67,21 +67,21 @@ public class PersonalAccountRepository {
 
         if (paList == null)
             paList = new ArrayList<>();
-        //todo удалять дубликаты лицевых счетов
         Set<PersonalAccountEntity> paEnList = new HashSet<>();
         for (String pa : paList) {
             String[] accountsNumber = pa.split(",");
             for (String acn : Arrays.stream(accountsNumber)
                     .distinct().collect(Collectors.toList())) {
-                PersonalAccountEntity en = new PersonalAccountEntity(null, pe, acn);
-                paEnList.add(en);
-                em.createNativeQuery("INSERT INTO PERSONAL_ACCOUNT (uuid, post_id, value) " +
-                                "SELECT :id, :post, :val " +
-                                "FROM DUAL " +
-                                "WHERE NOT EXISTS (SELECT value FROM PERSONAL_ACCOUNT WHERE value = :val);")
-                        .setParameter("id", String.valueOf(UUID.randomUUID()))
-                        .setParameter("post", pe.getPostId())
-                        .setParameter("val", acn);
+
+                List<PersonalAccountEntity> value = em.createQuery("SELECT pae FROM PersonalAccountEntity pae WHERE pae.value = :val and pae.post = :post"
+                                , PersonalAccountEntity.class)
+                        .setParameter("val", acn)
+                        .setParameter("post", pe)
+                        .getResultList();
+                if (value.isEmpty()) {
+                    PersonalAccountEntity en = new PersonalAccountEntity(null, pe, acn);
+                    paEnList.add(en);
+                }
             }
         }
 
