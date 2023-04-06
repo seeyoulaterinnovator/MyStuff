@@ -12,6 +12,7 @@ import org.keycloak.theme.FreeMarkerUtil;
 import org.keycloak.theme.Theme;
 import org.keycloak.theme.beans.LinkExpirationFormatterMethod;
 import org.keycloak.theme.beans.MessageFormatterMethod;
+import ru.alamics.sso.jpa.entity.common.BlockType;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.schedule.Translator;
 import ru.alamics.sso.settings.SettingConstants;
@@ -92,7 +93,7 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
 
         attributes.put("passwordResetBodyHtml", settingsService.getSettingsStringValue(EMAIL_RESET, realm.getName()));
 
-        if (user.isEnabled()) {
+        if (user.getAttribute(BlockType.MANAGER_BLOCK.getType()).isEmpty()) {
             send(settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_RESET, realm.getName()), BODY_TEMPLATE_PASS_RESET, attributes);
         }
     }
