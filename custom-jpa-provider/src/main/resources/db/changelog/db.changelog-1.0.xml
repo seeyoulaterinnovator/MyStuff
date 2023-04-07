@@ -1002,20 +1002,6 @@
         </sql>
     </changeSet>
 
-    <changeSet id="120" author="zhakov-mv">
-        <sql>
-            CREATE TABLE IF NOT EXISTS BLACK_LIST (
-                id VARCHAR(36) not null,
-                ip VARCHAR(24) not null,
-                user_login VARCHAR(128) null,
-                created timestamp not null,
-                unblocked timestamp null,
-                block_duration bigint null,
-                block_count int null
-            );
-        </sql>
-    </changeSet>
-
     <changeSet id="54_p" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="AUTO_LOCK_NOTIFICATION"/>
@@ -1557,6 +1543,24 @@
     <changeSet id="82" author="petrov-ny">
         <sql>
             UPDATE SETTINGS SET VALUE = 'https://lkb2b.stelecom.ru' WHERE ID = 'b91073d4-5668-11ec-bf63-0242ac130002';
+        </sql>
+    </changeSet>
+
+    <changeSet id="120" author="zhakov-mv">
+        <sql>
+            CREATE TABLE IF NOT EXISTS BLACK_LIST (
+                id VARCHAR(36) NOT NULL PRIMARY KEY,
+                user_login VARCHAR(128) NULL,
+                created TIMESTAMP NOT NULL,
+                unblocked TIMESTAMP NULL,
+                block_duration BIGINT NULL,
+                block_count INT DEFAULT 0,
+                phone VARCHAR(12) NOT NULL,
+                user_id VARCHAR(36) NOT NULL,
+                limitation_cause VARCHAR(36),
+                CONSTRAINT fk_user_entity
+                FOREIGN KEY (user_id) REFERENCES USER_ENTITY (ID) ON DELETE CASCADE
+                ) charset = utf8mb4;
         </sql>
     </changeSet>
 

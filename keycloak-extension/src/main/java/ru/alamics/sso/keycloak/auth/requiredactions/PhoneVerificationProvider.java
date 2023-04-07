@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.auth.requiredactions;
 
+import jdk.tools.jaotc.binformat.macho.MachOSegment;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.RequiredActionContext;
@@ -10,6 +11,8 @@ import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.UserModel;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaType;
+import ru.alamics.sso.antifraud.BlackListService;
+import ru.alamics.sso.jpa.util.LimitationCauseType;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.registration.model.AuthContext;
@@ -29,7 +32,9 @@ import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_BY_PHONE_NUMBER;
 import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_TO_SMS;
@@ -49,14 +54,19 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     private final UserPhoneVerifier userPhoneVerifier;
     private final ActivationCodeType activationCodeType;
     private final EmailTemplateProvider emailTemplateProvider;
-
+    private final BlackListService blackListService;
     private final SettingsService settingsService;
+    private static final LinkedList<String> tryCounterSms = new LinkedList<>();
+    private static final LinkedList<String> tryCounterPhoneCall = new LinkedList<>();
+
+    private static final Map<String, Map<LimitationCauseType, Integer>> counter = new TreeMap<>();
 
     public PhoneVerificationProvider(UserPhoneVerifier userPhoneVerifier, ActivationCodeType activationCodeType, EmailTemplateProvider emailTemplateProvider) {
         this.userPhoneVerifier = userPhoneVerifier;
         this.activationCodeType = activationCodeType;
         this.emailTemplateProvider = emailTemplateProvider;
         this.settingsService = Lookup.lookup(SettingsService.class);
+        this.blackListService = Lookup.lookup(BlackListService.class);
         ActivationCodeType.init();
     }
 
@@ -120,8 +130,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     .setAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, context.getRealm().getId()))
                     .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER, context.getRealm().getId()))
                     .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()));
-
-            context.challenge(createForm(context, loginFormsProvider));
+            context.challenge(createForm(context, loginFormsProvider, user));
 
         } catch (UserPhoneEmpty userPhoneEmpty) {
             log.info("ignore... userPhoneEmpty");
@@ -134,7 +143,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         }
     }
 
-    private Response createForm(RequiredActionContext context, LoginFormsProvider loginFormsProvider) {
+    private Response createForm(RequiredActionContext context, LoginFormsProvider loginFormsProvider, User user) {
         //Костыль тк при запросе с МП не нашел другого способа верификацию отправить по rest
         String mp = context.getAuthenticationSession().getAuthNote("MP");
         String errorCode = context.getAuthenticationSession().getAuthNote(ERROR_CODE);
@@ -204,9 +213,17 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             requiredActionChallenge(context);
 
         } else {
+            //logic here
             UserModel model = context.getUser();
             User user = UserModelUserMapper.mapToUser(model);
+            if (activationCodeType.equals(CODE_TO_SMS)) {
+                tryCounterSms.add(user.getPhone());
+                if (blackListService.isUserBlockedAuthBySms(user.getPhone())) {
+                    //throw юзер заблокан на 12 часов by sms
+                    return;
+                }
 
+            }
             AuthContext authContext = AuthContext.builder()
                     .hashProperty(authSession.getAuthNote(PHONE_KEY_HASH))
                     .expirationTime(LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME))
@@ -217,6 +234,10 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             try {
                 String code = context.getHttpRequest().getDecodedFormParameters().getFirst("smscode");
 
+
+                if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
+
+                }
                 userPhoneVerifier.verifyPhone(user, authContext, code, activationCodeType);
 
                 UserModelUserMapper.mergeUserInto(user, model);
