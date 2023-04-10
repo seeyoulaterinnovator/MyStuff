@@ -1927,6 +1927,7 @@ module.controller('RealmEventsCtrl', function ($scope, RealmEvents, realm, serve
             }
         }
         $scope.events = RealmEvents.query($scope.query);
+
     }
 
     $scope.reset = function () {

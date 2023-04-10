@@ -124,8 +124,8 @@
             Изменить данные
           </button>
         {:else}
-          <button class="btn text-accentBlue w-full md:w-auto" on:click={handleHide}>
-            Спасибо
+          <button class="btn btn-main btn-enter" on:click={handleHide}>
+            Понятно
           </button>
         {/if}
       </div>

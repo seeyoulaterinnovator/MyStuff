@@ -6,11 +6,15 @@ import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.email.EmailException;
 import org.keycloak.email.EmailTemplateProvider;
+import org.keycloak.events.Details;
+import org.keycloak.events.EventType;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaType;
+import ru.alamics.sso.keycloak.auth.form.newForms.SsoUtil;
+import ru.alamics.sso.keycloak.auth.form.newForms.common_mail_sender.EmailSenderService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.registration.model.AuthContext;
@@ -40,9 +44,7 @@ import static ru.alamics.sso.settings.SettingConstants.*;
 @Slf4j
 public class PhoneVerificationProvider implements RequiredActionProvider {
     private static final String VERIFY_PHONE_FTL = "verifyPhone.ftl";
-
     private static final String SECOND_PHASE_LOGIN = "login.ftl";
-
     private static final String NEED_SEND_EMAIL_CODE = "NEED_SEND_EMAIL_CODE";
     private static final String GRANT_TYPE = "grant_type";
     private static final String ERROR_CODE = "error_code";
@@ -124,7 +126,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     .setAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, context.getRealm().getId()))
                     .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER, context.getRealm().getId()))
                     .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()))
-                    .setAttribute("secondPhaseLogin", isLoginSecondPhaseActivated(context));
+                    .setAttribute("secondPhaseLogin", isLoginSecondPhaseActivated(context))
+                    .setAttribute("smsMessage", context.getUser().getRequiredActions().contains("phone_verificator_sms"));
 
             context.challenge(createForm(context, loginFormsProvider));
 
@@ -141,7 +144,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
     private boolean isLoginSecondPhaseActivated(RequiredActionContext context) {
         return context.getAuthenticationSession().getAuthNote("smsButton") != null
-                || (context.getAuthenticationSession().getAuthNote("phoneCallButton") != null);
+                || (context.getAuthenticationSession().getAuthNote("phoneCallButton") != null)
+                || (context.getAuthenticationSession().getAuthNote("loginPasswordButton") != null);
     }
 
     private Response createForm(RequiredActionContext context, LoginFormsProvider loginFormsProvider) {
@@ -161,7 +165,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             parameters.add(GRANT_TYPE, "password");
         }
 
-        return isLoginSecondPhaseActivated(context) ? loginFormsProvider.createForm(SECOND_PHASE_LOGIN) : loginFormsProvider.createForm(VERIFY_PHONE_FTL);
+        return loginFormsProvider.createForm(SECOND_PHASE_LOGIN);
     }
 
 
@@ -230,24 +234,18 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
                 userPhoneVerifier.verifyPhone(user, authContext, code, activationCodeType);
 
-                UserModelUserMapper.mergeUserInto(user, model);
-
                 authSession.removeAuthNote(PHONE_KEY_HASH);
                 authSession.removeAuthNote(EXPIRATION_TIME);
                 authSession.removeAuthNote(COUNT_REPEAT);
 
-                model.addRequiredAction("incoming_call_phone_verificator");
-
-//                AuthenticationManager.finishedRequiredActions()
-   //            context.getUser().addRequiredAction("incoming_call_phone_verificator");
-
+//                SsoUtil.sendEmailVer(authSession, context);
                 context.success();
 
             } catch (WrongSmsCode wrongSmsCode) {
                 log.warn("Wrong sms code");
                 context.form()
                         .setAttribute("error", "Пароль введен не верно. Вам выслан новый код")
-                        .setError("Введен некорректный код смс или его срок действия истек");
+                        .setError("Код введен неверно. Проверьте правильность введенных данных");
                 authSession.removeAuthNote(PHONE_KEY_HASH);
                 authSession.setAuthNote(ERROR_CODE, ERROR_CODE);
                 requiredActionChallenge(context);

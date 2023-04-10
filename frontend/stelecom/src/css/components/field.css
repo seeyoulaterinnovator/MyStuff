@@ -39,7 +39,7 @@
 
 .field__container {
   display: flex;
-  flex-flow: column-reverse;
+  flex-flow: column;
   position: relative;
 }
 

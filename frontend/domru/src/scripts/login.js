@@ -18,11 +18,6 @@ export default (function functionName() {
 
   console.log(usernameElement)
 
-  // if (submitElement && usernameElement && usernameElement.value === '' && passwordElement.value === '') {
-  //   submitElement.disabled = true;
-  // } else if (secondSubmit !== null && secondUserName !== null && secondUserName.value === '') {
-  //   secondSubmit.disabled = true;
-  // }
   if (usernameElement !== null && submitElement !== null) {
     if (passwordElement.value == '' && usernameElement.value == '') {
       submitElement.disabled = true;
@@ -96,7 +91,7 @@ export default (function functionName() {
 
     formElement.addEventListener('submit', () => {
       if (secondUserName !== null) {
-        secondUserName.value = dynamicMask.unmaskedValue;
+        secondUserName.value = dynamicMaskTwo.unmaskedValue;
         cityElement.value = Cookie.get('city-domain') || 'yar';
         return true;
       }
@@ -108,11 +103,6 @@ export default (function functionName() {
       return isUsernameValid;
     }
   }
-
-
-  // Отправляем на сервер значение телефона без маски
-  // Нужно так делать на каждой форме, где есть imask
-
 
 })();
 

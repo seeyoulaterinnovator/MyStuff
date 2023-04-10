@@ -20,19 +20,16 @@ import ru.alamics.sso.keycloak.auth.form.AbstractAuthMailPhoneForm;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.util.Util;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+
 
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 
 
 @Slf4j
 public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhoneForm {
-
-    private static final String LOGIN_SMS = "loginSms";
-    private static final String LOGIN_PHONE_CALL = "loginPhoneCall";
-    private static final String LOGIN_PASSWORD = "loginPassword";
-
     private final UserFindService userFindService;
 
     public NewAbstractAuthMailPhoneForm(UserFindService userFindService) {
@@ -54,23 +51,24 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
         // remove leading and trailing whitespace
         username = username.trim();
 
+
         context.getEvent().detail(Details.USERNAME, username);
         context.getAuthenticationSession().setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, username);
 
         UserModel user = null;
         try {
             log.info("find user casual");
-            if (context.getHttpRequest().getDecodedFormParameters().containsKey("loginPasswordButton")) {
-                user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(), username);
-            }
 
-            if (user == null) {
-                log.info("find user by phone");
+            if (!(username.matches("^\\d+$")) && context.getHttpRequest().getDecodedFormParameters().containsKey("loginPasswordButton")) {
+                if (!isUserNameValid(username, context, "email")) return false;
+                user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(), username);
+            } else {
+                if (!isUserNameValid(username, context, "phone")) return false;
                 user = Util.getUserAdapter(context.getSession(), userFindService.getUserByPhone(context.getRealm(), username));
             }
 
-            log.info("user is " + user);
             if (user != null) {
+                log.info("user is " + user);
                 log.info(user.getId());
             }
             if (!isSuccessCheckUser(context, user)) {
@@ -91,8 +89,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
         }
 
         if (invalidUser(context, user)) {
-            context.form().setAttribute("error", "¬ведите номер мобильного телефона")
-                          .setError("¬веден некорректный код смс или его срок действи€ истек");
             return false;
         }
 
@@ -105,7 +101,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
         if (!enabledUser(context, user)) {
             return false;
         }
-
         String rememberMe = inputData.getFirst("rememberMe");
         boolean remember = rememberMe != null && rememberMe.equalsIgnoreCase("on");
         if (remember) {
@@ -115,6 +110,28 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
             context.getAuthenticationSession().removeAuthNote(Details.REMEMBER_ME);
         }
         context.setUser(user);
+        return true;
+    }
+
+    private boolean isUserNameValid(String username, AuthenticationFlowContext context, String type) {
+        String phoneRegex = "^79\\d{2}\\d{7}$";
+        String emailRegex = "^[a-zA-Z\\d_!#$%&Т*+/=?`{|}~^.-]+@[a-zA-Z\\d.-]+$";
+
+        switch (type) {
+            case "email":
+                if (!(username.matches(emailRegex))) {
+                    context.form().setAttribute("error", "incorrect mail");
+                    authenticate(context);
+                    return false;
+                }
+                break;
+            case "phone":
+                if (!(username.matches(phoneRegex))) {
+                    context.form().setAttribute("error", "incorrect phone");
+                    authenticate(context);
+                    return false;
+                }
+        }
         return true;
     }
 
@@ -129,7 +146,9 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
         if (!validateUserAndPassword(context, formData)) {
             return;
         }
+        SsoUtil.sendEmailVer(context);
         context.getAuthenticationSession().setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
+        context.form().setAttribute("isVerified", context.getUser().isEmailVerified());
         context.success();
     }
 
@@ -146,6 +165,9 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
             formData.add("rememberMe", "on");
         }
         context.form().setAttribute("isSwitcherOn", getCurrentSwitcherStatus(context.getHttpRequest(), context));
+        MultivaluedMap<String, String> multivaluedMap = context.getHttpRequest().getDecodedFormParameters();
+        HttpRequest httpRequest = context.getHttpRequest();
+        HttpHeaders h = httpRequest.getHttpHeaders();
 
         context.challenge(challenge(context, formData));
     }
@@ -221,6 +243,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
         }
         return null;
     }
+
 
     public abstract boolean isSuccessCheckUser(AuthenticationFlowContext context, UserModel user);
 

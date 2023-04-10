@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.auth.post;
+package ru.alamics.sso.keycloak.auth.form.newForms.new_auth_post;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -12,6 +12,7 @@ import org.keycloak.models.UserSessionModel;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.auth.UserRole;
+import ru.alamics.sso.keycloak.auth.form.newForms.SsoUtil;
 import ru.alamics.sso.keycloak.facade.CachedUserPostFacade;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.dto.UserPostResponse;
@@ -33,14 +34,15 @@ import static ru.alamics.sso.registration.model.UserConstants.*;
 import static ru.alamics.sso.util.Util.CLIENT_B2B;
 
 @Slf4j
-public class AttributesForm implements Authenticator {
+public class NewAttributesForm implements Authenticator {
+
     private final static String DMP_ID = "dmp-kc-sit";
     private static final String FORM = "attributes.ftl";
     private final UserRole roleService;
     private final CachedUserPostFacade cachedUserPostFacade;
     private final SettingsService settingsService;
 
-    public AttributesForm() {
+    public NewAttributesForm() {
         this.roleService = Lookup.lookup(UserRole.class);
         this.cachedUserPostFacade = Lookup.lookup(CachedUserPostFacade.class);
         this.settingsService = Lookup.lookup(SettingsService.class);
@@ -76,13 +78,15 @@ public class AttributesForm implements Authenticator {
             }
             if (attributes.isEmpty()) {
                 context.success();
+            } else if (attributes.size() == 1) {
+                roleService.setUserPost(context, attributes.get(0).getTomsId(), attributes.get(0).getId());
+                context.success();
             } else {
                 context.challenge(createForm(context, attributes));
             }
         } else {
             context.success();
         }
-
     }
 
     private Response createForm(AuthenticationFlowContext context, List<UserPostResponse> posts) {

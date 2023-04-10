@@ -16,6 +16,8 @@ import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.client.ClientService;
+import ru.alamics.sso.keycloak.auth.form.newForms.SsoUtil;
+import ru.alamics.sso.keycloak.auth.form.newForms.common_mail_sender.EmailSenderService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
@@ -64,8 +66,11 @@ public class SsoUpdatePassword extends UpdatePassword {
             return;
         }
 
+        AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
+
         try {
             context.getSession().userCredentialManager().updateCredential(context.getRealm(), context.getUser(), UserCredentialModel.password(passwordNew, false));
+
             context.success();
         } catch (ModelException me) {
             errorEvent.detail(Details.REASON, me.getMessage()).error(Errors.PASSWORD_REJECTED);

@@ -46,6 +46,7 @@
   }
 }
 
+
 .btn-sell {
   @apply .bg-accentBlue .text-white;
 
@@ -112,7 +113,92 @@ a.btn {
   }
 
   .btn.btn-enter {
-    max-width: 136px;
+    max-width: 288px;
     box-sizing: border-box;
   }
 }
+@media only screen and (min-width: 1280px) {
+  .btn-switcher{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 13px 19px;
+    gap: 10px;
+
+    width: 285px;
+    height: 48px;
+
+    /* [Light]/Основные/Белый */
+
+    background: #FFFFFF;
+    /* Button/White_Normal */
+
+    box-shadow: 0px 2px 8px rgba(117, 142, 161, 0.25), 0px 0px 2px rgba(117, 142, 161, 0.22);
+    border-radius: 12px;
+
+    /* Inside auto layout */
+
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+  }
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1279px) {
+  .btn-switcher {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 17px;
+    gap: 10px;
+    width: 266px;
+    height: 44px;
+    background: #FFFFFF; /* [Light]/Основные/Белый */
+    /* Button/White_Normal */
+    box-shadow: 0px 2px 8px rgba(117, 142, 161, 0.25), 0px 0px 2px rgba(117, 142, 161, 0.22);
+    border-radius: 11px;
+    /* Inside auto layout */
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+  }
+}
+
+/* For 320 resolution */
+@media only screen and (max-width: 767px) {
+  .btn-switcher {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 11px 15px;
+    gap: 10px;
+    width: 288px;
+    height: 40px;
+    background: #FFFFFF; /* [Light]/Основные/Белый */
+    /* Button/White_Normal */
+    box-shadow: 0px 2px 8px rgba(117, 142, 161, 0.25), 0px 0px 2px rgba(117, 142, 161, 0.22);
+    border-radius: 10px;
+    /* Inside auto layout */
+    flex: none;
+    order: 1;
+    align-self: stretch;
+    flex-grow: 0;
+
+  }
+}
+@media only screen and (max-width: 767px) {
+  .btn-main{
+    width: 288px;
+    height: 40px;
+  }
+}
+@media only screen and (max-width: 767px) {
+  .btn-enter{
+    width: 288px;
+    height: 40px;
+  }
+}
+

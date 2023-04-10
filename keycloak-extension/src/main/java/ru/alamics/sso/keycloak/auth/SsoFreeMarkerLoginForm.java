@@ -50,11 +50,8 @@ import static ru.alamics.sso.util.Util.CLIENT_B2B;
 @Slf4j
 public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     private static final String REGISTRATION_ONLY_IN_FRAME_ATTRIBUTE = "registrationOnlyInFrame";
-
     private static final String AUTH_VIA_SMS = "loginViaSms";
-
     private static final String AUTH_VIA_EMAIL_OR_USERNAME_AND_PASSWORD = "loginViaEmailOrUsernameAndPassword";
-
     private static final String AUTH_VIA_PHONE_CALL = "loginViaPhoneCall";
 
     private ClientService clientService = null;
@@ -62,7 +59,6 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
     public SsoFreeMarkerLoginForm(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
-
         attributes.put("redirectUrl", getRedirectUrl());
         attributes.put("hideRegistration", isHideRegistration());
         attributes.put("loginViaSms", isLoginViaSms());

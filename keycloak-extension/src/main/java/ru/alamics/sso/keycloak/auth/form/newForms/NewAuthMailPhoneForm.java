@@ -30,7 +30,6 @@ public class NewAuthMailPhoneForm extends NewAbstractAuthMailPhoneForm {
 
     }
 
-
     @Override
     public boolean configuredFor(KeycloakSession keycloakSession, RealmModel realmModel, UserModel userModel) {
         return false;

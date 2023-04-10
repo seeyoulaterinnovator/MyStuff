@@ -247,6 +247,49 @@
                 </div>
                 <kc-tooltip>{{:: 'force-name-id-format.tooltip' | translate}}</kc-tooltip>
             </div>
+
+
+
+            <div class="form-group">
+                <label for="loginViaSms" class="col-md-2 control-label">SMS Auth</label>
+                <div class="col-md-6">
+                    <input ng-model="loginViaSms" name="loginViaSms" id="loginViaSms" onoffswitch
+                           on-text="{{:: 'onText' | translate}}" off-text="{{:: 'offText' | translate}}"
+                           data-ng-click="changed = true"/>
+                </div>
+                <kc-tooltip>Turns off auth via sms as basis auth</kc-tooltip>
+            </div>
+
+            <div class="form-group">
+                <label for="loginViaEmailOrUsernameAndPassword" class="col-md-2 control-label">Email or username and password auth</label>
+                <div class="col-md-6">
+                    <input ng-model="loginViaEmailOrUsernameAndPassword" name="loginViaEmailOrUsernameAndPassword" id="loginViaEmailOrUsernameAndPassword" onoffswitch
+                           on-text="{{:: 'onText' | translate}}" off-text="{{:: 'offText' | translate}}"
+                           data-ng-click="changed = true"/>
+                </div>
+                <kc-tooltip>Turns off auth via username/email and password</kc-tooltip>
+            </div>
+
+            <div class="form-group">
+                <label for="loginViaPhoneCall" class="col-md-2 control-label">Auth via phone call</label>
+                <div class="col-md-6">
+                    <input ng-model="loginViaPhoneCall" name="loginViaPhoneCall" id="loginViaPhoneCall" onoffswitch
+                           on-text="{{:: 'onText' | translate}}" off-text="{{:: 'offText' | translate}}"
+                           data-ng-click="changed = true"/>
+                </div>
+                <kc-tooltip>Turns off auth via username/email and password</kc-tooltip>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
             <div class="form-group" data-ng-show="protocol == 'saml'">
                 <label class="col-md-2 control-label" for="samlNameIdFormat">{{:: 'name-id-format' | translate}}</label>
                 <div class="col-sm-6">
@@ -268,7 +311,7 @@
                 </div>
                 <kc-tooltip>{{:: 'root-url.tooltip' | translate}}</kc-tooltip>
             </div>
-			
+
 			<div class="form-group" data-ng-show="!clientEdit.bearerOnly && protocol != 'docker-v2'">
                 <label class="col-md-2 control-label" for="mainUrl">Main Redirect URI</label>
                 <div class="col-sm-6">

@@ -64,7 +64,7 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
         AuthType authType = AuthType.getByString(type);
         String disable = context.getUser().getFirstAttribute(UserConstants.DISABLE_TWO_STEP_AUTH);
         AuthenticationSessionModel sessionModel = context.getAuthenticationSession();
-        Set<String> unnessReqActions = new HashSet<>();
+        UserModel userModel = context.getUser();
 
         if (authType != null) {
             context.getAuthenticationSession().setAuthNote(NOTE_AUTH_TYPE_NAME, authType.name());
@@ -78,10 +78,9 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
 
             if (authType != null && (disable == null || disable.isEmpty())) {
                 for (String providerName : authType.getRequiredActionNames()) {
-                    context.getUser().addRequiredAction(providerName);
+                    userModel.addRequiredAction(providerName);
                 }
             }
-
             context.success();
 
         } else if (buttons.containsKey("smsButton")) {
@@ -91,14 +90,14 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
 
             if (authType != null && (disable == null || disable.isEmpty())) {
                 for (String providerName : authType.getRequiredActionNames()) {
-                    if (providerName.equals("VERIFY_EMAIL")) {
-                        context.getUser().addRequiredAction(providerName);
+                    if (!providerName.equals("incoming_call_phone_verificator")) {
+                        userModel.addRequiredAction(providerName);
                     }
-                    unnessReqActions.add(providerName);
                 }
             }
 
-            removeAndSaveUnnecessaryRa(context.getUser(), unnessReqActions, "smsButton");
+            userModel.removeRequiredAction("incoming_call_phone_verificator");
+            userModel.addRequiredAction("phone_verificator_sms");
 
             context.success();
 
@@ -110,40 +109,22 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
             if (authType != null && (disable == null || disable.isEmpty())) {
                 for (String providerName : authType.getRequiredActionNames()) {
                     if (providerName.equals("VERIFY_EMAIL")) {
-                        context.getUser().addRequiredAction(providerName);
+                        userModel.addRequiredAction(providerName);
                     }
-                    unnessReqActions.add(providerName);
                 }
             }
 
-            removeAndSaveUnnecessaryRa(context.getUser(), unnessReqActions, "phoneCallButton");
+            userModel.removeRequiredAction("phone_verificator_sms");
+            userModel.addRequiredAction("incoming_call_phone_verificator");
 
             context.success();
         }
 
     }
 
-    protected void removeAndSaveUnnecessaryRa(UserModel userModel, Set<String> unnessReqActions, String button) {
-        switch (button) {
-            case "smsButton":
-                for (String reqAction : userModel.getRequiredActions()) {
-                    unnessReqActions.add(reqAction);
-                    if (reqAction.equals("incoming_call_phone_verificator")) {
-                        userModel.removeRequiredAction(reqAction);
-                    }
-                }
-                userModel.addRequiredAction("phone_verificator_sms");
-                break;
-            case "phoneCallButton":
-                for (String reqAction : userModel.getRequiredActions()) {
-                    unnessReqActions.add(reqAction);
-                    if (reqAction.equals("phone_verificator_sms")) {
-                        userModel.removeRequiredAction(reqAction);
-                    }
-                }
-                userModel.addRequiredAction("incoming_call_phone_verificator");
-        }
-
+    @Override
+    public String getReferenceCategory() {
+        return REFERENCE_CATEGORY;
     }
 
     @Override

@@ -3,6 +3,7 @@ ru.alamics.sso.keycloak.auth.form.AuthMailPhoneFormFactory
 ru.alamics.sso.keycloak.auth.TwoStepVerificationFactory
 ru.alamics.sso.keycloak.auth.form.newForms.newAuthReqActions.TwoStepAuthFactory
 ru.alamics.sso.keycloak.auth.post.AttributesFormFactory
+ru.alamics.sso.keycloak.auth.form.newForms.new_auth_post.NewAttributesFormFactory
 ru.alamics.sso.keycloak.resetcred.ResetCredentialEmailOrPhoneFactory
 ru.alamics.sso.keycloak.auth.rest.RestRequiredActionsAuthFactory
 ru.alamics.sso.keycloak.social.CustomIdpReviewProfileAuthenticatorFactory

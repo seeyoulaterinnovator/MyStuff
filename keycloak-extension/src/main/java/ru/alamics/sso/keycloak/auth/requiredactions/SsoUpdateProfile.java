@@ -12,6 +12,9 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.resources.AttributeFormDataProcessor;
+import org.keycloak.sessions.AuthenticationSessionModel;
+import ru.alamics.sso.keycloak.auth.form.newForms.SsoUtil;
+import ru.alamics.sso.keycloak.auth.form.newForms.common_mail_sender.EmailSenderService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.service.UserFindService;
@@ -115,6 +118,7 @@ public class SsoUpdateProfile extends UpdateProfile {
         if (emailChanged) {
             event.clone().event(EventType.UPDATE_EMAIL).detail(Details.PREVIOUS_EMAIL, oldEmail).detail(Details.UPDATED_EMAIL, email).success();
         }
+
         context.success();
     }
 }
