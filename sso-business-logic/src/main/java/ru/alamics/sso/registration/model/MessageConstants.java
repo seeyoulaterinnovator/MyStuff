@@ -4,4 +4,5 @@ public class MessageConstants {
 
     public static final String PHONE_EXISTS = "Номер мобильного телефона уже используется в другой учетной записи. Если Вы уже регистрировались, попробуйте войти в свою учетную запись, либо укажите другой номер телефона.";
     public static final String PHONE = "телефоном";
+    public static final String SMS_LIMIT_20 = "Превышен лимит СМС. Запросить новое СМС можно через 12 часов";
 }

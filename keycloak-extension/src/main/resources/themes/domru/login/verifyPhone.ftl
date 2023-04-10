@@ -14,7 +14,13 @@
         <#elseif userPhone??>
             <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4" x-ms-format-detection="none">
                 <#if lengthCode==6>
+                    <#if message.summary?contains('Превышен лимит СМС. Запросить новое СМС можно через 12 часов')>
+                        <div class="flex md:justify-start justify-start w-full items-center text-left md:text-left md:pb-10 sm:pb-8 pb-4">
+                            <p>"Ошибка смс 12 часов"</p>
+                        </div>
+                    <#else>
                     Вам выслан одноразовый пароль на номер:
+                    </#if>
                 <#else>
                     Введите последние 4 цифры номера входящего звонка на номер:
                 </#if>

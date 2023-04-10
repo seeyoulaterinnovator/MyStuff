@@ -10,6 +10,8 @@ import ru.alamics.sso.registration.model.User;
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import java.util.Objects;
+import java.util.UUID;
 
 @Stateless
 @LocalBean
@@ -23,11 +25,13 @@ public class BlackListService {
     public void limitUserBySmsOrPhone(User user, LimitationCauseType cause) {
         BlackListEntity blackList = new BlackListEntity();
         UserEntity userEntity = userRepository.findUser(user.getId());
-
+        blackList.setId(UUID.randomUUID().toString());
         blackList.setPhone(user.getPhone());
         blackList.setUser(userEntity);
         //default 0
-        blackList.setBlockCount(blackList.getBlockCount() + 1);
+        if (Objects.isNull(blackList.getBlockCount())) {
+            blackList.setBlockCount(1);
+        } else blackList.setBlockCount(blackList.getBlockCount() + 1);
         blackList.setUserLogin(user.getName());
         blackList.setBlockDurationSec(BLOCK_DURATION_SEC);
         blackList.setLimitationCause(cause);

@@ -7,15 +7,22 @@ import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.email.EmailException;
 import org.keycloak.email.EmailTemplateProvider;
+import org.keycloak.events.EventType;
 import org.keycloak.forms.login.LoginFormsProvider;
+import org.keycloak.forms.login.freemarker.FreeMarkerLoginFormsProvider;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.utils.FormMessage;
+import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import org.keycloak.theme.FreeMarkerUtil;
 import org.keycloak.utils.MediaType;
 import ru.alamics.sso.antifraud.BlackListService;
 import ru.alamics.sso.jpa.util.LimitationCauseType;
+import ru.alamics.sso.keycloak.auth.SsoFreeMarkerLoginForm;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.registration.model.AuthContext;
+import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.phone.ActivationCodeType;
 import ru.alamics.sso.registration.phone.HashGenerator;
@@ -31,10 +38,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_BY_PHONE_NUMBER;
 import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_TO_SMS;
@@ -56,9 +60,11 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     private final EmailTemplateProvider emailTemplateProvider;
     private final BlackListService blackListService;
     private final SettingsService settingsService;
+    //fixme
     private static final LinkedList<String> tryCounterSms = new LinkedList<>();
+    //fixme
     private static final LinkedList<String> tryCounterPhoneCall = new LinkedList<>();
-
+    //fixme
     private static final Map<String, Map<LimitationCauseType, Integer>> counter = new TreeMap<>();
 
     public PhoneVerificationProvider(UserPhoneVerifier userPhoneVerifier, ActivationCodeType activationCodeType, EmailTemplateProvider emailTemplateProvider) {
@@ -130,7 +136,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     .setAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, context.getRealm().getId()))
                     .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER, context.getRealm().getId()))
                     .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()));
-            context.challenge(createForm(context, loginFormsProvider, user));
+            context.challenge(createForm(context, loginFormsProvider));
 
         } catch (UserPhoneEmpty userPhoneEmpty) {
             log.info("ignore... userPhoneEmpty");
@@ -143,7 +149,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         }
     }
 
-    private Response createForm(RequiredActionContext context, LoginFormsProvider loginFormsProvider, User user) {
+    private Response createForm(RequiredActionContext context, LoginFormsProvider loginFormsProvider) {
         //Костыль тк при запросе с МП не нашел другого способа верификацию отправить по rest
         String mp = context.getAuthenticationSession().getAuthNote("MP");
         String errorCode = context.getAuthenticationSession().getAuthNote(ERROR_CODE);
@@ -158,6 +164,10 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             HttpRequest contextObject = context.getSession().getContext().getContextObject(HttpRequest.class);
             MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
             parameters.add(GRANT_TYPE, "password");
+        } else {
+            //fixme
+            context.form()
+                    .setError(MessageConstants.SMS_LIMIT_20);
         }
         return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
     }
@@ -218,44 +228,44 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             User user = UserModelUserMapper.mapToUser(model);
             if (activationCodeType.equals(CODE_TO_SMS)) {
                 tryCounterSms.add(user.getPhone());
-                if (blackListService.isUserBlockedAuthBySms(user.getPhone())) {
-                    //throw юзер заблокан на 12 часов by sms
-                    return;
+
+                AuthContext authContext = AuthContext.builder()
+                        .hashProperty(authSession.getAuthNote(PHONE_KEY_HASH))
+                        .expirationTime(LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME))
+                        .counter(getCount(authSession.getAuthNote(COUNT_REPEAT)))
+                        .activationCodeType(activationCodeType)
+                        .build();
+
+                try {
+                    String code = context.getHttpRequest().getDecodedFormParameters().getFirst("smscode");
+                    userPhoneVerifier.verifyPhone(user, authContext, code, activationCodeType);
+
+                    UserModelUserMapper.mergeUserInto(user, model);
+                    authSession.removeAuthNote(PHONE_KEY_HASH);
+                    authSession.removeAuthNote(EXPIRATION_TIME);
+                    authSession.removeAuthNote(COUNT_REPEAT);
+                    context.success();
+                } catch (WrongSmsCode wrongSmsCode) {
+                    //fixme
+                    if (tryCounterSms.size() > 2) {
+                        blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.SMS);
+                    }
+                    if (blackListService.isUserBlockedAuthBySms(user.getPhone())) {
+                        requiredActionChallenge(context);
+                        return;
+                    }
+                    log.warn("Wrong sms code");
+                    context.form()
+                            .setAttribute("error", "Пароль введен не верно. Вам выслан новый код")
+                            .setError("Введен некорректный код смс или его срок действия истек");
+                    authSession.removeAuthNote(PHONE_KEY_HASH);
+                    authSession.setAuthNote(ERROR_CODE, ERROR_CODE);
+                    requiredActionChallenge(context);
                 }
-
-            }
-            AuthContext authContext = AuthContext.builder()
-                    .hashProperty(authSession.getAuthNote(PHONE_KEY_HASH))
-                    .expirationTime(LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME))
-                    .counter(getCount(authSession.getAuthNote(COUNT_REPEAT)))
-                    .activationCodeType(activationCodeType)
-                    .build();
-
-            try {
-                String code = context.getHttpRequest().getDecodedFormParameters().getFirst("smscode");
-
-
-                if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
-
-                }
-                userPhoneVerifier.verifyPhone(user, authContext, code, activationCodeType);
-
-                UserModelUserMapper.mergeUserInto(user, model);
-                authSession.removeAuthNote(PHONE_KEY_HASH);
-                authSession.removeAuthNote(EXPIRATION_TIME);
-                authSession.removeAuthNote(COUNT_REPEAT);
-                context.success();
-            } catch (WrongSmsCode wrongSmsCode) {
-                log.warn("Wrong sms code");
-                context.form()
-                        .setAttribute("error", "Пароль введен не верно. Вам выслан новый код")
-                        .setError("Введен некорректный код смс или его срок действия истек");
-                authSession.removeAuthNote(PHONE_KEY_HASH);
-                authSession.setAuthNote(ERROR_CODE, ERROR_CODE);
-                requiredActionChallenge(context);
             }
         }
     }
+
     private Integer getCount(String countStr) {
         if (countStr == null || "null".equals(countStr)) {
             return 0;

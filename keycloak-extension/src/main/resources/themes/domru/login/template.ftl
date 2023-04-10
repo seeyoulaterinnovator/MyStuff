@@ -99,6 +99,10 @@
                                             ${kcSanitize(message.summary)?no_esc}
                                         </span>
                                     </#if>
+                                <#elseif message.summary?contains('Превышен лимит СМС. Запросить новое СМС можно через 12 часов')>
+                                    <div class="flex justify-between w-full items-center">
+                                        <p>"Ошибка смс 12 часов"</p>
+                                    </div>
                                 <#elseif message.summary == msg('emailExistsMessage')>
                                     <span class="text-accentRed bad_email hidden">
                                         ${kcSanitize(message.summary)?no_esc}

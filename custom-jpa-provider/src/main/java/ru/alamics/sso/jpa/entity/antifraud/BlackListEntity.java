@@ -16,9 +16,8 @@ import java.util.UUID;
 @NoArgsConstructor
 public class BlackListEntity {
     @Id
-    @GeneratedValue
     @Column(name = "id")
-    private UUID id;
+    private String id;
     @Column(name = "user_login")
     private String userLogin;
     @CreationTimestamp
