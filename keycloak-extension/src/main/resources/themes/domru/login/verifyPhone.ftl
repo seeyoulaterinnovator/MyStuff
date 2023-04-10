@@ -14,10 +14,28 @@
         <#elseif userPhone??>
             <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4" x-ms-format-detection="none">
                 <#if lengthCode==6>
-                    <#if message.summary?contains('Превышен лимит СМС. Запросить новое СМС можно через 12 часов')>
-                        <div class="flex md:justify-start justify-start w-full items-center text-left md:text-left md:pb-10 sm:pb-8 pb-4">
-                            <p>"Ошибка смс 12 часов"</p>
-                        </div>
+                    <#if message?has_content>
+                        <#if message.summary?contains('Превышен лимит СМС. Запросить новое СМС можно через 12 часов')>
+                            <div class="message">
+                                <div class="message__title flex flex-row justify-between items-center gap-4">
+                                    <span>Ошибка</span>
+                                    <button class="btn message__btn">×</button>
+                                </div>
+                                <p>
+                                    Превышен лимит СМС. Запросить новое СМС можно через 12 часов.
+                                </p>
+                            </div>
+                        <#elseif message.summary?contains('Превышен лимит повторных звонков. Запросить новый звонок можно через 12 часов')>
+                            <div class="message">
+                                <div class="message__title flex flex-row justify-between items-center gap-4">
+                                    <span>Ошибка</span>
+                                    <button class="btn message__btn">×</button>
+                                </div>
+                                <p>
+                                    Превышен лимит повторных звонков. Запросить новый звонок можно через 12 часов
+                                </p>
+                            </div>
+                    </#if>
                     <#else>
                     Вам выслан одноразовый пароль на номер:
                     </#if>

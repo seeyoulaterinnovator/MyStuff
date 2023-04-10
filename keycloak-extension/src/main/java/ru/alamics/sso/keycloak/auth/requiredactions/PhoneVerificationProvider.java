@@ -1,24 +1,17 @@
 package ru.alamics.sso.keycloak.auth.requiredactions;
 
-import jdk.tools.jaotc.binformat.macho.MachOSegment;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.email.EmailException;
 import org.keycloak.email.EmailTemplateProvider;
-import org.keycloak.events.EventType;
 import org.keycloak.forms.login.LoginFormsProvider;
-import org.keycloak.forms.login.freemarker.FreeMarkerLoginFormsProvider;
 import org.keycloak.models.UserModel;
-import org.keycloak.models.utils.FormMessage;
-import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionModel;
-import org.keycloak.theme.FreeMarkerUtil;
 import org.keycloak.utils.MediaType;
 import ru.alamics.sso.antifraud.BlackListService;
 import ru.alamics.sso.jpa.util.LimitationCauseType;
-import ru.alamics.sso.keycloak.auth.SsoFreeMarkerLoginForm;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.registration.model.AuthContext;
@@ -61,11 +54,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     private final BlackListService blackListService;
     private final SettingsService settingsService;
     //fixme
-    private static final LinkedList<String> tryCounterSms = new LinkedList<>();
-    //fixme
-    private static final LinkedList<String> tryCounterPhoneCall = new LinkedList<>();
-    //fixme
-    private static final Map<String, Map<LimitationCauseType, Integer>> counter = new TreeMap<>();
+    private static final Map<String, Map<ActivationCodeType, Integer>> counter = new HashMap<>();
+    private static Integer countTry = 0;
 
     public PhoneVerificationProvider(UserPhoneVerifier userPhoneVerifier, ActivationCodeType activationCodeType, EmailTemplateProvider emailTemplateProvider) {
         this.userPhoneVerifier = userPhoneVerifier;
@@ -136,7 +126,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     .setAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, context.getRealm().getId()))
                     .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER, context.getRealm().getId()))
                     .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()));
-            context.challenge(createForm(context, loginFormsProvider));
+            context.challenge(createForm(context, loginFormsProvider, user));
 
         } catch (UserPhoneEmpty userPhoneEmpty) {
             log.info("ignore... userPhoneEmpty");
@@ -149,7 +139,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         }
     }
 
-    private Response createForm(RequiredActionContext context, LoginFormsProvider loginFormsProvider) {
+    private Response createForm(RequiredActionContext context, LoginFormsProvider loginFormsProvider, User user) {
         //Костыль тк при запросе с МП не нашел другого способа верификацию отправить по rest
         String mp = context.getAuthenticationSession().getAuthNote("MP");
         String errorCode = context.getAuthenticationSession().getAuthNote(ERROR_CODE);
@@ -164,10 +154,17 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             HttpRequest contextObject = context.getSession().getContext().getContextObject(HttpRequest.class);
             MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
             parameters.add(GRANT_TYPE, "password");
-        } else {
-            //fixme
+
+        }
+        if (blackListService.isUserBlockedAuthBySms(user.getPhone())) {
             context.form()
-                    .setError(MessageConstants.SMS_LIMIT_20);
+                    .setError(MessageConstants.SMS_LIMIT_20_BLOCK);
+            return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
+        }
+        if (blackListService.isUserBlockedAuthByPhoneCall(user.getPhone())) {
+            context.form()
+                    .setError(MessageConstants.CALL_LIMIT_20_BLOCK);
+            return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
         }
         return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
     }
@@ -227,7 +224,18 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             UserModel model = context.getUser();
             User user = UserModelUserMapper.mapToUser(model);
             if (activationCodeType.equals(CODE_TO_SMS)) {
-                tryCounterSms.add(user.getPhone());
+                Map<ActivationCodeType, Integer> typeCount = new HashMap<>();
+                if (!counter.containsKey(user.getPhone())) {
+                    countTry++;
+                    typeCount.put(CODE_TO_SMS, countTry);
+                    counter.put(user.getPhone(), typeCount);
+                } else {
+                    Integer existTries = counter.get(user.getPhone()).values().stream().findFirst().orElseThrow();
+                    existTries++;
+                    typeCount.put(CODE_TO_SMS, existTries);
+                    counter.put(user.getPhone(), typeCount);
+                }
+
 
                 AuthContext authContext = AuthContext.builder()
                         .hashProperty(authSession.getAuthNote(PHONE_KEY_HASH))
@@ -247,12 +255,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     context.success();
                 } catch (WrongSmsCode wrongSmsCode) {
                     //fixme
-                    if (tryCounterSms.size() > 2) {
+                    if (counter.get(user.getPhone()).values().size() > 2) {
                         blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.SMS);
-                    }
-                    if (blackListService.isUserBlockedAuthBySms(user.getPhone())) {
-                        requiredActionChallenge(context);
-                        return;
                     }
                     log.warn("Wrong sms code");
                     context.form()
