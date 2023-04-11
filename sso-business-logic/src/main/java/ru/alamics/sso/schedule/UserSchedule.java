@@ -11,30 +11,37 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.ClientEntity;
 import org.keycloak.models.jpa.entities.RealmEntity;
+import org.keycloak.models.jpa.entities.UserAttributeEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.util.JsonSerialization;
 import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.emailer.EmailModel;
 import ru.alamics.sso.emailer.EmailSender;
 import ru.alamics.sso.jpa.entity.AutoLockNotification;
+import ru.alamics.sso.jpa.entity.common.BlockType;
 import ru.alamics.sso.jpa.entity.common.NotificationType;
 import ru.alamics.sso.jpa.repository.*;
 import ru.alamics.sso.keycloak.GeneralRealm;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.property.ApplicationProperties;
+import ru.alamics.sso.registration.AttributeFormatException;
+import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.mapper.DataMapper;
+import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsDto;
 import ru.alamics.sso.settings.SettingsService;
+import ru.alamics.sso.user.UserAttributeService;
+import ru.alamics.sso.user.web.AttributeRequest;
 import ru.alamics.sso.util.Util;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.ejb.Timer;
 import javax.ejb.*;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -68,6 +75,8 @@ public class UserSchedule {
     private TimerService timerService;
     @EJB
     private ClientService сlientService;
+    @EJB
+    private UserRepository userRepository;
 
     private Timer timer;
 
@@ -193,6 +202,7 @@ public class UserSchedule {
                     sender.send(bockNotification.build());
                 }
                 user.setEnabled(false);
+                addSystemBlockAttribute(user);
                 createAdminEvent(OperationType.UPDATE, user, realm);
             } else if (notification.getType() == NotificationType.PASSWORD_EXPIRED) {
                 EmailModel.EmailModelBuilder passwordExpired = passwordExpired(getClientLink(client), realm.getName());
@@ -202,6 +212,15 @@ public class UserSchedule {
             }
         }
         log.debug("stop={}", DEBUG_STR);
+    }
+
+    private void addSystemBlockAttribute(UserEntity user) {
+        UserAttributeEntity attribute = new UserAttributeEntity();
+        attribute.setUser(user);
+        attribute.setId(UUID.randomUUID().toString());
+        attribute.setName(BlockType.SYSTEM_BLOCK.getType());
+        attribute.setValue(LocalDateTime.now().toString());
+        userRepository.saveAttributes(attribute);
     }
 
 
