@@ -1550,7 +1550,7 @@
         <sql>
             CREATE TABLE IF NOT EXISTS BLACK_LIST (
                 id VARCHAR(36) NOT NULL PRIMARY KEY,
-                user_login VARCHAR(128) NULL,
+                email VARCHAR(128) NULL,
                 created TIMESTAMP NOT NULL,
                 unblocked TIMESTAMP NULL,
                 block_duration BIGINT NULL,

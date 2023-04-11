@@ -18,9 +18,8 @@ public class BlackListEntity {
     @Id
     @Column(name = "id")
     private String id;
-    @Column(name = "user_login")
-    private String userLogin;
-    @CreationTimestamp
+    @Column(name = "email")
+    private String email;
     @Column(name = "created")
     private LocalDateTime createdAt;
     @Column(name = "unblocked")

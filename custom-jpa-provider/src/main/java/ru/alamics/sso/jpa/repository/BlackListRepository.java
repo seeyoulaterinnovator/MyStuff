@@ -1,5 +1,6 @@
 package ru.alamics.sso.jpa.repository;
 
+import org.hibernate.Session;
 import ru.alamics.sso.jpa.entity.antifraud.BlackListEntity;
 
 import javax.ejb.LocalBean;
@@ -26,10 +27,10 @@ public class BlackListRepository {
                 .getSingleResult();
     }
 
-    public BlackListEntity findByLogin(String login) {
-        return em.createQuery("select be from BlackListEntity be where be.userLogin = :login", BlackListEntity.class)
-                .setParameter("login", login)
-                .getSingleResult();
+    public List<BlackListEntity> findByEmail(String email) {
+        return em.createQuery("select be from BlackListEntity be where be.email = :email ORDER BY be.createdAt desc", BlackListEntity.class)
+                .setParameter("email", email)
+                .getResultList();
     }
 
     public BlackListEntity findFirstByLogin(String login) {
@@ -38,8 +39,8 @@ public class BlackListRepository {
                 .getSingleResult();
     }
 
-    public List<BlackListEntity> findByPhone(String phone) {
-        return em.createQuery("select be from BlackListEntity be where be.phone =:phone", BlackListEntity.class)
+    public List<BlackListEntity> findBlockedByPhone(String phone) {
+        return em.createQuery("select be from BlackListEntity be where be.phone =:phone and be.unblockedAt >= current_timestamp ORDER BY be.createdAt desc", BlackListEntity.class)
                 .setParameter("phone", phone)
                 .getResultList();
 
