@@ -224,7 +224,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             Map<ActivationCodeType, Integer> typeCount = new HashMap<>();
             if (activationCodeType.equals(CODE_TO_SMS)) {
                 checkAndAddToCounter(user, typeCount, CODE_TO_SMS);
-                if (counter.get(user.getPhone()).values().stream().findFirst().orElseThrow() > 20) {
+                if (counter.get(user.getPhone()).values().stream().findFirst().orElseThrow(NullPointerException::new) > 20) {
                     blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.SMS);
                     requiredActionChallenge(context);
                     return;
@@ -234,7 +234,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
             if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
                 checkAndAddToCounter(user, typeCount, CODE_BY_PHONE_NUMBER);
-                if (counter.get(user.getPhone()).values().stream().findFirst().orElseThrow() > 20) {
+                if (counter.get(user.getPhone()).values().stream().findFirst().orElseThrow(NullPointerException::new) > 20) {
                     blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.PHONE_CALL);
                     requiredActionChallenge(context);
                     return;
@@ -267,7 +267,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             typeCount.put(codeByPhoneNumber, countTry);
             counter.put(user.getPhone(), typeCount);
         } else {
-            Integer existTries = counter.get(user.getPhone()).values().stream().findFirst().orElseThrow();
+            Integer existTries = counter.get(user.getPhone()).values().stream().findFirst().orElseThrow(NullPointerException::new);
             existTries++;
             typeCount.put(codeByPhoneNumber, existTries);
             counter.put(user.getPhone(), typeCount);
