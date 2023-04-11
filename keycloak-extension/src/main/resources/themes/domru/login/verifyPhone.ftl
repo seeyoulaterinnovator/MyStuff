@@ -35,6 +35,26 @@
                                     Превышен лимит повторных звонков. Запросить новый звонок можно через 12 часов
                                 </p>
                             </div>
+                        <#elseif message.summary?contains('Код был введён более 5 раз. Запросите новое СМС')>
+                            <div class="message">
+                                <div class="message__title flex flex-row justify-between items-center gap-4">
+                                    <span>Ошибка</span>
+                                    <button class="btn message__btn">×</button>
+                                </div>
+                                <p>
+                                    Код был введён более 5 раз. Запросите новое СМС
+                                </p>
+                            </div>
+                        <#elseif message.summary?contains('Код был введён более 5 раз. Запросите новый звонок')>
+                            <div class="message">
+                                <div class="message__title flex flex-row justify-between items-center gap-4">
+                                    <span>Ошибка</span>
+                                    <button class="btn message__btn">×</button>
+                                </div>
+                                <p>
+                                    Код был введён более 5 раз. Запросите новый звонок
+                                </p>
+                            </div>
                     </#if>
                     <#else>
                     Вам выслан одноразовый пароль на номер:

@@ -11,7 +11,6 @@ import org.keycloak.models.UserModel;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaType;
 import ru.alamics.sso.antifraud.BlackListService;
-import ru.alamics.sso.antifraud.exception.ReachLimitCodeException;
 import ru.alamics.sso.jpa.util.LimitationCauseType;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
@@ -33,7 +32,6 @@ import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.phone.ActivationCodeType.*;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.*;
@@ -54,7 +52,6 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     private final EmailTemplateProvider emailTemplateProvider;
     private final BlackListService blackListService;
     private final SettingsService settingsService;
-    //fixme
     private static final Map<String, Map<ActivationCodeType, Integer>> counter = new HashMap<>();
 
     public PhoneVerificationProvider(UserPhoneVerifier userPhoneVerifier, ActivationCodeType activationCodeType, EmailTemplateProvider emailTemplateProvider) {
@@ -166,20 +163,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     .setError(MessageConstants.CALL_LIMIT_20_BLOCK);
             return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
         }
-        try {
-            checkIsMoreThanFiveAttempts(user);
-        } catch (ReachLimitCodeException) {
-            if (CODE_TO_SMS) {
-                context.form()
-                        .setError(MessageConstants.SMS_LIMIT_5_CONTINUE);
-                return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
-            }
-            if (CODE_BY_PHONE_NUMBER) {
-                context.form()
-                        .setError(MessageConstants.CALL_LIMIT_5_CONTINUE);
-                return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
-            }
-        }
+        checkIsMoreThanFiveAttempts(context, loginFormsProvider, user);
         return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
     }
 
@@ -260,12 +244,19 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         }
     }
 
-    private void checkIsMoreThanFiveAttempts(User user) {
-        if (counter.get(user.getPhone()).entrySet().stream().filter(it -> it.getKey().equals(CODE_TO_SMS)).anyMatch(it -> it.getValue() % 5 == 0)) {
-            throw new ReachLimitCodeException(MessageConstants.SMS_LIMIT_5_CONTINUE);
-        }
-        if (counter.get(user.getPhone()).entrySet().stream().filter(it -> it.getKey().equals(CODE_BY_PHONE_NUMBER)).anyMatch(it -> it.getValue() % 5 == 0)) {
-            throw new ReachLimitCodeException(MessageConstants.CALL_LIMIT_5_CONTINUE);
+    private void checkIsMoreThanFiveAttempts(RequiredActionContext context, LoginFormsProvider loginFormsProvider, User user) {
+        if (counter.size() > 0) {
+            if (counter.get(user.getPhone()).entrySet().stream().filter(it -> it.getKey().equals(CODE_TO_SMS)).anyMatch(it -> it.getValue() % 5 == 0)) {
+                context.form()
+                        .setError(MessageConstants.SMS_LIMIT_5_CONTINUE);
+                loginFormsProvider.createForm(VERIFY_PHONE_FTL);
+                return;
+            }
+            if (counter.get(user.getPhone()).entrySet().stream().filter(it -> it.getKey().equals(CODE_BY_PHONE_NUMBER)).anyMatch(it -> it.getValue() % 5 == 0)) {
+                context.form()
+                        .setError(MessageConstants.CALL_LIMIT_5_CONTINUE);
+                loginFormsProvider.createForm(VERIFY_PHONE_FTL);
+            }
         }
     }
 
