@@ -11,6 +11,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaType;
 import ru.alamics.sso.antifraud.BlackListService;
+import ru.alamics.sso.antifraud.exception.ReachLimitCodeException;
 import ru.alamics.sso.jpa.util.LimitationCauseType;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
@@ -32,9 +33,9 @@ import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
-import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_BY_PHONE_NUMBER;
-import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_TO_SMS;
+import static ru.alamics.sso.registration.phone.ActivationCodeType.*;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.*;
 import static ru.alamics.sso.settings.SettingConstants.*;
 
@@ -165,6 +166,20 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     .setError(MessageConstants.CALL_LIMIT_20_BLOCK);
             return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
         }
+        try {
+            checkIsMoreThanFiveAttempts(user);
+        } catch (ReachLimitCodeException) {
+            if (CODE_TO_SMS) {
+                context.form()
+                        .setError(MessageConstants.SMS_LIMIT_5_CONTINUE);
+                return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
+            }
+            if (CODE_BY_PHONE_NUMBER) {
+                context.form()
+                        .setError(MessageConstants.CALL_LIMIT_5_CONTINUE);
+                return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
+            }
+        }
         return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
     }
 
@@ -224,18 +239,20 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             User user = UserModelUserMapper.mapToUser(model);
             Map<ActivationCodeType, Integer> typeCount = new HashMap<>();
             if (activationCodeType.equals(CODE_TO_SMS)) {
-                checkCounter(user, typeCount, CODE_TO_SMS);
-                if (counter.get(user.getPhone()).values().size() > 20) {
+                checkAndAddToCounter(user, typeCount, CODE_TO_SMS);
+                if (counter.get(user.getPhone()).values().stream().findFirst().orElseThrow() > 20) {
                     blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.SMS);
+                    requiredActionChallenge(context);
                     return;
                 }
                 verifyCode(context, authSession, user, model);
             }
 
             if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
-                checkCounter(user, typeCount, CODE_BY_PHONE_NUMBER);
-                if (counter.get(user.getPhone()).values().size() > 20) {
+                checkAndAddToCounter(user, typeCount, CODE_BY_PHONE_NUMBER);
+                if (counter.get(user.getPhone()).values().stream().findFirst().orElseThrow() > 20) {
                     blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.PHONE_CALL);
+                    requiredActionChallenge(context);
                     return;
                 }
                 verifyCode(context, authSession, user, model);
@@ -243,7 +260,16 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         }
     }
 
-    private void checkCounter(User user, Map<ActivationCodeType, Integer> typeCount, ActivationCodeType codeByPhoneNumber) {
+    private void checkIsMoreThanFiveAttempts(User user) {
+        if (counter.get(user.getPhone()).entrySet().stream().filter(it -> it.getKey().equals(CODE_TO_SMS)).anyMatch(it -> it.getValue() % 5 == 0)) {
+            throw new ReachLimitCodeException(MessageConstants.SMS_LIMIT_5_CONTINUE);
+        }
+        if (counter.get(user.getPhone()).entrySet().stream().filter(it -> it.getKey().equals(CODE_BY_PHONE_NUMBER)).anyMatch(it -> it.getValue() % 5 == 0)) {
+            throw new ReachLimitCodeException(MessageConstants.CALL_LIMIT_5_CONTINUE);
+        }
+    }
+
+    private void checkAndAddToCounter(User user, Map<ActivationCodeType, Integer> typeCount, ActivationCodeType codeByPhoneNumber) {
         if (!counter.containsKey(user.getPhone())) {
             Integer countTry = 0;
             countTry++;
