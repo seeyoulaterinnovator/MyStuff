@@ -34,14 +34,14 @@ public class BlackListService {
         } else blackList.setBlockCount(blackList.getBlockCount() + 1);
         blackList.setUserLogin(user.getName());
         blackList.setBlockDurationSec(BLOCK_DURATION_SEC);
-        blackList.setLimitationCause(cause);
+        blackList.setLimitationCause(cause.getCause());
         blackListRepository.save(blackList);
     }
 
     public boolean isUserBlockedAuthBySms(String phone) {
-        return blackListRepository.findByPhone(phone).stream().anyMatch(it -> it.getLimitationCause().equals(LimitationCauseType.SMS));
+        return blackListRepository.findByPhone(phone).stream().anyMatch(it -> it.getLimitationCause().equals(LimitationCauseType.SMS.getCause()));
     }
     public boolean isUserBlockedAuthByPhoneCall(String phone) {
-        return blackListRepository.findByPhone(phone).stream().anyMatch(it -> it.getLimitationCause().equals(LimitationCauseType.PHONE_CALL));
+        return blackListRepository.findByPhone(phone).stream().anyMatch(it -> it.getLimitationCause().equals(LimitationCauseType.PHONE_CALL.getCause()));
     }
 }

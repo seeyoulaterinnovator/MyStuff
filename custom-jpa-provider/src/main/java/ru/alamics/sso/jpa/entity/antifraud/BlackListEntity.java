@@ -32,7 +32,7 @@ public class BlackListEntity {
     @Column(name = "phone")
     private String phone;
     @Column(name = "limitation_cause")
-    private LimitationCauseType limitationCause;
+    private String limitationCause;
     @ManyToOne(targetEntity = UserEntity.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private UserEntity user;

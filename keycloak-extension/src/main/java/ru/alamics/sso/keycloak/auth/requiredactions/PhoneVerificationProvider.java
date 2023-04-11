@@ -55,7 +55,6 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     private final SettingsService settingsService;
     //fixme
     private static final Map<String, Map<ActivationCodeType, Integer>> counter = new HashMap<>();
-    private static Integer countTry = 0;
 
     public PhoneVerificationProvider(UserPhoneVerifier userPhoneVerifier, ActivationCodeType activationCodeType, EmailTemplateProvider emailTemplateProvider) {
         this.userPhoneVerifier = userPhoneVerifier;
@@ -223,52 +222,69 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             //logic here
             UserModel model = context.getUser();
             User user = UserModelUserMapper.mapToUser(model);
+            Map<ActivationCodeType, Integer> typeCount = new HashMap<>();
             if (activationCodeType.equals(CODE_TO_SMS)) {
-                Map<ActivationCodeType, Integer> typeCount = new HashMap<>();
-                if (!counter.containsKey(user.getPhone())) {
-                    countTry++;
-                    typeCount.put(CODE_TO_SMS, countTry);
-                    counter.put(user.getPhone(), typeCount);
-                } else {
-                    Integer existTries = counter.get(user.getPhone()).values().stream().findFirst().orElseThrow();
-                    existTries++;
-                    typeCount.put(CODE_TO_SMS, existTries);
-                    counter.put(user.getPhone(), typeCount);
+                checkCounter(user, typeCount, CODE_TO_SMS);
+                if (counter.get(user.getPhone()).values().size() > 20) {
+                    blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.SMS);
+                    return;
                 }
+                verifyCode(context, authSession, user, model);
+            }
 
-
-                AuthContext authContext = AuthContext.builder()
-                        .hashProperty(authSession.getAuthNote(PHONE_KEY_HASH))
-                        .expirationTime(LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME))
-                        .counter(getCount(authSession.getAuthNote(COUNT_REPEAT)))
-                        .activationCodeType(activationCodeType)
-                        .build();
-
-                try {
-                    String code = context.getHttpRequest().getDecodedFormParameters().getFirst("smscode");
-                    userPhoneVerifier.verifyPhone(user, authContext, code, activationCodeType);
-
-                    UserModelUserMapper.mergeUserInto(user, model);
-                    authSession.removeAuthNote(PHONE_KEY_HASH);
-                    authSession.removeAuthNote(EXPIRATION_TIME);
-                    authSession.removeAuthNote(COUNT_REPEAT);
-                    context.success();
-                } catch (WrongSmsCode wrongSmsCode) {
-                    //fixme
-                    if (counter.get(user.getPhone()).values().size() > 2) {
-                        blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.SMS);
-                    }
-                    log.warn("Wrong sms code");
-                    context.form()
-                            .setAttribute("error", "Пароль введен не верно. Вам выслан новый код")
-                            .setError("Введен некорректный код смс или его срок действия истек");
-                    authSession.removeAuthNote(PHONE_KEY_HASH);
-                    authSession.setAuthNote(ERROR_CODE, ERROR_CODE);
-                    requiredActionChallenge(context);
+            if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
+                checkCounter(user, typeCount, CODE_BY_PHONE_NUMBER);
+                if (counter.get(user.getPhone()).values().size() > 20) {
+                    blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.PHONE_CALL);
+                    return;
                 }
+                verifyCode(context, authSession, user, model);
             }
         }
     }
+
+    private void checkCounter(User user, Map<ActivationCodeType, Integer> typeCount, ActivationCodeType codeByPhoneNumber) {
+        if (!counter.containsKey(user.getPhone())) {
+            Integer countTry = 0;
+            countTry++;
+            typeCount.put(codeByPhoneNumber, countTry);
+            counter.put(user.getPhone(), typeCount);
+        } else {
+            Integer existTries = counter.get(user.getPhone()).values().stream().findFirst().orElseThrow();
+            existTries++;
+            typeCount.put(codeByPhoneNumber, existTries);
+            counter.put(user.getPhone(), typeCount);
+        }
+    }
+
+    private void verifyCode(RequiredActionContext context, AuthenticationSessionModel authSession, User user, UserModel model) {
+        AuthContext authContext = AuthContext.builder()
+                .hashProperty(authSession.getAuthNote(PHONE_KEY_HASH))
+                .expirationTime(LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME))
+                .counter(getCount(authSession.getAuthNote(COUNT_REPEAT)))
+                .activationCodeType(activationCodeType)
+                .build();
+
+        try {
+            String code = context.getHttpRequest().getDecodedFormParameters().getFirst("smscode");
+            userPhoneVerifier.verifyPhone(user, authContext, code, activationCodeType);
+
+            UserModelUserMapper.mergeUserInto(user, model);
+            authSession.removeAuthNote(PHONE_KEY_HASH);
+            authSession.removeAuthNote(EXPIRATION_TIME);
+            authSession.removeAuthNote(COUNT_REPEAT);
+            context.success();
+        } catch (WrongSmsCode wrongSmsCode) {
+            log.warn("Wrong sms code");
+            context.form()
+                    .setAttribute("error", "Пароль введен не верно. Вам выслан новый код")
+                    .setError("Введен некорректный код смс или его срок действия истек");
+            authSession.removeAuthNote(PHONE_KEY_HASH);
+            authSession.setAuthNote(ERROR_CODE, ERROR_CODE);
+            requiredActionChallenge(context);
+        }
+    }
+
 
     private Integer getCount(String countStr) {
         if (countStr == null || "null".equals(countStr)) {
