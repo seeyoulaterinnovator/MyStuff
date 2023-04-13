@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.auth.requiredactions;
 
+import com.sun.tools.javac.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.RequiredActionContext;
@@ -8,6 +9,7 @@ import org.keycloak.email.EmailException;
 import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.UserModel;
+import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaType;
 import ru.alamics.sso.antifraud.BlackListService;
@@ -52,7 +54,9 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     private final EmailTemplateProvider emailTemplateProvider;
     private final BlackListService blackListService;
     private final SettingsService settingsService;
+    /*private static final Map<String, Map<Pair<ActivationCodeType, String>, Integer>> counter = new HashMap<>();*/
     private static final Map<String, Map<ActivationCodeType, Integer>> counter = new HashMap<>();
+    private static final Map<String, Boolean> fiveAttemptsSentMap = new HashMap<>();
 
     public PhoneVerificationProvider(UserPhoneVerifier userPhoneVerifier, ActivationCodeType activationCodeType, EmailTemplateProvider emailTemplateProvider) {
         this.userPhoneVerifier = userPhoneVerifier;
@@ -83,6 +87,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
         try {
             boolean enableRepeatCall = true;
+            boolean canSendSms = false;
             if (authSession.getAuthNote(NEED_SEND_EMAIL_CODE) != null && activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
                 String code = SmsCodeGenerator.getCode(ActivationCodeType.CODE_TO_EMAIL.getLengthCode());
                 authContext = AuthContext.builder()
@@ -102,7 +107,10 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                         .build();
                 enableRepeatCall = false;
             } else {
-                authContext = userPhoneVerifier.sendValidationMsg(user, authContext, activationCodeType, context.getRealm());
+                if (checkCanWeSendSmS(user, context)) {
+                    canSendSms = true;
+                    authContext = userPhoneVerifier.sendValidationMsg(user, authContext, activationCodeType, context.getRealm());
+                }
             }
 
             authSession.setAuthNote(PHONE_KEY_HASH, authContext.getHashProperty());
@@ -122,7 +130,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     .setAttribute("homePage", settingsService.getSettingsStringValue(HOME_PAGE, context.getRealm().getId()))
                     .setAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, context.getRealm().getId()))
                     .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER, context.getRealm().getId()))
-                    .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()));
+                    .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()))
+                    .setAttribute("canSendSms", canSendSms);
             context.challenge(createForm(context, loginFormsProvider, user));
 
         } catch (UserPhoneEmpty userPhoneEmpty) {
@@ -156,14 +165,12 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         if (blackListService.isUserBlockedAuthBySms(user.getPhone())) {
             context.form()
                     .setError(MessageConstants.SMS_LIMIT_20_BLOCK);
-            return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
         }
         if (blackListService.isUserBlockedAuthByPhoneCall(user.getPhone())) {
             context.form()
                     .setError(MessageConstants.CALL_LIMIT_20_BLOCK);
-            return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
         }
-        checkIsMoreThanFiveAttempts(context, loginFormsProvider, user);
+        /*checkIsMoreThanFiveAttempts(context, user);*/ //comment
         return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
     }
 
@@ -214,7 +221,6 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             log.info("Sms code resend");
 
             authSession.removeAuthNote(PHONE_KEY_HASH);
-
             requiredActionChallenge(context);
 
         } else {
@@ -244,20 +250,47 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         }
     }
 
-    private void checkIsMoreThanFiveAttempts(RequiredActionContext context, LoginFormsProvider loginFormsProvider, User user) {
+    private boolean checkIsMoreThanFiveAttempts(RequiredActionContext context, User user) {
+        //fixme always true after 5 tries
+        boolean isMoreThanFiveAttempts = false;
+
+        Map<ActivationCodeType, Integer> usreMap = counter.get(user.getPhone());
+
+        if (usreMap == null)
+            return false;
+
+        Integer mms =  usreMap.get(CODE_TO_SMS);
+
+        if (mms % 5 == 0)
+        {
+            isMoreThanFiveAttempts = true;
+            context.form().setAttribute("isMoreThanFiveAttempts", isMoreThanFiveAttempts);
+
+        }
+
+
+
         if (counter.size() > 0) {
             if (counter.get(user.getPhone()).entrySet().stream().filter(it -> it.getKey().equals(CODE_TO_SMS)).anyMatch(it -> it.getValue() % 5 == 0)) {
+                fiveAttemptsSentMap.put(user.getPhone(), true);
+                isMoreThanFiveAttempts = true;
                 context.form()
+                        .setAttribute("isMoreThanFiveAttempts", isMoreThanFiveAttempts)
                         .setError(MessageConstants.SMS_LIMIT_5_CONTINUE);
-                loginFormsProvider.createForm(VERIFY_PHONE_FTL);
-                return;
+                return true;
             }
             if (counter.get(user.getPhone()).entrySet().stream().filter(it -> it.getKey().equals(CODE_BY_PHONE_NUMBER)).anyMatch(it -> it.getValue() % 5 == 0)) {
                 context.form()
                         .setError(MessageConstants.CALL_LIMIT_5_CONTINUE);
-                loginFormsProvider.createForm(VERIFY_PHONE_FTL);
+                return true;
             }
+
         }
+
+        return false;
+    }
+    private boolean checkCanWeSendSmS(User user, RequiredActionContext context) {
+        return checkIsMoreThanFiveAttempts(context, user) || !counter.containsKey(user.getPhone()) && !blackListService.isUserBlockedAuthBySms(user.getPhone());
     }
 
     private void checkAndAddToCounter(User user, Map<ActivationCodeType, Integer> typeCount, ActivationCodeType codeByPhoneNumber) {

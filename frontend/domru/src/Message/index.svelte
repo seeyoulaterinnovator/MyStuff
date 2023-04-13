@@ -7,6 +7,7 @@
     isBadEmail,
     isBadPhone,
     loginUrl,
+    isLimitExceeded,
   } from './stores.js';
 
   const hasRegistration = window.location.href.includes('registration');
@@ -123,6 +124,8 @@
           <button class="btn text-accentBlue w-full md:w-auto" on:click={handleHide}>
             Изменить данные
           </button>
+        {:else if $isLimitExceeded}
+
         {:else}
           <button class="btn text-accentBlue w-full md:w-auto" on:click={handleHide}>
             Спасибо
