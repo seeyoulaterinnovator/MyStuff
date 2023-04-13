@@ -81,7 +81,7 @@
             <#else>
                 <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds!}" />
             </#if>
-            <#if isMoreThanFiveAttempts>
+            <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
                 <input id="smscode" name="smscode" class="hidden" />
                 <span>
                     <button class="font-light verification__resend" name="resend" type="submit">${sendAgain}</button>

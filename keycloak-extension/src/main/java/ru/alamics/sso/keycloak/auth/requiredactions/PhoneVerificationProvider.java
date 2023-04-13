@@ -16,6 +16,7 @@ import ru.alamics.sso.antifraud.BlackListService;
 import ru.alamics.sso.jpa.util.LimitationCauseType;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
+import ru.alamics.sso.keycloak.util.VerifyPhoneKey;
 import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.model.User;
@@ -54,9 +55,9 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     private final EmailTemplateProvider emailTemplateProvider;
     private final BlackListService blackListService;
     private final SettingsService settingsService;
-    /*private static final Map<String, Map<Pair<ActivationCodeType, String>, Integer>> counter = new HashMap<>();*/
-    private static final Map<String, Map<ActivationCodeType, Integer>> counter = new HashMap<>();
-    private static final Map<String, Boolean> fiveAttemptsSentMap = new HashMap<>();
+    private static final Map<String, Map<VerifyPhoneKey, Integer>> counter = new HashMap<>();
+    /*private static final Map<String, Map<ActivationCodeType, Integer>> counter = new HashMap<>();*/
+    private static Map<String, String> currentCode = new HashMap<>();
 
     public PhoneVerificationProvider(UserPhoneVerifier userPhoneVerifier, ActivationCodeType activationCodeType, EmailTemplateProvider emailTemplateProvider) {
         this.userPhoneVerifier = userPhoneVerifier;
@@ -201,6 +202,16 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
 
+        AuthContext authContext = AuthContext.builder()
+                .hashProperty(authSession.getAuthNote(PHONE_KEY_HASH))
+                .expirationTime(LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME))
+                .counter(getCount(authSession.getAuthNote(COUNT_REPEAT)))
+                .activationCodeType(activationCodeType)
+                .build();
+
+        UserModel model = context.getUser();
+        User user = UserModelUserMapper.mapToUser(model);
+
         /*
         форма принимает код для ввода кода из смс(6 симоволов) и 6 из почты, 4 цифры номер телефона,
         4 цифры из email
@@ -220,58 +231,61 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         } else if (context.getHttpRequest().getDecodedFormParameters().containsKey("resend")) {
             log.info("Sms code resend");
 
+
+            currentCode.put(user.getPhone(), authContext.getHashProperty());
             authSession.removeAuthNote(PHONE_KEY_HASH);
             requiredActionChallenge(context);
 
         } else {
             //logic here
-            UserModel model = context.getUser();
-            User user = UserModelUserMapper.mapToUser(model);
-            Map<ActivationCodeType, Integer> typeCount = new HashMap<>();
+            Map<VerifyPhoneKey, Integer> typeCount = new HashMap<>();
+
             if (activationCodeType.equals(CODE_TO_SMS)) {
-                checkAndAddToCounter(user, typeCount, CODE_TO_SMS);
+                checkAndAddToCounter(user, typeCount, CODE_TO_SMS, authContext);
                 if (counter.get(user.getPhone()).values().stream().findFirst().orElseThrow(NullPointerException::new) > 20) {
                     blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.SMS);
                     requiredActionChallenge(context);
                     return;
                 }
-                verifyCode(context, authSession, user, model);
+                verifyCode(context, authSession, user, model, authContext);
             }
 
             if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
-                checkAndAddToCounter(user, typeCount, CODE_BY_PHONE_NUMBER);
+                checkAndAddToCounter(user, typeCount, CODE_BY_PHONE_NUMBER, authContext);
                 if (counter.get(user.getPhone()).values().stream().findFirst().orElseThrow(NullPointerException::new) > 20) {
                     blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.PHONE_CALL);
                     requiredActionChallenge(context);
                     return;
                 }
-                verifyCode(context, authSession, user, model);
+                verifyCode(context, authSession, user, model, authContext);
             }
         }
     }
 
     private boolean checkIsMoreThanFiveAttempts(RequiredActionContext context, User user) {
-        //fixme always true after 5 tries
+        //fixme always true after 5 tries +
         boolean isMoreThanFiveAttempts = false;
 
-        Map<ActivationCodeType, Integer> usreMap = counter.get(user.getPhone());
+        Map<VerifyPhoneKey, Integer> userMap = counter.get(user.getPhone());
 
-        if (usreMap == null)
-            return false;
-
-        Integer mms =  usreMap.get(CODE_TO_SMS);
-
-        if (mms % 5 == 0)
-        {
-            isMoreThanFiveAttempts = true;
+        if (userMap == null) {
             context.form().setAttribute("isMoreThanFiveAttempts", isMoreThanFiveAttempts);
-
+            return false;
+        }
+        //fixme не появляется поп-ап при проставлении атрибута
+        if (userMap.entrySet().stream().anyMatch(it -> it.getKey()
+                .getCurrentCode().equals(currentCode.get(user.getPhone())))) {
+            if (userMap.entrySet().stream().anyMatch(it -> it.getValue() % 5 == 0)) {
+                isMoreThanFiveAttempts = true;
+                context.form()/*.setAttribute("isMoreThanFiveAttempts", isMoreThanFiveAttempts)*/
+                        .setError(MessageConstants.SMS_LIMIT_5_CONTINUE);
+                return true;
+            }
         }
 
-
-
-        if (counter.size() > 0) {
-            if (counter.get(user.getPhone()).entrySet().stream().filter(it -> it.getKey().equals(CODE_TO_SMS)).anyMatch(it -> it.getValue() % 5 == 0)) {
+        context.form().setAttribute("isMoreThanFiveAttempts", isMoreThanFiveAttempts);
+        /*if (counter.size() > 0) {
+            if (counter.get(user.getPhone()).entrySet().stream().filter(it -> it.getKey().getActivationType().equals(CODE_TO_SMS)).anyMatch(it -> it.getValue() % 5 == 0)) {
                 fiveAttemptsSentMap.put(user.getPhone(), true);
                 isMoreThanFiveAttempts = true;
                 context.form()
@@ -279,13 +293,13 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                         .setError(MessageConstants.SMS_LIMIT_5_CONTINUE);
                 return true;
             }
-            if (counter.get(user.getPhone()).entrySet().stream().filter(it -> it.getKey().equals(CODE_BY_PHONE_NUMBER)).anyMatch(it -> it.getValue() % 5 == 0)) {
+            if (counter.get(user.getPhone()).entrySet().stream().filter(it -> it.getKey().getActivationType().equals(CODE_BY_PHONE_NUMBER)).anyMatch(it -> it.getValue() % 5 == 0)) {
                 context.form()
                         .setError(MessageConstants.CALL_LIMIT_5_CONTINUE);
                 return true;
             }
 
-        }
+        }*/
 
         return false;
     }
@@ -293,27 +307,26 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         return checkIsMoreThanFiveAttempts(context, user) || !counter.containsKey(user.getPhone()) && !blackListService.isUserBlockedAuthBySms(user.getPhone());
     }
 
-    private void checkAndAddToCounter(User user, Map<ActivationCodeType, Integer> typeCount, ActivationCodeType codeByPhoneNumber) {
+    private void checkAndAddToCounter(User user, Map<VerifyPhoneKey, Integer> typeCount, ActivationCodeType codeByPhoneNumber, AuthContext authContext) {
+        if (Objects.nonNull(authContext.getHashProperty())) {
+            currentCode.put(user.getPhone(), authContext.getHashProperty());
+        }
+        String code = currentCode.get(user.getPhone());
+
         if (!counter.containsKey(user.getPhone())) {
             Integer countTry = 0;
             countTry++;
-            typeCount.put(codeByPhoneNumber, countTry);
+            typeCount.put(new VerifyPhoneKey(codeByPhoneNumber, code), countTry);
             counter.put(user.getPhone(), typeCount);
         } else {
             Integer existTries = counter.get(user.getPhone()).values().stream().findFirst().orElseThrow(NullPointerException::new);
             existTries++;
-            typeCount.put(codeByPhoneNumber, existTries);
+            typeCount.put(new VerifyPhoneKey(codeByPhoneNumber, code), existTries);
             counter.put(user.getPhone(), typeCount);
         }
     }
 
-    private void verifyCode(RequiredActionContext context, AuthenticationSessionModel authSession, User user, UserModel model) {
-        AuthContext authContext = AuthContext.builder()
-                .hashProperty(authSession.getAuthNote(PHONE_KEY_HASH))
-                .expirationTime(LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME))
-                .counter(getCount(authSession.getAuthNote(COUNT_REPEAT)))
-                .activationCodeType(activationCodeType)
-                .build();
+    private void verifyCode(RequiredActionContext context, AuthenticationSessionModel authSession, User user, UserModel model, AuthContext authContext) {
 
         try {
             String code = context.getHttpRequest().getDecodedFormParameters().getFirst("smscode");
