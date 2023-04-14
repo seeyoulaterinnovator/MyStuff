@@ -208,7 +208,6 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 .counter(getCount(authSession.getAuthNote(COUNT_REPEAT)))
                 .activationCodeType(activationCodeType)
                 .build();
-
         UserModel model = context.getUser();
         User user = UserModelUserMapper.mapToUser(model);
 
@@ -272,25 +271,25 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             context.form().setAttribute("isMoreThanFiveAttempts", isMoreThanFiveAttempts);
             return false;
         }
-        //fixme не появляется поп-ап при проставлении атрибута
+
+        //fixme не появляется поп-ап при проставлении атрибута +-
         if (userMap.entrySet().stream().anyMatch(it -> it.getKey()
                 .getCurrentCode().equals(currentCode.get(user.getPhone())))) {
-            if (userMap.entrySet().stream().anyMatch(it -> it.getValue() % 5 == 0)) {
+            if (userMap.entrySet().stream().anyMatch(it -> it.getValue() >= 5 && it.getValue() <= 20)) {
                 isMoreThanFiveAttempts = true;
-                context.form()/*.setAttribute("isMoreThanFiveAttempts", isMoreThanFiveAttempts)*/
+                context.form().setAttribute("isMoreThanFiveAttempts", isMoreThanFiveAttempts)
                         .setError(MessageConstants.SMS_LIMIT_5_CONTINUE);
                 return true;
             }
         }
 
-        context.form().setAttribute("isMoreThanFiveAttempts", isMoreThanFiveAttempts);
         /*if (counter.size() > 0) {
             if (counter.get(user.getPhone()).entrySet().stream().filter(it -> it.getKey().getActivationType().equals(CODE_TO_SMS)).anyMatch(it -> it.getValue() % 5 == 0)) {
-                fiveAttemptsSentMap.put(user.getPhone(), true);
                 isMoreThanFiveAttempts = true;
                 context.form()
                         .setAttribute("isMoreThanFiveAttempts", isMoreThanFiveAttempts)
                         .setError(MessageConstants.SMS_LIMIT_5_CONTINUE);
+
                 return true;
             }
             if (counter.get(user.getPhone()).entrySet().stream().filter(it -> it.getKey().getActivationType().equals(CODE_BY_PHONE_NUMBER)).anyMatch(it -> it.getValue() % 5 == 0)) {
@@ -301,6 +300,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
         }*/
 
+        context.form().setAttribute("isMoreThanFiveAttempts", isMoreThanFiveAttempts);
         return false;
     }
     private boolean checkCanWeSendSmS(User user, RequiredActionContext context) {
@@ -314,15 +314,28 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         String code = currentCode.get(user.getPhone());
 
         if (!counter.containsKey(user.getPhone())) {
-            Integer countTry = 0;
-            countTry++;
-            typeCount.put(new VerifyPhoneKey(codeByPhoneNumber, code), countTry);
+
+            typeCount.put(new VerifyPhoneKey(codeByPhoneNumber, code), 1); // колво попыток 1
             counter.put(user.getPhone(), typeCount);
         } else {
-            Integer existTries = counter.get(user.getPhone()).values().stream().findFirst().orElseThrow(NullPointerException::new);
+            /*Integer existTries = counter.get(user.getPhone()).values().stream().findFirst().orElseThrow(NullPointerException::new);
             existTries++;
             typeCount.put(new VerifyPhoneKey(codeByPhoneNumber, code), existTries);
-            counter.put(user.getPhone(), typeCount);
+            counter.put(user.getPhone(), typeCount);*/
+
+            if (counter.get(user.getPhone()).entrySet().stream()
+                    .allMatch(it -> it.getKey().getCurrentCode().equals(code) && it.getKey().getActivationType().equals(activationCodeType))) {
+                Integer existTries = counter.get(user.getPhone()).entrySet().stream().filter(it -> it.getKey().getCurrentCode().equals(code)).findAny().get().getValue();
+                existTries++;
+                typeCount.put(new VerifyPhoneKey(activationCodeType, code), existTries);
+                counter.put(user.getPhone(), typeCount);
+            }
+            else {
+                Integer existTries = 0;
+                existTries++;
+                typeCount.put(new VerifyPhoneKey(activationCodeType, code), existTries);
+                counter.put(user.getPhone(), typeCount);
+            }
         }
     }
 

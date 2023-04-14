@@ -81,35 +81,38 @@
             <#else>
                 <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds!}" />
             </#if>
-            <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
-                <input id="smscode" name="smscode" class="hidden" />
-                <span>
-                    <button class="font-light verification__resend" name="resend" type="submit">${sendAgain}</button>
-                </span>
-            <#else>
                 <input id="smscode" name="smscode" class="hidden" />
                 <div class="flex md:justify-start justify-start w-full items-center text-left md:text-left xl:pb-55px md:pb-10 sm:pb-8 pb-4">
-                    <div id="timer" class="text-black text-center md:text-right flex items-center my-6 md:my-0 justify-center md:justify-start">
-                        Пароль действует <span id="timer-time" class="px-1 textTimer"></span><span style="font-weight: 350;font-size: 13px;line-height: 16px;color: #7585A1;opacity: 0.8;">мм:cc</span>
-                    </div>
-                    <#if enableRepeatCall?? && enableRepeatCall!>
-                        <p class="hidden font-light text-black verification__text" id="resend">
-                            Не приходит пароль?
-                            <span>
-                                <button class="font-light verification__resend" name="resend" type="submit">${sendAgain}</button>
-                            </span>
-                        </p>
+                    <#if isMoreThanFiveAttempts>
+                        <span>
+                            <button class="font-light verification__resend" name="resend" type="submit">${sendAgain}</button>
+                        </span>
+                    <#else>
+
+                        <div id="timer" class="text-black text-center md:text-right flex items-center my-6 md:my-0 justify-center md:justify-start">
+                            Пароль действует <span id="timer-time" class="px-1 textTimer"></span><span style="font-weight: 350;font-size: 13px;line-height: 16px;color: #7585A1;opacity: 0.8;">мм:cc</span>
+                        </div>
+                        <#if enableRepeatCall?? && enableRepeatCall!>
+                            <p class="hidden font-light text-black verification__text" id="resend">
+                                Не приходит пароль?
+                                <span>
+                                    <button class="font-light verification__resend" name="resend" type="submit">${sendAgain}</button>
+                                </span>
+                            </p>
+                        </#if>
                     </#if>
                 </div>
+
                 <div class="sm:block md:flex w-full items-center text-center md:text-left">
 
-                    <button class="btn btn-main verification__btn verification__btn__accept w-full md:w-3/7 mr-0 md:mr-4" name="accept" id="accept" type="submit">${doSubmit}</button>
 
-                    <#if lengthCode==4>
-                        <button class="btn verification__btn verification__btn__send" form="totpe" id="sentCode" name="sendEmailCode" type="submit">Отправить на эл. почту</button>
-                    </#if>
+                        <button class="btn btn-main verification__btn verification__btn__accept w-full md:w-3/7 mr-0 md:mr-4 <#if isMoreThanFiveAttempts> btn-disabled </#if>" name="accept" id="accept" type="submit">${doSubmit}</button>
+                        <#if lengthCode==4>
+                            <button class="btn verification__btn verification__btn__send" form="totpe" id="sentCode" name="sendEmailCode" type="submit">Отправить на эл. почту</button>
+                        </#if>
+
                 </div>
-            </#if>
+
         </form>
     </#if>
         <script>

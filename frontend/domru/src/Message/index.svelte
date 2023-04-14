@@ -124,8 +124,10 @@
           <button class="btn text-accentBlue w-full md:w-auto" on:click={handleHide}>
             Изменить данные
           </button>
-        {:else if $isLimitExceeded}
-
+        <!--{:else if $isLimitExceeded}
+          <button class="btn text-accentBlue w-full md:w-auto" on:click={handleHide}>
+            Спасибо
+          </button>-->
         {:else}
           <button class="btn text-accentBlue w-full md:w-auto" on:click={handleHide}>
             Спасибо
