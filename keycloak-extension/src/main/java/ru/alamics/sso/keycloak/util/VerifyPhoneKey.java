@@ -11,4 +11,5 @@ import ru.alamics.sso.registration.phone.ActivationCodeType;
 public class VerifyPhoneKey {
     private ActivationCodeType activationType;
     private String currentCode;
+    private Integer currentCodeCounter;
 }
