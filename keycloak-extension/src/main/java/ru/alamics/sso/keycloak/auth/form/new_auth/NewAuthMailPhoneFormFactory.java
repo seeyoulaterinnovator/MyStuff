@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.auth.form.newForms;
+package ru.alamics.sso.keycloak.auth.form.new_auth;
 
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.Authenticator;
@@ -14,8 +14,11 @@ import ru.alamics.sso.registration.service.UserFindService;
 public class NewAuthMailPhoneFormFactory extends AbstractAuthenticatorFactory implements DisplayTypeAuthenticatorFactory {
 
     private static final String PROVIDER_ID = "auth-mail-phone-pass-formq";
+
     private static final String DISPLAY_NAME = "New two step auth";
+
     private static final String HELP_TEXT = "Login/password or phone with sms or phone code";
+
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED
     };

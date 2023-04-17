@@ -6,15 +6,10 @@ import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.email.EmailException;
 import org.keycloak.email.EmailTemplateProvider;
-import org.keycloak.events.Details;
-import org.keycloak.events.EventType;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.UserModel;
-import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaType;
-import ru.alamics.sso.keycloak.auth.form.newForms.SsoUtil;
-import ru.alamics.sso.keycloak.auth.form.newForms.common_mail_sender.EmailSenderService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.registration.model.AuthContext;
@@ -44,7 +39,6 @@ import static ru.alamics.sso.settings.SettingConstants.*;
 @Slf4j
 public class PhoneVerificationProvider implements RequiredActionProvider {
     private static final String VERIFY_PHONE_FTL = "verifyPhone.ftl";
-    private static final String SECOND_PHASE_LOGIN = "login.ftl";
     private static final String NEED_SEND_EMAIL_CODE = "NEED_SEND_EMAIL_CODE";
     private static final String GRANT_TYPE = "grant_type";
     private static final String ERROR_CODE = "error_code";
@@ -164,8 +158,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
             parameters.add(GRANT_TYPE, "password");
         }
-
-        return loginFormsProvider.createForm(SECOND_PHASE_LOGIN);
+        return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
     }
 
 

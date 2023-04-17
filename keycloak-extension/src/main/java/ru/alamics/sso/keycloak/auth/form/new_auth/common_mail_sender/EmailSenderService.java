@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.auth.form.newForms.common_mail_sender;
+package ru.alamics.sso.keycloak.auth.form.new_auth.common_mail_sender;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.actiontoken.verifyemail.VerifyEmailActionToken;
@@ -12,9 +12,8 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.Urls;
-import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
-import ru.alamics.sso.keycloak.auth.form.newForms.SsoUtil;
+import ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.schedule.Translator;
 import ru.alamics.sso.settings.SettingConstants;
@@ -51,7 +50,6 @@ public class EmailSenderService {
                     .setRealm(realm)
                     .setUser(user)
                     .setAttribute("expTime", expirationStrRus);
-
 
             emailTemplateProvider.sendVerifyEmail(link, expirationInMinutes);
 

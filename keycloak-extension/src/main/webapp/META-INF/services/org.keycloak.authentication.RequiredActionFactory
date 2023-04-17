@@ -4,3 +4,4 @@ ru.alamics.sso.keycloak.auth.requiredactions.VerifyEmailFactory
 ru.alamics.sso.keycloak.auth.requiredactions.stats.LoginStatsActionFactory
 ru.alamics.sso.keycloak.auth.requiredactions.SsoUpdatePassword
 ru.alamics.sso.keycloak.auth.requiredactions.SsoUpdateProfile
+ru.alamics.sso.keycloak.auth.form.new_auth.newAuthReqActions.EmailReqActionFactory

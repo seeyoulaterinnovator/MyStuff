@@ -445,31 +445,19 @@ function genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $r
     $scope.setRegistrationOnlyInFrame = function () {
         $scope.registrationOnlyInFrame = $scope.realm.attributes['registrationOnlyInFrame'] == 'true';
     }
-
-    $scope.setLoginViaSMS = function () {
-        $scope.loginViaSms = $scope.realm.attributes['loginViaSms'] == 'true';
-    }
-
-    $scope.setLoginViaPhoneCall = function () {
-        $scope.loginViaPhoneCall = $scope.realm.attributes['loginViaPhoneCall'] == 'true';
-    }
-
-    $scope.setLoginViaEmailOrUsernameAndPassword = function () {
-        $scope.loginViaEmailOrUsernameAndPassword = $scope.realm.attributes['loginViaEmailOrUsernameAndPassword'] == 'true';
-    }
-
     $scope.setCheckInRiasIfNotFound = function () {
         $scope.checkInRiasIfNotFound = $scope.realm.attributes['checkInRiasIfNotFound'] == 'true';
     }
-    $scope.setRealmInSchedule = function () {``
+    $scope.setRealmInSchedule = function () {
+        ``
         $scope.realmInSchedule = $scope.realm.attributes['realmInSchedule'] == 'true';
     }
 
     $scope.setCheckInRiasIfNotFound();
     $scope.setRegistrationOnlyInFrame();
-    $scope.setLoginViaSMS();
-    $scope.setLoginViaEmailOrUsernameAndPassword();
-    $scope.setLoginViaPhoneCall();
+    // $scope.setLoginViaSMS();
+    // $scope.setLoginViaEmailOrUsernameAndPassword();
+    // $scope.setLoginViaPhoneCall();
     $scope.setRealmInSchedule();
 
     var oldCopy = angular.copy($scope.realm);
@@ -482,36 +470,33 @@ function genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $r
         }
     }, true);
 
-    $scope.$watch('loginViaEmailOrUsernameAndPassword', function (newValue, oldValue) {
-        if (newValue === true) {
-            $scope.loginViaSms = false;
-            $scope.loginViaPhoneCall=false;
-        }
-    });
-
-    $scope.$watch('loginViaSms', function (newValue, oldValue) {
-        if (newValue === true) {
-            $scope.loginViaEmailOrUsernameAndPassword = false;
-            $scope.loginViaPhoneCall=false;
-        }
-    });
-
-    $scope.$watch('loginViaPhoneCall', function (newValue, oldValue) {
-        if (newValue === true) {
-            $scope.loginViaEmailOrUsernameAndPassword = false;
-            $scope.loginViaSms = false;
-        }
-    });
+    // $scope.$watch('loginViaEmailOrUsernameAndPassword', function (newValue, oldValue) {
+    //     if (newValue === true) {
+    //         $scope.loginViaSms = false;
+    //         $scope.loginViaPhoneCall = false;
+    //     }
+    // });
+    //
+    // $scope.$watch('loginViaSms', function (newValue, oldValue) {
+    //     if (newValue === true) {
+    //         $scope.loginViaEmailOrUsernameAndPassword = false;
+    //         $scope.loginViaPhoneCall = false;
+    //     }
+    // });
+    //
+    // $scope.$watch('loginViaPhoneCall', function (newValue, oldValue) {
+    //     if (newValue === true) {
+    //         $scope.loginViaEmailOrUsernameAndPassword = false;
+    //         $scope.loginViaSms = false;
+    //     }
+    // });
 
 
     $scope.save = function () {
         $scope.realm.attributes.registrationOnlyInFrame = $scope.registrationOnlyInFrame;
-        $scope.realm.attributes.loginViaSms = $scope.loginViaSms;
-        $scope.realm.attributes.loginViaEmailOrUsernameAndPassword = $scope.loginViaEmailOrUsernameAndPassword;
-        $scope.realm.attributes.loginViaPhoneCall = $scope.loginViaPhoneCall;
         $scope.realm.attributes.checkInRiasIfNotFound = $scope.checkInRiasIfNotFound;
         $scope.realm.attributes.realmInSchedule = $scope.realmInSchedule;
-                var realmCopy = angular.copy($scope.realm);
+        var realmCopy = angular.copy($scope.realm);
         console.log('updating realm...');
         $scope.changed = false;
         console.log('oldCopy.realm - ' + oldCopy.realm);
@@ -525,9 +510,9 @@ function genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $r
     $scope.reset = function () {
         $scope.realm = angular.copy(oldCopy);
         $scope.setRegistrationOnlyInFrame();
-        $scope.setLoginViaSMS();
-        $scope.setLoginViaEmailOrUsernameAndPassword();
-        $scope.setLoginViaPhoneCall();
+        // $scope.setLoginViaSMS();
+        // $scope.setLoginViaEmailOrUsernameAndPassword();
+        // $scope.setLoginViaPhoneCall();
         $scope.setCheckInRiasIfNotFound();
         $scope.setRealmInSchedule();
         $scope.changed = false;

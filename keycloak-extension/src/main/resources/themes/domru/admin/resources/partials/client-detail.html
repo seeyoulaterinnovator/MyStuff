@@ -248,9 +248,17 @@
                 <kc-tooltip>{{:: 'force-name-id-format.tooltip' | translate}}</kc-tooltip>
             </div>
 
-
-
             <div class="form-group">
+                <label for="activateNewAuth" class="col-md-2 control-label">Activate New Auth</label>
+                <div class="col-md-6">
+                    <input ng-model="activateNewAuth" name="activateNewAuth" id="activateNewAuth" onoffswitch
+                           on-text="{{:: 'onText' | translate}}" off-text="{{:: 'offText' | translate}}"
+                           data-ng-click="changed = true"/>
+                </div>
+                <kc-tooltip>Activates new auth flow</kc-tooltip>
+            </div>
+
+            <div class="form-group" ng-show="activateNewAuth">
                 <label for="loginViaSms" class="col-md-2 control-label">SMS Auth</label>
                 <div class="col-md-6">
                     <input ng-model="loginViaSms" name="loginViaSms" id="loginViaSms" onoffswitch
@@ -260,7 +268,7 @@
                 <kc-tooltip>Turns off auth via sms as basis auth</kc-tooltip>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" ng-show="activateNewAuth">
                 <label for="loginViaEmailOrUsernameAndPassword" class="col-md-2 control-label">Email or username and password auth</label>
                 <div class="col-md-6">
                     <input ng-model="loginViaEmailOrUsernameAndPassword" name="loginViaEmailOrUsernameAndPassword" id="loginViaEmailOrUsernameAndPassword" onoffswitch
@@ -270,7 +278,7 @@
                 <kc-tooltip>Turns off auth via username/email and password</kc-tooltip>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" ng-show="activateNewAuth">
                 <label for="loginViaPhoneCall" class="col-md-2 control-label">Auth via phone call</label>
                 <div class="col-md-6">
                     <input ng-model="loginViaPhoneCall" name="loginViaPhoneCall" id="loginViaPhoneCall" onoffswitch

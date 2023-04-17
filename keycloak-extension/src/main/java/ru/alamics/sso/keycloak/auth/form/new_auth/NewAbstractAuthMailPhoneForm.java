@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.auth.form.newForms;
+package ru.alamics.sso.keycloak.auth.form.new_auth;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
@@ -25,6 +25,9 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 
+import java.util.List;
+import java.util.Map;
+
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 
 
@@ -37,7 +40,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
         this.userFindService = userFindService;
     }
 
-
     @Override
     public boolean validateUserAndPassword(AuthenticationFlowContext context, MultivaluedMap<String, String> inputData) {
         String username = inputData.getFirst(AuthenticationManager.FORM_USERNAME);
@@ -47,10 +49,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
             context.failureChallenge(AuthenticationFlowError.INVALID_USER, challengeResponse);
             return false;
         }
-
         // remove leading and trailing whitespace
         username = username.trim();
-
 
         context.getEvent().detail(Details.USERNAME, username);
         context.getAuthenticationSession().setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, username);
@@ -84,14 +84,12 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
             } else {
                 setDuplicateUserChallenge(context, Errors.USERNAME_IN_USE, Messages.USERNAME_EXISTS, AuthenticationFlowError.INVALID_USER);
             }
-
             return false;
         }
 
         if (invalidUser(context, user)) {
             return false;
         }
-
 
         if (context.getHttpRequest().getDecodedFormParameters().containsKey("loginPasswordButton")) {
             if (!validatePassword(context, user, inputData)) {
@@ -115,19 +113,19 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
 
     private boolean isUserNameValid(String username, AuthenticationFlowContext context, String type) {
         String phoneRegex = "^79\\d{2}\\d{7}$";
-        String emailRegex = "^[a-zA-Z\\d_!#$%&�*+/=?`{|}~^.-]+@[a-zA-Z\\d.-]+$";
+        String emailRegex = "^[a-zA-Z\\d_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z\\d.-]+$";
 
         switch (type) {
             case "email":
                 if (!(username.matches(emailRegex))) {
-                    context.form().setAttribute("error", "incorrect mail");
+                    context.form().setAttribute("error", "Введён неверный E-mail");
                     authenticate(context);
                     return false;
                 }
                 break;
             case "phone":
                 if (!(username.matches(phoneRegex))) {
-                    context.form().setAttribute("error", "incorrect phone");
+                    context.form().setAttribute("error", "Введён неверный номер телефона");
                     authenticate(context);
                     return false;
                 }
@@ -146,9 +144,12 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
         if (!validateUserAndPassword(context, formData)) {
             return;
         }
-        SsoUtil.sendEmailVer(context);
         context.getAuthenticationSession().setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
-        context.form().setAttribute("isVerified", context.getUser().isEmailVerified());
+
+        if (formData.containsKey("smsButton") || formData.containsKey("phoneCallButton")) {
+            context.getAuthenticationSession().setAuthNote("smsOrCall", "smsOrCall");
+        }
+
         context.success();
     }
 
@@ -165,9 +166,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
             formData.add("rememberMe", "on");
         }
         context.form().setAttribute("isSwitcherOn", getCurrentSwitcherStatus(context.getHttpRequest(), context));
-        MultivaluedMap<String, String> multivaluedMap = context.getHttpRequest().getDecodedFormParameters();
-        HttpRequest httpRequest = context.getHttpRequest();
-        HttpHeaders h = httpRequest.getHttpHeaders();
 
         context.challenge(challenge(context, formData));
     }
@@ -181,12 +179,13 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
         boolean isOff = httpRequest.getDecodedFormParameters().containsKey("off");
         boolean isOn = httpRequest.getDecodedFormParameters().containsKey("on");
 
-        boolean isLoginPassword = context.getRealm().getAttribute("loginViaEmailOrUsernameAndPassword", false);
-        boolean isSms = context.getRealm().getAttribute("loginViaSms", false);
-        boolean isPhoneCall = context.getRealm().getAttribute("loginViaPhoneCall", false);
+        boolean isLoginPassword = Boolean.parseBoolean(context.getAuthenticationSession().getClient().getAttribute("loginViaEmailOrUsernameAndPassword"));
+        boolean isSms = Boolean.parseBoolean(context.getAuthenticationSession().getClient().getAttribute("loginViaSms"));
+        boolean isPhoneCall = Boolean.parseBoolean(context.getAuthenticationSession().getClient().getAttribute("loginViaPhoneCall"));
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
 
 
+        String test = context.getAuthenticationSession().getAuthNote("hui");
         if (!(isOff || isOn)) {
             if (isLoginPassword) {
                 if (authenticationSession.getAuthNote(loginSmsAuthNote) == null) {
@@ -244,9 +243,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
         return null;
     }
 
-
     public abstract boolean isSuccessCheckUser(AuthenticationFlowContext context, UserModel user);
-
-
 }
 
