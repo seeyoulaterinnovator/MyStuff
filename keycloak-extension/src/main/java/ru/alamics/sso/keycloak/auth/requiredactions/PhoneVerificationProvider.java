@@ -93,15 +93,16 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         if (Objects.isNull(authSession.getAuthNote(EXPIRATION_TIME))) {
             authSession.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
         }
-
-        LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
+        //todo привести в порядок часть кода
         if (Objects.nonNull(blackListDto)) {
             LocalDateTime unblocked = blackListDto.getUnblockedAt();
+            authSession.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+            LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
             deltaTime = previousTime.until(unblocked, ChronoUnit.SECONDS);
-            //fixme фиксануть таймер, с бэка уходит все корректно, но на фронте отображается криво
-            context.form().setAttribute("expirationSeconds", deltaTime)
+            context.form().setAttribute("expirationSeconds", String.valueOf(deltaTime))
                     .setAttribute("codeLimited", true);
         } else {
+            LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
             deltaTime = Duration.between(previousTime, LocalDateTime.now()).getSeconds();
             context.form().setAttribute("expirationSeconds", String.valueOf(authContext.getActivationCodeType().getExpiredSeconds() - deltaTime));
         }
