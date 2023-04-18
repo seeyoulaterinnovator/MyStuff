@@ -5,7 +5,9 @@ export default class Timer {
     this._timeElement;
     this._callback;
   }
-
+  get hours() {
+    return String(parseInt(this.time / 3600, 10)).padStart(2, '0');
+  }
   get minutes() {
     return String(parseInt(this.time / 60, 10)).padStart(2, '0');
   }
@@ -34,7 +36,7 @@ export default class Timer {
 
   updateDOM() {
     if (this._timeElement)
-      this._timeElement.innerHTML = `${this.minutes}<span class="timer_minutes">:${this.seconds}</span>`;
+      this._timeElement.innerHTML = `${this.hours}:${this.minutes}<span class="timer_minutes">:${this.seconds}</span>`;
   }
 
   stopTimer() {

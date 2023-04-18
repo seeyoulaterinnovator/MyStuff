@@ -16,6 +16,7 @@
   const hasAlert = !!alert;
   const hasBadEmail = hasAlert && alert.classList.contains('bad_email');
   const hasBadPhone = hasAlert && alert.classList.contains('bad_phone');
+  const hasLimitCode = hasAlert && alert.classList.contains('limit-exceeded');
   const newText = hasAlert ? alert.innerText : '';
   const emailElement = document.getElementsByName('email')[0];
   const phoneElement = document.getElementsByName('phone')[0];
@@ -41,6 +42,7 @@
   isRegistration.set(hasRegistration);
   isUpdateProfile.set(hasUpdateProfile);
   text.set(newText);
+  isLimitExceeded.set(hasLimitCode);
 
   if (hasRegistration) {
     if (hasBadEmail && hasBadPhone) {
@@ -90,6 +92,8 @@
         <span>
           {#if $isBadEmail || $isBadPhone}
             Учетная запись существует
+          {:else if $isLimitExceeded}
+            Превышен лимит
           {:else}
             Ошибка
           {/if}
@@ -124,10 +128,8 @@
           <button class="btn text-accentBlue w-full md:w-auto" on:click={handleHide}>
             Изменить данные
           </button>
-        <!--{:else if $isLimitExceeded}
-          <button class="btn text-accentBlue w-full md:w-auto" on:click={handleHide}>
-            Спасибо
-          </button>-->
+        {:else if $isLimitExceeded}
+
         {:else}
           <button class="btn text-accentBlue w-full md:w-auto" on:click={handleHide}>
             Спасибо

@@ -10,6 +10,7 @@ import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.UserModel;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaType;
+import ru.alamics.sso.antifraud.BlackListDto;
 import ru.alamics.sso.antifraud.BlackListService;
 import ru.alamics.sso.jpa.util.LimitationCauseType;
 import ru.alamics.sso.keycloak.lookup.Lookup;
@@ -33,6 +34,7 @@ import javax.ws.rs.core.Response;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -79,22 +81,33 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
         User user = UserModelUserMapper.mapToUser(context.getUser());
         long deltaTime = 0L;
+
         AuthContext authContext = AuthContext.builder()
                 .activationCodeType(activationCodeType)
                 .expirationTime(LocalDateTime.now().plusSeconds(activationCodeType.getExpiredSeconds()))
                 .hashProperty(authSession.getAuthNote(PHONE_KEY_HASH))
                 .counter(getCount(authSession.getAuthNote(COUNT_REPEAT)))
                 .build();
+
+        BlackListDto blackListDto = blackListService.getBlockedUser(user.getPhone());
         if (Objects.isNull(authSession.getAuthNote(EXPIRATION_TIME))) {
             authSession.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+        }
+
+        LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
+        if (Objects.nonNull(blackListDto)) {
+            LocalDateTime unblocked = blackListDto.getUnblockedAt();
+            deltaTime = previousTime.until(unblocked, ChronoUnit.SECONDS);
+            //fixme фиксануть таймер, с бэка уходит все корректно, но на фронте отображается криво
+            context.form().setAttribute("expirationSeconds", deltaTime)
+                    .setAttribute("codeLimited", true);
         } else {
-            LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
             deltaTime = Duration.between(previousTime, LocalDateTime.now()).getSeconds();
+            context.form().setAttribute("expirationSeconds", String.valueOf(authContext.getActivationCodeType().getExpiredSeconds() - deltaTime));
         }
 
         try {
             boolean enableRepeatCall = true;
-            boolean canSendSms = false;
             if (authSession.getAuthNote(NEED_SEND_EMAIL_CODE) != null && activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
                 String code = SmsCodeGenerator.getCode(ActivationCodeType.CODE_TO_EMAIL.getLengthCode());
                 authContext = AuthContext.builder()
@@ -115,7 +128,6 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 enableRepeatCall = false;
             } else {
                 if (checkCanWeSendSmS(user, context)) {
-                    canSendSms = true;
                     authContext = userPhoneVerifier.sendValidationMsg(user, authContext, activationCodeType, context.getRealm());
                 }
             }
@@ -126,7 +138,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             LoginFormsProvider loginFormsProvider = context.form()
                     .setAttribute("userPhone", user.getPhone())
                     .setAttribute("userEmail", user.getEmail())
-                    .setAttribute("expirationSeconds", String.valueOf(authContext.getActivationCodeType().getExpiredSeconds() - deltaTime))
+
                     .setAttribute("lengthCode", authContext.getActivationCodeType().getLengthCode())
                     .setAttribute("activationCodeType", authContext.getActivationCodeType().name())
                     .setAttribute("enableRepeatCall", enableRepeatCall)
@@ -136,9 +148,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     .setAttribute("homePage", settingsService.getSettingsStringValue(HOME_PAGE, context.getRealm().getId()))
                     .setAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, context.getRealm().getId()))
                     .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER, context.getRealm().getId()))
-                    .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()))
-                    .setAttribute("canSendSms", canSendSms);
-            context.challenge(createForm(context, loginFormsProvider, user));
+                    .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()));
+            context.challenge(createForm(context, loginFormsProvider));
 
         } catch (UserPhoneEmpty userPhoneEmpty) {
             log.info("ignore... userPhoneEmpty");
@@ -151,11 +162,10 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         }
     }
 
-    private Response createForm(RequiredActionContext context, LoginFormsProvider loginFormsProvider, User user) {
+    private Response createForm(RequiredActionContext context, LoginFormsProvider loginFormsProvider) {
         //Костыль тк при запросе с МП не нашел другого способа верификацию отправить по rest
         String mp = context.getAuthenticationSession().getAuthNote("MP");
         String errorCode = context.getAuthenticationSession().getAuthNote(ERROR_CODE);
-
         if (mp != null && errorCode != null) {
             Response response = loginFormsProvider.createForm(VERIFY_PHONE_FTL);
             Map<String, String> entity = (Map<String, String>) response.getEntity();
@@ -167,14 +177,6 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
             parameters.add(GRANT_TYPE, "password");
 
-        }
-        if (blackListService.isUserBlockedAuthBySms(user.getPhone())) {
-            context.form()
-                    .setError(MessageConstants.SMS_LIMIT_20_BLOCK);
-        }
-        if (blackListService.isUserBlockedAuthByPhoneCall(user.getPhone())) {
-            context.form()
-                    .setError(MessageConstants.CALL_LIMIT_20_BLOCK);
         }
         return loginFormsProvider.createForm(VERIFY_PHONE_FTL);
     }
@@ -276,7 +278,6 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         }
         String code = context.getAuthenticationSession().getAuthNote("currentCode");
         if (userMap.entrySet().stream().allMatch(it -> it.getKey()
-                //fixme it code null
                 .getCurrentCode().equals(code) && it.getKey()
                 .getCurrentCodeCounter() >= 5 && it.getKey().getActivationType().equals(CODE_TO_SMS) && it.getValue() < 20)) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
@@ -296,6 +297,18 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     }
 
     private boolean checkCanWeSendSmS(User user, RequiredActionContext context) {
+        if (blackListService.isUserBlockedAuthBySms(user.getPhone())) {
+            context.form()
+                    .setAttribute("isLimited", true)
+                    .setError(MessageConstants.SMS_LIMIT_20_BLOCK);
+            return false;
+        }
+        if (blackListService.isUserBlockedAuthByPhoneCall(user.getPhone())) {
+            context.form()
+                    .setAttribute("isLimited", true)
+                    .setError(MessageConstants.CALL_LIMIT_20_BLOCK);
+            return false;
+        }
         return checkIsMoreThanFiveAttempts(context, user) || !mainCounter.containsKey(user.getPhone()) && !blackListService.isUserBlockedAuthBySms(user.getPhone());
     }
 
@@ -315,7 +328,9 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
 
         String code = authSession.getAuthNote("currentCode");
-
+        if (Objects.isNull(code)) {
+            return;
+        }
         if (mainCounter.containsKey(user.getPhone())) {
             int existCurrentCodeTries = 0;
             if (mainCounter.get(user.getPhone()).entrySet().stream().allMatch(it -> it.getKey().getCurrentCode().equals(code))) {

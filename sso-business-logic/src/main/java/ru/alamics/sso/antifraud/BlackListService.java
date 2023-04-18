@@ -6,6 +6,7 @@ import ru.alamics.sso.jpa.repository.BlackListRepository;
 import ru.alamics.sso.jpa.repository.UserRepository;
 import ru.alamics.sso.jpa.util.LimitationCauseType;
 import ru.alamics.sso.registration.model.User;
+import ru.alamics.sso.util.BlackListMapper;
 
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
@@ -53,5 +54,13 @@ public class BlackListService {
     public boolean isUserBlockedAuthByPhoneCall(String phone) {
         return blackListRepository.findBlockedByPhone(phone).stream()
                 .anyMatch(it -> it.getLimitationCause().equals(LimitationCauseType.PHONE_CALL.getCause()));
+    }
+
+    public BlackListDto getBlockedUser(String phone) {
+        List<BlackListEntity> entities = blackListRepository.findBlockedByPhone(phone);
+        if (!entities.isEmpty()) {
+            return BlackListMapper.toDto(entities.stream().findFirst().get());
+        }
+        return null;
     }
 }
