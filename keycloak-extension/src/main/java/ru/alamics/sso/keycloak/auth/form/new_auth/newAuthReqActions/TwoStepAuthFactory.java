@@ -70,7 +70,7 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
             context.getAuthenticationSession().setAuthNote(NOTE_AUTH_TYPE_DESC, authType.getDescription());
         }
 
-        if (buttons.containsKey("loginPasswordButton")) {
+        if (context.getAuthenticationSession().getAuthNote("loginPasswordButton") != null) {
             sessionModel.setAuthNote("loginPasswordButton", "loginPasswordButton");
             sessionModel.removeAuthNote("smsButton");
             sessionModel.removeAuthNote("phoneCallButton");
@@ -83,7 +83,7 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
             addEmailReqActIfNeeded(userModel);
             context.success();
 
-        } else if (buttons.containsKey("smsButton")) {
+        } else if (context.getAuthenticationSession().getAuthNote("smsButton") != null) {
             sessionModel.setAuthNote("smsButton", "smsButton");
             sessionModel.removeAuthNote("loginPasswordButton");
             sessionModel.removeAuthNote("phoneCallButton");

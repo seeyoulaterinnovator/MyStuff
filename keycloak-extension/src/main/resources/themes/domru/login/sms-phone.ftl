@@ -3,74 +3,15 @@
 
 <@layout.registrationLayout displayMessage=false displayCity=false; section>
     <#if section = "header">
-        <style>
-            .back-timer {
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                padding: 0px;
-                gap: 24px;
-
-                width: 568px;
-                height: 48px;
-
-
-                /* Inside auto layout */
-
-                flex: none;
-                order: 2;
-                align-self: stretch;
-                flex-grow: 0;
-            }
-
-            @media only screen and (min-width: 768px) and (max-width: 1279px) {
-                .back-timer {
-
-                    gap: 18px;
-
-                    width: 480px;
-                    height: 44px;
-
-                }
-            }
-
-            @media only screen and (max-width: 767px) {
-                .back-timer {
-                    flex-direction: column;
-                    justify-content: center;
-                    gap: 10px;
-                    width: 100%;
-                    height: auto;
-                }
-
-                #timer {
-                    margin: 0 auto;
-                    text-align: center;
-                }
-            }
-
-            .center-items {
-
-            }
-
-            @media (max-width: 767px) {
-                .center-items {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-            }
-
-        </style>
         <@blocks.contentHeader mainTitle="Вход" secondaryTitle="Регистрация" secondaryHref="${url.registrationUrl}" withBorder=true />
 
     <#elseif section = "form">
         <#if phoneCallButton!false>
-            <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4">
+            <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4 info-text">
                 На указанный номер поступит звонок. Для подтверждения нужно ввести последние 4 цифры входящего номера
             </h3>
         <#else>
-            <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4">
+            <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4 info-text">
                 Введите код из СМС отправленный на указанный номер телефона
             </h3>
         </#if>
@@ -80,17 +21,10 @@
 
             <div class="w-full xl:pb-37px md:pb-10 sm:pb-8 pb-4 center-items">
                 <#list 1..lengthCode as x>
-                    <#if x = 1>
-                        <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
-                               name="smscode-${x}"
-                               class="text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none"
-                               autocomplete="off"/>
-                    <#else>
-                        <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
-                               name="smscode-${x}"
-                               class="ml-4 text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none"
-                               autocomplete="off"/>
-                    </#if>
+                    <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
+                           name="smscode-${x}"
+                           class="text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none squares"
+                           autocomplete="off"/>
                 </#list>
             </div>
 
@@ -101,7 +35,7 @@
             <div class="back-timer">
                 <div>
                     <button id="topSecretButton" type="button" class="btn btn-back text-accentBlue-900"
-                            onclick="document.getElementById('loginPasswordButton').click();">телефон
+                            onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                     </button>
                 </div>
                 <div id="timer" style="margin-left: auto;">
@@ -128,7 +62,7 @@
             </div>
         </form>
         <form method="POST" action="${url.loginUrl}">
-            <button id="loginPasswordButton" name="on" type="submit" class="hidden">
+            <button id="loginPasswordButton" name="back" type="submit" class="hidden">
                 Войти с помощью логина
             </button>
         </form>
