@@ -1645,56 +1645,56 @@
         </sql>
     </changeSet>
 
-    <!--    <changeSet id="108" author="slabunov-yv">-->
-    <!--        <preConditions onFail="MARK_RAN">-->
-    <!--            <tableExists tableName="REALM_ATTRIBUTE"></tableExists>-->
-    <!--        </preConditions>-->
-    <!--        <sql>-->
-    <!--            INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'lkb2b'), 'false', 'activateNewAuth');-->
-    <!--            INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'lkb2b'), 'true', 'loginViaEmailOrUsernameAndPassword');-->
-    <!--            INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'lkb2b'), 'false', 'loginViaPhoneCall');-->
-    <!--            INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'lkb2b'), 'false', 'loginViaSms');-->
-    <!--            INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'b2b'), 'false', 'activateNewAuth');-->
-    <!--            INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'b2b'), 'false', 'loginViaEmailOrUsernameAndPassword');-->
-    <!--            INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'b2b'), 'true', 'loginViaPhoneCall');-->
-    <!--            INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'b2b'), 'false', 'loginViaSms');-->
-    <!--            INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'wifi'), 'false', 'activateNewAuth');-->
-    <!--            INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'wifi'), 'true', 'loginViaEmailOrUsernameAndPassword');-->
-    <!--            INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'wifi'), 'false', 'loginViaPhoneCall');-->
-    <!--            INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'wifi'), 'false', 'loginViaSms');-->
-    <!--            INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'dmp-ks-sit'), 'false', 'activateNewAuth');-->
-    <!--            INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'dmp-ks-sit'), 'false', 'loginViaEmailOrUsernameAndPassword');-->
-    <!--            INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'dmp-ks-sit'), 'true', 'loginViaPhoneCall');-->
-    <!--            INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'dmp-ks-sit'), 'false', 'loginViaSms');-->
-    <!--        </sql>-->
-    <!--    </changeSet>-->
+        <changeSet id="108" author="slabunov-yv">
+            <preConditions onFail="MARK_RAN">
+                <tableExists tableName="REALM_ATTRIBUTE"></tableExists>
+            </preConditions>
+            <sql>
+                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'lkb2b'), 'false', 'activateNewAuth');
+                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'lkb2b'), 'true', 'loginViaEmailOrUsernameAndPassword');
+                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'lkb2b'), 'false', 'loginViaPhoneCall');
+                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'lkb2b'), 'false', 'loginViaSms');
+                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'b2b'), 'false', 'activateNewAuth');
+                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'b2b'), 'false', 'loginViaEmailOrUsernameAndPassword');
+                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'b2b'), 'true', 'loginViaPhoneCall');
+                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'b2b'), 'false', 'loginViaSms');
+                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'wifi'), 'false', 'activateNewAuth');
+                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'wifi'), 'true', 'loginViaEmailOrUsernameAndPassword');
+                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'wifi'), 'false', 'loginViaPhoneCall');
+                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'wifi'), 'false', 'loginViaSms');
+                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'dmp-ks-sit'), 'false', 'activateNewAuth');
+                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'dmp-ks-sit'), 'false', 'loginViaEmailOrUsernameAndPassword');
+                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'dmp-ks-sit'), 'true', 'loginViaPhoneCall');
+                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'dmp-ks-sit'), 'false', 'loginViaSms');
+            </sql>
+        </changeSet>
 
-    <!--    <changeSet id="109" author="slabunov-yv">-->
-    <!--        <preConditions onFail="MARK_RAN">-->
-    <!--            <tableExists tableName="REALM_ATTRIBUTE"></tableExists>-->
-    <!--        </preConditions>-->
-    <!--        <sql>-->
-    <!--            UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'activateNewAuth' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'lkb2b');-->
-    <!--            UPDATE CLIENT_ATTRIBUTES SET VALUE = 'true'  WHERE NAME = 'loginViaEmailOrUsernameAndPassword' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'lkb2b');-->
-    <!--            UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'loginViaPhoneCall' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'lkb2b');-->
-    <!--            UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'loginViaSms' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'lkb2b');-->
+        <changeSet id="109" author="slabunov-yv">
+            <preConditions onFail="MARK_RAN">
+                <tableExists tableName="REALM_ATTRIBUTE"></tableExists>
+            </preConditions>
+            <sql>
+                UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'activateNewAuth' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'lkb2b');
+                UPDATE CLIENT_ATTRIBUTES SET VALUE = 'true'  WHERE NAME = 'loginViaEmailOrUsernameAndPassword' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'lkb2b');
+                UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'loginViaPhoneCall' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'lkb2b');
+                UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'loginViaSms' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'lkb2b');
 
-    <!--            UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'activateNewAuth' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'wifi');-->
-    <!--            UPDATE CLIENT_ATTRIBUTES SET VALUE = 'true'  WHERE NAME = 'loginViaEmailOrUsernameAndPassword' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'wifi');-->
-    <!--            UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'loginViaPhoneCall' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'wifi');-->
-    <!--            UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'loginViaSms' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'wifi');-->
+                UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'activateNewAuth' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'wifi');
+                UPDATE CLIENT_ATTRIBUTES SET VALUE = 'true'  WHERE NAME = 'loginViaEmailOrUsernameAndPassword' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'wifi');
+                UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'loginViaPhoneCall' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'wifi');
+                UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'loginViaSms' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'wifi');
 
-    <!--            UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'activateNewAuth' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'b2b');-->
-    <!--            UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'loginViaEmailOrUsernameAndPassword' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'b2b');-->
-    <!--            UPDATE CLIENT_ATTRIBUTES SET VALUE = 'true'  WHERE NAME = 'loginViaPhoneCall' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'b2b');-->
-    <!--            UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'loginViaSms' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'b2b');-->
+                UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'activateNewAuth' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'b2b');
+                UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'loginViaEmailOrUsernameAndPassword' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'b2b');
+                UPDATE CLIENT_ATTRIBUTES SET VALUE = 'true'  WHERE NAME = 'loginViaPhoneCall' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'b2b');
+                UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'loginViaSms' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'b2b');
 
-    <!--            UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'activateNewAuth' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'dmp-ks-sit');-->
-    <!--            UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'loginViaEmailOrUsernameAndPassword' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'dmp-ks-sit');-->
-    <!--            UPDATE CLIENT_ATTRIBUTES SET VALUE = 'true'  WHERE NAME = 'loginViaPhoneCall' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'dmp-ks-sit');-->
-    <!--            UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'loginViaSms' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'dmp-ks-sit');-->
-    <!--        </sql>-->
-    <!--    </changeSet>-->
+                UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'activateNewAuth' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'dmp-ks-sit');
+                UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'loginViaEmailOrUsernameAndPassword' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'dmp-ks-sit');
+                UPDATE CLIENT_ATTRIBUTES SET VALUE = 'true'  WHERE NAME = 'loginViaPhoneCall' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'dmp-ks-sit');
+                UPDATE CLIENT_ATTRIBUTES SET VALUE = 'false'  WHERE NAME = 'loginViaSms' AND CLIENT_ID = (SELECT id FROM CLIENT WHERE client_id = 'dmp-ks-sit');
+            </sql>
+        </changeSet>
 
     <changeSet id="92" author="petrov-ny">
         <sql>
@@ -1880,4 +1880,77 @@
             'FRONT');
         </sql>
     </changeSet>
+    
+     <changeSet id="104" author="petrov-ny">
+        <addColumn tableName="EXT_SYSTEM_ROLE">
+            <column name="REALM_ID" type="varchar(16)"/>
+        </addColumn>
+        <sql>
+
+            update EXT_SYSTEM_ROLE set realm_id = 'user';
+
+        </sql>
+    </changeSet>
+
+    <changeSet id="105" author="petrov-ny">
+        <addColumn tableName="EXTERNAL_SYSTEM">
+            <column name="REALM_ID" type="varchar(16)"/>
+        </addColumn>
+        <sql>
+
+            update EXTERNAL_SYSTEM set realm_id = 'user';
+
+        </sql>
+    </changeSet>
+
+    <changeSet id="106" author="petrov-ny">
+        <sql>
+
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (20, 'lkb2b', 'Личный кабинет Дом.ru Бизнес', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (21, 'dmp-kc-sit', 'Личный кабинет цифровых продуктов', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (22, 'forpost', 'Видеонаблюдение', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (23, 'itglobal', 'Виртуальный ЦОД', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (24, 'oats', 'Облачная телефония', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (25, 'wifi', 'Cервис управления услугами wifi', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (26, 'app_b2b', 'МП Дом.Ру Бизнес', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (27, 'b2b', 'Основной сайт b2b', 'S-TELECOM');
+
+        </sql>
+    </changeSet>
+
+    <changeSet id="107" author="petrov-ny">
+        <sql>
+
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (20, 'access_granted', 20, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (21, 'access_granted', 21, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (22, 'access_granted', 22, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (23, 'access_granted', 23, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (24, 'access_granted', 24, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (25, 'access_granted', 25, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (26, 'access_granted', 26, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (27, 'access_granted', 27, 'S-TELECOM');
+
+        </sql>
+    </changeSet>
+
+    <changeSet id="115" author="zhakov-mv">
+        <sql>
+            INSERT IGNORE INTO USER_ATTRIBUTE (NAME, VALUE, USER_ID, ID)
+            SELECT
+                CASE
+                    WHEN ae.RESOURCE_PATH = 'autoblock' THEN 'system-block'
+                    WHEN ae.RESOURCE_PATH = 'manage/block' THEN 'manager-block'
+                    ELSE 'manager-block'
+                    END                               AS NAME,
+                MAX(FROM_UNIXTIME(ae.ADMIN_EVENT_TIME / 1000))              AS VALUE,
+                JSON_VALUE(ae.REPRESENTATION, '$.id') AS USER_ID,
+                UUID()                                AS ID
+                    FROM ADMIN_EVENT_ENTITY ae
+                            INNER JOIN USER_ENTITY u ON JSON_VALUE(ae.REPRESENTATION, '$.id') = u.ID
+                                COLLATE utf8mb4_unicode_ci
+                    WHERE ENABLED = false
+                    GROUP BY USER_ID;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
