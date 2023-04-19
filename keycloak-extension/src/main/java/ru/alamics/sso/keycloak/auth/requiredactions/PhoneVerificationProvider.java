@@ -80,7 +80,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
         User user = UserModelUserMapper.mapToUser(context.getUser());
-        long deltaTime = 0L;
+        long deltaTime;
 
         AuthContext authContext = AuthContext.builder()
                 .activationCodeType(activationCodeType)
@@ -93,7 +93,6 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         if (Objects.isNull(authSession.getAuthNote(EXPIRATION_TIME))) {
             authSession.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
         }
-        //todo привести в порядок часть кода
         if (Objects.nonNull(blackListDto)) {
             LocalDateTime unblocked = blackListDto.getUnblockedAt();
             authSession.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
