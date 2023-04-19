@@ -119,9 +119,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     .setAttribute("homePage", settingsService.getSettingsStringValue(HOME_PAGE, context.getRealm().getId()))
                     .setAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, context.getRealm().getId()))
                     .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER, context.getRealm().getId()))
-                    .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()))
-                    .setAttribute("secondPhaseLogin", isLoginSecondPhaseActivated(context))
-                    .setAttribute("smsMessage", context.getUser().getRequiredActions().contains("phone_verificator_sms"));
+                    .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()));
+
 
             context.challenge(createForm(context, loginFormsProvider));
 
