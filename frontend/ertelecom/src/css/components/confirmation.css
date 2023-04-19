@@ -46,8 +46,8 @@
   }
 
   .confirm__btn:first-child {
-    margin-right: 0;
-    margin-bottom: 24px;
+    margin-right: 24px;
+    margin-bottom: 0;
   }
 
   .confirm__title {

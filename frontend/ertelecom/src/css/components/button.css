@@ -108,13 +108,111 @@ a.btn {
   }
 
   .btn.btn-enter {
-    max-width: 136px;
     box-sizing: border-box;
   }
 }
 
 @media (max-width: 320px) {
   .btn-enter {
-    width: 134px;
+    width: 100%;
   }
 }
+
+@media only screen and (min-width: 1280px) {
+  .btn-switcher{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 13px 19px;
+    gap: 10px;
+
+    width: 285px;
+    height: 48px;
+
+    /* [Light]/Основные/Белый */
+
+    background: #FFFFFF;
+    /* Button/White_Normal */
+
+    border: 2px solid #4F4BFE;
+    border-radius: 100px;
+
+    /* Inside auto layout */
+
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+  }
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1279px) {
+  .btn-switcher {
+    padding: 12px 17px;
+    width: 266px;
+    height: 44px;
+    border: 2px solid #4F4BFE;
+    border-radius: 100px;
+  }
+}
+
+/* For 320 resolution */
+@media only screen and (max-width: 767px) {
+  .btn-switcher {
+    padding: 11px 15px;
+    width: 288px;
+    height: 40px;
+    border: 2px solid #4F4BFE;
+    border-radius: 100px;
+
+  }
+}
+@media only screen and (max-width: 767px) {
+  .btn-enter{
+    width: 288px;
+    height: 40px;
+  }
+}
+
+@media only screen and (min-width: 1280px) {
+  .btn-back {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 13px 19px;
+    gap: 10px;
+    width: 292px;
+    height: 48px;
+    background: #FFFFFF;
+    border: 2px solid #4F4BFE;
+    border-radius: 100px;
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+  }
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1279px) {
+  .btn-back {
+    padding: 12px 17px;
+    width: 272px;
+    height: 44px;
+    background: #FFFFFF;
+    border: 2px solid #4F4BFE;
+    border-radius: 100px;
+  }
+}
+
+/* For 320 resolution */
+@media only screen and (max-width: 767px) {
+  .btn-back {
+    padding: 11px 15px;
+    width: 288px;
+    height: 40px;
+    background: #FFFFFF;
+    border: 2px solid #4F4BFE;
+    border-radius: 100px;
+  }
+}
+

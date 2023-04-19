@@ -7,6 +7,7 @@
     isBadEmail,
     isBadPhone,
     loginUrl,
+    showInfo,
   } from './stores.js';
 
   const hasRegistration = window.location.href.includes('registration');
@@ -18,6 +19,10 @@
   const newText = hasAlert ? alert.innerText : '';
   const emailElement = document.getElementsByName('email')[0];
   const phoneElement = document.getElementsByName('phone')[0];
+
+    const info = document.querySelector('.alert .text-black');
+    const hasInfo = !!info;
+    const submitButton = document.getElementById("closeWindow");
 
   let email = '';
   let phone = '';
@@ -35,6 +40,7 @@
   hasAlert && alert.parentElement.remove();
 
   show.set(hasAlert);
+  showInfo.set(hasInfo);
   isBadEmail.set(hasBadEmail);
   isBadPhone.set(hasBadPhone);
   isRegistration.set(hasRegistration);
@@ -73,9 +79,18 @@
     }
   }
 
+  if (hasInfo) {
+    text.set("На указанный E-mail отправлена инструкция для подтверждения данных")
+  }
+
   function handleHide() {
     show.set(false);
   }
+
+  function closeAndSubmit() {
+    submitButton.click();
+  }
+
 
   function handleClick(e) {
     e.stopPropagation();
@@ -131,5 +146,24 @@
       </div>
     </div>
   </div>
-
+{:else if $showInfo}
+  <div class="message__fade flex justify-center items-center" on:click={closeAndSubmit}>
+    <div class="email_window" on:click={closeAndSubmit}>
+      <div class="message__title flex flex-row justify-between items-center gap-4">
+        <span>
+          {#if $isBadEmail || $isBadPhone}
+            Учетная запись существует
+            {:else if $showInfo}
+            Подтверждение данных
+          {:else}
+            Ошибка
+          {/if}
+        </span>
+        <button class="btn message__btn" on:click={closeAndSubmit}>
+          &times;
+        </button>
+      </div>
+      <p>{$text}</p>
+    </div>
+  </div>
 {/if}
