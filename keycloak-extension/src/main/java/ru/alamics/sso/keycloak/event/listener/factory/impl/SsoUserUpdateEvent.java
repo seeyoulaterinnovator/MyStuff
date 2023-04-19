@@ -96,7 +96,6 @@ public class SsoUserUpdateEvent extends SsoEvent {
             int timeTokenResetPass = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm.getName());
             String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
             attributes.put("expTimePass", expirationStrRusPass);
-
             if (userNow.isEnabled()) {
                 long blockValue = settingsService.getSettingsLongValue(SettingConstants.BLOCK_NOTIFICATION_OF_UNLOCKING, realm.getName());
                 if (blockValue > 0) {

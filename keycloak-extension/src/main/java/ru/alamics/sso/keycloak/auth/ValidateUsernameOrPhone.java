@@ -13,12 +13,14 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.managers.AuthenticationManager;
+import ru.alamics.sso.jpa.entity.common.BlockType;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.util.Util;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import java.util.Objects;
 
 @Slf4j
 public class ValidateUsernameOrPhone extends ValidateUsername {
@@ -67,7 +69,7 @@ public class ValidateUsernameOrPhone extends ValidateUsername {
             context.failure(AuthenticationFlowError.INVALID_USER, challengeResponse);
             return;
         }
-        if (!user.isEnabled()) {
+        if (!user.getAttribute(BlockType.MANAGER_BLOCK.getType()).isEmpty()) {
             context.getEvent().user(user);
             context.getEvent().error(Errors.USER_DISABLED);
             Response challengeResponse = errorResponse(Response.Status.BAD_REQUEST.getStatusCode(), "invalid_grant", "Account disabled");
@@ -84,6 +86,7 @@ public class ValidateUsernameOrPhone extends ValidateUsername {
             }
         }
         context.setUser(user);
+        Objects.requireNonNull(user).setEnabled(true);
         context.success();
     }
 
