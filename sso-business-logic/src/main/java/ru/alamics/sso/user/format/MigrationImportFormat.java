@@ -1,5 +1,6 @@
 package ru.alamics.sso.user.format;
 
+import org.apache.commons.lang3.StringUtils;
 import ru.alamics.sso.user.FileServiceException;
 import ru.alamics.sso.user.filetype.FileModel;
 import ru.alamics.sso.user.model.ImportUsersDataModel;
@@ -18,7 +19,8 @@ public class MigrationImportFormat implements ImportFormat {
         if (row.length > 2) userImport.setEmail(row[2]);
         if (row.length > 3) userImport.setFirstName(row[3]);
         if (row.length > 4) userImport.setPhone(row[4]);
-        if (row.length > 5) userImport.setCleanPassword(row[5]);
+        if (row.length > 5) userImport.setCleanPassword(StringUtils.isEmpty(row[5].trim()) ? null : row[5].trim());
+        if (row.length > 6) userImport.setPersonalAccount(row[6]);
 
         userImport.setCreated(false);
         return userImport;

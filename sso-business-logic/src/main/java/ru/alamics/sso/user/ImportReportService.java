@@ -81,6 +81,7 @@ public class ImportReportService {
         entity.setUserId(data.getUserId());
         entity.setErrors(data.getErrors());
         entity.setStatus(data.getStatus());
+        entity.setPersonalAccount(data.getPersonalAccount());
 
         importUsersReportRepository.updateImportUsersData(entity);
 
