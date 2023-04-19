@@ -1895,7 +1895,7 @@
         </addColumn>
     </changeSet>
 
-    <changeSet id="110" author="petrov-ny">
+    <changeSet id="126" author="petrov-ny">
         <sql>
             <![CDATA[
             INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('94701e6a-c7d4-11ed-afa1-0242ac120002', 'emailAccountDataBodyHtml', '<p class="content__p">Для Вас создана учетная запись для входа в Личный кабинет «ЭР-Телеком Бизнес».</p><dl class="content__dl"><dt class="content__dl-dt">Логин:</dt><dd class="content__dl-dd"><b>{0}</b></dt></dl><p>Перейдите по ссылке и установите пароль.</p><p><a class="content__a" href="{3}">Установить пароль</a></p>', null, 'ER-TELECOM', 'Сообщение о создании УЗ', null, 'MESSAGE');
@@ -1904,7 +1904,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="111" author="petrov-ny">
+    <changeSet id="121" author="petrov-ny">
         <sql>
             INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
                 ('9c7464ae-c7d4-11ed-afa1-0242ac120002', 'user.expire.incoming.call.code', '30', null, 'ER-TELECOM', 'Время
@@ -2014,7 +2014,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="112" author="petrov-ny">
+    <changeSet id="122" author="petrov-ny">
         <sql>
             INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
                 ('66507a2c-c7d7-11ed-afa1-0242ac120002', 'homePageSystem', 'https://newlkb2b.dom.ru', null, 'ER-TELECOM',
@@ -2024,7 +2024,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="113" author="petrov-ny">
+    <changeSet id="123" author="petrov-ny">
         <sql>
             INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (30, 'lkb2b', 'Личный кабинет Дом.ru Бизнес', 'ER-TELECOM');
             INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (31, 'dmp-kc-sit', 'Личный кабинет цифровых продуктов', 'ER-TELECOM');
@@ -2038,7 +2038,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="114" author="petrov-ny">
+    <changeSet id="124" author="petrov-ny">
         <sql>
             INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (30, 'access_granted', 30, 'ER-TELECOM');
             INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (31, 'access_granted', 31, 'ER-TELECOM');
@@ -2051,7 +2051,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="115" author="slabunov-yv">
+    <changeSet id="125" author="slabunov-yv">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="REALM_ATTRIBUTE"></tableExists>
         </preConditions>
