@@ -50,6 +50,15 @@ public class UserRole {
         user.setAttribute(ATTR_TOMS_NAME, Collections.singletonList(tomsId));
     }
 
+    public void setUserPost(AuthenticationFlowContext context, String tomsId, String postId) {
+        final String DEBUG_STR = "setUserPost";
+        log.info("{}: user={}", DEBUG_STR, context.getUser().getId());
+
+        UserModel user = context.getUser();
+        selectPostByUser(user, postId);
+        user.setAttribute(ATTR_TOMS_NAME, Collections.singletonList(tomsId));
+    }
+
     private List<UserPostEntity> deselectAllPostsByUser(UserEntity user) {
         List<UserPostEntity> userPosts = postRepository.getAllUserPostByUserId(user.getId());
 

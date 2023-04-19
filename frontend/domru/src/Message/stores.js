@@ -4,6 +4,8 @@ export const text = writable('');
 
 export const show = writable(false);
 
+export const showInfo = writable(false);
+
 export const isBadEmail = writable(false);
 
 export const isBadPhone = writable(false);

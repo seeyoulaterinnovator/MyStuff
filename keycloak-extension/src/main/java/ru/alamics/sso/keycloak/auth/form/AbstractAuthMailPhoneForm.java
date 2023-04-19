@@ -2,6 +2,7 @@ package ru.alamics.sso.keycloak.auth.form;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
+import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
@@ -18,6 +19,7 @@ import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.messages.Messages;
+import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.util.Util;
 
@@ -61,6 +63,7 @@ public abstract class AbstractAuthMailPhoneForm extends AbstractUsernameFormAuth
             formData.add(AuthenticationManager.FORM_USERNAME, rememberMeUsername);
             formData.add("rememberMe", "on");
         }
+
         context.challenge(challenge(context, formData));
     }
 
