@@ -64,8 +64,11 @@ public class SsoUpdatePassword extends UpdatePassword {
             return;
         }
 
+        AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
+
         try {
             context.getSession().userCredentialManager().updateCredential(context.getRealm(), context.getUser(), UserCredentialModel.password(passwordNew, false));
+
             context.success();
         } catch (ModelException me) {
             errorEvent.detail(Details.REASON, me.getMessage()).error(Errors.PASSWORD_REJECTED);

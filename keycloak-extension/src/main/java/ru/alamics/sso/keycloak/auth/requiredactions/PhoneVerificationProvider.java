@@ -47,7 +47,6 @@ import static ru.alamics.sso.settings.SettingConstants.*;
 @Slf4j
 public class PhoneVerificationProvider implements RequiredActionProvider {
     private static final String VERIFY_PHONE_FTL = "verifyPhone.ftl";
-
     private static final String NEED_SEND_EMAIL_CODE = "NEED_SEND_EMAIL_CODE";
     private static final String GRANT_TYPE = "grant_type";
     private static final String ERROR_CODE = "error_code";
@@ -148,6 +147,10 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     .setAttribute("homePage", settingsService.getSettingsStringValue(HOME_PAGE, context.getRealm().getId()))
                     .setAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, context.getRealm().getId()))
                     .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER, context.getRealm().getId()))
+                    .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()))
+                    .setAttribute("secondPhaseLogin", isLoginSecondPhaseActivated(context))
+                    .setAttribute("smsMessage", context.getUser().getRequiredActions().contains("phone_verificator_sms"));
+
                     .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()));
             context.challenge(createForm(context, loginFormsProvider));
 
@@ -160,6 +163,12 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         } catch (SendMessageException se) {
             log.info("ignore... MsgSendException {}", se.getMessage());
         }
+    }
+
+    private boolean isLoginSecondPhaseActivated(RequiredActionContext context) {
+        return context.getAuthenticationSession().getAuthNote("smsButton") != null
+                || (context.getAuthenticationSession().getAuthNote("phoneCallButton") != null)
+                || (context.getAuthenticationSession().getAuthNote("loginPasswordButton") != null);
     }
 
     private Response createForm(RequiredActionContext context, LoginFormsProvider loginFormsProvider) {
@@ -369,8 +378,6 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             requiredActionChallenge(context);
         }
     }
-
-
     private Integer getCount(String countStr) {
         if (countStr == null || "null".equals(countStr)) {
             return 0;
