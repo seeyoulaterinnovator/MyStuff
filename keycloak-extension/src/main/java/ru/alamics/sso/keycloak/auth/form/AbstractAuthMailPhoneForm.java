@@ -19,12 +19,16 @@ import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.messages.Messages;
+import ru.alamics.sso.jpa.entity.common.BlockType;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.registration.service.UserFindService;
+import ru.alamics.sso.user.UserAttributeService;
 import ru.alamics.sso.util.Util;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+
+import java.util.Collections;
 
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 
@@ -32,6 +36,7 @@ import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 public abstract class AbstractAuthMailPhoneForm extends AbstractUsernameFormAuthenticator implements Authenticator {
 
     private final UserFindService userFindService;
+    private UserAttributeService attributeService;
 
     public AbstractAuthMailPhoneForm(UserFindService userFindService) {
         this.userFindService = userFindService;
@@ -120,6 +125,12 @@ public abstract class AbstractAuthMailPhoneForm extends AbstractUsernameFormAuth
 
         if (!validatePassword(context, user, inputData)) {
             return false;
+        }
+        if(user.getAttribute(BlockType.MANAGER_BLOCK.getType()).isEmpty()) {
+            user.setEnabled(true);
+
+            attributeService = new UserAttributeService(context.getSession(), userFindService);
+            attributeService.deleteAttributes(user.getId(), Collections.singletonList(BlockType.SYSTEM_BLOCK.getType()));
         }
 
         if (!enabledUser(context, user)) {
