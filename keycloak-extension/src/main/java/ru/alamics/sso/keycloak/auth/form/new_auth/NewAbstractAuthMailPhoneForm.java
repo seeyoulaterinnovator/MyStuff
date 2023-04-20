@@ -213,7 +213,9 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
                     .counter(getCount(sessionModel.getAuthNote(COUNT_REPEAT)))
                     .activationCodeType(activationCodeType)
                     .build();
-
+            if (Objects.nonNull(authContext.getHashProperty())) {
+                sessionModel.setAuthNote("currentCode", authContext.getHashProperty());
+            }
             if (context.getHttpRequest().getDecodedFormParameters().containsKey("resend")) {
                 log.info("Sms code resend");
 
@@ -222,31 +224,28 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
                 sessionModel.removeAuthNote(PHONE_KEY_HASH);
                 authenticate(context);
 
-            }
-
-            if (Objects.nonNull(authContext.getHashProperty())) {
-                sessionModel.setAuthNote("currentCode", authContext.getHashProperty());
-            }
-            if (activationCodeType.equals(CODE_TO_SMS)) {
-                checkAndAddToCounter(user, authContext, context);
-                if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > 20) {
-                    blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.SMS);
-                    authenticate(context);
-                    mainCounter.remove(user.getPhone());
-                    return;
+            } else {
+                if (activationCodeType.equals(CODE_TO_SMS)) {
+                    checkAndAddToCounter(user, authContext, context);
+                    if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > 20) {
+                        blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.SMS);
+                        authenticate(context);
+                        mainCounter.remove(user.getPhone());
+                        return;
+                    }
+                    verifyCode(context, sessionModel, user, authContext, httpRequest);
                 }
-                verifyCode(context, sessionModel, user, authContext, httpRequest);
-            }
 
-            if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
-                checkAndAddToCounter(user, authContext, context);
-                if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > 20) {
-                    blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.PHONE_CALL);
-                    authenticate(context);
-                    mainCounter.remove(user.getPhone());
-                    return;
+                if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
+                    checkAndAddToCounter(user, authContext, context);
+                    if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > 20) {
+                        blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.PHONE_CALL);
+                        authenticate(context);
+                        mainCounter.remove(user.getPhone());
+                        return;
+                    }
+                    verifyCode(context, sessionModel, user, authContext, httpRequest);
                 }
-                verifyCode(context, sessionModel, user, authContext, httpRequest);
             }
         }
     }
