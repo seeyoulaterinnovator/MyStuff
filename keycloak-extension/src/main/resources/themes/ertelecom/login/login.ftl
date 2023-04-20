@@ -86,17 +86,17 @@
                         <#if usernameEditDisabled??>
                             <input name="username" id="username-second" class="field__input"
                                    label="${msg('usernameOrEmailPlaceholder')}"
-                                   placeholder="Телефон или E-mail" value="${(login.username!)}"
+                                   placeholder="Номер телефона" value="${(login.username!)}"
                                    type="text" disabled/>
                         <#else>
                             <input name="username" id="username-second"
                                    class="field__input ${error?has_content?then('field__input--error','')}"
                                    label="${msg('usernameOrEmailPlaceholder')}"
-                                   placeholder="Телефон или E-mail" value="${(login.username!)}"
+                                   placeholder="Номер телефона" value="${(login.username!)}"
                                    type="text" autofocus autocomplete="off"/>
 
                         </#if>
-                        <label class="field__label" for="username">Телефон или E-mail</label>
+                        <label class="field__label" for="username">Номер телефона</label>
                         <span class="span-line">${error!}</span>
                     </div>
                 </#if>
@@ -133,17 +133,17 @@
                         <#if usernameEditDisabled??>
                             <input name="username" id="username-second" class="field__input"
                                    label="${msg('usernameOrEmailPlaceholder')}"
-                                   placeholder="Телефон или E-mail" value="${(login.username!)}"
+                                   placeholder="Номер телефона" value="${(login.username!)}"
                                    type="text" disabled/>
                         <#else>
                             <input name="username" id="username-second"
                                    class="field__input ${error?has_content?then('field__input--error','')}"
                                    label="${msg('usernameOrEmailPlaceholder')}"
-                                   placeholder="Телефон или E-mail" value="${(login.username!)}"
+                                   placeholder="Номер телефона" value="${(login.username!)}"
                                    type="text" autofocus autocomplete="off"/>
 
                         </#if>
-                        <label class="field__label" for="username">Телефон или E-mail</label>
+                        <label class="field__label" for="username">Номер телефона</label>
                         <span class="span-line">${error!}</span>
                     </div>
                 </#if>
@@ -242,17 +242,17 @@
                         <#if usernameEditDisabled??>
                             <input name="username" id="username-second" class="field__input"
                                    label="${msg('usernameOrEmailPlaceholder')}"
-                                   placeholder="Телефон или E-mail" value="${(login.username!)}"
+                                   placeholder="Номер телефона" value="${(login.username!)}"
                                    type="text" disabled/>
                         <#else>
                             <input name="username" id="username-second"
                                    class="field__input ${error?has_content?then('field__input--error','')}"
                                    label="${msg('usernameOrEmailPlaceholder')}"
-                                   placeholder="Телефон или E-mail" value="${(login.username!)}"
+                                   placeholder="Номер телефона" value="${(login.username!)}"
                                    type="text" autofocus autocomplete="off"/>
 
                         </#if>
-                        <label class="field__label" for="username">Телефон или E-mail</label>
+                        <label class="field__label" for="username">Номер телефона</label>
                         <span class="span-line">${error!}</span>
                     </div>
                 </#if>
