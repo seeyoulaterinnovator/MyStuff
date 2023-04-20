@@ -70,7 +70,7 @@
                     <#nested "info">
                 </#if>
 
-                <div class="py-2 sm:py-3 lg:py-12">
+                <div class="py-2 sm:py-3 lg:py-4">
                     <#if displayMessage && message?has_content>
                         <div class="alert pb-12">
                             <#if message.type = 'info'>

@@ -51,15 +51,13 @@
   top: 63%;
 }
 .eye {
-  opacity: 0.2;
   margin-bottom: 10px;
 }
 .field__open:hover .eye {
-  opacity: 0.5;
 }
 
 .field__input {
-  @apply .rounded-lg .pt-2 .pb-3 .px-3 .text-black .outline-none;
+  @apply .rounded-lg .text-black .outline-none;
 
   border-radius: 0;
 
