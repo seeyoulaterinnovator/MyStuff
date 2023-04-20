@@ -150,6 +150,11 @@ export default (function functionName() {
         }
       }
     });
+    secondUserName.addEventListener("keypress", (event) => {
+      if (!/^\d$/.test(event.key) && event.key !== "Backspace" && event.key !== "Delete" && event.key !== "Enter") {
+        event.preventDefault();
+      }
+     });
   }
 
 })();

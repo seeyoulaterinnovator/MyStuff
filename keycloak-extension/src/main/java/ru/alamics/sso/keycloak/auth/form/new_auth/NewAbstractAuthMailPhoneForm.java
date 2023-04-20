@@ -88,8 +88,10 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
             log.info("find user casual");
 
             if (!(username.matches("^\\d+$")) && context.getHttpRequest().getDecodedFormParameters().containsKey("loginPasswordButton")) {
+                if (!isUserNameValid(username, context, "email")) return false;
                 user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(), username);
             } else {
+                if (!isUserNameValid(username, context, "phone")) return false;
                 user = Util.getUserAdapter(context.getSession(), userFindService.getUserByPhone(context.getRealm(), username));
             }
 
@@ -134,6 +136,28 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
             context.getAuthenticationSession().removeAuthNote(Details.REMEMBER_ME);
         }
         context.setUser(user);
+        return true;
+    }
+
+    private boolean isUserNameValid(String username, AuthenticationFlowContext context, String type) {
+        String phoneRegex = "^79\\d{2}\\d{7}$";
+        String emailRegex = "^[a-zA-Z\\d_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z\\d.-]+$";
+
+        switch (type) {
+            case "email":
+                if (!(username.matches(emailRegex))) {
+                    context.form().setAttribute("error", "Введён неверный E-mail");
+                    authenticate(context);
+                    return false;
+                }
+                break;
+            case "phone":
+                if (!(username.matches(phoneRegex))) {
+                    context.form().setAttribute("error", "Введён неверный номер телефона");
+                    authenticate(context);
+                    return false;
+                }
+        }
         return true;
     }
 
@@ -295,16 +319,16 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
         boolean isSms = Boolean.parseBoolean(context.getAuthenticationSession().getClient().getAttribute("loginViaSms"));
         boolean isPhoneCall = Boolean.parseBoolean(context.getAuthenticationSession().getClient().getAttribute("loginViaPhoneCall"));
 
-        if (authenticationSession.getAuthNote("backToLoginPassword") != null) {
-            if (isLoginPassword) {
+        if (authenticationSession.getAuthNote("backToLoginPassword") != null){
+            if (isLoginPassword){
                 authenticationSession.removeAuthNote(loginSmsAuthNote);
                 authenticationSession.removeAuthNote("backToLoginPassword");
             }
-            if (isSms) {
+            if (isSms){
                 authenticationSession.setAuthNote(loginPasswordAuthNote, loginPasswordAuthNote);
                 authenticationSession.removeAuthNote("backToLoginPassword");
             }
-            if (isPhoneCall) {
+            if (isPhoneCall){
                 authenticationSession.setAuthNote(loginPasswordAuthNote, loginPasswordAuthNote);
                 authenticationSession.removeAuthNote("backToLoginPassword");
             }

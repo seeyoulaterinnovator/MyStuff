@@ -14,6 +14,7 @@ export default (function functionName() {
   const passwordElement = document.getElementById('password');
   const cityElement = document.getElementById('domain-login');
   const secondSubmit = document.getElementById("submit-phone")
+  const errorMessageElement = document.querySelector(".span-line");
   debugger
 
   console.log(usernameElement)
@@ -66,6 +67,34 @@ export default (function functionName() {
         passwordElement.value = replacePassword;
       }
     }
+    usernameElement.addEventListener("mouseout", (event) => {
+      const unmaskedValue = dynamicMask.unmaskedValue;
+      const onlyDigits = /^\d+$/.test(unmaskedValue);
+
+      if (!unmaskedValue) {
+        errorMessageElement.textContent = "";
+        usernameElement.classList.remove("field__input--error");
+      } else if (onlyDigits) {
+        const isPhoneNumber = /^79\d{9}$/.test(unmaskedValue);
+        if (isPhoneNumber) {
+          errorMessageElement.textContent = "";
+          usernameElement.classList.remove("field__input--error");
+        } else {
+          errorMessageElement.textContent = "¬ведЄн неверный номер телефона";
+          usernameElement.classList.add("field__input--error");
+
+        }
+      } else {
+        const isEmail = /^[a-zA-Z\d_!#$%&Т*+/=?`{|}~^.-]+@[a-zA-Z\d.-]+$/.test(unmaskedValue);
+        if (isEmail) {
+          errorMessageElement.textContent = "";
+          usernameElement.classList.remove("field__input--error");
+        } else {
+          errorMessageElement.textContent = "¬ведЄн неверный E-mail";
+          usernameElement.classList.add("field__input--error");
+        }
+      }
+    });
 
 
   } else if (secondUserName !== null && secondSubmit !== null) {
@@ -102,6 +131,29 @@ export default (function functionName() {
 
       return isUsernameValid;
     }
+    secondUserName.addEventListener("mouseout", (event) => {
+      const unmaskedValue = dynamicMaskTwo.unmaskedValue;
+      const onlyDigits = /^\d+$/.test(unmaskedValue);
+
+      if (!unmaskedValue) {
+        errorMessageElement.textContent = "";
+        secondUserName.classList.remove("field__input--error");
+      } else if (onlyDigits) {
+        const isPhoneNumber = /^79\d{9}$/.test(unmaskedValue);
+        if (isPhoneNumber) {
+          errorMessageElement.textContent = "";
+          secondUserName.classList.remove("field__input--error");
+        } else {
+          errorMessageElement.textContent = "¬ведЄн неверный номер телефона";
+          secondUserName.classList.add("field__input--error");
+        }
+      }
+    });
+    secondUserName.addEventListener("keypress", (event) => {
+      if (!/^\d$/.test(event.key) && event.key !== "Backspace" && event.key !== "Delete" && event.key !== "Enter") {
+        event.preventDefault();
+      }
+    });
   }
 
 })();
