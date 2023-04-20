@@ -259,6 +259,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > 20) {
                     blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.SMS);
                     requiredActionChallenge(context);
+                    mainCounter.remove(user.getPhone());
                     return;
                 }
                 verifyCode(context, authSession, user, model, authContext);
@@ -269,6 +270,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > 20) {
                     blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.PHONE_CALL);
                     requiredActionChallenge(context);
+                    mainCounter.remove(user.getPhone());
                     return;
                 }
                 verifyCode(context, authSession, user, model, authContext);
