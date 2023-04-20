@@ -137,7 +137,6 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             LoginFormsProvider loginFormsProvider = context.form()
                     .setAttribute("userPhone", user.getPhone())
                     .setAttribute("userEmail", user.getEmail())
-
                     .setAttribute("lengthCode", authContext.getActivationCodeType().getLengthCode())
                     .setAttribute("activationCodeType", authContext.getActivationCodeType().name())
                     .setAttribute("enableRepeatCall", enableRepeatCall)

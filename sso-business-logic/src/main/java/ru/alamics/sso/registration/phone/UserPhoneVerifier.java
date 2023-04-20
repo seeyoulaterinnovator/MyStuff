@@ -2,6 +2,7 @@ package ru.alamics.sso.registration.phone;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.RealmModel;
+import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.phone.exception.PhoneCallException;
@@ -15,6 +16,7 @@ import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Slf4j
 @Stateless

@@ -1662,7 +1662,7 @@
             ]]>
         </sql>
     </changeSet>
-
+        <!--comment 108 and 109 if doesnt work-->
         <changeSet id="108" author="slabunov-yv">
             <preConditions onFail="MARK_RAN">
                 <tableExists tableName="REALM_ATTRIBUTE"></tableExists>

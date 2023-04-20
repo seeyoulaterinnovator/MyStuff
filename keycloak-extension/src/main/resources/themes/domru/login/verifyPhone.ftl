@@ -45,7 +45,6 @@
                     <#else>
 
                         <div id="timer" class="text-black text-center md:text-right flex items-center my-6 md:my-0 justify-center md:justify-start">
-                            <#--здесь класс какой-то принимает 2 агрумента только, возможно. поэтому таймер не влазит-->
                             <#if codeLimited?? && codeLimited> Код можно запросить через: <#else> Пароль действует </#if> <span id="timer-time" class="px-1 textTimer"></span><span style="font-weight: 350;font-size: 13px;line-height: 16px;color: #7585A1;opacity: 0.8;">чч:мм:cc</span>
                         </div>
                         <#if enableRepeatCall?? && enableRepeatCall!>
