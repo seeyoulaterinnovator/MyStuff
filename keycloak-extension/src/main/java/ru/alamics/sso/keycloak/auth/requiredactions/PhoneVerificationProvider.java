@@ -75,6 +75,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
     @Override
     public void requiredActionChallenge(RequiredActionContext context) {
+
         log.info("PhoneRequiredActionChallenge");
 
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
