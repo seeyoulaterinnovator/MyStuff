@@ -10,11 +10,11 @@
             <@blocks.contentHeader mainTitle="${doLogIn}" secondaryTitle=" " secondaryHref=" " withBorder=true />
         </#if>
     <#elseif section = "form">
-        <p class="mb-7">${loginTitleText}</p>
+        <p class="">${loginTitleText}</p>
         <#if realm.password>
             <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
                   onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
-                <div class="field field__container field--required mb-3 sm:mb-4 md:w-full">
+                <div class="field field__container field--required mt-6 xl:mt-8 sm:mt-6 md:w-full">
                     <input class="hidden w-0 h-0" id="domain-login" name="city">
                     <#if withCity?has_content && withCity == "TRUE">
                         <input id = "withCity" class="hidden w-0 h-0" name="withCity" value="TRUE">
@@ -34,7 +34,7 @@
                     <label class="field__label" for="username">${usernameOrEmailPlaceholder}</label>
                 </div>
 
-                <@components.field class="mb-7 sm:mb-8 md:w-full" fieldName="password" label="${passwordPlaceholder}" placeholder="${passwordPlaceholder}" type="password" required=true />
+                <@components.field class="mb-6 mt-6 xl:mt-8 sm:mt-6 xl:mb-8 sm:mb-6 md:w-full" fieldName="password" label="${passwordPlaceholder}" placeholder="${passwordPlaceholder}" type="password" required=true />
 
                 <div class="flex justify-between w-full items-center">
                     <button id="submit" class="btn btn-main btn-enter" type="submit">${enter}</button>

@@ -268,7 +268,6 @@ public class UserMapper {
 
         return PersonalAccountModel.builder()
                 .uuid(entity.getUuid())
-                //.postId(entity.getPostId())
                 .value(entity.getValue())
                 .build();
     }

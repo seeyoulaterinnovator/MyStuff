@@ -150,8 +150,6 @@ public class ImportService {
 
         doGeneratePasswords(dataList, auth, session);
 
-        //if (cf != null)
-        //    cf.complete("");
     }
 
     private void importUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart) {
@@ -344,10 +342,10 @@ public class ImportService {
         userPostRequest.setRoleId(userPostService.getUserPostRole(data.getRole()));
         UserPostResponse userPostResponse = userPostService.save(userPostRequest);
 
-        addSystemRoles(data, userPostResponse.getId());
+        addSystemRoles(data, userPostResponse.getId(), user.getRealmId());
     }
 
-    private void addSystemRoles(ImportUsersDataModel userImport, String userPostId) {
+    private void addSystemRoles(ImportUsersDataModel userImport, String userPostId, String realmId) {
         if (userImport.getSystems() == null || userImport.getSystems().isEmpty()) {
             return;
         }
@@ -359,7 +357,7 @@ public class ImportService {
             for (String sysName : systems) {
                 try {
                     userPostService.addSystemRole(UserMapper.toExternalSystemRoleRequest(userPostId,
-                            userPostService.getExternalSystemRoleId(sysName)));
+                            userPostService.getExternalSystemRoleId(sysName, realmId)));
                 } catch (NotFoundException e) {
                     errorSystemNames.add(sysName);
                 }

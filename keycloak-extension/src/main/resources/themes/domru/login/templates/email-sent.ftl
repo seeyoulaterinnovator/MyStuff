@@ -1,7 +1,7 @@
 <#macro defaultTemplate email="" backHref="/" buttonExist=true isVerified=false success = true>
   <div class="container">
     <div>
-      <h1 class="text text__title"><#nested "header"></h1>
+      <h1 class="text__title titleAllPage"><#nested "header"></h1>
         <#if !isVerified>
           <p class="text text--far">
               <#nested "description">

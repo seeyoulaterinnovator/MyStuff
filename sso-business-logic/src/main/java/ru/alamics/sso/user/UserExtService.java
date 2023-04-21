@@ -176,7 +176,7 @@ public class UserExtService {
 
 
         if (!Util.isEmpty(request.getTomsId())) {
-            addUserPostRole(user, request, bss);
+            addUserPostRole(user, request, bss, realm.getId());
         }
 
         createAdminEvent(OperationType.CREATE, user);
@@ -224,7 +224,7 @@ public class UserExtService {
                 .success();
     }
 
-    private void addUserPostRole(UserModel userModel, UserRequest request, boolean isBss) throws NotFoundException, FoundException, FoundUserPostException, NotValidException {
+    private void addUserPostRole(UserModel userModel, UserRequest request, boolean isBss, String realmId) throws NotFoundException, FoundException, FoundUserPostException, NotValidException {
 
         UserPostRequest userPostRequest = UserMapper.toUserPostRequest(userModel, request);
 
@@ -239,6 +239,6 @@ public class UserExtService {
         }
         UserPostResponse userPostResponse = userPostFacade.save(userPostRequest);
 
-        userPostFacade.getUserPostService().addAllSystemRole(userPostResponse.getId());
+        userPostFacade.getUserPostService().addAllSystemRole(userPostResponse.getId(), realmId);
     }
 }

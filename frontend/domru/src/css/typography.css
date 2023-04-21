@@ -19,9 +19,6 @@ body {
 
 h1 {
   font-size: 26px;
-  b {
-    font-size: 1.03em;
-  }
   line-height: 1.18;
 
   @media (min-width: 640px) {
