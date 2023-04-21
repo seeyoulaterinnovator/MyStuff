@@ -68,7 +68,6 @@ public abstract class AbstractAuthMailPhoneForm extends AbstractUsernameFormAuth
             formData.add(AuthenticationManager.FORM_USERNAME, rememberMeUsername);
             formData.add("rememberMe", "on");
         }
-
         context.challenge(challenge(context, formData));
     }
 

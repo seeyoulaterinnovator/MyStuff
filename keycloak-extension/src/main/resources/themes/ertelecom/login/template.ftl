@@ -70,7 +70,7 @@
                     <#nested "info">
                 </#if>
 
-                <div class="py-2 sm:py-3 lg:py-12">
+                <div class="py-2 sm:py-3 lg:py-4">
                     <#if displayMessage && message?has_content>
                         <div class="alert pb-12">
                             <#if message.type = 'info'>
@@ -99,9 +99,29 @@
                                             ${kcSanitize(message.summary)?no_esc}
                                         </span>
                                     </#if>
+                                <#elseif message.summary?contains('Превышен лимит СМС. Запросить новое СМС можно через 12 часов')>
+                                    <span class="text-accentRed hidden limit-exceeded">
+                                        ${kcSanitize(message.summary)?no_esc}
+                                    </span>
+                                <#elseif message.summary?contains('Превышен лимит повторных звонков. Запросить новый звонок можно через 12 часов')>
+                                    <span class="text-accentRed hidden limit-exceeded">
+                                        ${kcSanitize(message.summary)?no_esc}
+                                    </span>
+                                <#elseif message.summary?contains('Код был введён более 5 раз. Запросите новое СМС')>
+                                    <span class="text-accentRed hidden limit-exceeded">
+                                        ${kcSanitize(message.summary)?no_esc}
+                                    </span>
+                                <#elseif message.summary?contains('Код был введён более 5 раз. Запросите новый звонок')>
+                                    <span class="text-accentRed hidden limit-exceeded">
+                                        ${kcSanitize(message.summary)?no_esc}
+                                    </span>
                                 <#elseif message.summary == msg('emailExistsMessage')>
                                     <span class="text-accentRed bad_email hidden">
                                         ${kcSanitize(message.summary)?no_esc}
+                                    </span>
+                                <#elseif message.summary?contains('Вы слишком долго бездействовали. Процесс аутентификации начнется с начала.')>
+                                    <span class="text-accentRed hidden">
+                                        Вы слишком долго бездействовали. Процесс аутентификации начнется с начала.
                                     </span>
                                 <#else>
                                     <span class="text-accentRed hidden">

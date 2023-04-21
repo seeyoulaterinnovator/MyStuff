@@ -80,16 +80,16 @@ export default (function functionName() {
           errorMessageElement.textContent = "";
           usernameElement.classList.remove("field__input--error");
         } else {
-          errorMessageElement.textContent = "Введён неверный номер телефона";
+          errorMessageElement.textContent = "Р’РІРµРґС‘РЅ РЅРµРІРµСЂРЅС‹Р№ РЅРѕРјРµСЂ С‚РµР»РµС„РѕРЅР°";
           usernameElement.classList.add("field__input--error");
         }
       } else {
-        const isEmail = /^[a-zA-Z\d_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z\d.-]+$/.test(unmaskedValue);
+        const isEmail = /^[a-zA-Z\d_!#$%&пїЅ*+/=?`{|}~^.-]+@[a-zA-Z\d.-]+$/.test(unmaskedValue);
         if (isEmail) {
           errorMessageElement.textContent = "";
           usernameElement.classList.remove("field__input--error");
         } else {
-          errorMessageElement.textContent = "Введён неверный E-mail";
+          errorMessageElement.textContent = "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ E-mail";
           usernameElement.classList.add("field__input--error");
         }
       }
@@ -149,7 +149,7 @@ export default (function functionName() {
           errorMessageElement.textContent = "";
           secondUserName.classList.remove("field__input--error");
         } else {
-          errorMessageElement.textContent = "Введён неверный номер телефона";
+          errorMessageElement.textContent = "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ";
           secondUserName.classList.add("field__input--error");
         }
       }

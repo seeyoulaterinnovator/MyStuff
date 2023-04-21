@@ -51,6 +51,9 @@
   }
 }
 
+.btn-disabled {
+  display: none!important;
+}
 
 .btn-sell {
   @apply .bg-accentBlue .text-white;

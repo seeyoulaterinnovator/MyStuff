@@ -304,6 +304,7 @@
 
 @media only screen and (max-width: 767px) {
   .login-pass {
+    margin-top: 20px;
     display: flex;
     flex-direction: column;
     justify-content: center;

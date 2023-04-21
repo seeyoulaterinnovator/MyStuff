@@ -1,7 +1,7 @@
 <#import "template.ftl" as layout>
 <#import "templates/blocks.ftl" as blocks>
 
-<@layout.registrationLayout displayMessage=false displayCity=false; section>
+<@layout.registrationLayout displayMessage=true displayCity=false; section>
     <#if section = "header">
         <@blocks.contentHeader mainTitle="Вход" secondaryTitle="Регистрация" secondaryHref="${url.registrationUrl}" withBorder=true />
 
@@ -23,7 +23,13 @@
                 <#list 1..lengthCode as x>
                     <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
                            name="smscode-${x}"
-                           class="text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none squares"
+                           <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
+                               disabled
+                           <#elseif codeLimited?? && codeLimited>
+                               disabled
+                           </#if>
+                           class="text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none squares
+                            sms-input"
                            autocomplete="off"/>
                 </#list>
             </div>
@@ -38,23 +44,29 @@
                             onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                     </button>
                 </div>
-                <div id="timer" style="margin-left: auto;">
-                    <span style="color: #899DA8">
-                        Код действует:
-                    </span>
-                    <span id="timer-time" class="px-2 textTimer">
-                    </span>
-                </div>
-                <#if enableRepeatCall?? && enableRepeatCall!>
-                    <p class="hidden font-light text-black verification__text" id="resend">
-                        password ne prihodit?
+                <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
                         <span>
-                            <button class="font-light verification__resend" name="resend"
-                                    type="submit">${sendAgain}</button>
+                            <button class="font-light verification__resend" name="resend" type="submit">${sendAgain}</button>
                         </span>
-                    </p>
+                <#else>
+                <div id="timer" style="margin-left: auto;">
+                        <span style="color: #899DA8">
+                            <#if codeLimited?? && codeLimited> Код можно запросить через: <#else> Пароль действует </#if>
+                        </span>
+                        <span id="timer-time" class="px-1 textTimer">
+                        </span>
+                    </div>
+                    <#if enableRepeatCall?? && enableRepeatCall!>
+                        <p class="hidden font-light text-black verification__text" id="resend">
+                            Пароль не приходит?
+                            <span>
+                                <button class="font-light verification__resend" name="resend"
+                                        type="submit">${sendAgain}</button>
+                            </span>
+                        </p>
+                    </#if>
+                </div>
                 </#if>
-            </div>
             <div class="sm:block md:flex w-full items-center text-center md:text-left">
                 <button class="hidden"
                         name="accept" id="accept" type="submit">${doSubmit}</button>

@@ -8,6 +8,7 @@
     isBadPhone,
     loginUrl,
     showInfo,
+    isLimitExceeded,
   } from './stores.js';
 
   const hasRegistration = window.location.href.includes('registration');
@@ -16,6 +17,7 @@
   const hasAlert = !!alert;
   const hasBadEmail = hasAlert && alert.classList.contains('bad_email');
   const hasBadPhone = hasAlert && alert.classList.contains('bad_phone');
+  const hasLimitCode = hasAlert && alert.classList.contains('limit-exceeded');
 
   const info = document.querySelector('.alert .text-black');
   const hasInfo = !!info;
@@ -48,6 +50,7 @@
   isRegistration.set(hasRegistration);
   isUpdateProfile.set(hasUpdateProfile);
   text.set(newText);
+  isLimitExceeded.set(hasLimitCode);
 
   if (hasRegistration) {
     if (hasBadEmail && hasBadPhone) {
@@ -104,6 +107,8 @@
         <span>
           {#if $isBadEmail || $isBadPhone}
             Учетная запись существует
+          {:else if $isLimitExceeded}
+            Превышен лимит
           {:else}
             Ошибка
           {/if}
@@ -138,6 +143,8 @@
           <button class="btn text-accentBlue w-full md:w-auto" on:click={handleHide}>
             Изменить данные
           </button>
+        {:else if $isLimitExceeded}
+
         {:else}
           <button class="btn btn-main btn-enter" on:click={handleHide}>
             Понятно

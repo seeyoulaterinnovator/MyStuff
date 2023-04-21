@@ -1546,6 +1546,24 @@
         </sql>
     </changeSet>
 
+    <changeSet id="120" author="zhakov-mv">
+        <sql>
+            CREATE TABLE IF NOT EXISTS BLACK_LIST (
+                id VARCHAR(36) NOT NULL PRIMARY KEY,
+                email VARCHAR(128) NULL,
+                created TIMESTAMP NOT NULL,
+                unblocked TIMESTAMP NULL,
+                block_duration BIGINT NULL,
+                block_count INT DEFAULT 0,
+                phone VARCHAR(12) NOT NULL,
+                user_id VARCHAR(36) NOT NULL,
+                limitation_cause VARCHAR(36),
+                CONSTRAINT fk_user_entity
+                FOREIGN KEY (user_id) REFERENCES USER_ENTITY (ID) ON DELETE CASCADE
+                ) charset = utf8mb4;
+        </sql>
+    </changeSet>
+
     <changeSet id="83" author="petrov-ny">
         <sql>
             <![CDATA[
@@ -1644,8 +1662,6 @@
             ]]>
         </sql>
     </changeSet>
-
-
 
     <changeSet id="92" author="petrov-ny">
         <sql>
@@ -1831,7 +1847,7 @@
             'FRONT');
         </sql>
     </changeSet>
-
+    
      <changeSet id="104" author="petrov-ny">
         <addColumn tableName="EXT_SYSTEM_ROLE">
             <column name="REALM_ID" type="varchar(16)"/>
@@ -2051,7 +2067,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="125" author="slabunov-yv">
+    <!--<changeSet id="125" author="slabunov-yv">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="REALM_ATTRIBUTE"></tableExists>
         </preConditions>
@@ -2072,7 +2088,7 @@
 
 
         </sql>
-    </changeSet>
+    </changeSet>-->
 
 
 </databaseChangeLog>

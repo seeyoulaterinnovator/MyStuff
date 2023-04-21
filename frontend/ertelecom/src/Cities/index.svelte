@@ -1,22 +1,16 @@
 <script>
-    import Cookie from 'js-cookie';
+  import Cookie from 'js-cookie';
 
-    import {
-        status,
-        city,
-        showModal,
-        editingStarted,
-        allCities,
-    } from './stores.js';
-    import { STATUS } from './constants.js';
+  import {allCities, city, editingStarted, showModal, status,} from './stores.js';
+  import {STATUS} from './constants.js';
 
-    import Confirmation from './Confirmation.svelte';
-    import Selection from './Selection.svelte';
+  import Confirmation from './Confirmation.svelte';
+  import Selection from './Selection.svelte';
 
-    import './selection';
-    import {selectCity, setAllSelected, setSelectedCity} from "./selection";
+  import './selection';
+  import {selectCity, setAllSelected} from "./selection";
 
-    let search;
+  let search;
 
     const unsubscribeCity = city.subscribe(value => {
         Cookie.set('CITY', value, {sameSite: 'None', secure: document.location.protocol === 'https:'});
@@ -42,7 +36,7 @@
 {#if $showModal}
     <div
             class="flex flex-col fixed transparent-bg w-screen inset-0 py-4 md:py-6 xl:py-8 scrollable-container overflow-x-hidden overflow-y-auto"
-            id="location-selection-window">
+            id="location-selection-window" style={$status === STATUS.SELECTING ? "background-color: white" : ''}>
         <header id="cities-header" class="flex items-center pb-4 px-4 sm:px-6 lg:px-8 xl:px-6">
             <div id="cities-header-div" class="w-full flex justify-between items-center">
                 <a id="cities-header-logo" href="http://lkb2b.stelecom.ru/" class={$status === STATUS.SELECTING && 'hidden sm:block'}>
