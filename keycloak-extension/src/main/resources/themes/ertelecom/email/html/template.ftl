@@ -39,7 +39,7 @@
                 </div>
               </div>
               <div>
-                <p class="mail-text--copyright mail-text--bold"><font color="#7c7c7c" size="+1"><b>С уважением, ЭР-Телеком!</b></font></p>
+                <p class="mail-text--copyright mail-text--bold"><font color="#222222" size="+1"><b>С уважением, ЭР-Телеком!</b></font></p>
                 <p class="mail-text--copyright mail-text--light-gray"><font color="#bcbcbc">Данное письмо отправлено с адреса, предназначенного только для рассылок. Пожалуйста, не отвечайте на это письмо. В случае возникновения вопросов Вы можете обратиться к персональному менеджеру, контактные данные есть в «личном кабинете» или по телефону +7(495)145 9555 (звонок бесплатный).</font></p>
                 <p class="mail-text--copyright mail-text--light-gray"><font color="#bcbcbc">© OOO «ЭР-Телеком» 2011-${.now?string.yyyy}</font></p>
               </div>
