@@ -83,7 +83,6 @@ export default (function functionName() {
         } else {
           errorMessageElement.textContent = "Введён неверный номер телефона";
           usernameElement.classList.add("field__input--error");
-
         }
       } else {
         const isEmail = /^[a-zA-Z\d_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z\d.-]+$/.test(unmaskedValue);
@@ -94,6 +93,15 @@ export default (function functionName() {
           errorMessageElement.textContent = "Введён неверный E-mail";
           usernameElement.classList.add("field__input--error");
         }
+      }
+    });
+
+    usernameElement.addEventListener("input", (event) => {
+      const unmaskedValue = dynamicMask.unmaskedValue;
+
+      if (!unmaskedValue || event.inputType === "insertFromPaste" || event.inputType === "insertText" || event.inputType === "deleteContentBackward" || event.inputType === "deleteContentForward") {
+        errorMessageElement.textContent = "";
+        usernameElement.classList.remove("field__input--error");
       }
     });
 
@@ -136,10 +144,7 @@ export default (function functionName() {
       const unmaskedValue = dynamicMaskTwo.unmaskedValue;
       const onlyDigits = /^\d+$/.test(unmaskedValue);
 
-      if (!unmaskedValue) {
-        errorMessageElement.textContent = "";
-        secondUserName.classList.remove("field__input--error");
-      } else if (onlyDigits) {
+      if (onlyDigits) {
         const isPhoneNumber = /^79\d{9}$/.test(unmaskedValue);
         if (isPhoneNumber) {
           errorMessageElement.textContent = "";
@@ -150,6 +155,17 @@ export default (function functionName() {
         }
       }
     });
+
+    secondUserName.addEventListener("input", (event) => {
+      const unmaskedValue = dynamicMaskTwo.unmaskedValue;
+
+      if (!unmaskedValue || event.inputType === "insertFromPaste" || event.inputType === "insertText" || event.inputType === "deleteContentBackward" || event.inputType === "deleteContentForward") {
+        errorMessageElement.textContent = "";
+        secondUserName.classList.remove("field__input--error");
+      }
+    });
+
+
     secondUserName.addEventListener("keypress", (event) => {
       if (!/^\d$/.test(event.key) && event.key !== "Backspace" && event.key !== "Delete" && event.key !== "Enter") {
         event.preventDefault();
