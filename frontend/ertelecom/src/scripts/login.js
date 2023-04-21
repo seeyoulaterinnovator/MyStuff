@@ -71,7 +71,10 @@ export default (function functionName() {
       const unmaskedValue = dynamicMask.unmaskedValue;
       const onlyDigits = /^\d+$/.test(unmaskedValue);
 
-      if (onlyDigits) {
+      if (!unmaskedValue) {
+        errorMessageElement.textContent = "";
+        usernameElement.classList.remove("field__input--error");
+      } else if (onlyDigits) {
         const isPhoneNumber = /^79\d{9}$/.test(unmaskedValue);
         if (isPhoneNumber) {
           errorMessageElement.textContent = "";
@@ -79,7 +82,6 @@ export default (function functionName() {
         } else {
           errorMessageElement.textContent = "¬ведЄн неверный номер телефона";
           usernameElement.classList.add("field__input--error");
-
         }
       } else {
         const isEmail = /^[a-zA-Z\d_!#$%&Т*+/=?`{|}~^.-]+@[a-zA-Z\d.-]+$/.test(unmaskedValue);
@@ -96,7 +98,7 @@ export default (function functionName() {
     usernameElement.addEventListener("input", (event) => {
       const unmaskedValue = dynamicMask.unmaskedValue;
 
-      if (!unmaskedValue) {
+      if (!unmaskedValue || event.inputType === "insertFromPaste" || event.inputType === "insertText" || event.inputType === "deleteContentBackward" || event.inputType === "deleteContentForward") {
         errorMessageElement.textContent = "";
         usernameElement.classList.remove("field__input--error");
       }
@@ -156,7 +158,7 @@ export default (function functionName() {
     secondUserName.addEventListener("input", (event) => {
       const unmaskedValue = dynamicMaskTwo.unmaskedValue;
 
-      if (!unmaskedValue) {
+      if (!unmaskedValue || event.inputType === "insertFromPaste" || event.inputType === "insertText" || event.inputType === "deleteContentBackward" || event.inputType === "deleteContentForward") {
         errorMessageElement.textContent = "";
         secondUserName.classList.remove("field__input--error");
       }
