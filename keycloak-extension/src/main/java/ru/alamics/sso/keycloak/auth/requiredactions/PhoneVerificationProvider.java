@@ -150,6 +150,9 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()))
                     .setAttribute("secondPhaseLogin", isLoginSecondPhaseActivated(context))
                     .setAttribute("smsMessage", context.getUser().getRequiredActions().contains("phone_verificator_sms"));
+            if (activationCodeType.equals(CODE_TO_SMS)) {
+                context.form().setAttribute("isSms", true); //костыля чтобы отдать на фронт инфу о типе экшена
+            }
             context.challenge(createForm(context, loginFormsProvider));
 
         } catch (UserPhoneEmpty userPhoneEmpty) {

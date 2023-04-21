@@ -3,7 +3,7 @@
 
 <@layout.registrationLayout displayMessage=true displayCity=false; section>
 <#if section = "header">
-<#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон -->
+<#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон (depricated)-->
 <@blocks.verificationHeader mainTitle="Подтвердить" />
 <#elseif section = "form">
 <#if lengthCode==4 && !enableRepeatCall && userEmail??>
@@ -13,7 +13,8 @@
 </h3>
 <#elseif userPhone??>
 <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4" x-ms-format-detection="none">
-    <#if lengthCode==6>
+    <#if isSms?? && isSms>
+        Введите код из СМС
     <#else>
         Введите последние 4 цифры номера входящего звонка на номер:
     </#if>
@@ -23,7 +24,7 @@
     <form id="totpe" action="${url.loginAction}" method="POST">
     </form>
     <form id="totpForm" action="${url.loginAction}" method="POST">
-        <#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон -->
+        <#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон (depricated)-->
 
         <div class="w-full xl:pb-37px md:pb-10 sm:pb-8 pb-4 center-items">
             <#list 1..lengthCode as x>
