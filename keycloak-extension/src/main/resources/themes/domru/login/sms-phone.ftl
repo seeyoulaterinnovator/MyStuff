@@ -58,7 +58,7 @@
                     </div>
                     <#if enableRepeatCall?? && enableRepeatCall!>
                         <p class="hidden font-light text-black verification__text" id="resend">
-                            password ne prihodit?
+                            Пароль не приходит?
                             <span>
                                 <button class="font-light verification__resend" name="resend"
                                         type="submit">${sendAgain}</button>
