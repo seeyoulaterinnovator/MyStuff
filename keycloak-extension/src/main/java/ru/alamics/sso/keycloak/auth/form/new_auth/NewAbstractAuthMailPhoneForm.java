@@ -17,6 +17,7 @@ import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import org.keycloak.utils.MediaType;
 import ru.alamics.sso.keycloak.auth.form.AbstractAuthMailPhoneForm;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
@@ -38,6 +39,7 @@ import javax.ws.rs.core.Response;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_BY_PHONE_NUMBER;
@@ -60,6 +62,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
     private final SettingsService settingsService;
 
     private static final String ERROR_CODE = "error_code";
+
+    private static final String GRANT_TYPE = "grant_type";
 
     public NewAbstractAuthMailPhoneForm(UserFindService userFindService) {
         super(userFindService);
@@ -182,6 +186,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
 
         if (isLoginPassword && (validateUserAndPassword(context, formData))) {
             sessionModel.setAuthNote("loginPasswordButton", "loginPasswordButton");
+            sessionModel.setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
             context.success();
             return;
         }
@@ -287,7 +292,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
                         .setAttribute("phoneCallButton", authSession.getAuthNote("secondPhase").equals("phoneCallButton"));
 
 
-                context.challenge(challenge(loginFormsProvider));
+                context.challenge(challenge(context, loginFormsProvider, "sms-phone.ftl"));
 
             } catch (UserPhoneEmpty userPhoneEmpty) {
                 log.info("ignore... userPhoneEmpty");
@@ -301,8 +306,24 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
         }
     }
 
-    protected Response challenge(LoginFormsProvider loginFormsProvider) {
-        return loginFormsProvider.createForm("sms-phone.ftl");
+    protected Response challenge(AuthenticationFlowContext context, LoginFormsProvider loginFormsProvider, String page) {
+
+        String mp = context.getAuthenticationSession().getAuthNote("MP");
+        String errorCode = context.getAuthenticationSession().getAuthNote(ERROR_CODE);
+
+        if (mp != null && errorCode != null) {
+            Response response = loginFormsProvider.createForm(page);
+            Map<String, String> entity = (Map<String, String>) response.getEntity();
+            entity.put("error", "Код введен неверно. Вам выслан новый код");
+            return Response.ok().entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
+        }
+        if (mp != null) {
+            HttpRequest contextObject = context.getSession().getContext().getContextObject(HttpRequest.class);
+            MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
+            parameters.add(GRANT_TYPE, "password");
+        }
+
+        return loginFormsProvider.createForm(page);
     }
 
     protected Boolean getCurrentSwitcherStatus(HttpRequest httpRequest, AuthenticationFlowContext context) {
