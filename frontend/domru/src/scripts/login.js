@@ -72,10 +72,7 @@ export default (function functionName() {
       const unmaskedValue = dynamicMask.unmaskedValue;
       const onlyDigits = /^\d+$/.test(unmaskedValue);
 
-      if (!unmaskedValue) {
-        errorMessageElement.textContent = "";
-        usernameElement.classList.remove("field__input--error");
-      } else if (onlyDigits) {
+        if (onlyDigits) {
         const isPhoneNumber = /^79\d{9}$/.test(unmaskedValue);
         if (isPhoneNumber) {
           errorMessageElement.textContent = "";
@@ -94,6 +91,15 @@ export default (function functionName() {
           errorMessageElement.textContent = "Введён неверный E-mail";
           usernameElement.classList.add("field__input--error");
         }
+      }
+    });
+
+    usernameElement.addEventListener("input", (event) => {
+      const unmaskedValue = dynamicMask.unmaskedValue;
+
+      if (!unmaskedValue) {
+        errorMessageElement.textContent = "";
+        usernameElement.classList.remove("field__input--error");
       }
     });
 
@@ -136,10 +142,7 @@ export default (function functionName() {
       const unmaskedValue = dynamicMaskTwo.unmaskedValue;
       const onlyDigits = /^\d+$/.test(unmaskedValue);
 
-      if (!unmaskedValue) {
-        errorMessageElement.textContent = "";
-        secondUserName.classList.remove("field__input--error");
-      } else if (onlyDigits) {
+      if (onlyDigits) {
         const isPhoneNumber = /^79\d{9}$/.test(unmaskedValue);
         if (isPhoneNumber) {
           errorMessageElement.textContent = "";
@@ -150,6 +153,17 @@ export default (function functionName() {
         }
       }
     });
+
+    secondUserName.addEventListener("input", (event) => {
+      const unmaskedValue = dynamicMaskTwo.unmaskedValue;
+
+      if (!unmaskedValue) {
+        errorMessageElement.textContent = "";
+        secondUserName.classList.remove("field__input--error");
+      }
+    });
+
+
     secondUserName.addEventListener("keypress", (event) => {
       if (!/^\d$/.test(event.key) && event.key !== "Backspace" && event.key !== "Delete" && event.key !== "Enter") {
         event.preventDefault();
