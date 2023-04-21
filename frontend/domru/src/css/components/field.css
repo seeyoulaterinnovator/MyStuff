@@ -238,9 +238,10 @@
 
 }
 
-.field__input--error{
+.field__input.field__input--error{
   border-color: #FF312C;
 }
+
 
 .login-password-forgot {
   display: flex;
