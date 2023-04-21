@@ -192,6 +192,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
 
         if (isLoginPassword && (validateUserAndPassword(context, formData))) {
             sessionModel.setAuthNote("loginPasswordButton", "loginPasswordButton");
+            sessionModel.setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
             context.success();
             return;
         }
