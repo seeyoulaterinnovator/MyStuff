@@ -1662,32 +1662,6 @@
             ]]>
         </sql>
     </changeSet>
-        <!--comment 108 and 109 if doesnt work-->
-        <changeSet id="108" author="slabunov-yv">
-            <preConditions onFail="MARK_RAN">
-                <tableExists tableName="REALM_ATTRIBUTE"></tableExists>
-            </preConditions>
-            <sql>
-                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'lkb2b'), 'false', 'activateNewAuth');
-                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'lkb2b'), 'true', 'loginViaEmailOrUsernameAndPassword');
-                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'lkb2b'), 'false', 'loginViaPhoneCall');
-                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'lkb2b'), 'false', 'loginViaSms');
-                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'b2b'), 'false', 'activateNewAuth');
-                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'b2b'), 'false', 'loginViaEmailOrUsernameAndPassword');
-                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'b2b'), 'true', 'loginViaPhoneCall');
-                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'b2b'), 'false', 'loginViaSms');
-                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'wifi'), 'false', 'activateNewAuth');
-                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'wifi'), 'true', 'loginViaEmailOrUsernameAndPassword');
-                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'wifi'), 'false', 'loginViaPhoneCall');
-                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'wifi'), 'false', 'loginViaSms');
-                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'dmp-ks-sit'), 'false', 'activateNewAuth');
-                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'dmp-ks-sit'), 'false', 'loginViaEmailOrUsernameAndPassword');
-                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'dmp-ks-sit'), 'true', 'loginViaPhoneCall');
-                INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name) values ((SELECT id FROM CLIENT WHERE client_id = 'dmp-ks-sit'), 'false', 'loginViaSms');
-            </sql>
-        </changeSet>
-
-
 
     <changeSet id="92" author="petrov-ny">
         <sql>
@@ -2093,7 +2067,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="125" author="slabunov-yv">
+    <!--<changeSet id="125" author="slabunov-yv">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="REALM_ATTRIBUTE"></tableExists>
         </preConditions>
@@ -2114,7 +2088,7 @@
 
 
         </sql>
-    </changeSet>
+    </changeSet>-->
 
 
 </databaseChangeLog>
