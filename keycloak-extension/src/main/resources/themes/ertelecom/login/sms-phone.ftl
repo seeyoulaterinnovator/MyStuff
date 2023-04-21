@@ -58,7 +58,7 @@
                         Пароль не приходит?
                         <span>
                                 <button class="font-light verification__resend" name="resend"
-                                        type="submit">${sendAgain}Отправить еще раз
+                                        type="submit">Отправить еще раз
                                 </button>
                             </span>
                     </p>
