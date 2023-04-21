@@ -10,10 +10,8 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Stateless
 @LocalBean
@@ -65,13 +63,23 @@ public class PersonalAccountRepository {
 
 
         if (paList == null)
-            paList = new ArrayList<>();
-
+            paList = new LinkedList<>();
         Set<PersonalAccountEntity> paEnList = new HashSet<>();
         for (String pa : paList) {
-            PersonalAccountEntity en = new PersonalAccountEntity(null, pe, pa);
-            paEnList.add(en);
-            em.persist(en);
+            String[] accountsNumber = pa.split(",");
+            for (String acn : Arrays.stream(accountsNumber)
+                    .distinct().collect(Collectors.toList())) {
+
+                List<PersonalAccountEntity> value = em.createQuery("SELECT pae FROM PersonalAccountEntity pae WHERE pae.value = :val and pae.post = :post"
+                                , PersonalAccountEntity.class)
+                        .setParameter("val", acn)
+                        .setParameter("post", pe)
+                        .getResultList();
+                if (value.isEmpty()) {
+                    PersonalAccountEntity en = new PersonalAccountEntity(null, pe, acn);
+                    paEnList.add(en);
+                }
+            }
         }
 
         if (pe.getAccounts() != null)

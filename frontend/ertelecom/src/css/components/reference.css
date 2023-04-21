@@ -1,0 +1,107 @@
+.reference-outer-text {
+  @apply .font-light;
+  color: #7585A1;
+
+}
+
+.reference {
+  @apply .font-light;
+
+  transition: 0.2s ease-in-out;
+  color: #4F4BFE;
+
+  &-generate-password {
+    display: inline-block;
+    font-size: 16px;
+    @media screen and (min-width: 1199px) {
+      font-size: 18px;
+    }
+  }
+
+  &_hoverable {
+   opacity: 1;
+  }
+}
+
+.reference, .reference-outer-text {
+  letter-spacing: 0.04em;
+  font-size: 12.5px;
+
+  @media (max-width: 641px) {
+    letter-spacing: 0.055em;
+    font-size: 11.5px;
+  }
+
+  @media (max-width: 320px) {
+    letter-spacing: 0.06em;
+    font-size: 10.5px;
+  }
+}
+
+.generate-btn {
+  &:hover {
+    .reference {
+      border-bottom-color: transparent;
+    }
+  }
+}
+
+.agreement {
+  min-width: 250px;
+  padding-bottom: 15px;
+}
+
+.generated-password {
+  margin-left: 24px;
+}
+
+@media screen and (max-width: 1199px){
+  .generate-btn {
+  }
+
+  .generated-password {
+    margin-top: -4px;
+    margin-left: 24px;
+  }
+}
+
+.hidden-big {
+  display: none;
+}
+
+.show-small-tell {
+  display: none;
+}
+
+@media screen and (max-width: 639px){
+  .generate-btn {
+    padding-bottom: 13px;
+  }
+}
+
+@media screen and (max-width: 479px){
+  .generate-btn {
+    margin: 1px 0 5px 10px;
+    width: 20%;
+  }
+
+  .show-small-tell {
+    display: block;
+  }
+
+  .hidden-big {
+    display: block;
+  }
+
+  .pass--hidden-small {
+    display: none;
+  }
+
+
+
+  .generated-password {
+    margin: 0 0 30px;
+    margin-left: 20px;
+    margin-top: -5px;
+  }
+}

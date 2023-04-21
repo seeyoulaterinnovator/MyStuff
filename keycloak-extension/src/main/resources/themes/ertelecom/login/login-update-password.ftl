@@ -1,0 +1,33 @@
+<#import "template.ftl" as layout>
+<#import "templates/blocks.ftl" as blocks>
+
+<@layout.registrationLayout displayInfo=true displayCity=false displayWarningMessage=false; section>
+    <#if section = "header">
+        <@blocks.contentHeader mainTitle="${msg('emailForgotContentTitle')}" />
+    <#elseif section = "form">
+        <form id="loginUpdatePasswordForm" action="${url.loginAction}" method="post">
+            <@blocks.password firstFieldName="password-new" />
+
+            <div class="flex flex-col justify-between sm:flex-row xl:mt-12 md:mt-8 mt-7">
+                <div class="flex-basis-auto w-full mb-2 sm:mb-0">
+                    <button id="submit" class="btn btn-main w-full pass-fields pass-fields--change-pass" type="submit">Сменить пароль</button>
+                </div>
+                <div class="flex-basis-auto w-full ml-0 text-sm sm:ml-6">
+                    <a id="cancel" href="${url.loginUrl}" class="btn w-full text-extra btn-border">${msg("doCancel")}</a>
+                </div>
+            </div>
+        </form>
+    </#if>
+
+<#--    <script>-->
+<#--        var actionIsEmpty = ${actionIsEmpty?c};-->
+<#--        var clientIsB2B = ${clientIsB2B?c};-->
+
+<#--        if (clientIsB2B === true && actionIsEmpty === true) {-->
+<#--            window.onunload = function () {-->
+<#--                window.parent.postMessage('post-selected', '*');-->
+<#--                console.log("Отправлено тк B2B и Action пуст");-->
+<#--            };-->
+<#--        }-->
+<#--    </script>-->
+</@layout.registrationLayout>

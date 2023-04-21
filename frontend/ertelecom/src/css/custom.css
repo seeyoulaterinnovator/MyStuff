@@ -1,0 +1,180 @@
+.scrollable-container {
+  scrollbar-width: thin;
+  scrollbar-color: #F3F3F3;
+}
+
+.scrollable-container::-webkit-scrollbar {
+  width: 2px;
+
+  background-color: #EFEFEF;
+}
+
+.scrollable-container::-webkit-scrollbar-thumb {
+  @apply .bg-extra;
+
+  width: 2px;
+
+  border-radius: 1px;
+}
+
+.hoverable {
+  transition: .2s ease-in-out;
+}
+
+.border-b.hoverable {
+  &:hover {
+    border-bottom-color: transparent;
+  }
+}
+
+.text-black-50.hoverable {
+  &:hover {
+     color: rgba(0,0,0,.8);
+  }
+}
+
+.border-box {
+  box-sizing: border-box;
+}
+.content-box {
+  box-sizing: content-box;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.service__item::before {
+  @apply .bg-extra !important;
+}
+
+.icon_service-question::before {
+  opacity: 0.5;
+  position: absolute;
+  width: 32px;
+  height: 34px;
+  top: 0;
+  left: 15px;
+  content: url('./images/Chat.svg') !important;
+}
+
+.login-title-text {
+  font-weight: 300;
+  width: 496px;
+  margin-bottom: 32px;
+  padding: 0;
+  font-size: 17.5px;
+}
+
+.text-secondary-title {
+  color: #B5B5B5;
+  transition: 0.2s ease-in-out;
+
+  &:hover {
+    opacity: 0.5;
+  }
+}
+
+.text-with-two{
+  font-size: 48px;
+  line-height: 56px;
+}
+
+.text-no-wrap {
+  white-space: nowrap;
+}
+
+.reset-password {
+  @apply .font-light;
+
+  position: relative;
+  transition: 0.2s ease-in-out;
+  cursor: pointer;
+  opacity: 0.75;
+  color: #4F4BFE;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.footer {
+  margin: auto 0 30px;
+  padding: 0;
+  max-width: calc(100% - 75px);
+}
+
+@media screen and (max-width: 1199px){
+  .footer {
+    width: 320px;
+    margin-bottom: 30px;
+  }
+
+  .service__item_main-active {
+    width: 60px;
+  }
+}
+
+@media screen and (max-width: 959px){
+  .footer {
+    margin-bottom: 0;
+    width: 100%;
+    position: relative;
+  }
+}
+
+@media screen and (max-width: 639px){
+  .login-title-text {
+    width: 480px;
+    font-size: 16.5px;
+  }
+}
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  body {
+    display: table !important;
+    width: 100%;
+  }
+  .footer {
+    display: table-footer-group;
+  }
+}
+
+.g-recaptcha {
+  transform-origin: 0 0;
+}
+
+@media (max-width: 479px) {
+  .login-title-text {
+    width: unset;
+    font-size: 16.5px;
+  }
+  .g-recaptcha {
+    padding-bottom: 1rem;
+  }
+}
+
+@media (max-width: 320px) {
+  .login-title-text {
+    width: 288px;
+    font-size: 15.5px;
+  }
+}
+
+#password, #password-new {
+  padding-right: 3rem;
+}
+
+.city_hidden_input {
+  display: none;
+}
+
+.field::placeholder {
+  font-weight: 300;
+  color: #8494A5;
+}
