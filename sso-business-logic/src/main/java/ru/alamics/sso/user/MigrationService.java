@@ -309,7 +309,7 @@ public class MigrationService {
         return modified;
     }
     private void addPersonalAccount(String postId,ImportUsersDataModel userImport) {
-        String accountNumber = userImport.getPersonalAccount();
+        String accountNumber = userImport.getPersonalAccountUser();
         if (StringUtils.isEmpty(accountNumber)) { return; }
 
         List<String> accNumList = new LinkedList<>();
