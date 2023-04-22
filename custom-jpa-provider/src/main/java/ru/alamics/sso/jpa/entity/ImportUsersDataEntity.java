@@ -1,5 +1,6 @@
 package ru.alamics.sso.jpa.entity;
 
+import com.beust.jcommander.internal.Nullable;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
@@ -31,6 +32,9 @@ public class ImportUsersDataEntity {
     private String tomsId;
     @Column(name = "dmp_id")
     private String dmpId;
+    @Column(name = "personal_account")
+    @Nullable
+    private String personalAccount;
     @Column(name = "role")
     private String role;
     @Column(name = "systems")
