@@ -1,6 +1,7 @@
 package ru.alamics.sso.user;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.keycloak.common.util.Time;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.jpa.AdminEventEntity;
@@ -27,10 +28,7 @@ import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.ws.rs.NotFoundException;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
@@ -56,7 +54,8 @@ public class MigrationService {
     private UserPostService userPostService;
     @EJB
     private ImportReportService importReportService;
-
+    @EJB
+    private PersonalAccountService personalAccountService;
     public void createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart) {
 
         log.info("importing users from file {} in progress", reportModel.getName());
@@ -96,7 +95,6 @@ public class MigrationService {
                         user.setFirstName(data.getFirstName());
                     }
                     data.setUserId(user.getId());
-
                     checkToms(data);
 
                     modified = addUserPost(user, data);
@@ -225,7 +223,6 @@ public class MigrationService {
 
         return userRepository.getFirstUserByUsername(realmId, email);
     }
-
     private UserEntity createUser(String realmId, ImportUsersDataModel importUserData) {
 
         UserEntity user = new UserEntity();
@@ -308,7 +305,15 @@ public class MigrationService {
             userImport.setRole(DEFAULT_ROLE_STR);
             userImport.setSystems(Util.join(userPostService.getAllExternalSystemLabels(), ","));
         }
-
+        addPersonalAccount(postId ,userImport);
         return modified;
+    }
+    private void addPersonalAccount(String postId,ImportUsersDataModel userImport) {
+        String accountNumber = userImport.getPersonalAccount();
+        if (StringUtils.isEmpty(accountNumber)) { return; }
+
+        List<String> accNumList = new LinkedList<>();
+        accNumList.add(accountNumber);
+        personalAccountService.addAccountList(postId, accNumList);
     }
 }
