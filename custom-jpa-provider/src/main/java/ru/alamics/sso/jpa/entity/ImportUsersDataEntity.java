@@ -35,6 +35,9 @@ public class ImportUsersDataEntity {
     @Column(name = "personal_account")
     @Nullable
     private String personalAccount;
+    @Column(name = "personal_account_user")
+    @Nullable
+    private String personalAccountUser;
     @Column(name = "role")
     private String role;
     @Column(name = "systems")
