@@ -111,7 +111,7 @@ back:war:
     # domru theme
     - cd frontend/domru
     - cp /opt/npmrc .npmrc
-    - npm install
+    - npm clean-install --cache ~/.npm --prefer-offline
     - npm run build
     - mkdir -p ../../keycloak-extension/src/main/resources/themes/domru/login/resources
     - cp -r -f build ../../keycloak-extension/src/main/resources/themes/domru/login/resources
@@ -119,7 +119,7 @@ back:war:
     # stelecom theme
     - cd frontend/stelecom
     - cp /opt/npmrc .npmrc
-    - npm install
+    - npm clean-install --cache ~/.npm --prefer-offline
     - npm run build
     - mkdir -p ../../keycloak-extension/src/main/resources/themes/stelecom/login/resources
     - cp -r -f build ../../keycloak-extension/src/main/resources/themes/stelecom/login/resources
