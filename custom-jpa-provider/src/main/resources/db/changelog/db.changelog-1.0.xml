@@ -1840,6 +1840,14 @@
         </sql>
     </changeSet>
 
+    <changeSet id="108" author="petrov-ny">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('ea9dd138-d103-11ec-9d64-0242ac120002', 'life.token.reset.pass.login', '12', 'Время токена "обновить пароль"', 'S-TELECOM', 'Send login and reset password', 'HOURS',
+            'REALM');
+        </sql>
+    </changeSet>
+
     <changeSet id="103" author="petrov-ny">
         <sql>
             INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
@@ -1847,8 +1855,30 @@
             'FRONT');
         </sql>
     </changeSet>
-    
-     <changeSet id="104" author="petrov-ny">
+
+    <changeSet id="116" author="zhakov-mv">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="IMPORT_USERS_DATA"/>
+        </preConditions>
+        <addColumn tableName="IMPORT_USERS_DATA">
+            <column name="personal_account" type="varchar(1024)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="130" author="zhakov-mv">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="IMPORT_USERS_DATA"/>
+        </preConditions>
+        <addColumn tableName="IMPORT_USERS_DATA">
+            <column name="personal_account_user" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="104" author="petrov-ny">
         <addColumn tableName="EXT_SYSTEM_ROLE">
             <column name="REALM_ID" type="varchar(16)"/>
         </addColumn>
@@ -1897,26 +1927,6 @@
             INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (26, 'access_granted', 26, 'S-TELECOM');
             INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (27, 'access_granted', 27, 'S-TELECOM');
 
-        </sql>
-    </changeSet>
-
-    <changeSet id="116" author="zhakov-mv">
-        <preConditions onFail="MARK_RAN">
-            <tableExists tableName="IMPORT_USERS_DATA"/>
-        </preConditions>
-        <addColumn tableName="IMPORT_USERS_DATA">
-            <column name="personal_account" type="varchar(1024)">
-                <constraints nullable="true"/>
-            </column>
-        </addColumn>
-    </changeSet>
-
-    <changeSet id="126" author="petrov-ny">
-        <sql>
-            <![CDATA[
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('94701e6a-c7d4-11ed-afa1-0242ac120002', 'emailAccountDataBodyHtml', '<p class="content__p">Для Вас создана учетная запись для входа в Личный кабинет «ЭР-Телеком Бизнес».</p><dl class="content__dl"><dt class="content__dl-dt">Логин:</dt><dd class="content__dl-dd"><b>{0}</b></dt></dl><p>Перейдите по ссылке и установите пароль.</p><p><a class="content__a" href="{3}">Установить пароль</a></p>', null, 'ER-TELECOM', 'Сообщение о создании УЗ', null, 'MESSAGE');
-            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('996fa304-c7d4-11ed-afa1-0242ac120002', 'emailAccountCreateBodyHtml', '<p class="content__p">Для Вас создана учетная запись для входа в Личный кабинет «ЭР-Телеком Бизнес».</p><dl class="content__dl"><dt class="content__dl-dt">Логин:</dt><dd class="content__dl-dd"><b>{0}</b></dd></dl>', null, 'ER-TELECOM', 'Сообщение о создании УЗ', null, 'MESSAGE');
-            ]]>
         </sql>
     </changeSet>
 
@@ -2067,28 +2077,12 @@
         </sql>
     </changeSet>
 
-    <!--<changeSet id="125" author="slabunov-yv">
-        <preConditions onFail="MARK_RAN">
-            <tableExists tableName="REALM_ATTRIBUTE"></tableExists>
-        </preConditions>
+    <changeSet id="126" author="petrov-ny">
         <sql>
-            INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name)
-            select id, 'false', 'activateNewAuth'
-            from CLIENT;
-            INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name)
-            select id, 'false', 'loginViaEmailOrUsernameAndPassword'
-            from CLIENT;
-
-            INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name)
-            select id, 'false', 'loginViaPhoneCall'
-            from CLIENT;
-            INSERT INTO CLIENT_ATTRIBUTES (client_id, value, name)
-            select id, 'false', 'loginViaSms'
-            from CLIENT;
-
-
+            <![CDATA[
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('94701e6a-c7d4-11ed-afa1-0242ac120002', 'emailAccountDataBodyHtml', '<p class="content__p">Для Вас создана учетная запись для входа в Личный кабинет «ЭР-Телеком Бизнес».</p><dl class="content__dl"><dt class="content__dl-dt">Логин:</dt><dd class="content__dl-dd"><b>{0}</b></dt></dl><p>Перейдите по ссылке и установите пароль.</p><p><a class="content__a" href="{3}">Установить пароль</a></p>', null, 'ER-TELECOM', 'Сообщение о создании УЗ', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('996fa304-c7d4-11ed-afa1-0242ac120002', 'emailAccountCreateBodyHtml', '<p class="content__p">Для Вас создана учетная запись для входа в Личный кабинет «ЭР-Телеком Бизнес».</p><dl class="content__dl"><dt class="content__dl-dt">Логин:</dt><dd class="content__dl-dd"><b>{0}</b></dd></dl>', null, 'ER-TELECOM', 'Сообщение о создании УЗ', null, 'MESSAGE');
+            ]]>
         </sql>
-    </changeSet>-->
-
-
+    </changeSet>
 </databaseChangeLog>
