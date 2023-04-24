@@ -1838,6 +1838,28 @@
         </sql>
     </changeSet>
 
+    <changeSet id="116" author="zhakov-mv">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="IMPORT_USERS_DATA"/>
+        </preConditions>
+        <addColumn tableName="IMPORT_USERS_DATA">
+            <column name="personal_account" type="varchar(1024)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="130" author="zhakov-mv">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="IMPORT_USERS_DATA"/>
+        </preConditions>
+        <addColumn tableName="IMPORT_USERS_DATA">
+            <column name="personal_account_user" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
     <changeSet id="104" author="petrov-ny">
         <addColumn tableName="EXT_SYSTEM_ROLE">
             <column name="REALM_ID" type="varchar(16)"/>
@@ -1888,17 +1910,6 @@
             INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (27, 'access_granted', 27, 'S-TELECOM');
 
         </sql>
-    </changeSet>
-
-    <changeSet id="116" author="zhakov-mv">
-        <preConditions onFail="MARK_RAN">
-            <tableExists tableName="IMPORT_USERS_DATA"/>
-        </preConditions>
-        <addColumn tableName="IMPORT_USERS_DATA">
-            <column name="personal_account" type="varchar(1024)">
-                <constraints nullable="true"/>
-            </column>
-        </addColumn>
     </changeSet>
 
     <changeSet id="121" author="petrov-ny">
@@ -2047,5 +2058,6 @@
             INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (37, 'access_granted', 37, 'ER-TELECOM');
         </sql>
     </changeSet>
+
 
 </databaseChangeLog>
