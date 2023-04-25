@@ -531,13 +531,13 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractAuthMailPhone
         if (blackListService.isUserBlockedAuthBySms(user.getPhone())) {
             context.form()
                     .setAttribute("isLimited", true)
-                    .setError(MessageConstants.SMS_LIMIT_20_BLOCK);
+                    .setError(MessageConstants.SMS_LIMIT_25_BLOCK);
             return false;
         }
         if (blackListService.isUserBlockedAuthByPhoneCall(user.getPhone())) {
             context.form()
                     .setAttribute("isLimited", true)
-                    .setError(MessageConstants.CALL_LIMIT_20_BLOCK);
+                    .setError(MessageConstants.CALL_LIMIT_25_BLOCK);
             return false;
         }
         return checkIsMoreThanFiveAttempts(context, user) || !mainCounter.containsKey(user.getPhone()) && !blackListService.isUserBlockedAuthBySms(user.getPhone());
