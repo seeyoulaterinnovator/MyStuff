@@ -120,6 +120,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             BlackListDto blackListDto = blackListService.getBlockedUser(user.getPhone());
             if (Objects.isNull(authSession.getAuthNote(EXPIRATION_TIME))) {
                 authSession.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+                authSession.setAuthNote("correctTime", LocalDateTime.now().plusSeconds(activationCodeType.getExpiredSeconds()).format(DateTimeFormatter.ISO_DATE_TIME));
             }
             if (Objects.nonNull(blackListDto)) {
                 LocalDateTime unblocked = blackListDto.getUnblockedAt();
@@ -137,8 +138,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 boolean enableRepeatCall = true;
                 if (checkCanWeSendSmS(user, context)) {
                     authContext = userPhoneVerifier.sendValidationMsg(user, authContext, activationCodeType, context.getRealm());
+                    authSession.setAuthNote("godMode", authContext.getHashProperty());
                 }
-
                 authSession.setAuthNote(PHONE_KEY_HASH, authContext.getHashProperty());
                 authSession.setAuthNote(COUNT_REPEAT, authContext.getCounter().toString());
 
@@ -205,8 +206,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         MultivaluedMap<String, String> formData = httpRequest.getDecodedFormParameters();
         AuthenticationSessionModel sessionModel = context.getAuthenticationSession();
 
-//        context.form().setAttribute("isSwitcherOn", getCurrentSwitcherStatus(context.getHttpRequest(), context));
-
         sessionModel.removeAuthNote("backToLoginPassword");
 
         if (formData.containsKey("cancel")) {
@@ -236,8 +235,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
             activationCodeType = sessionModel.getAuthNote("secondPhase").equals("smsButton") ? CODE_TO_SMS : CODE_BY_PHONE_NUMBER;
             AuthContext authContext = AuthContext.builder()
-                    .hashProperty(sessionModel.getAuthNote(PHONE_KEY_HASH))
-                    .expirationTime(LocalDateTime.parse(sessionModel.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME))
+                    .hashProperty(sessionModel.getAuthNote("godMode"))
+                    .expirationTime(LocalDateTime.parse(sessionModel.getAuthNote("correctTime"), DateTimeFormatter.ISO_DATE_TIME))
                     .counter(getCount(sessionModel.getAuthNote(COUNT_REPEAT)))
                     .activationCodeType(activationCodeType)
                     .build();
@@ -580,6 +579,3 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     public abstract boolean isSuccessCheckUser(AuthenticationFlowContext context, UserModel user);
 }
-
-
-

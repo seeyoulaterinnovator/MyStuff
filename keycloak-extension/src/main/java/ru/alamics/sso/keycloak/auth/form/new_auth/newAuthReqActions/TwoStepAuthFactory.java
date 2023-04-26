@@ -32,7 +32,6 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
 
     private static final String REFERENCE_CATEGORY = "two-step-verification-reference";
 
-
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
             AuthenticationExecutionModel.Requirement.DISABLED,
@@ -101,7 +100,7 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
             addEmailReqActIfNeeded(userModel);
             context.success();
 
-        } else if (buttons.containsKey("phoneCallButton")) {
+        } else if (context.getAuthenticationSession().getAuthNote("phoneCallButton") != null) {
             sessionModel.setAuthNote("phoneCallButton", "phoneCallButton");
             sessionModel.removeAuthNote("loginPasswordButton");
             sessionModel.removeAuthNote("smsButton");
