@@ -42,6 +42,18 @@ p {
    padding: 16px;
  }
 
+&__close-dialog-button {
+   width: 28px;
+   height: 28px;
+
+   display: flex;
+   justify-content: center;
+   align-items: center;
+
+   background: #EFF8FC;
+   border-radius: 14px;
+ }
+
 &__title {
    font-family: Inter, sans-serif;
    font-style: normal;

@@ -433,7 +433,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         String code = context.getAuthenticationSession().getAuthNote("currentCode");
         if (userMap.entrySet().stream().allMatch(it -> it.getKey()
                 .getCurrentCode().equals(code) && it.getKey()
-                .getCurrentCodeCounter() > 5 && it.getKey().getActivationType().equals(CODE_TO_SMS) && it.getValue() < 25)) {
+                .getCurrentCodeCounter() >= 5 && it.getKey().getActivationType().equals(CODE_TO_SMS) && it.getValue() < 25)) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
                     .setError(MessageConstants.SMS_LIMIT_5_CONTINUE);
             return true;
@@ -441,7 +441,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
         if (userMap.entrySet().stream().allMatch(it -> it.getKey()
                 .getCurrentCode().equals(code) && it.getKey()
-                .getCurrentCodeCounter() > 5 && it.getKey().getActivationType().equals(CODE_BY_PHONE_NUMBER) && it.getValue() < 25)) {
+                .getCurrentCodeCounter() >= 5 && it.getKey().getActivationType().equals(CODE_BY_PHONE_NUMBER) && it.getValue() < 25)) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
                     .setError(MessageConstants.CALL_LIMIT_5_CONTINUE);
             return true;
