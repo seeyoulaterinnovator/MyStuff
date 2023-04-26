@@ -3,7 +3,8 @@
   flex-direction: column;
 
 
-&--error {
+&
+--error {
 
 .field__input {
   @apply .border-accentRed;
@@ -11,28 +12,29 @@
 
 }
 
-&--row {
+&
+--row {
   flex-direction: row;
 }
-
 }
 
 .field__container {
   display: flex;
   flex-flow: column;
   position: relative;
+  margin-top: 10px;
 }
 
 
 @media (min-width: 768px) {
   .field__container {
-    margin-bottom: 24px; /* Keep the same margin for resolutions between 768px and 1280px */
+    margin-bottom: 24px;
   }
 }
 
 @media (min-width: 1280px) {
   .field__container {
-    margin-bottom: 32px; /* Increase the margin to 32px for resolutions of 1280px and above */
+    margin-bottom: 32px;
   }
 }
 
@@ -62,24 +64,26 @@
 
 @media (min-width: 1199px) {
   height:48px;
-
 }
 
-&:hover {
+&
+:hover {
   @apply .border-accentBlue-1000;
 }
 
-&:focus {
+&
+:focus {
   @apply .border-accentBlue-1000;
 }
 
-&::placeholder {
+&
+::placeholder {
   font-size: 16px;
   color: black;
   opacity: 0.5;
 
 @media (min-width: 1200px) {
-  font-size: 17px;
+  font-size:17px;
 }
 }
 }
@@ -113,9 +117,8 @@
   line-height: 13px;
 
 @media (min-width: 640px) {
-  font-size: 13px;
+  font-size:13px;
 }
-
 }
 
 .field__error-message {
@@ -131,15 +134,14 @@
   max-width: 270px;
 
 @media (max-width: 1199px) {
-  min-width: 235px;
-  max-width: 245px;
+  min-width:235px;
+  max-width:245px;
 }
 
 @media (max-width: 479px) {
-  width: 85%;
-  max-width: 100%;
+  width:85%;
+  max-width:100%;
 }
-
 }
 
 .reg-fields {
@@ -147,28 +149,26 @@
   max-width: 225px;
 
 @media (max-width: 1199px) {
-  min-width: 210px;
-  max-width: 210px;
+  min-width:210px;
+  max-width:210px;
 }
 
 @media (max-width: 479px) {
-  width: 100%;
-  max-width: 100%;
+  width:100%;
+  max-width:100%;
 }
-
 }
 
 .pass-fields--change-pass {
   min-width: unset;
 
 @media (max-width: 1199px) {
-  min-width: 210px;
+  min-width:210px;
 }
 
 @media (max-width: 479px) {
-  width: 100%;
+  width:100%;
 }
-
 }
 
 
@@ -176,19 +176,19 @@
   width: 384px;
 
 @media (max-width: 1199px) {
-  width: 280px;
+  width:280px;
 }
 
 @media (max-width: 959px) {
-  width: 288px;
+  width:288px;
 }
 
 @media (max-width: 640px) {
-  width: 231px;
+  width:231px;
 }
 
 @media (max-width: 479px) {
-  width: 240px;
+  width:240px;
 }
 }
 
@@ -199,9 +199,8 @@
   opacity: 0.5;
 
 @media (max-width: 1199px) {
-  font-size: 14px;
+  font-size:14px;
 }
-
 }
 
 .generated-password-field {
@@ -211,9 +210,8 @@
   height: 48px;
 
 @media (max-width: 1199px) {
-  height: 40px;
+  height:40px;
 }
-
 }
 
 
@@ -238,7 +236,7 @@
 
 }
 
-.field__input.field__input--error{
+.field__input.field__input--error {
   border-color: #FF312C;
 }
 
@@ -304,6 +302,7 @@
 
 @media only screen and (max-width: 767px) {
   .login-pass {
+    margin-top: 20px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -471,11 +470,13 @@
     width: 100%;
     height: auto;
   }
+
   #timer {
     margin: 0 auto;
     text-align: center;
   }
 }
+
 .center-items {
 }
 
@@ -487,21 +488,26 @@
     width: 288px;
   }
 }
-.squares:not(:first-child){
+
+.squares:not(:first-child) {
   margin-left: 14px;
 }
 
-.info-text{
-
+.info-text {
+  width: 568px;
+  height: 48px;
 }
+
 @media only screen and (min-width: 768px) and (max-width: 1279px) {
   .info-text {
     width: 480px;
+    height: 46px;
   }
 }
 
 @media only screen and (max-width: 767px) {
-  .info-text{
+  .info-text {
     width: 288px;
+    margin-bottom: 2.5rem;
   }
 }

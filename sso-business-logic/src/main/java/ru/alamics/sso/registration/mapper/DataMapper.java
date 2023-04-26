@@ -192,6 +192,7 @@ public class DataMapper {
         data.setUserId(entity.getUserId());
         data.setErrors(entity.getErrors());
         data.setStatus(entity.getStatus());
+        data.setPersonalAccountUser(entity.getPersonalAccountUser());
 
         return data;
     }

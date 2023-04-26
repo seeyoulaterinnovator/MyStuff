@@ -123,6 +123,10 @@
                                     <span class="text-accentRed bad_email hidden">
                                         ${kcSanitize(message.summary)?no_esc}
                                     </span>
+                                <#elseif message.summary?contains('Вы слишком долго бездействовали. Процесс аутентификации начнется с начала.')>
+                                    <span class="text-accentRed hidden">
+                                        Вы слишком долго бездействовали. Процесс аутентификации начнется с начала.
+                                    </span>
                                 <#else>
                                     <span class="text-accentRed hidden">
                                         ${kcSanitize(message.summary)?no_esc}

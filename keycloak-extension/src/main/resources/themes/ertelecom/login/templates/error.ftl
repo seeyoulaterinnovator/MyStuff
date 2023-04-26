@@ -76,5 +76,5 @@
         <#nested>
     </p>
     <a class="btn swr-button swr-button-desktop" href="${backHref}">На главную</a>
-    <a class="btn swr-button swr-button-tablet" href="${backHref}">Спасибо</a>
+    <a class="btn swr-button swr-button-tablet" href="${backHref}">На главную</a>
 </#macro>
