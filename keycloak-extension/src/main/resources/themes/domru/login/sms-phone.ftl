@@ -8,11 +8,11 @@
     <#elseif section = "form">
         <#if phoneCallButton!false>
             <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4 info-text">
-                На указанный номер поступит звонок. Для подтверждения нужно ввести последние 4 цифры входящего номера
+                Введите последние 4 цифры входящего номера
             </h3>
         <#else>
             <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4 info-text">
-                Введите код из СМС отправленный на указанный номер телефона
+                Введите код из СМС
             </h3>
         </#if>
         <form id="totpe" action="${url.loginAction}" method="POST"></form>
