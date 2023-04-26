@@ -92,6 +92,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         BlackListDto blackListDto = blackListService.getBlockedUser(user.getPhone());
         if (Objects.isNull(authSession.getAuthNote(EXPIRATION_TIME))) {
             authSession.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+            authSession.setAuthNote("correctTime", LocalDateTime.now().plusSeconds(activationCodeType.getExpiredSeconds()).format(DateTimeFormatter.ISO_DATE_TIME));
         }
         if (Objects.nonNull(blackListDto)) {
             LocalDateTime unblocked = blackListDto.getUnblockedAt();
@@ -129,6 +130,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             } else {
                 if (checkCanWeSendSmS(user, context)) {
                     authContext = userPhoneVerifier.sendValidationMsg(user, authContext, activationCodeType, context.getRealm());
+                    authSession.setAuthNote("godMode", authContext.getHashProperty());
                 }
             }
 
@@ -219,8 +221,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
 
         AuthContext authContext = AuthContext.builder()
-                .hashProperty(authSession.getAuthNote(PHONE_KEY_HASH))
-                .expirationTime(LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME))
+                .hashProperty(authSession.getAuthNote("godMode"))
+                .expirationTime(LocalDateTime.parse(authSession.getAuthNote("correctTime"), DateTimeFormatter.ISO_DATE_TIME))
                 .counter(getCount(authSession.getAuthNote(COUNT_REPEAT)))
                 .activationCodeType(activationCodeType)
                 .build();
@@ -381,6 +383,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             requiredActionChallenge(context);
         }
     }
+
     private Integer getCount(String countStr) {
         if (countStr == null || "null".equals(countStr)) {
             return 0;
