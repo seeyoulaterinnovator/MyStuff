@@ -275,6 +275,9 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 }
             }
         }
+        else {
+            authenticate(context);
+        }
     }
 
     @Override
