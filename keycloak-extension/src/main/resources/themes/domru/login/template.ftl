@@ -119,6 +119,10 @@
                                     <span class="text-accentRed bad_email hidden">
                                         ${kcSanitize(message.summary)?no_esc}
                                     </span>
+                                <#elseif message.summary?contains('Код введен неверно. Проверьте правильность введенных данных')>
+                                    <span class="text-accentRed hidden">
+                                        ${kcSanitize(message.summary)?no_esc}
+                                    </span>
                                 <#else>
                                     <span class="text-accentRed hidden">
                                         ${kcSanitize(message.summary)?no_esc}

@@ -49,7 +49,7 @@
         <input id="smscode" name="smscode" class="hidden"/>
         <div class="flex md:justify-start justify-start w-full items-center text-left md:text-left xl:pb-55px md:pb-10 sm:pb-8 pb-4">
             <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
-                <span>
+                <span class="w-full">
                     <button class="font-light verification__resend" name="resend"
                                     type="submit">${sendAgain}</button>
                 </span>
@@ -57,14 +57,14 @@
 
                 <div id="timer" style="margin-left: auto;">
                             <span style="color: #899DA8">
-                                <#if codeLimited?? && codeLimited> Код можно запросить через: <#else> Пароль действует </#if>
+                                <#if codeLimited?? && codeLimited> Код можно запросить через: <#else> Код действует </#if>
                             </span>
                     <span id="timer-time" class="px-1 textTimer">
                             </span>
                 </div>
                 <#if enableRepeatCall?? && enableRepeatCall!>
                     <p class="hidden font-light text-black verification__text" id="resend">
-                        <span>
+                        <span class="w-full">
                             <button class="font-light verification__resend" name="resend"
                                             type="submit">${sendAgain}</button>
                         </span>
