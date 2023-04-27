@@ -119,10 +119,12 @@
                                     <span class="text-accentRed bad_email hidden">
                                         ${kcSanitize(message.summary)?no_esc}
                                     </span>
-                                <#elseif message.summary == msg('Авторизация через временный код временно не доступна. Попробуйте авторизоваться через логин/пароль')>
-                                    <span class="text-accentRed phone_error hidden">
+                                <#elseif message.summary?contains('Код введен неверно. Проверьте правильность введенных данных')>
+                                    <span class="text-accentRed hidden">
                                         ${kcSanitize(message.summary)?no_esc}
                                     </span>
+                                <#elseif message.summary == msg('Авторизация через временный код временно не доступна. Попробуйте авторизоваться через логин/пароль')>
+                                    <span class="text-accentRed phone_error hidden">
                                 <#else>
                                     <span class="text-accentRed hidden">
                                         ${kcSanitize(message.summary)?no_esc}

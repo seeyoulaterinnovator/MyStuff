@@ -127,7 +127,7 @@ back:war:
     # ertelecom theme
     - cd frontend/ertelecom
     - cp /opt/npmrc .npmrc
-    - npm install
+    - npm clean-install --cache ~/.npm --prefer-offline
     - npm run build
     - mkdir -p ../../keycloak-extension/src/main/resources/themes/ertelecom/login/resources
     - cp -r -f build ../../keycloak-extension/src/main/resources/themes/ertelecom/login/resources

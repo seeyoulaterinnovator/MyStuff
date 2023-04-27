@@ -80,7 +80,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
         User user = UserModelUserMapper.mapToUser(context.getUser());
-        long deltaTime;
+        long deltaTime = 0;
 
         AuthContext authContext = AuthContext.builder()
                 .activationCodeType(activationCodeType)
@@ -94,18 +94,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             authSession.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
             authSession.setAuthNote("correctTime", LocalDateTime.now().plusSeconds(activationCodeType.getExpiredSeconds()).format(DateTimeFormatter.ISO_DATE_TIME));
         }
-        if (Objects.nonNull(blackListDto)) {
-            LocalDateTime unblocked = blackListDto.getUnblockedAt();
-            authSession.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
-            LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
-            deltaTime = previousTime.until(unblocked, ChronoUnit.SECONDS);
-            context.form().setAttribute("expirationSeconds", String.valueOf(deltaTime))
-                    .setAttribute("codeLimited", true);
-        } else {
-            LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
-            deltaTime = Duration.between(previousTime, LocalDateTime.now()).getSeconds();
-            context.form().setAttribute("expirationSeconds", String.valueOf(authContext.getActivationCodeType().getExpiredSeconds() - deltaTime));
-        }
+        setTimerValueByActivationType(blackListDto, user, authSession, authContext, deltaTime, context);
 
         try {
             boolean enableRepeatCall = true;
@@ -252,7 +241,6 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             log.info("Sms code resend");
 
             authSession.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
-            checkAndIncrementExistTries(user, authContext, context);
             authSession.removeAuthNote(PHONE_KEY_HASH);
             requiredActionChallenge(context);
 
@@ -261,7 +249,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
             if (activationCodeType.equals(CODE_TO_SMS)) {
                 checkAndAddToCounter(user, authContext, context);
-                if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > 20) {
+                if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > 25) {
                     blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.SMS);
                     requiredActionChallenge(context);
                     mainCounter.remove(user.getPhone());
@@ -272,7 +260,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
             if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
                 checkAndAddToCounter(user, authContext, context);
-                if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > 20) {
+                if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > 25) {
                     blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.PHONE_CALL);
                     requiredActionChallenge(context);
                     mainCounter.remove(user.getPhone());
@@ -293,7 +281,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         String code = context.getAuthenticationSession().getAuthNote("currentCode");
         if (userMap.entrySet().stream().allMatch(it -> it.getKey()
                 .getCurrentCode().equals(code) && it.getKey()
-                .getCurrentCodeCounter() >= 5 && it.getKey().getActivationType().equals(CODE_TO_SMS) && it.getValue() < 20)) {
+                .getCurrentCodeCounter() >= 5 && it.getKey().getActivationType().equals(CODE_TO_SMS) && it.getValue() < 25)) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
                     .setError(MessageConstants.SMS_LIMIT_5_CONTINUE);
             return true;
@@ -301,7 +289,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
         if (userMap.entrySet().stream().allMatch(it -> it.getKey()
                 .getCurrentCode().equals(code) && it.getKey()
-                .getCurrentCodeCounter() >= 5 && it.getKey().getActivationType().equals(CODE_BY_PHONE_NUMBER) && it.getValue() < 20)) {
+                .getCurrentCodeCounter() >= 5 && it.getKey().getActivationType().equals(CODE_BY_PHONE_NUMBER) && it.getValue() < 25)) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
                     .setError(MessageConstants.CALL_LIMIT_5_CONTINUE);
             return true;
@@ -311,19 +299,19 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     }
 
     private boolean checkCanWeSendSmS(User user, RequiredActionContext context) {
-        if (blackListService.isUserBlockedAuthBySms(user.getPhone())) {
+        if (activationCodeType.equals(CODE_TO_SMS) && blackListService.isUserBlockedAuthBySms(user.getPhone())) {
             context.form()
-                    .setAttribute("isLimited", true)
-                    .setError(MessageConstants.SMS_LIMIT_20_BLOCK);
+                    .setAttribute("codeLimited", true)
+                    .setError(MessageConstants.SMS_LIMIT_25_BLOCK);
             return false;
         }
-        if (blackListService.isUserBlockedAuthByPhoneCall(user.getPhone())) {
+        if (activationCodeType.equals(CODE_BY_PHONE_NUMBER) && blackListService.isUserBlockedAuthByPhoneCall(user.getPhone())) {
             context.form()
-                    .setAttribute("isLimited", true)
-                    .setError(MessageConstants.CALL_LIMIT_20_BLOCK);
+                    .setAttribute("codeLimited", true)
+                    .setError(MessageConstants.CALL_LIMIT_25_BLOCK);
             return false;
         }
-        return checkIsMoreThanFiveAttempts(context, user) || !mainCounter.containsKey(user.getPhone()) && !blackListService.isUserBlockedAuthBySms(user.getPhone());
+        return checkIsMoreThanFiveAttempts(context, user) || !mainCounter.containsKey(user.getPhone());
     }
 
     private void checkAndAddToCounter(User user, AuthContext authContext, RequiredActionContext context) {
@@ -361,6 +349,31 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         }
     }
 
+    private void setTimerValueByActivationType(BlackListDto blackListDto, User user, AuthenticationSessionModel authSession, AuthContext authContext, long deltaTime, RequiredActionContext context) {
+        if (Objects.nonNull(blackListDto)) {
+            if (blackListService.isUserBlockedAuthBySms(user.getPhone()) && activationCodeType.equals(CODE_TO_SMS)) {
+                setBlockedTime(blackListDto, authSession, deltaTime, context);
+                return;
+            }
+            if (blackListService.isUserBlockedAuthByPhoneCall(user.getPhone()) && activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
+                setBlockedTime(blackListDto, authSession, deltaTime, context);
+                return;
+            }
+        }
+        LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
+        deltaTime = Duration.between(previousTime, LocalDateTime.now()).getSeconds();
+        context.form().setAttribute("expirationSeconds", String.valueOf(authContext.getActivationCodeType().getExpiredSeconds() - deltaTime));
+    }
+
+    private void setBlockedTime(BlackListDto blackListDto, AuthenticationSessionModel authSession, Long deltaTime, RequiredActionContext context) {
+        LocalDateTime unblocked = blackListDto.getUnblockedAt();
+        authSession.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+        LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
+        deltaTime = previousTime.until(unblocked, ChronoUnit.SECONDS);
+        context.form().setAttribute("expirationSeconds", String.valueOf(deltaTime))
+                .setAttribute("codeLimited", true);
+    }
+
     private void verifyCode(RequiredActionContext context, AuthenticationSessionModel authSession, User user, UserModel model, AuthContext authContext) {
 
         try {
@@ -376,7 +389,6 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         } catch (WrongSmsCode wrongSmsCode) {
             log.warn("Wrong sms code");
             context.form()
-                    .setAttribute("error", "Пароль введен не верно. Вам выслан новый код")
                     .setError("Код введен неверно. Проверьте правильность введенных данных");
             authSession.removeAuthNote(PHONE_KEY_HASH);
             authSession.setAuthNote(ERROR_CODE, ERROR_CODE);

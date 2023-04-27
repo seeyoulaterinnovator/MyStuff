@@ -7,6 +7,7 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Stateless
@@ -40,10 +41,10 @@ public class BlackListRepository {
     }
 
     public List<BlackListEntity> findBlockedByPhone(String phone) {
-        return em.createQuery("select be from BlackListEntity be where be.phone =:phone and be.unblockedAt >= current_timestamp ORDER BY be.createdAt desc", BlackListEntity.class)
+        return em.createQuery("select be from BlackListEntity be where be.phone =:phone and be.unblockedAt >= :now ORDER BY be.createdAt desc", BlackListEntity.class)
                 .setParameter("phone", phone)
+                .setParameter("now", LocalDateTime.now()) //current_timestamp doesn't work
                 .getResultList();
-
     }
 
     public void save(BlackListEntity entity) {

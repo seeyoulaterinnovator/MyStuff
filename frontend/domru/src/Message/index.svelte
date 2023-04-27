@@ -121,12 +121,17 @@
             Ошибка
           {/if}
         </span>
-        <button class="btn message__btn" on:click={handleHide}>
-          &times;
+        <button class="message__close-dialog-button" on:click={handleHide}>
+          <svg width="14" height="13" viewBox="0 0 14 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M1.95959 0.540478C1.70575 0.286637 1.2942 0.286637 1.04036 0.540478C0.786515 0.794319 0.786515 1.20588 1.04036 1.45972L6.08074 6.5001L1.04036 11.5405C0.786515 11.7943 0.786515 12.2059 1.04036 12.4597C1.2942 12.7136 1.70575 12.7136 1.95959 12.4597L6.99998 7.41934L12.0404 12.4597C12.2942 12.7136 12.7058 12.7136 12.9596 12.4597C13.2134 12.2059 13.2134 11.7943 12.9596 11.5405L7.91921 6.5001L12.9596 1.45972C13.2134 1.20588 13.2134 0.79432 12.9596 0.540478C12.7058 0.286638 12.2942 0.286638 12.0404 0.540478L6.99998 5.58086L1.95959 0.540478Z" fill="#16629A"/>
+          </svg>
         </button>
       </div>
       <p>{$text}</p>
-      <div class="flex flex-col md:flex-row justify-start items-start gap-4">
+      {#if $isLimitExceeded}
+
+      {:else}
+      <div class="flex flex-col md:flex-row justify-start items-start gap-4 mt-6">
         {#if $isRegistration}
           <a href="{$loginUrl}" class="btn btn-main w-full md:w-auto" on:click={handleHide}>
             Войти
@@ -151,7 +156,6 @@
           <button class="btn text-accentBlue w-full md:w-auto" on:click={handleHide}>
             Изменить данные
           </button>
-        {:else if $isLimitExceeded}
         {:else if $isPhoneError}
           <button class="btn btn-switcher.modified.modified" style="background-color: #C51F1F; color: #FFFFFF;" on:click={switchToPassword}>
             Войти с помощью логина
@@ -162,6 +166,7 @@
           </button>
         {/if}
       </div>
+      {/if}
     </div>
   </div>
 {:else if $showInfo}

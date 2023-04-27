@@ -6,6 +6,7 @@ import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
+import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAuthenticator;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
@@ -108,6 +109,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         if (authSession.getAuthNote("secondPhase") != null) {
             activationCodeType = authSession.getAuthNote("secondPhase").equals("smsButton") ? CODE_TO_SMS : CODE_BY_PHONE_NUMBER;
             User user = UserModelUserMapper.mapToUser(context.getUser());
+            long deltaTime = 0;
 
             AuthContext authContext = AuthContext.builder()
                     .activationCodeType(activationCodeType)
@@ -116,24 +118,12 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                     .counter(getCount(authSession.getAuthNote(COUNT_REPEAT)))
                     .build();
 
-            long deltaTime;
             BlackListDto blackListDto = blackListService.getBlockedUser(user.getPhone());
             if (Objects.isNull(authSession.getAuthNote(EXPIRATION_TIME))) {
                 authSession.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
                 authSession.setAuthNote("correctTime", LocalDateTime.now().plusSeconds(activationCodeType.getExpiredSeconds()).format(DateTimeFormatter.ISO_DATE_TIME));
             }
-            if (Objects.nonNull(blackListDto)) {
-                LocalDateTime unblocked = blackListDto.getUnblockedAt();
-                authSession.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
-                LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
-                deltaTime = previousTime.until(unblocked, ChronoUnit.SECONDS);
-                context.form().setAttribute("expirationSeconds", String.valueOf(deltaTime))
-                        .setAttribute("codeLimited", true);
-            } else {
-                LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
-                deltaTime = Duration.between(previousTime, LocalDateTime.now()).getSeconds();
-                context.form().setAttribute("expirationSeconds", String.valueOf(authContext.getActivationCodeType().getExpiredSeconds() - deltaTime));
-            }
+            setTimerValueByActivationType(blackListDto, user, authSession, authContext, deltaTime, context);
             try {
                 boolean enableRepeatCall = true;
                 if (checkCanWeSendSmS(user, context)) {
@@ -253,14 +243,13 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 log.info("Sms code resend");
 
                 sessionModel.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
-                checkAndIncrementExistTries(user, authContext, context);
                 sessionModel.removeAuthNote(PHONE_KEY_HASH);
                 authenticate(context);
 
             } else {
                 if (activationCodeType.equals(CODE_TO_SMS)) {
                     checkAndAddToCounter(user, authContext, context);
-                    if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > 20) {
+                    if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > 25) {
                         blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.SMS);
                         authenticate(context);
                         mainCounter.remove(user.getPhone());
@@ -271,7 +260,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
                 if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
                     checkAndAddToCounter(user, authContext, context);
-                    if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > 20) {
+                    if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > 25) {
                         blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.PHONE_CALL);
                         authenticate(context);
                         mainCounter.remove(user.getPhone());
@@ -404,7 +393,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         } catch (WrongSmsCode wrongSmsCode) {
             log.warn("Wrong sms code");
             context.form()
-                    .setAttribute("error", "Пароль введен не верно. Вам выслан новый код")
                     .setError("Код введен неверно. Проверьте правильность введенных данных");
             sessionModel.removeAuthNote(PHONE_KEY_HASH);
             sessionModel.setAuthNote(ERROR_CODE, ERROR_CODE);
@@ -444,7 +432,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         String code = context.getAuthenticationSession().getAuthNote("currentCode");
         if (userMap.entrySet().stream().allMatch(it -> it.getKey()
                 .getCurrentCode().equals(code) && it.getKey()
-                .getCurrentCodeCounter() >= 5 && it.getKey().getActivationType().equals(CODE_TO_SMS) && it.getValue() < 20)) {
+                .getCurrentCodeCounter() >= 5 && it.getKey().getActivationType().equals(CODE_TO_SMS) && it.getValue() < 25)) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
                     .setError(MessageConstants.SMS_LIMIT_5_CONTINUE);
             return true;
@@ -452,7 +440,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
         if (userMap.entrySet().stream().allMatch(it -> it.getKey()
                 .getCurrentCode().equals(code) && it.getKey()
-                .getCurrentCodeCounter() >= 5 && it.getKey().getActivationType().equals(CODE_BY_PHONE_NUMBER) && it.getValue() < 20)) {
+                .getCurrentCodeCounter() >= 5 && it.getKey().getActivationType().equals(CODE_BY_PHONE_NUMBER) && it.getValue() < 25)) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
                     .setError(MessageConstants.CALL_LIMIT_5_CONTINUE);
             return true;
@@ -474,20 +462,47 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
     }
 
     private boolean checkCanWeSendSmS(User user, AuthenticationFlowContext context) {
-        if (blackListService.isUserBlockedAuthBySms(user.getPhone())) {
+        if (activationCodeType.equals(CODE_TO_SMS) && blackListService.isUserBlockedAuthBySms(user.getPhone())) {
             context.form()
-                    .setAttribute("isLimited", true)
-                    .setError(MessageConstants.SMS_LIMIT_20_BLOCK);
+                    .setAttribute("codeLimited", true)
+                    .setError(MessageConstants.SMS_LIMIT_25_BLOCK);
             return false;
         }
-        if (blackListService.isUserBlockedAuthByPhoneCall(user.getPhone())) {
+        if (activationCodeType.equals(CODE_BY_PHONE_NUMBER) && blackListService.isUserBlockedAuthByPhoneCall(user.getPhone())) {
             context.form()
-                    .setAttribute("isLimited", true)
-                    .setError(MessageConstants.CALL_LIMIT_20_BLOCK);
+                    .setAttribute("codeLimited", true)
+                    .setError(MessageConstants.CALL_LIMIT_25_BLOCK);
             return false;
         }
-        return checkIsMoreThanFiveAttempts(context, user) || !mainCounter.containsKey(user.getPhone()) && !blackListService.isUserBlockedAuthBySms(user.getPhone());
+        return checkIsMoreThanFiveAttempts(context, user) || !mainCounter.containsKey(user.getPhone());
     }
+
+    private void setTimerValueByActivationType(BlackListDto blackListDto, User user, AuthenticationSessionModel authSession, AuthContext authContext, long deltaTime, AuthenticationFlowContext context) {
+        if (Objects.nonNull(blackListDto)) {
+            if (blackListService.isUserBlockedAuthBySms(user.getPhone()) && activationCodeType.equals(CODE_TO_SMS)) {
+                setBlockedTime(blackListDto, authSession, deltaTime, context);
+                return;
+            }
+            if (blackListService.isUserBlockedAuthByPhoneCall(user.getPhone()) && activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
+                setBlockedTime(blackListDto, authSession, deltaTime, context);
+                return;
+            }
+        }
+        LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
+        deltaTime = Duration.between(previousTime, LocalDateTime.now()).getSeconds();
+        context.form().setAttribute("expirationSeconds", String.valueOf(authContext.getActivationCodeType().getExpiredSeconds() - deltaTime));
+    }
+
+    private void setBlockedTime(BlackListDto blackListDto, AuthenticationSessionModel authSession,Long deltaTime, AuthenticationFlowContext context) {
+        LocalDateTime unblocked = blackListDto.getUnblockedAt();
+        authSession.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+        LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
+        deltaTime = previousTime.until(unblocked, ChronoUnit.SECONDS);
+        context.form().setAttribute("expirationSeconds", String.valueOf(deltaTime))
+                .setAttribute("codeLimited", true);
+    }
+
+
 
     protected Boolean getCurrentSwitcherStatus(HttpRequest httpRequest, AuthenticationFlowContext context) {
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();

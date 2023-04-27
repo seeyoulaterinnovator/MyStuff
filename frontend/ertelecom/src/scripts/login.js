@@ -89,7 +89,7 @@ export default (function functionName() {
           errorMessageElement.textContent = "";
           usernameElement.classList.remove("field__input--error");
         } else {
-          errorMessageElement.textContent = "����� �������� E-mail";
+          errorMessageElement.textContent = "Введён неверный E-mail";
           usernameElement.classList.add("field__input--error");
         }
       }
@@ -149,7 +149,7 @@ export default (function functionName() {
           errorMessageElement.textContent = "";
           secondUserName.classList.remove("field__input--error");
         } else {
-          errorMessageElement.textContent = "����� �������� ����� ��������";
+          errorMessageElement.textContent = "Введён неверный номер телефона";
           secondUserName.classList.add("field__input--error");
         }
       }

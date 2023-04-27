@@ -5,7 +5,6 @@ export default class Timer {
     this._timeElement;
     this._callback;
   }
-  //todo считать > 60 мин в часы
   get hours() {
     return String(parseInt(this.time / 3600 % 24, 10)).padStart(2, '0');
   }
