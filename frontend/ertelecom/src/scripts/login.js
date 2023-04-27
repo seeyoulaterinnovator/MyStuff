@@ -149,7 +149,7 @@ export default (function functionName() {
           errorMessageElement.textContent = "";
           secondUserName.classList.remove("field__input--error");
         } else {
-          errorMessageElement.textContent = "����� �������� ����� ��������";
+          errorMessageElement.textContent = "Введён неверный номер телефона";
           secondUserName.classList.add("field__input--error");
         }
       }
