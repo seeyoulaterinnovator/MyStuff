@@ -9,6 +9,7 @@
     loginUrl,
     showInfo,
     isLimitExceeded,
+    isPhoneError
   } from './stores.js';
 
   const hasRegistration = window.location.href.includes('registration');
@@ -22,6 +23,8 @@
   const info = document.querySelector('.alert .text-black');
   const hasInfo = !!info;
   const submitButton = document.getElementById("closeWindow");
+  const switcher = document.getElementById("loginPasswordButton");
+  const hasPhoneErrorMessage = hasAlert && alert.classList.contains('phone_error');
 
 
   const newText = hasAlert ? alert.innerText : '';
@@ -46,6 +49,7 @@
   show.set(hasAlert);
   showInfo.set(hasInfo);
   isBadEmail.set(hasBadEmail);
+  isPhoneError.set(hasPhoneErrorMessage);
   isBadPhone.set(hasBadPhone);
   isRegistration.set(hasRegistration);
   isUpdateProfile.set(hasUpdateProfile);
@@ -89,6 +93,10 @@
 
   function handleHide() {
     show.set(false);
+  }
+
+  function switchToPassword() {
+    switcher.click();
   }
 
   function closeAndSubmit() {
@@ -147,6 +155,10 @@
           </a>
           <button class="btn text-accentBlue w-full md:w-auto" on:click={handleHide}>
             Изменить данные
+          </button>
+        {:else if $isPhoneError}
+          <button class="btn btn-switcher.modified.modified" style="background-color: #C51F1F; color: #FFFFFF;" on:click={switchToPassword}>
+            Войти с помощью логина
           </button>
         {:else}
           <button class="btn btn-main btn-enter" on:click={handleHide}>

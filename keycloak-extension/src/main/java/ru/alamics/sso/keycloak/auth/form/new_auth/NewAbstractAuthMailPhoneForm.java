@@ -153,8 +153,14 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 log.info("ignore... userPhoneEmpty");
             } catch (PhoneCallException e) {
                 log.info("ignore... PhoneCallException {}", e.getMessage());
+                context.form()
+                        .setError("Авторизация через временный код временно не доступна. Попробуйте авторизоваться через логин/пароль");
+                context.resetFlow();
             } catch (SendMessageException se) {
                 log.info("ignore... MsgSendException {}", se.getMessage());
+                context.form()
+                        .setError("Авторизация через временный код временно не доступна. Попробуйте авторизоваться через логин/пароль");
+                context.resetFlow();
             }
         } else {
             context.challenge(challenge(context, formData));
@@ -263,8 +269,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                     verifyCode(context, sessionModel, user, authContext, httpRequest);
                 }
             }
-        }
-        else {
+        } else {
             authenticate(context);
         }
     }
