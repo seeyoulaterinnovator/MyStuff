@@ -94,16 +94,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             authSession.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
             authSession.setAuthNote("correctTime", LocalDateTime.now().plusSeconds(activationCodeType.getExpiredSeconds()).format(DateTimeFormatter.ISO_DATE_TIME));
         }
-        if (Objects.nonNull(blackListDto) && blackListService.isUserBlockedAuthBySms(user.getPhone()) && activationCodeType.equals(CODE_TO_SMS)) {
-            setBlockedTime(blackListDto, authSession, deltaTime, context);
-        }
-        if (Objects.nonNull(blackListDto) && blackListService.isUserBlockedAuthByPhoneCall(user.getPhone()) && activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
-            setBlockedTime(blackListDto, authSession, deltaTime, context);
-        } else {
-            LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
-            deltaTime = Duration.between(previousTime, LocalDateTime.now()).getSeconds();
-            context.form().setAttribute("expirationSeconds", String.valueOf(authContext.getActivationCodeType().getExpiredSeconds() - deltaTime));
-        }
+        setTimerValueByActivationType(blackListDto, user, authSession, authContext, deltaTime, context);
 
         try {
             boolean enableRepeatCall = true;
@@ -356,6 +347,22 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             currentCounterMap.put(new VerifyPhoneKey(authContext.getActivationCodeType(), code, existCurrentCodeTries), existUserTries);
             mainCounter.put(user.getPhone(), currentCounterMap);
         }
+    }
+
+    private void setTimerValueByActivationType(BlackListDto blackListDto, User user, AuthenticationSessionModel authSession, AuthContext authContext, long deltaTime, RequiredActionContext context) {
+        if (Objects.nonNull(blackListDto)) {
+            if (blackListService.isUserBlockedAuthBySms(user.getPhone()) && activationCodeType.equals(CODE_TO_SMS)) {
+                setBlockedTime(blackListDto, authSession, deltaTime, context);
+                return;
+            }
+            if (blackListService.isUserBlockedAuthByPhoneCall(user.getPhone()) && activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
+                setBlockedTime(blackListDto, authSession, deltaTime, context);
+                return;
+            }
+        }
+        LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
+        deltaTime = Duration.between(previousTime, LocalDateTime.now()).getSeconds();
+        context.form().setAttribute("expirationSeconds", String.valueOf(authContext.getActivationCodeType().getExpiredSeconds() - deltaTime));
     }
 
     private void setBlockedTime(BlackListDto blackListDto, AuthenticationSessionModel authSession, Long deltaTime, RequiredActionContext context) {

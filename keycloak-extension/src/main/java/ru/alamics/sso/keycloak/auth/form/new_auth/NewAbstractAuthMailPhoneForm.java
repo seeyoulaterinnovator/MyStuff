@@ -6,6 +6,7 @@ import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
+import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAuthenticator;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
@@ -122,17 +123,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 authSession.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
                 authSession.setAuthNote("correctTime", LocalDateTime.now().plusSeconds(activationCodeType.getExpiredSeconds()).format(DateTimeFormatter.ISO_DATE_TIME));
             }
-            if (Objects.nonNull(blackListDto) && blackListService.isUserBlockedAuthByPhoneCall(user.getPhone()) && activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
-                setBlockedTime(blackListDto, authSession, deltaTime, context);
-            }
-            if (Objects.nonNull(blackListDto) && blackListService.isUserBlockedAuthBySms(user.getPhone()) && activationCodeType.equals(CODE_TO_SMS)) {
-                setBlockedTime(blackListDto, authSession,deltaTime, context);
-            }
-            else {
-                LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
-                deltaTime = Duration.between(previousTime, LocalDateTime.now()).getSeconds();
-                context.form().setAttribute("expirationSeconds", String.valueOf(authContext.getActivationCodeType().getExpiredSeconds() - deltaTime));
-            }
+            setTimerValueByActivationType(blackListDto, user, authSession, authContext, deltaTime, context);
             try {
                 boolean enableRepeatCall = true;
                 if (checkCanWeSendSmS(user, context)) {
@@ -476,6 +467,22 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             return false;
         }
         return checkIsMoreThanFiveAttempts(context, user) || !mainCounter.containsKey(user.getPhone());
+    }
+
+    private void setTimerValueByActivationType(BlackListDto blackListDto, User user, AuthenticationSessionModel authSession, AuthContext authContext, long deltaTime, AuthenticationFlowContext context) {
+        if (Objects.nonNull(blackListDto)) {
+            if (blackListService.isUserBlockedAuthBySms(user.getPhone()) && activationCodeType.equals(CODE_TO_SMS)) {
+                setBlockedTime(blackListDto, authSession, deltaTime, context);
+                return;
+            }
+            if (blackListService.isUserBlockedAuthByPhoneCall(user.getPhone()) && activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
+                setBlockedTime(blackListDto, authSession, deltaTime, context);
+                return;
+            }
+        }
+        LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
+        deltaTime = Duration.between(previousTime, LocalDateTime.now()).getSeconds();
+        context.form().setAttribute("expirationSeconds", String.valueOf(authContext.getActivationCodeType().getExpiredSeconds() - deltaTime));
     }
 
     private void setBlockedTime(BlackListDto blackListDto, AuthenticationSessionModel authSession,Long deltaTime, AuthenticationFlowContext context) {
