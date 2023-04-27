@@ -49,7 +49,7 @@
         <input id="smscode" name="smscode" class="hidden"/>
         <div class="flex md:justify-start justify-start w-full items-center text-left md:text-left xl:pb-55px md:pb-10 sm:pb-8 pb-4">
             <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
-                <span class="w-full">
+                <span class="w-full" style="text-align: right">
                     <button class="font-light verification__resend" name="resend"
                                     type="submit">${sendAgain}</button>
                 </span>
@@ -69,26 +69,14 @@
                                             type="submit">${sendAgain}</button>
                         </span>
                     </p>
-                    </#if>
-                </div>
+                </#if>
             </#if>
-
-
-        <div class="sm:block md:flex w-full items-center text-center md:text-left">
-
-
-            <div class="sm:block md:flex w-full items-center text-center md:text-left">
-                <button class="hidden"
-                        name="accept" id="accept" type="submit">${doSubmit}</button>
-
-            </div>
-            <#--<#if lengthCode==4>
-                <button class="btn verification__btn verification__btn__send" form="totpe" id="sentCode"
-                        name="sendEmailCode" type="submit">Отправить на эл. почту
-                </button>
-            </#if>-->
-
         </div>
+
+
+        <button class="hidden"
+                style="display: none"
+                name="accept" id="accept" type="submit">${doSubmit}</button>
 
     </form>
     </#if>
