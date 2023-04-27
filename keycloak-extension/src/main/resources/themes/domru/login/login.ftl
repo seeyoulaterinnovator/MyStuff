@@ -62,7 +62,20 @@
                 </#if>
                 </div>
                 </form>
-
+                <#if realm.password && social.providers??>
+                    <div class="flex items-center mt-2">
+                        <div class="text-no-wrap text-with-login mr-6">${loginWith}</div>
+                        <ul class="logo-social-providers">
+                            <#list social.providers as p>
+                                <li class="mr-4">
+                                    <a href="${p.loginUrl}">
+                                        <div class="logo logo--${p.providerId}"></div>
+                                    </a>
+                                </li>
+                            </#list>
+                        </ul>
+                    </div>
+                </#if>
                 <form id="on" method="POST" name="on" action="${url.loginUrl}">
                     <button id="smsLoginButton" name="on" type="submit" class="hidden">
                         login via sms
@@ -215,6 +228,20 @@
                 </#if>
                 </div>
                 </form>
+                <#if realm.password && social.providers??>
+                    <div class="flex items-center mt-2">
+                        <div class="text-no-wrap text-with-login mr-6">${loginWith}</div>
+                        <ul class="logo-social-providers">
+                            <#list social.providers as p>
+                                <li class="mr-4">
+                                    <a href="${p.loginUrl}">
+                                        <div class="logo logo--${p.providerId}"></div>
+                                    </a>
+                                </li>
+                            </#list>
+                        </ul>
+                    </div>
+                </#if>
                 <form method="POST" name="smsLoginButton" action="${url.loginUrl}">
                     <button id="smsLoginButton" name="off" type="submit" class="hidden">
                         login via sms
@@ -321,6 +348,20 @@
                 </#if>
                 </div>
                 </form>
+                <#if realm.password && social.providers??>
+                    <div class="flex items-center mt-2">
+                        <div class="text-no-wrap text-with-login mr-6">${loginWith}</div>
+                        <ul class="logo-social-providers">
+                            <#list social.providers as p>
+                                <li class="mr-4">
+                                    <a href="${p.loginUrl}">
+                                        <div class="logo logo--${p.providerId}"></div>
+                                    </a>
+                                </li>
+                            </#list>
+                        </ul>
+                    </div>
+                </#if>
                 <form method="POST" action="${url.loginUrl}">
                     <button id="smsLoginButton" name="off" type="submit" class="hidden">
                         login via phone call

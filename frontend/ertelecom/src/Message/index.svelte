@@ -9,6 +9,7 @@
     loginUrl,
     showInfo,
     isLimitExceeded,
+    isPhoneError
   } from './stores.js';
 
   const hasRegistration = window.location.href.includes('registration');
@@ -22,9 +23,11 @@
   const phoneElement = document.getElementsByName('phone')[0];
   const hasLimitCode = hasAlert && alert.classList.contains('limit-exceeded');
 
-    const info = document.querySelector('.alert .text-black');
-    const hasInfo = !!info;
-    const submitButton = document.getElementById("closeWindow");
+  const info = document.querySelector('.alert .text-black');
+  const hasInfo = !!info;
+  const submitButton = document.getElementById("closeWindow");
+  const hasPhoneErrorMessage = hasAlert && alert.classList.contains('phone_error');
+  const switcher = document.getElementById("loginPasswordButton");
 
   let email = '';
   let phone = '';
@@ -44,6 +47,7 @@
   show.set(hasAlert);
   showInfo.set(hasInfo);
   isBadEmail.set(hasBadEmail);
+  isPhoneError.set(hasPhoneErrorMessage);
   isBadPhone.set(hasBadPhone);
   isRegistration.set(hasRegistration);
   isUpdateProfile.set(hasUpdateProfile);
@@ -88,6 +92,10 @@
 
   function handleHide() {
     show.set(false);
+  }
+
+  function switchToPassword() {
+    switcher.click();
   }
 
   function closeAndSubmit() {
@@ -144,7 +152,10 @@
             Изменить данные
           </button>
         {:else if $isLimitExceeded}
-
+        {:else if $isPhoneError}
+          <button class="btn btn-switcher" style="background-color: #C51F1F; color: #FFFFFF;" on:click={switchToPassword}>
+            Войти с помощью логина
+          </button>
         {:else}
           <button class="btn text-extra w-full md:w-auto" on:click={handleHide}>
             Понятно
