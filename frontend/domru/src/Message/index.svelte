@@ -120,7 +120,10 @@
         </button>
       </div>
       <p>{$text}</p>
-      <div class="flex flex-col md:flex-row justify-start items-start gap-4">
+      {#if $isLimitExceeded}
+
+      {:else}
+      <div class="flex flex-col md:flex-row justify-start items-start gap-4 mt-6">
         {#if $isRegistration}
           <a href="{$loginUrl}" class="btn btn-main w-full md:w-auto" on:click={handleHide}>
             Войти
@@ -145,14 +148,13 @@
           <button class="btn text-accentBlue w-full md:w-auto" on:click={handleHide}>
             Изменить данные
           </button>
-        {:else if $isLimitExceeded}
-
         {:else}
           <button class="btn btn-main btn-enter" on:click={handleHide}>
             Понятно
           </button>
         {/if}
       </div>
+      {/if}
     </div>
   </div>
 {:else if $showInfo}

@@ -5,7 +5,7 @@
   height: 48px;
   padding: 0;
   transition: 0.2s ease-in-out;
-
+  font-family: 'CoFo Sans',sans-serif;
 
   @media (min-width: 1199px) {
   }
@@ -103,7 +103,7 @@ a.btn {
 }
 
 .btn-enter {
-  padding: 9.5px 19px 13.5px 19px;
+  padding: 13.5px 19px 13.5px 19px;
 
   @media screen and (max-width: 479px){
     width: 50%;
