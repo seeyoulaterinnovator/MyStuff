@@ -77,6 +77,10 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     private static final Map<String, Map<VerifyPhoneKey, Integer>> mainCounter = new HashMap<>();
 
+    private static final int MAX_COUNT_MESSAGES = 25;
+
+    private static final int COUNT_BY_ONE_CODE = 5;
+
     public NewAbstractAuthMailPhoneForm(UserFindService userFindService) {
         this.userFindService = userFindService;
         this.userPhoneVerifier = Lookup.lookup(UserPhoneVerifier.class);
@@ -126,9 +130,17 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             setTimerValueByActivationType(blackListDto, user, authSession, authContext, deltaTime, context);
             try {
                 boolean enableRepeatCall = true;
-                if (checkCanWeSendSmS(user, context)) {
+
+                if (authSession.getAuthNote("needSendSmsCode") != null && authSession.getAuthNote("needSendSmsCode").equals("true")) {
                     authContext = userPhoneVerifier.sendValidationMsg(user, authContext, activationCodeType, context.getRealm());
                     authSession.setAuthNote("godMode", authContext.getHashProperty());
+                    authSession.setAuthNote("needSendSmsCode", "false");
+                    authSession.setAuthNote("currentCode", authContext.getHashProperty());
+                } else if (checkCanWeSendSmS(user, context ) && authSession.getAuthNote("needSendSmsCode") != null && authSession.getAuthNote("needSendSmsCode").equals("true")
+                        || checkCanWeSendSmS(user, context) && authSession.getAuthNote("needSendSmsCode") == null) {
+                    authContext = userPhoneVerifier.sendValidationMsg(user, authContext, activationCodeType, context.getRealm());
+                    authSession.setAuthNote("godMode", authContext.getHashProperty());
+                    authSession.setAuthNote("needSendSmsCode", "false");
                 }
                 authSession.setAuthNote(PHONE_KEY_HASH, authContext.getHashProperty());
                 authSession.setAuthNote(COUNT_REPEAT, authContext.getCounter().toString());
@@ -242,6 +254,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             if (context.getHttpRequest().getDecodedFormParameters().containsKey("resend")) {
                 log.info("Sms code resend");
 
+                sessionModel.setAuthNote("needSendSmsCode", "true");
                 sessionModel.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
                 sessionModel.removeAuthNote(PHONE_KEY_HASH);
                 authenticate(context);
@@ -249,7 +262,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             } else {
                 if (activationCodeType.equals(CODE_TO_SMS)) {
                     checkAndAddToCounter(user, authContext, context);
-                    if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > 25) {
+                    if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > MAX_COUNT_MESSAGES) {
                         blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.SMS);
                         authenticate(context);
                         mainCounter.remove(user.getPhone());
@@ -260,7 +273,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
                 if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
                     checkAndAddToCounter(user, authContext, context);
-                    if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > 25) {
+                    if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > MAX_COUNT_MESSAGES) {
                         blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.PHONE_CALL);
                         authenticate(context);
                         mainCounter.remove(user.getPhone());
@@ -389,7 +402,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             sessionModel.setAuthNote(sessionModel.getAuthNote("secondPhase"), "");
             context.success();
             mainCounter.remove(user.getPhone());
-
+            sessionModel.removeAuthNote("needSendSmsCode");
         } catch (WrongSmsCode wrongSmsCode) {
             log.warn("Wrong sms code");
             context.form()
@@ -432,7 +445,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         String code = context.getAuthenticationSession().getAuthNote("currentCode");
         if (userMap.entrySet().stream().allMatch(it -> it.getKey()
                 .getCurrentCode().equals(code) && it.getKey()
-                .getCurrentCodeCounter() >= 5 && it.getKey().getActivationType().equals(CODE_TO_SMS) && it.getValue() < 25)) {
+                .getCurrentCodeCounter() >= COUNT_BY_ONE_CODE && it.getKey().getActivationType().equals(CODE_TO_SMS) && it.getValue() < MAX_COUNT_MESSAGES)) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
                     .setError(MessageConstants.SMS_LIMIT_5_CONTINUE);
             return true;
@@ -440,7 +453,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
         if (userMap.entrySet().stream().allMatch(it -> it.getKey()
                 .getCurrentCode().equals(code) && it.getKey()
-                .getCurrentCodeCounter() >= 5 && it.getKey().getActivationType().equals(CODE_BY_PHONE_NUMBER) && it.getValue() < 25)) {
+                .getCurrentCodeCounter() >= COUNT_BY_ONE_CODE && it.getKey().getActivationType().equals(CODE_BY_PHONE_NUMBER) && it.getValue() < MAX_COUNT_MESSAGES)) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
                     .setError(MessageConstants.CALL_LIMIT_5_CONTINUE);
             return true;

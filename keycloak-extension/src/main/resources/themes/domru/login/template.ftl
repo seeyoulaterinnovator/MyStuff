@@ -125,6 +125,8 @@
                                     </span>
                                 <#elseif message.summary == msg('Авторизация через временный код временно не доступна. Попробуйте авторизоваться через логин/пароль')>
                                     <span class="text-accentRed phone_error hidden">
+                                        ${kcSanitize(message.summary)?no_esc}
+                                    </span>
                                 <#else>
                                     <span class="text-accentRed hidden">
                                         ${kcSanitize(message.summary)?no_esc}
