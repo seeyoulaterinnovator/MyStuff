@@ -15,5 +15,6 @@ public class BlackListDto {
     private Long blockDurationSec;
     private String phone;
     private String limitationCause;
+    private String realm;
     private UserEntity user;
 }

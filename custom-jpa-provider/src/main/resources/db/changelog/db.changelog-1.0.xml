@@ -1564,6 +1564,12 @@
         </sql>
     </changeSet>
 
+    <changeSet id="125" author="zhakov-mv">
+        <sql>
+            ALTER TABLE BLACK_LIST ADD COLUMN IF NOT EXISTS realm varchar(36) not null;
+        </sql>
+    </changeSet>
+
     <changeSet id="83" author="petrov-ny">
         <sql>
             <![CDATA[

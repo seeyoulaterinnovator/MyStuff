@@ -32,6 +32,8 @@ public class BlackListEntity {
     private String phone;
     @Column(name = "limitation_cause")
     private String limitationCause;
+    @Column(name = "realm")
+    private String realm;
     @ManyToOne(targetEntity = UserEntity.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private UserEntity user;
