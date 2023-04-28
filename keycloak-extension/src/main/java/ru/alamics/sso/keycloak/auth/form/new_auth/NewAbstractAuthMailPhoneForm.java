@@ -1,13 +1,11 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
-import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAuthenticator;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
@@ -134,13 +132,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             setTimerValueByActivationType(blackListDto, user, authSession, authContext, deltaTime, context);
             try {
                 boolean enableRepeatCall = true;
-                if (mainCounter.containsKey(user.getPhone())) {
-                    int currentCodeCounter = mainCounter.get(user.getPhone()).keySet().stream().map(VerifyPhoneKey::getCurrentCodeCounter)
-                            .findFirst().orElse(0);
-                    if (currentCodeCounter <= 5) {
-                        authSession.removeAuthNote("needSendSmsCode");
-                    }
-                }
                 if (authSession.getAuthNote("needSendSmsCode") != null && authSession.getAuthNote("needSendSmsCode").equals("true")) {
                     authContext = userPhoneVerifier.sendValidationMsg(user, authContext, activationCodeType, context.getRealm());
                     authSession.setAuthNote("godMode", authContext.getHashProperty());
