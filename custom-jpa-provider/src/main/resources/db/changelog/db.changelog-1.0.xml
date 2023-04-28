@@ -1564,7 +1564,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="125" author="zhakov-mv">
+    <changeSet id="135" author="zhakov-mv">
         <sql>
             ALTER TABLE BLACK_LIST ADD COLUMN IF NOT EXISTS realm varchar(36) not null;
         </sql>
