@@ -99,6 +99,9 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             authSession.setAuthNote("backToLoginPassword", "backToLoginPassword");
             authSession.removeAuthNote("secondPhase");
             context.form().setAttribute("isSwitcherOn", getCurrentSwitcherStatus(context.getHttpRequest(), context));
+            authSession.setAuthNote("needSendSmsCode", "true");
+            authSession.removeAuthNote(PHONE_KEY_HASH);
+            context.clearUser();
             context.challenge(challenge(context, formData));
             return;
         }
@@ -136,7 +139,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                     authSession.setAuthNote("godMode", authContext.getHashProperty());
                     authSession.setAuthNote("needSendSmsCode", "false");
                     authSession.setAuthNote("currentCode", authContext.getHashProperty());
-                } else if (checkCanWeSendSmS(user, context ) && authSession.getAuthNote("needSendSmsCode") != null && authSession.getAuthNote("needSendSmsCode").equals("true")
+                } else if (checkCanWeSendSmS(user, context) && authSession.getAuthNote("needSendSmsCode") != null && authSession.getAuthNote("needSendSmsCode").equals("true")
                         || checkCanWeSendSmS(user, context) && authSession.getAuthNote("needSendSmsCode") == null) {
                     authContext = userPhoneVerifier.sendValidationMsg(user, authContext, activationCodeType, context.getRealm());
                     authSession.setAuthNote("godMode", authContext.getHashProperty());
@@ -305,7 +308,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         UserModel user = null;
         try {
             log.info("find user casual");
-
+            MultivaluedMap<String, String> qwe = context.getHttpRequest().getDecodedFormParameters();
             if (!(username.matches("^\\d+$")) && context.getHttpRequest().getDecodedFormParameters().containsKey("loginPasswordButton")) {
                 if (!isUserNameValid(username, context, "email")) return false;
                 user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(), username);
@@ -506,7 +509,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         context.form().setAttribute("expirationSeconds", String.valueOf(authContext.getActivationCodeType().getExpiredSeconds() - deltaTime));
     }
 
-    private void setBlockedTime(BlackListDto blackListDto, AuthenticationSessionModel authSession,Long deltaTime, AuthenticationFlowContext context) {
+    private void setBlockedTime(BlackListDto blackListDto, AuthenticationSessionModel authSession, Long deltaTime, AuthenticationFlowContext context) {
         LocalDateTime unblocked = blackListDto.getUnblockedAt();
         authSession.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
         LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
@@ -514,7 +517,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         context.form().setAttribute("expirationSeconds", String.valueOf(deltaTime))
                 .setAttribute("codeLimited", true);
     }
-
 
 
     protected Boolean getCurrentSwitcherStatus(HttpRequest httpRequest, AuthenticationFlowContext context) {
