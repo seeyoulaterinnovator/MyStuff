@@ -1,6 +1,8 @@
 package ru.alamics.sso.jpa.repository;
 
 import org.hibernate.Session;
+import org.keycloak.authentication.AuthenticationFlowContext;
+import org.keycloak.authentication.RequiredActionContext;
 import ru.alamics.sso.jpa.entity.antifraud.BlackListEntity;
 
 import javax.ejb.LocalBean;
@@ -40,10 +42,18 @@ public class BlackListRepository {
                 .getSingleResult();
     }
 
-    public List<BlackListEntity> findBlockedByPhone(String phone) {
-        return em.createQuery("select be from BlackListEntity be where be.phone =:phone and be.unblockedAt >= :now ORDER BY be.createdAt desc", BlackListEntity.class)
+    public List<BlackListEntity> findBlockedByPhone(String phone, AuthenticationFlowContext context) {
+        return em.createQuery("select be from BlackListEntity be where be.phone =:phone and be.unblockedAt >= :now and be.realm =:realm ORDER BY be.createdAt desc", BlackListEntity.class)
                 .setParameter("phone", phone)
                 .setParameter("now", LocalDateTime.now()) //current_timestamp doesn't work
+                .setParameter("realm", context.getRealm().getName())
+                .getResultList();
+    }
+    public List<BlackListEntity> findBlockedByPhone(String phone, RequiredActionContext context) {
+        return em.createQuery("select be from BlackListEntity be where be.phone =:phone and be.unblockedAt >= :now and be.realm =:realm ORDER BY be.createdAt desc", BlackListEntity.class)
+                .setParameter("phone", phone)
+                .setParameter("now", LocalDateTime.now()) //current_timestamp doesn't work
+                .setParameter("realm", context.getRealm().getName())
                 .getResultList();
     }
 

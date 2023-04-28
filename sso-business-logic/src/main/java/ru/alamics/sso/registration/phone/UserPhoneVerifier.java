@@ -92,7 +92,7 @@ public class UserPhoneVerifier {
             throws WrongSmsCode {
         String savedHash = authContext.getHashProperty();
         LocalDateTime expirationDate = authContext.getExpirationTime();
-        //null when send again and enter pass
+
         String codeHash = HashGenerator.getSecretHash(smsCode);
 
         if (codeHash.equals(savedHash) && expirationDate.isAfter(LocalDateTime.now())) {

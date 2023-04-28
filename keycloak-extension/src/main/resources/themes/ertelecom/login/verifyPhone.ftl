@@ -68,10 +68,10 @@
             </div>
             </#if>
             <div class="sm:block md:flex w-full items-center text-center md:text-left">
-                <button class="btn btn-main verification__btn verification__btn__accept w-full md:w-3/7 mr-0 md:mr-4" name="accept" id="accept" type="submit">Подтвердить</button>
-                <#if lengthCode==4>
-                    <button class="btn verification__btn verification__btn__send btn-border" form="totpe" id="sentCode" name="sendEmailCode" type="submit">Отправить на эл. почту</button>
-                </#if>
+                <button class="hidden"
+                        style="display: none"
+                        name="accept" id="accept" type="submit">${doSubmit}</button>
+
             </div>
         </form>
     </#if>

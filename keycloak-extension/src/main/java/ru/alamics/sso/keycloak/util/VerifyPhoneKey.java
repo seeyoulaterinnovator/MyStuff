@@ -12,4 +12,5 @@ public class VerifyPhoneKey {
     private ActivationCodeType activationType;
     private String currentCode;
     private Integer currentCodeCounter;
+    private String realm;
 }

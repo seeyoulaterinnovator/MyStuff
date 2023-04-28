@@ -13,6 +13,7 @@ public class BlackListMapper {
         blackListDto.setLimitationCause(entity.getLimitationCause());
         blackListDto.setUser(entity.getUser());
         blackListDto.setUnblockedAt(entity.getUnblockedAt());
+        blackListDto.setRealm(entity.getRealm());
         return blackListDto;
     }
     public static BlackListEntity toEntity(BlackListDto dto) {
@@ -24,6 +25,7 @@ public class BlackListMapper {
         entity.setUser(dto.getUser());
         entity.setCreatedAt(dto.getCreatedAt());
         entity.setLimitationCause(dto.getLimitationCause());
+        entity.setRealm(dto.getRealm());
         return entity;
     }
 }
