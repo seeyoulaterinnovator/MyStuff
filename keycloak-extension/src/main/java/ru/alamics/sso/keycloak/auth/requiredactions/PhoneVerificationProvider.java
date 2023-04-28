@@ -52,6 +52,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     private static final String ERROR_CODE = "error_code";
     private static final String subject = "emailVerificationAuthSubject";
     private static final String template = "mail-verify-auth.ftl";
+    private static final int MAX_COUNT_MESSAGES = 25;
+    private static final int COUNT_BY_ONE_CODE = 5;
 
     private final UserPhoneVerifier userPhoneVerifier;
     private final ActivationCodeType activationCodeType;
@@ -117,9 +119,16 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                         .build();
                 enableRepeatCall = false;
             } else {
-                if (checkCanWeSendSmS(user, context)) {
+                if (authSession.getAuthNote("needSendSmsCode") != null && authSession.getAuthNote("needSendSmsCode").equals("true")) {
                     authContext = userPhoneVerifier.sendValidationMsg(user, authContext, activationCodeType, context.getRealm());
                     authSession.setAuthNote("godMode", authContext.getHashProperty());
+                    authSession.setAuthNote("needSendSmsCode", "false");
+                    authSession.setAuthNote("currentCode", authContext.getHashProperty());
+                } else if (checkCanWeSendSmS(user, context) && authSession.getAuthNote("needSendSmsCode") != null && authSession.getAuthNote("needSendSmsCode").equals("true")
+                || checkCanWeSendSmS(user, context) && authSession.getAuthNote("needSendSmsCode") == null) {
+                    authContext = userPhoneVerifier.sendValidationMsg(user, authContext, activationCodeType, context.getRealm());
+                    authSession.setAuthNote("godMode", authContext.getHashProperty());
+                    authSession.setAuthNote("needSendSmsCode", "false");
                 }
             }
 
@@ -239,17 +248,17 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             requiredActionChallenge(context);
         } else if (context.getHttpRequest().getDecodedFormParameters().containsKey("resend")) {
             log.info("Sms code resend");
+            authSession.setAuthNote("needSendSmsCode", "true");
 
             authSession.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
             authSession.removeAuthNote(PHONE_KEY_HASH);
             requiredActionChallenge(context);
-
         } else {
             //logic here
 
             if (activationCodeType.equals(CODE_TO_SMS)) {
                 checkAndAddToCounter(user, authContext, context);
-                if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > 25) {
+                if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) >= MAX_COUNT_MESSAGES) {
                     blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.SMS);
                     requiredActionChallenge(context);
                     mainCounter.remove(user.getPhone());
@@ -260,7 +269,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
             if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
                 checkAndAddToCounter(user, authContext, context);
-                if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > 25) {
+                if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) >= MAX_COUNT_MESSAGES) {
                     blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.PHONE_CALL);
                     requiredActionChallenge(context);
                     mainCounter.remove(user.getPhone());
@@ -281,7 +290,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         String code = context.getAuthenticationSession().getAuthNote("currentCode");
         if (userMap.entrySet().stream().allMatch(it -> it.getKey()
                 .getCurrentCode().equals(code) && it.getKey()
-                .getCurrentCodeCounter() >= 5 && it.getKey().getActivationType().equals(CODE_TO_SMS) && it.getValue() < 25)) {
+                .getCurrentCodeCounter() >= COUNT_BY_ONE_CODE && it.getKey().getActivationType().equals(CODE_TO_SMS) && it.getValue() < MAX_COUNT_MESSAGES)) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
                     .setError(MessageConstants.SMS_LIMIT_5_CONTINUE);
             return true;
@@ -289,7 +298,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
         if (userMap.entrySet().stream().allMatch(it -> it.getKey()
                 .getCurrentCode().equals(code) && it.getKey()
-                .getCurrentCodeCounter() >= 5 && it.getKey().getActivationType().equals(CODE_BY_PHONE_NUMBER) && it.getValue() < 25)) {
+                .getCurrentCodeCounter() >= COUNT_BY_ONE_CODE && it.getKey().getActivationType().equals(CODE_BY_PHONE_NUMBER) && it.getValue() < MAX_COUNT_MESSAGES)) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
                     .setError(MessageConstants.CALL_LIMIT_5_CONTINUE);
             return true;
@@ -386,6 +395,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             authSession.removeAuthNote(COUNT_REPEAT);
             context.success();
             mainCounter.remove(user.getPhone());
+            authSession.removeAuthNote("needSendSmsCode");
         } catch (WrongSmsCode wrongSmsCode) {
             log.warn("Wrong sms code");
             context.form()
