@@ -308,8 +308,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         UserModel user = null;
         try {
             log.info("find user casual");
-            MultivaluedMap<String, String> qwe = context.getHttpRequest().getDecodedFormParameters();
-            if (!(username.matches("^\\d+$")) && context.getHttpRequest().getDecodedFormParameters().containsKey("loginPasswordButton")) {
+                if (!(username.matches("^\\d+$")) && context.getHttpRequest().getDecodedFormParameters().containsKey("loginPasswordButton")) {
                 if (!isUserNameValid(username, context, "email")) return false;
                 user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(), username);
             } else {
