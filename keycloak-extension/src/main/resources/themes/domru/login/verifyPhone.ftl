@@ -62,11 +62,12 @@
                     <span id="timer-time" class="px-1 textTimer" style="font-size: 14px!important;"></span>
                 </div>
                 <#if enableRepeatCall?? && enableRepeatCall!>
-                    <span class="w-full">
-                        <button class="hidden font-light verification__resend" name="resend"
-                                            type="submit">${sendAgain}</button>
-                    </span>
-
+                    <p class="hidden font-light text-black verification__text" id="resend">
+                        <span class="w-full">
+                            <button class="hidden font-light verification__resend" name="resend"
+                                                type="submit">${sendAgain}</button>
+                        </span>
+                    </p>
                 </#if>
             </#if>
         </div>

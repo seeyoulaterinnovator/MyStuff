@@ -54,9 +54,11 @@
                     </span>
                 </div>
                 <#if enableRepeatCall?? && enableRepeatCall!>
-                    <span>
-                        <button class="hidden font-light verification__resend w-full" style="text-align: right" name="resend" type="submit">Отправить еще раз</button>
-                    </span>
+                    <p class="hidden font-light text-black verification__text" id="resend">
+                        <span>
+                            <button class="font-light verification__resend w-full" style="text-align: right" name="resend" type="submit">Отправить еще раз</button>
+                        </span>
+                    </p>
                 </#if>
 
             </div>
