@@ -127,7 +127,7 @@
                                     <span class="text-accentRed hidden">
                                         Вы слишком долго бездействовали. Процесс аутентификации начнется с начала.
                                     </span>
-                                <#elseif message.summary == msg('Авторизация через временный код временно не доступна. Попробуйте авторизоваться через логин/пароль')>
+                                <#elseif message.summary == msg('Авторизация с использованием временного кода в данный момент не доступна. Для авторизации воспользуйтесь логином и паролем')>
                                     <span class="text-accentRed phone_error hidden">
                                         ${kcSanitize(message.summary)?no_esc}
                                     </span>
