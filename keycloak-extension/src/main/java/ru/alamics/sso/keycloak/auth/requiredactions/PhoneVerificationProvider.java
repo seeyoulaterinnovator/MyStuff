@@ -352,8 +352,14 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                         .findAny().orElseThrow(RuntimeException::new).getCurrentCodeCounter();
             }
             existCurrentCodeTries++;
-            int existUserTries = mainCounter.get(user.getPhone()).entrySet().stream().filter(it -> it.getKey().getRealm().equals(authSession.getRealm().getName()))
-                    .findFirst().orElseThrow(RuntimeException::new).getValue();
+
+            int existUserTries = 0;
+            if (mainCounter.get(user.getPhone()).entrySet().stream().allMatch(it ->
+                    it.getKey().getRealm().equals(authSession.getRealm().getName()))) {
+
+                existUserTries = mainCounter.get(user.getPhone()).entrySet().stream().filter(it -> it.getKey().getRealm().equals(authSession.getRealm().getName()))
+                        .findFirst().orElseThrow(RuntimeException::new).getValue();
+            }
             existUserTries++;
 
             Map<VerifyPhoneKey, Integer> currentCounterMap = new HashMap<>();

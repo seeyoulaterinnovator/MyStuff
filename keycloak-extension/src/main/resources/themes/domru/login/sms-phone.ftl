@@ -57,10 +57,12 @@
                         </span>
                     </div>
                     <#if enableRepeatCall?? && enableRepeatCall!>
-                        <span>
-                            <button class="hidden font-light verification__resend" name="resend"
-                                        type="submit">${sendAgain}</button>
-                        </span>
+                        <p class="hidden font-light text-black verification__text" id="resend">
+                            <span>
+                                <button class="font-light verification__resend" name="resend"
+                                            type="submit">${sendAgain}</button>
+                            </span>
+                        </p>
                     </#if>
                 </div>
                 </#if>

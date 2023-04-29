@@ -280,7 +280,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             } else {
                 if (activationCodeType.equals(CODE_TO_SMS)) {
                     checkAndAddToCounter(user, authContext, context);
-                    if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > MAX_COUNT_MESSAGES) {
+                    if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) >= MAX_COUNT_MESSAGES) {
                         blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.SMS, context);
                         authenticate(context);
                         mainCounter.remove(user.getPhone());
@@ -291,7 +291,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
                 if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
                     checkAndAddToCounter(user, authContext, context);
-                    if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) > MAX_COUNT_MESSAGES) {
+                    if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) >= MAX_COUNT_MESSAGES) {
                         blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.PHONE_CALL, context);
                         authenticate(context);
                         mainCounter.remove(user.getPhone());
@@ -446,8 +446,14 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                         .findAny().orElseThrow(RuntimeException::new).getCurrentCodeCounter();
             }
             existCurrentCodeTries++;
-            int existUserTries = mainCounter.get(user.getPhone()).entrySet().stream().filter(it -> it.getKey().getRealm().equals(authSession.getRealm().getName()))
-                    .findFirst().orElseThrow(RuntimeException::new).getValue();
+
+            int existUserTries = 0;
+            if (mainCounter.get(user.getPhone()).entrySet().stream().allMatch(it ->
+                    it.getKey().getRealm().equals(authSession.getRealm().getName()))) {
+
+                existUserTries = mainCounter.get(user.getPhone()).entrySet().stream().filter(it -> it.getKey().getRealm().equals(authSession.getRealm().getName()))
+                        .findFirst().orElseThrow(RuntimeException::new).getValue();
+            }
             existUserTries++;
 
             Map<VerifyPhoneKey, Integer> currentCounterMap = new HashMap<>();
