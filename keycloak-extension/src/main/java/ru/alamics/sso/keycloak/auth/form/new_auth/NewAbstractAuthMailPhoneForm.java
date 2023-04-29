@@ -49,6 +49,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_BY_PHONE_NUMBER;
@@ -76,6 +77,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     private static final Map<String, Map<VerifyPhoneKey, Integer>> mainCounter = new HashMap<>();
 
+    private static ConcurrentHashMap<String, KillMe> currentAuthFlowPhoneNumbers = new ConcurrentHashMap<>();
+
     private static final int MAX_COUNT_MESSAGES = 25;
 
     private static final int COUNT_BY_ONE_CODE = 5;
@@ -98,7 +101,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             authSession.setAuthNote("backToLoginPassword", "backToLoginPassword");
             authSession.removeAuthNote("secondPhase");
             context.form().setAttribute("isSwitcherOn", getCurrentSwitcherStatus(context.getHttpRequest(), context));
-            authSession.setAuthNote("needSendSmsCode", "true");
+            authSession.removeAuthNote("needSendSmsCode");
             authSession.removeAuthNote(PHONE_KEY_HASH);
             context.clearUser();
             context.challenge(challenge(context, formData));
@@ -115,6 +118,11 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         if (authSession.getAuthNote("secondPhase") != null) {
             activationCodeType = authSession.getAuthNote("secondPhase").equals("smsButton") ? CODE_TO_SMS : CODE_BY_PHONE_NUMBER;
             User user = UserModelUserMapper.mapToUser(context.getUser());
+
+            if (!currentAuthFlowPhoneNumbers.containsKey(user.getPhone())) {
+                currentAuthFlowPhoneNumbers.put(user.getPhone(), new KillMe(true, ""));
+            }
+
             long deltaTime = 0;
 
             AuthContext authContext = AuthContext.builder()
@@ -137,11 +145,15 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                     authSession.setAuthNote("godMode", authContext.getHashProperty());
                     authSession.setAuthNote("needSendSmsCode", "false");
                     authSession.setAuthNote("currentCode", authContext.getHashProperty());
+                    currentAuthFlowPhoneNumbers.get(user.getPhone()).setSendingBanned(false);
+                    currentAuthFlowPhoneNumbers.get(user.getPhone()).setSavedCodeHash(authContext.getHashProperty());
                 } else if (checkCanWeSendSmS(user, context) && authSession.getAuthNote("needSendSmsCode") != null && authSession.getAuthNote("needSendSmsCode").equals("true")
-                        || checkCanWeSendSmS(user, context) && authSession.getAuthNote("needSendSmsCode") == null) {
+                        && checkKillMe(user) || checkCanWeSendSmS(user, context) && authSession.getAuthNote("needSendSmsCode") == null && checkKillMe(user)) {
                     authContext = userPhoneVerifier.sendValidationMsg(user, authContext, activationCodeType, context.getRealm());
                     authSession.setAuthNote("godMode", authContext.getHashProperty());
                     authSession.setAuthNote("needSendSmsCode", "false");
+                    currentAuthFlowPhoneNumbers.get(user.getPhone()).setSendingBanned(false);
+                    currentAuthFlowPhoneNumbers.get(user.getPhone()).setSavedCodeHash(authContext.getHashProperty());
                 }
                 authSession.setAuthNote(PHONE_KEY_HASH, authContext.getHashProperty());
                 authSession.setAuthNote(COUNT_REPEAT, authContext.getCounter().toString());
@@ -178,6 +190,11 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         } else {
             context.challenge(challenge(context, formData));
         }
+    }
+
+    private boolean checkKillMe(User user) {
+        boolean test = currentAuthFlowPhoneNumbers.get(user.getPhone()).isSendingBanned();
+        return currentAuthFlowPhoneNumbers.get(user.getPhone()).isSendingBanned();
     }
 
     protected Response challenge(AuthenticationFlowContext context, MultivaluedMap<String, String> formData) {
@@ -244,7 +261,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
             activationCodeType = sessionModel.getAuthNote("secondPhase").equals("smsButton") ? CODE_TO_SMS : CODE_BY_PHONE_NUMBER;
             AuthContext authContext = AuthContext.builder()
-                    .hashProperty(sessionModel.getAuthNote("godMode"))
+                    .hashProperty(currentAuthFlowPhoneNumbers.get(user.getPhone()).getSavedCodeHash())
                     .expirationTime(LocalDateTime.parse(sessionModel.getAuthNote("correctTime"), DateTimeFormatter.ISO_DATE_TIME))
                     .counter(getCount(sessionModel.getAuthNote(COUNT_REPEAT)))
                     .activationCodeType(activationCodeType)
@@ -306,7 +323,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         UserModel user = null;
         try {
             log.info("find user casual");
-                if (!(username.matches("^\\d+$")) && context.getHttpRequest().getDecodedFormParameters().containsKey("loginPasswordButton")) {
+            if (!(username.matches("^\\d+$")) && context.getHttpRequest().getDecodedFormParameters().containsKey("loginPasswordButton")) {
                 if (!isUserNameValid(username, context, "email")) return false;
                 user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(), username);
             } else {
@@ -403,6 +420,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             context.success();
             mainCounter.remove(user.getPhone());
             sessionModel.removeAuthNote("needSendSmsCode");
+            currentAuthFlowPhoneNumbers.remove(user.getPhone());
         } catch (WrongSmsCode wrongSmsCode) {
             log.warn("Wrong sms code");
             context.form()
@@ -451,6 +469,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 && it.getKey().getRealm().equals(context.getRealm().getName()) && it.getValue() < MAX_COUNT_MESSAGES)) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
                     .setError(MessageConstants.SMS_LIMIT_5_CONTINUE);
+            currentAuthFlowPhoneNumbers.get(user.getPhone()).setSendingBanned(true);
             return true;
         }
 
@@ -460,6 +479,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 && it.getKey().getRealm().equals(context.getRealm().getName()) && it.getValue() < MAX_COUNT_MESSAGES)) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
                     .setError(MessageConstants.CALL_LIMIT_5_CONTINUE);
+            currentAuthFlowPhoneNumbers.get(user.getPhone()).setSendingBanned(true);
             return true;
         }
         context.form().setAttribute("isMoreThanFiveAttempts", false);
