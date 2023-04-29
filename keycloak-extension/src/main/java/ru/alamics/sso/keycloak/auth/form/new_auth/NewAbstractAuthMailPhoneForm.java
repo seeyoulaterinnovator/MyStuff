@@ -167,12 +167,12 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             } catch (PhoneCallException e) {
                 log.info("ignore... PhoneCallException {}", e.getMessage());
                 context.form()
-                        .setError("Авторизация через временный код временно не доступна. Попробуйте авторизоваться через логин/пароль");
+                        .setError("Авторизация с использованием временного кода в данный момент не доступна. Для авторизации воспользуйтесь логином и паролем");
                 context.resetFlow();
             } catch (SendMessageException se) {
                 log.info("ignore... MsgSendException {}", se.getMessage());
                 context.form()
-                        .setError("Авторизация через временный код временно не доступна. Попробуйте авторизоваться через логин/пароль");
+                        .setError("Авторизация с использованием временного кода в данный момент не доступна. Для авторизации воспользуйтесь логином и паролем");
                 context.resetFlow();
             }
         } else {
