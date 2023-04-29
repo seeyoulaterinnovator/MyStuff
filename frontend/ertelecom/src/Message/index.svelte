@@ -158,7 +158,7 @@
           </button>
         {:else if $isLimitExceeded}
         {:else if $isPhoneError}
-          <button class="btn btn-switcher" style="background-color: #C51F1F; color: #FFFFFF;" on:click={switchToPassword}>
+          <button class="btn btn-switcher" style="background-color: #4F4BFE; color: #FFFFFF;" on:click={switchToPassword}>
             Войти с помощью логина
           </button>
         {:else}
