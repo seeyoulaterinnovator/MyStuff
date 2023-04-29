@@ -1,23 +1,22 @@
 .message {
-  padding: 32px 24px 40px;
+  padding: 18px 18px 24px;
   max-width: 424px;
   background: #FFFFFF;
   box-shadow: 0 16px 64px rgba(43, 83, 155, 0.16);
   border-radius: 12px;
 
   @media (min-width: 768px) {
-    max-width: 586px;
+    max-width: 390px;
   }
 
   p {
-    font-family: Inter, sans-serif;
+    font-family: 'Suisse Intl', sans-serif;
     font-style: normal;
-    font-weight: 300;
-    font-size: 15.5px;
-    line-height: 21px;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
     color: #000000;
     mix-blend-mode: normal;
-    margin-bottom: 32px;
 
     @media (min-width: 768px) {
       font-size: 16.5px;
@@ -27,7 +26,7 @@
     @media (min-width: 1200px) {
       font-size: 17.5px;
       line-height: 24px;
-      margin-bottom: 40px;
+
     }
   }
 
@@ -41,12 +40,12 @@
     padding: 16px;
   }
 
-  &__title {
-    font-family: Inter, sans-serif;
+&__title {
+    font-family: 'Suisse Intl', sans-serif;
     font-style: normal;
-    font-weight: 600;
-    font-size: 22px;
-    line-height: 27px;
+    font-weight: 500;
+    font-size: 48px;
+    line-height: 56px;
     color: #000000;
     mix-blend-mode: normal;
     margin-bottom: 16px;
