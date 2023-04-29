@@ -122,11 +122,16 @@
           {/if}
         </span>
         <button class="btn message__btn" on:click={handleHide}>
-          &times;
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20.1926 20.1923L11 10.9997M11 10.9997L1.80743 1.80713M11 10.9997L20.1926 1.80713M11 10.9997L1.80743 20.1923" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </button>
       </div>
       <p>{$text}</p>
-      <div class="flex flex-col md:flex-row justify-start items-start gap-4">
+      {#if $isLimitExceeded}
+
+      {:else}
+      <div class="flex flex-col md:flex-row justify-start items-start gap-4 mt-6">
         {#if $isRegistration}
           <a href="{$loginUrl}" class="btn btn-main w-full md:w-auto" on:click={handleHide}>
             Войти
@@ -157,11 +162,12 @@
             Войти с помощью логина
           </button>
         {:else}
-          <button class="btn text-extra w-full md:w-auto" on:click={handleHide}>
+          <button class="btn btn-main confirm__btn w-full md:w-auto" on:click={handleHide}>
             Понятно
           </button>
         {/if}
       </div>
+      {/if}
     </div>
   </div>
 {:else if $showInfo}

@@ -50,7 +50,7 @@
             <div class="flex md:justify-start justify-start w-full items-center text-left md:text-left xl:pb-55px md:pb-10 sm:pb-8 pb-4">
             <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
                 <span>
-                    <button class="font-light verification__resend" name="resend"
+                    <button class="font-light verification__resend w-full" style="text-align: right" name="resend"
                                     type="submit">${sendAgain}</button>
                 </span>
             <#else>
@@ -67,12 +67,11 @@
                 </#if>
             </div>
             </#if>
-            <div class="sm:block md:flex w-full items-center text-center md:text-left">
-                <button class="hidden"
-                        style="display: none"
-                        name="accept" id="accept" type="submit">${doSubmit}</button>
+            <button class="hidden"
+                    style="display: none"
+                    name="accept" id="accept" type="submit">${doSubmit}
+            </button>
 
-            </div>
         </form>
     </#if>
         <script>
