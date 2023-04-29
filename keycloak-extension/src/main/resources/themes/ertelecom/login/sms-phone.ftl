@@ -43,7 +43,7 @@
                 </div>
                 <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
                         <span>
-                            <button class="font-light verification__resend" name="resend" type="submit">Отправить еще раз</button>
+                            <button class="font-light verification__resend w-full" style="text-align: right" name="resend" type="submit">Отправить еще раз</button>
                         </span>
                 <#else>
                 <div id="timer" style="margin-left: auto;">
@@ -57,7 +57,7 @@
                     <p class="hidden font-light text-black verification__text" id="resend">
                         Пароль не приходит?
                         <span>
-                                <button class="font-light verification__resend" name="resend"
+                                <button class="font-light verification__resend w-full" style="text-align: right" name="resend"
                                         type="submit">Отправить еще раз
                                 </button>
                             </span>
@@ -66,11 +66,11 @@
 
             </div>
             </#if>
-            <div class="sm:block md:flex w-full items-center text-center md:text-left">
-                <button class="hidden"
-                        name="accept" id="accept" type="submit">Подтвердить</button>
+            <button class="hidden"
+                    style="display: none"
+                    name="accept" id="accept" type="submit">${doSubmit}
+            </button>
 
-            </div>
         </form>
         <form method="POST" action="${url.loginUrl}">
             <button id="loginPasswordButton" name="back" type="submit" class="hidden">
