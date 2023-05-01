@@ -77,7 +77,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     private static final Map<String, Map<VerifyPhoneKey, Integer>> mainCounter = new HashMap<>();
 
-    private static ConcurrentHashMap<String, KillMe> currentAuthFlowPhoneNumbers = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, PhoneAbuseProtector> currentAuthFlowPhoneNumbers = new ConcurrentHashMap<>();
 
     private static final int MAX_COUNT_MESSAGES = 25;
 
@@ -120,7 +120,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             User user = UserModelUserMapper.mapToUser(context.getUser());
 
             if (!currentAuthFlowPhoneNumbers.containsKey(user.getPhone())) {
-                currentAuthFlowPhoneNumbers.put(user.getPhone(), new KillMe(true, ""));
+                currentAuthFlowPhoneNumbers.put(user.getPhone(), new PhoneAbuseProtector(true, ""));
             }
 
             long deltaTime = 0;
@@ -145,7 +145,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                     authSession.setAuthNote("godMode", authContext.getHashProperty());
                     authSession.setAuthNote("needSendSmsCode", "false");
                     authSession.setAuthNote("currentCode", authContext.getHashProperty());
-                    currentAuthFlowPhoneNumbers.get(user.getPhone()).setSendingBanned(false);
+                   // currentAuthFlowPhoneNumbers.get(user.getPhone()).setSendingBanned(false);
                     currentAuthFlowPhoneNumbers.get(user.getPhone()).setSavedCodeHash(authContext.getHashProperty());
                 } else if (checkCanWeSendSmS(user, context) && authSession.getAuthNote("needSendSmsCode") != null && authSession.getAuthNote("needSendSmsCode").equals("true")
                         && checkKillMe(user) || checkCanWeSendSmS(user, context) && authSession.getAuthNote("needSendSmsCode") == null && checkKillMe(user)) {
@@ -245,6 +245,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
         if (isLoginPassword && (validateUserAndPassword(context, formData))) {
             sessionModel.setAuthNote("loginPasswordButton", "loginPasswordButton");
+            sessionModel.setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
             context.success();
             return;
         }
@@ -475,7 +476,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 && it.getKey().getRealm().equals(context.getRealm().getName()) && it.getValue() < MAX_COUNT_MESSAGES)) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
                     .setError(MessageConstants.SMS_LIMIT_5_CONTINUE);
-            currentAuthFlowPhoneNumbers.get(user.getPhone()).setSendingBanned(true);
+        //    currentAuthFlowPhoneNumbers.get(user.getPhone()).setSendingBanned(true);
             return true;
         }
 
@@ -485,7 +486,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 && it.getKey().getRealm().equals(context.getRealm().getName()) && it.getValue() < MAX_COUNT_MESSAGES)) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
                     .setError(MessageConstants.CALL_LIMIT_5_CONTINUE);
-            currentAuthFlowPhoneNumbers.get(user.getPhone()).setSendingBanned(true);
+      //      currentAuthFlowPhoneNumbers.get(user.getPhone()).setSendingBanned(true);
             return true;
         }
         context.form().setAttribute("isMoreThanFiveAttempts", false);
