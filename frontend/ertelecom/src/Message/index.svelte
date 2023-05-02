@@ -9,7 +9,8 @@
     loginUrl,
     showInfo,
     isLimitExceeded,
-    isPhoneError
+    isPhoneError,
+    isSecondSwitcher
   } from './stores.js';
 
   const hasRegistration = window.location.href.includes('registration');
@@ -28,6 +29,8 @@
   const submitButton = document.getElementById("closeWindow");
   const hasPhoneErrorMessage = hasAlert && alert.classList.contains('phone_error');
   const switcher = document.getElementById("loginPasswordButton");
+  const secondSwitcher = document.getElementById("smsLoginButton");
+  const hasSecondSwitcher = secondSwitcher !== null;
 
   let email = '';
   let phone = '';
@@ -53,6 +56,7 @@
   isUpdateProfile.set(hasUpdateProfile);
   text.set(newText);
   isLimitExceeded.set(hasLimitCode);
+  isSecondSwitcher.set(hasSecondSwitcher)
 
   if (hasRegistration) {
     if (hasBadEmail && hasBadPhone) {
@@ -95,13 +99,21 @@
   }
 
   function switchToPassword() {
-    switcher.click();
+    if (switcher!==null){
+      switcher.click();
+    }
+    else {
+      show.set(false);
+    }
+  }
+
+  function clickSecondSwitcher() {
+    secondSwitcher.click();
   }
 
   function closeAndSubmit() {
     submitButton.click();
   }
-
 
   function handleClick(e) {
     e.stopPropagation();
@@ -121,11 +133,23 @@
             Ошибка
           {/if}
         </span>
-        <button class="btn message__btn" on:click={handleHide}>
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20.1926 20.1923L11 10.9997M11 10.9997L1.80743 1.80713M11 10.9997L20.1926 1.80713M11 10.9997L1.80743 20.1923" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
+        {#if $isSecondSwitcher && $isPhoneError}
+          <button class="message__close-dialog-button" on:click={clickSecondSwitcher}>
+            <svg width="14" height="13" viewBox="0 0 14 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd"
+                    d="M1.95959 0.540478C1.70575 0.286637 1.2942 0.286637 1.04036 0.540478C0.786515 0.794319 0.786515 1.20588 1.04036 1.45972L6.08074 6.5001L1.04036 11.5405C0.786515 11.7943 0.786515 12.2059 1.04036 12.4597C1.2942 12.7136 1.70575 12.7136 1.95959 12.4597L6.99998 7.41934L12.0404 12.4597C12.2942 12.7136 12.7058 12.7136 12.9596 12.4597C13.2134 12.2059 13.2134 11.7943 12.9596 11.5405L7.91921 6.5001L12.9596 1.45972C13.2134 1.20588 13.2134 0.79432 12.9596 0.540478C12.7058 0.286638 12.2942 0.286638 12.0404 0.540478L6.99998 5.58086L1.95959 0.540478Z"
+                    fill="#16629A"/>
+            </svg>
+          </button>
+        {:else}
+          <button class="message__close-dialog-button" on:click={handleHide}>
+            <svg width="14" height="13" viewBox="0 0 14 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd"
+                    d="M1.95959 0.540478C1.70575 0.286637 1.2942 0.286637 1.04036 0.540478C0.786515 0.794319 0.786515 1.20588 1.04036 1.45972L6.08074 6.5001L1.04036 11.5405C0.786515 11.7943 0.786515 12.2059 1.04036 12.4597C1.2942 12.7136 1.70575 12.7136 1.95959 12.4597L6.99998 7.41934L12.0404 12.4597C12.2942 12.7136 12.7058 12.7136 12.9596 12.4597C13.2134 12.2059 13.2134 11.7943 12.9596 11.5405L7.91921 6.5001L12.9596 1.45972C13.2134 1.20588 13.2134 0.79432 12.9596 0.540478C12.7058 0.286638 12.2942 0.286638 12.0404 0.540478L6.99998 5.58086L1.95959 0.540478Z"
+                    fill="#16629A"/>
+            </svg>
+          </button>
+        {/if}
       </div>
       <p>{$text}</p>
       {#if $isLimitExceeded}
@@ -172,7 +196,7 @@
   </div>
 {:else if $showInfo}
   <div class="message__fade flex justify-center items-center" on:click={closeAndSubmit}>
-    <div class="email_window" on:click={closeAndSubmit}>
+    <div class="message" on:click={closeAndSubmit}>
       <div class="message__title flex flex-row justify-between items-center gap-4">
         <span>
           {#if $isBadEmail || $isBadPhone}
@@ -183,8 +207,12 @@
             Ошибка
           {/if}
         </span>
-        <button class="btn message__btn" on:click={closeAndSubmit}>
-          &times;
+        <button class="message__close-dialog-button" on:click={closeAndSubmit}>
+          <svg width="14" height="13" viewBox="0 0 14 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd"
+                  d="M1.95959 0.540478C1.70575 0.286637 1.2942 0.286637 1.04036 0.540478C0.786515 0.794319 0.786515 1.20588 1.04036 1.45972L6.08074 6.5001L1.04036 11.5405C0.786515 11.7943 0.786515 12.2059 1.04036 12.4597C1.2942 12.7136 1.70575 12.7136 1.95959 12.4597L6.99998 7.41934L12.0404 12.4597C12.2942 12.7136 12.7058 12.7136 12.9596 12.4597C13.2134 12.2059 13.2134 11.7943 12.9596 11.5405L7.91921 6.5001L12.9596 1.45972C13.2134 1.20588 13.2134 0.79432 12.9596 0.540478C12.7058 0.286638 12.2942 0.286638 12.0404 0.540478L6.99998 5.58086L1.95959 0.540478Z"
+                  fill="#16629A"/>
+          </svg>
         </button>
       </div>
       <p>{$text}</p>
