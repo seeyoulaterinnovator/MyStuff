@@ -2,13 +2,10 @@ package ru.alamics.sso.jpa.entity.antifraud;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 import org.keycloak.models.jpa.entities.UserEntity;
-import ru.alamics.sso.jpa.util.LimitationCauseType;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Table(name = "BLACK_LIST")
 @Entity

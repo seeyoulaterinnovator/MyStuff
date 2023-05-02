@@ -968,6 +968,30 @@
         </sql>
     </changeSet>
 
+    <changeSet id="127" author="zhakov-mv">
+        <sql>
+            CREATE TABLE IF NOT EXISTS ATTEMPT_FAILS (
+                id VARCHAR(36) NOT NULL PRIMARY KEY,
+                phone VARCHAR(12) NOT NULL,
+                code VARCHAR(64) NOT NULL,
+                realm VARCHAR(36) NOT NULL,
+                limitation_cause VARCHAR(36) NOT NULL
+            ) charset = utf8mb4;
+        </sql>
+    </changeSet>
+
+    <changeSet id="128" author="zhakov-mv">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ATTEMPT_FAILS"/>
+            <not>
+                <indexExists indexName="IDX_ATTEMPT_FAILS_FULLTEXT"/>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE FULLTEXT INDEX IDX_ATTEMPT_FAILS_FULLTEXT ON ATTEMPT_FAILS(phone, realm)
+        </sql>
+    </changeSet>
+
     <changeSet id="51_p" author="plyusnin-da" dbms="mysql">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="USER_ENTITY"/>

@@ -1,6 +1,5 @@
 package ru.alamics.sso.jpa.repository;
 
-import org.hibernate.Session;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.RequiredActionContext;
 import ru.alamics.sso.jpa.entity.antifraud.BlackListEntity;
