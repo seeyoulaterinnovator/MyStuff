@@ -77,7 +77,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     private static final Map<String, Map<VerifyPhoneKey, Integer>> mainCounter = new HashMap<>();
 
-    private static ConcurrentHashMap<String, PhoneAbuseProtector> currentAuthFlowPhoneNumbers = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<PhonePlusRealmProtector, PhoneHashAndBanStatusKeeper> currentAuthFlowPhoneNumbers = new ConcurrentHashMap<>();
 
     private static final int MAX_COUNT_MESSAGES = 25;
 
@@ -119,8 +119,10 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             activationCodeType = authSession.getAuthNote("secondPhase").equals("smsButton") ? CODE_TO_SMS : CODE_BY_PHONE_NUMBER;
             User user = UserModelUserMapper.mapToUser(context.getUser());
 
-            if (!currentAuthFlowPhoneNumbers.containsKey(user.getPhone())) {
-                currentAuthFlowPhoneNumbers.put(user.getPhone(), new PhoneAbuseProtector(true, ""));
+            PhonePlusRealmProtector protector = new PhonePlusRealmProtector(user.getPhone(), context.getRealm());
+
+            if (!currentAuthFlowPhoneNumbers.containsKey(protector)) {
+                currentAuthFlowPhoneNumbers.put(protector, new PhoneHashAndBanStatusKeeper(true, ""));
             }
 
             long deltaTime = 0;
@@ -145,15 +147,14 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                     authSession.setAuthNote("godMode", authContext.getHashProperty());
                     authSession.setAuthNote("needSendSmsCode", "false");
                     authSession.setAuthNote("currentCode", authContext.getHashProperty());
-                   // currentAuthFlowPhoneNumbers.get(user.getPhone()).setSendingBanned(false);
-                    currentAuthFlowPhoneNumbers.get(user.getPhone()).setSavedCodeHash(authContext.getHashProperty());
+                    currentAuthFlowPhoneNumbers.get(protector).setSavedCodeHash(authContext.getHashProperty());
                 } else if (checkCanWeSendSmS(user, context) && authSession.getAuthNote("needSendSmsCode") != null && authSession.getAuthNote("needSendSmsCode").equals("true")
-                        && checkKillMe(user) || checkCanWeSendSmS(user, context) && authSession.getAuthNote("needSendSmsCode") == null && checkKillMe(user)) {
+                        && isPhoneAbuseActivated(protector) || checkCanWeSendSmS(user, context) && authSession.getAuthNote("needSendSmsCode") == null && isPhoneAbuseActivated(protector)) {
                     authContext = userPhoneVerifier.sendValidationMsg(user, authContext, activationCodeType, context.getRealm());
                     authSession.setAuthNote("godMode", authContext.getHashProperty());
                     authSession.setAuthNote("needSendSmsCode", "false");
-                    currentAuthFlowPhoneNumbers.get(user.getPhone()).setSendingBanned(false);
-                    currentAuthFlowPhoneNumbers.get(user.getPhone()).setSavedCodeHash(authContext.getHashProperty());
+                    currentAuthFlowPhoneNumbers.get(protector).setSendingBanned(false);
+                    currentAuthFlowPhoneNumbers.get(protector).setSavedCodeHash(authContext.getHashProperty());
                 }
                 authSession.setAuthNote(PHONE_KEY_HASH, authContext.getHashProperty());
                 authSession.setAuthNote(COUNT_REPEAT, authContext.getCounter().toString());
@@ -192,9 +193,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         }
     }
 
-    private boolean checkKillMe(User user) {
-        boolean test = currentAuthFlowPhoneNumbers.get(user.getPhone()).isSendingBanned();
-        return currentAuthFlowPhoneNumbers.get(user.getPhone()).isSendingBanned();
+    private boolean isPhoneAbuseActivated(PhonePlusRealmProtector protector) {
+        return currentAuthFlowPhoneNumbers.get(protector).isSendingBanned();
     }
 
     protected Response challenge(AuthenticationFlowContext context, MultivaluedMap<String, String> formData) {
@@ -259,10 +259,11 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         if (sessionModel.getAuthNote("secondPhase") != null) {
             UserModel model = context.getUser();
             User user = UserModelUserMapper.mapToUser(model);
+            PhonePlusRealmProtector protector = new PhonePlusRealmProtector(user.getPhone(), context.getRealm());
 
             activationCodeType = sessionModel.getAuthNote("secondPhase").equals("smsButton") ? CODE_TO_SMS : CODE_BY_PHONE_NUMBER;
             AuthContext authContext = AuthContext.builder()
-                    .hashProperty(currentAuthFlowPhoneNumbers.get(user.getPhone()).getSavedCodeHash())
+                    .hashProperty(currentAuthFlowPhoneNumbers.get(protector).getSavedCodeHash())
                     .expirationTime(LocalDateTime.parse(sessionModel.getAuthNote("correctTime"), DateTimeFormatter.ISO_DATE_TIME))
                     .counter(getCount(sessionModel.getAuthNote(COUNT_REPEAT)))
                     .activationCodeType(activationCodeType)
@@ -287,7 +288,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                         mainCounter.remove(user.getPhone());
                         return;
                     }
-                    verifyCode(context, sessionModel, user, authContext, httpRequest);
+                    verifyCode(context, sessionModel, user, authContext, httpRequest, protector);
                 }
 
                 if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
@@ -298,7 +299,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                         mainCounter.remove(user.getPhone());
                         return;
                     }
-                    verifyCode(context, sessionModel, user, authContext, httpRequest);
+                    verifyCode(context, sessionModel, user, authContext, httpRequest, protector);
                 }
             }
         } else {
@@ -406,7 +407,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         }
     }
 
-    private void verifyCode(AuthenticationFlowContext context, AuthenticationSessionModel sessionModel, User user, AuthContext authContext, HttpRequest httpRequest) {
+    private void verifyCode(AuthenticationFlowContext context, AuthenticationSessionModel sessionModel, User user, AuthContext authContext, HttpRequest httpRequest, PhonePlusRealmProtector protector) {
         try {
             String code = httpRequest.getDecodedFormParameters().getFirst("smscode");
 
@@ -421,7 +422,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             context.success();
             mainCounter.remove(user.getPhone());
             sessionModel.removeAuthNote("needSendSmsCode");
-            currentAuthFlowPhoneNumbers.remove(user.getPhone());
+            currentAuthFlowPhoneNumbers.remove(protector);
         } catch (WrongSmsCode wrongSmsCode) {
             log.warn("Wrong sms code");
             context.form()
@@ -476,7 +477,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 && it.getKey().getRealm().equals(context.getRealm().getName()) && it.getValue() < MAX_COUNT_MESSAGES)) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
                     .setError(MessageConstants.SMS_LIMIT_5_CONTINUE);
-        //    currentAuthFlowPhoneNumbers.get(user.getPhone()).setSendingBanned(true);
+            //    currentAuthFlowPhoneNumbers.get(user.getPhone()).setSendingBanned(true);
             return true;
         }
 
@@ -486,7 +487,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 && it.getKey().getRealm().equals(context.getRealm().getName()) && it.getValue() < MAX_COUNT_MESSAGES)) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
                     .setError(MessageConstants.CALL_LIMIT_5_CONTINUE);
-      //      currentAuthFlowPhoneNumbers.get(user.getPhone()).setSendingBanned(true);
+            //      currentAuthFlowPhoneNumbers.get(user.getPhone()).setSendingBanned(true);
             return true;
         }
         context.form().setAttribute("isMoreThanFiveAttempts", false);

@@ -5,11 +5,11 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode
 @Data
-public class PhoneAbuseProtector {
+public class PhoneHashAndBanStatusKeeper {
     private boolean isSendingBanned;
     private String savedCodeHash;
 
-    public PhoneAbuseProtector(boolean isSendingAllowed, String savedCodeHash) {
+    public PhoneHashAndBanStatusKeeper(boolean isSendingAllowed, String savedCodeHash) {
         this.isSendingBanned = isSendingAllowed;
         this.savedCodeHash = savedCodeHash;
     }
