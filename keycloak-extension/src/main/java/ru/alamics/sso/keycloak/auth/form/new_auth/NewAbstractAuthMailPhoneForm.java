@@ -1,12 +1,12 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth;
 
+
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
-import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAuthenticator;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
@@ -84,9 +84,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
     private final AttemptFailsService attemptFailsService;
 
     private static final int MAX_RESEND_RECALL_TRIES = 5;
-    private static final ConcurrentHashMap<PhonePlusRealmProtector, PhoneHashAndBanStatusKeeper> currentAuthFlowPhoneNumbers = new ConcurrentHashMap<>();
 
-    private static final int MAX_COUNT_MESSAGES = 25;
+    private static final ConcurrentHashMap<PhonePlusRealmProtector, PhoneHashAndBanStatusKeeper> currentAuthFlowPhoneNumbers = new ConcurrentHashMap<>();
 
     private static final int COUNT_BY_ONE_CODE = 5;
 
@@ -276,7 +275,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                     .counter(getCount(sessionModel.getAuthNote(COUNT_REPEAT)))
                     .activationCodeType(activationCodeType)
                     .build();
-            if (Objects.nonNull(authContext.getHashProperty())) {
+            if (Objects.nonNull(authContext.getHashProperty()) || !authContext.getHashProperty().equals("")) {
                 sessionModel.setAuthNote("currentCode", authContext.getHashProperty());
             }
             if (context.getHttpRequest().getDecodedFormParameters().containsKey("resend")) {
@@ -301,7 +300,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 authenticate(context);
 
             } else {
-                checkAndAddToCounter(user, authContext, context);
+                checkAndAddToCounter(user, authContext, context, sessionModel);
                 verifyCode(context, sessionModel, user, authContext, httpRequest, protector);
             }
         } else {
@@ -315,7 +314,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             if (!smsAttempts.isEmpty() && smsAttempts.size() >= MAX_RESEND_RECALL_TRIES && !blackListService.isUserBlockedAuthBySms(user.getPhone(), context)) {
                 blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.SMS, authSession);
                 authenticate(context);
-                mainCounter.remove(user.getPhone());
+                mainCounter.remove(user.getPhone());/* user.getPhone(), context.getRealm().getName());*/
                 attemptFailsService.deleteAttempts(smsAttempts);
                 return;
             }
@@ -326,7 +325,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             if (!callAttempts.isEmpty() && callAttempts.size() >= MAX_RESEND_RECALL_TRIES && !blackListService.isUserBlockedAuthByPhoneCall(user.getPhone(), context)) {
                 blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.PHONE_CALL, authSession);
                 authenticate(context);
-                mainCounter.remove(user.getPhone());
+                mainCounter.remove(user.getPhone()); /*user.getPhone());*/
                 attemptFailsService.deleteAttempts(callAttempts);
             }
         }
@@ -506,12 +505,12 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         return false;
     }
 
-    private void checkAndAddToCounter(User user, AuthContext authContext, AuthenticationFlowContext context) {
+    private void checkAndAddToCounter(User user, AuthContext authContext, AuthenticationFlowContext context, AuthenticationSessionModel sessionModel) {
         VerifyPhoneKey verifyPhoneKey = mainCounter.get(user.getPhone());
         if (!mainCounter.containsKey(user.getPhone()) || verifyPhoneKey
-                .getCurrentCodeCounter() == null && verifyPhoneKey.getRealm().equals(context.getRealm().getName())) {
+                .getCurrentCodeCounter() == null || !verifyPhoneKey.getRealm().equals(context.getRealm().getName())) {
             VerifyPhoneKey initCounter = new VerifyPhoneKey(authContext.getActivationCodeType(),
-                    authContext.getHashProperty(), 0, context.getRealm().getName()); /* 0 - кол-во попыток изначально */
+                    sessionModel.getAuthNote("currentCode"), 0, context.getRealm().getName()); /* 0 - кол-во попыток изначально */
             mainCounter.put(user.getPhone(), initCounter);
         }
 
