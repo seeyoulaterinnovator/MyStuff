@@ -302,7 +302,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
             } else {
                 checkAndAddToCounter(user, authContext, context);
-                verifyCode(context, sessionModel, user, authContext, httpRequest);
+                verifyCode(context, sessionModel, user, authContext, httpRequest, protector);
             }
         } else {
             authenticate(context);
@@ -523,7 +523,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             context.form()
                     .setAttribute("codeLimited", true)
                     .setError(MessageConstants.SMS_LIMIT_BLOCK);
-                    .setError(MessageConstants.SMS_LIMIT_25_BLOCK);
             currentAuthFlowPhoneNumbers.remove(protector);
             return false;
         }
@@ -531,7 +530,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             context.form()
                     .setAttribute("codeLimited", true)
                     .setError(MessageConstants.CALL_LIMIT_BLOCK);
-                    .setError(MessageConstants.CALL_LIMIT_25_BLOCK);
             currentAuthFlowPhoneNumbers.remove(protector);
             return false;
         }
