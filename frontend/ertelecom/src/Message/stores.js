@@ -8,6 +8,8 @@ export const isBadEmail = writable(false);
 
 export const isPhoneError = writable(false);
 
+export const isSecondSwitcher = writable(false);
+
 export const isBadPhone = writable(false);
 
 export const isRegistration = writable(false);

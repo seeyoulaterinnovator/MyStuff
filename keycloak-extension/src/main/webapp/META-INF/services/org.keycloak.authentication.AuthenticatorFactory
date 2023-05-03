@@ -1,4 +1,5 @@
 ru.alamics.sso.keycloak.auth.form.rias.AuthMailPhoneWithRiasFormFactory
+ru.alamics.sso.keycloak.auth.form.new_auth.new_auth_rias.NewAuthMailPhoneWithRiasFormFactory
 ru.alamics.sso.keycloak.auth.form.AuthMailPhoneFormFactory
 ru.alamics.sso.keycloak.auth.TwoStepVerificationFactory
 ru.alamics.sso.keycloak.auth.form.new_auth.newAuthReqActions.TwoStepAuthFactory
