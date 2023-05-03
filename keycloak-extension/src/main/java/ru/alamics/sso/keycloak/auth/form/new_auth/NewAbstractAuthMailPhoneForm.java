@@ -263,7 +263,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
             activationCodeType = sessionModel.getAuthNote("secondPhase").equals("smsButton") ? CODE_TO_SMS : CODE_BY_PHONE_NUMBER;
             AuthContext authContext = AuthContext.builder()
-                    .hashProperty(currentAuthFlowPhoneNumbers.get(protector).getSavedCodeHash())
+                    .hashProperty(currentAuthFlowPhoneNumbers.get(protector) != null ? currentAuthFlowPhoneNumbers.get(protector).getSavedCodeHash() : "")
                     .expirationTime(LocalDateTime.parse(sessionModel.getAuthNote("correctTime"), DateTimeFormatter.ISO_DATE_TIME))
                     .counter(getCount(sessionModel.getAuthNote(COUNT_REPEAT)))
                     .activationCodeType(activationCodeType)
