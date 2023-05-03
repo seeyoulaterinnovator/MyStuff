@@ -6,6 +6,7 @@ import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
+import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAuthenticator;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
@@ -21,6 +22,8 @@ import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaType;
+import ru.alamics.sso.antifraud.AttemptFailsDto;
+import ru.alamics.sso.antifraud.AttemptFailsService;
 import ru.alamics.sso.antifraud.BlackListDto;
 import ru.alamics.sso.antifraud.BlackListService;
 import ru.alamics.sso.jpa.util.LimitationCauseType;
@@ -47,6 +50,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -75,8 +79,11 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     private static final String GRANT_TYPE = "grant_type";
 
-    private static final Map<String, Map<VerifyPhoneKey, Integer>> mainCounter = new HashMap<>();
+    private static final Map<String, VerifyPhoneKey> mainCounter = new HashMap<>();
 
+    private final AttemptFailsService attemptFailsService;
+
+    private static final int MAX_RESEND_RECALL_TRIES = 5;
     private static final ConcurrentHashMap<PhonePlusRealmProtector, PhoneHashAndBanStatusKeeper> currentAuthFlowPhoneNumbers = new ConcurrentHashMap<>();
 
     private static final int MAX_COUNT_MESSAGES = 25;
@@ -88,6 +95,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         this.userPhoneVerifier = Lookup.lookup(UserPhoneVerifier.class);
         this.settingsService = Lookup.lookup(SettingsService.class);
         this.blackListService = Lookup.lookup(BlackListService.class);
+        this.attemptFailsService = Lookup.lookup(AttemptFailsService.class);
     }
 
     @Override
@@ -272,6 +280,19 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 sessionModel.setAuthNote("currentCode", authContext.getHashProperty());
             }
             if (context.getHttpRequest().getDecodedFormParameters().containsKey("resend")) {
+                String currentCode = sessionModel.getAuthNote("currentCode");
+
+                if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
+                    attemptFailsService.saveAttempt(new AttemptFailsDto(user.getPhone(), currentCode, context.getRealm().getName(), CODE_BY_PHONE_NUMBER.name()));
+                }
+
+                if (activationCodeType.equals(CODE_TO_SMS)) {
+                    attemptFailsService.saveAttempt(new AttemptFailsDto(user.getPhone(), currentCode, context.getRealm().getName(), CODE_TO_SMS.name()));
+                }
+                if (mainCounter.get(user.getPhone()).getCurrentCode().equals(currentCode)) {
+                    mainCounter.remove(user.getPhone());
+                }
+                checkIsLimited(user, context, sessionModel);
                 log.info("Sms code resend");
 
                 sessionModel.setAuthNote("needSendSmsCode", "true");
@@ -280,30 +301,34 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 authenticate(context);
 
             } else {
-                if (activationCodeType.equals(CODE_TO_SMS)) {
-                    checkAndAddToCounter(user, authContext, context);
-                    if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) >= MAX_COUNT_MESSAGES) {
-                        blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.SMS, context);
-                        authenticate(context);
-                        mainCounter.remove(user.getPhone());
-                        return;
-                    }
-                    verifyCode(context, sessionModel, user, authContext, httpRequest, protector);
-                }
-
-                if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
-                    checkAndAddToCounter(user, authContext, context);
-                    if (mainCounter.get(user.getPhone()).values().stream().findFirst().orElseThrow(() -> new RuntimeException("counter shouldnt be null")) >= MAX_COUNT_MESSAGES) {
-                        blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.PHONE_CALL, context);
-                        authenticate(context);
-                        mainCounter.remove(user.getPhone());
-                        return;
-                    }
-                    verifyCode(context, sessionModel, user, authContext, httpRequest, protector);
-                }
+                checkAndAddToCounter(user, authContext, context);
+                verifyCode(context, sessionModel, user, authContext, httpRequest, protector);
             }
         } else {
             authenticate(context);
+        }
+    }
+
+    public void checkIsLimited(User user, AuthenticationFlowContext context, AuthenticationSessionModel authSession) {
+        if (activationCodeType.equals(CODE_TO_SMS)) {
+            List<AttemptFailsDto> smsAttempts = attemptFailsService.getAttempts(user.getPhone(), context.getRealm().getName(), CODE_TO_SMS.name());
+            if (!smsAttempts.isEmpty() && smsAttempts.size() >= MAX_RESEND_RECALL_TRIES && !blackListService.isUserBlockedAuthBySms(user.getPhone(), context)) {
+                blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.SMS, authSession);
+                authenticate(context);
+                mainCounter.remove(user.getPhone());
+                attemptFailsService.deleteAttempts(smsAttempts);
+                return;
+            }
+        }
+
+        if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
+            List<AttemptFailsDto> callAttempts = attemptFailsService.getAttempts(user.getPhone(), context.getRealm().getName(), CODE_BY_PHONE_NUMBER.name());
+            if (!callAttempts.isEmpty() && callAttempts.size() >= MAX_RESEND_RECALL_TRIES && !blackListService.isUserBlockedAuthByPhoneCall(user.getPhone(), context)) {
+                blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.PHONE_CALL, authSession);
+                authenticate(context);
+                mainCounter.remove(user.getPhone());
+                attemptFailsService.deleteAttempts(callAttempts);
+            }
         }
     }
 
@@ -442,48 +467,37 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         }
         if (mainCounter.containsKey(user.getPhone())) {
             int existCurrentCodeTries = 0;
-            if (mainCounter.get(user.getPhone()).entrySet().stream().allMatch(it -> it.getKey().getCurrentCode().equals(code))) {
-                existCurrentCodeTries = mainCounter.get(user.getPhone()).keySet().stream().filter(it -> it.getCurrentCode().equals(code)
-                                && it.getRealm().equals(authSession.getRealm().getName()))
-                        .findAny().orElseThrow(RuntimeException::new).getCurrentCodeCounter();
+            VerifyPhoneKey verifyPhoneKey = mainCounter.get(user.getPhone());
+            if (verifyPhoneKey.getCurrentCode().equals(code) && verifyPhoneKey.getRealm().equals(authSession.getRealm().getName())) {
+                existCurrentCodeTries = verifyPhoneKey.getCurrentCodeCounter();
             }
             existCurrentCodeTries++;
 
-            int existUserTries = 0;
-            if (mainCounter.get(user.getPhone()).entrySet().stream().allMatch(it ->
-                    it.getKey().getRealm().equals(authSession.getRealm().getName()))) {
-
-                existUserTries = mainCounter.get(user.getPhone()).entrySet().stream().filter(it -> it.getKey().getRealm().equals(authSession.getRealm().getName()))
-                        .findFirst().orElseThrow(RuntimeException::new).getValue();
-            }
-            existUserTries++;
-
-            Map<VerifyPhoneKey, Integer> currentCounterMap = new HashMap<>();
-            currentCounterMap.put(new VerifyPhoneKey(authContext.getActivationCodeType(), code, existCurrentCodeTries, authSession.getRealm().getName()), existUserTries);
-            mainCounter.put(user.getPhone(), currentCounterMap);
+            verifyPhoneKey = new VerifyPhoneKey(authContext.getActivationCodeType(), code, existCurrentCodeTries, authSession.getRealm().getName());
+            mainCounter.put(user.getPhone(), verifyPhoneKey);
         }
     }
 
     private boolean checkIsMoreThanFiveAttempts(AuthenticationFlowContext context, User user) {
-        Map<VerifyPhoneKey, Integer> userMap = mainCounter.get(user.getPhone());
-        if (userMap == null) {
+        VerifyPhoneKey currentCodeCounter = mainCounter.get(user.getPhone());
+        if (currentCodeCounter == null) {
             context.form().setAttribute("isMoreThanFiveAttempts", false);
             return false;
         }
         String code = context.getAuthenticationSession().getAuthNote("currentCode");
-        if (userMap.entrySet().stream().allMatch(it -> it.getKey()
-                .getCurrentCode().equals(code) && it.getKey()
-                .getCurrentCodeCounter() >= COUNT_BY_ONE_CODE && it.getKey().getActivationType().equals(CODE_TO_SMS)
-                && it.getKey().getRealm().equals(context.getRealm().getName()) && it.getValue() < MAX_COUNT_MESSAGES)) {
+        if (currentCodeCounter
+                .getCurrentCode().equals(code) && currentCodeCounter
+                .getCurrentCodeCounter() >= COUNT_BY_ONE_CODE && currentCodeCounter.getActivationType().equals(CODE_TO_SMS)
+                && currentCodeCounter.getRealm().equals(context.getRealm().getName())) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
                     .setError(MessageConstants.SMS_LIMIT_5_CONTINUE);
             return true;
         }
 
-        if (userMap.entrySet().stream().allMatch(it -> it.getKey()
-                .getCurrentCode().equals(code) && it.getKey()
-                .getCurrentCodeCounter() >= COUNT_BY_ONE_CODE && it.getKey().getActivationType().equals(CODE_BY_PHONE_NUMBER)
-                && it.getKey().getRealm().equals(context.getRealm().getName()) && it.getValue() < MAX_COUNT_MESSAGES)) {
+        if (currentCodeCounter
+                .getCurrentCode().equals(code) && currentCodeCounter
+                .getCurrentCodeCounter() >= COUNT_BY_ONE_CODE && currentCodeCounter.getActivationType().equals(CODE_BY_PHONE_NUMBER)
+                && currentCodeCounter.getRealm().equals(context.getRealm().getName())) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
                     .setError(MessageConstants.CALL_LIMIT_5_CONTINUE);
             return true;
@@ -493,12 +507,12 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
     }
 
     private void checkAndAddToCounter(User user, AuthContext authContext, AuthenticationFlowContext context) {
-        if (!mainCounter.containsKey(user.getPhone()) || mainCounter.get(user.getPhone())
-                .entrySet().stream().allMatch(it -> it.getKey().getCurrentCodeCounter() == null && it.getKey().getRealm().equals(context.getRealm().getName()))) {
-            Map<VerifyPhoneKey, Integer> initCounterMap = new HashMap<>();
-            initCounterMap.put(new VerifyPhoneKey(authContext.getActivationCodeType(),
-                    authContext.getHashProperty(), 0, context.getRealm().getName()), 0 /* 0 - кол-во попыток изначально */);
-            mainCounter.put(user.getPhone(), initCounterMap);
+        VerifyPhoneKey verifyPhoneKey = mainCounter.get(user.getPhone());
+        if (!mainCounter.containsKey(user.getPhone()) || verifyPhoneKey
+                .getCurrentCodeCounter() == null && verifyPhoneKey.getRealm().equals(context.getRealm().getName())) {
+            VerifyPhoneKey initCounter = new VerifyPhoneKey(authContext.getActivationCodeType(),
+                    authContext.getHashProperty(), 0, context.getRealm().getName()); /* 0 - кол-во попыток изначально */
+            mainCounter.put(user.getPhone(), initCounter);
         }
 
         checkAndIncrementExistTries(user, authContext, context);
@@ -508,14 +522,14 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         if (activationCodeType.equals(CODE_TO_SMS) && blackListService.isUserBlockedAuthBySms(user.getPhone(), context)) {
             context.form()
                     .setAttribute("codeLimited", true)
-                    .setError(MessageConstants.SMS_LIMIT_25_BLOCK);
+                    .setError(MessageConstants.SMS_LIMIT_BLOCK);
             currentAuthFlowPhoneNumbers.remove(protector);
             return false;
         }
         if (activationCodeType.equals(CODE_BY_PHONE_NUMBER) && blackListService.isUserBlockedAuthByPhoneCall(user.getPhone(), context)) {
             context.form()
                     .setAttribute("codeLimited", true)
-                    .setError(MessageConstants.CALL_LIMIT_25_BLOCK);
+                    .setError(MessageConstants.CALL_LIMIT_BLOCK);
             currentAuthFlowPhoneNumbers.remove(protector);
             return false;
         }
