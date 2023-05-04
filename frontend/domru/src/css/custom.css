@@ -197,3 +197,7 @@ input[type="number"] {
     text-align: right;
   }
 }
+
+.hidden-important {
+  display: none !important;
+}

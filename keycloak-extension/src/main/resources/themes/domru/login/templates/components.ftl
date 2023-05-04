@@ -28,7 +28,7 @@
     />
     <#if label??>
         <label
-                class="field__label"
+                class="field__label hidden-important"
                 for="${fieldName}">
             ${label}
         </label>

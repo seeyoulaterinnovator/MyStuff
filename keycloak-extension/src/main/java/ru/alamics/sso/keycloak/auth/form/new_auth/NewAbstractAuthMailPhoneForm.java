@@ -35,10 +35,7 @@ import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.phone.ActivationCodeType;
 import ru.alamics.sso.registration.phone.UserPhoneVerifier;
-import ru.alamics.sso.registration.phone.exception.PhoneCallException;
-import ru.alamics.sso.registration.phone.exception.SendMessageException;
-import ru.alamics.sso.registration.phone.exception.UserPhoneEmpty;
-import ru.alamics.sso.registration.phone.exception.WrongSmsCode;
+import ru.alamics.sso.registration.phone.exception.*;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
@@ -434,7 +431,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         try {
             String code = httpRequest.getDecodedFormParameters().getFirst("smscode");
 
-            userPhoneVerifier.verifyPhone(user, authContext, code, activationCodeType);
+            userPhoneVerifier.verifyPhone(user, authContext.getExpirationTime(), authContext.getHashProperty(), code, activationCodeType);
 
             sessionModel.removeAuthNote(PHONE_KEY_HASH);
             sessionModel.removeAuthNote(EXPIRATION_TIME);
@@ -449,6 +446,13 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             log.warn("Wrong sms code");
             context.form()
                     .setError("Код введен неверно. Проверьте правильность введенных данных");
+            sessionModel.removeAuthNote(PHONE_KEY_HASH);
+            sessionModel.setAuthNote(ERROR_CODE, ERROR_CODE);
+            authenticate(context);
+        } catch (TimeExpiredException e) {
+            log.warn("Time for code is expired");
+            context.form()
+                    .setError("Истёк срок действия кода");
             sessionModel.removeAuthNote(PHONE_KEY_HASH);
             sessionModel.setAuthNote(ERROR_CODE, ERROR_CODE);
             authenticate(context);

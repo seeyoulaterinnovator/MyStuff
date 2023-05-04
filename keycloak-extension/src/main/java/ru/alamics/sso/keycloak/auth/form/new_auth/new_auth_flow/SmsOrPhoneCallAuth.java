@@ -19,10 +19,7 @@ import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.phone.ActivationCodeType;
 import ru.alamics.sso.registration.phone.UserPhoneVerifier;
-import ru.alamics.sso.registration.phone.exception.PhoneCallException;
-import ru.alamics.sso.registration.phone.exception.SendMessageException;
-import ru.alamics.sso.registration.phone.exception.UserPhoneEmpty;
-import ru.alamics.sso.registration.phone.exception.WrongSmsCode;
+import ru.alamics.sso.registration.phone.exception.*;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
@@ -177,7 +174,7 @@ public class SmsOrPhoneCallAuth implements Authenticator {
             try {
                 String code = context.getHttpRequest().getDecodedFormParameters().getFirst("smscode");
 
-                userPhoneVerifier.verifyPhone(user, authContext, code, activationCodeType);
+                userPhoneVerifier.verifyPhone(user, authContext.getExpirationTime(), authContext.getHashProperty(), code, activationCodeType);
 
                 authSession.removeAuthNote(PHONE_KEY_HASH);
                 authSession.removeAuthNote(EXPIRATION_TIME);
@@ -193,6 +190,10 @@ public class SmsOrPhoneCallAuth implements Authenticator {
                 authSession.removeAuthNote(PHONE_KEY_HASH);
                 authSession.setAuthNote(ERROR_CODE, ERROR_CODE);
                 authenticate(context);
+            } catch (TimeExpiredException e) {
+                // TODO: Дополнить catch выражение
+                log.warn("Expired time of code");
+                throw new RuntimeException(e);
             }
         }
     }

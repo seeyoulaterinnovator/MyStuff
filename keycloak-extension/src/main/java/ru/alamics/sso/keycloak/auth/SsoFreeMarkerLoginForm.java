@@ -351,6 +351,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             return Response.status(302).location(redirectUri).build();
         }
 
+        authenticationSession.setAuthNote("REGISTRATION", "REGISTRATION");
         RealmModel realm = this.session.getContext().getRealm();
         List<RequiredActionProviderModel> requiredActionsProvider = realm.getRequiredActionProviders();
         List<String> twoStepAuth = requiredActionsProvider.stream()
@@ -359,7 +360,10 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                 .collect(Collectors.toList());
         AuthType authType = AuthType.getByList(twoStepAuth);
         if (authType != null) {
-            this.attributes.put("twoStepAuthType", authType.getDescription());
+            // TODO: может вообще от этого избавиться?
+            // TODO: это для информации какая двухфакторная аутентификация будет
+//            this.attributes.put("twoStepAuthType", authType.getDescription());
+            this.attributes.put("twoStepAuthType", "");
         } else {
             this.attributes.put("twoStepAuthType", "");
         }
