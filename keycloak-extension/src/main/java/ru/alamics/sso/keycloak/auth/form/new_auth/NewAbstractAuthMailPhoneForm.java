@@ -288,7 +288,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 log.info("Sms code resend");
 
                 sessionModel.setAuthNote("needSendSmsCode", "true");
-                sessionModel.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+                sessionModel.removeAuthNote(EXPIRATION_TIME);
                 sessionModel.removeAuthNote(PHONE_KEY_HASH);
                 authenticate(context);
 
