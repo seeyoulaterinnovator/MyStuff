@@ -286,10 +286,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 if (activationCodeType.equals(CODE_TO_SMS)) {
                     attemptFailsService.saveAttempt(new AttemptFailsDto(user.getPhone(), currentCode, context.getRealm().getName(), CODE_TO_SMS.name()));
                 }
-
-                if (mainCounter.get(protector).getCurrentCode().equals(currentCode)) {
-                    mainCounter.remove(protector);
-                }
+                mainCounter.remove(protector);
                 checkIsLimited(user, context, sessionModel, protector);
                 log.info("Sms code resend");
 
@@ -444,6 +441,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             sessionModel.setAuthNote(sessionModel.getAuthNote("secondPhase"), "");
             context.success();
             sessionModel.removeAuthNote("needSendSmsCode");
+            mainCounter.remove(protector);
             currentAuthFlowPhoneNumbers.remove(protector);
         } catch (WrongSmsCode wrongSmsCode) {
             log.warn("Wrong sms code");
