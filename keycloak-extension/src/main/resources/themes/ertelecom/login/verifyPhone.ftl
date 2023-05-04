@@ -51,7 +51,7 @@
             <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
                 <span>
                     <button class="font-light verification__resend w-full" style="text-align: right" name="resend"
-                                    type="submit">${sendAgain}</button>
+                                    type="submit">Отправить еще раз</button>
                 </span>
             <#else>
                 <div id="timer" class="text-black text-center md:text-right flex items-center my-6 md:my-0 justify-center md:justify-start">
