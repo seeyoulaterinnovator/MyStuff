@@ -15,7 +15,7 @@
                 <#if realm.password>
                     <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
                     onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
-                    <div class="field field__container field--required mb-3 sm:mb-4 md:w-full">
+                    <div class="field field__container field--required md:w-full">
                         <input class="hidden w-0 h-0" id="domain-login" name="city">
                         <#if withCity?has_content && withCity == "TRUE">
                             <input id="withCity" class="hidden w-0 h-0" name="withCity" value="TRUE">
@@ -40,10 +40,10 @@
                         <span class="span-line">${error!}</span>
                     </div>
 
-                    <@components.field class="md:w-full" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />
+                    <@components.field class="md:w-full mt-8" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />
 
                     <div class="login-password-forgot">
-                    <div class="login-pass">
+                    <div class="login-pass mt-10">
                         <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
                                 type="submit">${enter}</button>
                         <#if activateNewAuth!false>
@@ -52,7 +52,7 @@
                             </button>
                         </#if>
                     </div>
-                    <div class="forgot-pass">
+                    <div class="forgot-pass mt-10">
                         <#if realm.resetPasswordAllowed>
                             <span class="my-span">
                             <a href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
@@ -88,7 +88,7 @@
                     <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
                     onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
 
-                    <div class="field field__container field--required mb-3 sm:mb-4 md:w-full">
+                    <div class="field field__container field--required md:w-full">
                         <input class="hidden w-0 h-0" id="domain-login" name="city">
                         <#if withCity?has_content && withCity == "TRUE">
                             <input id="withCity" class="hidden w-0 h-0" name="withCity" value="TRUE">
@@ -114,7 +114,7 @@
                     </div>
                 </#if>
                 <div class="login-password-forgot">
-                    <div class="login-pass">
+                    <div class="login-pass mt-10">
                         <button id="submit-phone" name="smsButton" class="btn btn-main btn-enter btn-new-enter"
                                 type="submit">${enter}</button>
                         <button id="topSecretButton" type="button" class="w-full btn btn-back text-accentBlue-900"
@@ -135,7 +135,7 @@
                 <#if realm.password>
                     <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
                     onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
-                    <div class="field field__container field--required mb-3 sm:mb-4 md:w-full">
+                    <div class="field field__container field--required md:w-full">
                         <input class="hidden w-0 h-0" id="domain-login" name="city">
                         <#if withCity?has_content && withCity == "TRUE">
                             <input id="withCity" class="hidden w-0 h-0" name="withCity" value="TRUE">
@@ -161,7 +161,7 @@
                     </div>
                 </#if>
                 <div class="login-password-forgot">
-                    <div class="login-pass">
+                    <div class="login-pass mt-10">
                         <button id="submit-phone" name="smsButton" class="btn btn-main btn-enter btn-new-enter"
                                 type="submit">${enter}</button>
                         <button id="topSecretButton" type="button" class="w-full btn btn-back text-accentBlue-900"
@@ -181,7 +181,7 @@
                 <#if realm.password>
                     <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
                     onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
-                    <div class="field field__container field--required mb-3 sm:mb-4 md:w-full">
+                    <div class="field field__container field--required md:w-full">
                         <input class="hidden w-0 h-0" id="domain-login" name="city">
                         <#if withCity?has_content && withCity == "TRUE">
                             <input id="withCity" class="hidden w-0 h-0" name="withCity" value="TRUE">
@@ -206,10 +206,10 @@
                         <span class="span-line">${error!}</span>
                     </div>
 
-                    <@components.field class="md:w-full" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />
+                    <@components.field class="md:w-full mt-8" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />
 
                     <div class="login-password-forgot">
-                    <div class="login-pass">
+                    <div class="login-pass mt-10">
                         <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
                                 type="submit">${enter}</button>
                         <#if activateNewAuth!false>
@@ -218,7 +218,7 @@
                             </button>
                         </#if>
                     </div>
-                    <div class="forgot-pass">
+                    <div class="forgot-pass mt-10">
                         <#if realm.resetPasswordAllowed>
                             <span class="my-span">
                             <a href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
@@ -256,7 +256,7 @@
                     <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
                     onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
 
-                    <div class="field field__container field--required mb-3 sm:mb-4 md:w-full">
+                    <div class="field field__container field--required md:w-full">
                         <input class="hidden w-0 h-0" id="domain-login" name="city">
                         <#if withCity?has_content && withCity == "TRUE">
                             <input id="withCity" class="hidden w-0 h-0" name="withCity" value="TRUE">
@@ -282,7 +282,7 @@
                     </div>
                 </#if>
                 <div class="login-password-forgot">
-                    <div class="login-pass">
+                    <div class="login-pass mt-10">
                         <button id="submit-phone" name="phoneCallButton" class="btn btn-main btn-enter btn-new-enter"
                                 type="submit">${enter}</button>
                         <button id="topSecretButton" type="button" class="w-full btn btn-back text-accentBlue-900"
@@ -301,7 +301,7 @@
                 <#if realm.password>
                     <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
                     onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
-                    <div class="field field__container field--required mb-3 sm:mb-4 md:w-full">
+                    <div class="field field__container field--required md:w-full">
                         <input class="hidden w-0 h-0" id="domain-login" name="city">
                         <#if withCity?has_content && withCity == "TRUE">
                             <input id="withCity" class="hidden w-0 h-0" name="withCity" value="TRUE">
@@ -326,10 +326,10 @@
                         <span class="span-line">${error!}</span>
                     </div>
 
-                    <@components.field class="md:w-full" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />
+                    <@components.field class="md:w-full mt-8" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />
 
                     <div class="login-password-forgot">
-                    <div class="login-pass">
+                    <div class="login-pass mt-10">
                         <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
                                 type="submit">${enter}</button>
                         <#if activateNewAuth!false>
@@ -338,7 +338,7 @@
                             </button>
                         </#if>
                     </div>
-                    <div class="forgot-pass">
+                    <div class="forgot-pass mt-10">
                         <#if realm.resetPasswordAllowed>
                             <span class="my-span">
                             <a href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>

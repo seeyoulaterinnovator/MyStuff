@@ -81,7 +81,7 @@ public class UserModelExtender extends AbstractFormActionFactory implements Form
             context.getEvent().detail(Details.REGISTER_METHOD, "form");
 
             User user = User.builder()
-                    .name(formData.getFirst(FIELD_FIRST_NAME))
+                    .name(formData.getFirst(FIELD_PHONE))
                     .email(formData.getFirst(FIELD_EMAIL))
                     .phone(formData.getFirst(FIELD_PHONE))
                     .build();

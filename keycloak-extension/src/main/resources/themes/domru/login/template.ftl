@@ -44,7 +44,7 @@
             <@header.defaultTemplate withCity=displayCity></@header.defaultTemplate>
         </#if>
 
-        <main id="content" class="flex-1 py-8 md:py-12 mx-auto md:mx-auto max-w-440px xl:max-w-470px">
+        <main id="content" class="flex-1 py-8 md:py-12 mx-auto md:mx-auto w-full max-w-440px xl:max-w-470px" style="overflow: initial;">
             <#if displayMessage && message?has_content && message.summary == msg('emailSentMessage')>
                 <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}" success=true; section>
                     <#if section = "header">
@@ -70,7 +70,7 @@
                     <#nested "info">
                 </#if>
 
-                <div class="py-2 sm:py-3 lg:py-4">
+                <div class="">
                     <#if displayMessage && message?has_content>
                         <div class="alert pb-4">
                             <#if message.type = 'info'>

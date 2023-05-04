@@ -13,6 +13,9 @@ import javax.ws.rs.core.MultivaluedMap;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ru.alamics.sso.registration.model.FormConstants.FIELD_FIRST_NAME;
+import static ru.alamics.sso.registration.model.FormConstants.FIELD_PHONE;
+
 public class RegistrationCustomProfile extends RegistrationProfile {
 
     private static final String DISPLAY_NAME = "Profile Custom Validation";
@@ -30,9 +33,12 @@ public class RegistrationCustomProfile extends RegistrationProfile {
         context.getEvent().detail(Details.REGISTER_METHOD, "form");
         String eventError = Errors.INVALID_REGISTRATION;
 
+        // empty is ok
+        /*
         if (Validation.isBlank(formData.getFirst((RegistrationPage.FIELD_FIRST_NAME)))) {
             errors.add(new FormMessage(RegistrationPage.FIELD_FIRST_NAME, Messages.MISSING_FIRST_NAME));
         }
+         */
 
         // empty is ok
         /*
@@ -42,6 +48,8 @@ public class RegistrationCustomProfile extends RegistrationProfile {
         */
         formData.remove(RegistrationPage.FIELD_LAST_NAME);
         formData.add(RegistrationPage.FIELD_LAST_NAME, " ");
+        formData.remove(FIELD_FIRST_NAME);
+        formData.add(FIELD_FIRST_NAME, formData.getFirst(FIELD_PHONE));
 
         String email = formData.getFirst(Validation.FIELD_EMAIL);
         boolean emailValid = true;

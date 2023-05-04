@@ -8,6 +8,7 @@ import org.jboss.resteasy.plugins.providers.StringTextStar;
 import ru.alamics.sso.registration.phone.MsgConfig;
 import ru.alamics.sso.registration.phone.exception.SendMessageException;
 import ru.alamics.sso.registration.phone.model.MessageRequest;
+import ru.alamics.sso.registration.phone.model.MessengerType;
 import ru.alamics.sso.registration.phone.port.SendMessageService;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.StandResolver;
@@ -19,6 +20,7 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static ru.alamics.sso.settings.SettingConstants.*;
@@ -39,8 +41,33 @@ public class SendMessageServiceImpl implements SendMessageService {
     public SendMessageServiceImpl() {
     }
 
+    public String sendMessageByRequestAndLogInfo(MessageRequest messageRequest) throws SendMessageException {
+        String response = sendMessageByRequest(messageRequest);
+        String id = UUID.randomUUID().toString();
+        String phone = messageRequest.getUserPhone();
+        String text = messageRequest.getText();
+        String messengerName = messageRequest.getMessengerName().toString();
+
+        log.info("Sent {} to phone: {}, text: {}, id: {}, resp: {}", messengerName, phone, text, id, response);
+        return response;
+    }
+
     @Override
-    public String sendMsg(MessageRequest messageRequest) throws SendMessageException {
+    public void sendMessageToMessengers(String phone, String message, String realmId, String[] messengerList) throws SendMessageException {
+        MessageRequest messageRequest = MessageRequest.builder()
+                .userPhone(phone)
+                .text(message)
+                .realmId(realmId)
+                .build();
+
+        for (String messenger : messengerList) {
+            messageRequest.setMessengerName(MessengerType.valueOf(messenger));
+            sendMessageByRequestAndLogInfo(messageRequest);
+        }
+    }
+
+    @Override
+    public String sendMessageByRequest(MessageRequest messageRequest) throws SendMessageException {
 
         // локально и на дэве фиксированный код и не отправляю смс
         if (!StandResolver.isBattle()) {

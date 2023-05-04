@@ -34,6 +34,9 @@ public enum ActivationCodeType {
         return null;
     }
 
+    /**
+     * Функция переопределяет ENUM элементы значениями из настроек, которые указываются в админке
+     */
     public static void init() {
         SettingsService settingsService = Lookup.lookup(SettingsService.class);
         for (ActivationCodeType activationCodeType : ActivationCodeType.values()) {

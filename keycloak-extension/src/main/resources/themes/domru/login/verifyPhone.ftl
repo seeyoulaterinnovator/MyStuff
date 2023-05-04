@@ -2,83 +2,97 @@
 <#import "templates/blocks.ftl" as blocks>
 
 <@layout.registrationLayout displayMessage=true displayCity=false; section>
-<#if section = "header">
-<#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон (depricated)-->
-<@blocks.verificationHeader mainTitle="Подтвердить" />
-<#elseif section = "form">
-<#if lengthCode==4 && !enableRepeatCall && userEmail??>
-<h3 class="verification__sub pb-2 sm:pb-3 md:pb-4">
-    Введите код, отправленый Вам на электронную почту: <br/>
-    ${userEmail}
-</h3>
-<#elseif userPhone??>
-<h3 class="verification__sub pb-2 sm:pb-3 md:pb-4" x-ms-format-detection="none">
-    <#if isSms?? && isSms>
-        Введите код из СМС
-    <#else>
-        Введите последние 4 цифры номера входящего звонка на номер:
-    </#if>
-    <br/>
-    ${userPhone?replace('([0-9]{1})([0-9]{3})([0-9]{3})([0-9]{2})([0-9]{2})', '+$1 $2 $3 $4 $5', 'ri')}
-    </#if>
-    <form id="totpe" action="${url.loginAction}" method="POST">
-    </form>
-    <form id="totpForm" action="${url.loginAction}" method="POST">
-        <#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон (depricated)-->
-
-        <div class="w-full xl:pb-37px md:pb-10 sm:pb-8 pb-4 center-items">
-            <#list 1..lengthCode as x>
-                <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
-                       name="smscode-${x}"
-                        <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
-                            disabled
-                        <#elseif codeLimited?? && codeLimited>
-                            disabled
-                        </#if>
-                       class="text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none squares
-                            sms-input"
-                       autocomplete="off"/>
-            </#list>
-        </div>
-        <input id="codeNumbers" name="codeNumbers" class="hidden" value="${lengthCode!}"/>
-        <#if error?has_content>
-            <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds!}"/>
+    <#if section = "header">
+        <#if isRegistration>
+            <@blocks.contentHeader mainTitle="Регистрация" secondaryTitle="Вход" secondaryHref="${url.loginUrl}" withBorder=true />
         <#else>
-            <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds!}"/>
+            <@blocks.verificationHeader mainTitle="Подтвердить" />
         </#if>
-        <input id="smscode" name="smscode" class="hidden"/>
-        <div class="flex md:justify-start justify-start w-full items-center text-left md:text-left xl:pb-55px md:pb-10 sm:pb-8 pb-4">
-            <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
-                <span class="w-full" style="text-align: right">
-                    <button class="font-light verification__resend" name="resend"
-                                    type="submit">${sendAgain}</button>
-                </span>
+    <#elseif section = "form">
+        <#if activationCodeType == "CODE_TO_SMS">
+            <h3 class="verification__sub">
+                Введите код из СМС отправленный на указанный номер телефона
+            </h3>
+        </#if>
+        <#if activationCodeType == "CODE_BY_PHONE_NUMBER">
+            <h3 class="verification__sub" x-ms-format-detection="none">
+                На указанный номер поступит звонок. Для подтверждения нужно ввести последние 4 цифры входящего номера
+            </h3>
+        </#if>
+        <form id="totpe" action="${url.loginAction}" method="POST"></form>
+
+        <form id="totpForm" action="${url.loginAction}" method="POST">
+            <div class="w-full mt-4">
+                <#list 1..lengthCode as x>
+                    <#if x = 1>
+                        <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
+                               name="smscode-${x}"
+                               class="text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none"
+                               autocomplete="off"/>
+                    <#else>
+                        <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
+                               name="smscode-${x}"
+                               class="ml-4 text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none"
+                               autocomplete="off"/>
+                    </#if>
+
+                </#list>
+            </div>
+
+            <input id="codeNumbers" name="codeNumbers" class="hidden" value="${lengthCode!}"/>
+            <input id="smscode" name="smscode" class="hidden"/>
+
+            <#if secondsUserIsBlocked gt 0>
+                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${secondsUserIsBlocked?c}"/>
             <#else>
-
-                <div id="timer" style="margin-left: auto;">
-                            <span style="color: #000000; font-size: 14px!important;">
-                                <#if codeLimited?? && codeLimited> Код можно запросить через: <#else> Код действует </#if>
-                            </span>
-                    <span id="timer-time" class="px-1 textTimer" style="font-size: 14px!important;"></span>
-                </div>
-                <#if enableRepeatCall?? && enableRepeatCall!>
-                    <p class="hidden font-light text-black verification__text" id="resend">
-                        <span class="w-full">
-                            <button class="hidden font-light verification__resend" name="resend"
-                                                type="submit">${sendAgain}</button>
-                        </span>
-                    </p>
-                </#if>
+                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${secondsCodeIsValid?c}"/>
             </#if>
-        </div>
 
+            <div class="flex flex-col sm:flex-row md:items-end items-center justify-between">
 
-        <button class="hidden"
-                style="display: none"
-                name="accept" id="accept" type="submit">${doSubmit}</button>
+                <div id="timer" class="text-black text-center md:text-right flex items-center mt-8 md:my-0 justify-center md:justify-start
+                     verification__timer__text">
+                    <#if secondsUserIsBlocked gt 0>
+                        <span style="color: #899DA8"> Код можно запросить через: </span>
+                    <#else>
+                        <span style="color: #899DA8"> Код действует: </span>
+                    </#if>
+                    <span id="timer-time" class="px-2 textTimer"></span>
+                </div>
 
-    </form>
+                <div>
+                    <#if activationCodeType == "CODE_TO_SMS">
+                        <button class="hidden verification__text verification__resend mt-8"
+                                id="resend" name="resend" type="submit">
+                            Отправить ещё раз
+                        </button>
+                    <#else>
+                        <button class="hidden verification__text verification__resend mt-8"
+                                id="resend" name="resend" type="submit">
+                            Повторный звонок
+                        </button>
+                    </#if>
+                </div>
+
+                <div>
+                    <#if activationCodeType == "CODE_BY_PHONE_NUMBER">
+                        <button class="verification__text verification__resend mt-4" form="totpe" id="sentCode"
+                                name="sendPhoneCode" type="submit">
+                            Отправить СМС
+                        </button>
+                    </#if>
+                </div>
+            </div>
+
+            <div class="sm:block md:flex w-full items-center text-center md:text-left">
+                <button class="btn btn-main btn-display-none verification__btn verification__btn__accept w-full md:w-3/7 mr-0 md:mr-4"
+                        name="accept" id="accept" type="submit">
+                    ${doSubmit}
+                </button>
+            </div>
+        </form>
     </#if>
+
     <script>
         var actionIsEmpty = ${actionIsEmpty?c};
         var clientIsB2B = ${clientIsB2B?c};
@@ -90,4 +104,4 @@
             };
         }
     </script>
-    </@layout.registrationLayout>
+</@layout.registrationLayout>
