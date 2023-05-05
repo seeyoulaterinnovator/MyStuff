@@ -248,7 +248,7 @@
   padding: 0px;
   gap: 24px;
   width: 568px;
-  height: 96px;
+  /*height: 96px;*/
   flex: none;
   order: 2;
   align-self: stretch;
@@ -260,7 +260,7 @@
   .login-password-forgot {
     gap: 18px;
     width: 480px;
-    height: 85px;
+    /*height: 85px;*/
     flex: none;
   }
 }
@@ -268,7 +268,7 @@
 @media only screen and (max-width: 767px) {
   .login-password-forgot {
     width: 288px;
-    height: 137px;
+    /*height: 137px;*/
     flex: none;
   }
 }

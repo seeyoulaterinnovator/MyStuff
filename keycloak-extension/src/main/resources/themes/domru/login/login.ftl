@@ -52,7 +52,7 @@
                             </button>
                         </#if>
                     </div>
-                    <div class="forgot-pass mt-10">
+                    <div class="forgot-pass">
                         <#if realm.resetPasswordAllowed>
                             <span class="my-span">
                             <a href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
@@ -218,7 +218,7 @@
                             </button>
                         </#if>
                     </div>
-                    <div class="forgot-pass mt-10">
+                    <div class="forgot-pass">
                         <#if realm.resetPasswordAllowed>
                             <span class="my-span">
                             <a href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
@@ -338,7 +338,7 @@
                             </button>
                         </#if>
                     </div>
-                    <div class="forgot-pass mt-10">
+                    <div class="forgot-pass">
                         <#if realm.resetPasswordAllowed>
                             <span class="my-span">
                             <a href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
