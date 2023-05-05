@@ -60,7 +60,7 @@ p {
    font-family: 'CoFo Sans', sans-serif;
    font-style: normal;
    font-weight: 700;
-   font-size: 27px;
+   font-size: 24px;
    line-height: 33px;
    color: #000000;
    mix-blend-mode: normal;
@@ -98,6 +98,26 @@ p {
   padding-left: 16px;
   padding-right: 16px;
 }
+}
+
+.new-message{
+  padding: 18px;
+  max-width: 568px;
+  max-height: 258px;
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1279px) {
+  .new-message {
+    max-width: 390px;
+    max-height: 248px;
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .new-message {
+    max-width: 288px;
+    max-height: 360px;
+  }
 }
 
 

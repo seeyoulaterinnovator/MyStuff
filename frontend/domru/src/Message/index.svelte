@@ -64,7 +64,7 @@
     if (hasBadEmail && hasBadPhone) {
       text.set('Адрес электронной почты и номер мобильного телефона уже используется на другой учетной записи. Если Вы уже регистрировались, попробуйте войти в свою учетную запись, либо укажите другой адрес электронной почты и номер мобильного телефона.');
     } else if (hasBadEmail) {
-      text.set('Адрес электронной почты уже используется на другой учетной записи. Если Вы уже регистрировались, попробуйте войти в свою учетную запись, либо укажите другой адрес электронной почты.');
+      text.set('Адрес электронной почты уже используется на другой учетной записи. Если Вы уже регистрировались, попробуйте войти в свою учетную запись, либо укажите другой E-mail.');
     } else if (hasBadPhone) {
       text.set('Номер мобильного телефона уже используется на другой учетной записи. Если Вы уже регистрировались, попробуйте войти в свою учетную запись, либо укажите другой номер мобильного телефона.');
     } else {
@@ -123,7 +123,7 @@
 
 {#if $show}
   <div class="message__fade flex justify-center items-center" on:click={handleHide}>
-    <div class="message" on:click={handleClick}>
+    <div class={$isRegistration ? 'message new-message' : 'message'} on:click={handleClick}>
       <div class="message__title flex flex-row justify-between items-center gap-4">
         <span>
           {#if $isBadEmail || $isBadPhone}
@@ -156,21 +156,21 @@
       {#if $isLimitExceeded}
 
       {:else}
-        <div class="flex flex-col md:flex-row justify-start items-start gap-4 mt-6">
+        <div class="flex flex-col md:flex-row justify-start items-start gap-4" style="margin-top: 1rem">
           {#if $isRegistration}
-            <a href="{$loginUrl}" class="btn btn-main w-full md:w-auto" on:click={handleHide}>
+            <a href="{$loginUrl}" class="btn btn-main w-full md:w-auto reg-button" on:click={handleHide}>
               Войти
             </a>
             {#if $isBadEmail}
-              <button class="btn text-accentBlue w-full md:w-auto" on:click={handleHide}>
+              <button class="btn text-accentBlue w-full md:w-auto reg-button" on:click={handleHide}>
                 Указать другой адрес
               </button>
             {:else if $isBadPhone}
-              <button class="btn text-accentBlue w-full md:w-auto" on:click={handleHide}>
+              <button class="btn text-accentBlue w-full md:w-auto reg-button" on:click={handleHide}>
                 Указать другой номер
               </button>
             {:else}
-              <button class="btn text-accentBlue w-full md:w-auto" on:click={handleHide}>
+              <button class="btn text-accentBlue w-full md:w-auto reg-button" on:click={handleHide}>
                 Отмена
               </button>
             {/if}
@@ -197,7 +197,7 @@
   </div>
 {:else if $showInfo}
   <div class="message__fade flex justify-center items-center" on:click={closeAndSubmit}>
-    <div class="message" on:click={closeAndSubmit}>
+    <div class="message" style="width: 288px;" on:click={closeAndSubmit}>
       <div class="message__title flex flex-row justify-between items-center gap-4">
         <span>
           {#if $isBadEmail || $isBadPhone}

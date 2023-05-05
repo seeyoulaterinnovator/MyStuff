@@ -291,3 +291,14 @@ a.btn {
   }
 }
 
+.reg-button{
+
+}
+
+@media only screen and (max-width: 767px) {
+  .reg-button {
+    width: 252px;
+    height: 40px;
+  }
+}
+
