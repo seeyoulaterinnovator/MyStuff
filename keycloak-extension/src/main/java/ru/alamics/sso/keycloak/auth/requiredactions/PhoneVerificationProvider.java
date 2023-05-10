@@ -211,13 +211,14 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         } else if (context.getHttpRequest().getDecodedFormParameters().containsKey("resend")) {
             String codeHash = authSession.getAuthNote(CODE_HASH_KEY);
             String userPhone = UserModelUserMapper.mapToUser(context.getUser()).getPhone();
+            if (codeHash != null && !codeHash.equals("")) {
+                if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
+                    attemptFailsService.saveAttempt(new AttemptFailsDto(userPhone, codeHash, context.getRealm().getName(), CODE_BY_PHONE_NUMBER.name(), LocalDateTime.now()));
+                }
 
-            if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
-                attemptFailsService.saveAttempt(new AttemptFailsDto(userPhone, codeHash, context.getRealm().getName(), CODE_BY_PHONE_NUMBER.name()));
-            }
-
-            if (activationCodeType.equals(CODE_TO_SMS)) {
-                attemptFailsService.saveAttempt(new AttemptFailsDto(userPhone, codeHash, context.getRealm().getName(), CODE_TO_SMS.name()));
+                if (activationCodeType.equals(CODE_TO_SMS)) {
+                    attemptFailsService.saveAttempt(new AttemptFailsDto(userPhone, codeHash, context.getRealm().getName(), CODE_TO_SMS.name(), LocalDateTime.now()));
+                }
             }
 
             checkIsLimited(context);
@@ -275,10 +276,9 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         if (activationCodeType.equals(CODE_TO_SMS)) {
             List<AttemptFailsDto> smsAttempts = attemptFailsService.getAttempts(user.getPhone(), context.getRealm().getName(), CODE_TO_SMS.name());
             if (!smsAttempts.isEmpty() && smsAttempts.size() >= MAX_RESEND_TRIES && !blackListService.isUserBlockedAuthBySms(user.getPhone(), context)) {
-                blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.SMS, context.getAuthenticationSession());
+                blackListService.limitUserBySmsOrPhone(user, activationCodeType.name(), context.getAuthenticationSession());
                 requiredActionChallenge(context);
                 mainCounter.remove(user.getPhone());
-                attemptFailsService.deleteAttempts(smsAttempts);
                 return;
             }
         }
@@ -286,10 +286,9 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
             List<AttemptFailsDto> callAttempts = attemptFailsService.getAttempts(user.getPhone(), context.getRealm().getName(), CODE_BY_PHONE_NUMBER.name());
             if (!callAttempts.isEmpty() && callAttempts.size() >= MAX_RESEND_TRIES && !blackListService.isUserBlockedAuthByPhoneCall(user.getPhone(), context)) {
-                blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.PHONE_CALL, context.getAuthenticationSession());
+                blackListService.limitUserBySmsOrPhone(user, activationCodeType.name(), context.getAuthenticationSession());
                 requiredActionChallenge(context);
                 mainCounter.remove(user.getPhone());
-                attemptFailsService.deleteAttempts(callAttempts);
             }
         }
     }

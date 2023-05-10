@@ -6,6 +6,9 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Stateless
@@ -21,6 +24,24 @@ public class AttemptFailsRepository {
                 .setParameter("realm", realm)
                 .setParameter("cause", cause)
                 .getResultList();
+    }
+
+    public List<AttemptFailsEntity> getFailAttemptsIfWasBlocked(String phone, String realm, String cause) {
+        Query query = em.createNativeQuery("WITH phones AS (" +
+                "  SELECT phone, realm, unblocked " +
+                "  FROM BLACK_LIST " +
+                "  WHERE phone =:phone " +
+                "    AND realm =:realm " +
+                "    AND limitation_cause =:cause " +
+                ") " +
+                "SELECT af.* " +
+                "FROM ATTEMPT_FAILS af " +
+                "INNER JOIN phones ON phones.phone = af.phone and phones.realm = af.realm where af.created >= phones.unblocked", AttemptFailsEntity.class)
+                .setParameter("phone", phone)
+                .setParameter("realm", realm)
+                .setParameter("cause", cause);
+
+        return (List<AttemptFailsEntity>) query.getResultList();
     }
 
     public void save(AttemptFailsEntity entity) {

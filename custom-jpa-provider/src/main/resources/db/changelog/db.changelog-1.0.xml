@@ -992,6 +992,17 @@
         </sql>
     </changeSet>
 
+    <changeSet id="129" author="zhakov-mv">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ATTEMPT_FAILS"/>
+        </preConditions>
+        <addColumn tableName="ATTEMPT_FAILS">
+            <column name="created" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
     <changeSet id="51_p" author="plyusnin-da" dbms="mysql">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="USER_ENTITY"/>

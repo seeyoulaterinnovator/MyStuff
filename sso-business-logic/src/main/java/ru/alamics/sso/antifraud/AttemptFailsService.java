@@ -1,6 +1,6 @@
 package ru.alamics.sso.antifraud;
 
-import lombok.NoArgsConstructor;
+import ru.alamics.sso.jpa.entity.antifraud.AttemptFailsEntity;
 import ru.alamics.sso.jpa.repository.AttemptFailsRepository;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.util.AttemptFailsMapper;
@@ -25,7 +25,11 @@ public class AttemptFailsService {
     }
 
     public List<AttemptFailsDto> getAttempts(String phone, String realm, String cause) {
-        return AttemptFailsMapper.toDtoList(repository.getFailAttemptsByPhoneAndRealm(phone, realm, cause));
+        List<AttemptFailsEntity> entities = repository.getFailAttemptsIfWasBlocked(phone, realm, cause);
+        if (entities.isEmpty()) {
+            return AttemptFailsMapper.toDtoList(repository.getFailAttemptsByPhoneAndRealm(phone, realm, cause));
+        }
+        return AttemptFailsMapper.toDtoList(entities) ;
     }
 
     public void deleteAttempts(List<AttemptFailsDto> dto) {

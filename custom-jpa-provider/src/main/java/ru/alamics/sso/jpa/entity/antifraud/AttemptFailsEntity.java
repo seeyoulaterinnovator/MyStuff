@@ -8,6 +8,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "ATTEMPT_FAILS")
@@ -26,4 +27,6 @@ public class AttemptFailsEntity {
     private String realm;
     @Column(name = "limitation_cause")
     private String limitationCause;
+    @Column(name = "created")
+    private LocalDateTime created;
 }
