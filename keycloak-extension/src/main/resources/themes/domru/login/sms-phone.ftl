@@ -46,25 +46,25 @@
                 </div>
                 <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
                         <span>
-                            <button class="font-light verification__resend" name="resend" type="submit">${sendAgain}</button>
+                            <button class="font-light verification__resend w-full" name="resend" type="submit">${sendAgain}</button>
                         </span>
                 <#else>
-                <div id="timer" style="margin-left: auto;">
-                        <span style="color: #000000; font-size: 14px!important;">
-                            <#if codeLimited?? && codeLimited> Код можно запросить через: <#else> Код действует </#if>
-                        </span>
-                        <span id="timer-time" class="px-1 textTimer" style="font-size: 14px!important; color: #000000!important;">
-                        </span>
-                    </div>
-                    <#if enableRepeatCall?? && enableRepeatCall!>
-                        <p class="hidden font-light text-black verification__text" id="resend">
-                            <span>
-                                <button class="font-light verification__resend" name="resend"
-                                            type="submit">${sendAgain}</button>
+                    <div id="timer" style="margin-left: auto;">
+                            <span style="color: #000000; font-size: 14px!important;">
+                                <#if codeLimited?? && codeLimited> Код можно запросить через: <#else> Код действует </#if>
                             </span>
-                        </p>
-                    </#if>
-                </div>
+                            <span id="timer-time" class="px-1 textTimer" style="font-size: 14px!important; color: #000000!important;">
+                            </span>
+                        </div>
+                        <#if enableRepeatCall?? && enableRepeatCall!>
+                            <p class="hidden font-light text-black verification__text" id="resend">
+                                <span>
+                                    <button class="font-light verification__resend" name="resend"
+                                                type="submit">${sendAgain}</button>
+                                </span>
+                            </p>
+                        </#if>
+                    </div>
                 </#if>
             <div class="sm:block md:flex w-full items-center text-center md:text-left">
                 <button class="hidden"

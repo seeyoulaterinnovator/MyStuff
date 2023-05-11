@@ -288,6 +288,10 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
                 mainCounter.remove(protector);
                 if (checkIsLimited(user, context, sessionModel, protector)) {
+                    sessionModel.setAuthNote("needSendSmsCode", "false");
+                    sessionModel.removeAuthNote(EXPIRATION_TIME);
+                    sessionModel.removeAuthNote(PHONE_KEY_HASH);
+                    authenticate(context);
                     return;
                 }
                 log.info("Sms code resend");
