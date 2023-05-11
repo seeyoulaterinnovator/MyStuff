@@ -72,14 +72,13 @@ public class BlackListRepository {
                 .setParameter("unblocked", entity.getUnblockedAt())
                 .setParameter("now", LocalDateTime.now())
                 .executeUpdate();
-        /*em.createQuery("update BlackListEntity ble set ble.blockCount=:count, ble.created=:now, ble.unblocked =:unblocked where ble.phone=:phone" +
-                " and ble.realm=:realm and ble.limitationCause=:cause")
-                .setParameter("phone", entity.getPhone())
-                .setParameter("count", entity.getBlockCount())
-                .setParameter("realm", entity.getRealm())
-                .setParameter("cause", entity.getLimitationCause())
-                .setParameter("unblocked", entity.getUnblockedAt())
-                .setParameter("now", LocalDateTime.now())
-                .executeUpdate();*/
+    }
+
+    public boolean isWasBlockedByPhoneRealmCause(String phone, String realm, String cause) {
+        return !em.createQuery("select ble from BlackListEntity ble where ble.limitationCause=:cause and ble.realm=:realm and ble.phone=:phone", BlackListEntity.class)
+                .setParameter("cause", cause)
+                .setParameter("realm", realm)
+                .setParameter("phone", phone)
+                .getResultList().isEmpty();
     }
 }

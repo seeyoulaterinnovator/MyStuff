@@ -1,5 +1,6 @@
 package ru.alamics.sso.jpa.repository;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.antifraud.AttemptFailsEntity;
 
 import javax.ejb.LocalBean;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @Stateless
 @LocalBean
+@Slf4j
 public class AttemptFailsRepository {
     @PersistenceContext
     private EntityManager em;

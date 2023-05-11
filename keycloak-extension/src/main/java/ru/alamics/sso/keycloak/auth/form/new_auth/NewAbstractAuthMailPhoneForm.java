@@ -145,6 +145,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             setTimerValueByActivationType(blackListDto, user, authSession, authContext, deltaTime, context);
             try {
                 boolean enableRepeatCall = true;
+
                 if (authSession.getAuthNote("needSendSmsCode") != null && authSession.getAuthNote("needSendSmsCode").equals("true")) {
                     authContext = userPhoneVerifier.sendValidationMsg(user, authContext, activationCodeType, context.getRealm());
                     authSession.setAuthNote("godMode", authContext.getHashProperty());
@@ -286,7 +287,9 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 }
 
                 mainCounter.remove(protector);
-                checkIsLimited(user, context, sessionModel, protector);
+                if (checkIsLimited(user, context, sessionModel, protector)) {
+                    return;
+                }
                 log.info("Sms code resend");
 
                 sessionModel.setAuthNote("needSendSmsCode", "true");
@@ -303,14 +306,14 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         }
     }
 
-    public void checkIsLimited(User user, AuthenticationFlowContext context, AuthenticationSessionModel authSession, PhonePlusRealmProtector protector) {
+    public boolean checkIsLimited(User user, AuthenticationFlowContext context, AuthenticationSessionModel authSession, PhonePlusRealmProtector protector) {
         if (activationCodeType.equals(CODE_TO_SMS)) {
             List<AttemptFailsDto> smsAttempts = attemptFailsService.getAttempts(user.getPhone(), context.getRealm().getName(), CODE_TO_SMS.name());
             if (!smsAttempts.isEmpty() && smsAttempts.size() >= MAX_RESEND_RECALL_TRIES && !blackListService.isUserBlockedAuthBySms(user.getPhone(), context)) {
                 blackListService.limitUserBySmsOrPhone(user, activationCodeType.name(), authSession);
                 authenticate(context);
                 mainCounter.remove(protector);
-                return;
+                return true;
             }
         }
 
@@ -320,8 +323,10 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 blackListService.limitUserBySmsOrPhone(user, activationCodeType.name(), authSession);
                 authenticate(context);
                 mainCounter.remove(protector);
+                return true;
             }
         }
+        return false;
     }
 
     @Override
