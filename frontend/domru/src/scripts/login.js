@@ -1,5 +1,5 @@
 import IMask from 'imask';
-import {setButtonAvailability} from './helpers.js';
+import {iMaskInstancePhone, iMaskInstancePhoneAndEmail, setButtonAvailability} from './helpers.js';
 import Cookie from 'js-cookie';
 import {WRONG_PASS_REG} from "../constants/passwordCharset";
 
@@ -15,7 +15,6 @@ export default (function functionName() {
   const cityElement = document.getElementById('domain-login');
   const secondSubmit = document.getElementById("submit-phone");
   const errorMessageElement = document.querySelector(".span-line");
-  debugger
 
   console.log(usernameElement)
 
@@ -24,16 +23,7 @@ export default (function functionName() {
       submitElement.disabled = true;
     }
 
-    const dynamicMask = IMask(usernameElement, {
-      mask: [
-        {
-          mask: '+{7} (000) 000-00-00',
-        },
-        {
-          mask: /^\S*@?\S*$/,
-        },
-      ],
-    });
+    const dynamicMask = iMaskInstancePhoneAndEmail(usernameElement);
     let isUsernameValid = false;
     let isPasswordExists = false;
 
@@ -110,16 +100,7 @@ export default (function functionName() {
     if (secondUserName.value == '') {
       secondSubmit.disabled = true;
     }
-    const dynamicMaskTwo = IMask(secondUserName, {
-      mask: [
-        {
-          mask: '+{7} (000) 000-00-00',
-        },
-        {
-          mask: /^\S*@?\S*$/,
-        },
-      ],
-    });
+    const dynamicMaskTwo = iMaskInstancePhone(secondUserName);
     let isUsernameValid = false;
 
     secondUserName.addEventListener('input', () => {
@@ -164,13 +145,6 @@ export default (function functionName() {
         secondUserName.classList.remove("field__input--error");
       }
     });
-
-
-    secondUserName.addEventListener("keypress", (event) => {
-      if (!/^\d$/.test(event.key) && event.key !== "Backspace" && event.key !== "Delete" && event.key !== "Enter") {
-        event.preventDefault();
-      }
-     });
   }
 
 })();

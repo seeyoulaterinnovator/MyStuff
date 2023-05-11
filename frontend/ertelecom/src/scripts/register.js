@@ -44,9 +44,7 @@ export default (function() {
   if (!formElement) return;
 
   // Маска для поля ввода телефона
-  const phoneMask = IMask(document.getElementById('phone'), {
-    mask: '+{7} (000) 000-00-00',
-  });
+  const phoneMask = iMaskInstancePhone(phoneField);
 
   // Убираем красные рамки инпутов на событии ввода после получения ошибки
   function cleanBorder() {

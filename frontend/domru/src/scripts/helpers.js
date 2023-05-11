@@ -1,6 +1,7 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { PASSWORD_CHARSET } from '../constants/passwordCharset.js';
+import {PASSWORD_CHARSET} from '../constants/passwordCharset.js';
+import IMask from "imask";
 
 function getRandomInt(min, max) {
   let byteArray = new Uint8Array(1);
@@ -105,3 +106,20 @@ export function isEmpty(obj) {
 export function setButtonAvailability(validate, submitElement) {
   submitElement.disabled = !validate();
 }
+
+const phoneMaskOption = {
+  mask: '+{7} (000) 000-00-00',
+  prepare: (appended, masked) => {
+    if (appended === '8' && masked.value === '') {
+      return '7'
+    }
+    return appended
+  }
+}
+
+const emailMaskOption = {
+  mask: /^\S*@?\S*$/
+}
+
+export const iMaskInstancePhone = (element) => IMask(element, {mask: [phoneMaskOption]});
+export const iMaskInstancePhoneAndEmail = (element) => IMask(element, {mask: [phoneMaskOption, emailMaskOption]});

@@ -24,16 +24,7 @@ export default (function functionName() {
       submitElement.disabled = true;
     }
 
-    const dynamicMask = IMask(usernameElement, {
-      mask: [
-        {
-          mask: '+{7} (000) 000-00-00',
-        },
-        {
-          mask: /^\S*@?\S*$/,
-        },
-      ],
-    });
+    const dynamicMask = iMaskInstancePhoneAndEmail(usernameElement);
     let isUsernameValid = false;
     let isPasswordExists = false;
 
@@ -109,16 +100,7 @@ export default (function functionName() {
     if (secondUserName.value == '') {
       secondSubmit.disabled = true;
     }
-    const dynamicMaskTwo = IMask(secondUserName, {
-      mask: [
-        {
-          mask: '+{7} (000) 000-00-00',
-        },
-        {
-          mask: /^\S*@?\S*$/,
-        },
-      ],
-    });
+    const dynamicMaskTwo = iMaskInstancePhone(phoneField);
     let isUsernameValid = false;
     let isPasswordExists = false;
 
@@ -161,12 +143,6 @@ export default (function functionName() {
       if (!unmaskedValue || event.inputType === "insertFromPaste" || event.inputType === "insertText" || event.inputType === "deleteContentBackward" || event.inputType === "deleteContentForward") {
         errorMessageElement.textContent = "";
         secondUserName.classList.remove("field__input--error");
-      }
-    });
-
-    secondUserName.addEventListener("keypress", (event) => {
-      if (!/^\d$/.test(event.key) && event.key !== "Backspace" && event.key !== "Delete" && event.key !== "Enter") {
-        event.preventDefault();
       }
     });
   }
