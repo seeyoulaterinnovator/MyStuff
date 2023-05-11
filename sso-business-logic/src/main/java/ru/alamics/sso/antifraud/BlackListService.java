@@ -9,6 +9,7 @@ import ru.alamics.sso.jpa.repository.BlackListRepository;
 import ru.alamics.sso.jpa.repository.UserRepository;
 import ru.alamics.sso.jpa.util.LimitationCauseType;
 import ru.alamics.sso.registration.model.User;
+import ru.alamics.sso.registration.phone.ActivationCodeType;
 import ru.alamics.sso.util.BlackListMapper;
 
 import javax.ejb.EJB;
@@ -27,7 +28,7 @@ public class BlackListService {
     private UserRepository userRepository;
     private final Long BLOCK_DURATION_SEC = 43200L; // 12 часов
 
-    public void limitUserBySmsOrPhone(User user, LimitationCauseType cause, AuthenticationSessionModel context) {
+    public void limitUserBySmsOrPhone(User user, String cause, AuthenticationSessionModel context) {
         BlackListEntity blackList = new BlackListEntity();
         UserEntity userEntity = userRepository.findUser(user.getId());
         List<BlackListEntity> existEntity = blackListRepository.findByEmail(user.getEmail());
@@ -37,21 +38,21 @@ public class BlackListService {
         blackList.setUser(userEntity);
         blackList.setEmail(user.getEmail());
         blackList.setBlockDurationSec(BLOCK_DURATION_SEC);
-        blackList.setLimitationCause(cause.getCause());
+        blackList.setLimitationCause(cause);
         blackList.setCreatedAt(LocalDateTime.now());
         blackList.setUnblockedAt(blackList.getCreatedAt().plusSeconds(BLOCK_DURATION_SEC));
         blackList.setRealm(context.getRealm().getName());
         //default 0 mb todo default 1 | do we need it?
         if (existEntity.isEmpty()) {
             blackList.setBlockCount(1);
+            blackListRepository.save(blackList);
+            return;
         }
-        else {
-            blackList.setBlockCount(existEntity.stream().findFirst().get().getBlockCount() + 1);
-        }
-        blackListRepository.save(blackList);
+        blackList.setBlockCount(existEntity.stream().findFirst().get().getBlockCount() + 1);
+        blackListRepository.update(blackList);
     }
 
-    public void limitUserBySmsOrPhone(User user, LimitationCauseType cause, AuthenticationFlowContext context) {
+    public void limitUserBySmsOrPhone(User user, String cause, AuthenticationFlowContext context) {
         BlackListEntity blackList = new BlackListEntity();
         UserEntity userEntity = userRepository.findUser(user.getId());
         List<BlackListEntity> existEntity = blackListRepository.findByEmail(user.getEmail());
@@ -61,37 +62,38 @@ public class BlackListService {
         blackList.setUser(userEntity);
         blackList.setEmail(user.getEmail());
         blackList.setBlockDurationSec(BLOCK_DURATION_SEC);
-        blackList.setLimitationCause(cause.getCause());
+        blackList.setLimitationCause(cause);
         blackList.setCreatedAt(LocalDateTime.now());
         blackList.setUnblockedAt(blackList.getCreatedAt().plusSeconds(BLOCK_DURATION_SEC));
         blackList.setRealm(context.getRealm().getName());
         //default 0 mb todo default 1 | do we need it?
         if (existEntity.isEmpty()) {
             blackList.setBlockCount(1);
+            blackListRepository.save(blackList);
+            return;
         }
-        else {
-            blackList.setBlockCount(existEntity.stream().findFirst().get().getBlockCount() + 1);
-        }
-        blackListRepository.save(blackList);
+        blackList.setBlockCount(existEntity.stream().findFirst().get().getBlockCount() + 1);
+        blackListRepository.update(blackList);
     }
 
     public boolean isUserBlockedAuthBySms(String phone, AuthenticationFlowContext context) {
+
         return blackListRepository.findBlockedByPhone(phone, context).stream()
-                .anyMatch(it -> it.getLimitationCause().equals(LimitationCauseType.SMS.getCause()));
+                .anyMatch(it -> it.getLimitationCause().equals(ActivationCodeType.CODE_TO_SMS.name()));
     }
 
     public boolean isUserBlockedAuthBySms(String phone, RequiredActionContext context) {
         return blackListRepository.findBlockedByPhone(phone, context).stream()
-                .anyMatch(it -> it.getLimitationCause().equals(LimitationCauseType.SMS.getCause()));
+                .anyMatch(it -> it.getLimitationCause().equals(ActivationCodeType.CODE_TO_SMS.name()));
     }
 
     public boolean isUserBlockedAuthByPhoneCall(String phone, AuthenticationFlowContext context) {
         return blackListRepository.findBlockedByPhone(phone, context).stream()
-                .anyMatch(it -> it.getLimitationCause().equals(LimitationCauseType.PHONE_CALL.getCause()));
+                .anyMatch(it -> it.getLimitationCause().equals(ActivationCodeType.CODE_BY_PHONE_NUMBER.name()));
     }
     public boolean isUserBlockedAuthByPhoneCall(String phone, RequiredActionContext context) {
         return blackListRepository.findBlockedByPhone(phone, context).stream()
-                .anyMatch(it -> it.getLimitationCause().equals(LimitationCauseType.PHONE_CALL.getCause()));
+                .anyMatch(it -> it.getLimitationCause().equals(ActivationCodeType.CODE_BY_PHONE_NUMBER.name()));
     }
 
     public BlackListDto getBlockedUser(String phone, AuthenticationFlowContext context) {

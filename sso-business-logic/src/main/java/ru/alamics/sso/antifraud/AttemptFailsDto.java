@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -14,4 +16,5 @@ public class AttemptFailsDto {
     private String code;
     private String realm;
     private String limitationCause;
+    private LocalDateTime created;
 }

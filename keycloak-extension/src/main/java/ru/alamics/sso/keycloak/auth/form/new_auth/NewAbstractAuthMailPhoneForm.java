@@ -145,6 +145,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             setTimerValueByActivationType(blackListDto, user, authSession, authContext, deltaTime, context);
             try {
                 boolean enableRepeatCall = true;
+
                 if (authSession.getAuthNote("needSendSmsCode") != null && authSession.getAuthNote("needSendSmsCode").equals("true")) {
                     authContext = userPhoneVerifier.sendValidationMsg(user, authContext, activationCodeType, context.getRealm());
                     authSession.setAuthNote("godMode", authContext.getHashProperty());
@@ -275,16 +276,20 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             }
             if (context.getHttpRequest().getDecodedFormParameters().containsKey("resend")) {
                 String currentCode = sessionModel.getAuthNote("currentCode");
+                if (currentCode !=null && !currentCode.equals("")) {
+                    if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
+                        attemptFailsService.saveAttempt(new AttemptFailsDto(user.getPhone(), currentCode, context.getRealm().getName(), CODE_BY_PHONE_NUMBER.name(), LocalDateTime.now()));
+                    }
 
-                if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
-                    attemptFailsService.saveAttempt(new AttemptFailsDto(user.getPhone(), currentCode, context.getRealm().getName(), CODE_BY_PHONE_NUMBER.name()));
+                    if (activationCodeType.equals(CODE_TO_SMS)) {
+                        attemptFailsService.saveAttempt(new AttemptFailsDto(user.getPhone(), currentCode, context.getRealm().getName(), CODE_TO_SMS.name(), LocalDateTime.now()));
+                    }
                 }
 
-                if (activationCodeType.equals(CODE_TO_SMS)) {
-                    attemptFailsService.saveAttempt(new AttemptFailsDto(user.getPhone(), currentCode, context.getRealm().getName(), CODE_TO_SMS.name()));
-                }
                 mainCounter.remove(protector);
-                checkIsLimited(user, context, sessionModel, protector);
+                if (checkIsLimited(user, context, sessionModel, protector)) {
+                    return;
+                }
                 log.info("Sms code resend");
 
                 sessionModel.setAuthNote("needSendSmsCode", "true");
@@ -301,27 +306,27 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         }
     }
 
-    public void checkIsLimited(User user, AuthenticationFlowContext context, AuthenticationSessionModel authSession, PhonePlusRealmProtector protector) {
+    public boolean checkIsLimited(User user, AuthenticationFlowContext context, AuthenticationSessionModel authSession, PhonePlusRealmProtector protector) {
         if (activationCodeType.equals(CODE_TO_SMS)) {
             List<AttemptFailsDto> smsAttempts = attemptFailsService.getAttempts(user.getPhone(), context.getRealm().getName(), CODE_TO_SMS.name());
             if (!smsAttempts.isEmpty() && smsAttempts.size() >= MAX_RESEND_RECALL_TRIES && !blackListService.isUserBlockedAuthBySms(user.getPhone(), context)) {
-                blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.SMS, authSession);
+                blackListService.limitUserBySmsOrPhone(user, activationCodeType.name(), authSession);
                 authenticate(context);
                 mainCounter.remove(protector);
-                attemptFailsService.deleteAttempts(smsAttempts);
-                return;
+                return true;
             }
         }
 
         if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
             List<AttemptFailsDto> callAttempts = attemptFailsService.getAttempts(user.getPhone(), context.getRealm().getName(), CODE_BY_PHONE_NUMBER.name());
             if (!callAttempts.isEmpty() && callAttempts.size() >= MAX_RESEND_RECALL_TRIES && !blackListService.isUserBlockedAuthByPhoneCall(user.getPhone(), context)) {
-                blackListService.limitUserBySmsOrPhone(user, LimitationCauseType.PHONE_CALL, authSession);
+                blackListService.limitUserBySmsOrPhone(user, activationCodeType.name(), authSession);
                 authenticate(context);
                 mainCounter.remove(protector);
-                attemptFailsService.deleteAttempts(callAttempts);
+                return true;
             }
         }
+        return false;
     }
 
     @Override

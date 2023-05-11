@@ -11,7 +11,7 @@ public class AttemptFailsMapper {
     public static List<AttemptFailsDto> toDtoList(List<AttemptFailsEntity> entity) {
         List<AttemptFailsDto> attemptFailsDto = new LinkedList<>();
         if (!entity.isEmpty()) {
-            entity.forEach(it -> attemptFailsDto.add(new AttemptFailsDto(it.getPhone(), it.getCode(), it.getRealm(), it.getLimitationCause())));
+            entity.forEach(it -> attemptFailsDto.add(new AttemptFailsDto(it.getPhone(), it.getCode(), it.getRealm(), it.getLimitationCause(), it.getCreated())));
         }
         return attemptFailsDto;
     }
@@ -23,13 +23,14 @@ public class AttemptFailsMapper {
         entity.setCode(dto.getCode());
         entity.setRealm(dto.getRealm());
         entity.setLimitationCause(dto.getLimitationCause());
+        entity.setCreated(dto.getCreated());
         return entity;
     }
 
     public static List<AttemptFailsEntity> toEntityList(List<AttemptFailsDto> dtoList) {
         List<AttemptFailsEntity> entities = new LinkedList<>();
         if (!dtoList.isEmpty()) {
-            dtoList.forEach(it -> entities.add(new AttemptFailsEntity(UUID.randomUUID().toString(), it.getPhone(), it.getCode(), it.getRealm(), it.getLimitationCause())));
+            dtoList.forEach(it -> entities.add(new AttemptFailsEntity(UUID.randomUUID().toString(), it.getPhone(), it.getCode(), it.getRealm(), it.getLimitationCause(), it.getCreated())));
         }
         return entities;
     }
