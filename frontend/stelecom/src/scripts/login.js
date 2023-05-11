@@ -13,16 +13,7 @@ export default (function() {
   const cityElement = document.getElementById('domain-login');
   submitElement.disabled = true;
 
-  const dynamicMask = IMask(usernameElement, {
-    mask: [
-      {
-        mask: '+{7} (000) 000-00-00',
-      },
-      {
-        mask: /^\S*@?\S*$/,
-      },
-    ],
-  });
+  const dynamicMask = iMaskInstancePhoneAndEmail(usernameElement);;
 
   let isUsernameValid = false;
   let isPasswordExists = false;
