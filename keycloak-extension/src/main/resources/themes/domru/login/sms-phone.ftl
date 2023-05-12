@@ -53,9 +53,8 @@
                             <span style="color: #000000; font-size: 14px!important;">
                                 <#if codeLimited?? && codeLimited> Код можно запросить через: <#else> Код действует </#if>
                             </span>
-                            <span id="timer-time" class="px-1 textTimer" style="font-size: 14px!important; color: #000000!important;">
-                            </span>
-                        </div>
+                            <span id="timer-time" class="px-1 textTimer" style="font-size: 14px!important; color: #000000!important;"></span>
+                    </div>
                         <#if enableRepeatCall?? && enableRepeatCall!>
                             <p class="hidden font-light text-black verification__text" id="resend">
                                 <span>

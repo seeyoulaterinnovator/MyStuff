@@ -565,6 +565,10 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         authSession.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
         LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
         deltaTime = previousTime.until(unblocked, ChronoUnit.SECONDS);
+        //fixme costilya
+        if (deltaTime < 0) {
+            deltaTime = LocalDateTime.now().until(LocalDateTime.now().plusSeconds(blackListDto.getBlockDurationSec()), ChronoUnit.SECONDS);
+        }
         context.form().setAttribute("expirationSeconds", String.valueOf(deltaTime))
                 .setAttribute("codeLimited", true);
     }
