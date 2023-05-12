@@ -99,7 +99,7 @@ export default (function functionName() {
     if (secondUserName.value == '') {
       secondSubmit.disabled = true;
     }
-    const dynamicMaskTwo = iMaskInstancePhone(phoneField);
+    const dynamicMaskTwo = iMaskInstancePhone(secondUserName);
     let isUsernameValid = false;
     let isPasswordExists = false;
 
