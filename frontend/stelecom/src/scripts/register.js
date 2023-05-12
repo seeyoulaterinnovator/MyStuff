@@ -1,8 +1,7 @@
-import IMask from 'imask';
 import { createForm } from 'final-form';
 
 import linkPasswords from './link-passwords.js';
-import { isEmpty } from './helpers';
+import {iMaskInstancePhone, isEmpty} from './helpers';
 
 import VALIDATION_RULES from '../constants/validationRules.js';
 

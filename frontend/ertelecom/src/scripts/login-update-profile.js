@@ -1,7 +1,6 @@
-import IMask from 'imask';
 import { createForm } from 'final-form';
 
-import { isEmpty } from './helpers';
+import {iMaskInstancePhone, isEmpty} from './helpers';
 
 import VALIDATION_RULES from '../constants/validationRules.js';
 

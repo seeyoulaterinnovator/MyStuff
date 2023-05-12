@@ -1,6 +1,5 @@
-import IMask from 'imask';
 import VALIDATION_RULES from '../constants/validationRules.js';
-import { setButtonAvailability } from './helpers.js';
+import {iMaskInstancePhoneAndEmail, setButtonAvailability} from './helpers.js';
 import { domain } from '../Cities/stores.js';
 
 export default (function() {

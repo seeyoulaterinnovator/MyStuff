@@ -1,4 +1,3 @@
-import IMask from 'imask';
 import {createForm} from 'final-form';
 
 import {iMaskInstancePhone, isEmpty} from './helpers';

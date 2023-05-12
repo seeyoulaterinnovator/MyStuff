@@ -1,4 +1,3 @@
-import IMask from 'imask';
 import {iMaskInstancePhone, iMaskInstancePhoneAndEmail, setButtonAvailability} from './helpers.js';
 import Cookie from 'js-cookie';
 import {WRONG_PASS_REG} from "../constants/passwordCharset";
