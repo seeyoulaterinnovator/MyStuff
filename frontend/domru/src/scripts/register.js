@@ -1,4 +1,3 @@
-import IMask from 'imask';
 import { createForm } from 'final-form';
 
 import linkPasswords from './link-passwords.js';
