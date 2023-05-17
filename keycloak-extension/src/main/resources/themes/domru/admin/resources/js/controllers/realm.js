@@ -2432,7 +2432,8 @@ module.controller('AuthenticationFlowsCtrl', function ($scope, $route, realm, fl
 
         } else if (realm.dockerAuthenticationFlow == $scope.flow.alias) {
             Notifications.error("Cannot remove flow, it is currently being used as the docker authentication flow.");
-
+        } else if (realm.restReg == $scope.flow.alias) {
+            Notifications.error("Cannot remove flow, it is currently being used as the registration flow.");
         } else {
             AuthenticationFlows.remove({realm: realm.realm, flow: $scope.flow.id}, function () {
                 $location.url("/realms/" + realm.realm + '/authentication/flows/' + flows[0].alias);

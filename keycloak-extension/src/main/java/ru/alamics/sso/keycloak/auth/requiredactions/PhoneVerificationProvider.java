@@ -180,10 +180,18 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             log.info("ignore... userPhoneEmpty");
         } catch (PhoneCallException e) {
             log.info("ignore... PhoneCallException {}", e.getMessage());
+            if (authSession.getAuthNote("restSecondPhase")!=null) {
+                authSession.setAuthNote("unable_to_send", "phone_error");
+                context.challenge(createForm(context, context.form()));
+            }
         } catch (EmailException e) {
             log.info("ignore... EmailException {}", e.getMessage());
         } catch (SendMessageException se) {
             log.info("ignore... MsgSendException {}", se.getMessage());
+            if (authSession.getAuthNote("restSecondPhase")!=null) {
+                authSession.setAuthNote("unable_to_send", "sms_error");
+                context.challenge(createForm(context, context.form()));
+            }
         }
     }
 
@@ -192,6 +200,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         log.info("PhoneProcessAction");
 
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
+
+        authSession.removeAuthNote("unable_to_send");
 
         // Переключаемся на отправку кода по СМС, даже если activationCodeType = CODE_BY_PHONE_NUMBER
         if (authSession.getAuthNote(NEED_SWITCH_TO_SMS_CODE) != null) {

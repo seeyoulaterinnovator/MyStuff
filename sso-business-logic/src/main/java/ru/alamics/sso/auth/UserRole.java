@@ -2,6 +2,7 @@ package ru.alamics.sso.auth;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
+import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.*;
 import ru.alamics.sso.jpa.entity.ExternalSystemEntity;
@@ -38,6 +39,19 @@ public class UserRole {
     private UserPostRepository postRepository;
 
     public void setUserPost(AuthenticationFlowContext context) {
+        final String DEBUG_STR = "setUserPost";
+        log.info("{}: user={}", DEBUG_STR, context.getUser().getId());
+
+        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
+        final String tomsId = formData.getFirst("tomsId");
+        final String selectedPostId = formData.get("postId").get(0);
+
+        UserModel user = context.getUser();
+        selectPostByUser(user, selectedPostId);
+        user.setAttribute(ATTR_TOMS_NAME, Collections.singletonList(tomsId));
+    }
+
+    public void setUserPost(RequiredActionContext context) {
         final String DEBUG_STR = "setUserPost";
         log.info("{}: user={}", DEBUG_STR, context.getUser().getId());
 
