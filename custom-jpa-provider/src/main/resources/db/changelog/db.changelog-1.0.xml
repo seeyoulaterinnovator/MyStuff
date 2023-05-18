@@ -1003,6 +1003,33 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="136" author="zhakov-mv">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_LOGIN_HISTORY"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE USER_LOGIN_HISTORY ADD COLUMN (
+                is_success TinyInt(1) DEFAULT 0,
+                realm VARCHAR(16) not null
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="137" author="zhakov-mv">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ATTEMPT_FAILS"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE ATTEMPT_FAILS ADD COLUMN user_id varchar(36) NOT NULL;
+        </sql>
+    </changeSet>
+    <changeSet id="138" author="zhakov-mv">
+        <sql>
+            ALTER TABLE ATTEMPT_FAILS ADD CONSTRAINT fk_user_id_attempts
+                FOREIGN KEY (user_id) REFERENCES USER_ENTITY (ID) ON DELETE CASCADE
+        </sql>
+    </changeSet>
+
     <changeSet id="51_p" author="plyusnin-da" dbms="mysql">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="USER_ENTITY"/>

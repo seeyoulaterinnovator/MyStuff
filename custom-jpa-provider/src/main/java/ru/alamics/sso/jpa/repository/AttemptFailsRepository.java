@@ -46,6 +46,23 @@ public class AttemptFailsRepository {
         return (List<AttemptFailsEntity>) query.getResultList();
     }
 
+    public List<AttemptFailsEntity> getFailAttemptsIfAuthSuccess(String phone, String realm, String cause) {
+        Query query = em.createNativeQuery("select * " +
+                        "from ATTEMPT_FAILS af " +
+                        "where created >= (select ul.LOGINED_AT " +
+                        "                  from USER_LOGIN_HISTORY ul " +
+                        "                  where phone =:phone " +
+                        "                      and ul.is_success = true " +
+                        "                  order by created desc " +
+                        "                  limit 1) " +
+                        "and af.phone =:phone and af.realm =:realm;", AttemptFailsEntity.class)
+                .setParameter("phone", phone)
+                .setParameter("realm", realm)
+                .setParameter("cause", cause);
+
+        return (List<AttemptFailsEntity>) query.getResultList();
+    }
+
     public void save(AttemptFailsEntity entity) {
         em.persist(entity);
         em.flush();

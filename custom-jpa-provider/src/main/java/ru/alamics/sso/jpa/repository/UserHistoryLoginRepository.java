@@ -2,11 +2,14 @@ package ru.alamics.sso.jpa.repository;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.UserLoginHistory;
+import ru.alamics.sso.jpa.entity.antifraud.AttemptFailsEntity;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -93,5 +96,24 @@ public class UserHistoryLoginRepository {
         return history;
     }
 
+    public void saveSuccessAuth(UserLoginHistory history) {
+        final String id = UUID.randomUUID().toString();
+        history.setId(id);
+        em.persist(history);
+        em.flush();
+    }
+
+    public List<UserLoginHistory> findLastAuthSuccess(String userId, String realm) {
+        Query query = em.createNativeQuery("select ul.LOGINED_AT\n" +
+                        "from USER_LOGIN_HISTORY ul\n" +
+                        "where ul.USER_ID = :userId\n" +
+                        "  and ul.is_success = 1\n" +
+                        "  and ul.realm = :realm\n" +
+                        "order by ul.LOGINED_AT desc\n" +
+                        "limit 1", UserLoginHistory.class)
+                .setParameter("userId", userId)
+                .setParameter("realm", realm);
+        return (List<UserLoginHistory>) query.getResultList();
+    }
 
 }

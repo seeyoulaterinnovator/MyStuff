@@ -27,4 +27,10 @@ public class UserLoginHistory implements Serializable {
 
     @Column(name = "logined_at")
     private LocalDateTime loginedAt;
+
+    @Column(name = "is_success")
+    private Boolean isSuccess;
+
+    @Column(name = "realm")
+    private String realm;
 }
