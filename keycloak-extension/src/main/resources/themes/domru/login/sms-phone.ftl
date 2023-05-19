@@ -30,7 +30,7 @@
                            </#if>
                            class="text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none squares
                             sms-input"
-                           autocomplete="off"/>
+                           autocomplete="off" autofocus/>
                 </#list>
             </div>
 
