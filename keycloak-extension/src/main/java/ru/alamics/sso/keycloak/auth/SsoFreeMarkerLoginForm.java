@@ -2,6 +2,7 @@ package ru.alamics.sso.keycloak.auth;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.common.util.ObjectUtil;
@@ -43,7 +44,8 @@ import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.RestAuthHelper.chooseYourDestiny;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth.RestAuthHelper.chooseYourDestiny;
 import static ru.alamics.sso.registration.model.UserConstants.*;
 import static ru.alamics.sso.settings.SettingConstants.*;
 import static ru.alamics.sso.util.Util.CLIENT_B2B;
@@ -276,7 +278,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         return super.setActionUri(uri);
     }
 
-    private Response createRestResponse() {
+    private Response createRestResponse() {//100% нужно сделать с нужным статусом ответа
         if (Util.isPasswordGrandType(session)) {
             if (!(accessCode == null || execution == null || authenticationSession == null)) {
                 Map<String, String> entity = new HashMap<>();
@@ -287,9 +289,12 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                 entity.put("tab_id", authenticationSession.getTabId());
                 chooseYourDestiny(entity, authenticationSession);
 
+//                if (authenticationSession.getAuthNote("invalid_registration") != null) {
+//                    return Response.status(BAD_REQUEST).entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
+//                }
                 return Response.ok().entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
             }
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(BAD_REQUEST).build();
         }
         return null;
     }

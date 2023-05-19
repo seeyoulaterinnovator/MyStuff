@@ -235,6 +235,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
             log.info("Sms code resend");
             authSession.setAuthNote(NEED_SEND_SMS_CODE_OR_DO_CALL, NEED_SEND_SMS_CODE_OR_DO_CALL);
+            authSession.removeAuthNote("error_code");
             requiredActionChallenge(context);
         } else {
             UserModel model = context.getUser();

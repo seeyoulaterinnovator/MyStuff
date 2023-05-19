@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest;
+package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth;
 
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -14,7 +14,7 @@ import ru.alamics.sso.registration.dto.UserPostResponse;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
-import static ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.RestAuthHelper.*;
+import static ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth.RestAuthHelper.*;
 
 
 public class PasswordRestValidator extends ValidatePassword {

@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest;
+package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth;
 
 
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -21,7 +21,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.util.Objects;
 
-import static ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.RestAuthHelper.isRestRequestValid;
+import static ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth.RestAuthHelper.isRestAuthRequestValid;
 
 
 public class UserNameOrPhoneRestValidator extends ValidateUsername {
@@ -38,7 +38,7 @@ public class UserNameOrPhoneRestValidator extends ValidateUsername {
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
-        if (!isRestRequestValid(context)) {
+        if (!isRestAuthRequestValid(context)) {
             Response challengeResponse = errorResponse(Response.Status.UNAUTHORIZED.getStatusCode(), "invalid_request", "Missing parameter: password or call/sms");
             context.failure(AuthenticationFlowError.INVALID_USER, challengeResponse);
             return;

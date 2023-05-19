@@ -47,6 +47,16 @@ public class Util {
         }
     }
 
+    public static boolean isRegistrationGrandType(KeycloakSession session) {
+        HttpRequest contextObject = session.getContext().getContextObject(HttpRequest.class);
+        MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
+        if (!CollectionUtils.isEmpty(parameters)) {
+            return "registration".equals(parameters.getFirst(OIDCLoginProtocol.GRANT_TYPE_PARAM));
+        } else {
+            return false;
+        }
+    }
+
     public static boolean isFrameByCurrentRequest(KeycloakSession session) {
         MultivaluedMap<String, String> queryParameters = session.getContext().getUri().getQueryParameters();
         return queryParameters != null && (queryParameters.get(I_FRAME) != null || queryParameters.get(HIDDEN_HEADER) != null);

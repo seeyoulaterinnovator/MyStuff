@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest;
+package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth;
 
 import org.keycloak.Config;
 import org.keycloak.authentication.RequiredActionFactory;

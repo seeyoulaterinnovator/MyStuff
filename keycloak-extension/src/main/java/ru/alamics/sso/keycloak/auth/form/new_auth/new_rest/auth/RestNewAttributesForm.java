@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest;
+package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -75,7 +75,7 @@ public class RestNewAttributesForm implements RequiredActionProvider {
     @Override
     public void processAction(RequiredActionContext context) {
         roleService.setUserPost(context);
-
+        context.getAuthenticationSession().removeAuthNote("rest_post");
         context.success();
     }
 

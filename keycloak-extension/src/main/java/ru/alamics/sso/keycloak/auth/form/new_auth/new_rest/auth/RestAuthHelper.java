@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest;
+package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth;
 
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.models.UserModel;
@@ -11,7 +11,7 @@ import java.util.Map;
 
 public interface RestAuthHelper {
 
-    static boolean isRestRequestValid(AuthenticationFlowContext context) {
+    static boolean isRestAuthRequestValid(AuthenticationFlowContext context) {
         MultivaluedMap<String, String> forms = context.getHttpRequest().getDecodedFormParameters();
         final boolean isPassword = forms.containsKey("password");
         final boolean isTwoStep = forms.containsKey("viaPhoneOnly");
@@ -35,6 +35,24 @@ public interface RestAuthHelper {
         }
         if (authenticationSession.getAuthNote("rest_post") != null) {
             entity.put("post_list", authenticationSession.getAuthNote("rest_post"));
+        }
+        if (authenticationSession.getAuthNote("email_error") != null) {
+            entity.put("email_error", authenticationSession.getAuthNote("email_error"));
+        }
+        if (authenticationSession.getAuthNote("dupl_email") != null) {
+            entity.put("dupl_email", authenticationSession.getAuthNote("dupl_email"));
+        }
+        if (authenticationSession.getAuthNote("phone_error") != null) {
+            entity.put("phone_error", authenticationSession.getAuthNote("phone_error"));
+        }
+        if (authenticationSession.getAuthNote("dupl_phone") != null) {
+            entity.put("dupl_phone", authenticationSession.getAuthNote("dupl_phone"));
+        }
+        if (authenticationSession.getAuthNote("phone_error") != null) {
+            entity.put("phone_error", authenticationSession.getAuthNote("phone_error"));
+        }
+        if (authenticationSession.getAuthNote("reg_error") != null) {
+            entity.put("reg_error", authenticationSession.getAuthNote("reg_error"));
         }
     }
 

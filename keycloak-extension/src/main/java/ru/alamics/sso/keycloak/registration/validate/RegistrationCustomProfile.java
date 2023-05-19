@@ -55,10 +55,12 @@ public class RegistrationCustomProfile extends RegistrationProfile {
         boolean emailValid = true;
         if (Validation.isBlank(email)) {
             errors.add(new FormMessage(RegistrationPage.FIELD_EMAIL, Messages.MISSING_EMAIL));
+          //  context.getAuthenticationSession().setAuthNote("email_error", "email is missing");
             emailValid = false;
         } else if (!Validation.isEmailValid(email)) {
             context.getEvent().detail(Details.EMAIL, email);
             errors.add(new FormMessage(RegistrationPage.FIELD_EMAIL, Messages.INVALID_EMAIL));
+           // context.getAuthenticationSession().setAuthNote("email_error", "email is not valid");
             emailValid = false;
         }
 
@@ -66,6 +68,7 @@ public class RegistrationCustomProfile extends RegistrationProfile {
             eventError = Errors.EMAIL_IN_USE;
             formData.remove(Validation.FIELD_EMAIL);
             context.getEvent().detail(Details.EMAIL, email);
+         //   context.getAuthenticationSession().setAuthNote("dupl_email", "email already exists");
             errors.add(new FormMessage(RegistrationPage.FIELD_EMAIL, Messages.EMAIL_EXISTS));
         }
 
