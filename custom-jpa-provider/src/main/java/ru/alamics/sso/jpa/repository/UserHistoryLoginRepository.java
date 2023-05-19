@@ -111,16 +111,6 @@ public class UserHistoryLoginRepository {
                 .setParameter("realm", realm)
                 .setMaxResults(1)
                 .getResultList();
-        /*Query query = em.createNativeQuery("select ul.LOGINED_AT\n" +
-                        "from USER_LOGIN_HISTORY ul\n" +
-                        "where ul.USER_ID = ':userId'\n" +
-                        "  and ul.is_success = true\n" +
-                        "  and ul.realm = ':realm'\n" +
-                        "order by ul.LOGINED_AT desc\n" +
-                        "limit 1", UserLoginHistory.class)
-                .setParameter("userId", userId)
-                .setParameter("realm", realm);
-        return (List<UserLoginHistory>) query.getResultList();*/
     }
 
 }

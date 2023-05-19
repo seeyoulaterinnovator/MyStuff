@@ -66,11 +66,6 @@ public class AttemptFailsRepository {
                 .setParameter("userId", user.getId());
 
         return (List<AttemptFailsEntity>) query.getResultList();
-         /*em.createQuery("select ul from UserLoginHistory where ul.user =:user and ul.isSuccess = true order by ul.loginedAt desc", LoginHistory.class)
-                .setParameter("user", user)
-                        .setMaxResults(1)
-                                .getResultList();
-        em.createQuery("select af from AttemptFailsEntity af where af.created >= ")*/
     }
 
     public void save(AttemptFailsEntity entity) {
