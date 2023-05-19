@@ -1010,7 +1010,7 @@
         <sql>
             ALTER TABLE USER_LOGIN_HISTORY ADD COLUMN (
                 is_success TinyInt(1) DEFAULT 0,
-                realm VARCHAR(16) not null
+                realm VARCHAR(16)
             );
         </sql>
     </changeSet>

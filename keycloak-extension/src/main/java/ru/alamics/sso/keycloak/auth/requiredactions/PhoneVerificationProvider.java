@@ -17,6 +17,7 @@ import ru.alamics.sso.antifraud.BlackListService;
 import ru.alamics.sso.jpa.util.LimitationCauseType;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
+import ru.alamics.sso.keycloak.util.UserToUserEntityMapper;
 import ru.alamics.sso.keycloak.util.VerifyPhoneKey;
 import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.model.User;
@@ -275,7 +276,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         User user = UserModelUserMapper.mapToUser(context.getUser());
 
         if (activationCodeType.equals(CODE_TO_SMS)) {
-            List<AttemptFailsDto> smsAttempts = attemptFailsService.getAttempts(user.getPhone(), context.getRealm().getName(), CODE_TO_SMS.name(), user.getId());
+            List<AttemptFailsDto> smsAttempts = attemptFailsService.getAttempts(user.getPhone(), context.getRealm().getName(), CODE_TO_SMS.name(), UserToUserEntityMapper.toUserEntity(user));
             if (!smsAttempts.isEmpty() && smsAttempts.size() >= MAX_RESEND_TRIES && !blackListService.isUserBlockedAuthBySms(user.getPhone(), context)) {
                 blackListService.limitUserBySmsOrPhone(user, activationCodeType.name(), context.getAuthenticationSession());
                 requiredActionChallenge(context);
@@ -285,7 +286,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         }
 
         if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
-            List<AttemptFailsDto> callAttempts = attemptFailsService.getAttempts(user.getPhone(), context.getRealm().getName(), CODE_BY_PHONE_NUMBER.name(), user.getId());
+            List<AttemptFailsDto> callAttempts = attemptFailsService.getAttempts(user.getPhone(), context.getRealm().getName(), CODE_BY_PHONE_NUMBER.name(), UserToUserEntityMapper.toUserEntity(user));
             if (!callAttempts.isEmpty() && callAttempts.size() >= MAX_RESEND_TRIES && !blackListService.isUserBlockedAuthByPhoneCall(user.getPhone(), context)) {
                 blackListService.limitUserBySmsOrPhone(user, activationCodeType.name(), context.getAuthenticationSession());
                 requiredActionChallenge(context);

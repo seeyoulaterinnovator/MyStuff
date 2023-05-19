@@ -1,6 +1,7 @@
 package ru.alamics.sso.jpa.repository;
 
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.jpa.entity.UserLoginHistory;
 import ru.alamics.sso.jpa.entity.antifraud.AttemptFailsEntity;
 
@@ -103,17 +104,23 @@ public class UserHistoryLoginRepository {
         em.flush();
     }
 
-    public List<UserLoginHistory> findLastAuthSuccess(String userId, String realm) {
-        Query query = em.createNativeQuery("select ul.LOGINED_AT\n" +
+    public List<UserLoginHistory> findLastAuthSuccess(UserEntity user, String realm) {
+        return em.createQuery("select ul from UserLoginHistory ul where" +
+                " ul.user =:user and ul.isSuccess = true and ul.realm =:realm order by ul.loginedAt desc", UserLoginHistory.class)
+                .setParameter("user", user)
+                .setParameter("realm", realm)
+                .setMaxResults(1)
+                .getResultList();
+        /*Query query = em.createNativeQuery("select ul.LOGINED_AT\n" +
                         "from USER_LOGIN_HISTORY ul\n" +
-                        "where ul.USER_ID = :userId\n" +
-                        "  and ul.is_success = 1\n" +
-                        "  and ul.realm = :realm\n" +
+                        "where ul.USER_ID = ':userId'\n" +
+                        "  and ul.is_success = true\n" +
+                        "  and ul.realm = ':realm'\n" +
                         "order by ul.LOGINED_AT desc\n" +
                         "limit 1", UserLoginHistory.class)
                 .setParameter("userId", userId)
                 .setParameter("realm", realm);
-        return (List<UserLoginHistory>) query.getResultList();
+        return (List<UserLoginHistory>) query.getResultList();*/
     }
 
 }
