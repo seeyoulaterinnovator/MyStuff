@@ -1024,6 +1024,9 @@
         </sql>
     </changeSet>
     <changeSet id="138" author="zhakov-mv">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ATTEMPT_FAILS"/>
+        </preConditions>
         <sql>
             ALTER TABLE ATTEMPT_FAILS ADD CONSTRAINT fk_user_id_attempts
                 FOREIGN KEY (user_id) REFERENCES USER_ENTITY (ID) ON DELETE CASCADE
