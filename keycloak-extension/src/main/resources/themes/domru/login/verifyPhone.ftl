@@ -28,7 +28,7 @@
                         <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
                                name="smscode-${x}"
                                class="text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none"
-                               autocomplete="off"/>
+                               autocomplete="off" autofocus/>
                     <#else>
                         <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
                                name="smscode-${x}"
