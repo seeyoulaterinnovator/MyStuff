@@ -2,12 +2,12 @@ package ru.alamics.sso.jpa.entity.antifraud;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.keycloak.models.UserModel;
+import org.keycloak.models.jpa.entities.UserEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
 public class AttemptFailsEntity {
     @Id
     @Column(name = "id")
@@ -27,6 +28,8 @@ public class AttemptFailsEntity {
     private String realm;
     @Column(name = "limitation_cause")
     private String limitationCause;
+    @Column(name = "user_id")
+    private String userId;
     @Column(name = "created")
     private LocalDateTime created;
 }
