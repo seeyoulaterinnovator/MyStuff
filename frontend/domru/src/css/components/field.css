@@ -182,22 +182,19 @@
 
 
 .field__input--city {
-  width: 384px;
+  width: 696px;
 
 @media (max-width: 1199px) {
-  width:280px;
+  width: 696px;
 }
 
-@media (max-width: 959px) {
-  width:288px;
+
+@media (max-width: 768px) {
+  width: 696px;
 }
 
-@media (max-width: 640px) {
-  width:231px;
-}
-
-@media (max-width: 479px) {
-  width:240px;
+@media (max-width: 320px) {
+  width: 288px;
 }
 }
 
