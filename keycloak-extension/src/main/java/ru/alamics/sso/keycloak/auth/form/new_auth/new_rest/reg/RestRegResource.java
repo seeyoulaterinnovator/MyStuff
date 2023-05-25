@@ -120,7 +120,7 @@ public class RestRegResource {
             }
             return processRegistration(false, null, createAuthenticationSessionForClient(clientId), null);
         }
-        return ErrorResponse.error("Не удалось создать flow", Response.Status.NOT_FOUND);
+        return ErrorResponse.error("РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ flow", Response.Status.NOT_FOUND);
     }
 
     protected Response processRegistration(boolean action, String execution, AuthenticationSessionModel authSession, String errorMessage) {

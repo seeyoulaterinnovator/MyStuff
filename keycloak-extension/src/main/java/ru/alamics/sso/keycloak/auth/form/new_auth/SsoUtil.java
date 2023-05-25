@@ -1,13 +1,37 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth;
 
+import org.keycloak.OAuth2Constants;
+import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.RequiredActionContext;
+import org.keycloak.common.util.Time;
 import org.keycloak.events.Details;
 import org.keycloak.events.EventType;
+import org.keycloak.models.*;
+import org.keycloak.protocol.oidc.OIDCAdvancedConfigWrapper;
+import org.keycloak.protocol.oidc.OIDCLoginProtocol;
+import org.keycloak.protocol.oidc.TokenManager;
+import org.keycloak.protocol.oidc.utils.OAuth2Code;
+import org.keycloak.protocol.oidc.utils.OAuth2CodeParser;
+import org.keycloak.sessions.AuthenticationSessionModel;
+import org.keycloak.utils.MediaType;
 import ru.alamics.sso.keycloak.auth.form.new_auth.common_mail_sender.EmailSenderService;
 
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
+import static ru.alamics.sso.registration.model.UserConstants.REDIRECT_URI;
+
 public interface SsoUtil {
+
+    Map<String, String> responseBody = new HashMap<>();
 
     static void sendEmailVer(RequiredActionContext context) {
         if (!context.getUser().isEmailVerified()) {
@@ -34,5 +58,87 @@ public interface SsoUtil {
             sb.append(characters.charAt(index));
         }
         return sb.toString();
+    }
+
+    static void decideResponseFormat(AuthenticationFlowContext context, AuthenticationSessionModel authSession) {
+        UriInfo uriInfo = context.getUriInfo();
+        MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
+        Map<String, String> redirectUriQueryParams = extractQueryParamsFromRedirectUri(queryParams.getFirst(REDIRECT_URI));
+        if (authSession.getAuthNote("format") == null) {
+            authSession.setAuthNote("format", redirectUriQueryParams.get("format"));
+        }
+    }
+
+    static Map<String, String> extractQueryParamsFromRedirectUri(String redirectUri) {
+        Map<String, String> queryParameters = new HashMap<>();
+        if (redirectUri != null && redirectUri.indexOf('?') >= 0) {
+            redirectUri = redirectUri.substring(redirectUri.indexOf('?') + 1);
+            String[] pairs = redirectUri.split("&");
+            for (String pair : pairs) {
+                int idx = pair.indexOf('=');
+                if (idx >= 0) {
+                    try {
+                        queryParameters.put(URLDecoder.decode(pair.substring(0, idx), StandardCharsets.UTF_8.name()), URLDecoder.decode(pair.substring(idx + 1), StandardCharsets.UTF_8.name()));
+                    } catch (UnsupportedEncodingException ignore) {
+
+                    }
+                }
+            }
+        }
+        return queryParameters;
+    }
+
+    static UserSessionModel isUserAuthenticated(AuthenticationFlowContext context, AuthenticationSessionModel sessionModel) {
+        UserSessionProvider userSessionProvider = context.getSession().sessions();
+        List<UserSessionModel> activeSessions = userSessionProvider.getUserSessions(context.getSession().getContext().getRealm(), context.getUser());
+        if (!activeSessions.isEmpty()) {
+            sessionModel.setAuthNote("authenticated", "");
+            return activeSessions.get(0);
+        }
+        return null;
+    }
+
+    static void decideResponse(AuthenticationFlowContext context, AuthenticationSessionModel sessionModel, UserSessionModel userSessionModel, KeycloakSession session) {
+        String authenticated = sessionModel.getAuthNote("authenticated");
+        String format = sessionModel.getAuthNote("format");
+        if (format != null) {
+            Map<String, String> entity = new HashMap<>();
+            if (authenticated != null) {
+                fillResponseBody(context.getAuthenticationSession(), userSessionModel, TokenManager.attachAuthenticationSession(session, userSessionModel, sessionModel), session);
+                entity.put("code", responseBody.get("code"));
+                entity.put("state", responseBody.get("state"));
+                entity.put("session_state", responseBody.get("session_state"));
+                context.forceChallenge(Response.ok().entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build());
+            } else {
+                entity.put("error", "format param while user has no active sessions");
+                context.forceChallenge(Response.status(400).entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build());
+            }
+        }
+    }
+
+    static void fillResponseBody(AuthenticationSessionModel authSession, UserSessionModel userSession, ClientSessionContext clientSessionCtx, KeycloakSession session) {
+        AuthenticatedClientSessionModel clientSession = clientSessionCtx.getClientSession();
+
+        String state = authSession.getClientNote(OIDCLoginProtocol.STATE_PARAM);
+        responseBody.put("state", state);
+
+        OIDCAdvancedConfigWrapper clientConfig = OIDCAdvancedConfigWrapper.fromClientModel(clientSession.getClient());
+        if (!clientConfig.isExcludeSessionStateFromAuthResponse()) {
+            responseBody.put("session_state", userSession.getId());
+        }
+
+        String nonce = authSession.getClientNote(OIDCLoginProtocol.NONCE_PARAM);
+        clientSessionCtx.setAttribute(OIDCLoginProtocol.NONCE_PARAM, nonce);
+
+        OAuth2Code codeData = new OAuth2Code(UUID.randomUUID(),
+                Time.currentTime() + userSession.getRealm().getAccessCodeLifespan(),
+                nonce,
+                authSession.getClientNote(OAuth2Constants.SCOPE),
+                authSession.getClientNote(OIDCLoginProtocol.REDIRECT_URI_PARAM),
+                authSession.getClientNote(OIDCLoginProtocol.CODE_CHALLENGE_PARAM),
+                authSession.getClientNote(OIDCLoginProtocol.CODE_CHALLENGE_METHOD_PARAM));
+
+        String code = OAuth2CodeParser.persistCode(session, clientSession, codeData);
+        responseBody.put("code", code);
     }
 }

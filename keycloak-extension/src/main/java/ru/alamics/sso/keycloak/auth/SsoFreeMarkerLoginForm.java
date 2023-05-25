@@ -2,7 +2,6 @@ package ru.alamics.sso.keycloak.auth;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.common.util.ObjectUtil;
@@ -52,11 +51,17 @@ import static ru.alamics.sso.util.Util.CLIENT_B2B;
 
 @Slf4j
 public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
+
     private static final String REGISTRATION_ONLY_IN_FRAME_ATTRIBUTE = "registrationOnlyInFrame";
+
     private static final String AUTH_VIA_SMS = "loginViaSms";
+
     private static final String AUTH_VIA_EMAIL_OR_USERNAME_AND_PASSWORD = "loginViaEmailOrUsernameAndPassword";
+
     private static final String AUTH_VIA_PHONE_CALL = "loginViaPhoneCall";
+
     private ClientService clientService = null;
+
     private SettingsService settingsService = null;
 
     public SsoFreeMarkerLoginForm(KeycloakSession session, FreeMarkerUtil freeMarker) {
@@ -278,7 +283,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         return super.setActionUri(uri);
     }
 
-    private Response createRestResponse() {//100% нужно сделать с нужным статусом ответа
+    private Response createRestResponse() {
         if (Util.isPasswordGrandType(session)) {
             if (!(accessCode == null || execution == null || authenticationSession == null)) {
                 Map<String, String> entity = new HashMap<>();
@@ -289,9 +294,6 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                 entity.put("tab_id", authenticationSession.getTabId());
                 chooseYourDestiny(entity, authenticationSession);
 
-//                if (authenticationSession.getAuthNote("invalid_registration") != null) {
-//                    return Response.status(BAD_REQUEST).entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
-//                }
                 return Response.ok().entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
             }
             return Response.status(BAD_REQUEST).build();

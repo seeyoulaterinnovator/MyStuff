@@ -11,10 +11,7 @@ import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAu
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.ModelDuplicateException;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ServicesLogger;
@@ -26,7 +23,6 @@ import ru.alamics.sso.antifraud.AttemptFailsDto;
 import ru.alamics.sso.antifraud.AttemptFailsService;
 import ru.alamics.sso.antifraud.BlackListDto;
 import ru.alamics.sso.antifraud.BlackListService;
-import ru.alamics.sso.jpa.util.LimitationCauseType;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.keycloak.util.VerifyPhoneKey;
@@ -51,6 +47,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil.*;
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_BY_PHONE_NUMBER;
 import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_TO_SMS;
@@ -85,12 +82,15 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     private static final int COUNT_BY_ONE_CODE = 5;
 
-    public NewAbstractAuthMailPhoneForm(UserFindService userFindService) {
+    private KeycloakSession session;
+
+    public NewAbstractAuthMailPhoneForm(UserFindService userFindService, KeycloakSession session) {
         this.userFindService = userFindService;
         this.userPhoneVerifier = Lookup.lookup(UserPhoneVerifier.class);
         this.settingsService = Lookup.lookup(SettingsService.class);
         this.blackListService = Lookup.lookup(BlackListService.class);
         this.attemptFailsService = Lookup.lookup(AttemptFailsService.class);
+        this.session=session;
     }
 
     @Override
@@ -99,6 +99,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         String loginHint = context.getAuthenticationSession().getClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM);
         String rememberMeUsername = AuthenticationManager.getRememberMeUsername(context.getRealm(), context.getHttpRequest().getHttpHeaders());
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
+        decideResponseFormat(context, authSession);
 
         if (context.getHttpRequest().getDecodedFormParameters().containsKey("back")) {
             authSession.setAuthNote("backToLoginPassword", "backToLoginPassword");
@@ -176,7 +177,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                         .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()))
                         .setAttribute("phoneCallButton", authSession.getAuthNote("secondPhase").equals("phoneCallButton"));
 
-
                 context.challenge(challenge(context, loginFormsProvider));
 
             } catch (UserPhoneEmpty userPhoneEmpty) {
@@ -249,7 +249,9 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         if (isLoginPassword && (validateUserAndPassword(context, formData))) {
             sessionModel.setAuthNote("loginPasswordButton", "loginPasswordButton");
             sessionModel.setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
+            UserSessionModel userSessionModel = isUserAuthenticated(context, sessionModel);
             context.success();
+            decideResponse(context, sessionModel, userSessionModel, session);
             return;
         }
 
@@ -261,6 +263,9 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
         if (sessionModel.getAuthNote("secondPhase") != null) {
             UserModel model = context.getUser();
+
+            UserSessionModel userSessionModel = isUserAuthenticated(context, sessionModel);
+
             User user = UserModelUserMapper.mapToUser(model);
             PhonePlusRealmProtector protector = new PhonePlusRealmProtector(user.getPhone(), context.getRealm());
 
@@ -276,7 +281,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             }
             if (context.getHttpRequest().getDecodedFormParameters().containsKey("resend")) {
                 String currentCode = sessionModel.getAuthNote("currentCode");
-                if (currentCode !=null && !currentCode.equals("")) {
+                if (currentCode != null && !currentCode.equals("")) {
                     if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
                         attemptFailsService.saveAttempt(new AttemptFailsDto(user.getPhone(), currentCode, context.getRealm().getName(), CODE_BY_PHONE_NUMBER.name(), LocalDateTime.now()));
                     }
@@ -304,6 +309,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             } else {
                 checkAndAddToCounter(user, authContext, context, sessionModel, protector);
                 verifyCode(context, sessionModel, user, authContext, httpRequest, protector);
+                isUserAuthenticated(context, sessionModel);
+                decideResponse(context, sessionModel, userSessionModel, session);
             }
         } else {
             authenticate(context);

@@ -3,9 +3,12 @@ package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.models.UserModel;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import ru.alamics.sso.keycloak.auth.form.new_auth.rest_enums.RestAuthSessionErrorNotes;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 
 import javax.ws.rs.core.MultivaluedMap;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -27,33 +30,44 @@ public interface RestAuthHelper {
     }
 
     static void chooseYourDestiny(Map<String, String> entity, AuthenticationSessionModel authenticationSession) {
-        if (authenticationSession.getAuthNote("error_code") != null) {
-            entity.put("wrong code", "wrong sms or phone code");
+
+        RestAuthSessionErrorNotes[] restAuthSessionErrorNotes = RestAuthSessionErrorNotes.values();
+        Iterator<RestAuthSessionErrorNotes> restAuthSessionErrorNotesIterator = Arrays.stream(restAuthSessionErrorNotes).iterator();
+        while (restAuthSessionErrorNotesIterator.hasNext()) {
+            String error = restAuthSessionErrorNotesIterator.next().toLowerCase();
+            String authError = authenticationSession.getAuthNote(error);
+            if (authError != null) {
+                entity.put(error, authError);
+            }
         }
-        if (authenticationSession.getAuthNote("unable_to_send") != null) {
-            entity.put("service_error", authenticationSession.getAuthNote("unable_to_send"));
-        }
-        if (authenticationSession.getAuthNote("rest_post") != null) {
-            entity.put("post_list", authenticationSession.getAuthNote("rest_post"));
-        }
-        if (authenticationSession.getAuthNote("email_error") != null) {
-            entity.put("email_error", authenticationSession.getAuthNote("email_error"));
-        }
-        if (authenticationSession.getAuthNote("dupl_email") != null) {
-            entity.put("dupl_email", authenticationSession.getAuthNote("dupl_email"));
-        }
-        if (authenticationSession.getAuthNote("phone_error") != null) {
-            entity.put("phone_error", authenticationSession.getAuthNote("phone_error"));
-        }
-        if (authenticationSession.getAuthNote("dupl_phone") != null) {
-            entity.put("dupl_phone", authenticationSession.getAuthNote("dupl_phone"));
-        }
-        if (authenticationSession.getAuthNote("phone_error") != null) {
-            entity.put("phone_error", authenticationSession.getAuthNote("phone_error"));
-        }
-        if (authenticationSession.getAuthNote("reg_error") != null) {
-            entity.put("reg_error", authenticationSession.getAuthNote("reg_error"));
-        }
+        //        if (authenticationSession.getAuthNote("error_code") != null) {
+//            entity.put("wrong code", "wrong sms or phone code");
+//        }
+//        if (authenticationSession.getAuthNote("unable_to_send") != null) {
+//            entity.put("service_error", authenticationSession.getAuthNote("unable_to_send"));
+//        }
+//        if (authenticationSession.getAuthNote("rest_post") != null) {
+//            entity.put("post_list", authenticationSession.getAuthNote("rest_post"));
+//        }
+//        if (authenticationSession.getAuthNote("email_error") != null) {
+//            entity.put("email_error", authenticationSession.getAuthNote("email_error"));
+//        }
+//        if (authenticationSession.getAuthNote("dupl_email") != null) {
+//            entity.put("dupl_email", authenticationSession.getAuthNote("dupl_email"));
+//        }
+//        if (authenticationSession.getAuthNote("phone_error") != null) {
+//            entity.put("phone_error", authenticationSession.getAuthNote("phone_error"));
+//        }
+//        if (authenticationSession.getAuthNote("dupl_phone") != null) {
+//            entity.put("dupl_phone", authenticationSession.getAuthNote("dupl_phone"));
+//        }
+//        if (authenticationSession.getAuthNote("phone_error") != null) {
+//            entity.put("phone_error", authenticationSession.getAuthNote("phone_error"));
+//        }
+//        if (authenticationSession.getAuthNote("reg_error") != null) {
+//            entity.put("reg_error", authenticationSession.getAuthNote("reg_error"));
+//        }
+
     }
 
     static void setEmailSetter(UserModel user) {

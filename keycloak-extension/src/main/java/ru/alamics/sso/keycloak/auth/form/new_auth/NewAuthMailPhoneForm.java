@@ -10,8 +10,8 @@ import ru.alamics.sso.registration.service.UserFindService;
 @Slf4j
 public class NewAuthMailPhoneForm extends NewAbstractAuthMailPhoneForm {
 
-    public NewAuthMailPhoneForm(UserFindService userFindService) {
-        super(userFindService);
+    public NewAuthMailPhoneForm(UserFindService userFindService, KeycloakSession session) {
+        super(userFindService, session);
 
     }
 
