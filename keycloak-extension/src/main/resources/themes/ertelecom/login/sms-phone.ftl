@@ -27,7 +27,7 @@
                             <#elseif codeLimited?? && codeLimited>
                                 disabled
                             </#if>
-                           class="text-center align-middle w-10 h-10 sm:w-14 sm:h-14 outline-none" autocomplete="off" />
+                           class="text-center align-middle w-10 h-10 sm:w-14 sm:h-14 outline-none" autocomplete="off" autofocus/>
                 </#list>
             </div>
 

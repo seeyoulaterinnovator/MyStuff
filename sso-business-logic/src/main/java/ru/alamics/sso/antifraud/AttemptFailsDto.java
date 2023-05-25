@@ -17,4 +17,5 @@ public class AttemptFailsDto {
     private String realm;
     private String limitationCause;
     private LocalDateTime created;
+    private String userId;
 }

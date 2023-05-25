@@ -17,6 +17,7 @@ import ru.alamics.sso.antifraud.BlackListService;
 import ru.alamics.sso.jpa.util.LimitationCauseType;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
+import ru.alamics.sso.keycloak.util.UserToUserEntityMapper;
 import ru.alamics.sso.keycloak.util.VerifyPhoneKey;
 import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.model.User;
@@ -172,7 +173,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER, context.getRealm().getId()))
                     .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()))
                     .setAttribute("secondPhaseLogin", isLoginSecondPhaseActivated(context))
-                    .setAttribute("smsMessage", context.getUser().getRequiredActions().contains("phone_verificator_sms"));
+                    .setAttribute("smsMessage", context.getUser().getRequiredActions().contains("phone_verificator_sms"))
+                    .setAttribute("enableRepeatCall", true);// just for stelecom
 
             context.challenge(createForm(context, loginFormsProvider));
 
@@ -223,11 +225,11 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             String userPhone = UserModelUserMapper.mapToUser(context.getUser()).getPhone();
             if (codeHash != null && !codeHash.equals("")) {
                 if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
-                    attemptFailsService.saveAttempt(new AttemptFailsDto(userPhone, codeHash, context.getRealm().getName(), CODE_BY_PHONE_NUMBER.name(), LocalDateTime.now()));
+                    attemptFailsService.saveAttempt(new AttemptFailsDto(userPhone, codeHash, context.getRealm().getName(), CODE_BY_PHONE_NUMBER.name(), LocalDateTime.now(), context.getUser().getId()));
                 }
 
                 if (activationCodeType.equals(CODE_TO_SMS)) {
-                    attemptFailsService.saveAttempt(new AttemptFailsDto(userPhone, codeHash, context.getRealm().getName(), CODE_TO_SMS.name(), LocalDateTime.now()));
+                    attemptFailsService.saveAttempt(new AttemptFailsDto(userPhone, codeHash, context.getRealm().getName(), CODE_TO_SMS.name(), LocalDateTime.now(), context.getUser().getId()));
                 }
             }
 
@@ -253,7 +255,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 String codeHash = authSession.getAuthNote(CODE_HASH_KEY);
                 String code = context.getHttpRequest().getDecodedFormParameters().getFirst("smscode");
                 LocalDateTime codeExpirationTime = LocalDateTime.parse(authSession.getAuthNote(CODE_EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
-                userPhoneVerifier.verifyPhone(user, codeExpirationTime, codeHash, code, activationCodeType);
+                userPhoneVerifier.verifyPhone(user, codeExpirationTime, codeHash, code, activationCodeType, authSession.getRealm().getName());
 
                 UserModelUserMapper.mergeUserInto(user, model);
                 authSession.removeAuthNote(CODE_HASH_KEY);
@@ -285,7 +287,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         User user = UserModelUserMapper.mapToUser(context.getUser());
 
         if (activationCodeType.equals(CODE_TO_SMS)) {
-            List<AttemptFailsDto> smsAttempts = attemptFailsService.getAttempts(user.getPhone(), context.getRealm().getName(), CODE_TO_SMS.name());
+            List<AttemptFailsDto> smsAttempts = attemptFailsService.getAttempts(user.getPhone(), context.getRealm().getName(), CODE_TO_SMS.name(), UserToUserEntityMapper.toUserEntity(user));
             if (!smsAttempts.isEmpty() && smsAttempts.size() >= MAX_RESEND_TRIES && !blackListService.isUserBlockedAuthBySms(user.getPhone(), context)) {
                 blackListService.limitUserBySmsOrPhone(user, activationCodeType.name(), context.getAuthenticationSession());
                 requiredActionChallenge(context);
@@ -295,7 +297,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         }
 
         if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
-            List<AttemptFailsDto> callAttempts = attemptFailsService.getAttempts(user.getPhone(), context.getRealm().getName(), CODE_BY_PHONE_NUMBER.name());
+            List<AttemptFailsDto> callAttempts = attemptFailsService.getAttempts(user.getPhone(), context.getRealm().getName(), CODE_BY_PHONE_NUMBER.name(), UserToUserEntityMapper.toUserEntity(user));
             if (!callAttempts.isEmpty() && callAttempts.size() >= MAX_RESEND_TRIES && !blackListService.isUserBlockedAuthByPhoneCall(user.getPhone(), context)) {
                 blackListService.limitUserBySmsOrPhone(user, activationCodeType.name(), context.getAuthenticationSession());
                 requiredActionChallenge(context);

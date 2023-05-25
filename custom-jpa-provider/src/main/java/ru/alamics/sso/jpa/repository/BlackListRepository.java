@@ -81,4 +81,12 @@ public class BlackListRepository {
                 .setParameter("phone", phone)
                 .getResultList().isEmpty();
     }
+
+    public List<BlackListEntity> findBlockedByPhoneRealmCause(String phone, String realm, String cause) {
+        return em.createQuery("select ble from BlackListEntity ble where ble.limitationCause=:cause and ble.realm=:realm and ble.phone=:phone", BlackListEntity.class)
+                .setParameter("cause", cause)
+                .setParameter("realm", realm)
+                .setParameter("phone", phone)
+                .getResultList();
+    }
 }

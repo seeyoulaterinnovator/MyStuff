@@ -13,7 +13,7 @@
             </h3>
         <#elseif userPhone??>
             <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4" x-ms-format-detection="none">
-                <#if isSms?? && isSms>
+                <#if activationCodeType == "CODE_TO_SMS">
                     Вам выслан одноразовый пароль на номер:
                 <#else>
                     Введите последние 4 цифры номера входящего звонка на номер:
@@ -35,41 +35,55 @@
                             <#elseif codeLimited?? && codeLimited>
                                 disabled
                             </#if>
-                           class="text-center align-middle text-3xl w-10 h-10 sm:w-14 sm:h-14 border rounded-lg focus:border-extra outline-none" autocomplete="off" />
+                           class="text-center align-middle text-3xl w-10 h-10 sm:w-14 sm:h-14 border rounded-lg focus:border-extra outline-none" autocomplete="off" autofocus/>
                 </#list>
             </div>
             <input id="codeNumbers" name="codeNumbers" class="hidden" value="${lengthCode!}" />
-            <#if error?has_content>
-                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="0" />
-            <#else>
-                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds!}" />
-            </#if>
-
             <input id="smscode" name="smscode" class="hidden" />
 
-            <div class="flex md:justify-start justify-start w-full items-center text-left md:text-left md:pb-10 sm:pb-8 pb-4">
-                <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
-                     <p class="font-light text-black verification__text" id="resend">
-                        Не приходит пароль?
-                        <span>
-                            <button class="font-light verification__resend" name="resend" type="submit">Отправить еще раз</button>
-                        </span>
-                     </p>
-                <#else>
-                     <div id="timer" class="text-main-600 text-center md:text-right text-sm flex items-center my-6 md:my-0 justify-center md:justify-start">
-                        <#if codeLimited?? && codeLimited> Код можно запросить через: <#else> Пароль действует </#if> <span id="timer-time" class="px-1 text-black text-5/3em"></span> чч:мм:cc
-                    </div>
-                    <#if enableRepeatCall?? && enableRepeatCall!>
-                        <p class="hidden font-light text-black verification__text" id="resend">
-                            Не приходит пароль?
-                            <span>
-                                <button class="font-light verification__resend" name="resend" type="submit">Отправить еще раз</button>
-                            </span>
-                        </p>
+            <#if secondsUserIsBlocked gt 0>
+                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${secondsUserIsBlocked?c}"/>
+            <#else>
+                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${secondsCodeIsValid?c}"/>
+            </#if>
+
+            <div class=" flex flex-col md:items-start items-center justify-between">
+
+                <div id="timer" class="text-black text-center md:text-right flex items-center md:my-0 justify-center md:justify-start
+                     verification__timer__text">
+                    <#if secondsUserIsBlocked gt 0>
+                        <span style="color: #899DA8"> Код можно запросить через: </span>
+                    <#else>
+                        <span style="color: #899DA8"> Код действует: </span>
                     </#if>
-                </#if>
+                    <span id="timer-time" class="px-2 textTimer"></span>
+                </div>
+
+                <div>
+                    <#if activationCodeType == "CODE_TO_SMS">
+                        <button class="hidden verification__text verification__resend"
+                                id="resend" name="resend" type="submit">
+                            Отправить ещё раз
+                        </button>
+                    <#else>
+                        <button class="hidden verification__text verification__resend"
+                                id="resend" name="resend" type="submit">
+                            Повторный звонок
+                        </button>
+                    </#if>
+                </div>
+
+                <div>
+                    <#if activationCodeType == "CODE_BY_PHONE_NUMBER">
+                        <button class="verification__text verification__resend mt-4" form="totpe" id="sentCode"
+                                name="sendPhoneCode" type="submit">
+                            Отправить СМС
+                        </button>
+                    </#if>
+                </div>
             </div>
-            <div class="sm:block md:flex w-full items-center text-center md:text-left">
+
+            <div class="sm:block md:flex mt-8 w-full items-center text-center md:text-left">
                 <button class="btn btn-main verification__btn verification__btn__accept w-full md:w-3/7 mr-0 md:mr-4" name="accept" id="accept" type="submit">Подтвердить</button>
                 <#if lengthCode==4>
                     <button class="btn verification__btn verification__btn__send" form="totpe" id="sentCode" name="sendEmailCode" type="submit">Отправить на эл. почту</button>

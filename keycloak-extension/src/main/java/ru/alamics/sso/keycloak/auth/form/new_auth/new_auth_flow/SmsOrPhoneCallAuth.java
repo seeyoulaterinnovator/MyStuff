@@ -174,7 +174,7 @@ public class SmsOrPhoneCallAuth implements Authenticator {
             try {
                 String code = context.getHttpRequest().getDecodedFormParameters().getFirst("smscode");
 
-                userPhoneVerifier.verifyPhone(user, authContext.getExpirationTime(), authContext.getHashProperty(), code, activationCodeType);
+                userPhoneVerifier.verifyPhone(user, authContext.getExpirationTime(), authContext.getHashProperty(), code, activationCodeType, authSession.getRealm().getName());
 
                 authSession.removeAuthNote(PHONE_KEY_HASH);
                 authSession.removeAuthNote(EXPIRATION_TIME);

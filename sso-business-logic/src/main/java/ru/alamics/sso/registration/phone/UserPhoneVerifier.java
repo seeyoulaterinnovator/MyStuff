@@ -2,7 +2,9 @@ package ru.alamics.sso.registration.phone;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import ru.alamics.sso.jpa.entity.UserLoginHistory;
 import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.phone.exception.*;
@@ -10,6 +12,7 @@ import ru.alamics.sso.registration.phone.model.MessageRequest;
 import ru.alamics.sso.registration.phone.model.MessengerType;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 import ru.alamics.sso.registration.phone.port.SendMessageService;
+import ru.alamics.sso.stats.LoginHistory;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -29,6 +32,8 @@ public class UserPhoneVerifier {
     private SendMessageService messageSendService;
     @EJB
     private PhoneCallerRemoteService phoneCallerService;
+    @EJB
+    private LoginHistory loginHistory;
 
     public UserPhoneVerifier() {
         System.out.println("Got SendMessageService");
@@ -86,7 +91,7 @@ public class UserPhoneVerifier {
         return null;
     }
 
-    public void verifyPhone(User user, LocalDateTime expirationTime, String savedCodeHash, String smsCode, ActivationCodeType activationCodeType) throws WrongSmsCode, TimeExpiredException {
+    public void verifyPhone(User user, LocalDateTime expirationTime, String savedCodeHash, String smsCode, ActivationCodeType activationCodeType, String realm) throws WrongSmsCode, TimeExpiredException {
         String codeHash = HashGenerator.getSecretHash(smsCode);
 
         if (!codeHash.equals(savedCodeHash)) {
@@ -101,5 +106,8 @@ public class UserPhoneVerifier {
         if (!ActivationCodeType.CODE_TO_EMAIL.equals(activationCodeType)) {
             user.setPhoneVerifiedOn(LocalDateTime.now());
         }
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId(user.getId());
+        loginHistory.createSuccessAuth(userEntity, realm);
     }
 }
