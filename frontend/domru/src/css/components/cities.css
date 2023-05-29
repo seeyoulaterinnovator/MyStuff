@@ -8,6 +8,19 @@
   justify-content: space-between;
 }
 
+.transparent-bg {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.choose-city-text {
+  font-family: 'CoFo Sans', sans-serif;
+  font-style: normal;
+  padding-bottom: 44px;
+  font-size: 46px;
+  font-weight: 900;
+  line-height: 52px;
+}
+
 #cities-button {
   * {
     transition: 0.2s ease-in-out;
