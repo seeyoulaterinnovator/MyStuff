@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.reg;
 
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.Config;
 import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormActionFactory;
@@ -21,13 +22,15 @@ import org.keycloak.services.validation.Validation;
 import javax.ws.rs.core.MultivaluedMap;
 import java.util.ArrayList;
 import java.util.List;
-
+@Slf4j
 public class RestRegistrationUserCreation implements FormAction, FormActionFactory {
 
     public static final String PROVIDER_ID = "rest-registration-user-creation";
 
     @Override
     public void validate(ValidationContext context) {
+        log.info("Rest Reg");
+
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         List<FormMessage> errors = new ArrayList<>();
         context.getEvent().detail(Details.REGISTER_METHOD, "form");
@@ -171,6 +174,9 @@ public class RestRegistrationUserCreation implements FormAction, FormActionFacto
     @Override
     public void success(FormContext context) {
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
+        if (!formData.containsKey("grant_type") && !formData.getFirst("grant_type").equals("password")) {
+            return;
+        }
         String email = formData.getFirst(Validation.FIELD_EMAIL);
         String username = formData.getFirst(RegistrationPage.FIELD_USERNAME);
         if (context.getRealm().isRegistrationEmailAsUsername()) {
