@@ -35,7 +35,7 @@
 <#macro contentHeader mainTitle secondaryTitle="" secondaryHref="" withBorder=false >
   <header class="flex items-center mb-10">
     <h1 id="page-title"
-        class="<#if secondaryTitle != ''>text-3xl</#if>">
+        class="<#if secondaryTitle != ''>enter-text</#if>">
       <b <#if secondaryTitle == ''>class="titleAllPage"</#if>>
         ${mainTitle}
       </b>

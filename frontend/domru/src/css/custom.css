@@ -74,6 +74,9 @@ input[type="number"] {
 &:hover {
    opacity: 0.5;
  }
+@media screen and (max-width: 320px) {
+  opacity: 1;
+}
 }
 
 .text-with-login {
@@ -91,7 +94,33 @@ input[type="number"] {
     @media screen and (max-width: 479px) {
       font-size: 30px;
     }
+
+    @media screen and (max-width: 320px) {
+      font-size: 33px;
+      overflow:hidden;
+      max-width: 250px;
+      background: linear-gradient(to right, #CDCDCD, transparent);
+      color: transparent;
+      -webkit-background-clip: text;
+    }
 }
+
+.enter-text{
+  font-size: 46px;
+
+@media screen and (max-width: 640px) {
+  font-size: 35px;
+}
+
+@media screen and (max-width: 479px) {
+  font-size: 30px;
+}
+
+@media screen and (max-width: 320px) {
+  font-size: 33px;
+}
+}
+
 
 .text-no-wrap {
   white-space: nowrap;

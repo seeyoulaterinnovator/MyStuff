@@ -56,7 +56,7 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
-        MultivaluedMap<String, String> buttons = context.getHttpRequest().getDecodedFormParameters();
+       // MultivaluedMap<String, String> buttons = context.getHttpRequest().getDecodedFormParameters();
         Map<String, String> config = context.getAuthenticatorConfig().getConfig();
         String type = config.get(TWO_STEP_VERIFICATION_TYPES);
         AuthType authType = AuthType.getByString(type);

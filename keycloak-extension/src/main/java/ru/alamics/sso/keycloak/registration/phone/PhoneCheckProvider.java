@@ -69,6 +69,7 @@ public class PhoneCheckProvider implements FormAction {
 
         if (!user.getPhone().matches("^\\d+$")) {
             context.getAuthenticationSession().setAuthNote("phone_error", "phone is not valid");
+//            errors.add(new FormMessage(FIELD_PHONE, MessageConstants.PHONE_INVALID));
         }
 
         if (!errors.isEmpty()) {
