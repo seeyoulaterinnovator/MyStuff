@@ -33,7 +33,7 @@
 </#macro>
 
 <#macro contentHeader mainTitle secondaryTitle="" secondaryHref="" withBorder=false >
-  <header class="flex items-center mb-10">
+  <header class="flex items-center mb-10 enter-reg-mobile">
     <h1 id="page-title"
         class="<#if secondaryTitle != ''>enter-text</#if>">
       <b <#if secondaryTitle == ''>class="titleAllPage"</#if>>

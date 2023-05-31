@@ -16,6 +16,7 @@
 --row {
   flex-direction: row;
 }
+
 }
 
 .field__container {
@@ -151,21 +152,21 @@
   }
 }
 
-  @media only screen and (min-width: 768px) and (max-width: 1279px) {
-    .reg-fields {
-      width: 226px;
-      height: 44px;
-      font-size: 15px;
-    }
+@media only screen and (min-width: 768px) and (max-width: 1279px) {
+  .reg-fields {
+    width: 226px;
+    height: 44px;
+    font-size: 15px;
   }
+}
 
-  @media only screen and (max-width: 767px) {
-    .reg-fields {
-      width: 288px;
-      height: 40px;
-      font-size: 14px;
-    }
+@media only screen and (max-width: 767px) {
+  .reg-fields {
+    width: 288px;
+    height: 40px;
+    font-size: 14px;
   }
+}
 
 
 .pass-fields--change-pass {
@@ -446,6 +447,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
   }
 }
 
@@ -494,7 +496,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 288px;
+    width: 100%;
   }
 }
 
@@ -504,7 +506,6 @@
 
 .info-text {
   width: 568px;
-  height: 48px;
 }
 
 @media only screen and (min-width: 768px) and (max-width: 1279px) {
@@ -516,13 +517,28 @@
 
 @media only screen and (max-width: 767px) {
   .info-text {
-    width: 288px;
-    margin-bottom: 2.5rem;
+    width: 100%;
   }
 }
 
-/*@media only screen and (max-width: 767px) {*/
-/*  .new-forms-fields {*/
-/*    width: 288px;*/
-/*  }*/
+.enter-reg-mobile{
 
+}
+
+@media (max-width: 767px){
+  .enter-reg-mobile{
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
+.info-text-code{
+
+}
+
+@media (max-width: 767px){
+  .info-text-code{
+    display: flex;
+    justify-content: center;
+  }
+}

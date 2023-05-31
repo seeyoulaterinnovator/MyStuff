@@ -56,7 +56,7 @@
                           class="md:flex md:flex-wrap md:justify-between"
                           on:submit|preventDefault={handleSelectCity}>
                       <fieldset>
-                          <div class="field field--row md:w-full items-center">
+                          <div class="field field--row md:w-full items-center" style="flex-direction: row;">
                               <label for="search-city" class="mr-4 hidden lg:block">Текущий выбор:</label>
                               <input
                                       name="Поиск города"
