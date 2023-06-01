@@ -17,6 +17,7 @@ import ru.alamics.sso.antifraud.BlackListService;
 import ru.alamics.sso.jpa.util.LimitationCauseType;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
+import ru.alamics.sso.keycloak.util.PhoneVerifierUtil;
 import ru.alamics.sso.keycloak.util.UserToUserEntityMapper;
 import ru.alamics.sso.keycloak.util.VerifyPhoneKey;
 import ru.alamics.sso.registration.model.MessageConstants;
@@ -243,8 +244,20 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
                 String codeHash = authSession.getAuthNote(CODE_HASH_KEY);
                 String code = context.getHttpRequest().getDecodedFormParameters().getFirst("smscode");
-                LocalDateTime codeExpirationTime = LocalDateTime.parse(authSession.getAuthNote(CODE_EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
-                userPhoneVerifier.verifyPhone(user, codeExpirationTime, codeHash, code, activationCodeType, authSession.getRealm().getName());
+                /*LocalDateTime codeExpirationTime = LocalDateTime.parse(authSession.getAuthNote(CODE_EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);*/
+                //todo избавиться от дубликатов кода
+                long codeLifeTime = 0;
+                if (activationCodeType.equals(CODE_TO_SMS)) {
+                    codeLifeTime = settingsService.getSettingsLongValue(EXPIRE_SMS_VIBER_CODE, context.getRealm().getName()) * 60; //we need seconds
+
+                }
+                if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
+                    codeLifeTime = settingsService.getSettingsLongValue(EXPIRE_INCOMING_CALL_CODE, context.getRealm().getName()) * 60; //we need seconds
+
+                }
+
+                userPhoneVerifier.verifyPhone(user, codeLifeTime,
+                        codeHash, code, activationCodeType, authSession.getRealm().getName(), authSession);
 
                 UserModelUserMapper.mergeUserInto(user, model);
                 authSession.removeAuthNote(CODE_HASH_KEY);

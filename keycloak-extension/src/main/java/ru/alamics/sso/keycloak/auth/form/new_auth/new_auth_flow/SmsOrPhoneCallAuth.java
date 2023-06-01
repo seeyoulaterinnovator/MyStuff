@@ -15,6 +15,7 @@ import org.keycloak.utils.MediaType;
 import ru.alamics.sso.keycloak.auth.SsoFreeMarkerLoginForm;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
+import ru.alamics.sso.keycloak.util.PhoneVerifierUtil;
 import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.phone.ActivationCodeType;
@@ -33,6 +34,7 @@ import java.util.Map;
 
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 
+import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_BY_PHONE_NUMBER;
 import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_TO_SMS;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.*;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.COUNT_REPEAT;
@@ -173,8 +175,17 @@ public class SmsOrPhoneCallAuth implements Authenticator {
 
             try {
                 String code = context.getHttpRequest().getDecodedFormParameters().getFirst("smscode");
+                long codeLifeTime = 0;
+                if (authContext.getActivationCodeType().equals(CODE_TO_SMS)) {
+                    codeLifeTime = settingsService.getSettingsLongValue(EXPIRE_SMS_VIBER_CODE, context.getRealm().getName()) * 60; //we need seconds
 
-                userPhoneVerifier.verifyPhone(user, authContext.getExpirationTime(), authContext.getHashProperty(), code, activationCodeType, authSession.getRealm().getName());
+                }
+                if (authContext.getActivationCodeType().equals(CODE_BY_PHONE_NUMBER)) {
+                    codeLifeTime = settingsService.getSettingsLongValue(EXPIRE_INCOMING_CALL_CODE, context.getRealm().getName()) * 60; //we need seconds
+
+                }
+                userPhoneVerifier.verifyPhone(user, codeLifeTime,
+                        authContext.getHashProperty(), code, activationCodeType, authSession.getRealm().getName(), authSession);
 
                 authSession.removeAuthNote(PHONE_KEY_HASH);
                 authSession.removeAuthNote(EXPIRATION_TIME);
