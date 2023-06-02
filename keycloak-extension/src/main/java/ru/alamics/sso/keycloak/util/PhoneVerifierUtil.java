@@ -2,11 +2,11 @@ package ru.alamics.sso.keycloak.util;
 
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.RequiredActionContext;
-import ru.alamics.sso.registration.model.AuthContext;
+import ru.alamics.sso.keycloak.auth.form.new_auth.PhonePlusRealmProtector;
 import ru.alamics.sso.registration.phone.ActivationCodeType;
 import ru.alamics.sso.settings.SettingsService;
 
-import javax.ejb.EJB;
+import java.util.Map;
 
 import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_BY_PHONE_NUMBER;
 import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_TO_SMS;
@@ -41,5 +41,15 @@ public class PhoneVerifierUtil {
             return codeLifeTime;
         }
         return codeLifeTime;
+    }
+
+    public static boolean countLastAttemptIsMoreThan5(Map<PhonePlusRealmProtector, Integer> map, PhonePlusRealmProtector protector) {
+        if (map.get(protector) == null ) {
+            map.put(protector, 0);
+        }
+        else {
+            map.put(protector, map.get(protector) + 1);
+        }
+        return map.get(protector) >= 5;
     }
 }

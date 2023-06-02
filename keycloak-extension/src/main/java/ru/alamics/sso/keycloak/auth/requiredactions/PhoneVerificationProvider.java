@@ -15,6 +15,7 @@ import ru.alamics.sso.antifraud.AttemptFailsService;
 import ru.alamics.sso.antifraud.BlackListDto;
 import ru.alamics.sso.antifraud.BlackListService;
 import ru.alamics.sso.jpa.util.LimitationCauseType;
+import ru.alamics.sso.keycloak.auth.form.new_auth.PhonePlusRealmProtector;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.keycloak.util.PhoneVerifierUtil;
@@ -39,6 +40,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static ru.alamics.sso.registration.phone.ActivationCodeType.*;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.COUNT_REPEAT;
@@ -62,7 +64,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     private static final String IS_MORE_THAN_FIVE_ATTEMPTS = "isMoreThanFiveAttempts";
     private static final String CODE_LIMITED = "codeLimited";
 
-    private static final int MAX_RESEND_TRIES = 5;
+    private static final int MAX_RESEND_TRIES = 4; //на самом деле 5
     private static final int ONE_CODE_ATTEMPTS = 5;
     public static final String MESSENGER = "messenger";
 
@@ -73,6 +75,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     private final SettingsService settingsService;
     private final AttemptFailsService attemptFailsService;
     private static final Map<String, VerifyPhoneKey> mainCounter = new HashMap<>(); // key userPhone
+    private static final ConcurrentHashMap<PhonePlusRealmProtector, Integer> lastAttemptCounter = new ConcurrentHashMap<>();
+
     private final SendMessageService messageSendService;
     private final PhoneCallerRemoteService phoneCallerService;
 
@@ -195,7 +199,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         log.info("PhoneProcessAction");
 
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
-
+        PhonePlusRealmProtector protector = new PhonePlusRealmProtector(UserModelUserMapper.mapToUser(context.getUser()).getPhone(),
+                context.getRealm());
         // Переключаемся на отправку кода по СМС, даже если activationCodeType = CODE_BY_PHONE_NUMBER
         if (authSession.getAuthNote(NEED_SWITCH_TO_SMS_CODE) != null) {
             activationCodeType = CODE_TO_SMS;
@@ -206,6 +211,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             activationCodeType = CODE_TO_SMS;
             authSession.setAuthNote(NEED_SWITCH_TO_SMS_CODE, NEED_SWITCH_TO_SMS_CODE);
             authSession.setAuthNote(NEED_SEND_SMS_CODE_OR_DO_CALL, NEED_SEND_SMS_CODE_OR_DO_CALL);
+            checkIsLimited(context, protector, authSession);
             requiredActionChallenge(context);
         } else if (context.getHttpRequest().getDecodedFormParameters().containsKey("sendEmailCode")) {
             log.info("Email code send");
@@ -223,8 +229,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     attemptFailsService.saveAttempt(new AttemptFailsDto(userPhone, codeHash, context.getRealm().getName(), CODE_TO_SMS.name(), LocalDateTime.now(), context.getUser().getId()));
                 }
             }
-
-            checkIsLimited(context);
+            checkIsLimited(context, protector, authSession);
 
             log.info("Sms code resend");
             authSession.setAuthNote(NEED_SEND_SMS_CODE_OR_DO_CALL, NEED_SEND_SMS_CODE_OR_DO_CALL);
@@ -285,25 +290,30 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     public void close() {
     }
 
-    public void checkIsLimited(RequiredActionContext context) {
+    public void checkIsLimited(RequiredActionContext context, PhonePlusRealmProtector protector, AuthenticationSessionModel authSession) {
         User user = UserModelUserMapper.mapToUser(context.getUser());
 
         if (activationCodeType.equals(CODE_TO_SMS)) {
             List<AttemptFailsDto> smsAttempts = attemptFailsService.getAttempts(user.getPhone(), context.getRealm().getName(), CODE_TO_SMS.name(), UserToUserEntityMapper.toUserEntity(user));
             if (!smsAttempts.isEmpty() && smsAttempts.size() >= MAX_RESEND_TRIES && !blackListService.isUserBlockedAuthBySms(user.getPhone(), context)) {
-                blackListService.limitUserBySmsOrPhone(user, activationCodeType.name(), context.getAuthenticationSession());
-                requiredActionChallenge(context);
-                mainCounter.remove(user.getPhone());
-                return;
+                if (PhoneVerifierUtil.countLastAttemptIsMoreThan5(lastAttemptCounter, protector)) {
+                    blackListService.limitUserBySmsOrPhone(user, activationCodeType.name(), authSession);
+                    requiredActionChallenge(context);
+                    mainCounter.remove(protector);
+                    lastAttemptCounter.remove(protector);
+                    return;
+                }
             }
         }
 
         if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
             List<AttemptFailsDto> callAttempts = attemptFailsService.getAttempts(user.getPhone(), context.getRealm().getName(), CODE_BY_PHONE_NUMBER.name(), UserToUserEntityMapper.toUserEntity(user));
             if (!callAttempts.isEmpty() && callAttempts.size() >= MAX_RESEND_TRIES && !blackListService.isUserBlockedAuthByPhoneCall(user.getPhone(), context)) {
-                blackListService.limitUserBySmsOrPhone(user, activationCodeType.name(), context.getAuthenticationSession());
-                requiredActionChallenge(context);
-                mainCounter.remove(user.getPhone());
+                if (mainCounter.get(user.getPhone()).getCurrentCodeCounter() >= 5 && mainCounter.get(user.getPhone()).getRealm().equals(context.getRealm().getId())) {
+                    blackListService.limitUserBySmsOrPhone(user, activationCodeType.name(), context.getAuthenticationSession());
+                    requiredActionChallenge(context);
+                    mainCounter.remove(user.getPhone());
+                }
             }
         }
     }
