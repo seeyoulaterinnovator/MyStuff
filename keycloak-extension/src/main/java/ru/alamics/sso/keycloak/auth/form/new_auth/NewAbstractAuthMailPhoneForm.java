@@ -83,7 +83,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     private static final int COUNT_BY_ONE_CODE = 5;
 
-    private KeycloakSession session;
+    private final KeycloakSession session;
 
     public NewAbstractAuthMailPhoneForm(UserFindService userFindService, KeycloakSession session) {
         this.userFindService = userFindService;
@@ -91,7 +91,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         this.settingsService = Lookup.lookup(SettingsService.class);
         this.blackListService = Lookup.lookup(BlackListService.class);
         this.attemptFailsService = Lookup.lookup(AttemptFailsService.class);
-        this.session=session;
+        this.session = session;
     }
 
     @Override
@@ -103,13 +103,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         decideResponseFormat(context, authSession);
 
         if (context.getHttpRequest().getDecodedFormParameters().containsKey("back")) {
-            authSession.setAuthNote("backToLoginPassword", "backToLoginPassword");
-            authSession.removeAuthNote("secondPhase");
-            context.form().setAttribute("isSwitcherOn", getCurrentSwitcherStatus(context.getHttpRequest(), context));
-            authSession.removeAuthNote("needSendSmsCode");
-            authSession.removeAuthNote(PHONE_KEY_HASH);
-            context.clearUser();
-            context.challenge(challenge(context, formData));
+            doBack(authSession, context, formData);
             return;
         }
 
@@ -196,6 +190,16 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         } else {
             context.challenge(challenge(context, formData));
         }
+    }
+
+    private void doBack(AuthenticationSessionModel authSession, AuthenticationFlowContext context, MultivaluedMap<String, String> formData) {
+        authSession.setAuthNote("backToLoginPassword", "backToLoginPassword");
+        authSession.removeAuthNote("secondPhase");
+        context.form().setAttribute("isSwitcherOn", getCurrentSwitcherStatus(context.getHttpRequest(), context));
+        authSession.removeAuthNote("needSendSmsCode");
+        authSession.removeAuthNote(PHONE_KEY_HASH);
+        context.clearUser();
+        context.challenge(challenge(context, formData));
     }
 
     private boolean isPhoneAbuseActivated(PhonePlusRealmProtector protector) {
@@ -412,8 +416,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
     }
 
     private boolean isUserNameValid(String username, AuthenticationFlowContext context, String type) {
-        String phoneRegex = "^79\\d{2}\\d{7}$";
-        String emailRegex = "^[a-zA-Z\\d_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z\\d.-]+$";
+        final String phoneRegex = "^79\\d{2}\\d{7}$";
+        final String emailRegex = "^[a-zA-Z\\d_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z\\d.-]+$";
 
         switch (type) {
             case "email":
@@ -598,16 +602,14 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         if (authenticationSession.getAuthNote("backToLoginPassword") != null) {
             if (isLoginPassword) {
                 authenticationSession.removeAuthNote(loginSmsAuthNote);
-                authenticationSession.removeAuthNote("backToLoginPassword");
             }
             if (isSms) {
                 authenticationSession.setAuthNote(loginPasswordAuthNote, loginPasswordAuthNote);
-                authenticationSession.removeAuthNote("backToLoginPassword");
             }
             if (isPhoneCall) {
                 authenticationSession.setAuthNote(loginPasswordAuthNote, loginPasswordAuthNote);
-                authenticationSession.removeAuthNote("backToLoginPassword");
             }
+            authenticationSession.removeAuthNote("backToLoginPassword");
         }
 
         if (!(isOff || isOn)) {
