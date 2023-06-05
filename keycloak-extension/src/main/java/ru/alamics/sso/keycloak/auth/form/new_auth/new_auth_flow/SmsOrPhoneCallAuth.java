@@ -4,18 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
-import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.protocol.LoginProtocol;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaType;
-import ru.alamics.sso.keycloak.auth.SsoFreeMarkerLoginForm;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
-import ru.alamics.sso.keycloak.util.PhoneVerifierUtil;
 import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.phone.ActivationCodeType;
@@ -24,7 +20,6 @@ import ru.alamics.sso.registration.phone.exception.*;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
@@ -61,7 +56,6 @@ public class SmsOrPhoneCallAuth implements Authenticator {
         this.userPhoneVerifier = userPhoneVerifier;
         this.keycloakSession = session;
         this.settingsService = Lookup.lookup(SettingsService.class);
-        ActivationCodeType.init();
     }
 
     @Override
@@ -81,7 +75,7 @@ public class SmsOrPhoneCallAuth implements Authenticator {
 
                 AuthContext authContext = AuthContext.builder()
                         .activationCodeType(activationCodeType)
-                        .expirationTime(LocalDateTime.now().plusSeconds(activationCodeType.getExpiredSeconds()))
+                        .expirationTime(LocalDateTime.now().plusSeconds(activationCodeType.getExpiredCodeSeconds()))
                         .hashProperty(authSession.getAuthNote(PHONE_KEY_HASH))
                         .counter(getCount(authSession.getAuthNote(COUNT_REPEAT)))
                         .build();
@@ -96,7 +90,7 @@ public class SmsOrPhoneCallAuth implements Authenticator {
 
                     LoginFormsProvider loginFormsProvider = context.form()
                             .setAttribute("userPhone", user.getPhone())
-                            .setAttribute("expirationSeconds", String.valueOf(authContext.getActivationCodeType().getExpiredSeconds()))
+                            .setAttribute("expirationSeconds", String.valueOf(authContext.getActivationCodeType().getExpiredSecondsToResend()))
                             .setAttribute("lengthCode", authContext.getActivationCodeType().getLengthCode())
                             .setAttribute("activationCodeType", authContext.getActivationCodeType().name())
                             .setAttribute("enableRepeatCall", enableRepeatCall)
@@ -150,6 +144,7 @@ public class SmsOrPhoneCallAuth implements Authenticator {
     @Override
     public void action(AuthenticationFlowContext context) {
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
+        ActivationCodeType.init(context.getRealm().getName());
         if (context.getHttpRequest().getDecodedFormParameters().containsKey("sendPhoneCode")) {
             log.info("Sms code send Phone");
             authSession.removeAuthNote(PHONE_KEY_HASH);

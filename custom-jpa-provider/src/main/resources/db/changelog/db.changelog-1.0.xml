@@ -1319,6 +1319,20 @@
         </sql>
     </changeSet>
 
+    <changeSet id="144" author="zhakov-mv">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('eddbab90-0389-11ee-be56-0242ac120002', 'user.expire.time.to.resend.sms', '60', null, 'S-TELECOM', 'Время
+            до запроса кода', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('eddbae42-0389-11ee-be56-0242ac120002', 'user.expire.time.to.resend.sms', '60', null, 'ER-TELECOM', 'Время
+            до запроса кода', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('eddbafbe-0389-11ee-be56-0242ac120002', 'user.expire.time.to.resend.sms', '60', null, 'user', 'Время
+            до запроса кода', 'SECONDS', 'REALM');
+        </sql>
+    </changeSet>
+
     <changeSet id="71" author="alimov-ze">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="SETTINGS"/>

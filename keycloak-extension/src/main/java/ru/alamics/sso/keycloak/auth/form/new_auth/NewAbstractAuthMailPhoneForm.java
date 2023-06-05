@@ -26,7 +26,6 @@ import ru.alamics.sso.antifraud.AttemptFailsDto;
 import ru.alamics.sso.antifraud.AttemptFailsService;
 import ru.alamics.sso.antifraud.BlackListDto;
 import ru.alamics.sso.antifraud.BlackListService;
-import ru.alamics.sso.jpa.util.LimitationCauseType;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.keycloak.util.PhoneVerifierUtil;
@@ -39,7 +38,6 @@ import ru.alamics.sso.registration.phone.ActivationCodeType;
 import ru.alamics.sso.registration.phone.UserPhoneVerifier;
 import ru.alamics.sso.registration.phone.exception.*;
 import ru.alamics.sso.registration.service.UserFindService;
-import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
@@ -55,8 +53,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
-import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_BY_PHONE_NUMBER;
-import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_TO_SMS;
+import static ru.alamics.sso.registration.phone.ActivationCodeType.*;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.*;
 import static ru.alamics.sso.settings.SettingConstants.*;
 
@@ -137,7 +134,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
             AuthContext authContext = AuthContext.builder()
                     .activationCodeType(activationCodeType)
-                    .expirationTime(LocalDateTime.now().plusSeconds(/*activationCodeType.getExpiredSeconds()*/ 60L))
+                    .expirationTime(LocalDateTime.now().plusSeconds(activationCodeType.getExpiredSecondsToResend()))
                     .hashProperty(authSession.getAuthNote(PHONE_KEY_HASH))
                     .counter(getCount(authSession.getAuthNote(COUNT_REPEAT)))
                     .build();
@@ -145,7 +142,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             BlackListDto blackListDto = blackListService.getBlockedUser(user.getPhone(), context);
             if (Objects.isNull(authSession.getAuthNote(EXPIRATION_TIME))) {
                 authSession.setAuthNote(EXPIRATION_TIME, LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
-                authSession.setAuthNote("correctTime", LocalDateTime.now().plusSeconds(/*activationCodeType.getExpiredSeconds()*/ 60L).format(DateTimeFormatter.ISO_DATE_TIME));
+                authSession.setAuthNote("correctTime", LocalDateTime.now().plusSeconds(activationCodeType.getExpiredSecondsToResend()).format(DateTimeFormatter.ISO_DATE_TIME));
             }
             setTimerValueByActivationType(blackListDto, user, authSession, authContext, deltaTime, context);
             try {
@@ -241,7 +238,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         MultivaluedMap<String, String> formData = httpRequest.getDecodedFormParameters();
         AuthenticationSessionModel sessionModel = context.getAuthenticationSession();
         sessionModel.removeAuthNote("backToLoginPassword");
-
+        ActivationCodeType.init(context.getRealm().getName());
         if (formData.containsKey("cancel")) {
             context.cancelLogin();
             return;
@@ -452,18 +449,9 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     private void verifyCode(AuthenticationFlowContext context, AuthenticationSessionModel sessionModel, User user, AuthContext authContext, HttpRequest httpRequest, PhonePlusRealmProtector protector) {
         try {
-            long codeLifeTime = 0;
-            if (authContext.getActivationCodeType().equals(CODE_TO_SMS)) {
-                codeLifeTime = settingsService.getSettingsLongValue(EXPIRE_SMS_VIBER_CODE, context.getRealm().getName()) * 60; //we need seconds
-
-            }
-            if (authContext.getActivationCodeType().equals(CODE_BY_PHONE_NUMBER)) {
-                codeLifeTime = settingsService.getSettingsLongValue(EXPIRE_INCOMING_CALL_CODE, context.getRealm().getName()) * 60; //we need seconds
-
-            }
 
             String code = httpRequest.getDecodedFormParameters().getFirst("smscode");
-            userPhoneVerifier.verifyPhone(user, /*todo change expiration time to expire code*/ codeLifeTime,
+            userPhoneVerifier.verifyPhone(user, /*todo change expiration time to expire code +*/ activationCodeType.getExpiredCodeSeconds(),
                     authContext.getHashProperty(), code, activationCodeType, sessionModel.getRealm().getName(), sessionModel);
             sessionModel.removeAuthNote(PHONE_KEY_HASH);
             sessionModel.removeAuthNote(EXPIRATION_TIME);
@@ -584,7 +572,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         }
         LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
         deltaTime = Duration.between(previousTime, LocalDateTime.now()).getSeconds();
-        context.form().setAttribute("expirationSeconds", String.valueOf(/*authContext.getActivationCodeType().getExpiredSeconds()*/ 60L - deltaTime));
+        context.form().setAttribute("expirationSeconds", String.valueOf(/*authContext.getActivationCodeType().getExpiredSeconds()*/
+                activationCodeType.getExpiredSecondsToResend() - deltaTime));
     }
 
     private void setBlockedTime(BlackListDto blackListDto, AuthenticationSessionModel authSession, Long deltaTime, AuthenticationFlowContext context) {
