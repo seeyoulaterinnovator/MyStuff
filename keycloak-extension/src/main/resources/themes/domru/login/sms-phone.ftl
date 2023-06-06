@@ -53,7 +53,8 @@
                             <span style="color: #000000; font-size: 14px!important;">
                                 Код можно запросить через:
                             </span>
-                            <span id="timer-time" class="px-1 textTimer" style="font-size: 14px!important; color: #000000!important;"></span>
+                        <br>
+                            <span id="timer-time" class="timerDigits textTimer" style="font-size: 14px!important; color: #000000!important;"></span>
                     </div>
                         <#if enableRepeatCall?? && enableRepeatCall!>
                             <p class="hidden font-light text-black verification__text" id="resend">

@@ -252,18 +252,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 String codeHash = authSession.getAuthNote(CODE_HASH_KEY);
                 String code = context.getHttpRequest().getDecodedFormParameters().getFirst("smscode");
                 /*LocalDateTime codeExpirationTime = LocalDateTime.parse(authSession.getAuthNote(CODE_EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);*/
-                //todo избавиться от дубликатов кода
-                long codeLifeTime = 0;
-                if (activationCodeType.equals(CODE_TO_SMS)) {
-                    codeLifeTime = settingsService.getSettingsLongValue(EXPIRE_SMS_VIBER_CODE, context.getRealm().getName()) * 60; //we need seconds
 
-                }
-                if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
-                    codeLifeTime = settingsService.getSettingsLongValue(EXPIRE_INCOMING_CALL_CODE, context.getRealm().getName()) * 60; //we need seconds
-
-                }
-
-                userPhoneVerifier.verifyPhone(user, codeLifeTime,
+                userPhoneVerifier.verifyPhone(user, activationCodeType.getExpiredCodeSeconds(),
                         codeHash, code, activationCodeType, authSession.getRealm().getName(), authSession);
 
                 UserModelUserMapper.mergeUserInto(user, model);
@@ -271,6 +261,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 authSession.removeAuthNote(CODE_EXPIRATION_TIME);
                 authSession.removeAuthNote(COUNT_REPEAT);
                 mainCounter.remove(protector);
+                lastAttemptCounter.remove(protector);
                 context.success();
             } catch (WrongSmsCode wrongSmsCode) {
                 log.warn("Wrong sms code");
@@ -315,6 +306,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     blackListService.limitUserBySmsOrPhone(user, activationCodeType.name(), context.getAuthenticationSession());
                     requiredActionChallenge(context);
                     mainCounter.remove(protector);
+                    lastAttemptCounter.remove(protector);
                 }
             }
         }
