@@ -60,7 +60,7 @@ public class UserExtService {
     }
 
     private static void updateUserFromRequest(UserModel user, UserRequest
-            request, RealmModel realm, KeycloakSession session, boolean removeMissingRequiredActions) {
+            request, RealmModel realm, KeycloakSession session, boolean removeMissingRequiredActions, boolean bss) {
         if (request.getEmail() != null && realm.isEditUsernameAllowed()) {
             user.setUsername(request.getEmail());
         }
@@ -77,16 +77,18 @@ public class UserExtService {
 
         List<String> reqActions = Collections.singletonList("UPDATE_PASSWORD");
 
-        if (reqActions != null) {
-            Set<String> allActions = new HashSet<>();
-            for (ProviderFactory factory : session.getKeycloakSessionFactory().getProviderFactories(RequiredActionProvider.class)) {
-                allActions.add(factory.getId());
-            }
-            for (String action : allActions) {
-                if (reqActions.contains(action)) {
-                    user.addRequiredAction(action);
-                } else if (removeMissingRequiredActions) {
-                    user.removeRequiredAction(action);
+        if (!bss) {
+            if (reqActions != null) {
+                Set<String> allActions = new HashSet<>();
+                for (ProviderFactory factory : session.getKeycloakSessionFactory().getProviderFactories(RequiredActionProvider.class)) {
+                    allActions.add(factory.getId());
+                }
+                for (String action : allActions) {
+                    if (reqActions.contains(action)) {
+                        user.addRequiredAction(action);
+                    } else if (removeMissingRequiredActions) {
+                        user.removeRequiredAction(action);
+                    }
                 }
             }
         }
@@ -102,12 +104,12 @@ public class UserExtService {
         }
     }
 
-    private synchronized UserModel createUser(UserRequest userRequest) {
+    private synchronized UserModel createUser(boolean bss, UserRequest userRequest) {
         try {
             userRequest.setPhone(Util.getCleanUserPhone(userRequest.getPhone()));
 
             UserModel user = session.users().addUser(realm, userRequest.getEmail());
-            updateUserFromRequest(user, userRequest, realm, session, false);
+            updateUserFromRequest(user, userRequest, realm, session, false, bss);
             return user;
         } finally {
             if (session.getTransactionManager().isActive()) {
@@ -120,7 +122,6 @@ public class UserExtService {
 
         request.setEmail(UserServiceUtil.doCleanMail(request.getEmail()));
         request.setPhone(UserServiceUtil.doCleanPhone(request.getPhone()));
-
         FoundException exception = null;
 
         String userIdByPhone = null;
@@ -171,7 +172,7 @@ public class UserExtService {
             user = session.users().getUserById(userIdByPhone, realm);
 
         } else {
-            user = createUser(request);
+            user = createUser(bss, request);
         }
 
 

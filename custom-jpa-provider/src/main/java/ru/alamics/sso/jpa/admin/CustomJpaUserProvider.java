@@ -7,12 +7,14 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.JpaUserProvider;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.models.utils.KeycloakModelUtils;
 import ru.alamics.sso.jpa.entity.AutoLockNotification;
 import ru.alamics.sso.jpa.entity.UserLoginHistory;
 import ru.alamics.sso.jpa.entity.UserPostEntity;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -108,5 +110,21 @@ public class CustomJpaUserProvider extends JpaUserProvider {
             em.createNativeQuery("delete from USERPOST_EXT_SYSTEM_ROLE where USER_POST_ID = :post_id")
                     .setParameter("post_id", postId).executeUpdate();
         }
+    }
+
+    @Override
+    public UserModel addUser(RealmModel realm, String id, String username, boolean addDefaultRoles, boolean addDefaultRequiredActions) {
+        return super.addUser(realm, id, username, addDefaultRoles, addDefaultRequiredActions);
+    }
+
+    @Override
+    public UserModel addUser(RealmModel realm, String username) {
+        String adr = session.getContext().getUri().getAbsolutePath().toString();
+
+        if (adr.contains("bss")) {
+            return addUser(realm, KeycloakModelUtils.generateId(), username.toLowerCase(), true, false);
+        }
+
+        return addUser(realm, KeycloakModelUtils.generateId(), username.toLowerCase(), true, true);
     }
 }
