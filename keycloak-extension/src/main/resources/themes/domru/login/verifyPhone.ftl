@@ -52,12 +52,9 @@
 
                 <div id="timer" class="text-black text-center md:text-right flex items-center mt-8 md:my-0 justify-center md:justify-start
                      verification__timer__text">
-                    <#if secondsUserIsBlocked gt 0>
                         <span style="color: #899DA8"> Код можно запросить через: </span>
-                    <#else>
-                        <span style="color: #899DA8"> Код действует: </span>
-                    </#if>
-                    <span id="timer-time" class="px-2 textTimer"></span>
+                    <br>
+                    <span id="timer-time" class="timerDigits textTimer"></span>
                 </div>
 
                 <div>

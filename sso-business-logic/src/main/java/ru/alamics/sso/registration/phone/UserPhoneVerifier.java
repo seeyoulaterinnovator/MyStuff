@@ -16,8 +16,10 @@ import ru.alamics.sso.stats.LoginHistory;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 @Slf4j
 @Stateless
@@ -91,14 +93,18 @@ public class UserPhoneVerifier {
         return null;
     }
 
-    public void verifyPhone(User user, LocalDateTime expirationTime, String savedCodeHash, String smsCode, ActivationCodeType activationCodeType, String realm) throws WrongSmsCode, TimeExpiredException {
+    public void verifyPhone(User user, long codeLifeTime, String savedCodeHash, String smsCode,
+                            ActivationCodeType activationCodeType, String realm, AuthenticationSessionModel authSession) throws WrongSmsCode, TimeExpiredException {
         String codeHash = HashGenerator.getSecretHash(smsCode);
+        LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
+
+        LocalDateTime codeExpirationLifeTime = previousTime.plusSeconds(codeLifeTime);
 
         if (!codeHash.equals(savedCodeHash)) {
             throw new WrongSmsCode();
         }
 
-        if (expirationTime.isBefore(LocalDateTime.now())) {
+        if (codeExpirationLifeTime.isBefore(LocalDateTime.now())) {
             throw new TimeExpiredException();
         }
 
