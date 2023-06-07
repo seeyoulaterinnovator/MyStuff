@@ -273,7 +273,7 @@
 
 @media only screen and (max-width: 767px) {
   .login-password-forgot {
-    width: 288px;
+    width: 100%;
     /*height: 137px;*/
     flex: none;
   }
@@ -313,7 +313,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
-    width: 288px;
+    width: 100%;
     height: 98px;
   }
 }
@@ -345,7 +345,7 @@
   .forgot-pass {
     justify-content: center;
     text-align: center;
-    width: 288px;
+    width: 100%;
     height: 21px;
   }
 }
@@ -443,6 +443,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
   }
 }
 
@@ -491,7 +492,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 288px;
+    width: 100%;
   }
 }
 
@@ -501,7 +502,6 @@
 
 .info-text {
   width: 568px;
-  height: 48px;
 }
 
 @media only screen and (min-width: 768px) and (max-width: 1279px) {
@@ -513,7 +513,30 @@
 
 @media only screen and (max-width: 767px) {
   .info-text {
-    width: 288px;
-    margin-bottom: 2.5rem;
+    width: 100%;
   }
 }
+
+.enter-reg-mobile{
+
+}
+
+@media (max-width: 767px){
+  .enter-reg-mobile{
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
+
+.info-text-code{
+
+}
+
+@media (max-width: 767px){
+  .info-text-code{
+    display: flex;
+    justify-content: center;
+  }
+}
+

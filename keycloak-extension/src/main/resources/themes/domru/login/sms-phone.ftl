@@ -7,11 +7,11 @@
 
     <#elseif section = "form">
         <#if phoneCallButton!false>
-            <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4 info-text">
+            <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4 info-text info-text-code">
                 Введите последние 4 цифры входящего номера
             </h3>
         <#else>
-            <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4 info-text">
+            <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4 info-text info-text-code">
                 Введите код из СМС
             </h3>
         </#if>
