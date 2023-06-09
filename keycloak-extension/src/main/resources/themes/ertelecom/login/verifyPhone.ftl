@@ -57,7 +57,7 @@
                 <div id="timer" class="text-black text-center md:text-right flex items-center my-6 md:my-0 justify-center md:justify-start">
                     Код можно запросить через:
                     <br>
-                    <span id="timer-time" class="timerDigits textTimer"></span><span style="font-weight: 350;font-size: 13px;line-height: 16px;color: #7585A1;opacity: 0.8;">чч:мм:cc</span>
+                    <span id="timer-time" class="textTimer"></span><span style="font-weight: 350;font-size: 13px;line-height: 16px;color: #7585A1;opacity: 0.8;">чч:мм:cc</span>
                 </div>
                 <#if enableRepeatCall?? && enableRepeatCall!>
                     <p class="hidden font-light text-black verification__text" id="resend">

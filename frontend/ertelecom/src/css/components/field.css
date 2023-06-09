@@ -406,7 +406,7 @@
   align-items: center;
   padding: 0px;
   gap: 24px;
-  width: 568px;
+  width: 515px;
   height: 48px;
   flex: none;
   order: 2;
@@ -417,7 +417,7 @@
 @media only screen and (min-width: 768px) and (max-width: 1279px) {
   .back-timer {
     gap: 18px;
-    width: 480px;
+    width: 489px;
     height: 44px;
 
   }
@@ -455,7 +455,7 @@
   align-items: center;
   padding: 0px;
   gap: 24px;
-  width: 568px;
+  width: 515px;
   height: 48px;
   flex: none;
   order: 2;
@@ -466,7 +466,7 @@
 @media only screen and (min-width: 768px) and (max-width: 1279px) {
   .back-timer {
     gap: 18px;
-    width: 480px;
+    width: 489px;
     height: 44px;
   }
 }
