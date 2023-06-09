@@ -230,3 +230,14 @@ input[type="number"] {
 .hidden-important {
   display: none !important;
 }
+
+.breakable::before {
+  content: "\A";
+  white-space: pre;
+}
+
+@media (max-width: 413px) {
+  .breakable::before {
+    content: none;
+  }
+}

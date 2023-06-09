@@ -251,7 +251,7 @@
 
         <#elseif loginViaPhoneCall>
             <#if !isSwitcherOn!true>
-                <p class="mb-7 info-text">На указанный номер поступит звонок. Для подтверждения <br> нужно ввести последние 4 цифры входящего номера</p>
+                <p class="mb-7 info-text">На указанный номер поступит звонок. Для подтверждения <span class="breakable"> нужно ввести последние 4 цифры входящего номера</span></p>
                 <#if realm.password>
                     <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
                     onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
