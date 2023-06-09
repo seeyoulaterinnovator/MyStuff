@@ -212,3 +212,25 @@ input[type="number"] {
     content: none;
   }
 }
+
+.textTimer{
+  opacity: 0.8;
+  font-weight: 400;
+  line-height: 19px;
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1279px) {
+  .textTimer {
+    display: block;
+    text-align: right;
+  }
+}
+
+@media only screen and (min-width: 1280px)  {
+  .textTimer{
+    opacity: 0.8;
+    font-weight: 400;
+    line-height: 19px;
+    padding-left: 7.9rem;
+  }
+}

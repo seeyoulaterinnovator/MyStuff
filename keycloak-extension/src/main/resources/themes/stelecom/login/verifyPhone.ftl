@@ -53,7 +53,7 @@
                      verification__timer__text">
                         <span style="color: #899DA8"> Код можно запросить через: </span>
                     <br>
-                    <span id="timer-time" class="timerDigits textTimer"></span>
+                    <span id="timer-time" class="textTimer"></span>
                 </div>
 
                 <div>
