@@ -23,10 +23,21 @@ public class LoginHistory {
     public void create(UserEntity user) {
         UserLoginHistory history = UserLoginHistory.builder()
                 .loginedAt(LocalDateTime.now())
+                .realm(user.getRealmId())
                 .user(user)
                 .build();
         repository.save(history);
 
+    }
+
+    public void createSuccessAuth(UserEntity entity, String realm) {
+        UserLoginHistory history = UserLoginHistory.builder()
+                .isSuccess(true)
+                .realm(realm)
+                .loginedAt(LocalDateTime.now())
+                .user(entity)
+                .build();
+        repository.saveSuccessAuth(history);
     }
 
 }

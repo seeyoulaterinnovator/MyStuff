@@ -1,12 +1,16 @@
 package ru.alamics.sso.jpa.repository;
 
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.jpa.entity.UserLoginHistory;
+import ru.alamics.sso.jpa.entity.antifraud.AttemptFailsEntity;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -93,5 +97,20 @@ public class UserHistoryLoginRepository {
         return history;
     }
 
+    public void saveSuccessAuth(UserLoginHistory history) {
+        final String id = UUID.randomUUID().toString();
+        history.setId(id);
+        em.persist(history);
+        em.flush();
+    }
+
+    public List<UserLoginHistory> findLastAuthSuccess(UserEntity user, String realm) {
+        return em.createQuery("select ul from UserLoginHistory ul where" +
+                " ul.user =:user and ul.isSuccess = true and ul.realm =:realm order by ul.loginedAt desc", UserLoginHistory.class)
+                .setParameter("user", user)
+                .setParameter("realm", realm)
+                .setMaxResults(1)
+                .getResultList();
+    }
 
 }

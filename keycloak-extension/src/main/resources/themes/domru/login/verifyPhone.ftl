@@ -1,75 +1,104 @@
 <#import "template.ftl" as layout>
 <#import "templates/blocks.ftl" as blocks>
 
-<@layout.registrationLayout displayMessage=false displayCity=false; section>
+<@layout.registrationLayout displayMessage=true displayCity=false; section>
     <#if section = "header">
-        <#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон -->
-        <@blocks.verificationHeader mainTitle="Подтвердить" />
-    <#elseif section = "form">
-        <#if lengthCode==4 && !enableRepeatCall && userEmail??>
-            <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4">
-                Введите код, отправленый Вам на электронную почту: <br/>
-                ${userEmail}
-            </h3>
-        <#elseif userPhone??>
-            <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4" x-ms-format-detection="none">
-                <#if lengthCode==6>
-                    Вам выслан одноразовый пароль на номер:
-                <#else>
-                    Введите последние 4 цифры номера входящего звонка на номер:
-                </#if>
-                <br/>
-                ${userPhone?replace('([0-9]{1})([0-9]{3})([0-9]{3})([0-9]{2})([0-9]{2})', '+$1 $2 $3 $4 $5', 'ri')}
+        <#if isRegistration>
+            <@blocks.contentHeader mainTitle="Регистрация" secondaryTitle="Вход" secondaryHref="${url.loginUrl}" withBorder=true />
+        <#else>
+            <@blocks.verificationHeader mainTitle="Подтвердить" />
         </#if>
-        <form id="totpe" action="${url.loginAction}" method="POST">
-         </form>
+    <#elseif section = "form">
+        <#if activationCodeType == "CODE_TO_SMS">
+            <h3 class="verification__sub">
+                Введите код из СМС отправленный на указанный номер телефона
+            </h3>
+        </#if>
+        <#if activationCodeType == "CODE_BY_PHONE_NUMBER">
+            <h3 class="verification__sub" x-ms-format-detection="none">
+                На указанный номер поступит звонок. Для подтверждения нужно ввести последние 4 цифры входящего номера
+            </h3>
+        </#if>
+        <form id="totpe" action="${url.loginAction}" method="POST"></form>
+
         <form id="totpForm" action="${url.loginAction}" method="POST">
-        <#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон -->
-        <p class="pb-2 sm:pb-3 md:pb-4 text-accentRed-1100"> ${error!}<p>
-            <div class="flex justify-between w-full xl:pb-37px md:pb-10 sm:pb-8 pb-4">
+            <div class="w-full mt-4">
                 <#list 1..lengthCode as x>
-                    <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;" name="smscode-${x}" class="text-center align-middle w-10 h-10 sm:w-14 sm:h-14 border rounded-lg focus:border-extra outline-none" autocomplete="off" />
+                    <#if x = 1>
+                        <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
+                               name="smscode-${x}"
+                               class="text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none"
+                               autocomplete="off" autofocus/>
+                    <#else>
+                        <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
+                               name="smscode-${x}"
+                               class="ml-4 text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none"
+                               autocomplete="off"/>
+                    </#if>
+
                 </#list>
             </div>
-            <input id="codeNumbers" name="codeNumbers" class="hidden" value="${lengthCode!}" />
-            <#if error?has_content>
-                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds!}" />
+
+            <input id="codeNumbers" name="codeNumbers" class="hidden" value="${lengthCode!}"/>
+            <input id="smscode" name="smscode" class="hidden"/>
+
+            <#if secondsUserIsBlocked gt 0>
+                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${secondsUserIsBlocked?c}"/>
             <#else>
-                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds!}" />
+                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${secondsCodeIsValid?c}"/>
             </#if>
 
-            <input id="smscode" name="smscode" class="hidden" />
+            <div class="flex flex-col sm:flex-row md:items-end items-center justify-between">
 
-            <div class="flex md:justify-start justify-start w-full items-center text-left md:text-left xl:pb-55px md:pb-10 sm:pb-8 pb-4">
-                <div id="timer" class="text-black text-center md:text-right flex items-center my-6 md:my-0 justify-center md:justify-start">
-                    Пароль действует <span id="timer-time" class="px-1 textTimer"></span><span style="font-weight: 350;font-size: 13px;line-height: 16px;color: #7585A1;opacity: 0.8;">мм:cc</span>
+                <div id="timer" class="text-black text-center md:text-right flex items-center mt-8 md:my-0 justify-center md:justify-start
+                     verification__timer__text">
+                        <span style="color: #899DA8"> Код можно запросить через: </span>
+                    <br>
+                    <span id="timer-time" class="textTimer"></span>
                 </div>
-                <#if enableRepeatCall?? && enableRepeatCall!>
-                    <p class="hidden font-light text-black verification__text" id="resend">
-                        Не приходит пароль?
-                        <span>
-                            <button class="font-light verification__resend" name="resend" type="submit">${sendAgain}</button>
-                        </span>
-                    </p>
-                </#if>
+
+                <div>
+                    <#if activationCodeType == "CODE_TO_SMS">
+                        <button class="hidden verification__text verification__resend mt-8"
+                                id="resend" name="resend" type="submit">
+                            Отправить ещё раз
+                        </button>
+                    <#else>
+                        <button class="hidden verification__text verification__resend mt-8"
+                                id="resend" name="resend" type="submit">
+                            Повторный звонок
+                        </button>
+                    </#if>
+                </div>
+
+                <div>
+                    <#if activationCodeType == "CODE_BY_PHONE_NUMBER">
+                        <button class="verification__text verification__resend mt-4" form="totpe" id="sentCode"
+                                name="sendPhoneCode" type="submit">
+                            Отправить СМС
+                        </button>
+                    </#if>
+                </div>
             </div>
+
             <div class="sm:block md:flex w-full items-center text-center md:text-left">
-                <button class="btn btn-main verification__btn verification__btn__accept w-full md:w-3/7 mr-0 md:mr-4" name="accept" id="accept" type="submit">${doSubmit}</button>
-                <#if lengthCode==4>
-                    <button class="btn verification__btn verification__btn__send" form="totpe" id="sentCode" name="sendEmailCode" type="submit">Отправить на эл. почту</button>
-                </#if>
+                <button class="btn btn-main btn-display-none verification__btn verification__btn__accept w-full md:w-3/7 mr-0 md:mr-4"
+                        name="accept" id="accept" type="submit">
+                    ${doSubmit}
+                </button>
             </div>
         </form>
     </#if>
-        <script>
-            var actionIsEmpty = ${actionIsEmpty?c};
-            var clientIsB2B = ${clientIsB2B?c};
 
-            if (clientIsB2B === true && actionIsEmpty === true) {
-                window.onunload = function () {
-                    window.parent.postMessage('post-selected', '*');
-                    console.log("Отправлено тк B2B и Action пуст");
-                };
-            }
-        </script>
+    <script>
+        var actionIsEmpty = ${actionIsEmpty?c};
+        var clientIsB2B = ${clientIsB2B?c};
+
+        if (clientIsB2B === true && actionIsEmpty === true) {
+            window.onunload = function () {
+                window.parent.postMessage('post-selected', '*');
+                console.log("Отправлено тк B2B и Action пуст");
+            };
+        }
+    </script>
 </@layout.registrationLayout>

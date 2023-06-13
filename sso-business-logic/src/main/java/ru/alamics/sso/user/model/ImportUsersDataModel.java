@@ -19,6 +19,7 @@ public class ImportUsersDataModel {
     private String userId;
     private String errors;
     private String personalAccountUser;
+    private String personalAccount;
     private ImportUsersDataStatus status = ImportUsersDataStatus.AWAITING;
 
     private String cleanPassword;

@@ -124,6 +124,14 @@ back:war:
     - mkdir -p ../../keycloak-extension/src/main/resources/themes/stelecom/login/resources
     - cp -r -f build ../../keycloak-extension/src/main/resources/themes/stelecom/login/resources
     - cd $currentdir
+    # ertelecom theme
+    - cd frontend/ertelecom
+    - cp /opt/npmrc .npmrc
+    - npm clean-install --cache ~/.npm --prefer-offline
+    - npm run build
+    - mkdir -p ../../keycloak-extension/src/main/resources/themes/ertelecom/login/resources
+    - cp -r -f build ../../keycloak-extension/src/main/resources/themes/ertelecom/login/resources
+    - cd $currentdir
     # deploy
     - mkdir -p .ci_status
     - ./gradlew :deploy -Dorg.gradle.java.home=/usr/java/jdk1.8.0

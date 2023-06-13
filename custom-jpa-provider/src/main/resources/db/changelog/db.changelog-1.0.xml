@@ -968,6 +968,71 @@
         </sql>
     </changeSet>
 
+    <changeSet id="127" author="zhakov-mv">
+        <sql>
+            CREATE TABLE IF NOT EXISTS ATTEMPT_FAILS (
+                id VARCHAR(36) NOT NULL PRIMARY KEY,
+                phone VARCHAR(12) NOT NULL,
+                code VARCHAR(64) NOT NULL,
+                realm VARCHAR(36) NOT NULL,
+                limitation_cause VARCHAR(36) NOT NULL
+            ) charset = utf8mb4;
+        </sql>
+    </changeSet>
+
+    <changeSet id="128" author="zhakov-mv">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ATTEMPT_FAILS"/>
+            <not>
+                <indexExists indexName="IDX_ATTEMPT_FAILS_FULLTEXT"/>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE FULLTEXT INDEX IDX_ATTEMPT_FAILS_FULLTEXT ON ATTEMPT_FAILS(phone, realm)
+        </sql>
+    </changeSet>
+
+    <changeSet id="129" author="zhakov-mv">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ATTEMPT_FAILS"/>
+        </preConditions>
+        <addColumn tableName="ATTEMPT_FAILS">
+            <column name="created" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="136" author="zhakov-mv">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_LOGIN_HISTORY"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE USER_LOGIN_HISTORY ADD COLUMN (
+                is_success TinyInt(1) DEFAULT 0,
+                realm VARCHAR(16)
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="137" author="zhakov-mv">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ATTEMPT_FAILS"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE ATTEMPT_FAILS ADD COLUMN user_id varchar(36) NOT NULL;
+        </sql>
+    </changeSet>
+    <changeSet id="138" author="zhakov-mv">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ATTEMPT_FAILS"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE ATTEMPT_FAILS ADD CONSTRAINT fk_user_id_attempts
+                FOREIGN KEY (user_id) REFERENCES USER_ENTITY (ID) ON DELETE CASCADE
+        </sql>
+    </changeSet>
+
     <changeSet id="51_p" author="plyusnin-da" dbms="mysql">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="USER_ENTITY"/>
@@ -1237,6 +1302,47 @@
             blocked';
             UPDATE SETTINGS SET NAME = 'Отключить уведомление о разблокировке' WHERE NAME = 'Block notification of
             unlocking';
+        </sql>
+    </changeSet>
+
+    <changeSet id="143" author="zhakov-mv">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('95595f66-006a-11ee-be56-0242ac120002', 'user.block.duration', '300', null, 'S-TELECOM', 'Время
+            блокировки смс / дозвона', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('955963a8-006a-11ee-be56-0242ac120002', 'user.block.duration', '300', null, 'ER-TELECOM', 'Время
+            блокировки смс / дозвона', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('95596560-006a-11ee-be56-0242ac120002', 'user.block.duration', '300', null, 'user', 'Время
+            блокировки смс / дозвона', 'SECONDS', 'REALM');
+        </sql>
+    </changeSet>
+    <changeSet id="145" author="zhakov-mv">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('b407d018-06bf-11ee-be56-0242ac120002', 'user.expire.time.to.resend.call', '60', null, 'S-TELECOM', 'Время
+            до запроса кода звонок', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('b407d2de-06bf-11ee-be56-0242ac120002', 'user.expire.time.to.resend.call', '60', null, 'ER-TELECOM', 'Время
+            до запроса кода звонок', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('b407d482-06bf-11ee-be56-0242ac120002', 'user.expire.time.to.resend.call', '60', null, 'user', 'Время
+            до запроса кода звонок', 'SECONDS', 'REALM');
+        </sql>
+    </changeSet>
+
+    <changeSet id="144" author="zhakov-mv">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('eddbab90-0389-11ee-be56-0242ac120002', 'user.expire.time.to.resend.sms', '60', null, 'S-TELECOM', 'Время
+            до запроса кода', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('eddbae42-0389-11ee-be56-0242ac120002', 'user.expire.time.to.resend.sms', '60', null, 'ER-TELECOM', 'Время
+            до запроса кода', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('eddbafbe-0389-11ee-be56-0242ac120002', 'user.expire.time.to.resend.sms', '60', null, 'user', 'Время
+            до запроса кода', 'SECONDS', 'REALM');
         </sql>
     </changeSet>
 
@@ -1546,6 +1652,30 @@
         </sql>
     </changeSet>
 
+    <changeSet id="120" author="zhakov-mv">
+        <sql>
+            CREATE TABLE IF NOT EXISTS BLACK_LIST (
+                id VARCHAR(36) NOT NULL PRIMARY KEY,
+                email VARCHAR(128) NULL,
+                created TIMESTAMP NOT NULL,
+                unblocked TIMESTAMP NULL,
+                block_duration BIGINT NULL,
+                block_count INT DEFAULT 0,
+                phone VARCHAR(12) NOT NULL,
+                user_id VARCHAR(36) NOT NULL,
+                limitation_cause VARCHAR(36),
+                CONSTRAINT fk_user_entity
+                FOREIGN KEY (user_id) REFERENCES USER_ENTITY (ID) ON DELETE CASCADE
+                ) charset = utf8mb4;
+        </sql>
+    </changeSet>
+
+    <changeSet id="135" author="zhakov-mv">
+        <sql>
+            ALTER TABLE BLACK_LIST ADD COLUMN IF NOT EXISTS realm varchar(36) not null;
+        </sql>
+    </changeSet>
+
     <changeSet id="83" author="petrov-ny">
         <sql>
             <![CDATA[
@@ -1822,6 +1952,14 @@
         </sql>
     </changeSet>
 
+    <changeSet id="108" author="petrov-ny">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+            ('ea9dd138-d103-11ec-9d64-0242ac120002', 'life.token.reset.pass.login', '12', 'Время токена "обновить пароль"', 'S-TELECOM', 'Send login and reset password', 'HOURS',
+            'REALM');
+        </sql>
+    </changeSet>
+
     <changeSet id="103" author="petrov-ny">
         <sql>
             INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
@@ -1852,4 +1990,211 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="104" author="petrov-ny">
+        <addColumn tableName="EXT_SYSTEM_ROLE">
+            <column name="REALM_ID" type="varchar(16)"/>
+        </addColumn>
+        <sql>
+
+            update EXT_SYSTEM_ROLE set realm_id = 'user';
+
+        </sql>
+    </changeSet>
+
+    <changeSet id="105" author="petrov-ny">
+        <addColumn tableName="EXTERNAL_SYSTEM">
+            <column name="REALM_ID" type="varchar(16)"/>
+        </addColumn>
+        <sql>
+
+            update EXTERNAL_SYSTEM set realm_id = 'user';
+
+        </sql>
+    </changeSet>
+
+    <changeSet id="106" author="petrov-ny">
+        <sql>
+
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (20, 'lkb2b', 'Личный кабинет Дом.ru Бизнес', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (21, 'dmp-kc-sit', 'Личный кабинет цифровых продуктов', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (22, 'forpost', 'Видеонаблюдение', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (23, 'itglobal', 'Виртуальный ЦОД', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (24, 'oats', 'Облачная телефония', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (25, 'wifi', 'Cервис управления услугами wifi', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (26, 'app_b2b', 'МП Дом.Ру Бизнес', 'S-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (27, 'b2b', 'Основной сайт b2b', 'S-TELECOM');
+
+        </sql>
+    </changeSet>
+
+    <changeSet id="107" author="petrov-ny">
+        <sql>
+
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (20, 'access_granted', 20, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (21, 'access_granted', 21, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (22, 'access_granted', 22, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (23, 'access_granted', 23, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (24, 'access_granted', 24, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (25, 'access_granted', 25, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (26, 'access_granted', 26, 'S-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (27, 'access_granted', 27, 'S-TELECOM');
+
+        </sql>
+    </changeSet>
+
+    <changeSet id="121" author="petrov-ny">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('9c7464ae-c7d4-11ed-afa1-0242ac120002', 'user.expire.incoming.call.code', '30', null, 'ER-TELECOM', 'Время
+            действия кода входящего звонка', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('a067d456-c7d4-11ed-afa1-0242ac120002', 'user.absence.blocking.days', '180', null, 'ER-TELECOM', 'Время до
+            блокировки отсутствия активности', 'DAYS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('a583b112-c7d4-11ed-afa1-0242ac120002', 'user.expire.incoming.call.email.code', '4', null, 'ER-TELECOM',
+                 'Время действия кода входящего звонка для электронной почты', 'MINUTES', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('a9e99c1c-c7d4-11ed-afa1-0242ac120002', 'user.expire.sms-viber.code', '1', null, 'ER-TELECOM', 'Время
+            действия смс / кода Viber', 'MINUTES', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('ae7b4de8-c7d4-11ed-afa1-0242ac120002', 'user.absence.notifications.days', '175', null, 'ER-TELECOM', 'Время
+            до предупреждения отсутствия активности', 'DAYS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('b8a3a82e-c7d4-11ed-afa1-0242ac120002', 'block.notification.warning', '1', 'Values: -1 = block, 1 =
+            unblock', 'ER-TELECOM', 'Отключить уведомление о предупреждении', 'DAYS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('bcbae896-c7d4-11ed-afa1-0242ac120002', 'block.notification.blocked', '1', 'Values: -1 = block, 1 =
+            unblock', 'ER-TELECOM', 'Отключить уведомление о блокировке', 'DAYS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('c0611eb6-c7d4-11ed-afa1-0242ac120002', 'block.notification.unlocking', '1', 'Values: -1 = block, 1 =
+            unblock', 'ER-TELECOM', 'Отключить уведомление о разблокировке', 'DAYS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('c383d3c2-c7d4-11ed-afa1-0242ac120002', 'life.token.loginverify.email', '36', 'Email confirmation token
+            lifetime', 'ER-TELECOM', 'Token time to verify-email', 'HOURS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('c84efc6a-c7d4-11ed-afa1-0242ac120002', 'life.token.reset.pass', '36', 'Password reset token lifetime',
+                 'ER-TELECOM', 'Token time to reset password', 'HOURS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('cc38f290-c7d4-11ed-afa1-0242ac120002', 'life.token.set.first-pass', '36', 'First password token lifetime',
+                 'ER-TELECOM', 'Token time to set first password', 'HOURS', 'REALM');
+
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('d167ea78-c7d4-11ed-afa1-0242ac120002', 'emailResetPasswordSubject', 'Ваш пароль для входа в Личный кабинет
+            сброшен', null, 'ER-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('d5cb2ee0-c7d4-11ed-afa1-0242ac120002', 'executeActionsSubject', 'Обновление Вашей учетной записи', null,
+                 'ER-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('d9c0ef6c-c7d4-11ed-afa1-0242ac120002', 'emailAccountDataSubject', 'Создан аккаунт', null, 'ER-TELECOM',
+                 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('dd82b3a6-c7d4-11ed-afa1-0242ac120002', 'emailDisabledAccountSubject', 'Ваша учетная запись заблокирована',
+                 null, 'ER-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('e133ffc8-c7d4-11ed-afa1-0242ac120002', 'emailVerificationSubject', 'Подтверждение E-mail', null,
+                 'ER-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('e813ce5e-c7d4-11ed-afa1-0242ac120002', 'emailSendLoginSubject', 'Ваш логин для входа в Личный кабинет',
+                 null, 'ER-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('ec7c5b96-c7d4-11ed-afa1-0242ac120002', 'emailCredentialDisableSubject', 'Обновление Вашей учетной записи',
+                 null, 'ER-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('f01c927a-c7d4-11ed-afa1-0242ac120002', 'emailVerificationAuthSubject', 'Подтверждение данных', null,
+                 'ER-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('f3f7119a-c7d4-11ed-afa1-0242ac120002', 'passwordResetSubject', 'Сброс пароля', null, 'ER-TELECOM',
+                 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('f6cb148e-c7d4-11ed-afa1-0242ac120002', 'identityProviderLinkSubject', 'Ссылка {0}', null, 'ER-TELECOM',
+                 'Заголовок сообщения', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('ff38d0ac-c7d4-11ed-afa1-0242ac120002', 'emailEnabledAccountSubject', 'Ваша учетная запись разблокирована',
+                 null, 'ER-TELECOM', 'Заголовок сообщения', null, 'MESSAGE');
+
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('054b15b8-c7d5-11ed-afa1-0242ac120002', 'smsSender.uri',
+                 'http://smsgw.ertelecom.ru:13003/cgi-bin/sendsms?smsc=', 'SMS', 'ER-TELECOM', 'Url', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('0c9db8fc-c7d5-11ed-afa1-0242ac120002', 'smsSender.smscName', 'rapporto_gold_stelecom', 'SMS', 'ER-TELECOM',
+                 'Название соединения', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('11392806-c7d5-11ed-afa1-0242ac120002', 'smsSender.username', 'ertelecom', 'SMS', 'ER-TELECOM',
+                 'ПОЛЬЗОВАТЕЛЬ ОТ KANNEL', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('279325a2-c7d5-11ed-afa1-0242ac120002', 'smsSender.password', 'P10BxzA6Z1BRM', 'SMS', 'ER-TELECOM', 'ПАРОЛЬ
+            ОТ KANNEL', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('2ba6ac7c-c7d5-11ed-afa1-0242ac120002', 'smsSender.senderName', 'С-Телеком Бизнес', 'SMS', 'ER-TELECOM',
+                 'Имя отправителя', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('2fb5a89a-c7d5-11ed-afa1-0242ac120002', 'smsSender.timeout', '1440', 'SMS', 'ER-TELECOM', 'Задержка', null,
+                 'EMAIL');
+
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('33fc7398-c7d5-11ed-afa1-0242ac120002', 'viberSender.uri',
+                 'http://smsgw-prior.ertelecom.ru:13003/cgi-bin/sendsms', 'Viber', 'ER-TELECOM', 'Url', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('37f4a0c4-c7d5-11ed-afa1-0242ac120002', 'viberSender.smscName', 'rapporto_viber', 'Viber', 'ER-TELECOM',
+                 'Название соединения', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('3c713022-c7d5-11ed-afa1-0242ac120002', 'viberSender.username', 'ertelecom', 'Viber', 'ER-TELECOM',
+                 'ПОЛЬЗОВАТЕЛЬ ОТ KANNEL', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('406f1324-c7d5-11ed-afa1-0242ac120002', 'viberSender.password', 'P10BxzA6Z1BRM', 'Viber', 'ER-TELECOM',
+                 'ПАРОЛЬ ОТ KANNEL', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('52128098-c7d5-11ed-afa1-0242ac120002', 'viberSender.senderName', 'Domru', 'Viber', 'ER-TELECOM', 'Имя
+            отправителя', null, 'EMAIL');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('554d8b36-c7d5-11ed-afa1-0242ac120002', 'viberSender.timeout', '5', 'Viber', 'ER-TELECOM', 'Задержка', null,
+                 'EMAIL');
+        </sql>
+    </changeSet>
+
+    <changeSet id="122" author="petrov-ny">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('66507a2c-c7d7-11ed-afa1-0242ac120002', 'homePageSystem', 'https://newlkb2b.dom.ru', null, 'ER-TELECOM',
+                 'Home page', null, 'APP');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('87e0d7d6-c7d7-11ed-afa1-0242ac120002', 'defaultRealmClient', null, null, 'ER-TELECOM', 'Default clientId realm', null, 'APP');
+        </sql>
+    </changeSet>
+
+    <changeSet id="123" author="petrov-ny">
+        <sql>
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (30, 'lkb2b', 'Личный кабинет Дом.ru Бизнес', 'ER-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (31, 'dmp-kc-sit', 'Личный кабинет цифровых продуктов', 'ER-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (32, 'forpost', 'Видеонаблюдение', 'ER-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (33, 'itglobal', 'Виртуальный ЦОД', 'ER-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (34, 'oats', 'Облачная телефония', 'ER-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (35, 'wifi', 'Cервис управления услугами wifi', 'ER-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (36, 'app_b2b', 'МП Дом.Ру Бизнес', 'ER-TELECOM');
+            INSERT INTO EXTERNAL_SYSTEM (ID, NAME, LABEL, REALM_ID) VALUES (37, 'b2b', 'Основной сайт b2b', 'ER-TELECOM');
+
+        </sql>
+    </changeSet>
+
+    <changeSet id="124" author="petrov-ny">
+        <sql>
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (30, 'access_granted', 30, 'ER-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (31, 'access_granted', 31, 'ER-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (32, 'access_granted', 32, 'ER-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (33, 'access_granted', 33, 'ER-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (34, 'access_granted', 34, 'ER-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (35, 'access_granted', 35, 'ER-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (36, 'access_granted', 36, 'ER-TELECOM');
+            INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (37, 'access_granted', 37, 'ER-TELECOM');
+        </sql>
+    </changeSet>
+
+    <changeSet id="126" author="petrov-ny">
+        <sql>
+            <![CDATA[
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('94701e6a-c7d4-11ed-afa1-0242ac120002', 'emailAccountDataBodyHtml', '<p class="content__p">Для Вас создана учетная запись для входа в Личный кабинет «ЭР-Телеком Бизнес».</p><dl class="content__dl"><dt class="content__dl-dt">Логин:</dt><dd class="content__dl-dd"><b>{0}</b></dt></dl><p>Перейдите по ссылке и установите пароль.</p><p><a class="content__a" href="{3}">Установить пароль</a></p>', null, 'ER-TELECOM', 'Сообщение о создании УЗ', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('996fa304-c7d4-11ed-afa1-0242ac120002', 'emailAccountCreateBodyHtml', '<p class="content__p">Для Вас создана учетная запись для входа в Личный кабинет «ЭР-Телеком Бизнес».</p><dl class="content__dl"><dt class="content__dl-dt">Логин:</dt><dd class="content__dl-dd"><b>{0}</b></dd></dl>', null, 'ER-TELECOM', 'Сообщение о создании УЗ', null, 'MESSAGE');
+            ]]>
+        </sql>
+    </changeSet>
 </databaseChangeLog>

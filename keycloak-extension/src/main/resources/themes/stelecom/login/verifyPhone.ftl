@@ -1,7 +1,7 @@
 <#import "template.ftl" as layout>
 <#import "templates/blocks.ftl" as blocks>
 
-<@layout.registrationLayout displayMessage=false displayCity=false; section>
+<@layout.registrationLayout displayMessage=true displayCity=false; section>
     <#if section = "header">
         <#--lengthCode=6 - отправка смс, lengthCode=4 - звонок на телефон -->
         <@blocks.verificationHeader mainTitle="Подтвердить" />
@@ -13,7 +13,7 @@
             </h3>
         <#elseif userPhone??>
             <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4" x-ms-format-detection="none">
-                <#if lengthCode==6>
+                <#if activationCodeType == "CODE_TO_SMS">
                     Вам выслан одноразовый пароль на номер:
                 <#else>
                     Введите последние 4 цифры номера входящего звонка на номер:
@@ -29,32 +29,58 @@
         <p class="pb-2 sm:pb-3 md:pb-4 text-accentRed"> ${error!}<p>
             <div class="flex justify-between w-full xl:pb-37px md:pb-10 sm:pb-8 pb-4">
                 <#list 1..lengthCode as x>
-                    <input placeholder="-" maxlength="1" id="smscode-${x}" name="smscode-${x}" class="text-center align-middle text-3xl w-10 h-10 sm:w-14 sm:h-14 border rounded-lg focus:border-extra outline-none" autocomplete="off" />
+                    <input placeholder="-" maxlength="1" id="smscode-${x}" name="smscode-${x}"
+                            <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
+                                disabled
+                            <#elseif codeLimited?? && codeLimited>
+                                disabled
+                            </#if>
+                           class="text-center align-middle text-3xl w-10 h-10 sm:w-14 sm:h-14 border rounded-lg focus:border-extra outline-none" autocomplete="off" autofocus/>
                 </#list>
             </div>
             <input id="codeNumbers" name="codeNumbers" class="hidden" value="${lengthCode!}" />
-            <#if error?has_content>
-                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="0" />
-            <#else>
-                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds!}" />
-            </#if>
-
             <input id="smscode" name="smscode" class="hidden" />
 
-            <div class="flex md:justify-start justify-start w-full items-center text-left md:text-left md:pb-10 sm:pb-8 pb-4">
-                 <div id="timer" class="text-main-600 text-center md:text-right text-sm flex items-center my-6 md:my-0 justify-center md:justify-start">
-                    Пароль действует <span id="timer-time" class="px-1 text-black text-5/3em"></span> мм:cc
+            <#if secondsUserIsBlocked gt 0>
+                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${secondsUserIsBlocked?c}"/>
+            <#else>
+                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${secondsCodeIsValid?c}"/>
+            </#if>
+
+            <div class=" flex flex-col md:items-start items-center justify-between">
+
+                <div id="timer" class="text-black text-center md:text-right flex items-center md:my-0 justify-center md:justify-start
+                     verification__timer__text">
+                        <span style="color: #899DA8"> Код можно запросить через: </span>
+                    <br>
+                    <span id="timer-time" class="textTimer"></span>
                 </div>
-                <#if enableRepeatCall?? && enableRepeatCall!>
-                    <p class="hidden font-light text-black verification__text" id="resend">
-                        Не приходит пароль?
-                        <span>
-                            <button class="font-light verification__resend" name="resend" type="submit">Отправить еще раз</button>
-                        </span>
-                    </p>
-                </#if>
+
+                <div>
+                    <#if activationCodeType == "CODE_TO_SMS">
+                        <button class="hidden verification__text verification__resend"
+                                id="resend" name="resend" type="submit">
+                            Отправить ещё раз
+                        </button>
+                    <#else>
+                        <button class="hidden verification__text verification__resend"
+                                id="resend" name="resend" type="submit">
+                            Повторный звонок
+                        </button>
+                    </#if>
+                </div>
+
+                <div>
+                    <#if activationCodeType == "CODE_BY_PHONE_NUMBER">
+                        <button class="verification__text verification__resend mt-4" form="totpe" id="sentCode"
+                                name="sendPhoneCode" type="submit">
+                            Отправить СМС
+                        </button>
+                    </#if>
+                </div>
             </div>
-            <div class="sm:block md:flex w-full items-center text-center md:text-left">
+
+            <div class="sm:block md:flex mt-8 w-full items-center text-center md:text-left">
                 <button class="btn btn-main verification__btn verification__btn__accept w-full md:w-3/7 mr-0 md:mr-4" name="accept" id="accept" type="submit">Подтвердить</button>
                 <#if lengthCode==4>
                     <button class="btn verification__btn verification__btn__send" form="totpe" id="sentCode" name="sendEmailCode" type="submit">Отправить на эл. почту</button>

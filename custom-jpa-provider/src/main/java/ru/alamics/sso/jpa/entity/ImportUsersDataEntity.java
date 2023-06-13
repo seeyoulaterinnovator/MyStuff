@@ -5,6 +5,7 @@ import org.hibernate.annotations.GenericGenerator;
 import ru.alamics.sso.jpa.entity.common.ImportUsersDataStatus;
 
 import javax.persistence.*;
+import java.util.List;
 
 @NoArgsConstructor
 @Entity

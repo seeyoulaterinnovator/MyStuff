@@ -173,3 +173,8 @@ input[type="number"] {
   font-weight: 300;
   color: #8494A5;
 }
+
+.timerDigits {
+  padding-left: 6.55rem;
+  padding-right: 1rem;
+}

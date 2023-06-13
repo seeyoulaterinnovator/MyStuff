@@ -83,7 +83,6 @@ public class AttributesForm implements Authenticator {
             context.success();
         }
 
-
     }
 
     private Response createForm(AuthenticationFlowContext context, List<UserPostResponse> posts) {

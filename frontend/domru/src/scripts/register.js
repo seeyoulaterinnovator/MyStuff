@@ -1,8 +1,7 @@
-import IMask from 'imask';
 import { createForm } from 'final-form';
 
 import linkPasswords from './link-passwords.js';
-import { isEmpty } from './helpers';
+import {iMaskInstancePhone, isEmpty} from './helpers';
 
 import VALIDATION_RULES from '../constants/validationRules.js';
 
@@ -44,9 +43,7 @@ export default (function() {
   if (!formElement) return;
 
   // Маска для поля ввода телефона
-  const phoneMask = IMask(document.getElementById('phone'), {
-    mask: '+{7} (000) 000-00-00',
-  });
+  const phoneMask = iMaskInstancePhone(phoneField);
 
   // Убираем красные рамки инпутов на событии ввода после получения ошибки
   function cleanBorder() {
@@ -68,13 +65,62 @@ export default (function() {
     phoneField.addEventListener('input', cleanBorder, false)
   }
 
+  const getLabelsForInputElement = (element) => {
+    let labels;
+    let id = element.id;
+
+    if (element.labels) {
+      return element.labels;
+    }
+
+    if (id) {
+      labels = Array.from(document.querySelector(`label[for='${id}']`));
+    }
+
+    while (element = element.parentNode) {
+      if (element.tagName.toLowerCase() == "label") {
+        labels.push(element);
+      }
+    }
+
+    return labels;
+  };
+
+  emailField.addEventListener('input', () => {
+    // if email is empty, remove all labels
+    let lables = getLabelsForInputElement(emailField);
+    if (!emailField.value) {
+      lables.forEach(label => {
+        label.classList.add('hidden-important');
+      })
+    } else {
+      lables.forEach(label => {
+        label.classList.remove('hidden-important');
+      })
+    }
+  })
+
+  phoneField.addEventListener('input', () => {
+    // if phone is empty, remove all labels
+    let lables = getLabelsForInputElement(phoneField);
+    if (!phoneField.value) {
+      lables.forEach(label => {
+        label.classList.add('hidden-important');
+      })
+    } else {
+      lables.forEach(label => {
+        label.classList.remove('hidden-important');
+      })
+    }
+  })
+
   // Создаем объект формы с помощью final-form
   const registered = {};
   const form = createForm({
     onSubmit: () => {},
     initialValues: {
       orgName: orgNameField && orgNameField.value || '',
-      firstName: firstName && firstName.value || '',
+      firstName: '-',
       lastName: '-',
       email: emailField && emailField.value || '',
       phone: phoneField && phoneField.value || '',
@@ -95,8 +141,8 @@ export default (function() {
       });
     }
 
-    if (!values.password.match(VALIDATION_RULES['password_8-16']))
-      errors.password = 'Пароль не подходит';
+    // if (!values.password.match(VALIDATION_RULES['password_8-16']))
+    //   errors.password = 'Пароль не подходит';
 
     // if (!values['password-confirm'].match(VALIDATION_RULES['password_8-16']))
     //   errors.password = 'Пароль не подходит. Попробуйте другой';
@@ -154,7 +200,7 @@ export default (function() {
   function scaleCaptcha() {
     const reCaptcha = document.querySelector(".g-recaptcha");
     const reCaptchaWidth = 304;
-    const containerWidth = document.getElementById('password').offsetWidth;
+    const containerWidth = document.getElementById('phone').offsetWidth;
     if(reCaptchaWidth !== containerWidth) {
       const captchaScale = containerWidth / reCaptchaWidth;
       if (reCaptcha)

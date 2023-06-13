@@ -50,13 +50,14 @@ import static ru.alamics.sso.util.Util.CLIENT_B2B;
 @Slf4j
 public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     private static final String REGISTRATION_ONLY_IN_FRAME_ATTRIBUTE = "registrationOnlyInFrame";
-
+    private static final String AUTH_VIA_SMS = "loginViaSms";
+    private static final String AUTH_VIA_EMAIL_OR_USERNAME_AND_PASSWORD = "loginViaEmailOrUsernameAndPassword";
+    private static final String AUTH_VIA_PHONE_CALL = "loginViaPhoneCall";
     private ClientService clientService = null;
     private SettingsService settingsService = null;
 
     public SsoFreeMarkerLoginForm(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
-
         attributes.put("redirectUrl", getRedirectUrl());
         attributes.put("hideRegistration", isHideRegistration());
         attributes.put("iframe", Util.isFrame(session));
@@ -68,7 +69,6 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         attributes.put("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, realm.getName()));
         attributes.put("footer", settingsService.getSettingsStringValue(FOOTER, realm.getName()));
         attributes.put("homePage", settingsService.getSettingsStringValue(HOME_PAGE, realm.getName()));
-
     }
 
     @Override
@@ -162,6 +162,10 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
             attributes.put("url", new SsoUrlBean(realm, theme, baseUri, this.actionUri, Util.isFrame(session)));
             attributes.put("requiredActionUrl", new RequiredActionUrlFormatterMethod(realm, baseUri));
+            attributes.put("activateNewAuth", isNewAuthActivated(client));
+            attributes.put("loginViaSms", isLoginViaSms());
+            attributes.put("loginViaEmailOrUsernameAndPassword", isLoginViaEmailOrUsernameAndPassword());
+            attributes.put("loginViaPhoneCall", isLoginViaPhoneCall());
 
             if (realm.isInternationalizationEnabled()) {
                 UriBuilder b;
@@ -204,12 +208,29 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         }
     }
 
+
     private boolean isHideRegistration() {
         final boolean registrationOnlyInFrame = realm.getAttribute(REGISTRATION_ONLY_IN_FRAME_ATTRIBUTE, false);
 
         final boolean isIframe = Util.isFrame(session);
 
         return registrationOnlyInFrame && !isIframe;
+    }
+
+    private boolean isLoginViaSms() {
+        return Boolean.parseBoolean(client.getAttribute(AUTH_VIA_SMS));
+    }
+
+    private boolean isLoginViaEmailOrUsernameAndPassword() {
+        return Boolean.parseBoolean(client.getAttribute(AUTH_VIA_EMAIL_OR_USERNAME_AND_PASSWORD));
+    }
+
+    private boolean isLoginViaPhoneCall() {
+        return Boolean.parseBoolean(client.getAttribute(AUTH_VIA_PHONE_CALL));
+    }
+
+    private boolean isNewAuthActivated(ClientModel client) {
+        return Boolean.parseBoolean(client.getAttribute("activateNewAuth"));
     }
 
     private String getRedirectUrl() {
@@ -259,14 +280,12 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             if (!(accessCode == null || execution == null || authenticationSession == null)) {
                 Map<String, String> entity = new HashMap<>();
 
-
                 entity.put("session_state", authenticationSession.getParentSession().getId());
                 entity.put("access_code", accessCode);
                 entity.put("execution", execution);
                 entity.put("tab_id", authenticationSession.getTabId());
                 return Response.ok().entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
             }
-
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         return null;
@@ -332,6 +351,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             return Response.status(302).location(redirectUri).build();
         }
 
+        authenticationSession.setAuthNote("REGISTRATION", "REGISTRATION");
         RealmModel realm = this.session.getContext().getRealm();
         List<RequiredActionProviderModel> requiredActionsProvider = realm.getRequiredActionProviders();
         List<String> twoStepAuth = requiredActionsProvider.stream()
@@ -340,7 +360,10 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                 .collect(Collectors.toList());
         AuthType authType = AuthType.getByList(twoStepAuth);
         if (authType != null) {
-            this.attributes.put("twoStepAuthType", authType.getDescription());
+            // TODO: может вообще от этого избавиться?
+            // TODO: это для информации какая двухфакторная аутентификация будет
+//            this.attributes.put("twoStepAuthType", authType.getDescription());
+            this.attributes.put("twoStepAuthType", "");
         } else {
             this.attributes.put("twoStepAuthType", "");
         }

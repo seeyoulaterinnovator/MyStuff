@@ -115,6 +115,7 @@ public class SsoUpdateProfile extends UpdateProfile {
         if (emailChanged) {
             event.clone().event(EventType.UPDATE_EMAIL).detail(Details.PREVIOUS_EMAIL, oldEmail).detail(Details.UPDATED_EMAIL, email).success();
         }
+
         context.success();
     }
 }

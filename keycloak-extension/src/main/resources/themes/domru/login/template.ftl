@@ -44,7 +44,7 @@
             <@header.defaultTemplate withCity=displayCity></@header.defaultTemplate>
         </#if>
 
-        <main id="content" class="flex-1 py-8 md:py-12 mx-auto md:mx-auto w-full max-w-440px xl:max-w-470px">
+        <main id="content" class="flex-1 py-8 md:py-12 mx-auto md:mx-auto w-full max-w-440px xl:max-w-470px" style="overflow: initial;">
             <#if displayMessage && message?has_content && message.summary == msg('emailSentMessage')>
                 <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}" success=true; section>
                     <#if section = "header">
@@ -70,7 +70,7 @@
                     <#nested "info">
                 </#if>
 
-                <div class="py-2 sm:py-3 lg:py-4">
+                <div class="">
                     <#if displayMessage && message?has_content>
                         <div class="alert pb-4">
                             <#if message.type = 'info'>
@@ -99,8 +99,32 @@
                                             ${kcSanitize(message.summary)?no_esc}
                                         </span>
                                     </#if>
+                                <#elseif message.summary?contains('Превышен лимит СМС. Запросить новое СМС можно через 5 минут')>
+                                    <span class="text-accentRed hidden limit-exceeded">
+                                        ${kcSanitize(message.summary)?no_esc}
+                                    </span>
+                                <#elseif message.summary?contains('Превышен лимит повторных звонков. Запросить новый звонок можно через 12 часов')>
+                                    <span class="text-accentRed hidden limit-exceeded">
+                                        ${kcSanitize(message.summary)?no_esc}
+                                    </span>
+                                <#elseif message.summary?contains('Код был введён более 5 раз. Запросите новое СМС')>
+                                    <span class="text-accentRed hidden limit-exceeded">
+                                        ${kcSanitize(message.summary)?no_esc}
+                                    </span>
+                                <#elseif message.summary?contains('Код был введён более 5 раз. Запросите новый звонок')>
+                                    <span class="text-accentRed hidden limit-exceeded">
+                                        ${kcSanitize(message.summary)?no_esc}
+                                    </span>
                                 <#elseif message.summary == msg('emailExistsMessage')>
                                     <span class="text-accentRed bad_email hidden">
+                                        ${kcSanitize(message.summary)?no_esc}
+                                    </span>
+                                <#elseif message.summary?contains('Код введен неверно. Проверьте правильность введенных данных')>
+                                    <span class="text-accentRed hidden">
+                                        ${kcSanitize(message.summary)?no_esc}
+                                    </span>
+                                <#elseif message.summary == msg('Авторизация с использованием временного кода в данный момент не доступна. Для авторизации воспользуйтесь логином и паролем')>
+                                    <span class="text-accentRed phone_error hidden">
                                         ${kcSanitize(message.summary)?no_esc}
                                     </span>
                                 <#else>

@@ -84,7 +84,6 @@ public class VerifyEmailFactory extends VerifyEmail {
             SettingsService settingsService = Lookup.lookup(SettingsService.class);
             int timeTokenVerifyEmail = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_VERIFY_EMAIL, realm.getName());
             int absoluteExpirationInSecs = Time.currentTime() + timeTokenVerifyEmail;
-
             String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authSession).getEncodedId();
             VerifyEmailActionToken token = new VerifyEmailActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, user.getEmail(), authSession.getClient().getClientId());
             UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),

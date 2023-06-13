@@ -449,11 +449,15 @@ function genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $r
         $scope.checkInRiasIfNotFound = $scope.realm.attributes['checkInRiasIfNotFound'] == 'true';
     }
     $scope.setRealmInSchedule = function () {
+        ``
         $scope.realmInSchedule = $scope.realm.attributes['realmInSchedule'] == 'true';
     }
 
     $scope.setCheckInRiasIfNotFound();
     $scope.setRegistrationOnlyInFrame();
+    // $scope.setLoginViaSMS();
+    // $scope.setLoginViaEmailOrUsernameAndPassword();
+    // $scope.setLoginViaPhoneCall();
     $scope.setRealmInSchedule();
 
     var oldCopy = angular.copy($scope.realm);
@@ -465,6 +469,28 @@ function genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $r
             $scope.changed = true;
         }
     }, true);
+
+    // $scope.$watch('loginViaEmailOrUsernameAndPassword', function (newValue, oldValue) {
+    //     if (newValue === true) {
+    //         $scope.loginViaSms = false;
+    //         $scope.loginViaPhoneCall = false;
+    //     }
+    // });
+    //
+    // $scope.$watch('loginViaSms', function (newValue, oldValue) {
+    //     if (newValue === true) {
+    //         $scope.loginViaEmailOrUsernameAndPassword = false;
+    //         $scope.loginViaPhoneCall = false;
+    //     }
+    // });
+    //
+    // $scope.$watch('loginViaPhoneCall', function (newValue, oldValue) {
+    //     if (newValue === true) {
+    //         $scope.loginViaEmailOrUsernameAndPassword = false;
+    //         $scope.loginViaSms = false;
+    //     }
+    // });
+
 
     $scope.save = function () {
         $scope.realm.attributes.registrationOnlyInFrame = $scope.registrationOnlyInFrame;
@@ -484,6 +510,9 @@ function genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $r
     $scope.reset = function () {
         $scope.realm = angular.copy(oldCopy);
         $scope.setRegistrationOnlyInFrame();
+        // $scope.setLoginViaSMS();
+        // $scope.setLoginViaEmailOrUsernameAndPassword();
+        // $scope.setLoginViaPhoneCall();
         $scope.setCheckInRiasIfNotFound();
         $scope.setRealmInSchedule();
         $scope.changed = false;
@@ -880,7 +909,7 @@ module.controller('RealmIdentityProviderCtrl', function ($scope, $filter, $uploa
         $scope.changed = true;
     }
 
-    $http.get(authUrl + '/realms/' + realm.realm + '/user-post/system-roles').then(function (data) {
+    $http.get(authUrl + '/realms/' + realm.realm + '/user-post/system-roles?realmId=' + realm.realm).then(function (data) {
         let roles = angular.fromJson(data).data.results['system-roles'];
         roles = roles.filter(role => role.name === 'access_granted').filter((role, index, self) => self.indexOf(role) === index);
         $scope.systemRoles = roles;
@@ -1883,6 +1912,7 @@ module.controller('RealmEventsCtrl', function ($scope, RealmEvents, realm, serve
             }
         }
         $scope.events = RealmEvents.query($scope.query);
+
     }
 
     $scope.reset = function () {

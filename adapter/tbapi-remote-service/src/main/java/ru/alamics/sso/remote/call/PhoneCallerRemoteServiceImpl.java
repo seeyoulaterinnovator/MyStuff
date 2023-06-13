@@ -22,7 +22,7 @@ import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-@Stateless(name = "PhoneCaller")
+@Stateless(name = "PhoneCallerService")
 public class PhoneCallerRemoteServiceImpl implements PhoneCallerRemoteService {
 
     private static final String URI_PERM = "phoneCaller.uri.perm";
@@ -55,15 +55,16 @@ public class PhoneCallerRemoteServiceImpl implements PhoneCallerRemoteService {
     }
 
     @Override
-    public String call(String phone, int count) throws PhoneCallException {
+    public String callAndGetCode(String phone, int count) throws PhoneCallException {
 
         String response = null;
         try {
-            if (uriVoronezh != null) {
-                response = getCode(uriVoronezh, Util.getCleanUserPhone(phone), count);
+            //TODO обратно при проде
+            if (uriPerm != null) {
+                response = getCode(uriPerm, Util.getCleanUserPhone(phone), count);
             }
             if (isNull(response)) {
-                response = getCode(uriPerm, Util.getCleanUserPhone(phone), count);
+                response = getCode(uriVoronezh, Util.getCleanUserPhone(phone), count);
             }
         } catch (BadRequestException e) {
             log.error("Error", e);

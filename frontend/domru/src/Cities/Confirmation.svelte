@@ -40,9 +40,9 @@
 </script>
 
 <div>
-  <p class="text-center confirm__title">Вы находитесь в г. {$city}?</p>
+  <p class="confirm__title">Вы находитесь в г. {$city}?</p>
   <div class="flex confirm__btns">
-    <button class="btn btn-main mr-8 confirm__btn" on:click={handleConfirm}>Да, верно</button>
-    <button class="btn disabled confirm__btn" on:click={handleReject}>Выбрать другой</button>
+    <button class="btn btn-main mr-8 confirm__btn" on:click={handleConfirm}>Да</button>
+    <button class="btn disabled confirm__btn" on:click={handleReject}><p style="color: #16629A;">Выбрать другой</p></button>
   </div>
 </div>

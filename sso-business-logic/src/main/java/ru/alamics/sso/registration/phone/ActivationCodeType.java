@@ -9,18 +9,23 @@ import static ru.alamics.sso.settings.SettingConstants.*;
 
 @Slf4j
 public enum ActivationCodeType {
-    CODE_TO_EMAIL(4, 300L, EXPIRE_INCOMING_CALL_EMAIL_CODE),
-    CODE_BY_PHONE_NUMBER(4, 20L, EXPIRE_INCOMING_CALL_CODE),
-    CODE_TO_SMS(6, 300L, EXPIRE_SMS_VIBER_CODE);
+    CODE_TO_EMAIL(EXPIRE_INCOMING_CALL_EMAIL_CODE, 4, 300L, 60L, EXPIRE_TIME_TO_RESEND_MAIL),
+    CODE_BY_PHONE_NUMBER(EXPIRE_INCOMING_CALL_CODE, 4, 300L, 60L, EXPIRE_TIME_TO_RESEND_CALL),
+    CODE_TO_SMS(EXPIRE_SMS_VIBER_CODE, 4, 300L, 60L, EXPIRE_TIME_TO_RESEND_SMS);
 
     private final int lengthCode;
-    private final SettingConstants propertyConstant;
-    private long expiredSeconds;
+    private final SettingConstants propertyCodeTimeConstant;
+    private final SettingConstants propertyTimeConstant;
+    private long expiredCodeSeconds;
+    private long expiredSecondsToResend;
 
-    ActivationCodeType(int lengthCode, long expiredSeconds, SettingConstants propertyConstant) {
+    ActivationCodeType(SettingConstants propertyCodeTimeConstant, int lengthCode, long expiredCodeSeconds,
+                       long expiredSecondsToResend, SettingConstants propertyTimeConstant) {
         this.lengthCode = lengthCode;
-        this.expiredSeconds = expiredSeconds;
-        this.propertyConstant = propertyConstant;
+        this.expiredCodeSeconds = expiredCodeSeconds;
+        this.propertyCodeTimeConstant = propertyCodeTimeConstant;
+        this.expiredSecondsToResend = expiredSecondsToResend;
+        this.propertyTimeConstant = propertyTimeConstant;
     }
 
     public static ActivationCodeType fromString(String authNote) {
@@ -34,14 +39,22 @@ public enum ActivationCodeType {
         return null;
     }
 
-    public static void init() {
+    /**
+     * Функция переопределяет ENUM элементы значениями из настроек, которые указываются в админке
+     */
+    public static void init(String realmId) {
         SettingsService settingsService = Lookup.lookup(SettingsService.class);
         for (ActivationCodeType activationCodeType : ActivationCodeType.values()) {
-            long timeValue = settingsService.getSettingsLongValue(activationCodeType.getPropertyConstant(), "user");
-            if (timeValue <= -1) {
-                timeValue = 0;
+            long codeTimeValue = settingsService.getSettingsLongValue(activationCodeType.getPropertyCodeTimeConstant(), realmId);
+            long timeToResend = settingsService.getSettingsLongValue(activationCodeType.getPropertyTimeConstant(), realmId);
+            if (codeTimeValue <= -1) {
+                codeTimeValue = 0;
             }
-            activationCodeType.setExpiredSeconds(timeValue);
+            if (timeToResend <= -1) {
+                timeToResend = 0;
+            }
+            activationCodeType.setExpiredCodeSeconds(codeTimeValue);
+            activationCodeType.setExpiredSecondsToResend(timeToResend);
         }
 
     }
@@ -50,15 +63,26 @@ public enum ActivationCodeType {
         return lengthCode;
     }
 
-    public long getExpiredSeconds() {
-        return expiredSeconds;
+    public long getExpiredCodeSeconds() {
+        return expiredCodeSeconds;
     }
 
-    private void setExpiredSeconds(long expiredSeconds) {
-        this.expiredSeconds = expiredSeconds;
+    private void setExpiredCodeSeconds(long expiredCodeSeconds) {
+        this.expiredCodeSeconds = expiredCodeSeconds;
+    }
+    private void setExpiredSecondsToResend(long expiredSecondsToResend) {
+        this.expiredSecondsToResend = expiredSecondsToResend;
     }
 
-    public SettingConstants getPropertyConstant() {
-        return propertyConstant;
+    public SettingConstants getPropertyCodeTimeConstant() {
+        return propertyCodeTimeConstant;
+    }
+
+    public long getExpiredSecondsToResend() {
+        return expiredSecondsToResend;
+    }
+
+    public SettingConstants getPropertyTimeConstant() {
+        return propertyTimeConstant;
     }
 }

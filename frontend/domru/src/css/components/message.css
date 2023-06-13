@@ -1,13 +1,134 @@
 .message {
-  padding: 32px 24px 40px;
+  padding: 24px 24px 32px;;
   max-width: 424px;
   background: #FFFFFF;
   box-shadow: 0 16px 64px rgba(43, 83, 155, 0.16);
   border-radius: 12px;
 
 @media (min-width: 768px) {
-  max-width: 586px;
+    max-width: 390px;
 }
+
+.btn-margin {
+  margin-top: 24px;
+}
+
+p {
+  font-family: 'CoFo Sans', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 23px;
+  color: #000000;
+  mix-blend-mode: normal;
+
+@media (min-width: 768px) {
+  font-size: 16.5px;
+  line-height: 23px;
+}
+
+@media (min-width: 1200px) {
+  font-size: 17.5px;
+  line-height: 24px;
+}
+}
+
+&__fade {
+   position: fixed;
+   left: 0;
+   top: 0;
+   right: 0;
+   bottom: 0;
+   z-index: 1000;
+   background-color: rgba(255, 255, 255, 0.4);
+   padding: 16px;
+ }
+
+&__close-dialog-button {
+   width: 28px;
+   height: 28px;
+
+   display: flex;
+   justify-content: center;
+   align-items: center;
+
+   background: #EFF8FC;
+   border-radius: 14px;
+ }
+
+&__title {
+   font-family: 'CoFo Sans', sans-serif;
+   font-style: normal;
+   font-weight: 700;
+   font-size: 24px;
+   line-height: 33px;
+   color: #000000;
+   mix-blend-mode: normal;
+   margin-bottom: 16px;
+
+@media (min-width: 768px) {
+  font-size: 23px;
+  line-height: 30px;
+}
+
+@media (min-width: 1200px) {
+  font-size: 26px;
+  line-height: 33px;
+}
+}
+
+&__btn {
+   color: #007BFB;
+   padding: 0;
+   font-size: 2rem;
+   box-shadow: none;
+   outline: none;
+   margin-top: -0.25em;
+
+&:hover, &:focus {
+            box-shadow: none;
+            outline: none;
+          }
+}
+
+.btn:not(&__btn) {
+  font-size: 16px;
+  line-height: 21px;
+  letter-spacing: 0.6px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+}
+
+.new-message{
+  padding: 18px;
+  max-width: 568px;
+  /*max-height: 258px;*/
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1279px) {
+  .new-message {
+    max-width: 390px;
+    /*max-height: 248px;*/
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .new-message {
+    max-width: 381px;
+    /*max-height: 360px;*/
+  }
+}
+
+
+
+.email_window {
+  padding: 32px 24px 40px;
+  max-width: 288px;
+  background: #FFFFFF;
+  box-shadow: 0 16px 64px rgba(43, 83, 155, 0.16);
+  border-radius: 12px;
+
 
 p {
   font-family: Fact, sans-serif;
@@ -63,25 +184,24 @@ p {
 }
 }
 
-&__btn {
-   color: #007BFB;
-   padding: 0;
-   font-size: 2rem;
-   box-shadow: none;
-   outline: none;
-   margin-top: -0.25em;
-
-&:hover, &:focus {
-            box-shadow: none;
-            outline: none;
-          }
-}
-
 .btn:not(&__btn) {
   font-size: 16px;
   line-height: 21px;
   letter-spacing: 0.6px;
   padding-left: 16px;
   padding-right: 16px;
+}
+
+@media only screen and (max-width: 767px) {
+  .btn:not(&__btn) {
+    font-size: 14px;
+    width: 100%;
+  }
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1279px) {
+  .btn:not(&__btn) {
+    font-size: 15px;
+  }
 }
 }

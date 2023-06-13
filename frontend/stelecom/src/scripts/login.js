@@ -1,5 +1,4 @@
-import IMask from 'imask';
-import { setButtonAvailability } from './helpers.js';
+import {iMaskInstancePhoneAndEmail, setButtonAvailability} from './helpers.js';
 import Cookie from 'js-cookie';
 import {WRONG_PASS_REG} from "../constants/passwordCharset";
 
@@ -13,16 +12,7 @@ export default (function() {
   const cityElement = document.getElementById('domain-login');
   submitElement.disabled = true;
 
-  const dynamicMask = IMask(usernameElement, {
-    mask: [
-      {
-        mask: '+{7} (000) 000-00-00',
-      },
-      {
-        mask: /^\S*@?\S*$/,
-      },
-    ],
-  });
+  const dynamicMask = iMaskInstancePhoneAndEmail(usernameElement);;
 
   let isUsernameValid = false;
   let isPasswordExists = false;

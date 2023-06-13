@@ -74,6 +74,9 @@ input[type="number"] {
 &:hover {
    opacity: 0.5;
  }
+@media screen and (max-width: 320px) {
+  opacity: 1;
+}
 }
 
 .text-with-login {
@@ -84,14 +87,40 @@ input[type="number"] {
 .text-3xl{
   font-size: 46px;
 
-    @media screen and (max-width: 640px) {
-      font-size: 35px;
-    }
-
-    @media screen and (max-width: 479px) {
-      font-size: 30px;
-    }
+@media screen and (max-width: 640px) {
+  font-size: 35px;
 }
+
+@media screen and (max-width: 479px) {
+  font-size: 33px;
+}
+
+@media screen and (max-width: 320px) {
+  font-size: 33px;
+  overflow:hidden;
+  max-width: 250px;
+  background: linear-gradient(to right, #CDCDCD, transparent);
+  color: transparent;
+  -webkit-background-clip: text;
+}
+}
+
+.enter-text{
+  font-size: 46px;
+
+@media screen and (max-width: 640px) {
+  font-size: 35px;
+}
+
+@media screen and (max-width: 479px) {
+  font-size: 33px;
+}
+
+@media screen and (max-width: 320px) {
+  font-size: 33px;
+}
+}
+
 
 .text-no-wrap {
   white-space: nowrap;
@@ -188,6 +217,36 @@ input[type="number"] {
 
 .textTimer{
   opacity: 0.8;
-  font-weight: 500;
-  line-height: 24px;
+  font-weight: 400;
+  line-height: 19px;
+}
+@media only screen and (min-width: 768px) and (max-width: 1279px) {
+  .textTimer {
+    display: block;
+    text-align: right;
+  }
+}
+
+@media only screen and (min-width: 1280px)  {
+  .textTimer{
+    opacity: 0.8;
+    font-weight: 400;
+    line-height: 19px;
+    padding-left: 6.55rem;
+  }
+}
+
+.hidden-important {
+  display: none !important;
+}
+
+.breakable::before {
+  content: "\A";
+  white-space: pre;
+}
+
+@media (max-width: 413px) {
+  .breakable::before {
+    content: none;
+  }
 }

@@ -9,24 +9,24 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import java.util.UUID;
 
+// TODO: delete class
 @Slf4j
-@Stateless
+//@Stateless
 public class MessageService {
+//    @EJB
+//    private SendMessageService msgSendService;
 
-    @EJB
-    private SendMessageService msgSendService;
-
-    public void sendMsg(MessageRequest messageRequest) throws SendMessageException {
-        String response = null;
-        try {
-            response = msgSendService.sendMsg(messageRequest);
-        } finally {
-            String id = UUID.randomUUID().toString();
-            String phone = messageRequest.getUserPhone();
-            String text = messageRequest.getText();
-            String messengerName = messageRequest.getMessengerName().toString();
-            log.info("Sent {} to phone: {}, text: {}, id: {}, resp: {}", messengerName, phone, text, id, response);
-        }
-    }
+//    public void sendMsg(MessageRequest messageRequest) throws SendMessageException {
+//        String response = null;
+//        try {
+//            response = msgSendService.sendMsg(messageRequest);
+//        } finally {
+//            String id = UUID.randomUUID().toString();
+//            String phone = messageRequest.getUserPhone();
+//            String text = messageRequest.getText();
+//            String messengerName = messageRequest.getMessengerName().toString();
+//            log.info("Sent {} to phone: {}, text: {}, id: {}, resp: {}", messengerName, phone, text, id, response);
+//        }
+//    }
 
 }
