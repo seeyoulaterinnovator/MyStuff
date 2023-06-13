@@ -50,6 +50,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
     }
 
     private TbapiResponse createCustomerBattle(TbapiRequest request, TbapiConnectConfig connectConfig) throws TbapiRegisterException {
+        log.info("TbapiServiceRestImpl");
 
         URI uri = new ResteasyUriBuilder()
                 .scheme(connectConfig.isSecure() ? "https" : "http")

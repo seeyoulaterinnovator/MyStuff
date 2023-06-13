@@ -63,6 +63,7 @@ public class UserModelExtender extends AbstractFormActionFactory implements Form
 
     @Override
     public void validate(ValidationContext context) {
+        log.info("Registration user extension");
 
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         List<FormMessage> errors = new ArrayList<>();
