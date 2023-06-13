@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.registration.rias;
 
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormContext;
 import org.keycloak.authentication.ValidationContext;
@@ -24,6 +25,7 @@ import java.util.List;
 import static ru.alamics.sso.registration.model.FormConstants.FIELD_EMAIL;
 import static ru.alamics.sso.registration.model.FormConstants.FIELD_PHONE;
 
+@Slf4j
 public class RiasCheckProvider implements FormAction {
 
     public static final String RIAS_REJECTED = "rias.rejected";
@@ -40,6 +42,7 @@ public class RiasCheckProvider implements FormAction {
 
     @Override
     public void validate(ValidationContext context) {
+        log.info("RiasCheckProvider");
 
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         List<FormMessage> errors = new ArrayList<>();

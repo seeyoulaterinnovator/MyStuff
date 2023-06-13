@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.registration.validate;
 
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.ValidationContext;
 import org.keycloak.authentication.forms.RegistrationPage;
 import org.keycloak.authentication.forms.RegistrationProfile;
@@ -15,7 +16,7 @@ import java.util.List;
 
 import static ru.alamics.sso.registration.model.FormConstants.FIELD_FIRST_NAME;
 import static ru.alamics.sso.registration.model.FormConstants.FIELD_PHONE;
-
+@Slf4j
 public class RegistrationCustomProfile extends RegistrationProfile {
 
     private static final String DISPLAY_NAME = "Profile Custom Validation";
@@ -27,6 +28,7 @@ public class RegistrationCustomProfile extends RegistrationProfile {
 
     @Override
     public void validate(ValidationContext context) {
+        log.info("Profile Custom Validation");
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         List<FormMessage> errors = new ArrayList<>();
 
