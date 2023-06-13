@@ -91,6 +91,9 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
             //responseMap = Map.of();
             throw new TbapiRegisterException(e);
         }
+        finally {
+            log.info("TbapiServiceRestImpl has ended");
+        }
 
         return responseData;
     }
