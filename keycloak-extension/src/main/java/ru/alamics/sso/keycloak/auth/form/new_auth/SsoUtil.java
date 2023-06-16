@@ -98,7 +98,7 @@ public interface SsoUtil {
         return null;
     }
 
-    static void decideResponse(AuthenticationFlowContext context, AuthenticationSessionModel sessionModel, UserSessionModel userSessionModel, KeycloakSession session) {
+    static boolean decideResponse(AuthenticationFlowContext context, AuthenticationSessionModel sessionModel, UserSessionModel userSessionModel, KeycloakSession session) {
         String authenticated = sessionModel.getAuthNote("authenticated");
         String format = sessionModel.getAuthNote("format");
         if (format != null) {
@@ -113,7 +113,15 @@ public interface SsoUtil {
                 entity.put("error", "format param while user has no active sessions");
                 context.forceChallenge(Response.status(400).entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build());
             }
+            return false;
         }
+        return true;
+    }
+
+    static void decideResponse(AuthenticationFlowContext context) {
+        Map<String, String> entity = new HashMap<>();
+        entity.put("error", "format param while user has no active sessions");
+        context.forceChallenge(Response.status(400).entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build());
     }
 
     static void fillResponseBody(AuthenticationSessionModel authSession, UserSessionModel userSession, ClientSessionContext clientSessionCtx, KeycloakSession session) {
