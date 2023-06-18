@@ -35,8 +35,12 @@ import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.phone.ActivationCodeType;
+import ru.alamics.sso.registration.phone.HashGenerator;
+import ru.alamics.sso.registration.phone.SmsCodeGenerator;
 import ru.alamics.sso.registration.phone.UserPhoneVerifier;
 import ru.alamics.sso.registration.phone.exception.*;
+import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
+import ru.alamics.sso.registration.phone.port.SendMessageService;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
@@ -69,11 +73,17 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     private final SettingsService settingsService;
 
+    private final SendMessageService messageSendService;
+
+    private final PhoneCallerRemoteService phoneCallerService;
+
     private static final String ERROR_CODE = "error_code";
 
     private final BlackListService blackListService;
 
     private static final String GRANT_TYPE = "grant_type";
+
+    private static final String CODE_HASH_KEY = "CODE_HASH_KEY";
 
     private static final ConcurrentHashMap<PhonePlusRealmProtector, VerifyPhoneKey> mainCounter = new ConcurrentHashMap<>();
 
@@ -93,6 +103,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         this.settingsService = Lookup.lookup(SettingsService.class);
         this.blackListService = Lookup.lookup(BlackListService.class);
         this.attemptFailsService = Lookup.lookup(AttemptFailsService.class);
+        this.messageSendService = Lookup.lookup(SendMessageService.class, "MessageSender");
+        this.phoneCallerService = Lookup.lookup(PhoneCallerRemoteService.class, "PhoneCallerService");
     }
 
     @Override
@@ -107,7 +119,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             authSession.removeAuthNote("secondPhase");
             context.form().setAttribute("isSwitcherOn", getCurrentSwitcherStatus(context.getHttpRequest(), context));
             authSession.removeAuthNote("needSendSmsCode");
-            authSession.removeAuthNote(PHONE_KEY_HASH);
+            authSession.removeAuthNote(CODE_HASH_KEY);
             context.clearUser();
             context.challenge(challenge(context, formData));
             return;
@@ -135,7 +147,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             AuthContext authContext = AuthContext.builder()
                     .activationCodeType(activationCodeType)
                     .expirationTime(LocalDateTime.now().plusSeconds(activationCodeType.getExpiredSecondsToResend()))
-                    .hashProperty(authSession.getAuthNote(PHONE_KEY_HASH))
+                    .hashProperty(authSession.getAuthNote(CODE_HASH_KEY))
                     .counter(getCount(authSession.getAuthNote(COUNT_REPEAT)))
                     .build();
 
@@ -146,23 +158,56 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             }
             setTimerValueByActivationType(blackListDto, user, authSession, authContext, deltaTime, context);
             try {
+                if (user.getPhone() == null || user.getPhone().isEmpty())
+                    throw new UserPhoneEmpty();
+                if (Objects.isNull(mainCounter.get(protector))) {
+                    authSession.setAuthNote("needSendSmsCode", "true");
+                }
                 boolean enableRepeatCall = true;
 
                 if (authSession.getAuthNote("needSendSmsCode") != null && authSession.getAuthNote("needSendSmsCode").equals("true")) {
-                    authContext = userPhoneVerifier.sendValidationMsg(user, authContext, activationCodeType, context.getRealm());
-                    authSession.setAuthNote("godMode", authContext.getHashProperty());
+                    switch (activationCodeType) {
+                        case CODE_TO_SMS: {
+                            String code = SmsCodeGenerator.getCode(activationCodeType.getLengthCode());
+                            authSession.setAuthNote(CODE_HASH_KEY, HashGenerator.getSecretHash(code));
+
+                            String[] messengerList = context.getRealm().getSmtpConfig().get(MESSENGER).split(",");
+                            messageSendService.sendMessageToMessengers(user.getPhone(), code, context.getRealm().getId(), messengerList);
+                            break;
+                        }
+                        case CODE_BY_PHONE_NUMBER: {
+                            String code = phoneCallerService.callAndGetCode(user.getPhone(), 1);
+                            authSession.setAuthNote(CODE_HASH_KEY, HashGenerator.getSecretHash(code));
+                            break;
+                        }
+                    }
+                    authSession.setAuthNote("godMode", authSession.getAuthNote(CODE_HASH_KEY));
                     authSession.setAuthNote("needSendSmsCode", "false");
-                    authSession.setAuthNote("currentCode", authContext.getHashProperty());
-                    currentAuthFlowPhoneNumbers.get(protector).setSavedCodeHash(authContext.getHashProperty());
+                    authSession.setAuthNote("currentCode", authSession.getAuthNote(CODE_HASH_KEY));
+                    currentAuthFlowPhoneNumbers.get(protector).setSavedCodeHash(authSession.getAuthNote(CODE_HASH_KEY));
                 } else if (checkCanWeSendSmS(user, context, protector) && authSession.getAuthNote("needSendSmsCode") != null && authSession.getAuthNote("needSendSmsCode").equals("true")
                         && isPhoneAbuseActivated(protector) || checkCanWeSendSmS(user, context, protector) && authSession.getAuthNote("needSendSmsCode") == null && isPhoneAbuseActivated(protector)) {
-                    authContext = userPhoneVerifier.sendValidationMsg(user, authContext, activationCodeType, context.getRealm());
-                    authSession.setAuthNote("godMode", authContext.getHashProperty());
+                    switch (activationCodeType) {
+                        case CODE_TO_SMS: {
+                            String code = SmsCodeGenerator.getCode(activationCodeType.getLengthCode());
+                            authSession.setAuthNote(CODE_HASH_KEY, HashGenerator.getSecretHash(code));
+
+                            String[] messengerList = context.getRealm().getSmtpConfig().get(MESSENGER).split(",");
+                            messageSendService.sendMessageToMessengers(user.getPhone(), code, context.getRealm().getId(), messengerList);
+                            break;
+                        }
+                        case CODE_BY_PHONE_NUMBER: {
+                            String code = phoneCallerService.callAndGetCode(user.getPhone(), 1);
+                            authSession.setAuthNote(CODE_HASH_KEY, HashGenerator.getSecretHash(code));
+                            break;
+                        }
+                    }
+                    authSession.setAuthNote("godMode", authSession.getAuthNote(CODE_HASH_KEY));
                     authSession.setAuthNote("needSendSmsCode", "false");
+                    authSession.setAuthNote("currentCode", authSession.getAuthNote(CODE_HASH_KEY));
                     currentAuthFlowPhoneNumbers.get(protector).setSendingBanned(false);
-                    currentAuthFlowPhoneNumbers.get(protector).setSavedCodeHash(authContext.getHashProperty());
+                    currentAuthFlowPhoneNumbers.get(protector).setSavedCodeHash(authSession.getAuthNote(CODE_HASH_KEY));
                 }
-                authSession.setAuthNote(PHONE_KEY_HASH, authContext.getHashProperty());
                 authSession.setAuthNote(COUNT_REPEAT, authContext.getCounter().toString());
 
                 LoginFormsProvider loginFormsProvider = context.form()
@@ -248,6 +293,10 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         final boolean isSms = httpRequest.getDecodedFormParameters().containsKey("smsButton");
         final boolean isPhoneCall = httpRequest.getDecodedFormParameters().containsKey("phoneCallButton");
 
+        if (isLoginPassword && !isSuccessCheckUser(context, null)) {
+            return;
+        }
+
         if (isLoginPassword && (validateUserAndPassword(context, formData))) {
             sessionModel.setAuthNote("loginPasswordButton", "loginPasswordButton");
             sessionModel.setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
@@ -273,18 +322,20 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                     .counter(getCount(sessionModel.getAuthNote(COUNT_REPEAT)))
                     .activationCodeType(activationCodeType)
                     .build();
-            if (Objects.nonNull(authContext.getHashProperty()) || !authContext.getHashProperty().equals("")) {
-                sessionModel.setAuthNote("currentCode", authContext.getHashProperty());
-            }
+            String code = sessionModel.getAuthNote("currentCode");
+            /*if (Objects.nonNull(sessionModel.getAuthNote("currentCode")) && !sessionModel.getAuthNote("currentCode").equals("")) {
+                sessionModel.setAuthNote("currentCode", sessionModel.getAuthNote(CODE_HASH_KEY));
+            }*/
             if (checkIsLimited(user, context, sessionModel, protector)) {
                 sessionModel.setAuthNote("needSendSmsCode", "false");
                 sessionModel.removeAuthNote(EXPIRATION_TIME);
-                sessionModel.removeAuthNote(PHONE_KEY_HASH);
+                sessionModel.removeAuthNote(CODE_HASH_KEY);
                 authenticate(context);
                 return;
             }
             if (context.getHttpRequest().getDecodedFormParameters().containsKey("resend")) {
                 String currentCode = sessionModel.getAuthNote("currentCode");
+                /*String codeHash = sessionModel.getAuthNote(CODE_HASH_KEY);*/
                 if (currentCode !=null && !currentCode.equals("")) {
                     if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
                         attemptFailsService.saveAttempt(new AttemptFailsDto(user.getPhone(), currentCode, context.getRealm().getName(), CODE_BY_PHONE_NUMBER.name(), LocalDateTime.now(), user.getId()));
@@ -298,7 +349,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 if (checkIsLimited(user, context, sessionModel, protector)) {
                     sessionModel.setAuthNote("needSendSmsCode", "false");
                     sessionModel.removeAuthNote(EXPIRATION_TIME);
-                    sessionModel.removeAuthNote(PHONE_KEY_HASH);
+                    sessionModel.removeAuthNote(CODE_HASH_KEY);
                     authenticate(context);
                     return;
                 }
@@ -306,11 +357,11 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 mainCounter.remove(protector);
                 sessionModel.setAuthNote("needSendSmsCode", "true");
                 sessionModel.removeAuthNote(EXPIRATION_TIME);
-                sessionModel.removeAuthNote(PHONE_KEY_HASH);
+
                 authenticate(context);
 
             } else {
-                checkAndAddToCounter(user, authContext, context, sessionModel, protector);
+                checkAndAddToCounter(user, authContext, context, sessionModel, protector, code);
                 verifyCode(context, sessionModel, user, authContext, httpRequest, protector);
             }
         } else {
@@ -377,9 +428,9 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 log.info("user is " + user);
                 log.info(user.getId());
             }
-            if (!isSuccessCheckUser(context, user)) {
-                return false;
-            }
+//            if (!isSuccessCheckUser(context, user)) {
+//                return false;
+//            }
 
         } catch (ModelDuplicateException mde) {
             ServicesLogger.LOGGER.modelDuplicateException(mde);
@@ -402,9 +453,11 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 return false;
             }
         }
+
         if (!enabledUser(context, user)) {
             return false;
         }
+
         String rememberMe = inputData.getFirst("rememberMe");
         boolean remember = rememberMe != null && rememberMe.equalsIgnoreCase("on");
         if (remember) {
@@ -449,11 +502,11 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     private void verifyCode(AuthenticationFlowContext context, AuthenticationSessionModel sessionModel, User user, AuthContext authContext, HttpRequest httpRequest, PhonePlusRealmProtector protector) {
         try {
-
+            String codeHash = sessionModel.getAuthNote("currentCode");
             String code = httpRequest.getDecodedFormParameters().getFirst("smscode");
             userPhoneVerifier.verifyPhone(user, /*todo change expiration time to expire code +*/ activationCodeType.getExpiredCodeSeconds(),
-                    authContext.getHashProperty(), code, activationCodeType, sessionModel.getRealm().getName(), sessionModel);
-            sessionModel.removeAuthNote(PHONE_KEY_HASH);
+                    codeHash, code, activationCodeType, sessionModel.getRealm().getName(), sessionModel);
+            sessionModel.removeAuthNote(CODE_HASH_KEY);
             sessionModel.removeAuthNote(EXPIRATION_TIME);
             sessionModel.removeAuthNote(COUNT_REPEAT);
 
@@ -461,6 +514,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             sessionModel.setAuthNote(sessionModel.getAuthNote("secondPhase"), "");
             context.success();
             sessionModel.removeAuthNote("needSendSmsCode");
+            sessionModel.removeAuthNote(CODE_HASH_KEY);
             mainCounter.remove(protector);
             lastAttemptCounter.remove(protector);
             currentAuthFlowPhoneNumbers.remove(protector);
@@ -468,23 +522,23 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             log.warn("Wrong sms code");
             context.form()
                     .setError("Код введен неверно. Проверьте правильность введенных данных");
-            sessionModel.removeAuthNote(PHONE_KEY_HASH);
+            sessionModel.removeAuthNote(CODE_HASH_KEY);
             sessionModel.setAuthNote(ERROR_CODE, ERROR_CODE);
             authenticate(context);
         } catch (TimeExpiredException e) {
             log.warn("Time for code is expired");
             context.form()
                     .setError("Истёк срок действия кода");
-            sessionModel.removeAuthNote(PHONE_KEY_HASH);
+            sessionModel.removeAuthNote(CODE_HASH_KEY);
             sessionModel.setAuthNote(ERROR_CODE, ERROR_CODE);
             authenticate(context);
         }
     }
 
-    private void checkAndIncrementExistTries(AuthContext authContext, AuthenticationFlowContext context, PhonePlusRealmProtector protector) {
+    private void checkAndIncrementExistTries(AuthContext authContext, AuthenticationFlowContext context, PhonePlusRealmProtector protector, String code) {
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
 
-        String code = authSession.getAuthNote("currentCode");
+        /*String code = authSession.getAuthNote(CODE_HASH_KEY);*/
         if (Objects.isNull(code)) {
             return;
         }
@@ -503,13 +557,14 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     private boolean checkIsMoreThanFiveAttempts(AuthenticationFlowContext context, PhonePlusRealmProtector protector) {
         VerifyPhoneKey currentCodeCounter = mainCounter.get(protector);
+
         if (currentCodeCounter == null) {
             context.form().setAttribute("isMoreThanFiveAttempts", false);
             return false;
         }
-        String code = context.getAuthenticationSession().getAuthNote("currentCode");
+        String codeHash = context.getAuthenticationSession().getAuthNote("currentCode");
         if (currentCodeCounter
-                .getCurrentCode().equals(code) && currentCodeCounter
+                .getCurrentCode().equals(codeHash) && currentCodeCounter
                 .getCurrentCodeCounter() >= COUNT_BY_ONE_CODE && currentCodeCounter.getActivationType().equals(CODE_TO_SMS)
                 && currentCodeCounter.getRealm().equals(context.getRealm().getName())) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
@@ -518,7 +573,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         }
 
         if (currentCodeCounter
-                .getCurrentCode().equals(code) && currentCodeCounter
+                .getCurrentCode().equals(codeHash) && currentCodeCounter
                 .getCurrentCodeCounter() >= COUNT_BY_ONE_CODE && currentCodeCounter.getActivationType().equals(CODE_BY_PHONE_NUMBER)
                 && currentCodeCounter.getRealm().equals(context.getRealm().getName())) {
             context.form().setAttribute("isMoreThanFiveAttempts", true)
@@ -529,8 +584,9 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         return false;
     }
 
-    private void checkAndAddToCounter(User user, AuthContext authContext, AuthenticationFlowContext context, AuthenticationSessionModel sessionModel, PhonePlusRealmProtector protector) {
+    private void checkAndAddToCounter(User user, AuthContext authContext, AuthenticationFlowContext context, AuthenticationSessionModel sessionModel, PhonePlusRealmProtector protector, String code) {
         VerifyPhoneKey verifyPhoneKey = mainCounter.get(protector);
+        /*String codeHash = context.getAuthenticationSession().getAuthNote(CODE_HASH_KEY);*/
         if (!mainCounter.containsKey(protector) || verifyPhoneKey
                 .getCurrentCodeCounter() == null || !verifyPhoneKey.getRealm().equals(context.getRealm().getName())) {
             VerifyPhoneKey initCounter = new VerifyPhoneKey(authContext.getActivationCodeType(),
@@ -538,7 +594,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             mainCounter.put(protector, initCounter);
         }
 
-        checkAndIncrementExistTries(authContext, context, protector);
+        checkAndIncrementExistTries(authContext, context, protector, code);
     }
 
     private boolean checkCanWeSendSmS(User user, AuthenticationFlowContext context, PhonePlusRealmProtector protector) {
