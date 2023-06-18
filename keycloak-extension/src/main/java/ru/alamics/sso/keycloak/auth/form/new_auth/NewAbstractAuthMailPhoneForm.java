@@ -248,6 +248,10 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         final boolean isSms = httpRequest.getDecodedFormParameters().containsKey("smsButton");
         final boolean isPhoneCall = httpRequest.getDecodedFormParameters().containsKey("phoneCallButton");
 
+        if (isLoginPassword && !isSuccessCheckUser(context, null)) {
+            return;
+        }
+
         if (isLoginPassword && (validateUserAndPassword(context, formData))) {
             sessionModel.setAuthNote("loginPasswordButton", "loginPasswordButton");
             sessionModel.setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
@@ -285,7 +289,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             }
             if (context.getHttpRequest().getDecodedFormParameters().containsKey("resend")) {
                 String currentCode = sessionModel.getAuthNote("currentCode");
-                if (currentCode !=null && !currentCode.equals("")) {
+                if (currentCode != null && !currentCode.equals("")) {
                     if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {
                         attemptFailsService.saveAttempt(new AttemptFailsDto(user.getPhone(), currentCode, context.getRealm().getName(), CODE_BY_PHONE_NUMBER.name(), LocalDateTime.now(), user.getId()));
                     }
@@ -377,9 +381,9 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 log.info("user is " + user);
                 log.info(user.getId());
             }
-            if (!isSuccessCheckUser(context, user)) {
-                return false;
-            }
+//            if (!isSuccessCheckUser(context, user)) {
+//                return false;
+//            }
 
         } catch (ModelDuplicateException mde) {
             ServicesLogger.LOGGER.modelDuplicateException(mde);
@@ -402,9 +406,11 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 return false;
             }
         }
+
         if (!enabledUser(context, user)) {
             return false;
         }
+
         String rememberMe = inputData.getFirst("rememberMe");
         boolean remember = rememberMe != null && rememberMe.equalsIgnoreCase("on");
         if (remember) {
