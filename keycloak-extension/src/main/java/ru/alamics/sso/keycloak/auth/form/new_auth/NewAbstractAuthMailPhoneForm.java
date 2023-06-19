@@ -293,6 +293,11 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         final boolean isSms = httpRequest.getDecodedFormParameters().containsKey("smsButton");
         final boolean isPhoneCall = httpRequest.getDecodedFormParameters().containsKey("phoneCallButton");
 
+        if (isLoginPassword && !isSuccessCheckUser(context, null)) {
+            log.info("voshel v etot if - isLoginPassword && !isSuccessCheckUser(context, null)");
+            return;
+        }
+
         if (isLoginPassword && (validateUserAndPassword(context, formData))) {
             sessionModel.setAuthNote("loginPasswordButton", "loginPasswordButton");
             sessionModel.setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
@@ -303,10 +308,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         if ((isSms || isPhoneCall) && (validateUserAndPassword(context, formData))) {
             sessionModel.setAuthNote("secondPhase", (!isSms ? "phoneCallButton" : "smsButton"));
             authenticate(context);
-            return;
-        }
-
-        if (isLoginPassword && !isSuccessCheckUser(context, null)) {
             return;
         }
 
