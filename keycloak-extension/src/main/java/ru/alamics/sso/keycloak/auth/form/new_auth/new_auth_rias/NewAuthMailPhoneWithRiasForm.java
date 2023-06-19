@@ -79,6 +79,8 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
                     context.form().setAttribute(FormConstants.WITH_CITY, "TRUE");
                     context.form().setAttribute("showModal", "TRUE");
                     context.challenge(context.form().createLogin());
+                    log.info("первая проверка вернула true");
+                    return true;
                 } else if (!checkAuthRias(context, CHOOSE_REDIRECT_TO_LK_FORM)) {
                     log.info("!checkAuthRias(context, CHOOSE_REDIRECT_TO_LK_FORM))");
                     context.getEvent().error(Errors.USER_NOT_FOUND);
@@ -86,7 +88,8 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
                     context.form().setAttribute(FormConstants.WITH_CITY, "TRUE");
                     context.failureChallenge(AuthenticationFlowError.INVALID_USER, challenge(context, Messages.INVALID_USER));
                 }
-                return true;
+                log.info("внешний if вернул false");
+                return false;
             }
             String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, context.getRealm().getName());
             boolean test = (!defaultClientRealm.equals(cm.getClientId()) && !CONSOLE_ID.equals(cm.getClientId())) || !checkAuthRias(context, REDIRECT_TO_RIAS_FORM);
