@@ -4,8 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import static ru.alamics.sso.registration.model.TbapiConstants.TBAPI_EMAIL_ID;
-import static ru.alamics.sso.registration.model.TbapiConstants.TBAPI_EMAIL_NAME;
+import static ru.alamics.sso.registration.model.TbapiConstants.*;
 
 @Data
 public class TbapiRequest {
@@ -33,6 +32,9 @@ public class TbapiRequest {
 
     @Data
     private class ExtendedMap {
+
+        //@JsonProperty(TBAPI_PHONE_ID)
+        //private MapObjectHolder phoneHolder = new MapObjectHolder(TBAPI_PHONE_NAME);
 
         @JsonProperty(TBAPI_EMAIL_ID)
         private MapObjectHolder emailHolder = new MapObjectHolder(TBAPI_EMAIL_NAME);
@@ -66,5 +68,6 @@ public class TbapiRequest {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+        //getExtendedMap().getPhoneHolder().getSingleValue().setAttributeValue(phoneNumber);
     }
 }

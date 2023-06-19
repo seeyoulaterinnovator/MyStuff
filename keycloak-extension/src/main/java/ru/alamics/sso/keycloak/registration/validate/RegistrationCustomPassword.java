@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.registration.validate;
 
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.ValidationContext;
 import org.keycloak.authentication.forms.RegistrationPage;
 import org.keycloak.authentication.forms.RegistrationPassword;
@@ -14,7 +15,7 @@ import org.keycloak.services.validation.Validation;
 import javax.ws.rs.core.MultivaluedMap;
 import java.util.ArrayList;
 import java.util.List;
-
+@Slf4j
 public class RegistrationCustomPassword extends RegistrationPassword {
 
     private static final String DISPLAY_NAME = "Password Custom Validation";
@@ -26,6 +27,7 @@ public class RegistrationCustomPassword extends RegistrationPassword {
 
     @Override
     public void validate(ValidationContext context) {
+        log.info("Password Custom Validation");
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         List<FormMessage> errors = new ArrayList<>();
         context.getEvent().detail(Details.REGISTER_METHOD, "form");

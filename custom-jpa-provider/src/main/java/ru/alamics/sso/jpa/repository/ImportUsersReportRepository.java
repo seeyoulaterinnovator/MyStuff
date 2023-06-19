@@ -1,5 +1,6 @@
 package ru.alamics.sso.jpa.repository;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
 import ru.alamics.sso.jpa.entity.common.ImportUsersDataStatus;
@@ -16,6 +17,7 @@ import java.util.List;
 @LocalBean
 @Stateless
 @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+@Slf4j
 public class ImportUsersReportRepository {
 
     @PersistenceContext
@@ -55,13 +57,13 @@ public class ImportUsersReportRepository {
     }
 
     public void saveImportUsersReport(ImportUsersReportEntity importUsersReportEntity) {
-
+        log.info("import report with id = {} saved, status = {}", importUsersReportEntity.getId(), importUsersReportEntity.getStatus());
         em.persist(importUsersReportEntity);
         em.flush();
     }
 
     public void saveImportUsersData(ImportUsersDataEntity entity) {
-
+        log.info("importUserData with id = {} saved", entity.getId());
         em.persist(entity);
         em.flush();
     }
@@ -94,7 +96,7 @@ public class ImportUsersReportRepository {
     }
 
     public void updateReport(String id, ImportUsersReportStatus status, int clones, int created) {
-
+        log.info("report with id = {} was updated", id);
         em.createQuery("update ImportUsersReportEntity rep " +
                 "set rep.status = :status, rep.countClones = :clones, rep.countCreatedUsers = :created where rep.id = :id")
                 .setParameter("id", id)

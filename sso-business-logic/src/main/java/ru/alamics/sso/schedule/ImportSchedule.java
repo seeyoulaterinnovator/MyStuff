@@ -36,6 +36,8 @@ public class ImportSchedule {
     private ApplicationProperties properties;
     @EJB
     private ImportService importService;
+    //@Resource
+    //private TimerService timerService;
 
     @Resource
     private ManagedScheduledExecutorService scheduler;
@@ -52,15 +54,22 @@ public class ImportSchedule {
 
     @PostConstruct
     private void init() {
+        //final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
 
         final long intervalDuration = properties.getPropertyLong(TIMER_INTERVAL_DURATION_PROPERTY, DEFAULT_INTERVAL_DURATION);
+        //timerService.createIntervalTimer(DEFAULT_INTERVAL_DURATION, intervalDuration, timerConfig);
+        //log.info("Timer:{} is created, interval duration set to value={} milliseconds ", TIMER_NAME, intervalDuration);
 
         this.scheduler.scheduleAtFixedRate(this::schedule,
                 DEFAULT_INTERVAL_DURATION, intervalDuration,
                 TimeUnit.MILLISECONDS);
     }
 
+    //@Timeout
     public void schedule(/*Timer timer*/) {
+        //if (timer != null && !TIMER_NAME.equals(timer.getInfo().toString())) {
+        //    return;
+        //}
 
         long scheduleStart = System.currentTimeMillis();
 

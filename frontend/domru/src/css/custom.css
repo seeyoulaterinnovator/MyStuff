@@ -71,53 +71,56 @@ input[type="number"] {
   color: black;
   opacity: 0.1;
   transition: 0.2s ease-in-out;
-  &:hover {
-     opacity: 1;
-     color: #0357F1;
-   }
+&:hover {
+   opacity: 0.5;
+ }
+@media screen and (max-width: 320px) {
+  opacity: 1;
 }
-
-.item_hover:hover {
-  color: #0357F1;
-}
-.generated_hover:hover svg{
-  color: #0357F1;
-}
-.generated_hover:hover span{
-  color: #0357F1;
-}
-.generated_hover:active svg{
-  color: #2B539B;
-}
-.generated_hover:active span{
-  color: #2B539B;
 }
 
 .text-with-login {
   font-weight: 350;
-  font-size: 18px;
-
-  @media screen and (max-width: 640px) {
-    font-size: 17px;
-  }
-
-  @media screen and (max-width: 320px) {
-    font-size: 16px;
-  }
-
+  font-size: 17px;
 }
 
 .text-3xl{
   font-size: 46px;
 
-    @media screen and (max-width: 640px) {
-      font-size: 35px;
-    }
-
-    @media screen and (max-width: 479px) {
-      font-size: 30px;
-    }
+@media screen and (max-width: 640px) {
+  font-size: 35px;
 }
+
+@media screen and (max-width: 479px) {
+  font-size: 33px;
+}
+
+@media screen and (max-width: 320px) {
+  font-size: 33px;
+  overflow:hidden;
+  max-width: 250px;
+  background: linear-gradient(to right, #CDCDCD, transparent);
+  color: transparent;
+  -webkit-background-clip: text;
+}
+}
+
+.enter-text{
+  font-size: 46px;
+
+@media screen and (max-width: 640px) {
+  font-size: 35px;
+}
+
+@media screen and (max-width: 479px) {
+  font-size: 33px;
+}
+
+@media screen and (max-width: 320px) {
+  font-size: 33px;
+}
+}
+
 
 .text-no-wrap {
   white-space: nowrap;
@@ -130,7 +133,7 @@ input[type="number"] {
   transition: 0.2s ease-in-out;
   cursor: pointer;
 &:hover {
-   color: #0357F1;
+   opacity: 0.5;
 &:after {
    @apply .bg-extra;
  }
@@ -211,16 +214,39 @@ input[type="number"] {
     line-height: 40px;
   }
 }
-@media (max-width: 320px) {
-  .titleAllPage {
-    font-size: 33px;
-    line-height: 33px;
+
+.textTimer{
+  opacity: 0.8;
+  font-weight: 400;
+  line-height: 19px;
+}
+@media only screen and (min-width: 768px) and (max-width: 1279px) {
+  .textTimer {
+    display: block;
+    text-align: right;
   }
 }
 
-.textTimer{
-  font-weight: 700;
-  font-size: 18px;
-  line-height: 24px;
-  opacity: 0.8;
+@media only screen and (min-width: 1280px)  {
+  .textTimer{
+    opacity: 0.8;
+    font-weight: 400;
+    line-height: 19px;
+    padding-left: 6.55rem;
+  }
+}
+
+.hidden-important {
+  display: none !important;
+}
+
+.breakable::before {
+  content: "\A";
+  white-space: pre;
+}
+
+@media (max-width: 413px) {
+  .breakable::before {
+    content: none;
+  }
 }

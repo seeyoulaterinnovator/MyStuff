@@ -1,0 +1,116 @@
+@font-face {
+  font-weight: 500;
+  font-family: 'Inter';
+  font-style: normal;
+  src: url('./fonts/Inter-Medium.eot');
+  src: url('./fonts/Inter-Medium.eot?#iefix') format('embedded-opentype'),
+    url('./fonts/Inter-Medium.woff2') format('woff2'),
+    url('./fonts/Inter-Medium.woff') format('woff');
+}
+
+@font-face {
+  font-weight: bold;
+  font-family: 'Inter';
+  font-style: normal;
+  src: url('./fonts/Inter-Bold.eot');
+  src: url('./fonts/Inter-Bold.eot?#iefix') format('embedded-opentype'),
+    url('./fonts/Inter-Bold.woff2') format('woff2'),
+    url('./fonts/Inter-Bold.woff') format('woff');
+}
+
+@font-face {
+  font-weight: normal;
+  font-family: 'Inter';
+  font-style: normal;
+  src: url('./fonts/Inter-Regular.eot');
+  src: url('./fonts/Inter-Regular.eot?#iefix') format('embedded-opentype'),
+    url('./fonts/Inter-Regular.woff2') format('woff2'),
+    url('./fonts/Inter-Regular.woff') format('woff');
+}
+
+@font-face {
+  font-weight: 300;
+  font-family: 'Inter';
+  font-style: italic;
+  src: url('./fonts/Inter-LightItalic.eot');
+  src: url('./fonts/Inter-LightItalic.eot?#iefix') format('embedded-opentype'),
+    url('./fonts/Inter-LightItalic.woff2') format('woff2'),
+    url('./fonts/Inter-LightItalic.woff') format('woff');
+}
+
+@font-face {
+  font-weight: 300;
+  font-family: 'Inter';
+  font-style: normal;
+  src: url('./fonts/Inter-Light.eot');
+  src: url('./fonts/Inter-Light.eot?#iefix') format('embedded-opentype'),
+    url('./fonts/Inter-Light.woff2') format('woff2'),
+    url('./fonts/Inter-Light.woff') format('woff');
+}
+
+/* Фоллбэк, если не придут шрифты чата */
+@font-face {
+  font-family: 'RobotoRegular';
+  src: url('./fonts/RobotoRegular.woff2') format('woff');
+}
+
+@font-face {
+  font-weight: 400;
+  font-family: icomoon;
+  font-style: normal;
+  src: url('./fonts/icomoon.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'GolosTextWebBlack';
+  src:
+    url('./fonts/golos-text_black.woff2') format('woff2'),
+    url('./fonts/golos-text_black.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'GolosTextWebBold';
+  src:
+    url('./fonts/golos-text_bold.woff2') format('woff2'),
+    url('./fonts/golos-text_bold.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'GolosTextWebDemiBold';
+  src:
+    url('./fonts/golos-text_demiBold.woff2') format('woff2'),
+    url('./fonts/golos-text_demiBold.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'GolosTextWebMedium';
+  src:
+    url('./fonts/golos-text_medium.woff2') format('woff2'),
+    url('./fonts/golos-text_medium.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'GolosTextWebRegular';
+  src:
+    url('./fonts/golos-text_regular.woff2') format('woff2'),
+    url('./fonts/golos-text_regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'GolosTextWebVF';
+  src:
+    url('./fonts/Golos-Text_VF.woff2') format('woff2'),
+    url('./fonts/Golos-Text_VF.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}

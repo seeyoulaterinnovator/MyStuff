@@ -1,6 +1,6 @@
 import IMask from 'imask';
 import VALIDATION_RULES from '../constants/validationRules.js';
-import { setButtonAvailability } from './helpers.js';
+import {iMaskInstancePhoneAndEmail, setButtonAvailability} from './helpers.js';
 import { domain } from '../Cities/stores.js';
 
 export default (function() {
@@ -16,16 +16,7 @@ export default (function() {
   const usernameElement = document.getElementById('username');
   submitElement.disabled = true;
 
-  const dynamicMask = IMask(usernameElement, {
-    mask: [
-      {
-        mask: '+{7} (000) 000-00-00',
-      },
-      {
-        mask: /^\S*@?\S*$/,
-      },
-    ],
-  });
+  const dynamicMask = iMaskInstancePhoneAndEmail(usernameElement);
 
   usernameElement.addEventListener('input', () => {
     setButtonAvailability(validate, submitElement);

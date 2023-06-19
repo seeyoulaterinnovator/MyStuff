@@ -1,7 +1,6 @@
-import IMask from 'imask';
 import { createForm } from 'final-form';
 
-import { isEmpty } from './helpers';
+import {iMaskInstancePhone, isEmpty} from './helpers';
 
 import VALIDATION_RULES from '../constants/validationRules.js';
 
@@ -18,9 +17,7 @@ export default (function() {
   const phoneField = document.getElementById('phone');
 
   // Маска для поля ввода телефона
-  const phoneMask = IMask(document.getElementById('phone'), {
-    mask: '+{7} (000) 000-00-00',
-  });
+  const phoneMask = iMaskInstancePhone(phoneField);;
 
   // Убираем красные рамки инпутов на событии ввода после получения ошибки
   function cleanBorder() {

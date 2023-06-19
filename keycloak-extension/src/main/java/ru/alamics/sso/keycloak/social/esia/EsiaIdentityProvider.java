@@ -32,6 +32,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -111,6 +113,10 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
         }
 
         uuidToState.put(uuid.toString(), request.getState().getEncoded());
+        /*
+            AuthenticationSessionModel asm = session.getContext().getAuthenticationSession();
+            asm.setAuthNote(uuid.toString(), request.getState().getEncoded());
+        */
 
         return uriBuilder;
     }
@@ -128,6 +134,11 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
     private BrokeredIdentityContext extractIdentityFromProfile(JsonNode profile, String userId) {
         log.info("profile={}", profile);
         BrokeredIdentityContext user = new BrokeredIdentityContext(userId);
+
+//        String email = getJsonProperty(profile, "email");
+//
+//        user.setEmail(email);
+
 
         String firstName = getJsonProperty(profile, "firstName");
         String lastName = getJsonProperty(profile, "lastName");
@@ -232,6 +243,12 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
                     federatedIdentity.setIdpConfig(getConfig());
                     federatedIdentity.setIdp(EsiaIdentityProvider.this);
                     federatedIdentity.setCode(uuidToState.remove(state));
+
+                    /*
+                        AuthenticationSessionModel asm = session.getContext().getAuthenticationSession();
+                        federatedIdentity.setCode(asm.getAuthNote(state));
+                        asm.removeAuthNote(state);
+                    */
 
                     return callback.authenticated(federatedIdentity);
                 }

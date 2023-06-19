@@ -76,6 +76,7 @@ public class SsoUserCustomEvent extends SsoEvent {
                     a.disableCredentialType(realm, user, CredentialModel.PASSWORD,
                             timeTokenResetPassAndLogin,
                             settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_RESET_PASSWORD, realm.getName()), BODY_TEMPLATE_PASSWORD_RESET_WITH_LOGIN, attributes);
+                    //this.sendEmail(user, realm, "emailResetPasswordSubject", "mail-password-reset-with-login.ftl", attributes);
                 }
             } else {
                 log.error(String.format("User '%s' not found or do not have email", userId));

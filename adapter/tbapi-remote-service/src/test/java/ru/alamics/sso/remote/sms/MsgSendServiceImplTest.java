@@ -95,7 +95,7 @@ class MsgSendServiceImplTest {
                     .text(TEXT)
                     .build();
 
-            String result = service.sendMsg(messageRequest);
+            String result = service.sendMessageByRequest(messageRequest);
 
             assertThat(result.substring(0, 1)).isEqualTo("0");
 

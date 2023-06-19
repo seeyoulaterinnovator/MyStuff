@@ -54,12 +54,25 @@ export default (function() {
       cutRedundant(input);
       clearEmptyInputsHighlights();
       highlightCurrentInput(input, index);
+      checkInputs();
     });
 
     input.addEventListener('keypress', event => {
       checkNumeric(event);
     });
   });
+
+  function checkInputs() {
+    console.log("checkInputs")
+    const inputs = [1, 2, 3, 4, 5, 6]
+      .slice(0, codeNumbers.value || 6)
+      .map(index => document.getElementById(`smscode-${index}`));
+    const filledInputs = inputs
+      .filter(input => input.value.length === 1);
+    if (filledInputs.length === inputs.length) {
+      submitElement.click();
+    }
+  }
 
   function validate() {
     return !inputs.some(input => input.value === '');
@@ -141,4 +154,23 @@ export default (function() {
       .reduce((acc, currentValue) => acc + currentValue);
     resultSmscodeElement.value = resultSmscode;
   });
+  // Закомментил дублирующиеся изменения по автоматическому нажатию кнопки при достижении определённого условия
+  // function checkInputs() {
+  //   const inputs = [1, 2, 3, 4, 5, 6].slice(0, codeNumbers.value || 6).map(index => document.getElementById(`smscode-${index}`));
+  //   const filledInputs = inputs.filter(input => input.value.length === 1);
+  //   if (filledInputs.length === inputs.length) {
+  //     submitElement.click();
+  //   }
+  // }
+  //
+  // inputs.forEach((input, index) => {
+  //   input.addEventListener('input', () => {
+  //     setButtonAvailability(validate, submitElement);
+  //
+  //     jumpToNextInput(input);
+  //     cutRedundant(input);
+  //
+  //     checkInputs();
+  //   });
+  // });
 })();

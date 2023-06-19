@@ -35,6 +35,8 @@ public class PersonalAccountMapper extends AbstractOIDCProtocolMapper implements
         multiValued.setType(ProviderConfigProperty.BOOLEAN_TYPE);
         configProperties.add(multiValued);
 
+        //OIDCAttributeMapperHelper.addAttributeConfig(configProperties, PersonalAccountMapper.class);
+
         OIDCAttributeMapperHelper.addTokenClaimNameConfig(configProperties);
         addJsonTypeConfig(configProperties);
 
@@ -49,7 +51,11 @@ public class PersonalAccountMapper extends AbstractOIDCProtocolMapper implements
         property.setName(OIDCAttributeMapperHelper.JSON_TYPE);
         property.setLabel(OIDCAttributeMapperHelper.JSON_TYPE);
         List<String> types = new ArrayList<>();
+        //types.add("String");
         types.add("JSON");
+        //types.add("long");
+        //types.add("int");
+        //types.add("boolean");
         property.setType(ProviderConfigProperty.LIST_TYPE);
         property.setOptions(types);
         property.setHelpText(OIDCAttributeMapperHelper.JSON_TYPE_TOOLTIP);

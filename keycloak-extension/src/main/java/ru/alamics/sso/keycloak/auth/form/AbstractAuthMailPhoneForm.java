@@ -2,6 +2,7 @@ package ru.alamics.sso.keycloak.auth.form;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
+import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
@@ -13,13 +14,17 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ModelDuplicateException;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.messages.Messages;
 import ru.alamics.sso.jpa.entity.common.BlockType;
+import org.keycloak.sessions.AuthenticationSessionModel;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.service.UserFindService;
+import ru.alamics.sso.stats.LoginHistory;
 import ru.alamics.sso.user.UserAttributeService;
 import ru.alamics.sso.util.Util;
 
@@ -34,10 +39,13 @@ import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 public abstract class AbstractAuthMailPhoneForm extends AbstractUsernameFormAuthenticator implements Authenticator {
 
     private final UserFindService userFindService;
+
+    private final LoginHistory loginHistory;
     private UserAttributeService attributeService;
 
     public AbstractAuthMailPhoneForm(UserFindService userFindService) {
         this.userFindService = userFindService;
+        this.loginHistory = Lookup.lookup(LoginHistory.class);
     }
 
     @Override
@@ -143,6 +151,11 @@ public abstract class AbstractAuthMailPhoneForm extends AbstractUsernameFormAuth
             context.getAuthenticationSession().removeAuthNote(Details.REMEMBER_ME);
         }
         context.setUser(user);
+        if (user.getRequiredActions().isEmpty()) {
+            UserEntity userEntity = new UserEntity();
+            userEntity.setId(user.getId());
+            loginHistory.createSuccessAuth(userEntity, context.getRealm().getName());
+        }
         return true;
     }
 

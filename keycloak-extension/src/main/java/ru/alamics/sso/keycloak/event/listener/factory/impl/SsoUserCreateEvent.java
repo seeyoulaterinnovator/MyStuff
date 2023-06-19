@@ -24,6 +24,7 @@ public class SsoUserCreateEvent extends SsoEvent {
     private static final String BODY_TEMPLATE_CREATE = "mail-account-create.ftl";
     private static final String BODY_TEMPLATE_DATE = "mail-account-data.ftl";
 
+    //    private static final String userEnabled = "enabled";
     private AdminEvent event;
     private SettingsService settingsService = null;
 

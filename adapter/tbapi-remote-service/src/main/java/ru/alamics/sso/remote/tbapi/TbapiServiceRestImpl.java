@@ -50,6 +50,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
     }
 
     private TbapiResponse createCustomerBattle(TbapiRequest request, TbapiConnectConfig connectConfig) throws TbapiRegisterException {
+        log.info("TbapiServiceRestImpl");
 
         URI uri = new ResteasyUriBuilder()
                 .scheme(connectConfig.isSecure() ? "https" : "http")
@@ -89,6 +90,9 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
             log.error(e.getMessage(), e);
             //responseMap = Map.of();
             throw new TbapiRegisterException(e);
+        }
+        finally {
+            log.info("TbapiServiceRestImpl has ended");
         }
 
         return responseData;

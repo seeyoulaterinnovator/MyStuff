@@ -11,7 +11,10 @@ public enum SettingConstants {
     EXPIRE_SMS_VIBER_CODE("user.expire.sms-viber.code"),
     EXPIRE_INCOMING_CALL_CODE("user.expire.incoming.call.code"),
     EXPIRE_INCOMING_CALL_EMAIL_CODE("user.expire.incoming.call.email.code"),
-
+    BLOCK_DURATION_SEC("user.block.duration"),
+    EXPIRE_TIME_TO_RESEND_SMS("user.expire.time.to.resend.sms"),
+    EXPIRE_TIME_TO_RESEND_CALL("user.expire.time.to.resend.call"),
+    EXPIRE_TIME_TO_RESEND_MAIL("user.expire.time.to.resend.mail"),
 
     //параметры шлюзов сообщений СМС и Viber
     SEND_URI_SMS("smsSender.uri"),

@@ -968,6 +968,71 @@
         </sql>
     </changeSet>
 
+    <changeSet id="127" author="zhakov-mv">
+        <sql>
+            CREATE TABLE IF NOT EXISTS ATTEMPT_FAILS (
+                id VARCHAR(36) NOT NULL PRIMARY KEY,
+                phone VARCHAR(12) NOT NULL,
+                code VARCHAR(64) NOT NULL,
+                realm VARCHAR(36) NOT NULL,
+                limitation_cause VARCHAR(36) NOT NULL
+            ) charset = utf8mb4;
+        </sql>
+    </changeSet>
+
+    <changeSet id="128" author="zhakov-mv">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ATTEMPT_FAILS"/>
+            <not>
+                <indexExists indexName="IDX_ATTEMPT_FAILS_FULLTEXT"/>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE FULLTEXT INDEX IDX_ATTEMPT_FAILS_FULLTEXT ON ATTEMPT_FAILS(phone, realm)
+        </sql>
+    </changeSet>
+
+    <changeSet id="129" author="zhakov-mv">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ATTEMPT_FAILS"/>
+        </preConditions>
+        <addColumn tableName="ATTEMPT_FAILS">
+            <column name="created" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="136" author="zhakov-mv">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_LOGIN_HISTORY"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE USER_LOGIN_HISTORY ADD COLUMN (
+                is_success TinyInt(1) DEFAULT 0,
+                realm VARCHAR(16)
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="137" author="zhakov-mv">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ATTEMPT_FAILS"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE ATTEMPT_FAILS ADD COLUMN user_id varchar(36) NOT NULL;
+        </sql>
+    </changeSet>
+    <changeSet id="138" author="zhakov-mv">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ATTEMPT_FAILS"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE ATTEMPT_FAILS ADD CONSTRAINT fk_user_id_attempts
+                FOREIGN KEY (user_id) REFERENCES USER_ENTITY (ID) ON DELETE CASCADE
+        </sql>
+    </changeSet>
+
     <changeSet id="51_p" author="plyusnin-da" dbms="mysql">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="USER_ENTITY"/>
@@ -1237,6 +1302,47 @@
             blocked';
             UPDATE SETTINGS SET NAME = 'Отключить уведомление о разблокировке' WHERE NAME = 'Block notification of
             unlocking';
+        </sql>
+    </changeSet>
+
+    <changeSet id="143" author="zhakov-mv">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('95595f66-006a-11ee-be56-0242ac120002', 'user.block.duration', '300', null, 'S-TELECOM', 'Время
+            блокировки смс / дозвона', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('955963a8-006a-11ee-be56-0242ac120002', 'user.block.duration', '300', null, 'ER-TELECOM', 'Время
+            блокировки смс / дозвона', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('95596560-006a-11ee-be56-0242ac120002', 'user.block.duration', '300', null, 'user', 'Время
+            блокировки смс / дозвона', 'SECONDS', 'REALM');
+        </sql>
+    </changeSet>
+    <changeSet id="145" author="zhakov-mv">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('b407d018-06bf-11ee-be56-0242ac120002', 'user.expire.time.to.resend.call', '60', null, 'S-TELECOM', 'Время
+            до запроса кода звонок', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('b407d2de-06bf-11ee-be56-0242ac120002', 'user.expire.time.to.resend.call', '60', null, 'ER-TELECOM', 'Время
+            до запроса кода звонок', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('b407d482-06bf-11ee-be56-0242ac120002', 'user.expire.time.to.resend.call', '60', null, 'user', 'Время
+            до запроса кода звонок', 'SECONDS', 'REALM');
+        </sql>
+    </changeSet>
+
+    <changeSet id="144" author="zhakov-mv">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('eddbab90-0389-11ee-be56-0242ac120002', 'user.expire.time.to.resend.sms', '60', null, 'S-TELECOM', 'Время
+            до запроса кода', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('eddbae42-0389-11ee-be56-0242ac120002', 'user.expire.time.to.resend.sms', '60', null, 'ER-TELECOM', 'Время
+            до запроса кода', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('eddbafbe-0389-11ee-be56-0242ac120002', 'user.expire.time.to.resend.sms', '60', null, 'user', 'Время
+            до запроса кода', 'SECONDS', 'REALM');
         </sql>
     </changeSet>
 
@@ -1543,6 +1649,30 @@
     <changeSet id="82" author="petrov-ny">
         <sql>
             UPDATE SETTINGS SET VALUE = 'https://lkb2b.stelecom.ru' WHERE ID = 'b91073d4-5668-11ec-bf63-0242ac130002';
+        </sql>
+    </changeSet>
+
+    <changeSet id="120" author="zhakov-mv">
+        <sql>
+            CREATE TABLE IF NOT EXISTS BLACK_LIST (
+                id VARCHAR(36) NOT NULL PRIMARY KEY,
+                email VARCHAR(128) NULL,
+                created TIMESTAMP NOT NULL,
+                unblocked TIMESTAMP NULL,
+                block_duration BIGINT NULL,
+                block_count INT DEFAULT 0,
+                phone VARCHAR(12) NOT NULL,
+                user_id VARCHAR(36) NOT NULL,
+                limitation_cause VARCHAR(36),
+                CONSTRAINT fk_user_entity
+                FOREIGN KEY (user_id) REFERENCES USER_ENTITY (ID) ON DELETE CASCADE
+                ) charset = utf8mb4;
+        </sql>
+    </changeSet>
+
+    <changeSet id="135" author="zhakov-mv">
+        <sql>
+            ALTER TABLE BLACK_LIST ADD COLUMN IF NOT EXISTS realm varchar(36) not null;
         </sql>
     </changeSet>
 
@@ -2059,5 +2189,12 @@
         </sql>
     </changeSet>
 
-
+    <changeSet id="126" author="petrov-ny">
+        <sql>
+            <![CDATA[
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('94701e6a-c7d4-11ed-afa1-0242ac120002', 'emailAccountDataBodyHtml', '<p class="content__p">Для Вас создана учетная запись для входа в Личный кабинет «ЭР-Телеком Бизнес».</p><dl class="content__dl"><dt class="content__dl-dt">Логин:</dt><dd class="content__dl-dd"><b>{0}</b></dt></dl><p>Перейдите по ссылке и установите пароль.</p><p><a class="content__a" href="{3}">Установить пароль</a></p>', null, 'ER-TELECOM', 'Сообщение о создании УЗ', null, 'MESSAGE');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES ('996fa304-c7d4-11ed-afa1-0242ac120002', 'emailAccountCreateBodyHtml', '<p class="content__p">Для Вас создана учетная запись для входа в Личный кабинет «ЭР-Телеком Бизнес».</p><dl class="content__dl"><dt class="content__dl-dt">Логин:</dt><dd class="content__dl-dd"><b>{0}</b></dd></dl>', null, 'ER-TELECOM', 'Сообщение о создании УЗ', null, 'MESSAGE');
+            ]]>
+        </sql>
+    </changeSet>
 </databaseChangeLog>

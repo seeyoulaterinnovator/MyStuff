@@ -10,7 +10,6 @@ import org.keycloak.events.EventBuilder;
 import org.keycloak.events.EventType;
 import org.keycloak.models.*;
 import org.keycloak.models.utils.FormMessage;
-import org.keycloak.models.utils.SystemClientUtil;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.Urls;
@@ -93,7 +92,7 @@ public class RestResetCredentialsResource {
                 event.error(Errors.NOT_ALLOWED);
                 return ErrorResponse.error(Messages.RESET_CREDENTIAL_NOT_ALLOWED, Response.Status.BAD_REQUEST);
             }
-            return processResetCredentials(false, null, createAuthenticationSessionForClient(), null);
+            return processResetCredentials(false, null, createAuthenticationSessionForClient(client), null);
         }
         return ErrorResponse.error("Не удалось создать flow", Response.Status.NOT_FOUND);
     }
@@ -104,11 +103,8 @@ public class RestResetCredentialsResource {
         return processFlow(actionRequest, execution, authSession, RESET_CREDENTIALS_PATH, CustomAuthenticationFlowResolver.resolveResetCredentialFlow(authSession), errorMessage, authProcessor);
     }
 
-    AuthenticationSessionModel createAuthenticationSessionForClient() throws UriBuilderException, IllegalArgumentException {
+    AuthenticationSessionModel createAuthenticationSessionForClient(ClientModel client) throws UriBuilderException, IllegalArgumentException {
         AuthenticationSessionModel authSession;
-
-        // set up the account service as the endpoint to call.
-        ClientModel client = SystemClientUtil.getSystemClient(realm);
 
         RootAuthenticationSessionModel rootAuthSession = new AuthenticationSessionManager(session).createAuthenticationSession(realm, true);
         authSession = rootAuthSession.createAuthenticationSession(client);

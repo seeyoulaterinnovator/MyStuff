@@ -1,6 +1,7 @@
 package ru.alamics.sso.keycloak.auth.requiredactions;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.requiredactions.UpdatePassword;
@@ -8,6 +9,7 @@ import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.events.EventType;
+import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.*;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.Urls;
@@ -29,7 +31,10 @@ import java.util.regex.Pattern;
 @Slf4j
 public class SsoUpdatePassword extends UpdatePassword {
     private final static String DEFAULT_CLIENT_ID = "account";
-
+    private static final String GRANT_TYPE = "grant_type";
+    private static final String UPDATE_PASSWORD_FTL = "login-update-password.ftl";
+    private static final String PASSWORD = "password";
+    private static final String MOBILE_APP = "MP";
     private SettingsService settingsService;
 
     @Override
@@ -64,8 +69,11 @@ public class SsoUpdatePassword extends UpdatePassword {
             return;
         }
 
+        AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
+
         try {
             context.getSession().userCredentialManager().updateCredential(context.getRealm(), context.getUser(), UserCredentialModel.password(passwordNew, false));
+
             context.success();
         } catch (ModelException me) {
             errorEvent.detail(Details.REASON, me.getMessage()).error(Errors.PASSWORD_REJECTED);
@@ -87,6 +95,25 @@ public class SsoUpdatePassword extends UpdatePassword {
 
         setRedirectAfterAction(context);
 
+    }
+
+    @Override
+    public void requiredActionChallenge(RequiredActionContext context) {
+
+        context.challenge(createForm(context, context.form()));
+
+    }
+
+    private Response createForm(RequiredActionContext context, LoginFormsProvider loginFormsProvider) {
+        //Костыль тк при запросе с МП не нашел другого способа верификацию отправить по rest
+        String mp = context.getAuthenticationSession().getAuthNote(MOBILE_APP);
+
+        if (mp != null) {
+            HttpRequest contextObject = context.getSession().getContext().getContextObject(HttpRequest.class);
+            MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
+            parameters.add(GRANT_TYPE, PASSWORD);
+        }
+        return loginFormsProvider.createForm(UPDATE_PASSWORD_FTL);
     }
 
     private void setRedirectAfterAction(RequiredActionContext context) {
