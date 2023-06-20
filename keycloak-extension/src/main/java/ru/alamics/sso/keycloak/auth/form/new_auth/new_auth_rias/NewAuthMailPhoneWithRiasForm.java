@@ -66,35 +66,28 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
 
     @Override
     public boolean isSuccessCheckUser(AuthenticationFlowContext context, UserModel user) {
-        log.info("isSuccessCheckUser");
         if (user == null) {
             ClientModel cm = context.getAuthenticationSession().getClient();
             log.info("find user by rias: " + cm.getClientId());
             boolean checkInRiasIfNotFound = context.getRealm().getAttribute("checkInRiasIfNotFound", false);
             if (checkInRiasIfNotFound && Util.isFrame(context.getSession()) && (B2B_ID.equals(cm.getClientId()) || DMP_ID.equals(cm.getClientId()))) {
-                log.info("checkInRiasIfNotFound && Util.isFrame(context.getSession()) && (B2B_ID.equals(cm.getClientId()) || DMP_ID.equals(cm.getClientId()))");
                 String withCity = context.getHttpRequest().getDecodedFormParameters().getFirst(FormConstants.WITH_CITY);
                 if (Util.isEmpty(withCity) || !withCity.equals("TRUE")) {
-                    log.info("Util.isEmpty(withCity) || !withCity.equals(\"TRUE\")");
                     context.form().setAttribute(FormConstants.WITH_CITY, "TRUE");
                     context.form().setAttribute("showModal", "TRUE");
                     context.challenge(context.form().createLogin());
-                    log.info("первая проверка вернула true");
                     return true;
                 } else if (!checkAuthRias(context, CHOOSE_REDIRECT_TO_LK_FORM)) {
-                    log.info("!checkAuthRias(context, CHOOSE_REDIRECT_TO_LK_FORM))");
                     context.getEvent().error(Errors.USER_NOT_FOUND);
                     context.form().setAttribute("showModal", "FALSE");
                     context.form().setAttribute(FormConstants.WITH_CITY, "TRUE");
                     context.failureChallenge(AuthenticationFlowError.INVALID_USER, challenge(context, Messages.INVALID_USER));
+                    return true;
                 }
-                log.info("внешний if вернул false");
                 return false;
             }
             String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, context.getRealm().getName());
-            boolean test = (!defaultClientRealm.equals(cm.getClientId()) && !CONSOLE_ID.equals(cm.getClientId())) || !checkAuthRias(context, REDIRECT_TO_RIAS_FORM);
-            log.info(String.format("длинная херня вернула %s", test));
-            return test;
+            return (!defaultClientRealm.equals(cm.getClientId()) && !CONSOLE_ID.equals(cm.getClientId())) || !checkAuthRias(context, REDIRECT_TO_RIAS_FORM);
         }
         return true;
     }
@@ -102,8 +95,6 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
     // -------------
 
     private boolean checkAuthRias(AuthenticationFlowContext context, String form) {
-        log.info("check auth RIAS");
-
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         String username = formData.getFirst(FormConstants.FIELD_USERNAME);
         String password = formData.getFirst(FormConstants.FIELD_PASSWORD);
@@ -149,11 +140,9 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
                         .createForm(form);
 
                 context.challenge(challenge);
-                log.info("checkAuthRias vernula true");
                 return true;
             }
         }
-        log.info("checkAuthRias vernula false");
         return false;
     }
 

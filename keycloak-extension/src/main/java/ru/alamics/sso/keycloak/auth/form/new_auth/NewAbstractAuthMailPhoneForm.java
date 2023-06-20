@@ -294,7 +294,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         final boolean isPhoneCall = httpRequest.getDecodedFormParameters().containsKey("phoneCallButton");
 
         if (isLoginPassword && !isSuccessCheckUser(context, null)) {
-            log.info("voshel v etot if - isLoginPassword && !isSuccessCheckUser(context, null)");
             return;
         }
 
