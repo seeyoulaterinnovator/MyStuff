@@ -4,6 +4,7 @@ import org.keycloak.authentication.Authenticator;
 import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.auth.AbstractAuthenticatorFactory;
+import ru.alamics.sso.keycloak.auth.post.AttributesForm;
 
 public class NewAttributesFormFactory extends AbstractAuthenticatorFactory {
 
@@ -35,7 +36,12 @@ public class NewAttributesFormFactory extends AbstractAuthenticatorFactory {
 
     @Override
     public Authenticator create(KeycloakSession session) {
-        return new NewAttributesForm();
+        String clientId = session.getContext().getClient().getClientId();
+        if (clientId.equals("security-admin-console")) {
+            return new AttributesForm();
+        } else {
+            return new NewAttributesForm();
+        }
     }
 
     @Override
