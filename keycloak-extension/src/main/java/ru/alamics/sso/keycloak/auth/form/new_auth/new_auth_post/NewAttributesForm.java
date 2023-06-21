@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth.new_auth_post;
 
-import com.sun.jndi.toolkit.url.Uri;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
@@ -25,7 +24,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -76,11 +74,7 @@ public class NewAttributesForm implements Authenticator {
             } else {
                 attributes = Collections.emptyList();
             }
-            if (attributes.size() <= 1 && context.getSession().getContext().getClient().getClientId().equals("security-admin-console")) {
-                context.cancelLogin();
-                //      context.success();
-//                context.success();
-            } else if (attributes.size() <= 1) {
+            if (attributes.size() <= 1) {
                 context.success();
             } else {
                 context.challenge(createForm(context, attributes));
