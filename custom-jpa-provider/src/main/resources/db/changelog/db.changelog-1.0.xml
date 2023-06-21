@@ -2189,6 +2189,26 @@
         </sql>
     </changeSet>
 
+    <changeSet id="155" author="petrov-ny">
+        <sql>
+            CREATE TABLE IF NOT EXISTS WROTE_CODE_ATTEMPTS (
+                id VARCHAR(36) NOT NULL PRIMARY KEY,
+                phone VARCHAR(12) NOT NULL,
+                realm VARCHAR(36) NOT NULL,
+                code VARCHAR(64) NOT NULL,
+                user_code VARCHAR(64) NOT NULL,
+                type_send VARCHAR(36),
+                user_id VARCHAR(36) NOT NULL,
+                created TIMESTAMP NOT NULL,
+                CONSTRAINT fk_user_wrote_code_att
+                FOREIGN KEY (user_id) REFERENCES USER_ENTITY (ID) ON DELETE CASCADE
+                ) charset = utf8mb4;
+        </sql>
+        <sql>
+            CREATE FULLTEXT INDEX IDX_WROTE_CODE_ATTEMPTS_FULLTEXT ON WROTE_CODE_ATTEMPTS(phone, realm)
+        </sql>
+    </changeSet>
+
     <changeSet id="126" author="petrov-ny">
         <sql>
             <![CDATA[
