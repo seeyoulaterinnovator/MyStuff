@@ -12,7 +12,6 @@
 
 # Frontend
 node_modules/
-package-lock.json
 .vscode
 .cache
 /keycloak-extension/src/main/resources/themes/*/login/resources/build/

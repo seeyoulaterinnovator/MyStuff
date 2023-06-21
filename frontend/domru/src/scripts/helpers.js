@@ -117,9 +117,14 @@ const phoneMaskOption = {
   }
 };
 
+const phoneMaskOptionWithoutPrepare = {
+  mask: '+{7} (000) 000-00-00'
+};
+
 const emailMaskOption = {
   mask: /^\S*@?\S*$/
 };
 
 export const iMaskInstancePhone = (element) => IMask(element, {mask: [phoneMaskOption]});
 export const iMaskInstancePhoneAndEmail = (element) => IMask(element, {mask: [phoneMaskOption, emailMaskOption]});
+export const iMaskInstancePhoneWithoutPrepareAndEmail = (element) => IMask(element, {mask: [phoneMaskOptionWithoutPrepare, emailMaskOption]});

@@ -18,6 +18,7 @@ import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
+
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.UserConstants.*;
 import static ru.alamics.sso.util.Util.CLIENT_B2B;
+
 @Slf4j
 public class NewAttributesForm implements Authenticator {
     private final static String DMP_ID = "dmp-kc-sit";
