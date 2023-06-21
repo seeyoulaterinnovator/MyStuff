@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth.new_auth_post;
 
+import com.sun.jndi.toolkit.url.Uri;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
@@ -18,11 +19,13 @@ import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
+
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -30,6 +33,7 @@ import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.UserConstants.*;
 import static ru.alamics.sso.util.Util.CLIENT_B2B;
+
 @Slf4j
 public class NewAttributesForm implements Authenticator {
     private final static String DMP_ID = "dmp-kc-sit";
@@ -72,14 +76,11 @@ public class NewAttributesForm implements Authenticator {
             } else {
                 attributes = Collections.emptyList();
             }
-            if (attributes.size() <= 1) {
-                KeycloakSession session = context.getSession();
-                RealmModel realm = context.getAuthenticationSession().getRealm();
-                session.userCache().clear();
-                UserSessionModel userSession = session.sessions().getUserSession(realm, context.getAuthenticationSession().getParentSession().getId());
-                ClientConnection clientConnection = session.getContext().getConnection();
-                AuthenticationManager.backchannelLogout(session, realm, userSession, session.getContext().getUri(), clientConnection, session.getContext().getRequestHeaders(), true);
-                authSession.setAuthNote(AUTH_FORM_SUCCESS, Util.FALSE_STR);
+            if (attributes.size() <= 1 && context.getSession().getContext().getClient().getClientId().equals("security-admin-console")) {
+                context.cancelLogin();
+                //      context.success();
+//                context.success();
+            } else if (attributes.size() <= 1) {
                 context.success();
             } else {
                 context.challenge(createForm(context, attributes));
