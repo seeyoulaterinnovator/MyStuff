@@ -73,6 +73,13 @@ public class NewAttributesForm implements Authenticator {
                 attributes = Collections.emptyList();
             }
             if (attributes.size() <= 1) {
+                KeycloakSession session = context.getSession();
+                RealmModel realm = context.getAuthenticationSession().getRealm();
+                session.userCache().clear();
+                UserSessionModel userSession = session.sessions().getUserSession(realm, context.getAuthenticationSession().getParentSession().getId());
+                ClientConnection clientConnection = session.getContext().getConnection();
+                AuthenticationManager.backchannelLogout(session, realm, userSession, session.getContext().getUri(), clientConnection, session.getContext().getRequestHeaders(), true);
+                authSession.setAuthNote(AUTH_FORM_SUCCESS, Util.FALSE_STR);
                 context.success();
             } else {
                 context.challenge(createForm(context, attributes));
