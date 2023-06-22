@@ -48,13 +48,13 @@
                 <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${secondsCodeIsValid?c}"/>
             </#if>
 
-            <div class="flex flex-col sm:flex-row md:items-end items-center justify-between">
+            <div class="flex flex-col sm:flex-row md:items-end items-center justify-between css-god">
 
-                <div id="timer" class="text-black text-center md:text-right flex items-center mt-8 md:my-0 justify-center md:justify-start
+                <div id="timer2" class="text-black text-center md:text-right flex items-center justify-center md:justify-start
                      verification__timer__text">
                         <span style="color: #899DA8"> Код можно запросить через: </span>
                     <br>
-                    <span id="timer-time" class="textTimer"></span>
+                    <span id="timer-time" class="textTimer2"></span>
                 </div>
 
                 <div>
