@@ -23,13 +23,10 @@ import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaType;
 import ru.alamics.sso.antifraud.*;
-import ru.alamics.sso.jpa.repository.AttemptFailsRepository;
-import ru.alamics.sso.jpa.repository.WroteCodeAttemptsRepository;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
-import ru.alamics.sso.keycloak.util.PhoneVerifierUtil;
+import ru.alamics.sso.keycloak.util.MessagesExtender;
 import ru.alamics.sso.keycloak.util.UserToUserEntityMapper;
-import ru.alamics.sso.keycloak.util.VerifyPhoneKey;
 import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.model.User;
@@ -44,7 +41,6 @@ import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
-import javax.ejb.EJB;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.time.Duration;
@@ -442,7 +438,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             return false;
         }
 
-        if (invalidUser(context, user)) {
+        if (invalidUser(context, user, inputData)) {
             return false;
         }
 
@@ -466,6 +462,18 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         }
         context.setUser(user);
         return true;
+    }
+
+    public boolean invalidUser(AuthenticationFlowContext context, UserModel user, MultivaluedMap<String, String> inputData) {
+        if (user == null) {
+            dummyHash(context);
+            context.getEvent().error(Errors.USER_NOT_FOUND);
+            Response challengeResponse =
+                    challenge(context, inputData.getFirst("password") != null ? Messages.INVALID_USER : MessagesExtender.CRINGE_RIAS_NOT_FOUND);
+            context.failureChallenge(AuthenticationFlowError.INVALID_USER, challengeResponse);
+            return true;
+        }
+        return false;
     }
 
     private boolean isUserNameValid(String username, AuthenticationFlowContext context, String type) {
