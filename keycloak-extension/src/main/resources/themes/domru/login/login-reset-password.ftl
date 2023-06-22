@@ -33,6 +33,6 @@
             </div>
         </form>
     <#elseif section = "info" >
-    <p class="mb-7"> ${msg(emailInstruction)}</p>
+        <p class="mb-7"> ${msg(emailInstruction)}</p>
     </#if>
 </@layout.registrationLayout>

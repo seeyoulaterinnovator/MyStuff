@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.registration.phone;
 
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormContext;
 import org.keycloak.authentication.ValidationContext;
@@ -22,7 +23,7 @@ import java.util.List;
 
 import static ru.alamics.sso.registration.model.FormConstants.FIELD_EMAIL;
 import static ru.alamics.sso.registration.model.FormConstants.FIELD_PHONE;
-
+@Slf4j
 public class PhoneCheckProvider implements FormAction {
 
     private final UserFindService userFindService;
@@ -38,6 +39,7 @@ public class PhoneCheckProvider implements FormAction {
 
     @Override
     public void validate(ValidationContext context) {
+        log.info("PhoneCheckProvider");
 
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         List<FormMessage> errors = new ArrayList<>();

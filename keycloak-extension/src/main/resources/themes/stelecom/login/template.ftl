@@ -86,7 +86,7 @@
                                             ${kcSanitize(message.summary)?no_esc}
                                         </span>
                                     </#if>
-                                <#elseif message.summary?contains('Превышен лимит СМС. Запросить новое СМС можно через 12 часов')>
+                                <#elseif message.summary?contains('Превышен лимит СМС. Запросить новое СМС можно через 5 минут')>
                                     <span class="text-accentRed hidden limit-exceeded">
                                         ${kcSanitize(message.summary)?no_esc}
                                     </span>

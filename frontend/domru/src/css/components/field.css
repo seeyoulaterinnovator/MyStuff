@@ -16,7 +16,6 @@
 --row {
   flex-direction: row;
 }
-
 }
 
 .field__container {
@@ -152,21 +151,21 @@
   }
 }
 
-@media only screen and (min-width: 768px) and (max-width: 1279px) {
-  .reg-fields {
-    width: 226px;
-    height: 44px;
-    font-size: 15px;
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    .reg-fields {
+      width: 226px;
+      height: 44px;
+      font-size: 15px;
+    }
   }
-}
 
-@media only screen and (max-width: 767px) {
-  .reg-fields {
-    width: 288px;
-    height: 40px;
-    font-size: 14px;
+  @media only screen and (max-width: 767px) {
+    .reg-fields {
+      width: 288px;
+      height: 40px;
+      font-size: 14px;
+    }
   }
-}
 
 
 .pass-fields--change-pass {
@@ -183,22 +182,19 @@
 
 
 .field__input--city {
-  width: 384px;
+  width: 696px;
 
 @media (max-width: 1199px) {
-  width:280px;
+  width: 696px;
 }
 
-@media (max-width: 959px) {
-  width:288px;
+
+@media (max-width: 768px) {
+  width: 696px;
 }
 
-@media (max-width: 640px) {
-  width:231px;
-}
-
-@media (max-width: 479px) {
-  width:240px;
+@media (max-width: 320px) {
+  width: 288px;
 }
 }
 
@@ -532,6 +528,7 @@
   }
 }
 
+
 .info-text-code{
 
 }
@@ -542,3 +539,4 @@
     justify-content: center;
   }
 }
+

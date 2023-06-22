@@ -182,6 +182,7 @@ public class CitiesResource {
 
             title = city == null ? null : city.getName();
         }
+        log.info("getCityTitle ended");
 
         return JsonResponse.success()
                 .addResult("title", title)

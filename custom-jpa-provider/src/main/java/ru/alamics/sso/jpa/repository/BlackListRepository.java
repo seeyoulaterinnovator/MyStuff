@@ -62,7 +62,7 @@ public class BlackListRepository {
     }
 
     public void update(BlackListEntity entity) {
-        em.createNativeQuery("update BLACK_LIST set created=:now, unblocked=:unblocked, block_count=:count" +
+        em.createNativeQuery("update BLACK_LIST set created=:now, unblocked=:unblocked, block_count=:count, block_duration=:block_dur" +
                         " where phone =:phone and realm=:realm" +
                 " and limitation_cause=:cause")
                 .setParameter("phone", entity.getPhone())
@@ -71,6 +71,7 @@ public class BlackListRepository {
                 .setParameter("cause", entity.getLimitationCause())
                 .setParameter("unblocked", entity.getUnblockedAt())
                 .setParameter("now", LocalDateTime.now())
+                .setParameter("block_dur", entity.getBlockDurationSec())
                 .executeUpdate();
     }
 

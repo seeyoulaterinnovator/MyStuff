@@ -38,36 +38,35 @@
 
         selectCity($allCities[indexOfChosenCity]);
     }
+    console.log($status);
 </script>
-
 {#if $showModal}
     <div
-            class="flex flex-col fixed w-screen bg-white inset-0 py-4 md:py-6 xl:py-8 {$status === STATUS.INITIAL && 'opacity-90'} scrollable-container overflow-x-hidden overflow-y-auto"
-            id="location-selection-window">
+            class="flex flex-col fixed transparent-bg w-screen bg-white inset-0 py-4 md:py-6 xl:py-8 {$status === STATUS.INITIAL && 'opacity-90'} scrollable-container overflow-x-hidden overflow-y-auto"
+            id="location-selection-window" style={$status === STATUS.SELECTING ? "background-color: white" : ''}>
         <header id="cities-header" class="flex items-center pb-4 px-4 sm:px-6 lg:px-8 xl:px-6">
             <div id="cities-header-div" class="w-full flex justify-between items-center">
-                <a id="cities-header-logo" href="https://newlkb2b.dom.ru/" class={$status === STATUS.SELECTING && 'hidden sm:block'}>
+              <!--ydalit-->
+                <!--<a id="cities-header-logo" href="https://newlkb2b.dom.ru/" class={$status === STATUS.SELECTING && 'hidden sm:block'}>
                     <div
-                            class="h-30px w-60px md:h-10 md:w-20 xl:h-16 xl:w-32 bg-contain bg-no-repeat logo logo--domru" />
-                </a>
+                            class="h-30px w-60px md:h-10 md:w-20 xl:h-16 xl:w-32 bg-contain bg-no-repeat logo logo&#45;&#45;domru" />
+                </a>-->
 
               {#if $status === STATUS.SELECTING}
                   <form
                           class="md:flex md:flex-wrap md:justify-between"
                           on:submit|preventDefault={handleSelectCity}>
                       <fieldset>
-                          <div class="field field--row md:w-full items-center" style="flex-direction: row;">
-                              <label for="search-city" class="mr-4 hidden lg:block">Текущий выбор:</label>
+                          <div class="field field--row md:w-full">
+                              <label for="search-city" class="choose-city-text hidden lg:block">Выбрать город</label>
                               <input
                                       name="Поиск города"
                                       id="search-city"
                                       class="field__input field__input--city"
-                                      placeholder="Выберите город"
+                                      placeholder="Название города"
                                       bind:value={search}
                                       on:input={handleInputChange} />
-                              <button class="btn btn-main ml-4 p-3 min-w-0 btn__choose" type="submit">
-                                  Выбрать
-                              </button>
+
                           </div>
                       </fieldset>
                   </form>
@@ -100,7 +99,7 @@
         </header>
 
       {#if $status === STATUS.INITIAL}
-          <div class="flex flex-1 items-center justify-center content-box h-full mt-4 xl:mt-17 custom-scroll flex-col">
+          <div class="flex flex-1 justify-center content-box select-city-confirmation flex-col">
               <Confirmation />
           </div>
       {:else if $status === STATUS.SELECTING}

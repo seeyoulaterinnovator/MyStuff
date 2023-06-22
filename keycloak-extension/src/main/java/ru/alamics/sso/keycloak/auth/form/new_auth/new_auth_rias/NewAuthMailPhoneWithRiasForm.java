@@ -76,11 +76,13 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
                     context.form().setAttribute(FormConstants.WITH_CITY, "TRUE");
                     context.form().setAttribute("showModal", "TRUE");
                     context.challenge(context.form().createLogin());
+                    return true;
                 } else if (!checkAuthRias(context, CHOOSE_REDIRECT_TO_LK_FORM)) {
                     context.getEvent().error(Errors.USER_NOT_FOUND);
                     context.form().setAttribute("showModal", "FALSE");
                     context.form().setAttribute(FormConstants.WITH_CITY, "TRUE");
                     context.failureChallenge(AuthenticationFlowError.INVALID_USER, challenge(context, Messages.INVALID_USER));
+                    return true;
                 }
                 return false;
             }
@@ -93,8 +95,6 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
     // -------------
 
     private boolean checkAuthRias(AuthenticationFlowContext context, String form) {
-        log.info("check auth RIAS");
-
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         String username = formData.getFirst(FormConstants.FIELD_USERNAME);
         String password = formData.getFirst(FormConstants.FIELD_PASSWORD);
@@ -140,11 +140,9 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
                         .createForm(form);
 
                 context.challenge(challenge);
-
                 return true;
             }
         }
-
         return false;
     }
 

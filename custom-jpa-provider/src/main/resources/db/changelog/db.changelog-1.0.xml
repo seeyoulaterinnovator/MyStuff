@@ -1305,6 +1305,47 @@
         </sql>
     </changeSet>
 
+    <changeSet id="143" author="zhakov-mv">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('95595f66-006a-11ee-be56-0242ac120002', 'user.block.duration', '300', null, 'S-TELECOM', 'Время
+            блокировки смс / дозвона', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('955963a8-006a-11ee-be56-0242ac120002', 'user.block.duration', '300', null, 'ER-TELECOM', 'Время
+            блокировки смс / дозвона', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('95596560-006a-11ee-be56-0242ac120002', 'user.block.duration', '300', null, 'user', 'Время
+            блокировки смс / дозвона', 'SECONDS', 'REALM');
+        </sql>
+    </changeSet>
+    <changeSet id="145" author="zhakov-mv">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('b407d018-06bf-11ee-be56-0242ac120002', 'user.expire.time.to.resend.call', '60', null, 'S-TELECOM', 'Время
+            до запроса кода звонок', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('b407d2de-06bf-11ee-be56-0242ac120002', 'user.expire.time.to.resend.call', '60', null, 'ER-TELECOM', 'Время
+            до запроса кода звонок', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('b407d482-06bf-11ee-be56-0242ac120002', 'user.expire.time.to.resend.call', '60', null, 'user', 'Время
+            до запроса кода звонок', 'SECONDS', 'REALM');
+        </sql>
+    </changeSet>
+
+    <changeSet id="144" author="zhakov-mv">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('eddbab90-0389-11ee-be56-0242ac120002', 'user.expire.time.to.resend.sms', '60', null, 'S-TELECOM', 'Время
+            до запроса кода', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('eddbae42-0389-11ee-be56-0242ac120002', 'user.expire.time.to.resend.sms', '60', null, 'ER-TELECOM', 'Время
+            до запроса кода', 'SECONDS', 'REALM');
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('eddbafbe-0389-11ee-be56-0242ac120002', 'user.expire.time.to.resend.sms', '60', null, 'user', 'Время
+            до запроса кода', 'SECONDS', 'REALM');
+        </sql>
+    </changeSet>
+
     <changeSet id="71" author="alimov-ze">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="SETTINGS"/>
@@ -2145,6 +2186,26 @@
             INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (35, 'access_granted', 35, 'ER-TELECOM');
             INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (36, 'access_granted', 36, 'ER-TELECOM');
             INSERT INTO EXT_SYSTEM_ROLE (ID, NAME, SYSTEM_ID, REALM_ID) VALUES (37, 'access_granted', 37, 'ER-TELECOM');
+        </sql>
+    </changeSet>
+
+    <changeSet id="155" author="petrov-ny">
+        <sql>
+            CREATE TABLE IF NOT EXISTS WROTE_CODE_ATTEMPTS (
+                id VARCHAR(36) NOT NULL PRIMARY KEY,
+                phone VARCHAR(12) NOT NULL,
+                realm VARCHAR(36) NOT NULL,
+                code VARCHAR(64) NOT NULL,
+                user_code VARCHAR(64) NOT NULL,
+                type_send VARCHAR(36),
+                user_id VARCHAR(36) NOT NULL,
+                created TIMESTAMP NOT NULL,
+                CONSTRAINT fk_user_wrote_code_att
+                FOREIGN KEY (user_id) REFERENCES USER_ENTITY (ID) ON DELETE CASCADE
+                ) charset = utf8mb4;
+        </sql>
+        <sql>
+            CREATE FULLTEXT INDEX IDX_WROTE_CODE_ATTEMPTS_FULLTEXT ON WROTE_CODE_ATTEMPTS(phone, realm)
         </sql>
     </changeSet>
 

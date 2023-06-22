@@ -10,6 +10,8 @@ import ru.alamics.sso.jpa.repository.UserRepository;
 import ru.alamics.sso.jpa.util.LimitationCauseType;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.phone.ActivationCodeType;
+import ru.alamics.sso.settings.SettingConstants;
+import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.BlackListMapper;
 
 import javax.ejb.EJB;
@@ -26,21 +28,24 @@ public class BlackListService {
     private BlackListRepository blackListRepository;
     @EJB
     private UserRepository userRepository;
-    private final Long BLOCK_DURATION_SEC = 43200L; // 12 часов
+    @EJB
+    private SettingsService settingsService;
+    // 43200L 12 часов
 
     public void limitUserBySmsOrPhone(User user, String cause, AuthenticationSessionModel context) {
         BlackListEntity blackList = new BlackListEntity();
         UserEntity userEntity = userRepository.findUser(user.getId());
         List<BlackListEntity> existEntity = blackListRepository.findByEmail(user.getEmail());
+        long blockDuration = settingsService.getSettingsLongValue(SettingConstants.BLOCK_DURATION_SEC, context.getRealm().getName());
 
         blackList.setId(UUID.randomUUID().toString());
         blackList.setPhone(user.getPhone());
         blackList.setUser(userEntity);
         blackList.setEmail(user.getEmail());
-        blackList.setBlockDurationSec(BLOCK_DURATION_SEC);
+        blackList.setBlockDurationSec(blockDuration);
         blackList.setLimitationCause(cause);
         blackList.setCreatedAt(LocalDateTime.now());
-        blackList.setUnblockedAt(blackList.getCreatedAt().plusSeconds(BLOCK_DURATION_SEC));
+        blackList.setUnblockedAt(blackList.getCreatedAt().plusSeconds(blockDuration));
         blackList.setRealm(context.getRealm().getName());
         //default 0 mb todo default 1 | do we need it?
         if (existEntity.isEmpty()) {
@@ -56,15 +61,16 @@ public class BlackListService {
         BlackListEntity blackList = new BlackListEntity();
         UserEntity userEntity = userRepository.findUser(user.getId());
         List<BlackListEntity> existEntity = blackListRepository.findByEmail(user.getEmail());
+        long blockDuration = settingsService.getSettingsLongValue(SettingConstants.BLOCK_DURATION_SEC, context.getRealm().getName());
 
         blackList.setId(UUID.randomUUID().toString());
         blackList.setPhone(user.getPhone());
         blackList.setUser(userEntity);
         blackList.setEmail(user.getEmail());
-        blackList.setBlockDurationSec(BLOCK_DURATION_SEC);
+        blackList.setBlockDurationSec(blockDuration);
         blackList.setLimitationCause(cause);
         blackList.setCreatedAt(LocalDateTime.now());
-        blackList.setUnblockedAt(blackList.getCreatedAt().plusSeconds(BLOCK_DURATION_SEC));
+        blackList.setUnblockedAt(blackList.getCreatedAt().plusSeconds(blockDuration));
         blackList.setRealm(context.getRealm().getName());
         //default 0 mb todo default 1 | do we need it?
         if (existEntity.isEmpty()) {

@@ -206,6 +206,10 @@ a.btn {
 /* For 320 resolution */
 @media only screen and (max-width: 767px) {
   .btn-back {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
     padding: 11px 15px;
     width: 288px;
     height: 40px;
