@@ -138,9 +138,9 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             authSession.removeAuthNote(CODE_HASH_KEY);
             context.clearUser();
             context.challenge(challenge(context, formData));
-            doBack(authSession, context, formData);
             return;
         }
+
 
         if (loginHint != null) {
             formData.add(AuthenticationManager.FORM_USERNAME, loginHint);
@@ -259,16 +259,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         } else {
             context.challenge(challenge(context, formData));
         }
-    }
-
-    private void doBack(AuthenticationSessionModel authSession, AuthenticationFlowContext context, MultivaluedMap<String, String> formData) {
-        authSession.setAuthNote("backToLoginPassword", "backToLoginPassword");
-        authSession.removeAuthNote("secondPhase");
-        context.form().setAttribute("isSwitcherOn", getCurrentSwitcherStatus(context.getHttpRequest(), context));
-        authSession.removeAuthNote("needSendSmsCode");
-        authSession.removeAuthNote(PHONE_KEY_HASH);
-        context.clearUser();
-        context.challenge(challenge(context, formData));
     }
 
     private boolean isPhoneAbuseActivated(PhonePlusRealmProtector protector) {
