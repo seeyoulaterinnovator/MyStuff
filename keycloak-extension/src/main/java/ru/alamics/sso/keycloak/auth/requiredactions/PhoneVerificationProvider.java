@@ -126,6 +126,10 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 context.getAuthenticationSession().setAuthNote(CODE_EXPIRATION_TIME, codeExpirationTime.format(DateTimeFormatter.ISO_DATE_TIME));
             }
 
+            if (authSession.getAuthNote(NEED_SEND_EMAIL_CODE) != null){
+                activationCodeType = CODE_TO_EMAIL;
+            }
+
             boolean isUserBlocked = isUserBlocked(context);
             boolean needWeSendSmsOrDoCall = needWeSendSmsOrDoCall(context);
 
