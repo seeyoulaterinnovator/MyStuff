@@ -2,10 +2,7 @@ package ru.alamics.sso.keycloak.auth.form.new_auth.newAuthReqActions;
 
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
-import org.keycloak.models.AuthenticationExecutionModel;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.keycloak.auth.AbstractAuthenticatorFactory;
@@ -76,10 +73,10 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
 
             if (authType != null && (disable == null || disable.isEmpty())) {
                 for (String providerName : authType.getRequiredActionNames()) {
-                    userModel.addRequiredAction(providerName);
+                    addRequiredAction(context, providerName, userModel);
                 }
             }
-            addEmailReqActIfNeeded(userModel);
+            addEmailReqActIfNeeded(userModel, context, "email_sender");
             context.success();
 
         } else if (context.getAuthenticationSession().getAuthNote("smsButton") != null) {
@@ -90,14 +87,14 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
             if (authType != null && (disable == null || disable.isEmpty())) {
                 for (String providerName : authType.getRequiredActionNames()) {
                     if (!providerName.equals("incoming_call_phone_verificator")) {
-                        userModel.addRequiredAction(providerName);
+                        addRequiredAction(context, providerName, userModel);
                     }
                 }
             }
 
             userModel.removeRequiredAction("incoming_call_phone_verificator");
             userModel.removeRequiredAction("phone_verificator_sms");
-            addEmailReqActIfNeeded(userModel);
+            addEmailReqActIfNeeded(userModel, context, "email_sender");
             context.success();
 
         } else if (context.getAuthenticationSession().getAuthNote("phoneCallButton") != null) {
@@ -108,22 +105,32 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
             if (authType != null && (disable == null || disable.isEmpty())) {
                 for (String providerName : authType.getRequiredActionNames()) {
                     if (!providerName.equals("phone_verificator_sms")) {
-                        userModel.addRequiredAction(providerName);
+                        addRequiredAction(context, providerName, userModel);
                     }
                 }
             }
 
             userModel.removeRequiredAction("incoming_call_phone_verificator");
             userModel.removeRequiredAction("phone_verificator_sms");
-            addEmailReqActIfNeeded(userModel);
+            addEmailReqActIfNeeded(userModel, context, "email_sender");
             context.success();
         }
     }
 
-    private void addEmailReqActIfNeeded(UserModel user) {
-        if (!user.isEmailVerified()) {
+    private void addEmailReqActIfNeeded(UserModel user, AuthenticationFlowContext context, String providerName) {
+        if (!user.isEmailVerified() && addRequiredAction(context, providerName, user)) {
             user.addRequiredAction("email_sender");
         }
+    }
+
+    private boolean addRequiredAction(AuthenticationFlowContext context, String providerName, UserModel userModel) {
+        RequiredActionProviderModel providerModel = context.getRealm().getRequiredActionProviderByAlias(providerName);
+
+        if (providerModel.isEnabled()) {
+            userModel.addRequiredAction(providerName);
+            return true;
+        }
+        return false;
     }
 
     @Override
