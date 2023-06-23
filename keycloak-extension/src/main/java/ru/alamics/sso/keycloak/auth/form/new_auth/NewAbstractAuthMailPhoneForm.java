@@ -169,7 +169,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 }
                 boolean enableRepeatCall = true;
 
-                if (authSession.getAuthNote("needSendSmsCode") != null && authSession.getAuthNote("needSendSmsCode").equals("true")) {
+                if (sendIfNotBan(user, context, protector) && authSession.getAuthNote("needSendSmsCode") != null && authSession.getAuthNote("needSendSmsCode").equals("true")) {
                     switch (activationCodeType) {
                         case CODE_TO_SMS: {
                             String code = SmsCodeGenerator.getCode(activationCodeType.getLengthCode());
@@ -567,6 +567,24 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             return false;
         }
         return checkIsMoreThanFiveAttempts(context, protector);
+    }
+
+    private boolean sendIfNotBan(User user, AuthenticationFlowContext context, PhonePlusRealmProtector protector) {
+        if (activationCodeType.equals(CODE_TO_SMS) && blackListService.isUserBlockedAuthBySms(user.getPhone(), context)) {
+            context.form()
+                    .setAttribute("codeLimited", true)
+                    .setError(MessageConstants.SMS_LIMIT_BLOCK);
+            currentAuthFlowPhoneNumbers.remove(protector);
+            return false;
+        }
+        if (activationCodeType.equals(CODE_BY_PHONE_NUMBER) && blackListService.isUserBlockedAuthByPhoneCall(user.getPhone(), context)) {
+            context.form()
+                    .setAttribute("codeLimited", true)
+                    .setError(MessageConstants.CALL_LIMIT_BLOCK);
+            currentAuthFlowPhoneNumbers.remove(protector);
+            return false;
+        }
+        return true;
     }
 
     private void setTimerValueByActivationType(BlackListDto blackListDto, User user, AuthenticationSessionModel authSession, AuthContext authContext, long deltaTime, AuthenticationFlowContext context) {
