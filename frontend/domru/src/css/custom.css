@@ -270,3 +270,15 @@ input[type="number"] {
     content: none;
   }
 }
+
+.test{
+
+}
+
+@media (max-width: 479px){
+  .test{
+    align-items: center;
+    display: flex;
+    justify-content: center;
+  }
+}

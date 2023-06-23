@@ -22,7 +22,7 @@
         <form id="totpe" action="${url.loginAction}" method="POST"></form>
 
         <form id="totpForm" action="${url.loginAction}" method="POST">
-            <div class="w-full mt-4">
+            <div class="w-full mt-4 test">
                 <#list 1..lengthCode as x>
                     <#if x = 1>
                         <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
@@ -48,7 +48,7 @@
                 <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${secondsCodeIsValid?c}"/>
             </#if>
 
-            <div class="flex flex-col sm:flex-row md:items-end items-center justify-between css-god">
+            <div class="flex flex-col sm:flex-row md:items-end items-center justify-between">
 
                 <div id="timer2" class="text-black text-center md:text-right flex items-center justify-center md:justify-start
                      verification__timer__text">
@@ -73,7 +73,7 @@
 
                 <div>
                     <#if activationCodeType == "CODE_BY_PHONE_NUMBER">
-                        <button class="verification__text verification__resend mt-4" form="totpe" id="sentCode"
+                        <button class="verification__text verification__resend mt-8" form="totpe" id="sentCode"
                                 name="sendPhoneCode" type="submit">
                             Отправить СМС
                         </button>
