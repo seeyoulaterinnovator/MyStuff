@@ -447,7 +447,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 .phone(username)
                 .build();
 
-        boolean isSmsOrPhone = inputData.containsKey("loginPasswordButton") || inputData.containsKey("smsButton");
+        boolean isSmsOrPhone = inputData.containsKey("phoneCallButton") || inputData.containsKey("smsButton");
 
         if (isSmsOrPhone && riasService.checkPhone(commonUser)) {
             dummyHash(context);
