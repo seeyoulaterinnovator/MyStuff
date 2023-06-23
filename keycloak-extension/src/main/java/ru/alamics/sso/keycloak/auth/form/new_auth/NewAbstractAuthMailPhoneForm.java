@@ -37,6 +37,7 @@ import ru.alamics.sso.registration.phone.UserPhoneVerifier;
 import ru.alamics.sso.registration.phone.exception.*;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 import ru.alamics.sso.registration.phone.port.SendMessageService;
+import ru.alamics.sso.registration.rias.RiasService;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
@@ -95,6 +96,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     private static final int COUNT_BY_ONE_CODE = 5;
 
+    private final RiasService riasService;
+
 
     public NewAbstractAuthMailPhoneForm(UserFindService userFindService) {
         this.userFindService = userFindService;
@@ -105,6 +108,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         this.wroteCodeAttemptsService = Lookup.lookup(WroteCodeAttemptsService.class);
         this.messageSendService = Lookup.lookup(SendMessageService.class, "MessageSender");
         this.phoneCallerService = Lookup.lookup(PhoneCallerRemoteService.class, "PhoneCallerService");
+        this.riasService = Lookup.lookup(RiasService.class);
     }
 
     @Override
@@ -438,7 +442,23 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             return false;
         }
 
-        if (invalidUser(context, user, inputData)) {
+        User commonUser = User.builder()
+                .email("")
+                .phone(username)
+                .build();
+
+        boolean isSmsOrPhone = inputData.containsKey("loginPasswordButton") || inputData.containsKey("smsButton");
+
+        if (isSmsOrPhone && riasService.checkPhone(commonUser)) {
+            dummyHash(context);
+            context.getEvent().error(Errors.USER_NOT_FOUND);
+            Response challengeResponse = challenge(context, MessagesExtender.CRINGE_RIAS_NOT_FOUND);
+            context.failureChallenge(AuthenticationFlowError.INVALID_USER, challengeResponse);
+
+            return false;
+        }
+
+        if (invalidUser(context, user)) {
             return false;
         }
 
@@ -462,18 +482,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         }
         context.setUser(user);
         return true;
-    }
-
-    public boolean invalidUser(AuthenticationFlowContext context, UserModel user, MultivaluedMap<String, String> inputData) {
-        if (user == null) {
-            dummyHash(context);
-            context.getEvent().error(Errors.USER_NOT_FOUND);
-            Response challengeResponse =
-                    challenge(context, inputData.getFirst("password") != null ? Messages.INVALID_USER : MessagesExtender.CRINGE_RIAS_NOT_FOUND);
-            context.failureChallenge(AuthenticationFlowError.INVALID_USER, challengeResponse);
-            return true;
-        }
-        return false;
     }
 
     private boolean isUserNameValid(String username, AuthenticationFlowContext context, String type) {
