@@ -126,36 +126,45 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 context.getAuthenticationSession().setAuthNote(CODE_EXPIRATION_TIME, codeExpirationTime.format(DateTimeFormatter.ISO_DATE_TIME));
             }
 
+            if (authSession.getAuthNote(NEED_SEND_EMAIL_CODE) != null){
+                activationCodeType = CODE_TO_EMAIL;
+            }
+
             boolean isUserBlocked = isUserBlocked(context);
             boolean needWeSendSmsOrDoCall = needWeSendSmsOrDoCall(context);
 
             switch (activationCodeType) {
                 case CODE_TO_SMS:
-                    if (needWeSendSmsOrDoCall && !isUserBlocked) {
-                        String code = SmsCodeGenerator.getCode(activationCodeType.getLengthCode());
-                        authSession.setAuthNote(CODE_HASH_KEY, HashGenerator.getSecretHash(code));
+                    if (!isUserBlocked){
+                        if (needWeSendSmsOrDoCall){
+                            String code = SmsCodeGenerator.getCode(activationCodeType.getLengthCode());
+                            authSession.setAuthNote(CODE_HASH_KEY, HashGenerator.getSecretHash(code));
 
-                        String[] messengerList = context.getRealm().getSmtpConfig().get(MESSENGER).split(",");
-                        messageSendService.sendMessageToMessengers(userPhone, code, context.getRealm().getId(), messengerList);
+                            String[] messengerList = context.getRealm().getSmtpConfig().get(MESSENGER).split(",");
+                            messageSendService.sendMessageToMessengers(userPhone, code, context.getRealm().getId(), messengerList);
 
-                        codeExpirationTime = setCodeExpirationTime(context); // Устанавливаем новую временную точку, когда истечёт действие кода
-                        expireTime = setExpirationTime(context); // Таймер до кнопки отправить ещё раз
-                        authSession.removeAuthNote(NEED_SEND_SMS_CODE_OR_DO_CALL);
+                            codeExpirationTime = setCodeExpirationTime(context); // Устанавливаем новую временную точку, когда истечёт действие кода
+                            expireTime = setExpirationTime(context); // Таймер до кнопки отправить ещё раз
+                            authSession.removeAuthNote(NEED_SEND_SMS_CODE_OR_DO_CALL);
+                        }
                     }
                     break;
                 case CODE_BY_PHONE_NUMBER:
-                    if (needWeSendSmsOrDoCall && !isUserBlocked) {
-                        String code = phoneCallerService.callAndGetCode(userPhone, 1);
-                        authSession.setAuthNote(CODE_HASH_KEY, HashGenerator.getSecretHash(code));
+                    if (!isUserBlocked){
+                        if (needWeSendSmsOrDoCall){
+                            String code = phoneCallerService.callAndGetCode(userPhone, 1);
+                            authSession.setAuthNote(CODE_HASH_KEY, HashGenerator.getSecretHash(code));
 
-                        codeExpirationTime = setCodeExpirationTime(context); // Устанавливаем новую временную точку, когда истечёт действие кода
-                        expireTime = setExpirationTime(context); // Таймер до кнопки отправить ещё раз
-                        authSession.removeAuthNote(NEED_SEND_SMS_CODE_OR_DO_CALL);
+                            codeExpirationTime = setCodeExpirationTime(context); // Устанавливаем новую временную точку, когда истечёт действие кода
+                            expireTime = setExpirationTime(context); // Таймер до кнопки отправить ещё раз
+                            authSession.removeAuthNote(NEED_SEND_SMS_CODE_OR_DO_CALL);
+                        }
                     }
                     break;
                 case CODE_TO_EMAIL: // Недостижимый функционал
                     String code = SmsCodeGenerator.getCode(activationCodeType.getLengthCode());
                     code = sendEmail(context, code);
+                    expireTime = setExpirationTime(context); // Таймер до кнопки отправить ещё раз
 
                     authSession.setAuthNote(CODE_HASH_KEY, HashGenerator.getSecretHash(code));
                     break;
@@ -404,12 +413,12 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         String codeHash = context.getAuthenticationSession().getAuthNote(CODE_HASH_KEY);
 
         if (wroteCodeAttemptsService.getWroteCodeAttemptsByCode(protector.getPhoneNumber(), protector.getUserRealm().getName(), CODE_TO_SMS.name(), codeHash) >= ONE_CODE_ATTEMPTS) {
-            context.form()
+            context.form().setAttribute("isMoreThanFiveAttempts", true)
                     .setError(MessageConstants.SMS_LIMIT_5_CONTINUE);
             return true;
         }
         if (wroteCodeAttemptsService.getWroteCodeAttemptsByCode(protector.getPhoneNumber(), protector.getUserRealm().getName(), CODE_BY_PHONE_NUMBER.name(), codeHash) >= ONE_CODE_ATTEMPTS) {
-            context.form()
+            context.form().setAttribute("isMoreThanFiveAttempts", true)
                     .setError(MessageConstants.CALL_LIMIT_5_CONTINUE);
             return true;
         }
@@ -422,13 +431,13 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
 
         if (activationCodeType.equals(CODE_TO_SMS) && blackListService.isUserBlockedAuthBySms(userPhone, context)) {
-            context.form().setError(MessageConstants.SMS_LIMIT_BLOCK);
+            context.form().setAttribute("codeLimited", true).setAttribute("isMoreThanFiveAttempts", false).setError(MessageConstants.SMS_LIMIT_BLOCK);
             authSession.setAuthNote(USER_BLOCKED, USER_BLOCKED);
             return true;
         }
 
         if (activationCodeType.equals(CODE_BY_PHONE_NUMBER) && blackListService.isUserBlockedAuthByPhoneCall(userPhone, context)) {
-            context.form().setError(MessageConstants.CALL_LIMIT_BLOCK);
+            context.form().setAttribute("codeLimited", true).setAttribute("isMoreThanFiveAttempts", false).setError(MessageConstants.CALL_LIMIT_BLOCK);
             authSession.setAuthNote(USER_BLOCKED, USER_BLOCKED);
             return true;
         }
