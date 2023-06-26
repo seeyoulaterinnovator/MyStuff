@@ -163,7 +163,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     break;
                 case CODE_TO_EMAIL: // Недостижимый функционал
                     String code = SmsCodeGenerator.getCode(activationCodeType.getLengthCode());
-//                    code = sendEmail(context, code);
+                    code = sendEmail(context, code);
 
                     expireTime = setExpirationTime(context); // Таймер до кнопки отправить ещё раз
 
@@ -197,8 +197,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             log.info("ignore... userPhoneEmpty");
         } catch (PhoneCallException e) {
             log.info("ignore... PhoneCallException {}", e.getMessage());
-//        } catch (EmailException e) {
-//            log.info("ignore... EmailException {}", e.getMessage());
+        } catch (EmailException e) {
+            log.info("ignore... EmailException {}", e.getMessage());
         } catch (SendMessageException se) {
             log.info("ignore... MsgSendException {}", se.getMessage());
         }
