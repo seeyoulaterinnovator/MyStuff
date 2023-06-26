@@ -161,6 +161,8 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     String code = SmsCodeGenerator.getCode(activationCodeType.getLengthCode());
                     code = sendEmail(context, code);
 
+                    expireTime = setExpirationTime(context); // Таймер до кнопки отправить ещё раз
+
                     authSession.setAuthNote(CODE_HASH_KEY, HashGenerator.getSecretHash(code));
                     break;
                 default:
