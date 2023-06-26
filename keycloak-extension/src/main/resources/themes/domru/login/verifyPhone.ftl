@@ -22,7 +22,7 @@
         <form id="totpe" action="${url.loginAction}" method="POST"></form>
 
         <form id="totpForm" action="${url.loginAction}" method="POST">
-            <div class="w-full mt-4">
+            <div class="w-full mt-4 test">
                 <#list 1..lengthCode as x>
                     <#if x = 1>
                         <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
@@ -68,12 +68,12 @@
 
                 <div class="flex flex-col sm:flex-row md:items-end items-center justify-between">
 
-                    <div id="timer" class="text-black text-center md:text-right flex items-center mt-8 md:my-0 justify-center md:justify-start
-                         verification__timer__text">
+                <div id="timer2" class="text-black text-center md:text-right flex items-center justify-center md:justify-start
+                     verification__timer__text">
                         <span style="color: #899DA8"> Код можно запросить через: </span>
-                        <br>
-                        <span id="timer-time" class="textTimer"></span>
-                    </div>
+                    <br>
+                    <span id="timer-time" class="textTimer2"></span>
+                </div>
 
                     <div>
                         <#if activationCodeType == "CODE_TO_SMS">
@@ -91,7 +91,7 @@
 
                     <div>
                         <#if activationCodeType == "CODE_BY_PHONE_NUMBER">
-                            <button class="verification__text verification__resend mt-4" form="totpe" id="sentCode"
+                            <button class="verification__text verification__resend mt-8" form="totpe" id="sentCode"
                                     name="sendPhoneCode" type="submit">
                                 Отправить СМС
                             </button>
