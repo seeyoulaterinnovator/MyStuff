@@ -288,6 +288,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         AuthenticationSessionModel sessionModel = context.getAuthenticationSession();
         sessionModel.removeAuthNote("backToLoginPassword");
         ActivationCodeType.init(context.getRealm().getName());
+
         if (formData.containsKey("cancel")) {
             context.cancelLogin();
             return;
