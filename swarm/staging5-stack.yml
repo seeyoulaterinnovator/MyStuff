@@ -1,0 +1,71 @@
+---
+version: '3.4'
+
+services:
+  nginx:
+    image: docker.io/library/nginx:1.24.0-alpine
+    deploy:
+      replicas: 1
+    ports:
+      - 8123:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+
+  keycloak:
+    image: harbor.ertelecom.ru/sso-protected/sso:latest
+    ulimits:
+      nofile:
+        soft: 131072
+        hard: 131072
+    deploy:
+      endpoint_mode: dnsrr
+      replicas: 3
+    # Use healthcheck check to wait until upgraded container is actually ready
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    # Comment out if you want to deploy MariaDB inside cluster
+    extra_hosts:
+      - mariadb:10.101.6.63
+    logging:
+      driver: syslog
+      options:
+        tag: "sso5"
+    command:
+      - -b
+      - 0.0.0.0
+      - -c=standalone-ha-new.xml
+    # Overriden in SSO5_STAGING_OVERRIDES env file
+    environment:
+      - DB_USER=${DB_USER:-sso}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - DB_DATABASE=${DB_DATABASE:-sso5}
+      - DB_HOST=mariadb
+      - DB_PORT=${DB_PORT:-3306}
+      - KEYCLOAK_HOSTNAME=${KEYCLOAK_HOSTNAME:-sso.test.server}
+      - SITE=stage
+      - TZ=Asia/Yekaterinburg
+      - PROXY_ADDRESS_FORWARDING=true
+      - JGROUPS_DISCOVERY_PROTOCOL=dns.DNS_PING
+      - JGROUPS_DISCOVERY_PROPERTIES=dns_query=keycloak
+
+  # Note: you may need to restore database from snapshot
+  # manually before Keycloak start
+  #
+  # Uncomment if you need to deploy locally
+  # mariadb:
+  #   image: docker.io/library/mariadb:10.4.13-focal
+  #   deploy:
+  #     replicas: 1
+  #   ports:
+  #     - "3306:3306"
+  #   environment:
+  #     - MYSQL_USER=${DB_USER:-sso}
+  #     - MYSQL_PASSWORD=${DB_PASSWORD:-password}
+  #     - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-12345678}
+  #     - MYSQL_DATABASE=${DB_DATABASE:-sso3}
+  #   volumes:
+  #     - ./database:/var/lib/mysql:Z
