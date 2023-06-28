@@ -24,6 +24,16 @@
                 </kc-tooltip>
             </div>
 
+            <div class="form-group">
+                <label for="hideChat" class="col-md-2 control-label">Hide Chat</label>
+                <div class="col-md-6">
+                    <input ng-model="hideChat" name="hideChat"
+                           id="hideChat" onoffswitch on-text="{{:: 'onText' | translate}}"
+                           off-text="{{:: 'offText' | translate}}" data-ng-click="changed = true"/>
+                </div>
+                <kc-tooltip>Hides chat</kc-tooltip>
+            </div>
+
             <div class="form-group" ng-show="realm.registrationAllowed">
                 <label for="registrationEmailAsUsername"
                        class="col-md-2 control-label">{{:: 'registrationEmailAsUsername' | translate}}</label>
