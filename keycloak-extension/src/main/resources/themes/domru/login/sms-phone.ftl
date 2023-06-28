@@ -36,7 +36,7 @@
 
             <input id="codeNumbers" name="codeNumbers" class="hidden" value="${lengthCode!}"/>
             <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds!}"/>
-            <input id="smscode" name="smscode" class="hidden"/>
+            <input id="smscode" name="smscode" class="hidden" autocomplete="one-time-code"/>
 
             <div class="back-timer">
                 <div>
@@ -88,5 +88,29 @@
                 console.log("Отправлено тк B2B и Action пуст");
             };
         }
+
+        if ('OTPCredential' in window) {
+            window.addEventListener('DOMContentLoaded', e => {
+                const input = document.querySelector('input[autocomplete="one-time-code"]');
+                if (!input) return;
+                const ac = new AbortController();
+                const form = input.closest('form');
+                if (form) {
+                    form.addEventListener('submit', e => {
+                        ac.abort();
+                    });
+                }
+                navigator.credentials.get({
+                    otp: { transport:['sms'] },
+                    signal: ac.signal
+                }).then(otp => {
+                    input.value = otp.code;
+                    if (form) form.submit();
+                }).catch(err => {
+                    console.log(err);
+                });
+            });
+        }
+
     </script>
 </@layout.registrationLayout>

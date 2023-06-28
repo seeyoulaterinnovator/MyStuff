@@ -54,9 +54,11 @@ public class SendMessageServiceImpl implements SendMessageService {
 
     @Override
     public void sendMessageToMessengers(String phone, String message, String realmId, String[] messengerList) throws SendMessageException {
+        String pattern = String.format("Your OTP is: %s.\n" +
+                "@localhost:8080 #%s", phone, phone);
         MessageRequest messageRequest = MessageRequest.builder()
                 .userPhone(phone)
-                .text(message)
+                .text(pattern)
                 .realmId(realmId)
                 .build();
 
