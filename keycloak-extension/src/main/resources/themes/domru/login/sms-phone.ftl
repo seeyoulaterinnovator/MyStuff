@@ -22,7 +22,7 @@
             <div class="w-full xl:pb-37px md:pb-10 sm:pb-8 pb-4 center-items">
                 <#list 1..lengthCode as x>
                     <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
-                           name="smscode-${x}"
+                           name="smscode-${x} " autocomplete="one-time-code"
                            <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
                                disabled
                            <#elseif codeLimited?? && codeLimited>
@@ -30,7 +30,7 @@
                            </#if>
                            class="text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none squares
                             sms-input"
-                           autocomplete="off" autofocus/>
+                           autocomplete="one-time-code" autofocus/>
                 </#list>
             </div>
 
