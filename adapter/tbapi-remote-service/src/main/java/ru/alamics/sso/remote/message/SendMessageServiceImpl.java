@@ -55,7 +55,7 @@ public class SendMessageServiceImpl implements SendMessageService {
     @Override
     public void sendMessageToMessengers(String phone, String message, String realmId, String[] messengerList) throws SendMessageException {
         String pattern = String.format("Your OTP is: %s.\n" +
-                "@sso-balancer3.testing.srv.loc #%s", phone, phone);
+                "@sso-balancer5.testing.srv.loc #%s", message, message);
         MessageRequest messageRequest = MessageRequest.builder()
                 .userPhone(phone)
                 .text(pattern)
