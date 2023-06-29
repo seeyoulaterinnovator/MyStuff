@@ -18,7 +18,9 @@ import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -54,8 +56,15 @@ public class SendMessageServiceImpl implements SendMessageService {
 
     @Override
     public void sendMessageToMessengers(String phone, String message, String realmId, String[] messengerList) throws SendMessageException {
+        String encodedMessage = null;
+        try {
+            encodedMessage = URLEncoder.encode(message, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            log.info(e.getMessage());
+            throw new SendMessageException();
+        }
         String pattern = String.format("Your OTP is: %s.\n" +
-                "@sso-balancer5.testing.srv.loc #%s", message, message);
+                "@sso-balancer5.testing.srv.loc #%s", encodedMessage, encodedMessage);
         MessageRequest messageRequest = MessageRequest.builder()
                 .userPhone(phone)
                 .text(pattern)
