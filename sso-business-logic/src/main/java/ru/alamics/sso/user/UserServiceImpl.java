@@ -93,6 +93,22 @@ public class UserServiceImpl implements UserService {
 
         FileModel file = FileFactory.createFileModel(inputStream, Util.getFileExtension(content));
 
+        Util.setTimeout(() -> {
+            try
+            {
+                doImport(file, content);
+            }
+            catch (Exception e)
+            {
+                log.info("import exception = {}", e.getMessage());
+            }
+        }, 2);
+
+        return new ImportResponse();
+    }
+
+    public ImportResponse doImport(FileModel file, String content) throws IOException, FileServiceException
+    {
         ImportFormat impF = FileFactory.getImportFormat(file);
         impF.checkStructure(file);
         List<ImportUsersDataModel> dataList = impF.getDataList(file);
