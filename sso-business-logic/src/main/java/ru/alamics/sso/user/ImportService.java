@@ -63,7 +63,7 @@ public class ImportService {
     @EJB
     private ImportReportService importReportService;
 
-    private void doGeneratePasswords(List<ImportUsersDataModel> dataList, AdminAuth auth, KeycloakSession session) {
+    public void doGeneratePasswords(List<ImportUsersDataModel> dataList, AdminAuth auth, KeycloakSession session) {
 
         log.info("doGeneratePasswords");
 
@@ -150,7 +150,7 @@ public class ImportService {
             importUsers(reportModel, dataList, scheduleStart);
         }
 
-        doGeneratePasswords(dataList, auth, session);
+        /*doGeneratePasswords(dataList, auth, session);*/
 
     }
 
