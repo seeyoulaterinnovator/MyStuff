@@ -116,7 +116,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         this.phoneCallerService = Lookup.lookup(PhoneCallerRemoteService.class, "PhoneCallerService");
         this.session = session;
         this.riasService = Lookup.lookup(RiasService.class);
-        this.session = session;
     }
 
     @Override
