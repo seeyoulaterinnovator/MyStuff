@@ -10,7 +10,8 @@
     showInfo,
     isLimitExceeded,
     isPhoneError,
-    isSecondSwitcher
+    isSecondSwitcher,
+    isEmailVer
   } from './stores.js';
 
   const hasRegistration = window.location.href.includes('registration');
@@ -23,6 +24,7 @@
 
   const info = document.querySelector('.alert .text-black');
   const hasInfo = !!info;
+  const hasEmailVer = hasInfo && info.classList.contains('email-ver');
   const submitButton = document.getElementById("closeWindow");
   const switcher = document.getElementById("loginPasswordButton");
   const hasPhoneErrorMessage = hasAlert && alert.classList.contains('phone_error');
@@ -30,7 +32,7 @@
   const hasSecondSwitcher = secondSwitcher !== null;
 
 
-  const newText = hasAlert ? alert.innerText : '';
+  const newText = hasAlert ? alert.innerText : hasInfo ? info.innerText : '';
   const emailElement = document.getElementsByName('email')[0];
   const phoneElement = document.getElementsByName('phone')[0];
 
@@ -58,7 +60,8 @@
   isUpdateProfile.set(hasUpdateProfile);
   text.set(newText);
   isLimitExceeded.set(hasLimitCode);
-  isSecondSwitcher.set(hasSecondSwitcher)
+  isSecondSwitcher.set(hasSecondSwitcher);
+  isEmailVer.set(hasEmailVer)
 
   if (hasRegistration) {
     if (hasBadEmail && hasBadPhone) {
@@ -91,25 +94,29 @@
       }
     }
   }
-  if (hasInfo) {
-    text.set("На указанный E-mail отправлена инструкция для подтверждения данных")
-  }
 
   function handleHide() {
     show.set(false);
   }
 
-  function switchToPassword() {
-    if (switcher!==null){
-      switcher.click();
+  function handleHide2() {
+    if ($isEmailVer) {
+      showInfo.set(false);
     }
-    else {
+  }
+
+  setTimeout(handleHide2, 1800);
+
+  function switchToPassword() {
+    if (switcher !== null) {
+      switcher.click();
+    } else {
       show.set(false);
     }
   }
 
   function clickSecondSwitcher() {
-  secondSwitcher.click();
+    secondSwitcher.click();
   }
 
   function closeAndSubmit() {
@@ -143,13 +150,13 @@
             </svg>
           </button>
         {:else}
-        <button class="message__close-dialog-button" on:click={handleHide}>
-          <svg width="14" height="13" viewBox="0 0 14 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" clip-rule="evenodd"
-                  d="M1.95959 0.540478C1.70575 0.286637 1.2942 0.286637 1.04036 0.540478C0.786515 0.794319 0.786515 1.20588 1.04036 1.45972L6.08074 6.5001L1.04036 11.5405C0.786515 11.7943 0.786515 12.2059 1.04036 12.4597C1.2942 12.7136 1.70575 12.7136 1.95959 12.4597L6.99998 7.41934L12.0404 12.4597C12.2942 12.7136 12.7058 12.7136 12.9596 12.4597C13.2134 12.2059 13.2134 11.7943 12.9596 11.5405L7.91921 6.5001L12.9596 1.45972C13.2134 1.20588 13.2134 0.79432 12.9596 0.540478C12.7058 0.286638 12.2942 0.286638 12.0404 0.540478L6.99998 5.58086L1.95959 0.540478Z"
-                  fill="#16629A"/>
-          </svg>
-        </button>
+          <button class="message__close-dialog-button" on:click={handleHide}>
+            <svg width="14" height="13" viewBox="0 0 14 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd"
+                    d="M1.95959 0.540478C1.70575 0.286637 1.2942 0.286637 1.04036 0.540478C0.786515 0.794319 0.786515 1.20588 1.04036 1.45972L6.08074 6.5001L1.04036 11.5405C0.786515 11.7943 0.786515 12.2059 1.04036 12.4597C1.2942 12.7136 1.70575 12.7136 1.95959 12.4597L6.99998 7.41934L12.0404 12.4597C12.2942 12.7136 12.7058 12.7136 12.9596 12.4597C13.2134 12.2059 13.2134 11.7943 12.9596 11.5405L7.91921 6.5001L12.9596 1.45972C13.2134 1.20588 13.2134 0.79432 12.9596 0.540478C12.7058 0.286638 12.2942 0.286638 12.0404 0.540478L6.99998 5.58086L1.95959 0.540478Z"
+                    fill="#16629A"/>
+            </svg>
+          </button>
         {/if}
       </div>
       <p>{$text}</p>
@@ -197,24 +204,32 @@
   </div>
 {:else if $showInfo}
   <div class="message__fade flex justify-center items-center" on:click={closeAndSubmit}>
-    <div class="message" style="width: 288px;" on:click={closeAndSubmit}>
+    <div class="message" style="{$isEmailVer ? 'width: 390px' : 'width: 288px'}" on:click={closeAndSubmit}>
       <div class="message__title flex flex-row justify-between items-center gap-4">
         <span>
-          {#if $isBadEmail || $isBadPhone}
-            Учетная запись существует
-            {:else if $showInfo}
-            Подтверждение данных
+          {#if $isEmailVer}
+            Подтверждение
           {:else}
-            Ошибка
+            Подтверждение данных
           {/if}
         </span>
-        <button class="message__close-dialog-button" on:click={closeAndSubmit}>
-          <svg width="14" height="13" viewBox="0 0 14 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" clip-rule="evenodd"
-                  d="M1.95959 0.540478C1.70575 0.286637 1.2942 0.286637 1.04036 0.540478C0.786515 0.794319 0.786515 1.20588 1.04036 1.45972L6.08074 6.5001L1.04036 11.5405C0.786515 11.7943 0.786515 12.2059 1.04036 12.4597C1.2942 12.7136 1.70575 12.7136 1.95959 12.4597L6.99998 7.41934L12.0404 12.4597C12.2942 12.7136 12.7058 12.7136 12.9596 12.4597C13.2134 12.2059 13.2134 11.7943 12.9596 11.5405L7.91921 6.5001L12.9596 1.45972C13.2134 1.20588 13.2134 0.79432 12.9596 0.540478C12.7058 0.286638 12.2942 0.286638 12.0404 0.540478L6.99998 5.58086L1.95959 0.540478Z"
-                  fill="#16629A"/>
-          </svg>
-        </button>
+        {#if $isEmailVer}
+          <button class="message__close-dialog-button" on:click={handleHide2}>
+            <svg width="14" height="13" viewBox="0 0 14 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd"
+                    d="M1.95959 0.540478C1.70575 0.286637 1.2942 0.286637 1.04036 0.540478C0.786515 0.794319 0.786515 1.20588 1.04036 1.45972L6.08074 6.5001L1.04036 11.5405C0.786515 11.7943 0.786515 12.2059 1.04036 12.4597C1.2942 12.7136 1.70575 12.7136 1.95959 12.4597L6.99998 7.41934L12.0404 12.4597C12.2942 12.7136 12.7058 12.7136 12.9596 12.4597C13.2134 12.2059 13.2134 11.7943 12.9596 11.5405L7.91921 6.5001L12.9596 1.45972C13.2134 1.20588 13.2134 0.79432 12.9596 0.540478C12.7058 0.286638 12.2942 0.286638 12.0404 0.540478L6.99998 5.58086L1.95959 0.540478Z"
+                    fill="#16629A"/>
+            </svg>
+          </button>
+        {:else}
+          <button class="message__close-dialog-button" on:click={closeAndSubmit}>
+            <svg width="14" height="13" viewBox="0 0 14 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd"
+                    d="M1.95959 0.540478C1.70575 0.286637 1.2942 0.286637 1.04036 0.540478C0.786515 0.794319 0.786515 1.20588 1.04036 1.45972L6.08074 6.5001L1.04036 11.5405C0.786515 11.7943 0.786515 12.2059 1.04036 12.4597C1.2942 12.7136 1.70575 12.7136 1.95959 12.4597L6.99998 7.41934L12.0404 12.4597C12.2942 12.7136 12.7058 12.7136 12.9596 12.4597C13.2134 12.2059 13.2134 11.7943 12.9596 11.5405L7.91921 6.5001L12.9596 1.45972C13.2134 1.20588 13.2134 0.79432 12.9596 0.540478C12.7058 0.286638 12.2942 0.286638 12.0404 0.540478L6.99998 5.58086L1.95959 0.540478Z"
+                    fill="#16629A"/>
+            </svg>
+          </button>
+        {/if}
       </div>
       <p>{$text}</p>
     </div>
