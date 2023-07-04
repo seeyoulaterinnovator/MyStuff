@@ -22,16 +22,26 @@
         <form id="totpe" action="${url.loginAction}" method="POST"></form>
 
         <form id="totpForm" action="${url.loginAction}" method="POST">
-            <div class="w-full mt-4">
+            <div class="w-full mt-4 test">
                 <#list 1..lengthCode as x>
                     <#if x = 1>
                         <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
                                name="smscode-${x}"
+                                <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
+                                    disabled
+                                <#elseif codeLimited?? && codeLimited>
+                                    disabled
+                                </#if>
                                class="text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none"
                                autocomplete="off" autofocus/>
                     <#else>
                         <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
                                name="smscode-${x}"
+                                <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
+                                    disabled
+                                <#elseif codeLimited?? && codeLimited>
+                                    disabled
+                                </#if>
                                class="ml-4 text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none"
                                autocomplete="off"/>
                     </#if>
@@ -43,43 +53,52 @@
             <input id="smscode" name="smscode" class="hidden"/>
 
             <#if secondsUserIsBlocked gt 0>
-                <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${secondsUserIsBlocked?c}"/>
+                <input id="expirationSeconds" name="expirationSeconds" class="hidden"
+                       value="${secondsUserIsBlocked?c}"/>
             <#else>
                 <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${secondsCodeIsValid?c}"/>
             </#if>
 
-            <div class="flex flex-col sm:flex-row md:items-end items-center justify-between">
+            <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
+                <span>
+                    <button class="verification__text verification__resend mt-8" name="resend"
+                            type="submit">${sendAgain}</button>
+                </span>
+            <#else>
 
-                <div id="timer" class="text-black text-center md:text-right flex items-center mt-8 md:my-0 justify-center md:justify-start
+                <div class="flex flex-col sm:flex-row md:items-end items-center justify-between">
+
+                <div id="timer2" class="text-black text-center md:text-right flex items-center justify-center md:justify-start
                      verification__timer__text">
                         <span style="color: #899DA8"> Код можно запросить через: </span>
                     <br>
-                    <span id="timer-time" class="textTimer"></span>
+                    <span id="timer-time" class="textTimer2"></span>
                 </div>
 
-                <div>
-                    <#if activationCodeType == "CODE_TO_SMS">
-                        <button class="hidden verification__text verification__resend mt-8"
-                                id="resend" name="resend" type="submit">
-                            Отправить ещё раз
-                        </button>
-                    <#else>
-                        <button class="hidden verification__text verification__resend mt-8"
-                                id="resend" name="resend" type="submit">
-                            Повторный звонок
-                        </button>
-                    </#if>
-                </div>
+                    <div>
+                        <#if activationCodeType == "CODE_TO_SMS">
+                            <button class="hidden verification__text verification__resend mt-8"
+                                    id="resend" name="resend" type="submit">
+                                Отправить ещё раз
+                            </button>
+                        <#else>
+                            <button class="hidden verification__text verification__resend mt-8"
+                                    id="resend" name="resend" type="submit">
+                                Повторный звонок
+                            </button>
+                        </#if>
+                    </div>
 
-                <div>
-                    <#if activationCodeType == "CODE_BY_PHONE_NUMBER">
-                        <button class="verification__text verification__resend mt-4" form="totpe" id="sentCode"
-                                name="sendPhoneCode" type="submit">
-                            Отправить СМС
-                        </button>
-                    </#if>
+                    <div>
+                        <#if activationCodeType == "CODE_BY_PHONE_NUMBER">
+                            <button class="verification__text verification__resend mt-8" form="totpe" id="sentCode"
+                                    name="sendPhoneCode" type="submit">
+                                Отправить СМС
+                            </button>
+                        </#if>
+                    </div>
                 </div>
-            </div>
+            </#if>
 
             <div class="sm:block md:flex w-full items-center text-center md:text-left">
                 <button class="btn btn-main btn-display-none verification__btn verification__btn__accept w-full md:w-3/7 mr-0 md:mr-4"

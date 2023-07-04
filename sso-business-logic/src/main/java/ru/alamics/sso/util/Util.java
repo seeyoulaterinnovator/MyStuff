@@ -24,6 +24,8 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static ru.alamics.sso.registration.model.UserConstants.HIDDEN_HEADER;
 import static ru.alamics.sso.registration.model.UserConstants.I_FRAME;
@@ -197,6 +199,20 @@ public class Util {
             searchRealm = isEmpty(realm) ? "user" : realm;
         }
         return searchRealm;
+    }
+
+    public static void setTimeout(Runnable task, int timeoutInSeconds)
+    {
+        final Timer timer = new Timer("Timeout timer");
+
+        timer.schedule(new TimerTask()
+        {
+            @Override
+            public void run()
+            {
+                task.run();
+            }
+        }, 1000 * timeoutInSeconds);
     }
 
 }
