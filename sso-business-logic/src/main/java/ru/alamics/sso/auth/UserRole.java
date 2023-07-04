@@ -2,7 +2,6 @@ package ru.alamics.sso.auth;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
-import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.*;
 import ru.alamics.sso.jpa.entity.ExternalSystemEntity;

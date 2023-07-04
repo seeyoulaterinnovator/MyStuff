@@ -77,6 +77,7 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
             }
             userModel.removeRequiredAction("rest_post_selector");
             addEmailReqActIfNeeded(userModel, context, "email_sender");
+            userModel.removeRequiredAction("rest_post_selector");
             context.success();
 
         } else if (context.getAuthenticationSession().getAuthNote("smsButton") != null) {
