@@ -236,6 +236,26 @@ input[type="number"] {
   }
 }
 
+.textTimer2{
+  opacity: 0.8;
+  font-weight: 400;
+  line-height: 19px;
+}
+@media only screen and (min-width: 768px) and (max-width: 1279px) {
+  .textTimer2 {
+    display: block;
+    text-align: right;
+  }
+}
+
+@media only screen and (min-width: 1280px)  {
+  .textTimer2{
+    opacity: 0.8;
+    font-weight: 400;
+    line-height: 19px;
+     }
+}
+
 .hidden-important {
   display: none !important;
 }
@@ -248,5 +268,17 @@ input[type="number"] {
 @media (max-width: 413px) {
   .breakable::before {
     content: none;
+  }
+}
+
+.test{
+
+}
+
+@media (max-width: 479px){
+  .test{
+    align-items: center;
+    display: flex;
+    justify-content: center;
   }
 }

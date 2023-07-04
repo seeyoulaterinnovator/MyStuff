@@ -166,6 +166,7 @@ container:source:
 
 container:
   stage: docker
+  <<: *decrypt-variables
   when: manual
   script:
     - docker build -t harbor.ertelecom.ru/sso-protected/sso:$CI_PIPELINE_ID -f Dockerfile .
@@ -181,7 +182,7 @@ domru:stage:
   when: manual
   environment:
     name: stage
-    url: http://domru-sso-stage.alamics.ru
+    url: https://sso-balancer.testing.srv.loc
   script:
     - $BASE_DIR/scripts/deploy.sh
   tags:
@@ -191,8 +192,8 @@ domru:stage2:
   stage: deploy
   when: manual
   environment:
-    name: stage
-    url: http://domru-sso-stage1.alamics.ru
+    name: stage2
+    url: https://sso-balancer2.testing.srv.loc
   script:
     - $BASE_DIR/scripts/deploy.sh
   tags:
@@ -202,8 +203,8 @@ domru:stage3:
   stage: deploy
   when: manual
   environment:
-    name: stage
-    url: http://domru-sso-stage3.alamics.ru
+    name: stage3
+    url: https://sso-balancer3.testing.srv.loc
   script:
     - $BASE_DIR/scripts/deploy.sh
   tags:
@@ -213,12 +214,32 @@ domru:stage4:
   stage: deploy
   when: manual
   environment:
-    name: stage
-    url: http://domru-sso-stage4.alamics.ru
+    name: stage4
+    url: https://sso-balancer4.testing.srv.loc
   script:
     - $BASE_DIR/scripts/deploy.sh
   tags:
     - sso-domain-controller-perm
+
+domru:stage5:
+  stage: deploy
+  when: manual
+  environment:
+    name: stage5
+    url: https://sso-balancer5.testing.srv.loc
+  script:
+    - sed -i
+        "s/sso:.*$/sso:$CI_PIPELINE_ID/g"
+        $CI_PROJECT_DIR/swarm/staging5-stack.yml
+    - cp -r $CI_PROJECT_DIR/swarm/* $HOME/swarm/stage05
+    - cp -r $SSO5_STAGING_OVERRIDES $HOME/swarm/stage05/env.yml
+    - cd $HOME/swarm/stage05 &&
+        docker stack deploy --with-registry-auth
+               -c staging5-stack.yml -c env.yml domrussostage5
+  tags:
+    - sso-stage
+    # - sso-domain-controller-perm
+
 
 domru:perm:primary:
   stage: deploy
@@ -227,8 +248,8 @@ domru:perm:primary:
   only:
     - tags
   environment:
-    name: stage
-    url: http://sso.dev.itrev.ru
+    name: production-perm-primary
+    url: https://auth.dom.ru/auth
   script:
     - for i in domru stelecom ertelecom; do cp -r build/deploy/themes/${i} /usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app02:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app03:/usr/local/keycloak/themes; done
     - mkdir -p /usr/local/keycloak/domain/data/password-blacklists
@@ -254,8 +275,8 @@ domru:perm:secondary:
   only:
     - tags
   environment:
-    name: stage
-    url: http://sso.dev.itrev.ru
+    name: production-perm-secondary
+    url: https://auth.dom.ru/auth
   script:
     - for i in domru stelecom ertelecom; do scp -r build/deploy/themes/${i} sso-app04:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app05:/usr/local/keycloak/themes; done
     - ssh sso-app04 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
@@ -277,8 +298,8 @@ domru:voronezh:primary:
   only:
     - tags
   environment:
-    name: production
-    url: http://sso.dev.itrev.ru
+    name: production-voronezh-primary
+    url: https://auth.dom.ru/auth
   script:
     - for i in domru stelecom ertelecom; do cp -r build/deploy/themes/${i} /usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app02:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app03:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app04:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app05:/usr/local/keycloak/themes; done
     - mkdir -p /usr/local/keycloak/domain/data/password-blacklists
@@ -304,8 +325,8 @@ domru:voronezh:secondary:
   only:
     - tags
   environment:
-    name: production
-    url: http://sso.dev.itrev.ru
+    name: production-voronezh-secondary
+    url: https://auth.dom.ru/auth
   script:
     - for i in domru stelecom ertelecom; do scp -r build/deploy/themes/${i} sso-app04:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app05:/usr/local/keycloak/themes; done
     - ssh sso-app04 mkdir -p /usr/local/keycloak/domain/data/password-blacklists

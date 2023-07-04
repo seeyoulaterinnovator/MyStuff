@@ -6,6 +6,7 @@ export default (function() {
   if (!formElement) return;
 
   const timerElement = document.getElementById('timer');
+  const timerElement2 = document.getElementById('timer2');
   const submitElement = document.getElementById('accept');
   const resendElement = document.getElementById('resend');
   const sentCode = document.getElementById('sentCode');
@@ -28,6 +29,11 @@ export default (function() {
     if (timerElement) {
       timerElement.classList.remove('flex');
       timerElement.classList.add('hidden');
+    }
+
+    if (timerElement2) {
+      timerElement2.classList.remove('flex');
+      timerElement2.classList.add('hidden');
     }
 
     if (sentCode) {
