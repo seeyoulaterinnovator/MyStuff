@@ -98,7 +98,7 @@ public class SendMessageServiceImpl implements SendMessageService {
                 .target(uri)
                 .queryParams(msgConfig.getConfigForQuery())
                 .queryParam("to", Util.getCleanUserPhone(messageRequest.getUserPhone()))
-                .queryParam("text", "Your%20OTP%20is%3A%20123456.%0D%0A%0D%0A%40web-otp.glitch.me%20%2312345")
+                .queryParam("text", "Your%20OTP%20is%3A%201234.%0D%0A%0D%0A%40sso-balancer3.testing.srv.loc%20%231234")
                 .request();
         try {
             return builder.get(String.class);
