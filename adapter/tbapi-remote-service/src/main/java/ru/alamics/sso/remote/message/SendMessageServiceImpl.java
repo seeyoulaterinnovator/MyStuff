@@ -98,7 +98,8 @@ public class SendMessageServiceImpl implements SendMessageService {
                 .target(uri)
                 .queryParams(msgConfig.getConfigForQuery())
                 .queryParam("to", Util.getCleanUserPhone(messageRequest.getUserPhone()))
-                .queryParam("text", Util.encodeCharset(messageRequest.getText().replaceAll("%2B", "%20"), msgConfig.getCharset()))
+               // .queryParam("text", Util.encodeCharset(messageRequest.getText(), msgConfig.getCharset()).replaceAll("%2B", "%20"))
+                .queryParam("text", "bla%20bla%20bla")
                 .request();
         try {
             return builder.get(String.class);
