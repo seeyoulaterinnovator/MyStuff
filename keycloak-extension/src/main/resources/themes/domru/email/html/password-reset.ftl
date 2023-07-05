@@ -2,7 +2,7 @@
 
 <@template.layout ; section>
   <#if section = "style">
-    <#include 'styles/content-style--default.html' >
+    <#include 'styles/custom-content-style.html' >
   <#elseif section = "body">
 
     <#assign email=realmName>
@@ -10,6 +10,6 @@
       <#assign email= user.getEmail()>
     </#if>
 
-    ${kcSanitize(msg(passwordResetBodyHtml,link, expTime, email, linkExpirationFormatter(linkExpiration)))?no_esc}
+    ${kcSanitize(msg(passwordResetBodyHtml,link, expTime, email, phone))?no_esc}
   </#if>
 </@template.layout>

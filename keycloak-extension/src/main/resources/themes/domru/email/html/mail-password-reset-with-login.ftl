@@ -2,7 +2,7 @@
 
 <@template.layout ; section>
     <#if section = "style">
-        <#include 'styles/content-style--default.html' >
+        <#include 'styles/custom-content-style.html' >
     <#elseif section = "body">
         ${kcSanitize(msg(emailResetPasswordBodyHtml,authHref, expTimePassAndLogin))?no_esc}
         <#if phone??>
@@ -11,6 +11,6 @@
             ${kcSanitize(msg(emailLoginHtml, userName))?no_esc}
         </#if>
         ${kcSanitize(msg("login"))?no_esc}
-        ${kcSanitize(msg(emailPasswordFooterHtml, expTimePass))?no_esc}
+        ${kcSanitize(msg(emailPasswordFooterHtml, phone))?no_esc}
     </#if>
 </@template.layout>
