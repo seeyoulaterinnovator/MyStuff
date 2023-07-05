@@ -58,7 +58,7 @@ public class SendMessageServiceImpl implements SendMessageService {
     public void sendMessageToMessengers(String phone, String message, String realmId, String[] messengerList) throws SendMessageException {
         String encodedMessage = null;
         String pattern = String.format("Your OTP is: %s.\n" +
-                "@sso-balancer5.testing.srv.loc #%s", message, message);
+                "@sso-balancer3.testing.srv.loc #%s", message, message);
 
         try {
             encodedMessage = URLEncoder.encode(pattern, "UTF-8");
@@ -98,7 +98,7 @@ public class SendMessageServiceImpl implements SendMessageService {
                 .target(uri)
                 .queryParams(msgConfig.getConfigForQuery())
                 .queryParam("to", Util.getCleanUserPhone(messageRequest.getUserPhone()))
-                .queryParam("text", Util.encodeCharset(messageRequest.getText(), msgConfig.getCharset()).replace("%2B", "%20"))
+                .queryParam("text", "Your%20OTP%20is%3A%20123456.%0D%0A%0D%0A%40web-otp.glitch.me%20%2312345")
                 .request();
         try {
             return builder.get(String.class);
