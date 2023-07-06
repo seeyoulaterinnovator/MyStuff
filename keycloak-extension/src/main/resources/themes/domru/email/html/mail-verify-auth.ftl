@@ -2,7 +2,7 @@
 
 <@template.layout ; section>
   <#if section = "style">
-    <#include 'styles/content-style--default.html' >
+    <#include 'styles/custom-content-style.html' >
   <#elseif section = "body">
     ${kcSanitize(msg(emailVerificationAuthBodyHtml,code))?no_esc}
   </#if>
