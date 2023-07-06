@@ -103,8 +103,7 @@
                     otp: { transport:['sms'] },
                     signal: ac.signal
                 }).then(otp => {
-                    let numbers = otp.code.split('');
-                    [...input].forEach((it, idx) => it.value = numbers[idx]);
+                    input.value = otp.code;
                     if (form)
                         form.submit();
                 }).catch(err => {
