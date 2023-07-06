@@ -90,8 +90,8 @@
 
         if ('OTPCredential' in window) {
             window.addEventListener('DOMContentLoaded', e => {
-                const input = document.querySelector('input[autocomplete="one-time-code"]');    //4 РёРЅРїСѓС‚Р°, РЅР° РєР°Р¶РґСѓСЋ С†РёС„СЂСѓ
-                if (!input.length) return;
+                const input = document.querySelector('input[autocomplete="one-time-code"]');
+                if (!input) return;
                 const ac = new AbortController();
                 const form = input.closest('form');
                 if (form) {
@@ -104,8 +104,7 @@
                     signal: ac.signal
                 }).then(otp => {
                     input.value = otp.code;
-                    if (form)
-                        form.submit();
+                    if (form) form.submit();
                 }).catch(err => {
                     console.log(err);
                 });
