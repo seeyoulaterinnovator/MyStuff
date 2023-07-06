@@ -57,7 +57,7 @@ public class SendMessageServiceImpl implements SendMessageService {
     @Override
     public void sendMessageToMessengers(String phone, String message, String realmId, String[] messengerList) throws SendMessageException {
         String encodedMessage = null;
-        String pattern = String.format("Your OTP is: %s.\n" +
+        String pattern = String.format("Your OTP is: %s.\n\n" +
                 "@sso-balancer3.testing.srv.loc #%s", message, message);
 
         try {
@@ -69,7 +69,7 @@ public class SendMessageServiceImpl implements SendMessageService {
 
         MessageRequest messageRequest = MessageRequest.builder()
                 .userPhone(phone)
-                .text(encodedMessage)
+                .text(pattern)
                 .realmId(realmId)
                 .build();
 
@@ -83,10 +83,10 @@ public class SendMessageServiceImpl implements SendMessageService {
     public String sendMessageByRequest(MessageRequest messageRequest) throws SendMessageException {
 
         // локально и на дэве фиксированный код и не отправляю смс
-        if (!StandResolver.isBattle()) {
-            log.info("Stand {}, do not sending sms", StandResolver.ENV);
-            return "0: Accepted for delivery";
-        }
+//        if (!StandResolver.isBattle()) {
+//            log.info("Stand {}, do not sending sms", StandResolver.ENV);
+//            return "0: Accepted for delivery";
+//        }
 
         MsgConfig msgConfig = createMsgConfig(messageRequest.getRealmId(), messageRequest.getMessengerName().getType());
 
@@ -98,7 +98,8 @@ public class SendMessageServiceImpl implements SendMessageService {
                 .target(uri)
                 .queryParams(msgConfig.getConfigForQuery())
                 .queryParam("to", Util.getCleanUserPhone(messageRequest.getUserPhone()))
-                .queryParam("text", "Your%20OTP%20is%3A%201234.%0D%0A%0D%0A%40sso-balancer3.testing.srv.loc%20%231234")
+             //   .queryParam("text", "Your%20OTP%20is%3A%201234.%0D%0A%0D%0A%40sso-balancer3.testing.srv.loc%20%231234")
+                .queryParam("text", Util.rfc3986Encoder(messageRequest.getText()))
                 .request();
         try {
             return builder.get(String.class);
