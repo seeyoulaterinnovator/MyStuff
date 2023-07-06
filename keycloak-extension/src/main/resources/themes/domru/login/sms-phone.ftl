@@ -29,14 +29,13 @@
                                 disabled
                             </#if>
                            class="text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none squares
-                            sms-input"
-                           autofocus/>
+                            sms-input"  autofocus/>
                 </#list>
             </div>
 
             <input id="codeNumbers" name="codeNumbers" class="hidden" value="${lengthCode!}"/>
             <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds!}"/>
-            <input id="smscode" name="smscode" class="hidden" />
+            <input id="smscode" name="smscode" class="hidden" autocomplete="one-time-code"/>
 
             <div class="back-timer">
                 <div>
