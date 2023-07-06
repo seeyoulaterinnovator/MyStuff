@@ -90,10 +90,10 @@
 
         if ('OTPCredential' in window) {
             window.addEventListener('DOMContentLoaded', e => {
-                const inputs = document.querySelector('input[autocomplete="one-time-code"]');
-                if (!inputs.length) return;
+                const input = document.querySelectorAll('input[autocomplete="one-time-code"]');    //4 РёРЅРїСѓС‚Р°, РЅР° РєР°Р¶РґСѓСЋ С†РёС„СЂСѓ
+                if (!input.length) return;
                 const ac = new AbortController();
-                const form = inputs.closest('form');
+                const form = input.closest('form');
                 if (form) {
                     form.addEventListener('submit', e => {
                         ac.abort();
@@ -103,7 +103,8 @@
                     otp: { transport:['sms'] },
                     signal: ac.signal
                 }).then(otp => {
-                    inputs.value = otp.code;
+                    let numbers = otp.code.split('');
+                    [...input].forEach((it, idx) => it.value = numbers[idx]);
                     if (form)
                         form.submit();
                 }).catch(err => {
@@ -111,6 +112,7 @@
                 });
             });
         }
+
 
     </script>
 </@layout.registrationLayout>
