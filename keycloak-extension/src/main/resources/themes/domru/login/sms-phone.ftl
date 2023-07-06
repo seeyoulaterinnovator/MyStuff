@@ -23,20 +23,20 @@
                 <#list 1..lengthCode as x>
                     <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
                            name="smscode-${x} " autocomplete="one-time-code"
-                           <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
-                               disabled
-                           <#elseif codeLimited?? && codeLimited>
-                               disabled
-                           </#if>
+                            <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
+                                disabled
+                            <#elseif codeLimited?? && codeLimited>
+                                disabled
+                            </#if>
                            class="text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none squares
                             sms-input"
-                           autocomplete="one-time-code" autofocus/>
+                           autofocus/>
                 </#list>
             </div>
 
             <input id="codeNumbers" name="codeNumbers" class="hidden" value="${lengthCode!}"/>
             <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds!}"/>
-            <input id="smscode" name="smscode" class="hidden" autocomplete="one-time-code"/>
+            <input id="smscode" name="smscode" class="hidden" />
 
             <div class="back-timer">
                 <div>
@@ -45,27 +45,27 @@
                     </button>
                 </div>
                 <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
-                        <span>
+                <span>
                             <button class="font-light verification__resend w-full" name="resend" type="submit">${sendAgain}</button>
                         </span>
                 <#else>
-                    <div id="timer" style="margin-left: auto;">
+                <div id="timer" style="margin-left: auto;">
                             <span style="color: #000000; font-size: 14px!important;">
                                 Код можно запросить через:
                             </span>
-                        <br>
-                            <span id="timer-time" class="textTimer" style="font-size: 14px!important; color: #000000!important;"></span>
-                    </div>
-                        <#if enableRepeatCall?? && enableRepeatCall!>
-                            <p class="hidden font-light text-black verification__text" id="resend">
+                    <br>
+                    <span id="timer-time" class="textTimer" style="font-size: 14px!important; color: #000000!important;"></span>
+                </div>
+                <#if enableRepeatCall?? && enableRepeatCall!>
+                    <p class="hidden font-light text-black verification__text" id="resend">
                                 <span>
                                     <button class="font-light verification__resend" name="resend"
-                                                type="submit">${sendAgain}</button>
+                                            type="submit">${sendAgain}</button>
                                 </span>
-                            </p>
-                        </#if>
-                    </div>
+                    </p>
                 </#if>
+            </div>
+            </#if>
             <div class="sm:block md:flex w-full items-center text-center md:text-left">
                 <button class="hidden"
                         name="accept" id="accept" type="submit">${doSubmit}</button>
@@ -91,8 +91,8 @@
 
         if ('OTPCredential' in window) {
             window.addEventListener('DOMContentLoaded', e => {
-                const input = document.querySelector('input[autocomplete="one-time-code"]');
-                if (!input) return;
+                const inputs = document.querySelectorAll('input[autocomplete="one-time-code"]');    //4 инпута, на каждую цифру
+                if (!inputs.length) return;
                 const ac = new AbortController();
                 const form = input.closest('form');
                 if (form) {
@@ -104,8 +104,10 @@
                     otp: { transport:['sms'] },
                     signal: ac.signal
                 }).then(otp => {
-                    input.value = otp.code;
-                    if (form) form.submit();
+                    let numbers = otp.code.split('');
+                    [...inputs].forEach((it, idx) => it.value = numbers[idx]);
+                    if (form)
+                        form.submit();
                 }).catch(err => {
                     console.log(err);
                 });
