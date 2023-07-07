@@ -15,15 +15,20 @@
         <p>Мы не храним ваши пароли.</p>
         <p>Если вы забыли свой пароль или у вас не получается войти в Личный кабинет - воспользуйтесь формой
             восстановления пароля по ссылке <a class="no_block" href="https://newlkb2b.dom.ru">«Забыли пароль?»</a></p>
-        <p>
-        <ul class="instruction content__ul">
-            <li class="small_text instruction_text content__ul-li">Для восстановления данных
-                укажите ваш логин
-            </li>
-            <li class="small_text content__ul-li">На ваш адрес электронной почты будет отправлена
-                ссылка для восстановления пароля.<br>Срок действия ссылки ${expTimePass?no_esc}
-            </li>
-        </ul>
-        </p>
+        <div style="font-size: 12px;  margin-top: 16px;  font-weight: 400">
+            <div>
+                <span
+                        style="background-color: rgba(255, 49, 44, 1); width: 8px; height: 8px; display: inline-block; border-radius: 8px; margin-right: 8px;">
+
+	            </span> Для восстановления данных укажите ваш логин.
+            </div>
+            <div style="margin-top:8px">
+                <span
+                        style="background-color: rgba(255, 49, 44, 1); width: 8px; height: 8px; display: inline-block; border-radius: 8px; margin-right: 8px;">
+
+	            </span> На ваш адрес электронной почты будет отправлена ссылка для восстановления пароля. Срок действия ссылки ${expTimePass?no_esc}.
+            </div>
+        </div>
+
     </#if>
 </@template.layout>

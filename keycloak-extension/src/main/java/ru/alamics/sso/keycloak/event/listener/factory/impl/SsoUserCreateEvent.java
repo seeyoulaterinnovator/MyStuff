@@ -79,6 +79,7 @@ public class SsoUserCreateEvent extends SsoEvent {
                 attributes.put("gratitudeDown", settingsService.getSettingsStringValue(GRATITUDE_DOWN, realm.getName()));
                 attributes.put("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, realm.getName()));
                 attributes.put("homePage", settingsService.getSettingsStringValue(HOME_PAGE, realm.getName()));
+                attributes.put("email", userModel.getEmail());
 
                 // если миграция с паролями, просить вводить пароль не нужно
                 String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, realm.getName());
