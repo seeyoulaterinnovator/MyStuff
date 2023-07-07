@@ -4,7 +4,7 @@
   <#if section = "style">
     <#include 'styles/custom-content-style.html' >
   <#elseif section = "body">
-    <div style=" color: #222; font-family: Arial; padding: 24px">
+    <div style=" color: #222; font-family: Arial;">
       <span style="font-size: 18px; line-height: 24px;">
           Для вас создана учетная запись для входа в <a href="${accountLink}">Личный кабинет</a>
       </span>
