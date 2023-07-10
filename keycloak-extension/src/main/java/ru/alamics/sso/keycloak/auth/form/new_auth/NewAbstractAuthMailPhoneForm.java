@@ -453,7 +453,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         if (isSmsOrPhone && riasService.checkPhone(commonUser)) {
             dummyHash(context);
             context.getEvent().error(Errors.USER_NOT_FOUND);
-            Response challengeResponse = challenge(context, MessagesExtender.CRINGE_RIAS_NOT_FOUND);
+            Response challengeResponse = challenge(context, Messages.INVALID_USER);
             context.failureChallenge(AuthenticationFlowError.INVALID_USER, challengeResponse);
 
             return false;
