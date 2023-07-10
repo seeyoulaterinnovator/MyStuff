@@ -518,6 +518,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
     private void verifyCode(AuthenticationFlowContext context, AuthenticationSessionModel sessionModel, User user, AuthContext authContext, HttpRequest httpRequest, PhonePlusRealmProtector protector) {
         String codeHash = sessionModel.getAuthNote("currentCode");
         String code = httpRequest.getDecodedFormParameters().getFirst("smscode");
+
+        log.info(String.format("Here is our codehash:%s \nHere is user's code %s", codeHash, code));
         try {
 
             userPhoneVerifier.verifyPhone(user, /*todo change expiration time to expire code +*/ activationCodeType.getExpiredCodeSeconds(),
