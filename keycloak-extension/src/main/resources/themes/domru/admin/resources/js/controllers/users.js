@@ -630,9 +630,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         }
         var errorMsg = errors.length === 0 ? "Ошибок нет" : errors.join(",\n\t\t\t\t\t\t\t   ");
         var msg = `
-            Количество записей, для которых найдены дубли: ${resp.countClones}
-            Количество созданых пользователей: ${resp.createdUsers}
-            Информация об ошибках: ${errorMsg}`;
+            Процесс импорта начался.
+            Подробная информация о статусе импорта во вкладке Import Users.`;
 
         Dialog.message('Информация', msg, () => location.reload());
 

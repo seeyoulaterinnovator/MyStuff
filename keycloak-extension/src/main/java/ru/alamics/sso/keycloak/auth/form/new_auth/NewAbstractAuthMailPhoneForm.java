@@ -23,13 +23,10 @@ import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaType;
 import ru.alamics.sso.antifraud.*;
-import ru.alamics.sso.jpa.repository.AttemptFailsRepository;
-import ru.alamics.sso.jpa.repository.WroteCodeAttemptsRepository;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
-import ru.alamics.sso.keycloak.util.PhoneVerifierUtil;
+import ru.alamics.sso.keycloak.util.MessagesExtender;
 import ru.alamics.sso.keycloak.util.UserToUserEntityMapper;
-import ru.alamics.sso.keycloak.util.VerifyPhoneKey;
 import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.model.User;
@@ -40,11 +37,11 @@ import ru.alamics.sso.registration.phone.UserPhoneVerifier;
 import ru.alamics.sso.registration.phone.exception.*;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 import ru.alamics.sso.registration.phone.port.SendMessageService;
+import ru.alamics.sso.registration.rias.RiasService;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
-import javax.ejb.EJB;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.time.Duration;
@@ -99,6 +96,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     private static final int COUNT_BY_ONE_CODE = 5;
 
+    private final RiasService riasService;
+
 
     public NewAbstractAuthMailPhoneForm(UserFindService userFindService) {
         this.userFindService = userFindService;
@@ -109,6 +108,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         this.wroteCodeAttemptsService = Lookup.lookup(WroteCodeAttemptsService.class);
         this.messageSendService = Lookup.lookup(SendMessageService.class, "MessageSender");
         this.phoneCallerService = Lookup.lookup(PhoneCallerRemoteService.class, "PhoneCallerService");
+        this.riasService = Lookup.lookup(RiasService.class);
     }
 
     @Override
@@ -169,7 +169,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 }
                 boolean enableRepeatCall = true;
 
-                if (authSession.getAuthNote("needSendSmsCode") != null && authSession.getAuthNote("needSendSmsCode").equals("true")) {
+                if (sendIfNotBan(user, context, protector) && authSession.getAuthNote("needSendSmsCode") != null && authSession.getAuthNote("needSendSmsCode").equals("true")) {
                     switch (activationCodeType) {
                         case CODE_TO_SMS: {
                             String code = SmsCodeGenerator.getCode(activationCodeType.getLengthCode());
@@ -288,6 +288,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         AuthenticationSessionModel sessionModel = context.getAuthenticationSession();
         sessionModel.removeAuthNote("backToLoginPassword");
         ActivationCodeType.init(context.getRealm().getName());
+
         if (formData.containsKey("cancel")) {
             context.cancelLogin();
             return;
@@ -442,6 +443,22 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             return false;
         }
 
+        User commonUser = User.builder()
+                .email("")
+                .phone(username)
+                .build();
+
+        boolean isSmsOrPhone = inputData.containsKey("phoneCallButton") || inputData.containsKey("smsButton");
+
+        if (isSmsOrPhone && riasService.checkPhone(commonUser)) {
+            dummyHash(context);
+            context.getEvent().error(Errors.USER_NOT_FOUND);
+            Response challengeResponse = challenge(context, MessagesExtender.CRINGE_RIAS_NOT_FOUND);
+            context.failureChallenge(AuthenticationFlowError.INVALID_USER, challengeResponse);
+
+            return false;
+        }
+
         if (invalidUser(context, user)) {
             return false;
         }
@@ -567,6 +584,24 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             return false;
         }
         return checkIsMoreThanFiveAttempts(context, protector);
+    }
+
+    private boolean sendIfNotBan(User user, AuthenticationFlowContext context, PhonePlusRealmProtector protector) {
+        if (activationCodeType.equals(CODE_TO_SMS) && blackListService.isUserBlockedAuthBySms(user.getPhone(), context)) {
+            context.form()
+                    .setAttribute("codeLimited", true)
+                    .setError(MessageConstants.SMS_LIMIT_BLOCK);
+            currentAuthFlowPhoneNumbers.remove(protector);
+            return false;
+        }
+        if (activationCodeType.equals(CODE_BY_PHONE_NUMBER) && blackListService.isUserBlockedAuthByPhoneCall(user.getPhone(), context)) {
+            context.form()
+                    .setAttribute("codeLimited", true)
+                    .setError(MessageConstants.CALL_LIMIT_BLOCK);
+            currentAuthFlowPhoneNumbers.remove(protector);
+            return false;
+        }
+        return true;
     }
 
     private void setTimerValueByActivationType(BlackListDto blackListDto, User user, AuthenticationSessionModel authSession, AuthContext authContext, long deltaTime, AuthenticationFlowContext context) {
