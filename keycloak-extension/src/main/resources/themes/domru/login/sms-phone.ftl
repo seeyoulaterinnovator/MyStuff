@@ -105,7 +105,7 @@
                 }).then(otp => {
                     let numbers = otp.code.split('');
                     [...inputs].forEach((it, idx) => it.value = numbers[idx]);
-                    if (form) form.submit();
+                //    if (form) form.submit();
                 }).catch(err => {
                     console.log(err);
                 });
