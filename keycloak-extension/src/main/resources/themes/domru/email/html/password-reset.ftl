@@ -13,7 +13,7 @@
     <#--${kcSanitize(msg(passwordResetBodyHtml,link, expTime, email, phone))?no_esc}-->
     <div style="font-family: Arial; color: #222;">
       <span style="font-size: 18px; line-height: 24px; ">
-        Был создан запрос на изменение пароля от вашей учетной записи {email}. Если это были вы, пройдите по ссылке: <br>
+        Был создан запрос на изменение пароля от вашей учетной записи <a style="display: inline-block !important" href="${email}">${email}</a>. Если это были вы, пройдите по ссылке: <br>
 
         <div style="font-size: 18px;  margin-top: 16px"><a href="${link}">Изменить пароль</a></div>
 
