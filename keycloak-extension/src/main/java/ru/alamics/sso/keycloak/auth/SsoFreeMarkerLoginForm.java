@@ -204,6 +204,9 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             attributes.put("authenticatorConfigured", new AuthenticatorConfiguredMethod(realm, user, session));
             attributes.put("actionIsNull", user.getRequiredActions() == null || user.getRequiredActions().size() == 0);
             attributes.put("actionIsEmpty", user.getRequiredActions() != null && user.getRequiredActions().size() == 1);
+
+            log.info(String.format("actionIsEmpty is %s", user.getRequiredActions() != null && user.getRequiredActions().size() == 1));
+
             attributes.put("clientIsB2B", CLIENT_B2B.equals(client.getClientId()));
         }
     }
