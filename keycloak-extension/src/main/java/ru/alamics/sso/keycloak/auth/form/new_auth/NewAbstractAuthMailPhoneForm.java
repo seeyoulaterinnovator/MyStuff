@@ -313,17 +313,13 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
         if ((isSms || isPhoneCall) && (validateUserAndPassword(context, formData))) {
             sessionModel.setAuthNote("secondPhase", (!isSms ? "phoneCallButton" : "smsButton"));
+            addEmptyReqForB2b(context, context.getUser());
             authenticate(context);
             return;
         }
 
         if (sessionModel.getAuthNote("secondPhase") != null) {
             UserModel model = context.getUser();
-
-            if (context.getAuthenticationSession().getClient().getClientId().equals(CLIENT_B2B)) {
-                addRequiredAction(context, "empty_req", model);
-            }
-
             User user = UserModelUserMapper.mapToUser(model);
             PhonePlusRealmProtector protector = new PhonePlusRealmProtector(user.getPhone(), context.getRealm());
 
@@ -739,4 +735,10 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
     }
 
     public abstract boolean isSuccessCheckUser(AuthenticationFlowContext context, UserModel user);
+
+    private void addEmptyReqForB2b(AuthenticationFlowContext context, UserModel model) {
+        if (context.getAuthenticationSession().getClient().getClientId().equals(CLIENT_B2B)) {
+            addRequiredAction(context, "empty_req", model);
+        }
+    }
 }
