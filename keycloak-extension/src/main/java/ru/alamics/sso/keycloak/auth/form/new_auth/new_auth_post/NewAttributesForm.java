@@ -75,6 +75,7 @@ public class NewAttributesForm implements Authenticator {
                 attributes = Collections.emptyList();
             }
             if (attributes.size() <= 1) {
+                roleService.setUserPost(context, attributes);
                 context.success();
             } else {
                 context.challenge(createForm(context, attributes));

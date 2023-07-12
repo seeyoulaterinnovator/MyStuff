@@ -1,12 +1,14 @@
 package ru.alamics.sso.user;
 
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.authentication.authenticators.x509.UserIdentityToModelMapper;
 import org.keycloak.common.util.Time;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
 import org.keycloak.events.jpa.AdminEventEntity;
 import org.keycloak.models.*;
 import org.keycloak.models.jpa.entities.*;
+import org.keycloak.services.DefaultKeycloakTransactionManager;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.storage.ReadOnlyException;
@@ -61,7 +63,7 @@ public class ImportService {
     @EJB
     private ImportReportService importReportService;
 
-    private void doGeneratePasswords(List<ImportUsersDataModel> dataList, AdminAuth auth, KeycloakSession session) {
+    public void doGeneratePasswords(List<ImportUsersDataModel> dataList, AdminAuth auth, KeycloakSession session) {
 
         log.info("doGeneratePasswords");
 
@@ -84,7 +86,7 @@ public class ImportService {
             if (data.getUserId() != null && data.getCleanPassword() != null) {
 
                 String errors = "";
-
+                //здесь происходит ужас
                 UserModel user = session.users().getUserById(data.getUserId(), realm);
 
                 try {
@@ -148,7 +150,7 @@ public class ImportService {
             importUsers(reportModel, dataList, scheduleStart);
         }
 
-        doGeneratePasswords(dataList, auth, session);
+        /*doGeneratePasswords(dataList, auth, session);*/
 
     }
 
