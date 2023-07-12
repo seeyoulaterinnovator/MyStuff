@@ -29,6 +29,8 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
 
     private static final String REFERENCE_CATEGORY = "two-step-verification-reference";
 
+    public final static String CLIENT_B2B = "b2b";
+
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
             AuthenticationExecutionModel.Requirement.DISABLED,
@@ -60,6 +62,10 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
         String disable = context.getUser().getFirstAttribute(UserConstants.DISABLE_TWO_STEP_AUTH);
         AuthenticationSessionModel sessionModel = context.getAuthenticationSession();
         UserModel userModel = context.getUser();
+
+        if (!userModel.getRequiredActions().contains("empty_req") && context.getAuthenticationSession().getClient().getClientId().equals(CLIENT_B2B)) {
+            addRequiredAction(context, "empty_req", userModel);
+        }
 
         if (authType != null) {
             context.getAuthenticationSession().setAuthNote(NOTE_AUTH_TYPE_NAME, authType.name());
