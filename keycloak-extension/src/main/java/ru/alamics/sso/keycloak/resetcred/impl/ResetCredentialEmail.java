@@ -23,14 +23,17 @@ import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.keycloak.resetcred.ResetCredential;
 import ru.alamics.sso.keycloak.resetcred.ResetCredentialEmailOrPhoneFactory;
+import ru.alamics.sso.keycloak.util.PhoneFormatter;
 import ru.alamics.sso.schedule.Translator;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import java.text.DecimalFormat;
 import java.util.Objects;
 
 @Slf4j
@@ -45,7 +48,7 @@ public class ResetCredentialEmail extends ResetCredential {
         this.settingsService = Lookup.lookup(SettingsService.class);
         this.clientService = Lookup.lookup(ClientService.class);
     }
-
+//here
     @Override
     public void reset(UserModel user, String username) {
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
@@ -92,12 +95,14 @@ public class ResetCredentialEmail extends ResetCredential {
                 .toString();
 
         String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
+        String phone = PhoneFormatter.formatPhoneNumber(UserModelUserMapper.mapToUser(user).getPhone().trim());
         try {
             EmailTemplateProvider template = context.getSession().getProvider(EmailTemplateProvider.class);
             template.setRealm(realm)
                     .setUser(user)
                     .setAuthenticationSession(authenticationSession)
                     .setAttribute("expTime", expirationStrRus)
+                    .setAttribute("phone", phone)
                     .sendPasswordReset(link, timeTokenResetPass);
 
             event.clone().event(EventType.SEND_RESET_PASSWORD)
