@@ -53,6 +53,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil.addRequiredAction;
+import static ru.alamics.sso.keycloak.auth.form.new_auth.newAuthReqActions.TwoStepAuthFactory.CLIENT_B2B;
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 import static ru.alamics.sso.registration.phone.ActivationCodeType.*;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.*;
@@ -317,6 +319,11 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
         if (sessionModel.getAuthNote("secondPhase") != null) {
             UserModel model = context.getUser();
+
+            if (context.getAuthenticationSession().getClient().getClientId().equals(CLIENT_B2B)) {
+                addRequiredAction(context, "empty_req", model);
+            }
+
             User user = UserModelUserMapper.mapToUser(model);
             PhonePlusRealmProtector protector = new PhonePlusRealmProtector(user.getPhone(), context.getRealm());
 
