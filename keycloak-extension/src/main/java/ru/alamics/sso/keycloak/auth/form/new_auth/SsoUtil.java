@@ -1,8 +1,11 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth;
 
+import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.events.Details;
 import org.keycloak.events.EventType;
+import org.keycloak.models.RequiredActionProviderModel;
+import org.keycloak.models.UserModel;
 import ru.alamics.sso.keycloak.auth.form.new_auth.common_mail_sender.EmailSenderService;
 
 import java.util.UUID;
@@ -34,5 +37,15 @@ public interface SsoUtil {
             sb.append(characters.charAt(index));
         }
         return sb.toString();
+    }
+
+    static boolean addRequiredAction(AuthenticationFlowContext context, String providerName, UserModel userModel) {
+        RequiredActionProviderModel providerModel = context.getRealm().getRequiredActionProviderByAlias(providerName);
+
+        if (providerModel.isEnabled() && !userModel.getRequiredActions().contains(providerName)) {
+            userModel.addRequiredAction(providerName);
+            return true;
+        }
+        return false;
     }
 }

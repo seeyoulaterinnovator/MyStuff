@@ -53,6 +53,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil.addRequiredAction;
+import static ru.alamics.sso.keycloak.auth.form.new_auth.newAuthReqActions.TwoStepAuthFactory.CLIENT_B2B;
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 import static ru.alamics.sso.registration.phone.ActivationCodeType.*;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.*;
@@ -311,6 +313,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
         if ((isSms || isPhoneCall) && (validateUserAndPassword(context, formData))) {
             sessionModel.setAuthNote("secondPhase", (!isSms ? "phoneCallButton" : "smsButton"));
+            addEmptyReqForB2b(context, context.getUser());
             authenticate(context);
             return;
         }
@@ -453,7 +456,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         if (isSmsOrPhone && riasService.checkPhone(commonUser)) {
             dummyHash(context);
             context.getEvent().error(Errors.USER_NOT_FOUND);
-            Response challengeResponse = challenge(context, Messages.INVALID_USER);
+            Response challengeResponse = challenge(context, "Данный способ авторизации недоступен, воспользуйтесь входом через логин и пароль");
             context.failureChallenge(AuthenticationFlowError.INVALID_USER, challengeResponse);
 
             return false;
@@ -732,4 +735,10 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
     }
 
     public abstract boolean isSuccessCheckUser(AuthenticationFlowContext context, UserModel user);
+
+    private void addEmptyReqForB2b(AuthenticationFlowContext context, UserModel model) {
+        if (context.getAuthenticationSession().getClient().getClientId().equals(CLIENT_B2B) && !model.getRequiredActions().isEmpty()) {
+            addRequiredAction(context, "empty_req", model);
+        }
+    }
 }
