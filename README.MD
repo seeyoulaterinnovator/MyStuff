@@ -72,6 +72,3 @@ USER_ENTITY - все пользователи разных реалмов
 USER_POST - таблица кастомеров пользователей
 USER_ATTRIBUTE - атрибуты пользователей
 
-# —ервисные письма на email
-»зменени€ производ€тс€ в keycloak-extension/src/main/resources/themes/domru/email/html ( см примеры ) - domru
-
