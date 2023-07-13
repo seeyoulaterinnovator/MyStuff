@@ -737,7 +737,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
     public abstract boolean isSuccessCheckUser(AuthenticationFlowContext context, UserModel user);
 
     private void addEmptyReqForB2b(AuthenticationFlowContext context, UserModel model) {
-        if (context.getAuthenticationSession().getClient().getClientId().equals(CLIENT_B2B)) {
+        if (context.getAuthenticationSession().getClient().getClientId().equals(CLIENT_B2B) && !model.getRequiredActions().isEmpty()) {
             addRequiredAction(context, "empty_req", model);
         }
     }
