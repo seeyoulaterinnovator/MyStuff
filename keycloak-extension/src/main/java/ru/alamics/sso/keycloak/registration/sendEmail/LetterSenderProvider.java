@@ -60,7 +60,6 @@ public class LetterSenderProvider implements FormAction {
 
         attributes.put("emailLoginAndPhoneHtml", settingsService.getSettingsStringValue(EMAIL_LOGIN_AND_PHONE_ACCOUNT, context.getRealm().getName()));
         attributes.put("emailLoginHtml", settingsService.getSettingsStringValue(EMAIL_LOGIN_ACCOUNT, context.getRealm().getName()));
-        attributes.put("email", context.getUser().getEmail());
         try {
             String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, context.getRealm().getName());
             emailTemplateProvider

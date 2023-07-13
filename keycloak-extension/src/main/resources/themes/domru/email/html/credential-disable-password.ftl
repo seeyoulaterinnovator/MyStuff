@@ -2,8 +2,8 @@
 
 <@template.layout ; section>
     <#if section = "style">
-        <#include 'styles/custom-content-style.html' >
+        <#include 'styles/content-style--default.html' >
     <#elseif section = "body">
-        ${kcSanitize(msg(emailCredentialDisableBodyHtmlCost, authHref, expTime, email, phone))?no_esc}
+        ${kcSanitize(msg(emailCredentialDisableBodyHtml, authHref))?no_esc}
     </#if>
 </@template.layout>

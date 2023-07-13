@@ -17,10 +17,6 @@ import org.keycloak.services.managers.AuthenticationSessionManager;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.keycloak.lookup.Lookup;
-import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
-import ru.alamics.sso.keycloak.util.PhoneFormatter;
-import ru.alamics.sso.schedule.Translator;
-import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 
 import javax.ws.rs.core.UriBuilder;
@@ -59,7 +55,7 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
             sendDisableCredentialEmail(realm, user, expirationTimeSeconds, subject, template, attributes);
         }
     }
-    //here disable cred email
+
     private void sendDisableCredentialEmail(RealmModel realm, UserModel user, int expirationTime, String subject, String template, Map<String, Object> attributes) {
 
 
@@ -79,18 +75,10 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
         ResetCredentialsActionToken token = new ResetCredentialsActionToken(user.getId(), Time.currentTime() + expirationTime, authSessionEncodedId, clientModel.getClientId());
         UriBuilder builder = Urls.actionTokenBuilder(session.getContext().getUri().getBaseUri(), token.serialize(session, realm, session.getContext().getUri()),
                 clientModel.getClientId(), authenticationSession.getTabId());
-
-        int timeTokenResetPass = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm.getName());
-        String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
         String link = builder.build(realm.getName()).toString();
-        String phone = PhoneFormatter.formatPhoneNumber(UserModelUserMapper.mapToUser(user).getPhone().trim());
-        String email = user.getEmail();
 
         attributes.put("authHref", link);
         attributes.put("emailCredentialDisableBodyHtmlCost", settingsService.getSettingsStringValue(EMAIL_CREDENTIAL_DISABLE_ACCOUNT, realm.getName()));
-        attributes.put("expTime", expirationStrRus);
-        attributes.put("phone", phone);
-        attributes.put("email", email);
         EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
         try {
             emailTemplateProvider.setRealm(realm)
