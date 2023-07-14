@@ -38,6 +38,7 @@ import ru.alamics.sso.registration.phone.exception.*;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 import ru.alamics.sso.registration.phone.port.SendMessageService;
 import ru.alamics.sso.registration.rias.RiasService;
+import ru.alamics.sso.registration.service.AuthorisedUsersService;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
@@ -73,6 +74,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
     private final SettingsService settingsService;
 
     private final WroteCodeAttemptsService wroteCodeAttemptsService;
+
+    private final AuthorisedUsersService authorisedUsersService;
 
     private final SendMessageService messageSendService;
 
@@ -111,6 +114,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         this.messageSendService = Lookup.lookup(SendMessageService.class, "MessageSender");
         this.phoneCallerService = Lookup.lookup(PhoneCallerRemoteService.class, "PhoneCallerService");
         this.riasService = Lookup.lookup(RiasService.class);
+        this.authorisedUsersService = Lookup.lookup(AuthorisedUsersService.class);
     }
 
     @Override
@@ -305,9 +309,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         }
 
         if (isLoginPassword && (validateUserAndPassword(context, formData))) {
-            sessionModel.setAuthNote("loginPasswordButton", "loginPasswordButton");
-            sessionModel.setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
-            context.success();
+            doAuthActionForLogNPass(sessionModel, context);
             return;
         }
 
@@ -740,5 +742,13 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         if (context.getAuthenticationSession().getClient().getClientId().equals(CLIENT_B2B) && !model.getRequiredActions().isEmpty()) {
             addRequiredAction(context, "empty_req", model);
         }
+    }
+
+    private void doAuthActionForLogNPass(AuthenticationSessionModel sessionModel, AuthenticationFlowContext context){
+        sessionModel.setAuthNote("loginPasswordButton", "loginPasswordButton");
+        sessionModel.setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
+        User user = UserModelUserMapper.mapToUser(context.getUser());
+        authorisedUsersService.saveSuccessfulAuth(user, context.getRealm().getId(), "log_and_pass");
+        context.success();
     }
 }
