@@ -4,7 +4,11 @@
     <#if section = "style">
         <#include 'styles/content-style--default.html' >
     <#elseif section = "body">
-        ${kcSanitize(msg(emailDisabledAccountBodyHtml))?no_esc}
+        <p style="font-size: 18px">Ваша учетная запись для входа в Личный кабинет «Дом.ру Бизнес» <font color="red">заблокирована</font>.
+            Доступ к услугам при этом не блокируется.</p>
+        <p>Чтобы восстановить доступ к учетной записи, обратитесь к своему персональному менеджеру или оставьте заявку в чате
+            <a class="no_block" href="https://newlkb2b.dom.ru">Личного кабинета</a>, или по телефону
+            <a class="no_block" href="tel:88002500333">8 800 2500 333</a>.</p>
         <#--<#if phone??>
             ${kcSanitize(msg(emailLoginAndPhoneHtml, userName, phone))?no_esc}
         <#else>

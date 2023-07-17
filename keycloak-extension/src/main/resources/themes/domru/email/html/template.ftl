@@ -40,7 +40,7 @@
                                             <tr>
                                                 <td class="contact__number">
                                                     <a href="${phoneConstLink}" class="contacts">
-                                                        ${phoneInMessage}
+                                                        8 800 250 0333
                                                     </a>
                                                 </td>
                                             </tr>
@@ -59,13 +59,13 @@
 
                             <div class="mail-container__content content">
                                 <div class="content">
-                                    <h2 class="content__heading">${customer}</h2>
+                                    <h2 style="margin-top: 30px; font-size: 32px" class="content__heading">${customer}</h2>
                                     <#nested "body">
                                 </div>
                             </div>
 
                             <div>
-                                <p class="mail-text-title" style="font-width: 700; font-size: 24px">Всегда на связи!</p>
+                                <p class="mail-text-title" style="font-width: 700; font-size: 24px; font-weight: bold">Всегда на связи!</p>
                                 <table class="messegers" cellpadding="0" cellspacing="0" width="100%">
                                     <tr height="120" valign="top">
                                         <td style="text-align: center; width: 132px">
