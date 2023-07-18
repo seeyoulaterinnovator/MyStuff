@@ -23,6 +23,8 @@ import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaType;
 import ru.alamics.sso.antifraud.*;
+import ru.alamics.sso.jpa.entity.auth_reg.AuthOrRegTypeEntity;
+import ru.alamics.sso.jpa.entity.auth_reg.AuthorisedUsersEntity;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.keycloak.util.MessagesExtender;
@@ -38,6 +40,7 @@ import ru.alamics.sso.registration.phone.exception.*;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 import ru.alamics.sso.registration.phone.port.SendMessageService;
 import ru.alamics.sso.registration.rias.RiasService;
+import ru.alamics.sso.registration.service.AuthOrRegTypeService;
 import ru.alamics.sso.registration.service.AuthorisedUsersService;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.settings.SettingsService;
@@ -77,6 +80,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     private final AuthorisedUsersService authorisedUsersService;
 
+    private final AuthOrRegTypeService authOrRegTypeService;
+
     private final SendMessageService messageSendService;
 
     private final PhoneCallerRemoteService phoneCallerService;
@@ -88,10 +93,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
     private static final String GRANT_TYPE = "grant_type";
 
     private static final String CODE_HASH_KEY = "CODE_HASH_KEY";
-
-//    private static final ConcurrentHashMap<PhonePlusRealmProtector, VerifyPhoneKey> mainCounter = new ConcurrentHashMap<>();
-
-//    private static final ConcurrentHashMap<PhonePlusRealmProtector, Integer> lastAttemptCounter = new ConcurrentHashMap<>();
 
     private final AttemptFailsService attemptFailsService;
 
@@ -115,6 +116,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         this.phoneCallerService = Lookup.lookup(PhoneCallerRemoteService.class, "PhoneCallerService");
         this.riasService = Lookup.lookup(RiasService.class);
         this.authorisedUsersService = Lookup.lookup(AuthorisedUsersService.class);
+        this.authOrRegTypeService = Lookup.lookup(AuthOrRegTypeService.class);
     }
 
     @Override
@@ -744,11 +746,13 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         }
     }
 
-    private void doAuthActionForLogNPass(AuthenticationSessionModel sessionModel, AuthenticationFlowContext context){
+    private void doAuthActionForLogNPass(AuthenticationSessionModel sessionModel, AuthenticationFlowContext context) {
         sessionModel.setAuthNote("loginPasswordButton", "loginPasswordButton");
         sessionModel.setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
         User user = UserModelUserMapper.mapToUser(context.getUser());
-        authorisedUsersService.saveSuccessfulAuth(user, context.getRealm().getId(), "log_and_pass");
+        AuthOrRegTypeEntity authOrRegTypeEntity = authOrRegTypeService.findAndReturn(1);
+        String test = authOrRegTypeEntity.getAuthOrRegTypeName();
+        authorisedUsersService.saveSuccessfulAuth(user, context.getRealm().getId());
         context.success();
     }
 }

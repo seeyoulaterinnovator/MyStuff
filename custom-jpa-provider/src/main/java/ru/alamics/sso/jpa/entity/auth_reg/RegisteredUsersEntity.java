@@ -8,10 +8,10 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "AUTHORISED_USERS")
+@Table(name = "REGISTERED_USERS")
 @Getter
 @Setter
-public class AuthorisedUsersEntity {
+public class RegisteredUsersEntity {
 
     @Id
     @Column(name = "id")
@@ -24,11 +24,9 @@ public class AuthorisedUsersEntity {
     @Column(name = "realm")
     private String realm;
 
-    @ManyToOne(targetEntity = AuthOrRegTypeEntity.class, cascade = CascadeType.ALL)
-    @JoinColumn(name = "auth_type")
-    private AuthOrRegTypeEntity authType;
+    @Column(name = "auth_type")
+    private String authType;
 
-    @Column(name = "authorised")
+    @Column(name = "registered")
     private LocalDateTime created;
-
 }
