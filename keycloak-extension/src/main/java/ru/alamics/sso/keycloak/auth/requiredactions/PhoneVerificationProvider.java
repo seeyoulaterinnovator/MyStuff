@@ -229,7 +229,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             log.info("Email code send");
             activationCodeType = CODE_TO_EMAIL;
             requiredActionChallenge(context);
-        } else if (context.getHttpRequest().getDecodedFormParameters().containsKey("resend")) {
+        } else if (context.getHttpRequest().getDecodedFormParameters().containsKey("again")) {
             String userPhone = UserModelUserMapper.mapToUser(context.getUser()).getPhone();
             if (codeHash != null && !codeHash.equals("")) {
                 if (activationCodeType.equals(CODE_BY_PHONE_NUMBER)) {

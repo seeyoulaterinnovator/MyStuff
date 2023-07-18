@@ -338,7 +338,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 authenticate(context);
                 return;
             }
-            if (context.getHttpRequest().getDecodedFormParameters().containsKey("resend")) {
+            if (context.getHttpRequest().getDecodedFormParameters().containsKey("again")) {
                 String currentCode = sessionModel.getAuthNote("currentCode");
                 /*String codeHash = sessionModel.getAuthNote(CODE_HASH_KEY);*/
                 if (currentCode != null && !currentCode.equals("")) {
