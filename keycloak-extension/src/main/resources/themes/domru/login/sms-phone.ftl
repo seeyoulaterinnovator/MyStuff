@@ -55,6 +55,14 @@
                         <br>
                             <span id="timer-time" class="textTimer" style="font-size: 14px!important; color: #000000!important;"></span>
                     </div>
+                        <#if enableRepeatCall?? && enableRepeatCall!>
+                            <p class="hidden font-light text-black verification__text" id="gfddgdf">
+                                <span>
+                                    <button class="font-light verification__resend" name="gfdgdfgfd"
+                                                type="submit">${sendAgain}</button>
+                                </span>
+                            </p>
+                        </#if>
                     </div>
                 </#if>
             <div class="sm:block md:flex w-full items-center text-center md:text-left">
@@ -63,18 +71,6 @@
 
             </div>
         </form>
-
-        <#if enableRepeatCall?? && enableRepeatCall!>
-            <form method="POST" action="${url.loginAction}">
-                <p class="hidden font-light text-black verification__text" id="resend">
-                    <span>
-                        <button class="font-light verification__resend" name="resend"
-                                type="submit">${sendAgain}</button>
-                    </span>
-                </p>
-            </form>
-        </#if>
-
         <form method="POST" action="${url.loginUrl}">
             <button id="loginPasswordButton" name="back" type="submit" class="hidden">
                 Войти с помощью логина
