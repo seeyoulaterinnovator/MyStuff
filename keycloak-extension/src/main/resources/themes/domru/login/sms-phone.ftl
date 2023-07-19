@@ -19,6 +19,12 @@
 
         <form id="totpForm" action="${url.loginAction}" method="POST">
 
+            <div class="sm:block md:flex w-full items-center text-center md:text-left">
+                <button class="hidden"
+                        name="accept" id="accept" type="submit">${doSubmit}</button>
+
+            </div>
+
             <div class="w-full xl:pb-37px md:pb-10 sm:pb-8 pb-4 center-items">
                 <#list 1..lengthCode as x>
                     <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
@@ -65,11 +71,7 @@
                         </#if>
                     </div>
                 </#if>
-            <div class="sm:block md:flex w-full items-center text-center md:text-left">
-                <button class="hidden"
-                        name="accept" id="accept" type="submit">${doSubmit}</button>
 
-            </div>
         </form>
         <form method="POST" action="${url.loginUrl}">
             <button id="loginPasswordButton" name="back" type="submit" class="hidden">
