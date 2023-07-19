@@ -150,7 +150,7 @@ public class SmsOrPhoneCallAuth implements Authenticator {
             authSession.removeAuthNote(PHONE_KEY_HASH);
 
             authenticate(context);
-        } else if (context.getHttpRequest().getDecodedFormParameters().containsKey("again")) {
+        } else if (context.getHttpRequest().getDecodedFormParameters().containsKey("resend")) {
             log.info("Sms code resend");
 
             authSession.removeAuthNote(PHONE_KEY_HASH);

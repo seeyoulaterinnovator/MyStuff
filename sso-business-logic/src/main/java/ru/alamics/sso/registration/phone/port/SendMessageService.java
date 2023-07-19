@@ -17,5 +17,5 @@ public interface SendMessageService {
      * @param messengerList Список месенджеров. "Отправка по СМС" - это тоже мессенджер
      * @throws SendMessageException
      */
-    void sendMessageToMessengers(String phone, String message, String realmId, String[] messengerList) throws SendMessageException;
+    void sendMessageToMessengers(String phone, String message, String realmId, String[] messengerList, String host) throws SendMessageException;
 }

@@ -55,17 +55,9 @@ public class SendMessageServiceImpl implements SendMessageService {
     }
 
     @Override
-    public void sendMessageToMessengers(String phone, String message, String realmId, String[] messengerList) throws SendMessageException {
-        String encodedMessage = null;
+    public void sendMessageToMessengers(String phone, String message, String realmId, String[] messengerList, String host) throws SendMessageException {
         String pattern = String.format("Your OTP is: %s.\n\n" +
-                "@sso-balancer3.testing.srv.loc #%s", message, message);
-
-        try {
-            encodedMessage = URLEncoder.encode(pattern, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            log.info(e.getMessage());
-            throw new SendMessageException();
-        }
+                "@%s #%s", message, host, message);
 
         MessageRequest messageRequest = MessageRequest.builder()
                 .userPhone(phone)
@@ -98,7 +90,6 @@ public class SendMessageServiceImpl implements SendMessageService {
                 .target(uri)
                 .queryParams(msgConfig.getConfigForQuery())
                 .queryParam("to", Util.getCleanUserPhone(messageRequest.getUserPhone()))
-             //   .queryParam("text", "Your%20OTP%20is%3A%201234.%0D%0A%0D%0A%40sso-balancer3.testing.srv.loc%20%231234")
                 .queryParam("text", Util.rfc3986Encoder(messageRequest.getText()))
                 .request();
         try {

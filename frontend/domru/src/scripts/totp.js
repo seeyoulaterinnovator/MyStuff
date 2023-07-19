@@ -8,7 +8,7 @@ export default (function() {
   const timerElement = document.getElementById('timer');
   const timerElement2 = document.getElementById('timer2');
   const submitElement = document.getElementById('accept');
-  const resendElement = document.getElementById('again');
+  const resendElement = document.getElementById('resend');
   const sentCode = document.getElementById('sentCode');
 
   const codeNumbers = document.getElementById('codeNumbers');

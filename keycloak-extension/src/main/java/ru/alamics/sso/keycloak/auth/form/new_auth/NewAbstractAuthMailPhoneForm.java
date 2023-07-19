@@ -168,6 +168,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                     authSession.setAuthNote("needSendSmsCode", "true");
                 }
                 boolean enableRepeatCall = true;
+                String host = context.getHttpRequest().getUri().getBaseUri().getHost();
 
                 if (sendIfNotBan(user, context, protector) && authSession.getAuthNote("needSendSmsCode") != null && authSession.getAuthNote("needSendSmsCode").equals("true")) {
                     switch (activationCodeType) {
@@ -176,7 +177,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                             authSession.setAuthNote(CODE_HASH_KEY, HashGenerator.getSecretHash(code));
 
                             String[] messengerList = context.getRealm().getSmtpConfig().get(MESSENGER).split(",");
-                            messageSendService.sendMessageToMessengers(user.getPhone(), code, context.getRealm().getId(), messengerList);
+                            messageSendService.sendMessageToMessengers(user.getPhone(), code, context.getRealm().getId(), messengerList, host);
                             break;
                         }
                         case CODE_BY_PHONE_NUMBER: {
@@ -197,7 +198,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                             authSession.setAuthNote(CODE_HASH_KEY, HashGenerator.getSecretHash(code));
 
                             String[] messengerList = context.getRealm().getSmtpConfig().get(MESSENGER).split(",");
-                            messageSendService.sendMessageToMessengers(user.getPhone(), code, context.getRealm().getId(), messengerList);
+                            messageSendService.sendMessageToMessengers(user.getPhone(), code, context.getRealm().getId(), messengerList, host);
                             break;
                         }
                         case CODE_BY_PHONE_NUMBER: {
@@ -338,7 +339,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 authenticate(context);
                 return;
             }
-            if (context.getHttpRequest().getDecodedFormParameters().containsKey("again")) {
+            if (context.getHttpRequest().getDecodedFormParameters().containsKey("resend")) {
                 String currentCode = sessionModel.getAuthNote("currentCode");
                 /*String codeHash = sessionModel.getAuthNote(CODE_HASH_KEY);*/
                 if (currentCode != null && !currentCode.equals("")) {
