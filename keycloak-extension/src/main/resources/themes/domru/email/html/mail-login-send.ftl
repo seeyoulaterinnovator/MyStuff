@@ -14,9 +14,8 @@
         <#else>
             <p class = "small_text login_data">Ваш логин:<br><span style="font-weight: bold; font-size: 18px; line-height: 24px;">${userName}</span></p>
         </#if>
-        <p style="font-size: 18px">Мы не храним ваши пароли.</p>
-        <p style="font-size: 18px">Если вы забыли свой пароль или у вас не получается войти в Личный кабинет
-            - воспользуйтесь формой восстановления пароля по ссылке
+        <p style="font-size: 18px">Мы не храним ваши пароли. <br/>
+            Если вы забыли свой пароль или у вас не получается войти в Личный кабинет - воспользуйтесь формой восстановления пароля по ссылке
             <a class="no_block" href="https://newlkb2b.dom.ru">«Забыли пароль?»</a></p>
 
         <div style="font-size: 12px;  margin-top: 16px;  font-weight: 400">
