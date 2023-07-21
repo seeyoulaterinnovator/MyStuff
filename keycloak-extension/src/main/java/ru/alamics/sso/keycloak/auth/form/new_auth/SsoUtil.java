@@ -6,11 +6,15 @@ import org.keycloak.events.Details;
 import org.keycloak.events.EventType;
 import org.keycloak.models.RequiredActionProviderModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.sessions.AuthenticationSessionModel;
+import ru.alamics.sso.auth_n_regi.AuthOrRegTypeNotFoundException;
+import ru.alamics.sso.jpa.entity.auth_reg.AuthOrRegType;
 import ru.alamics.sso.keycloak.auth.form.new_auth.common_mail_sender.EmailSenderService;
 
 import java.util.UUID;
 
 public interface SsoUtil {
+
 
     static void sendEmailVer(RequiredActionContext context) {
         if (!context.getUser().isEmailVerified()) {
@@ -47,5 +51,16 @@ public interface SsoUtil {
             return true;
         }
         return false;
+    }
+
+    static int getAuthOrRegType(AuthenticationSessionModel authenticationSessionModel) throws AuthOrRegTypeNotFoundException{
+        AuthOrRegType[] authOrRegTypes = AuthOrRegType.values();
+
+        for (AuthOrRegType authOrRegType : authOrRegTypes) {
+            if (authenticationSessionModel.getAuthNote(authOrRegType.getButtonName()) != null) {
+                return authOrRegType.getId();
+            }
+        }
+        throw new AuthOrRegTypeNotFoundException("Auth or Reg Type Not Found");
     }
 }

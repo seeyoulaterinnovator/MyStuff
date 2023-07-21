@@ -2,8 +2,6 @@ package ru.alamics.sso.registration.service;
 
 import ru.alamics.sso.jpa.entity.auth_reg.AuthOrRegTypeEntity;
 import ru.alamics.sso.jpa.repository.AuthOrRegTypeRepository;
-import ru.alamics.sso.jpa.repository.AuthorisedUsersRepository;
-import ru.alamics.sso.jpa.repository.UserRepository;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 
 import javax.ejb.EJB;

@@ -29,6 +29,10 @@ public class AuthorisedUsersEntity {
     private AuthOrRegTypeEntity authType;
 
     @Column(name = "authorised")
-    private LocalDateTime created;
+    private LocalDateTime authorised;
+
+    @ManyToOne(targetEntity = ClientsForMonitoringEntity.class, cascade = CascadeType.ALL)
+    @JoinColumn(name = "client")
+    private ClientsForMonitoringEntity client;
 
 }

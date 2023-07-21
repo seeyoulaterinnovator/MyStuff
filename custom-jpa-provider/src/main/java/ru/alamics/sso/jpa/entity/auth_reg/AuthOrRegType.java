@@ -1,26 +1,31 @@
 package ru.alamics.sso.jpa.entity.auth_reg;
 
 public enum AuthOrRegType {
-    LOG_PASS(3, "log_pass"),
-    PHONE_CALL(2, "phone_call"),
-    SMS_CODE(1, "sms_code");
+    LOG_PASS(3, "loginPasswordButton", ""),
+    PHONE_CALL(2, "phoneCallButton", "incoming_call_phone_verificator"),
+    SMS_CODE(1, "smsButton", "phone_verificator_sms");
 
     private final int id;
 
-    private final String name;
+    private final String buttonName;
 
-    AuthOrRegType(int id, String name) {
+    private final String reqActProviderName;
+
+    AuthOrRegType(int id, String name, String reqActProviderName) {
         this.id = id;
-        this.name = name;
+        this.buttonName = name;
+        this.reqActProviderName = reqActProviderName;
     }
 
     public int getId() {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public String getButtonName() {
+        return buttonName;
     }
 
-
+    public String getReqActProviderName() {
+        return reqActProviderName;
+    }
 }

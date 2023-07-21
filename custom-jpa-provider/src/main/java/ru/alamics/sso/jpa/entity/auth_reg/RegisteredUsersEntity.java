@@ -24,9 +24,15 @@ public class RegisteredUsersEntity {
     @Column(name = "realm")
     private String realm;
 
-    @Column(name = "auth_type")
-    private String authType;
+    @ManyToOne(targetEntity = AuthOrRegTypeEntity.class, cascade = CascadeType.ALL)
+    @JoinColumn(name = "reg_type")
+    private AuthOrRegTypeEntity regType;
 
     @Column(name = "registered")
-    private LocalDateTime created;
+    private LocalDateTime registered;
+
+    @ManyToOne(targetEntity = ClientsForMonitoringEntity.class, cascade = CascadeType.ALL)
+    @JoinColumn(name = "client")
+    private ClientsForMonitoringEntity client;
+
 }
