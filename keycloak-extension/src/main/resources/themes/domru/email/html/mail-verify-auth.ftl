@@ -4,6 +4,6 @@
   <#if section = "style">
     <#include 'styles/custom-content-style.html' >
   <#elseif section = "body">
-    <p>Код для подтверждения данных вашей учетной записи Личного кабинета «Дом.ру Бизнес»:</p><p class = "text_bolid margin_block">${code}</p>
+    <p>РљРѕРґ РґР»СЏ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ РґР°РЅРЅС‹С… РІР°С€РµР№ СѓС‡РµС‚РЅРѕР№ Р·Р°РїРёСЃРё Р›РёС‡РЅРѕРіРѕ РєР°Р±РёРЅРµС‚Р° В«Р”РѕРј.СЂСѓ Р‘РёР·РЅРµСЃВ»:</p><p class = "text_bolid margin_block">${code}</p>
   </#if>
 </@template.layout>
