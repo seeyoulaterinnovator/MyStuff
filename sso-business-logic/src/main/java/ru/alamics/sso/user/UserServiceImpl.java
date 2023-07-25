@@ -11,6 +11,7 @@ import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
+import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.user.filetype.FileFactory;
 import ru.alamics.sso.user.filetype.FileModel;
 import ru.alamics.sso.user.format.ImportFormat;
@@ -24,6 +25,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.ws.rs.NotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedList;
 import java.util.List;
 
 @Slf4j
@@ -71,7 +73,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void activateImportUsersFromReport(String importId) {
+
         final List<ImportUsersDataEntity> importUsersData = importReportService.findImportUsersDataByImportId(importId);
+        List<ImportUsersDataModel> importModel = new LinkedList<>();
+
         for (ImportUsersDataEntity importData : importUsersData) {
             String id = importData.getUserId();
             if (id == null || id.isEmpty() || !importData.isCreated()) {
@@ -81,9 +86,11 @@ public class UserServiceImpl implements UserService {
             if (user == null || user.isEnabled()) {
                 continue;
             }
+            importModel.add(DataMapper.toDataModel(importData));
             user.setEnabled(true);
             importService.createAdminEvent(OperationType.CREATE, user, realm, auth, session);
         }
+        importService.doGeneratePasswords(importModel, auth, session);
     }
 
     @Override
@@ -93,6 +100,22 @@ public class UserServiceImpl implements UserService {
 
         FileModel file = FileFactory.createFileModel(inputStream, Util.getFileExtension(content));
 
+        Util.setTimeout(() -> {
+            try
+            {
+                doImport(file, content);
+            }
+            catch (Exception e)
+            {
+                log.info("import exception = {}", e.getMessage());
+            }
+        }, 2);
+
+        return new ImportResponse();
+    }
+
+    public ImportResponse doImport(FileModel file, String content) throws IOException, FileServiceException
+    {
         ImportFormat impF = FileFactory.getImportFormat(file);
         impF.checkStructure(file);
         List<ImportUsersDataModel> dataList = impF.getDataList(file);

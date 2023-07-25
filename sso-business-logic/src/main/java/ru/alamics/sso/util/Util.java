@@ -24,6 +24,8 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static ru.alamics.sso.registration.model.UserConstants.HIDDEN_HEADER;
 import static ru.alamics.sso.registration.model.UserConstants.I_FRAME;
@@ -42,6 +44,16 @@ public class Util {
         MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
         if (!CollectionUtils.isEmpty(parameters)) {
             return OAuth2Constants.PASSWORD.equals(parameters.getFirst(OIDCLoginProtocol.GRANT_TYPE_PARAM));
+        } else {
+            return false;
+        }
+    }
+
+    public static boolean isRegistrationGrandType(KeycloakSession session) {
+        HttpRequest contextObject = session.getContext().getContextObject(HttpRequest.class);
+        MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
+        if (!CollectionUtils.isEmpty(parameters)) {
+            return "registration".equals(parameters.getFirst(OIDCLoginProtocol.GRANT_TYPE_PARAM));
         } else {
             return false;
         }
@@ -187,6 +199,20 @@ public class Util {
             searchRealm = isEmpty(realm) ? "user" : realm;
         }
         return searchRealm;
+    }
+
+    public static void setTimeout(Runnable task, int timeoutInSeconds)
+    {
+        final Timer timer = new Timer("Timeout timer");
+
+        timer.schedule(new TimerTask()
+        {
+            @Override
+            public void run()
+            {
+                task.run();
+            }
+        }, 1000 * timeoutInSeconds);
     }
 
     public static String rfc3986Encoder(String text) {

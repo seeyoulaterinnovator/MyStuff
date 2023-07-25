@@ -9,6 +9,8 @@ public class CustomAuthenticationFlowResolver {
 
     private final static String RESET_CREDENTIALS = "reset_credential";
 
+    private final static String REGISTRATION = "registration";
+
     public static AuthenticationFlowModel resolveResetCredentialFlow(AuthenticationSessionModel authSession) {
         ClientModel client = authSession.getClient();
         String clientFlow = client.getAuthenticationFlowBindingOverride(RESET_CREDENTIALS);
@@ -20,5 +22,18 @@ public class CustomAuthenticationFlowResolver {
             return flow;
         }
         return authSession.getRealm().getResetCredentialsFlow();
+    }
+
+    public static AuthenticationFlowModel resolveRegistrationFlow(AuthenticationSessionModel authSession) {
+        ClientModel client = authSession.getClient();
+        String clientFlow = client.getAuthenticationFlowBindingOverride(REGISTRATION);
+        if (clientFlow != null) {
+            AuthenticationFlowModel flow = authSession.getRealm().getAuthenticationFlowById(clientFlow);
+            if (flow == null) {
+                throw new ModelException("Client " + client.getClientId() + " has reset credential flow override, but this flow does not exist");
+            }
+            return flow;
+        }
+        return authSession.getRealm().getRegistrationFlow();
     }
 }

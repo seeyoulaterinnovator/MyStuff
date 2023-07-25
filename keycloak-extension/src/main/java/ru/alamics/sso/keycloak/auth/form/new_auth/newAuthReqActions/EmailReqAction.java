@@ -26,7 +26,7 @@ public class EmailReqAction implements RequiredActionProvider {
     }
 
     @Override
-    public void processAction(RequiredActionContext context) {
+    public void processAction(RequiredActionContext context)  {
         context.success();
     }
 

@@ -34,7 +34,7 @@ public class NewAuthMailPhoneWithRiasFormFactory extends AbstractAuthenticatorFa
         UserFindService userFindService = Lookup.lookup(UserFindService.class);
 
         log.info("Creating AuthMailPhoneForm");
-        SINGLETON = new NewAuthMailPhoneWithRiasForm(riasService, userFindService);
+        SINGLETON = new NewAuthMailPhoneWithRiasForm(riasService, userFindService, session);
 
         return SINGLETON;
     }

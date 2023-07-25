@@ -53,7 +53,6 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
-        MultivaluedMap<String, String> buttons = context.getHttpRequest().getDecodedFormParameters();
         Map<String, String> config = context.getAuthenticatorConfig().getConfig();
         String type = config.get(TWO_STEP_VERIFICATION_TYPES);
         AuthType authType = AuthType.getByString(type);
@@ -76,7 +75,9 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
                     addRequiredAction(context, providerName, userModel);
                 }
             }
+            userModel.removeRequiredAction("rest_post_selector");
             addEmailReqActIfNeeded(userModel, context, "email_sender");
+            userModel.removeRequiredAction("rest_post_selector");
             context.success();
 
         } else if (context.getAuthenticationSession().getAuthNote("smsButton") != null) {
@@ -94,6 +95,7 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
 
             userModel.removeRequiredAction("incoming_call_phone_verificator");
             userModel.removeRequiredAction("phone_verificator_sms");
+            userModel.removeRequiredAction("rest_post_selector");
             addEmailReqActIfNeeded(userModel, context, "email_sender");
             context.success();
 
@@ -112,6 +114,7 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
 
             userModel.removeRequiredAction("incoming_call_phone_verificator");
             userModel.removeRequiredAction("phone_verificator_sms");
+            userModel.removeRequiredAction("rest_post_selector");
             addEmailReqActIfNeeded(userModel, context, "email_sender");
             context.success();
         }
