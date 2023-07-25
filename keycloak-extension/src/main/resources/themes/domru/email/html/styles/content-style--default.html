@@ -17,6 +17,12 @@
         font-style: italic;
     }
 
+    .text_bold{
+        font-weight: bold;
+        font-size: 18px;
+        line-height: 24px;
+    }
+
     .content a,
     .content__a {
         display: block !important;
@@ -68,6 +74,11 @@
         line-height: 16px;
     }
 
+    .big_text {
+        font-size: 18px;
+        line-height: 16px;
+    }
+
     .block_timer {
         margin-top: 16px;
     }
@@ -99,6 +110,15 @@
         white-space: nowrap;
         display: inline !important;
     }
+
+    .instructions.content_ul li::before {
+        content: "\2022";
+        color: red;
+        font-weight: bold;
+        display: inline-block;
+        width: 1em;
+        margin-left: -1em;
+    }
 </style>
 
 <!--[if !mso]><!-->
@@ -120,4 +140,5 @@
         background-color: red !important;
     }
 </style>
+
 <!--<![endif]-->
