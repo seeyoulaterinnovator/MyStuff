@@ -69,8 +69,6 @@ public class SsoUpdatePassword extends UpdatePassword {
             return;
         }
 
-        AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
-
         try {
             context.getSession().userCredentialManager().updateCredential(context.getRealm(), context.getUser(), UserCredentialModel.password(passwordNew, false));
 
@@ -97,10 +95,23 @@ public class SsoUpdatePassword extends UpdatePassword {
 
     }
 
+    private void verifyEmailHandler(RequiredActionContext context, LoginFormsProvider lfp) {
+        AuthenticationSessionModel sessionModel = context.getAuthenticationSession();
+
+        if (sessionModel.getAuthNote("emailHandler") != null) {
+            context.getUser().setEmailVerified(true);
+            sessionModel.removeAuthNote("emailHandler");
+            lfp.setInfo("Ваш E-mail успешно подтверждён!");
+        }
+    }
+
     @Override
     public void requiredActionChallenge(RequiredActionContext context) {
+        LoginFormsProvider lfp = context.form();
 
-        context.challenge(createForm(context, context.form()));
+        verifyEmailHandler(context, lfp);
+
+        context.challenge(createForm(context, lfp));
 
     }
 

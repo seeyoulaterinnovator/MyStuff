@@ -2,7 +2,12 @@ package ru.alamics.sso.keycloak.auth.form.new_auth;
 
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.events.Details;
+import org.keycloak.events.EventBuilder;
 import org.keycloak.events.EventType;
+import org.keycloak.forms.login.LoginFormsProvider;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.UserModel;
+import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.keycloak.auth.form.new_auth.common_mail_sender.EmailSenderService;
 
 import java.util.UUID;
@@ -35,4 +40,17 @@ public interface SsoUtil {
         }
         return sb.toString();
     }
+
+    static boolean sendEmailVer(UserModel userModel, LoginFormsProvider lfp, KeycloakSession session, AuthenticationSessionModel sessionModel, EventBuilder eventBuilder) {
+        if (userModel != null && !userModel.isEmailVerified()) {
+            EmailSenderService.sendVerifyEmail(session,
+                    lfp,
+                    userModel,
+                    sessionModel,
+                    eventBuilder.clone().event(EventType.SEND_VERIFY_EMAIL).detail(Details.EMAIL, userModel.getEmail()));
+            return false;
+        }
+        return true;
+    }
+
 }
