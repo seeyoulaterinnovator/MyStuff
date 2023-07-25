@@ -51,6 +51,7 @@ import static ru.alamics.sso.util.Util.CLIENT_B2B;
 public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     private static final String REGISTRATION_ONLY_IN_FRAME_ATTRIBUTE = "registrationOnlyInFrame";
     private static final String AUTH_VIA_SMS = "loginViaSms";
+    private static final String HIDDEN_CHAT = "hideChat";
     private static final String AUTH_VIA_EMAIL_OR_USERNAME_AND_PASSWORD = "loginViaEmailOrUsernameAndPassword";
     private static final String AUTH_VIA_PHONE_CALL = "loginViaPhoneCall";
     private ClientService clientService = null;
@@ -166,6 +167,8 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             attributes.put("loginViaSms", isLoginViaSms());
             attributes.put("loginViaEmailOrUsernameAndPassword", isLoginViaEmailOrUsernameAndPassword());
             attributes.put("loginViaPhoneCall", isLoginViaPhoneCall());
+            attributes.put("hideChat", isChatHidden());
+
 
             if (realm.isInternationalizationEnabled()) {
                 UriBuilder b;
@@ -232,6 +235,12 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     private boolean isNewAuthActivated(ClientModel client) {
         return Boolean.parseBoolean(client.getAttribute("activateNewAuth"));
     }
+
+    private Object isChatHidden() {
+        boolean test = Boolean.parseBoolean(realm.getAttribute(HIDDEN_CHAT));
+        return Boolean.parseBoolean(realm.getAttribute(HIDDEN_CHAT));
+    }
+
 
     private String getRedirectUrl() {
 

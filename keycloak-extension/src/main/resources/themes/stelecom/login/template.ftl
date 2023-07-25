@@ -150,7 +150,13 @@
         </#list>
     </#if>
 
+    <#if hideChat>
+        <div id="hiddenChat" class="hidden">
+        </div>
+    </#if>
+
     <script type="text/javascript">
+        let isChatHidden = document.getElementById('hiddenChat');
 
         let isFramed = false;
         try {
