@@ -4,6 +4,6 @@
   <#if section = "style">
     <#include 'styles/content-style--default.html' >
   <#elseif section = "body">
-    ${kcSanitize(msg(emailVerificationAuthBodyHtml,code))?no_esc}
+    <p>Код для подтверждения данных вашей учетной записи Личного кабинета «Дом.ру Бизнес»:</p><p style="font-weight: bold" class = "text_bolid margin_block">${code}</p>
   </#if>
 </@template.layout>

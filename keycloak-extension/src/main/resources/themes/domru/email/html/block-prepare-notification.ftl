@@ -13,7 +13,7 @@
             <p class="small_text login_data">Ваш логин:<br><span class="text_bolid">${userName}</span></p>
         </#if>
         <p>Мы не храним ваши пароли.</p>
-        <p>Если вы забыли свой пароль или у вас не получается войти в Личный кабинет - воспользуйтесь формой
+        <p style="font-size: 18px">Если вы забыли свой пароль или у вас не получается войти в Личный кабинет - воспользуйтесь формой
             восстановления пароля по ссылке <a class="no_block" href="https://newlkb2b.dom.ru">«Забыли пароль?»</a></p>
         <p>
         <ul class="instruction content__ul">

@@ -4,7 +4,9 @@
     <#if section = "style">
         <#include 'styles/content-style--default.html' >
     <#elseif section = "body">
-        ${kcSanitize(msg(emailVerificationLoginBodyHtml,link, linkExpiration, realmName, linkExpirationFormatter(linkExpiration), expTime))?no_esc}
+        <p>Подтвердите вашу учетную запись для входа в Личный кабинет<br/>«Дом.ру Бизнес» по ссылке.
+            Срок действия ссылки ${expTime}.</p>
+        <p class = "block_link"><a href="${link}">Подтвердить учетную запись</a></p>
     </#if>
 </@template.layout>
 
