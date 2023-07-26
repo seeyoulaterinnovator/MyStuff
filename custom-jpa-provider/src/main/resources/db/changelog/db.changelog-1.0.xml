@@ -2217,4 +2217,14 @@
             ]]>
         </sql>
     </changeSet>
+
+    <changeSet id="180" author="slabunov-yv">
+        <sql>
+            <![CDATA[
+            UPDATE SETTINGS SET VALUE = '<p>Ваша учетная запись для входа в Личный кабинет «Дом.ру Бизнес» <font color="red">будет заблокирована через %s</font>.</p><p>Доступ к услугам при этом не блокируется.<br> Вы не использовали свою учетную запись в течении длительного времени. Для предотвращения блокировки учетной записи, просим вас войти в <a class="no_block" href="%s">Личный кабинет</a> до истечения указанного срока.</p>'
+where EXT_ID = 'blockPrepareNotificationSchedulerHtml';
+            ]]>
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
