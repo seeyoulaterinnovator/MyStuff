@@ -108,6 +108,7 @@ public class UserModelExtender extends AbstractFormActionFactory implements Form
         } catch (Exception e) {
             log.error("", e);
             errors.add(new FormMessage("Регистрация временно недоступна, попробуйте повторить попытку позже"));
+            context.getAuthenticationSession().setAuthNote("reg_error", "registration is not available");
         }
 
         if (!errors.isEmpty()) {

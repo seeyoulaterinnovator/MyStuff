@@ -21,7 +21,7 @@ public class EmailReqAction implements RequiredActionProvider {
         context.challenge(createForm(context));
     }
     @Override
-    public void processAction(RequiredActionContext context) {
+    public void processAction(RequiredActionContext context)  {
         context.success();
     }
     @Override
