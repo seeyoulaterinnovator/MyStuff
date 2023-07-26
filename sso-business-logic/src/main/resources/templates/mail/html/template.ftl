@@ -48,7 +48,7 @@
 
               <div class="mail-container__content content">
                 <div class="content">
-                  <h2 class="content__heading">${customer}</h2>
+                  <h2 class="content__heading">Уважаемый клиент!</h2>
                   <#nested "body">
                 </div>
               </div>
