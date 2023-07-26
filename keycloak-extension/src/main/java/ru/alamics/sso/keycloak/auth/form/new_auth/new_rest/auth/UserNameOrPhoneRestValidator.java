@@ -1,0 +1,130 @@
+package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth;
+
+
+import lombok.extern.slf4j.Slf4j;
+import org.keycloak.authentication.AuthenticationFlowContext;
+import org.keycloak.authentication.AuthenticationFlowError;
+import org.keycloak.authentication.authenticators.directgrant.ValidateUsername;
+import org.keycloak.events.Details;
+import org.keycloak.events.Errors;
+import org.keycloak.models.AuthenticationExecutionModel;
+import org.keycloak.models.ModelDuplicateException;
+import org.keycloak.models.UserModel;
+import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.services.ServicesLogger;
+import org.keycloak.services.managers.AuthenticationManager;
+import ru.alamics.sso.jpa.entity.common.BlockType;
+import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.registration.service.UserFindService;
+import ru.alamics.sso.util.Util;
+
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import java.util.Objects;
+
+import static ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth.RestAuthHelper.isRestAuthRequestValid;
+
+@Slf4j
+public class UserNameOrPhoneRestValidator extends ValidateUsername {
+
+    private static final String PROVIDER_ID = "rest-phone-username-validator";
+
+    private static final String DISPLAY_NAME = "Rest Username Validator";
+
+    private static final String HELP_TEXT = "";
+
+    private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
+            AuthenticationExecutionModel.Requirement.REQUIRED
+    };
+
+    @Override
+    public void authenticate(AuthenticationFlowContext context) {
+        log.info("Rest Auth");
+
+        if (!isRestAuthRequestValid(context)) {
+            Response challengeResponse = errorResponse(Response.Status.UNAUTHORIZED.getStatusCode(), "invalid_request", "Missing parameter: password or call/sms");
+            context.failure(AuthenticationFlowError.INVALID_USER, challengeResponse);
+            return;
+        }
+        String username = retrieveUsername(context);
+        if (username == null) {
+            context.getEvent().error(Errors.USER_NOT_FOUND);
+            Response challengeResponse = errorResponse(Response.Status.UNAUTHORIZED.getStatusCode(), "invalid_request", "Missing parameter: username");
+            context.failure(AuthenticationFlowError.INVALID_USER, challengeResponse);
+            return;
+        }
+        username = username.trim();
+        context.getEvent().detail(Details.USERNAME, username);
+        UserModel user = null;
+
+        try {
+            if (username.startsWith("+7")) {
+                final String phone = username.replaceAll("\\D", "");
+                UserFindService userFindService = Lookup.lookup(UserFindService.class);
+
+                user = Util.getUserAdapter(context.getSession(), userFindService.getUserByPhone(context.getRealm(), phone));
+            } else {
+                user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(), username);
+
+            }
+        } catch (ModelDuplicateException mde) {
+            ServicesLogger.LOGGER.modelDuplicateException(mde);
+            Response challengeResponse = errorResponse(Response.Status.UNAUTHORIZED.getStatusCode(), "invalid_request", "Invalid user credentials");
+            context.failure(AuthenticationFlowError.INVALID_USER, challengeResponse);
+            return;
+        }
+
+        if (user == null) {
+            context.getEvent().error(Errors.INVALID_USER_CREDENTIALS);
+            Response challengeResponse = errorResponse(Response.Status.UNAUTHORIZED.getStatusCode(), "invalid_grant", "Invalid user credentials");
+            context.failure(AuthenticationFlowError.INVALID_USER, challengeResponse);
+            return;
+        }
+
+        if (!user.getAttribute(BlockType.MANAGER_BLOCK.getType()).isEmpty()) {
+            context.getEvent().user(user);
+            context.getEvent().error(Errors.USER_DISABLED);
+            Response challengeResponse = errorResponse(Response.Status.BAD_REQUEST.getStatusCode(), "invalid_grant", "Account disabled");
+            context.failure(AuthenticationFlowError.INVALID_USER, challengeResponse);
+            return;
+        }
+
+        if (context.getRealm().isBruteForceProtected()) {
+            if (context.getProtector().isTemporarilyDisabled(context.getSession(), context.getRealm(), user)) {
+                context.getEvent().user(user);
+                context.getEvent().error(Errors.USER_TEMPORARILY_DISABLED);
+                Response challengeResponse = errorResponse(Response.Status.UNAUTHORIZED.getStatusCode(), "invalid_grant", "Invalid user credentials");
+                context.failure(AuthenticationFlowError.INVALID_USER, challengeResponse);
+                return;
+            }
+        }
+        context.setUser(user);
+        Objects.requireNonNull(user).setEnabled(true);
+        context.success();
+    }
+
+    @Override
+    public String getDisplayType() {
+        return DISPLAY_NAME;
+    }
+
+    @Override
+    public AuthenticationExecutionModel.Requirement[] getRequirementChoices() {
+        return REQUIREMENT_CHOICES;
+    }
+
+    @Override
+    public String getHelpText() {
+        return HELP_TEXT;
+    }
+
+    @Override
+    public String getId() {
+        return PROVIDER_ID;
+    }
+
+    protected String retrieveUsername(AuthenticationFlowContext context) {
+        MultivaluedMap<String, String> inputData = context.getHttpRequest().getDecodedFormParameters();
+        return inputData.getFirst(AuthenticationManager.FORM_USERNAME);
+    }
+}

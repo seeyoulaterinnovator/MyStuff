@@ -49,8 +49,8 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
 
     private final SettingsService settingsService;
 
-    public NewAuthMailPhoneWithRiasForm(RiasService riasService, UserFindService userFindService) {
-        super(userFindService);
+    public NewAuthMailPhoneWithRiasForm(RiasService riasService, UserFindService userFindService, KeycloakSession session) {
+        super(userFindService, session);
         this.riasService = riasService;
 
         this.properties = Lookup.lookup(ApplicationProperties.class);

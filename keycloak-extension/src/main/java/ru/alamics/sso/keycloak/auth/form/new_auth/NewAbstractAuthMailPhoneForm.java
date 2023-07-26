@@ -11,10 +11,7 @@ import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAu
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.ModelDuplicateException;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ServicesLogger;
@@ -23,6 +20,12 @@ import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaType;
 import ru.alamics.sso.antifraud.*;
+import ru.alamics.sso.jpa.repository.AttemptFailsRepository;
+import ru.alamics.sso.jpa.repository.WroteCodeAttemptsRepository;
+import ru.alamics.sso.antifraud.AttemptFailsDto;
+import ru.alamics.sso.antifraud.AttemptFailsService;
+import ru.alamics.sso.antifraud.BlackListDto;
+import ru.alamics.sso.antifraud.BlackListService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.keycloak.util.MessagesExtender;
@@ -48,6 +51,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -55,6 +59,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil.addRequiredAction;
 import static ru.alamics.sso.keycloak.auth.form.new_auth.newAuthReqActions.TwoStepAuthFactory.CLIENT_B2B;
+import static ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil.*;
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 import static ru.alamics.sso.registration.phone.ActivationCodeType.*;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.*;
@@ -98,10 +103,11 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     private static final int COUNT_BY_ONE_CODE = 5;
 
+    private final KeycloakSession session;
     private final RiasService riasService;
 
 
-    public NewAbstractAuthMailPhoneForm(UserFindService userFindService) {
+    public NewAbstractAuthMailPhoneForm(UserFindService userFindService, KeycloakSession session) {
         this.userFindService = userFindService;
         this.userPhoneVerifier = Lookup.lookup(UserPhoneVerifier.class);
         this.settingsService = Lookup.lookup(SettingsService.class);
@@ -110,6 +116,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         this.wroteCodeAttemptsService = Lookup.lookup(WroteCodeAttemptsService.class);
         this.messageSendService = Lookup.lookup(SendMessageService.class, "MessageSender");
         this.phoneCallerService = Lookup.lookup(PhoneCallerRemoteService.class, "PhoneCallerService");
+        this.session = session;
         this.riasService = Lookup.lookup(RiasService.class);
     }
 
@@ -119,6 +126,13 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         String loginHint = context.getAuthenticationSession().getClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM);
         String rememberMeUsername = AuthenticationManager.getRememberMeUsername(context.getRealm(), context.getHttpRequest().getHttpHeaders());
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
+        decideResponseFormat(context, authSession);
+
+        if (authSession.getAuthNote("format")!=null) {
+            decideResponse(context);
+            authSession.removeAuthNote("format");
+            return;
+        }
 
         if (context.getHttpRequest().getDecodedFormParameters().containsKey("back")) {
             authSession.setAuthNote("backToLoginPassword", "backToLoginPassword");
@@ -130,6 +144,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             context.challenge(challenge(context, formData));
             return;
         }
+
 
         if (loginHint != null) {
             formData.add(AuthenticationManager.FORM_USERNAME, loginHint);
@@ -369,6 +384,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
             } else {
                 verifyCode(context, sessionModel, user, authContext, httpRequest, protector);
+                isUserAuthenticated(context, sessionModel);
+            //    decideResponse(context, sessionModel, userSessionModel, session);
             }
         } else {
             authenticate(context);

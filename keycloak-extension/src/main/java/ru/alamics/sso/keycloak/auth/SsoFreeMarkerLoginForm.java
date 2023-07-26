@@ -43,17 +43,25 @@ import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth.RestAuthHelper.chooseYourDestiny;
 import static ru.alamics.sso.registration.model.UserConstants.*;
 import static ru.alamics.sso.settings.SettingConstants.*;
 import static ru.alamics.sso.util.Util.CLIENT_B2B;
 
 @Slf4j
 public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
+
     private static final String REGISTRATION_ONLY_IN_FRAME_ATTRIBUTE = "registrationOnlyInFrame";
+
     private static final String AUTH_VIA_SMS = "loginViaSms";
+
     private static final String AUTH_VIA_EMAIL_OR_USERNAME_AND_PASSWORD = "loginViaEmailOrUsernameAndPassword";
+
     private static final String AUTH_VIA_PHONE_CALL = "loginViaPhoneCall";
+
     private ClientService clientService = null;
+
     private SettingsService settingsService = null;
 
     public SsoFreeMarkerLoginForm(KeycloakSession session, FreeMarkerUtil freeMarker) {
@@ -287,9 +295,11 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                 entity.put("access_code", accessCode);
                 entity.put("execution", execution);
                 entity.put("tab_id", authenticationSession.getTabId());
+                chooseYourDestiny(entity, authenticationSession);
+
                 return Response.ok().entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
             }
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(BAD_REQUEST).build();
         }
         return null;
     }

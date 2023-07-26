@@ -57,6 +57,7 @@ public class PhoneCheckProvider implements FormAction {
             formData.remove(FIELD_PHONE);
             context.getEvent().detail("Phone", user.getPhone());
             errors.add(new FormMessage(FIELD_PHONE, "Телефон должен быть заполнен"));
+            context.getAuthenticationSession().setAuthNote("phone_error", "phone is missing");
         } else {
             UserEntity userEntity = userFindService.getUserByPhone(context.getRealm(), user.getPhone());
 
@@ -64,7 +65,13 @@ public class PhoneCheckProvider implements FormAction {
                 formData.remove(FIELD_PHONE);
                 context.getEvent().detail("Phone", user.getPhone());
                 errors.add(new FormMessage(FIELD_PHONE, MessageConstants.PHONE_EXISTS));
+                context.getAuthenticationSession().setAuthNote("dupl_phone", "phone already exists");
             }
+        }
+
+        if (formData.containsKey("grant_type") && !user.getPhone().matches("^\\d+$")) {
+            context.getAuthenticationSession().setAuthNote("phone_error", "phone is not valid");
+            errors.add(new FormMessage(FIELD_PHONE, MessageConstants.PHONE_INVALID));
         }
 
         if (!errors.isEmpty()) {

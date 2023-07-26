@@ -51,7 +51,7 @@ public class NewAuthMailPhoneFormFactory extends AbstractAuthenticatorFactory im
     public Authenticator create(KeycloakSession session) {
         UserFindService userFindService = Lookup.lookup(UserFindService.class);
 
-        SINGLETON = new NewAuthMailPhoneForm(userFindService);
+        SINGLETON = new NewAuthMailPhoneForm(userFindService, session);
 
         return SINGLETON;
     }

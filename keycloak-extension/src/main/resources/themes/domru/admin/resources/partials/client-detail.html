@@ -593,6 +593,16 @@
                 </div>
                 <kc-tooltip>Выберите flow для сброса пароля (только для rest)</kc-tooltip>
             </div>
+            <div class="form-group" data-ng-show="protocol == 'openid-connect'">
+                <label for="grant" class="col-md-2 control-label">REST Registration</label>
+                <div class="col-md-2">
+                    <div>
+                        <select id="restReg" ng-model="clientEdit.authenticationFlowBindingOverrides['registration']" class="form-control" ng-options="flow.id as flow.alias for flow in flows">
+                        </select>
+                    </div>
+                </div>
+                <kc-tooltip>Выбор flow для регистрации по REST</kc-tooltip>
+            </div>
         </fieldset>
 
 
