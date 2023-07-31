@@ -2218,12 +2218,92 @@
         </sql>
     </changeSet>
 
-    <changeSet id="180" author="slabunov-yv">
+    <changeSet id="177" author="slabunov-yv">
         <sql>
-            <![CDATA[
-            UPDATE SETTINGS SET VALUE = '<p>Ваша учетная запись для входа в Личный кабинет «Дом.ру Бизнес» <font color="red">будет заблокирована через %s</font>.</p><p>Доступ к услугам при этом не блокируется.<br> Вы не использовали свою учетную запись в течении длительного времени. Для предотвращения блокировки учетной записи, просим вас войти в <a class="no_block" href="%s">Личный кабинет</a> до истечения указанного срока.</p>'
-where EXT_ID = 'blockPrepareNotificationSchedulerHtml';
-            ]]>
+            create table IF NOT EXISTS AUTH_OR_REG_TYPE (
+                id int not null primary key,
+                auth_or_reg_type_name varchar(36) not null,
+                constraint AUTH_OR_REG_TYPE_AUTH_OR_REG_NAME_uindex
+                    unique (auth_or_reg_type_name)
+            ) charset = utf8mb4;
+        </sql>
+    </changeSet>
+
+    <changeSet id="178" author="slabunov-yv">
+        <sql>
+            INSERT INTO AUTH_OR_REG_TYPE (id, auth_or_reg_type_name) VALUES (3, 'log_pass');
+            INSERT INTO AUTH_OR_REG_TYPE (id, auth_or_reg_type_name ) VALUES (2, 'phone_call');
+            INSERT INTO AUTH_OR_REG_TYPE (id, auth_or_reg_type_name ) VALUES (1, 'sms_code');
+            INSERT INTO AUTH_OR_REG_TYPE (id, auth_or_reg_type_name ) VALUES (4, 'bss');
+            INSERT INTO AUTH_OR_REG_TYPE (id, auth_or_reg_type_name ) VALUES (5, 'migration');
+        </sql>
+    </changeSet>
+
+    <changeSet id="179" author="slabunov-yv">
+        <sql>
+            create table IF NOT EXISTS CLIENTS_FOR_MONITORING (
+                id int auto_increment primary key,
+                client_name varchar(36) not null,
+                monitoring  tinyint(1)  not null,
+                realm       varchar(36) not null,
+                constraint CLIENTS_FOR_MONITORING_client_name_uindex
+                    unique (client_name)
+            ) charset = utf8mb4;
+        </sql>
+    </changeSet>
+
+    <changeSet id="181" author="slabunov-yv">
+        <sql>
+            INSERT INTO CLIENTS_FOR_MONITORING (client_name, monitoring, realm) VALUES ('b2b', 1, 'user');
+            INSERT INTO CLIENTS_FOR_MONITORING (client_name, monitoring, realm) VALUES ('lkb2b', 1, 'user');
+            INSERT INTO CLIENTS_FOR_MONITORING (client_name, monitoring, realm) VALUES ('app_b2b', 1, 'user');
+            INSERT INTO CLIENTS_FOR_MONITORING (client_name, monitoring, realm) VALUES ('dmp-kc-sit', 1, 'user');
+            INSERT INTO CLIENTS_FOR_MONITORING (client_name, monitoring, realm) VALUES ('bss', 1, 'user');
+            INSERT INTO CLIENTS_FOR_MONITORING (client_name, monitoring, realm) VALUES ('migration', 1, 'user');
+        </sql>
+    </changeSet>
+    <changeSet id="182" author="slabunov-yv">
+        <sql>
+            create table IF NOT EXISTS AUTHORISED_USERS
+            (
+                id varchar(36) not null primary key,
+                user_id    varchar(36)                           not null,
+                realm      varchar(36)                           not null,
+                auth_type  int                                   null,
+                authorised timestamp default current_timestamp() not null on update current_timestamp(),
+                client     int                                   not null,
+                constraint AUTHORISED_USERS_AUTH_OR_REG_TYPE_id_fk
+                    foreign key (auth_type) references AUTH_OR_REG_TYPE (id),
+                constraint AUTHORISED_USERS_CLIENTS_FOR_MONITORING_id_fk
+                    foreign key (client) references CLIENTS_FOR_MONITORING (id),
+                constraint fk_authorised_users
+                    foreign key (user_id) references USER_ENTITY (ID)
+                        on delete cascade
+            )
+                charset = utf8mb4;
+        </sql>
+    </changeSet>
+
+    <changeSet id="183" author="slabunov-yv">
+        <sql>
+            create table REGISTERED_USERS
+            (
+                id         varchar(36)                           not null
+                    primary key,
+                user_id    varchar(36)                           not null,
+                realm      varchar(36)                           not null,
+                reg_type   int                                   null,
+                registered timestamp default current_timestamp() not null on update current_timestamp(),
+                client     int                                   not null,
+                constraint REGISTERED_USERS_AUTH_OR_REG_TYPE_id_fk
+                    foreign key (reg_type) references AUTH_OR_REG_TYPE (id),
+                constraint REGISTERED_USERS_CLIENTS_FOR_MONITORING_id_fk
+                    foreign key (client) references CLIENTS_FOR_MONITORING (id),
+                constraint fk_REGISTERED_users
+                    foreign key (user_id) references USER_ENTITY (ID)
+                        on delete cascade
+            )
+                charset = utf8mb4;
         </sql>
     </changeSet>
 

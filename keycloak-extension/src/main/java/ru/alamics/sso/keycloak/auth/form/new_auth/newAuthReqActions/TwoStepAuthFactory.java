@@ -13,6 +13,8 @@ import javax.ws.rs.core.MultivaluedMap;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil.addRequiredAction;
+
 public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements Authenticator {
 
     private static final String PROVIDER_ID = "two-step-auth";
@@ -28,6 +30,8 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
     private static final String TWO_STEP_VERIFICATION_TYPES = "two.step.verification.types";
 
     private static final String REFERENCE_CATEGORY = "two-step-verification-reference";
+
+    public final static String CLIENT_B2B = "b2b";
 
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
@@ -59,6 +63,10 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
         String disable = context.getUser().getFirstAttribute(UserConstants.DISABLE_TWO_STEP_AUTH);
         AuthenticationSessionModel sessionModel = context.getAuthenticationSession();
         UserModel userModel = context.getUser();
+
+        if (context.getAuthenticationSession().getClient().getClientId().equals(CLIENT_B2B)) {
+            addRequiredAction(context, "empty_req", userModel);
+        }
 
         if (authType != null) {
             context.getAuthenticationSession().setAuthNote(NOTE_AUTH_TYPE_NAME, authType.name());
@@ -124,16 +132,6 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
         if (!user.isEmailVerified() && addRequiredAction(context, providerName, user)) {
             user.addRequiredAction("email_sender");
         }
-    }
-
-    private boolean addRequiredAction(AuthenticationFlowContext context, String providerName, UserModel userModel) {
-        RequiredActionProviderModel providerModel = context.getRealm().getRequiredActionProviderByAlias(providerName);
-
-        if (providerModel.isEnabled()) {
-            userModel.addRequiredAction(providerName);
-            return true;
-        }
-        return false;
     }
 
     @Override

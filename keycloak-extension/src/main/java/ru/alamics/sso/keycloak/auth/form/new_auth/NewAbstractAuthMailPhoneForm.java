@@ -26,9 +26,9 @@ import ru.alamics.sso.antifraud.AttemptFailsDto;
 import ru.alamics.sso.antifraud.AttemptFailsService;
 import ru.alamics.sso.antifraud.BlackListDto;
 import ru.alamics.sso.antifraud.BlackListService;
+import ru.alamics.sso.auth_n_regi.AuthOrRegTypeNotFoundException;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
-import ru.alamics.sso.keycloak.util.MessagesExtender;
 import ru.alamics.sso.keycloak.util.UserToUserEntityMapper;
 import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.MessageConstants;
@@ -41,6 +41,8 @@ import ru.alamics.sso.registration.phone.exception.*;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 import ru.alamics.sso.registration.phone.port.SendMessageService;
 import ru.alamics.sso.registration.rias.RiasService;
+import ru.alamics.sso.registration.service.AuthOrRegTypeService;
+import ru.alamics.sso.registration.service.AuthorisedUsersService;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
@@ -57,6 +59,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil.addRequiredAction;
+import static ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil.getAuthOrRegType;
+import static ru.alamics.sso.keycloak.auth.form.new_auth.newAuthReqActions.TwoStepAuthFactory.CLIENT_B2B;
 import static ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil.*;
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 import static ru.alamics.sso.registration.phone.ActivationCodeType.*;
@@ -77,6 +82,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     private final WroteCodeAttemptsService wroteCodeAttemptsService;
 
+    private final AuthorisedUsersService authorisedUsersService;
     private final SendMessageService messageSendService;
 
     private final PhoneCallerRemoteService phoneCallerService;
@@ -88,10 +94,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
     private static final String GRANT_TYPE = "grant_type";
 
     private static final String CODE_HASH_KEY = "CODE_HASH_KEY";
-
-//    private static final ConcurrentHashMap<PhonePlusRealmProtector, VerifyPhoneKey> mainCounter = new ConcurrentHashMap<>();
-
-//    private static final ConcurrentHashMap<PhonePlusRealmProtector, Integer> lastAttemptCounter = new ConcurrentHashMap<>();
 
     private final AttemptFailsService attemptFailsService;
 
@@ -116,6 +118,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         this.phoneCallerService = Lookup.lookup(PhoneCallerRemoteService.class, "PhoneCallerService");
         this.session = session;
         this.riasService = Lookup.lookup(RiasService.class);
+        this.authorisedUsersService = Lookup.lookup(AuthorisedUsersService.class);
     }
 
     @Override
@@ -319,14 +322,13 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         }
 
         if (isLoginPassword && (validateUserAndPassword(context, formData))) {
-            sessionModel.setAuthNote("loginPasswordButton", "loginPasswordButton");
-            sessionModel.setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
-            context.success();
+            doAuthActionForLogNPass(sessionModel, context);
             return;
         }
 
         if ((isSms || isPhoneCall) && (validateUserAndPassword(context, formData))) {
             sessionModel.setAuthNote("secondPhase", (!isSms ? "phoneCallButton" : "smsButton"));
+            addEmptyReqForB2b(context, context.getUser());
             authenticate(context);
             return;
         }
@@ -471,7 +473,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         if (isSmsOrPhone && riasService.checkPhone(commonUser)) {
             dummyHash(context);
             context.getEvent().error(Errors.USER_NOT_FOUND);
-            Response challengeResponse = challenge(context, MessagesExtender.CRINGE_RIAS_NOT_FOUND);
+            Response challengeResponse = challenge(context, "Данный способ авторизации недоступен, воспользуйтесь входом через логин и пароль");
             context.failureChallenge(AuthenticationFlowError.INVALID_USER, challengeResponse);
 
             return false;
@@ -542,16 +544,9 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
             userPhoneVerifier.verifyPhone(user, /*todo change expiration time to expire code +*/ activationCodeType.getExpiredCodeSeconds(),
                     codeHash, code, activationCodeType, sessionModel.getRealm().getName(), sessionModel);
-            sessionModel.removeAuthNote(CODE_HASH_KEY);
-            sessionModel.removeAuthNote(EXPIRATION_TIME);
-            sessionModel.removeAuthNote(COUNT_REPEAT);
 
-            sessionModel.setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
-            sessionModel.setAuthNote(sessionModel.getAuthNote("secondPhase"), "");
-            context.success();
-            sessionModel.removeAuthNote("needSendSmsCode");
-            sessionModel.removeAuthNote(CODE_HASH_KEY);
             currentAuthFlowPhoneNumbers.remove(protector);
+            doAuthActionForPhone(sessionModel, context);
         } catch (WrongSmsCode wrongSmsCode) {
             log.warn("Wrong sms code");
             context.form()
@@ -752,4 +747,44 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
     }
 
     public abstract boolean isSuccessCheckUser(AuthenticationFlowContext context, UserModel user);
+
+    private void addEmptyReqForB2b(AuthenticationFlowContext context, UserModel model) {
+        if (context.getAuthenticationSession().getClient().getClientId().equals(CLIENT_B2B) && !model.getRequiredActions().isEmpty()) {
+            addRequiredAction(context, "empty_req", model);
+        }
+    }
+
+    private void doAuthActionForLogNPass(AuthenticationSessionModel sessionModel, AuthenticationFlowContext context) {
+        try {
+            sessionModel.setAuthNote("loginPasswordButton", "loginPasswordButton");
+            sessionModel.setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
+            User user = UserModelUserMapper.mapToUser(context.getUser());
+            String clientId = sessionModel.getClient().getClientId();
+            authorisedUsersService.saveSuccessfulAuth(user, context.getRealm().getId(), clientId, getAuthOrRegType(sessionModel));
+        } catch (AuthOrRegTypeNotFoundException authOrRegTypeNotFoundException) {
+            log.error(authOrRegTypeNotFoundException.getMessage());
+        } finally {
+            context.success();
+        }
+    }
+
+    private void doAuthActionForPhone(AuthenticationSessionModel sessionModel, AuthenticationFlowContext context) {
+        try {
+            User user = UserModelUserMapper.mapToUser(context.getUser());
+            String clientId = context.getAuthenticationSession().getClient().getClientId();
+            sessionModel.removeAuthNote(CODE_HASH_KEY);
+            sessionModel.removeAuthNote(EXPIRATION_TIME);
+            sessionModel.removeAuthNote(COUNT_REPEAT);
+            sessionModel.setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
+            sessionModel.setAuthNote(sessionModel.getAuthNote("secondPhase"), "");
+            sessionModel.removeAuthNote("needSendSmsCode");
+            sessionModel.removeAuthNote(CODE_HASH_KEY);
+            authorisedUsersService.saveSuccessfulAuth(user, context.getRealm().getId(), clientId, getAuthOrRegType(sessionModel));
+
+        } catch (AuthOrRegTypeNotFoundException authOrRegTypeNotFoundException) {
+            log.error(authOrRegTypeNotFoundException.getMessage());
+        } finally {
+            context.success();
+        }
+    }
 }
