@@ -7,3 +7,4 @@ ru.alamics.sso.keycloak.auth.requiredactions.SsoUpdateProfile
 ru.alamics.sso.keycloak.auth.form.new_auth.newAuthReqActions.EmailReqActionFactory
 ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth.RestNewAttributesFormFactory
 ru.alamics.sso.keycloak.auth.form.new_auth.newAuthReqActions.EmptyReqActionFactory
+ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth.RestNewAttributesFormFactory

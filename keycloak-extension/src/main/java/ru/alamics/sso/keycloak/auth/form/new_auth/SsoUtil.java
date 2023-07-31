@@ -3,6 +3,7 @@ package ru.alamics.sso.keycloak.auth.form.new_auth;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.AuthenticationFlowContext;
+import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.common.util.Time;
 import org.keycloak.events.Details;
@@ -17,6 +18,8 @@ import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import org.keycloak.models.RequiredActionProviderModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.models.*;
 import org.keycloak.protocol.oidc.OIDCAdvancedConfigWrapper;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
@@ -84,6 +87,16 @@ public interface SsoUtil {
         return true;
     }
 
+
+    static boolean addRequiredAction(AuthenticationFlowContext context, String providerName, UserModel userModel) {
+        RequiredActionProviderModel providerModel = context.getRealm().getRequiredActionProviderByAlias(providerName);
+
+        if (providerModel.isEnabled() && !userModel.getRequiredActions().contains(providerName)) {
+            userModel.addRequiredAction(providerName);
+            return true;
+        }
+        return false;
+    }
 
     static void decideResponseFormat(AuthenticationFlowContext context, AuthenticationSessionModel authSession) {
         UriInfo uriInfo = context.getUriInfo();
