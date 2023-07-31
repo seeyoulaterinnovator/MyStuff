@@ -188,16 +188,6 @@ public interface SsoUtil {
         responseBody.put("code", code);
     }
 
-    static boolean addRequiredAction(AuthenticationFlowContext context, String providerName, UserModel userModel) {
-        RequiredActionProviderModel providerModel = context.getRealm().getRequiredActionProviderByAlias(providerName);
-
-        if (providerModel.isEnabled() && !userModel.getRequiredActions().contains(providerName)) {
-            userModel.addRequiredAction(providerName);
-            return true;
-        }
-        return false;
-    }
-
     static int getAuthOrRegType(AuthenticationSessionModel authenticationSessionModel) throws AuthOrRegTypeNotFoundException{
         AuthOrRegType[] authOrRegTypes = AuthOrRegType.values();
 
