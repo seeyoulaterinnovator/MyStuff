@@ -40,7 +40,7 @@ public class RegisteredUsersService {
 
         ClientsForMonitoringEntity clientsForMonitoringEntity = clientsForMonitoringService.findAndReturnClientsForMonitoringEntity(realm, client);
 
-        if (!clientsForMonitoringEntity.isMonitoring()) {
+        if (clientsForMonitoringEntity == null || !clientsForMonitoringEntity.isMonitoring()) {
             return;
         }
 
