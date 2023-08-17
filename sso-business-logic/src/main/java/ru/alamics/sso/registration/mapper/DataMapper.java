@@ -193,6 +193,7 @@ public class DataMapper {
         data.setErrors(entity.getErrors());
         data.setStatus(entity.getStatus());
         data.setPersonalAccountUser(entity.getPersonalAccountUser());
+        data.setCleanPassword(entity.getCleanPassword());
 
         return data;
     }
@@ -229,6 +230,7 @@ public class DataMapper {
         entity.setUserId(data.getUserId());
         entity.setErrors(data.getErrors());
         entity.setStatus(data.getStatus());
+        entity.setCleanPassword(data.getCleanPassword());
 
         return entity;
     }
