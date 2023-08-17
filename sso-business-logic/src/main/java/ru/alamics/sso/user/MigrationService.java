@@ -235,7 +235,7 @@ public class MigrationService {
         user.setEnabled(false);
         if (importUserData.getCleanPassword() != null) {
             user.setEmailVerified(true);
-            user.setEnabled(true);
+            user.setEnabled(false);
         }
 
         user = userRepository.save(user);

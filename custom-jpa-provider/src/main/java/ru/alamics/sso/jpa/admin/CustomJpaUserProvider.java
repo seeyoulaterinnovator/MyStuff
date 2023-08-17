@@ -119,10 +119,13 @@ public class CustomJpaUserProvider extends JpaUserProvider {
 
     @Override
     public UserModel addUser(RealmModel realm, String username) {
-        String adr = session.getContext().getUri().getAbsolutePath().toString();
-
-        if (adr.contains("bss")) {
-            return addUser(realm, KeycloakModelUtils.generateId(), username.toLowerCase(), true, false);
+        try {
+            String adr = session.getContext().getUri().getAbsolutePath().toString();
+            if (adr.contains("bss")) {
+                return addUser(realm, KeycloakModelUtils.generateId(), username.toLowerCase(), true, false);
+            }
+        } catch (NullPointerException e) { // can be thrown from getUri if user added through ./add-user-keycloak.sh
+            log.warn("Error while adding user, use super.addUser method", e);
         }
 
         return addUser(realm, KeycloakModelUtils.generateId(), username.toLowerCase(), true, true);

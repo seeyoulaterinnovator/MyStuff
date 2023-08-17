@@ -2227,4 +2227,13 @@ where EXT_ID = 'blockPrepareNotificationSchedulerHtml';
         </sql>
     </changeSet>
 
+    <changeSet id="181" author="nesterov-aa">
+        <sql>
+            <![CDATA[
+            alter table IMPORT_USERS_DATA
+                add cleanPassword varchar(255) null;
+            ]]>
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

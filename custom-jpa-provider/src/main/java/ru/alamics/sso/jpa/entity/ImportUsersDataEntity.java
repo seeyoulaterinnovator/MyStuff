@@ -47,9 +47,7 @@ public class ImportUsersDataEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private ImportUsersDataStatus status = ImportUsersDataStatus.AWAITING;
-
-    // not a column
-    @Transient
+    @Column
     private String cleanPassword;
 
     public String getId() {
