@@ -124,7 +124,11 @@ public class UserFindService {
         return userRepository.findUser(userId);
     }
 
-    public UserPostRoleEntity getRoleEntity(Long id){
+    public UserPostRoleEntity getRoleEntity(Long id) {
         return userPostRepository.findUserPostRoleById(id);
+    }
+
+    public UserEntity getFirstUserByEmail(String realmId, String email) {
+        return userRepository.getFirstUserByEmail(realmId, email);
     }
 }
