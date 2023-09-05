@@ -1,8 +1,6 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest;
 
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.C;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -11,7 +9,6 @@ import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import ru.alamics.sso.jpa.entity.UserPostEntity;
 import ru.alamics.sso.keycloak.lookup.Lookup;
-import ru.alamics.sso.keycloak.response.CustomerBuilderImpl;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
@@ -20,7 +17,6 @@ import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.user.ImportReportService;
 import ru.alamics.sso.user.UserService;
 import ru.alamics.sso.user.UserServiceImpl;
-import ru.alamics.sso.user.model.UserParameter;
 import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.util.validator.NotValidException;
 
@@ -29,9 +25,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import javax.ws.rs.core.MediaType;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+
 
 @Slf4j
 public class CustomNewResource {
@@ -177,21 +172,18 @@ public class CustomNewResource {
         return JsonResponse.success().build();
     }
 
-    @GET
-    @Path("/{sso_user_id}/customerAccounts")
-    @NoCache
+    @POST
+    @Path("/{sso_user_id}/dmpCustomerAccounts")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-    public Response getCustomerDmpByID(@PathParam("sso_user_id") String userId) {
-        UserEntity user = userFindService.getUserEntity(userId);
-
-        return user != null ?
-                JsonResponse.success()
-                        .httpStatus(Response.Status.OK)
-                        .addResult("customerAccounts", userPostService.getUserPost(user.getId()))
-                        .build()
-                :
-                JsonResponse.error(Response.Status.NOT_FOUND)
-                        .message("user not found").build();
+    @NoCache
+    public Response saveNewCustomerByDmp(@PathParam("sso_user_id") String userId, final UserPostRequest userPostRequest) {
+        try {
+            userPostRequest.setUserId(userId);
+            userPostService.save(userPostRequest);
+            return JsonResponse.success().build();
+        } catch (NotFoundException | FoundUserPostException | NotValidException e) {
+            log.error(e.getMessage());
+            return ErrorResponse.error("invalid request", Response.Status.NOT_FOUND);
+        }
     }
-
 }
