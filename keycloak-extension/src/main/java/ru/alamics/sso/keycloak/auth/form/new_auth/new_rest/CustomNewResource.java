@@ -10,6 +10,7 @@ import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluato
 import ru.alamics.sso.jpa.entity.UserPostEntity;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.keycloak.response.ResponseBuilder;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.service.UserFindService;
@@ -69,7 +70,7 @@ public class CustomNewResource {
                             .addResult("customerAccounts", userPostService.getUserPost(user.getId()))
                             .build()
                     :
-                    JsonResponse.error(Response.Status.NOT_FOUND)
+                    JsonResponse.error(Response.Status.BAD_REQUEST)
                             .message("phone not found").build();
 
 
@@ -85,7 +86,7 @@ public class CustomNewResource {
                             .httpStatus(Response.Status.OK)
                             .build()
                     :
-                    JsonResponse.error(Response.Status.NOT_FOUND)
+                    JsonResponse.error(Response.Status.BAD_REQUEST)
                             .message("mail not found").build();
         }
 
@@ -106,7 +107,7 @@ public class CustomNewResource {
                         .addResult("customerAccounts", userPostService.getUserPost(user.getId()))
                         .build()
                 :
-                JsonResponse.error(Response.Status.NOT_FOUND)
+                JsonResponse.error(Response.Status.BAD_REQUEST)
                         .message("user not found").build();
     }
 
@@ -138,7 +139,7 @@ public class CustomNewResource {
                         .addResult("customerAccounts", userPostService.getUserPost(user.getId()))
                         .build()
                 :
-                JsonResponse.error(Response.Status.NOT_FOUND)
+                JsonResponse.error(Response.Status.BAD_REQUEST)
                         .message("user not found").build();
     }
 
@@ -149,11 +150,14 @@ public class CustomNewResource {
     public Response saveNewCustomer(@PathParam("sso_user_id") String userId, final UserPostRequest userPostRequest) {
         try {
             userPostRequest.setUserId(userId);
+            if (userPostRequest.getUserId() == null || userPostRequest.getRoleId() == null || userPostRequest.getTomsId() == null) {
+                return JsonResponse.error(Response.Status.BAD_REQUEST).build();
+            }
             userPostService.save(userPostRequest);
             return JsonResponse.success().build();
         } catch (NotFoundException | FoundUserPostException | NotValidException e) {
             log.error(e.getMessage());
-            return ErrorResponse.error("invalid request", Response.Status.NOT_FOUND);
+            return JsonResponse.error(Response.Status.BAD_REQUEST).build();
         }
     }
 
@@ -179,11 +183,14 @@ public class CustomNewResource {
     public Response saveNewCustomerByDmp(@PathParam("sso_user_id") String userId, final UserPostRequest userPostRequest) {
         try {
             userPostRequest.setUserId(userId);
+            if (userPostRequest.getUserId() == null || userPostRequest.getRoleId() == null || userPostRequest.getTomsId() == null || userPostRequest.getDmpId() == null) {
+                return JsonResponse.error(Response.Status.BAD_REQUEST).build();
+            }
             userPostService.save(userPostRequest);
             return JsonResponse.success().build();
         } catch (NotFoundException | FoundUserPostException | NotValidException e) {
             log.error(e.getMessage());
-            return ErrorResponse.error("invalid request", Response.Status.NOT_FOUND);
+            return JsonResponse.error(Response.Status.BAD_REQUEST).build();
         }
     }
 }
