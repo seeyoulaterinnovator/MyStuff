@@ -3,21 +3,17 @@ package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.UserEntity;
-import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import ru.alamics.sso.jpa.entity.UserPostEntity;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
-import ru.alamics.sso.keycloak.response.ResponseBuilder;
 import ru.alamics.sso.registration.FoundUserPostException;
+import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
+import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.registration.service.UserPostService;
-import ru.alamics.sso.user.ImportReportService;
-import ru.alamics.sso.user.UserService;
-import ru.alamics.sso.user.UserServiceImpl;
 import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.util.validator.NotValidException;
 
@@ -31,12 +27,6 @@ import java.util.List;
 
 @Slf4j
 public class CustomNewResource {
-
-    private final UserService userService;
-    private final AdminPermissionEvaluator auth;
-    private final ImportReportService importReportService;
-    private final RealmModel realm;
-
     protected KeycloakSession session;
     private final UserFindService userFindService;
 
@@ -44,12 +34,8 @@ public class CustomNewResource {
 
     public CustomNewResource(KeycloakSession session, AdminPermissionEvaluator auth) {
         this.session = session;
-        this.auth = auth;
         auth.users().requireManage();
-        this.userService = new UserServiceImpl(session, auth.adminAuth());
-        this.importReportService = Lookup.lookup(ImportReportService.class);
         this.userFindService = Lookup.lookup(UserFindService.class);
-        this.realm = session.getContext().getRealm();
         this.userPostService = Lookup.lookup(UserPostService.class);
     }
 
@@ -153,7 +139,10 @@ public class CustomNewResource {
             if (userPostRequest.getUserId() == null || userPostRequest.getRoleId() == null || userPostRequest.getTomsId() == null) {
                 return JsonResponse.error(Response.Status.BAD_REQUEST).build();
             }
-            userPostService.save(userPostRequest);
+            UserPostResponse userPostResponse = userPostService.save(userPostRequest);
+            ExternalSystemRoleRequest systemRole = new ExternalSystemRoleRequest();
+            systemRole.setUserPostId(userPostResponse.getId());
+            userPostService.addAllSystemRole(userPostResponse.getId(), session.getContext().getRealm().getId());
             return JsonResponse.success().build();
         } catch (NotFoundException | FoundUserPostException | NotValidException e) {
             log.error(e.getMessage());
@@ -186,7 +175,11 @@ public class CustomNewResource {
             if (userPostRequest.getUserId() == null || userPostRequest.getRoleId() == null || userPostRequest.getTomsId() == null || userPostRequest.getDmpId() == null) {
                 return JsonResponse.error(Response.Status.BAD_REQUEST).build();
             }
-            userPostService.save(userPostRequest);
+            UserPostResponse userPostResponse = userPostService.save(userPostRequest);
+            ExternalSystemRoleRequest systemRole = new ExternalSystemRoleRequest();
+            systemRole.setUserPostId(userPostResponse.getId());
+            userPostService.addAllSystemRole(userPostResponse.getId(), session.getContext().getRealm().getId());
+            userPostService.addSystemRole(systemRole);
             return JsonResponse.success().build();
         } catch (NotFoundException | FoundUserPostException | NotValidException e) {
             log.error(e.getMessage());
