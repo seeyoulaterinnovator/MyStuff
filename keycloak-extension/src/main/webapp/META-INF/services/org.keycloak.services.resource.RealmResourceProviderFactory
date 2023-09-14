@@ -15,3 +15,4 @@ ru.alamics.sso.keycloak.user.resource.session.CustomSessionsFactory
 ru.alamics.sso.keycloak.rest.messenger.MessengerResourceFactory
 ru.alamics.sso.keycloak.mobile.resource.credentials.RestResetCredentialsFactory
 ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.reg.RegistrationResourceProviderFactory
+ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.CustomRestResourceProviderFactory

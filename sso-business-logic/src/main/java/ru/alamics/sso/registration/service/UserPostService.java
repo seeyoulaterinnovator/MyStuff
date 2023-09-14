@@ -222,4 +222,8 @@ public class UserPostService {
 
         return userPost;
     }
+
+    public List<UserPostEntity> getAllUserPostByUserId(String userId) {
+        return userPostRepository.getAllUserPostByUserId(userId);
+    }
 }
