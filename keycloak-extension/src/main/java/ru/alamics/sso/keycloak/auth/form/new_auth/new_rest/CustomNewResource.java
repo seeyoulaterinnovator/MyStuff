@@ -140,8 +140,6 @@ public class CustomNewResource {
                 return JsonResponse.error(Response.Status.BAD_REQUEST).build();
             }
             UserPostResponse userPostResponse = userPostService.save(userPostRequest);
-            ExternalSystemRoleRequest systemRole = new ExternalSystemRoleRequest();
-            systemRole.setUserPostId(userPostResponse.getId());
             userPostService.addAllSystemRole(userPostResponse.getId(), session.getContext().getRealm().getId());
             return JsonResponse.success().build();
         } catch (NotFoundException | FoundUserPostException | NotValidException e) {
@@ -176,10 +174,7 @@ public class CustomNewResource {
                 return JsonResponse.error(Response.Status.BAD_REQUEST).build();
             }
             UserPostResponse userPostResponse = userPostService.save(userPostRequest);
-            ExternalSystemRoleRequest systemRole = new ExternalSystemRoleRequest();
-            systemRole.setUserPostId(userPostResponse.getId());
             userPostService.addAllSystemRole(userPostResponse.getId(), session.getContext().getRealm().getId());
-            userPostService.addSystemRole(systemRole);
             return JsonResponse.success().build();
         } catch (NotFoundException | FoundUserPostException | NotValidException e) {
             log.error(e.getMessage());
