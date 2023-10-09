@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "sso.fullname" . }}
+  labels:
+    {{- include "sso.labels" . | nindent 4 }}
+    {{- with .Values.extraLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "sso.selectorLabels" . | nindent 6 }}
+  serviceName: {{ include "sso.fullname" . }}-headless
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        {{- include "sso.labels" . | nindent 8 }}
+        {{- with .Values.extraLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      {{- if .Values.serviceAccount }}
+      serviceAccountName: {{ include "sso.serviceAccountName" . }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: keycloak
+          args:
+            - -b
+            - 0.0.0.0
+            - -c=standalone-ha-new.xml
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          {{- if .Values.workingDir }}
+          workingDir: {{ .Values.workingDir }}
+          {{- end }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: PROXY_ADDRESS_FORWARDING
+              value: "true"
+            - name: JGROUPS_DISCOVERY_PROTOCOL
+              value: "dns.DNS_PING"
+            - name: JGROUPS_DISCOVERY_PROPERTIES
+              value: "dns_query={{ include "sso.fullname" . }}-headless"
+            - name: JGROUPS_DISCOVERY_QUERY
+              value: "dns_query={{ include "sso.fullname" . }}-headless"
+          {{- if or .Values.extraEnvs .Values.extraSensitiveEnvs }}
+          envFrom:
+          {{- if .Values.extraEnvs }}
+          - configMapRef:
+              name: {{ include "sso.fullname" . }}
+          {{- end}}
+          {{- if .Values.extraSensitiveEnvs }}
+          - secretRef:
+              name: {{ include "sso.fullname" . }}
+          {{- end }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: http-management
+              containerPort: 9990
+              protocol: TCP
+            - name: jgroups
+              containerPort: 7600
+              protocol: TCP
+          {{- if .Values.preStopDelay.enabled }}
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sleep", "{{ .Values.preStopDelay.delaySeconds }}"]
+          {{- end }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- if .Values.hostAliases }}
+      hostAliases:
+        {{ toYaml .Values.hostAliases | indent 8 }}
+    {{- end }}

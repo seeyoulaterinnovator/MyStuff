@@ -167,7 +167,6 @@ container:source:
 container:
   stage: docker
   <<: *decrypt-variables
-  when: manual
   script:
     - docker build -t harbor.ertelecom.ru/sso-protected/sso:$CI_PIPELINE_ID -f Dockerfile .
     - docker push harbor.ertelecom.ru/sso-protected/sso:$CI_PIPELINE_ID
@@ -240,6 +239,23 @@ domru:stage5:
     - sso-stage
     # - sso-domain-controller-perm
 
+domru:k8s:stage1:
+  stage: deploy
+  image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
+  when: manual
+  environment:
+    name: k8s-stage01
+    url: https://sso.b2btest.ertelecom.ru
+  variables:
+    NAMESPACE: 'sso'
+    TLS_SECRET: 'b2btest-ssl'
+  script:
+    - export FQDN=`echo "${CI_ENVIRONMENT_URL}" | sed 's/^http\(\|s\):\/\///g'`
+    - envsubst < .helm/values-dev.yaml.template > values.yaml
+    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml ./.helm -n ${NAMESPACE} --atomic --timeout 5m
+    - helm history -n ${NAMESPACE} ${CI_ENVIRONMENT_SLUG} --max 5
+  tags:
+    - sso-build-k8s
 
 domru:perm:primary:
   stage: deploy
