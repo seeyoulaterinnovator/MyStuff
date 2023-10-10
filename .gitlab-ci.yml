@@ -167,6 +167,7 @@ container:source:
 container:
   stage: docker
   <<: *decrypt-variables
+  when: manual
   script:
     - docker build -t harbor.ertelecom.ru/sso-protected/sso:$CI_PIPELINE_ID -f Dockerfile .
     - docker push harbor.ertelecom.ru/sso-protected/sso:$CI_PIPELINE_ID
@@ -251,7 +252,7 @@ domru:k8s:stage1:
     TLS_SECRET: 'b2btest-ssl'
   script:
     - export FQDN=`echo "${CI_ENVIRONMENT_URL}" | sed 's/^http\(\|s\):\/\///g'`
-    - envsubst < .helm/values-dev.yaml.template > values.yaml
+    - consul-template -once -template ".helm/values-dev.yaml.tpl:values.yaml"
     - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml ./.helm -n ${NAMESPACE} --atomic --timeout 5m
     - helm history -n ${NAMESPACE} ${CI_ENVIRONMENT_SLUG} --max 5
   tags:
