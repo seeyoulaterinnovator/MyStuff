@@ -74,9 +74,15 @@
                     <#if displayMessage && message?has_content>
                         <div class="alert pb-4">
                             <#if message.type = 'info'>
-                                <span class="text-black">
+                            <#if message.summary?contains('Ваш E-mail успешно подтверждён!')>
+                                <span class="text-black email-ver hidden">
+                                        ${kcSanitize(message.summary)?no_esc}
+                                </span>
+                            <#else>
+                                <span class="text-black hidden">
                                     ${kcSanitize(message.summary)?no_esc}
                                 </span>
+                            </#if>
                             </#if>
                             <#if message.type = 'warning' && displayWarningMessage>
                                 <span class="text-black">

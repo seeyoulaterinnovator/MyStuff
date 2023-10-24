@@ -56,10 +56,13 @@ public class MigrationService {
     private ImportReportService importReportService;
     @EJB
     private PersonalAccountService personalAccountService;
-    public void createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart) {
+
+    public List<UserEntity> createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart) {
 
         log.info("importing users from file {} in progress", reportModel.getName());
         long migrationStarts = new Date().getTime();
+
+        List<UserEntity> entities = new ArrayList<>();
 
         reportModel.setStatus(ImportUsersReportStatus.IN_PROGRESS);
         int createdUsers = reportModel.getCountCreatedUsers();
@@ -98,6 +101,8 @@ public class MigrationService {
                     checkToms(data);
 
                     modified = addUserPost(user, data);
+
+                    entities.add(user);
 
                 } catch (AllNotValidException av) {
 
@@ -162,6 +167,7 @@ public class MigrationService {
             log.error("Error, but processed " + processedUsers, e);
             throw e;
         }
+        return entities;
     }
 
     private void addMigrationAttribute(String reportId, UserEntity user, long migrationStarts) {
@@ -223,6 +229,7 @@ public class MigrationService {
 
         return userRepository.getFirstUserByUsername(realmId, email);
     }
+
     private UserEntity createUser(String realmId, ImportUsersDataModel importUserData) {
 
         UserEntity user = new UserEntity();
@@ -305,12 +312,15 @@ public class MigrationService {
             userImport.setRole(DEFAULT_ROLE_STR);
             userImport.setSystems(Util.join(userPostService.getAllExternalSystemLabelsForRealm(user.getRealmId()), ","));
         }
-        addPersonalAccount(postId ,userImport);
+        addPersonalAccount(postId, userImport);
         return modified;
     }
-    private void addPersonalAccount(String postId,ImportUsersDataModel userImport) {
+
+    private void addPersonalAccount(String postId, ImportUsersDataModel userImport) {
         String accountNumber = userImport.getPersonalAccountUser();
-        if (StringUtils.isEmpty(accountNumber)) { return; }
+        if (StringUtils.isEmpty(accountNumber)) {
+            return;
+        }
 
         List<String> accNumList = new LinkedList<>();
         accNumList.add(accountNumber);

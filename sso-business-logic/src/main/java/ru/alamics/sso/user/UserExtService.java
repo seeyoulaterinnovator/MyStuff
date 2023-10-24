@@ -18,6 +18,7 @@ import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
+import ru.alamics.sso.registration.service.RegisteredUsersService;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.user.model.UserRequest;
@@ -49,6 +50,8 @@ public class UserExtService {
     private final UserFindService userFindService;
     private final UserPostFacade userPostFacade;
 
+    private final RegisteredUsersService registeredUsersService;
+
     public UserExtService(KeycloakSession session, AdminAuth auth) {
 
         this.auth = auth;
@@ -57,6 +60,7 @@ public class UserExtService {
 
         this.userFindService = Lookup.lookup(UserFindService.class);
         this.userPostFacade = Lookup.lookup(UserPostFacade.class);
+        this.registeredUsersService = Lookup.lookup(RegisteredUsersService.class);
     }
 
     private static void updateUserFromRequest(UserModel user, UserRequest
@@ -110,6 +114,8 @@ public class UserExtService {
 
             UserModel user = session.users().addUser(realm, userRequest.getEmail());
             updateUserFromRequest(user, userRequest, realm, session, false, bss);
+
+            registeredUsersService.saveSuccessfulReg(user.getId(), realm.getId(), "bss", 4);
             return user;
         } finally {
             if (session.getTransactionManager().isActive()) {

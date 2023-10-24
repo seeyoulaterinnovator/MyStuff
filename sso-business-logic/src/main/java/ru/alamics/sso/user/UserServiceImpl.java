@@ -5,6 +5,7 @@ import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.services.resources.admin.AdminAuth;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
@@ -12,6 +13,7 @@ import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.mapper.DataMapper;
+import ru.alamics.sso.registration.service.RegisteredUsersService;
 import ru.alamics.sso.user.filetype.FileFactory;
 import ru.alamics.sso.user.filetype.FileModel;
 import ru.alamics.sso.user.format.ImportFormat;
@@ -40,6 +42,8 @@ public class UserServiceImpl implements UserService {
     private final UserExtService userExtService;
     protected KeycloakSession session;
 
+    private final RegisteredUsersService registeredUsersService;
+
     public UserServiceImpl(KeycloakSession session, AdminAuth auth) {
         this.auth = auth;
         this.session = session;
@@ -51,6 +55,7 @@ public class UserServiceImpl implements UserService {
 
         this.exportWorker = new ExportWorker(realm);
         this.userExtService = new UserExtService(session, auth);
+        this.registeredUsersService = Lookup.lookup(RegisteredUsersService.class);
     }
 
     @Override
@@ -101,12 +106,9 @@ public class UserServiceImpl implements UserService {
         FileModel file = FileFactory.createFileModel(inputStream, Util.getFileExtension(content));
 
         Util.setTimeout(() -> {
-            try
-            {
+            try {
                 doImport(file, content);
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 log.info("import exception = {}", e.getMessage());
             }
         }, 2);
@@ -114,8 +116,7 @@ public class UserServiceImpl implements UserService {
         return new ImportResponse();
     }
 
-    public ImportResponse doImport(FileModel file, String content) throws IOException, FileServiceException
-    {
+    public ImportResponse doImport(FileModel file, String content) throws IOException, FileServiceException {
         ImportFormat impF = FileFactory.getImportFormat(file);
         impF.checkStructure(file);
         List<ImportUsersDataModel> dataList = impF.getDataList(file);
@@ -138,7 +139,14 @@ public class UserServiceImpl implements UserService {
             //CompletableFuture<String> cf = new CompletableFuture<>();
             //asyncList.add(cf);
 
-            importService.createImportUsers(importUsersReport, dataListBuffer, null, auth, session);
+            List<UserEntity> entities = importService.createImportUsers(importUsersReport, dataListBuffer, null, auth, session);
+
+            if (entities!=null && !entities.isEmpty()){
+                for (UserEntity user: entities) {
+                    registeredUsersService.saveSuccessfulReg(user.getId(), user.getRealmId(), "migration", 5);
+                }
+            }
+
             first = last;
             last += wndw;
         }
@@ -157,6 +165,8 @@ public class UserServiceImpl implements UserService {
         ImportResponse importResponse = UserMapper.toImportUsersReportEntity(importUsersReport, dataList);
 
         log.info("Upload users success!", importResponse);
+
+
         return importResponse;
     }
 

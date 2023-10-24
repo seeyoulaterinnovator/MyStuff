@@ -139,19 +139,18 @@ public class ImportService {
 
     //@Asynchronous
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart,
-                                  AdminAuth auth, KeycloakSession session) {
+    public List<UserEntity> createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart,
+                                              AdminAuth auth, KeycloakSession session) {
 
         if (FileFactory.CTL.equalsIgnoreCase(reportModel.getFiletype())) {
 
-            migrationService.createImportUsers(reportModel, dataList, scheduleStart);
+            return migrationService.createImportUsers(reportModel, dataList, scheduleStart);
 
         } else {
             importUsers(reportModel, dataList, scheduleStart);
         }
-
         /*doGeneratePasswords(dataList, auth, session);*/
-
+        return null;
     }
 
     private void importUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart) {

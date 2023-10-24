@@ -18,7 +18,9 @@ import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -53,10 +55,13 @@ public class SendMessageServiceImpl implements SendMessageService {
     }
 
     @Override
-    public void sendMessageToMessengers(String phone, String message, String realmId, String[] messengerList) throws SendMessageException {
+    public void sendMessageToMessengers(String phone, String message, String realmId, String[] messengerList, String host) throws SendMessageException {
+        String pattern = String.format("Your OTP is: %s.\n\n" +
+                "@%s #%s", message, host, message);
+
         MessageRequest messageRequest = MessageRequest.builder()
                 .userPhone(phone)
-                .text(message)
+                .text(pattern)
                 .realmId(realmId)
                 .build();
 
@@ -85,7 +90,7 @@ public class SendMessageServiceImpl implements SendMessageService {
                 .target(uri)
                 .queryParams(msgConfig.getConfigForQuery())
                 .queryParam("to", Util.getCleanUserPhone(messageRequest.getUserPhone()))
-                .queryParam("text", Util.encodeCharset(messageRequest.getText(), msgConfig.getCharset()))
+                .queryParam("text", Util.rfc3986Encoder(messageRequest.getText()))
                 .request();
         try {
             return builder.get(String.class);

@@ -445,6 +445,11 @@ function genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $r
     $scope.setRegistrationOnlyInFrame = function () {
         $scope.registrationOnlyInFrame = $scope.realm.attributes['registrationOnlyInFrame'] == 'true';
     }
+
+    $scope.setHideChatInFrame = function () {
+        $scope.hideChat = $scope.realm.attributes['hideChat'] == 'true';
+    }
+
     $scope.setCheckInRiasIfNotFound = function () {
         $scope.checkInRiasIfNotFound = $scope.realm.attributes['checkInRiasIfNotFound'] == 'true';
     }
@@ -455,6 +460,7 @@ function genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $r
 
     $scope.setCheckInRiasIfNotFound();
     $scope.setRegistrationOnlyInFrame();
+    $scope.setHideChatInFrame();
     // $scope.setLoginViaSMS();
     // $scope.setLoginViaEmailOrUsernameAndPassword();
     // $scope.setLoginViaPhoneCall();
@@ -494,6 +500,7 @@ function genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $r
 
     $scope.save = function () {
         $scope.realm.attributes.registrationOnlyInFrame = $scope.registrationOnlyInFrame;
+        $scope.realm.attributes.hideChat = $scope.hideChat;
         $scope.realm.attributes.checkInRiasIfNotFound = $scope.checkInRiasIfNotFound;
         $scope.realm.attributes.realmInSchedule = $scope.realmInSchedule;
         var realmCopy = angular.copy($scope.realm);
@@ -510,6 +517,7 @@ function genericRealmUpdate($scope, Current, Realm, realm, serverInfo, $http, $r
     $scope.reset = function () {
         $scope.realm = angular.copy(oldCopy);
         $scope.setRegistrationOnlyInFrame();
+        $scope.setHideChatInFrame();
         // $scope.setLoginViaSMS();
         // $scope.setLoginViaEmailOrUsernameAndPassword();
         // $scope.setLoginViaPhoneCall();

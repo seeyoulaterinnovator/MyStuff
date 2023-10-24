@@ -132,6 +132,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
             boolean isUserBlocked = isUserBlocked(context);
             boolean needWeSendSmsOrDoCall = needWeSendSmsOrDoCall(context);
+            String host = context.getHttpRequest().getUri().getBaseUri().getHost();
 
             switch (activationCodeType) {
                 case CODE_TO_SMS:
@@ -141,7 +142,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                             authSession.setAuthNote(CODE_HASH_KEY, HashGenerator.getSecretHash(code));
 
                             String[] messengerList = context.getRealm().getSmtpConfig().get(MESSENGER).split(",");
-                            messageSendService.sendMessageToMessengers(userPhone, code, context.getRealm().getId(), messengerList);
+                            messageSendService.sendMessageToMessengers(userPhone, code, context.getRealm().getId(), messengerList, host);
 
                             codeExpirationTime = setCodeExpirationTime(context); // Устанавливаем новую временную точку, когда истечёт действие кода
                             expireTime = setExpirationTime(context); // Таймер до кнопки отправить ещё раз

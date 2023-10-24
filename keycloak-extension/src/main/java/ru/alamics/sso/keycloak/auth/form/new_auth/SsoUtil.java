@@ -1,12 +1,23 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth;
 
+import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.common.util.Time;
 import org.keycloak.events.Details;
+import org.keycloak.events.EventBuilder;
 import org.keycloak.events.EventType;
+import org.keycloak.models.RequiredActionProviderModel;
+import org.keycloak.models.UserModel;
+import org.keycloak.sessions.AuthenticationSessionModel;
+import ru.alamics.sso.auth_n_regi.AuthOrRegTypeNotFoundException;
+import ru.alamics.sso.jpa.entity.auth_reg.AuthOrRegType;
+import org.keycloak.forms.login.LoginFormsProvider;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.UserModel;
+import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.models.RequiredActionProviderModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.*;
@@ -33,6 +44,7 @@ import java.util.UUID;
 import static ru.alamics.sso.registration.model.UserConstants.REDIRECT_URI;
 
 public interface SsoUtil {
+
 
     Map<String, String> responseBody = new HashMap<>();
 
@@ -62,6 +74,19 @@ public interface SsoUtil {
         }
         return sb.toString();
     }
+
+    static boolean sendEmailVer(UserModel userModel, LoginFormsProvider lfp, KeycloakSession session, AuthenticationSessionModel sessionModel, EventBuilder eventBuilder) {
+        if (userModel != null && !userModel.isEmailVerified()) {
+            EmailSenderService.sendVerifyEmail(session,
+                    lfp,
+                    userModel,
+                    sessionModel,
+                    eventBuilder.clone().event(EventType.SEND_VERIFY_EMAIL).detail(Details.EMAIL, userModel.getEmail()));
+            return false;
+        }
+        return true;
+    }
+
 
     static boolean addRequiredAction(AuthenticationFlowContext context, String providerName, UserModel userModel) {
         RequiredActionProviderModel providerModel = context.getRealm().getRequiredActionProviderByAlias(providerName);
@@ -161,5 +186,16 @@ public interface SsoUtil {
 
         String code = OAuth2CodeParser.persistCode(session, clientSession, codeData);
         responseBody.put("code", code);
+    }
+
+    static int getAuthOrRegType(AuthenticationSessionModel authenticationSessionModel) throws AuthOrRegTypeNotFoundException{
+        AuthOrRegType[] authOrRegTypes = AuthOrRegType.values();
+
+        for (AuthOrRegType authOrRegType : authOrRegTypes) {
+            if (authenticationSessionModel.getAuthNote(authOrRegType.getButtonName()) != null) {
+                return authOrRegType.getId();
+            }
+        }
+        throw new AuthOrRegTypeNotFoundException("Auth or Reg Type Not Found");
     }
 }

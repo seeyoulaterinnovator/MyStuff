@@ -22,6 +22,14 @@
         <form id="totpe" action="${url.loginAction}" method="POST"></form>
 
         <form id="totpForm" action="${url.loginAction}" method="POST">
+
+            <div class="sm:block md:flex w-full items-center text-center md:text-left">
+                <button class="btn btn-main btn-display-none verification__btn verification__btn__accept w-full md:w-3/7 mr-0 md:mr-4"
+                        name="accept" id="accept" type="submit">
+                    ${doSubmit}
+                </button>
+            </div>
+
             <div class="w-full mt-4 test">
                 <#list 1..lengthCode as x>
                     <#if x = 1>
@@ -43,7 +51,7 @@
                                     disabled
                                 </#if>
                                class="ml-4 text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none"
-                               autocomplete="off"/>
+                               autocomplete="one-time-code"/>
                     </#if>
 
                 </#list>
@@ -100,16 +108,38 @@
                 </div>
             </#if>
 
-            <div class="sm:block md:flex w-full items-center text-center md:text-left">
-                <button class="btn btn-main btn-display-none verification__btn verification__btn__accept w-full md:w-3/7 mr-0 md:mr-4"
-                        name="accept" id="accept" type="submit">
-                    ${doSubmit}
-                </button>
-            </div>
         </form>
     </#if>
 
     <script>
+
+        if ('OTPCredential' in window) {
+            window.addEventListener('DOMContentLoaded', e => {
+                const inputs = document.querySelectorAll('input[autocomplete="one-time-code"]');
+                if (!inputs.length) return;
+                const ac = new AbortController();
+                const form = inputs[0].closest('form');
+                if (form) {
+                    form.addEventListener('submit', e => {
+                        ac.abort();
+                    });
+                }
+                navigator.credentials.get({
+                    otp: { transport:['sms'] },
+                    signal: ac.signal
+                }).then(otp => {
+                    let numbers = otp.code.split('');
+                    [...inputs].forEach((it, idx) => it.value = numbers[idx]);
+                    let code = document.getElementById('smscode')
+                    code.value = otp.code;
+                    if (form)
+                        form.submit();
+                }).catch(err => {
+                    console.log(err);
+                });
+            });
+        }
+
         var actionIsEmpty = ${actionIsEmpty?c};
         var clientIsB2B = ${clientIsB2B?c};
 

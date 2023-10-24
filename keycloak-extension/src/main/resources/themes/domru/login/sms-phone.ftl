@@ -19,18 +19,23 @@
 
         <form id="totpForm" action="${url.loginAction}" method="POST">
 
+            <div class="sm:block md:flex w-full items-center text-center md:text-left">
+                <button class="hidden"
+                        name="accept" id="accept" type="submit">${doSubmit}</button>
+
+            </div>
+
             <div class="w-full xl:pb-37px md:pb-10 sm:pb-8 pb-4 center-items">
                 <#list 1..lengthCode as x>
                     <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
-                           name="smscode-${x}"
+                           name="smscode-${x} " autocomplete="one-time-code"
                            <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
                                disabled
                            <#elseif codeLimited?? && codeLimited>
                                disabled
                            </#if>
                            class="text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none squares
-                            sms-input"
-                           autocomplete="off" autofocus/>
+                            sms-input" x == 1 && autofocus/>
                 </#list>
             </div>
 
@@ -66,11 +71,7 @@
                         </#if>
                     </div>
                 </#if>
-            <div class="sm:block md:flex w-full items-center text-center md:text-left">
-                <button class="hidden"
-                        name="accept" id="accept" type="submit">${doSubmit}</button>
 
-            </div>
         </form>
         <form method="POST" action="${url.loginUrl}">
             <button id="loginPasswordButton" name="back" type="submit" class="hidden">
@@ -88,5 +89,33 @@
                 console.log("Отправлено тк B2B и Action пуст");
             };
         }
+
+        if ('OTPCredential' in window) {
+            window.addEventListener('DOMContentLoaded', e => {
+                const inputs = document.querySelectorAll('input[autocomplete="one-time-code"]');
+                if (!inputs.length) return;
+                const ac = new AbortController();
+                const form = inputs[0].closest('form');
+                if (form) {
+                    form.addEventListener('submit', e => {
+                        ac.abort();
+                    });
+                }
+                navigator.credentials.get({
+                    otp: { transport:['sms'] },
+                    signal: ac.signal
+                }).then(otp => {
+                    let numbers = otp.code.split('');
+                    [...inputs].forEach((it, idx) => it.value = numbers[idx]);
+                    let code = document.getElementById('smscode')
+                    code.value = otp.code;
+                    if (form)
+                        form.submit();
+                }).catch(err => {
+                    console.log(err);
+                });
+            });
+        }
+
     </script>
 </@layout.registrationLayout>

@@ -215,4 +215,26 @@ public class Util {
         }, 1000 * timeoutInSeconds);
     }
 
+    public static String rfc3986Encoder(String text) {
+        StringBuilder encodedText = new StringBuilder();
+        for (char c : text.toCharArray()) {
+            if (c == ' ') {
+                encodedText.append("%20");
+            } else if (c == ':') {
+                encodedText.append("%3A");
+            } else if (c == '\r') {
+                encodedText.append("%0D");
+            } else if (c == '\n') {
+                encodedText.append("%0A");
+            } else if (c == '@') {
+                encodedText.append("%40");
+            } else if (c == '#') {
+                encodedText.append("%23");
+            } else {
+                encodedText.append(c);
+            }
+        }
+        return encodedText.toString();
+    }
+
 }
