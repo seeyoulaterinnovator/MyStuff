@@ -1,0 +1,54 @@
+{{- if .Values.ingress }}
+{{- range $i, $s := .Values.ingress }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $.Release.Name }}-{{ $i }}
+  {{- with $s.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- include "sso.labels" $ | nindent 4 }}
+    {{- with $.Values.extraLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: {{ $.Values.ingressClassName }}
+{{- if $s.tls }}
+  tls:
+  {{- range $s.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+    {{- range $s.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          - path: {{ .paths | quote }}
+            {{- if $s.pathType}}
+            pathType: {{ $s.pathType }}            
+            {{- else }}
+            pathType: ImplementationSpecific
+            {{- end }}
+            backend:
+        {{- if $s.external_service }}
+              service:
+                name: {{ $s.external_service.name }}
+                port:
+                  number: {{ $s.external_service.port }}
+        {{- else }}
+              service:
+                name: {{ include "sso.fullname" $ }}-http
+                port:
+                  number: {{ $.Values.service.httpPort }}
+        {{- end }}
+    {{- end }}
+{{- end }}
+{{- end }}
