@@ -96,7 +96,7 @@
                                             <a href="https://b2b.domru.ru/?openchat">b2b.domru.ru</a>
                                         </td>
                                         <td style="text-align: center; font-size: 12px">
-                                            <a href="https://b2b.domru.ru/?openchat">Мобильное приложение</a>
+                                            <a href="https://app.b2b.dom.ru/mobile-a">Мобильное приложение</a>
                                         </td>
                                     </tr>
                                 </table>
