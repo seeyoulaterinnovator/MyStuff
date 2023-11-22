@@ -108,10 +108,10 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
         authenticationSession.setAuthNote("RESET_TYPE", resetType.name());
         ResetFactory factory = new ResetFactoryImpl(this.session, context);
         ResetCredential resetCredential = factory.create(resetType);
-        resetCredential.reset(user, username);
-//        if (sendEmailVer(user, context.form(), context.getSession(), context.getAuthenticationSession(), context.getEvent())) {
-//              resetCredential.reset(user, username);
-//        }
+//        resetCredential.reset(user, username);
+        if (sendEmailVer(user, context.form(), context.getSession(), context.getAuthenticationSession(), context.getEvent())) {
+              resetCredential.reset(user, username);
+        }
     }
 
     private UserEntity findUserByConvertUsernameToPhone(RealmModel realm, final String username) {
