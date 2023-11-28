@@ -48,7 +48,7 @@
                     </span>
                     <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;"
                        href="https://moscow.b2b.dom.ru/agreement" target="_blink">
-                        с правилами обработки перс. данных</a>
+                        с правилами обработки персональных данных</a>
                 </span>
             </div>
         </form>
