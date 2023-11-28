@@ -47,9 +47,13 @@
                         <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
                                 type="submit">${enter}</button>
                         <#if activateNewAuth!false>
-                            <button id="topSecretButton" type="button" class="btn btn-switcher text-accentBlue-900"
-                                    onclick="document.getElementById('smsLoginButton').click();">Получить временный код
-                            </button>
+                            <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">
+                                <span class="opacity-50" style="font-weight: 350; color: #7585A1;">
+                                 Нажимая кнопку, вы соглашаетесь <br>
+                                </span>
+                                <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;" href="https://moscow.b2b.dom.ru/agreement" target="_blink">с правилами обработки персональных данных</a>
+                             </span>
+                            <a href="#" id="topSecretButton" class="btn btn-switcher text-accentBlue-900">Получить временный код</a>
                         </#if>
                     </div>
                     <div class="forgot-pass">
@@ -251,7 +255,8 @@
 
         <#elseif loginViaPhoneCall>
             <#if !isSwitcherOn!true>
-                <p class="mb-7 info-text">На указанный номер поступит звонок. Для подтверждения <span class="breakable"> нужно ввести последние 4 цифры входящего номера</span></p>
+                <p class="mb-7 info-text">На указанный номер поступит звонок. Для подтверждения <span class="breakable"> нужно ввести последние 4 цифры входящего номера</span>
+                </p>
                 <#if realm.password>
                     <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
                     onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
