@@ -34,7 +34,6 @@
                                    label="${usernameOrEmailPlaceholder}"
                                    placeholder="Телефон или E-mail" value="${(login.username!)}"
                                    type="text" autofocus autocomplete="off"/>
-
                         </#if>
                         <label class="field__label" for="username">Телефон или E-mail</label>
                         <span class="span-line">${error!}</span>
@@ -52,28 +51,19 @@
                             <span class="opacity-50" style="font-weight: 350; color: #7585A1;">
                                  Нажимая кнопку, вы соглашаетесь <br>
                                 </span>
-                            <a class="reference reference_hoverable allowDoubleClick item_hover" style="consent"
+                            <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;"
                                href="https://moscow.b2b.dom.ru/agreement" target="_blink">с Условиями обработки данных</a>
                             </span>
-
-<#--                            <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">-->
-<#--                                <span class="opacity-50" style="font-weight: 350; color: #7585A1;">-->
-<#--                                 Нажимая кнопку, вы соглашаетесь <br>-->
-<#--                                </span>-->
-<#--                                <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;" href="https://moscow.b2b.dom.ru/agreement" target="_blink">с правилами обработки персональных данных</a>-->
-<#--                             </span>-->
+                            </div>
                             <div class="code-forgot">
-                                <span class="code">
+                            <span class="code">
                             <a href="#" id="topSecretButton" onclick="document.getElementById('smsLoginButton').click();">Получить временный код</a>
                         </span>
-                                    <#if realm.resetPasswordAllowed>
-                                        <span class="forgot">
-                            <a href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
+                            <#if realm.resetPasswordAllowed>
+                                <span class="forgot">
+                            <a class="reference reference_hoverable allowDoubleClick item_hover" href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
                                      </span>
-                                    </#if>
-
-                            </div>
-
+                            </#if>
                                 </#if>
                     </div>
 <#--                    <div class="forgot-pass">-->
