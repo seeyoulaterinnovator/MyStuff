@@ -41,28 +41,46 @@
                     </div>
 
                     <@components.field class="md:w-full mt-8" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />
-
-                    <div class="login-password-forgot">
-                    <div class="login-pass mt-10">
+<#--                    iframe -->
+<#--                    изменил стиль на свой-->
+                    <div class="login-consent-password-forgot-code">
+                    <div class="login-consent">
                         <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
-                                type="submit">${enter}</button>
+                                type="submit">${enter}frame</button>
                         <#if activateNewAuth!false>
-                            <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">
-                                <span class="opacity-50" style="font-weight: 350; color: #7585A1;">
+                            <span class="opacity-50" style="font-weight: 350; color: #7585A1;">
                                  Нажимая кнопку, вы соглашаетесь <br>
                                 </span>
-                                <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;" href="https://moscow.b2b.dom.ru/agreement" target="_blink">с правилами обработки персональных данных</a>
-                             </span>
-                            <a href="#" id="topSecretButton" class="btn btn-switcher text-accentBlue-900">Получить временный код</a>
-                        </#if>
-                    </div>
-                    <div class="forgot-pass">
-                        <#if realm.resetPasswordAllowed>
-                            <span class="my-span">
+                            <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;" href="https://moscow.b2b.dom.ru/agreement" target="_blink">с Условиями обработки данных</a>
+
+<#--                            <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">-->
+<#--                                <span class="opacity-50" style="font-weight: 350; color: #7585A1;">-->
+<#--                                 Нажимая кнопку, вы соглашаетесь <br>-->
+<#--                                </span>-->
+<#--                                <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;" href="https://moscow.b2b.dom.ru/agreement" target="_blink">с правилами обработки персональных данных</a>-->
+<#--                             </span>-->
+                            <div class="forgot-code">
+                                <span class="-code">
+                            <a href="#" id="topSecretButton" class="forgot-pass" onclick="document.getElementById('smsLoginButton').click();">Получить временный код</a>
+                        </span>
+                                <span class="forgot">
+                                    <#if realm.resetPasswordAllowed>
+                                        <span class="forgot">
                             <a href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
-            </span>
-                        </#if>
+                                     </span>
+                                    </#if>
+                                </span>
+                            </div>
+
+                                </#if>
                     </div>
+<#--                    <div class="forgot-pass">-->
+<#--                        <#if realm.resetPasswordAllowed>-->
+<#--                            <span class="my-span">-->
+<#--                            <a href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>-->
+<#--            </span>-->
+<#--                        </#if>-->
+<#--                    </div>-->
                 </#if>
                 </div>
                 </form>
@@ -120,7 +138,7 @@
                 <div class="login-password-forgot">
                     <div class="login-pass mt-10">
                         <button id="submit-phone" name="smsButton" class="btn btn-main btn-enter btn-new-enter"
-                                type="submit">${enter}</button>
+                                type="submit">${enter}123</button>
                         <button id="topSecretButton" type="button" class="w-full btn btn-back text-accentBlue-900"
                                 onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                         </button>
@@ -167,7 +185,7 @@
                 <div class="login-password-forgot">
                     <div class="login-pass mt-10">
                         <button id="submit-phone" name="smsButton" class="btn btn-main btn-enter btn-new-enter"
-                                type="submit">${enter}</button>
+                                type="submit">${enter}170</button>
                         <button id="topSecretButton" type="button" class="w-full btn btn-back text-accentBlue-900"
                                 onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                         </button>
@@ -215,7 +233,7 @@
                     <div class="login-password-forgot">
                     <div class="login-pass mt-10">
                         <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
-                                type="submit">${enter}</button>
+                                type="submit">${enter}218</button>
                         <#if activateNewAuth!false>
                             <button id="topSecretButton" type="button" class="btn btn-switcher text-accentBlue-900"
                                     onclick="document.getElementById('smsLoginButton').click();">Получить временный код
@@ -289,7 +307,7 @@
                 <div class="login-password-forgot">
                     <div class="login-pass mt-10">
                         <button id="submit-phone" name="phoneCallButton" class="btn btn-main btn-enter btn-new-enter"
-                                type="submit">${enter}</button>
+                                type="submit">${enter}292</button>
                         <button id="topSecretButton" type="button" class="w-full btn btn-back text-accentBlue-900"
                                 onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                         </button>
@@ -336,7 +354,7 @@
                     <div class="login-password-forgot">
                     <div class="login-pass mt-10">
                         <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
-                                type="submit">${enter}</button>
+                                type="submit">${enter}339</button>
                         <#if activateNewAuth!false>
                             <button id="topSecretButton" type="button" class="btn btn-switcher text-accentBlue-900"
                                     onclick="document.getElementById('smsLoginButton').click();">Получить временный код

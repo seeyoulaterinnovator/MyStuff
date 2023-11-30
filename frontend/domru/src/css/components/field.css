@@ -241,6 +241,57 @@
   position: relative;
 
 }
+/*my*/
+.consent-personal-data {
+
+}
+/*my*/
+.login-consent-password-forgot-code {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  align-self: stretch;
+}
+/*my*/
+.login-consent {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  align-self: stretch;
+}
+/*my*/
+.forgot-code {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  align-self: stretch;
+}
+
+/*my*/
+.code {
+  color: var(--light, #16629A);
+  text-align: center;
+
+  /* Desktop/Ссылка_18-24_Desktop */
+  font-family: CoFo Sans;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px; /* 133.333% */
+}
+
+/*my*/
+.fogot {
+  color: var(--light, #16629A);
+  /* Desktop/Ссылка_18-24_Desktop */
+  font-family: CoFo Sans;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px; /* 133.333% */
+}
+
 
 .field__input.field__input--error {
   border-color: #FF312C;
