@@ -48,10 +48,13 @@
                         <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
                                 type="submit">${enter}frame</button>
                         <#if activateNewAuth!false>
+                        <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">
                             <span class="opacity-50" style="font-weight: 350; color: #7585A1;">
                                  Нажимая кнопку, вы соглашаетесь <br>
                                 </span>
-                            <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;" href="https://moscow.b2b.dom.ru/agreement" target="_blink">с Условиями обработки данных</a>
+                            <a class="reference reference_hoverable allowDoubleClick item_hover" style="consent"
+                               href="https://moscow.b2b.dom.ru/agreement" target="_blink">с Условиями обработки данных</a>
+                            </span>
 
 <#--                            <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">-->
 <#--                                <span class="opacity-50" style="font-weight: 350; color: #7585A1;">-->
@@ -59,17 +62,16 @@
 <#--                                </span>-->
 <#--                                <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;" href="https://moscow.b2b.dom.ru/agreement" target="_blink">с правилами обработки персональных данных</a>-->
 <#--                             </span>-->
-                            <div class="forgot-code">
-                                <span class="-code">
-                            <a href="#" id="topSecretButton" class="forgot-pass" onclick="document.getElementById('smsLoginButton').click();">Получить временный код</a>
+                            <div class="code-forgot">
+                                <span class="code">
+                            <a href="#" id="topSecretButton" onclick="document.getElementById('smsLoginButton').click();">Получить временный код</a>
                         </span>
-                                <span class="forgot">
                                     <#if realm.resetPasswordAllowed>
                                         <span class="forgot">
                             <a href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
                                      </span>
                                     </#if>
-                                </span>
+
                             </div>
 
                                 </#if>

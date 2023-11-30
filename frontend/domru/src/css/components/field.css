@@ -242,8 +242,11 @@
 
 }
 /*my*/
-.consent-personal-data {
-
+.consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex: 1 0 0;
 }
 /*my*/
 .login-consent-password-forgot-code {
@@ -261,7 +264,7 @@
   align-self: stretch;
 }
 /*my*/
-.forgot-code {
+.code-forgot {
   display: flex;
   justify-content: space-between;
   align-items: center;
