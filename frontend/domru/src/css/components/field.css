@@ -241,34 +241,46 @@
   position: relative;
 
 }
-/*my*/
-.consent {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  flex: 1 0 0;
-}
+
 /*my*/
 .login-consent-password-forgot-code {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 24px;
+  gap: 18px;
   align-self: stretch;
 }
 /*my*/
 .login-consent {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 18px;
   align-self: stretch;
 }
 /*my*/
 .code-forgot {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 18px;
   align-self: stretch;
+}
+
+/*my*/
+.login {
+  display: flex;
+  height: 44px;
+  padding: 12px 17px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+/*my*/
+.consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex: 1 0 0;
 }
 
 /*my*/

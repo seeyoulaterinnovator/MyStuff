@@ -45,14 +45,15 @@
                     <div class="login-consent-password-forgot-code">
                     <div class="login-consent">
                         <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
-                                type="submit">${enter}frame</button>
+                                type="submit">${enter}</button>
                         <#if activateNewAuth!false>
                         <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">
-                            <span class="opacity-50" style="font-weight: 350; color: #7585A1;">
+                            <span class="consent" style="font-weight: 350; color: #7585A1;">
                                  Нажимая кнопку, вы соглашаетесь <br>
                                 </span>
                             <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;"
-                               href="https://moscow.b2b.dom.ru/agreement" target="_blink">с Условиями обработки данных</a>
+                               href="https://moscow.b2b.dom.ru/agreement" target="_blink">
+                                с Условиями обработки данных</a>
                             </span>
                             </div>
                             <div class="code-forgot">
