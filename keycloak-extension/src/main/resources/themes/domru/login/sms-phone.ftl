@@ -45,9 +45,12 @@
 
             <div class="back-timer">
                 <div>
-                    <button id="topSecretButton" type="button" class="btn btn-back text-accentBlue-900"
-                            onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
-                    </button>
+<#--                    <button id="topSecretButton" type="button" class="btn btn-back text-accentBlue-900"-->
+<#--                            onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина-->
+<#--                    </button>-->
+                    <a id="topSecretButton" class="enter-login-link" href="#"
+                       onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
+                    </a>
                 </div>
                 <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
                         <span>

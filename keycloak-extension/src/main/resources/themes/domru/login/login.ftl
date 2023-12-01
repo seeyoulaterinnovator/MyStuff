@@ -135,8 +135,8 @@
                                 с Условиями обработки данных</a>
                             </span>
                     </div>
-                    <div class="flex justify-between code-forgot">
-                    <a id="topSecretButton" class="enter-login-link"
+                    <div class="flex justify-between enter-login-link">
+                    <a id="topSecretButton" class="enter-login-link" href="#"
                        onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                     </a>
                     </div>
