@@ -80,20 +80,13 @@
 <#--                            </span>-->
                             </span>
                             </div>
-                            <div class="flex justify-between">
-                            <a href="#" id="topSecretButton" onclick="document.getElementById('smsLoginButton').click();">Получить временный код</a>
+                            <div class="flex justify-between code-forgot">
+                            <a class="code" href="#" id="topSecretButton" onclick="document.getElementById('smsLoginButton').click();">Получить временный код</a>
                             <#if realm.resetPasswordAllowed>
                             <a class="reference reference_hoverable allowDoubleClick item_hover forgot" href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
                             </#if>
                                 </#if>
                     </div>
-<#--                    <div class="forgot-pass">-->
-<#--                        <#if realm.resetPasswordAllowed>-->
-<#--                            <span class="my-span">-->
-<#--                            <a href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>-->
-<#--            </span>-->
-<#--                        </#if>-->
-<#--                    </div>-->
                 </#if>
                 </div>
                 </form>
