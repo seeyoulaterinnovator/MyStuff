@@ -82,9 +82,10 @@
                             </div>
                             <div class="flex justify-between code-forgot">
                             <a class="code" href="#" id="topSecretButton" onclick="document.getElementById('smsLoginButton').click();">Получить временный код</a>
-                            <#if realm.resetPasswordAllowed>
+<#--                            раскомментириуй меня!!!!!!!!!!!!!!!!!!!-->
+<#--                            <#if realm.resetPasswordAllowed>-->
                             <a class="reference reference_hoverable allowDoubleClick item_hover forgot" href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
-                            </#if>
+<#--                            </#if>-->
                                 </#if>
                     </div>
                 </#if>
