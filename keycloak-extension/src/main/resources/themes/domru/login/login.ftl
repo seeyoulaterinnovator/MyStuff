@@ -63,30 +63,27 @@
 <#--                    изменил стиль на свой-->
 <#--                    <div class="login-consent-password-forgot-code">-->
                     <div class="login-password-forgot">
+                    <div class="login-pass mt-10">
 <#--                    <div class="login-consent">-->
-                    <div class="flex flex-basis-auto items-center">
+<#--                    <div class="flex flex-basis-auto items-center">-->
                         <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
                                 type="submit">${enter}</button>
                         <#if activateNewAuth!false>
                             <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">
-                        <span class="flex flex-col sm:flex-row mt-8">
+<#--                        <span class="flex flex-col sm:flex-row mt-8">-->
                             <span class="opacity-50" style="font-weight: 350; color: #7585A1;">
                                  Нажимая кнопку, вы соглашаетесь <br>
                                 </span>
                             <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;"
                                href="https://moscow.b2b.dom.ru/agreement" target="_blink">
                                 с Условиями обработки данных</a>
-                            </span>
+<#--                            </span>-->
                             </span>
                             </div>
-                            <div class="code-forgot">
-                            <span class="code">
+                            <div class="flex justify-between">
                             <a href="#" id="topSecretButton" onclick="document.getElementById('smsLoginButton').click();">Получить временный код</a>
-                        </span>
                             <#if realm.resetPasswordAllowed>
-                                <span class="forgot">
-                            <a class="reference reference_hoverable allowDoubleClick item_hover" href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
-                                     </span>
+                            <a class="reference reference_hoverable allowDoubleClick item_hover forgot" href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
                             </#if>
                                 </#if>
                     </div>

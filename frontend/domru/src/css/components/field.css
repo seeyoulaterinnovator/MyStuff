@@ -297,10 +297,7 @@
 }
 
 /*my*/
-.fogot {
-  color: var(--light, #16629A);
-  /* Desktop/Ссылка_18-24_Desktop */
-  font-family: CoFo Sans;
+.forgot {
   font-size: 18px;
   font-style: normal;
   font-weight: 400;
