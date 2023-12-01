@@ -40,15 +40,30 @@
                     </div>
 
                     <@components.field class="md:w-full mt-8" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />
-<#--                    iframe -->
+<#--                    дернул с регистрации -->
+<#--                    <div class="flex flex-col sm:flex-row mt-8">-->
+<#--                        <div class="flex flex-basis-auto items-center">-->
+<#--                            <button id="submit" class="btn btn-main reg-fields" type="submit">${msg(doRegister)}</button>-->
+<#--                        </div>-->
+<#--                        <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">-->
+<#--                    <span class="opacity-50" style="font-weight: 350; color: #7585A1;">-->
+<#--                        Нажимая кнопку, вы соглашаетесь <br>-->
+<#--                    </span>-->
+<#--                    <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;"-->
+<#--                       href="https://moscow.b2b.dom.ru/agreement" target="_blink">-->
+<#--                        с правилами обработки персональных данных</a>-->
+<#--                </span>-->
+<#--                    </div>-->
 <#--                    изменил стиль на свой-->
-                    <div class="login-consent-password-forgot-code">
-                    <div class="login-consent">
+<#--                    <div class="login-consent-password-forgot-code">-->
+                    <div class="flex flex-col sm:flex-row mt-8">
+<#--                    <div class="login-consent">-->
+                    <div class="flex flex-basis-auto items-center">
                         <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
                                 type="submit">${enter}</button>
                         <#if activateNewAuth!false>
                         <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">
-                            <span class="consent" style="font-weight: 350; color: #7585A1;">
+                            <span class="opacity-50" style="font-weight: 350; color: #7585A1;">
                                  Нажимая кнопку, вы соглашаетесь <br>
                                 </span>
                             <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;"
