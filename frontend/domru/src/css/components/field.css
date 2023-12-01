@@ -304,6 +304,13 @@
   line-height: 24px; /* 133.333% */
 }
 
+.enter-login-link {
+  font-size: 17px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 23px; /* 135.294% */
+}
+
 
 .field__input.field__input--error {
   border-color: #FF312C;
