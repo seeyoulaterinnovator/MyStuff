@@ -58,7 +58,7 @@
                         </span>
                 <#else>
                 <div class="flex justify-between enter-login-link-timer enter-login-link-resend ">
-                    <a id="topSecretButton" class="enter-login-link" href="#"
+                    <a id="topSecretButton" class="resend" href="#"
                        onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                     </a>
                     <div id="timer"  style="margin-left: auto;">

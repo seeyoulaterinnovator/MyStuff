@@ -377,7 +377,7 @@
 
 /*my*/
 .resend {
-  olor: var(--light, #16629A);
+  color: var(--light, #16629A);
   text-align: right;
   /* Tablet/Ссылка_17-23_Tablet */
   font-family: CoFo Sans;
