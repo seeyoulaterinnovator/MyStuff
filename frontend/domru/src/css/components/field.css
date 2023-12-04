@@ -257,6 +257,15 @@
   gap: 18px;
   align-self: stretch;
 }
+
+/*my*/
+. login-consent-enter-login-link {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+  align-self: stretch;
+}
 /*my*/
 .code-forgot {
   display: flex;

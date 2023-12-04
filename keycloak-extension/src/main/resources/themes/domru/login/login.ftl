@@ -120,7 +120,8 @@
                         <span class="span-line">${error!}</span>
                     </div>
                 </#if>
-                <div class="login-password-forgot">
+                <div class=""
+                <div class="login-consent">
                     <div class="login-pass mt-10">
                         <button id="submit-phone" name="smsButton" class="btn btn-main btn-enter btn-new-enter"
                                 type="submit">${enter}123</button>
