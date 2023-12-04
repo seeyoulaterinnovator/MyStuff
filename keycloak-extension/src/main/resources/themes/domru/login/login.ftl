@@ -121,33 +121,7 @@
                         <span class="span-line">${error!}</span>
                     </div>
                 </#if>
-
-               <div class="login-consent-password-forgot-code">
-
-                    <div class="flex flex-col sm:flex-row mt-8">
-                        <div class=" flex flex-basis-auto items-center login-consent">
-                             <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
-                                type="submit">${enter}</button>
-                        </div>
-                        <#if activateNewAuth!false>
-                            <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">
-                                <span class="opacity-50" style="font-weight: 350; color: #7585A1;">
-                                 Нажимая кнопку, вы соглашаетесь <br>
-                                </span>
-                                <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;"
-                                    href="https://moscow.b2b.dom.ru/agreement" target="_blink">
-                                    с Условиями обработки данных</a>
-                            </span>
-                            </div>
-                            <div class="flex justify-between code-forgot">
-                            <a class="code" href="#" id="topSecretButton" onclick="document.getElementById('smsLoginButton').click();">Получить временный код</a>
-<#--                            раскомментириуй меня!!!!!!!!!!!!!!!!!!!-->
-<#--                            <#if realm.resetPasswordAllowed>-->
-                            <a class="reference reference_hoverable allowDoubleClick item_hover forgot" href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
-<#--                            </#if>-->
-                                </#if>
-                            </div>
-                    </div>
+                
 <#--                фрейм Мы отправим код в СМС 123
 -->
                 <div class="login-consent-enter-login-link">
