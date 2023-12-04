@@ -122,7 +122,9 @@
                     </div>
                 </#if>
 
-<#--                <div class="flex flex-col sm:flex-row mt-8">
+<#--                <div class="login-consent-password-forgot-code">
+
+                    <div class="flex flex-col sm:flex-row mt-8">
                         <div class=" flex flex-basis-auto items-center login-consent">
                              <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
                                 type="submit">${enter}</button>
@@ -136,14 +138,25 @@
                                     href="https://moscow.b2b.dom.ru/agreement" target="_blink">
                                     с Условиями обработки данных</a>
                             </span>
-                            </div>-->
-<#--                фрейм Мы отправим код в СМС
+                            </div>
+                            <div class="flex justify-between code-forgot">
+                            <a class="code" href="#" id="topSecretButton" onclick="document.getElementById('smsLoginButton').click();">Получить временный код</a>
+<#--                            раскомментириуй меня!!!!!!!!!!!!!!!!!!!-->
+<#--                            <#if realm.resetPasswordAllowed>-->
+                            <a class="reference reference_hoverable allowDoubleClick item_hover forgot" href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
+<#--                            </#if>-->
+                                </#if>
+                            </div>
+                    </div>
+<#--                фрейм Мы отправим код в СМС 123
 -->
                 <div class="login-consent-enter-login-link">
+                <div class="flex flex-col sm:flex-row mt-8">
                 <div class="flex flex-basis-auto items-center login-consent">
 <#--                    <div class="login-pass mt-10">-->
                         <button id="submit-phone" name="smsButton" class="btn btn-main btn-enter btn-new-enter"
-                                type="submit">${enter}123</button>
+                                type="submit">${enter}</button>
+                                </div>
 <#--                        paste consent-->
                         <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">
                             <span class="opacity-50" style="font-weight: 350; color: #7585A1;">
@@ -153,7 +166,7 @@
                                href="https://moscow.b2b.dom.ru/agreement" target="_blink">
                                 с Условиями обработки данных</a>
                             </span>
-<#--                    </div>-->
+                    </div>
                 </div>
 
 <#--                     <div class="login-consent-password-forgot-code">
