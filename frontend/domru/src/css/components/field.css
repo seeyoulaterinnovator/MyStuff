@@ -306,10 +306,20 @@
 
 /*my*/
 .enter-login-link {
+  color: var(--light, #16629A);
+  /* Tablet/Ссылка_17-23_Tablet */
+  font-family: CoFo Sans;
   font-size: 17px;
   font-style: normal;
   font-weight: 400;
   line-height: 23px; /* 135.294% */
+}
+
+.enter-login-link-timer {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  align-self: stretch;
 }
 
 

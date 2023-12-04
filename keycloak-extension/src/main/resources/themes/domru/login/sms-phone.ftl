@@ -57,13 +57,19 @@
                             <button class="font-light verification__resend w-full" name="resend" type="submit">${sendAgain}</button>
                         </span>
                 <#else>
+                <div class="flex justify-between enter-login-link">
+                    <a id="topSecretButton" class="enter-login-link" href="#"
+                       onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
+                    </a>
                     <div id="timer" style="margin-left: auto;">
                             <span style="color: #000000; font-size: 14px!important;">
                                 Код можно запросить через:
                             </span>
                         <br>
-                            <span id="timer-time" class="textTimer" style="font-size: 14px!important; color: #000000!important;"></span>
+                        <span id="timer-time" class="textTimer" style="font-size: 14px!important; color: #000000!important;"></span>
                     </div>
+                </div>
+
                         <#if enableRepeatCall?? && enableRepeatCall!>
                             <p class="hidden font-light text-black verification__text" id="resend">
                                 <span>
