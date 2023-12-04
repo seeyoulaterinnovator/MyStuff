@@ -90,9 +90,10 @@
                 </form>
 
             <#elseif isSwitcherOn!false>
+
                 <p class="mb-7">Мы отправим код в СМС</p>
                 <#if realm.password>
-                    <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
+                    <form id="loginForm" class="md:flex md:flex-wrap md:justify-between we-are-send-code"
                     onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
 
                     <div class="field field__container field--required md:w-full">
@@ -136,7 +137,8 @@
                                     с Условиями обработки данных</a>
                             </span>
                             </div>-->
-
+<#--                фрейм Мы отправим код в СМС
+-->
                 <div class="login-consent-enter-login-link">
                 <div class="flex flex-basis-auto items-center login-consent">
 <#--                    <div class="login-pass mt-10">-->
