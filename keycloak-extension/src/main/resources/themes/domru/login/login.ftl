@@ -207,7 +207,7 @@
                 <div class="login-password-forgot">
                     <div class="login-pass mt-10">
                         <button id="submit-phone" name="smsButton" class="btn btn-main btn-enter btn-new-enter"
-                                type="submit">${enter}170</button>
+                                type="submit">${enter}</button>
                         <button id="topSecretButton" type="button" class="w-full btn btn-back text-accentBlue-900"
                                 onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                         </button>
@@ -255,7 +255,7 @@
                     <div class="login-password-forgot">
                     <div class="login-pass mt-10">
                         <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
-                                type="submit">${enter}218</button>
+                                type="submit">${enter}</button>
                         <#if activateNewAuth!false>
                             <button id="topSecretButton" type="button" class="btn btn-switcher text-accentBlue-900"
                                     onclick="document.getElementById('smsLoginButton').click();">Получить временный код
