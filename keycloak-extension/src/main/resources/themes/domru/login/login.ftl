@@ -93,7 +93,7 @@
 
                 <p class="mb-7">Мы отправим код в СМС</p>
                 <#if realm.password>
-                    <form id="loginForm" class="md:flex md:flex-wrap md:justify-between we-are-send-code"
+                    <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
                     onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
 
                     <div class="field field__container field--required md:w-full">
@@ -177,7 +177,7 @@
             <#if !isSwitcherOn!true>
                 <p class="mb-7">Мы отправим код в СМС</p>
                 <#if realm.password>
-                    <form id="loginForm" class="md:flex md:flex-wrap md:justify-between we-are-send-code"
+                    <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
                     onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
                     <div class="field field__container field--required md:w-full">
                         <input class="hidden w-0 h-0" id="domain-login" name="city">
