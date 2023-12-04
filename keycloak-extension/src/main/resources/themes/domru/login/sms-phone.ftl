@@ -57,7 +57,7 @@
                             <button class="font-light verification__resend w-full" name="resend" type="submit">${sendAgain}</button>
                         </span>
                 <#else>
-                <div class="flex justify-between enter-login-link-timer">
+                <div class="flex justify-between enter-login-link-timer enter-login-link-resend ">
                     <a id="topSecretButton" class="enter-login-link" href="#"
                        onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                     </a>
@@ -68,7 +68,6 @@
                         <span id="timer-time" class="timer-new-countdown textTimer"></span>
                     </div>
                 </div>
-
                         <#if enableRepeatCall?? && enableRepeatCall!>
                             <p class="hidden font-light text-black verification__text" id="resend">
                                 <span>

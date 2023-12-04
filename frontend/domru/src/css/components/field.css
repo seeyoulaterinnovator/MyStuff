@@ -344,6 +344,14 @@
   align-self: stretch;
 }
 
+/*my*/
+.enter-login-link-resend {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  align-self: stretch;
+}
+
 .timer-new {
   color: var(--light, #899DA8);
   text-align: right;
