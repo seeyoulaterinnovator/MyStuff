@@ -122,7 +122,7 @@
                     </div>
                 </#if>
 
-<#--                <div class="login-consent-password-forgot-code">
+               <div class="login-consent-password-forgot-code">
 
                     <div class="flex flex-col sm:flex-row mt-8">
                         <div class=" flex flex-basis-auto items-center login-consent">
