@@ -41,7 +41,7 @@
 
                     <@components.field class="md:w-full mt-8" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />
 
-                    <div class="flex flex-col sm:flex-row mt-8 login-password-forgot">
+                    <div class="flex flex-col sm:flex-row mt-8">
                     <div class=" flex flex-basis-auto items-center login-consent">
                         <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
                                 type="submit">${enter}</button>
