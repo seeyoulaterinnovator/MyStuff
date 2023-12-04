@@ -333,6 +333,7 @@
   font-style: normal;
   font-weight: 400;
   line-height: 23px; /* 135.294% */
+  margin-top: 18px;
 }
 
 /*my*/
@@ -364,6 +365,18 @@
   font-weight: 400;
   line-height: 18px;
   letter-spacing: 0.42px;
+}
+
+/*my*/
+.resend {
+  olor: var(--light, #16629A);
+  text-align: right;
+  /* Tablet/Ссылка_17-23_Tablet */
+  font-family: CoFo Sans;
+  font-size: 17px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 23px; /* 135.294% */
 }
 
 
@@ -557,6 +570,7 @@
 @media only screen and (max-width: 767px) {
   .back-timer {
     flex-direction: column;
+    align-items: start;
     justify-content: center;
     gap: 10px;
     width: 100%;

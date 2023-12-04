@@ -61,7 +61,7 @@
                             <a class="code" href="#" id="topSecretButton" onclick="document.getElementById('smsLoginButton').click();">Получить временный код</a>
 <#--                            раскомментириуй меня!!!!!!!!!!!!!!!!!!!-->
 <#--                            <#if realm.resetPasswordAllowed>-->
-                            <a class="reference reference_hoverable allowDoubleClick item_hover forgot" href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
+                            <a class="forgot reference_hoverable allowDoubleClick item_hover" href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
 <#--                            </#if>-->
                                 </#if>
                             </div>
@@ -159,7 +159,7 @@
                                 с Условиями обработки данных</a>
 <#--                            </span>-->
 
-                    <div class="flex justify-between enter-login-link">
+                    <div class="flex justify-between">
                     <a id="topSecretButton" class="enter-login-link" href="#"
                        onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                     </a>

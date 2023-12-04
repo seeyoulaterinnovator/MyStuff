@@ -62,18 +62,17 @@
                        onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                     </a>
                     <div id="timer"  style="margin-left: auto;">
-                            <span class="timer-new" style="color: #000000; font-size: 14px!important;">
+                            <span class="timer-new">
                                 Код действует:
                             </span>
-                        <br>
-                        <span id="timer-time" class="timer-new-countdown textTimer" style="font-size: 14px!important; color: #000000!important;"></span>
+                        <span id="timer-time" class="timer-new-countdown textTimer"></span>
                     </div>
                 </div>
 
                         <#if enableRepeatCall?? && enableRepeatCall!>
                             <p class="hidden font-light text-black verification__text" id="resend">
                                 <span>
-                                    <button class="font-light verification__resend" name="resend"
+                                    <button class="font-light verification__resend resend" name="resend"
                                                 type="submit">${sendAgain}</button>
                                 </span>
                             </p>
