@@ -65,7 +65,7 @@
                             <span class="timer-new">
                                 Код действует:
                             </span>
-                        <span id="timer-time" class="timer-new-countdown textTimer"></span>
+                        <span id="timer-time" class="timer-new-countdown"></span>
                     </div>
                 </div>
                         <#if enableRepeatCall?? && enableRepeatCall!>
