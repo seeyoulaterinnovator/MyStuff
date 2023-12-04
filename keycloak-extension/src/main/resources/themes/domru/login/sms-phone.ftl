@@ -61,9 +61,9 @@
                     <a id="topSecretButton" class="enter-login-link" href="#"
                        onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                     </a>
-                    <div id="timer" class="timer-new" style="margin-left: auto;">
-                            <span style="color: #000000; font-size: 14px!important;">
-                                Код можно запросить через:
+                    <div id="timer"  style="margin-left: auto;">
+                            <span class="timer-new" style="color: #000000; font-size: 14px!important;">
+                                Код действует:
                             </span>
                         <br>
                         <span id="timer-time" class="timer-new-countdown textTimer" style="font-size: 14px!important; color: #000000!important;"></span>

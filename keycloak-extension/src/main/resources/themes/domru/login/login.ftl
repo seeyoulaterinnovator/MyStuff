@@ -121,7 +121,7 @@
                         <span class="span-line">${error!}</span>
                     </div>
                 </#if>
-                
+
 <#--                фрейм Мы отправим код в СМС 123
 -->
                 <div class="login-consent-enter-login-link">
