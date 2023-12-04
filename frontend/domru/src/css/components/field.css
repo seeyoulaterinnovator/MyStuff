@@ -259,6 +259,16 @@
 }
 
 /*my*/
+.we-are-send-code {
+  display: flex;
+  width: 480px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+/*my*/
 .login-consent-enter-login-link {
   display: flex;
   flex-direction: column;
