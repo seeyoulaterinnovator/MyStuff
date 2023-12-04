@@ -121,8 +121,8 @@
                     </div>
                 </#if>
                 <div class="login-consent-enter-login-link">
-                <div class="login-consent">
-                    <div class="login-pass mt-10">
+                <div class="flex flex-basis-auto items-center login-consent">
+<#--                    <div class="login-pass mt-10">-->
                         <button id="submit-phone" name="smsButton" class="btn btn-main btn-enter btn-new-enter"
                                 type="submit">${enter}123</button>
 <#--                        paste consent-->
@@ -134,14 +134,32 @@
                                href="https://moscow.b2b.dom.ru/agreement" target="_blink">
                                 с Условиями обработки данных</a>
                             </span>
-                    </div>
-
-<#--                    <div class="flex justify-between enter-login-link">-->
-<#--                    <a id="topSecretButton" class="enter-login-link" href="#"-->
-<#--                       onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина-->
-<#--                    </a>-->
 <#--                    </div>-->
                 </div>
+
+<#--                     <div class="login-consent-password-forgot-code">
+                    <div class="flex flex-col sm:flex-row mt-8">
+                    <div class=" flex flex-basis-auto items-center login-consent">
+                        <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
+                                type="submit">${enter}</button>
+                    </div>
+                        <#if activateNewAuth!false>
+                            <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">
+                                <span class="opacity-50" style="font-weight: 350; color: #7585A1;">
+                                 Нажимая кнопку, вы соглашаетесь <br>
+                                </span>
+                                <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;"
+                               href="https://moscow.b2b.dom.ru/agreement" target="_blink">
+                                с Условиями обработки данных</a>
+<#--                            </span>-->
+                    </span>-->
+
+                    <div class="flex justify-between enter-login-link">
+                    <a id="topSecretButton" class="enter-login-link" href="#"
+                       onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
+                    </a>
+                    </div>
+
                 </div>
                 </form>
                 <form id="off" method="POST" name="off" action="${url.loginUrl}">
