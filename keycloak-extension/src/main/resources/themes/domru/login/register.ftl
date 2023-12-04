@@ -47,8 +47,8 @@
                         Нажимая кнопку, вы соглашаетесь <br>
                     </span>
                     <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;"
-                       href="https://dom.ru/policy.pdf" target="_blink">
-                        с правилами обработки перс. данных</a>
+                       href="https://moscow.b2b.dom.ru/agreement" target="_blink">
+                        с правилами обработки персональных данных</a>
                 </span>
             </div>
         </form>

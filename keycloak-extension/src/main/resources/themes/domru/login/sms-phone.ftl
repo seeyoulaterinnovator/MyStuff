@@ -43,28 +43,35 @@
             <input id="expirationSeconds" name="expirationSeconds" class="hidden" value="${expirationSeconds!}"/>
             <input id="smscode" name="smscode" class="hidden"/>
 
-            <div class="back-timer">
-                <div>
-                    <button id="topSecretButton" type="button" class="btn btn-back text-accentBlue-900"
-                            onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
-                    </button>
-                </div>
+            <div class="back-timer lex justify-between">
+<#--                <div>-->
+<#--                    <button id="topSecretButton" type="button" class="btn btn-back text-accentBlue-900"-->
+<#--                            onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина-->
+<#--                    </button>-->
+<#--                    <a id="topSecretButton" class="enter-login-link" href="#"-->
+<#--                       onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина-->
+<#--                    </a>-->
+<#--                </div>-->
                 <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
                         <span>
                             <button class="font-light verification__resend w-full" name="resend" type="submit">${sendAgain}</button>
                         </span>
                 <#else>
-                    <div id="timer" style="margin-left: auto;">
-                            <span style="color: #000000; font-size: 14px!important;">
-                                Код можно запросить через:
+                <div class="flex justify-between enter-login-link-timer enter-login-link-resend ">
+                    <a id="topSecretButton" class="resend" href="#"
+                       onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
+                    </a>
+                    <div id="timer"  style="margin-left: auto;">
+                            <span class="timer-new">
+                                Код действует:
                             </span>
-                        <br>
-                            <span id="timer-time" class="textTimer" style="font-size: 14px!important; color: #000000!important;"></span>
+                        <span id="timer-time" class="timer-new-countdown"></span>
                     </div>
+                </div>
                         <#if enableRepeatCall?? && enableRepeatCall!>
                             <p class="hidden font-light text-black verification__text" id="resend">
                                 <span>
-                                    <button class="font-light verification__resend" name="resend"
+                                    <button class="font-light verification__resend resend" name="resend"
                                                 type="submit">${sendAgain}</button>
                                 </span>
                             </p>

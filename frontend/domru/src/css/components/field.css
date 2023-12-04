@@ -242,6 +242,152 @@
 
 }
 
+/*my*/
+.login-consent-password-forgot-code {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+  align-self: stretch;
+}
+/*my*/
+.login-consent {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  align-self: stretch;
+}
+
+/*my*/
+.we-are-send-code {
+  display: flex;
+  width: 480px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+/*my*/
+.login-consent-enter-login-link {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+  align-self: stretch;
+}
+/*my*/
+.code-forgot {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  align-self: stretch;
+}
+
+/*my*/
+.login {
+  display: flex;
+  height: 44px;
+  padding: 12px 17px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+/*my*/
+.consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex: 1 0 0;
+}
+
+/*my*/
+.code {
+  color: var(--light, #16629A);
+  /* Tablet/Ссылка_17-23_Tablet */
+  font-family: CoFo Sans;
+  font-size: 17px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 23px; /* 135.294% */
+}
+
+/*my*/
+.forgot {
+  color: var(--light, #16629A);
+  /* Tablet/Ссылка_17-23_Tablet */
+  font-family: CoFo Sans;
+  font-size: 17px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 23px; /* 135.294% */
+}
+
+/*my*/
+.enter-login-link {
+  color: var(--light, #16629A);
+  /* Tablet/Ссылка_17-23_Tablet */
+  font-family: CoFo Sans;
+  font-size: 17px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 23px; /* 135.294% */
+  margin-top: 18px;
+}
+
+/*my*/
+.enter-login-link-timer {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  align-self: stretch;
+}
+
+/*my*/
+.enter-login-link-resend {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  align-self: stretch;
+}
+
+.timer-new {
+  color: var(--light, #899DA8);
+  text-align: right;
+  /* Tablet/Подпись_14-18_Tablet */
+  font-family: CoFo Sans;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 18px; /* 128.571% */
+  letter-spacing: 0.42px;
+}
+
+.timer-new-countdown {
+  color: var(--light, #222);
+  /* Tablet/Подпись_14-18_Tablet */
+  font-family: CoFo Sans;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 18px;
+  letter-spacing: 0.42px;
+}
+
+/*my*/
+.resend {
+  color: var(--light, #16629A);
+  text-align: right;
+  /* Tablet/Ссылка_17-23_Tablet */
+  font-family: CoFo Sans;
+  font-size: 17px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 23px; /* 135.294% */
+}
+
+
 .field__input.field__input--error {
   border-color: #FF312C;
 }
@@ -294,6 +440,16 @@
   flex-grow: 0;
 }
 
+@media only screen and (min-width: 1279px) {
+  .login-pass {
+    color: #16629A;
+    display: flex;
+    flex-direction: row;
+    gap: 18px;
+    width: 480px;
+    height: 44px;
+  }
+}
 
 @media only screen and (min-width: 768px) and (max-width: 1279px) {
   .login-pass {
@@ -422,6 +578,7 @@
 @media only screen and (max-width: 767px) {
   .back-timer {
     flex-direction: column;
+    align-items: start;
     justify-content: center;
     gap: 10px;
     width: 100%;
