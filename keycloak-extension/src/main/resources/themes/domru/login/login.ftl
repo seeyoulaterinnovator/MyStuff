@@ -152,7 +152,6 @@
                                href="https://moscow.b2b.dom.ru/agreement" target="_blink">
                                 с Условиями обработки данных</a>
 <#--                            </span>-->
-                    </span>-->
 
                     <div class="flex justify-between enter-login-link">
                     <a id="topSecretButton" class="enter-login-link" href="#"
