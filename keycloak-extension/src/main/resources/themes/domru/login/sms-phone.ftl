@@ -57,7 +57,7 @@
                             <button class="font-light verification__resend w-full" name="resend" type="submit">${sendAgain}</button>
                         </span>
                 <#else>
-                <div class="flex justify-between enter-login-link">
+                <div class="flex justify-between enter-login-link-timer">
                     <a id="topSecretButton" class="enter-login-link" href="#"
                        onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                     </a>

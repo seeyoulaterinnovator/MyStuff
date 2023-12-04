@@ -120,7 +120,7 @@
                         <span class="span-line">${error!}</span>
                     </div>
                 </#if>
-                <div class=""
+                <div class="login-consent-enter-login-link">
                 <div class="login-consent">
                     <div class="login-pass mt-10">
                         <button id="submit-phone" name="smsButton" class="btn btn-main btn-enter btn-new-enter"
@@ -141,6 +141,7 @@
 <#--                       onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина-->
 <#--                    </a>-->
 <#--                    </div>-->
+                </div>
                 </div>
                 </form>
                 <form id="off" method="POST" name="off" action="${url.loginUrl}">

@@ -259,7 +259,7 @@
 }
 
 /*my*/
-. login-consent-enter-login-link {
+.login-consent-enter-login-link {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
