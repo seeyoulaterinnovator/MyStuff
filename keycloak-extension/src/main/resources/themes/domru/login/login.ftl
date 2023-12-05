@@ -39,6 +39,33 @@
                         <span class="span-line">${error!}</span>
                     </div>
 
+<#--                    начало старого кода-->
+<#--                    <@components.field class="md:w-full mt-8" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />-->
+
+<#--                    <div class="login-password-forgot">-->
+<#--                    <div class="login-pass mt-10">-->
+<#--                        <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"-->
+<#--                                type="submit">${enter}</button>-->
+<#--                        <#if activateNewAuth!false>-->
+<#--                            <button id="topSecretButton" type="button" class="btn btn-switcher text-accentBlue-900"-->
+<#--                                    onclick="document.getElementById('smsLoginButton').click();">Получить временный код-->
+<#--                            </button>-->
+<#--                        </#if>-->
+<#--                    </div>-->
+<#--                    <div class="forgot-pass">-->
+<#--                        <#if realm.resetPasswordAllowed>-->
+<#--                            <span class="my-span">-->
+<#--                            <a href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>-->
+<#--            </span>-->
+<#--                        </#if>-->
+<#--                    </div>-->
+<#--                </#if>-->
+<#--                </div>-->
+<#--                </form>-->
+<#--                    конец старого кода-->
+
+
+
                     <@components.field class="md:w-full mt-8" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />
                     <div class="login-consent-password-forgot-code">
 
@@ -47,7 +74,7 @@
                              <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
                                 type="submit">${enter}</button>
                         </div>
-                        <#if activateNewAuth!false>
+
                             <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">
                                 <span class="opacity-50" style="font-weight: 350; color: #7585A1;">
                                  Нажимая кнопку, вы соглашаетесь <br>
@@ -57,18 +84,20 @@
                                     с Условиями обработки данных</a>
                             </span>
                             </div>
+
                             <div class="flex justify-between code-forgot">
+                             <#if activateNewAuth!false>
                             <a class="code" href="#" id="topSecretButton" onclick="document.getElementById('smsLoginButton').click();">Получить временный код</a>
-<#--                            раскомментириуй меня!!!!!!!!!!!!!!!!!!!-->
+                            </#if>
                             <#if realm.resetPasswordAllowed>
                             <a class="forgot reference_hoverable allowDoubleClick item_hover" href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
                             </#if>
-                                </#if>
                             </div>
                     </div>
                 </#if>
-                </div>
                 </form>
+
+
                 <#if realm.password && social.providers??>
                     <div class="flex items-center mt-2">
                         <div class="text-no-wrap text-with-login mr-6">${loginWith}</div>
