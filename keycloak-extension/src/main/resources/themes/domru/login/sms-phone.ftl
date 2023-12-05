@@ -3,7 +3,7 @@
 
 <@layout.registrationLayout displayMessage=true displayCity=false; section>
     <#if section = "header">
-        <@blocks.contentHeader mainTitle="Вход" secondaryTitle="Регистрация" secondaryHref="${url.registrationUrl}" withBorder=true />
+        <@blocks.contentHeader mainTitle="Вход" secondaryTitle="" secondaryHref="" withBorder=true />
 
     <#elseif section = "form">
         <#if phoneCallButton!false>
