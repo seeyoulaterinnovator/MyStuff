@@ -340,7 +340,7 @@
 .enter-login-link-timer {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 78px;
   align-self: stretch;
 }
 
@@ -348,7 +348,7 @@
 .enter-login-link-resend {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 78px;
   align-self: stretch;
 }
 
