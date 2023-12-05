@@ -71,7 +71,7 @@
                         <#if enableRepeatCall?? && enableRepeatCall!>
                             <p class="hidden font-light text-black verification__text" id="resend">
                                 <span>
-                                    <button class="font-light verification__resend resend" name="resend"
+                                    <button class="resend font-light" name="resend"
                                                 type="submit">${sendAgain}</button>
                                 </span>
                             </p>
