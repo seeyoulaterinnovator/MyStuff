@@ -3,7 +3,7 @@
 
 <@layout.registrationLayout displayMessage=true displayCity=false; section>
     <#if section = "header">
-        <@blocks.contentHeader mainTitle="Вход" secondaryTitle="Регистрация" secondaryHref="${url.registrationUrl}" withBorder=true />
+        <@blocks.contentHeader mainTitle="Вход" secondaryTitle="" secondaryHref="" withBorder=true />
 
     <#elseif section = "form">
         <#if phoneCallButton!false>
@@ -71,7 +71,7 @@
                         <#if enableRepeatCall?? && enableRepeatCall!>
                             <p class="hidden font-light text-black verification__text" id="resend">
                                 <span>
-                                    <button class="font-light verification__resend resend" name="resend"
+                                    <button class="resend font-light" name="resend"
                                                 type="submit">${sendAgain}</button>
                                 </span>
                             </p>
