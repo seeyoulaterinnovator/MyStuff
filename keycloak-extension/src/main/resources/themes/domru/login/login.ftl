@@ -261,33 +261,8 @@
                         <label class="field__label" for="username">Телефон или E-mail</label>
                         <span class="span-line">${error!}</span>
                     </div>
-<#--                    old code-->
-<#--                    <@components.field class="md:w-full mt-8" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />-->
 
-<#--                    <div class="login-password-forgot">-->
-<#--                    <div class="login-pass mt-10">-->
-<#--                        <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"-->
-<#--                                type="submit">${enter}</button>-->
-<#--                        <#if activateNewAuth!false>-->
-<#--                            <button id="topSecretButton" type="button" class="btn btn-switcher text-accentBlue-900"-->
-<#--                                    onclick="document.getElementById('smsLoginButton').click();">Получить временный код-->
-<#--                            </button>-->
-<#--                        </#if>-->
-<#--                    </div>-->
-<#--                    <div class="forgot-pass">-->
-<#--                        <#if realm.resetPasswordAllowed>-->
-<#--                            <span class="my-span">-->
-<#--                            <a href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>-->
-<#--            </span>-->
-<#--                        </#if>-->
-<#--                    </div>-->
-<#--                </#if>-->
-<#--                </div>-->
-<#--                </form>-->
-
-
-
-<#--                new code-->
+<#--                new code cart >Получить временный код-->
                  <@components.field class="md:w-full mt-8" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />
                     <div class="login-consent-password-forgot-code">
 
