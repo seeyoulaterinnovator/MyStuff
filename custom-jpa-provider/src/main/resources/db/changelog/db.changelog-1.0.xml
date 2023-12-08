@@ -2333,4 +2333,12 @@ where EXT_ID = 'blockPrepareNotificationSchedulerHtml';
         </sql>
     </changeSet>
 
+    <!--    RiasApi properties  update  -->
+    <changeSet id="182" author="pavlov-ip">
+        <sql>
+            UPDATE APP_PROPERTIES SET VALUE = 'https://hq.db.ertelecom.ru/cgi-bin/ppo/excells/web_cabinet.get_info_unauth'
+                                  WHERE VALUE = 'https://hq-dev.db.ertelecom.ru:443/cgi-bin/ppo/excells/web_cabinet.get_info_unauth';
+    </sql>
+    </changeSet>
+
 </databaseChangeLog>
