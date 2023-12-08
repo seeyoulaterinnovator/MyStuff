@@ -544,7 +544,7 @@
         <!--    RiasApi properties    -->
         <sql>
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasApi.uri',
-            'https://hq-dev.db.ertelecom.ru:443/cgi-bin/ppo/excells/web_cabinet.get_info_unauth');
+            'https://hq.db.ertelecom.ru/cgi-bin/ppo/excells/web_cabinet.get_info_unauth');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasApi.client.name', 'SSO');
             INSERT INTO APP_PROPERTIES (NAME, VALUE) VALUES ('riasApi.client.salt', 'W2NHAYTWrfEG9fDw2MAt2TuuM7VK2K7H');
         </sql>
