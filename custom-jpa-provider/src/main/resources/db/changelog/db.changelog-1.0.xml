@@ -2332,5 +2332,11 @@ where EXT_ID = 'blockPrepareNotificationSchedulerHtml';
             ]]>
         </sql>
     </changeSet>
+    <changeSet id="182" author="pavlov-ip">
+        <sql>
+            INSERT INTO REALM_ATTRIBUTE (NAME, VALUE, REALM_ID) VALUES ('hideChat', 'false', 'user');
+        </sql>
+    </changeSet>
+
 
 </databaseChangeLog>
