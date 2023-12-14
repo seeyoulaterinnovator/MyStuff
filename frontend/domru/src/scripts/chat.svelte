@@ -1,22 +1,19 @@
 <script>
   import ErChat from 'er-chat/dist/er-chat.esm';
-  import {onMount} from 'svelte';
+  import { onMount } from 'svelte';
   import Cookie from 'js-cookie';
 
-  // // TODO: find way to use environment variables
-  // // TIP: `process` is NodeJS global variable
-  // let SVELTE_APP_ENVIRONMENT = 'develop';
-  // if (typeof process !== 'undefined') {
-  //   SVELTE_APP_ENVIRONMENT = process.env.SVELTE_APP_ENVIRONMENT
-  // }
+  // TODO: find way to use environment variables
+  // TIP: `process` is NodeJS global variable
+  let SVELTE_APP_ENVIRONMENT = 'develop';
+  if (typeof process !== 'undefined') {
+    SVELTE_APP_ENVIRONMENT = process.env.SVELTE_APP_ENVIRONMENT
+  }
 
   let chatContent;
   let chatWrapper;
   let isOpen = false;
-  // let showChat = SVELTE_APP_ENVIRONMENT === 'production' && ( isFramed === undefined || isFramed === false);
-  let showChat = isFramed === undefined || isFramed === false;
-  let test = isChatHidden;
-
+  let showChat = SVELTE_APP_ENVIRONMENT === 'production' && ( isFramed === undefined || isFramed === false);
 
   console.log("isFramed s " + isFramed);
 
@@ -24,19 +21,18 @@
     isOpen = !isOpen
   };
 
-onMount(() => {
-  const chat = new ErChat({
-  nickname: 'Пользователь',
-  subject: 'Вопросы со страницы авторизации',
-  city: Cookie.get('city-domain') || 'yar',
-  // isProd: SVELTE_APP_ENVIRONMENT === 'production'
-  isProd: true
-});
-  chat.attach(chatContent);
-});
+  onMount(() => {
+    const chat = new ErChat({
+      nickname: 'Пользователь',
+      subject: 'Вопросы со страницы авторизации',
+      city: Cookie.get('city-domain') || 'yar',
+      isProd: SVELTE_APP_ENVIRONMENT === 'production'
+    });
+    chat.attach(chatContent);
+  });
 </script>
 
-{#if showChat && test!==null}
+{#if showChat}
   <div class="er-chat er-chat-hidden" class:er-chat-hidden={!isOpen}>
     <div class="er-chat__header">
       <div class="er-chat__header__close" on:click={toggleChat} />
