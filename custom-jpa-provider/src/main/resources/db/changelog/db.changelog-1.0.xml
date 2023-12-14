@@ -2332,5 +2332,4 @@ where EXT_ID = 'blockPrepareNotificationSchedulerHtml';
             ]]>
         </sql>
     </changeSet>
-
 </databaseChangeLog>
