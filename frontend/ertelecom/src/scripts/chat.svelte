@@ -1,12 +1,13 @@
 <script>
   import ErChat from 'er-chat/dist/er-chat.esm';
-  import { onMount } from 'svelte';
+  import {onMount} from 'svelte';
   import Cookie from 'js-cookie';
 
   let chatContent;
   let chatWrapper;
   let isOpen = false;
   let showChat = isFramed === undefined || isFramed === false;
+  let test = isChatHidden;
 
   console.log("isFramed s " + isFramed);
 
@@ -25,7 +26,7 @@
   });
 </script>
 
-{#if showChat}
+{#if showChat && test!==null}
 <div class="er-chat er-chat-hidden" class:er-chat-hidden={!isOpen}>
   <div class="er-chat__header">
     <div class="er-chat__header__close" on:click={toggleChat} />
