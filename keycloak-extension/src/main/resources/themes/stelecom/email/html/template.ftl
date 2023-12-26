@@ -41,7 +41,8 @@
               <div class="mail-container__footer">
                 <p class="mail-text--copyright mail-text--bold"><font color="#7c7c7c" size="+1"><b>С уважением, Телеком Центр бизнес!</b></font></p>
                 <p class="mail-text--copyright mail-text--light-gray"><font color="#bcbcbc">Данное письмо отправлено с адреса, предназначенного только для рассылок. Пожалуйста, не отвечайте на это письмо. В случае возникновения вопросов Вы можете обратиться к персональному менеджеру, контактные данные есть в «личном кабинете» или по телефону +7(495)803 38 88 (звонок бесплатный).</font></p>
-                <p class="mail-text--copyright mail-text--light-gray"><font color="#bcbcbc">© OOO «Телеком Центр бизнес» 2021-${.now?string.yyyy}</font></p>
+                <p class="mail-text--copyright mail-text--light-gray"><font color="#bcbcbc">© OOO «Телеком Центр бизнес»</font></p>
+<#--                <p class="mail-text--copyright mail-text--light-gray"><font color="#bcbcbc">© OOO «Телеком Центр бизнес» 2021-${.now?string.yyyy}</font></p>-->
               </div>
             </td>
           </tr>
