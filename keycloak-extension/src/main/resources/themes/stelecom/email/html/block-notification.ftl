@@ -5,7 +5,7 @@
         <#include 'styles/content-style--default.html' >
         <title>Уведомление о блокировке</title>
     <#elseif section="body">
-        <p class="content__p">Ваша учетная запись для входа в Личный кабинет «С-Телеком Бизнес» <font color="red" class="text_red">заблокирована</font>. Доступ к услугам при этом не блокируется.</p>
+        <p class="content__p">Ваша учетная запись для входа в Личный кабинет «Телеком Центр бизнес» <font color="red" class="text_red">заблокирована</font>. Доступ к услугам при этом не блокируется.</p>
         <p class="content__p">Вы не использовали свою учетную запись в течении длительного времени. Чтобы восстановить доступ к учетной записи, обратитесь к своему персональному менеджеру или оставьте заявку в чате <a class="content__a no_block" href="http://lkb2b.tcenter.ru">Личного кабинета</a>, или по телефону <a class="content__a no_block" href="tel:88003339000">8 800 333 9000</a>.</p>
         <dl class="content__dl">
             <#if phone??>
