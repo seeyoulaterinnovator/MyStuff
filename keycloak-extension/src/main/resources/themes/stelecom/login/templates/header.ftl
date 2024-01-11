@@ -1,7 +1,7 @@
 <#macro defaultTemplate withCity=true>
   <header id="page-header" class="flex items-center">
     <div class="w-full flex justify-between">
-      <a href="https://lkb2b.stelecom.ru">
+      <a href="https://lkb2b.tcenter.ru">
         <div class="h-30px w-120px md:h-10 md:w-40 xl:h-16 xl:w-64 bg-contain bg-no-repeat logo logo--base"></div>
       </a>
       <div class="flex items-center xl:items-start">

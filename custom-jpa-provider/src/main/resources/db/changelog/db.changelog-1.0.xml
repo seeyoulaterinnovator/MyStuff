@@ -2332,4 +2332,13 @@ where EXT_ID = 'blockPrepareNotificationSchedulerHtml';
             ]]>
         </sql>
     </changeSet>
+
+    <changeSet id="182" author="pavlov-ip">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE) VALUES
+                ('2a925881-61b7-4913-a912-3e279bb691ea', 'life.token.reset.pass.login', '12', 'Время токена "обновить пароль"', 'ER-TELECOM', 'Send login and reset password', 'HOURS',
+                 'REALM');
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
