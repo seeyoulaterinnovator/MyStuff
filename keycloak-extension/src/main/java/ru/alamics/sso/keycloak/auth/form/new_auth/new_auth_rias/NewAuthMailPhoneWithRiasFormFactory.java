@@ -28,10 +28,11 @@ public class NewAuthMailPhoneWithRiasFormFactory extends AbstractAuthenticatorFa
     @Override
     public Authenticator create(KeycloakSession session) {
 
-        log.info("Get RiasAuthProvider");
-        RiasService riasService = Lookup.lookup(RiasService.class);
         log.info("Got riasService from context");
         UserFindService userFindService = Lookup.lookup(UserFindService.class);
+        log.info("Get RiasAuthProvider");
+        RiasService riasService = Lookup.lookup(RiasService.class);
+
 
         log.info("Creating AuthMailPhoneForm");
         SINGLETON = new NewAuthMailPhoneWithRiasForm(riasService, userFindService, session);
