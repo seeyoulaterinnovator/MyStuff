@@ -67,7 +67,6 @@ public class CustomVerifyEmailActionTokenHandler extends AbstractActionTokenHand
 
         // verify user email as we know it is valid as this entry point would never have gotten here.
         //   user.setEmailVerified(true);
-        user.setEmailVerified(true);
         user.removeRequiredAction(UserModel.RequiredAction.VERIFY_EMAIL);
         user.addRequiredAction("phone_verificator_sms");
         user.addRequiredAction(UserModel.RequiredAction.UPDATE_PASSWORD.name());
@@ -77,15 +76,16 @@ public class CustomVerifyEmailActionTokenHandler extends AbstractActionTokenHand
 
         event.success();
 
-        if (token.getCompoundOriginalAuthenticationSessionId() != null) {
-            AuthenticationSessionManager asm = new AuthenticationSessionManager(tokenContext.getSession());
-            asm.removeAuthenticationSession(tokenContext.getRealm(), authSession, true);
+//        if (token.getCompoundOriginalAuthenticationSessionId() != null) {
+//            AuthenticationSessionManager asm = new AuthenticationSessionManager(tokenContext.getSession());
+//            asm.removeAuthenticationSession(tokenContext.getRealm(), authSession, true);
+//
+//            return tokenContext.getSession().getProvider(LoginFormsProvider.class)
+//                    .setAuthenticationSession(authSession)
+//                    .setSuccess(Messages.EMAIL_VERIFIED)
+//                    .createInfoPage();
+//        }
 
-            return tokenContext.getSession().getProvider(LoginFormsProvider.class)
-                    .setAuthenticationSession(authSession)
-                    .setSuccess(Messages.EMAIL_VERIFIED)
-                    .createInfoPage();
-        }
 
 
         tokenContext.setEvent(event.clone().removeDetail(Details.EMAIL).event(EventType.LOGIN));
