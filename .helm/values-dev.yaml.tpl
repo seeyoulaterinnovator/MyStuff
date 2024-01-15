@@ -34,3 +34,11 @@ service:
   # The http Service port
   httpPort: 80
   extraPorts: []
+
+resources:
+  limits:
+    cpu: '2'
+    memory: 1.5Gi
+  requests:
+    cpu: 500m
+    memory: 500Mi
