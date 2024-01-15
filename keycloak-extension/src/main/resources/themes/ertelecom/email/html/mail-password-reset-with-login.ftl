@@ -35,13 +35,13 @@
 <#--                <div style="font-size: 18px;   font-weight: 700">${phone}</div>-->
 <#--            </#if>-->
 
-<#--            <div style="font-size: 18px;  margin-top: 16px"><a href="http://lk.ertelecom.ru">Перейти в-->
+<#--            <div style="font-size: 18px;  margin-top: 16px"><a href="https://lk.ertelecom.ru">Перейти в-->
 <#--                    Личный кабинет</a></div>-->
 
 <#--            <div style="font-size: 18px; line-height: 24px;  font-weight: 400; margin-top: 16px">-->
 <#--                Мы не храним ваши пароли.<br/>-->
 <#--                Если вы забыли свой пароль или у вас не получается войти-->
-<#--                в Личный кабинет — воспользуйтесь формой восстановления пароля по ссылке <a class="no_block" href="http://lk.ertelecom.ru">«Забыли пароль?»</a>.-->
+<#--                в Личный кабинет — воспользуйтесь формой восстановления пароля по ссылке <a class="no_block" href="https://lk.ertelecom.ru">«Забыли пароль?»</a>.-->
 <#--            </div>-->
 
 
