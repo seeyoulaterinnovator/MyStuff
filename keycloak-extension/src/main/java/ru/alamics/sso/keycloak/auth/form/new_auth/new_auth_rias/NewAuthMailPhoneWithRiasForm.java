@@ -4,12 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.events.Errors;
-import org.keycloak.models.ClientModel;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.services.messages.Messages;
+import org.keycloak.services.resources.admin.UserResource;
 import org.keycloak.services.validation.Validation;
+import ru.alamics.sso.jpa.entity.UserLoginHistory;
 import ru.alamics.sso.keycloak.auth.form.new_auth.NewAbstractAuthMailPhoneForm;
 import ru.alamics.sso.keycloak.cities.CitiesResource;
 import ru.alamics.sso.keycloak.cities.model.CityMigration;
@@ -92,7 +92,6 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
         return true;
     }
 
-    // -------------
 
     private boolean checkAuthRias(AuthenticationFlowContext context, String form) {
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
@@ -113,8 +112,13 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
         }
 
         RiasLogin riasLogin = riasService.loginUser(domain, username, password);
-        if (riasLogin != null) {
 
+        UserEntity userEntity = (UserEntity) context.getSession().users().getUserByUsername(username, context.getRealm());
+        if (userEntity != null ) {
+            return false;
+        }
+
+        if (riasLogin != null) {
             if (riasLogin.getAccess_token() != null) {
                 String redirectTo = properties.getProperty(RIAS_REDIRECT_PROPERTY);
                 if (redirectTo == null)
@@ -145,6 +149,5 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
         }
         return false;
     }
-
 }
 
