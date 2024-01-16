@@ -113,11 +113,6 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
 
         RiasLogin riasLogin = riasService.loginUser(domain, username, password);
 
-        UserEntity userEntity = (UserEntity) context.getSession().users().getUserByUsername(username, context.getRealm());
-        if (userEntity != null ) {
-            return false;
-        }
-
         if (riasLogin != null) {
             if (riasLogin.getAccess_token() != null) {
                 String redirectTo = properties.getProperty(RIAS_REDIRECT_PROPERTY);
