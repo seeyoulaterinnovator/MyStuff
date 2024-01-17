@@ -25,6 +25,13 @@
             el2.type = "submit";
             form.appendChild(el2);
 
+            let newButton = document.createElement('button');
+            newButton.innerHTML = 'Новый ЛК';
+            newButton.onclick = function() {
+                window.location.href = "${enter}";
+            };
+            form.appendChild(newButton);
+
             form.submit();
 
             // window.location = redirectTo;
