@@ -66,9 +66,10 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
 
     @Override
     public boolean isSuccessCheckUser(AuthenticationFlowContext context, UserModel user) {
-        if (context.getUser().getId() != null) {
-            return true;
-        }
+//        эта проверка валит авторизацию
+//        if (context.getUser().getId() != null) {
+//            return true;
+//        }
 
         if (user == null) {
             ClientModel cm = context.getAuthenticationSession().getClient();
