@@ -25,6 +25,8 @@
             el2.type = "submit";
             form.appendChild(el2);
 
+            //попытка решить проблему того, что авторизация УЗ в которой логин и пароль совпадает с РИАС учеткой происходит первично в старом ЛК
+            //тестировал на 3 балансере - проблему решило, но третью кнопку я не увидел
             let newButton = document.createElement('button');
             newButton.innerHTML = 'Новый ЛК';
             newButton.onclick = function() {
