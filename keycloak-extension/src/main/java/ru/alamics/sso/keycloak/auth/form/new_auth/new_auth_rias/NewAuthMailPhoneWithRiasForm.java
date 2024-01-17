@@ -66,8 +66,13 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
 
     @Override
     public boolean isSuccessCheckUser(AuthenticationFlowContext context, UserModel user) {
+        if (context.getUser().getId() != null) {
+            return true;
+        }
+
         if (user == null) {
             ClientModel cm = context.getAuthenticationSession().getClient();
+//            for example cm = "b2b" if iframe
             log.info("find user by rias: " + cm.getClientId());
             boolean checkInRiasIfNotFound = context.getRealm().getAttribute("checkInRiasIfNotFound", false);
             if (checkInRiasIfNotFound && Util.isFrame(context.getSession()) && (B2B_ID.equals(cm.getClientId()) || DMP_ID.equals(cm.getClientId()))) {
@@ -102,9 +107,9 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
 
         log.info("RIAS auth, got city = " + city);
 
-//        if (Validation.isBlank(city)) {
-//            city = "yar";
-//        }
+        if (Validation.isBlank(city)) {
+            city = "yar";
+        }
 
 
         String domain = null;
