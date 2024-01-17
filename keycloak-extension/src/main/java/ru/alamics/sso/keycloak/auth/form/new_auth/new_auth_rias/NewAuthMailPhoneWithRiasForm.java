@@ -97,20 +97,22 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         String username = formData.getFirst(FormConstants.FIELD_USERNAME);
         String password = formData.getFirst(FormConstants.FIELD_PASSWORD);
+//        city = выбранному городу(смотрел по логам)
         String city = formData.getFirst(FormConstants.FIELD_CITY);
 
         log.info("RIAS auth, got city = " + city);
 
-        if (Validation.isBlank(city)) {
-            city = "yar";
-        }
+//        if (Validation.isBlank(city)) {
+//            city = "yar";
+//        }
+
 
         String domain = null;
         CityMigration cm = CitiesResource.getCityMigrationByCity(city);
         if (cm != null) {
             domain = cm.getDomain();
         }
-
+//        авторизация риас
         RiasLogin riasLogin = riasService.loginUser(domain, username, password);
 
         if (riasLogin != null) {

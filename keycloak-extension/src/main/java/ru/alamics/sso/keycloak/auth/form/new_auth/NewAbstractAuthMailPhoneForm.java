@@ -316,8 +316,10 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         final boolean isLoginPassword = httpRequest.getDecodedFormParameters().containsKey("loginPasswordButton");
         final boolean isSms = httpRequest.getDecodedFormParameters().containsKey("smsButton");
         final boolean isPhoneCall = httpRequest.getDecodedFormParameters().containsKey("phoneCallButton");
-
-        if (isLoginPassword && !isSuccessCheckUser(context, context.getUser())) {
+//        old version
+        if (isLoginPassword && !isSuccessCheckUser(context, null)) {
+//            new version
+//        if (isLoginPassword && !isSuccessCheckUser(context, context.getUser())) {
             return;
         }
 
