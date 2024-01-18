@@ -108,6 +108,7 @@ public abstract class AbstractAuthMailPhoneForm extends AbstractUsernameFormAuth
                 log.info(user.getId());
             }
             if (!isSuccessCheckUser(context, user)) {
+                log.info("AbstractAuthMailPhoneForm called isSuccessCheckUser, return false");
                 return false;
             }
 

@@ -70,6 +70,8 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
 //        if (context.getUser().getId() != null) {
 //            return true;
 //        }
+//        1)try return false что будет если вернуть тру или фолс при каком результате происходит логин,
+//        2)проверить логи с юзером которого нет в риасе
 
         if (user == null) {
             ClientModel cm = context.getAuthenticationSession().getClient();
@@ -100,6 +102,7 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
 
 
     private boolean checkAuthRias(AuthenticationFlowContext context, String form) {
+//        try return false что будет если вернуть тру или фолс
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         String username = formData.getFirst(FormConstants.FIELD_USERNAME);
         String password = formData.getFirst(FormConstants.FIELD_PASSWORD);
@@ -111,7 +114,6 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
         if (Validation.isBlank(city)) {
             city = "yar";
         }
-
 
         String domain = null;
         CityMigration cm = CitiesResource.getCityMigrationByCity(city);
