@@ -99,7 +99,8 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
             }
             String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, context.getRealm().getName());
             boolean ret = (!defaultClientRealm.equals(cm.getClientId()) && !CONSOLE_ID.equals(cm.getClientId())) || !checkAuthRias(context, REDIRECT_TO_RIAS_FORM);
-            log.info("Rias isSuccessCheckUser, boolean ret = " + ret);
+            //выводится если креды одинаковые и город НН
+            log.info("Rias isSuccessCheckUser, boolean ret = " + ret);//ret = false
 
             return (!defaultClientRealm.equals(cm.getClientId()) && !CONSOLE_ID.equals(cm.getClientId())) || !checkAuthRias(context, REDIRECT_TO_RIAS_FORM);
         }
@@ -139,14 +140,18 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
             if (riasLogin.getAccess_token() != null) {
                 String redirectTo = properties.getProperty(RIAS_REDIRECT_PROPERTY);
                 if (redirectTo == null)
+                    //попадаем если креды одинаковые и город НН
                     redirectTo = "https://lkb2b.dom.ru/login";
                     log.info("Rias auth, redirectTo = " + redirectTo);
-
+                //город и домен = НН(не пусто)
                 if (!Validation.isBlank(city)) {
+                    //попадаем если креды одинаковые и город НН
                     redirectTo += "?citydomain=" + city;
                     log.info(redirectTo += "?citydomain=" + city);
+                    //redirectTo = https://lkb2b.dom.ru/login?citydomain=nn?citydomain=nn - получаем ошибку
                 }
-                log.info("Redirecting to {}", redirectTo);
+                log.info("Redirecting to {}", redirectTo); //Redirecting to https://lkb2b.dom.ru/login?citydomain=nn?citydomain=nn
+
 
                 String redirectHeader = riasLogin.getAccess_token();
 
@@ -163,6 +168,7 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
                         .createForm(form);
 
                 context.challenge(challenge);
+                //лог выводится, если креды одинаковые и город НН
                 log.info("Rias checkAuthRias, return true");
                 return true;
             }
