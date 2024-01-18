@@ -8,7 +8,6 @@ import {
   allCities,
 } from './stores.js';
 import { STATUS } from './constants.js';
-import {log} from "tailwindcss/lib/cli/utils";
 
 export function setAllSelected() {
   status.set(STATUS.CONFIRMED);
@@ -24,11 +23,11 @@ export function setSelectedCity(selectedCity, selectedDomain) {
 // hardcode https://lkb2b.dom.ru/login
 export function selectCity(selectedCity) {
   const selectedDomain = selectedCity.city;
-  log.info("selectedDomain = " + selectedDomain);
+  console.log("selectedDomain = " + selectedDomain);
   const selectedCityName = selectedCity.name;
-  log.info("selectedCityName = " + selectedCityName);
+  console.log("selectedCityName = " + selectedCityName);
   if (selectedDomain && !selectedCity.bss) {
-    log.info("!! window.location = `https://lkb2b.dom.ru/login?citydomain=${selectedDomain} ");
+    console.log("!! window.location = `https://lkb2b.dom.ru/login?citydomain=${selectedDomain} ");
       window.location = `https://lkb2b.dom.ru/login?citydomain=${selectedDomain}`;
   }
   setSelectedCity(selectedCityName, selectedDomain);
