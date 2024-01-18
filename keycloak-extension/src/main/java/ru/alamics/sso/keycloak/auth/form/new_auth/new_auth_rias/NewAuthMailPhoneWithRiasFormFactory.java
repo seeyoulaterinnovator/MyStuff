@@ -20,7 +20,7 @@ public class NewAuthMailPhoneWithRiasFormFactory extends AbstractAuthenticatorFa
     private static final String DISPLAY_NAME = "New two step auth with RIAS";
     private static final String HELP_TEXT = "Login/password or phone with sms or phone code with RIAS";
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
-            AuthenticationExecutionModel.Requirement.ALTERNATIVE,
+            AuthenticationExecutionModel.Requirement.REQUIRED,
             AuthenticationExecutionModel.Requirement.DISABLED
     };
 
