@@ -81,27 +81,36 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
             if (checkInRiasIfNotFound && Util.isFrame(context.getSession()) && (B2B_ID.equals(cm.getClientId()) || DMP_ID.equals(cm.getClientId()))) {
                 String withCity = context.getHttpRequest().getDecodedFormParameters().getFirst(FormConstants.WITH_CITY);
                 if (Util.isEmpty(withCity) || !withCity.equals("TRUE")) {
+                    log.info("Rias isSuccessCheckUser,  if (Util.isEmpty(withCity) || !withCity.equals(TRUE))");
                     context.form().setAttribute(FormConstants.WITH_CITY, "TRUE");
                     context.form().setAttribute("showModal", "TRUE");
                     context.challenge(context.form().createLogin());
                     return true;
                 } else if (!checkAuthRias(context, CHOOSE_REDIRECT_TO_LK_FORM)) {
+                    log.info("Rias isSuccessCheckUser,  else if (!checkAuthRias(context, CHOOSE_REDIRECT_TO_LK_FORM))");
                     context.getEvent().error(Errors.USER_NOT_FOUND);
                     context.form().setAttribute("showModal", "FALSE");
                     context.form().setAttribute(FormConstants.WITH_CITY, "TRUE");
                     context.failureChallenge(AuthenticationFlowError.INVALID_USER, challenge(context, Messages.INVALID_USER));
                     return true;
                 }
+                log.info("Rias isSuccessCheckUser, return false");
                 return false;
             }
             String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, context.getRealm().getName());
+            boolean ret = (!defaultClientRealm.equals(cm.getClientId()) && !CONSOLE_ID.equals(cm.getClientId())) || !checkAuthRias(context, REDIRECT_TO_RIAS_FORM);
+            log.info("Rias isSuccessCheckUser, boolean ret = " + ret);
+
             return (!defaultClientRealm.equals(cm.getClientId()) && !CONSOLE_ID.equals(cm.getClientId())) || !checkAuthRias(context, REDIRECT_TO_RIAS_FORM);
         }
+        log.info("Rias isSuccessCheckUser, return true");
+
         return true;
     }
 
 
     private boolean checkAuthRias(AuthenticationFlowContext context, String form) {
+        log.info("call check auth RIAS");
 //        try return false что будет если вернуть тру или фолс
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         String username = formData.getFirst(FormConstants.FIELD_USERNAME);
@@ -113,24 +122,29 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
 
         if (Validation.isBlank(city)) {
             city = "yar";
+            log.info("RIAS auth, got city = yar");
         }
 
         String domain = null;
         CityMigration cm = CitiesResource.getCityMigrationByCity(city);
         if (cm != null) {
             domain = cm.getDomain();
+            log.info("RIAS auth, domain = " + domain);
         }
 //        авторизация риас
         RiasLogin riasLogin = riasService.loginUser(domain, username, password);
 
         if (riasLogin != null) {
+            log.info("Rias Login - success");
             if (riasLogin.getAccess_token() != null) {
                 String redirectTo = properties.getProperty(RIAS_REDIRECT_PROPERTY);
                 if (redirectTo == null)
                     redirectTo = "https://lkb2b.dom.ru/login";
+                    log.info("Rias auth, redirectTo = " + redirectTo);
 
                 if (!Validation.isBlank(city)) {
                     redirectTo += "?citydomain=" + city;
+                    log.info(redirectTo += "?citydomain=" + city);
                 }
                 log.info("Redirecting to {}", redirectTo);
 
@@ -149,9 +163,11 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
                         .createForm(form);
 
                 context.challenge(challenge);
+                log.info("Rias checkAuthRias, return true");
                 return true;
             }
         }
+        log.info("Rias checkAuthRias, return false");
         return false;
     }
 }
