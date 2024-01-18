@@ -123,6 +123,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
+        log.info("Call method authenticate");
+
         MultivaluedMap<String, String> formData = new MultivaluedMapImpl<>();
         String loginHint = context.getAuthenticationSession().getClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM);
         String rememberMeUsername = AuthenticationManager.getRememberMeUsername(context.getRealm(), context.getHttpRequest().getHttpHeaders());
@@ -302,6 +304,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     @Override
     public void action(AuthenticationFlowContext context) {
+        log.info("Call method action");
         HttpRequest httpRequest = context.getHttpRequest();
         MultivaluedMap<String, String> formData = httpRequest.getDecodedFormParameters();
         AuthenticationSessionModel sessionModel = context.getAuthenticationSession();
@@ -316,10 +319,9 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         final boolean isLoginPassword = httpRequest.getDecodedFormParameters().containsKey("loginPasswordButton");
         final boolean isSms = httpRequest.getDecodedFormParameters().containsKey("smsButton");
         final boolean isPhoneCall = httpRequest.getDecodedFormParameters().containsKey("phoneCallButton");
-//        old version
+
         if (isLoginPassword && !isSuccessCheckUser(context, null)) {
-//            new version
-//        if (isLoginPassword && !isSuccessCheckUser(context, context.getUser())) {
+            log.info("NewAbstractAuthMailPhoneForm check isLoginPassword && !isSuccessCheckUser(context, null)");
             return;
         }
 
