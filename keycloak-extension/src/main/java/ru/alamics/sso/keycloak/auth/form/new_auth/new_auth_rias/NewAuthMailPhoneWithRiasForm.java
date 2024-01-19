@@ -67,7 +67,7 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
     @Override
     public boolean isSuccessCheckUser(AuthenticationFlowContext context, UserModel user) {
         log.info("Enter to method isSuccessCheckUser");
-        return false;
+        return true;
 
 
 ////        эта проверка валит авторизацию
