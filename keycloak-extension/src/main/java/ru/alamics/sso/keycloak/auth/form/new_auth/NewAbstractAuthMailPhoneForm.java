@@ -321,7 +321,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         final boolean isPhoneCall = httpRequest.getDecodedFormParameters().containsKey("phoneCallButton");
 
         if (isLoginPassword && !isSuccessCheckUser(context, null)) {
-            //попадаю если креды одинаковые и город НН
+            //попадаю если креды одинаковые и город НН (hardcode checkAuthRias-false)
             log.info("NewAbstractAuthMailPhoneForm check isLoginPassword && !isSuccessCheckUser(context, null)");
             return;
         }
