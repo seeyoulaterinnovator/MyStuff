@@ -424,8 +424,11 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     @Override
     public boolean validateUserAndPassword(AuthenticationFlowContext context, MultivaluedMap<String, String> inputData) {
+        log.info("Call method validateUserAndPassword");
         String username = inputData.getFirst(AuthenticationManager.FORM_USERNAME);
+        log.info("Username = " + username);
         if (username == null) {
+            log.info("if (username == null)");
             context.getEvent().error(Errors.USER_NOT_FOUND);
             Response challengeResponse = challenge(context, Messages.INVALID_USER);
             context.failureChallenge(AuthenticationFlowError.INVALID_USER, challengeResponse);
@@ -441,6 +444,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         try {
             log.info("find user casual");
             if (!(username.matches("^\\d+$")) && context.getHttpRequest().getDecodedFormParameters().containsKey("loginPasswordButton")) {
+                log.info("if (!(username.matches");
                 if (!isUserNameValid(username, context, "email")) return false;
                 user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(), username);
             } else {
@@ -472,6 +476,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 .email("")
                 .phone(username)
                 .build();
+
+        log.info("commonUser = " + commonUser);
 
         boolean isSmsOrPhone = inputData.containsKey("phoneCallButton") || inputData.containsKey("smsButton");
 

@@ -80,6 +80,7 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
             boolean checkInRiasIfNotFound = context.getRealm().getAttribute("checkInRiasIfNotFound", false);
             if (checkInRiasIfNotFound && Util.isFrame(context.getSession()) && (B2B_ID.equals(cm.getClientId()) || DMP_ID.equals(cm.getClientId()))) {
                 String withCity = context.getHttpRequest().getDecodedFormParameters().getFirst(FormConstants.WITH_CITY);
+                log.info("withCity = " + withCity);
                 if (Util.isEmpty(withCity) || !withCity.equals("TRUE")) {
                     //ilya547 попадает сюда(нет в риасе)
                     log.info("Rias isSuccessCheckUser,  if (Util.isEmpty(withCity) || !withCity.equals(TRUE))");
