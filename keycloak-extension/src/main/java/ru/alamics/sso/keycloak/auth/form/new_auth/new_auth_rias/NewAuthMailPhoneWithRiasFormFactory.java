@@ -27,6 +27,7 @@ public class NewAuthMailPhoneWithRiasFormFactory extends AbstractAuthenticatorFa
 
     @Override
     public Authenticator create(KeycloakSession session) {
+        //ilya547 попадает сюда(нет в риасе)
         log.info("Call method create Authenticator");
 
         log.info("Got riasService from context");

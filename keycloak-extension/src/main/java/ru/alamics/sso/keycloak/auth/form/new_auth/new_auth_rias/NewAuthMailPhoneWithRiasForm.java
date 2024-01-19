@@ -81,6 +81,7 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
             if (checkInRiasIfNotFound && Util.isFrame(context.getSession()) && (B2B_ID.equals(cm.getClientId()) || DMP_ID.equals(cm.getClientId()))) {
                 String withCity = context.getHttpRequest().getDecodedFormParameters().getFirst(FormConstants.WITH_CITY);
                 if (Util.isEmpty(withCity) || !withCity.equals("TRUE")) {
+                    //ilya547 попадает сюда(нет в риасе)
                     log.info("Rias isSuccessCheckUser,  if (Util.isEmpty(withCity) || !withCity.equals(TRUE))");
                     context.form().setAttribute(FormConstants.WITH_CITY, "TRUE");
                     context.form().setAttribute("showModal", "TRUE");
@@ -113,7 +114,7 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
     private boolean checkAuthRias(AuthenticationFlowContext context, String form) {
 
         log.info("call check auth RIAS");
-        return false;
+        return true;
 
 ////        try return false что будет если вернуть тру или фолс
 //        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
