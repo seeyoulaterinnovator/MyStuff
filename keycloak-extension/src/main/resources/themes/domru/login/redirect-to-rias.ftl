@@ -25,6 +25,8 @@
             el2.type = "submit";
             form.appendChild(el2);
 
+            form.submit();
+
             // window.location = redirectTo;
 
         </script>
