@@ -28,7 +28,8 @@ export function selectCity(selectedCity) {
   console.log("selectedCityName = " + selectedCityName);
   if (selectedDomain && !selectedCity.bss) {
     console.log("!! window.location = `https://lkb2b.dom.ru/login?citydomain=${selectedDomain} ");
-      window.location = `https://lkb2b.dom.ru/login?citydomain=${selectedDomain}`;
+      // window.location = `https://lkb2b.dom.ru/login?citydomain=${selectedDomain}`;
+      window.location = `https://www.youtube.com/`;
   }
   setSelectedCity(selectedCityName, selectedDomain);
   setAllSelected();

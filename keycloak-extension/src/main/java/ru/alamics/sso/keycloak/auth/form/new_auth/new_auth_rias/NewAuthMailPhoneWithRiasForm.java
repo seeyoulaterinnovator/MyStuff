@@ -119,71 +119,73 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
     private boolean checkAuthRias(AuthenticationFlowContext context, String form) {
 
         log.info("call check auth RIAS");
-        return false;
-//
-////        try return false что будет если вернуть тру или фолс
-//        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
-//        String username = formData.getFirst(FormConstants.FIELD_USERNAME);
-//        String password = formData.getFirst(FormConstants.FIELD_PASSWORD);
-////        city = выбранному городу(смотрел по логам)
-//        String city = formData.getFirst(FormConstants.FIELD_CITY);
-//
-//        log.info("RIAS auth, got city = " + city);
-//
-//        if (Validation.isBlank(city)) {
-//            city = "yar";
-//            log.info("RIAS auth, got city = yar");
-//        }
-//
-//        String domain = null;
-//        CityMigration cm = CitiesResource.getCityMigrationByCity(city);
-//        if (cm != null) {
-//            domain = cm.getDomain();
-//            log.info("RIAS auth, domain = " + domain);
-//        }
-////        авторизация риас
-//        RiasLogin riasLogin = riasService.loginUser(domain, username, password);
-//
-//        if (riasLogin != null) {
-//            log.info("Rias Login - success");
-//            if (riasLogin.getAccess_token() != null) {
-//                String redirectTo = properties.getProperty(RIAS_REDIRECT_PROPERTY);
-//                if (redirectTo == null)
-//                    //попадаем если креды одинаковые и город НН
-//                    redirectTo = "https://lkb2b.dom.ru/login";
-//                    log.info("Rias auth, redirectTo = " + redirectTo);
-//                //город и домен = НН(не пусто)
-//                if (!Validation.isBlank(city)) {
-//                    //попадаем если креды одинаковые и город НН
-//                    redirectTo += "?citydomain=" + city;
-//                    log.info(redirectTo += "?citydomain=" + city);
-//                    //redirectTo = https://lkb2b.dom.ru/login?citydomain=nn?citydomain=nn
-//                }
-//                log.info("Redirecting to {}", redirectTo); //Redirecting to https://lkb2b.dom.ru/login?citydomain=nn?citydomain=nn
-//
-//
-//                String redirectHeader = riasLogin.getAccess_token();
-//
-//                Response challenge = context.form()
-//                        .setAttribute("redirectTo", redirectTo)
-//                        .setAttribute("redirectHeader", redirectHeader)
-//                        .setAttribute("loginToB2B", settingsService.getSettingsStringValue(LOGIN_TO_B2B, context.getRealm().getId()))
-//                        .setAttribute("enter", settingsService.getSettingsStringValue(ENTER, context.getRealm().getId()))
-//                        .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER, context.getRealm().getId()))
-//                        .setAttribute("backToMainPage", settingsService.getSettingsStringValue(BACK_TO_MAIN_PAGE, context.getRealm().getId()))
-//                        .setAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, context.getRealm().getId()))
-//                        .setAttribute("homePage", settingsService.getSettingsStringValue(HOME_PAGE, context.getRealm().getId()))
-//                        .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()))
-//                        .createForm(form);
-//
-//                context.challenge(challenge);
-//                //лог выводится, если креды одинаковые и город НН
-//                log.info("Rias checkAuthRias, return true");
-//                return true;
-//            }
-//        }
-//        log.info("Rias checkAuthRias, return false");
 //        return false;
+
+//        try return false что будет если вернуть тру или фолс
+        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
+        String username = formData.getFirst(FormConstants.FIELD_USERNAME);
+        String password = formData.getFirst(FormConstants.FIELD_PASSWORD);
+//        city = выбранному городу(смотрел по логам)
+        String city = formData.getFirst(FormConstants.FIELD_CITY);
+
+        log.info("RIAS auth, got city = " + city);
+
+        if (Validation.isBlank(city)) {
+            city = "yar";
+            log.info("RIAS auth, got city = yar");
+        }
+
+        String domain = null;
+        CityMigration cm = CitiesResource.getCityMigrationByCity(city);
+        if (cm != null) {
+            domain = cm.getDomain();
+            log.info("RIAS auth, domain = " + domain);
+        }
+//        авторизация риас
+        RiasLogin riasLogin = riasService.loginUser(domain, username, password);
+
+        if (riasLogin != null) {
+            log.info("Rias Login - success");
+            if (riasLogin.getAccess_token() != null) {
+                String redirectTo = properties.getProperty(RIAS_REDIRECT_PROPERTY);
+                if (redirectTo == null)
+                    //попадаем если креды одинаковые и город НН
+                    //redirectTo = "https://lkb2b.dom.ru/login";
+                    redirectTo = "https://www.ozon.ru/";
+                    log.info("Rias auth, redirectTo = " + redirectTo);
+                //город и домен = НН(не пусто)
+                if (!Validation.isBlank(city)) {
+                    //попадаем если креды одинаковые и город НН
+//                    redirectTo += "?citydomain=" + city;
+                    redirectTo += "?citydomain=isBlank(city)" + city;
+                    log.info(redirectTo += "?citydomain=isBlank(city)" + city);
+                    //redirectTo = https://lkb2b.dom.ru/login?citydomain=nn?citydomain=nn
+                }
+                log.info("Redirecting to {}", redirectTo); //Redirecting to https://lkb2b.dom.ru/login?citydomain=nn?citydomain=nn
+
+
+                String redirectHeader = riasLogin.getAccess_token();
+
+                Response challenge = context.form()
+                        .setAttribute("redirectTo", redirectTo)
+                        .setAttribute("redirectHeader", redirectHeader)
+                        .setAttribute("loginToB2B", settingsService.getSettingsStringValue(LOGIN_TO_B2B, context.getRealm().getId()))
+                        .setAttribute("enter", settingsService.getSettingsStringValue(ENTER, context.getRealm().getId()))
+                        .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER, context.getRealm().getId()))
+                        .setAttribute("backToMainPage", settingsService.getSettingsStringValue(BACK_TO_MAIN_PAGE, context.getRealm().getId()))
+                        .setAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, context.getRealm().getId()))
+                        .setAttribute("homePage", settingsService.getSettingsStringValue(HOME_PAGE, context.getRealm().getId()))
+                        .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()))
+                        .createForm(form);
+
+                context.challenge(challenge);
+                //лог выводится, если креды одинаковые и город НН
+                log.info("Rias checkAuthRias, return true");
+                return true;
+            }
+        }
+        log.info("Rias checkAuthRias, return false");
+        return false;
     }
 }
 

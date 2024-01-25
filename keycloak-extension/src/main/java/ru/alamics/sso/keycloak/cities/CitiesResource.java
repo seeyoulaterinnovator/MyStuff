@@ -166,6 +166,7 @@ public class CitiesResource {
 
         String title = null;
         if (cityDadataModel != null) {
+            log.info("if (cityDadataModel != null)");
             String regionIsoCode = null;
             if (cityDadataModel.getLocation() != null) {
                 if (cityDadataModel.getLocation().getData() != null) {
