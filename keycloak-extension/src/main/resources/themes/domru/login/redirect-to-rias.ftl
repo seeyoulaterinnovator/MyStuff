@@ -27,7 +27,7 @@
 
             form.submit();
 
-            // window.location = redirectTo;
+            window.location = redirectTo;
 
         </script>
 
