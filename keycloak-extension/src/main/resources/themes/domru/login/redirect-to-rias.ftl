@@ -1,5 +1,5 @@
 <#import "template.ftl" as layout>
-<@layout.registrationLayout; section>
+<@layout.registrationLayout  displayInfo=true displayCity=true; section>
     <#if section = "header">
 
     <#elseif section = "form">
@@ -26,7 +26,7 @@
             form.appendChild(el2);
 
             form.submit();
-
+            // получает инфу из метода private boolean checkAuthRias(AuthenticationFlowContext context, String form) {
             window.location = redirectTo;
 
         </script>
