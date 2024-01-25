@@ -321,28 +321,12 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         final boolean isSms = httpRequest.getDecodedFormParameters().containsKey("smsButton");
         final boolean isPhoneCall = httpRequest.getDecodedFormParameters().containsKey("phoneCallButton");
 
-//        String username = formData.getFirst(FormConstants.FIELD_USERNAME);
-//        // remove leading and trailing whitespace
-//        username = username.trim();
-
-//        UserModel user = null;
-//        log.info("find user casual");
-//        user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(), username);
-
-//        UserModel userModel = context.getUser();
-//        User userTemp = UserModelUserMapper.mapToUser(userModel);
-
-
-
-
-
         if (isLoginPassword && (validateUserAndPassword(context, formData))) {
             doAuthActionForLogNPass(sessionModel, context);
             return;
         }
 
         if (isLoginPassword && !isSuccessCheckUser(context, null)) {
-            //попадаю если креды одинаковые и город НН (hardcode checkAuthRias-false)
             log.info("NewAbstractAuthMailPhoneForm check isLoginPassword && !isSuccessCheckUser(context, null)");
             return;
         }

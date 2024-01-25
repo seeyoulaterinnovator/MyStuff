@@ -153,8 +153,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
 
         String location = properties.getProperty(RESET_CREDENTIALS_REDIRECT_URL);
         if (location == null) {
-//            location = "https://lkb2b.dom.ru/recovery";
-            location = "https://habr.com/ru/feed/";
+            location = "https://lkb2b.dom.ru/recovery";
         }
 
         String city = context.getHttpRequest().getDecodedFormParameters().getFirst(FormConstants.FIELD_CITY);

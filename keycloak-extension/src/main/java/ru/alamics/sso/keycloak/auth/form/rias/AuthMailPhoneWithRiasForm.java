@@ -121,13 +121,11 @@ public class AuthMailPhoneWithRiasForm extends AbstractAuthMailPhoneForm {
             if (riasLogin.getAccess_token() != null) {
                 String redirectTo = properties.getProperty(RIAS_REDIRECT_PROPERTY);
                 if (redirectTo == null) {
-//                    redirectTo = "https://lkb2b.dom.ru/login";
-                    redirectTo = "https://oldauth.ru";
+                    redirectTo = "https://lkb2b.dom.ru/login";
                     log.info("Rias auth, redirectTo = " + redirectTo);
                 }
                 if (!Validation.isBlank(city)) {
-//                    redirectTo += "?citydomain=" + city;
-                    redirectTo += "?citydomain=oldauth" + city;
+                    redirectTo += "?citydomain=" + city;
                 }
                 log.info("Redirecting to {}", redirectTo);
 

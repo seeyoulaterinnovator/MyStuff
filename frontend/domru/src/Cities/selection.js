@@ -20,7 +20,7 @@ export function setSelectedCity(selectedCity, selectedDomain) {
   Cookie.set('CITY', selectedCity, {sameSite: 'None', secure: document.location.protocol === 'https:'});
   Cookie.set('city-domain', selectedDomain, {sameSite: 'None', secure: document.location.protocol === 'https:'});
 }
-// hardcode https://lkb2b.dom.ru/login
+
 export function selectCity(selectedCity) {
   const selectedDomain = selectedCity.city;
   console.log("selectedDomain = " + selectedDomain);
@@ -28,8 +28,7 @@ export function selectCity(selectedCity) {
   console.log("selectedCityName = " + selectedCityName);
   if (selectedDomain && !selectedCity.bss) {
     console.log("!! window.location = `https://lkb2b.dom.ru/login?citydomain=${selectedDomain} ");
-      // window.location = `https://lkb2b.dom.ru/login?citydomain=${selectedDomain}`;
-      window.location = `https://www.youtube.com/`;
+      window.location = `https://lkb2b.dom.ru/login?citydomain=${selectedDomain}`;
   }
   setSelectedCity(selectedCityName, selectedDomain);
   setAllSelected();

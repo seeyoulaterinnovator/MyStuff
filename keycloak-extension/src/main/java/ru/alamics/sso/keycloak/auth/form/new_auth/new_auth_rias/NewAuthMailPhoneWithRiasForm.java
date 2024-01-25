@@ -68,34 +68,20 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
     public boolean isSuccessCheckUser(AuthenticationFlowContext context, UserModel user) {
         log.info("Enter to method isSuccessCheckUser");
 
-//        эта проверка валит авторизацию
-//        if (context.getUser().getId() != null) {
-//            return true;
-//        }
-//        1)try return false что будет если вернуть тру или фолс при каком результате происходит логин,
-//        2)проверить логи с юзером которого нет в риасе
-
         if (user == null) {
             ClientModel cm = context.getAuthenticationSession().getClient();
-//            for example cm = "b2b" if iframe
             log.info("find user by rias: " + cm.getClientId());
             boolean checkInRiasIfNotFound = context.getRealm().getAttribute("checkInRiasIfNotFound", false);
-//           //Проверяет, должна ли система проверять пользователя в системе RIAS, если пользователь не найден. Это определяется атрибутом checkInRiasIfNotFound.
-//Если условие выше выполняется и текущий сеанс является фреймом, то выполняются дополнительные проверки.
             if (checkInRiasIfNotFound && Util.isFrame(context.getSession()) && (B2B_ID.equals(cm.getClientId()) || DMP_ID.equals(cm.getClientId()))) {
                 String withCity = context.getHttpRequest().getDecodedFormParameters().getFirst(FormConstants.WITH_CITY);
                 log.info("withCity = " + withCity);
-//                Если withCity пуст или не равен "TRUE", то устанавливает атрибуты формы и вызывает метод challenge с формой входа. Затем возвращает true.
                 if (Util.isEmpty(withCity) || !withCity.equals("TRUE")) {
-                    //ilya547 попадает сюда(нет в риасе) (hardcode checkAuthRias-false)
                     log.info("Rias isSuccessCheckUser,  if (Util.isEmpty(withCity) || !withCity.equals(TRUE))");
                     context.form().setAttribute(FormConstants.WITH_CITY, "TRUE");
                     context.form().setAttribute("showModal", "TRUE");
                     context.challenge(context.form().createLogin());
                     return true;
                 } else if (!checkAuthRias(context, CHOOSE_REDIRECT_TO_LK_FORM)) {
-//                    Если withCity не пуст и равен "TRUE", но проверка checkAuthRias не проходит, то устанавливает атрибуты формы, вызывает метод failureChallenge и возвращает true.
-                    // true, если аутентификация rias не прошла успешно, и false если аутентификация прошла успешно.
                     log.info("Rias isSuccessCheckUser,  else if (!checkAuthRias(context, CHOOSE_REDIRECT_TO_LK_FORM))");
                     context.getEvent().error(Errors.USER_NOT_FOUND);
                     context.form().setAttribute("showModal", "FALSE");
@@ -106,12 +92,9 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
                 log.info("Rias isSuccessCheckUser, return false");
                 return false;
             }
-//            Если условие checkInRiasIfNotFound не выполняется, то получает значение defaultClientRealm и проверяет его на равенство с ID клиента и ID консоли.
-//            Если они не равны, или проверка checkAuthRias не проходит, то возвращает true. В противном случае возвращает false
+
             String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, context.getRealm().getName());
             boolean ret = (!defaultClientRealm.equals(cm.getClientId()) && !CONSOLE_ID.equals(cm.getClientId())) || !checkAuthRias(context, REDIRECT_TO_RIAS_FORM);
-            //выводится если креды одинаковые и город НН без хардкода тру/фолс
-            //выводится если УЗ есть только в РИАС (hardcode checkAuthRias-TRUE)
             log.info("Rias isSuccessCheckUser, boolean ret = " + ret);//ret = false
 
             return (!defaultClientRealm.equals(cm.getClientId()) && !CONSOLE_ID.equals(cm.getClientId())) || !checkAuthRias(context, REDIRECT_TO_RIAS_FORM);
@@ -123,15 +106,11 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
 
 
     private boolean checkAuthRias(AuthenticationFlowContext context, String form) {
-
         log.info("call check auth RIAS");
-//        return false;
 
-//        try return false что будет если вернуть тру или фолс
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         String username = formData.getFirst(FormConstants.FIELD_USERNAME);
         String password = formData.getFirst(FormConstants.FIELD_PASSWORD);
-//        city = выбранному городу(смотрел по логам)
         String city = formData.getFirst(FormConstants.FIELD_CITY);
 
         log.info("RIAS auth, got city = " + city);
@@ -147,7 +126,6 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
             domain = cm.getDomain();
             log.info("RIAS auth, domain = " + domain);
         }
-//        авторизация риас
         RiasLogin riasLogin = riasService.loginUser(domain, username, password);
 
         if (riasLogin != null) {
@@ -155,17 +133,11 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
             if (riasLogin.getAccess_token() != null) {
                 String redirectTo = properties.getProperty(RIAS_REDIRECT_PROPERTY);
                 if (redirectTo == null)
-                    //попадаем если креды одинаковые и город НН
-                    //redirectTo = "https://lkb2b.dom.ru/login";
-                    redirectTo = "https://www.ozon.ru/";
+                    redirectTo = "https://lkb2b.dom.ru/login";
                     log.info("Rias auth, redirectTo = " + redirectTo);
-                //город и домен = НН(не пусто)
                 if (!Validation.isBlank(city)) {
-                    //попадаем если креды одинаковые и город НН
-//                    redirectTo += "?citydomain=" + city;
-                    redirectTo += "?citydomain=isBlank(city)" + city;
+                    redirectTo += "?citydomain=" + city;
                     log.info(redirectTo += "?citydomain=isBlank(city)" + city);
-                    //redirectTo = https://lkb2b.dom.ru/login?citydomain=nn?citydomain=nn
                 }
                 log.info("Redirecting to {}", redirectTo); //Redirecting to https://lkb2b.dom.ru/login?citydomain=nn?citydomain=nn
 
@@ -185,7 +157,6 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
                         .createForm(form);
 
                 context.challenge(challenge);
-                //лог выводится, если креды одинаковые и город НН
                 log.info("Rias checkAuthRias, return true");
                 return true;
             }
