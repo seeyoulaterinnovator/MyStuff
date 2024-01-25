@@ -329,19 +329,21 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 //        log.info("find user casual");
 //        user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(), username);
 
-        UserModel userModel = context.getUser();
-        User userTemp = UserModelUserMapper.mapToUser(userModel);
+//        UserModel userModel = context.getUser();
+//        User userTemp = UserModelUserMapper.mapToUser(userModel);
 
 
 
-        if (isLoginPassword && !isSuccessCheckUser(context, (UserModel) userTemp)) {
-            //попадаю если креды одинаковые и город НН (hardcode checkAuthRias-false)
-            log.info("NewAbstractAuthMailPhoneForm check isLoginPassword && !isSuccessCheckUser(context, null)");
-            return;
-        }
+
 
         if (isLoginPassword && (validateUserAndPassword(context, formData))) {
             doAuthActionForLogNPass(sessionModel, context);
+            return;
+        }
+
+        if (isLoginPassword && !isSuccessCheckUser(context, null)) {
+            //попадаю если креды одинаковые и город НН (hardcode checkAuthRias-false)
+            log.info("NewAbstractAuthMailPhoneForm check isLoginPassword && !isSuccessCheckUser(context, null)");
             return;
         }
 
