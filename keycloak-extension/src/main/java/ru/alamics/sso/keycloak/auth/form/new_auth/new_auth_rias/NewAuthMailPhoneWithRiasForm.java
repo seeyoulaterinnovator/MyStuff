@@ -80,9 +80,12 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
 //            for example cm = "b2b" if iframe
             log.info("find user by rias: " + cm.getClientId());
             boolean checkInRiasIfNotFound = context.getRealm().getAttribute("checkInRiasIfNotFound", false);
+//           //Проверяет, должна ли система проверять пользователя в системе RIAS, если пользователь не найден. Это определяется атрибутом checkInRiasIfNotFound.
+//Если условие выше выполняется и текущий сеанс является фреймом, то выполняются дополнительные проверки.
             if (checkInRiasIfNotFound && Util.isFrame(context.getSession()) && (B2B_ID.equals(cm.getClientId()) || DMP_ID.equals(cm.getClientId()))) {
                 String withCity = context.getHttpRequest().getDecodedFormParameters().getFirst(FormConstants.WITH_CITY);
                 log.info("withCity = " + withCity);
+//                Если withCity пуст или не равен "TRUE", то устанавливает атрибуты формы и вызывает метод challenge с формой входа. Затем возвращает true.
                 if (Util.isEmpty(withCity) || !withCity.equals("TRUE")) {
                     //ilya547 попадает сюда(нет в риасе) (hardcode checkAuthRias-false)
                     log.info("Rias isSuccessCheckUser,  if (Util.isEmpty(withCity) || !withCity.equals(TRUE))");
@@ -91,6 +94,7 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
                     context.challenge(context.form().createLogin());
                     return true;
                 } else if (!checkAuthRias(context, CHOOSE_REDIRECT_TO_LK_FORM)) {
+//                    Если withCity не пуст и равен "TRUE", но проверка checkAuthRias не проходит, то устанавливает атрибуты формы, вызывает метод failureChallenge и возвращает true.
                     // true, если аутентификация rias не прошла успешно, и false если аутентификация прошла успешно.
                     log.info("Rias isSuccessCheckUser,  else if (!checkAuthRias(context, CHOOSE_REDIRECT_TO_LK_FORM))");
                     context.getEvent().error(Errors.USER_NOT_FOUND);
@@ -102,9 +106,11 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
                 log.info("Rias isSuccessCheckUser, return false");
                 return false;
             }
+//            Если условие checkInRiasIfNotFound не выполняется, то получает значение defaultClientRealm и проверяет его на равенство с ID клиента и ID консоли.
+//            Если они не равны, или проверка checkAuthRias не проходит, то возвращает true. В противном случае возвращает false
             String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, context.getRealm().getName());
             boolean ret = (!defaultClientRealm.equals(cm.getClientId()) && !CONSOLE_ID.equals(cm.getClientId())) || !checkAuthRias(context, REDIRECT_TO_RIAS_FORM);
-            //выводится если креды одинаковые и город НН без хардкода тру фолс
+            //выводится если креды одинаковые и город НН без хардкода тру/фолс
             //выводится если УЗ есть только в РИАС (hardcode checkAuthRias-TRUE)
             log.info("Rias isSuccessCheckUser, boolean ret = " + ret);//ret = false
 

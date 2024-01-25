@@ -31,6 +31,7 @@ import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.keycloak.util.UserToUserEntityMapper;
 import ru.alamics.sso.registration.model.AuthContext;
+import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.phone.ActivationCodeType;
@@ -320,7 +321,20 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         final boolean isSms = httpRequest.getDecodedFormParameters().containsKey("smsButton");
         final boolean isPhoneCall = httpRequest.getDecodedFormParameters().containsKey("phoneCallButton");
 
-        if (isLoginPassword && !isSuccessCheckUser(context, null)) {
+//        String username = formData.getFirst(FormConstants.FIELD_USERNAME);
+//        // remove leading and trailing whitespace
+//        username = username.trim();
+
+//        UserModel user = null;
+//        log.info("find user casual");
+//        user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(), username);
+
+        UserModel userModel = context.getUser();
+        User userTemp = UserModelUserMapper.mapToUser(userModel);
+
+
+
+        if (isLoginPassword && !isSuccessCheckUser(context, (UserModel) userTemp)) {
             //попадаю если креды одинаковые и город НН (hardcode checkAuthRias-false)
             log.info("NewAbstractAuthMailPhoneForm check isLoginPassword && !isSuccessCheckUser(context, null)");
             return;
