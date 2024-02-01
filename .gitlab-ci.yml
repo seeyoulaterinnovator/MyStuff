@@ -17,11 +17,9 @@ stages:
   - chmod 775 ./gradlew
   - fi
 
-.decrypt: &decrypt-variables
+.init_vars: &init-variables
   before_script:
-  - echo ${ERTK_PEM_ENC} | base64 -d > configs/ertk.pem
-  - export SSO_DB_USR=`echo ${SSO_DB_USR_ENC} | base64 -d`
-  - export SSO_DB_PASS=`echo ${JBOSS_CLI_PASS_ENC} | base64 -d`
+  - cp ${ERTK_PEM} configs/ertk.pem
   - envsubst < configs/sso.tmpl > configs/sso
 
 back:compile:
@@ -153,7 +151,7 @@ back:war:
 
 container:source:
   stage: docker
-  <<: *decrypt-variables
+  <<: *init-variables
   when: manual
   script:
     - docker build -t harbor.ertelecom.ru/sso-protected/keycloak:6.0.1 -f Dockerfile.intermediate .
@@ -166,7 +164,7 @@ container:source:
 
 container:
   stage: docker
-  <<: *decrypt-variables
+  <<: *init-variables
   when: manual
   script:
     - docker build -t harbor.ertelecom.ru/sso-protected/sso:$CI_PIPELINE_ID -f Dockerfile .
@@ -260,7 +258,7 @@ domru:k8s:stage1:
 
 domru:perm:primary:
   stage: deploy
-  <<: *decrypt-variables
+  <<: *init-variables
   when: manual
   only:
     - tags
@@ -282,12 +280,13 @@ domru:perm:primary:
     - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - ~/scripts/deploy.sh primary
+  resource_group: "${CI_PROJECT_NAMESPACE}${CI_PROJECT_NAME}"
   tags:
     - sso-domain-controller-perm
 
 domru:perm:secondary:
   stage: deploy
-  <<: *decrypt-variables
+  <<: *init-variables
   when: manual
   only:
     - tags
@@ -305,12 +304,13 @@ domru:perm:secondary:
     - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - scp tools/module.xml sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - ~/scripts/deploy.sh secondary
+  resource_group: "${CI_PROJECT_NAMESPACE}${CI_PROJECT_NAME}"
   tags:
     - sso-domain-controller-perm
 
 domru:voronezh:primary:
   stage: deploy
-  <<: *decrypt-variables
+  <<: *init-variables
   when: manual
   only:
     - tags
@@ -332,12 +332,13 @@ domru:voronezh:primary:
     - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - ~/scripts/deploy.sh primary
+  resource_group: "${CI_PROJECT_NAMESPACE}${CI_PROJECT_NAME}"
   tags:
     - sso-domain-controller-voronezh
 
 domru:voronezh:secondary:
   stage: deploy
-  <<: *decrypt-variables
+  <<: *init-variables
   when: manual
   only:
     - tags
@@ -356,6 +357,7 @@ domru:voronezh:secondary:
     - scp tools/module.xml sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
     - ~/scripts/deploy.sh secondary
+  resource_group: "${CI_PROJECT_NAMESPACE}${CI_PROJECT_NAME}"
   tags:
     - sso-domain-controller-voronezh
 
@@ -370,8 +372,9 @@ domru:voronezh:xml:
   script:
     - rm /usr/local/keycloak/domain/configuration/domain.xml
     - cp -r configs/domain.xml.voronezh /usr/local/keycloak/domain/configuration/domain.xml
-    - /usr/local/keycloak/bin/jboss-cli.sh --connect --command-timeout=180 --user=`echo ${JBOSS_CLI_USER_ENC} | base64 -d` --password=`echo ${JBOSS_CLI_PASS_ENC} | base64 -d` --command="reload --host=master --restart-servers=true"
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect --command-timeout=180 --user=${JBOSS_CLI_USER} --password=${JBOSS_CLI_PASS} --command="reload --host=master --restart-servers=true"
   artifacts: {}
+  resource_group: "${CI_PROJECT_NAMESPACE}${CI_PROJECT_NAME}"
   tags:
     - sso-domain-controller-voronezh
 
@@ -386,7 +389,8 @@ domru:perm:xml:
   script:
     - rm /usr/local/keycloak/domain/configuration/domain.xml
     - cp -r configs/domain.xml.perm /usr/local/keycloak/domain/configuration/domain.xml
-    - /usr/local/keycloak/bin/jboss-cli.sh --connect --command-timeout=180 --user=`echo ${JBOSS_CLI_USER_ENC} | base64 -d` --password=`echo ${JBOSS_CLI_PASS_ENC} | base64 -d` --command="reload --host=master --restart-servers=true"
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect --command-timeout=180 --user=${JBOSS_CLI_USER} --password=${JBOSS_CLI_PASS} --command="reload --host=master --restart-servers=true"
   artifacts: {}
+  resource_group: "${CI_PROJECT_NAMESPACE}${CI_PROJECT_NAME}"
   tags:
     - sso-domain-controller-perm
