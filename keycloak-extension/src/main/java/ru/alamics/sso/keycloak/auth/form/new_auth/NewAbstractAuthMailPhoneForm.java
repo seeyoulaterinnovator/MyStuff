@@ -31,7 +31,6 @@ import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.keycloak.util.UserToUserEntityMapper;
 import ru.alamics.sso.registration.model.AuthContext;
-import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.phone.ActivationCodeType;
@@ -124,8 +123,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
-        log.info("Call method authenticate");
-
         MultivaluedMap<String, String> formData = new MultivaluedMapImpl<>();
         String loginHint = context.getAuthenticationSession().getClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM);
         String rememberMeUsername = AuthenticationManager.getRememberMeUsername(context.getRealm(), context.getHttpRequest().getHttpHeaders());
@@ -305,7 +302,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     @Override
     public void action(AuthenticationFlowContext context) {
-        log.info("Call method action");
         HttpRequest httpRequest = context.getHttpRequest();
         MultivaluedMap<String, String> formData = httpRequest.getDecodedFormParameters();
         AuthenticationSessionModel sessionModel = context.getAuthenticationSession();
@@ -321,13 +317,12 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         final boolean isSms = httpRequest.getDecodedFormParameters().containsKey("smsButton");
         final boolean isPhoneCall = httpRequest.getDecodedFormParameters().containsKey("phoneCallButton");
 
-        if (isLoginPassword && (validateUserAndPassword(context, formData))) {
-            doAuthActionForLogNPass(sessionModel, context);
+        if (isLoginPassword && !isSuccessCheckUser(context, null)) {
             return;
         }
 
-        if (isLoginPassword && !isSuccessCheckUser(context, null)) {
-            log.info("NewAbstractAuthMailPhoneForm check isLoginPassword && !isSuccessCheckUser(context, null)");
+        if (isLoginPassword && (validateUserAndPassword(context, formData))) {
+            doAuthActionForLogNPass(sessionModel, context);
             return;
         }
 
@@ -424,11 +419,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     @Override
     public boolean validateUserAndPassword(AuthenticationFlowContext context, MultivaluedMap<String, String> inputData) {
-        log.info("Call method validateUserAndPassword");
         String username = inputData.getFirst(AuthenticationManager.FORM_USERNAME);
-        log.info("Username = " + username);
         if (username == null) {
-            log.info("if (username == null)");
             context.getEvent().error(Errors.USER_NOT_FOUND);
             Response challengeResponse = challenge(context, Messages.INVALID_USER);
             context.failureChallenge(AuthenticationFlowError.INVALID_USER, challengeResponse);
@@ -444,7 +436,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         try {
             log.info("find user casual");
             if (!(username.matches("^\\d+$")) && context.getHttpRequest().getDecodedFormParameters().containsKey("loginPasswordButton")) {
-                log.info("if (!(username.matches");
                 if (!isUserNameValid(username, context, "email")) return false;
                 user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(), username);
             } else {
@@ -476,8 +467,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 .email("")
                 .phone(username)
                 .build();
-
-        log.info("commonUser = " + commonUser);
 
         boolean isSmsOrPhone = inputData.containsKey("phoneCallButton") || inputData.containsKey("smsButton");
 

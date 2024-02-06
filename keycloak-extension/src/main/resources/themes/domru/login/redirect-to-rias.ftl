@@ -26,7 +26,7 @@
             form.appendChild(el2);
 
             form.submit();
-            // получает инфу из метода private boolean checkAuthRias(AuthenticationFlowContext context, String form) {
+
             // window.location = redirectTo;
 
         </script>
