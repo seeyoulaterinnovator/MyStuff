@@ -470,7 +470,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
         boolean isSmsOrPhone = inputData.containsKey("phoneCallButton") || inputData.containsKey("smsButton");
 
-        if (isSmsOrPhone && riasService.checkPhone(commonUser)) {
+        if (isSmsOrPhone && !riasService.checkPhone(commonUser)) {
             dummyHash(context);
             context.getEvent().error(Errors.USER_NOT_FOUND);
             Response challengeResponse = challenge(context, "Данный способ авторизации недоступен, воспользуйтесь входом через логин и пароль");
