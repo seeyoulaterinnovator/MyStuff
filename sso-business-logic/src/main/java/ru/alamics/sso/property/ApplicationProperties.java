@@ -112,7 +112,7 @@ public class ApplicationProperties {
         if (!tempProp.isEmpty()) {
             dbProperties = tempProp;
         }
-        log.info("Initializing application properties from database finished");
+        log.info("Initializing application properties from database finished:{}", dbProperties.toString());
     }
 
 }
