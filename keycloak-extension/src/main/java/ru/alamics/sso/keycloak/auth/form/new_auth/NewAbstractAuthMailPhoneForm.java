@@ -468,16 +468,18 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 .phone(username)
                 .build();
 
-        boolean isSmsOrPhone = inputData.containsKey("phoneCallButton") || inputData.containsKey("smsButton");
 
-        if (isSmsOrPhone && riasService.checkPhone(commonUser)) {
-            dummyHash(context);
-            context.getEvent().error(Errors.USER_NOT_FOUND);
-            Response challengeResponse = challenge(context, "Данный способ авторизации недоступен, воспользуйтесь входом через логин и пароль");
-            context.failureChallenge(AuthenticationFlowError.INVALID_USER, challengeResponse);
-
-            return false;
-        }
+//        если раскоментить, то УЗ(есть в РИАС и ССО) не авторизуется по смс
+//        boolean isSmsOrPhone = inputData.containsKey("phoneCallButton") || inputData.containsKey("smsButton");
+//
+//        if (isSmsOrPhone && riasService.checkPhone(commonUser)) {
+//            dummyHash(context);
+//            context.getEvent().error(Errors.USER_NOT_FOUND);
+//            Response challengeResponse = challenge(context, "Данный способ авторизации недоступен, воспользуйтесь входом через логин и пароль");
+//            context.failureChallenge(AuthenticationFlowError.INVALID_USER, challengeResponse);
+//
+//            return false;
+//        }
 
         if (invalidUser(context, user)) {
             return false;
