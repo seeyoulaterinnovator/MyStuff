@@ -11,6 +11,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaType;
 import ru.alamics.sso.antifraud.*;
+import ru.alamics.sso.auth_n_regi.AuthOrRegTypeNotFoundException;
 import ru.alamics.sso.keycloak.auth.form.new_auth.PhonePlusRealmProtector;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
@@ -26,6 +27,7 @@ import ru.alamics.sso.registration.phone.UserPhoneVerifier;
 import ru.alamics.sso.registration.phone.exception.*;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 import ru.alamics.sso.registration.phone.port.SendMessageService;
+import ru.alamics.sso.registration.service.AuthorisedUsersService;
 import ru.alamics.sso.settings.SettingsService;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -39,6 +41,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil.getAuthOrRegType;
 import static ru.alamics.sso.registration.phone.ActivationCodeType.*;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.COUNT_REPEAT;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.EXPIRATION_TIME;
@@ -78,6 +81,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
     private final SendMessageService messageSendService;
     private final PhoneCallerRemoteService phoneCallerService;
     private final WroteCodeAttemptsService wroteCodeAttemptsService;
+    private final AuthorisedUsersService authorisedUsersService;
 
     public PhoneVerificationProvider(UserPhoneVerifier userPhoneVerifier, ActivationCodeType activationCodeType, EmailTemplateProvider emailTemplateProvider) {
         this.userPhoneVerifier = userPhoneVerifier;
@@ -89,6 +93,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
         this.phoneCallerService = Lookup.lookup(PhoneCallerRemoteService.class, "PhoneCallerService");
         this.attemptFailsService = Lookup.lookup(AttemptFailsService.class);
         this.wroteCodeAttemptsService = Lookup.lookup(WroteCodeAttemptsService.class);
+        this.authorisedUsersService = Lookup.lookup(AuthorisedUsersService.class);
     }
 
     @Override
@@ -267,11 +272,17 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                 return;
             }
             String code = context.getHttpRequest().getDecodedFormParameters().getFirst("smscode");
+            int typeId = 0;
+            try {
+                typeId = getAuthOrRegType(authSession);
+            } catch (AuthOrRegTypeNotFoundException e) {
+                throw new RuntimeException(e);
+            }
             try {
                 /*LocalDateTime codeExpirationTime = LocalDateTime.parse(authSession.getAuthNote(CODE_EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);*/
 
                 userPhoneVerifier.verifyPhone(user, activationCodeType.getExpiredCodeSeconds(),
-                        codeHash, code, activationCodeType, authSession.getRealm().getName(), authSession);
+                        codeHash, code, activationCodeType, authSession.getRealm().getName(), authSession, authorisedUsersService, typeId);
 
                 UserModelUserMapper.mergeUserInto(user, model);
                 authSession.removeAuthNote(CODE_HASH_KEY);
