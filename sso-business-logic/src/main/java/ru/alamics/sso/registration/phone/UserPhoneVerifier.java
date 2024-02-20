@@ -12,6 +12,7 @@ import ru.alamics.sso.registration.phone.model.MessageRequest;
 import ru.alamics.sso.registration.phone.model.MessengerType;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 import ru.alamics.sso.registration.phone.port.SendMessageService;
+import ru.alamics.sso.registration.service.AuthorisedUsersService;
 import ru.alamics.sso.stats.LoginHistory;
 
 import javax.ejb.EJB;
@@ -20,6 +21,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
+
 
 @Slf4j
 @Stateless
@@ -94,7 +96,7 @@ public class UserPhoneVerifier {
     }
 
     public void verifyPhone(User user, long codeLifeTime, String savedCodeHash, String smsCode,
-                            ActivationCodeType activationCodeType, String realm, AuthenticationSessionModel authSession) throws WrongSmsCode, TimeExpiredException {
+                            ActivationCodeType activationCodeType, String realm, AuthenticationSessionModel authSession, AuthorisedUsersService authorisedUsersService, int typeId) throws WrongSmsCode, TimeExpiredException {
         String codeHash = HashGenerator.getSecretHash(smsCode);
         LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
 
@@ -115,5 +117,8 @@ public class UserPhoneVerifier {
         UserEntity userEntity = new UserEntity();
         userEntity.setId(user.getId());
         loginHistory.createSuccessAuth(userEntity, realm);
+        log.info("verifyPhone : add to USER_LOGIN_HISTORY");
+        String clientId = authSession.getClient().getClientId();
+        authorisedUsersService.saveSuccessfulAuth(user, authSession.getRealm().getId(), clientId,typeId);
     }
 }
