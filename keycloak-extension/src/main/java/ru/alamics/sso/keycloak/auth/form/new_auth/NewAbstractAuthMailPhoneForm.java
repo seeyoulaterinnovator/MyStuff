@@ -545,6 +545,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         try {
             typeId = getAuthOrRegType(sessionModel);
         } catch (AuthOrRegTypeNotFoundException e) {
+            typeId = 999;
             throw new RuntimeException(e);
         }
         log.info(String.format("Here is our codehash:%s \nHere is user's code %s", codeHash, code));

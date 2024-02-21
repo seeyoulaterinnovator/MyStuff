@@ -189,6 +189,7 @@ public class SmsOrPhoneCallAuth implements Authenticator {
                 try {
                     typeId = getAuthOrRegType(authSession);
                 } catch (AuthOrRegTypeNotFoundException e) {
+                    typeId = 999;
                     throw new RuntimeException(e);
                 }
                 userPhoneVerifier.verifyPhone(user, codeLifeTime,
