@@ -276,7 +276,6 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             try {
                 typeId = getAuthOrRegType(authSession);
             } catch (AuthOrRegTypeNotFoundException e) {
-                typeId = 999;
                 throw new RuntimeException(e);
             }
             try {
