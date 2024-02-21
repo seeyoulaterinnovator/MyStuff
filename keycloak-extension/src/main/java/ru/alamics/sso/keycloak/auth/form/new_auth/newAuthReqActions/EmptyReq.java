@@ -88,8 +88,11 @@ public class EmptyReq implements RequiredActionProvider {
                         .findFirst());
 
         if (optionalAuthOrRegType.isPresent()) {
+            log.info(" optionalAuthOrRegType.isPresent()" );
+            log.info(" optionalAuthOrRegType.get().getId() is : " + optionalAuthOrRegType.get().getId());
             registeredUsersService.saveSuccessfulReg(context.getUser().getId(), context.getRealm().getId(), authenticationSessionModel.getClient().getClientId(), optionalAuthOrRegType.get().getId());
         } else {
+            log.info(" else AuthOrRegType.LOG_PASS.getId() is " + AuthOrRegType.LOG_PASS.getId());
             registeredUsersService.saveSuccessfulReg(context.getUser().getId(), context.getRealm().getId(), authenticationSessionModel.getClient().getClientId(), AuthOrRegType.LOG_PASS.getId());
         }
 
