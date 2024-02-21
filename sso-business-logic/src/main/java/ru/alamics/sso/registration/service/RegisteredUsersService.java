@@ -1,5 +1,6 @@
 package ru.alamics.sso.registration.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.auth_n_regi.ClientsForMonitoringService;
 import ru.alamics.sso.jpa.entity.auth_reg.AuthOrRegTypeEntity;
@@ -17,6 +18,7 @@ import java.util.UUID;
 
 @Stateless(name = "RegisteredUsersService")
 @LocalBean
+@Slf4j
 public class RegisteredUsersService {
 
     @EJB
@@ -37,12 +39,14 @@ public class RegisteredUsersService {
     }
 
     public void saveSuccessfulReg(String user, String realm, String client, int typeId) {
-
+        log.info(" Client is : " + client);
+        log.info(" typeId is : " + typeId);
         ClientsForMonitoringEntity clientsForMonitoringEntity = clientsForMonitoringService.findAndReturnClientsForMonitoringEntity(realm, client);
 
         if (clientsForMonitoringEntity == null || !clientsForMonitoringEntity.isMonitoring()) {
             return;
         }
+
 
         UserEntity userEntity = userRepository.findUser(user);
         AuthOrRegTypeEntity authOrRegTypeEntity = authOrRegTypeService.findAndReturn(typeId);

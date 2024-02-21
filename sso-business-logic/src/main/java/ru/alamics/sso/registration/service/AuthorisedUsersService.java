@@ -1,5 +1,6 @@
 package ru.alamics.sso.registration.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.auth_n_regi.ClientsForMonitoringService;
 import ru.alamics.sso.jpa.entity.auth_reg.AuthOrRegTypeEntity;
@@ -18,6 +19,7 @@ import java.util.UUID;
 
 @Stateless
 @LocalBean
+@Slf4j
 public class AuthorisedUsersService {
 
     @EJB
@@ -53,6 +55,7 @@ public class AuthorisedUsersService {
         authorisedUsersEntity.setRealm(realm);
         authorisedUsersEntity.setAuthorised(LocalDateTime.now());
         authorisedUsersEntity.setClient(clientsForMonitoringEntity);
+        log.info("clientsForMonitoringEntity is : " + clientsForMonitoringEntity);
         authorisedUsersRepository.save(authorisedUsersEntity);
     }
 }

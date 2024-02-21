@@ -541,13 +541,21 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         String codeHash = sessionModel.getAuthNote("currentCode");
         String code = httpRequest.getDecodedFormParameters().getFirst("smscode");
 
+        int typeId = 0;
+        try {
+            typeId = getAuthOrRegType(sessionModel);
+        } catch (AuthOrRegTypeNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         log.info(String.format("Here is our codehash:%s \nHere is user's code %s", codeHash, code));
         try {
 
+
             userPhoneVerifier.verifyPhone(user, /*todo change expiration time to expire code +*/ activationCodeType.getExpiredCodeSeconds(),
-                    codeHash, code, activationCodeType, sessionModel.getRealm().getName(), sessionModel);
+                    codeHash, code, activationCodeType, sessionModel.getRealm().getName(), sessionModel, authorisedUsersService, typeId);
 
             currentAuthFlowPhoneNumbers.remove(protector);
+            log.info("next step - call doAuthActionForPhone");
             doAuthActionForPhone(sessionModel, context);
         } catch (WrongSmsCode wrongSmsCode) {
             log.warn("Wrong sms code");
@@ -762,6 +770,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             sessionModel.setAuthNote(AUTH_FORM_SUCCESS, Util.TRUE_STR);
             User user = UserModelUserMapper.mapToUser(context.getUser());
             String clientId = sessionModel.getClient().getClientId();
+            log.info("Client ID doAuthActionForLogNPass is : " + clientId);
             authorisedUsersService.saveSuccessfulAuth(user, context.getRealm().getId(), clientId, getAuthOrRegType(sessionModel));
         } catch (AuthOrRegTypeNotFoundException authOrRegTypeNotFoundException) {
             log.error(authOrRegTypeNotFoundException.getMessage());
@@ -774,6 +783,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         try {
             User user = UserModelUserMapper.mapToUser(context.getUser());
             String clientId = context.getAuthenticationSession().getClient().getClientId();
+            log.info("Client ID doAuthActionForPhone is : " + clientId);
             sessionModel.removeAuthNote(CODE_HASH_KEY);
             sessionModel.removeAuthNote(EXPIRATION_TIME);
             sessionModel.removeAuthNote(COUNT_REPEAT);

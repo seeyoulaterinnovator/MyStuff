@@ -10,6 +10,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaType;
+import ru.alamics.sso.auth_n_regi.AuthOrRegTypeNotFoundException;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.registration.model.AuthContext;
@@ -17,6 +18,7 @@ import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.phone.ActivationCodeType;
 import ru.alamics.sso.registration.phone.UserPhoneVerifier;
 import ru.alamics.sso.registration.phone.exception.*;
+import ru.alamics.sso.registration.service.AuthorisedUsersService;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
@@ -27,6 +29,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 
+import static ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil.getAuthOrRegType;
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
 
 import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_BY_PHONE_NUMBER;
@@ -52,10 +55,13 @@ public class SmsOrPhoneCallAuth implements Authenticator {
 
     private final KeycloakSession keycloakSession;
 
+    private final AuthorisedUsersService authorisedUsersService;
+
     public SmsOrPhoneCallAuth(UserPhoneVerifier userPhoneVerifier, KeycloakSession session) {
         this.userPhoneVerifier = userPhoneVerifier;
         this.keycloakSession = session;
         this.settingsService = Lookup.lookup(SettingsService.class);
+        this.authorisedUsersService = Lookup.lookup(AuthorisedUsersService.class);
     }
 
     @Override
@@ -179,8 +185,14 @@ public class SmsOrPhoneCallAuth implements Authenticator {
                     codeLifeTime = settingsService.getSettingsLongValue(EXPIRE_INCOMING_CALL_CODE, context.getRealm().getName()) * 60; //we need seconds
 
                 }
+                int typeId = 0;
+                try {
+                    typeId = getAuthOrRegType(authSession);
+                } catch (AuthOrRegTypeNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
                 userPhoneVerifier.verifyPhone(user, codeLifeTime,
-                        authContext.getHashProperty(), code, activationCodeType, authSession.getRealm().getName(), authSession);
+                        authContext.getHashProperty(), code, activationCodeType, authSession.getRealm().getName(), authSession, authorisedUsersService, typeId);
 
                 authSession.removeAuthNote(PHONE_KEY_HASH);
                 authSession.removeAuthNote(EXPIRATION_TIME);

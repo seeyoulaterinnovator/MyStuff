@@ -116,6 +116,7 @@ public class UserExtService {
             updateUserFromRequest(user, userRequest, realm, session, false, bss);
 
             registeredUsersService.saveSuccessfulReg(user.getId(), realm.getId(), "bss", 4);
+            log.info(" registeredUsersService.saveSuccessfulReg(user.getId(), realm.getId(), \"bss\", 4);" );
             return user;
         } finally {
             if (session.getTransactionManager().isActive()) {
