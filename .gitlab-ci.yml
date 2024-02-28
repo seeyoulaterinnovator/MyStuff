@@ -1,7 +1,6 @@
 variables:
   GIT_STRATEGY: fetch
   BASE_DIR: /opt/gitlab-ci
-  REGISTRY: registry.alamics.ru
 
 stages:
   - compile
@@ -149,7 +148,7 @@ back:war:
     name: "domru-sso-compile-$CI_PIPELINE_ID"
     expire_in: 1 week
 
-container:source:
+container-image:source:
   stage: docker
   <<: *init-variables
   when: manual
@@ -162,7 +161,7 @@ container:source:
   tags:
     - sso-stage
 
-container:
+container-image:
   stage: docker
   <<: *init-variables
   when: manual
