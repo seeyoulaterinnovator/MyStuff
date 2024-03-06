@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.auth.requiredactions.stats;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
@@ -26,6 +27,7 @@ public class LoginStatsRecording implements RequiredActionProvider {
         this.authorisedUsersService = authorisedUsersService;
     }
 
+    @SneakyThrows
     @Override
     public void evaluateTriggers(RequiredActionContext context) {
         final String DEBUG_STR = "evaluateTriggers";
@@ -33,11 +35,8 @@ public class LoginStatsRecording implements RequiredActionProvider {
         Objects.requireNonNull(user);
         log.debug("{}: username={}", DEBUG_STR, user.getUsername());
         log.info("evaluateTriggers");
-        try {
-            recordRecentLogin(user);
-        } catch (AuthOrRegTypeNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+
+        recordRecentLogin(user);
     }
 
     @Override

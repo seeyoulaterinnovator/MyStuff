@@ -12,13 +12,8 @@ import ru.alamics.sso.stats.LoginHistory;
 @Slf4j
 public class LoginStatsActionFactory extends AbstractRequiredActionFactory {
 
-    private final AuthorisedUsersService authorisedUsersService;
     private static final String PROVIDER_ID = "login_stats_recordings";
     private static final String RECORD_LOGIN_STATISTICS_ACTION = "Record Login Statistics Action";
-
-    public LoginStatsActionFactory(AuthorisedUsersService authorisedUsersService) {
-        this.authorisedUsersService = authorisedUsersService;
-    }
 
     @Override
     public String getDisplayText() {
@@ -27,7 +22,7 @@ public class LoginStatsActionFactory extends AbstractRequiredActionFactory {
 
     @Override
     public RequiredActionProvider create(KeycloakSession session) {
-        return new LoginStatsRecording(Lookup.lookup(LoginHistory.class), authorisedUsersService);
+        return new LoginStatsRecording(Lookup.lookup(LoginHistory.class), Lookup.lookup(AuthorisedUsersService.class));
     }
 
     @Override
