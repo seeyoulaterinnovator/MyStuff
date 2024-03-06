@@ -155,6 +155,9 @@ public abstract class AbstractAuthMailPhoneForm extends AbstractUsernameFormAuth
             UserEntity userEntity = new UserEntity();
             userEntity.setId(user.getId());
             loginHistory.createSuccessAuth(userEntity, context.getRealm().getName());
+            log.info("loginHistory.createSuccessAuth(userEntity, context.getRealm().getName())");
+//            String clientId = authSession.getClient().getClientId();
+//            authorisedUsersService.saveSuccessfulAuth(user, authSession.getRealm().getId(), clientId,typeId);
         }
         return true;
     }
