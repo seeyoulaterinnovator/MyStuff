@@ -56,7 +56,8 @@ public class LoginStatsRecording implements RequiredActionProvider {
 //        String clientId = authSession.getClient().getClientId();
         String clientId = "AAA";
 //        String clientId = model.get;
-        authorisedUsersService.saveSuccessfulAuth(User.builder().build(), entity.getRealmId(), clientId, getAuthOrRegType((AuthenticationSessionModel) model));
+
+        authorisedUsersService.saveSuccessfulAuth(User.builder().build(), "test", clientId, 777);
     }
 
     @Override
