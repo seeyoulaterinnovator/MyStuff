@@ -43,7 +43,7 @@ public class AuthorisedUsersService {
         ClientsForMonitoringEntity clientsForMonitoringEntity = clientsForMonitoringService.findAndReturnClientsForMonitoringEntity(realm, client);
         log.info("clientsForMonitoringEntity is : " + clientsForMonitoringEntity);
         if (clientsForMonitoringEntity == null || !clientsForMonitoringEntity.isMonitoring()){
-            log.info("saveSuccessfulAuth is stop, because clientsForMonitoringEntity == null || !clientsForMonitoringEntity.isMonitoring()");
+            log.info(" saveSuccessfulAuth is stop, because clientsForMonitoringEntity == null || !clientsForMonitoringEntity.isMonitoring()");
             return;
         }
 

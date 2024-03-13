@@ -50,14 +50,16 @@ public class LoginStatsRecording implements RequiredActionProvider {
 
     private void recordRecentLogin(UserModel model) throws AuthOrRegTypeNotFoundException {
         UserEntity entity = new UserEntity();
+        log.info("model.getUsername() is : " + model.getUsername());
         entity.setId(model.getId());
         log.info("!recordRecentLogin!, UserEntity entity.getUsername is : " + entity.getUsername());
         loginHistoryService.create(entity);
 //        String clientId = authSession.getClient().getClientId();
-        String clientId = "AAA";
+        String clientId = "app_b2b";
 //        String clientId = model.get;
+//       !!в метод ниже User.builder().build() - равно ноль, надо поискать как сюда его передать!!
 
-        authorisedUsersService.saveSuccessfulAuth(User.builder().build(), "test", clientId, 777);
+        authorisedUsersService.saveSuccessfulAuth(User.builder().build(), entity.getRealmId(), clientId, 777);
     }
 
     @Override
