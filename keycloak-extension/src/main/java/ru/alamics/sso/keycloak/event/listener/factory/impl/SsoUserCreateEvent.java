@@ -6,6 +6,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.RealmProvider;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.theme.Theme;
 import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
 import ru.alamics.sso.keycloak.lookup.Lookup;
@@ -88,6 +89,12 @@ public class SsoUserCreateEvent extends SsoEvent {
                     this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
                 } else if (!userModel.isEmailVerified() && !userModel.getRequiredActions().contains("email_sender")) {
                     log.info("sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes)");
+                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
+                } else if (userModel.isEmailVerified() && userModel.getAttribute("phone").size() == 0) {
+                    log.info("New check !! sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes)");
+                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
+                } else if (!userModel.isEmailVerified() && userModel.getAttribute("phone").size() == 0) {
+                    log.info("New check !! sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes)");
                     this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
                 }
             } else {
