@@ -91,36 +91,14 @@ public class SsoUserCreateEvent extends SsoEvent {
                 attributes.put("homePage", settingsService.getSettingsStringValue(HOME_PAGE, realm.getName()));
                 attributes.put("email", userModel.getEmail());
 
-//                attributes.put("user", new ProfileBean(user));
-//                addLinkInfoIntoAttributes(link, expirationInMinutes, attributes);
-
-//                attributes.put("realmName", realm);
-                attributes.put("emailVerificationBodyHtml", settingsService.getSettingsStringValue(SettingConstants.EMAIL_VERIFICATION_ACCOUNT, realm.getName()));
-
                 // если миграция с паролями, просить вводить пароль не нужно
-                String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_VERIFICATION, realm.getName());
-//                this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_EMAIL_VERIFICATION, attributes);
-//                if (userModel.isEmailVerified()) {
-//                    log.info("sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes)");
-//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_EMAIL_VERIFICATION, attributes);
-//                } else {
-//                    log.info("sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes)");
-//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_EMAIL_VERIFICATION, attributes);
-//                }
+                String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, realm.getName());
+                if (userModel.isEmailVerified()) {
+                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
+                } else {
+                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
+                }
 
-//                if (userModel.isEmailVerified() && !userModel.getRequiredActions().contains("email_sender")) {
-//                    log.info("sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes)");
-//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
-//                } else if (!userModel.isEmailVerified() && !userModel.getRequiredActions().contains("email_sender")) {
-//                    log.info("sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes)");
-//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
-//                } else if (userModel.isEmailVerified() && userModel.getAttribute("phone").size() == 0) {
-//                    log.info("New check !! sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes)");
-//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
-//                } else if (!userModel.isEmailVerified() && userModel.getAttribute("phone").size() == 0) {
-//                    log.info("New check !! sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes)");
-//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
-//                }
             } else {
                 log.error(String.format("User '%s' not found or do not have email", userId));
             }
@@ -129,14 +107,4 @@ public class SsoUserCreateEvent extends SsoEvent {
         }
 
     }
-//    protected void addLinkInfoIntoAttributes(String link, long expirationInMinutes, Map<String, Object> attributes) throws EmailException {
-//        attributes.put("link", link);
-//        attributes.put("linkExpiration", expirationInMinutes);
-//        try {
-//            Locale locale = session.getContext().resolveLocale(user);
-//            attributes.put("linkExpirationFormatter", new LinkExpirationFormatterMethod(getTheme().getMessages(locale), locale));
-//        } catch (IOException e) {
-//            throw new EmailException("Failed to template email", e);
-//        }
-//    }
 }
