@@ -1,6 +1,8 @@
 package ru.alamics.sso.keycloak.event.listener.factory.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.email.EmailException;
+import org.keycloak.email.freemarker.beans.ProfileBean;
 import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -8,15 +10,21 @@ import org.keycloak.models.RealmProvider;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.theme.Theme;
+import org.keycloak.email.freemarker.FreeMarkerEmailTemplateProvider;
+import org.keycloak.theme.beans.LinkExpirationFormatterMethod;
 import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
 import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
+import static org.keycloak.exportimport.ExportImportConfig.getRealmName;
 import static ru.alamics.sso.settings.SettingConstants.*;
 
 @Slf4j
@@ -24,6 +32,7 @@ public class SsoUserCreateEvent extends SsoEvent {
 
     private static final String BODY_TEMPLATE_CREATE = "mail-account-create.ftl";
     private static final String BODY_TEMPLATE_DATE = "mail-account-data.ftl";
+    private static final String  BODY_TEMPLATE_EMAIL_VERIFICATION = "email-verification.ftl";
 
     //    private static final String userEnabled = "enabled";
     private AdminEvent event;
@@ -82,26 +91,52 @@ public class SsoUserCreateEvent extends SsoEvent {
                 attributes.put("homePage", settingsService.getSettingsStringValue(HOME_PAGE, realm.getName()));
                 attributes.put("email", userModel.getEmail());
 
+//                attributes.put("user", new ProfileBean(user));
+//                addLinkInfoIntoAttributes(link, expirationInMinutes, attributes);
+
+                attributes.put("realmName", getRealmName());
+                attributes.put("emailVerificationBodyHtml", settingsService.getSettingsStringValue(SettingConstants.EMAIL_VERIFICATION_ACCOUNT, realm.getName()));
+
                 // если миграция с паролями, просить вводить пароль не нужно
-                String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, realm.getName());
-                if (userModel.isEmailVerified() && !userModel.getRequiredActions().contains("email_sender")) {
-                    log.info("sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes)");
-                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
-                } else if (!userModel.isEmailVerified() && !userModel.getRequiredActions().contains("email_sender")) {
-                    log.info("sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes)");
-                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
-                } else if (userModel.isEmailVerified() && userModel.getAttribute("phone").size() == 0) {
-                    log.info("New check !! sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes)");
-                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
-                } else if (!userModel.isEmailVerified() && userModel.getAttribute("phone").size() == 0) {
-                    log.info("New check !! sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes)");
-                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
-                }
+                String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_VERIFICATION, realm.getName());
+                this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_EMAIL_VERIFICATION, attributes);
+//                if (userModel.isEmailVerified()) {
+//                    log.info("sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes)");
+//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_EMAIL_VERIFICATION, attributes);
+//                } else {
+//                    log.info("sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes)");
+//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_EMAIL_VERIFICATION, attributes);
+//                }
+
+//                if (userModel.isEmailVerified() && !userModel.getRequiredActions().contains("email_sender")) {
+//                    log.info("sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes)");
+//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
+//                } else if (!userModel.isEmailVerified() && !userModel.getRequiredActions().contains("email_sender")) {
+//                    log.info("sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes)");
+//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
+//                } else if (userModel.isEmailVerified() && userModel.getAttribute("phone").size() == 0) {
+//                    log.info("New check !! sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes)");
+//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
+//                } else if (!userModel.isEmailVerified() && userModel.getAttribute("phone").size() == 0) {
+//                    log.info("New check !! sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes)");
+//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
+//                }
             } else {
                 log.error(String.format("User '%s' not found or do not have email", userId));
             }
         } catch (Exception e) {
             log.error("Error ", e);
         }
+
     }
+//    protected void addLinkInfoIntoAttributes(String link, long expirationInMinutes, Map<String, Object> attributes) throws EmailException {
+//        attributes.put("link", link);
+//        attributes.put("linkExpiration", expirationInMinutes);
+//        try {
+//            Locale locale = session.getContext().resolveLocale(user);
+//            attributes.put("linkExpirationFormatter", new LinkExpirationFormatterMethod(getTheme().getMessages(locale), locale));
+//        } catch (IOException e) {
+//            throw new EmailException("Failed to template email", e);
+//        }
+//    }
 }
