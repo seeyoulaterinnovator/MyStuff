@@ -91,7 +91,7 @@
   }
 
   if (hasInfo) {
-    text.set("Новый пароль задан успешно.")
+    text.set("Электронная почта успешно подтверждена.")
   }
 
   function handleHide() {
