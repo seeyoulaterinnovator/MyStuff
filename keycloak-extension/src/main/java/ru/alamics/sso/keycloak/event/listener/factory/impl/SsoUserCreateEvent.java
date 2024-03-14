@@ -94,12 +94,12 @@ public class SsoUserCreateEvent extends SsoEvent {
 //                attributes.put("user", new ProfileBean(user));
 //                addLinkInfoIntoAttributes(link, expirationInMinutes, attributes);
 
-                attributes.put("realmName", getRealmName());
+//                attributes.put("realmName", realm);
                 attributes.put("emailVerificationBodyHtml", settingsService.getSettingsStringValue(SettingConstants.EMAIL_VERIFICATION_ACCOUNT, realm.getName()));
 
                 // если миграция с паролями, просить вводить пароль не нужно
                 String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_VERIFICATION, realm.getName());
-                this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_EMAIL_VERIFICATION, attributes);
+//                this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_EMAIL_VERIFICATION, attributes);
 //                if (userModel.isEmailVerified()) {
 //                    log.info("sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes)");
 //                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_EMAIL_VERIFICATION, attributes);
