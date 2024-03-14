@@ -90,9 +90,9 @@
     }
   }
 
-  if (hasInfo) {
-    text.set("На указанный E-mail отправлена инструкция для подтверждения данных")
-  }
+  // if (hasInfo) {
+  //   text.set("На указанный E-mail отправлена инструкция для подтверждения данных")
+  // }
 
   function handleHide() {
     show.set(false);
