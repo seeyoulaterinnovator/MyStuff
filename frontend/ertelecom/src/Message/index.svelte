@@ -91,7 +91,7 @@
   }
 
   if (hasInfo) {
-    text.set("Электронная почта успешно подтверждена.")
+    text.set("Ваш E-mail успешно подтверждён!")
   }
 
   function handleHide() {
