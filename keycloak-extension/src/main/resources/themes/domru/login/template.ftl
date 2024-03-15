@@ -50,7 +50,7 @@
                     <#if section = "header">
                         Восстановление пароля
                     <#elseif section = "description">
-                        <span>На почту: ${login.username!}</span><br>
+                        <span>На почту: ${login.username!"указанную при регистрации"}</span><br>
                         Отправлены инструкции по восстановлению пароля
                     </#if>
                 </@emailSent.defaultTemplate>
