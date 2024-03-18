@@ -45,7 +45,7 @@
         </#if>
 
         <main id="content" class="flex-1 py-8 md:py-12 mx-auto md:mx-auto w-full max-w-440px xl:max-w-470px" style="overflow: initial;">
-            <#if displayMessage && message?has_content && message.summary == msg('emailSentMessage')>
+            <#if displayMessage && message?has_content && message.summary != msg('emailSentMessage')>
                 <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}" success=true; section>
                     <#if section = "header">
                         Восстановление пароля
