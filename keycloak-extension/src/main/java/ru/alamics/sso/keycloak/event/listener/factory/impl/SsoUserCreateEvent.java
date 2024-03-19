@@ -40,7 +40,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.keycloak.exportimport.ExportImportConfig.getRealmName;
 import static ru.alamics.sso.keycloak.auth.form.new_auth.common_mail_sender.EmailSenderService.sendVerifyEmail;
-import static ru.alamics.sso.keycloak.auth.form.new_auth.common_mail_sender.EmailSenderService.sendVerifyEmailAdmin;
 import static ru.alamics.sso.settings.SettingConstants.*;
 
 @Slf4j
