@@ -2,26 +2,32 @@ package ru.alamics.sso.keycloak.event.listener.factory.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.RequiredActionContext;
+import org.keycloak.authentication.actiontoken.verifyemail.VerifyEmailActionToken;
+import org.keycloak.common.util.Time;
 import org.keycloak.email.EmailException;
+import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.email.freemarker.beans.ProfileBean;
+import org.keycloak.events.EventBuilder;
 import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.forms.login.LoginFormsProvider;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.RealmProvider;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
 import org.keycloak.models.jpa.UserAdapter;
+import org.keycloak.services.Urls;
+import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.theme.Theme;
 import org.keycloak.email.freemarker.FreeMarkerEmailTemplateProvider;
 import org.keycloak.theme.beans.LinkExpirationFormatterMethod;
 import ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil;
 import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
 import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.schedule.Translator;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +35,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import static org.keycloak.exportimport.ExportImportConfig.getRealmName;
+import static ru.alamics.sso.keycloak.auth.form.new_auth.common_mail_sender.EmailSenderService.sendVerifyEmail;
+import static ru.alamics.sso.keycloak.auth.form.new_auth.common_mail_sender.EmailSenderService.sendVerifyEmailAdmin;
 import static ru.alamics.sso.settings.SettingConstants.*;
 
 @Slf4j
@@ -57,12 +65,20 @@ public class SsoUserCreateEvent extends SsoEvent {
             RealmProvider model = session.realms();
             log.info("ExtendedEventListener: admin create user");
             String userId = this.getUserId(event);
+            RealmModel realm = model.getRealm(event.getRealmId());
+            SettingsService settingsService = Lookup.lookup(SettingsService.class);
+            int timeTokenVerifyEmail = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_VERIFY_EMAIL, realm.getName());
+            int absoluteExpirationInSecs = Time.currentTime() + timeTokenVerifyEmail;
+            UriInfo uriInfo = session.getContext().getUri();
+            UserModel userModel = session.users().getUserById(userId, realm);
+
+
             if (userId == null) {
                 return;
             }
 
-            RealmModel realm = model.getRealm(event.getRealmId());
-            UserModel userModel = session.users().getUserById(userId, realm);
+
+
 
             if (userModel != null && userModel.getEmail() != null) {
 
@@ -97,12 +113,29 @@ public class SsoUserCreateEvent extends SsoEvent {
                 attributes.put("email", userModel.getEmail());
 
                 // если миграция с паролями, просить вводить пароль не нужно
-                String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, realm.getName());
-                if (userModel.isEmailVerified()) {
-                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
-                } else {
-                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
-                }
+//                String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, realm.getName());
+//                if (userModel.isEmailVerified()) {
+//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
+//                } else {
+//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
+//                }
+
+//                String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(timeTokenVerifyEmail);
+//
+//                EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class)
+//                        .setAuthenticationSession((AuthenticationSessionModel) session)
+//                        .setRealm(realm)
+//                        .setUser(userModel)
+//                        .setAttribute("expTime", expirationStrRus);
+////            вызывается при регистрации через сайт и через админку (после перехода по ссылке из первого письма(создан аккаунт))
+//                log.info("emailTemplateProvider is : " + emailTemplateProvider.getClass());
+//
+//                emailTemplateProvider.sendVerifyEmail(link, expirationInMinutes);
+
+
+                AuthenticationSessionModel authSession = (AuthenticationSessionModel) session;
+//                EventBuilder event = session
+                sendVerifyEmailAdmin(session, userModel, authSession, event);
 //                new
 //                log.info(" NEW !");
 //                RequiredActionContext context = (RequiredActionContext) this;
@@ -117,8 +150,8 @@ public class SsoUserCreateEvent extends SsoEvent {
         }
 
     }
-    private Response createForm(RequiredActionContext context) {
-        LoginFormsProvider form = context.form();
-        return form.createForm(BLANK_PAGE);
-    }
+//    private Response createForm(RequiredActionContext context) {
+//        LoginFormsProvider form = context.form();
+//        return form.createForm(BLANK_PAGE);
+//    }
 }
