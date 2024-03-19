@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.keycloak.exportimport.ExportImportConfig.getRealmName;
 import static ru.alamics.sso.keycloak.auth.form.new_auth.common_mail_sender.EmailSenderService.sendVerifyEmail;
@@ -136,8 +137,15 @@ public class SsoUserCreateEvent extends SsoEvent {
 
 
 //                AuthenticationSessionModel authSession = session.authenticationSessions().createA;
+//                EmailTemplateProvider emailTemplateProvider = (EmailTemplateProvider) this;
 
-                sendVerifyEmailAdmin(session, userModel, authSession, event);
+
+                EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
+                emailTemplateProvider.setRealm(session.getContext().getRealm());
+                emailTemplateProvider.setUser(session.users().getUserById(event.getAuthDetails().getUserId(), session.getContext().getRealm()));
+                long expirationInMinutes = TimeUnit.SECONDS.toMinutes(timeTokenVerifyEmail);
+
+                emailTemplateProvider.sendVerifyEmail(settingsService.getSettingsStringValue(EMAIL_LINK_PASSWORD, realm.getName()), expirationInMinutes);
 
 
             } else {
