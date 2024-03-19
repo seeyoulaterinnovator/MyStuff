@@ -1,6 +1,7 @@
 package ru.alamics.sso.keycloak.event.listener.factory.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.actiontoken.verifyemail.VerifyEmailActionToken;
 import org.keycloak.common.util.Time;
@@ -13,7 +14,9 @@ import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.*;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.services.Urls;
+import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import org.keycloak.sessions.AuthenticationSessionProvider;
 import org.keycloak.theme.Theme;
 import org.keycloak.email.freemarker.FreeMarkerEmailTemplateProvider;
 import org.keycloak.theme.beans.LinkExpirationFormatterMethod;
@@ -122,25 +125,20 @@ public class SsoUserCreateEvent extends SsoEvent {
 
 //                String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(timeTokenVerifyEmail);
 //
-//                EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class)
-//                        .setAuthenticationSession((AuthenticationSessionModel) session)
-//                        .setRealm(realm)
-//                        .setUser(userModel)
-//                        .setAttribute("expTime", expirationStrRus);
-////            вызывается при регистрации через сайт и через админку (после перехода по ссылке из первого письма(создан аккаунт))
-//                log.info("emailTemplateProvider is : " + emailTemplateProvider.getClass());
-//
-//                emailTemplateProvider.sendVerifyEmail(link, expirationInMinutes);
+
+                String clientId = session.getContext().getClient().getClientId();
+                ClientModel client = session.clientStorageManager().getClientByClientId(clientId, realm);
+                String tabId = "tabId";
+
+                AuthenticationSessionModel authSession = (AuthenticationSessionModel) session.authenticationSessions().getRootAuthenticationSession(realm, tabId);
 
 
-                AuthenticationSessionModel authSession = (AuthenticationSessionModel) session;
-//                EventBuilder event = session
+
+
+//                AuthenticationSessionModel authSession = session.authenticationSessions().createA;
+
                 sendVerifyEmailAdmin(session, userModel, authSession, event);
-//                new
-//                log.info(" NEW !");
-//                RequiredActionContext context = (RequiredActionContext) this;
-//                SsoUtil.sendEmailVer(context);
-//                context.challenge(createForm(context));
+
 
             } else {
                 log.error(String.format("User '%s' not found or do not have email", userId));

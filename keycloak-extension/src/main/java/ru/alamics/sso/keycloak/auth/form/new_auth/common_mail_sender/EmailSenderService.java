@@ -63,6 +63,7 @@ public class EmailSenderService {
     }
 
     public static void sendVerifyEmailAdmin(KeycloakSession session, UserModel user, AuthenticationSessionModel authSession, AdminEvent event) throws UriBuilderException, IllegalArgumentException {
+        log.info(" sendVerifyEmailAdmin is called ");
         RealmModel realm = session.getContext().getRealm();
         UriInfo uriInfo = session.getContext().getUri();
 
