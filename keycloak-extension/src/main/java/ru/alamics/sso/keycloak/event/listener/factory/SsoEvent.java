@@ -80,6 +80,7 @@ public abstract class SsoEvent {
 
             emailSender.send(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
                     session.theme().getTheme(Theme.Type.EMAIL), session.getContext().resolveLocale(user)));
+            log.info(" is call!!");
 
         } catch (Exception e) {
             log.error("Failed to send email: userId={}, email={}", user.getEmail(), user.getEmail(), e);
