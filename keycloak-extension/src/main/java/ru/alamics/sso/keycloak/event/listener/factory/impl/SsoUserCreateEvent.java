@@ -126,8 +126,8 @@ public class SsoUserCreateEvent extends SsoEvent {
 //                String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(timeTokenVerifyEmail);
 //
 
-                String clientId = session.getContext().getClient().getClientId();
-                ClientModel client = session.clientStorageManager().getClientByClientId(clientId, realm);
+//                String clientId = session.getContext().getClient().getClientId();
+//                ClientModel client = session.clientStorageManager().getClientByClientId(clientId, realm);
                 String tabId = "tabId";
 
                 AuthenticationSessionModel authSession = (AuthenticationSessionModel) session.authenticationSessions().getRootAuthenticationSession(realm, tabId);
