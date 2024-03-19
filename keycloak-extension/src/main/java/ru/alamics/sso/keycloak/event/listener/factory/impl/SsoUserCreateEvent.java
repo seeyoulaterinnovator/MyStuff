@@ -98,16 +98,16 @@ public class SsoUserCreateEvent extends SsoEvent {
 
                 // если миграция с паролями, просить вводить пароль не нужно
                 String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, realm.getName());
-//                if (userModel.isEmailVerified()) {
-//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
-//                } else {
-//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
-//                }
+                if (userModel.isEmailVerified()) {
+                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
+                } else {
+                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
+                }
 //                new
-                log.info(" NEW !");
-                RequiredActionContext context = (RequiredActionContext) this;
-                SsoUtil.sendEmailVer(context);
-                context.challenge(createForm(context));
+//                log.info(" NEW !");
+//                RequiredActionContext context = (RequiredActionContext) this;
+//                SsoUtil.sendEmailVer(context);
+//                context.challenge(createForm(context));
 
             } else {
                 log.error(String.format("User '%s' not found or do not have email", userId));
