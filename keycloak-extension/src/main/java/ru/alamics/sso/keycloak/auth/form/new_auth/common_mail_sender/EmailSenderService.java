@@ -50,6 +50,7 @@ public class EmailSenderService {
                     .setRealm(realm)
                     .setUser(user)
                     .setAttribute("expTime", expirationStrRus);
+//            вызывается при регистрации через сайт
             log.info("emailTemplateProvider is : " + emailTemplateProvider.toString());
 
             emailTemplateProvider.sendVerifyEmail(link, expirationInMinutes);

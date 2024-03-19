@@ -1,9 +1,11 @@
 package ru.alamics.sso.keycloak.event.listener.factory.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.email.EmailException;
 import org.keycloak.email.freemarker.beans.ProfileBean;
 import org.keycloak.events.admin.AdminEvent;
+import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.RealmProvider;
@@ -12,12 +14,14 @@ import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.theme.Theme;
 import org.keycloak.email.freemarker.FreeMarkerEmailTemplateProvider;
 import org.keycloak.theme.beans.LinkExpirationFormatterMethod;
+import ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil;
 import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +37,7 @@ public class SsoUserCreateEvent extends SsoEvent {
     private static final String BODY_TEMPLATE_CREATE = "mail-account-create.ftl";
     private static final String BODY_TEMPLATE_DATE = "mail-account-data.ftl";
     private static final String  BODY_TEMPLATE_EMAIL_VERIFICATION = "email-verification.ftl";
+    private static final String BLANK_PAGE = "blank-page.ftl";
 
     //    private static final String userEnabled = "enabled";
     private AdminEvent event;
@@ -93,11 +98,16 @@ public class SsoUserCreateEvent extends SsoEvent {
 
                 // если миграция с паролями, просить вводить пароль не нужно
                 String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, realm.getName());
-                if (userModel.isEmailVerified()) {
-                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
-                } else {
-                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
-                }
+//                if (userModel.isEmailVerified()) {
+//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
+//                } else {
+//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
+//                }
+//                new
+                log.info(" NEW !");
+                RequiredActionContext context = (RequiredActionContext) this;
+                SsoUtil.sendEmailVer(context);
+                context.challenge(createForm(context));
 
             } else {
                 log.error(String.format("User '%s' not found or do not have email", userId));
@@ -106,5 +116,9 @@ public class SsoUserCreateEvent extends SsoEvent {
             log.error("Error ", e);
         }
 
+    }
+    private Response createForm(RequiredActionContext context) {
+        LoginFormsProvider form = context.form();
+        return form.createForm(BLANK_PAGE);
     }
 }
