@@ -33,6 +33,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -49,6 +50,7 @@ public class SsoUserCreateEvent extends SsoEvent {
     private static final String BODY_TEMPLATE_CREATE = "mail-account-create.ftl";
     private static final String BODY_TEMPLATE_DATE = "mail-account-data.ftl";
     private static final String  BODY_TEMPLATE_EMAIL_VERIFICATION = "email-verification.ftl";
+    private static final String  BODY_TEMPLATE_EMAIL_VERIFICATION_2 = "email-verification2.ftl";
     private static final String BLANK_PAGE = "blank-page.ftl";
 
     //    private static final String userEnabled = "enabled";
@@ -116,6 +118,11 @@ public class SsoUserCreateEvent extends SsoEvent {
                 attributes.put("homePage", settingsService.getSettingsStringValue(HOME_PAGE, realm.getName()));
                 attributes.put("email", userModel.getEmail());
 
+
+                String newLink = uriInfo.getBaseUri().toString() + "realms/" + realm.getName() + "/login-actions/required-action?execution=email_sender&client_id=lkb2b&tab_id=LJeH2GYbsp8";
+                attributes.put("link", userModel.getEmail());
+                attributes.put("link2", newLink);
+
                 // если миграция с паролями, просить вводить пароль не нужно
                 String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, realm.getName());
                 if (userModel.isEmailVerified()) {
@@ -123,6 +130,14 @@ public class SsoUserCreateEvent extends SsoEvent {
                 } else {
                     this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
                 }
+
+
+//                String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, realm.getName());
+//                if (userModel.isEmailVerified()) {
+//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_EMAIL_VERIFICATION, attributes);
+//                } else {
+//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_EMAIL_VERIFICATION_2, attributes);
+//                }
 
 //                String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(timeTokenVerifyEmail);
 //

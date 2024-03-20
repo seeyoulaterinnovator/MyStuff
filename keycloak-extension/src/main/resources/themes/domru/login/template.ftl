@@ -45,25 +45,25 @@
         </#if>
 
         <main id="content" class="flex-1 py-8 md:py-12 mx-auto md:mx-auto w-full max-w-440px xl:max-w-470px" style="overflow: initial;">
-            <#if displayMessage && message?has_content && message.summary == msg('emailSentMessage')>
-                <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}" success=true; section>
-                    <#if section = "header">
-                        Восстановление пароля
-                    <#elseif section = "description">
-                        <span>На почту: ${login.username!"указанную при регистрации"}</span><br>
-                        Отправлены инструкции по восстановлению пароля
-                    </#if>
-                </@emailSent.defaultTemplate>
+<#--            <#if displayMessage && message?has_content && message.summary == msg('emailSentMessage')>-->
+<#--                <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}" success=true; section>-->
+<#--                    <#if section = "header">-->
+<#--                        Восстановление пароля-->
+<#--                    <#elseif section = "description">-->
+<#--                        <span>На почту: ${login.username!"указанную при регистрации"}</span><br>-->
+<#--                        Отправлены инструкции по восстановлению пароля-->
+<#--                    </#if>-->
+<#--                </@emailSent.defaultTemplate>-->
 
-            <#elseif displayMessage && message?has_content && message.summary == msg('emailSendErrorMessage')>
-                <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}" success = false; section>
-                    <#if section = "header">
-                        Восстановление пароля
-                    <#elseif section = "description">
-                        Не получается отправить письмо. Учетная запись с такими данными не существует в системе.
-                    </#if>
-                </@emailSent.defaultTemplate>
-            <#else>
+<#--            <#elseif displayMessage && message?has_content && message.summary == msg('emailSendErrorMessage')>-->
+<#--                <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}" success = false; section>-->
+<#--                    <#if section = "header">-->
+<#--                        Восстановление пароля-->
+<#--                    <#elseif section = "description">-->
+<#--                        Не получается отправить письмо. Учетная запись с такими данными не существует в системе.-->
+<#--                    </#if>-->
+<#--                </@emailSent.defaultTemplate>-->
+<#--            <#else>-->
 
                 <#nested "header">
 
@@ -147,7 +147,7 @@
 
                 </div>
 
-            </#if>
+<#--            </#if>-->
         </main>
 
         <#if iframe == false>
