@@ -116,12 +116,12 @@ public class SsoUserCreateEvent extends SsoEvent {
                 attributes.put("email", userModel.getEmail());
 
                 // если миграция с паролями, просить вводить пароль не нужно
-                String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, realm.getName());
-                if (userModel.isEmailVerified()) {
-                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
-                } else {
-                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
-                }
+//                String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, realm.getName());
+//                if (userModel.isEmailVerified()) {
+//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
+//                } else {
+//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
+//                }
 
 //                String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(timeTokenVerifyEmail);
 //
@@ -140,12 +140,12 @@ public class SsoUserCreateEvent extends SsoEvent {
 //                EmailTemplateProvider emailTemplateProvider = (EmailTemplateProvider) this;
 
 
-//                EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
-//                emailTemplateProvider.setRealm(session.getContext().getRealm());
-//                emailTemplateProvider.setUser(session.users().getUserById(event.getAuthDetails().getUserId(), session.getContext().getRealm()));
-//                long expirationInMinutes = TimeUnit.SECONDS.toMinutes(timeTokenVerifyEmail);
-//
-//                emailTemplateProvider.sendVerifyEmail(settingsService.getSettingsStringValue(EMAIL_LINK_PASSWORD, realm.getName()), expirationInMinutes);
+                EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
+                emailTemplateProvider.setRealm(session.getContext().getRealm());
+                emailTemplateProvider.setUser(session.users().getUserById(userModel.getId(), session.getContext().getRealm()));
+                long expirationInMinutes = TimeUnit.SECONDS.toMinutes(timeTokenVerifyEmail);
+
+                emailTemplateProvider.sendVerifyEmail(settingsService.getSettingsStringValue(EMAIL_LINK_PASSWORD, realm.getName()), expirationInMinutes);
 
 
             } else {
