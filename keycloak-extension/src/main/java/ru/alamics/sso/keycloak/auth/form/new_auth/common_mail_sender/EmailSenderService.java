@@ -28,7 +28,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class EmailSenderService {
 
-    public static void sendVerifyEmail(KeycloakSession session, LoginFormsProvider forms, UserModel user, AuthenticationSessionModel authSession, EventBuilder event) throws UriBuilderException, IllegalArgumentException {
+    public static void sendVerifyEmail(KeycloakSession session, LoginFormsProvider forms, UserModel user, AuthenticationSessionModel authSession, EventBuilder event)
+            throws UriBuilderException, IllegalArgumentException {
         RealmModel realm = session.getContext().getRealm();
         UriInfo uriInfo = session.getContext().getUri();
 

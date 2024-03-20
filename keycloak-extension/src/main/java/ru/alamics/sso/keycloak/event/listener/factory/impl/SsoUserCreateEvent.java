@@ -129,8 +129,9 @@ public class SsoUserCreateEvent extends SsoEvent {
 //                String clientId = session.getContext().getClient().getClientId();
 //                ClientModel client = session.clientStorageManager().getClientByClientId(clientId, realm);
                 String tabId = "tabId";
-
-                AuthenticationSessionModel authSession = (AuthenticationSessionModel) session.authenticationSessions().getRootAuthenticationSession(realm, tabId);
+//                встать в дебаге и понять кто может иметь отношение к AuthenticationSessionModel, какие сессии существуют
+                AuthenticationSessionModel authSession = (AuthenticationSessionModel) session.authenticationSessions().
+                        getRootAuthenticationSession(realm, tabId).getAuthenticationSessions();
 
 
 
