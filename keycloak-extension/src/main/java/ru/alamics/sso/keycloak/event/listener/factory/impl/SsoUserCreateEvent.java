@@ -15,6 +15,7 @@ import org.keycloak.models.*;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.services.Urls;
 import org.keycloak.services.managers.AuthenticationManager;
+import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.sessions.AuthenticationSessionProvider;
 import org.keycloak.theme.Theme;
@@ -116,12 +117,12 @@ public class SsoUserCreateEvent extends SsoEvent {
                 attributes.put("email", userModel.getEmail());
 
                 // если миграция с паролями, просить вводить пароль не нужно
-//                String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, realm.getName());
-//                if (userModel.isEmailVerified()) {
-//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
-//                } else {
-//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
-//                }
+                String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, realm.getName());
+                if (userModel.isEmailVerified()) {
+                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
+                } else {
+                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
+                }
 
 //                String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(timeTokenVerifyEmail);
 //
@@ -138,14 +139,22 @@ public class SsoUserCreateEvent extends SsoEvent {
 
 //                AuthenticationSessionModel authSession = session.authenticationSessions().createA;
 //                EmailTemplateProvider emailTemplateProvider = (EmailTemplateProvider) this;
-
-
-                EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
-                emailTemplateProvider.setRealm(session.getContext().getRealm());
-                emailTemplateProvider.setUser(session.users().getUserById(userModel.getId(), session.getContext().getRealm()));
-                long expirationInMinutes = TimeUnit.SECONDS.toMinutes(timeTokenVerifyEmail);
-
-                emailTemplateProvider.sendVerifyEmail(settingsService.getSettingsStringValue(EMAIL_LINK_PASSWORD, realm.getName()), expirationInMinutes);
+//                AuthenticationSessionModel authSession = session.authenticationSessions().createRootAuthenticationSession()
+//                int timeTokenVerifyEmail = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_VERIFY_EMAIL, realm.getName());
+//                int absoluteExpirationInSecs = Time.currentTime() + timeTokenVerifyEmail;
+//                String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authSession).getEncodedId();
+//                VerifyEmailActionToken token = new VerifyEmailActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, user.getEmail(), authSession.getClient().getClientId());
+//                UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
+//                        authSession.getClient().getClientId(), authSession.getTabId());
+//                String link = builder.build(realm.getName()).toString();
+//
+//                EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
+//                emailTemplateProvider.setRealm(session.getContext().getRealm());
+//                emailTemplateProvider.setUser(session.users().getUserById(userModel.getId(), session.getContext().getRealm()));
+//                long expirationInMinutes = TimeUnit.SECONDS.toMinutes(timeTokenVerifyEmail);
+//
+//                emailTemplateProvider.sendVerifyEmail(settingsService.getSettingsStringValue(EMAIL_LINK_PASSWORD,
+//                        realm.getName()), expirationInMinutes);
 
 
             } else {
