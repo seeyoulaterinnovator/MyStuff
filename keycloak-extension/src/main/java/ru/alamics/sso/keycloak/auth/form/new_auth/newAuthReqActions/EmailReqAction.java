@@ -21,7 +21,7 @@ public class EmailReqAction implements RequiredActionProvider {
 
     @Override
     public void requiredActionChallenge(RequiredActionContext context) {
-        context.form().setInfo("Проверка На указанный E-mail отправлена инструкция для подтверждения данных");
+        context.form().setInfo("На указанный E-mail отправлена инструкция для подтверждения данных.");
 //       гипотеза: этот метод вызывается при регистрации через сайт, проверка с помощью добавления логирования
         log.info(" is call ! !");
         SsoUtil.sendEmailVer(context);
