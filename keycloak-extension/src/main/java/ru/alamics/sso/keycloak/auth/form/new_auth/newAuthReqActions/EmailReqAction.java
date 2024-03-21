@@ -28,13 +28,17 @@ public class EmailReqAction implements RequiredActionProvider {
         log.info("user.getAttribute(\"phone\") is : " + user.getAttribute("phone"));
         if (isContainsPhone) {
             context.form().setInfo("test Ваш E-mail успешно подтверждён!");
+            SsoUtil.sendEmailVer(context);
+            context.challenge(createForm(context));
         } else {
             context.form().setInfo("На указанный E-mail отправлена инструкция для подтверждения данных.");
+            SsoUtil.sendEmailVer(context);
+            context.challenge(createForm(context));
         }
 //       гипотеза: этот метод вызывается при регистрации через сайт, проверка с помощью добавления логирования
         log.info(" is call ! !");
-        SsoUtil.sendEmailVer(context);
-        context.challenge(createForm(context));
+//        SsoUtil.sendEmailVer(context);
+//        context.challenge(createForm(context));
     }
 
     @Override
