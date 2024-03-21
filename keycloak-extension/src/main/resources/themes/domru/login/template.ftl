@@ -46,28 +46,16 @@
 
         <main id="content" class="flex-1 py-8 md:py-12 mx-auto md:mx-auto w-full max-w-440px xl:max-w-470px" style="overflow: initial;">
 
-            <#if displayMessage && message?has_content && message.summary == msg('emailSentMessage')>
-            <form id="loginUpdatePasswordForm" action="${url.loginAction}" method="post">
-                <@blocks.password firstFieldName="password-new" />
-                <div class="flex flex-col justify-between sm:flex-row xl:mt-12 md:mt-8 mt-7">
-                    <div class="flex-basis-auto w-full mb-2 sm:mb-0">
-                        <button id="submit" class="btn btn-main w-full pass-fields pass-fields--change-pass" type="submit">${msg(resetPassword)}</button>
-                    </div>
-                    <div class="flex-basis-auto w-full ml-0 text-sm sm:ml-6">
-                        <a id="cancel" href="${url.loginUrl}" class="btn w-full text-accentBlue-900">${msg(doCancel)}</a>
-                    </div>
-                </div>
-            </form>
 
-                <#--            <#if displayMessage && message?has_content && message.summary == msg('emailSentMessage')>-->
-<#--                <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}" success=true; section>-->
-<#--                    <#if section = "header">-->
-<#--                        Восстановление пароля-->
-<#--                    <#elseif section = "description">-->
-<#--                        <span>На почту: ${login.username!"указанную при регистрации"}</span><br>-->
-<#--                        Отправлены инструкции по восстановлению пароля-->
-<#--                    </#if>-->
-<#--                </@emailSent.defaultTemplate>-->
+            <#if displayMessage && message?has_content && message.summary == msg('emailSentMessage')>
+                <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}" success=true; section>
+                    <#if section = "header">
+                        Восстановление пароля
+                    <#elseif section = "description">
+                        <span>На почту: ${login.username!"указанную при регистрации"}</span><br>
+                        Отправлены инструкции по восстановлению пароля
+                    </#if>
+                </@emailSent.defaultTemplate>
 
             <#elseif displayMessage && message?has_content && message.summary == msg('emailSendErrorMessage')>
                 <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}" success = false; section>
