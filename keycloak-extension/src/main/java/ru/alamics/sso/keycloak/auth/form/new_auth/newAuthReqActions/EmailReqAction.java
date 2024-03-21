@@ -24,7 +24,7 @@ public class EmailReqAction implements RequiredActionProvider {
     @Override
     public void requiredActionChallenge(RequiredActionContext context) {
         UserModel user = context.getUser();
-        boolean isContainsPhone = user.getAttribute("phone") == null;
+        boolean isContainsPhone = user.getAttribute("phone").size() == 0;
         if (isContainsPhone) {
             context.form().setInfo("test Ваш E-mail успешно подтверждён!");
         } else {
