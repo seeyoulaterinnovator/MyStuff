@@ -73,7 +73,7 @@ public class SsoUserCreateEvent extends SsoEvent {
             String userId = this.getUserId(event);
             RealmModel realm = model.getRealm(event.getRealmId());
             SettingsService settingsService = Lookup.lookup(SettingsService.class);
-            int timeTokenVerifyEmail = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_VERIFY_EMAIL, realm.getName());
+            int timeTokenVerifyEmail = settingsService.getSettingsIntValue(TIME_TOKEN_VERIFY_EMAIL, realm.getName());
             int absoluteExpirationInSecs = Time.currentTime() + timeTokenVerifyEmail;
             UriInfo uriInfo = session.getContext().getUri();
             UserModel userModel = session.users().getUserById(userId, realm);
@@ -125,11 +125,14 @@ public class SsoUserCreateEvent extends SsoEvent {
 
                 // если миграция с паролями, просить вводить пароль не нужно
                 String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, realm.getName());
+                userModel.setEmailVerified(true);
                 if (userModel.isEmailVerified()) {
                     this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
                 } else {
                     this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
                 }
+
+
 
 //                SsoUtil.sendEmailVer();
 
