@@ -206,7 +206,7 @@
       {/if}
     </div>
   </div>
-{:else if $showInfo && ($phoneElement == null || $phoneElement.isEmpty())}
+{:else if $showInfo}
   <div class="message__fade flex justify-center items-center" on:click={closeAndSubmit}>
     <div class="message" style="{$isEmailVer ? 'width: 390px' : 'width: 288px'}" on:click={closeAndSubmit}>
       <div class="message__title flex flex-row justify-between items-center gap-4">
