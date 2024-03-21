@@ -131,6 +131,8 @@ public class SsoUserCreateEvent extends SsoEvent {
                     this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
                 }
 
+//                SsoUtil.sendEmailVer();
+
 
 
 //                String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, realm.getName());
