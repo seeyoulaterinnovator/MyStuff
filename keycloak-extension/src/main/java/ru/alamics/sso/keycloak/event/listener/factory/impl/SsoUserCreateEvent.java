@@ -126,11 +126,13 @@ public class SsoUserCreateEvent extends SsoEvent {
                 // если миграция с паролями, просить вводить пароль не нужно
                 String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, realm.getName());
                 userModel.setEmailVerified(true);
-                if (userModel.isEmailVerified()) {
-                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
-                } else {
-                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
-                }
+//                if (userModel.isEmailVerified()) {
+//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
+//                } else {
+//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
+//                }
+                this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
+
 
 
 

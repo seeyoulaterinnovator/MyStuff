@@ -23,22 +23,24 @@ public class EmailReqAction implements RequiredActionProvider {
 
     @Override
     public void requiredActionChallenge(RequiredActionContext context) {
-        UserModel user = context.getUser();
-        boolean isContainsPhone = user.getAttribute("phone").size() == 0;
-        log.info("user.getAttribute(\"phone\") is : " + user.getAttribute("phone"));
-        if (isContainsPhone) {
-            context.form().setInfo("test Ваш E-mail успешно подтверждён!");
-            SsoUtil.sendEmailVer(context);
-            context.challenge(createForm(context));
-        } else {
-            context.form().setInfo("На указанный E-mail отправлена инструкция для подтверждения данных.");
-            SsoUtil.sendEmailVer(context);
-            context.challenge(createForm(context));
-        }
+//        UserModel user = context.getUser();
+//        boolean isContainsPhone = user.getAttribute("phone").size() == 0;
+//        log.info("user.getAttribute(\"phone\") is : " + user.getAttribute("phone"));
+//        if (isContainsPhone) {
+//            context.form().setInfo("test Ваш E-mail успешно подтверждён!");
+//            SsoUtil.sendEmailVer(context);
+//            context.challenge(createForm(context));
+//        } else {
+//            context.form().setInfo("На указанный E-mail отправлена инструкция для подтверждения данных.");
+//            SsoUtil.sendEmailVer(context);
+//            context.challenge(createForm(context));
+//        }
 //       гипотеза: этот метод вызывается при регистрации через сайт, проверка с помощью добавления логирования
         log.info(" is call ! !");
-//        SsoUtil.sendEmailVer(context);
-//        context.challenge(createForm(context));
+        context.form().setInfo("На указанный E-mail отправлена инструкция для подтверждения данных.");
+
+        SsoUtil.sendEmailVer(context);
+        context.challenge(createForm(context));
     }
 
     @Override
