@@ -13,6 +13,7 @@
     isSecondSwitcher,
     isEmailVer
   } from './stores.js';
+  import {showModal} from "../Cities/stores";
 
   const hasRegistration = window.location.href.includes('registration');
   const hasUpdateProfile = window.location.href.includes('UPDATE_PROFILE');
@@ -106,7 +107,7 @@
 
   function handleHide2() {
     if ($isEmailVer) {
-      showInfo.set(false);
+      showInfo.set(true);
     }
   }
 
