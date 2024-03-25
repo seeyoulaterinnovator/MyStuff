@@ -96,7 +96,8 @@
   }
 
   if (phone === '') {
-    text.set("test Ваш E-mail успешно подтверждён!")
+    text.set("Ваш E-mail успешно подтверждён!")
+    isEmailVer.set(true)
   }
 
   function handleHide() {
