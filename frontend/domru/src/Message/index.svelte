@@ -95,9 +95,9 @@
     }
   }
 
-  // if (hasInfo) {
-  //   text.set("На указанный E-mail отправлена инструкция для подтверждения данных")
-  // }
+  if (phone === '') {
+    text.set("test Ваш E-mail успешно подтверждён!")
+  }
 
   function handleHide() {
     show.set(false);
