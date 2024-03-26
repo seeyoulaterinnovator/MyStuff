@@ -31,7 +31,6 @@ public class EmptyReq implements RequiredActionProvider {
     private static final String EMPTY_PAGE = "empty-page.ftl";
 
     public final static String CLIENT_B2B = "b2b";
-    public final static String CLIENT_LKB2B = "lkb2b";
 
     @Override
     public void evaluateTriggers(RequiredActionContext context) {
@@ -46,7 +45,7 @@ public class EmptyReq implements RequiredActionProvider {
         }
 
 
-        if (context.getAuthenticationSession().getClient().getClientId().equals(CLIENT_B2B) || context.getAuthenticationSession().getClient().getClientId().equals(CLIENT_LKB2B)) {
+        if (context.getAuthenticationSession().getClient().getClientId().equals(CLIENT_B2B)) {
             context.challenge(createForm(context));
         } else {
             context.success();
