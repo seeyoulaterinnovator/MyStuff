@@ -75,10 +75,7 @@ public class EmailSenderService {
 //
 //            String authSessionEncodedId = SsoUtil.generatePattern();
 //            VerifyEmailActionToken token = new VerifyEmailActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, user.getEmail(), authSession.getClient().getClientId());
-//            UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
-//                    authSession.getClient().getClientId(), authSession.getTabId());
-//            String link = builder.build(realm.getName()).toString();
-//            long expirationInMinutes = TimeUnit.SECONDS.toMinutes(timeTokenVerifyEmail);
+//
 //
 //            String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(timeTokenVerifyEmail);
 //

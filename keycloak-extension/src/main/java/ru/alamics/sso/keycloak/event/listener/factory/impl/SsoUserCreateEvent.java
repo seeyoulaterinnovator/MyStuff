@@ -120,8 +120,7 @@ public class SsoUserCreateEvent extends SsoEvent {
 
 
                 String newLink = uriInfo.getBaseUri().toString() + "realms/" + realm.getName() + "/login-actions/required-action?execution=email_sender&client_id=lkb2b&tab_id=LJeH2GYbsp8";
-                attributes.put("link", userModel.getEmail());
-                attributes.put("link2", newLink);
+
 
                 // если миграция с паролями, просить вводить пароль не нужно
                 String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, realm.getName());

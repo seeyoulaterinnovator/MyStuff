@@ -2,8 +2,12 @@ package ru.alamics.sso.keycloak.event.listener.factory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.actiontoken.resetcred.ResetCredentialsActionToken;
+import org.keycloak.authentication.actiontoken.verifyemail.VerifyEmailActionToken;
 import org.keycloak.common.util.Time;
+import org.keycloak.events.Details;
+import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
@@ -16,6 +20,8 @@ import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.theme.Theme;
 import ru.alamics.sso.emailer.EmailModel;
 import ru.alamics.sso.emailer.EmailSender;
+import ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil;
+import ru.alamics.sso.keycloak.auth.form.new_auth.common_mail_sender.EmailSenderService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
 import ru.alamics.sso.schedule.Translator;
@@ -64,23 +70,33 @@ public abstract class SsoEvent {
             int absoluteExpirationInSecs = Time.currentTime() + timeTokenCreateUser;
 
             // We send the secret in the email in a link as a query param.
-            String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
-            ResetCredentialsActionToken token = new ResetCredentialsActionToken(
-                    user.getId(), absoluteExpirationInSecs, authSessionEncodedId, authenticationSession.getClient().getClientId());
+//            String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
+//            ResetCredentialsActionToken token = new ResetCredentialsActionToken(
+//                    user.getId(), absoluteExpirationInSecs, authSessionEncodedId, authenticationSession.getClient().getClientId());
+
+
+            String authSessionEncodedId = SsoUtil.generatePattern();
+            VerifyEmailActionToken token = new VerifyEmailActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, user.getEmail(), clientModel.getClientId());
+
 
             UriInfo uriInfo = session.getContext().getUri();
 
             UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
                     clientModel.getClientId(), authenticationSession.getTabId());
+
+
             String link = builder.build(realm.getName()).toString();
             attributes.put("accountLink", link);
 
             String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenCreateUser);
             attributes.put("expTimePass", expirationStrRusPass);
 
+
+
+
             emailSender.send(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
                     session.theme().getTheme(Theme.Type.EMAIL), session.getContext().resolveLocale(user)));
-            log.info(" is call!!");
+            log.info("sendEmail from SsoEvent is call!!");
 
         } catch (Exception e) {
             log.error("Failed to send email: userId={}, email={}", user.getEmail(), user.getEmail(), e);
