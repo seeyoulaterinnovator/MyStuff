@@ -70,13 +70,13 @@ public abstract class SsoEvent {
             int absoluteExpirationInSecs = Time.currentTime() + timeTokenCreateUser;
 
             // We send the secret in the email in a link as a query param.
-//            String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
-//            ResetCredentialsActionToken token = new ResetCredentialsActionToken(
-//                    user.getId(), absoluteExpirationInSecs, authSessionEncodedId, authenticationSession.getClient().getClientId());
+            String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
+            ResetCredentialsActionToken token = new ResetCredentialsActionToken(
+                    user.getId(), absoluteExpirationInSecs, authSessionEncodedId, authenticationSession.getClient().getClientId());
 
 
-            String authSessionEncodedId = SsoUtil.generatePattern();
-            VerifyEmailActionToken token = new VerifyEmailActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, user.getEmail(), clientModel.getClientId());
+//            String authSessionEncodedId = SsoUtil.generatePattern();
+//            VerifyEmailActionToken token = new VerifyEmailActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, user.getEmail(), clientModel.getClientId());
 
 
             UriInfo uriInfo = session.getContext().getUri();
@@ -94,8 +94,8 @@ public abstract class SsoEvent {
 
 
 
-//            emailSender.send(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
-//                    session.theme().getTheme(Theme.Type.EMAIL), session.getContext().resolveLocale(user)));
+            emailSender.send(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
+                    session.theme().getTheme(Theme.Type.EMAIL), session.getContext().resolveLocale(user)));
             log.info("sendEmail from SsoEvent is call!!");
 
         } catch (Exception e) {
