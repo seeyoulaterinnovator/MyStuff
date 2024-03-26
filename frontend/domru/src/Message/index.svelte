@@ -96,10 +96,10 @@
     }
   }
 
-  if (!document.getElementsByName('phone')[0]) {
-    console.log('phone is ' + document.getElementsByName('phone')[0]);
-    text.set("front Ваш E-mail успешно подтверждён!")
-  }
+  // if (!document.getElementsByName('phone')[0]) {
+  //   console.log('phone is ' + document.getElementsByName('phone')[0]);
+  //   text.set("front Ваш E-mail успешно подтверждён!")
+  // }
 
   function handleHide() {
     show.set(false);
