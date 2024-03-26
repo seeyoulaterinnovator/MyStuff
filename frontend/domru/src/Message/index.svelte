@@ -97,6 +97,7 @@
   }
 
   if (phone === '') {
+    console.log('phone is ' + phone);
     text.set("front Ваш E-mail успешно подтверждён!")
   }
 
