@@ -94,8 +94,8 @@ public abstract class SsoEvent {
 
 
 
-            emailSender.send(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
-                    session.theme().getTheme(Theme.Type.EMAIL), session.getContext().resolveLocale(user)));
+//            emailSender.send(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
+//                    session.theme().getTheme(Theme.Type.EMAIL), session.getContext().resolveLocale(user)));
             log.info("sendEmail from SsoEvent is call!!");
 
         } catch (Exception e) {
