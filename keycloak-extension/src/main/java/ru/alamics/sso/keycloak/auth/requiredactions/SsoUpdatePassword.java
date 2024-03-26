@@ -96,6 +96,7 @@ public class SsoUpdatePassword extends UpdatePassword {
     }
 
     private void verifyEmailHandler(RequiredActionContext context, LoginFormsProvider lfp) {
+        log.info("verifyEmailHandler is called");
         AuthenticationSessionModel sessionModel = context.getAuthenticationSession();
 
         if (sessionModel.getAuthNote("emailHandler") != null) {
@@ -107,6 +108,7 @@ public class SsoUpdatePassword extends UpdatePassword {
 
     @Override
     public void requiredActionChallenge(RequiredActionContext context) {
+        log.info("requiredActionChallenge is called");
         LoginFormsProvider lfp = context.form();
 
         verifyEmailHandler(context, lfp);

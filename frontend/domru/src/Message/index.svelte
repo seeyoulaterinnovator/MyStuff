@@ -107,7 +107,7 @@
 
   function handleHide2() {
     if ($isEmailVer) {
-      showInfo.set(true);
+      showInfo.set(false);
     }
   }
 
