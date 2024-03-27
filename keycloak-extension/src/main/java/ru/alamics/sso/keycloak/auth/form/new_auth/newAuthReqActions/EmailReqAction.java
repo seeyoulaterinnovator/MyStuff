@@ -58,6 +58,7 @@ public class EmailReqAction implements RequiredActionProvider {
         log.info("user.getAttribute(\"phone\") is : " + user.getAttribute("phone"));
         LoginFormsProvider form = context.form();
         if (isContainsPhone) {
+            log.info("isContainsPhone is " + isContainsPhone);
             return form.createForm(BLANK_PAGE);
         }
         return form.createForm(UPDATE_PASSWORD_FTL);
