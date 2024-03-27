@@ -28,19 +28,19 @@ public class EmailReqAction implements RequiredActionProvider {
         UserModel user = context.getUser();
         boolean isContainsPhone = user.getAttribute("phone").size() == 0;
         log.info("user.getAttribute(\"phone\") is : " + user.getAttribute("phone"));
-//        if (isContainsPhone) {
-//            context.form().setInfo("test from requiredActionChallenge Ваш E-mail успешно подтверждён!");
-//        } else {
-//            context.form().setInfo("На указанный E-mail отправлена инструкция для подтверждения данных.");
-//        }
-//        SsoUtil.sendEmailVer(context);
-//        context.challenge(createForm(context));
-//       гипотеза: этот метод вызывается при регистрации через сайт, проверка с помощью добавления логирования
-        log.info(" is call ! !");
-        context.form().setInfo("На указанный E-mail отправлена инструкция для подтверждения данных.");
-
+        if (isContainsPhone) {
+            context.form().setInfo("test from requiredActionChallenge Ваш E-mail успешно подтверждён!");
+        } else {
+            context.form().setInfo("На указанный E-mail отправлена инструкция для подтверждения данных.");
+        }
         SsoUtil.sendEmailVer(context);
         context.challenge(createForm(context));
+//       гипотеза: этот метод вызывается при регистрации через сайт, проверка с помощью добавления логирования
+        log.info(" is call ! !");
+//        context.form().setInfo("На указанный E-mail отправлена инструкция для подтверждения данных.");
+//
+//        SsoUtil.sendEmailVer(context);
+//        context.challenge(createForm(context));
     }
 
     @Override
