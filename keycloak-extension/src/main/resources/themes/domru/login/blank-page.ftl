@@ -2,6 +2,7 @@
 <#import "templates/blocks.ftl" as blocks>
 
 <@layout.registrationLayout displayInfo=true displayCity=false displayWarningMessage=false; section>
+    <p>BLANK PAGE</p>
     <#if section = "header">
     <#elseif section = "form">
         <form action="${url.loginAction}" method="post">
