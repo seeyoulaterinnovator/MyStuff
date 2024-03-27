@@ -111,8 +111,11 @@
     }
   }
   function handleHide3() {
+    setTimeout(() => {
       showInfo.set(false);
+    }, 100);
   }
+
 
   setTimeout(handleHide2, 1800);
   setTimeout(handleHide3, 2800);
