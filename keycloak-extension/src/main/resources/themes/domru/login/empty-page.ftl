@@ -20,10 +20,11 @@
         var actionIsEmpty = ${actionIsEmpty?c};
         var clientIsB2B = ${clientIsB2B?c};
 
-        if (clientIsB2B === true && actionIsEmpty === true) {
+        if (actionIsEmpty === true) {
+            // if (clientIsB2B === true && actionIsEmpty === true) {
             window.onunload = function () {
                 window.parent.postMessage('post-selected', '*');
-                console.log("���������� �� B2B � Action ����");
+                console.log("ep���������� �� B2B � Action ����");
             };
         }
 
