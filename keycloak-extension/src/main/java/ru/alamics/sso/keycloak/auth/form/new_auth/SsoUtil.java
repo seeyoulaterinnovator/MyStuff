@@ -55,15 +55,15 @@ public interface SsoUtil {
 
     static void sendEmailVer(RequiredActionContext context) {
         log.info("void sendEmailVer is called");
-        if (!context.getUser().isEmailVerified()) {
+//        if (!context.getUser().isEmailVerified()) {
             log.info("if ver : " + !context.getUser().isEmailVerified());
             EmailSenderService.sendVerifyEmail(context.getSession(),
                     context.form(),
                     context.getUser(),
                     context.getAuthenticationSession(),
                     context.getEvent().clone().event(EventType.SEND_VERIFY_EMAIL).detail(Details.EMAIL, context.getUser().getEmail()));
-        }
-        log.info("else");
+//        }
+//        log.info("else");
     }
 
     static String generatePattern() {
