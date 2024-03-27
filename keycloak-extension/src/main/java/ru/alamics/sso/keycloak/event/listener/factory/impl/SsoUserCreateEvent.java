@@ -130,7 +130,7 @@ public class SsoUserCreateEvent extends SsoEvent {
 //                } else {
 //                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
 //                }
-                this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
+//                this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
 
 
 
