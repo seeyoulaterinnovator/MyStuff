@@ -110,6 +110,7 @@
     if ($isEmailVer) {
       console.log("handleHide2")
       showInfo.set(false);
+      closeAndSubmit();
     }
   }
   // function handleHide3() {
