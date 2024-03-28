@@ -93,9 +93,9 @@
     }
   }
 
-  // if (hasInfo) {
-  //   text.set("Ваш E-mail успешно подтверждён!")
-  // }
+  if (hasInfo) {
+    text.set("Ваш E-mail успешно подтверждён!")
+  }
 
   function handleHide() {
     show.set(false);
@@ -128,6 +128,8 @@
       closeAndSubmit();
     }
   }
+
+  setTimeout(handleHide2, 1800);
 
   function handleHide3() {
     showInfo.set(false);

@@ -8,8 +8,6 @@
     <#elseif section = "form">
         <body onload="autoSubmit()">
 
-        <p> EMPTY PAGE </p>
-
         <form id="form" action="${url.loginAction}" method="post">
             <button  class="hide"
                     type="submit"></button>
