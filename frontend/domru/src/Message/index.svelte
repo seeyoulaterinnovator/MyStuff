@@ -102,11 +102,13 @@
   // }
 
   function handleHide() {
+    console.log("handleHide")
     show.set(false);
   }
 
   function handleHide2() {
     if ($isEmailVer) {
+      console.log("handleHide2")
       showInfo.set(false);
     }
   }
@@ -122,21 +124,26 @@
 
   function switchToPassword() {
     if (switcher !== null) {
+      console.log("switcher !== null")
       switcher.click();
     } else {
+      console.log("switchToPassword else")
       show.set(false);
     }
   }
 
   function clickSecondSwitcher() {
+    console.log("clickSecondSwitcher")
     secondSwitcher.click();
   }
 
   function closeAndSubmit() {
+    console.log("closeAndSubmit")
     submitButton.click();
   }
 
   function handleClick(e) {
+    console.log("handleClick")
     e.stopPropagation();
   }
 </script>

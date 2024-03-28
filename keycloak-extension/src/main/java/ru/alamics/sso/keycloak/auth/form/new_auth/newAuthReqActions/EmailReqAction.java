@@ -53,16 +53,13 @@ public class EmailReqAction implements RequiredActionProvider {
     }
 
     private Response createForm(RequiredActionContext context) {
-        UserModel user = context.getUser();
-        boolean isContainsPhone = user.getAttribute("phone").size() == 0;
-        log.info("user.getAttribute(\"phone\") is : " + user.getAttribute("phone"));
+        log.info("createForm is called");
         LoginFormsProvider form = context.form();
-//        if (!isContainsPhone) {
-//            log.info("isContainsPhone is " + isContainsPhone);
-//            return form.createForm(BLANK_PAGE);
-//        }
-//        return form.createForm(UPDATE_PASSWORD_FTL);
-        log.info("isContainsPhone is " + isContainsPhone);
-        return form.createForm(BLANK_PAGE);
+
+        if (context.getAuthenticationSession() != null) {
+            log.info("context.getAuthenticationSession() != null");
+            return form.createForm(BLANK_PAGE);
+        }
+        return form.createForm(UPDATE_PASSWORD_FTL);
     }
 }
