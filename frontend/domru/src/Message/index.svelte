@@ -229,7 +229,7 @@
       <div class="message__title flex flex-row justify-between items-center gap-4">
         <span>
           {#if $isEmailVer}
-            Подтверждение test
+            Подтверждение
           {:else}
             Подтверждение данных
           {/if}
