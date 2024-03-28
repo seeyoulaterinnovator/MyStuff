@@ -56,8 +56,8 @@ public class EmailReqAction implements RequiredActionProvider {
         log.info("createForm is called");
         LoginFormsProvider form = context.form();
 
-        if (context.getAuthenticationSession() != null) {
-            log.info("context.getAuthenticationSession() != null");
+        if (context.getUser().getAttribute("phone").size() == 0) {
+            log.info("context.getUser().getAttribute(\"phone\").size() == 0");
             return form.createForm(BLANK_PAGE);
         }
         return form.createForm(UPDATE_PASSWORD_FTL);
