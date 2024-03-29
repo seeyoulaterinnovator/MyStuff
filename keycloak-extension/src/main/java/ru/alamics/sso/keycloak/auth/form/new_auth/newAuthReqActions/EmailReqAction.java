@@ -17,7 +17,6 @@ public class EmailReqAction implements RequiredActionProvider {
     public static final String PROVIDER_ID = "email_sender";
 
     private static final String BLANK_PAGE = "blank-page.ftl";
-    private static final String UPDATE_PASSWORD_FTL = "login-update-password.ftl";
 
     @Override
     public void evaluateTriggers(RequiredActionContext context) {
@@ -27,7 +26,6 @@ public class EmailReqAction implements RequiredActionProvider {
     public void requiredActionChallenge(RequiredActionContext context) {
         UserModel user = context.getUser();
         boolean isContainsPhone = user.getAttribute("phone").size() == 0;
-        log.info("user.getAttribute(\"phone\") is : " + user.getAttribute("phone"));
         if (isContainsPhone) {
             context.form().setInfo("Поздравляем! Учетная запись создана успешно!");
         } else {
@@ -35,12 +33,6 @@ public class EmailReqAction implements RequiredActionProvider {
         }
         SsoUtil.sendEmailVer(context);
         context.challenge(createForm(context));
-//       гипотеза: этот метод вызывается при регистрации через сайт, проверка с помощью добавления логирования
-        log.info(" is call ! !");
-//        context.form().setInfo("На указанный E-mail отправлена инструкция для подтверждения данных.");
-//
-//        SsoUtil.sendEmailVer(context);
-//        context.challenge(createForm(context));
     }
 
     @Override
