@@ -122,11 +122,11 @@
     e.stopPropagation();
   }
   function handleHide2() {
-    if ($isEmailVer) {
+    // if ($isEmailVer) {
       console.log("handleHide2")
       showInfo.set(false);
       closeAndSubmit();
-    }
+    // }
   }
 
   setTimeout(handleHide2, 1800);
