@@ -41,6 +41,7 @@ public class AuthorisedUsersService {
 
     public void saveSuccessfulAuth(User user, String realm, String client, int typeId) {
         ClientsForMonitoringEntity clientsForMonitoringEntity = clientsForMonitoringService.findAndReturnClientsForMonitoringEntity(realm, client);
+        log.info("User is : " + user + "realm is : " + realm +  "client is : " + client + "typeId is : " + typeId);
         log.info("clientsForMonitoringEntity is : " + clientsForMonitoringEntity);
         if (clientsForMonitoringEntity == null || !clientsForMonitoringEntity.isMonitoring()){
             log.info(" saveSuccessfulAuth is stop, because clientsForMonitoringEntity == null || !clientsForMonitoringEntity.isMonitoring()");
@@ -56,7 +57,7 @@ public class AuthorisedUsersService {
         authorisedUsersEntity.setRealm(realm);
         authorisedUsersEntity.setAuthorised(LocalDateTime.now());
         authorisedUsersEntity.setClient(clientsForMonitoringEntity);
-        log.info("clientsForMonitoringEntity is : " + clientsForMonitoringEntity);
+        log.info("later clientsForMonitoringEntity is : " + clientsForMonitoringEntity);
 //        лог с прода при тесте метода
 //        2024-02-21 19:15:31,374 INFO  [ru.ala.sso.reg.ser.AuthorisedUsersService] (default task-5837) clientsForMonitoringEntity is : ru.alamics.sso.jpa.entity.auth_reg.ClientsForMonitoringEntity@d67cc43
         authorisedUsersRepository.save(authorisedUsersEntity);
