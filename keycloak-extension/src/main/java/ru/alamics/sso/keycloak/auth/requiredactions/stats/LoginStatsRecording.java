@@ -9,6 +9,7 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.storage.user.UserLookupProvider;
 import ru.alamics.sso.auth_n_regi.AuthOrRegTypeNotFoundException;
+import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.service.AuthorisedUsersService;
 import ru.alamics.sso.stats.LoginHistory;
@@ -50,6 +51,7 @@ public class LoginStatsRecording implements RequiredActionProvider {
     }
 
     private void recordRecentLogin(UserModel model, RequiredActionContext context) throws AuthOrRegTypeNotFoundException {
+        User user = UserModelUserMapper.mapToUser(context.getUser());
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
         UserEntity entity = new UserEntity();
         log.info("model.getUsername() is : " + model.getUsername());
@@ -59,9 +61,8 @@ public class LoginStatsRecording implements RequiredActionProvider {
         String clientId = authSession.getClient().getClientId();
         int typeId = getAuthOrRegType(authSession);
 //
-//       !!в метод ниже User.builder().build() - равно ноль, надо поискать как сюда его передать!!
             // сюда заходит при авторизации логопасс в МП
-        authorisedUsersService.saveSuccessfulAuth((User) model, context.getRealm().getName(), clientId, typeId);
+        authorisedUsersService.saveSuccessfulAuth(user, context.getRealm().getName(), clientId, typeId);
     }
 
     @Override
