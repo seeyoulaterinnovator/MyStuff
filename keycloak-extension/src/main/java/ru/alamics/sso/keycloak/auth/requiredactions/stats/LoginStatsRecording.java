@@ -7,6 +7,7 @@ import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import org.keycloak.storage.user.UserLookupProvider;
 import ru.alamics.sso.auth_n_regi.AuthOrRegTypeNotFoundException;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.service.AuthorisedUsersService;
@@ -36,7 +37,7 @@ public class LoginStatsRecording implements RequiredActionProvider {
         log.debug("{}: username={}", DEBUG_STR, user.getUsername());
         log.info("evaluateTriggers");
 
-        recordRecentLogin(user);
+        recordRecentLogin(user, context);
     }
 
     @Override
@@ -48,18 +49,19 @@ public class LoginStatsRecording implements RequiredActionProvider {
     public void processAction(RequiredActionContext context) {
     }
 
-    private void recordRecentLogin(UserModel model) throws AuthOrRegTypeNotFoundException {
+    private void recordRecentLogin(UserModel model, RequiredActionContext context) throws AuthOrRegTypeNotFoundException {
+        AuthenticationSessionModel authSession = context.getAuthenticationSession();
         UserEntity entity = new UserEntity();
         log.info("model.getUsername() is : " + model.getUsername());
         entity.setId(model.getId());
         log.info("!recordRecentLogin!, UserEntity entity.getUsername is : " + entity.getUsername());
         loginHistoryService.create(entity);
-//        String clientId = authSession.getClient().getClientId();
-        String clientId = "app_b2b";
-//        String clientId = model.get;
+        String clientId = authSession.getClient().getClientId();
+        int typeId = getAuthOrRegType(authSession);
+//
 //       !!в метод ниже User.builder().build() - равно ноль, надо поискать как сюда его передать!!
-
-        authorisedUsersService.saveSuccessfulAuth(User.builder().build(), entity.getRealmId(), clientId, 777);
+            // сюда заходит при авторизации логопасс в МП
+        authorisedUsersService.saveSuccessfulAuth((User) model, context.getRealm().getName(), clientId, typeId);
     }
 
     @Override
