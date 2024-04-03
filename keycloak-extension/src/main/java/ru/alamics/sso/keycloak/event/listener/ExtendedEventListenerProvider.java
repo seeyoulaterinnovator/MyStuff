@@ -9,6 +9,7 @@ import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.event.listener.factory.EventFactory;
 import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
 import ru.alamics.sso.keycloak.event.listener.factory.impl.EventFactoryImpl;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.service.AuthorisedUsersService;
 
 @Slf4j
@@ -17,9 +18,9 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
     private KeycloakSession session;
     private final AuthorisedUsersService authorisedUsersService;
 
-    public ExtendedEventListenerProvider(KeycloakSession session, AuthorisedUsersService authorisedUsersService) {
+    public ExtendedEventListenerProvider(KeycloakSession session) {
         this.session = session;
-        this.authorisedUsersService = authorisedUsersService;
+        this.authorisedUsersService = Lookup.lookup(AuthorisedUsersService.class);
     }
 
 

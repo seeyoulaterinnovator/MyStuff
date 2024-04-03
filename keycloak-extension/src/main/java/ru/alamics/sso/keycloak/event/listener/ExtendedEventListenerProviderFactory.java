@@ -9,15 +9,10 @@ import ru.alamics.sso.registration.service.AuthorisedUsersService;
 public class ExtendedEventListenerProviderFactory implements EventListenerProviderFactory {
 
     private static final String PROVIDER_ID = "ExtendedListener";
-    private final AuthorisedUsersService authorisedUsersService;
-
-    public ExtendedEventListenerProviderFactory(AuthorisedUsersService authorisedUsersService) {
-        this.authorisedUsersService = authorisedUsersService;
-    }
 
     @Override
     public ExtendedEventListenerProvider create(KeycloakSession session) {
-        return new ExtendedEventListenerProvider(session, authorisedUsersService);
+        return new ExtendedEventListenerProvider(session);
     }
 
     @Override
