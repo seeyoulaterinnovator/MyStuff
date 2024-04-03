@@ -3,6 +3,7 @@ package ru.alamics.sso.keycloak.event.listener;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
+import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.event.listener.factory.EventFactory;
@@ -20,6 +21,10 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 
     @Override
     public void onEvent(Event event) {
+        if (EventType.REFRESH_TOKEN.equals(event.getType())) {
+            String refreshToken = event.getDetails().get("refresh_token");
+            log.info("LOG refresh token from ExtendedEventListenerProvider");
+        }
 
     }
 
