@@ -62,4 +62,28 @@ public class AuthorisedUsersService {
 //        2024-02-21 19:15:31,374 INFO  [ru.ala.sso.reg.ser.AuthorisedUsersService] (default task-5837) clientsForMonitoringEntity is : ru.alamics.sso.jpa.entity.auth_reg.ClientsForMonitoringEntity@d67cc43
         authorisedUsersRepository.save(authorisedUsersEntity);
     }
+
+    public void saveSuccessfulAuthFromRefreshToken(String userId, String realm, String client, int typeId) {
+        ClientsForMonitoringEntity clientsForMonitoringEntity = clientsForMonitoringService.findAndReturnClientsForMonitoringEntity(realm, client);
+        log.info("UserID is : " + userId + ", " + "realm is : " + realm + ", " +  "client is : " + client + ", " + "typeId is : " + typeId);
+        log.info("clientsForMonitoringEntity is : " + clientsForMonitoringEntity);
+        if (clientsForMonitoringEntity == null || !clientsForMonitoringEntity.isMonitoring()){
+            log.info(" saveSuccessfulAuth is stop, because clientsForMonitoringEntity == null || !clientsForMonitoringEntity.isMonitoring()");
+            return;
+        }
+
+        UserEntity userEntity = userRepository.findUser(userId);
+        AuthOrRegTypeEntity authOrRegTypeEntity = authOrRegTypeService.findAndReturn(typeId);
+        AuthorisedUsersEntity authorisedUsersEntity = new AuthorisedUsersEntity();
+        authorisedUsersEntity.setUser(userEntity);
+        authorisedUsersEntity.setAuthType(authOrRegTypeEntity);
+        authorisedUsersEntity.setId(UUID.randomUUID().toString());
+        authorisedUsersEntity.setRealm(realm);
+        authorisedUsersEntity.setAuthorised(LocalDateTime.now());
+        authorisedUsersEntity.setClient(clientsForMonitoringEntity);
+        log.info("later clientsForMonitoringEntity is : " + clientsForMonitoringEntity);
+//        лог с прода при тесте метода
+//        2024-02-21 19:15:31,374 INFO  [ru.ala.sso.reg.ser.AuthorisedUsersService] (default task-5837) clientsForMonitoringEntity is : ru.alamics.sso.jpa.entity.auth_reg.ClientsForMonitoringEntity@d67cc43
+        authorisedUsersRepository.save(authorisedUsersEntity);
+    }
 }
