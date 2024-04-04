@@ -57,7 +57,7 @@ public class AuthorisedUsersService {
         authorisedUsersEntity.setRealm(realm);
         authorisedUsersEntity.setAuthorised(LocalDateTime.now());
         authorisedUsersEntity.setClient(clientsForMonitoringEntity);
-        log.info("later clientsForMonitoringEntity is : " + clientsForMonitoringEntity);
+        log.info("later saveSuccessfulAuth clientsForMonitoringEntity is : " + clientsForMonitoringEntity.getClientName());
 //        лог с прода при тесте метода
 //        2024-02-21 19:15:31,374 INFO  [ru.ala.sso.reg.ser.AuthorisedUsersService] (default task-5837) clientsForMonitoringEntity is : ru.alamics.sso.jpa.entity.auth_reg.ClientsForMonitoringEntity@d67cc43
         authorisedUsersRepository.save(authorisedUsersEntity);
@@ -81,7 +81,7 @@ public class AuthorisedUsersService {
         authorisedUsersEntity.setRealm(realm);
         authorisedUsersEntity.setAuthorised(LocalDateTime.now());
         authorisedUsersEntity.setClient(clientsForMonitoringEntity);
-        log.info("later clientsForMonitoringEntity is : " + clientsForMonitoringEntity);
+        log.info("later saveSuccessfulAuthFromRefreshToken clientsForMonitoringEntity is : " + clientsForMonitoringEntity.getClientName());
 //        лог с прода при тесте метода
 //        2024-02-21 19:15:31,374 INFO  [ru.ala.sso.reg.ser.AuthorisedUsersService] (default task-5837) clientsForMonitoringEntity is : ru.alamics.sso.jpa.entity.auth_reg.ClientsForMonitoringEntity@d67cc43
         authorisedUsersRepository.save(authorisedUsersEntity);

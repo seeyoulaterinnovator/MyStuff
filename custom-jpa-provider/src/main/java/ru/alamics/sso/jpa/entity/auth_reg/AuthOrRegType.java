@@ -4,7 +4,7 @@ public enum AuthOrRegType {
     LOG_PASS(3, "loginPasswordButton", ""),
     PHONE_CALL(2, "phoneCallButton", "incoming_call_phone_verificator"),
     SMS_CODE(1, "smsButton", "phone_verificator_sms"),
-    FORGOT_PASS(6, "forgotPass", "");
+    FORGOT_PASS(6, "doForgotPassword", "");
 
     private final int id;
 
