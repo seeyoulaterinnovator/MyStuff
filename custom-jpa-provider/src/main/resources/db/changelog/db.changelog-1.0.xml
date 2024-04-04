@@ -2341,7 +2341,7 @@ where EXT_ID = 'blockPrepareNotificationSchedulerHtml';
         </sql>
     </changeSet>
 
-    <changeSet id="184" author="pavlov-ip">
+    <changeSet id="183" author="pavlov-ip">
         <sql>
             INSERT INTO AUTH_OR_REG_TYPE (id, auth_or_reg_type_name) VALUES
                 (6, 'forgot_pass');

@@ -30,8 +30,9 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
             log.info("LOG refresh token from ExtendedEventListenerProvider");
             log.info("user: " + event.getUserId() + ", " + "realm: " + event.getRealmId() + ", " + "clientId: "
                     + event.getClientId() + ", " + "type ID: ");
+//            typeId = 7 - magic code, но работает
             authorisedUsersService.saveSuccessfulAuthFromRefreshToken(event.getUserId(), event.getRealmId(),
-                    event.getClientId(), 1);
+                    event.getClientId(), 7);
         }
 
     }
