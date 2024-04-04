@@ -66,7 +66,7 @@ public class AuthorisedUsersService {
     public void saveSuccessfulAuthFromRefreshToken(String userId, String realm, String client, int typeId) {
         ClientsForMonitoringEntity clientsForMonitoringEntity = clientsForMonitoringService.findAndReturnClientsForMonitoringEntity(realm, client);
         log.info("UserID is : " + userId + ", " + "realm is : " + realm + ", " +  "client is : " + client + ", " + "typeId is : " + typeId);
-        log.info("clientsForMonitoringEntity is : " + clientsForMonitoringEntity);
+        log.info("clientsForMonitoringEntity is : " + clientsForMonitoringEntity.getClientName());
         if (clientsForMonitoringEntity == null || !clientsForMonitoringEntity.isMonitoring()){
             log.info(" saveSuccessfulAuth is stop, because clientsForMonitoringEntity == null || !clientsForMonitoringEntity.isMonitoring()");
             return;
