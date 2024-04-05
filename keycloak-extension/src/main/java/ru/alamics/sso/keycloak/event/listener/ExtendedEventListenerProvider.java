@@ -31,8 +31,11 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
             log.info("user: " + event.getUserId() + ", " + "realm: " + event.getRealmId() + ", " + "clientId: "
                     + event.getClientId() + ", " + "type ID: ");
 //            typeId = 7 - magic code, но работает
-            authorisedUsersService.saveSuccessfulAuthFromRefreshToken(event.getUserId(), event.getRealmId(),
+            authorisedUsersService.saveSuccessfulAuthFromEventListener(event.getUserId(), event.getRealmId(),
                     event.getClientId(), 7);
+        } else if (EventType.LOGIN.equals(event.getType()) && event.getClientId().equals("app_b2b")) {
+            authorisedUsersService.saveSuccessfulAuthFromEventListener(event.getUserId(), event.getRealmId(),
+                    event.getClientId(), 1);
         }
 
     }

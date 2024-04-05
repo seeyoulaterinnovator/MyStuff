@@ -63,7 +63,7 @@ public class AuthorisedUsersService {
         authorisedUsersRepository.save(authorisedUsersEntity);
     }
 
-    public void saveSuccessfulAuthFromRefreshToken(String userId, String realm, String client, int typeId) {
+    public void saveSuccessfulAuthFromEventListener(String userId, String realm, String client, int typeId) {
         ClientsForMonitoringEntity clientsForMonitoringEntity = clientsForMonitoringService.findAndReturnClientsForMonitoringEntity(realm, client);
         log.info("UserID is : " + userId + ", " + "realm is : " + realm + ", " +  "client is : " + client + ", " + "typeId is : " + typeId);
         log.info("clientsForMonitoringEntity is : " + clientsForMonitoringEntity.getClientName());
