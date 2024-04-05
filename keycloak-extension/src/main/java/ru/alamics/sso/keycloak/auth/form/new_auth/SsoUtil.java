@@ -196,7 +196,7 @@ public interface SsoUtil {
                 return authOrRegType.getId();
             }
         }
-//        return 6;
-        throw new AuthOrRegTypeNotFoundException("Auth or Reg Type Not Found");
+        return 0;
+//        throw new AuthOrRegTypeNotFoundException("Auth or Reg Type Not Found");
     }
 }
