@@ -58,11 +58,11 @@ public class LoginStatsRecording implements RequiredActionProvider {
         entity.setId(model.getId());
         log.info("!recordRecentLogin!, UserEntity entity.getUsername is : " + entity.getUsername());
         loginHistoryService.create(entity);
-        String clientId = authSession.getClient().getClientId();
-        int typeId = getAuthOrRegType(authSession);
+//        String clientId = authSession.getClient().getClientId();
+//        int typeId = getAuthOrRegType(authSession);
 //
             // сюда заходит при авторизации логопасс в МП
-        authorisedUsersService.saveSuccessfulAuth(user, context.getRealm().getName(), clientId, typeId);
+//        authorisedUsersService.saveSuccessfulAuth(user, context.getRealm().getName(), clientId, typeId);
     }
 
     @Override
