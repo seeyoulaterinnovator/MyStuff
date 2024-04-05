@@ -27,17 +27,16 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
     @Override
     public void onEvent(Event event) {
         if (EventType.REFRESH_TOKEN.equals(event.getType())) {
-            log.info("LOG refresh token from ExtendedEventListenerProvider");
-            log.info("user: " + event.getUserId() + ", " + "realm: " + event.getRealmId() + ", " + "clientId: "
-                    + event.getClientId() + ", " + "type ID: ");
-//            typeId = 7 - magic code, но работает
+//            typeId - hardcode иначе не смог придумать как сохранить авторизацию через МП по отпечатку/коду
             authorisedUsersService.saveSuccessfulAuthFromEventListener(event.getUserId(), event.getRealmId(),
                     event.getClientId(), 7);
         } else if (EventType.LOGIN.equals(event.getType()) && event.getClientId().equals("app_b2b")) {
             authorisedUsersService.saveSuccessfulAuthFromEventListener(event.getUserId(), event.getRealmId(),
                     event.getClientId(), 1);
+        } else if (EventType.LOGIN.equals(event.getType()) && event.getClientId().equals("wifi")) {
+            authorisedUsersService.saveSuccessfulAuthFromEventListener(event.getUserId(), event.getRealmId(),
+                    event.getClientId(), 1);
         }
-
     }
 
     @Override
