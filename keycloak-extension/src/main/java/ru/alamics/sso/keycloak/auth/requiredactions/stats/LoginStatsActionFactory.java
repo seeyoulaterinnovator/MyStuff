@@ -22,7 +22,7 @@ public class LoginStatsActionFactory extends AbstractRequiredActionFactory {
 
     @Override
     public RequiredActionProvider create(KeycloakSession session) {
-        return new LoginStatsRecording(Lookup.lookup(LoginHistory.class), Lookup.lookup(AuthorisedUsersService.class));
+        return new LoginStatsRecording(Lookup.lookup(LoginHistory.class));
     }
 
     @Override

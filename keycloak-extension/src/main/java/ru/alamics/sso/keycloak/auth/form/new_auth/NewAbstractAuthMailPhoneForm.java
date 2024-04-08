@@ -123,7 +123,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
-        log.info("authenticate from NewAbstractAuthMailPhoneForm is called");
         MultivaluedMap<String, String> formData = new MultivaluedMapImpl<>();
         String loginHint = context.getAuthenticationSession().getClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM);
         String rememberMeUsername = AuthenticationManager.getRememberMeUsername(context.getRealm(), context.getHttpRequest().getHttpHeaders());
@@ -264,7 +263,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                 context.resetFlow();
             }
         } else {
-            log.info("context.challenge(challenge(context, formData)");
             context.challenge(challenge(context, formData));
         }
     }

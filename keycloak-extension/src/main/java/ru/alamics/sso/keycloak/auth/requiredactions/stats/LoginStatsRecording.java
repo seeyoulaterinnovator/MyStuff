@@ -7,7 +7,6 @@ import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.sessions.AuthenticationSessionModel;
-import org.keycloak.storage.user.UserLookupProvider;
 import ru.alamics.sso.auth_n_regi.AuthOrRegTypeNotFoundException;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.registration.model.User;
@@ -16,17 +15,13 @@ import ru.alamics.sso.stats.LoginHistory;
 
 import java.util.Objects;
 
-import static ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil.getAuthOrRegType;
-
 @Slf4j
 public class LoginStatsRecording implements RequiredActionProvider {
 
     private final LoginHistory loginHistoryService;
-    private final AuthorisedUsersService authorisedUsersService;
 
-    public LoginStatsRecording(LoginHistory loginHistoryService, AuthorisedUsersService authorisedUsersService) {
+    public LoginStatsRecording(LoginHistory loginHistoryService) {
         this.loginHistoryService = loginHistoryService;
-        this.authorisedUsersService = authorisedUsersService;
     }
 
     @SneakyThrows
@@ -36,9 +31,7 @@ public class LoginStatsRecording implements RequiredActionProvider {
         UserModel user = context.getUser();
         Objects.requireNonNull(user);
         log.debug("{}: username={}", DEBUG_STR, user.getUsername());
-        log.info("evaluateTriggers");
-
-        recordRecentLogin(user, context);
+        recordRecentLogin(user);
     }
 
     @Override
@@ -50,19 +43,12 @@ public class LoginStatsRecording implements RequiredActionProvider {
     public void processAction(RequiredActionContext context) {
     }
 
-    private void recordRecentLogin(UserModel model, RequiredActionContext context) throws AuthOrRegTypeNotFoundException {
-        User user = UserModelUserMapper.mapToUser(context.getUser());
-        AuthenticationSessionModel authSession = context.getAuthenticationSession();
+    private void recordRecentLogin(UserModel model) {
         UserEntity entity = new UserEntity();
         log.info("model.getUsername() is : " + model.getUsername());
         entity.setId(model.getId());
         log.info("!recordRecentLogin!, UserEntity entity.getUsername is : " + entity.getUsername());
         loginHistoryService.create(entity);
-//        String clientId = authSession.getClient().getClientId();
-//        int typeId = getAuthOrRegType(authSession);
-//
-            // сюда заходит при авторизации логопасс в МП
-//        authorisedUsersService.saveSuccessfulAuth(user, context.getRealm().getName(), clientId, typeId);
     }
 
     @Override

@@ -196,6 +196,7 @@ public interface SsoUtil {
                 return authOrRegType.getId();
             }
         }
+        // magic code возвращаем 6, при "забыли пароль"
         return 6;
 //        throw new AuthOrRegTypeNotFoundException("Auth or Reg Type Not Found");
     }

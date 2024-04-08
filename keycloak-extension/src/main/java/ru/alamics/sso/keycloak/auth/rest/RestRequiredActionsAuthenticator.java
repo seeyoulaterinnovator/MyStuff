@@ -48,7 +48,6 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
-        log.info("authenticate from RestRequiredActionsAuthenticator is called");
         if (!Util.isPasswordGrandType(session)) {
             context.attempted();
             return;

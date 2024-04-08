@@ -117,10 +117,7 @@ public class UserPhoneVerifier {
         UserEntity userEntity = new UserEntity();
         userEntity.setId(user.getId());
         loginHistory.createSuccessAuth(userEntity, realm);
-        log.info("verifyPhone : add to USER_LOGIN_HISTORy");
         String clientId = authSession.getClient().getClientId();
-        log.info("CLIENT_ID IS : " + clientId);
-        log.info("user is : " + user + "authSession.getRealm().getId() is : " + authSession.getRealm().getId() + "clientId is : " + clientId + "typeId is : " + typeId);
         authorisedUsersService.saveSuccessfulAuth(user, authSession.getRealm().getId(), clientId,typeId);
     }
 }

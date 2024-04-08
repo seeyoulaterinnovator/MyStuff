@@ -17,7 +17,6 @@ import javax.ws.rs.core.Response;
 public class RestOIDCLoginProtocol extends OIDCLoginProtocol {
     @Override
     public Response authenticated(AuthenticationSessionModel authSession, UserSessionModel userSession, ClientSessionContext clientSessionCtx) {
-        log.info("authenticated is called");
         if (Util.isPasswordGrandType(session)) {
             return createTokenResponse(authSession, userSession);
         }
