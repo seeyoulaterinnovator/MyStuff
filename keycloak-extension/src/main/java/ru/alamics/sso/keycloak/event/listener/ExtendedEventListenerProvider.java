@@ -51,8 +51,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 
         if (EventType.REFRESH_TOKEN.equals(event.getType())) {
             authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
-        } else if (EventType.LOGIN.equals(event.getType()) &&  clientId.equals("wifi")) {
-//        } else if (EventType.LOGIN.equals(event.getType()) && (clientId.equals("app_b2b") || clientId.equals("wifi"))) {
+        } else if (EventType.LOGIN.equals(event.getType()) && (clientId.equals("app_b2b") || clientId.equals("wifi"))) {
             authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
         }
     }
