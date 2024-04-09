@@ -45,7 +45,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 
 
         if (userId == null || realmId == null || clientId == null) {
-            log.error("(userId == null || realmId == null || clientId == null");
+            log.error("userId == " + userId + ", " + "realmId == " + realmId + ", " + "clientId == " + clientId);
             return;
         }
 
