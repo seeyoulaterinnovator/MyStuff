@@ -61,7 +61,6 @@ public class AuthorisedUsersService {
 
     public void saveSuccessfulAuthFromEventListener(String userId, String realm, String client, int typeId) {
         ClientsForMonitoringEntity clientsForMonitoringEntity = clientsForMonitoringService.findAndReturnClientsForMonitoringEntity(realm, client);
-        log.info("UserID is : " + userId + ", " + "realm is : " + realm + ", " + "client is : " + client + ", " + "typeId is : " + typeId);
         if (clientsForMonitoringEntity == null || !clientsForMonitoringEntity.isMonitoring()) {
             log.info(" saveSuccessfulAuth is stop, because clientsForMonitoringEntity == null || !clientsForMonitoringEntity.isMonitoring()");
             return;
