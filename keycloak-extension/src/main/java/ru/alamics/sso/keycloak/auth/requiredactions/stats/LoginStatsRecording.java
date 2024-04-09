@@ -20,7 +20,7 @@ public class LoginStatsRecording implements RequiredActionProvider {
 
     private final LoginHistory loginHistoryService;
 
-    public LoginStatsRecording(LoginHistory loginHistoryService) {
+    public LoginStatsRecording(LoginHistory loginHistoryService, AuthorisedUsersService authorisedUsersService) {
         this.loginHistoryService = loginHistoryService;
     }
 
@@ -31,7 +31,7 @@ public class LoginStatsRecording implements RequiredActionProvider {
         UserModel user = context.getUser();
         Objects.requireNonNull(user);
         log.debug("{}: username={}", DEBUG_STR, user.getUsername());
-        recordRecentLogin(user);
+        recordRecentLogin(user, context);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class LoginStatsRecording implements RequiredActionProvider {
     public void processAction(RequiredActionContext context) {
     }
 
-    private void recordRecentLogin(UserModel model) {
+    private void recordRecentLogin(UserModel model, RequiredActionContext context) throws AuthOrRegTypeNotFoundException {
         UserEntity entity = new UserEntity();
         log.info("model.getUsername() is : " + model.getUsername());
         entity.setId(model.getId());
