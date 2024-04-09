@@ -32,10 +32,10 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                     event.getClientId(), 7);
         } else if (EventType.LOGIN.equals(event.getType()) && event.getClientId().equals("app_b2b")) {
             authorisedUsersService.saveSuccessfulAuthFromEventListener(event.getUserId(), event.getRealmId(),
-                    event.getClientId(), 1);
+                    event.getClientId(), 3);
         } else if (EventType.LOGIN.equals(event.getType()) && event.getClientId().equals("wifi")) {
             authorisedUsersService.saveSuccessfulAuthFromEventListener(event.getUserId(), event.getRealmId(),
-                    event.getClientId(), 1);
+                    event.getClientId(), 3);
         }
     }
 
