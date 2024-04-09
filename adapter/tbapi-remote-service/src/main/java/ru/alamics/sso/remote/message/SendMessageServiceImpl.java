@@ -56,11 +56,10 @@ public class SendMessageServiceImpl implements SendMessageService {
 
     @Override
     public void sendMessageToMessengers(String phone, String message, String realmId, String[] messengerList, String host) throws SendMessageException {
-//        без дополнительных данных в смс("Your OTP is..." не срабатывает автоподстановка кода из смс
-//                String pattern = String.format("Your OTP is: %s.\n\n" +
-//                "@%s #%s", message, host, message);
+//        без дополнительных данных в смс("Your OTP is..." не срабатывает автоподстановка кода из смс)
+        String pattern = String.format("Your OTP is: %s.\n\n" + "@%s #%s", message, host, message);
 
-        String pattern = message;
+//        String pattern = message;
 
         MessageRequest messageRequest = MessageRequest.builder()
                 .userPhone(phone)
