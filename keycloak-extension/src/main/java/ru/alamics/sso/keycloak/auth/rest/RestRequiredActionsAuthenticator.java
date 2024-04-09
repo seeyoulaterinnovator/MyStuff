@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.auth.rest;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -23,7 +24,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Map;
-
+@Slf4j
 public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
 
     private final KeycloakSession session;

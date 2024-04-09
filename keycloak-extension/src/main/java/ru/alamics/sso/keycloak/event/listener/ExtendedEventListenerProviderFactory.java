@@ -4,6 +4,7 @@ import org.keycloak.Config;
 import org.keycloak.events.EventListenerProviderFactory;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
+import ru.alamics.sso.registration.service.AuthorisedUsersService;
 
 public class ExtendedEventListenerProviderFactory implements EventListenerProviderFactory {
 

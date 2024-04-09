@@ -6,10 +6,12 @@ import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.auth.requiredactions.AbstractRequiredActionFactory;
 import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.registration.service.AuthorisedUsersService;
 import ru.alamics.sso.stats.LoginHistory;
 
 @Slf4j
 public class LoginStatsActionFactory extends AbstractRequiredActionFactory {
+
     private static final String PROVIDER_ID = "login_stats_recordings";
     private static final String RECORD_LOGIN_STATISTICS_ACTION = "Record Login Statistics Action";
 
@@ -20,7 +22,7 @@ public class LoginStatsActionFactory extends AbstractRequiredActionFactory {
 
     @Override
     public RequiredActionProvider create(KeycloakSession session) {
-        return new LoginStatsRecording(Lookup.lookup(LoginHistory.class));
+        return new LoginStatsRecording(Lookup.lookup(LoginHistory.class), Lookup.lookup(AuthorisedUsersService.class));
     }
 
     @Override

@@ -41,8 +41,9 @@ public class AuthorisedUsersService {
 
     public void saveSuccessfulAuth(User user, String realm, String client, int typeId) {
         ClientsForMonitoringEntity clientsForMonitoringEntity = clientsForMonitoringService.findAndReturnClientsForMonitoringEntity(realm, client);
-
-        if (clientsForMonitoringEntity == null || !clientsForMonitoringEntity.isMonitoring()){
+        log.info("User is : " + user + ", " + "realm is : " + realm + ", " + "client is : " + client + ", " + "typeId is : " + typeId);
+        if (clientsForMonitoringEntity == null || !clientsForMonitoringEntity.isMonitoring()) {
+            log.info(" saveSuccessfulAuth is stop, because clientsForMonitoringEntity == null || !clientsForMonitoringEntity.isMonitoring()");
             return;
         }
 
@@ -55,7 +56,25 @@ public class AuthorisedUsersService {
         authorisedUsersEntity.setRealm(realm);
         authorisedUsersEntity.setAuthorised(LocalDateTime.now());
         authorisedUsersEntity.setClient(clientsForMonitoringEntity);
-        log.info("clientsForMonitoringEntity is : " + clientsForMonitoringEntity);
+        authorisedUsersRepository.save(authorisedUsersEntity);
+    }
+
+    public void saveSuccessfulAuthFromEventListener(String userId, String realm, String client, int typeId) {
+        ClientsForMonitoringEntity clientsForMonitoringEntity = clientsForMonitoringService.findAndReturnClientsForMonitoringEntity(realm, client);
+        if (clientsForMonitoringEntity == null || !clientsForMonitoringEntity.isMonitoring()) {
+            log.info(" saveSuccessfulAuth is stop, because clientsForMonitoringEntity == null || !clientsForMonitoringEntity.isMonitoring()");
+            return;
+        }
+
+        UserEntity userEntity = userRepository.findUser(userId);
+        AuthOrRegTypeEntity authOrRegTypeEntity = authOrRegTypeService.findAndReturn(typeId);
+        AuthorisedUsersEntity authorisedUsersEntity = new AuthorisedUsersEntity();
+        authorisedUsersEntity.setUser(userEntity);
+        authorisedUsersEntity.setAuthType(authOrRegTypeEntity);
+        authorisedUsersEntity.setId(UUID.randomUUID().toString());
+        authorisedUsersEntity.setRealm(realm);
+        authorisedUsersEntity.setAuthorised(LocalDateTime.now());
+        authorisedUsersEntity.setClient(clientsForMonitoringEntity);
         authorisedUsersRepository.save(authorisedUsersEntity);
     }
 }

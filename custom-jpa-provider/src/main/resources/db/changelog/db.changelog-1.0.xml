@@ -2341,4 +2341,24 @@ where EXT_ID = 'blockPrepareNotificationSchedulerHtml';
         </sql>
     </changeSet>
 
+    <changeSet id="184" author="pavlov-ip">
+        <sql>
+            INSERT INTO AUTH_OR_REG_TYPE (id, auth_or_reg_type_name) VALUES
+                (6, 'forgot_pass');
+        </sql>
+    </changeSet>
+
+    <changeSet id="185" author="pavlov-ip">
+        <sql>
+            INSERT INTO AUTH_OR_REG_TYPE (id, auth_or_reg_type_name) VALUES
+                (7, 'refresh_token');
+        </sql>
+    </changeSet>
+
+    <changeSet id="186" author="pavlov-ip">
+        <sql>
+            INSERT INTO CLIENTS_FOR_MONITORING (client_name, monitoring, realm) VALUES ('wifi', 1, 'user');
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

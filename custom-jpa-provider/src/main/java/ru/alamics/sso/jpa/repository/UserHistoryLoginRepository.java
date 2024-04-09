@@ -93,11 +93,12 @@ public class UserHistoryLoginRepository {
         history.setId(id);
         em.persist(history);
         em.flush();
-
+        log.info("UserLoginHistory save");
         return history;
     }
 
     public void saveSuccessAuth(UserLoginHistory history) {
+        log.info("UserLoginHistory saveSuccessAuth");
         final String id = UUID.randomUUID().toString();
         history.setId(id);
         em.persist(history);

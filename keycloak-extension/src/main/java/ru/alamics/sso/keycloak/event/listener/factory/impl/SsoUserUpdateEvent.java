@@ -132,8 +132,8 @@ public class SsoUserUpdateEvent extends SsoEvent {
     private void recordLoginUser(final String userId) {
         UserEntity entity = new UserEntity();
         entity.setId(userId);
-
         LoginHistory loginHistoryService = Lookup.lookup(LoginHistory.class);
+
         Optional.ofNullable(loginHistoryService).ifPresent(loginHistory -> {
             loginHistory.create(entity);
         });
