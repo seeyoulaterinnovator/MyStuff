@@ -26,16 +26,33 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 
     @Override
     public void onEvent(Event event) {
+//        if (EventType.REFRESH_TOKEN.equals(event.getType())) {
+////            typeId - hardcode иначе не смог придумать как сохранить авторизацию через МП по отпечатку/коду
+//            authorisedUsersService.saveSuccessfulAuthFromEventListener(event.getUserId(), event.getRealmId(),
+//                    event.getClientId(), 7);
+//        } else if (EventType.LOGIN.equals(event.getType()) && event.getClientId().equals("app_b2b")) {
+//            authorisedUsersService.saveSuccessfulAuthFromEventListener(event.getUserId(), event.getRealmId(),
+//                    event.getClientId(), 3);
+//        } else if (EventType.LOGIN.equals(event.getType()) && event.getClientId().equals("wifi")) {
+//            authorisedUsersService.saveSuccessfulAuthFromEventListener(event.getUserId(), event.getRealmId(),
+//                    event.getClientId(), 3);
+//        }
+
+        String userId = event.getUserId();
+        String realmId = event.getRealmId();
+        String clientId = event.getClientId();
+        //  typeId - hardcode иначе не смог придумать как сохранить авторизацию через МП по отпечатку/коду
+
+
+        if (userId == null || realmId == null || clientId == null) {
+            log.error("(userId == null || realmId == null || clientId == null");
+            return;
+        }
+
         if (EventType.REFRESH_TOKEN.equals(event.getType())) {
-//            typeId - hardcode иначе не смог придумать как сохранить авторизацию через МП по отпечатку/коду
-            authorisedUsersService.saveSuccessfulAuthFromEventListener(event.getUserId(), event.getRealmId(),
-                    event.getClientId(), 7);
-        } else if (EventType.LOGIN.equals(event.getType()) && event.getClientId().equals("app_b2b")) {
-            authorisedUsersService.saveSuccessfulAuthFromEventListener(event.getUserId(), event.getRealmId(),
-                    event.getClientId(), 3);
-        } else if (EventType.LOGIN.equals(event.getType()) && event.getClientId().equals("wifi")) {
-            authorisedUsersService.saveSuccessfulAuthFromEventListener(event.getUserId(), event.getRealmId(),
-                    event.getClientId(), 3);
+            authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
+        } else if (EventType.LOGIN.equals(event.getType()) && (clientId.equals("app_b2b") || clientId.equals("wifi"))) {
+            authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
         }
     }
 
