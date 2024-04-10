@@ -44,7 +44,8 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 
         String key = userId + ":" + clientId;
         long now = System.currentTimeMillis();
-        Long lastRecordTime = lastRecordTimestamps.get(key);
+        Long lastRecordTime = lastRecordTimestamps.getOrDefault(key, -1L);
+
 
         //  typeId - hardcode иначе не смог придумать как сохранить авторизацию через МП по отпечатку/коду
 //        if (EventType.REFRESH_TOKEN.equals(event.getType())) {
