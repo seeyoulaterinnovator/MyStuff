@@ -67,12 +67,22 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
     }
 
     private boolean isSameDay(Long lastRecordTime, long now) {
-        LocalDate date1 = LocalDate.ofInstant(java.time.Instant.ofEpochMilli(lastRecordTime), ZoneId.systemDefault());
-        LocalDate date2 = LocalDate.ofInstant(java.time.Instant.ofEpochMilli(now), ZoneId.systemDefault());
-        log.info("date1 = " + date1 + ", date2 = " + date2);
+//        LocalDate date1 = LocalDate.ofInstant(java.time.Instant.ofEpochMilli(lastRecordTime), ZoneId.systemDefault());
+//        LocalDate date2 = LocalDate.ofInstant(java.time.Instant.ofEpochMilli(now), ZoneId.systemDefault());
+//        log.info("date1 = " + date1 + ", date2 = " + date2);
+//
+//        log.info("return date1.isEqual(date2);" + String.valueOf(date1.isEqual(date2)));
+//        return date1.isEqual(date2);
+        // Количество миллисекунд в одном дне
+        long millisecondsPerDay = 24 * 60 * 60 * 1000;
 
-        log.info("return date1.isEqual(date2);" + String.valueOf(date1.isEqual(date2)));
-        return date1.isEqual(date2);
+        // Преобразование меток времени в миллисекунды с начала дня
+        long day1 = lastRecordTime / millisecondsPerDay;
+        long day2 = now / millisecondsPerDay;
+        log.info("day1 = " + day1 + ", day2 = " + day2);
+
+        // Сравнение дней на равенство
+        return day1 == day2;
     }
 
     @Override
