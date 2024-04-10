@@ -12,6 +12,8 @@ import ru.alamics.sso.keycloak.event.listener.factory.impl.EventFactoryImpl;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.service.AuthorisedUsersService;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -50,8 +52,10 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 //        } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
 //            authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
 //        }
+        log.info(" now - lastRecordTime > TimeUnit.DAYS.toMillis(1) is : " + (now - lastRecordTime > TimeUnit.DAYS.toMillis(1)));
 
-        if (lastRecordTime == null || now - lastRecordTime > TimeUnit.DAYS.toMillis(1)) {
+        if (lastRecordTime == null || !isSameDay(lastRecordTime, now)) {
+//        if (lastRecordTime == null || now - lastRecordTime > TimeUnit.DAYS.toMillis(1)) {
             if (EventType.REFRESH_TOKEN.equals(event.getType())) {
                 authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
             } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
@@ -60,6 +64,15 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
             lastRecordTimestamps.put(key, now);
         }
 
+    }
+
+    private boolean isSameDay(Long lastRecordTime, long now) {
+        LocalDate date1 = LocalDate.ofInstant(java.time.Instant.ofEpochMilli(lastRecordTime), ZoneId.systemDefault());
+        LocalDate date2 = LocalDate.ofInstant(java.time.Instant.ofEpochMilli(now), ZoneId.systemDefault());
+        log.info("date1 = " + date1 + ", date2 = " + date2);
+
+        log.info("return date1.isEqual(date2);" + String.valueOf(date1.isEqual(date2)));
+        return date1.isEqual(date2);
     }
 
     @Override
