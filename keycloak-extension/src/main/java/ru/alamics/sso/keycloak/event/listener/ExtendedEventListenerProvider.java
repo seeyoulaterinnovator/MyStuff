@@ -55,13 +55,18 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 //        log.info(" now - lastRecordTime > TimeUnit.DAYS.toMillis(1) is : " + (now - lastRecordTime > TimeUnit.DAYS.toMillis(1)));
 
         if (lastRecordTime == null || !isSameDay(lastRecordTime, now)) {
+            log.info("onEvent is called, lastRecordTime != null ");
 //        if (lastRecordTime == null || now - lastRecordTime > TimeUnit.DAYS.toMillis(1)) {
             if (EventType.REFRESH_TOKEN.equals(event.getType())) {
+                log.info("loging REFRESH TOKEN");
                 authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
             } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
+                log.info("loging LOGIN APP_b2b");
                 authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
             }
+            log.info("after lastRecordTimestamps.toString() is " + lastRecordTimestamps.toString());
             lastRecordTimestamps.put(key, now);
+            log.info("before lastRecordTimestamps.toString() is " + lastRecordTimestamps.toString());
         }
 
     }
