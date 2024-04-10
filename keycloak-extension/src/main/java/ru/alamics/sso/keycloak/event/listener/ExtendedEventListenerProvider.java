@@ -12,11 +12,16 @@ import ru.alamics.sso.keycloak.event.listener.factory.impl.EventFactoryImpl;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.service.AuthorisedUsersService;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+
 @Slf4j
 public class ExtendedEventListenerProvider implements EventListenerProvider {
 
     private KeycloakSession session;
     private final AuthorisedUsersService authorisedUsersService;
+    private Map<String, Long> lastRecordTimestamps = new ConcurrentHashMap<>();
 
     public ExtendedEventListenerProvider(KeycloakSession session) {
         this.session = session;
@@ -26,34 +31,35 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 
     @Override
     public void onEvent(Event event) {
-//        if (EventType.REFRESH_TOKEN.equals(event.getType())) {
-////            typeId - hardcode иначе не смог придумать как сохранить авторизацию через МП по отпечатку/коду
-//            authorisedUsersService.saveSuccessfulAuthFromEventListener(event.getUserId(), event.getRealmId(),
-//                    event.getClientId(), 7);
-//        } else if (EventType.LOGIN.equals(event.getType()) && event.getClientId().equals("app_b2b")) {
-//            authorisedUsersService.saveSuccessfulAuthFromEventListener(event.getUserId(), event.getRealmId(),
-//                    event.getClientId(), 3);
-//        } else if (EventType.LOGIN.equals(event.getType()) && event.getClientId().equals("wifi")) {
-//            authorisedUsersService.saveSuccessfulAuthFromEventListener(event.getUserId(), event.getRealmId(),
-//                    event.getClientId(), 3);
-//        }
-
         String userId = event.getUserId();
         String realmId = event.getRealmId();
         String clientId = event.getClientId();
-        //  typeId - hardcode иначе не смог придумать как сохранить авторизацию через МП по отпечатку/коду
 
-//          clientId == null внезапно
         if (userId == null || realmId == null || clientId == null) {
             log.error("userId == " + userId + ", " + "realmId == " + realmId + ", " + "clientId == " + clientId);
             return;
         }
 
-        if (EventType.REFRESH_TOKEN.equals(event.getType())) {
-            authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
-        } else if (EventType.LOGIN.equals(event.getType()) && (clientId.equals("app_b2b") || clientId.equals("wifi"))) {
-            authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
+        String key = userId + ":" + clientId;
+        long now = System.currentTimeMillis();
+        Long lastRecordTime = lastRecordTimestamps.get(key);
+
+        //  typeId - hardcode иначе не смог придумать как сохранить авторизацию через МП по отпечатку/коду
+//        if (EventType.REFRESH_TOKEN.equals(event.getType())) {
+//            authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
+//        } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
+//            authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
+//        }
+
+        if (lastRecordTime == null || now - lastRecordTime > TimeUnit.DAYS.toMillis(1)) {
+            if (EventType.REFRESH_TOKEN.equals(event.getType())) {
+                authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
+            } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
+                authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
+            }
+            lastRecordTimestamps.put(key, now);
         }
+
     }
 
     @Override
