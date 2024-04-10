@@ -23,7 +23,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 
     private KeycloakSession session;
     private final AuthorisedUsersService authorisedUsersService;
-    private Map<String, Long> lastRecordTimestamps = new ConcurrentHashMap<>();
+    private final Map<String, Long> lastRecordTimestamps = new ConcurrentHashMap<>();
 
     public ExtendedEventListenerProvider(KeycloakSession session) {
         this.session = session;
