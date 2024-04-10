@@ -14,6 +14,7 @@ import ru.alamics.sso.registration.service.AuthorisedUsersService;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -23,7 +24,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 
     private KeycloakSession session;
     private final AuthorisedUsersService authorisedUsersService;
-    private final Map<String, Long> lastRecordTimestamps = new ConcurrentHashMap<>();
+    private Map<String, Map<String, Long>> lastSuccessfulAuthTimestamps = new HashMap<>();
 
     public ExtendedEventListenerProvider(KeycloakSession session) {
         this.session = session;
@@ -41,34 +42,58 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
             log.error("userId == " + userId + ", " + "realmId == " + realmId + ", " + "clientId == " + clientId);
             return;
         }
+        String key = userId + "-" + clientId;
+        long currentTime = System.currentTimeMillis();
+        long lastAuthTimestamp = lastSuccessfulAuthTimestamps
+                .getOrDefault(key, new HashMap<>())
+                .getOrDefault(realmId, 0L);
 
-        String key = userId + ":" + clientId;
-        long now = System.currentTimeMillis();
-        Long lastRecordTime = lastRecordTimestamps.getOrDefault(key, -1L);
+        if (EventType.REFRESH_TOKEN.equals(event.getType()) || (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b"))) {
+            if (currentTime - lastAuthTimestamp > TimeUnit.DAYS.toMillis(1)) { // Check if a day has passed
+                authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
+                // Update last successful auth timestamp
+                lastSuccessfulAuthTimestamps
+                        .computeIfAbsent(key, k -> new HashMap<>())
+                        .put(realmId, currentTime);
+            }
+        }
+
+//        String key = userId + ":" + clientId;
+//        long now = System.currentTimeMillis();
+//        Long lastRecordTime = lastRecordTimestamps.getOrDefault(key, -1L);
 
 
-        //  typeId - hardcode иначе не смог придумать как сохранить авторизацию через МП по отпечатку/коду
-//        if (EventType.REFRESH_TOKEN.equals(event.getType())) {
-//            authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
-//        } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
-//            authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
-//        }
+        //  typeId - hardcode для авторизации через МП по отпечатку/коду
+
 //        log.info(" now - lastRecordTime > TimeUnit.DAYS.toMillis(1) is : " + (now - lastRecordTime > TimeUnit.DAYS.toMillis(1)));
 
-        if (lastRecordTime == null || !isSameDay(lastRecordTime, now)) {
-            log.info("onEvent is called, lastRecordTime != null ");
-//        if (lastRecordTime == null || now - lastRecordTime > TimeUnit.DAYS.toMillis(1)) {
-            if (EventType.REFRESH_TOKEN.equals(event.getType())) {
-                log.info("loging REFRESH TOKEN");
-                authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
-            } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
-                log.info("loging LOGIN APP_b2b");
-                authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
-            }
-            log.info("after lastRecordTimestamps.toString() is " + lastRecordTimestamps.toString());
-            lastRecordTimestamps.put(key, now);
-            log.info("before lastRecordTimestamps.toString() is " + lastRecordTimestamps.toString());
-        }
+//        if (lastRecordTime == null || !isSameDay(lastRecordTime, now)) {
+//            log.info("onEvent is called, lastRecordTime != null ");
+////        if (lastRecordTime == null || now - lastRecordTime > TimeUnit.DAYS.toMillis(1)) {
+//            if (EventType.REFRESH_TOKEN.equals(event.getType())) {
+//                log.info("loging REFRESH TOKEN");
+//                authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
+//            } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
+//                log.info("loging LOGIN APP_b2b");
+//                authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
+//            }
+//            log.info("after lastRecordTimestamps.toString() is " + lastRecordTimestamps.toString());
+//            lastRecordTimestamps.put(key, now);
+//            log.info("before lastRecordTimestamps.toString() is " + lastRecordTimestamps.toString());
+//        }
+
+
+
+//        if (EventType.REFRESH_TOKEN.equals(event.getType())) {
+//            if (authorisedUsersService.shouldSaveAuth(userId, clientId)) {
+//                authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
+//            }
+//        } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
+//            if (authorisedUsersService.shouldSaveAuth(userId, clientId)) {
+//                authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
+//            }
+//        }
+
 
     }
 
