@@ -6,6 +6,9 @@ import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.RealmProvider;
+import org.keycloak.models.UserModel;
 import ru.alamics.sso.keycloak.event.listener.factory.EventFactory;
 import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
 import ru.alamics.sso.keycloak.event.listener.factory.impl.EventFactoryImpl;
@@ -24,7 +27,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 
     private KeycloakSession session;
     private final AuthorisedUsersService authorisedUsersService;
-    private Map<String, Map<String, Long>> lastSuccessfulAuthTimestamps = new HashMap<>();
+//    private Map<String, Map<String, Long>> lastSuccessfulAuthTimestamps = new HashMap<>();
 
     public ExtendedEventListenerProvider(KeycloakSession session) {
         this.session = session;
@@ -42,24 +45,9 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
             log.error("userId == " + userId + ", " + "realmId == " + realmId + ", " + "clientId == " + clientId);
             return;
         }
-        String key = userId + "-" + clientId;
-        long currentTime = System.currentTimeMillis();
-        long lastAuthTimestamp = lastSuccessfulAuthTimestamps
-                .getOrDefault(key, new HashMap<>())
-                .getOrDefault(realmId, 0L);
-
-        if (EventType.REFRESH_TOKEN.equals(event.getType()) || (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b"))) {
-            if (currentTime - lastAuthTimestamp > TimeUnit.DAYS.toMillis(1)) { // Check if a day has passed
-                authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
-                // Update last successful auth timestamp
-                lastSuccessfulAuthTimestamps
-                        .computeIfAbsent(key, k -> new HashMap<>())
-                        .put(realmId, currentTime);
-            }
-        }
 
 //        String key = userId + ":" + clientId;
-//        long now = System.currentTimeMillis();
+        long now = System.currentTimeMillis();
 //        Long lastRecordTime = lastRecordTimestamps.getOrDefault(key, -1L);
 
 
@@ -81,18 +69,21 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 //            lastRecordTimestamps.put(key, now);
 //            log.info("before lastRecordTimestamps.toString() is " + lastRecordTimestamps.toString());
 //        }
+        RealmProvider model = session.realms();
+        RealmModel realm = model.getRealm(event.getRealmId());
+        UserModel userModel = session.users().getUserById(userId, realm);
 
+        long userAtt = Long.parseLong(userModel.getAttribute("authorization_time").get(0));
+        if (EventType.REFRESH_TOKEN.equals(event.getType())) {
+            if (!userModel.getAttributes().containsKey("authorization_time") || now - userAtt > TimeUnit.DAYS.toMillis(1)) {
+                authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
+                userModel.setSingleAttribute("authorization_time", String.valueOf(now));
+            }
+        } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
 
+                authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
 
-//        if (EventType.REFRESH_TOKEN.equals(event.getType())) {
-//            if (authorisedUsersService.shouldSaveAuth(userId, clientId)) {
-//                authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
-//            }
-//        } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
-//            if (authorisedUsersService.shouldSaveAuth(userId, clientId)) {
-//                authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
-//            }
-//        }
+        }
 
 
     }
