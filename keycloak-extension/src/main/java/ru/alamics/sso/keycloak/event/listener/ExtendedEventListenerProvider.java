@@ -52,7 +52,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 //        } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
 //            authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
 //        }
-        log.info(" now - lastRecordTime > TimeUnit.DAYS.toMillis(1) is : " + (now - lastRecordTime > TimeUnit.DAYS.toMillis(1)));
+//        log.info(" now - lastRecordTime > TimeUnit.DAYS.toMillis(1) is : " + (now - lastRecordTime > TimeUnit.DAYS.toMillis(1)));
 
         if (lastRecordTime == null || !isSameDay(lastRecordTime, now)) {
 //        if (lastRecordTime == null || now - lastRecordTime > TimeUnit.DAYS.toMillis(1)) {
