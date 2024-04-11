@@ -49,6 +49,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
         }
 
         long now = System.currentTimeMillis();
+        log.info("now is " + now);
 
 
         //  typeId - hardcode для авторизации через МП по отпечатку/коду
@@ -72,6 +73,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 
             Instant instant = Instant.ofEpochMilli(now);
             Instant nowMinus25 = instant.minus(25, ChronoUnit.HOURS);
+            log.info("nowMinus25 is " + nowMinus25);
 
             userModel.setSingleAttribute("authorization_time", String.valueOf(nowMinus25));
 //            userModel.setSingleAttribute("number_of_ref_tokens", "0");
@@ -115,23 +117,6 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 
     }
 
-    private boolean isSameDay(Long lastRecordTime, long now) {
-//        LocalDate date1 = LocalDate.ofInstant(java.time.Instant.ofEpochMilli(lastRecordTime), ZoneId.systemDefault());
-//        LocalDate date2 = LocalDate.ofInstant(java.time.Instant.ofEpochMilli(now), ZoneId.systemDefault());
-//        log.info("date1 = " + date1 + ", date2 = " + date2);
-//
-//        log.info("return date1.isEqual(date2);" + String.valueOf(date1.isEqual(date2)));
-//        return date1.isEqual(date2);
-        // Количество миллисекунд в одном дне
-        long millisecondsPerDay = 24 * 60 * 60 * 1000;
-
-        // Преобразование меток времени в миллисекунды с начала дня
-        long day1 = lastRecordTime / millisecondsPerDay;
-        long day2 = now / millisecondsPerDay;
-        log.info("day1 = " + day1 + ", day2 = " + day2);
-
-        return day1 == day2;
-    }
 
     @Override
     public void onEvent(AdminEvent event, boolean includeRepresentation) {
