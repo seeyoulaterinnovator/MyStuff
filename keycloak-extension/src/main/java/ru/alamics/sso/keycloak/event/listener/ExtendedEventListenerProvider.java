@@ -15,8 +15,10 @@ import ru.alamics.sso.keycloak.event.listener.factory.impl.EventFactoryImpl;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.service.AuthorisedUsersService;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,12 +48,49 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
             return;
         }
 
-//        String key = userId + ":" + clientId;
         long now = System.currentTimeMillis();
-//        Long lastRecordTime = lastRecordTimestamps.getOrDefault(key, -1L);
 
 
         //  typeId - hardcode для авторизации через МП по отпечатку/коду
+
+
+        RealmProvider model = session.realms();
+        RealmModel realm = model.getRealm(event.getRealmId());
+        UserModel userModel = session.users().getUserById(userId, realm);
+        if (EventType.REFRESH_TOKEN.equals(event.getType()) && clientId.equals("app_b2b")) {
+            if ((now - Long.parseLong(userModel.getAttribute("authorization_time").get(0)) > TimeUnit.DAYS.toMillis(1)) &&
+                    (userModel.getAttribute("number_of_ref_tokens").contains("0"))) {
+                authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
+                userModel.setSingleAttribute("authorization_time", String.valueOf(now));
+                userModel.setSingleAttribute("number_of_ref_tokens", "1");
+            } else if ((now - Long.parseLong(userModel.getAttribute("authorization_time").get(0)) > TimeUnit.DAYS.toMillis(1))) {
+                userModel.setSingleAttribute("number_of_ref_tokens", "0");
+            }
+        } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
+            authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
+
+            Instant instant = Instant.ofEpochMilli(now);
+            Instant nowMinus25 = instant.minus(25, ChronoUnit.HOURS);
+
+            userModel.setSingleAttribute("authorization_time", String.valueOf(nowMinus25));
+            userModel.setSingleAttribute("number_of_ref_tokens", "0");
+        }
+
+//        try {
+//            long userAtt = Long.parseLong(userModel.getAttribute("authorization_time").get(0));
+//        }
+//        catch (IndexOutOfBoundsException e) {
+//            log.info("userModel.getAttribute(authorization_time).get(0) = " + userModel.getAttribute("authorization_time").get(0));
+//            userModel.setSingleAttribute("authorization_time", String.valueOf(now));
+//
+//        }
+//        if (userModel.getAttribute("authorization_time").get(0) == null) {
+//            log.info("userModel.setSingleAttribute");
+//            userModel.setSingleAttribute("authorization_time", String.valueOf(now));
+//        }
+
+//        long userAtt = Long.parseLong(userModel.getAttribute("authorization_time").get(0));
+//        log.info("userAtt = " + userAtt);
 
 //        log.info(" now - lastRecordTime > TimeUnit.DAYS.toMillis(1) is : " + (now - lastRecordTime > TimeUnit.DAYS.toMillis(1)));
 
@@ -69,38 +108,6 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 //            lastRecordTimestamps.put(key, now);
 //            log.info("before lastRecordTimestamps.toString() is " + lastRecordTimestamps.toString());
 //        }
-        RealmProvider model = session.realms();
-        RealmModel realm = model.getRealm(event.getRealmId());
-        UserModel userModel = session.users().getUserById(userId, realm);
-
-//        try {
-//            long userAtt = Long.parseLong(userModel.getAttribute("authorization_time").get(0));
-//        }
-//        catch (IndexOutOfBoundsException e) {
-//            log.info("userModel.getAttribute(authorization_time).get(0) = " + userModel.getAttribute("authorization_time").get(0));
-//            userModel.setSingleAttribute("authorization_time", String.valueOf(now));
-//
-//        }
-//        if (userModel.getAttribute("authorization_time").get(0) == null) {
-//            log.info("userModel.setSingleAttribute");
-//            userModel.setSingleAttribute("authorization_time", String.valueOf(now));
-//        }
-
-//        long userAtt = Long.parseLong(userModel.getAttribute("authorization_time").get(0));
-//        log.info("userAtt = " + userAtt);
-        if (EventType.REFRESH_TOKEN.equals(event.getType()) && clientId.equals("app_b2b")) {
-            if ((now - Long.parseLong(userModel.getAttribute("authorization_time").get(0)) > TimeUnit.DAYS.toMillis(1)) &&
-                    (userModel.getAttribute("number_of_ref_tokens").contains("0"))) {
-                authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
-                userModel.setSingleAttribute("authorization_time", String.valueOf(now));
-                userModel.setSingleAttribute("number_of_ref_tokens", "1");
-            }
-        } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
-            authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
-            userModel.setSingleAttribute("authorization_time", String.valueOf(now));
-            userModel.setSingleAttribute("number_of_ref_tokens", "0");
-        }
-
 
     }
 
