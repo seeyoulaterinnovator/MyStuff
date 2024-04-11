@@ -18,6 +18,7 @@ import ru.alamics.sso.registration.service.AuthorisedUsersService;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +28,6 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 
     private KeycloakSession session;
     private final AuthorisedUsersService authorisedUsersService;
-//    private Map<String, Map<String, Long>> lastSuccessfulAuthTimestamps = new HashMap<>();
 
     public ExtendedEventListenerProvider(KeycloakSession session) {
         this.session = session;
@@ -73,16 +73,19 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
         RealmModel realm = model.getRealm(event.getRealmId());
         UserModel userModel = session.users().getUserById(userId, realm);
 
+        if (userModel.getAttribute("authorization_time").get(0) == null) {
+            userModel.setSingleAttribute("authorization_time", String.valueOf(now));
+        }
+
         long userAtt = Long.parseLong(userModel.getAttribute("authorization_time").get(0));
+        log.info("userAtt = " + userAtt);
         if (EventType.REFRESH_TOKEN.equals(event.getType())) {
-            if (!userModel.getAttributes().containsKey("authorization_time") || now - userAtt > TimeUnit.DAYS.toMillis(1)) {
+            if (now - userAtt > TimeUnit.DAYS.toMillis(1)) {
                 authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
                 userModel.setSingleAttribute("authorization_time", String.valueOf(now));
             }
         } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
-
                 authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
-
         }
 
 
@@ -103,7 +106,6 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
         long day2 = now / millisecondsPerDay;
         log.info("day1 = " + day1 + ", day2 = " + day2);
 
-        // Сравнение дней на равенство
         return day1 == day2;
     }
 
