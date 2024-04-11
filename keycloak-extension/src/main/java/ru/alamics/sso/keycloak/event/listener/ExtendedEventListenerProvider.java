@@ -54,17 +54,16 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
         UserModel userModel = session.users().getUserById(userId, realm);
         //  typeId - hardcode для авторизации через МП по отпечатку/коду
         if (EventType.REFRESH_TOKEN.equals(event.getType()) && clientId.equals("app_b2b")) {
-            if ((now - Long.parseLong(userModel.getAttribute("authorization_time").get(0)) < TimeUnit.DAYS.toMillis(1))) {
+            if ((now - Long.parseLong(userModel.getAttribute("authorization_time").get(0)) <= TimeUnit.DAYS.toMillis(1))) {
                 return;
             }
-                authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
-                userModel.setSingleAttribute("authorization_time", String.valueOf(now));
-
+            authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
+            userModel.setSingleAttribute("authorization_time", String.valueOf(now));
         } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
             authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
 
             long hoursToSubtract = 25;
-            long millisecondsToSubtract = hoursToSubtract * 3600000; // Перевод часов в миллисекунды
+            long millisecondsToSubtract = hoursToSubtract * 3600000;
             long nowMinus25 = now - millisecondsToSubtract;
 
             userModel.setSingleAttribute("authorization_time", String.valueOf(nowMinus25));
@@ -87,6 +86,4 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
     @Override
     public void close() {
     }
-
-
 }
