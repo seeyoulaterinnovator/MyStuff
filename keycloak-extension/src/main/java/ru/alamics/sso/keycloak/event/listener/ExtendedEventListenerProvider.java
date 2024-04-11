@@ -73,28 +73,32 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
         RealmModel realm = model.getRealm(event.getRealmId());
         UserModel userModel = session.users().getUserById(userId, realm);
 
-        try {
-            long userAtt = Long.parseLong(userModel.getAttribute("authorization_time").get(0));
-        }
-        catch (IndexOutOfBoundsException e) {
-            log.info("userModel.getAttribute(authorization_time).get(0) = " + userModel.getAttribute("authorization_time").get(0));
-            userModel.setSingleAttribute("authorization_time", String.valueOf(now));
-
-        }
+//        try {
+//            long userAtt = Long.parseLong(userModel.getAttribute("authorization_time").get(0));
+//        }
+//        catch (IndexOutOfBoundsException e) {
+//            log.info("userModel.getAttribute(authorization_time).get(0) = " + userModel.getAttribute("authorization_time").get(0));
+//            userModel.setSingleAttribute("authorization_time", String.valueOf(now));
+//
+//        }
 //        if (userModel.getAttribute("authorization_time").get(0) == null) {
 //            log.info("userModel.setSingleAttribute");
 //            userModel.setSingleAttribute("authorization_time", String.valueOf(now));
 //        }
 
-        long userAtt = Long.parseLong(userModel.getAttribute("authorization_time").get(0));
-        log.info("userAtt = " + userAtt);
-        if (EventType.REFRESH_TOKEN.equals(event.getType())) {
-            if (now - userAtt > TimeUnit.DAYS.toMillis(1)) {
+//        long userAtt = Long.parseLong(userModel.getAttribute("authorization_time").get(0));
+//        log.info("userAtt = " + userAtt);
+        if (EventType.REFRESH_TOKEN.equals(event.getType()) && clientId.equals("app_b2b")) {
+            if ((now - Long.parseLong(userModel.getAttribute("authorization_time").get(0)) > TimeUnit.DAYS.toMillis(1)) &&
+                    (userModel.getAttribute("number_of_ref_tokens").contains("0"))) {
                 authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
                 userModel.setSingleAttribute("authorization_time", String.valueOf(now));
+                userModel.setSingleAttribute("number_of_ref_tokens", "1");
             }
         } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
-                authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
+            authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
+            userModel.setSingleAttribute("authorization_time", String.valueOf(now));
+            userModel.setSingleAttribute("number_of_ref_tokens", "0");
         }
 
 
