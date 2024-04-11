@@ -71,8 +71,11 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
         } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
             authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
 
-            Instant instant = Instant.ofEpochMilli(now);
-            Instant nowMinus25 = instant.minus(25, ChronoUnit.HOURS);
+            long hoursToSubtract = 25;
+            long millisecondsToSubtract = hoursToSubtract * 3600000; // Перевод часов в миллисекунды
+
+            long nowMinus25 = now - millisecondsToSubtract;
+
             log.info("nowMinus25 is " + nowMinus25);
 
             userModel.setSingleAttribute("authorization_time", String.valueOf(nowMinus25));
