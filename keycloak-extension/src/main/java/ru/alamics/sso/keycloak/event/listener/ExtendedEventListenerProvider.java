@@ -6,11 +6,24 @@ import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.RealmProvider;
+import org.keycloak.models.UserModel;
 import ru.alamics.sso.keycloak.event.listener.factory.EventFactory;
 import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
 import ru.alamics.sso.keycloak.event.listener.factory.impl.EventFactoryImpl;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.service.AuthorisedUsersService;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class ExtendedEventListenerProvider implements EventListenerProvider {
@@ -26,35 +39,37 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 
     @Override
     public void onEvent(Event event) {
-//        if (EventType.REFRESH_TOKEN.equals(event.getType())) {
-////            typeId - hardcode иначе не смог придумать как сохранить авторизацию через МП по отпечатку/коду
-//            authorisedUsersService.saveSuccessfulAuthFromEventListener(event.getUserId(), event.getRealmId(),
-//                    event.getClientId(), 7);
-//        } else if (EventType.LOGIN.equals(event.getType()) && event.getClientId().equals("app_b2b")) {
-//            authorisedUsersService.saveSuccessfulAuthFromEventListener(event.getUserId(), event.getRealmId(),
-//                    event.getClientId(), 3);
-//        } else if (EventType.LOGIN.equals(event.getType()) && event.getClientId().equals("wifi")) {
-//            authorisedUsersService.saveSuccessfulAuthFromEventListener(event.getUserId(), event.getRealmId(),
-//                    event.getClientId(), 3);
-//        }
-
         String userId = event.getUserId();
         String realmId = event.getRealmId();
         String clientId = event.getClientId();
-        //  typeId - hardcode иначе не смог придумать как сохранить авторизацию через МП по отпечатку/коду
 
-//          clientId == null внезапно
         if (userId == null || realmId == null || clientId == null) {
             log.error("userId == " + userId + ", " + "realmId == " + realmId + ", " + "clientId == " + clientId);
             return;
         }
 
-        if (EventType.REFRESH_TOKEN.equals(event.getType())) {
+        long now = System.currentTimeMillis();
+        RealmProvider model = session.realms();
+        RealmModel realm = model.getRealm(event.getRealmId());
+        UserModel userModel = session.users().getUserById(userId, realm);
+        //  typeId - hardcode для авторизации через МП по отпечатку/коду
+        if (EventType.REFRESH_TOKEN.equals(event.getType()) && clientId.equals("app_b2b")) {
+            if ((now - Long.parseLong(userModel.getAttribute("authorization_time").get(0)) <= TimeUnit.DAYS.toMillis(1))) {
+                return;
+            }
             authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
-        } else if (EventType.LOGIN.equals(event.getType()) && (clientId.equals("app_b2b") || clientId.equals("wifi"))) {
+            userModel.setSingleAttribute("authorization_time", String.valueOf(now));
+        } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
             authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
+
+            long hoursToSubtract = 25;
+            long millisecondsToSubtract = hoursToSubtract * 3600000;
+            long nowMinus25 = now - millisecondsToSubtract;
+
+            userModel.setSingleAttribute("authorization_time", String.valueOf(nowMinus25));
         }
     }
+
 
     @Override
     public void onEvent(AdminEvent event, boolean includeRepresentation) {
@@ -71,6 +86,4 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
     @Override
     public void close() {
     }
-
-
 }
