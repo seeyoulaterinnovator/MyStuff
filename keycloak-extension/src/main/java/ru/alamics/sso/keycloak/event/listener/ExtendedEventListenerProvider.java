@@ -73,9 +73,18 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
         RealmModel realm = model.getRealm(event.getRealmId());
         UserModel userModel = session.users().getUserById(userId, realm);
 
-        if (userModel.getAttribute("authorization_time").get(0) == null) {
-            userModel.setSingleAttribute("authorization_time", String.valueOf(now));
+        try {
+            long userAtt = Long.parseLong(userModel.getAttribute("authorization_time").get(0));
         }
+        catch (IndexOutOfBoundsException e) {
+            log.info("userModel.getAttribute(authorization_time).get(0) = " + userModel.getAttribute("authorization_time").get(0));
+            userModel.setSingleAttribute("authorization_time", String.valueOf(now));
+
+        }
+//        if (userModel.getAttribute("authorization_time").get(0) == null) {
+//            log.info("userModel.setSingleAttribute");
+//            userModel.setSingleAttribute("authorization_time", String.valueOf(now));
+//        }
 
         long userAtt = Long.parseLong(userModel.getAttribute("authorization_time").get(0));
         log.info("userAtt = " + userAtt);
