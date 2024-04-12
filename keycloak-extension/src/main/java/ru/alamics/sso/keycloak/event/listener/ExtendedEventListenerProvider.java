@@ -66,7 +66,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
             if (lastAuthorizationTimeStr != null) {
                 LocalDateTime lastAuthorizationTime = LocalDateTime.parse(lastAuthorizationTimeStr, formatter);
                 log.info("lastAuthorizationTime is " + lastAuthorizationTime);
-                if (ChronoUnit.DAYS.between(lastAuthorizationTime, now) <= 1) {
+                if (ChronoUnit.HOURS.between(lastAuthorizationTime, now) <= 24) {
                     log.info("AAAAAAAAAA");
                     return;
                 }
@@ -86,8 +86,8 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 //
 //            userModel.setSingleAttribute("authorization_time_appb2b", String.valueOf(nowMinus25));
 
-            LocalDateTime nowMinus48 = now.minusHours(48);
-            userModel.setSingleAttribute("authorization_time_appb2b", nowMinus48.format(formatter));
+            LocalDateTime nowMinus26 = now.minusHours(26);
+            userModel.setSingleAttribute("authorization_time_appb2b", nowMinus26.format(formatter));
         }
     }
 
