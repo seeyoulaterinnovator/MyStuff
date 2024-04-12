@@ -50,7 +50,8 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 //        long now = System.currentTimeMillis();
 
         LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
 
         RealmProvider model = session.realms();
         RealmModel realm = model.getRealm(event.getRealmId());
@@ -61,6 +62,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 //                return;
 //            }
             String lastAuthorizationTimeStr = userModel.getFirstAttribute("authorization_time_appb2b");
+            log.info("lastAuthorizationTimeStr is " + lastAuthorizationTimeStr);
             if (lastAuthorizationTimeStr != null) {
                 LocalDateTime lastAuthorizationTime = LocalDateTime.parse(lastAuthorizationTimeStr, formatter);
                 log.info("lastAuthorizationTime is " + lastAuthorizationTime);
@@ -69,8 +71,10 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                     return;
                 }
             }
+            log.info("сохраняю рефреш");
             authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
 //            userModel.setSingleAttribute("authorization_time_appb2b", String.valueOf(now));
+            log.info("now.format(formatter) is " + now.format(formatter));
             userModel.setSingleAttribute("authorization_time_appb2b", now.format(formatter));
 
         } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
