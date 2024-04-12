@@ -57,19 +57,21 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
         UserModel userModel = session.users().getUserById(userId, realm);
         //  typeId - hardcode для авторизации через МП по отпечатку/коду
         if (EventType.REFRESH_TOKEN.equals(event.getType()) && clientId.equals("app_b2b")) {
-//            if ((now - Long.parseLong(userModel.getAttribute("authorization_time").get(0)) <= TimeUnit.DAYS.toMillis(1))) {
+//            if ((now - Long.parseLong(userModel.getAttribute("authorization_time_appb2b").get(0)) <= TimeUnit.DAYS.toMillis(1))) {
 //                return;
 //            }
-            String lastAuthorizationTimeStr = userModel.getFirstAttribute("authorization_time");
+            String lastAuthorizationTimeStr = userModel.getFirstAttribute("authorization_time_appb2b");
             if (lastAuthorizationTimeStr != null) {
                 LocalDateTime lastAuthorizationTime = LocalDateTime.parse(lastAuthorizationTimeStr, formatter);
+                log.info("lastAuthorizationTime is " + lastAuthorizationTime);
                 if (ChronoUnit.DAYS.between(lastAuthorizationTime, now) <= 1) {
+                    log.info("не прошло 24 часа");
                     return;
                 }
             }
             authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
-//            userModel.setSingleAttribute("authorization_time", String.valueOf(now));
-            userModel.setSingleAttribute("authorization_time", now.format(formatter));
+//            userModel.setSingleAttribute("authorization_time_appb2b", String.valueOf(now));
+            userModel.setSingleAttribute("authorization_time_appb2b", now.format(formatter));
 
         } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
             authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
@@ -78,10 +80,10 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 //            long millisecondsToSubtract = hoursToSubtract * 3600000;
 //            long nowMinus25 = now - millisecondsToSubtract;
 //
-//            userModel.setSingleAttribute("authorization_time", String.valueOf(nowMinus25));
+//            userModel.setSingleAttribute("authorization_time_appb2b", String.valueOf(nowMinus25));
 
-            LocalDateTime nowMinus24 = now.minusHours(24);
-            userModel.setSingleAttribute("authorization_time", nowMinus24.format(formatter));
+            LocalDateTime nowMinus25 = now.minusHours(25);
+            userModel.setSingleAttribute("authorization_time_appb2b", nowMinus25.format(formatter));
         }
     }
 
