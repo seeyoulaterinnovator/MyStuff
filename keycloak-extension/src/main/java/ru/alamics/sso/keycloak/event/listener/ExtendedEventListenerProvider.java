@@ -86,8 +86,8 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 //
 //            userModel.setSingleAttribute("authorization_time_appb2b", String.valueOf(nowMinus25));
 
-            LocalDateTime nowMinus25 = now.minusHours(25);
-            userModel.setSingleAttribute("authorization_time_appb2b", nowMinus25.format(formatter));
+            LocalDateTime nowMinus48 = now.minusHours(48);
+            userModel.setSingleAttribute("authorization_time_appb2b", nowMinus48.format(formatter));
         }
     }
 
