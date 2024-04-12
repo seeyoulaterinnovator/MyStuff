@@ -58,34 +58,19 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
         UserModel userModel = session.users().getUserById(userId, realm);
         //  typeId - hardcode для авторизации через МП по отпечатку/коду
         if (EventType.REFRESH_TOKEN.equals(event.getType()) && clientId.equals("app_b2b")) {
-//            if ((now - Long.parseLong(userModel.getAttribute("authorization_time_appb2b").get(0)) <= TimeUnit.DAYS.toMillis(1))) {
-//                return;
-//            }
             String lastAuthorizationTimeStr = userModel.getFirstAttribute("authorization_time_appb2b");
-            log.info("lastAuthorizationTimeStr is " + lastAuthorizationTimeStr);
             if (lastAuthorizationTimeStr != null) {
                 LocalDateTime lastAuthorizationTime = LocalDateTime.parse(lastAuthorizationTimeStr, formatter);
-                log.info("lastAuthorizationTime is " + lastAuthorizationTime);
                 if (ChronoUnit.HOURS.between(lastAuthorizationTime, now) <= 24) {
-                    log.info("AAAAAAAAAA");
                     return;
                 }
             }
-            log.info("save refresh");
             authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
-//            userModel.setSingleAttribute("authorization_time_appb2b", String.valueOf(now));
             log.info("now.format(formatter) is " + now.format(formatter));
             userModel.setSingleAttribute("authorization_time_appb2b", now.format(formatter));
 
         } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
             authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
-
-//            long hoursToSubtract = 25;
-//            long millisecondsToSubtract = hoursToSubtract * 3600000;
-//            long nowMinus25 = now - millisecondsToSubtract;
-//
-//            userModel.setSingleAttribute("authorization_time_appb2b", String.valueOf(nowMinus25));
-
             LocalDateTime nowMinus26 = now.minusHours(26);
             userModel.setSingleAttribute("authorization_time_appb2b", nowMinus26.format(formatter));
         }
