@@ -15,9 +15,8 @@ import ru.alamics.sso.keycloak.event.listener.factory.impl.EventFactoryImpl;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.service.AuthorisedUsersService;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
@@ -48,25 +47,41 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
             return;
         }
 
-        long now = System.currentTimeMillis();
+//        long now = System.currentTimeMillis();
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
         RealmProvider model = session.realms();
         RealmModel realm = model.getRealm(event.getRealmId());
         UserModel userModel = session.users().getUserById(userId, realm);
         //  typeId - hardcode для авторизации через МП по отпечатку/коду
         if (EventType.REFRESH_TOKEN.equals(event.getType()) && clientId.equals("app_b2b")) {
-            if ((now - Long.parseLong(userModel.getAttribute("authorization_time").get(0)) <= TimeUnit.DAYS.toMillis(1))) {
-                return;
+//            if ((now - Long.parseLong(userModel.getAttribute("authorization_time").get(0)) <= TimeUnit.DAYS.toMillis(1))) {
+//                return;
+//            }
+            String lastAuthorizationTimeStr = userModel.getFirstAttribute("authorization_time");
+            if (lastAuthorizationTimeStr != null) {
+                LocalDateTime lastAuthorizationTime = LocalDateTime.parse(lastAuthorizationTimeStr, formatter);
+                if (ChronoUnit.DAYS.between(lastAuthorizationTime, now) <= 1) {
+                    return;
+                }
             }
             authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
-            userModel.setSingleAttribute("authorization_time", String.valueOf(now));
+//            userModel.setSingleAttribute("authorization_time", String.valueOf(now));
+            userModel.setSingleAttribute("authorization_time", now.format(formatter));
+
         } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
             authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
 
-            long hoursToSubtract = 25;
-            long millisecondsToSubtract = hoursToSubtract * 3600000;
-            long nowMinus25 = now - millisecondsToSubtract;
+//            long hoursToSubtract = 25;
+//            long millisecondsToSubtract = hoursToSubtract * 3600000;
+//            long nowMinus25 = now - millisecondsToSubtract;
+//
+//            userModel.setSingleAttribute("authorization_time", String.valueOf(nowMinus25));
 
-            userModel.setSingleAttribute("authorization_time", String.valueOf(nowMinus25));
+            LocalDateTime nowMinus24 = now.minusHours(24);
+            userModel.setSingleAttribute("authorization_time", nowMinus24.format(formatter));
         }
     }
 
