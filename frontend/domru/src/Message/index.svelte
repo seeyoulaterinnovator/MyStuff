@@ -107,11 +107,11 @@
   }
 
   function handleHide2() {
-    // if ($isEmailVer) {
+    if ($isEmailVer) {
       console.log("handleHide2")
       showInfo.set(false);
       closeAndSubmit();
-    // }
+    }
   }
   // function handleHide3() {
   //   setTimeout(() => {
@@ -120,7 +120,7 @@
   // }
 
 
-  setTimeout(handleHide2, 1800);
+  setTimeout(handleHide2, 2300);
   // setTimeout(handleHide3, 2800);
 
   function switchToPassword() {
