@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth;
 
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -12,6 +13,8 @@ import org.keycloak.events.EventType;
 import org.keycloak.models.RequiredActionProviderModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.alamics.sso.auth_n_regi.AuthOrRegTypeNotFoundException;
 import ru.alamics.sso.jpa.entity.auth_reg.AuthOrRegType;
 import org.keycloak.forms.login.LoginFormsProvider;
@@ -45,17 +48,22 @@ import static ru.alamics.sso.registration.model.UserConstants.REDIRECT_URI;
 
 public interface SsoUtil {
 
+    Logger log = LoggerFactory.getLogger(SsoUtil.class);
+
 
     Map<String, String> responseBody = new HashMap<>();
 
     static void sendEmailVer(RequiredActionContext context) {
+        log.info("void sendEmailVer is called");
         if (!context.getUser().isEmailVerified()) {
+            log.info("if ver : " + !context.getUser().isEmailVerified());
             EmailSenderService.sendVerifyEmail(context.getSession(),
                     context.form(),
                     context.getUser(),
                     context.getAuthenticationSession(),
                     context.getEvent().clone().event(EventType.SEND_VERIFY_EMAIL).detail(Details.EMAIL, context.getUser().getEmail()));
         }
+        log.info("else");
     }
 
     static String generatePattern() {
@@ -76,7 +84,9 @@ public interface SsoUtil {
     }
 
     static boolean sendEmailVer(UserModel userModel, LoginFormsProvider lfp, KeycloakSession session, AuthenticationSessionModel sessionModel, EventBuilder eventBuilder) {
+        log.info("boolean sendEmailVer: is called ");
         if (userModel != null && !userModel.isEmailVerified()) {
+            log.info("boolean sendEmailVer: " + userModel.getUsername());
             EmailSenderService.sendVerifyEmail(session,
                     lfp,
                     userModel,
@@ -84,6 +94,7 @@ public interface SsoUtil {
                     eventBuilder.clone().event(EventType.SEND_VERIFY_EMAIL).detail(Details.EMAIL, userModel.getEmail()));
             return false;
         }
+        log.info("boolean return true");
         return true;
     }
 

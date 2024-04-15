@@ -16,7 +16,7 @@
         if (clientIsB2B === true && actionIsEmpty === true) {
             window.onunload = function () {
                 window.parent.postMessage('post-selected', '*');
-                console.log("Отправлено тк B2B и Action пуст");
+                console.log("bpпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ B2B пїЅ Action пїЅпїЅпїЅпїЅ");
             };
         }
     </script>

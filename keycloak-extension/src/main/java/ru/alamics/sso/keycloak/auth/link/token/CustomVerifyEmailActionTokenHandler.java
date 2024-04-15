@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.auth.link.token;
 
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.TokenVerifier;
 import org.keycloak.authentication.actiontoken.AbstractActionTokenHander;
 import org.keycloak.authentication.actiontoken.ActionTokenContext;
@@ -22,7 +23,7 @@ import org.keycloak.sessions.AuthenticationSessionModel;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.util.Objects;
-
+@Slf4j
 public class CustomVerifyEmailActionTokenHandler extends AbstractActionTokenHander<VerifyEmailActionToken> {
 
     public CustomVerifyEmailActionTokenHandler() {
@@ -47,6 +48,7 @@ public class CustomVerifyEmailActionTokenHandler extends AbstractActionTokenHand
 
     @Override
     public Response handleToken(VerifyEmailActionToken token, ActionTokenContext<VerifyEmailActionToken> tokenContext) {
+        log.info("handleToken is call");
         UserModel user = tokenContext.getAuthenticationSession().getAuthenticatedUser();
         EventBuilder event = tokenContext.getEvent();
 
@@ -66,7 +68,7 @@ public class CustomVerifyEmailActionTokenHandler extends AbstractActionTokenHand
         }
 
         // verify user email as we know it is valid as this entry point would never have gotten here.
-        //   user.setEmailVerified(true);
+           user.setEmailVerified(true);
         user.removeRequiredAction(UserModel.RequiredAction.VERIFY_EMAIL);
         user.addRequiredAction("phone_verificator_sms");
         user.addRequiredAction(UserModel.RequiredAction.UPDATE_PASSWORD.name());
