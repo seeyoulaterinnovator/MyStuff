@@ -2361,4 +2361,10 @@ where EXT_ID = 'blockPrepareNotificationSchedulerHtml';
         </sql>
     </changeSet>
 
+    <changeSet id="187" author="pavlov-ip">
+        <sql>
+            INSERT INTO CLIENTS_FOR_MONITORING (client_name, monitoring, realm) VALUES ('oats', 1, 'user');
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
