@@ -20,12 +20,11 @@
             if (clientIsB2B === true && actionIsEmpty === true) {
             window.onunload = function () {
                 window.parent.postMessage('post-selected', '*');
-                console.log("ep���������� �� B2B � Action ����");
+                console.log(" B2B � Action ");
             };
         }
 
         function autoSubmit() {
-            console.log("���������� autoSubmit ����");
             document.getElementById("form").submit();
         }
     </script>
