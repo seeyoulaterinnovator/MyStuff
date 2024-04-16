@@ -52,8 +52,6 @@ public class EmailSenderService {
                     .setRealm(realm)
                     .setUser(user)
                     .setAttribute("expTime", expirationStrRus);
-//            вызывается при регистрации через сайт и через админку (после перехода по ссылке из первого письма(создан аккаунт))
-            log.info("emailTemplateProvider is : " + emailTemplateProvider.getClass());
 
             emailTemplateProvider.sendVerifyEmail(link, expirationInMinutes);
 

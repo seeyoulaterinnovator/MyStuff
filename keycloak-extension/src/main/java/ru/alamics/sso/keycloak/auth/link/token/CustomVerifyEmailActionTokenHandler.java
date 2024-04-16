@@ -48,7 +48,6 @@ public class CustomVerifyEmailActionTokenHandler extends AbstractActionTokenHand
 
     @Override
     public Response handleToken(VerifyEmailActionToken token, ActionTokenContext<VerifyEmailActionToken> tokenContext) {
-        log.info("handleToken is call");
         UserModel user = tokenContext.getAuthenticationSession().getAuthenticatedUser();
         EventBuilder event = tokenContext.getEvent();
 

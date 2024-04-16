@@ -45,7 +45,6 @@ public class EmailReqAction implements RequiredActionProvider {
     }
 
     private Response createForm(RequiredActionContext context) {
-        log.info("createForm is called");
         LoginFormsProvider form = context.form();
         return form.createForm(BLANK_PAGE);
     }

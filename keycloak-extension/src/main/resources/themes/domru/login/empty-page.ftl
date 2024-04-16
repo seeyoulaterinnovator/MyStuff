@@ -17,8 +17,6 @@
     <script>
         var actionIsEmpty = ${actionIsEmpty?c};
         var clientIsB2B = ${clientIsB2B?c};
-        // if (actionIsEmpty === true) - то во фрейме мы видим под попапом прозрачное пространство с восстановлением пароля, попап не зарывается
-        // if (actionIsEmpty === true) {
             if (clientIsB2B === true && actionIsEmpty === true) {
             window.onunload = function () {
                 window.parent.postMessage('post-selected', '*');

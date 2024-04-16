@@ -113,38 +113,26 @@
       closeAndSubmit();
     // }
   }
-  // function handleHide3() {
-  //   setTimeout(() => {
-  //     showInfo.set(false);
-  //   }, 100);
-  // }
-
 
   setTimeout(handleHide2, 2300);
-  // setTimeout(handleHide3, 2800);
 
   function switchToPassword() {
     if (switcher !== null) {
-      console.log("switcher !== null")
       switcher.click();
     } else {
-      console.log("switchToPassword else")
       show.set(false);
     }
   }
 
   function clickSecondSwitcher() {
-    console.log("clickSecondSwitcher")
     secondSwitcher.click();
   }
 
   function closeAndSubmit() {
-    console.log("closeAndSubmit")
     submitButton.click();
   }
 
   function handleClick(e) {
-    console.log("handleClick")
     e.stopPropagation();
   }
 </script>

@@ -73,17 +73,11 @@ public class SsoUserCreateEvent extends SsoEvent {
             String userId = this.getUserId(event);
             RealmModel realm = model.getRealm(event.getRealmId());
             SettingsService settingsService = Lookup.lookup(SettingsService.class);
-            int timeTokenVerifyEmail = settingsService.getSettingsIntValue(TIME_TOKEN_VERIFY_EMAIL, realm.getName());
-            int absoluteExpirationInSecs = Time.currentTime() + timeTokenVerifyEmail;
-            UriInfo uriInfo = session.getContext().getUri();
             UserModel userModel = session.users().getUserById(userId, realm);
-
 
             if (userId == null) {
                 return;
             }
-
-
 
 
             if (userModel != null && userModel.getEmail() != null) {
@@ -118,67 +112,18 @@ public class SsoUserCreateEvent extends SsoEvent {
                 attributes.put("homePage", settingsService.getSettingsStringValue(HOME_PAGE, realm.getName()));
                 attributes.put("email", userModel.getEmail());
 
-
-                String newLink = uriInfo.getBaseUri().toString() + "realms/" + realm.getName() + "/login-actions/required-action?execution=email_sender&client_id=lkb2b&tab_id=LJeH2GYbsp8";
-
-
                 // если миграция с паролями, просить вводить пароль не нужно
                 String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, realm.getName());
-                userModel.setEmailVerified(true);
+//                предыдущая реализация
 //                if (userModel.isEmailVerified()) {
 //                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
 //                } else {
 //                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
 //                }
+
+//                при создании пользователя через админку, почта подтверждается автоматом
+                userModel.setEmailVerified(true);
                 this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
-
-
-
-
-//                SsoUtil.sendEmailVer();
-
-
-
-//                String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, realm.getName());
-//                if (userModel.isEmailVerified()) {
-//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_EMAIL_VERIFICATION, attributes);
-//                } else {
-//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_EMAIL_VERIFICATION_2, attributes);
-//                }
-
-//                String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(timeTokenVerifyEmail);
-//
-
-//                String clientId = session.getContext().getClient().getClientId();
-//                ClientModel client = session.clientStorageManager().getClientByClientId(clientId, realm);
-//                String tabId = "tabId";
-//                встать в дебаге и понять кто может иметь отношение к AuthenticationSessionModel, какие сессии существуют
-//                AuthenticationSessionModel authSession = (AuthenticationSessionModel) session.authenticationSessions().
-//                        getRootAuthenticationSession(realm, tabId).getAuthenticationSessions();
-
-
-
-
-//                AuthenticationSessionModel authSession = session.authenticationSessions().createA;
-//                EmailTemplateProvider emailTemplateProvider = (EmailTemplateProvider) this;
-//                AuthenticationSessionModel authSession = session.authenticationSessions().createRootAuthenticationSession()
-//                int timeTokenVerifyEmail = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_VERIFY_EMAIL, realm.getName());
-//                int absoluteExpirationInSecs = Time.currentTime() + timeTokenVerifyEmail;
-//                String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authSession).getEncodedId();
-//                VerifyEmailActionToken token = new VerifyEmailActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, user.getEmail(), authSession.getClient().getClientId());
-//                UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
-//                        authSession.getClient().getClientId(), authSession.getTabId());
-//                String link = builder.build(realm.getName()).toString();
-//
-//                EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
-//                emailTemplateProvider.setRealm(session.getContext().getRealm());
-//                emailTemplateProvider.setUser(session.users().getUserById(userModel.getId(), session.getContext().getRealm()));
-//                long expirationInMinutes = TimeUnit.SECONDS.toMinutes(timeTokenVerifyEmail);
-//
-//                emailTemplateProvider.sendVerifyEmail(settingsService.getSettingsStringValue(EMAIL_LINK_PASSWORD,
-//                        realm.getName()), expirationInMinutes);
-
-
             } else {
                 log.error(String.format("User '%s' not found or do not have email", userId));
             }
@@ -187,8 +132,4 @@ public class SsoUserCreateEvent extends SsoEvent {
         }
 
     }
-//    private Response createForm(RequiredActionContext context) {
-//        LoginFormsProvider form = context.form();
-//        return form.createForm(BLANK_PAGE);
-//    }
 }

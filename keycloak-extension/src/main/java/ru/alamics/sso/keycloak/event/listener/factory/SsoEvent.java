@@ -75,10 +75,6 @@ public abstract class SsoEvent {
                     user.getId(), absoluteExpirationInSecs, authSessionEncodedId, authenticationSession.getClient().getClientId());
 
 
-//            String authSessionEncodedId = SsoUtil.generatePattern();
-//            VerifyEmailActionToken token = new VerifyEmailActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, user.getEmail(), clientModel.getClientId());
-
-
             UriInfo uriInfo = session.getContext().getUri();
 
             UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
@@ -96,7 +92,6 @@ public abstract class SsoEvent {
 
             emailSender.send(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
                     session.theme().getTheme(Theme.Type.EMAIL), session.getContext().resolveLocale(user)));
-            log.info("sendEmail from SsoEvent is call!!");
 
         } catch (Exception e) {
             log.error("Failed to send email: userId={}, email={}", user.getEmail(), user.getEmail(), e);

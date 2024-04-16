@@ -133,7 +133,6 @@
 
   function handleHide3() {
     showInfo.set(false);
-    console.log("handleHide 3")
   }
 
 </script>

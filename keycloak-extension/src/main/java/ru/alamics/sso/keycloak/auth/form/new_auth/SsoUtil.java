@@ -54,16 +54,13 @@ public interface SsoUtil {
     Map<String, String> responseBody = new HashMap<>();
 
     static void sendEmailVer(RequiredActionContext context) {
-        log.info("void sendEmailVer is called");
         if (!context.getUser().isEmailVerified()) {
-            log.info("if ver : " + !context.getUser().isEmailVerified());
             EmailSenderService.sendVerifyEmail(context.getSession(),
                     context.form(),
                     context.getUser(),
                     context.getAuthenticationSession(),
                     context.getEvent().clone().event(EventType.SEND_VERIFY_EMAIL).detail(Details.EMAIL, context.getUser().getEmail()));
         }
-        log.info("else");
     }
 
     static String generatePattern() {
@@ -84,9 +81,7 @@ public interface SsoUtil {
     }
 
     static boolean sendEmailVer(UserModel userModel, LoginFormsProvider lfp, KeycloakSession session, AuthenticationSessionModel sessionModel, EventBuilder eventBuilder) {
-        log.info("boolean sendEmailVer: is called ");
         if (userModel != null && !userModel.isEmailVerified()) {
-            log.info("boolean sendEmailVer: " + userModel.getUsername());
             EmailSenderService.sendVerifyEmail(session,
                     lfp,
                     userModel,
@@ -94,7 +89,6 @@ public interface SsoUtil {
                     eventBuilder.clone().event(EventType.SEND_VERIFY_EMAIL).detail(Details.EMAIL, userModel.getEmail()));
             return false;
         }
-        log.info("boolean return true");
         return true;
     }
 

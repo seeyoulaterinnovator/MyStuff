@@ -47,8 +47,6 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
             return;
         }
 
-//        long now = System.currentTimeMillis();
-
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -66,7 +64,6 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                 }
             }
             authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
-            log.info("now.format(formatter) is " + now.format(formatter));
             userModel.setSingleAttribute("authorization_time_appb2b", now.format(formatter));
 
         } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
