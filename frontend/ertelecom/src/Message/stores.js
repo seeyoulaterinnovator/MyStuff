@@ -6,6 +6,8 @@ export const show = writable(false);
 
 export const isBadEmail = writable(false);
 
+export const isEmailVer = writable(false);
+
 export const isPhoneError = writable(false);
 
 export const isSecondSwitcher = writable(false);

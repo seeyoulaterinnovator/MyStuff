@@ -1,30 +1,47 @@
 package ru.alamics.sso.keycloak.event.listener.factory.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.authentication.AuthenticationFlowContext;
+import org.keycloak.authentication.RequiredActionContext;
+import org.keycloak.authentication.actiontoken.verifyemail.VerifyEmailActionToken;
+import org.keycloak.common.util.Time;
 import org.keycloak.email.EmailException;
+import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.email.freemarker.beans.ProfileBean;
+import org.keycloak.events.EventBuilder;
 import org.keycloak.events.admin.AdminEvent;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.RealmProvider;
-import org.keycloak.models.UserModel;
+import org.keycloak.forms.login.LoginFormsProvider;
+import org.keycloak.models.*;
 import org.keycloak.models.jpa.UserAdapter;
+import org.keycloak.services.Urls;
+import org.keycloak.services.managers.AuthenticationManager;
+import org.keycloak.sessions.AuthenticationSessionCompoundId;
+import org.keycloak.sessions.AuthenticationSessionModel;
+import org.keycloak.sessions.AuthenticationSessionProvider;
 import org.keycloak.theme.Theme;
 import org.keycloak.email.freemarker.FreeMarkerEmailTemplateProvider;
 import org.keycloak.theme.beans.LinkExpirationFormatterMethod;
+import ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil;
 import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
 import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.schedule.Translator;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.keycloak.exportimport.ExportImportConfig.getRealmName;
+import static ru.alamics.sso.keycloak.auth.form.new_auth.common_mail_sender.EmailSenderService.sendVerifyEmail;
 import static ru.alamics.sso.settings.SettingConstants.*;
 
 @Slf4j
@@ -33,6 +50,8 @@ public class SsoUserCreateEvent extends SsoEvent {
     private static final String BODY_TEMPLATE_CREATE = "mail-account-create.ftl";
     private static final String BODY_TEMPLATE_DATE = "mail-account-data.ftl";
     private static final String  BODY_TEMPLATE_EMAIL_VERIFICATION = "email-verification.ftl";
+    private static final String  BODY_TEMPLATE_EMAIL_VERIFICATION_2 = "email-verification2.ftl";
+    private static final String BLANK_PAGE = "blank-page.ftl";
 
     //    private static final String userEnabled = "enabled";
     private AdminEvent event;
@@ -52,12 +71,14 @@ public class SsoUserCreateEvent extends SsoEvent {
             RealmProvider model = session.realms();
             log.info("ExtendedEventListener: admin create user");
             String userId = this.getUserId(event);
+            RealmModel realm = model.getRealm(event.getRealmId());
+            SettingsService settingsService = Lookup.lookup(SettingsService.class);
+            UserModel userModel = session.users().getUserById(userId, realm);
+
             if (userId == null) {
                 return;
             }
 
-            RealmModel realm = model.getRealm(event.getRealmId());
-            UserModel userModel = session.users().getUserById(userId, realm);
 
             if (userModel != null && userModel.getEmail() != null) {
 
@@ -93,12 +114,16 @@ public class SsoUserCreateEvent extends SsoEvent {
 
                 // если миграция с паролями, просить вводить пароль не нужно
                 String subject = settingsService.getSettingsStringValue(ACCOUNT_SUBJECT, realm.getName());
-                if (userModel.isEmailVerified()) {
-                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
-                } else {
-                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
-                }
+//                предыдущая реализация
+//                if (userModel.isEmailVerified()) {
+//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_CREATE, attributes);
+//                } else {
+//                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
+//                }
 
+//                при создании пользователя через админку, почта подтверждается автоматом
+                userModel.setEmailVerified(true);
+                this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
             } else {
                 log.error(String.format("User '%s' not found or do not have email", userId));
             }
