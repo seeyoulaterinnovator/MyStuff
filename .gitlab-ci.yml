@@ -209,14 +209,22 @@ domru:stage3:
 
 domru:stage4:
   stage: deploy
+  image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
   when: manual
   environment:
     name: stage4
     url: https://sso-balancer4.testing.srv.loc
+  variables:
+    NAMESPACE: 'sso'
+    NODE_PORT: '30084'
+    REPLICA_COUNT: '1'
   script:
-    - $BASE_DIR/scripts/deploy.sh
+    - export FQDN=`echo "${CI_ENVIRONMENT_URL}" | sed 's/^http\(\|s\):\/\///g'`
+    - consul-template -once -template ".helm/values-dev.yaml.tpl:values.yaml"
+    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml ./.helm -n ${NAMESPACE} --atomic --timeout 5m
+    - helm history -n ${NAMESPACE} ${CI_ENVIRONMENT_SLUG} --max 5
   tags:
-    - sso-domain-controller-perm
+    - sso-build-k8s
 
 domru:stage5:
   stage: deploy
@@ -228,6 +236,7 @@ domru:stage5:
   variables:
     NAMESPACE: 'sso'
     NODE_PORT: '30085'
+    REPLICA_COUNT: '3'
   script:
     - export FQDN=`echo "${CI_ENVIRONMENT_URL}" | sed 's/^http\(\|s\):\/\///g'`
     - consul-template -once -template ".helm/values-dev.yaml.tpl:values.yaml"

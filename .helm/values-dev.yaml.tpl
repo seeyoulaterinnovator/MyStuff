@@ -9,7 +9,7 @@ serviceAccount:
 imagePullSecrets:
   - name: regcred
 
-replicaCount: 3
+replicaCount: "{{ env "REPLICA_COUNT" }}"
 
 preStopDelay:
   enabled: true
