@@ -33,6 +33,7 @@ import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public abstract class SsoEvent {
@@ -69,29 +70,62 @@ public abstract class SsoEvent {
             int timeTokenCreateUser = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_SET_FIRST_PASS, realm.getName());
             int absoluteExpirationInSecs = Time.currentTime() + timeTokenCreateUser;
 
-            // We send the secret in the email in a link as a query param.
-            String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
-            ResetCredentialsActionToken token = new ResetCredentialsActionToken(
-                    user.getId(), absoluteExpirationInSecs, authSessionEncodedId, authenticationSession.getClient().getClientId());
+              boolean isContainsPhone = user.getAttribute("phone").size() == 0;
+            if (isContainsPhone) {
+//                UriInfo uriInfo = session.getContext().getUri();
+                String authSessionEncodedId = SsoUtil.generatePattern();
+                VerifyEmailActionToken token = new VerifyEmailActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, user.getEmail(), authenticationSession.getClient().getClientId());
+//                UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
+//                        authenticationSession.getClient().getClientId(), authenticationSession.getTabId());
+//                String link = builder.build(realm.getName()).toString();
+//                long expirationInMinutes = TimeUnit.SECONDS.toMinutes(timeTokenVerifyEmail);
+//
+//                String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(timeTokenVerifyEmail);
+
+//                String link = builder.build(realm.getName()).toString();
+//                long expirationInMinutes = TimeUnit.SECONDS.toMinutes(timeTokenVerifyEmail);
 
 
-            UriInfo uriInfo = session.getContext().getUri();
+                UriInfo uriInfo = session.getContext().getUri();
 
-            UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
-                    clientModel.getClientId(), authenticationSession.getTabId());
-
-
-            String link = builder.build(realm.getName()).toString();
-            attributes.put("accountLink", link);
-
-            String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenCreateUser);
-            attributes.put("expTimePass", expirationStrRusPass);
+                UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
+                        clientModel.getClientId(), authenticationSession.getTabId());
 
 
+                String link = builder.build(realm.getName()).toString();
+                attributes.put("accountLink", link);
+
+                String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenCreateUser);
+                attributes.put("expTimePass", expirationStrRusPass);
+                emailSender.send(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
+                        session.theme().getTheme(Theme.Type.EMAIL), session.getContext().resolveLocale(user)));
 
 
-            emailSender.send(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
-                    session.theme().getTheme(Theme.Type.EMAIL), session.getContext().resolveLocale(user)));
+            } else {
+                // We send the secret in the email in a link as a query param.
+                String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
+
+                ResetCredentialsActionToken token = new ResetCredentialsActionToken(
+                        user.getId(), absoluteExpirationInSecs, authSessionEncodedId, authenticationSession.getClient().getClientId());
+
+                UriInfo uriInfo = session.getContext().getUri();
+
+                UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
+                        clientModel.getClientId(), authenticationSession.getTabId());
+
+
+                String link = builder.build(realm.getName()).toString();
+                attributes.put("accountLink", link);
+
+                String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenCreateUser);
+                attributes.put("expTimePass", expirationStrRusPass);
+
+
+                emailSender.send(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
+                        session.theme().getTheme(Theme.Type.EMAIL), session.getContext().resolveLocale(user)));
+
+            }
+
 
         } catch (Exception e) {
             log.error("Failed to send email: userId={}, email={}", user.getEmail(), user.getEmail(), e);
