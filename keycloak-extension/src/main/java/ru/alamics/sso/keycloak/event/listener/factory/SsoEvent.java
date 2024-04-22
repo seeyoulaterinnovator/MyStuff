@@ -72,6 +72,7 @@ public abstract class SsoEvent {
 
               boolean isContainsPhone = user.getAttribute("phone").size() == 0;
             if (isContainsPhone) {
+                log.info("ContainsPhone");
 //                UriInfo uriInfo = session.getContext().getUri();
                 String authSessionEncodedId = SsoUtil.generatePattern();
                 VerifyEmailActionToken token = new VerifyEmailActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, user.getEmail(), authenticationSession.getClient().getClientId());
@@ -102,6 +103,7 @@ public abstract class SsoEvent {
 
 
             } else {
+                log.info("NO ContainsPhone");
                 // We send the secret in the email in a link as a query param.
                 String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
 
