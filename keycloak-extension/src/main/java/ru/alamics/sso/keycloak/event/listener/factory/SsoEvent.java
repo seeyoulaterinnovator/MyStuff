@@ -74,6 +74,7 @@ public abstract class SsoEvent {
             String keyPrefix = "migration";
             boolean isContainsMigration = user.getAttributes().keySet().stream()
                     .anyMatch(key -> key.startsWith(keyPrefix));
+            log.info("isContainsMigration is " + isContainsMigration);
             if (isContainsPhone && !isContainsMigration) {
                 log.info("ContainsPhone && ContainsMigration");
 //                UriInfo uriInfo = session.getContext().getUri();
