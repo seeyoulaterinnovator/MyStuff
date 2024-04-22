@@ -71,8 +71,11 @@ public abstract class SsoEvent {
             int absoluteExpirationInSecs = Time.currentTime() + timeTokenCreateUser;
 
               boolean isContainsPhone = user.getAttribute("phone").size() != 0;
-            if (isContainsPhone) {
-                log.info("ContainsPhone");
+            String keyPrefix = "migration";
+            boolean isContainsMigration = user.getAttributes().keySet().stream()
+                    .anyMatch(key -> key.startsWith(keyPrefix));
+            if (isContainsPhone && !isContainsMigration) {
+                log.info("ContainsPhone && ContainsMigration");
 //                UriInfo uriInfo = session.getContext().getUri();
                 String authSessionEncodedId = SsoUtil.generatePattern();
                 VerifyEmailActionToken token = new VerifyEmailActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, user.getEmail(), authenticationSession.getClient().getClientId());
