@@ -107,6 +107,10 @@ public abstract class SsoEvent {
 
             } else {
                 log.info("NO ContainsPhone");
+//                при создании пользователя через админку, почта подтверждается автоматом
+
+                user.setEmailVerified(true);
+
                 // We send the secret in the email in a link as a query param.
                 String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
 

@@ -121,9 +121,7 @@ public class SsoUserCreateEvent extends SsoEvent {
 //                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
 //                }
 
-//                при создании пользователя через админку, почта подтверждается автоматом
-
-                userModel.setEmailVerified(true);
+//
                 this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
             } else {
                 log.error(String.format("User '%s' not found or do not have email", userId));
