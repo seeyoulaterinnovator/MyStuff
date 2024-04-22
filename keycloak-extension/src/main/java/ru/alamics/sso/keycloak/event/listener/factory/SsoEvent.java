@@ -70,7 +70,7 @@ public abstract class SsoEvent {
             int timeTokenCreateUser = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_SET_FIRST_PASS, realm.getName());
             int absoluteExpirationInSecs = Time.currentTime() + timeTokenCreateUser;
 
-              boolean isContainsPhone = user.getAttribute("phone").size() == 0;
+              boolean isContainsPhone = user.getAttribute("phone").size() != 0;
             if (isContainsPhone) {
                 log.info("ContainsPhone");
 //                UriInfo uriInfo = session.getContext().getUri();
