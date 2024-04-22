@@ -77,19 +77,8 @@ public abstract class SsoEvent {
             log.info("isContainsMigration is " + isContainsMigration);
             if (isContainsPhone && !isContainsMigration) {
                 log.info("ContainsPhone && ContainsMigration");
-//                UriInfo uriInfo = session.getContext().getUri();
                 String authSessionEncodedId = SsoUtil.generatePattern();
                 VerifyEmailActionToken token = new VerifyEmailActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, user.getEmail(), authenticationSession.getClient().getClientId());
-//                UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
-//                        authenticationSession.getClient().getClientId(), authenticationSession.getTabId());
-//                String link = builder.build(realm.getName()).toString();
-//                long expirationInMinutes = TimeUnit.SECONDS.toMinutes(timeTokenVerifyEmail);
-//
-//                String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(timeTokenVerifyEmail);
-
-//                String link = builder.build(realm.getName()).toString();
-//                long expirationInMinutes = TimeUnit.SECONDS.toMinutes(timeTokenVerifyEmail);
-
 
                 UriInfo uriInfo = session.getContext().getUri();
 
@@ -109,7 +98,6 @@ public abstract class SsoEvent {
             } else {
                 log.info("NO ContainsPhone");
 //                при создании пользователя через админку, почта подтверждается автоматом
-
                 user.setEmailVerified(true);
 
                 // We send the secret in the email in a link as a query param.

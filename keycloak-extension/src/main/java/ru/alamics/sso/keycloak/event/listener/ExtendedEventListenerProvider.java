@@ -59,8 +59,10 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
             String lastAuthorizationTimeStr = userModel.getFirstAttribute("authorization_time_appb2b");
             if (lastAuthorizationTimeStr != null) {
                 LocalDateTime lastAuthorizationTime = LocalDateTime.parse(lastAuthorizationTimeStr, formatter);
-                if (ChronoUnit.HOURS.between(lastAuthorizationTime, now) <= 24) {
-                    return;
+                LocalDate lastAuthorizationDate = lastAuthorizationTime.toLocalDate();
+                LocalDate currentDate = now.toLocalDate();
+                if (lastAuthorizationDate.isEqual(currentDate)) {
+                    return; // Если авторизация была в этот же календарный день, прерываем выполнение
                 }
             }
             authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
