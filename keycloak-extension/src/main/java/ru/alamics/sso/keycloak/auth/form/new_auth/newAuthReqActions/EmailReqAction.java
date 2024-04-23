@@ -27,10 +27,11 @@ public class EmailReqAction implements RequiredActionProvider {
         UserModel user = context.getUser();
         boolean isContainsPhone = user.getAttribute("phone").size() == 0;
         if (isContainsPhone) {
-            context.form().setInfo("requiredActionChallenge Ваш E-mail успешно подтверждён!");
+            context.form().setInfo("Ваш E-mail успешно подтверждён!");
         } else {
             context.form().setInfo("На указанный E-mail отправлена инструкция для подтверждения данных.");
         }
+        log.info("called requiredActionChallenge");
         SsoUtil.sendEmailVer(context);
         context.challenge(createForm(context));
     }
