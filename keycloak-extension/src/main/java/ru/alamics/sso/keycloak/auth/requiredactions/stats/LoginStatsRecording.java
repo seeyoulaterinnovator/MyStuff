@@ -45,9 +45,7 @@ public class LoginStatsRecording implements RequiredActionProvider {
 
     private void recordRecentLogin(UserModel model, RequiredActionContext context) throws AuthOrRegTypeNotFoundException {
         UserEntity entity = new UserEntity();
-        log.info("model.getUsername() is : " + model.getUsername());
         entity.setId(model.getId());
-        log.info("!recordRecentLogin!, UserEntity entity.getUsername is : " + entity.getUsername());
         loginHistoryService.create(entity);
     }
 

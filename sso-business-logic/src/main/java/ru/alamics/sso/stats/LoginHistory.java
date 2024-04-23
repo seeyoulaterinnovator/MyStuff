@@ -21,7 +21,6 @@ public class LoginHistory {
     private KeycloakSession session;
 
     public void create(UserEntity user) {
-        log.info("UserLoginHistory create");
         UserLoginHistory history = UserLoginHistory.builder()
                 .loginedAt(LocalDateTime.now())
                 .realm(user.getRealmId())
@@ -32,7 +31,6 @@ public class LoginHistory {
     }
 
     public void createSuccessAuth(UserEntity entity, String realm) {
-        log.info("UserLoginHistory createSuccessAuth");
         UserLoginHistory history = UserLoginHistory.builder()
                 .isSuccess(true)
                 .realm(realm)
