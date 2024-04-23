@@ -31,6 +31,7 @@ public class EmailReqAction implements RequiredActionProvider {
         } else {
             context.form().setInfo("На указанный E-mail отправлена инструкция для подтверждения данных.");
         }
+        log.info("called requiredActionChallenge");
         SsoUtil.sendEmailVer(context);
         context.challenge(createForm(context));
     }

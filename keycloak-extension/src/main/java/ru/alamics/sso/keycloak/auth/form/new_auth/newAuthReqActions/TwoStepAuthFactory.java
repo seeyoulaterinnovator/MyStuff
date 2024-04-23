@@ -14,6 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil.addRequiredAction;
+import static ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil.log;
 
 public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements Authenticator {
 
@@ -89,6 +90,7 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
             context.success();
 
         } else if (context.getAuthenticationSession().getAuthNote("smsButton") != null) {
+            log.info("context.getAuthenticationSession().getAuthNote(\"smsButton\") != null");
             sessionModel.setAuthNote("smsButton", "smsButton");
             sessionModel.removeAuthNote("loginPasswordButton");
             sessionModel.removeAuthNote("phoneCallButton");
@@ -96,6 +98,7 @@ public class TwoStepAuthFactory extends AbstractAuthenticatorFactory implements 
             if (authType != null && (disable == null || disable.isEmpty())) {
                 for (String providerName : authType.getRequiredActionNames()) {
                     if (!providerName.equals("incoming_call_phone_verificator")) {
+                        log.info("!providerName.equals(\"incoming_call_phone_verificator\"");
                         addRequiredAction(context, providerName, userModel);
                     }
                 }

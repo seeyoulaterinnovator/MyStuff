@@ -49,8 +49,8 @@ public class SsoUserCreateEvent extends SsoEvent {
 
     private static final String BODY_TEMPLATE_CREATE = "mail-account-create.ftl";
     private static final String BODY_TEMPLATE_DATE = "mail-account-data.ftl";
-    private static final String  BODY_TEMPLATE_EMAIL_VERIFICATION = "email-verification.ftl";
-    private static final String  BODY_TEMPLATE_EMAIL_VERIFICATION_2 = "email-verification2.ftl";
+    private static final String BODY_TEMPLATE_EMAIL_VERIFICATION = "email-verification.ftl";
+    private static final String BODY_TEMPLATE_EMAIL_VERIFICATION_2 = "email-verification2.ftl";
     private static final String BLANK_PAGE = "blank-page.ftl";
 
     //    private static final String userEnabled = "enabled";
@@ -121,8 +121,7 @@ public class SsoUserCreateEvent extends SsoEvent {
 //                    this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
 //                }
 
-//                при создании пользователя через админку, почта подтверждается автоматом
-                userModel.setEmailVerified(true);
+//
                 this.sendEmail(userModel, realm, subject, BODY_TEMPLATE_DATE, attributes);
             } else {
                 log.error(String.format("User '%s' not found or do not have email", userId));
