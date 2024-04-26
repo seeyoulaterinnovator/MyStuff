@@ -21,6 +21,18 @@ stages:
   - cp ${ERTK_PEM} configs/ertk.pem
   - envsubst < configs/sso.tmpl > configs/sso
 
+.domru:stage:template:
+  stage: deploy
+  image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
+  when: manual
+  script:
+    - export FQDN=`echo "${CI_ENVIRONMENT_URL}" | sed 's/^http\(\|s\):\/\///g'`
+    - consul-template -once -template ".helm/values-dev.yaml.tpl:values.yaml"
+    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml ./.helm -n ${NAMESPACE} --atomic --timeout 5m
+    - helm history -n ${NAMESPACE} ${CI_ENVIRONMENT_SLUG} --max 5
+  tags:
+    - sso-build-k8s
+
 back:compile:
   stage: compile
   <<: *build-template
@@ -197,20 +209,17 @@ domru:stage2:
     - sso-domain-controller-perm
 
 domru:stage3:
-  stage: deploy
-  when: manual
+  extends: .domru:stage:template
   environment:
     name: stage3
     url: https://sso-balancer3.testing.srv.loc
-  script:
-    - $BASE_DIR/scripts/deploy.sh
-  tags:
-    - sso-domain-controller-perm
+  variables:
+    NAMESPACE: 'sso'
+    NODE_PORT: '30083'
+    REPLICA_COUNT: '1'
 
 domru:stage4:
-  stage: deploy
-  image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
-  when: manual
+  extends: .domru:stage:template
   environment:
     name: stage4
     url: https://sso-balancer4.testing.srv.loc
@@ -218,18 +227,9 @@ domru:stage4:
     NAMESPACE: 'sso'
     NODE_PORT: '30084'
     REPLICA_COUNT: '1'
-  script:
-    - export FQDN=`echo "${CI_ENVIRONMENT_URL}" | sed 's/^http\(\|s\):\/\///g'`
-    - consul-template -once -template ".helm/values-dev.yaml.tpl:values.yaml"
-    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml ./.helm -n ${NAMESPACE} --atomic --timeout 5m
-    - helm history -n ${NAMESPACE} ${CI_ENVIRONMENT_SLUG} --max 5
-  tags:
-    - sso-build-k8s
 
 domru:stage5:
-  stage: deploy
-  image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
-  when: manual
+  extends: .domru:stage:template
   environment:
     name: stage5
     url: https://sso-balancer5.testing.srv.loc
@@ -237,13 +237,6 @@ domru:stage5:
     NAMESPACE: 'sso'
     NODE_PORT: '30085'
     REPLICA_COUNT: '3'
-  script:
-    - export FQDN=`echo "${CI_ENVIRONMENT_URL}" | sed 's/^http\(\|s\):\/\///g'`
-    - consul-template -once -template ".helm/values-dev.yaml.tpl:values.yaml"
-    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml ./.helm -n ${NAMESPACE} --atomic --timeout 5m
-    - helm history -n ${NAMESPACE} ${CI_ENVIRONMENT_SLUG} --max 5
-  tags:
-    - sso-build-k8s
 
 domru:perm:primary:
   stage: deploy

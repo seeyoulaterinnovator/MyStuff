@@ -20,7 +20,7 @@ extraEnvs:
   KEYCLOAK_HOSTNAME: "{{ env "FQDN" }}"
   DB_HOST: "{{ env "DB_HOST" }}"
   DB_PORT: "{{ env "DB_PORT" }}"
-  SITE: "stage"
+  SITE: "{{ env "CI_ENVIRONMENT_SLUG" }}"
   TZ: "Asia/Yekaterinburg"  
 
 extraSensitiveEnvs:
