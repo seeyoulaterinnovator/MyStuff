@@ -33,7 +33,7 @@
             <div class="w-full mt-4 test">
                 <#list 1..lengthCode as x>
                     <#if x = 1>
-                        <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
                                name="smscode-${x}"
                                 <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
                                     disabled
@@ -43,7 +43,7 @@
                                class="text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none"
                                autocomplete="off" autofocus/>
                     <#else>
-                        <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
                                name="smscode-${x}"
                                 <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
                                     disabled
