@@ -27,7 +27,7 @@
 
             <div class="w-full xl:pb-37px md:pb-10 sm:pb-8 pb-4 center-items">
                 <#list 1..lengthCode as x>
-                    <input placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
+                    <input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
                            name="smscode-${x} " autocomplete="one-time-code"
                            <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
                                disabled
