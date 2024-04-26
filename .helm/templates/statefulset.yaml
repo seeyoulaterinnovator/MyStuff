@@ -57,7 +57,7 @@ spec:
             - name: JGROUPS_DISCOVERY_PROPERTIES
               value: "dns_query={{ include "sso.fullname" . }}-headless"
             - name: JGROUPS_DISCOVERY_QUERY
-              value: "dns_query={{ include "sso.fullname" . }}-headless"
+              value: "{{ include "sso.fullname" . }}-headless"
           {{- if or .Values.extraEnvs .Values.extraSensitiveEnvs }}
           envFrom:
           {{- if .Values.extraEnvs }}
