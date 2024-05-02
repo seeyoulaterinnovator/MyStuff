@@ -198,15 +198,14 @@ domru:stage:
     - sso-domain-controller-perm
 
 domru:stage2:
-  stage: deploy
-  when: manual
+  extends: .domru:stage:template
   environment:
     name: stage2
     url: https://sso-balancer2.testing.srv.loc
-  script:
-    - $BASE_DIR/scripts/deploy.sh
-  tags:
-    - sso-domain-controller-perm
+  variables:
+    NAMESPACE: 'sso'
+    NODE_PORT: '30082'
+    REPLICA_COUNT: '1'
 
 domru:stage3:
   extends: .domru:stage:template
