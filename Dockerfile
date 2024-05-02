@@ -12,7 +12,7 @@ RUN mkdir -p /opt/jboss/keycloak/standalone/data/password-blacklists
 RUN mkdir -p /opt/jboss/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
 
 COPY configs/standalone.xml /opt/jboss/keycloak/standalone/configuration
-COPY swarm/standalone-ha-new.xml /opt/jboss/keycloak/standalone/configuration
+COPY configs/standalone-ha-new.xml /opt/jboss/keycloak/standalone/configuration
 
 COPY tools/module.xml /opt/jboss/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
 COPY tools/modules /opt/jboss/keycloak/modules/system/layers/base
