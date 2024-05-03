@@ -187,15 +187,14 @@ container-image:
     - sso-stage
 
 domru:stage:
-  stage: deploy
-  when: manual
+  extends: .domru:stage:template
   environment:
     name: stage
     url: https://sso-balancer.testing.srv.loc
-  script:
-    - $BASE_DIR/scripts/deploy.sh
-  tags:
-    - sso-domain-controller-perm
+  variables:
+    NAMESPACE: 'sso'
+    NODE_PORT: '30081'
+    REPLICA_COUNT: '1'
 
 domru:stage2:
   extends: .domru:stage:template
