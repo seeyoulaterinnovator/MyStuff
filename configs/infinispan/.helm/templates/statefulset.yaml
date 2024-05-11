@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "infinispan.fullname" . }}
+  labels:
+    {{- include "infinispan.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "infinispan.selectorLabels" . | nindent 6 }}
+  serviceName: {{ include "infinispan.fullname" . }}-headless
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      name: {{ include "infinispan.fullname" . }}
+      labels:
+        {{- include "infinispan.labels" . | nindent 8 }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}  
+    spec:
+      {{- if .Values.serviceAccount }}
+      serviceAccountName: {{ include "infinispan.serviceAccountName" . }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: infinispan-server
+        command:
+          - /opt/jboss/infinispan-server/bin/standalone.sh
+          - -c
+          - clustered.xml
+          - -Djboss.default.jgroups.stack=tcp
+          - -Djava.net.preferIPv4Stack=true
+          - -Djava.awt.headless=true
+          - -Djboss.bind.address.management=0.0.0.0
+        env:
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: JGROUPS_DISCOVERY_PROTOCOL
+            value: "dns.DNS_PING"
+          - name: JGROUPS_DISCOVERY_PROPERTIES
+            value: "dns_query={{ include "infinispan.fullname" . }}-headless"
+          - name: JGROUPS_DISCOVERY_QUERY
+            value: "{{ include "infinispan.fullname" . }}-headless"
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- if .Values.extraEnvs }}
+        envFrom:          
+          - configMapRef:
+              name: {{ include "infinispan.fullname" . }}-envs
+        {{- end}}
+        ports:
+        - containerPort: 9080
+          name: rest
+          protocol: TCP
+        - containerPort: 9990
+          name: management
+          protocol: TCP
+        - containerPort: 8888
+          name: ping
+          protocol: TCP
+        - containerPort: 12222
+          name: hotrod
+          protocol: TCP
+        - containerPort: 7601
+          name: jgroups-tcp
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - /usr/local/bin/is_healthy.sh
+          failureThreshold: 5
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 80
+        livenessProbe:
+          exec:
+            command:
+            - /usr/local/bin/is_running.sh
+          failureThreshold: 5
+          initialDelaySeconds: 10
+          periodSeconds: 60
+          successThreshold: 1
+          timeoutSeconds: 80
+        {{- with .Values.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+          - name: config
+            mountPath: /opt/jboss/infinispan-server/standalone/configuration/clustered.xml
+            subPath: clustered.xml
+          - name: auth-config
+            mountPath: /opt/jboss/infinispan-server/standalone/configuration/mgmt-groups.properties
+            subPath: mgmt-groups.properties
+          - name: auth-config
+            mountPath: /opt/jboss/infinispan-server/standalone/configuration/mgmt-users.properties
+            subPath: mgmt-users.properties
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "infinispan.fullname" . }}
+        - name: auth-config
+          secret:
+            secretName: {{ include "infinispan.fullname" . }}-config
+      terminationGracePeriodSeconds: 120
