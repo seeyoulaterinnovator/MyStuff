@@ -21,7 +21,8 @@ extraEnvs:
   DB_HOST: "{{ env "DB_HOST" }}"
   DB_PORT: "{{ env "DB_PORT" }}"
   SITE: "{{ env "CI_ENVIRONMENT_SLUG" }}"
-  TZ: "Asia/Yekaterinburg"  
+  TZ: "Asia/Yekaterinburg"
+  JAVA_OPTS: "-server -Xms64m -Xmx512m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Djava.net.preferIPv4Stack=true -Djboss.modules.system.pkgs=org.jboss.byteman -Djboss.site.name={{ env "CI_ENVIRONMENT_SLUG" }} -Djava.awt.headless=true"
 
 extraSensitiveEnvs:
   DB_USER: "{{ env "DB_USER" }}"
@@ -34,6 +35,10 @@ service:
   # The http Service port
   httpPort: 80
   extraPorts: []
+
+externalInfinispan:
+  server: "{{ env "INFINISPAN_HOST" }}"
+  port: "{{ env "INFINISPAN_PORT" }}"
 
 resources:
   limits:
