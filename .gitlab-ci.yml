@@ -236,6 +236,23 @@ domru:stage5:
     NODE_PORT: '30085'
     REPLICA_COUNT: '3'
 
+infinispan:stage5:
+  stage: deploy
+  image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
+  when: manual
+  variables:
+    NAMESPACE: 'sso'
+    INFINISPAN_REPLICA_COUNT: '3'
+  script:
+    - export DTD=$(date | sha256sum)
+    - consul-template -once -template "./configs/infinispan/.helm/values-dev.yaml.tpl:values.yaml"
+    - ln -s ${INFINISPAN_MGMT_USERS} ./configs/infinispan/.helm/configs/mgmt-users.properties
+    - ln -s ${INFINISPAN_MGMT_GROUPS} ./configs/infinispan/.helm/configs/mgmt-groups.properties
+    - helm upgrade -i infinispan --values values.yaml ./configs/infinispan/.helm -n ${NAMESPACE} --atomic --timeout 5m
+    - helm history -n ${NAMESPACE} infinispan --max 5
+  tags:
+    - sso-build-k8s
+
 domru:perm:primary:
   stage: deploy
   <<: *init-variables

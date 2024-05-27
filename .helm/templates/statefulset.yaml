@@ -41,7 +41,11 @@ spec:
           args:
             - -b
             - 0.0.0.0
-            - -c=standalone-ha-new.xml
+            {{- if and .Values.externalInfinispan.server .Values.externalInfinispan.port }}
+            - -c=standalone-ha-infspn-ext.xml
+            {{- else }}
+            - -c=standalone-ha-infspn-int.xml
+            {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -58,6 +62,12 @@ spec:
               value: "dns_query={{ include "sso.fullname" . }}-headless"
             - name: JGROUPS_DISCOVERY_QUERY
               value: "{{ include "sso.fullname" . }}-headless"
+            {{- if and .Values.externalInfinispan.server .Values.externalInfinispan.port }}
+            - name: INFINISPAN_HOST
+              value: "{{ .Values.externalInfinispan.server }}"
+            - name: INFINISPAN_PORT
+              value: "{{ .Values.externalInfinispan.port }}"
+            {{- end }}
           {{- if or .Values.extraEnvs .Values.extraSensitiveEnvs }}
           envFrom:
           {{- if .Values.extraEnvs }}
