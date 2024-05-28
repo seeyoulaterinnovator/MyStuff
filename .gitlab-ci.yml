@@ -171,7 +171,7 @@ container-image:source:
     paths:
       - .ci_status/
   tags:
-    - sso-stage
+    - sso-build-shell
 
 container-image:
   stage: docker
@@ -184,7 +184,7 @@ container-image:
     paths:
       - .ci_status/
   tags:
-    - sso-stage
+    - sso-build-shell
 
 domru:stage:
   extends: .domru:stage:template
