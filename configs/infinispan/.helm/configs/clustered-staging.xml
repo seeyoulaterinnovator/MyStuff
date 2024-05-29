@@ -153,11 +153,6 @@
                 <replicated-cache-configuration name="replicated"/>
                 <replicated-cache name="repl" configuration="replicated"/>
                 <replicated-cache-configuration name="sessions-cfg" mode="SYNC" start="EAGER" batching="false">
-                    <!-- <backups>
-                        <backup site="voronezh" failure-policy="WARN" enabled="true">
-                            <take-offline after-failures="3" min-wait="60000"/>
-                        </backup>
-                    </backups> -->
                     <locking acquire-timeout="0"/>
                     <transaction mode="NON_XA"/>
                 </replicated-cache-configuration>
@@ -252,23 +247,12 @@
                     <protocol type="UFC_NB"/>
                     <protocol type="MFC_NB"/>
                     <protocol type="FRAG3"/>
-                    <!-- <relay site="perm"> -->
-                        <!-- <remote-site name="voronezh" channel="xsite"/> -->
-                    <!-- </relay> -->
                 </stack>
                 <stack name="tcp">
                     <transport type="TCP" socket-binding="jgroups-tcp"/>
                     <protocol type="dns.DNS_PING">
                         <property name="dns_query">${env.JGROUPS_DISCOVERY_QUERY}</property>
                     </protocol>
-                    <!-- <protocol type="TCPPING"> -->
-                        <!-- <property name="initial_hosts">
-                            sso-app01.cc-perm.ertelecom.ru[7601],sso-app01.cc-voronezh.ertelecom.ru[7601]
-                        </property> -->
-                        <!-- <property name="ergonomics"> -->
-                            <!-- false -->
-                        <!-- </property> -->
-                    <!-- </protocol> -->
                     <protocol type="MERGE3"/>
                     <protocol type="FD_SOCK" socket-binding="jgroups-tcp-fd"/>
                     <protocol type="FD_ALL"/>

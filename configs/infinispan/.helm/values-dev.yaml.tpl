@@ -20,6 +20,9 @@ credentials:
 extraEnvs:
   JAVA_OPTS: '-server -verbose:gc -Xloggc:"/opt/jboss/infinispan-server/standalone/log/gc.log" -XX:+PrintGCDetails -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 -XX:GCLogFileSize=3M -XX:-TraceClassUnloading -Xms128m -Xmx768m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Djava.net.preferIPv4Stack=true -Djboss.modules.system.pkgs=org.jboss.byteman -Djava.awt.headless=true'
 
+persistentStorage:
+  emptyDir: {}
+
 managementService:
   type: NodePort
   loadBalancerIP: ""
