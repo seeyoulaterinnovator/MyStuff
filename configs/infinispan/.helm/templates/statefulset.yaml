@@ -35,8 +35,7 @@ spec:
       - name: infinispan-server
         command:
           - /opt/jboss/infinispan-server/bin/standalone.sh
-          - -c
-          - clustered.xml
+          - --read-only-server-config=clustered.xml
           - -Djboss.default.jgroups.stack=tcp
           - -Djava.net.preferIPv4Stack=true
           - -Djava.awt.headless=true
@@ -107,6 +106,10 @@ spec:
           - name: auth-config
             mountPath: /opt/jboss/infinispan-server/standalone/configuration/mgmt-users.properties
             subPath: mgmt-users.properties
+          {{- with .Values.persistentStorage }}
+          - name: persistent-storage
+            mountPath: /usr/local/infinispan/standalone/data/persistent
+          {{- end }}
       volumes:
         - name: config
           configMap:
@@ -114,4 +117,8 @@ spec:
         - name: auth-config
           secret:
             secretName: {{ include "infinispan.fullname" . }}-config
+        {{- with .Values.persistentStorage }}
+        - name: persistent-storage
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
       terminationGracePeriodSeconds: 120
