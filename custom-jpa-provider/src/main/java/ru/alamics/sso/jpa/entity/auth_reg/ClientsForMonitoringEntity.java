@@ -27,5 +27,6 @@ public class ClientsForMonitoringEntity {
     @Column(name = "realm")
     private String realm;
 
-
+    @Column(name = "name")
+    private String name;
 }

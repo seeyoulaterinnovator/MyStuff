@@ -3,7 +3,6 @@ package ru.alamics.sso.keycloak.event.listener;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
-import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -17,18 +16,16 @@ import ru.alamics.sso.registration.service.AuthorisedUsersService;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
+import java.util.Set;
 
 @Slf4j
 public class ExtendedEventListenerProvider implements EventListenerProvider {
 
     private KeycloakSession session;
     private final AuthorisedUsersService authorisedUsersService;
+
+    private static final String AUTHORIZATION_TIME = "authorization_time_";
+    private static final Set<String> clientsList = Set.of("b2b", "lkb2b", "app_b2b", "dmp-kc-sit", "wifi", "oats");
 
     public ExtendedEventListenerProvider(KeycloakSession session) {
         this.session = session;
@@ -46,32 +43,47 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
             log.error("userId == " + userId + ", " + "realmId == " + realmId + ", " + "clientId == " + clientId);
             return;
         }
+        String authorization_time_type = AUTHORIZATION_TIME + clientId;
 
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-
 
         RealmProvider model = session.realms();
         RealmModel realm = model.getRealm(event.getRealmId());
         UserModel userModel = session.users().getUserById(userId, realm);
         //  typeId - hardcode для авторизации через МП по отпечатку/коду
-        if (EventType.REFRESH_TOKEN.equals(event.getType()) && clientId.equals("app_b2b")) {
-            String lastAuthorizationTimeStr = userModel.getFirstAttribute("authorization_time_appb2b");
-            if (lastAuthorizationTimeStr != null) {
-                LocalDateTime lastAuthorizationTime = LocalDateTime.parse(lastAuthorizationTimeStr, formatter);
-                LocalDate lastAuthorizationDate = lastAuthorizationTime.toLocalDate();
-                LocalDate currentDate = now.toLocalDate();
-                if (lastAuthorizationDate.isEqual(currentDate)) {
-                    return; // Если авторизация была в этот же календарный день, прерываем выполнение
+
+        switch (event.getType()) {
+            case LOGIN: {
+                if (clientId.equals("app_b2b")) {
+                    authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
+                    LocalDateTime nowMinus26 = now.minusHours(26);
+                    userModel.setSingleAttribute(authorization_time_type, nowMinus26.format(formatter));
                 }
             }
-            authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
-            userModel.setSingleAttribute("authorization_time_appb2b", now.format(formatter));
-
-        } else if (EventType.LOGIN.equals(event.getType()) && clientId.equals("app_b2b")) {
-            authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
-            LocalDateTime nowMinus26 = now.minusHours(26);
-            userModel.setSingleAttribute("authorization_time_appb2b", nowMinus26.format(formatter));
+            break;
+            case REFRESH_TOKEN: {
+                if (clientsList.contains(clientId)) {
+                    String lastAuthorizationTimeStr = userModel.getFirstAttribute(authorization_time_type);
+                    if (lastAuthorizationTimeStr != null) {
+                        LocalDateTime lastAuthorizationTime = LocalDateTime.parse(lastAuthorizationTimeStr, formatter);
+                        LocalDate lastAuthorizationDate = lastAuthorizationTime.toLocalDate();
+                        LocalDate currentDate = now.toLocalDate();
+                        if (lastAuthorizationDate.isEqual(currentDate)) {
+                            return; // Если авторизация была в этот же календарный день, прерываем выполнение
+                        }
+                    }
+                    authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
+                    userModel.setSingleAttribute(authorization_time_type, now.format(formatter));
+                }
+            }
+            break;
+            case CODE_TO_TOKEN: {
+                if (clientsList.contains(clientId)) {
+                    authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 8);
+                }
+            }
+            break;
         }
     }
 
