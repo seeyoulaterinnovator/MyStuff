@@ -17,6 +17,8 @@ import ru.alamics.sso.registration.service.AuthorisedUsersService;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 public class ExtendedEventListenerProvider implements EventListenerProvider {
@@ -25,7 +27,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
     private final AuthorisedUsersService authorisedUsersService;
 
     private static final String AUTHORIZATION_TIME = "authorization_time_";
-    private static final Set<String> clientsList = Set.of("b2b", "lkb2b", "app_b2b", "dmp-kc-sit", "wifi", "oats");
+    private static final Set<String> clientsList = Stream.of("b2b", "lkb2b", "app_b2b", "dmp-kc-sit", "wifi", "oats").collect(Collectors.toSet());
 
     public ExtendedEventListenerProvider(KeycloakSession session) {
         this.session = session;
