@@ -69,10 +69,13 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                     String lastAuthorizationTimeStr = userModel.getFirstAttribute(authorization_time_type);
                     if (lastAuthorizationTimeStr != null) {
                         LocalDateTime lastAuthorizationTime = LocalDateTime.parse(lastAuthorizationTimeStr, formatter);
-                        LocalDate lastAuthorizationDate = lastAuthorizationTime.toLocalDate();
-                        LocalDate currentDate = now.toLocalDate();
-                        if (lastAuthorizationDate.isEqual(currentDate)) {
-                            return; // Если авторизация была в этот же календарный день, прерываем выполнение
+//                        LocalDate lastAuthorizationDate = lastAuthorizationTime.toLocalDate();
+//                        LocalDate currentDate = now.toLocalDate();
+//                        if (lastAuthorizationDate.isEqual(currentDate)) {
+//                            return; // Если авторизация была в этот же календарный день, прерываем выполнение
+//                        }
+                        if(lastAuthorizationTime.plusMinutes(10).isBefore(LocalDateTime.now())){
+                            return;
                         }
                     }
                     authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
@@ -86,6 +89,8 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                 }
             }
             break;
+            default:
+                log.info("eventType = {}", event.getType());
         }
     }
 
