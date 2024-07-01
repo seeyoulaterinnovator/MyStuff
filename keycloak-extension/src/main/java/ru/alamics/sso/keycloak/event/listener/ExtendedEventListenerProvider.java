@@ -66,20 +66,17 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
             break;
             case REFRESH_TOKEN: {
                 if (clientsList.contains(clientId)) {
-                    String lastAuthorizationTimeStr = userModel.getFirstAttribute(authorization_time_type);
-                    if (lastAuthorizationTimeStr != null) {
-                        LocalDateTime lastAuthorizationTime = LocalDateTime.parse(lastAuthorizationTimeStr, formatter);
+//                    String lastAuthorizationTimeStr = userModel.getFirstAttribute(authorization_time_type);
+//                    if (lastAuthorizationTimeStr != null) {
+//                        LocalDateTime lastAuthorizationTime = LocalDateTime.parse(lastAuthorizationTimeStr, formatter);
 //                        LocalDate lastAuthorizationDate = lastAuthorizationTime.toLocalDate();
 //                        LocalDate currentDate = now.toLocalDate();
 //                        if (lastAuthorizationDate.isEqual(currentDate)) {
 //                            return; // Если авторизация была в этот же календарный день, прерываем выполнение
 //                        }
-                        if(lastAuthorizationTime.plusMinutes(10).isBefore(LocalDateTime.now())){
-                            return;
-                        }
-                    }
+//                    }
                     authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
-                    userModel.setSingleAttribute(authorization_time_type, now.format(formatter));
+//                    userModel.setSingleAttribute(authorization_time_type, now.format(formatter));
                 }
             }
             break;
