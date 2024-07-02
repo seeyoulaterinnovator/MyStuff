@@ -191,7 +191,7 @@ public class SmsOrPhoneCallAuth implements Authenticator {
                 } catch (AuthOrRegTypeNotFoundException e) {
                     throw new RuntimeException(e);
                 }
-                userPhoneVerifier.verifyPhone(user, codeLifeTime,
+                userPhoneVerifier.verifyPhone(model, user, codeLifeTime,
                         authContext.getHashProperty(), code, activationCodeType, authSession.getRealm().getName(), authSession, authorisedUsersService, typeId);
 
                 authSession.removeAuthNote(PHONE_KEY_HASH);

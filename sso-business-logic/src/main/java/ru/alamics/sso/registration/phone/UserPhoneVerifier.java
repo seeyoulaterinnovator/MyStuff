@@ -2,6 +2,7 @@ package ru.alamics.sso.registration.phone;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.jpa.entity.UserLoginHistory;
@@ -95,7 +96,7 @@ public class UserPhoneVerifier {
         return null;
     }
 
-    public void verifyPhone(User user, long codeLifeTime, String savedCodeHash, String smsCode,
+    public void verifyPhone(UserModel userModel, User user, long codeLifeTime, String savedCodeHash, String smsCode,
                             ActivationCodeType activationCodeType, String realm, AuthenticationSessionModel authSession, AuthorisedUsersService authorisedUsersService, int typeId) throws WrongSmsCode, TimeExpiredException {
         String codeHash = HashGenerator.getSecretHash(smsCode);
         LocalDateTime previousTime = LocalDateTime.parse(authSession.getAuthNote(EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);
@@ -118,6 +119,6 @@ public class UserPhoneVerifier {
         userEntity.setId(user.getId());
         loginHistory.createSuccessAuth(userEntity, realm);
         String clientId = authSession.getClient().getClientId();
-        authorisedUsersService.saveSuccessfulAuth(user, authSession.getRealm().getId(), clientId,typeId);
+        authorisedUsersService.saveSuccessfulAuth(userModel, user, authSession.getRealm().getId(), clientId,typeId);
     }
 }

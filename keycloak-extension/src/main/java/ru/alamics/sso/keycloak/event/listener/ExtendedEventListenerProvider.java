@@ -8,6 +8,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.RealmProvider;
 import org.keycloak.models.UserModel;
+import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.keycloak.event.listener.factory.EventFactory;
 import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
 import ru.alamics.sso.keycloak.event.listener.factory.impl.EventFactoryImpl;
@@ -20,6 +21,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil.getAuthOrRegType;
+
 @Slf4j
 public class ExtendedEventListenerProvider implements EventListenerProvider {
 
@@ -28,8 +31,6 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 
     private static final String AUTHORIZATION_TIME = "authorization_time_";
     private static final Set<String> clientsRedirect = Stream.of("b2b", "lkb2b", "app_b2b", "dmp-kc-sit", "wifi", "oats").collect(Collectors.toSet());
-    private static final Set<String> clientsRefresh1 = Stream.of("lkb2b", "app_b2b", "wifi").collect(Collectors.toSet());
-    private static final Set<String> clientsRefresh2 = Stream.of("b2b", "dmp-kc-sit", "oats").collect(Collectors.toSet());
 
     public ExtendedEventListenerProvider(KeycloakSession session) {
         this.session = session;
@@ -57,17 +58,22 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
         UserModel userModel = session.users().getUserById(userId, realm);
         //  typeId - hardcode для авторизации через МП по отпечатку/коду
 
+        log.info("eventType = {}, clientId = {}", event.getType(), clientId);
         switch (event.getType()) {
             case LOGIN: {
                 if (clientId.equals("app_b2b")) {
                     authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
                     LocalDateTime nowMinus26 = now.minusHours(26);
                     userModel.setSingleAttribute(authorization_time_type, nowMinus26.format(formatter));
+                } else {
+                    if(userModel.getFirstAttribute("login_first") != null) {
+                        authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 8);
+                    }
                 }
             }
             break;
             case REFRESH_TOKEN: {
-                if (clientsRefresh1.contains(clientId)) {
+                if (clientsRedirect.contains(clientId)) {
 //                    String lastAuthorizationTimeStr = userModel.getFirstAttribute(authorization_time_type);
 //                    if (lastAuthorizationTimeStr != null) {
 //                        LocalDateTime lastAuthorizationTime = LocalDateTime.parse(lastAuthorizationTimeStr, formatter);
@@ -82,30 +88,6 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                 }
             }
             break;
-//            case CODE_TO_TOKEN: {
-//                if (clientsRefresh2.contains(clientId)) {
-////                    String lastAuthorizationTimeStr = userModel.getFirstAttribute(authorization_time_type);
-////                    if (lastAuthorizationTimeStr != null) {
-////                        LocalDateTime lastAuthorizationTime = LocalDateTime.parse(lastAuthorizationTimeStr, formatter);
-////                        LocalDate lastAuthorizationDate = lastAuthorizationTime.toLocalDate();
-////                        LocalDate currentDate = now.toLocalDate();
-////                        if (lastAuthorizationDate.isEqual(currentDate)) {
-////                            return; // Если авторизация была в этот же календарный день, прерываем выполнение
-////                        }
-////                    }
-//                    authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
-////                    userModel.setSingleAttribute(authorization_time_type, now.format(formatter));
-//                }
-//            }
-//            break;
-            case CLIENT_LOGIN: {
-                if (clientsRedirect.contains(clientId)) {
-                    authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 8);
-                }
-            }
-            break;
-            default:
-                log.info("eventType = {}", event.getType());
         }
     }
 
