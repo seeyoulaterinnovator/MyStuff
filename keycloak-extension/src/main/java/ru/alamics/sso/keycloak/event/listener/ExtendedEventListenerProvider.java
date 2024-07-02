@@ -30,7 +30,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
     private final AuthorisedUsersService authorisedUsersService;
 
     private static final String AUTHORIZATION_TIME = "authorization_time_";
-    private static final Set<String> clientsRedirect = Stream.of("b2b", "lkb2b", "app_b2b", "dmp-kc-sit", "wifi", "oats").collect(Collectors.toSet());
+    private static final Set<String> clients = Stream.of("b2b", "lkb2b", "app_b2b", "dmp-kc-sit", "wifi", "oats").collect(Collectors.toSet());
 
     public ExtendedEventListenerProvider(KeycloakSession session) {
         this.session = session;
@@ -49,7 +49,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
             return;
         }
         String authorization_time_type = AUTHORIZATION_TIME + clientId;
-        String login_client = "login_first_" + clientId;
+
 
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
@@ -67,6 +67,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                     LocalDateTime nowMinus26 = now.minusHours(26);
                     userModel.setSingleAttribute(authorization_time_type, nowMinus26.format(formatter));
                 } else {
+                    String login_client = "login_first_" + clientId;
                     if(userModel.getFirstAttribute("login_first") != null && userModel.getFirstAttribute(login_client) == null) {
                         authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 8);
                         userModel.setSingleAttribute(login_client, "true");
@@ -75,7 +76,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
             }
             break;
             case REFRESH_TOKEN: {
-                if (clientsRedirect.contains(clientId)) {
+                if (clients.contains(clientId)) {
 //                    String lastAuthorizationTimeStr = userModel.getFirstAttribute(authorization_time_type);
 //                    if (lastAuthorizationTimeStr != null) {
 //                        LocalDateTime lastAuthorizationTime = LocalDateTime.parse(lastAuthorizationTimeStr, formatter);
@@ -90,6 +91,17 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                 }
             }
             break;
+            case LOGOUT:{
+                if (userModel.getFirstAttribute("login_first") != null){
+                    userModel.removeAttribute("login_first");
+                }
+                for (String client : clients){
+                    String login_client = "login_first_" + client;
+                    if (userModel.getFirstAttribute(login_client) != null){
+                        userModel.removeAttribute(login_client);
+                    }
+                }
+            }
         }
     }
 
