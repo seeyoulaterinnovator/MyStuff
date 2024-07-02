@@ -48,8 +48,6 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
             log.error("userId == " + userId + ", " + "realmId == " + realmId + ", " + "clientId == " + clientId);
             return;
         }
-        String authorization_time_type = AUTHORIZATION_TIME + clientId;
-
 
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
@@ -65,7 +63,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                 if (clientId.equals("app_b2b")) {
                     authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
                     LocalDateTime nowMinus26 = now.minusHours(26);
-                    userModel.setSingleAttribute(authorization_time_type, nowMinus26.format(formatter));
+                    userModel.setSingleAttribute("authorization_time_appb2b", nowMinus26.format(formatter));
                 } else {
                     String login_client = "login_first_" + clientId;
                     if(userModel.getFirstAttribute("login_first") != null && userModel.getFirstAttribute(login_client) == null) {
@@ -76,22 +74,24 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
             }
             break;
             case REFRESH_TOKEN: {
-                if (clients.contains(clientId)) {
-//                    String lastAuthorizationTimeStr = userModel.getFirstAttribute(authorization_time_type);
-//                    if (lastAuthorizationTimeStr != null) {
-//                        LocalDateTime lastAuthorizationTime = LocalDateTime.parse(lastAuthorizationTimeStr, formatter);
-//                        LocalDate lastAuthorizationDate = lastAuthorizationTime.toLocalDate();
-//                        LocalDate currentDate = now.toLocalDate();
-//                        if (lastAuthorizationDate.isEqual(currentDate)) {
-//                            return; // Если авторизация была в этот же календарный день, прерываем выполнение
-//                        }
-//                    }
+                if (clientId.equals("app_b2b")) {
+                    String lastAuthorizationTimeStr = userModel.getFirstAttribute("authorization_time_appb2b");
+                    if (lastAuthorizationTimeStr != null) {
+                        LocalDateTime lastAuthorizationTime = LocalDateTime.parse(lastAuthorizationTimeStr, formatter);
+                        LocalDate lastAuthorizationDate = lastAuthorizationTime.toLocalDate();
+                        LocalDate currentDate = now.toLocalDate();
+                        if (lastAuthorizationDate.isEqual(currentDate)) {
+                            return; // Если авторизация была в этот же календарный день, прерываем выполнение
+                        }
+                    }
                     authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
-//                    userModel.setSingleAttribute(authorization_time_type, now.format(formatter));
+                    userModel.setSingleAttribute("authorization_time_appb2b", now.format(formatter));
+
                 }
             }
             break;
             case LOGOUT:{
+                log.info("userModel before LOGOUT = {} ", userModel);
                 if (userModel.getFirstAttribute("login_first") != null){
                     userModel.removeAttribute("login_first");
                 }
@@ -101,7 +101,9 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                         userModel.removeAttribute(login_client);
                     }
                 }
+                log.info("userModel after LOGOUT = {} ", userModel);
             }
+            break;
         }
     }
 
