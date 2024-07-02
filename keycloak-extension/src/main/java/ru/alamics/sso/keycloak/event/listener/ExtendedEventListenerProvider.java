@@ -3,6 +3,7 @@ package ru.alamics.sso.keycloak.event.listener;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
+import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -44,17 +45,35 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
         String realmId = event.getRealmId();
         String clientId = event.getClientId();
 
-        if (userId == null || realmId == null || clientId == null) {
-            log.error("userId == " + userId + ", " + "realmId == " + realmId + ", " + "clientId == " + clientId);
+        if (userId == null || realmId == null) {
+            log.error("userId == " + userId + ", " + "realmId == " + realmId);
             return;
         }
-
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
         RealmProvider model = session.realms();
         RealmModel realm = model.getRealm(event.getRealmId());
         UserModel userModel = session.users().getUserById(userId, realm);
+
+        if(event.getType().equals(EventType.LOGOUT)) {
+            log.info("userModel before LOGOUT = {} ", userModel);
+            if (userModel.getFirstAttribute("login_first") != null){
+                userModel.removeAttribute("login_first");
+            }
+            for (String client : clients){
+                String login_client = "login_first_" + client;
+                if (userModel.getFirstAttribute(login_client) != null){
+                    userModel.removeAttribute(login_client);
+                }
+            }
+            log.info("userModel after LOGOUT = {} ", userModel);
+        }
+
+        if (clientId == null) {
+            log.error("clientId == " + clientId);
+            return;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         //  typeId - hardcode для авторизации через МП по отпечатку/коду
 
         log.info("eventType = {}, clientId = {}", event.getType(), clientId);
@@ -88,20 +107,6 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                     userModel.setSingleAttribute("authorization_time_appb2b", now.format(formatter));
 
                 }
-            }
-            break;
-            case LOGOUT:{
-                log.info("userModel before LOGOUT = {} ", userModel);
-                if (userModel.getFirstAttribute("login_first") != null){
-                    userModel.removeAttribute("login_first");
-                }
-                for (String client : clients){
-                    String login_client = "login_first_" + client;
-                    if (userModel.getFirstAttribute(login_client) != null){
-                        userModel.removeAttribute(login_client);
-                    }
-                }
-                log.info("userModel after LOGOUT = {} ", userModel);
             }
             break;
         }
