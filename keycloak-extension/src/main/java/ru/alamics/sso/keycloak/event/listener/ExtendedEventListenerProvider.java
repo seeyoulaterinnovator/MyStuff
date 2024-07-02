@@ -45,8 +45,8 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
         String realmId = event.getRealmId();
         String clientId = event.getClientId();
 
-        if (userId == null || realmId == null) {
-            log.error("userId == " + userId + ", " + "realmId == " + realmId);
+        if (userId == null || realmId == null || clientId == null) {
+            log.error("userId == " + userId + ", " + "realmId == " + realmId + "clientId == " + clientId);
             return;
         }
 
@@ -54,24 +54,6 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
         RealmModel realm = model.getRealm(event.getRealmId());
         UserModel userModel = session.users().getUserById(userId, realm);
 
-        if(event.getType().equals(EventType.LOGOUT)) {
-            log.info("userModel before LOGOUT = {} ", userModel);
-            if (userModel.getFirstAttribute("login_first") != null){
-                userModel.removeAttribute("login_first");
-            }
-            for (String client : clients){
-                String login_client = "login_first_" + client;
-                if (userModel.getFirstAttribute(login_client) != null){
-                    userModel.removeAttribute(login_client);
-                }
-            }
-            log.info("userModel after LOGOUT = {} ", userModel);
-        }
-
-        if (clientId == null) {
-            log.error("clientId == " + clientId);
-            return;
-        }
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         //  typeId - hardcode для авторизации через МП по отпечатку/коду
@@ -83,11 +65,10 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                     authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
                     LocalDateTime nowMinus26 = now.minusHours(26);
                     userModel.setSingleAttribute("authorization_time_appb2b", nowMinus26.format(formatter));
+                    userModel.setSingleAttribute("login_first", clientId);
                 } else {
-                    String login_client = "login_first_" + clientId;
-                    if(userModel.getFirstAttribute("login_first") != null && userModel.getFirstAttribute(login_client) == null) {
+                    if(userModel.getFirstAttribute("login_first") != null && userModel.getFirstAttribute("login_first").equals(clientId)) {
                         authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 8);
-                        userModel.setSingleAttribute(login_client, "true");
                     }
                 }
             }
@@ -105,7 +86,6 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                     }
                     authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
                     userModel.setSingleAttribute("authorization_time_appb2b", now.format(formatter));
-
                 }
             }
             break;
