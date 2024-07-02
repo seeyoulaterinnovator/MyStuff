@@ -550,8 +550,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         log.info(String.format("Here is our codehash:%s \nHere is user's code %s", codeHash, code));
         try {
 
-
-            userPhoneVerifier.verifyPhone(user, /*todo change expiration time to expire code +*/ activationCodeType.getExpiredCodeSeconds(),
+            UserModel userModel = context.getUser();
+            userPhoneVerifier.verifyPhone(userModel, user, /*todo change expiration time to expire code +*/ activationCodeType.getExpiredCodeSeconds(),
                     codeHash, code, activationCodeType, sessionModel.getRealm().getName(), sessionModel, authorisedUsersService, typeId);
 
             currentAuthFlowPhoneNumbers.remove(protector);
@@ -771,7 +771,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             User user = UserModelUserMapper.mapToUser(context.getUser());
             String clientId = sessionModel.getClient().getClientId();
             log.info("Client ID doAuthActionForLogNPass is : " + clientId);
-            authorisedUsersService.saveSuccessfulAuth(user, context.getRealm().getId(), clientId, getAuthOrRegType(sessionModel));
+            UserModel userModel = context.getUser();
+            authorisedUsersService.saveSuccessfulAuth(userModel, user, context.getRealm().getId(), clientId, getAuthOrRegType(sessionModel));
         } catch (AuthOrRegTypeNotFoundException authOrRegTypeNotFoundException) {
             log.error(authOrRegTypeNotFoundException.getMessage());
         } finally {
@@ -791,7 +792,8 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             sessionModel.setAuthNote(sessionModel.getAuthNote("secondPhase"), "");
             sessionModel.removeAuthNote("needSendSmsCode");
             sessionModel.removeAuthNote(CODE_HASH_KEY);
-            authorisedUsersService.saveSuccessfulAuth(user, context.getRealm().getId(), clientId, getAuthOrRegType(sessionModel));
+            UserModel userModel = context.getUser();
+            authorisedUsersService.saveSuccessfulAuth(userModel, user, context.getRealm().getId(), clientId, getAuthOrRegType(sessionModel));
 
         } catch (AuthOrRegTypeNotFoundException authOrRegTypeNotFoundException) {
             log.error(authOrRegTypeNotFoundException.getMessage());
