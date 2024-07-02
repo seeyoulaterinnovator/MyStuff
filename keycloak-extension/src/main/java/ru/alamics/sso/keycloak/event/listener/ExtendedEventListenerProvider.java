@@ -67,7 +67,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                     userModel.setSingleAttribute("authorization_time_appb2b", nowMinus26.format(formatter));
                     userModel.setSingleAttribute("login_first", clientId);
                 } else {
-                    if(userModel.getFirstAttribute("login_first") != null && userModel.getFirstAttribute("login_first").equals(clientId)) {
+                    if(userModel.getFirstAttribute("login_first") != null && !userModel.getFirstAttribute("login_first").equals(clientId)) {
                         authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 8);
                     }
                 }
