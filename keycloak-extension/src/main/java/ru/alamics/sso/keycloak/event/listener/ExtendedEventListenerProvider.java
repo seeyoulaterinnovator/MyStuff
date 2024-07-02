@@ -49,6 +49,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
             return;
         }
         String authorization_time_type = AUTHORIZATION_TIME + clientId;
+        String login_client = "login_first_" + clientId;
 
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
@@ -66,8 +67,9 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                     LocalDateTime nowMinus26 = now.minusHours(26);
                     userModel.setSingleAttribute(authorization_time_type, nowMinus26.format(formatter));
                 } else {
-                    if(userModel.getFirstAttribute("login_first") != null) {
+                    if(userModel.getFirstAttribute("login_first") != null && userModel.getFirstAttribute(login_client) == null) {
                         authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 8);
+                        userModel.setSingleAttribute(login_client, "true");
                     }
                 }
             }
