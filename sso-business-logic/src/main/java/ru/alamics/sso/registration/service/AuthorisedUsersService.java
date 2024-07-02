@@ -88,5 +88,7 @@ public class AuthorisedUsersService {
     private void setParam (UserModel userModel, String client){
         userModel.setSingleAttribute("login_first", "true");
         log.info("set first param for clientId = {}", client);
+        String login_client = "login_first_" + client;
+        userModel.setSingleAttribute(login_client, "true");
     }
 }
