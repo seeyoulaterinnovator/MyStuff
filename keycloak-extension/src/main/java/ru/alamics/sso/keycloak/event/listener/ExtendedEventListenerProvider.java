@@ -3,13 +3,11 @@ package ru.alamics.sso.keycloak.event.listener;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
-import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.RealmProvider;
 import org.keycloak.models.UserModel;
-import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.keycloak.event.listener.factory.EventFactory;
 import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
 import ru.alamics.sso.keycloak.event.listener.factory.impl.EventFactoryImpl;
@@ -21,8 +19,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil.getAuthOrRegType;
 
 @Slf4j
 public class ExtendedEventListenerProvider implements EventListenerProvider {
@@ -37,7 +33,6 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
         this.session = session;
         this.authorisedUsersService = Lookup.lookup(AuthorisedUsersService.class);
     }
-
 
     @Override
     public void onEvent(Event event) {
@@ -58,24 +53,26 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         //  typeId - hardcode для авторизации через МП по отпечатку/коду
 
-        log.info("eventType = {}, clientId = {}", event.getType(), clientId);
+        String attributeLoginName = AUTHORIZATION_TIME + clientId;
         switch (event.getType()) {
             case LOGIN: {
-                if (clientId.equals("app_b2b")) {
-                    authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
-                    LocalDateTime nowMinus26 = now.minusHours(26);
-                    userModel.setSingleAttribute("authorization_time_appb2b", nowMinus26.format(formatter));
-                    userModel.setSingleAttribute("login_first", clientId);
-                } else {
+                if(clients.contains(clientId)) {
                     if(userModel.getFirstAttribute("login_first") != null && !userModel.getFirstAttribute("login_first").equals(clientId)) {
                         authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 8);
+                    } else {
+                        if (clientId.equals("app_b2b")) {
+                            authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
+                            LocalDateTime nowMinus26 = now.minusHours(26);
+                            userModel.setSingleAttribute(attributeLoginName, nowMinus26.format(formatter));
+                            userModel.setSingleAttribute("login_first", clientId);
+                        }
                     }
                 }
             }
             break;
             case REFRESH_TOKEN: {
-                if (clientId.equals("app_b2b")) {
-                    String lastAuthorizationTimeStr = userModel.getFirstAttribute("authorization_time_appb2b");
+                if (clients.contains(clientId)) {
+                    String lastAuthorizationTimeStr = userModel.getFirstAttribute(attributeLoginName);
                     if (lastAuthorizationTimeStr != null) {
                         LocalDateTime lastAuthorizationTime = LocalDateTime.parse(lastAuthorizationTimeStr, formatter);
                         LocalDate lastAuthorizationDate = lastAuthorizationTime.toLocalDate();
@@ -85,7 +82,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                         }
                     }
                     authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 7);
-                    userModel.setSingleAttribute("authorization_time_appb2b", now.format(formatter));
+                    userModel.setSingleAttribute(attributeLoginName, now.format(formatter));
                 }
             }
             break;
@@ -102,7 +99,6 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
         } catch (IllegalArgumentException e) {
             log.info("ignore event factory create exception e={}", e.getMessage());
         }
-
     }
 
     @Override
