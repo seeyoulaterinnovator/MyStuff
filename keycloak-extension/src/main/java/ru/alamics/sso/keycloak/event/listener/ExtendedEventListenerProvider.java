@@ -57,7 +57,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
         switch (event.getType()) {
             case LOGIN: {
                 if(clients.contains(clientId)) {
-                    if(userModel.getFirstAttribute("login_first") != null && !userModel.getFirstAttribute("login_first").equals(clientId)) {
+                    if(userModel.getFirstAttribute("login_first") != null) {
                         authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 8);
                     } else {
                         if (clientId.equals("app_b2b")) {
