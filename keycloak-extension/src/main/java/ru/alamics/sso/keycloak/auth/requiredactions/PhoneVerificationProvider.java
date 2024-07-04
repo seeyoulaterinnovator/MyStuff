@@ -281,7 +281,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             try {
                 /*LocalDateTime codeExpirationTime = LocalDateTime.parse(authSession.getAuthNote(CODE_EXPIRATION_TIME), DateTimeFormatter.ISO_DATE_TIME);*/
 
-                userPhoneVerifier.verifyPhone(user, activationCodeType.getExpiredCodeSeconds(),
+                userPhoneVerifier.verifyPhone(model, user, activationCodeType.getExpiredCodeSeconds(),
                         codeHash, code, activationCodeType, authSession.getRealm().getName(), authSession, authorisedUsersService, typeId);
 
                 UserModelUserMapper.mergeUserInto(user, model);
