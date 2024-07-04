@@ -11,8 +11,6 @@
             UPDATE CLIENTS_FOR_MONITORING SET name = 'Ecom' WHERE client_name = 'dmp-kc-sit';
             UPDATE CLIENTS_FOR_MONITORING SET name = 'Сайт Дом.ru' WHERE client_name = 'b2b';
             UPDATE CLIENTS_FOR_MONITORING SET name = 'Приложение Дом.ru' WHERE client_name = 'app_b2b';
-            UPDATE CLIENTS_FOR_MONITORING SET name = 'Миграции' WHERE client_name = 'migration';
-            UPDATE CLIENTS_FOR_MONITORING SET name = 'Система bss' WHERE client_name = 'bss';
         </sql>
     </changeSet>
     <changeSet id="2" author="ichetovkina.eiu">
