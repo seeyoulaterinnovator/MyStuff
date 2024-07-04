@@ -29,10 +29,10 @@ public class ApplicationProperties {
             result = System.getProperty(name);
         }
         if (result == null) {
-            result = this.fileProperties.getProperty(name);
+            result = this.dbProperties.getProperty(name);
         }
         if (result == null) {
-            result = this.dbProperties.getProperty(name);
+            result = this.fileProperties.getProperty(name);
         }
         return result;
     }

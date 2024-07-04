@@ -64,7 +64,6 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
                             authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
                             LocalDateTime nowMinus26 = now.minusHours(26);
                             userModel.setSingleAttribute(attributeLoginName, nowMinus26.format(formatter));
-                            userModel.setSingleAttribute("login_first", clientId);
                         }
                     }
                 }
