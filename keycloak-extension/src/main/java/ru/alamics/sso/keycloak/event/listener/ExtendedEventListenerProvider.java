@@ -56,15 +56,13 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
         String attributeLoginName = AUTHORIZATION_TIME + clientId;
         switch (event.getType()) {
             case LOGIN: {
-                if(clients.contains(clientId)) {
+                if (clientId.equals("app_b2b")) {
+                    authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
+                    LocalDateTime nowMinus26 = now.minusHours(26);
+                    userModel.setSingleAttribute(attributeLoginName, nowMinus26.format(formatter));
+                } else {
                     if(userModel.getFirstAttribute("login_first") != null && !userModel.getFirstAttribute("login_first").equals(clientId)) {
                         authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 8);
-                    } else {
-                        if (clientId.equals("app_b2b")) {
-                            authorisedUsersService.saveSuccessfulAuthFromEventListener(userId, realmId, clientId, 3);
-                            LocalDateTime nowMinus26 = now.minusHours(26);
-                            userModel.setSingleAttribute(attributeLoginName, nowMinus26.format(formatter));
-                        }
                     }
                 }
             }
