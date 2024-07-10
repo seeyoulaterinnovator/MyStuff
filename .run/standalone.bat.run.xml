@@ -1,0 +1,23 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="standalone.bat" type="BatchConfigurationType" factoryName="Batch">
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="WORKING_DIRECTORY" value="" />
+    <option name="PARENT_ENVS" value="true" />
+    <envs>
+      <!-- mklink /d "C:\Program Files\Java\jdk1.8" "C:\Program Files\Java\jdk1.8.0_192"  -->
+      <env name="JAVA_HOME" value="C:\Program Files\Java\jdk1.8" />
+      <!-- ru.alamics.sso.util.StandResolver.ENV -->
+      <env name="SITE" value="local"/>
+      <env name="WILDFLY_DS_KC_H2_NAME" value="KeycloakDS1" />
+      <env name="WILDFLY_DS_KC_H2_ENABLED" value="false" />
+      <env name="WILDFLY_DS_KC_MYSQL_NAME" value="KeycloakDS"/>
+      <env name="WILDFLY_DS_KC_MYSQL_ENABLED" value="true"/>
+    </envs>
+    <module name="" />
+    <option name="SCRIPT_NAME" value=".\data\local\keycloak-6.0.1\bin\standalone.bat" />
+    <option name="PARAMETERS" value="--debug 9797" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
