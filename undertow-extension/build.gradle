@@ -1,0 +1,15 @@
+plugins {
+    id 'java'
+    id 'osgi'
+}
+
+group = 'ru.alamics.sso'
+version = '0.0.1'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly 'io.undertow:undertow-core:2.0.19.Final'
+}
