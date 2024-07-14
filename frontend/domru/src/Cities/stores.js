@@ -36,3 +36,13 @@ export const editingStarted = writable(false);
 export const allCities = writable([]);
 
 export const quarter = writable(0);
+
+export const b2bChatWidgetUrl = writable('');
+
+isFirstVisit && fetch('/auth/realms/user/config-custom').then(response => response.json())
+  .then(json => {
+    b2bChatWidgetUrl.set(json.results.b2bChatWidgetUrl);
+  })
+  .catch(error => {
+    console.log(error);
+  });
