@@ -4,17 +4,28 @@
   import Cookie from "js-cookie";
 
   onMount(() => {
-    b2bChatWidgetUrl.subscribe(src => {
-      if (!window.B2B_CHAT_WIDGET_PARAMS && src) {
-        window.B2B_CHAT_WIDGET_PARAMS = {
-          userData: {
-            citydomain: Cookie.get('city-domain') || 'interzet'
-          }
-        };
-        const element = document.createElement('script');
-        element.src = $b2bChatWidgetUrl;
-        document.head.appendChild(element);
-      }
-    });
+    const initialize = () => {
+      b2bChatWidgetUrl.subscribe(src => {
+        if (!window.B2B_CHAT_WIDGET_PARAMS && src) {
+          window.B2B_CHAT_WIDGET_PARAMS = {
+            userData: {
+              citydomain: Cookie.get('city-domain') || 'interzet'
+            }
+          };
+          const element = document.createElement('script');
+          element.src = src;
+          document.head.appendChild(element);
+        }
+      });
+    };
+    if(document.readyState === 'complete') {
+      initialize();
+    } else {
+      document.addEventListener('readystatechange', () => {
+        if(document.readyState === 'complete') {
+          initialize();
+        }
+      });
+    }
   });
 </script>
