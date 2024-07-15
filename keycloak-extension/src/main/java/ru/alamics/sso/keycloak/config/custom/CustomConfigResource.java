@@ -27,6 +27,7 @@ public class CustomConfigResource {
     public Response getCities() {
         return JsonResponse.success()
                 .addResult("b2bChatWidgetUrl", properties.getProperty("b2bChatWidget.url"))
+                .addResult("b2bChatWidgetServer", properties.getProperty("b2bChatWidget.server"))
                 .build();
     }
 }
