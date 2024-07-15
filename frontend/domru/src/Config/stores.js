@@ -1,7 +1,4 @@
 import {writable} from "svelte/store";
-import Cookie from "js-cookie";
-
-const isFirstVisit = Cookie.get('VISITED') !== '1';
 
 export const customConfig = writable({
   isLoaded: false,
@@ -9,7 +6,7 @@ export const customConfig = writable({
   b2bChatWidgetServer: ''
 });
 
-isFirstVisit && fetch('/auth/realms/user/config-custom').then(response => response.json())
+fetch('/auth/realms/user/config-custom').then(response => response.json())
   .then(json => {
     customConfig.set({
       isLoaded: true,
