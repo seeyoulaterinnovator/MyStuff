@@ -6,6 +6,8 @@ public enum EStand {
     DEV("dev", false),
     TEST("test", true),
     STAGE("stage", true),
+    STAGE2("stage2", true),
+    STAGE5("stage5", true),
     PROD("prod", true);
 
     String val;
