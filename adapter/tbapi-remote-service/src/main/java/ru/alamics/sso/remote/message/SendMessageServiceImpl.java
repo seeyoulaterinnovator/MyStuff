@@ -77,10 +77,10 @@ public class SendMessageServiceImpl implements SendMessageService {
     public String sendMessageByRequest(MessageRequest messageRequest) throws SendMessageException {
 
         // локально и на дэве фиксированный код и не отправляю смс
-//        if (!StandResolver.isBattle()) {
-//            log.info("Stand {}, do not sending sms", StandResolver.ENV);
-//            return "0: Accepted for delivery";
-//        }
+        if (!StandResolver.isBattle()) {
+            log.info("Stand {}, do not sending sms", StandResolver.ENV);
+            return "0: Accepted for delivery";
+        }
 
         MsgConfig msgConfig = createMsgConfig(messageRequest.getRealmId(), messageRequest.getMessengerName().getType());
 
