@@ -16,6 +16,10 @@ public class StandResolver {
         if (st != null)
             return st;
 
+        if(env.contains(EStand.STAGE.val)){
+            return EStand.STAGE;
+        }
+
         return dflt;
     }
 
