@@ -47,3 +47,10 @@ resources:
   requests:
     cpu: 500m
     memory: 500Mi
+
+ingress:
+  annotations:
+    # viber://* - для чата
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      add_header Content-Security-Policy frame-src 'self' https://* wss://* viber://*; frame-ancestors 'self' *; object-src 'none';
+
