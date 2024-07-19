@@ -1,0 +1,14 @@
+version: '3.5'
+name: "sso"
+services:
+  db:
+    image: mariadb:10.4.7
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: sso
+      MYSQL_USER: sso
+      MYSQL_PASSWORD: sso
+      MYSQL_ROOT_PASSWORD: sa
+    volumes:
+      - ./data/local/db:/var/lib/mysql
