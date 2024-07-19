@@ -5,7 +5,11 @@
 <@layout.registrationLayout displayInfo=social.displayInfo displayWide=(realm.password && social.providers??); section>
     <#if section = "header">
         <#if !hideRegistration!false>
-            <@blocks.contentHeader mainTitle="${doLogIn}" secondaryTitle="${registerTitle}" secondaryHref="${url.registrationUrl}" withBorder=true />
+            <#if !registrationFirstTab!false>
+                <@blocks.contentHeader mainTitle="${registerTitle}" secondaryTitle="${doLogIn}" secondaryHref="${url.loginUrl}" withBorder=true />
+            <#else>
+                <@blocks.contentHeader mainTitle="${doLogIn}" secondaryTitle="${registerTitle}" secondaryHref="${url.registrationUrl}" withBorder=true />
+            </#if>
         <#else>
             <@blocks.contentHeader mainTitle="${doLogIn}" secondaryTitle=" " secondaryHref=" " withBorder=true />
         </#if>

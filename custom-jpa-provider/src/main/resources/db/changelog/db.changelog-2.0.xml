@@ -24,4 +24,16 @@
             UPDATE CLIENTS_FOR_MONITORING SET name = 'Система bss' WHERE client_name = 'bss';
         </sql>
     </changeSet>
+    <changeSet id="4" author="korotaev.miu">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE)
+            VALUES ('8ceb894a-055c-4ec2-ac34-a377786d1f4a', 'registrationFirstTabClientUds', '', 'dmp-kc-sit', 'user',
+                    'Список (через ",") ID-ов client-ов с вкладкой регистрации на 1-ом месте', null, 'FRONT'),
+                   ('8ceb894a-055c-4ec2-ac34-a377786d1f4b', 'registrationFullTextsClientIds', '', 'dmp-kc-sit', 'user',
+                    'Список (через ",") ID-ов client-ов с полными текстовками на форме регистрации', null, 'FRONT'),
+                   ('8ceb894a-055c-4ec2-ac34-a377786d1f4c', 'fullPlaceholderEmail', '',
+                    'Введите адрес электронной почты', 'user', 'Placeholder поля ввода email (без сокращений)', null,
+                    'FRONT');
+        </sql>
+    </changeSet>
 </databaseChangeLog>
