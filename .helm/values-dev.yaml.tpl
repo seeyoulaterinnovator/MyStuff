@@ -47,3 +47,4 @@ resources:
   requests:
     cpu: 500m
     memory: 500Mi
+
