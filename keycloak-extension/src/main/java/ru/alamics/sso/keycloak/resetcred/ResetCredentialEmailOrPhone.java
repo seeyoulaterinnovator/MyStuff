@@ -3,6 +3,7 @@ package ru.alamics.sso.keycloak.resetcred;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAuthenticator;
+import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -62,6 +63,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
     @Override
     public void authenticate(AuthenticationFlowContext context) {
         UserModel user = context.getUser();
+        log.info("authenticate reset-cred = {}", user.getEmail());
         ResetType resetType = ResetType.EMAIL;
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
         String username = authenticationSession.getAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME);
@@ -82,8 +84,14 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
                 username = userFind.getUsername();
                 authenticationSession.setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, userFind.getEmail());
                 context.getHttpRequest().getDecodedFormParameters().replace("username", Collections.singletonList(userFind.getEmail()));
+                if(!userFind.isEmailVerified()) {
+                    context.setUser(user);
+                    log.info("authenticate reset-cred not Verified = {}", context.getUser().getEmail());
+                    context.challenge(context.form().createForm("verify-email-by-reset.ftl"));
+                }
             }
         }
+
         if (user == null && userFind == null && checkRias(context)) {
             return;
         }
@@ -109,6 +117,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
         ResetFactory factory = new ResetFactoryImpl(this.session, context);
         ResetCredential resetCredential = factory.create(resetType);
         resetCredential.reset(user, username);
+
 //        if (sendEmailVer(user, context.form(), context.getSession(), context.getAuthenticationSession(), context.getEvent())) {
 //              resetCredential.reset(user, username);
 //        }
@@ -122,8 +131,16 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
 
     @Override
     public void action(AuthenticationFlowContext context) {
-        context.getUser().setEmailVerified(true);
-        context.success();
+        AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
+        log.info("action verify-email-by-reset context.getUser() = {}", context.getUser().getEmail());
+        String username = authenticationSession.getAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME);
+        log.info("action verify-email-by-reset username = {}", username);
+        if(username.equals(context.getUser().getEmail())){
+            context.getUser().setEmailVerified(true);
+            authenticate(context);
+            return;
+        }
+        context.forkWithErrorMessage(new FormMessage("Не получается отправить письмо. Учетная запись с такими данными не существует в системе"));
     }
 
     private boolean checkRias(AuthenticationFlowContext context) {
