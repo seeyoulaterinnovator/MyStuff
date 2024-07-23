@@ -8,9 +8,8 @@
         <@blocks.contentHeader mainTitle="${msg(emailForgotContentTitle)}" />
     <#elseif section = "form">
         <form id="verifyEmailByResetForm" action="${url.loginAction}" method="post">
-            <input name="city" id="city" class="city_hidden_input" type="text" />
             <div class="field field__container field--required mb-4 md:w-full">
-                <input name="username" id="username" class="field__input"
+                <input name="verifyEmail" id="verifyEmail" class="field__input"
                        label="${placeholderEmail}" placeholder="${placeholderEmail}" value="${email!''}"
                        required=true type="text"/>
             </div>
