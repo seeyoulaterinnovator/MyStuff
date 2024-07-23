@@ -87,7 +87,6 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
                     context.getHttpRequest().getDecodedFormParameters().replace("username", Collections.singletonList(userFind.getEmail()));
                 } else {
                     context.setUser(user);
-                    log.info("authenticate reset-cred not Verified = {}", context.getUser().getEmail());
                     context.challenge(context.form().createForm("verify-email-by-reset.ftl"));
                     return;
                 }
@@ -136,7 +135,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
     public void action(AuthenticationFlowContext context) {
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
         log.info("action verify-email-by-reset context.getUser() = {}", context.getUser().getEmail());
-        String username = authenticationSession.getAuthNote("email");
+        String username = authenticationSession.getAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME);
         log.info("action verify-email-by-reset username = {}", username);
         if(username.equals(context.getUser().getEmail())){
             context.getUser().setEmailVerified(true);
