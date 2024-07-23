@@ -1,4 +1,5 @@
 <#import "template.ftl" as layout>
+<#import "templates/components.ftl" as components>
 <#import "templates/blocks.ftl" as blocks>
 
 <@layout.registrationLayout displayInfo=true displayCity=true; section>
@@ -8,10 +9,7 @@
     <#elseif section = "form">
         <form id="verifyEmailByResetForm" action="${url.loginAction}" method="post">
             <input name="city" id="city" class="city_hidden_input" type="text" />
-            <div class="field field__container field--required mb-4 md:w-full">
-                <input name="username" id="username" class="field__input" placeholder="${msg(emailPlaceholder)}" type="text" autofocus />
-                <label class="field__label" for="username">E-mail</label>
-            </div>
+            <@components.field class="mb-4 md:w-full" fieldName="email" value="${email!''}" label="${placeholderEmail}" placeholder="${placeholderEmail}" required=true type="text" />
 
             <div class="flex flex-col justify-between sm:flex-row xl:mt-12 md:mt-8 mt-7">
                 <div class="flex-basis-auto w-full mb-2 sm:mb-0">

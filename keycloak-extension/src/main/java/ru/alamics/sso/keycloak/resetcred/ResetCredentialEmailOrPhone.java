@@ -62,6 +62,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
+        log.info("authenticate reset start");
         UserModel user = context.getUser();
         ResetType resetType = ResetType.EMAIL;
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
@@ -81,9 +82,10 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
                 user = context.getSession().users().getUserById(userFind.getId(), context.getSession().realms().getRealm(userFind.getRealmId()));
                 Objects.requireNonNull(user).setEnabled(true);
                 username = userFind.getUsername();
-                authenticationSession.setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, userFind.getEmail());
-                context.getHttpRequest().getDecodedFormParameters().replace("username", Collections.singletonList(userFind.getEmail()));
-                if(!userFind.isEmailVerified()) {
+                if(userFind.isEmailVerified()) {
+                    authenticationSession.setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, userFind.getEmail());
+                    context.getHttpRequest().getDecodedFormParameters().replace("username", Collections.singletonList(userFind.getEmail()));
+                } else {
                     context.setUser(user);
                     log.info("authenticate reset-cred not Verified = {}", context.getUser().getEmail());
                     context.challenge(context.form().createForm("verify-email-by-reset.ftl"));
@@ -133,7 +135,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
     public void action(AuthenticationFlowContext context) {
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
         log.info("action verify-email-by-reset context.getUser() = {}", context.getUser().getEmail());
-        String username = authenticationSession.getAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME);
+        String username = authenticationSession.getAuthNote("email");
         log.info("action verify-email-by-reset username = {}", username);
         if(username.equals(context.getUser().getEmail())){
             context.getUser().setEmailVerified(true);
