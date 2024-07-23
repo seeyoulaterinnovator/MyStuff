@@ -9,8 +9,11 @@
     <#elseif section = "form">
         <form id="verifyEmailByResetForm" action="${url.loginAction}" method="post">
             <input name="city" id="city" class="city_hidden_input" type="text" />
-            <@components.field class="mb-4 md:w-full" fieldName="email" value="${email!''}" label="${placeholderEmail}" placeholder="${placeholderEmail}" required=true type="text" />
-
+            <div class="field field__container field--required mb-4 md:w-full">
+                <input name="username" id="username" class="field__input"
+                       label="${placeholderEmail}" placeholder="${placeholderEmail}" value="${email!''}"
+                       required=true type="text"/>
+            </div>
             <div class="flex flex-col justify-between sm:flex-row xl:mt-12 md:mt-8 mt-7">
                 <div class="flex-basis-auto w-full mb-2 sm:mb-0">
                     <#--  <button id="submit" class="btn btn-main w-full" type="submit">${msg("doSubmit")}</button>  -->

@@ -135,7 +135,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
     public void action(AuthenticationFlowContext context) {
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
         log.info("action verify-email-by-reset context.getUser() = {}", context.getUser().getEmail());
-        String username = authenticationSession.getAuthNote("placeholderEmail");
+        String username = authenticationSession.getAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME);
         log.info("action verify-email-by-reset username = {}", username);
         if(username != null && context.getUser().getEmail() != null && username.equals(context.getUser().getEmail())){
             context.getUser().setEmailVerified(true);
