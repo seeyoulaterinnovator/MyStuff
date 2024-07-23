@@ -81,14 +81,15 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
             if (userFind != null && userFind.getAttributes().stream().noneMatch(it -> it.getName().equals(BlockType.MANAGER_BLOCK.getType()))) {
                 user = context.getSession().users().getUserById(userFind.getId(), context.getSession().realms().getRealm(userFind.getRealmId()));
                 Objects.requireNonNull(user).setEnabled(true);
-                username = userFind.getUsername();
                 if(userFind.isEmailVerified()) {
+                    username = userFind.getUsername();
                     authenticationSession.setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, userFind.getEmail());
                     context.getHttpRequest().getDecodedFormParameters().replace("username", Collections.singletonList(userFind.getEmail()));
                 } else {
                     context.setUser(user);
                     log.info("authenticate reset-cred not Verified = {}", context.getUser().getEmail());
                     context.challenge(context.form().createForm("verify-email-by-reset.ftl"));
+                    return;
                 }
             }
         }
