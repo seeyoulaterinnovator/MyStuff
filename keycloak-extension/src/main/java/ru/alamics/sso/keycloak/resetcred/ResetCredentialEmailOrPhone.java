@@ -141,6 +141,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
         if(username != null && context.getUser().getEmail() != null && username.equals(context.getUser().getEmail())){
             context.getUser().setEmailVerified(true);
             authenticate(context);
+            return;
         }
         context.forkWithErrorMessage(new FormMessage("Не получается отправить письмо. Учетная запись с такими данными не существует в системе"));
     }
