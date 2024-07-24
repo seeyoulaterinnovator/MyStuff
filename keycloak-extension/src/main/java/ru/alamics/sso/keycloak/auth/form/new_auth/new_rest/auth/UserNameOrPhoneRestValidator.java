@@ -29,7 +29,7 @@ public class UserNameOrPhoneRestValidator extends ValidateUsername {
 
     private static final String PROVIDER_ID = "rest-phone-username-validator";
 
-    private static final String DISPLAY_NAME = "Rest Username Validator";
+    public static final String DISPLAY_NAME = "Rest Username Validator";
 
     private static final String HELP_TEXT = "";
 
