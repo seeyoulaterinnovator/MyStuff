@@ -204,7 +204,6 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                 } catch (Exception e) {
                     log.info(e.getMessage(), e);
                     failure(context, "Ошибка отправки кода");
-                    context.resetFlow();
                     return;
                 }
                 codeSentAt = Instant.now();
