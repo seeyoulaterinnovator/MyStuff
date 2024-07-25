@@ -153,7 +153,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                     UserToUserEntityMapper.toUserEntity(user)
             ).size();
             if(attemptCount > maxResendRecallTries) {
-                blackListService.limitUserBySmsOrPhone(user, codeType.name(), session);
+                blackListService.limitUserBySmsOrPhoneV2(user, codeType.name(), session);
                 log.info("{} blocked by attempt count", user.getPhone());
                 isBlocked = true;
             }
