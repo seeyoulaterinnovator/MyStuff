@@ -50,6 +50,7 @@ import static ru.alamics.sso.registration.model.UserConstants.*;
 import static ru.alamics.sso.settings.SettingConstants.*;
 import static ru.alamics.sso.util.Util.CLIENT_B2B;
 import static ru.alamics.sso.keycloak.util.MiscUtil.*;
+import static org.keycloak.models.Constants.*;
 
 @Slf4j
 public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
@@ -182,8 +183,18 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             attributes.put("loginViaEmailOrUsernameAndPassword", isLoginViaEmailOrUsernameAndPassword());
             attributes.put("loginViaPhoneCall", isLoginViaPhoneCall());
             attributes.put("hideChat", isChatHidden());
-            attributes.put("registrationFirstTab", hasClientIdInSettings(REGISTRATION_FIRST_TAB_CLIENT_IDS));
-            attributes.put("registrationFullTexts", hasClientIdInSettings(REGISTRATION_FULL_TEXTS_CLIENT_IDS));
+            attributes.put(
+                    "registrationFirstTab",
+                    hasClientIdInSettings(REGISTRATION_FIRST_TAB_CLIENT_IDS)
+                            && page == LoginFormsPages.LOGIN
+                            && !Util.TRUE_STR.equals(uriInfo.getQueryParameters().getFirst(SELF))
+                            && !uriInfo.getQueryParameters().containsKey(TAB_ID)
+                            && (formData == null || formData.isEmpty())
+
+            );
+            attributes.put("registrationFullTexts", hasClientIdInSettings(REGISTRATION_FIRST_TAB_CLIENT_IDS));
+            attributes.put("loginFullTexts", hasClientIdInSettings(LOGIN_FULL_TEXTS_CLIENT_IDS));
+            attributes.put("loginFailToRegistration", hasClientIdInSettings(LOGIN_FAIL_TO_REGISTRATION_CLIENT_IDS));
 
             if (realm.isInternationalizationEnabled()) {
                 UriBuilder b;
@@ -230,6 +241,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     }
 
     private boolean hasClientIdInSettings(SettingConstants setting) {
+        if(client == null) return false;
         return Arrays.stream(settingsService.getSettingsStringValue(setting, realm.getName()).split(","))
                 .map(String::trim)
                 .map(String::toLowerCase)

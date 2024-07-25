@@ -1,0 +1,483 @@
+[{
+  "httpRequest": {
+    "path": "/cities/domains"
+  },
+  "httpResponse": {
+    "body": [
+      {
+        "city": "dev-av-penza",
+        "name": "dev-av-penza",
+        "domain": "dev-av-penza",
+        "bss": false
+      },
+      {
+        "city": "dev-b2c-penza",
+        "name": "dev-b2c-penza",
+        "domain": "dev-b2c-penza",
+        "bss": false
+      },
+      {
+        "city": "dev-b2c-saratov",
+        "name": "dev-b2c-saratov",
+        "domain": "dev-b2c-penza",
+        "bss": false
+      },
+      {
+        "city": "dev-lk-penza",
+        "name": "dev-lk-penza",
+        "domain": "dev-lk-penza",
+        "bss": false
+      },
+      {
+        "city": "dev-ma-penza",
+        "name": "dev-ma-penza",
+        "domain": "dev-ma-penza",
+        "bss": false
+      },
+      {
+        "city": "dev-oats3-penza",
+        "name": "dev-oats3-penza",
+        "domain": "dev-oats3-penza",
+        "bss": false
+      },
+      {
+        "city": "dev-tv3-penza",
+        "name": "dev-tv3-penza",
+        "domain": "dev-tv3-penza",
+        "bss": false
+      },
+      {
+        "city": "hq-dev",
+        "name": "hq-dev",
+        "domain": "hq-dev",
+        "bss": false
+      },
+      {
+        "city": "infocenter",
+        "name": "Infocenter",
+        "domain": "ic",
+        "bss": false
+      },
+      {
+        "city": "nlink",
+        "name": "nlink",
+        "domain": "nlink",
+        "bss": false
+      },
+      {
+        "city": "perm-dev",
+        "name": "perm-dev",
+        "domain": "perm-dev",
+        "bss": false
+      },
+      {
+        "city": "testing2",
+        "name": "Testing2",
+        "domain": "testing2",
+        "bss": false
+      },
+      {
+        "city": "westcall",
+        "name": "westcall",
+        "domain": "westcall",
+        "bss": false
+      },
+      {
+        "city": "westcall-spb",
+        "name": "westcall-spb",
+        "domain": "wc-spb",
+        "bss": false
+      },
+      {
+        "city": "angarsk",
+        "name": "Ангарск",
+        "domain": "irkutsk",
+        "bss": true
+      },
+      {
+        "city": "barnaul",
+        "name": "Барнаул",
+        "domain": "barnaul",
+        "bss": true
+      },
+      {
+        "city": "ber",
+        "name": "Березники",
+        "domain": "perm",
+        "bss": true
+      },
+      {
+        "city": "bryansk",
+        "name": "Брянск",
+        "domain": "bryansk",
+        "bss": true
+      },
+      {
+        "city": "volgograd",
+        "name": "Волгоград",
+        "domain": "volgograd",
+        "bss": true
+      },
+      {
+        "city": "vlz",
+        "name": "Волжский",
+        "domain": "volgograd",
+        "bss": true
+      },
+      {
+        "city": "voronezh",
+        "name": "Воронеж",
+        "domain": "voronezh",
+        "bss": true
+      },
+      {
+        "city": "dzr",
+        "name": "Дзержинск",
+        "domain": "nn",
+        "bss": true
+      },
+      {
+        "city": "dmgd",
+        "name": "Димитровград",
+        "domain": "ulsk",
+        "bss": true
+      },
+      {
+        "city": "ekat",
+        "name": "Екатеринбург",
+        "domain": "ekat",
+        "bss": true
+      },
+      {
+        "city": "izhevsk",
+        "name": "Ижевск",
+        "domain": "izhevsk",
+        "bss": true
+      },
+      {
+        "city": "irkutsk",
+        "name": "Иркутск",
+        "domain": "irkutsk",
+        "bss": true
+      },
+      {
+        "city": "yola",
+        "name": "Йошкар-Ола",
+        "domain": "yola",
+        "bss": true
+      },
+      {
+        "city": "kazan",
+        "name": "Казань",
+        "domain": "kzn",
+        "bss": true
+      },
+      {
+        "city": "kirov",
+        "name": "Киров",
+        "domain": "kirov",
+        "bss": true
+      },
+      {
+        "city": "krd",
+        "name": "Краснодар",
+        "domain": "krd",
+        "bss": true
+      },
+      {
+        "city": "krsk",
+        "name": "Красноярск",
+        "domain": "krsk",
+        "bss": true
+      },
+      {
+        "city": "kungur",
+        "name": "Кунгур",
+        "domain": "perm",
+        "bss": true
+      },
+      {
+        "city": "kurgan",
+        "name": "Курган",
+        "domain": "kurgan",
+        "bss": true
+      },
+      {
+        "city": "kursk",
+        "name": "Курск",
+        "domain": "kursk",
+        "bss": true
+      },
+      {
+        "city": "lipetsk",
+        "name": "Липецк",
+        "domain": "lipetsk",
+        "bss": true
+      },
+      {
+        "city": "mgn",
+        "name": "Магнитогорск",
+        "domain": "mgn",
+        "bss": true
+      },
+      {
+        "city": "mich",
+        "name": "Мичуринск",
+        "domain": "lipetsk",
+        "bss": true
+      },
+      {
+        "city": "msk",
+        "name": "Москва",
+        "domain": "msk",
+        "bss": true
+      },
+      {
+        "city": "chelny",
+        "name": "Набережные Челны",
+        "domain": "chelny",
+        "bss": true
+      },
+      {
+        "city": "nk",
+        "name": "Нижнекамск",
+        "domain": "chelny",
+        "bss": true
+      },
+      {
+        "city": "nn",
+        "name": "Нижний Новгород",
+        "domain": "nn",
+        "bss": true
+      },
+      {
+        "city": "nsk",
+        "name": "Новосибирск",
+        "domain": "nsk",
+        "bss": true
+      },
+      {
+        "city": "omsk",
+        "name": "Омск",
+        "domain": "omsk",
+        "bss": true
+      },
+      {
+        "city": "oren",
+        "name": "Оренбург",
+        "domain": "oren",
+        "bss": true
+      },
+      {
+        "city": "penza",
+        "name": "Пенза",
+        "domain": "penza",
+        "bss": true
+      },
+      {
+        "city": "perm",
+        "name": "Пермь",
+        "domain": "perm",
+        "bss": true
+      },
+      {
+        "city": "rostov",
+        "name": "Ростов-на-Дону",
+        "domain": "rostov",
+        "bss": true
+      },
+      {
+        "city": "ryazan",
+        "name": "Рязань",
+        "domain": "ryazan",
+        "bss": true
+      },
+      {
+        "city": "samara",
+        "name": "Самара",
+        "domain": "samara",
+        "bss": true
+      },
+      {
+        "city": "interzet",
+        "name": "Санкт-Петербург",
+        "domain": "spb",
+        "bss": true
+      },
+      {
+        "city": "saratov",
+        "name": "Саратов",
+        "domain": "saratov",
+        "bss": true
+      },
+      {
+        "city": "seversk",
+        "name": "Северск",
+        "domain": "tomsk",
+        "bss": true
+      },
+      {
+        "city": "slk",
+        "name": "Соликамск",
+        "domain": "perm",
+        "bss": true
+      },
+      {
+        "city": "sbor",
+        "name": "Сосновый Бор",
+        "domain": "spb",
+        "bss": true
+      },
+      {
+        "city": "ctk",
+        "name": "СТК",
+        "domain": "ctk",
+        "bss": false
+      },
+      {
+        "city": "syzran",
+        "name": "Сызрань",
+        "domain": "samara",
+        "bss": true
+      },
+      {
+        "city": "tver",
+        "name": "Тверь",
+        "domain": "tver",
+        "bss": true
+      },
+      {
+        "city": "tomsk",
+        "name": "Томск",
+        "domain": "tomsk",
+        "bss": true
+      },
+      {
+        "city": "tula",
+        "name": "Тула",
+        "domain": "tula",
+        "bss": true
+      },
+      {
+        "city": "tmn",
+        "name": "Тюмень",
+        "domain": "tmn",
+        "bss": true
+      },
+      {
+        "city": "ulsk",
+        "name": "Ульяновск",
+        "domain": "ulsk",
+        "bss": true
+      },
+      {
+        "city": "usol",
+        "name": "Усолье-Сибирское",
+        "domain": "irkutsk",
+        "bss": true
+      },
+      {
+        "city": "ufa",
+        "name": "Уфа",
+        "domain": "ufa",
+        "bss": true
+      },
+      {
+        "city": "hq",
+        "name": "Холдинг",
+        "domain": "federal",
+        "bss": false
+      },
+      {
+        "city": "cheb",
+        "name": "Чебоксары",
+        "domain": "cheb",
+        "bss": true
+      },
+      {
+        "city": "chel",
+        "name": "Челябинск",
+        "domain": "chel",
+        "bss": true
+      },
+      {
+        "city": "chus",
+        "name": "Чусовой",
+        "domain": "perm",
+        "bss": true
+      },
+      {
+        "city": "engels",
+        "name": "Энгельс",
+        "domain": "saratov",
+        "bss": true
+      },
+      {
+        "city": "yar",
+        "name": "Ярославль",
+        "domain": "yar",
+        "bss": true
+      },
+      {
+        "city": "yats",
+        "name": "ЯТС",
+        "domain": "yats",
+        "bss": false
+      },
+      {
+        "city": "ulu",
+        "name": "Улан-Удэ",
+        "domain": "ulu",
+        "bss": true
+      },
+      {
+        "city": "votkinsk",
+        "name": "Воткинск",
+        "domain": "izhevsk",
+        "bss": true
+      },
+      {
+        "city": "rinet",
+        "name": "Москва Кроникс Плюс",
+        "domain": "rinet",
+        "bss": true
+      },
+      {
+        "city": "nizhneudinsk",
+        "name": "Нижнеудинск",
+        "domain": "irkutsk",
+        "bss": true
+      },
+      {
+        "city": "taishet",
+        "name": "Тайшет",
+        "domain": "irkutsk",
+        "bss": true
+      },
+      {
+        "city": "krasnokamsk",
+        "name": "Краснокамск",
+        "domain": "perm",
+        "bss": true
+      },
+      {
+        "city": "donryanka",
+        "name": "Добрянка",
+        "domain": "perm",
+        "bss": true
+      },
+      {
+        "city": "lysva",
+        "name": "Лысьва",
+        "domain": "perm",
+        "bss": true
+      },
+      {
+        "city": "nts",
+        "name": "Томск (НТС)",
+        "domain": "nts",
+        "bss": false
+      }
+    ]
+  }
+}]

@@ -1,7 +1,7 @@
 <#import "templates/email-sent.ftl" as emailSent>
 <#import "templates/header.ftl" as header>
 
-<#macro registrationLayout displayInfo=false displayMessage=true displayWarningMessage=true displayWide=false environment="production" displayCity=true>
+<#macro registrationLayout displayInfo=false displayMessage=true displayWarningMessage=true displayWide=false environment="production" displayCity=true redirectTo="">
     <!DOCTYPE html>
     <html xmlns="http://www.w3.org/1999/xhtml" lang="ru" class="h-full scrollable-container">
     <head>
@@ -27,6 +27,12 @@
                 <link href="${url.resourcesPath}/${style}?hash=" rel="stylesheet"/>
             </#list>
         </#if>
+        <#if redirectTo?has_content>
+            <script>
+              document.location = "${redirectTo}".replaceAll('&amp;', '&');
+            </script>
+        </#if>
+
     </head>
     <body class="min-h-full flex flex-col p-4 sm:px-6 md:py-6 lg:px-8 xl:py-8 xl:px-6">
     <#if displayMessage && message?has_content && message.summary == 'Регистрация временно недоступна, попробуйте повторить попытку позже'>

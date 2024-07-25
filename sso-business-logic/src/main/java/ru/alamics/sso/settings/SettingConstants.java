@@ -90,6 +90,8 @@ public enum SettingConstants {
     PHONE_CONST_LINK("phoneConstLink"),
     REGISTRATION_FIRST_TAB_CLIENT_IDS("registrationFirstTabClientIds"),
     REGISTRATION_FULL_TEXTS_CLIENT_IDS("registrationFullTextsClientIds"),
+    LOGIN_FULL_TEXTS_CLIENT_IDS("loginFullTextsClientIds"),
+    LOGIN_FAIL_TO_REGISTRATION_CLIENT_IDS("loginFailToRegistrationClientIds"),
 
     //Заголовоки сообщений
 
