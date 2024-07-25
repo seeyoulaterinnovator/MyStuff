@@ -4,6 +4,7 @@ package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
+import org.keycloak.authentication.AuthenticationFlowException;
 import org.keycloak.authentication.authenticators.directgrant.ValidateUsername;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
@@ -15,6 +16,7 @@ import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.managers.AuthenticationManager;
 import ru.alamics.sso.jpa.entity.common.BlockType;
 import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.util.Util;
 
@@ -29,7 +31,7 @@ public class UserNameOrPhoneRestValidator extends ValidateUsername {
 
     private static final String PROVIDER_ID = "rest-phone-username-validator";
 
-    private static final String DISPLAY_NAME = "Rest Username Validator";
+    public static final String DISPLAY_NAME = "Rest Username Validator";
 
     private static final String HELP_TEXT = "";
 
@@ -98,7 +100,16 @@ public class UserNameOrPhoneRestValidator extends ValidateUsername {
                 return;
             }
         }
-        context.setUser(user);
+        try {
+            context.setUser(user);
+        } catch (AuthenticationFlowException e) {
+            if(e.getError() == AuthenticationFlowError.USER_DISABLED) {
+                Response challenge = JsonResponse.fail().message("Пользователь заблокирован").build();
+                context.failureChallenge(e.getError(), challenge);
+                return;
+            }
+            throw e;
+        }
         Objects.requireNonNull(user).setEnabled(true);
         context.success();
     }
