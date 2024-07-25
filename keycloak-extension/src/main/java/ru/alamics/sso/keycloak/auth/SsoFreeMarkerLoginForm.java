@@ -192,9 +192,17 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                             && (formData == null || formData.isEmpty())
 
             );
-            attributes.put("registrationFullTexts", hasClientIdInSettings(REGISTRATION_FIRST_TAB_CLIENT_IDS));
-            attributes.put("loginFullTexts", hasClientIdInSettings(LOGIN_FULL_TEXTS_CLIENT_IDS));
-            attributes.put("loginFailToRegistration", hasClientIdInSettings(LOGIN_FAIL_TO_REGISTRATION_CLIENT_IDS));
+            attributes.put("isRegistrationFullTexts", hasClientIdInSettings(REGISTRATION_FIRST_TAB_CLIENT_IDS));
+            attributes.put("isLoginFullTexts", hasClientIdInSettings(LOGIN_FULL_TEXTS_CLIENT_IDS));
+            if(hasClientIdInSettings(LOGIN_FAIL_TO_REGISTRATION_CLIENT_IDS)
+                    && messages != null && !messages.isEmpty()
+                    && messages.stream().allMatch(m -> Messages.INVALID_USER.equals(m.getMessage()))
+                    && page == LoginFormsPages.LOGIN && formData != null && !formData.isEmpty()
+            ) {
+                attributes.put("loginFailToRegistrationMessage", notEmptySettingsValue(
+                        settingsService.getSettingsStringValue(LOGIN_FAIL_TO_REGISTRATION_MESSAGE, realm.getName()),
+                        ""));
+            }
 
             if (realm.isInternationalizationEnabled()) {
                 UriBuilder b;

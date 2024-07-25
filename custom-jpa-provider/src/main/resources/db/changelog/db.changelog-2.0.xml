@@ -38,6 +38,10 @@
                     'FRONT'),
                    ('8ceb894a-055c-4ec2-ac34-a377786d1f4e', 'fullPlaceholderEmail', 'Введите адрес электронной почты',
                     '', 'user', 'Placeholder поля ввода email (без сокращений)', null,
+                    'FRONT'),
+                   ('8ceb894a-055c-4ec2-ac34-a377786d1f4f', 'loginFailToRegistrationMessage',
+                    'Учетная запись не найдена, пожалуйста, зарегистрируйтесь',
+                    '', 'user', 'Сообщение предложением регистрации при ошибке входа', null,
                     'FRONT');
         </sql>
     </changeSet>

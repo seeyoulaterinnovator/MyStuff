@@ -16,8 +16,8 @@
 
             <@components.field class="md:w-full"
                 fieldName="email" value="${email!''}"
-                label="${util.if(registrationFullTexts!false, fullPlaceholderEmail, placeholderEmail)}"
-                placeholder="${util.if(registrationFullTexts!false, fullPlaceholderEmail, placeholderEmail)}"
+                label="${util.if(isRegistrationFullTexts!false, fullPlaceholderEmail, placeholderEmail)}"
+                placeholder="${util.if(isRegistrationFullTexts!false, fullPlaceholderEmail, placeholderEmail)}"
                 required=true
                 type="text" />
 

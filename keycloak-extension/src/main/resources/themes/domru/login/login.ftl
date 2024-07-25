@@ -11,7 +11,7 @@
     <a class="reference reference_hoverable allowDoubleClick item_hover"
        style="font-weight: 350;"
        href="https://moscow.b2b.dom.ru/agreement" target="_blink">
-       <#if loginFullTexts!false>
+       <#if isLoginFullTexts!false>
            с Условиями обработки персональных данных
        <#else>
            с Условиями обработки данных

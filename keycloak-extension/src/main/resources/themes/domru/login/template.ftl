@@ -1,7 +1,16 @@
 <#import "templates/email-sent.ftl" as emailSent>
 <#import "templates/header.ftl" as header>
 
-<#macro registrationLayout displayInfo=false displayMessage=true displayWarningMessage=true displayWide=false environment="production" displayCity=true redirectTo="">
+<#macro registrationLayout
+        displayInfo=false
+        displayMessage=true
+        displayWarningMessage=true
+        displayWide=false
+        environment="production"
+        displayCity=true
+        redirectTo=""
+        redirectToOnModalClose=""
+>
     <!DOCTYPE html>
     <html xmlns="http://www.w3.org/1999/xhtml" lang="ru" class="h-full scrollable-container">
     <head>
@@ -104,7 +113,11 @@
                                 </span>
                             </#if>
                             <#if message.type = 'error'>
-                                <#if message.summary?contains('Номер мобильного телефона уже используется в другой учетной записи.')>
+                                <#if loginFailToRegistrationMessage?has_content>
+                                    <span class="text-accentRed login-fail-to-registration hidden">
+                                        ${kcSanitize(loginFailToRegistrationMessage)?no_esc}
+                                    </span>
+                                <#elseif message.summary?contains('Номер мобильного телефона уже используется в другой учетной записи.')>
                                     <#if message.summary?contains(msg('emailExistsMessage'))>
                                         <span class="text-accentRed bad_phone bad_email hidden">
                                             ${kcSanitize(message.summary)?no_esc}
@@ -177,7 +190,7 @@
         </#if>
 
         <div id="cities-modal"></div>
-        <div id="message-modal" data-login-url="${url.loginUrl}"></div>
+        <div id="message-modal" data-login-url="${url.loginUrl}" data-registration-url="${url.registrationUrl}"></div>
     </#if>
 
     <#if properties.scripts?has_content>

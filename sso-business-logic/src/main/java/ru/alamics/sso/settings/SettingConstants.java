@@ -92,6 +92,7 @@ public enum SettingConstants {
     REGISTRATION_FULL_TEXTS_CLIENT_IDS("registrationFullTextsClientIds"),
     LOGIN_FULL_TEXTS_CLIENT_IDS("loginFullTextsClientIds"),
     LOGIN_FAIL_TO_REGISTRATION_CLIENT_IDS("loginFailToRegistrationClientIds"),
+    LOGIN_FAIL_TO_REGISTRATION_MESSAGE("loginFailToRegistrationMessage"),
 
     //Заголовоки сообщений
 
