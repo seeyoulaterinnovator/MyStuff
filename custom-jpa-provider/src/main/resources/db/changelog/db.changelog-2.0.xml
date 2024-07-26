@@ -34,7 +34,7 @@
                    ('8ceb894a-055c-4ec2-ac34-a377786d1f4c', 'registrationFullTextsClientIds', 'dmp-kc-sit', '', 'user',
                     'Список (через ",") ID-ов client-ов с полными текстовками на форме регистрации', null, 'FRONT'),
                    ('8ceb894a-055c-4ec2-ac34-a377786d1f4d', 'loginFailToRegistrationClientIds', 'dmp-kc-sit',
-                    '', 'user', 'ID-ов client-ов с предложением регистрации при ошибке входа', null,
+                    '', 'user', 'Список (через ",") ID-ов client-ов с предложением регистрации при ошибке входа', null,
                     'FRONT'),
                    ('8ceb894a-055c-4ec2-ac34-a377786d1f4e', 'fullPlaceholderEmail', 'Введите адрес электронной почты',
                     '', 'user', 'Placeholder поля ввода email (без сокращений)', null,
