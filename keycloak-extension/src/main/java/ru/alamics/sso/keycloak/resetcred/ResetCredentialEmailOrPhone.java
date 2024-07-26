@@ -62,7 +62,6 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
-        log.info("authenticate reset start");
         UserModel user = context.getUser();
         ResetType resetType = ResetType.EMAIL;
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
@@ -92,7 +91,6 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
                 }
             }
         }
-        log.info("authenticate reset-cred = {}", user.getEmail());
 
         if (user == null && userFind == null && checkRias(context)) {
             return;
@@ -134,10 +132,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
     @Override
     public void action(AuthenticationFlowContext context) {
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
-        log.info("action verify-email-by-reset context.getUser() = {}", context.getUser().getEmail());
-//        String username = authenticationSession.getAuthNote("verifyEmail");
         String username = context.getHttpRequest().getDecodedFormParameters().getFirst("verifyEmail");
-        log.info("action verify-email-by-reset username = {}", username);
         if(username != null && context.getUser().getEmail() != null && username.equals(context.getUser().getEmail())){
             context.getUser().setEmailVerified(true);
             authenticate(context);
