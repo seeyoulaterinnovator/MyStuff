@@ -20,3 +20,8 @@ services:
       MOCKSERVER_INITIALIZATION_JSON_PATH: /var/mockserver/initialization.json
     volumes:
       - ./data/local/mockserver/:/var/mockserver/:ro
+  smtp4dev:
+    image: rnwood/smtp4dev:v3
+    ports:
+      - "25:25"
+      - "8025:80"
