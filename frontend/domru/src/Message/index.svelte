@@ -7,11 +7,12 @@
     isBadEmail,
     isBadPhone,
     loginUrl,
+    registrationUrl,
     showInfo,
     isLimitExceeded,
     isPhoneError,
     isSecondSwitcher,
-    isEmailVer
+    isEmailVer, isLoginFailToRegistration
   } from './stores.js';
   import {showModal} from "../Cities/stores";
 
@@ -22,6 +23,7 @@
   const hasBadEmail = hasAlert && alert.classList.contains('bad_email');
   const hasBadPhone = hasAlert && alert.classList.contains('bad_phone');
   const hasLimitCode = hasAlert && alert.classList.contains('limit-exceeded');
+  const hasLoginFailToRegistration = hasAlert && alert.classList.contains('login-fail-to-registration');
 
   const info = document.querySelector('.alert .text-black');
   const hasInfo = !!info;
@@ -61,6 +63,7 @@
   isUpdateProfile.set(hasUpdateProfile);
   text.set(newText);
   isLimitExceeded.set(hasLimitCode);
+  isLoginFailToRegistration.set(hasLoginFailToRegistration);
   isSecondSwitcher.set(hasSecondSwitcher);
   isEmailVer.set(hasEmailVer)
 
@@ -102,8 +105,11 @@
   // }
 
   function handleHide() {
-    console.log("handleHide")
+    console.log("handleHide");
     show.set(false);
+    if($isLoginFailToRegistration && $registrationUrl) {
+      document.location = $registrationUrl;
+    }
   }
 
   function handleHide2() {
@@ -128,8 +134,12 @@
     secondSwitcher.click();
   }
 
-  function closeAndSubmit() {
-    submitButton.click();
+  function closeAndSubmit(e) {
+    if(submitButton) {
+      submitButton.click();
+    } else if(e) {
+      handleHide();
+    }
   }
 
   function handleClick(e) {

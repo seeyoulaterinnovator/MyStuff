@@ -22,6 +22,7 @@ public class UserConstants {
     public static final String HIDDEN_HEADER = "hiddenHeader";
     public static final String CITY = "city";
     public static final String REDIRECT_URI = "redirect_uri";
+    public static final String SELF = "self";
 
     public static final String DISABLE_TWO_STEP_AUTH = "disable_two_step_auth";
 }

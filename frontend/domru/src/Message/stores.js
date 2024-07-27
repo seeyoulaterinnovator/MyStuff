@@ -22,4 +22,8 @@ export const isUpdateProfile = writable(false);
 
 export const isLimitExceeded = writable(false);
 
+export const isLoginFailToRegistration = writable(false);
+
 export const loginUrl = writable(document.getElementById('message-modal').getAttribute('data-login-url'));
+
+export const registrationUrl = writable(document.getElementById('message-modal').getAttribute('data-registration-url'));
