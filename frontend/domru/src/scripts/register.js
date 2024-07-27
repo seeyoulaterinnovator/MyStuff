@@ -308,8 +308,14 @@ export default (function() {
   }
   linkPasswords(getPassword, setPassword, getConfirmation, setConfirmation, document.getElementById('password'), document.getElementById('password-confirm'));
 
-  // fix отображения значения по умолчанию только после 1-го фокуса
-  document.querySelectorAll('input[type="text"]').forEach(input => {
-    if(input.value) input.focus();
-  })
+  // fix ошибки final-form отображения значения по умолчанию только после 1-го фокуса
+  setTimeout(() => {
+    document.querySelectorAll('input[type="text"]').forEach(input => {
+      const value = input.getAttribute('value');
+      if(!input.value && value) {
+        input.value = value;
+        input.dispatchEvent(new Event('blur', { bubbles: true }));
+      }
+    })
+  }, 0);
 })();

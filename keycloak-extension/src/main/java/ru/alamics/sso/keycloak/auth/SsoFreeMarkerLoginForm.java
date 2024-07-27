@@ -31,6 +31,7 @@ import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.keycloak.auth.model.AuthType;
 import ru.alamics.sso.keycloak.auth.model.SsoUrlBean;
 import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.keycloak.util.MiscUtil;
 import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
@@ -469,7 +470,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             if(formData != null) {
                 String username = formData.getFirst("username");
                 if(username != null && !username.trim().isEmpty()) {
-                    if(formData.containsKey("smsButton")) {
+                    if(formData.containsKey("smsButton") || MiscUtil.isPhoneNumber(username)) {
                         authenticationSession.setAuthNote(AUTH_NOTE_LAST_LOGIN_PHONE, username);
                     } else {
                         authenticationSession.setAuthNote(AUTH_NOTE_LAST_LOGIN_USERNAME, username);

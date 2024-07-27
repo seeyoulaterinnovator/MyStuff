@@ -12,10 +12,18 @@ https://gitlab.ertelecom.ru/b2bweb/sso
    но не забыть потом их создать
 7) Обновить настройки для локального развертывания:
 ```mysql
-update REALM set ssl_required = 'NONE';
-# Если будут использоваться сохраненные run config-и для Idea
-update app_properties set value = 'http://localhost:1080/cities/domains' where name = 'cities.url';
-update REALM_SMTP_CONFIG set VALUE = 'localhost' where NAME = 'host';
+update REALM
+set ssl_required = 'NONE';
+-- Если будут использоваться сохраненные run config-и для Idea
+update APP_PROPERTIES
+set value = 'http://localhost:1080/cities/domains'
+where name = 'cities.url';
+update REALM_SMTP_CONFIG
+set VALUE = 'localhost'
+where NAME = 'host';
+update SETTINGS
+set VALUE = 'http://localhost:1080/dadata/suggestions/api/4_1/rs/iplocate/address'
+where EXT_ID = 'urlDaDataRequestLocationIp';
 ```
 
 # Запуск проекта с Дебагом

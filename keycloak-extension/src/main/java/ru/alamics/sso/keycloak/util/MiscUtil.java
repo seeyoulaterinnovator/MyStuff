@@ -22,4 +22,8 @@ public final class MiscUtil {
     public static boolean isEmptySettingsValue(String value) {
         return value == null || value.isEmpty() || STUB_SETTING_VALUE.equals(value);
     }
+
+    public static boolean isPhoneNumber(String value) {
+        return value != null && !value.isEmpty() && value.matches("^79[0-9]{9}$");
+    }
 }
