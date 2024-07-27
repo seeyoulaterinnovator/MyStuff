@@ -35,15 +35,6 @@ public class BlackListRepository {
                 .getResultList();
     }
 
-    public List<BlackListEntity> findFirstByPhoneAndLimitationCause(String phone, String limitationCause) {
-        return em.createQuery("select be from BlackListEntity be " +
-                        "where be.phone = :phone and be.limitationCause = :limitationCause " +
-                        "order by be.createdAt desc", BlackListEntity.class)
-                .setParameter("phone", phone)
-                .setParameter("limitationCause", limitationCause)
-                .getResultList();
-    }
-
     public BlackListEntity findFirstByLogin(String login) {
         return em.createQuery("select be from BlackListEntity be where be.unblockedAt >= current_timestamp and be.userLogin =:login", BlackListEntity.class)
                 .setParameter("login", login)

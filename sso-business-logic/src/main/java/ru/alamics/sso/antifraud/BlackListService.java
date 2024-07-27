@@ -57,10 +57,10 @@ public class BlackListService {
         blackListRepository.update(blackList);
     }
 
-    public void limitUserBySmsOrPhoneV2(User user, String cause, AuthenticationSessionModel context) {
+    public void limitUserBySmsOrPhone(User user, String cause, AuthenticationFlowContext context) {
         BlackListEntity blackList = new BlackListEntity();
         UserEntity userEntity = userRepository.findUser(user.getId());
-        List<BlackListEntity> existEntity = blackListRepository.findFirstByPhoneAndLimitationCause(user.getPhone(), cause);
+        List<BlackListEntity> existEntity = blackListRepository.findByEmail(user.getEmail());
         long blockDuration = settingsService.getSettingsLongValue(SettingConstants.BLOCK_DURATION_SEC, context.getRealm().getName());
 
         blackList.setId(UUID.randomUUID().toString());
@@ -72,6 +72,7 @@ public class BlackListService {
         blackList.setCreatedAt(LocalDateTime.now());
         blackList.setUnblockedAt(blackList.getCreatedAt().plusSeconds(blockDuration));
         blackList.setRealm(context.getRealm().getName());
+        //default 0 mb todo default 1 | do we need it?
         if (existEntity.isEmpty()) {
             blackList.setBlockCount(1);
             blackListRepository.save(blackList);

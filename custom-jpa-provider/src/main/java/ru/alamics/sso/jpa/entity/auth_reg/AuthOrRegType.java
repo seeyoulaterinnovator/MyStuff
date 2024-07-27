@@ -28,13 +28,4 @@ public enum AuthOrRegType {
     public String getReqActProviderName() {
         return reqActProviderName;
     }
-
-    public static AuthOrRegType findByReqActProviderName(String reqActProviderName) {
-        for (AuthOrRegType value : AuthOrRegType.values()) {
-            if (value.getReqActProviderName().equals(reqActProviderName)) {
-                return value;
-            }
-        }
-        return null;
-    }
 }

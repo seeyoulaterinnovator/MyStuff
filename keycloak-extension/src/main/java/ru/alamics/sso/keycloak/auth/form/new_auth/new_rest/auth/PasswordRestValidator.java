@@ -21,7 +21,7 @@ public class PasswordRestValidator extends ValidatePassword {
 
     private static final String PROVIDER_ID = "rest-password-validator";
 
-    public static final String DISPLAY_NAME = "Rest Password Validator";
+    private static final String DISPLAY_NAME = "Rest Password Validator";
 
     private static final String HELP_TEXT = "";
 
