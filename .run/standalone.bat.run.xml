@@ -9,7 +9,6 @@
       <env name="WILDFLY_DS_KC_MYSQL_NAME" value="KeycloakDS" />
       <env name="JAVA_HOME" value="C:\Program Files\Java\jdk1.8" />
       <env name="WILDFLY_DS_KC_MYSQL_ENABLED" value="true" />
-      <env name="UNDERTOW_HTTP_DUMP_ENABLED" value="true" />
       <env name="WILDFLY_DS_KC_H2_ENABLED" value="false" />
     </envs>
     <module name="" />
