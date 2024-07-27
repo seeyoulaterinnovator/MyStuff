@@ -11,6 +11,7 @@ import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 
 import static ru.alamics.sso.registration.model.UserConstants.I_FRAME;
+import static ru.alamics.sso.registration.model.UserConstants.SELF;
 
 public class SsoUrlBean extends UrlBean {
     private final URI baseURI;
@@ -50,6 +51,8 @@ public class SsoUrlBean extends UrlBean {
         if (isFrame) {
             builder.queryParam(I_FRAME, Util.TRUE_STR);
         }
+
+        builder.queryParam(SELF, Util.TRUE_STR);
 
         return builder.build(realm.getName())
                 .toString();

@@ -85,8 +85,14 @@ public enum SettingConstants {
     REQUIRED_FIELDS("requiredFields"),
     PLACEHOLDER_USERNAME("placeholderUsername"),
     PLACEHOLDER_EMAIL("placeholderEmail"),
+    FULL_PLACEHOLDER_EMAIL("fullPlaceholderEmail"),
     PLACEHOLDER_PHONE("placeholderPhone"),
     PHONE_CONST_LINK("phoneConstLink"),
+    REGISTRATION_FIRST_TAB_CLIENT_IDS("registrationFirstTabClientIds"),
+    REGISTRATION_FULL_TEXTS_CLIENT_IDS("registrationFullTextsClientIds"),
+    LOGIN_FULL_TEXTS_CLIENT_IDS("loginFullTextsClientIds"),
+    LOGIN_FAIL_TO_REGISTRATION_CLIENT_IDS("loginFailToRegistrationClientIds"),
+    LOGIN_FAIL_TO_REGISTRATION_MESSAGE("loginFailToRegistrationMessage"),
 
     //Заголовоки сообщений
 

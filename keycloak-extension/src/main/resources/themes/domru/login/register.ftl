@@ -1,6 +1,7 @@
 <#import "template.ftl" as layout>
 <#import "templates/components.ftl" as components>
 <#import "templates/blocks.ftl" as blocks>
+<#import "util.ftl" as util>
 
 <@layout.registrationLayout displayInfo=true displayCity=false; section >
     <#if section = "header">
@@ -13,7 +14,12 @@
             <#-- Пока бэк не уберет необходимость фамилии, скрою поле и отправлю дефис -->
             <@components.field class="mt-6 xl:mt-8 sm:mt-6 md:w-full" fieldName="lastName" value="-" label="Фамилия" placeholder="Фамилия" required=true style="display: none" />
 
-            <@components.field class="md:w-full" fieldName="email" value="${email!''}" label="${placeholderEmail}" placeholder="${placeholderEmail}" required=true type="text" />
+            <@components.field class="md:w-full"
+                fieldName="email" value="${email!''}"
+                label="${util.if(isRegistrationFullTexts!false, fullPlaceholderEmail, placeholderEmail)}"
+                placeholder="${util.if(isRegistrationFullTexts!false, fullPlaceholderEmail, placeholderEmail)}"
+                required=true
+                type="text" />
 
             <#if !realm.registrationEmailAsUsername>
                 <@components.field class="mt-6 xl:mt-8 sm:mt-6 md:w-full" fieldName="username" value="${username!''}" label="Имя пользователя" placeholder="Имя пользователя" required=true />

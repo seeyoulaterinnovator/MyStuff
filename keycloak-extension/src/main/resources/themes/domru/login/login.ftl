@@ -1,8 +1,30 @@
+<#import "util.ftl" as util>
 <#import "template.ftl" as layout>
 <#import "templates/components.ftl" as components>
 <#import "templates/blocks.ftl" as blocks>
 
-<@layout.registrationLayout displayInfo=social.displayInfo displayWide=(realm.password && social.providers??); section>
+<#macro personalDataProcessAccept>
+    <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">
+    <span class="opacity-50" style="font-weight: 350; color: #7585A1;">
+        Нажимая кнопку, вы соглашаетесь <br>
+    </span>
+    <a class="reference reference_hoverable allowDoubleClick item_hover"
+       style="font-weight: 350;"
+       href="https://moscow.b2b.dom.ru/agreement" target="_blink">
+       <#if isLoginFullTexts!false>
+           с Условиями обработки персональных данных
+       <#else>
+           с Условиями обработки данных
+       </#if>
+    </a>
+    </span>
+</#macro>
+
+<@layout.registrationLayout
+        displayInfo=social.displayInfo
+        displayWide=(realm.password && social.providers??)
+        redirectTo=util.if(registrationFirstTab!false && !hideRegistration!false, url.registrationUrl, '');
+    section>
     <#if section = "header">
         <#if !hideRegistration!false>
             <@blocks.contentHeader mainTitle="${doLogIn}" secondaryTitle="${registerTitle}" secondaryHref="${url.registrationUrl}" withBorder=true />
@@ -48,14 +70,8 @@
                                 type="submit">${enter}</button>
                         </div>
 
-                            <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">
-                                <span class="opacity-50" style="font-weight: 350; color: #7585A1;">
-                                 Нажимая кнопку, вы соглашаетесь <br>
-                                </span>
-                                <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;"
-                                    href="https://moscow.b2b.dom.ru/agreement" target="_blink">
-                                    с Условиями обработки данных</a>
-                            </span>
+                        <@personalDataProcessAccept/>
+
                             </div>
 
                             <div class="flex justify-between code-forgot">
@@ -129,14 +145,7 @@
                             <button id="submit-phone" name="smsButton" class="btn btn-main btn-enter btn-new-enter"
                                 type="submit">${enter}</button>
                          </div>
-                        <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">
-                            <span class="opacity-50" style="font-weight: 350; color: #7585A1;">
-                                 Нажимая кнопку, вы соглашаетесь <br>
-                                </span>
-                            <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;"
-                               href="https://moscow.b2b.dom.ru/agreement" target="_blink">
-                                с Условиями обработки данных</a>
-                            </span>
+                        <@personalDataProcessAccept/>
                     </div>
                 </div>
 
@@ -191,14 +200,7 @@
                             <button id="submit-phone" name="smsButton" class="btn btn-main btn-enter btn-new-enter"
                                     type="submit">${enter}</button>
                         </div>
-                        <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">
-                            <span class="opacity-50" style="font-weight: 350; color: #7585A1;">
-                                 Нажимая кнопку, вы соглашаетесь <br>
-                                </span>
-                            <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;"
-                               href="https://moscow.b2b.dom.ru/agreement" target="_blink">
-                                с Условиями обработки данных</a>
-                            </span>
+                        <@personalDataProcessAccept/>
                     </div>
                 </div>
 
@@ -256,14 +258,7 @@
                                 type="submit">${enter}</button>
                         </div>
 
-                            <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">
-                                <span class="opacity-50" style="font-weight: 350; color: #7585A1;">
-                                 Нажимая кнопку, вы соглашаетесь <br>
-                                </span>
-                                <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;"
-                                    href="https://moscow.b2b.dom.ru/agreement" target="_blink">
-                                    с Условиями обработки данных</a>
-                            </span>
+                            <@personalDataProcessAccept/>
                             </div>
 
                             <div class="flex justify-between code-forgot">
