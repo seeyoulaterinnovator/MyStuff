@@ -307,4 +307,9 @@ export default (function() {
     form.getFieldState('password-confirm').change(confirmation);
   }
   linkPasswords(getPassword, setPassword, getConfirmation, setConfirmation, document.getElementById('password'), document.getElementById('password-confirm'));
+
+  // fix отображения значения по умолчанию только после 1-го фокуса
+  document.querySelectorAll('input[type="text"]').forEach(input => {
+    if(input.value) input.focus();
+  })
 })();

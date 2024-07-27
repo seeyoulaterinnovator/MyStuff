@@ -23,7 +23,7 @@
 <@layout.registrationLayout
         displayInfo=social.displayInfo
         displayWide=(realm.password && social.providers??)
-        redirectTo=util.if(registrationFirstTab!false && !hideRegistration!false, url.registrationUrl, '');
+        redirectTo=util.if(isRegistrationRedirect!false, url.registrationUrl, '');
     section>
     <#if section = "header">
         <#if !hideRegistration!false>
