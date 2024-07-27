@@ -17,3 +17,4 @@ ru.alamics.sso.keycloak.mobile.resetcred.ResetCredentialsChooseUserRestFactory
 ru.alamics.sso.keycloak.auth.form.new_auth.NewAuthMailPhoneFormFactory
 ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth.UserNameOrPhoneRestValidator
 ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth.PasswordRestValidator
+ru.alamics.sso.keycloak.auth.rest.RestSmsOrPhoneCallAuthFactory

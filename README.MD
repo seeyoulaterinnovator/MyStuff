@@ -3,7 +3,8 @@ https://gitlab.ertelecom.ru/b2bweb/sso
 
 # Поднятие проекта
 1) Скачиваем КС 6.0.1 по ссылке https://downloads.jboss.org/keycloak/6.0.1/keycloak-6.0.1.zip
-2) Вот этот [файл](org.zip) положить в сам КС в папку modules ![img.png](img.png)
+2) Вот этот [файл](org.zip) положить в сам КС в папку modules ![img.png](img.png) 
+   1) Скопировать также [папку](./tools/modules) в папку modules у КС
 3) Файл [standalone](standalone.xml) вот сюда ![img_1.png](img_1.png)
 4) Далее настраиваем файл конфигурацию запуска ![img_2.png](img_2.png) добавить строку KEYCLOAK_DEPLOY_DIR=C:\keycloak-6.0.1\keycloak-6.0.1.
 5) Запуск проекта после Деплоя через этот файл ![img_3.png](img_3.png)

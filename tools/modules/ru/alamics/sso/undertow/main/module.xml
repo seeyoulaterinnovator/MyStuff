@@ -1,0 +1,9 @@
+<module xmlns="urn:jboss:module:1.0" name="ru.alamics.sso.undertow">
+    <resources>
+        <resource-root path="undertow-extension-0.0.1.jar"/>
+    </resources>
+    <dependencies>
+        <module name="io.undertow.core" services="import"/>
+        <module name="org.jboss.xnio" services="import"/>
+    </dependencies>
+</module>
