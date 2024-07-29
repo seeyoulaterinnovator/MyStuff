@@ -1217,29 +1217,24 @@ module.controller('UserCredentialsCtrl', function ($scope, realm, user, $route, 
             Dialog.message("Cannot send email", "You must save your current changes before you can send an email");
             return;
         }
-        if($scope.emailActions.includes('UPDATE_PASSWORD')){
-            if(user.emailVerified === false){
-                if(!!user.attributes.phone){
-                    Dialog.message("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
-                    return;
-                } else {
-                    Dialog.message("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
-                    return;
-                }
+        if(user.emailVerified === false){
+            if(!!user.attributes.phone){
+                Dialog.message("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
+            } else {
+                Dialog.message("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
             }
-        }
-
-        Dialog.confirm('Send Email', 'Are you sure you want to send email to user?', function () {
-            $http.put(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/users/' + user.id + '/execute-actions-email?'
-                + 'lifespan=' + $scope.emailActionsTimeout.toSeconds(),
-                $scope.emailActions).then(function () {
-                Notifications.success("Email sent to user");
-                $scope.emailActions = [];
-            }).catch(function () {
-                Notifications.error("Failed to send email to user");
+        } else {
+            Dialog.confirm('Send Email', 'Are you sure you want to send email to user?', function () {
+                $http.put(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/users/' + user.id + '/execute-actions-email?'
+                    + 'lifespan=' + $scope.emailActionsTimeout.toSeconds(),
+                    $scope.emailActions).then(function () {
+                    Notifications.success("Email sent to user");
+                    $scope.emailActions = [];
+                }).catch(function () {
+                    Notifications.error("Failed to send email to user");
+                });
             });
-        });
-
+        }
     };
 
 
