@@ -1218,7 +1218,11 @@ module.controller('UserCredentialsCtrl', function ($scope, realm, user, $route, 
             return;
         }
         if(user.emailVerified === false){
-            Dialog.message("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
+            if(!!user.attributes.phone){
+                Dialog.message("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
+            } else {
+                Dialog.message("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
+            }
         } else {
             Dialog.confirm('Send Email', 'Are you sure you want to send email to user?', function () {
                 $http.put(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/users/' + user.id + '/execute-actions-email?'
