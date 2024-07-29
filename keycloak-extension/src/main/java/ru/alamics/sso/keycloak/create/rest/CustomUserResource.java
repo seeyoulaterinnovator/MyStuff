@@ -8,6 +8,7 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.common.Profile;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
+import org.keycloak.email.EmailException;
 import org.keycloak.events.Details;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.events.EventType;
@@ -449,7 +450,7 @@ public class CustomUserResource {
 
     @Path("credential/reset-with-send-login")
     @POST
-    public Response sendLoginAndResetPassword(List<String> ids) {
+    public Response sendLoginAndResetPassword(List<String> ids) throws EmailException {
         sendLogin(ids, UserEntityRepresentation.SEND_LOGIN_AND_RESET_PASSWORD);
         return JsonResponse.success()
                 .httpStatus(Response.Status.NO_CONTENT)
@@ -458,14 +459,14 @@ public class CustomUserResource {
 
     @Path("/send/login")
     @POST
-    public Response sendLogin(List<String> ids) {
+    public Response sendLogin(List<String> ids) throws EmailException {
         sendLogin(ids, UserEntityRepresentation.SEND_LOGIN);
         return JsonResponse.success()
                 .httpStatus(Response.Status.NO_CONTENT)
                 .build();
     }
 
-    private void sendLogin(List<String> ids, final String requiredAction) {
+    private void sendLogin(List<String> ids, final String requiredAction) throws EmailException {
         KeycloakContext context = session.getContext();
         AdminEventBuilder eventBuilder = new AdminEventBuilder(context.getRealm(), auth.adminAuth(), session, context.getConnection());
         eventBuilder.resource(ResourceType.USER);
@@ -473,14 +474,22 @@ public class CustomUserResource {
         if (ids != null) {
             for (String id : ids) {
                 UserModel user = userProvider.getUserById(id, realm);
-                if (user != null) {
-                    UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
-                    rep.getRequiredActions().add(requiredAction);
-                    eventBuilder.operation(OperationType.ACTION)
-                            .resourcePath(session.getContext().getUri())
-                            .representation(rep)
-                            .realm(realm)
-                            .success();
+                if(!user.isEmailVerified()) {
+                    if(user.getAttribute("phone") != null && !user.getAttribute("phone").isEmpty()){
+                        throw new EmailException("Письмо не може быть отправлено, почта в Учётной записи не подтверждена", null);
+                    } else {
+                        throw new EmailException("В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено", null);
+                    }
+                } else {
+                    if (user != null) {
+                        UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
+                        rep.getRequiredActions().add(requiredAction);
+                        eventBuilder.operation(OperationType.ACTION)
+                                .resourcePath(session.getContext().getUri())
+                                .representation(rep)
+                                .realm(realm)
+                                .success();
+                    }
                 }
             }
         }

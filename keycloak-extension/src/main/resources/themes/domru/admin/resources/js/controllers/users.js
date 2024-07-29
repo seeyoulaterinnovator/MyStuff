@@ -1197,15 +1197,23 @@ module.controller('UserCredentialsCtrl', function ($scope, realm, user, $route, 
     };
 
     $scope.disableCredentialTypes = function () {
-        Dialog.confirm('Disable credentials', 'Are you sure you want to disable these users credentials?', function () {
-            $http.put(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/users/' + user.id + '/disable-credential-types',
-                $scope.disableableCredentialTypes).then(function () {
-                $route.reload();
-                Notifications.success("Credentials disabled");
-            }).catch(function () {
-                Notifications.error("Failed to disable credentials");
+        if(user.emailVerified === false){
+            if(!!user.attributes.phone){
+                Dialog.message("Failed to disable credentials", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
+            } else {
+                Dialog.message("Failed to disable credentials", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
+            }
+        } else {
+            Dialog.confirm('Disable credentials', 'Are you sure you want to disable these users credentials?', function () {
+                $http.put(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/users/' + user.id + '/disable-credential-types',
+                    $scope.disableableCredentialTypes).then(function () {
+                    $route.reload();
+                    Notifications.success("Credentials disabled");
+                }).catch(function () {
+                    Notifications.error("Failed to disable credentials");
+                });
             });
-        });
+        }
     };
 
     $scope.emailActions = [];
