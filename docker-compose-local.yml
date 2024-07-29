@@ -1,0 +1,27 @@
+version: '3.5'
+name: "sso"
+services:
+  db:
+    image: mariadb:10.4.7
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: sso
+      MYSQL_USER: sso
+      MYSQL_PASSWORD: sso
+      MYSQL_ROOT_PASSWORD: sa
+    volumes:
+      - ./data/local/db:/var/lib/mysql
+  mockserver:
+    image: mockserver/mockserver:5.12.0
+    ports:
+      - "1080:1080"
+    environment:
+      MOCKSERVER_INITIALIZATION_JSON_PATH: /var/mockserver/initialization.json
+    volumes:
+      - ./data/local/mockserver/:/var/mockserver/:ro
+  smtp4dev:
+    image: rnwood/smtp4dev:v3
+    ports:
+      - "25:25"
+      - "8025:80"

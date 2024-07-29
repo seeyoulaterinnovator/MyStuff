@@ -101,7 +101,7 @@ public class UserSchedule {
     private long getTime() {
         long intervalDuration = settingsService.getSettingsLongValue(SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY, GeneralRealm.MASTER) * 1000;
 
-        if (intervalDuration == 0) {
+        if (intervalDuration <= 0) {
             intervalDuration = DEFAULT_INTERVAL_DURATION;
         }
 

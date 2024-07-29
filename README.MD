@@ -7,12 +7,40 @@ https://gitlab.ertelecom.ru/b2bweb/sso
 3) Файл [standalone](standalone.xml) вот сюда ![img_1.png](img_1.png)
 4) Далее настраиваем файл конфигурацию запуска ![img_2.png](img_2.png) добавить строку KEYCLOAK_DEPLOY_DIR=C:\keycloak-6.0.1\keycloak-6.0.1.
 5) Запуск проекта после Деплоя через этот файл ![img_3.png](img_3.png)
-6) Сделать проливку данными из какого стейджа
+6) Сделать проливку данными из какого стейджа, для облегчения дампа
+   исключить можно таблицы событий (ADMIN_EVENT_ENTITY, USER_LOGIN_HISTORY, EVENT_ENTITY), 
+   но не забыть потом их создать
+7) Обновить настройки для локального развертывания:
+```mysql
+update REALM
+set ssl_required = 'NONE';
+-- Если будут использоваться сохраненные run config-и для Idea
+update APP_PROPERTIES
+set value = 'http://localhost:1080/cities/domains'
+where name = 'cities.url';
+update REALM_SMTP_CONFIG
+set VALUE = 'localhost'
+where NAME = 'host';
+update SETTINGS
+set VALUE = 'http://localhost:1080/dadata/suggestions/api/4_1/rs/iplocate/address'
+where EXT_ID = 'urlDaDataRequestLocationIp';
+```
 
 # Запуск проекта с Дебагом
 1) Качаем wildFly 16 
 2) Настраиваем ![img_4.png](img_4.png) ![img_5.png](img_5.png) ![img_6.png](img_6.png)
 3) Запуск самого приложение с тегом debug т.е. standalone.bat --debug
+
+# Запуск через run config-и для Idea
+1) Запустить docker-compose-local.yaml (версия бд как на тесте)
+2) Выполнить на Windows (пример):
+```batch
+mklink /d "C:\Program Files\Java\jdk1.8" "C:\Program Files\Java\jdk1.8.0_192"
+```
+3) Распаковать keycloak в data/local/keycloak-6.0.1 и org.zip в него в modules, скопировать ту да же ./tools/modules
+4) Выполнить run config gradle "sso [build]" и "sso [deploy]"
+5) Выполнить run config batch "standalone.bat"
+6) Выполнить run config remote jvm debug "debug"
 
 # Логи стейджей
 https://kibana.dev.itrev.ru/app/logs/stream?flyoutOptions=(flyoutId:!n,flyoutVisibility:hidden,surroundingLogsId:!n)&logFilter=(language:kuery,query:ssostage2)&logPosition=(end:now,position:(tiebreaker:1409023,time:1635776220481),start:%272021-11-01T13:17:00.481Z%27,streamLive:!f)
