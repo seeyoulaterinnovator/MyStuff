@@ -1221,26 +1221,25 @@ module.controller('UserCredentialsCtrl', function ($scope, realm, user, $route, 
             if(user.emailVerified === false){
                 if(!!user.attributes.phone){
                     Dialog.message("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
+                    return;
                 } else {
                     Dialog.message("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
+                    return;
                 }
             }
-            var index = $scope.emailActions.indexOf('UPDATE_PASSWORD');
-            $scope.emailActions.splice(index, 1);
         }
 
-        if($scope.emailActions.length > 0) {
-            Dialog.confirm('Send Email', 'Are you sure you want to send email to user?', function () {
-                $http.put(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/users/' + user.id + '/execute-actions-email?'
-                    + 'lifespan=' + $scope.emailActionsTimeout.toSeconds(),
-                    $scope.emailActions).then(function () {
-                    Notifications.success("Email sent to user");
-                    $scope.emailActions = [];
-                }).catch(function () {
-                    Notifications.error("Failed to send email to user");
-                });
+        Dialog.confirm('Send Email', 'Are you sure you want to send email to user?', function () {
+            $http.put(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/users/' + user.id + '/execute-actions-email?'
+                + 'lifespan=' + $scope.emailActionsTimeout.toSeconds(),
+                $scope.emailActions).then(function () {
+                Notifications.success("Email sent to user");
+                $scope.emailActions = [];
+            }).catch(function () {
+                Notifications.error("Failed to send email to user");
             });
-        }
+        });
+
     };
 
 
