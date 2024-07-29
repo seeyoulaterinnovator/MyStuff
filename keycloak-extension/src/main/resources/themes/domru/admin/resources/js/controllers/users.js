@@ -1217,13 +1217,19 @@ module.controller('UserCredentialsCtrl', function ($scope, realm, user, $route, 
             Dialog.message("Cannot send email", "You must save your current changes before you can send an email");
             return;
         }
-        if(user.emailVerified === false){
-            if(!!user.attributes.phone){
-                Dialog.message("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
-            } else {
-                Dialog.message("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
+        if($scope.emailActions.includes('UPDATE_PASSWORD')){
+            if(user.emailVerified === false){
+                if(!!user.attributes.phone){
+                    Dialog.message("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
+                } else {
+                    Dialog.message("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
+                }
             }
-        } else {
+            var index = $scope.emailActions.indexOf('UPDATE_PASSWORD');
+            $scope.emailActions.splice(index, 1);
+        }
+
+        if($scope.emailActions.length > 0) {
             Dialog.confirm('Send Email', 'Are you sure you want to send email to user?', function () {
                 $http.put(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/users/' + user.id + '/execute-actions-email?'
                     + 'lifespan=' + $scope.emailActionsTimeout.toSeconds(),
