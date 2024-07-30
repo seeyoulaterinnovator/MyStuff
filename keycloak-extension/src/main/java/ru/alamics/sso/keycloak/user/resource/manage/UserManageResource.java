@@ -65,6 +65,12 @@ public class UserManageResource {
             ids.forEach(id -> {
                 UserModel user = userProvider.getUserById(id, realm);
                 user.addRequiredAction(UserModel.RequiredAction.UPDATE_PASSWORD);
+                UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
+                eventBuilder.operation(OperationType.ACTION)
+                        .resourcePath(session.getContext().getUri())
+                        .representation(rep)
+                        .realm(realm)
+                        .success();
             });
         }
         return JsonResponse.success()
