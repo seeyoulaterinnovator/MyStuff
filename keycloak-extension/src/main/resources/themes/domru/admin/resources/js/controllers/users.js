@@ -511,11 +511,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         let message = "";
         if(userNotUnlock.length > 0) {
             let usersEmail = userNotUnlock.join(', ')
-            if (userNotUnlock.length === 1) {
-                message = "Письмо не може быть отправлено, почта в Учётной записи не подтверждена";
-            } else {
-                message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
-            }
+            message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
         }
         if(userForUnlock.length > 0) {
             $http.post(`${authUrl}/realms/${realm.realm}/manage/unlock`, userForUnlock).then(response => {
@@ -536,11 +532,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         let message = "";
         if(userNotResetPassword.length > 0) {
             let usersEmail = userNotResetPassword.join(', ')
-            if (userNotResetPassword.length === 1) {
-                message = "Письмо не може быть отправлено, почта в Учётной записи не подтверждена";
-            } else {
-                message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
-            }
+            message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
         }
         if(userForResetPassword.length > 0) {
             $http.post(`${authUrl}/realms/${realm.realm}/manage/credential/reset`, userForResetPassword).then(response => {
@@ -561,11 +553,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             let message = "";
             if(userNotSendLogin.length > 0) {
                 let usersEmail = userNotSendLogin.join(', ')
-                if (userNotSendLogin.length === 1) {
-                    message = "Письмо не може быть отправлено, почта в Учётной записи не подтверждена";
-                } else {
-                    message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
-                }
+                message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
             }
             if(userForSendLogin.length > 0) {
                 $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/send/login`, userForSendLogin).then(response => {
@@ -587,11 +575,8 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             let message = "";
             if(userNotResetPassword.length > 0) {
                 let usersEmail = userNotResetPassword.join(', ')
-                if (userNotResetPassword.length === 1) {
-                    message = "Письмо не може быть отправлено, почта в Учётной записи не подтверждена";
-                } else {
-                    message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
-                }
+                message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
+
             }
             if(userForResetPassword.length > 0) {
                 $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/credential/reset-with-send-login`, userForResetPassword)
@@ -624,11 +609,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         let message = "";
         if(userNotBlockUsers.length > 0) {
             let usersEmail = userNotBlockUsers.join(', ')
-            if (userNotBlockUsers.length === 1) {
-                message = "Письмо не може быть отправлено, почта в Учётной записи не подтверждена";
-            } else {
-                message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
-            }
+            message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
         }
         if(userForBlockUsers.length > 0) {
             $http.post(`${authUrl}/realms/${realm.realm}/manage/block`, userForBlockUsers).then(response => {
