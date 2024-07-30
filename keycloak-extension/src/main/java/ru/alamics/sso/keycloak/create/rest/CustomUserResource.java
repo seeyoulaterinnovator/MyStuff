@@ -450,7 +450,7 @@ public class CustomUserResource {
 
     @Path("credential/reset-with-send-login")
     @POST
-    public Response sendLoginAndResetPassword(List<String> ids) throws EmailException {
+    public Response sendLoginAndResetPassword(List<String> ids) {
         sendLogin(ids, UserEntityRepresentation.SEND_LOGIN_AND_RESET_PASSWORD);
         return JsonResponse.success()
                 .httpStatus(Response.Status.NO_CONTENT)
@@ -459,14 +459,14 @@ public class CustomUserResource {
 
     @Path("/send/login")
     @POST
-    public Response sendLogin(List<String> ids) throws EmailException {
+    public Response sendLogin(List<String> ids) {
         sendLogin(ids, UserEntityRepresentation.SEND_LOGIN);
         return JsonResponse.success()
                 .httpStatus(Response.Status.NO_CONTENT)
                 .build();
     }
 
-    private void sendLogin(List<String> ids, final String requiredAction) throws EmailException {
+    private void sendLogin(List<String> ids, final String requiredAction) {
         KeycloakContext context = session.getContext();
         AdminEventBuilder eventBuilder = new AdminEventBuilder(context.getRealm(), auth.adminAuth(), session, context.getConnection());
         eventBuilder.resource(ResourceType.USER);
@@ -474,22 +474,14 @@ public class CustomUserResource {
         if (ids != null) {
             for (String id : ids) {
                 UserModel user = userProvider.getUserById(id, realm);
-                if(!user.isEmailVerified()) {
-                    if(user.getAttribute("phone") != null && !user.getAttribute("phone").isEmpty()){
-                        throw new EmailException("Письмо не може быть отправлено, почта в Учётной записи не подтверждена", null);
-                    } else {
-                        throw new EmailException("В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено", null);
-                    }
-                } else {
-                    if (user != null) {
-                        UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
-                        rep.getRequiredActions().add(requiredAction);
-                        eventBuilder.operation(OperationType.ACTION)
-                                .resourcePath(session.getContext().getUri())
-                                .representation(rep)
-                                .realm(realm)
-                                .success();
-                    }
+                if (user != null) {
+                    UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
+                    rep.getRequiredActions().add(requiredAction);
+                    eventBuilder.operation(OperationType.ACTION)
+                            .resourcePath(session.getContext().getUri())
+                            .representation(rep)
+                            .realm(realm)
+                            .success();
                 }
             }
         }
