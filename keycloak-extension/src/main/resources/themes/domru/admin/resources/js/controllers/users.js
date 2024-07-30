@@ -565,7 +565,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         let message = "";
         if(userNotResetPassword.length > 0) {
             let usersEmail = userNotResetPassword.join(', ')
-            message = "Пользователям: " + usersEmail + "письмо не може быть отправлено, почта в Учётной записи не подтверждена";
+            message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
         }
         if(userForResetPassword.length > 0) {
             $http.post(`${authUrl}/realms/${realm.realm}/manage/block`, userForResetPassword).then(response => {
