@@ -1,5 +1,8 @@
 package ru.alamics.sso.keycloak.auth.rest;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.OAuthErrorException;
@@ -52,6 +55,8 @@ import static ru.alamics.sso.registration.phone.UserPhoneVerifier.MESSENGER;
  */
 @Slf4j
 public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
+    private static final String SMS_CODE_ID_PARAM = "smsCodeId";
+
     private final BlackListService blackListService;
 
     private final AttemptFailsService attemptFailsService;
@@ -114,11 +119,14 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
 
         // Parameters
         String host = context.getHttpRequest().getUri().getBaseUri().getHost();
-        String userCode = context.getHttpRequest().getDecodedFormParameters().getFirst("smscode");
+        String userCodeId = context.getHttpRequest().getDecodedFormParameters().getFirst(SMS_CODE_ID_PARAM);
+        String userCodeValue = context.getHttpRequest().getDecodedFormParameters().getFirst("smscode");
         boolean isPassword = context.getHttpRequest().getDecodedFormParameters().containsKey(CredentialRepresentation.PASSWORD);
 
         // Attributes
-        String codeHashKey = userModel.getFirstAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_HASH_KEY);
+        AttributeCode attributeCode = AttributeCode.fromString(
+                userModel.getFirstAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_ID_AND_HASH_KEY)
+        );
         Instant codeSentAt = MiscUtil.parseInstant(userModel.getFirstAttribute(
                 UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_SENT_AT));
         Instant blockedAt = Instant.ofEpochMilli(MiscUtil.parseLong(userModel.getFirstAttribute(
@@ -171,19 +179,17 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
             userModel.removeAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_BLOCKED_AT);
         }
 
-        if(userCode == null || userCode.isEmpty()) {
-            if(codeSentAt != null && codeSentAt.isAfter(Instant.now().minus(newSendDelay))
-                    && (codeHashKey == null || codeHashKey.isEmpty())) {
+        if(userCodeValue == null || userCodeValue.isEmpty()) {
+            if(codeSentAt != null && codeSentAt.isAfter(Instant.now().minus(newSendDelay)) && attributeCode == null) {
                 failure(context, "Слишком много запросов отправки кода. Повторите позже");
                 return;
             }
             if(codeSentAt == null
                     || codeSentAt.isBefore(Instant.now().minus(Duration.ofSeconds(codeType.getExpiredSecondsToResend())))
-                    || codeHashKey == null
-                    || codeHashKey.isEmpty()) {
-                if(codeHashKey != null && !codeHashKey.isEmpty()) {
+                    || attributeCode == null) {
+                if(attributeCode != null) {
                     // Сохраняем попытку переотправки кода, см. resend input у формы
-                    attemptFailsService.saveAttempt(new AttemptFailsDto(user.getPhone(), codeHashKey,
+                    attemptFailsService.saveAttempt(new AttemptFailsDto(user.getPhone(), attributeCode.getHashKey(),
                             context.getRealm().getName(), codeType.name(), LocalDateTime.now(),
                             context.getUser().getId()));
                 }
@@ -207,28 +213,41 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                     return;
                 }
                 codeSentAt = Instant.now();
-                userModel.setSingleAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_HASH_KEY,
-                        HashGenerator.getSecretHash(code));
+                attributeCode = AttributeCode.builder()
+                        .id(UUID.randomUUID().toString())
+                        .hashKey(HashGenerator.getSecretHash(code))
+                        .build();
+                userModel.setSingleAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_ID_AND_HASH_KEY,
+                        attributeCode.toString());
                 userModel.setSingleAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_SENT_AT,
                         String.valueOf(codeSentAt.toEpochMilli()));
                 log.info("Code sent");
             }
             Map<String, Object> result = new HashMap<>();
             result.put("message", "Код отправлен");
-            result.put("expiration_seconds", Duration.between(
+            result.put("expirationSeconds", Duration.between(
                     Instant.now(),
                     codeSentAt.plus(Duration.ofSeconds(codeType.getExpiredSecondsToResend()))
             ).getSeconds());
+            result.put(SMS_CODE_ID_PARAM, attributeCode.getId());
             context.challenge(Response.ok().entity(result).type(MediaType.APPLICATION_JSON_TYPE).build());
             return;
         }
 
-        if(codeHashKey == null || codeHashKey.isEmpty() || codeSentAt == null) {
+        if(attributeCode == null || codeSentAt == null) {
             failure(context, "Код не запрошен");
             return;
         }
+        if(userCodeId == null || userCodeId.isEmpty()) {
+            failure(context, "Не передан ID кода");
+            return;
+        }
+        if(!userCodeId.equals(attributeCode.getId())) {
+            failure(context, "Не активного кода с переданным идентификатором");
+            return;
+        }
         int codeAttempts = wroteCodeAttemptsService.getWroteCodeAttemptsByCode(user.getPhone(),
-                context.getRealm().getName(), authType.name(), codeHashKey);
+                context.getRealm().getName(), authType.name(), attributeCode.getHashKey());
         if (codeAttempts >= countByOnCode) {
             failure(context, "Исчерпаны попытки ввода кода");
             userModel.removeAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_SENT_AT);
@@ -237,14 +256,16 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
         session.setAuthNote(EXPIRATION_TIME, codeSentAt.atZone(ZoneOffset.systemDefault()).toLocalDateTime()
                 .format(DateTimeFormatter.ISO_DATE_TIME));
         try {
-            userPhoneVerifier.verifyPhone(userModel, user, codeType.getExpiredCodeSeconds(), codeHashKey, userCode,
-                    codeType, session.getRealm().getName(), session, authorisedUsersService, authType.getId());
-            userModel.removeAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_HASH_KEY);
+            userPhoneVerifier.verifyPhone(
+                    userModel, user, codeType.getExpiredCodeSeconds(), attributeCode.getHashKey(), userCodeValue, codeType,
+                    session.getRealm().getName(), session, authorisedUsersService, authType.getId()
+            );
+            userModel.removeAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_ID_AND_HASH_KEY);
             context.success();
         } catch (WrongSmsCode e) {
             log.warn("Wrong sms code");
             failure(context, "Неверный код");
-            wroteCodeAttemptsService.saveFailWroteCode(codeHashKey, userCode, user.getPhone(),
+            wroteCodeAttemptsService.saveFailWroteCode(attributeCode.getHashKey(), userCodeValue, user.getPhone(),
                     context.getRealm().getName(), authType.name(), user);
         } catch (TimeExpiredException e) {
             log.warn("Expired time of code");
@@ -267,5 +288,29 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                         .build()
 
         );
+    }
+
+    @Data
+    @AllArgsConstructor
+    @Builder
+    static class AttributeCode {
+        static AttributeCode fromString(String value) {
+            if(value == null || value.isEmpty()) {
+                return null;
+            } else {
+                String[] words = value.split(":", 2);
+                if(words.length != 2) return null;
+                return new AttributeCode(words[0], words[1]);
+            }
+        }
+
+        final String id;
+
+        final String hashKey;
+
+        @Override
+        public String toString() {
+            return id + ":" + hashKey;
+        }
     }
 }

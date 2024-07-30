@@ -27,10 +27,11 @@ public class UserConstants {
     public static final String DISABLE_TWO_STEP_AUTH = "disable_two_step_auth";
 
     /**
-     * Атрибут пользователя с хэш-суммой отправленного кода
+     * Атрибут пользователя с ID и хэш-суммой отправленного кода
      * (т.к. для direct grant flow сессия на token endpoint не поддерживается)
      */
-    public static final String ATTR_REST_SMS_OR_PHONE_CALL_CODE_HASH_KEY = "rest_sms_or_phone_call_code_hash_key";
+    public static final String ATTR_REST_SMS_OR_PHONE_CALL_CODE_ID_AND_HASH_KEY
+            = "rest_sms_or_phone_call_code_id_and_hash_key";
 
     /**
      * Атрибут пользователя с меткой времени последней отправки кода в REST авторизации
