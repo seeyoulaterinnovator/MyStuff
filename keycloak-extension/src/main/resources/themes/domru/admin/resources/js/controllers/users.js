@@ -620,7 +620,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
 
     $scope.selectedBlockUsers = function () {
         let userForBlockUsers = $scope.users.filter(user => user.active).filter(user => user.emailVerified).map(user => user.id);
-        let userNotBlockUsers = $scope.users.filter(user => !user.emailVerified).map(user => user.email);
+        let userNotBlockUsers = $scope.users.filter(user => user.active).filter(user => !user.emailVerified).map(user => user.email);
         let message = "";
         if(userNotBlockUsers.length > 0) {
             let usersEmail = userNotBlockUsers.join(', ')
@@ -639,7 +639,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 }
                 $scope.users.filter(user => user.active).forEach(user => user.enabled = false)})
         } else {
-            CustomNotifications.error(message, 10000 * userBlockUsers.length);
+            CustomNotifications.error(message, 10000 * userNotBlockUsers.length);
         }
     };
 
