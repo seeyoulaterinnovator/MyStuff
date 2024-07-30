@@ -520,7 +520,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 } else {
                     CustomNotifications.success("Selected users has been unlocked");
                 }
-                $scope.users.filter(user => user.active).forEach(user => user.enabled = false)})
+                $scope.users.filter(user => user.active).forEach(user => user.enabled = true)})
         } else {
             CustomNotifications.error(message, 10000 * userNotUnlock.length);
         }
@@ -540,8 +540,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                     CustomNotifications.warn(message, 10000 * userNotResetPassword.length);
                 } else {
                     CustomNotifications.success("Password Reset");
-                }
-                $scope.users.filter(user => user.active).forEach(user => user.enabled = false)})
+                }})
         } else {
             CustomNotifications.error(message, 10000 * userNotResetPassword.length);
         }
@@ -562,8 +561,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                         CustomNotifications.warn(message, 10000 * userNotSendLogin.length);
                     } else {
                         CustomNotifications.success("Login has been sent");
-                    }
-                    $scope.users.filter(user => user.active).forEach(user => user.enabled = false)})
+                    }})
             } else {
                 CustomNotifications.error(message, 10000 * userNotSendLogin.length);
             }
@@ -586,8 +584,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                         CustomNotifications.warn(message, 10000 * userNotResetPassword.length);
                     } else {
                         CustomNotifications.success("Login has been sent and password reset");
-                    }
-                    $scope.users.filter(user => user.active).forEach(user => user.enabled = false)})
+                    }})
             } else {
                 CustomNotifications.error(message, 10000 * userNotResetPassword.length);
             }
@@ -598,7 +595,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         let users = $scope.users.filter(user => user.active);
         for (let i = 0; i < users.length; i++) {
             if (!users[i].enabled) {
-                Notifications.error("Вы выбрали заблокированного пользователя c username " + users[i].username);
+                CustomNotifications.error("Вы выбрали заблокированного пользователя c username " + users[i].username);
                 return false;
             }
         }
