@@ -508,9 +508,9 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     $scope.unlockUsers = function () {
         if(user.emailVerified === false){
             if(!!user.attributes.phone){
-                Dialog.message("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
+                Notifications.error("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
             } else {
-                Dialog.message("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
+                Notifications.error("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
             }
         } else {
             let userForUnlock = $scope.users.filter(user => user.active).map(user => user.id);
@@ -524,9 +524,9 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     $scope.selectedResetPassword = function () {
         if(user.emailVerified === false){
             if(!!user.attributes.phone){
-                Dialog.message("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
+                Notifications.error("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
             } else {
-                Dialog.message("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
+                Notifications.error("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
             }
         } else {
             let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
@@ -540,9 +540,9 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         if (checkSelect()) {
             if(user.emailVerified === false){
                 if(!!user.attributes.phone){
-                    Dialog.message("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
+                    Notifications.error("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
                 } else {
-                    Dialog.message("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
+                    Notifications.error("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
                 }
             } else {
                 let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
@@ -557,9 +557,9 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         if (checkSelect()) {
             if(user.emailVerified === false){
                 if(!!user.attributes.phone){
-                    Dialog.message("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
+                    Notifications.error("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
                 } else {
-                    Dialog.message("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
+                    Notifications.error("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
                 }
             } else {
                 let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
@@ -583,9 +583,9 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     $scope.selectedBlockUsers = function () {
         if(user.emailVerified === false){
             if(!!user.attributes.phone){
-                Dialog.message("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
+                Notifications.error("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
             } else {
-                Dialog.message("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
+                Notifications.error("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
             }
         } else {
             let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
