@@ -269,7 +269,7 @@ module.controller('UserOfflineSessionsCtrl', function ($scope, $location, realm,
 module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState, UserImpersonation,
                                             BruteForce, Notifications, $route, Dialog/*, CustomUser*/,
                                             $http, $window,
-                                            RealmClearUserCache, RealmClearRealmCache, RealmClearKeysCache) {
+                                            RealmClearUserCache, RealmClearRealmCache, RealmClearKeysCache, CustomNotifications) {
 
     $scope.userRealms = [];
     $scope.users = [];
@@ -522,50 +522,29 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
     $scope.selectedResetPassword = function () {
-        if(user.emailVerified === false){
-            if(!!user.attributes.phone){
-                Notifications.error("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
-            } else {
-                Notifications.error("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
-            }
-        } else {
-            let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
-            $http.post(`${authUrl}/realms/${realm.realm}/manage/credential/reset`, userForResetPassword).then(response => {
+        let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
+        $http.post(`${authUrl}/realms/${realm.realm}/manage/credential/reset`, userForResetPassword)
+            .then(function () {
                 Notifications.success("Password Reset");
-            })
-        }
+            }).catch(function () {
+            Notifications.error("Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
+        });
     };
 
     $scope.selectedSendLogin = function () {
         if (checkSelect()) {
-            if(user.emailVerified === false){
-                if(!!user.attributes.phone){
-                    Notifications.error("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
-                } else {
-                    Notifications.error("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
-                }
-            } else {
-                let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
-                $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/send/login`, userForResetPassword).then(response => {
-                    Notifications.success("Login has been sent");
-                })
-            }
+            let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
+            $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/send/login`, userForResetPassword).then(response => {
+                Notifications.success("Login has been sent");
+            })
         }
     };
 
     $scope.selectedSendLoginAndResetPassword = function () {
         if (checkSelect()) {
-            if(user.emailVerified === false){
-                if(!!user.attributes.phone){
-                    Notifications.error("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
-                } else {
-                    Notifications.error("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
-                }
-            } else {
-                let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
-                $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/credential/reset-with-send-login`, userForResetPassword)
-                    .then(response => {Notifications.success("Login has been sent and password reset");})
-            }
+            let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
+            $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/credential/reset-with-send-login`, userForResetPassword)
+                .then(response => {Notifications.success("Login has been sent and password reset");})
         }
     };
 
@@ -581,14 +560,23 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     }
 
     $scope.selectedBlockUsers = function () {
-        if($scope.users.filter(user => !user.emailVerified).length > 0){
-            Dialog.message("Failed", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
-        } else {
-            let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
+        let userForResetPassword = $scope.users.filter(user => user.active).filter(user => user.emailVerified).map(user => user.id);
+        let userNotResetPassword = $scope.users.filter(user => user.active).filter(user => !user.emailVerified).map(user => user.email);
+        let message = "";
+        if(userNotResetPassword.length > 0) {
+            let usersEmail = userNotResetPassword.join(', ')
+            message = "Пользователям: " + usersEmail + "письмо не може быть отправлено, почта в Учётной записи не подтверждена";
+        }
+        if(userForResetPassword.length > 0) {
             $http.post(`${authUrl}/realms/${realm.realm}/manage/block`, userForResetPassword).then(response => {
-                Notifications.success("Users has been blocking");
-                $scope.users.filter(user => user.active).forEach(user => user.enabled = false)
-            })
+                if(message.length > 0) {
+                    CustomNotifications.warn(message, 10000 * userNotResetPassword.length);
+                } else {
+                    Notifications.success("Users has been blocking");
+                }
+                $scope.users.filter(user => user.active).forEach(user => user.enabled = false)})
+        } else {
+            CustomNotifications.error(message, 10000 * userNotResetPassword.length);
         }
     };
 
@@ -2668,4 +2656,58 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
     };
 
     $scope.init();
+});
+
+module.factory('CustomNotifications', function($rootScope, $timeout) {
+    // time (in ms) the notifications are shown
+    var defaultDelay = 5000;
+
+    var notifications = {};
+    notifications.current = { display: false };
+    notifications.current.remove = function() {
+        if (notifications.scheduled) {
+            $timeout.cancel(notifications.scheduled);
+            delete notifications.scheduled;
+        }
+        delete notifications.current.type;
+        delete notifications.current.header;
+        delete notifications.current.message;
+        notifications.current.display = false;
+        console.debug("Remove message");
+    }
+
+    $rootScope.notification = notifications.current;
+
+    notifications.message = function(type, header, message, delay) {
+        notifications.current.remove();
+
+        notifications.current.type = type;
+        notifications.current.header = header;
+        notifications.current.message = message;
+        notifications.current.display = true;
+
+        notifications.scheduled = $timeout(function() {
+            notifications.current.remove();
+        }, delay || defaultDelay);
+
+        console.debug("Added message");
+    }
+
+    notifications.info = function(message, delay) {
+        notifications.message("info", "Info!", message, delay);
+    };
+
+    notifications.success = function(message, delay) {
+        notifications.message("success", "Success!", message, delay);
+    };
+
+    notifications.error = function(message, delay) {
+        notifications.message("danger", "Error!", message, delay);
+    };
+
+    notifications.warn = function(message, delay) {
+        notifications.message("warning", "Warning!", message, delay);
+    };
+
+    return notifications;
 });
