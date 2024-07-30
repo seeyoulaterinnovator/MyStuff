@@ -506,45 +506,91 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
     $scope.unlockUsers = function () {
-        if(user.emailVerified === false){
-            if(!!user.attributes.phone){
-                Notifications.error("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
-            } else {
-                Notifications.error("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
-            }
-        } else {
-            let userForUnlock = $scope.users.filter(user => user.active).map(user => user.id);
+        let userForUnlock = $scope.users.filter(user => user.active).filter(user => user.emailVerified).map(user => user.id);
+        let userNotUnlock = $scope.users.filter(user => user.active).filter(user => !user.emailVerified).map(user => user.email);
+        let message = "";
+        if(userNotUnlock.length > 0) {
+            let usersEmail = userNotUnlock.join(', ')
+            message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
+        }
+        if(userForUnlock.length > 0) {
             $http.post(`${authUrl}/realms/${realm.realm}/manage/unlock`, userForUnlock).then(response => {
-                Notifications.success("Selected users has been unlocked");
-                $scope.users.filter(user => user.active).forEach(user => user.enabled = true)
-            })
+                if(message.length > 0) {
+                    CustomNotifications.warn(message, 10000 * userNotUnlock.length);
+                } else {
+                    CustomNotifications.success("Selected users has been unlocked");
+                }
+                $scope.users.filter(user => user.active).forEach(user => user.enabled = false)})
+        } else {
+            CustomNotifications.error(message, 10000 * userNotUnlock.length);
         }
     };
 
     $scope.selectedResetPassword = function () {
-        let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
-        $http.post(`${authUrl}/realms/${realm.realm}/manage/credential/reset`, userForResetPassword)
-            .then(function () {
-                Notifications.success("Password Reset");
-            }).catch(function () {
-            Notifications.error("Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
-        });
+        let userForResetPassword = $scope.users.filter(user => user.active).filter(user => user.emailVerified).map(user => user.id);
+        let userNotResetPassword = $scope.users.filter(user => user.active).filter(user => !user.emailVerified).map(user => user.email);
+        let message = "";
+        if(userNotResetPassword.length > 0) {
+            let usersEmail = userNotResetPassword.join(', ')
+            message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
+        }
+        if(userForResetPassword.length > 0) {
+            $http.post(`${authUrl}/realms/${realm.realm}/manage/credential/reset`, userForResetPassword).then(response => {
+                if(message.length > 0) {
+                    CustomNotifications.warn(message, 10000 * userNotResetPassword.length);
+                } else {
+                    CustomNotifications.success("Password Reset");
+                }
+                $scope.users.filter(user => user.active).forEach(user => user.enabled = false)})
+        } else {
+            CustomNotifications.error(message, 10000 * userNotResetPassword.length);
+        }
     };
 
     $scope.selectedSendLogin = function () {
         if (checkSelect()) {
-            let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
-            $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/send/login`, userForResetPassword).then(response => {
-                Notifications.success("Login has been sent");
-            })
+            let userForSendLogin = $scope.users.filter(user => user.active).filter(user => user.emailVerified).map(user => user.id);
+            let userNotSendLogin = $scope.users.filter(user => user.active).filter(user => !user.emailVerified).map(user => user.email);
+            let message = "";
+            if(userNotSendLogin.length > 0) {
+                let usersEmail = userNotSendLogin.join(', ')
+                message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
+            }
+            if(userForSendLogin.length > 0) {
+                $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/send/login`, userForSendLogin).then(response => {
+                    if(message.length > 0) {
+                        CustomNotifications.warn(message, 10000 * userNotSendLogin.length);
+                    } else {
+                        CustomNotifications.success("Login has been sent");
+                    }
+                    $scope.users.filter(user => user.active).forEach(user => user.enabled = false)})
+            } else {
+                CustomNotifications.error(message, 10000 * userNotSendLogin.length);
+            }
         }
     };
 
     $scope.selectedSendLoginAndResetPassword = function () {
         if (checkSelect()) {
-            let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
-            $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/credential/reset-with-send-login`, userForResetPassword)
-                .then(response => {Notifications.success("Login has been sent and password reset");})
+            let userForResetPassword = $scope.users.filter(user => user.active).filter(user => user.emailVerified).map(user => user.id);
+            let userNotResetPassword = $scope.users.filter(user => user.active).filter(user => !user.emailVerified).map(user => user.email);
+            let message = "";
+            if(userNotResetPassword.length > 0) {
+                let usersEmail = userNotResetPassword.join(', ')
+                message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
+            }
+            if(userForResetPassword.length > 0) {
+                $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/credential/reset-with-send-login`, userForResetPassword)
+                    .then(response => {
+                    if(message.length > 0) {
+                        CustomNotifications.warn(message, 10000 * userNotResetPassword.length);
+                    } else {
+                        CustomNotifications.success("Login has been sent and password reset");
+                    }
+                    $scope.users.filter(user => user.active).forEach(user => user.enabled = false)})
+            } else {
+                CustomNotifications.error(message, 10000 * userNotResetPassword.length);
+            }
         }
     };
 
@@ -560,23 +606,23 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     }
 
     $scope.selectedBlockUsers = function () {
-        let userForResetPassword = $scope.users.filter(user => user.active).filter(user => user.emailVerified).map(user => user.id);
-        let userNotResetPassword = $scope.users.filter(user => user.active).filter(user => !user.emailVerified).map(user => user.email);
+        let userForBlockUsers = $scope.users.filter(user => user.active).filter(user => user.emailVerified).map(user => user.id);
+        let userNotBlockUsers = $scope.users.filter(user => user.active).filter(user => !user.emailVerified).map(user => user.email);
         let message = "";
-        if(userNotResetPassword.length > 0) {
-            let usersEmail = userNotResetPassword.join(', ')
+        if(userNotBlockUsers.length > 0) {
+            let usersEmail = userNotBlockUsers.join(', ')
             message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
         }
-        if(userForResetPassword.length > 0) {
-            $http.post(`${authUrl}/realms/${realm.realm}/manage/block`, userForResetPassword).then(response => {
+        if(userForBlockUsers.length > 0) {
+            $http.post(`${authUrl}/realms/${realm.realm}/manage/block`, userForBlockUsers).then(response => {
                 if(message.length > 0) {
-                    CustomNotifications.warn(message, 10000 * userNotResetPassword.length);
+                    CustomNotifications.warn(message, 10000 * userNotBlockUsers.length);
                 } else {
-                    Notifications.success("Users has been blocking");
+                    CustomNotifications.success("Users has been blocking");
                 }
                 $scope.users.filter(user => user.active).forEach(user => user.enabled = false)})
         } else {
-            CustomNotifications.error(message, 10000 * userNotResetPassword.length);
+            CustomNotifications.error(message, 10000 * userBlockUsers.length);
         }
     };
 
