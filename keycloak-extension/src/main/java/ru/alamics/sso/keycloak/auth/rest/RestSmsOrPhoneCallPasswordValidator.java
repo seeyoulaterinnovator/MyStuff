@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth;
+package ru.alamics.sso.keycloak.auth.rest;
 
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -16,12 +16,10 @@ import java.util.List;
 
 import static ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth.RestAuthHelper.*;
 
+public class RestSmsOrPhoneCallPasswordValidator extends ValidatePassword {
+    private static final String PROVIDER_ID = "rest-sms-or-phone-pass-validator";
 
-public class PasswordRestValidator extends ValidatePassword {
-
-    private static final String PROVIDER_ID = "rest-password-validator";
-
-    private static final String DISPLAY_NAME = "Rest Password Validator";
+    public static final String DISPLAY_NAME = "REST SMS or phone call password validator";
 
     private static final String HELP_TEXT = "";
 
@@ -39,19 +37,15 @@ public class PasswordRestValidator extends ValidatePassword {
         setEmailSetter(user);
         setPostSelector(user, attributes);
 
-        if (password == null) {
-            context.getAuthenticationSession().setAuthNote("restSecondPhase", "restSecondPhase");
-            setSecondPhaseAuth(context, user);
-            context.success();
-            return;
-        }
-        boolean valid = context.getSession().userCredentialManager().isValid(context.getRealm(), context.getUser(), UserCredentialModel.password(password));
-        if (!valid) {
-            context.getEvent().user(context.getUser());
-            context.getEvent().error(Errors.INVALID_USER_CREDENTIALS);
-            Response challengeResponse = errorResponse(Response.Status.UNAUTHORIZED.getStatusCode(), "invalid_grant", "Invalid user credentials");
-            context.failure(AuthenticationFlowError.INVALID_USER, challengeResponse);
-            return;
+        if (password != null) {
+            boolean valid = context.getSession().userCredentialManager().isValid(context.getRealm(), context.getUser(), UserCredentialModel.password(password));
+            if (!valid) {
+                context.getEvent().user(context.getUser());
+                context.getEvent().error(Errors.INVALID_USER_CREDENTIALS);
+                Response challengeResponse = errorResponse(Response.Status.UNAUTHORIZED.getStatusCode(), "invalid_grant", "Invalid user credentials");
+                context.failure(AuthenticationFlowError.INVALID_USER, challengeResponse);
+                return;
+            }
         }
 
         context.success();
@@ -76,6 +70,4 @@ public class PasswordRestValidator extends ValidatePassword {
     public String getId() {
         return PROVIDER_ID;
     }
-
-
 }

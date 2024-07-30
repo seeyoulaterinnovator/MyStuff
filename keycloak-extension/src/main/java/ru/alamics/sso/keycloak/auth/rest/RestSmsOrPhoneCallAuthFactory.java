@@ -5,7 +5,6 @@ import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.provider.ProviderConfigProperty;
 import ru.alamics.sso.keycloak.auth.AbstractAuthenticatorFactory;
-import ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth.PasswordRestValidator;
 import ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth.UserNameOrPhoneRestValidator;
 
 import java.util.Arrays;
@@ -47,6 +46,14 @@ public class RestSmsOrPhoneCallAuthFactory extends AbstractAuthenticatorFactory 
             15
     );
 
+    public static final ProviderConfigProperty PHONE_VERIFICATION_REQUIRED = new ProviderConfigProperty(
+            "phoneVerificationRequired",
+            "Phone verification required",
+            "Телефон должен быть подтвержден",
+            ProviderConfigProperty.BOOLEAN_TYPE,
+            false
+    );
+
     private static final String PROVIDER_ID = "rest-sms-or-phone-call-auth";
 
     private static final String DISPLAY_NAME = "REST SMS or phone call authentication";
@@ -72,7 +79,7 @@ public class RestSmsOrPhoneCallAuthFactory extends AbstractAuthenticatorFactory 
                 "Авторизация через отправку SMS кода или звонка по телефону для Direct Grant Flow " +
                         "(требует наличия перед собой \"%s\", \"%s\" и после себя \"%s\")",
                 UserNameOrPhoneRestValidator.DISPLAY_NAME,
-                PasswordRestValidator.DISPLAY_NAME,
+                RestSmsOrPhoneCallPasswordValidator.DISPLAY_NAME,
                 RestRequiredActionsAuthFactory.DISPLAY_TYPE
         );
     }
@@ -93,7 +100,8 @@ public class RestSmsOrPhoneCallAuthFactory extends AbstractAuthenticatorFactory 
                 MAX_RESEND_RECALL_TRIES,
                 COUNT_BY_ONE_CODE,
                 BLOCK_CHECK_CACHE_SECS,
-                NEW_SEND_DELAY_SECS
+                NEW_SEND_DELAY_SECS,
+                PHONE_VERIFICATION_REQUIRED
         );
     }
 

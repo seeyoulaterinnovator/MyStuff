@@ -48,7 +48,7 @@ import static ru.alamics.sso.registration.phone.UserPhoneVerifier.MESSENGER;
  * Требует flow:
  * <ul>
  *     <li>{@link ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth.UserNameOrPhoneRestValidator}</li>
- *     <li>{@link ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth.PasswordRestValidator}</li>
+ *     <li>{@link RestSmsOrPhoneCallPasswordValidator}</li>
  *     <li>{@link RestSmsOrPhoneCallAuth}</li>
  *     <li>{@link RestRequiredActionsAuthenticator}</li>
  * </ul>
@@ -86,16 +86,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
         AuthenticationSessionModel session = context.getAuthenticationSession();
         UserModel userModel = context.getUser();
         User user = UserModelUserMapper.mapToUser(context.getUser());
-        List<AuthOrRegType> authOrRegTypes = context.getUser()
-                .getRequiredActions()
-                .stream()
-                .map(AuthOrRegType::findByReqActProviderName)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-        ActivationCodeType codeType = authOrRegTypes.contains(AuthOrRegType.SMS_CODE) ? ActivationCodeType.CODE_TO_SMS :
-                authOrRegTypes.contains(AuthOrRegType.PHONE_CALL) ? ActivationCodeType.CODE_BY_PHONE_NUMBER : null;
-        AuthOrRegType authType = codeType == ActivationCodeType.CODE_TO_SMS ? AuthOrRegType.SMS_CODE :
-                AuthOrRegType.PHONE_CALL;
+
 
         // Config
         Map<String, String> config = context.getAuthenticatorConfig() != null ?
@@ -116,8 +107,19 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                 config.get(RestSmsOrPhoneCallAuthFactory.BLOCK_CHECK_CACHE_SECS.getName()),
                 (int) RestSmsOrPhoneCallAuthFactory.BLOCK_CHECK_CACHE_SECS.getDefaultValue()
         ));
+        boolean phoneVerificationRequired = Boolean.TRUE.toString().equals(
+                config.get(RestSmsOrPhoneCallAuthFactory.PHONE_VERIFICATION_REQUIRED.getName())
+        );
 
         // Parameters
+        String viaPhoneOnly = context.getHttpRequest().getDecodedFormParameters().getFirst("viaPhoneOnly");
+        ActivationCodeType codeType = "phone_verificator_sms".equals(viaPhoneOnly) ?
+                ActivationCodeType.CODE_TO_SMS :
+                "incoming_call_phone_verificator".equals(viaPhoneOnly) ?
+                        ActivationCodeType.CODE_BY_PHONE_NUMBER :
+                        null;
+        AuthOrRegType authType = codeType == ActivationCodeType.CODE_TO_SMS ? AuthOrRegType.SMS_CODE :
+                AuthOrRegType.PHONE_CALL;
         String host = context.getHttpRequest().getUri().getBaseUri().getHost();
         String userCodeId = context.getHttpRequest().getDecodedFormParameters().getFirst(SMS_CODE_ID_PARAM);
         String userCodeValue = context.getHttpRequest().getDecodedFormParameters().getFirst("smscode");
@@ -139,6 +141,14 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
 
         if(user.getPhone() == null) {
             failure(context, "У пользователя нет телефона");
+            return;
+        }
+
+        if(phoneVerificationRequired && (
+                userModel.getRequiredActions().contains(AuthOrRegType.SMS_CODE.getReqActProviderName())
+                        || userModel.getRequiredActions().contains(AuthOrRegType.PHONE_CALL.getReqActProviderName())
+        )) {
+            failure(context, "Телефон еще не верифицирован");
             return;
         }
 
