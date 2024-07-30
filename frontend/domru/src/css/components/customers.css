@@ -70,7 +70,7 @@
   letter-spacing: 0.02em;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 1279px) {
   .org-cell {
     font-size: 15px;
     line-height: 19px;
@@ -81,25 +81,25 @@
   }
 }
 
-@media (max-width: 641px) {
+@media (max-width: 767px) {
   .theader {
     font-weight: 300;
   }
 
   .titems:hover {
-  .role-cell, .org-cell {
-    color: #0357F1 !important;
+    .role-cell, .org-cell {
+      color: #0357F1 !important;
+    }
+  }
+
+  .title {
+    font-size: 32px;
+    line-height: 38px;
+    margin-bottom: 30px;
   }
 }
 
-.title {
-  font-size: 32px;
-  line-height: 38px;
-  margin-bottom: 30px;
-}
-}
-
-@media (max-width: 480px) {
+@media (max-width: 767px) {
   .table {
     font-weight: 300;
   }
@@ -159,7 +159,7 @@
   }
 }
 
-@media (max-width: 320px) {
+@media (max-width: 767px) {
   .trow div {
     padding-left: 15px;
     padding-right: 15px;

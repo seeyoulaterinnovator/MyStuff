@@ -7,13 +7,9 @@
   transition: 0.2s ease-in-out;
   font-family: 'CoFo Sans',sans-serif;
 
-  @media (min-width: 1199px) {
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    height: 44px;
   }
-
-@media only screen and (min-width: 768px) and (max-width: 1279px) {
-  height: 44px;
-}
-
 
   &:disabled {
     @apply .opacity-40 .cursor-not-allowed;
@@ -77,15 +73,11 @@
   width: 203px;
   box-sizing: border-box;
 
-  @media screen and (max-width: 959px) {
-    width: 96px;
-  }
-
-  @media screen and (max-width: 640px) {
+  @media screen and (max-width: 1279px) {
     width: 88px;
   }
 
-  @media screen and (max-width: 479px) {
+  @media screen and (max-width: 767px) {
     display: none;
   }
 }
@@ -94,7 +86,7 @@
   width: 29px;
   height: 29px;
 
-  @media screen and (max-width: 640px) {
+  @media screen and (max-width: 767px) {
     width: 22px;
     height: 22px;
   }
@@ -118,13 +110,13 @@ a.btn {
   justify-content: center;
   align-items: center;
 
-  @media screen and (max-width: 479px){
+  @media screen and (max-width: 767px){
     width: 50%;
   }
 }
 
 
-@media screen and (max-width: 479px) {
+@media screen and (max-width: 767px) {
   .btn {
     font-size: 13px;
   }
@@ -187,7 +179,6 @@ a.btn {
   }
 }
 
-/* For 320 resolution */
 @media only screen and (max-width: 767px) {
   .btn-switcher {
     display: flex;
@@ -271,7 +262,6 @@ a.btn {
   }
 }
 
-/* For 320 resolution */
 @media only screen and (max-width: 767px) {
   .btn-back {
     display: flex;
@@ -291,12 +281,7 @@ a.btn {
     order: 1;
     align-self: stretch;
     flex-grow: 0;
-
   }
-}
-
-.reg-button{
-
 }
 
 @media only screen and (max-width: 767px) {
@@ -304,10 +289,6 @@ a.btn {
     width: 252px;
     height: 40px;
   }
-}
-
-.domru-cancel{
-
 }
 
 @media only screen and (max-width: 767px) {

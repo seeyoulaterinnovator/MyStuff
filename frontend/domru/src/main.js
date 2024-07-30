@@ -28,7 +28,6 @@ import './css/components/cities.css';
 import './css/components/confirmation.css';
 import './css/components/customers.css';
 import './css/components/verification.css';
-import './css/components/chat.css';
 import './css/components/message.css';
 import './css/components/error.css';
 

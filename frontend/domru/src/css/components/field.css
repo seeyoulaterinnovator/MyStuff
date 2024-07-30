@@ -24,19 +24,6 @@
   position: relative;
 }
 
-/* Эти штуки руинят форму регистрации!!!*/
-/*@media (min-width: 768px) {*/
-/*  .field__container {*/
-/*    margin-bottom: 24px;*/
-/*  }*/
-/*}*/
-
-/*@media (min-width: 1280px) {*/
-/*  .field__container {*/
-/*    margin-bottom: 32px;*/
-/*  }*/
-/*}*/
-
 .field__open {
   cursor: pointer;
   position: absolute;
@@ -62,7 +49,7 @@
   transition: border-color 0.1s ease-in;
   width: 100%;
 
-@media (min-width: 1199px) {
+@media (min-width: 1280px) {
   height:48px;
 }
 
@@ -82,7 +69,7 @@
   color: black;
   opacity: 0.5;
 
-@media (min-width: 1200px) {
+@media (min-width: 1280px) {
   font-size:17px;
 }
 }
@@ -116,7 +103,7 @@
   font-size: 10px;
   line-height: 13px;
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   font-size:13px;
 }
 }
@@ -133,12 +120,12 @@
   min-width: 270px;
   max-width: 270px;
 
-@media (max-width: 1199px) {
+@media (max-width: 1279px) {
   min-width:235px;
   max-width:245px;
 }
 
-@media (max-width: 479px) {
+@media (max-width: 767px) {
   width:85%;
   max-width:100%;
 }
@@ -171,31 +158,22 @@
 .pass-fields--change-pass {
   min-width: unset;
 
-@media (max-width: 1199px) {
-  min-width:210px;
-}
+  @media (max-width: 1279px) {
+    min-width:210px;
+  }
 
-@media (max-width: 479px) {
-  width:100%;
-}
+  @media (max-width: 767px) {
+    width:100%;
+  }
 }
 
 
 .field__input--city {
   width: 696px;
 
-@media (max-width: 1199px) {
-  width: 696px;
-}
-
-
-@media (max-width: 768px) {
-  width: 696px;
-}
-
-@media (max-width: 320px) {
-  width: 288px;
-}
+  @media (max-width: 767px) {
+    width: 288px;
+  }
 }
 
 .generated-password-text {
@@ -204,9 +182,9 @@
   white-space: nowrap;
   opacity: 0.5;
 
-@media (max-width: 1199px) {
-  font-size:14px;
-}
+  @media (max-width: 1279px) {
+    font-size:14px;
+  }
 }
 
 .generated-password-field {
@@ -215,9 +193,9 @@
   align-items: center;
   height: 48px;
 
-@media (max-width: 1199px) {
-  height:40px;
-}
+  @media (max-width: 1279px) {
+    height: 40px;
+  }
 }
 
 
@@ -440,7 +418,7 @@
   flex-grow: 0;
 }
 
-@media only screen and (min-width: 1279px) {
+@media only screen and (min-width: 1280px) {
   .login-pass {
     color: #16629A;
     display: flex;
@@ -628,20 +606,11 @@
   }
 }
 
-.enter-reg-mobile{
-
-}
-
 @media (max-width: 767px){
   .enter-reg-mobile{
     display: flex;
     justify-content: space-between;
   }
-}
-
-
-.info-text-code{
-
 }
 
 @media (max-width: 767px){

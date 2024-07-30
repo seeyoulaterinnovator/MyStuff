@@ -71,12 +71,12 @@ input[type="number"] {
   color: black;
   opacity: 0.1;
   transition: 0.2s ease-in-out;
-&:hover {
-   opacity: 0.5;
- }
-@media screen and (max-width: 320px) {
-  opacity: 1;
-}
+  &:hover {
+    opacity: 0.5;
+  }
+  @media only screen and (max-width: 767px) {
+    opacity: 1;
+  }
 }
 
 .text-with-login {
@@ -87,40 +87,23 @@ input[type="number"] {
 .text-3xl{
   font-size: 46px;
 
-@media screen and (max-width: 640px) {
-  font-size: 35px;
+  @media only screen and (max-width: 767px) {
+    font-size: 33px;
+    overflow:hidden;
+    max-width: 250px;
+    background: linear-gradient(to right, #CDCDCD, transparent);
+    color: transparent;
+    -webkit-background-clip: text;
+  }
 }
 
-@media screen and (max-width: 479px) {
-  font-size: 33px;
-}
-
-@media screen and (max-width: 320px) {
-  font-size: 33px;
-  overflow:hidden;
-  max-width: 250px;
-  background: linear-gradient(to right, #CDCDCD, transparent);
-  color: transparent;
-  -webkit-background-clip: text;
-}
-}
-
-.enter-text{
+.enter-text {
   font-size: 46px;
 
-@media screen and (max-width: 640px) {
-  font-size: 35px;
+  @media screen and (max-width: 767px) {
+    font-size: 33px;
+  }
 }
-
-@media screen and (max-width: 479px) {
-  font-size: 33px;
-}
-
-@media screen and (max-width: 320px) {
-  font-size: 33px;
-}
-}
-
 
 .text-no-wrap {
   white-space: nowrap;
@@ -146,7 +129,7 @@ input[type="number"] {
   max-width: calc(100% - 75px);
 }
 
-@media screen and (max-width: 1199px){
+@media screen and (max-width: 1279px) {
   .footer {
     width: 206px;
   }
@@ -156,7 +139,7 @@ input[type="number"] {
   }
 }
 
-@media screen and (max-width: 959px){
+@media screen and (max-width: 767px){
   .footer {
     margin-bottom: 30px;
     width: 100%;
@@ -164,13 +147,13 @@ input[type="number"] {
   }
 }
 
-@media screen and (max-width: 640px){
+@media only screen and (max-width: 767px) {
   .login-title-text {
     max-width: unset;
   }
 }
 
-@media screen and (max-width: 479px){
+@media only screen and (max-width: 767px) {
   .footer {
     margin-bottom: 16px;
   }
@@ -189,7 +172,8 @@ input[type="number"] {
 .g-recaptcha {
   transform-origin: 0 0;
 }
-@media (max-width: 479px) {
+
+@media (max-width: 767px) {
   .g-recaptcha {
     padding-bottom: 1rem;
   }
@@ -208,7 +192,7 @@ input[type="number"] {
   line-height: 52px;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 767px) {
   .titleAllPage {
     font-size: 35px;
     line-height: 40px;
@@ -253,7 +237,7 @@ input[type="number"] {
     opacity: 0.8;
     font-weight: 400;
     line-height: 19px;
-     }
+  }
 }
 
 .hidden-important {
@@ -265,17 +249,13 @@ input[type="number"] {
   white-space: pre;
 }
 
-@media (max-width: 413px) {
+@media (max-width: 767px) {
   .breakable::before {
     content: none;
   }
 }
 
-.test{
-
-}
-
-@media (max-width: 479px){
+@media only screen and (max-width: 767px) {
   .test{
     align-items: center;
     display: flex;
