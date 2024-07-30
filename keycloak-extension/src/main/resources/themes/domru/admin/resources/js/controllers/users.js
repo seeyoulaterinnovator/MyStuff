@@ -581,12 +581,9 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     }
 
     $scope.selectedBlockUsers = function () {
-        if(user.emailVerified === false){
-            if(!!user.attributes.phone){
-                Notifications.error("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
-            } else {
-                Notifications.error("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
-            }
+        let userNotEmailVerified = $scope.users.filter(user => !user.emailVerified);
+        if(userNotEmailVerified.length > 0){
+            Dialog.message("Failed", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
         } else {
             let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
             $http.post(`${authUrl}/realms/${realm.realm}/manage/block`, userForResetPassword).then(response => {
