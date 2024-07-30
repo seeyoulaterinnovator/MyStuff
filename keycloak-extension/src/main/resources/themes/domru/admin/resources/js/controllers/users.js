@@ -581,8 +581,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     }
 
     $scope.selectedBlockUsers = function () {
-        let userNotEmailVerified = $scope.users.filter(user => !user.emailVerified);
-        if(userNotEmailVerified.length > 0){
+        if($scope.users.filter(user => !user.emailVerified).length > 0){
             Dialog.message("Failed", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
         } else {
             let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
