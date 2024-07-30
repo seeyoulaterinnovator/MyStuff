@@ -31,6 +31,7 @@ import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.keycloak.auth.model.AuthType;
 import ru.alamics.sso.keycloak.auth.model.SsoUrlBean;
 import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.keycloak.util.MiscUtil;
 import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
@@ -63,6 +64,10 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     private static final String AUTH_VIA_EMAIL_OR_USERNAME_AND_PASSWORD = "loginViaEmailOrUsernameAndPassword";
 
     private static final String AUTH_VIA_PHONE_CALL = "loginViaPhoneCall";
+
+    private static final String AUTH_NOTE_LAST_LOGIN_PHONE = "lastLoginPhone";
+
+    private static final String AUTH_NOTE_LAST_LOGIN_USERNAME = "lastLoginUsername";
 
     private ClientService clientService = null;
 
@@ -184,12 +189,13 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             attributes.put("loginViaPhoneCall", isLoginViaPhoneCall());
             attributes.put("hideChat", isChatHidden());
             attributes.put(
-                    "registrationFirstTab",
+                    "isRegistrationRedirect",
                     hasClientIdInSettings(REGISTRATION_FIRST_TAB_CLIENT_IDS)
                             && page == LoginFormsPages.LOGIN
                             && !Util.TRUE_STR.equals(uriInfo.getQueryParameters().getFirst(SELF))
                             && !uriInfo.getQueryParameters().containsKey(TAB_ID)
                             && (formData == null || formData.isEmpty())
+                            && !isHideRegistration()
 
             );
             attributes.put("isRegistrationFullTexts", hasClientIdInSettings(REGISTRATION_FIRST_TAB_CLIENT_IDS));
@@ -202,6 +208,10 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                 attributes.put("loginFailToRegistrationMessage", notEmptySettingsValue(
                         settingsService.getSettingsStringValue(LOGIN_FAIL_TO_REGISTRATION_MESSAGE, realm.getName()),
                         ""));
+            }
+            if(hasClientIdInSettings(LOGIN_FAIL_TO_REGISTRATION_CLIENT_IDS) && page == LoginFormsPages.REGISTER) {
+                attributes.put("lastLoginUsername", getAndRemoveLastLoginUsername());
+                attributes.put("lastLoginPhone", getAndRemoveLastLoginPhone());
             }
 
             if (realm.isInternationalizationEnabled()) {
@@ -450,5 +460,42 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             attributes.put(FormConstants.EXISTING_USER_EMAIL, existingUser.getEmail());
         }
         return createResponse(LoginFormsPages.LOGIN_IDP_LINK_EMAIL);
+    }
+
+    @Override
+    public Response createLogin() {
+        if(authenticationSession != null) {
+            authenticationSession.removeAuthNote(AUTH_NOTE_LAST_LOGIN_PHONE);
+            authenticationSession.removeAuthNote(AUTH_NOTE_LAST_LOGIN_USERNAME);
+            if(formData != null) {
+                String username = formData.getFirst("username");
+                if(username != null && !username.trim().isEmpty()) {
+                    if(formData.containsKey("smsButton") || MiscUtil.isPhoneNumber(username)) {
+                        authenticationSession.setAuthNote(AUTH_NOTE_LAST_LOGIN_PHONE, username);
+                    } else {
+                        authenticationSession.setAuthNote(AUTH_NOTE_LAST_LOGIN_USERNAME, username);
+                    }
+                }
+            }
+        }
+        return super.createLogin();
+    }
+
+    private String getAndRemoveLastLoginPhone() {
+        if(authenticationSession != null) {
+            String phone = authenticationSession.getAuthNote(AUTH_NOTE_LAST_LOGIN_PHONE);
+            authenticationSession.removeAuthNote(AUTH_NOTE_LAST_LOGIN_PHONE);
+            return phone;
+        }
+        return null;
+    }
+
+    private String getAndRemoveLastLoginUsername() {
+        if(authenticationSession != null) {
+            String username = authenticationSession.getAuthNote(AUTH_NOTE_LAST_LOGIN_USERNAME);
+            authenticationSession.removeAuthNote(AUTH_NOTE_LAST_LOGIN_USERNAME);
+            return username;
+        }
+        return null;
     }
 }
