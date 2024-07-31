@@ -20,6 +20,7 @@ import javax.ejb.Stateless;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Stateless
 @LocalBean
@@ -96,13 +97,29 @@ public class BlackListService {
         return blackListRepository.findBlockedByPhone(phone, context).stream()
                 .anyMatch(it -> it.getLimitationCause().equals(ActivationCodeType.CODE_BY_PHONE_NUMBER.name()));
     }
+
     public boolean isUserBlockedAuthByPhoneCall(String phone, RequiredActionContext context) {
         return blackListRepository.findBlockedByPhone(phone, context).stream()
                 .anyMatch(it -> it.getLimitationCause().equals(ActivationCodeType.CODE_BY_PHONE_NUMBER.name()));
     }
 
+    public boolean isUserBlockedAuthByPhoneCallAndCause(String phone, AuthenticationFlowContext context, String cause) {
+        return blackListRepository.findBlockedByPhone(phone, context).stream()
+                .anyMatch(it -> cause.equals(it.getLimitationCause()));
+    }
+
     public BlackListDto getBlockedUser(String phone, AuthenticationFlowContext context) {
         List<BlackListEntity> entities = blackListRepository.findBlockedByPhone(phone, context);
+        if (!entities.isEmpty()) {
+            return BlackListMapper.toDto(entities.stream().findFirst().get());
+        }
+        return null;
+    }
+
+    public BlackListDto getBlockedUserByCause(String phone, AuthenticationFlowContext context, String cause) {
+        List<BlackListEntity> entities = blackListRepository.findBlockedByPhone(phone, context).stream()
+                .filter(it -> cause.equals(it.getLimitationCause()))
+                .collect(Collectors.toList());
         if (!entities.isEmpty()) {
             return BlackListMapper.toDto(entities.stream().findFirst().get());
         }

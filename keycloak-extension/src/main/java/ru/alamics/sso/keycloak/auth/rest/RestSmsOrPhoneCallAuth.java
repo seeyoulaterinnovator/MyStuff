@@ -31,15 +31,16 @@ import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 import ru.alamics.sso.registration.phone.port.SendMessageService;
 import ru.alamics.sso.registration.service.AuthorisedUsersService;
 
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
+import static javax.ws.rs.core.Response.Status.TOO_MANY_REQUESTS;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.EXPIRATION_TIME;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.MESSENGER;
 
@@ -55,7 +56,13 @@ import static ru.alamics.sso.registration.phone.UserPhoneVerifier.MESSENGER;
  */
 @Slf4j
 public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
+    private static final String AUTH_OR_REG_TYPE_PARAM = "viaPhoneOnly";
+
+    private static final String SMS_CODE_PARAM = "smscode";
+
     private static final String SMS_CODE_ID_PARAM = "smsCodeId";
+
+    private static final String MESSAGE_FIELD = "message";
 
     private final BlackListService blackListService;
 
@@ -112,18 +119,14 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
         );
 
         // Parameters
-        String viaPhoneOnly = context.getHttpRequest().getDecodedFormParameters().getFirst("viaPhoneOnly");
-        ActivationCodeType codeType = "phone_verificator_sms".equals(viaPhoneOnly) ?
-                ActivationCodeType.CODE_TO_SMS :
-                "incoming_call_phone_verificator".equals(viaPhoneOnly) ?
-                        ActivationCodeType.CODE_BY_PHONE_NUMBER :
-                        null;
-        AuthOrRegType authType = codeType == ActivationCodeType.CODE_TO_SMS ? AuthOrRegType.SMS_CODE :
-                AuthOrRegType.PHONE_CALL;
         String host = context.getHttpRequest().getUri().getBaseUri().getHost();
-        String userCodeId = context.getHttpRequest().getDecodedFormParameters().getFirst(SMS_CODE_ID_PARAM);
-        String userCodeValue = context.getHttpRequest().getDecodedFormParameters().getFirst("smscode");
-        boolean isPassword = context.getHttpRequest().getDecodedFormParameters().containsKey(CredentialRepresentation.PASSWORD);
+        MultivaluedMap<String, String> params = context.getHttpRequest().getDecodedFormParameters();
+        AuthOrRegType authType = AuthOrRegType.findByReqActProviderName(params.getFirst(AUTH_OR_REG_TYPE_PARAM));
+        ActivationCodeType codeType = authType == AuthOrRegType.SMS_CODE ? ActivationCodeType.CODE_TO_SMS :
+                authType == AuthOrRegType.PHONE_CALL ? ActivationCodeType.CODE_BY_PHONE_NUMBER : null;
+        String userCodeId = params.getFirst(SMS_CODE_ID_PARAM);
+        String userCodeValue = params.getFirst(SMS_CODE_PARAM);
+        boolean isPassword = params.containsKey(CredentialRepresentation.PASSWORD);
 
         // Attributes
         AttributeCode attributeCode = AttributeCode.fromString(
@@ -131,11 +134,16 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
         );
         Instant codeSentAt = MiscUtil.parseInstant(userModel.getFirstAttribute(
                 UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_SENT_AT));
-        Instant blockedAt = Instant.ofEpochMilli(MiscUtil.parseLong(userModel.getFirstAttribute(
-                UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_BLOCKED_AT), 0));
+        BlockTimeout blockTimeout = BlockTimeout.fromString(
+                userModel.getFirstAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_BLOCKED_AT)
+        );
 
-        if(codeType == null || isPassword) {
-            context.success();
+        if(codeType == null) {
+            if(isPassword) {
+                context.success();
+            } else {
+                failure(context, "Не указан вариант отправки кода");
+            }
             return;
         }
 
@@ -152,38 +160,48 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
             return;
         }
 
-        boolean isBlockCached = Instant.now().isBefore(blockedAt);
-        boolean isBlocked = isBlockCached;
-        if(!isBlocked) {
+        if(blockTimeout == null || Instant.now().isAfter(blockTimeout.getCachedAt())) {
+            boolean isBlocked = false;
             BlackListDto blackList = blackListService.getBlockedUser(user.getPhone(), context);
-            if (blackList != null && (
-                    codeType == ActivationCodeType.CODE_TO_SMS
-                            && blackListService.isUserBlockedAuthBySms(user.getPhone(), context)
-                            || codeType == ActivationCodeType.CODE_BY_PHONE_NUMBER
-                            && blackListService.isUserBlockedAuthByPhoneCall(user.getPhone(), context)
-            )) {
+            if (blackList != null &&
+                    blackListService.isUserBlockedAuthByPhoneCallAndCause(user.getPhone(), context, codeType.name())) {
                 isBlocked = true;
             }
-        }
-        if(!isBlocked) {
-            long attemptCount = attemptFailsService.getAttempts(
-                    user.getPhone(), context.getRealm().getName(), codeType.name(),
-                    UserToUserEntityMapper.toUserEntity(user)
-            ).size();
-            if(attemptCount > maxResendRecallTries) {
-                blackListService.limitUserBySmsOrPhoneV2(user, codeType.name(), session);
-                log.info("{} blocked by attempt count", user.getPhone());
-                isBlocked = true;
+            if(!isBlocked) {
+                long attemptCount = attemptFailsService.getAttempts(
+                        user.getPhone(), context.getRealm().getName(), codeType.name(),
+                        UserToUserEntityMapper.toUserEntity(user)
+                ).size();
+                if(attemptCount > maxResendRecallTries) {
+                    blackListService.limitUserBySmsOrPhoneV2(user, codeType.name(), session);
+                    log.info("{} blocked by attempt count", user.getPhone());
+                    isBlocked = true;
+                }
+            }
+            if(isBlocked) {
+                Instant unblockedAt = blackListService.getBlockedUserByCause(
+                        user.getPhone(), context, codeType.name()
+                ).getUnblockedAt().atZone(ZoneOffset.systemDefault()).toInstant();
+                Instant cachedAt = Instant.now().plus(blockCacheExpire);
+                blockTimeout = BlockTimeout.builder()
+                        .cachedAt(cachedAt.isAfter(unblockedAt) ? unblockedAt : cachedAt)
+                        .unblockedAt(unblockedAt)
+                        .build();
+            } else {
+                blockTimeout = null;
             }
         }
-        if(isBlocked) {
-            if(!isBlockCached) {
-                userModel.setSingleAttribute(
-                        UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_BLOCKED_AT,
-                        String.valueOf(Instant.now().plus(blockCacheExpire).toEpochMilli())
-                );
-            }
+        if(blockTimeout != null) {
+            userModel.setSingleAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_BLOCKED_AT, blockTimeout.toString());
             failure(context, "Временная блокировка");
+            Map<String, Object> result = new HashMap<>();
+            result.put(MESSAGE_FIELD, "Временная блокировка");
+            result.put("blockSeconds", lastSeconds(Duration.between(Instant.now(), blockTimeout.unblockedAt)));
+            result.put(SMS_CODE_ID_PARAM, attributeCode.getId());
+            context.challenge(Response.status(TOO_MANY_REQUESTS)
+                    .entity(result)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .build());
             return;
         } else {
             userModel.removeAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_BLOCKED_AT);
@@ -234,11 +252,11 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                 log.info("Code sent");
             }
             Map<String, Object> result = new HashMap<>();
-            result.put("message", "Код отправлен");
-            result.put("expirationSeconds", Duration.between(
+            result.put(MESSAGE_FIELD, "Код отправлен");
+            result.put("expirationSeconds", lastSeconds(Duration.between(
                     Instant.now(),
                     codeSentAt.plus(Duration.ofSeconds(codeType.getExpiredSecondsToResend()))
-            ).getSeconds());
+            )));
             result.put(SMS_CODE_ID_PARAM, attributeCode.getId());
             context.challenge(Response.ok().entity(result).type(MediaType.APPLICATION_JSON_TYPE).build());
             return;
@@ -300,6 +318,10 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
         );
     }
 
+    private int lastSeconds(Duration duration) {
+        return Math.max(0, (int) Math.ceil(duration.toMillis() / 1000.0));
+    }
+
     @Data
     @AllArgsConstructor
     @Builder
@@ -321,6 +343,36 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
         @Override
         public String toString() {
             return id + ":" + hashKey;
+        }
+    }
+
+    @Data
+    @AllArgsConstructor
+    @Builder
+    static class BlockTimeout {
+        static BlockTimeout fromString(String value) {
+            if(value == null || value.isEmpty()) {
+                return null;
+            } else {
+                String[] timestamps = value.split(":", 2);
+                try {
+                    return new BlockTimeout(
+                            Instant.ofEpochMilli(Long.parseLong(timestamps[0])),
+                            Instant.ofEpochMilli(Long.parseLong(timestamps[1]))
+                    );
+                } catch (Exception e) {
+                    return null;
+                }
+            }
+        }
+
+        final Instant cachedAt;
+
+        final Instant unblockedAt;
+
+        @Override
+        public String toString() {
+            return cachedAt.toEpochMilli() + ":" + unblockedAt.toEpochMilli();
         }
     }
 }
