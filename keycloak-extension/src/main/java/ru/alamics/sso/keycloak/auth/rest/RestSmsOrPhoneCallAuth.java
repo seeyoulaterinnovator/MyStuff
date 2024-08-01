@@ -189,7 +189,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                     int resendAttempts = attemptFailsService.getActualAttemptFailsCount(
                             user.getPhone(), context.getRealm().getName(), codeType.name(), user.getId()
                     );
-                    if(maxResendRecallTries - resendAttempts < 0) {
+                    if(maxResendRecallTries - resendAttempts <= 0) {
                         failureWithBlocking(
                                 context,
                                 mapToBlockTimeout(
