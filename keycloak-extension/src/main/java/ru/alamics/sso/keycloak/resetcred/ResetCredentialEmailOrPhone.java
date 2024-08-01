@@ -133,7 +133,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
     public void action(AuthenticationFlowContext context) {
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
         String username = context.getHttpRequest().getDecodedFormParameters().getFirst("verifyEmail");
-        if(username != null && context.getUser().getEmail() != null && username.equals(context.getUser().getEmail())){
+        if(username != null && context.getUser().getEmail() != null && username.toLowerCase().equals(context.getUser().getEmail())){
             context.getUser().setEmailVerified(true);
             authenticate(context);
             return;

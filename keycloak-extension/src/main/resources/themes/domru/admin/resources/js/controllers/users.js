@@ -516,13 +516,13 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         if(userForUnlock.length > 0) {
             $http.post(`${authUrl}/realms/${realm.realm}/manage/unlock`, userForUnlock).then(response => {
                 if(message.length > 0) {
-                    CustomNotifications.warn(message, 10000 * userNotUnlock.length);
+                    CustomNotifications.warn(message, 5000 * userNotUnlock.length);
                 } else {
                     CustomNotifications.success("Selected users has been unlocked");
                 }
                 $scope.users.filter(user => user.active).forEach(user => user.enabled = true)})
         } else {
-            CustomNotifications.error(message, 10000 * userNotUnlock.length);
+            CustomNotifications.error(message, 5000 * userNotUnlock.length);
         }
     };
 
@@ -537,12 +537,12 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         if(userForResetPassword.length > 0) {
             $http.post(`${authUrl}/realms/${realm.realm}/manage/credential/reset`, userForResetPassword).then(response => {
                 if(message.length > 0) {
-                    CustomNotifications.warn(message, 10000 * userNotResetPassword.length);
+                    CustomNotifications.warn(message, 5000 * userNotResetPassword.length);
                 } else {
                     CustomNotifications.success("Password Reset");
                 }})
         } else {
-            CustomNotifications.error(message, 10000 * userNotResetPassword.length);
+            CustomNotifications.error(message, 5000 * userNotResetPassword.length);
         }
     };
 
@@ -558,12 +558,12 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
             if(userForSendLogin.length > 0) {
                 $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/send/login`, userForSendLogin).then(response => {
                     if(message.length > 0) {
-                        CustomNotifications.warn(message, 10000 * userNotSendLogin.length);
+                        CustomNotifications.warn(message, 5000 * userNotSendLogin.length);
                     } else {
                         CustomNotifications.success("Login has been sent");
                     }})
             } else {
-                CustomNotifications.error(message, 10000 * userNotSendLogin.length);
+                CustomNotifications.error(message, 5000 * userNotSendLogin.length);
             }
         }
     };
@@ -582,12 +582,12 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
                 $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/credential/reset-with-send-login`, userForResetPassword)
                     .then(response => {
                     if(message.length > 0) {
-                        CustomNotifications.warn(message, 10000 * userNotResetPassword.length);
+                        CustomNotifications.warn(message, 5000 * userNotResetPassword.length);
                     } else {
                         CustomNotifications.success("Login has been sent and password reset");
                     }})
             } else {
-                CustomNotifications.error(message, 10000 * userNotResetPassword.length);
+                CustomNotifications.error(message, 5000 * userNotResetPassword.length);
             }
         }
     };
@@ -614,13 +614,13 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         if(userForBlockUsers.length > 0) {
             $http.post(`${authUrl}/realms/${realm.realm}/manage/block`, userForBlockUsers).then(response => {
                 if(message.length > 0) {
-                    CustomNotifications.warn(message, 10000 * userNotBlockUsers.length);
+                    CustomNotifications.warn(message, 5000 * userNotBlockUsers.length);
                 } else {
                     CustomNotifications.success("Users has been blocking");
                 }
                 $scope.users.filter(user => user.active).forEach(user => user.enabled = false)})
         } else {
-            CustomNotifications.error(message, 10000 * userNotBlockUsers.length);
+            CustomNotifications.error(message, 5000 * userNotBlockUsers.length);
         }
     };
 
