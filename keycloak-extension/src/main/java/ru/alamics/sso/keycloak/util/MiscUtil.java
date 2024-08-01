@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MiscUtil {
@@ -62,5 +63,20 @@ public final class MiscUtil {
                 return null;
             }
         }
+    }
+
+    public static String pluralize(int n, String form1, String form2, String form3) {
+        n = Math.abs(n);
+        if (n % 10 == 1 && n % 100 != 11) {
+            return form1;
+        } else if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) {
+            return form2;
+        } else {
+            return form3;
+        }
+    }
+    public static String pluralize(int n, List<String> forms) {
+        if(forms.size() != 3) throw new IllegalArgumentException();
+        return pluralize(n, forms.get(0), forms.get(1), forms.get(2));
     }
 }

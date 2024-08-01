@@ -58,7 +58,7 @@ public class BlackListService {
         blackListRepository.update(blackList);
     }
 
-    public void limitUserBySmsOrPhoneV2(User user, String cause, AuthenticationSessionModel context) {
+    public BlackListDto limitUserBySmsOrPhoneV2(User user, String cause, AuthenticationSessionModel context) {
         BlackListEntity blackList = new BlackListEntity();
         UserEntity userEntity = userRepository.findUser(user.getId());
         List<BlackListEntity> existEntity = blackListRepository.findFirstByPhoneAndLimitationCause(user.getPhone(), cause);
@@ -76,10 +76,11 @@ public class BlackListService {
         if (existEntity.isEmpty()) {
             blackList.setBlockCount(1);
             blackListRepository.save(blackList);
-            return;
+            return BlackListMapper.toDto(blackList);
         }
         blackList.setBlockCount(existEntity.stream().findFirst().get().getBlockCount() + 1);
         blackListRepository.update(blackList);
+        return BlackListMapper.toDto(blackList);
     }
 
     public boolean isUserBlockedAuthBySms(String phone, AuthenticationFlowContext context) {
@@ -103,7 +104,7 @@ public class BlackListService {
                 .anyMatch(it -> it.getLimitationCause().equals(ActivationCodeType.CODE_BY_PHONE_NUMBER.name()));
     }
 
-    public boolean isUserBlockedAuthByPhoneCallAndCause(String phone, AuthenticationFlowContext context, String cause) {
+    public boolean isUserBlockedAuthByCause(String phone, AuthenticationFlowContext context, String cause) {
         return blackListRepository.findBlockedByPhone(phone, context).stream()
                 .anyMatch(it -> cause.equals(it.getLimitationCause()));
     }

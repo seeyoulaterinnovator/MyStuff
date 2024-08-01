@@ -18,7 +18,6 @@ import ru.alamics.sso.keycloak.auth.AbstractAuthenticator;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.keycloak.util.MiscUtil;
-import ru.alamics.sso.keycloak.util.UserToUserEntityMapper;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.model.UserConstants;
 import ru.alamics.sso.registration.phone.ActivationCodeType;
@@ -33,12 +32,12 @@ import ru.alamics.sso.registration.service.AuthorisedUsersService;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import java.time.*;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static javax.ws.rs.core.Response.Status.TOO_MANY_REQUESTS;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.EXPIRATION_TIME;
@@ -63,6 +62,10 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
     private static final String SMS_CODE_ID_PARAM = "smsCodeId";
 
     private static final String MESSAGE_FIELD = "message";
+
+    private static final List<String> ATTEMPT_WORD_FORMS = Arrays.asList("попытка", "попытки", "попыток");
+
+    private static final List<String> SECOND_WORD_FORMS = Arrays.asList("секунда", "секунды", "секунд");
 
     private final BlackListService blackListService;
 
@@ -93,7 +96,6 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
         AuthenticationSessionModel session = context.getAuthenticationSession();
         UserModel userModel = context.getUser();
         User user = UserModelUserMapper.mapToUser(context.getUser());
-
 
         // Config
         Map<String, String> config = context.getAuthenticatorConfig() != null ?
@@ -161,47 +163,15 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
         }
 
         if(blockTimeout == null || Instant.now().isAfter(blockTimeout.getCachedAt())) {
-            boolean isBlocked = false;
+            blockTimeout = null;
             BlackListDto blackList = blackListService.getBlockedUser(user.getPhone(), context);
-            if (blackList != null &&
-                    blackListService.isUserBlockedAuthByPhoneCallAndCause(user.getPhone(), context, codeType.name())) {
-                isBlocked = true;
-            }
-            if(!isBlocked) {
-                long attemptCount = attemptFailsService.getAttempts(
-                        user.getPhone(), context.getRealm().getName(), codeType.name(),
-                        UserToUserEntityMapper.toUserEntity(user)
-                ).size();
-                if(attemptCount > maxResendRecallTries) {
-                    blackListService.limitUserBySmsOrPhoneV2(user, codeType.name(), session);
-                    log.info("{} blocked by attempt count", user.getPhone());
-                    isBlocked = true;
-                }
-            }
-            if(isBlocked) {
-                Instant unblockedAt = blackListService.getBlockedUserByCause(
-                        user.getPhone(), context, codeType.name()
-                ).getUnblockedAt().atZone(ZoneOffset.systemDefault()).toInstant();
-                Instant cachedAt = Instant.now().plus(blockCacheExpire);
-                blockTimeout = BlockTimeout.builder()
-                        .cachedAt(cachedAt.isAfter(unblockedAt) ? unblockedAt : cachedAt)
-                        .unblockedAt(unblockedAt)
-                        .build();
-            } else {
-                blockTimeout = null;
+            if(blackList != null
+                    && blackListService.isUserBlockedAuthByCause(user.getPhone(), context, codeType.name())) {
+                blockTimeout = mapToBlockTimeout(blackList, blockCacheExpire);
             }
         }
         if(blockTimeout != null) {
-            userModel.setSingleAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_BLOCKED_AT, blockTimeout.toString());
-            failure(context, "Временная блокировка");
-            Map<String, Object> result = new HashMap<>();
-            result.put(MESSAGE_FIELD, "Временная блокировка");
-            result.put("blockSeconds", lastSeconds(Duration.between(Instant.now(), blockTimeout.unblockedAt)));
-            result.put(SMS_CODE_ID_PARAM, attributeCode.getId());
-            context.challenge(Response.status(TOO_MANY_REQUESTS)
-                    .entity(result)
-                    .type(MediaType.APPLICATION_JSON_TYPE)
-                    .build());
+            failureWithBlocking(context, blockTimeout);
             return;
         } else {
             userModel.removeAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_BLOCKED_AT);
@@ -212,10 +182,23 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                 failure(context, "Слишком много запросов отправки кода. Повторите позже");
                 return;
             }
-            if(codeSentAt == null
+            if(attributeCode == null || codeSentAt == null
                     || codeSentAt.isBefore(Instant.now().minus(Duration.ofSeconds(codeType.getExpiredSecondsToResend())))
-                    || attributeCode == null) {
+            ) {
                 if(attributeCode != null) {
+                    int resendAttempts = attemptFailsService.getActualAttemptFailsCount(
+                            user.getPhone(), context.getRealm().getName(), codeType.name(), user.getId()
+                    );
+                    if(maxResendRecallTries - resendAttempts < 0) {
+                        failureWithBlocking(
+                                context,
+                                mapToBlockTimeout(
+                                        blackListService.limitUserBySmsOrPhoneV2(user, codeType.name(), session),
+                                        blockCacheExpire
+                                )
+                        );
+                        return;
+                    }
                     // Сохраняем попытку переотправки кода, см. resend input у формы
                     attemptFailsService.saveAttempt(new AttemptFailsDto(user.getPhone(), attributeCode.getHashKey(),
                             context.getRealm().getName(), codeType.name(), LocalDateTime.now(),
@@ -227,10 +210,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                         code = SmsCodeGenerator.getCode(codeType.getLengthCode());
                         String[] messengers = context.getRealm().getSmtpConfig().get(MESSENGER).split(",");
                         messageSendService.sendMessageToMessengers(
-                                user.getPhone(),
-                                code, context.getRealm().getId(),
-                                messengers,
-                                host
+                                user.getPhone(), code, context.getRealm().getId(), messengers, host
                         );
                     } else {
                         code = phoneCallerService.callAndGetCode(user.getPhone(), 1);
@@ -241,9 +221,11 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                     return;
                 }
                 codeSentAt = Instant.now();
+                String codeId = UUID.randomUUID().toString();
                 attributeCode = AttributeCode.builder()
-                        .id(UUID.randomUUID().toString())
-                        .hashKey(HashGenerator.getSecretHash(code))
+                        .id(codeId)
+                        // считаем хэш сумму с солью в виде ID кода (из возможного пересечения кодов в WroteCode-сервисе)
+                        .hashKey(HashGenerator.getSecretHash(codeId + ":" + code))
                         .build();
                 userModel.setSingleAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_ID_AND_HASH_KEY,
                         attributeCode.toString());
@@ -253,7 +235,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
             }
             Map<String, Object> result = new HashMap<>();
             result.put(MESSAGE_FIELD, "Код отправлен");
-            result.put("expirationSeconds", lastSeconds(Duration.between(
+            result.put("expirationSeconds", mapToSeconds(Duration.between(
                     Instant.now(),
                     codeSentAt.plus(Duration.ofSeconds(codeType.getExpiredSecondsToResend()))
             )));
@@ -274,27 +256,56 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
             failure(context, "Не активного кода с переданным идентификатором");
             return;
         }
-        int codeAttempts = wroteCodeAttemptsService.getWroteCodeAttemptsByCode(user.getPhone(),
-                context.getRealm().getName(), authType.name(), attributeCode.getHashKey());
-        if (codeAttempts >= countByOnCode) {
-            failure(context, "Исчерпаны попытки ввода кода");
-            userModel.removeAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_SENT_AT);
-            return;
-        }
         session.setAuthNote(EXPIRATION_TIME, codeSentAt.atZone(ZoneOffset.systemDefault()).toLocalDateTime()
                 .format(DateTimeFormatter.ISO_DATE_TIME));
+        String userCodeIdValue = userCodeId + ":" + userCodeValue;
         try {
             userPhoneVerifier.verifyPhone(
-                    userModel, user, codeType.getExpiredCodeSeconds(), attributeCode.getHashKey(), userCodeValue, codeType,
-                    session.getRealm().getName(), session, authorisedUsersService, authType.getId()
+                    userModel, user, codeType.getExpiredCodeSeconds(), attributeCode.getHashKey(),
+                    userCodeIdValue, codeType, session.getRealm().getName(), session,
+                    authorisedUsersService, authType.getId()
             );
             userModel.removeAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_ID_AND_HASH_KEY);
             context.success();
         } catch (WrongSmsCode e) {
             log.warn("Wrong sms code");
-            failure(context, "Неверный код");
-            wroteCodeAttemptsService.saveFailWroteCode(attributeCode.getHashKey(), userCodeValue, user.getPhone(),
+            wroteCodeAttemptsService.saveFailWroteCode(attributeCode.getHashKey(), userCodeIdValue, user.getPhone(),
                     context.getRealm().getName(), authType.name(), user);
+            int codeAttempts = wroteCodeAttemptsService.getWroteCodeAttemptsByCode(user.getPhone(),
+                    context.getRealm().getName(), authType.name(), attributeCode.getHashKey());
+            int lastCodeAttempts = countByOnCode - codeAttempts;
+            if(lastCodeAttempts > 0) {
+                failure(context, String.format(
+                        "Неверный код. Осталось %d %s ввода кода",
+                        lastCodeAttempts,
+                        MiscUtil.pluralize(lastCodeAttempts, ATTEMPT_WORD_FORMS)
+                ));
+            } else {
+                attemptFailsService.saveAttempt(new AttemptFailsDto(user.getPhone(), attributeCode.getHashKey(),
+                        context.getRealm().getName(), codeType.name(), LocalDateTime.now(),
+                        context.getUser().getId()));
+                userModel.removeAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_ID_AND_HASH_KEY);
+                userModel.removeAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_SENT_AT);
+                int resendAttempts = attemptFailsService.getActualAttemptFailsCount(
+                        user.getPhone(), context.getRealm().getName(), codeType.name(), user.getId()
+                );
+                int lastResendAttempts = maxResendRecallTries - resendAttempts + 1;
+                if(lastResendAttempts > 0) {
+                    failure(context, String.format(
+                            "Неверный код. Исчерпаны попытки ввода кода. Осталось %d %s повторной отправки кода",
+                            lastResendAttempts,
+                            MiscUtil.pluralize(lastResendAttempts, ATTEMPT_WORD_FORMS)
+                    ));
+                } else {
+                    failureWithBlocking(
+                            context,
+                            mapToBlockTimeout(
+                                    blackListService.limitUserBySmsOrPhoneV2(user, codeType.name(), session),
+                                    blockCacheExpire
+                            )
+                    );
+                }
+            }
         } catch (TimeExpiredException e) {
             log.warn("Expired time of code");
             failure(context, "Код устарел");
@@ -303,6 +314,25 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
 
     @Override
     public void action(AuthenticationFlowContext context) { }
+
+    private void failureWithBlocking(AuthenticationFlowContext context, BlockTimeout blockTimeout) {
+        context.getUser().setSingleAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_BLOCKED_AT,
+                blockTimeout.toString());
+        context.getUser().removeAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_ID_AND_HASH_KEY);
+        context.getUser().removeAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_SENT_AT);
+        int blockSeconds = mapToSeconds(Duration.between(Instant.now(), blockTimeout.unblockedAt));
+        Map<String, Object> result = new HashMap<>();
+        result.put(MESSAGE_FIELD, String.format(
+                "Временная блокировка на %d %s",
+                blockSeconds,
+                MiscUtil.pluralize(blockSeconds, SECOND_WORD_FORMS)
+        ));
+        result.put("blockSeconds", mapToSeconds(Duration.between(Instant.now(), blockTimeout.unblockedAt)));
+        context.challenge(Response.status(TOO_MANY_REQUESTS)
+                .entity(result)
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .build());
+    }
 
     private void failure(AuthenticationFlowContext context, String error) {
         Map<String, Object> result = new HashMap<>();
@@ -318,7 +348,16 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
         );
     }
 
-    private int lastSeconds(Duration duration) {
+    private BlockTimeout mapToBlockTimeout(BlackListDto blackList, Duration blockCacheExpire) {
+        Instant unblockedAt = blackList.getUnblockedAt().atZone(ZoneOffset.systemDefault()).toInstant();
+        Instant cachedAt = Instant.now().plus(blockCacheExpire);
+        return BlockTimeout.builder()
+                .cachedAt(cachedAt.isAfter(unblockedAt) ? unblockedAt : cachedAt)
+                .unblockedAt(unblockedAt)
+                .build();
+    }
+
+    private int mapToSeconds(Duration duration) {
         return Math.max(0, (int) Math.ceil(duration.toMillis() / 1000.0));
     }
 
