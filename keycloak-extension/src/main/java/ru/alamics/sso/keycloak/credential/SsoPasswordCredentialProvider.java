@@ -83,14 +83,16 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
         int timeTokenResetPass = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm.getName());
         String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
         String link = builder.build(realm.getName()).toString();
-        String phone = PhoneFormatter.formatPhoneNumber(UserModelUserMapper.mapToUser(user).getPhone().trim());
         String email = user.getEmail();
 
         attributes.put("authHref", link);
         attributes.put("emailCredentialDisableBodyHtmlCost", settingsService.getSettingsStringValue(EMAIL_CREDENTIAL_DISABLE_ACCOUNT, realm.getName()));
         attributes.put("expTime", expirationStrRus);
-        attributes.put("phone", phone);
         attributes.put("email", email);
+
+        if(UserModelUserMapper.mapToUser(user).getPhone() != null) {
+            attributes.put("phone", PhoneFormatter.formatPhoneNumber(UserModelUserMapper.mapToUser(user).getPhone().trim()));
+        }
         EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
         try {
             emailTemplateProvider.setRealm(realm)

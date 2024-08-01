@@ -269,7 +269,7 @@ module.controller('UserOfflineSessionsCtrl', function ($scope, $location, realm,
 module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState, UserImpersonation,
                                             BruteForce, Notifications, $route, Dialog/*, CustomUser*/,
                                             $http, $window,
-                                            RealmClearUserCache, RealmClearRealmCache, RealmClearKeysCache) {
+                                            RealmClearUserCache, RealmClearRealmCache, RealmClearKeysCache, CustomNotifications) {
 
     $scope.userRealms = [];
     $scope.users = [];
@@ -506,49 +506,89 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     };
 
     $scope.unlockUsers = function () {
-        let userForUnlock = $scope.users.filter(user => user.active).map(user => user.id);
-        $http.post(`${authUrl}/realms/${realm.realm}/manage/unlock`, userForUnlock).then(response => {
-            Notifications.success("Selected users has been unlocked");
-            $scope.users.filter(user => user.active).forEach(user => user.enabled = true)
-        })
+        let userForUnlock = $scope.users.filter(user => user.active).filter(user => user.emailVerified).map(user => user.id);
+        let userNotUnlock = $scope.users.filter(user => user.active).filter(user => !user.emailVerified).map(user => user.email);
+        let message = "";
+        if(userNotUnlock.length > 0) {
+            let usersEmail = userNotUnlock.join(', ')
+            message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
+        }
+        if(userForUnlock.length > 0) {
+            $http.post(`${authUrl}/realms/${realm.realm}/manage/unlock`, userForUnlock).then(response => {
+                if(message.length > 0) {
+                    CustomNotifications.warn(message, 5000 * userNotUnlock.length);
+                } else {
+                    CustomNotifications.success("Selected users has been unlocked");
+                }
+                $scope.users.filter(user => user.active).forEach(user => user.enabled = true)})
+        } else {
+            CustomNotifications.error(message, 5000 * userNotUnlock.length);
+        }
     };
 
     $scope.selectedResetPassword = function () {
-        let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
-        $http.post(`${authUrl}/realms/${realm.realm}/manage/credential/reset`, userForResetPassword).then(response => {
-            Notifications.success("Password Reset");
-        })
-    };
-
-    $scope.selectedSendLogin = function () {
-        let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
-        $http.post(`${authUrl}/realms/${realm.realm}/manage/send/login`, userForResetPassword).then(response => {
-            Notifications.success("Login has been sent");
-        })
-    };
-
-    $scope.selectedSendLoginAndResetPassword = function () {
-        let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
-        $http.post(`${authUrl}/realms/${realm.realm}/manage/credential/reset-with-send-login`, userForResetPassword).then(response => {
-            Notifications.success("Login has been sent and password reset");
-        })
+        let userForResetPassword = $scope.users.filter(user => user.active).filter(user => user.emailVerified).map(user => user.id);
+        let userNotResetPassword = $scope.users.filter(user => user.active).filter(user => !user.emailVerified).map(user => user.email);
+        let message = "";
+        if(userNotResetPassword.length > 0) {
+            let usersEmail = userNotResetPassword.join(', ')
+            message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
+        }
+        if(userForResetPassword.length > 0) {
+            $http.post(`${authUrl}/realms/${realm.realm}/manage/credential/reset`, userForResetPassword).then(response => {
+                if(message.length > 0) {
+                    CustomNotifications.warn(message, 5000 * userNotResetPassword.length);
+                } else {
+                    CustomNotifications.success("Password Reset");
+                }})
+        } else {
+            CustomNotifications.error(message, 5000 * userNotResetPassword.length);
+        }
     };
 
     $scope.selectedSendLogin = function () {
         if (checkSelect()) {
-            let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
-            $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/send/login`, userForResetPassword).then(response => {
-                Notifications.success("Login has been sent");
-            })
+            let userForSendLogin = $scope.users.filter(user => user.active).filter(user => user.emailVerified).map(user => user.id);
+            let userNotSendLogin = $scope.users.filter(user => user.active).filter(user => !user.emailVerified).map(user => user.email);
+            let message = "";
+            if(userNotSendLogin.length > 0) {
+                let usersEmail = userNotSendLogin.join(', ')
+                message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
+            }
+            if(userForSendLogin.length > 0) {
+                $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/send/login`, userForSendLogin).then(response => {
+                    if(message.length > 0) {
+                        CustomNotifications.warn(message, 5000 * userNotSendLogin.length);
+                    } else {
+                        CustomNotifications.success("Login has been sent");
+                    }})
+            } else {
+                CustomNotifications.error(message, 5000 * userNotSendLogin.length);
+            }
         }
     };
 
     $scope.selectedSendLoginAndResetPassword = function () {
         if (checkSelect()) {
-            let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
-            $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/credential/reset-with-send-login`, userForResetPassword).then(response => {
-                Notifications.success("Login has been sent and password reset");
-            })
+            let userForResetPassword = $scope.users.filter(user => user.active).filter(user => user.emailVerified).map(user => user.id);
+            let userNotResetPassword = $scope.users.filter(user => user.active).filter(user => !user.emailVerified).map(user => user.email);
+            let message = "";
+            if(userNotResetPassword.length > 0) {
+                let usersEmail = userNotResetPassword.join(', ')
+                message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
+
+            }
+            if(userForResetPassword.length > 0) {
+                $http.post(`${authUrl}/realms/` + $scope.query.searchRealm + `/users-toms/credential/reset-with-send-login`, userForResetPassword)
+                    .then(response => {
+                    if(message.length > 0) {
+                        CustomNotifications.warn(message, 5000 * userNotResetPassword.length);
+                    } else {
+                        CustomNotifications.success("Login has been sent and password reset");
+                    }})
+            } else {
+                CustomNotifications.error(message, 5000 * userNotResetPassword.length);
+            }
         }
     };
 
@@ -556,7 +596,7 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
         let users = $scope.users.filter(user => user.active);
         for (let i = 0; i < users.length; i++) {
             if (!users[i].enabled) {
-                Notifications.error("Вы выбрали заблокированного пользователя c username " + users[i].username);
+                CustomNotifications.error("Вы выбрали заблокированного пользователя c username " + users[i].username);
                 return false;
             }
         }
@@ -564,11 +604,24 @@ module.controller('UserListCtrl', function ($scope, realm, User, UserSearchState
     }
 
     $scope.selectedBlockUsers = function () {
-        let userForResetPassword = $scope.users.filter(user => user.active).map(user => user.id);
-        $http.post(`${authUrl}/realms/${realm.realm}/manage/block`, userForResetPassword).then(response => {
-            Notifications.success("Users has been blocking");
-            $scope.users.filter(user => user.active).forEach(user => user.enabled = false)
-        })
+        let userForBlockUsers = $scope.users.filter(user => user.active).filter(user => user.emailVerified).map(user => user.id);
+        let userNotBlockUsers = $scope.users.filter(user => user.active).filter(user => !user.emailVerified).map(user => user.email);
+        let message = "";
+        if(userNotBlockUsers.length > 0) {
+            let usersEmail = userNotBlockUsers.join(', ')
+            message = "Пользователям: " + usersEmail + " письмо не може быть отправлено, почта в Учётной записи не подтверждена";
+        }
+        if(userForBlockUsers.length > 0) {
+            $http.post(`${authUrl}/realms/${realm.realm}/manage/block`, userForBlockUsers).then(response => {
+                if(message.length > 0) {
+                    CustomNotifications.warn(message, 5000 * userNotBlockUsers.length);
+                } else {
+                    CustomNotifications.success("Users has been blocking");
+                }
+                $scope.users.filter(user => user.active).forEach(user => user.enabled = false)})
+        } else {
+            CustomNotifications.error(message, 5000 * userNotBlockUsers.length);
+        }
     };
 
     $scope.importFileCommon = function (files) {
@@ -1197,15 +1250,23 @@ module.controller('UserCredentialsCtrl', function ($scope, realm, user, $route, 
     };
 
     $scope.disableCredentialTypes = function () {
-        Dialog.confirm('Disable credentials', 'Are you sure you want to disable these users credentials?', function () {
-            $http.put(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/users/' + user.id + '/disable-credential-types',
-                $scope.disableableCredentialTypes).then(function () {
-                $route.reload();
-                Notifications.success("Credentials disabled");
-            }).catch(function () {
-                Notifications.error("Failed to disable credentials");
+        if(user.emailVerified === false){
+            if(!!user.attributes.phone){
+                Dialog.message("Failed to disable credentials", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
+            } else {
+                Dialog.message("Failed to disable credentials", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
+            }
+        } else {
+            Dialog.confirm('Disable credentials', 'Are you sure you want to disable these users credentials?', function () {
+                $http.put(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/users/' + user.id + '/disable-credential-types',
+                    $scope.disableableCredentialTypes).then(function () {
+                    $route.reload();
+                    Notifications.success("Credentials disabled");
+                }).catch(function () {
+                    Notifications.error("Failed to disable credentials");
+                });
             });
-        });
+        }
     };
 
     $scope.emailActions = [];
@@ -1217,16 +1278,24 @@ module.controller('UserCredentialsCtrl', function ($scope, realm, user, $route, 
             Dialog.message("Cannot send email", "You must save your current changes before you can send an email");
             return;
         }
-        Dialog.confirm('Send Email', 'Are you sure you want to send email to user?', function () {
-            $http.put(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/users/' + user.id + '/execute-actions-email?'
-                + 'lifespan=' + $scope.emailActionsTimeout.toSeconds(),
-                $scope.emailActions).then(function () {
-                Notifications.success("Email sent to user");
-                $scope.emailActions = [];
-            }).catch(function () {
-                Notifications.error("Failed to send email to user");
+        if(user.emailVerified === false){
+            if(!!user.attributes.phone){
+                Dialog.message("Cannot send email", "Письмо не може быть отправлено, почта в Учётной записи не подтверждена");
+            } else {
+                Dialog.message("Cannot send email", "В Учётной записи клиента не подтверждена почта и не указан номер телефона, письмо не отправлено");
+            }
+        } else {
+            Dialog.confirm('Send Email', 'Are you sure you want to send email to user?', function () {
+                $http.put(authUrl + '/realms/' + $scope.query.searchRealm + '/users-toms/users/' + user.id + '/execute-actions-email?'
+                    + 'lifespan=' + $scope.emailActionsTimeout.toSeconds(),
+                    $scope.emailActions).then(function () {
+                    Notifications.success("Email sent to user");
+                    $scope.emailActions = [];
+                }).catch(function () {
+                    Notifications.error("Failed to send email to user");
+                });
             });
-        });
+        }
     };
 
 
@@ -2631,4 +2700,58 @@ module.controller('ImportUsersCtrl', function ($scope, realm, $location, $http, 
     };
 
     $scope.init();
+});
+
+module.factory('CustomNotifications', function($rootScope, $timeout) {
+    // time (in ms) the notifications are shown
+    var defaultDelay = 5000;
+
+    var notifications = {};
+    notifications.current = { display: false };
+    notifications.current.remove = function() {
+        if (notifications.scheduled) {
+            $timeout.cancel(notifications.scheduled);
+            delete notifications.scheduled;
+        }
+        delete notifications.current.type;
+        delete notifications.current.header;
+        delete notifications.current.message;
+        notifications.current.display = false;
+        console.debug("Remove message");
+    }
+
+    $rootScope.notification = notifications.current;
+
+    notifications.message = function(type, header, message, delay) {
+        notifications.current.remove();
+
+        notifications.current.type = type;
+        notifications.current.header = header;
+        notifications.current.message = message;
+        notifications.current.display = true;
+
+        notifications.scheduled = $timeout(function() {
+            notifications.current.remove();
+        }, delay || defaultDelay);
+
+        console.debug("Added message");
+    }
+
+    notifications.info = function(message, delay) {
+        notifications.message("info", "Info!", message, delay);
+    };
+
+    notifications.success = function(message, delay) {
+        notifications.message("success", "Success!", message, delay);
+    };
+
+    notifications.error = function(message, delay) {
+        notifications.message("danger", "Error!", message, delay);
+    };
+
+    notifications.warn = function(message, delay) {
+        notifications.message("warning", "Warning!", message, delay);
+    };
+
+    return notifications;
 });

@@ -95,20 +95,34 @@ public class ResetCredentialEmail extends ResetCredential {
                 .toString();
 
         String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
-        String phone = PhoneFormatter.formatPhoneNumber(UserModelUserMapper.mapToUser(user).getPhone().trim());
+
         try {
             EmailTemplateProvider template = context.getSession().getProvider(EmailTemplateProvider.class);
+
+            if(UserModelUserMapper.mapToUser(user).getPhone() != null) {
+                template.setAttribute("phone", PhoneFormatter.formatPhoneNumber(UserModelUserMapper.mapToUser(user).getPhone().trim()));
+                if(username.contains("@") && !user.isEmailVerified()) {
+                    user.setEmailVerified(true);
+                }
+            } else {
+                if(!user.isEmailVerified()) {
+                    context.forkWithErrorMessage(new FormMessage("Не получается отправить письмо. Учетная запись с такими данными не существует в системе"));
+                    return;
+                }
+            }
+
             template.setRealm(realm)
                     .setUser(user)
                     .setAuthenticationSession(authenticationSession)
                     .setAttribute("expTime", expirationStrRus)
-                    .setAttribute("phone", phone)
                     .sendPasswordReset(link, timeTokenResetPass);
 
             event.clone().event(EventType.SEND_RESET_PASSWORD)
                     .user(user)
                     .detail(Details.USERNAME, username)
-                    .detail(Details.EMAIL, user.getEmail()).detail(Details.CODE_ID, authenticationSession.getParentSession().getId()).success();
+                    .detail(Details.EMAIL, user.getEmail())
+                    .detail(Details.CODE_ID, authenticationSession.getParentSession().getId())
+                    .success();
             context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT));
         } catch (EmailException e) {
             event.clone().event(EventType.SEND_RESET_PASSWORD)

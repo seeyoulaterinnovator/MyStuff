@@ -88,6 +88,7 @@ public class UserMapper {
                         UserSearch.builder()
                                 .id(user.getId())
                                 .email(user.getEmail())
+                                .emailVerified(user.isEmailVerified())
                                 .username(user.getUsername())
                                 .phone(user.getPhone())
                                 .firstName(user.getFirstName())
