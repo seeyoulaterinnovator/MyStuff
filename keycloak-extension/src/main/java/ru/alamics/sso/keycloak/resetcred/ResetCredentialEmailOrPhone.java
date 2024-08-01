@@ -117,7 +117,6 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
         ResetFactory factory = new ResetFactoryImpl(this.session, context);
         ResetCredential resetCredential = factory.create(resetType);
         resetCredential.reset(user, username);
-
 //        if (sendEmailVer(user, context.form(), context.getSession(), context.getAuthenticationSession(), context.getEvent())) {
 //              resetCredential.reset(user, username);
 //        }
