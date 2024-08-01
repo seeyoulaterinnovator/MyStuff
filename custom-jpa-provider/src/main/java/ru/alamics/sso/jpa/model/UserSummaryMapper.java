@@ -17,7 +17,8 @@ import javax.persistence.SqlResultSetMapping;
                 @ColumnResult(name = "LAST_NAME", type = String.class),
                 @ColumnResult(name = "EMAIL", type = String.class),
                 @ColumnResult(name = "PHONE", type = String.class),
-                @ColumnResult(name = "ENABLED", type = Boolean.class)
+                @ColumnResult(name = "ENABLED", type = Boolean.class),
+                @ColumnResult(name = "EMAIL_VERIFIED", type = Boolean.class)
             })
     })
 

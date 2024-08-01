@@ -18,6 +18,7 @@ public class UserSearch {
     private String firstName;
     private String lastName;
     private String email;
+    private Boolean emailVerified;
     private String phone;
     private Boolean enabled;
     private List<UserPostResponse> userPosts;

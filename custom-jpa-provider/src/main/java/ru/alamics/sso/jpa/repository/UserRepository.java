@@ -283,7 +283,8 @@ public class UserRepository {
                         "                                                         UE.lastName, " +
                         "                                                         UE.email, " +
                         "                                                         UA.value, " +
-                        "                                                         UE.enabled) " +
+                        "                                                         UE.enabled, " +
+                        "                                                         UE.emailVerified) " +
                         "from UserEntity UE\n" +
                         "         left join UserAttributeEntity UA on UE = UA.user AND UA.name = 'phone'\n" +
                         "         left join UserPostEntity UP on UE = UP.user \n" +
@@ -335,7 +336,8 @@ public class UserRepository {
                         "         UE.LAST_NAME, " +
                         "         UE.EMAIL, " +
                         "         UA.VALUE as PHONE, " +
-                        "         UE.ENABLED " +
+                        "         UE.ENABLED, " +
+                        "         UE.EMAIL_VERIFIED " +
                         "from USER_ENTITY UE \n" +
                         "left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone' \n" +
                         "WHERE UE.REALM_ID = :realm \n" +
@@ -380,7 +382,8 @@ public class UserRepository {
                         "        UE.LAST_NAME, " +
                         "        UE.EMAIL, " +
                         "        UA.VALUE as PHONE, " +
-                        "        UE.ENABLED " +
+                        "        UE.ENABLED, " +
+                        "        UE.EMAIL_VERIFIED " +
                         "from USER_ENTITY UE \n" +
                         "join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID \n" +
                         "where UE.REALM_ID = :realm \n" +
