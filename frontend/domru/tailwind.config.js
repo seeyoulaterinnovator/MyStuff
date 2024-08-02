@@ -1,12 +1,12 @@
 module.exports = {
   theme: {
     screens: {
-      xs: '320px',
-      sm: '480px',
-      md: '640px',
-      lg: '960px',
-      xl: '1200px',
-      xxl: '1440px',
+      xs: '768px',
+      sm: '768px',
+      md: '768px',
+      lg: '1280px',
+      xl: '1280px',
+      xxl: '1280px',
     },
     fontFamily: {
       body: ['Fact', 'Arial', 'sans-serif'],

@@ -25,8 +25,17 @@
   * {
     transition: 0.2s ease-in-out;
   }
+  span {
+    font-family: CoFo Sans, sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    text-align: left;
+    font-size: 13px;
+    line-height: 16px;
+    display: flex;
+    align-items: center;
+  }
   button {
-    opacity: .5;
     &:hover {
       opacity: 1;
       span {
@@ -68,6 +77,11 @@
   .phone-call-center {
     margin-top: 6px;
   }
+
+  #show-cities span {
+    font-size: 12px;
+    line-height: 15px;
+  }
 }
 
 @media screen and (max-width: 767px){
@@ -82,9 +96,7 @@
   .cities-column:nth-child(4) {
     order: 4;
   }
-}
 
-@media screen and (max-width: 767px) {
   .phone--hidden-small {
     display: none;
   }

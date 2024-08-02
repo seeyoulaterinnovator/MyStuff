@@ -262,3 +262,38 @@ input[type="number"] {
     justify-content: center;
   }
 }
+
+@media only screen and (max-width: 767px) {
+  body.custom {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+header .phone-number {
+  font-family: CoFo Sans, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 15px;
+  letter-spacing: 0.05em;
+  text-align: left;
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1279px) {
+  body.custom {
+    padding-left: 38px;
+    padding-right: 38px;
+  }
+}
+
+@media only screen and (min-width: 1280px) {
+  body.custom {
+    padding-left: 80px;
+    padding-right: 80px;
+  }
+  header .phone-number {
+    font-size: 18px;
+    line-height: 24px;
+  }
+}
+

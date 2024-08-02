@@ -284,7 +284,7 @@
 .code {
   color: var(--light, #16629A);
   /* Tablet/Ссылка_17-23_Tablet */
-  font-family: CoFo Sans;
+  font-family: CoFo Sans, sans-serif;
   font-size: 17px;
   font-style: normal;
   font-weight: 400;
@@ -306,7 +306,7 @@
 .enter-login-link {
   color: var(--light, #16629A);
   /* Tablet/Ссылка_17-23_Tablet */
-  font-family: CoFo Sans;
+  font-family: CoFo Sans, sans-serif;
   font-size: 17px;
   font-style: normal;
   font-weight: 400;
