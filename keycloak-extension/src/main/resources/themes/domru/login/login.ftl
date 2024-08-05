@@ -4,8 +4,8 @@
 <#import "templates/blocks.ftl" as blocks>
 
 <#macro personalDataProcessAccept>
-    <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">
-    <span class="opacity-50" style="font-weight: 350; color: #7585A1;">
+    <span class="personal-data-process-accept flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">
+    <span class="opacity-50">
         Нажимая кнопку, вы соглашаетесь <br>
     </span>
     <a class="reference reference_hoverable allowDoubleClick item_hover"
@@ -29,7 +29,7 @@
         <#if !hideRegistration!false>
             <@blocks.contentHeader mainTitle="${doLogIn}" secondaryTitle="${registerTitle}" secondaryHref="${url.registrationUrl}" withBorder=true />
         <#else>
-            <@blocks.contentHeader mainTitle="${doLogIn}" secondaryTitle=" " secondaryHref=" " withBorder=true />
+            <@blocks.contentHeader mainTitle="${doLogIn}" secondaryTitle="" secondaryHref="" withBorder=true />
         </#if>
     <#elseif section = "form">
         <#if !activateNewAuth || loginViaEmailOrUsernameAndPassword!true>
@@ -109,7 +109,7 @@
 
             <#elseif isSwitcherOn!false>
 
-                <p class="mb-7">Мы отправим код в СМС</p>
+                <p class="mb-10">Мы отправим код в СМС</p>
                 <#if realm.password>
                     <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
                     onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
@@ -149,12 +149,11 @@
                     </div>
                 </div>
 
-                    <div class="flex justify-between">
+                <div class="flex justify-between w-full">
                     <a id="topSecretButton" class="enter-login-link" href="#"
                        onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                     </a>
-                    </div>
-
+                </div>
                 </form>
                 <form id="off" method="POST" name="off" action="${url.loginUrl}">
                     <button id="loginPasswordButton" name="off" type="submit" class="hidden">
@@ -164,7 +163,7 @@
 
         <#elseif loginViaSms!true>
             <#if !isSwitcherOn!true>
-                <p class="mb-7">Мы отправим код в СМС</p>
+                <p class="mb-10">Мы отправим код в СМС</p>
                 <#if realm.password>
                     <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
                     onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
@@ -204,7 +203,7 @@
                     </div>
                 </div>
 
-                <div class="flex justify-between">
+                <div class="flex justify-between w-full">
                     <a id="topSecretButton" class="enter-login-link" href="#"
                        onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                     </a>
@@ -297,7 +296,7 @@
 
         <#elseif loginViaPhoneCall>
             <#if !isSwitcherOn!true>
-                <p class="mb-7 info-text">На указанный номер поступит звонок. Для подтверждения <span class="breakable"> нужно ввести последние 4 цифры входящего номера</span>
+                <p class="mb-10 info-text">На указанный номер поступит звонок. Для подтверждения <span class="breakable"> нужно ввести последние 4 цифры входящего номера</span>
                 </p>
                 <#if realm.password>
                     <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"

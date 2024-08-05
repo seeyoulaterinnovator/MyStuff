@@ -74,35 +74,11 @@ input[type="number"] {
   &:hover {
     opacity: 0.5;
   }
-  @media only screen and (max-width: 767px) {
-    opacity: 1;
-  }
 }
 
 .text-with-login {
   font-weight: 350;
   font-size: 17px;
-}
-
-.text-3xl{
-  font-size: 46px;
-
-  @media only screen and (max-width: 767px) {
-    font-size: 33px;
-    overflow:hidden;
-    max-width: 250px;
-    background: linear-gradient(to right, #CDCDCD, transparent);
-    color: transparent;
-    -webkit-background-clip: text;
-  }
-}
-
-.enter-text {
-  font-size: 46px;
-
-  @media screen and (max-width: 767px) {
-    font-size: 33px;
-  }
 }
 
 .text-no-wrap {
@@ -130,10 +106,6 @@ input[type="number"] {
 }
 
 @media screen and (max-width: 1279px) {
-  .footer {
-    width: 206px;
-  }
-
   .service__item_main-active {
     width: 60px;
   }
@@ -256,44 +228,183 @@ input[type="number"] {
 }
 
 @media only screen and (max-width: 767px) {
-  .test{
+  .test {
     align-items: center;
     display: flex;
     justify-content: center;
   }
 }
 
-@media only screen and (max-width: 767px) {
-  body.custom {
+/* new figma design */
+
+.personal-data-process-accept {
+
+}
+
+body.custom { /*custom for priority*/
+  font-family: CoFo Sans, sans-serif;
+
+  .page-title-wrapper {
+    margin-bottom: 24px;
+  }
+
+  .page-title.text-secondary-title {
+    overflow:hidden;
+    background: linear-gradient(to right, #CDCDCD, transparent);
+    -webkit-background-clip: text;
+    padding-left: 2rem;
+  }
+
+  .page-buttons {
+    margin-top: 32px;
+  }
+
+  #content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .copyright {
+    color: #899DA8;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+  }
+
+  .page-title-wrapper .titleAllPage,
+  .page-title-wrapper .text-secondary-title,
+  #show-cities span,
+  .show-small-tell * {
+    color: #222222;
+  }
+
+  @media only screen and (max-width: 767px) {
     padding-left: 16px;
     padding-right: 16px;
+    #content {
+      display: block;
+      margin-top: 16px;
+      p {
+        font-size: 16px;
+        line-height: 21px;
+      }
+    }
+    .page-title-wrapper .titleAllPage,
+    .page-title-wrapper .page-title.text-secondary-title {
+      font-size: 31px;
+      line-height: 34px;
+    }
+    #show-cities {
+      svg {
+        height: 16px;
+        width: 16px;
+      }
+      span {
+        font-size: 11px;
+        line-height: 14px;
+      }
+    }
+    .copyright {
+      font-size: 11px;
+      line-height: 14px;
+    }
+    .footer {
+      max-width: initial;
+    }
+    .show-small-tell {
+      svg {
+        height: 16px;
+        width: 16px;
+      }
+      .phone-number {
+        font-size: 16px;
+        line-height: 21px;
+      }
+    }
+    .page-title-wrapper .page-title.text-secondary-title {
+      max-width: 250px;
+    }
   }
-}
 
-header .phone-number {
-  font-family: CoFo Sans, sans-serif;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 15px;
-  letter-spacing: 0.05em;
-  text-align: left;
-}
-
-@media only screen and (min-width: 768px) and (max-width: 1279px) {
-  body.custom {
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
     padding-left: 38px;
     padding-right: 38px;
+    #content {
+      max-width: 480px;
+      p {
+        font-size: 17px;
+        line-height: 23px;
+      }
+    }
+    .page-title-wrapper .titleAllPage,
+    .page-title-wrapper .page-title.text-secondary-title {
+      font-size: 35px;
+      line-height: 40px;
+    }
+    #show-cities {
+      svg {
+        height: 18px;
+        width: 18px;
+      }
+      span {
+        font-size: 12px;
+        line-height: 15px;
+      }
+    }
+    [phone-call-center] {
+      svg {
+        height: 18px;
+        width: 18px;
+      }
+      .phone-number {
+        font-size: 17px;
+        line-height: 23px;
+      }
+    }
+    .copyright {
+      font-size: 12px;
+      line-height: 15px;
+    }
   }
-}
 
-@media only screen and (min-width: 1280px) {
-  body.custom {
+  @media only screen and (min-width: 1280px) {
     padding-left: 80px;
     padding-right: 80px;
-  }
-  header .phone-number {
-    font-size: 18px;
-    line-height: 24px;
+    #content {
+      max-width: 568px;
+      p {
+        font-size: 18px;
+        line-height: 24px;
+      }
+    }
+    .page-title-wrapper .titleAllPage,
+    .page-title-wrapper .page-title.text-secondary-title {
+      font-size: 46px;
+      line-height: 52px;
+    }
+    #show-cities {
+      svg {
+        height: 20px;
+        width: 20px;
+      }
+      span {
+        font-size: 13px;
+        line-height: 16px;
+      }
+    }
+    [phone-call-center] {
+      svg {
+        height: 20px;
+        width: 20px;
+      }
+      .phone-number {
+        font-size: 18px;
+        line-height: 24px;
+      }
+    }
+    .copyright {
+      font-size: 13px;
+      line-height: 16px;
+    }
   }
 }
-

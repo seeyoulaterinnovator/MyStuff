@@ -5,9 +5,17 @@
     </div>
 
     <div class="swr-content">
-      <h1>Что-то пошло не так</h1>
+      <header class="page-title-wrapper">
+        <h1 class="page-title">
+          <b class="titleAllPage">
+            Что-то пошло не так
+          </b>
+        </h1>
+      </header>
       <p>Регистрация временно недоступна, попробуйте повторить попытку позже.</p>
-      <a href="${redirectUrl}" class="btn swr-button"><div>На главную</div></a>
+      <div class="page-buttons">
+        <a href="${redirectUrl}" class="btn swr-button"><div>На главную</div></a>
+      </div>
     </div>
   </div>
 </#macro>

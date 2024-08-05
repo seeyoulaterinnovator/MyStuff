@@ -58,8 +58,12 @@
     <#else>
         <img class="mb-8" src="${img}"/>
     </#if>
-    <h1 class="error-heading mb-10">${heading}</h1>
-    <p class="mb-8 text-sm">
+    <header class="page-title-wrapper">
+        <h1 class="page-title error-heading">
+            <b class="titleAllPage">${heading}</b>
+        </h1>
+    </header>
+    <p class="text-sm">
         <#nested>
     </p>
 </#macro>
@@ -71,10 +75,14 @@
     <#else>
         <img class="mb-8" src="${img}"/>
     </#if>
-    <h1 class="error-heading mb-10">${heading}</h1>
-    <p class="mb-8 text-sm">
+    <header>
+        <h1 class="error-heading">${heading}</h1>
+    </header>
+    <p class="text-sm">
         <#nested>
     </p>
-    <a class="btn swr-button swr-button-desktop" href="${backHref}">На главную</a>
-    <a class="btn swr-button swr-button-tablet" href="${backHref}">Спасибо</a>
+    <div class="page-buttons">
+        <a class="btn swr-button swr-button-desktop" href="${backHref}">На главную</a>
+        <a class="btn swr-button swr-button-tablet" href="${backHref}">Понятно</a>
+    </div>
 </#macro>

@@ -67,7 +67,7 @@
                     <#if section = "header">
                         Восстановление пароля
                     <#elseif section = "description">
-                        <span>На почту: ${login.username!"указанную при регистрации"}</span><br>
+                        <span>На e-mail: ${login.username!"указанную при регистрации"}</span><br>
                         Отправлены инструкции по восстановлению пароля
                     </#if>
                 </@emailSent.defaultTemplate>
@@ -181,11 +181,7 @@
                         <span class="phone-number">${(phoneConst)!"8 800 550 0479"}</span>
                     </div>
                 </a>
-                <span class="text-main-500">${(footer)!"© АО «ЭР-Телеком Холдинг» 2011-"}
-                <script>
-                        document.write(new Date().getFullYear())
-                </script>
-            </span>
+                <span class="text-main-500 copyright">${(footer)!"© АО «ЭР-Телеком Холдинг» 2011—"}${.now?string('yyyy')}</span>
             </footer>
         </#if>
 

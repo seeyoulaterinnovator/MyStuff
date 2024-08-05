@@ -73,17 +73,6 @@
   margin-top: 4px;
 }
 
-@media screen and (max-width: 1279px){
-  .phone-call-center {
-    margin-top: 6px;
-  }
-
-  #show-cities span {
-    font-size: 12px;
-    line-height: 15px;
-  }
-}
-
 @media screen and (max-width: 767px){
   .cities-column {
     width: 50%;
@@ -99,6 +88,12 @@
 
   .phone--hidden-small {
     display: none;
+  }
+}
+
+@media screen and (max-width: 1279px){
+  .phone-call-center {
+    margin-top: 6px;
   }
 }
 

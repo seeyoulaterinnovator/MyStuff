@@ -213,6 +213,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                 attributes.put("lastLoginUsername", getAndRemoveLastLoginUsername());
                 attributes.put("lastLoginPhone", getAndRemoveLastLoginPhone());
             }
+            attributes.put("restoreButtonLabel", settingsService.getSettingsStringValue(RESTORE_BUTTON_LABEL, realm.getName()));
 
             if (realm.isInternationalizationEnabled()) {
                 UriBuilder b;
