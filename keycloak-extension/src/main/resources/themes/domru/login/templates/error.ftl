@@ -58,11 +58,11 @@
     <#else>
         <img class="mb-8" src="${img}"/>
     </#if>
-    <header class="page-title-wrapper">
+    <div class="page-title-wrapper">
         <h1 class="page-title error-heading">
             <b class="titleAllPage">${heading}</b>
         </h1>
-    </header>
+    </div>
     <p class="text-sm">
         <#nested>
     </p>

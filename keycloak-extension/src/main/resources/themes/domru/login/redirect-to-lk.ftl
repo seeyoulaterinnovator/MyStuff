@@ -6,7 +6,7 @@
         <@blocks.contentHeader mainTitle="${msg(loginToB2B)}" />
     <#elseif section = "form">
         <form id="loginResetPasswordForm" action="${redirectTo}" method="post" target="_top">
-            <div class="sm:flex sm:flex-row page-buttons">
+            <div class="flex page-buttons">
                 <div class="mb-2 sm:mb-0">
                     <button id="submit" class="btn btn-main w-full" type="submit">${enter}</button>
                     <input name="btoken" value="${redirectHeader}" type="hidden"/>

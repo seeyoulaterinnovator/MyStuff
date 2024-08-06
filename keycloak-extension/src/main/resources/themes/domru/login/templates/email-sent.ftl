@@ -1,10 +1,10 @@
 <#macro defaultTemplate email="" backHref="/" buttonExist=true isVerified=false success = true>
     <div class="container">
-        <header class="page-title-wrapper">
+        <div class="page-title-wrapper">
             <h1 id="page-title">
                 <b class="titleAllPage"><#nested "header"></b>
             </h1>
-        </header>
+        </div>
         <#if !isVerified>
             <p>
                 <#nested "description">

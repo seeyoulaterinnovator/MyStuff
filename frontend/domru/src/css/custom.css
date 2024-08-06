@@ -99,35 +99,15 @@ input[type="number"] {
 }
 }
 
-.footer {
-  margin: auto 0 35px;
-  padding: 0;
-  max-width: calc(100% - 75px);
-}
-
 @media screen and (max-width: 1279px) {
   .service__item_main-active {
     width: 60px;
   }
 }
 
-@media screen and (max-width: 767px){
-  .footer {
-    margin-bottom: 30px;
-    width: 100%;
-    position: relative;
-  }
-}
-
 @media only screen and (max-width: 767px) {
   .login-title-text {
     max-width: unset;
-  }
-}
-
-@media only screen and (max-width: 767px) {
-  .footer {
-    margin-bottom: 16px;
   }
 }
 
@@ -235,59 +215,91 @@ input[type="number"] {
   }
 }
 
-/* new figma design */
-
-.personal-data-process-accept {
-
-}
-
-body.custom { /*custom for priority*/
-  font-family: CoFo Sans, sans-serif;
-
-  .page-title-wrapper {
+.custom-mb-md {
+  margin-bottom: 18px;
+  @media only screen and (min-width: 1280px) {
     margin-bottom: 24px;
   }
+}
 
-  .page-title.text-secondary-title {
-    overflow:hidden;
-    background: linear-gradient(to right, #CDCDCD, transparent);
-    -webkit-background-clip: text;
-    padding-left: 2rem;
+.custom-mt-md {
+  margin-top: 18px;
+  @media only screen and (min-width: 1280px) {
+    margin-top: 24px;
   }
+}
 
-  .page-buttons {
-    margin-top: 32px;
+.custom-mb-lg {
+  margin-bottom: 24px;
+  @media only screen and (min-width: 1280px) {
+    margin-bottom: 32px;
   }
+}
+
+body.custom {
+  font-family: CoFo Sans, sans-serif;
+  color: #222222;
+  padding: 32px 80px;
 
   #content {
     display: flex;
     flex-direction: column;
     justify-content: center;
   }
-
+  .page-title-wrapper {
+    margin-bottom: 32px;
+  }
+  .page-title-wrapper:has(+ p) {
+    @apply .custom-mb-lg;
+  }
+  .page-buttons {
+    margin-top: 32px;
+    gap: 24px;
+  }
+  .page-title.text-secondary-title {
+    overflow:hidden;
+    background: linear-gradient(to right, #CDCDCD, transparent);
+    -webkit-background-clip: text;
+    padding-left: 2rem;
+  }
   .copyright {
     color: #899DA8;
     font-weight: 400;
     letter-spacing: 0.05em;
   }
-
-  .page-title-wrapper .titleAllPage,
-  .page-title-wrapper .text-secondary-title,
-  #show-cities span,
-  .show-small-tell * {
-    color: #222222;
+  .personal-data-process-accept * {
+    letter-spacing: 0.05em;
+    text-wrap: nowrap;
+  }
+  .code-forgot, .social-providers {
+    @apply .custom-mt-md;
+  }
+  .code-forgot {
+    justify-content: space-between;
+    > * {
+      text-wrap: nowrap;
+    }
   }
 
   @media only screen and (max-width: 767px) {
-    padding-left: 16px;
-    padding-right: 16px;
+    padding: 16px 16px;
     #content {
       display: block;
-      margin-top: 16px;
+      margin: 0 auto;
+      padding: 40px 0;
       p {
         font-size: 16px;
         line-height: 21px;
       }
+    }
+    .page-buttons {
+      gap: 18px;
+      flex-wrap: wrap;
+      justify-content: center;
+      text-align: center;
+    }
+    .page-buttons:has(.personal-data-process-accept) > * {
+      flex-grow: 1;
     }
     .page-title-wrapper .titleAllPage,
     .page-title-wrapper .page-title.text-secondary-title {
@@ -308,9 +320,6 @@ body.custom { /*custom for priority*/
       font-size: 11px;
       line-height: 14px;
     }
-    .footer {
-      max-width: initial;
-    }
     .show-small-tell {
       svg {
         height: 16px;
@@ -324,11 +333,18 @@ body.custom { /*custom for priority*/
     .page-title-wrapper .page-title.text-secondary-title {
       max-width: 250px;
     }
+    .personal-data-process-accept * {
+      font-size: 11px;
+      line-height: 14px;
+    }
+    .code-forgot {
+      flex-wrap: wrap;
+    }
   }
 
   @media only screen and (min-width: 768px) and (max-width: 1279px) {
-    padding-left: 38px;
-    padding-right: 38px;
+    padding: 24px 38px;
+
     #content {
       max-width: 480px;
       p {
@@ -365,17 +381,28 @@ body.custom { /*custom for priority*/
       font-size: 12px;
       line-height: 15px;
     }
+    .personal-data-process-accept * {
+      font-size: 12px;
+      line-height: 15px;
+    }
   }
 
   @media only screen and (min-width: 1280px) {
-    padding-left: 80px;
-    padding-right: 80px;
     #content {
       max-width: 568px;
       p {
         font-size: 18px;
         line-height: 24px;
       }
+    }
+    .page-title-wrapper {
+      margin-bottom: 40px;
+    }
+    .page-title-wrapper:has(+ p) {
+      margin-bottom: 32px;
+    }
+    .page-buttons {
+      margin-top: 40px;
     }
     .page-title-wrapper .titleAllPage,
     .page-title-wrapper .page-title.text-secondary-title {
@@ -403,6 +430,10 @@ body.custom { /*custom for priority*/
       }
     }
     .copyright {
+      font-size: 13px;
+      line-height: 16px;
+    }
+    .personal-data-process-accept * {
       font-size: 13px;
       line-height: 16px;
     }

@@ -8,7 +8,7 @@
         <form id="loginUpdatePasswordForm" action="${url.loginAction}" method="post">
             <@blocks.password firstFieldName="password-new" />
 
-            <div class="sm:flex sm:flex-row page-buttons">
+            <div class="flex page-buttons">
                 <div class="mb-2 sm:mb-0">
                     <button id="submit" class="btn btn-main w-full pass-fields pass-fields--change-pass" type="submit">${msg(resetPassword)}</button>
                 </div>

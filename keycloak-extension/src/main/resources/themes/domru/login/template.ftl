@@ -172,7 +172,7 @@
         </main>
 
         <#if iframe == false>
-            <footer id="page-footer" class="w-full fixed bottom-0 footer">
+            <footer id="page-footer" class="w-full footer">
                 <a href="${(phoneConstLink)!"tel:88005500479"}" class= "show-small-tell">
                     <div class="flex h-6 items-center">
                         <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">

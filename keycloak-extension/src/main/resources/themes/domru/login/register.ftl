@@ -53,11 +53,11 @@
                 </div>
             </#if>
 
-            <div class="flex flex-col sm:flex-row mt-8">
+            <div class="flex page-buttons">
                 <div class="flex flex-basis-auto items-center">
                     <button id="submit" class="btn btn-main reg-fields" type="submit">${msg(doRegister)}</button>
                 </div>
-                <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">
+                <span class="personal-data-process-accept flex flex-col justify-center items-left flex-basis-auto text-xs">
                     <span class="opacity-50">
                         Нажимая кнопку, вы соглашаетесь <br>
                     </span>
@@ -69,7 +69,7 @@
         </form>
 
         <#if realm.password && social.providers??>
-            <div class="flex items-center mt-4">
+            <div class="flex items-center social-providers">
                 <div class="text-no-wrap text-with-login mr-6">${loginWith}</div>
                 <ul class="logo-social-providers">
                     <#list social.providers as p>

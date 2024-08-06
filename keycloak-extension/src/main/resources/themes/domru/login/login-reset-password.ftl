@@ -21,7 +21,7 @@
                 </label>
             </div>
 
-            <div class="sm:flex sm:flex-row page-buttons">
+            <div class="flex page-buttons">
                 <div class="mb-2 sm:mb-0">
                     <#--  <button id="submit" class="btn btn-main w-full" type="submit">${msg("doSubmit")}</button>  -->
                     <button id="submit" class="btn btn-main w-full" type="submit">${msg(restoreButtonLabel!next)}</button>

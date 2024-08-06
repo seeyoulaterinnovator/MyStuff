@@ -37,7 +37,7 @@
 </#macro>
 
 <#macro contentHeader mainTitle secondaryTitle="" secondaryHref="" withBorder=false >
-    <header class="page-title-wrapper flex items-center enter-reg-mobile">
+    <div class="page-title-wrapper flex items-center enter-reg-mobile">
         <h1 id="page-title"
             class="<#if secondaryTitle != ''>enter-text</#if>">
             <b class="titleAllPage">
@@ -54,13 +54,13 @@
                 </a>
             </h2>
         </#if>
-    </header>
+    </div>
 </#macro>
 
 <#macro verificationHeader mainTitle>
-    <header class="page-title-wrapper">
+    <div class="page-title-wrapper">
         <h1 id="page-title" class="verification__title">
             <b class="titleAllPage">${mainTitle}</b>
         </h1>
-    </header>
+    </div>
 </#macro>
