@@ -25,3 +25,10 @@ services:
     ports:
       - "25:25"
       - "8025:80"
+  nginx:
+    image: nginx:1.15.3
+    ports:
+      - "8180:80"
+    volumes:
+      - ./data/local/nginx/etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./data/local/nginx/usr/share/nginx/html:/usr/share/nginx/html:ro

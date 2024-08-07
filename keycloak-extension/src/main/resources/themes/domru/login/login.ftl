@@ -71,7 +71,7 @@
                             <@personalDataProcessAccept/>
                         </div>
 
-                        <div class="flex code-forgot">
+                        <div class="flex code-forgot" flex-wrap-justify-content="center">
                             <#if activateNewAuth!false>
                                 <a class="code" href="#" id="topSecretButton" onclick="document.getElementById('smsLoginButton').click();">Получить временный код</a>
                             </#if>
@@ -255,7 +255,7 @@
                             <@personalDataProcessAccept/>
                         </div>
 
-                        <div class="flex code-forgot">
+                        <div class="flex code-forgot" flex-wrap-justify-content="center">
                             <#if activateNewAuth!false>
                                 <a class="code" href="#" id="topSecretButton" onclick="document.getElementById('smsLoginButton').click();">Получить временный код</a>
                             </#if>

@@ -163,15 +163,6 @@
   }
 }
 
-
-.field__input--city {
-  width: 696px;
-
-  @media (max-width: 767px) {
-    width: 288px;
-  }
-}
-
 .generated-password-text {
   font-size: 15px;
   line-height: 1rem;

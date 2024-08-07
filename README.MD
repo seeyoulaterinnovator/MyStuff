@@ -24,6 +24,17 @@ where NAME = 'host';
 update SETTINGS
 set VALUE = 'http://localhost:1080/dadata/suggestions/api/4_1/rs/iplocate/address'
 where EXT_ID = 'urlDaDataRequestLocationIp';
+update CLIENT
+set SECRET = 'secret'
+where CLIENT_ID in ('b2b') and REALM_ID = 'user';
+delete from REDIRECT_URIS
+where CLIENT_ID in (select ID
+                    from CLIENT
+                    where CLIENT_ID in ('b2b') and REALM_ID = 'user');
+INSERT INTO REDIRECT_URIS(CLIENT_ID, VALUE)
+select ID, '*'
+from CLIENT
+where CLIENT_ID in ('b2b') and REALM_ID = 'user';
 ```
 
 # Запуск проекта с Дебагом
