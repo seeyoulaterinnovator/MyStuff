@@ -149,8 +149,9 @@
 
 {#if $show}
   <div class="message__fade flex justify-center items-center" on:click={handleHide}>
-    <div class={$isRegistration ? 'message new-message' : 'message'} on:click={handleClick}>
-      <div class="message__title flex flex-row justify-between items-center gap-4">
+    <div class="message custom-pt-md custom-pb-lg custom-pl-md custom-pr-md {$isRegistration ? 'new-message' : 'message'}"
+         on:click={handleClick}>
+      <div class="message__title flex flex-row justify-between items-center gap-4 custom-mb-sm">
         <span>
           {#if $isBadEmail || $isBadPhone}
             Учетная запись существует
@@ -170,7 +171,7 @@
       {#if $isLimitExceeded}
 
       {:else}
-        <div class="flex flex-col md:flex-row justify-start items-start gap-4" style="margin-top: 1rem">
+        <div class="flex flex-col md:flex-row justify-start items-start gap-4 custom-mt-md">
           {#if $isRegistration}
             <a href="{$loginUrl}" class="btn btn-main w-full md:w-auto reg-button" on:click={handleHide}>
               Войти
@@ -212,7 +213,7 @@
 {:else if $showInfo}
   <div class="message__fade flex justify-center items-center" on:click={closeAndSubmit}>
     <div class="message" style="{$isEmailVer ? 'width: 390px' : 'width: 288px'}" on:click={closeAndSubmit}>
-      <div class="message__title flex flex-row justify-between items-center gap-4">
+      <div class="message__title flex flex-row justify-between items-center gap-4 custom-mb-sm">
         <span>
           {#if $isEmailVer}
             Подтверждение

@@ -9,7 +9,7 @@
 }
 
 .transparent-bg {
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(34, 34, 34, 0.7);
 }
 
 .choose-city-text {
@@ -147,4 +147,17 @@
   font-weight: 700;
   font-size: 22px;
   line-height: 28px;
+}
+
+.cities-column .city:hover {
+  color: #0090D8;
+}
+
+.select-city-confirmation {
+  .btn {
+    text-wrap: nowrap;
+    @media only screen and (max-width: 767px) {
+      text-wrap: wrap;
+    }
+  }
 }

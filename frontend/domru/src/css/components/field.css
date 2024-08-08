@@ -128,7 +128,7 @@
 }
 @media only screen and (min-width: 1280px) {
   .reg-fields {
-    width: 242px;
+    min-width: 242px;
     height: 48px;
     font-size: 16px;
   }
@@ -136,7 +136,7 @@
 
   @media only screen and (min-width: 768px) and (max-width: 1279px) {
     .reg-fields {
-      width: 226px;
+      min-width: 226px;
       height: 44px;
       font-size: 15px;
     }
@@ -144,7 +144,7 @@
 
   @media only screen and (max-width: 767px) {
     .reg-fields {
-      width: 288px;
+      min-width: 288px;
       height: 40px;
       font-size: 14px;
     }

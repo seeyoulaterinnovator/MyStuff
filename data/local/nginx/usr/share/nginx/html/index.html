@@ -9,10 +9,15 @@
     <select id="realm">
         <option value="user">user</option>
     </select>
+    <br>
     <label for="client">Client</label>
     <select id="client">
         <option value="b2b">b2b</option>
     </select>
+    <br>
+    <label for="iframe">Iframe</label>
+    <input id="iframe" type="checkbox">
+    <br>
     <button id="go">Go</button>
 </div>
 <div id="redirect" hidden>
@@ -43,10 +48,12 @@
       document.getElementById('go').onclick = () => {
         const realm = document.getElementById('realm').value;
         const client = document.getElementById('client').value;
+        const iframe = document.getElementById('iframe').checked ? { iframe: 1 } : {};
         document.location = `http://localhost:8080/auth/realms/${realm}/protocol/openid-connect/auth?` + new URLSearchParams({
           response_type: 'code',
           client_id: client,
-          redirect_uri: `http://localhost:8180/?realm=${realm}&client=${client}`
+          redirect_uri: `http://localhost:8180/?realm=${realm}&client=${client}`,
+          ...iframe
         });
       };
       document.getElementById('logon').removeAttribute('hidden');

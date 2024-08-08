@@ -3,7 +3,6 @@
 <@template.layout ; section>
 
     <#if section = "style">
-        <#include 'styles/content-style--default.html' >
     <#elseif section = "body">
         <p style="font-size: 18px">Для авторизации в <a class="no_block" href="https://newlkb2b.dom.ru">Личном кабинете</a> необходимо указать логин и пароль, установленный вами при регистрации в Личном кабинете.</p>
         <#if phone??>

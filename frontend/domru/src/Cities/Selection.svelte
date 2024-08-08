@@ -104,7 +104,7 @@
 
            <ul class="flex flex-col">
            {#each group.cities as city}
-              <li class="mb-2 sm:px-2 hover:bg-extra city">
+              <li class="mb-2 sm:px-2 city">
                 <button class="city text-left" on:click={() => handleClick(city)}>{city.name}</button>
               </li>
             {:else}

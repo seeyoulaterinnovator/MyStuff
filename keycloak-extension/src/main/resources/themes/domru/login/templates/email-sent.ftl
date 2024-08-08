@@ -1,5 +1,5 @@
 <#macro defaultTemplate email="" backHref="/" buttonExist=true isVerified=false success = true>
-    <div class="container">
+    <div>
         <div class="page-title-wrapper">
             <h1 id="page-title">
                 <b class="titleAllPage"><#nested "header"></b>

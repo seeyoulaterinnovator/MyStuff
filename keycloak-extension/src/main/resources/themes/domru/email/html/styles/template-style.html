@@ -1,45 +1,192 @@
 <style>
+    html {
+        line-height: 1.15;
+        -webkit-text-size-adjust: 100%;
+    }
+    body {
+        margin: 0;
+    }
+    main {
+        display: block;
+    }
+    h1 {
+        font-size: 2em;
+        margin: 0.67em 0;
+    }
+    hr {
+        box-sizing: content-box;
+        height: 0;
+        overflow: visible;
+    }
+    pre {
+        font-family: monospace, monospace;
+        font-size: 1em;
+    }
+    a {
+        background-color: transparent;
+    }
+    abbr[title] {
+        border-bottom: none;
+        text-decoration: underline;
+        text-decoration: underline dotted;
+    }
+    b,
+    strong {
+        font-weight: bolder;
+    }
+    code,
+    kbd,
+    samp {
+        font-family: monospace, monospace;
+        font-size: 1em;
+    }
+    small {
+        font-size: 80%;
+    }
+    sub,
+    sup {
+        font-size: 75%;
+        line-height: 0;
+        position: relative;
+        vertical-align: baseline;
+    }
+    sub {
+        bottom: -0.25em;
+    }
+    sup {
+        top: -0.5em;
+    }
+    img {
+        border-style: none;
+    }
+    button,
+    input,
+    optgroup,
+    select,
+    textarea {
+        font-family: inherit;
+        font-size: 100%;
+        line-height: 1.15;
+        margin: 0;
+    }
+    button,
+    input {
+        overflow: visible;
+    }
+    button,
+    select {
+        text-transform: none;
+    }
+    button,
+    [type="button"],
+    [type="reset"],
+    [type="submit"] {
+        -webkit-appearance: button;
+    }
+    button::-moz-focus-inner,
+    [type="button"]::-moz-focus-inner,
+    [type="reset"]::-moz-focus-inner,
+    [type="submit"]::-moz-focus-inner {
+        border-style: none;
+        padding: 0;
+    }
+    button:-moz-focusring,
+    [type="button"]:-moz-focusring,
+    [type="reset"]:-moz-focusring,
+    [type="submit"]:-moz-focusring {
+        outline: 1px dotted ButtonText;
+    }
+    fieldset {
+        padding: 0.35em 0.75em 0.625em;
+    }
+    legend {
+        box-sizing: border-box;
+        color: inherit;
+        display: table;
+        max-width: 100%;
+        padding: 0;
+        white-space: normal;
+    }
+    progress {
+        vertical-align: baseline;
+    }
+    textarea {
+        overflow: auto;
+    }
+    [type="checkbox"],
+    [type="radio"] {
+        box-sizing: border-box;
+        padding: 0;
+    }
+    [type="number"]::-webkit-inner-spin-button,
+    [type="number"]::-webkit-outer-spin-button {
+        height: auto;
+    }
+    [type="search"] {
+        -webkit-appearance: textfield;
+        outline-offset: -2px;
+    }
+    [type="search"]::-webkit-search-decoration {
+        -webkit-appearance: none;
+    }
+    ::-webkit-file-upload-button {
+        -webkit-appearance: button;
+        font: inherit;
+    }
+    details {
+        display: block;
+    }
+    summary {
+        display: list-item;
+    }
+    template {
+        display: none;
+    }
+    [hidden] {
+        display: none;
+    }
+</style>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        color: #222222;
+    }
+
+    a, a:visited {
+        color: #16529A;
+    }
+    a:hover {
+        color: #0090D8;
+    }
+
     .content {
         width: 100%;
-        color: rgb(0, 0, 0);
         font-size: 18px;
         line-height: 24px;
         margin: 0;
     }
 
-    .message_link {
-        padding-left: 8px;
-        font-size: 12px;
-        line-height: 16px;
+    .content__heading {
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 40px;
     }
 
-    .content__heading {
-        font-weight: bold;
-        font-size: 18px;
-        margin-bottom: 18px;
+    .content__secondary {
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0.02em;
+    }
+
+    .content__secondary-mt {
+        margin-top: 16px;
     }
 
     .content__additional {
-        color: #505050cc;
+        opacity: 0.5;
         font-size: 12px;
         line-height: 14px;
-        font-style: italic;
-    }
-
-    .content a {
-        display: block;
-        overflow: hidden;
-        text-decoration-line: underline;
-        text-overflow: ellipsis;
-        font-size: 20px;
-
-        /* not working in Yandex Mail */
-        overflow-wrap: normal;
-        word-wrap: initial;
-    }
-
-    * {
-        margin: 0;
     }
 
     .mail-wrapper {
@@ -54,34 +201,46 @@
         margin: 0 auto;
         box-sizing: border-box;
         font-family: Arial, sans-serif;
-        color: #000000;
         display: inline-table;
         text-align: left;
+    }
+
+    .mail-container__header {
+        height: 86px;
+        border-bottom-width: 1px;
+        border-bottom-color: #CFDBE0;
+        border-bottom-style: solid;
     }
 
     .mail-text-title {
         margin-top: 40px;
         margin-bottom: 16px;
         font-weight: bold;
+        opacity: 0.8;
     }
 
-    .messegers {
+    .messengers {
         margin-top: 16px;
+        text-align: center;
     }
 
-    .messeger {
-        vertical-align: middle;
+    .messengers img {
+        width: 120px;
+        height: 120px
     }
 
-    .message_block {
-        padding-bottom: 9px;
+    .messengers-links td {
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0.5px;
+        text-align: center;
     }
 
     .mail-text--translucent {
         margin-top: 8px;
         font-size: 12px;
         line-height: 16px;
-        color: rgba(0, 0, 0, 0.5);
+        opacity: 0.5;
     }
 
     .mail-container__header {
@@ -89,86 +248,113 @@
         padding-bottom: 24px;
     }
 
-    .logo {
-        height: 40px;
-        max-height: 40px;
-        width: auto;
-    }
-
-    .hr_color {
-        background: #D5DDEB;
-        margin-bottom: 24px;
-    }
-
     .contacts {
-        color: rgb(43, 83, 155);
         text-decoration: none;
-    }
-
-    .contacts__img {
-        height: 30px;
-        max-height: 30px;
-        width: auto;
-        padding-top: 7px;
     }
 
     .contact__number {
         font-size: 20px;
-        line-height: 20px;
+        line-height: 25px;
         letter-spacing: -1px;
-        padding-top: 4px;
-        height: 24px;
-        padding-bottom: 2px;
+        text-align: right;
     }
 
-    .mail-container__footer {
-        padding-top: 41px;
-        font-size: 14px;
-        line-height: 18px;
-        opacity: 0.8;
-    }
-
-    .mail-text--copyright {
-    }
-
-    .system {
+    .system_link {
         font-size: 12px;
         line-height: 16px;
     }
 
-    .system_link {
-        color: rgb(43, 83, 155);
-    }
-
-    .mail-text--additional {
-        font-size: 12px;
-        line-height: 14px;
-        font-style: italic;
-    }
-
-    .mail-text--small {
-        font-size: 14px;
-        line-height: 18px;
-        padding-bottom: 12px;
-    }
-
     .mail-text--light-gray {
-        color: #5050504d;
+        opacity: 0.5;
         font-size: 12px;
     }
 
-    @media all and (min-width: 420px) {
-        .logo,
-        .contacts__img {
-            max-height: 48px;
-            height: 48px;
-        }
-
-        .contact__number {
-            padding-left: 5px;
-            font-size: 20px;
-            height: 48px;
-        }
+    .text_bold {
+        font-weight: bold;
+        font-size: 18px;
+        line-height: 24px;
     }
 
+    .text_bolid {
+        font-weight: bold;
+        font-size: 18px;
+        line-height: 24px;
+    }
+
+    .no_block {
+        display: inline !important;
+        white-space: nowrap;
+    }
+
+    .content__ul {
+        padding: 8px 0 0 36px !important;
+        font-size: 12px !important;
+        line-height: 16px !important;
+    }
+
+    .content__ul-li {
+        position: relative !important;
+        padding-top: 8px !important;
+    }
+
+    .instruction {
+        margin-bottom: 16px;
+        margin-top: 16px;
+        list-style: none;
+    }
+
+    .small_text {
+        font-size: 12px;
+        line-height: 16px;
+    }
+
+    .big_text {
+        font-size: 18px;
+        line-height: 16px;
+    }
+
+    .block_timer {
+        margin-top: 16px;
+    }
+
+    .login_data {
+        margin-top: 16px;
+        margin-bottom: 16px;
+    }
+
+    .block_login {
+        margin-bottom: 16px;
+    }
+
+    .instruction_text {
+        margin-bottom: 8px;
+        list-style-type: none;
+    }
+
+    .block_link {
+        margin-top: 16px;
+        margin-bottom: 16px;
+    }
+
+    .margin_block {
+        margin-top: 16px;
+    }
+
+    .instructions.content_ul li::before {
+        content: "\2022";
+        color: rgba(255, 49, 44, 1);
+        font-weight: bold;
+        display: inline-block;
+        width: 1em;
+        margin-left: -1em;
+    }
+
+    .red-item {
+        background-color: rgba(255, 49, 44, 1);
+        width: 8px;
+        height: 8px;
+        display: inline-block;
+        border-radius: 8px;
+        margin-right: 8px;
+    }
 </style>
