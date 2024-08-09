@@ -39,17 +39,13 @@
             </div>
 
 
-            <div style="font-size: 12px;  margin-top: 16px;  font-weight: 400">
-                <div style="margin-left: 25px">
-                    <div class="red-item">
-
-                    </div>
+            <div class="instruction">
+                <div class="instruction_text">
+                    <div class="red-item">&nbsp;</div>
                     Для восстановления данных укажите ваш логин.
                 </div>
-                <div style="margin-top:8px; margin-left: 25px">
-                    <div class="red-item">
-
-                    </div>
+                <div class="instruction_text">
+                    <div class="red-item">&nbsp;</div>
                     На ваш адрес электронной почты будет отправлена ссылка для восстановления пароля.<br/>
                     <span style="margin-left: 19px">Срок действия ссылки ${expTimePass}.</span>
                 </div>

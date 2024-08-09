@@ -286,21 +286,23 @@
         white-space: nowrap;
     }
 
-    .content__ul {
-        padding: 8px 0 0 36px !important;
-        font-size: 12px !important;
-        line-height: 16px !important;
-    }
-
-    .content__ul-li {
-        position: relative !important;
-        padding-top: 8px !important;
-    }
-
     .instruction {
-        margin-bottom: 16px;
+        font-size: 12px;
         margin-top: 16px;
-        list-style: none;
+    }
+
+    .instruction_text {
+        margin-bottom: 8px;
+    }
+
+    .red-item {
+        background-color: #FF312C;
+        width: 8px;
+        height: 8px;
+        display: inline-block;
+        border-radius: 8px;
+        margin-right: 8px;
+        vertical-align: middle;
     }
 
     .small_text {
@@ -326,11 +328,6 @@
         margin-bottom: 16px;
     }
 
-    .instruction_text {
-        margin-bottom: 8px;
-        list-style-type: none;
-    }
-
     .block_link {
         margin-top: 16px;
         margin-bottom: 16px;
@@ -338,23 +335,5 @@
 
     .margin_block {
         margin-top: 16px;
-    }
-
-    .instructions.content_ul li::before {
-        content: "\2022";
-        color: rgba(255, 49, 44, 1);
-        font-weight: bold;
-        display: inline-block;
-        width: 1em;
-        margin-left: -1em;
-    }
-
-    .red-item {
-        background-color: rgba(255, 49, 44, 1);
-        width: 8px;
-        height: 8px;
-        display: inline-block;
-        border-radius: 8px;
-        margin-right: 8px;
     }
 </style>
