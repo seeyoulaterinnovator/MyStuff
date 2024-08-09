@@ -116,16 +116,18 @@
   min-width: 270px;
   max-width: 270px;
 
-@media (max-width: 1279px) {
-  min-width:235px;
-  max-width:245px;
+  @media (max-width: 1279px) {
+    min-width:235px;
+    max-width:245px;
+  }
+
+  @media (max-width: 767px) {
+    min-width: auto;
+    max-width: none;
+    flex-grow: 1;
+  }
 }
 
-@media (max-width: 767px) {
-  width:85%;
-  max-width:100%;
-}
-}
 @media only screen and (min-width: 1280px) {
   .reg-fields {
     min-width: 242px;

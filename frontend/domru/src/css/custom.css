@@ -389,6 +389,13 @@ body.custom {
     }
   }
 
+  .message {
+    @apply .custom-pt-md;
+    @apply .custom-pb-lg;
+    @apply .custom-pl-md;
+    @apply .custom-pr-md;
+  }
+
   @media only screen and (min-width: 768px) and (max-width: 1279px) {
     padding: 24px 38px;
 
@@ -440,10 +447,9 @@ body.custom {
     .page-buttons {
       gap: 18px;
       flex-wrap: wrap;
-      justify-content: center;
       text-align: center;
     }
-    .page-buttons:has(.personal-data-process-accept) > * {
+    .page-buttons > * {
       flex-grow: 1;
     }
     .page-title-wrapper .titleAllPage,

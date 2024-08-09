@@ -50,8 +50,6 @@
 </svg></span>
 
         </div>
-
-        </div>
     </#if>
     </div>
     <#if withError>

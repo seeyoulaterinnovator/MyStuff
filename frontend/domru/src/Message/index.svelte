@@ -149,7 +149,7 @@
 
 {#if $show}
   <div class="message__fade flex justify-center items-center" on:click={handleHide}>
-    <div class="message custom-pt-md custom-pb-lg custom-pl-md custom-pr-md {$isRegistration ? 'new-message' : 'message'}"
+    <div class="message {$isRegistration ? 'new-message' : 'message'}"
          on:click={handleClick}>
       <div class="message__title flex flex-row justify-between items-center gap-4 custom-mb-sm">
         <span>
