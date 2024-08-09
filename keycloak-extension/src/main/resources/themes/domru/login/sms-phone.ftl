@@ -25,7 +25,7 @@
 
             </div>
 
-            <div class="w-full xl:pb-37px md:pb-10 sm:pb-8 pb-4 center-items">
+            <div class="w-full center-items">
                 <#list 1..lengthCode as x>
                     <input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
                            name="smscode-${x} " autocomplete="one-time-code"
@@ -45,11 +45,11 @@
 
             <div class="back-timer lex justify-between">
                 <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
-                        <span>
+                <span>
                             <button class="font-light verification__resend w-full" name="resend" type="submit">${sendAgain}</button>
                         </span>
                 <#else>
-                <div class="flex justify-between enter-login-link-timer enter-login-link-resend">
+                <div class="flex justify-between enter-login-link-timer enter-login-link-resend page-buttons" flex-wrap-justify-content="center">
                     <a id="topSecretButton" class="resend" href="#"
                        onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                     </a>
@@ -59,17 +59,17 @@
                             </span>
                         <span id="timer-time" class="timer-new-countdown"></span>
                     </div>
-                </div>
-                        <#if enableRepeatCall?? && enableRepeatCall!>
-                            <p class="hidden font-light text-black verification__text" id="resend">
+                    <#if enableRepeatCall?? && enableRepeatCall!>
+                        <p class="hidden font-light text-black verification__text" id="resend">
                                 <span>
                                     <button class="resend font-light" name="resend"
-                                                type="submit">${sendAgain}</button>
+                                            type="submit">${sendAgain}</button>
                                 </span>
-                            </p>
-                        </#if>
-                    </div>
-                </#if>
+                        </p>
+                    </#if>
+                </div>
+            </div>
+            </#if>
 
         </form>
         <form method="POST" action="${url.loginUrl}">

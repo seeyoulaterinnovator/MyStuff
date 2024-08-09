@@ -54,15 +54,18 @@
                     <label for="search-city" class="choose-city-text">Выбрать город</label>
                     <CloseButton on:click={handleClose} class="custom-icon"/>
                   </div>
-                  <form on:submit|preventDefault={handleSelectCity} class="flex items-center search-city-input field__input">
-                    <input
-                      name="Поиск города"
-                      id="search-city"
-                      placeholder="Название города"
-                      bind:value={search}
-                      on:input={handleInputChange} />
-                    <SearchIcon/>
-                  </form>
+                  <div class="field field__container search-city-form">
+                    <form on:submit|preventDefault={handleSelectCity} class="flex items-center search-city-input field__input">
+                      <input
+                        name="Поиск города"
+                        id="search-city"
+                        placeholder="Название города"
+                        bind:value={search}
+                        on:input={handleInputChange} />
+                      <SearchIcon/>
+                    </form>
+                    <label class="field__label" for="search-city">Название города</label>
+                  </div>
                 </div>
               {/if}
 

@@ -344,9 +344,7 @@
 /*my*/
 .resend {
   color: var(--light, #16629A);
-  text-align: right;
-  /* Tablet/Ссылка_17-23_Tablet */
-  font-family: CoFo Sans;
+  text-align: center;
   font-size: 17px;
   font-style: normal;
   font-weight: 400;

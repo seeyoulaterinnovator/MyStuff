@@ -485,7 +485,8 @@ body.custom {
     }
     /* chat */
     div[style*="position: fixed"][style*="z-index: 100000"][style*="transform: translate(0%, 50%)"][style*="height: 56px"] {
-      bottom: 72px!important;
+      bottom: 16px!important;
+      transform: none!important;
     }
   }
 
