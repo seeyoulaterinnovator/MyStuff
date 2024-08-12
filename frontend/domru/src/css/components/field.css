@@ -319,26 +319,21 @@
 }
 
 .timer-new {
-  color: var(--light, #899DA8);
+  color: #899DA8;
   text-align: right;
-  /* Tablet/Подпись_14-18_Tablet */
-  font-family: CoFo Sans;
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 18px; /* 128.571% */
-  letter-spacing: 0.42px;
-}
-
-.timer-new-countdown {
-  color: var(--light, #222);
-  /* Tablet/Подпись_14-18_Tablet */
-  font-family: CoFo Sans;
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
   line-height: 18px;
-  letter-spacing: 0.42px;
+  letter-spacing: 0.03em;
+}
+
+.timer-new-countdown {
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 18px;
+  letter-spacing: 0.03em;
 }
 
 /*my*/

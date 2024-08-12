@@ -2,7 +2,6 @@
   &__title {
     font-size: 36px;
     line-height: 42px;
-    letter-spacing: -1px;
     font-weight: 700;
 
     @media (max-width: 1279px) {
@@ -19,7 +18,6 @@
   &__sub {
     font-size: 18px;
     line-height: 25px;
-    letter-spacing: -1px;
     font-weight: 300;
 
     @media (max-width: 1279px) {
@@ -30,7 +28,6 @@
     @media (max-width: 767px) {
       font-size: 16px;
       line-height: 23px;
-      letter-spacing: -0.5px;
     }
   }
 
@@ -79,10 +76,7 @@
   }
 
   &__text {
-    color: #000000;
     font-size: 18px;
-    font-family: 'CoFo Sans',sans-serif;
-
     @media (max-width: 767px) {
       font-size: 15.5px;
     }
@@ -90,7 +84,6 @@
 
   &__resend {
     color: #16629A !important;
-    opacity: 0.8;
   }
 
   &__error__text{
@@ -105,20 +98,16 @@
     }
   }
 
-  &__timer__text{
-    font-weight: 400;
+  &__timer__text {
     font-size: 14px;
     line-height: 24px;
-    color: #000000;
-    opacity: 0.8;
     margin-top: 2rem;
+    letter-spacing: 0.03em;
   }
 
-  &__timer__text__little{
+  &__timer__text__little {
     font-weight: 400;
     font-size: 13px;
     line-height: 24px;
-    color: #000000;
-    opacity: 0.8;
   }
 }

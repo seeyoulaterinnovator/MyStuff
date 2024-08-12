@@ -11,7 +11,7 @@
 .text {
   font-size: 17px;
   line-height: 22px;
-  color: #000;
+  color: #222222;
   opacity: 0.5;
 }
 
@@ -29,7 +29,6 @@
   line-height: 26px;
   opacity: 1;
   padding-bottom: 10px;
-  letter-spacing: -0.35px;
 }
 
 .text--close {

@@ -79,7 +79,7 @@
                 <div id="timer2" class="text-black text-center md:text-right flex items-center justify-center md:justify-start
                      verification__timer__text">
                         <span style="color: #899DA8"> Код можно запросить через: </span>
-                    <br>
+                    &nbsp;
                     <span id="timer-time" class="textTimer2"></span>
                 </div>
 
