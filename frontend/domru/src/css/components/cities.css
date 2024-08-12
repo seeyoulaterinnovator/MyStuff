@@ -174,3 +174,9 @@
     }
   }
 }
+
+#cities-modal:has(.select-city-confirmation) {
+  #cities-header {
+    display: none;
+  }
+}
