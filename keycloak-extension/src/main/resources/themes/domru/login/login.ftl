@@ -63,7 +63,7 @@
 
                     <@components.field class="md:w-full mt-8" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />
                     <div class="login-consent-password-forgot-code">
-                        <div class="flex page-buttons">
+                        <div class="flex page-buttons w-full">
                             <div class=" flex flex-basis-auto items-center login-consent">
                                 <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
                                         type="submit">${enter}</button>
@@ -137,7 +137,7 @@
                     </div>
                 </#if>
                 <div class="login-consent-enter-login-link">
-                    <div class="flex page-buttons">
+                    <div class="flex page-buttons w-full">
                         <div class="flex flex-basis-auto items-center login-consent">
                             <button id="submit-phone" name="smsButton" class="btn btn-main btn-enter btn-new-enter"
                                     type="submit">${enter}</button>
@@ -146,7 +146,7 @@
                     </div>
                 </div>
 
-                <div class="flex justify-between w-full">
+                <div class="flex justify-center md:justify-between w-full">
                     <a id="topSecretButton" class="enter-login-link" href="#"
                        onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                     </a>
@@ -191,7 +191,7 @@
                 </#if>
 
                 <div class="login-consent-enter-login-link">
-                    <div class="flex page-buttons">
+                    <div class="flex page-buttons w-full">
                         <div class="flex flex-basis-auto items-center login-consent">
                             <button id="submit-phone" name="smsButton" class="btn btn-main btn-enter btn-new-enter"
                                     type="submit">${enter}</button>
@@ -200,7 +200,7 @@
                     </div>
                 </div>
 
-                <div class="flex justify-between w-full">
+                <div class="flex justify-center md:justify-between w-full">
                     <a id="topSecretButton" class="enter-login-link" href="#"
                        onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                     </a>
@@ -247,7 +247,7 @@
 <#--                new code cart >Получить временный код-->
                  <@components.field class="md:w-full mt-8" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />
                     <div class="login-consent-password-forgot-code">
-                        <div class="flex page-buttons">
+                        <div class="flex page-buttons w-full">
                             <div class="flex flex-basis-auto items-center login-consent">
                                 <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
                                         type="submit">${enter}</button>

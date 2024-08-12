@@ -228,6 +228,13 @@ input[type="number"] {
   }
 }
 
+.custom-mb-xl {
+  margin-bottom: 40px;
+  @media only screen and (min-width: 1280px) {
+    margin-bottom: 32px;
+  }
+}
+
 .custom-pb-lg {
   padding-bottom: 24px;
   @media only screen and (min-width: 1280px) {
@@ -310,7 +317,7 @@ body.custom {
     justify-content: center;
   }
   .page-title-wrapper {
-    margin-bottom: 32px;
+    @apply .custom-mb-xl;
   }
   .page-title-wrapper:has(+ p) {
     @apply .custom-mb-lg;
