@@ -56,6 +56,7 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
         );
         context.getAuthenticationSession()
                 .removeAuthNote(UserConstants.AUTH_NOTE_REST_SMS_OR_PHONE_CALL_END_REQUIRED_ACTION);
+        Object entity;
         try {
             if (!Util.isPasswordGrandType(session)) {
                 context.attempted();
@@ -69,7 +70,7 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
             authSession.setClientNote(OIDCLoginProtocol.RESPONSE_TYPE_PARAM, OIDCResponseType.NONE);
             authSession.setRedirectUri(""); //костыль, redirect url в REST не используем, при null падает NPE
             Response response = AuthenticationManager.nextActionAfterAuthentication(session, authSession, clientConnection, request, session.getContext().getUri(), event);
-            Object entity = response.getEntity();
+            entity = response.getEntity();
             if (!(entity instanceof AccessTokenResponse)) {
                 if (!(entity instanceof Map)) {
                     context.attempted();
@@ -86,25 +87,26 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
                 authSession.setAuthNote(AuthenticationProcessor.CURRENT_FLOW_PATH, LoginActionsService.REQUIRED_ACTION);
                 authSession.setAuthNote(AuthenticationProcessor.CURRENT_AUTHENTICATION_EXECUTION, execution);
             }
-            if(requiredAction != null) {
-                context.failure(
-                        AuthenticationFlowError.CREDENTIAL_SETUP_REQUIRED,
-                        Response.status(Response.Status.OK)
-                                .entity(entity)
-                                .type(org.keycloak.utils.MediaType.APPLICATION_JSON_TYPE)
-                                .build()
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            context.getUser().addRequiredAction(UserModel.RequiredAction.valueOf(requiredAction));
+            throw e;
+        }
+        if(requiredAction != null) {
+            context.getUser().addRequiredAction(UserModel.RequiredAction.valueOf(requiredAction));
+            context.failure(
+                    AuthenticationFlowError.CREDENTIAL_SETUP_REQUIRED,
+                    Response.status(Response.Status.OK)
+                            .entity(entity)
+                            .type(org.keycloak.utils.MediaType.APPLICATION_JSON_TYPE)
+                            .build()
 
-                );
-            } else {
-                context.challenge(Response.ok(
-                        entity,
-                        MediaType.APPLICATION_JSON_TYPE
-                ).build());
-            }
-        } finally {
-            if(requiredAction != null) {
-                context.getUser().addRequiredAction(UserModel.RequiredAction.valueOf(requiredAction));
-            }
+            );
+        } else {
+            context.challenge(Response.ok(
+                    entity,
+                    MediaType.APPLICATION_JSON_TYPE
+            ).build());
         }
     }
 
