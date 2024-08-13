@@ -86,10 +86,21 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
                 authSession.setAuthNote(AuthenticationProcessor.CURRENT_FLOW_PATH, LoginActionsService.REQUIRED_ACTION);
                 authSession.setAuthNote(AuthenticationProcessor.CURRENT_AUTHENTICATION_EXECUTION, execution);
             }
-            context.challenge(Response.ok(
-                    entity,
-                    MediaType.APPLICATION_JSON_TYPE
-            ).build());
+            if(requiredAction != null) {
+                context.failure(
+                        AuthenticationFlowError.CREDENTIAL_SETUP_REQUIRED,
+                        Response.status(Response.Status.OK)
+                                .entity(entity)
+                                .type(org.keycloak.utils.MediaType.APPLICATION_JSON_TYPE)
+                                .build()
+
+                );
+            } else {
+                context.challenge(Response.ok(
+                        entity,
+                        MediaType.APPLICATION_JSON_TYPE
+                ).build());
+            }
         } finally {
             if(requiredAction != null) {
                 context.getUser().addRequiredAction(UserModel.RequiredAction.valueOf(requiredAction));
