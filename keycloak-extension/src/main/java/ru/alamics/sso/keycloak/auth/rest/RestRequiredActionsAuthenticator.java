@@ -51,6 +51,10 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
+        if (!Util.isPasswordGrandType(session)) {
+            context.attempted();
+            return;
+        }
         String requiredAction = context.getAuthenticationSession().getAuthNote(
                 UserConstants.AUTH_NOTE_REST_SMS_OR_PHONE_CALL_END_REQUIRED_ACTION
         );
@@ -58,14 +62,6 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
                 .removeAuthNote(UserConstants.AUTH_NOTE_REST_SMS_OR_PHONE_CALL_END_REQUIRED_ACTION);
         Object entity;
         try {
-            if (!Util.isPasswordGrandType(session)) {
-                context.attempted();
-                return;
-            }
-            if (CollectionUtils.isEmpty(context.getUser().getRequiredActions())) {
-                context.success();
-                return;
-            }
             AuthenticationSessionModel authSession = context.getAuthenticationSession();
             authSession.setClientNote(OIDCLoginProtocol.RESPONSE_TYPE_PARAM, OIDCResponseType.NONE);
             authSession.setRedirectUri(""); //костыль, redirect url в REST не используем, при null падает NPE
