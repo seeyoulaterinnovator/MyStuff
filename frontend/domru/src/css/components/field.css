@@ -38,6 +38,7 @@
   height: 40px;
   transition: border-color 0.1s ease-in;
   width: 100%;
+  color: #222222;
 
 @media (min-width: 1280px) {
   height:48px;
