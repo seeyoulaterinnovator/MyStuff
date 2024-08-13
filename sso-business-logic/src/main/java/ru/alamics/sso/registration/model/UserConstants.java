@@ -43,4 +43,7 @@ public class UserConstants {
      * (кэш на уровне атрибутов пользователя, для того чтобы сократить кол-во обращений в БД)
      */
     public static final String ATTR_REST_SMS_OR_PHONE_CALL_BLOCKED_AT = "attr_rest_sms_or_phone_call_blocked_at";
+
+    public static final String AUTH_NOTE_REST_SMS_OR_PHONE_CALL_END_REQUIRED_ACTION =
+            "auth_note_rest_sms_or_phone_call_end_required_action";
 }

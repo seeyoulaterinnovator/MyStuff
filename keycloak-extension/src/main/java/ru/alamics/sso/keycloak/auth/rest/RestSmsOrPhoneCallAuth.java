@@ -40,6 +40,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static javax.ws.rs.core.Response.Status.TOO_MANY_REQUESTS;
+import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_VALIDATED_ON;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.EXPIRATION_TIME;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.MESSENGER;
 
@@ -266,6 +267,24 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                     authorisedUsersService, authType.getId()
             );
             userModel.removeAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_ID_AND_HASH_KEY);
+            if(!phoneVerificationRequired && (
+                    userModel.getRequiredActions().contains(AuthOrRegType.SMS_CODE.getReqActProviderName())
+                            || userModel.getRequiredActions().contains(AuthOrRegType.PHONE_CALL.getReqActProviderName())
+            )) {
+                userModel.removeRequiredAction(AuthOrRegType.SMS_CODE.getReqActProviderName());
+                userModel.removeRequiredAction(AuthOrRegType.PHONE_CALL.getReqActProviderName());
+                userModel.setAttribute(
+                        ATTR_PHONE_VALIDATED_ON,
+                        Collections.singletonList(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME))
+                );
+            }
+            if(userModel.getRequiredActions().contains(UserModel.RequiredAction.UPDATE_PASSWORD.name())) {
+                session.setAuthNote(
+                        UserConstants.AUTH_NOTE_REST_SMS_OR_PHONE_CALL_END_REQUIRED_ACTION,
+                        UserModel.RequiredAction.UPDATE_PASSWORD.name()
+                );
+                userModel.removeRequiredAction(UserModel.RequiredAction.UPDATE_PASSWORD);
+            }
             context.success();
         } catch (WrongSmsCode e) {
             log.warn("Wrong sms code");

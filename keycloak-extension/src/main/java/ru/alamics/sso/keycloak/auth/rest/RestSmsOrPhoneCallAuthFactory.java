@@ -49,7 +49,7 @@ public class RestSmsOrPhoneCallAuthFactory extends AbstractAuthenticatorFactory 
     public static final ProviderConfigProperty PHONE_VERIFICATION_REQUIRED = new ProviderConfigProperty(
             "phoneVerificationRequired",
             "Phone verification required",
-            "Телефон должен быть подтвержден",
+            "Телефон должен быть подтвержден (иначе неявная верификация при успешном подтверждении кода)",
             ProviderConfigProperty.BOOLEAN_TYPE,
             false
     );
