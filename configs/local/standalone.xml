@@ -626,8 +626,6 @@
                 <host name="default-host" alias="localhost">
                     <location name="/" handler="welcome-content"/>
                     <http-invoker security-realm="ApplicationRealm"/>
-                    <filter-ref name="request-dumper" predicate="regex[pattern=/auth/realms/\w+/protocol/openid-connect/token , value=%{RELATIVE_PATH}]"/>
-                    <filter-ref name="response-dumper" predicate="regex[pattern=/auth/realms/\w+/protocol/openid-connect/token , value=%{RELATIVE_PATH}]"/>
                 </host>
             </server>
             <servlet-container name="default">
@@ -637,12 +635,6 @@
             <handlers>
                 <file name="welcome-content" path="${jboss.home.dir}/welcome-content"/>
             </handlers>
-            <filters>
-                <filter name="request-dumper" module="ru.alamics.sso.undertow"
-                        class-name="ru.alamics.sso.undertow.FixedRequestDumpingHandler"/>
-                <filter name="response-dumper" module="ru.alamics.sso.undertow"
-                        class-name="ru.alamics.sso.undertow.FixedStoredResponseHandler"/>
-            </filters>
         </subsystem>
     </profile>
     <interfaces>
