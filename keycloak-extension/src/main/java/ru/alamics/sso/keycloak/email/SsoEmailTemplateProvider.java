@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.email;
 
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.common.util.ObjectUtil;
 import org.keycloak.email.EmailException;
@@ -17,6 +18,7 @@ import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.schedule.Translator;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
+import ru.alamics.sso.util.HtmlUtil;
 
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -24,6 +26,7 @@ import java.util.*;
 
 import static ru.alamics.sso.settings.SettingConstants.*;
 
+@Slf4j
 public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider implements EmailTemplateProvider {
 
     private static final String BODY_TEMPLATE_PASS_RESET = "password-reset.ftl";
@@ -128,6 +131,13 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
                 htmlBody = freeMarker.processTemplate(attributes, htmlTemplate, theme);
             } catch (final FreeMarkerException e) {
                 htmlBody = null;
+            }
+            if(htmlBody != null) {
+                try {
+                    htmlBody = HtmlUtil.applyEmailCssToHtml(htmlBody);
+                } catch (Throwable e) {
+                    log.warn(e.getMessage(), e);
+                }
             }
 
             return new EmailTemplate(subject, textBody, htmlBody);
