@@ -62,9 +62,9 @@
                     </div>
 
                     <@components.field class="md:w-full mt-8" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />
-                    <div class="login-consent-password-forgot-code">
+                    <div class="login-consent-password-forgot-code w-full">
                         <div class="flex page-buttons w-full">
-                            <div class=" flex flex-basis-auto items-center login-consent">
+                            <div class="flex flex-basis-auto items-center login-consent">
                                 <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
                                         type="submit">${enter}</button>
                             </div>
@@ -246,7 +246,7 @@
 
 <#--                new code cart >Получить временный код-->
                  <@components.field class="md:w-full mt-8" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />
-                    <div class="login-consent-password-forgot-code">
+                    <div class="login-consent-password-forgot-code w-full">
                         <div class="flex page-buttons w-full">
                             <div class="flex flex-basis-auto items-center login-consent">
                                 <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
