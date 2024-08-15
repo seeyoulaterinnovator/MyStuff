@@ -3,6 +3,7 @@ package ru.alamics.sso.keycloak.resetcred;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAuthenticator;
+import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -79,11 +80,18 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
             if (userFind != null && userFind.getAttributes().stream().noneMatch(it -> it.getName().equals(BlockType.MANAGER_BLOCK.getType()))) {
                 user = context.getSession().users().getUserById(userFind.getId(), context.getSession().realms().getRealm(userFind.getRealmId()));
                 Objects.requireNonNull(user).setEnabled(true);
-                username = userFind.getUsername();
-                authenticationSession.setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, userFind.getEmail());
-                context.getHttpRequest().getDecodedFormParameters().replace("username", Collections.singletonList(userFind.getEmail()));
+                if(userFind.isEmailVerified()) {
+                    username = userFind.getUsername();
+                    authenticationSession.setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, userFind.getEmail());
+                    context.getHttpRequest().getDecodedFormParameters().replace("username", Collections.singletonList(userFind.getEmail()));
+                } else {
+                    context.setUser(user);
+                    context.challenge(context.form().createForm("verify-email-by-reset.ftl"));
+                    return;
+                }
             }
         }
+
         if (user == null && userFind == null && checkRias(context)) {
             return;
         }
@@ -122,8 +130,14 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
 
     @Override
     public void action(AuthenticationFlowContext context) {
-        context.getUser().setEmailVerified(true);
-        context.success();
+        AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
+        String username = context.getHttpRequest().getDecodedFormParameters().getFirst("verifyEmail");
+        if(username != null && context.getUser().getEmail() != null && username.toLowerCase().equals(context.getUser().getEmail())){
+            context.getUser().setEmailVerified(true);
+            authenticate(context);
+            return;
+        }
+        context.forkWithErrorMessage(new FormMessage("Не получается отправить письмо. Учетная запись с такими данными не существует в системе"));
     }
 
     private boolean checkRias(AuthenticationFlowContext context) {

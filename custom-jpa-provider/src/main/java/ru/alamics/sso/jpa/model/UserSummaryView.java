@@ -21,5 +21,7 @@ public class UserSummaryView {
     private String phone;
 
     private boolean enabled;
+
+    private boolean emailVerified;
     
 }
