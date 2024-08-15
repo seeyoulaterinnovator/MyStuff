@@ -2,7 +2,6 @@
 
 <@template.layout ; section>
     <#if section = "style">
-        <#include 'styles/content-style--default.html' >
     <#elseif section = "body">
         ${blockNotificationSchedulerHtml?no_esc}
         <#if phone??>
@@ -16,14 +15,16 @@
         <p style="font-size: 18px">Если вы забыли свой пароль или у вас не получается войти в Личный кабинет - воспользуйтесь формой
             восстановления пароля по ссылке <a class="no_block" href="https://newlkb2b.dom.ru">«Забыли пароль?»</a></p>
         <p>
-        <ul class="instruction content__ul">
-            <li class="small_text instruction_text content__ul-li">Для восстановления данных
-                укажите ваш логин
-            </li>
-            <li class="small_text content__ul-li">На ваш адрес электронной почты будет отправлена
+        <div class="instruction">
+            <div class="instruction_text">
+                <div class="red-item">&nbsp;</div>
+                Для восстановления данных укажите ваш логин
+            </div>
+            <div class="instruction_text">
+                <div class="red-item">&nbsp;</div>
+                На ваш адрес электронной почты будет отправлена
                 ссылка для восстановления пароля.<br>Срок действия ссылки ${expTimePass?no_esc}
-            </li>
-        </ul>
-        </p>
+            </div>
+        </div>
     </#if>
 </@template.layout>

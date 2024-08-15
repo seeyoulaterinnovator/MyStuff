@@ -2,7 +2,6 @@
 
 <@template.layout ; section>
     <#if section = "style">
-        <#include 'styles/custom-content-style.html' >
     <#elseif section = "body">
         <#--${kcSanitize(msg(emailResetPasswordBodyHtml,authHref, expTimePassAndLogin))?no_esc}
         <#if phone??>
@@ -12,21 +11,21 @@
         </#if>
         ${kcSanitize(msg("login"))?no_esc}
         ${kcSanitize(msg(emailPasswordFooterHtml, phone))?no_esc}-->
-        <div style=" color: #222; font-family: Arial;">
+        <div>
             <span style="font-size: 18px;   line-height: 24px;">
                 Пароль вашей учетной записи был сброшен.<br/>
                 Установите новый пароль по <a style="display: inline-block !important" href="${authHref}">ссылке</a>, чтобы завершить процесс <br/> и восстановить доступ к личному кабинету.<br/>
 	        </span>
 
-            <div style="font-size: 12px;   font-weight: 400; margin-top: 16px"> Срок действия ссылки ${expTimePassAndLogin}.
+            <div class="content__secondary content__secondary-mt"> Срок действия ссылки ${expTimePassAndLogin}.
             </div>
 
             <#if email??>
-                <div style="font-size: 12px;   font-weight: 400; margin-top: 16px">Ваш логин:</div>
+                <div class="content__secondary content__secondary-mt">Ваш логин:</div>
                 <div style="font-size: 18px;   font-weight: 700">${email}</div>
             </#if>
             <#if phone ??>
-                <div style="font-size: 12px;   font-weight: 400">или</div>
+                <div class="content__secondary">или</div>
                 <div style="font-size: 18px;   font-weight: 700">${phone}</div>
             </#if>
 
@@ -40,17 +39,13 @@
             </div>
 
 
-            <div style="font-size: 12px;  margin-top: 16px;  font-weight: 400">
-                <div style="margin-left: 25px">
-                    <div class="red-item">
-
-                    </div>
+            <div class="instruction">
+                <div class="instruction_text">
+                    <div class="red-item">&nbsp;</div>
                     Для восстановления данных укажите ваш логин.
                 </div>
-                <div style="margin-top:8px; margin-left: 25px">
-                    <div class="red-item">
-
-                    </div>
+                <div class="instruction_text">
+                    <div class="red-item">&nbsp;</div>
                     На ваш адрес электронной почты будет отправлена ссылка для восстановления пароля.<br/>
                     <span style="margin-left: 19px">Срок действия ссылки ${expTimePass}.</span>
                 </div>

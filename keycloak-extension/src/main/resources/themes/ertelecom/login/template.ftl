@@ -164,11 +164,7 @@
                         <span class="phone-number">8 800 550 0479</span>
                     </div>
                 </a>
-                <span class="text-main-900">© АО «ЭР-Телеком Холдинг» 2011-
-                <script>
-                        document.write(new Date().getFullYear())
-                </script>
-            </span>
+                <span class="text-main-900">© АО «ЭР-Телеком Холдинг» 2011—${.now?string('yyyy')}</span>
             </footer>
         </#if>
 

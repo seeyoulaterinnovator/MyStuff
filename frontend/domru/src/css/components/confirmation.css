@@ -1,10 +1,9 @@
 .confirm__title {
   font-size: 16px;
   line-height: 20px;
-  color: #000000;
+  color: #222222;
   font-weight: 400;
   padding: 25px;
-  opacity: 0.8;
 }
 
 .select-city-confirmation{
@@ -45,13 +44,7 @@
   margin-right: 46px;
 }
 
-@media screen and (max-width: 1199px){
-  .confirm__btns {
-    /*margin-top: 32px;*/
-  }
-}
-
-@media screen and (max-width: 959px){
+@media screen and (max-width: 1279px){
   .confirm__btns {
     flex-direction: row;
     align-items: center;
@@ -69,10 +62,9 @@
   }
 }
 
-@media screen and (max-width: 639px){
+@media screen and (max-width: 767px){
   .confirm__btns {
     flex-direction: row;
-    /*margin-top: 28px;*/
   }
 
   .confirm__btn:first-child {
@@ -89,9 +81,8 @@
 
 }
 
-@media screen and (max-width: 479px){
+@media screen and (max-width: 767px){
   .confirm__btns {
-    /*flex-direction: column;*/
     margin-right: 16px;
   }
 

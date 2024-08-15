@@ -40,7 +40,7 @@ public class AutoLockNotificationRepository {
             lock.setSendedAt(LocalDateTime.now());
             entityManager.merge(lock);
         });
-        log.info("{}: update notifications = SENT ", DEBUG_STR);
+        log.info("{}: update notifications = SENT (count = {})", DEBUG_STR, ret.size());
         entityManager.flush();
 
         return ret;

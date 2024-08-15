@@ -2,7 +2,6 @@
 
 <@template.layout ; section>
     <#if section = "style">
-        <#include 'styles/content-style--default.html' >
     <#elseif section = "body">
         <p>Подтвердите вашу учетную запись для входа в Личный кабинет<br/>«Дом.ру Бизнес».
             Срок действия ссылки ${expTime}.</p>

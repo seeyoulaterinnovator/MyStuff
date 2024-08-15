@@ -213,6 +213,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                 attributes.put("lastLoginUsername", getAndRemoveLastLoginUsername());
                 attributes.put("lastLoginPhone", getAndRemoveLastLoginPhone());
             }
+            attributes.put("restoreButtonLabel", settingsService.getSettingsStringValue(RESTORE_BUTTON_LABEL, realm.getName()));
 
             if (realm.isInternationalizationEnabled()) {
                 UriBuilder b;
@@ -277,23 +278,22 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     }
 
     private boolean isLoginViaSms() {
-        return Boolean.parseBoolean(client.getAttribute(AUTH_VIA_SMS));
+        return client != null && Boolean.parseBoolean(client.getAttribute(AUTH_VIA_SMS));
     }
 
     private boolean isLoginViaEmailOrUsernameAndPassword() {
-        return Boolean.parseBoolean(client.getAttribute(AUTH_VIA_EMAIL_OR_USERNAME_AND_PASSWORD));
+        return client != null && Boolean.parseBoolean(client.getAttribute(AUTH_VIA_EMAIL_OR_USERNAME_AND_PASSWORD));
     }
 
     private boolean isLoginViaPhoneCall() {
-        return Boolean.parseBoolean(client.getAttribute(AUTH_VIA_PHONE_CALL));
+        return client != null && Boolean.parseBoolean(client.getAttribute(AUTH_VIA_PHONE_CALL));
     }
 
     private boolean isNewAuthActivated(ClientModel client) {
-        return Boolean.parseBoolean(client.getAttribute("activateNewAuth"));
+        return client != null && Boolean.parseBoolean(client.getAttribute("activateNewAuth"));
     }
 
     private Object isChatHidden() {
-        boolean test = Boolean.parseBoolean(realm.getAttribute(HIDDEN_CHAT));
         return Boolean.parseBoolean(realm.getAttribute(HIDDEN_CHAT));
     }
 

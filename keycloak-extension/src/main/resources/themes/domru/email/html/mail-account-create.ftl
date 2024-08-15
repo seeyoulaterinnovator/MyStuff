@@ -2,23 +2,22 @@
 <#--import + default reg-->
 <@template.layout ; section>
   <#if section = "style">
-    <#include 'styles/custom-content-style.html' >
   <#elseif section = "body">
-    <div style=" color: #222; font-family: Arial;">
+    <div>
       <span style="font-size: 18px; line-height: 24px;">
           Для вас создана учетная запись для входа в <a href="${accountLink}">Личный кабинет</a>
       </span>
 
-      <div style="font-size: 12px;   font-weight: 400; margin-top: 16px">
+      <div class="content__secondary content__secondary-mt">
         Срок действия ссылки ${expTimePass}.
       </div>
 
       <#if email??>
-        <div style="font-size: 12px;   font-weight: 400; margin-top: 16px">Ваш логин:</div>
+        <div class="content__secondary content__secondary-mt">Ваш логин:</div>
         <div style="font-size: 18px;   font-weight: 700">${email}</div>
       </#if>
       <#if phone ??>
-        <div style="font-size: 12px;   font-weight: 400">или</div>
+        <div class="content__secondary">или</div>
         <div style="font-size: 18px;   font-weight: 700">${phone}</div>
       </#if>
 

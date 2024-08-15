@@ -1,25 +1,25 @@
 .reference {
   transition: 0.2s ease-in-out;
   color: #2B539B;
-&-generate-password {
-   display: inline-block;
-   font-size: 16px;
-@media screen and (min-width: 1199px) {
-  font-size: 18px;
-}
-}
-&_hoverable {
-   opacity: 1;
- }
+  &-generate-password {
+    display: inline-block;
+    font-size: 16px;
+    @media screen and (min-width: 1280px) {
+      font-size: 18px;
+    }
+  }
+  &_hoverable {
+    opacity: 1;
+  }
 }
 
 .generate-btn {
   padding-bottom: 15px;
-&:hover {
-.reference {
-  border-bottom-color: transparent;
-}
-}
+  &:hover {
+    .reference {
+      border-bottom-color: transparent;
+    }
+  }
 }
 
 .agreement {
@@ -30,7 +30,7 @@
   margin-left: 20px;
 }
 
-@media screen and (max-width: 1199px){
+@media screen and (max-width: 1279px){
   .generate-btn {
     padding-bottom: 9px
   }
@@ -45,14 +45,9 @@
   display: none;
 }
 
-@media screen and (max-width: 640px){
+@media screen and (max-width: 767px) {
   .generate-btn {
     padding-bottom: 13px;
-  }
-}
-
-@media screen and (max-width: 479px){
-  .generate-btn {
     margin: 0 auto;
     width: 20%;
   }

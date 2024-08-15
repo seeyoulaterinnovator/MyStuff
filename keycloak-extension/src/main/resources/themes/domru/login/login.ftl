@@ -4,8 +4,8 @@
 <#import "templates/blocks.ftl" as blocks>
 
 <#macro personalDataProcessAccept>
-    <span class="flex flex-col justify-center items-left flex-basis-auto text-xs sm:ml-5 sm:mt-0 mt-4">
-    <span class="opacity-50" style="font-weight: 350; color: #7585A1;">
+    <span class="personal-data-process-accept flex flex-col justify-center items-left flex-basis-auto text-xs">
+    <span class="opacity-50">
         Нажимая кнопку, вы соглашаетесь <br>
     </span>
     <a class="reference reference_hoverable allowDoubleClick item_hover"
@@ -29,7 +29,7 @@
         <#if !hideRegistration!false>
             <@blocks.contentHeader mainTitle="${doLogIn}" secondaryTitle="${registerTitle}" secondaryHref="${url.registrationUrl}" withBorder=true />
         <#else>
-            <@blocks.contentHeader mainTitle="${doLogIn}" secondaryTitle=" " secondaryHref=" " withBorder=true />
+            <@blocks.contentHeader mainTitle="${doLogIn}" secondaryTitle="" secondaryHref="" withBorder=true />
         </#if>
     <#elseif section = "form">
         <#if !activateNewAuth || loginViaEmailOrUsernameAndPassword!true>
@@ -62,33 +62,30 @@
                     </div>
 
                     <@components.field class="md:w-full mt-8" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />
-                    <div class="login-consent-password-forgot-code">
-
-                    <div class="flex flex-col sm:flex-row mt-8">
-                        <div class=" flex flex-basis-auto items-center login-consent">
-                             <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
-                                type="submit">${enter}</button>
+                    <div class="login-consent-password-forgot-code w-full">
+                        <div class="flex page-buttons w-full">
+                            <div class="flex flex-basis-auto items-center login-consent">
+                                <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
+                                        type="submit">${enter}</button>
+                            </div>
+                            <@personalDataProcessAccept/>
                         </div>
 
-                        <@personalDataProcessAccept/>
-
-                            </div>
-
-                            <div class="flex justify-between code-forgot">
-                             <#if activateNewAuth!false>
-                            <a class="code" href="#" id="topSecretButton" onclick="document.getElementById('smsLoginButton').click();">Получить временный код</a>
+                        <div class="flex code-forgot" flex-wrap-justify-content="center">
+                            <#if activateNewAuth!false>
+                                <a class="code" href="#" id="topSecretButton" onclick="document.getElementById('smsLoginButton').click();">Получить временный код</a>
                             </#if>
-                            <#if realm.resetPasswordAllowed>
-                            <a class="forgot reference_hoverable allowDoubleClick item_hover" href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
+                            <#if realm.resetPasswordAllowed!false>
+                                <a class="forgot reference_hoverable allowDoubleClick item_hover" href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
                             </#if>
-                            </div>
+                        </div>
                     </div>
                 </#if>
                 </form>
 
 
                 <#if realm.password && social.providers??>
-                    <div class="flex items-center mt-2">
+                    <div class="flex items-center social-providers">
                         <div class="text-no-wrap text-with-login mr-6">${loginWith}</div>
                         <ul class="logo-social-providers">
                             <#list social.providers as p>
@@ -109,7 +106,7 @@
 
             <#elseif isSwitcherOn!false>
 
-                <p class="mb-7">Мы отправим код в СМС</p>
+                <p class="custom-mb-md">Мы отправим код в СМС</p>
                 <#if realm.password>
                     <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
                     onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
@@ -140,21 +137,20 @@
                     </div>
                 </#if>
                 <div class="login-consent-enter-login-link">
-                    <div class="flex flex-col sm:flex-row mt-8">
-                         <div class="flex flex-basis-auto items-center login-consent">
+                    <div class="flex page-buttons w-full">
+                        <div class="flex flex-basis-auto items-center login-consent">
                             <button id="submit-phone" name="smsButton" class="btn btn-main btn-enter btn-new-enter"
-                                type="submit">${enter}</button>
-                         </div>
+                                    type="submit">${enter}</button>
+                        </div>
                         <@personalDataProcessAccept/>
                     </div>
                 </div>
 
-                    <div class="flex justify-between">
+                <div class="flex justify-center md:justify-between w-full">
                     <a id="topSecretButton" class="enter-login-link" href="#"
                        onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                     </a>
-                    </div>
-
+                </div>
                 </form>
                 <form id="off" method="POST" name="off" action="${url.loginUrl}">
                     <button id="loginPasswordButton" name="off" type="submit" class="hidden">
@@ -164,7 +160,7 @@
 
         <#elseif loginViaSms!true>
             <#if !isSwitcherOn!true>
-                <p class="mb-7">Мы отправим код в СМС</p>
+                <p class="custom-mb-md">Мы отправим код в СМС</p>
                 <#if realm.password>
                     <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
                     onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
@@ -195,7 +191,7 @@
                 </#if>
 
                 <div class="login-consent-enter-login-link">
-                    <div class="flex flex-col sm:flex-row mt-8">
+                    <div class="flex page-buttons w-full">
                         <div class="flex flex-basis-auto items-center login-consent">
                             <button id="submit-phone" name="smsButton" class="btn btn-main btn-enter btn-new-enter"
                                     type="submit">${enter}</button>
@@ -204,7 +200,7 @@
                     </div>
                 </div>
 
-                <div class="flex justify-between">
+                <div class="flex justify-center md:justify-between w-full">
                     <a id="topSecretButton" class="enter-login-link" href="#"
                        onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                     </a>
@@ -250,32 +246,30 @@
 
 <#--                new code cart >Получить временный код-->
                  <@components.field class="md:w-full mt-8" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />
-                    <div class="login-consent-password-forgot-code">
-
-                    <div class="flex flex-col sm:flex-row mt-8">
-                        <div class=" flex flex-basis-auto items-center login-consent">
-                             <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
-                                type="submit">${enter}</button>
+                    <div class="login-consent-password-forgot-code w-full">
+                        <div class="flex page-buttons w-full">
+                            <div class="flex flex-basis-auto items-center login-consent">
+                                <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
+                                        type="submit">${enter}</button>
+                            </div>
+                            <@personalDataProcessAccept/>
                         </div>
 
-                            <@personalDataProcessAccept/>
-                            </div>
-
-                            <div class="flex justify-between code-forgot">
-                             <#if activateNewAuth!false>
-                            <a class="code" href="#" id="topSecretButton" onclick="document.getElementById('smsLoginButton').click();">Получить временный код</a>
+                        <div class="flex code-forgot" flex-wrap-justify-content="center">
+                            <#if activateNewAuth!false>
+                                <a class="code" href="#" id="topSecretButton" onclick="document.getElementById('smsLoginButton').click();">Получить временный код</a>
                             </#if>
-                            <#if realm.resetPasswordAllowed>
-                            <a class="forgot reference_hoverable allowDoubleClick item_hover" href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
+                            <#if realm.resetPasswordAllowed!false>
+                                <a class="forgot reference_hoverable allowDoubleClick item_hover" href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
                             </#if>
-                            </div>
+                        </div>
                     </div>
                 </#if>
                 </form>
 
 
                 <#if realm.password && social.providers??>
-                    <div class="flex items-center mt-2">
+                    <div class="flex items-center social-providers">
                         <div class="text-no-wrap text-with-login mr-6">${loginWith}</div>
                         <ul class="logo-social-providers">
                             <#list social.providers as p>
@@ -297,7 +291,7 @@
 
         <#elseif loginViaPhoneCall>
             <#if !isSwitcherOn!true>
-                <p class="mb-7 info-text">На указанный номер поступит звонок. Для подтверждения <span class="breakable"> нужно ввести последние 4 цифры входящего номера</span>
+                <p class="custom-mb-md info-text">На указанный номер поступит звонок. Для подтверждения <span class="breakable"> нужно ввести последние 4 цифры входящего номера</span>
                 </p>
                 <#if realm.password>
                     <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
@@ -397,7 +391,7 @@
                 </div>
                 </form>
                 <#if realm.password && social.providers??>
-                    <div class="flex items-center mt-2">
+                    <div class="flex items-center social-providers">
                         <div class="text-no-wrap text-with-login mr-6">${loginWith}</div>
                         <ul class="logo-social-providers">
                             <#list social.providers as p>

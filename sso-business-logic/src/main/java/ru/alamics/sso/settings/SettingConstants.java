@@ -71,6 +71,7 @@ public enum SettingConstants {
     USERNAME("username"),
     PHONE_OR_EMAIL("phoneOrEmail"),
     NEXT("next"),
+    RESTORE("restore"),
     EMAIL_INSTRUCTION("emailInstruction"),
     USERNAME_OR_EMAIL("usernameOrEmail"),
     RESET_PASSWORD("resetPassword"),
@@ -93,6 +94,7 @@ public enum SettingConstants {
     LOGIN_FULL_TEXTS_CLIENT_IDS("loginFullTextsClientIds"),
     LOGIN_FAIL_TO_REGISTRATION_CLIENT_IDS("loginFailToRegistrationClientIds"),
     LOGIN_FAIL_TO_REGISTRATION_MESSAGE("loginFailToRegistrationMessage"),
+    RESTORE_BUTTON_LABEL("restoreButtonLabel"),
 
     //Заголовоки сообщений
 

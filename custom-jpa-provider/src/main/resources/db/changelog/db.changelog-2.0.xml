@@ -45,4 +45,14 @@
                     'FRONT');
         </sql>
     </changeSet>
+    <changeSet id="5" author="korotaev-my">
+        <sql>
+            update SETTINGS
+            set value = '© АО «ЭР-Телеком Холдинг» 2011—'
+            where EXT_ID = 'footer' and value = '© АО «ЭР-Телеком Холдинг» 2011-';
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE)
+            VALUES ('8ceb894a-055c-4ec2-ac34-a377786d1f50', 'restoreButtonLabel', 'Восстановить', '', 'user',
+                    'Подпись кнопки предложения восстановления пароля', null, 'FRONT');
+        </sql>
+    </changeSet>
 </databaseChangeLog>
