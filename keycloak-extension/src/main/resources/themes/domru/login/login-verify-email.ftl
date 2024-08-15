@@ -7,7 +7,7 @@
         <#if section = "header">
             Подтверждение данных
         <#elseif section = "description">
-            На почту: ${mail!} <br/>
+            На e-mail: ${mail!} <br/>
             Отправлены инструкции для авторизации
         </#if>
     </@emailSent.defaultTemplate>

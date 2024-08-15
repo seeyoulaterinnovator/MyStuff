@@ -3,20 +3,19 @@
     <#if section = "header">
     <#--        ${msg("termsTitle")}-->
     <#elseIf section = "form">
-        <div id="kc-terms-text">
-            <#--            ${kcSanitize(msg("termsText"))?no_esc}-->
-        </div>
-
-        <div class="table-wrapper">
-            <h1 class="title">${chooseOrganization}</h1>
+        <div class="table-wrapper attributes-wrapper">
+            <div class="page-title-wrapper">
+                <h1 id="page-title">
+                    <b class="titleAllPage">${chooseOrganization}</b>
+                </h1>
+            </div>
             <div id="post" class="table overflow-x-hidden overflow-y-auto">
                 <div class="trow theader">
                     <div class="org-cell">${organization}</div>
-                    <#--                    <div class="org-cell">Уникальный номер</div>-->
                     <div class="role-cell">${roleUser}</div>
                 </div>
-                <div class="trow theader-mobile">
-                    <div class="cell-header-mobile">Организация / Роль пользователя</div>
+                <div class="trow theader theader-mobile">
+                    <div>${organization} / ${roleUser}</div>
                 </div>
                 <#list posts as post>
                     <#assign firstRow = post?index == 0>

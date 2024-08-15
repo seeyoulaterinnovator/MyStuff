@@ -2,7 +2,6 @@
 
 <@template.layout ; section>
     <#if section = "style">
-        <#include 'styles/content-style--default.html' >
     <#elseif section = "body">
         <p style="font-size: 18px">Ваша учетная запись для входа в Личный кабинет «Дом.ру Бизнес» <font color="red">заблокирована</font>.
             Доступ к услугам при этом не блокируется.</p>

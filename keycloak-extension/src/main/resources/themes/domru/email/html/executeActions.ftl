@@ -14,7 +14,6 @@
 
 <@template.layout ; section>
   <#if section = "style">
-    <#include 'styles/content-style--default.html' >
   <#elseif section = "body">
 
     <#assign email=realmName>

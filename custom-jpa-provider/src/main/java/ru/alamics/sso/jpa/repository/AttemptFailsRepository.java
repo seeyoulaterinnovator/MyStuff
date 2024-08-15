@@ -68,6 +68,32 @@ public class AttemptFailsRepository {
         return (List<AttemptFailsEntity>) query.getResultList();
     }
 
+    public int getActualAttemptFailsCount(String phone, String realm, String cause, String userId) {
+        return ((Number) em.createNativeQuery(
+                "select count(*) from ATTEMPT_FAILS\n" +
+                        "where limitation_cause = :cause and phone = :phone\n" +
+                        "    and user_id = :userId and realm = :realm\n" +
+                        "    and (\n" +
+                        "        not exists(select *\n" +
+                        "               from USER_LOGIN_HISTORY\n" +
+                        "               where user_id = :userId and realm = :realm and is_success = 1)\n" +
+                        "        or created > (select max(LOGINED_AT)\n" +
+                        "                         from USER_LOGIN_HISTORY\n" +
+                        "                         where user_id = :userId and realm = :realm and is_success = 1)\n" +
+                        "    ) and (\n" +
+                        "        not exists(select * from BLACK_LIST\n" +
+                        "                   where limitation_cause = :cause and user_id = :userId and realm = :realm)\n" +
+                        "        or created > (select max(unblocked) from BLACK_LIST\n" +
+                        "                        where limitation_cause = :cause and user_id = :userId and realm = :realm)\n" +
+                        "    );"
+                )
+                .setParameter("phone", phone)
+                .setParameter("realm", realm)
+                .setParameter("cause", cause)
+                .setParameter("userId", userId)
+                .getSingleResult()).intValue();
+    }
+
     public void save(AttemptFailsEntity entity) {
         em.persist(entity);
         em.flush();

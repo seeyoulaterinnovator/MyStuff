@@ -65,4 +65,8 @@ public class AttemptFailsService {
     public void deleteAttempts(List<AttemptFailsDto> dto) {
         repository.delete(AttemptFailsMapper.toEntityList(dto));
     }
+
+    public int getActualAttemptFailsCount(String phone, String realm, String cause, String userId) {
+        return repository.getActualAttemptFailsCount(phone, realm, cause, userId);
+    }
 }

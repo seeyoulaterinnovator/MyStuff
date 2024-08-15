@@ -2,20 +2,10 @@
   display: flex;
   flex-direction: column;
 
-
-&
---error {
-
-.field__input {
-  @apply .border-accentRed;
-}
-
-}
-
-&
---row {
-  flex-direction: row;
-}
+  &
+  --row {
+    flex-direction: row;
+  }
 }
 
 .field__container {
@@ -23,19 +13,6 @@
   flex-flow: column;
   position: relative;
 }
-
-/* Эти штуки руинят форму регистрации!!!*/
-/*@media (min-width: 768px) {*/
-/*  .field__container {*/
-/*    margin-bottom: 24px;*/
-/*  }*/
-/*}*/
-
-/*@media (min-width: 1280px) {*/
-/*  .field__container {*/
-/*    margin-bottom: 32px;*/
-/*  }*/
-/*}*/
 
 .field__open {
   cursor: pointer;
@@ -61,8 +38,13 @@
   height: 40px;
   transition: border-color 0.1s ease-in;
   width: 100%;
+  color: #222222;
+  &:-webkit-autofill,
+  &:-webkit-autofill:focus {
+    transition: color 0s 222222s !important;
+  }
 
-@media (min-width: 1199px) {
+@media (min-width: 1280px) {
   height:48px;
 }
 
@@ -82,7 +64,7 @@
   color: black;
   opacity: 0.5;
 
-@media (min-width: 1200px) {
+@media (min-width: 1280px) {
   font-size:17px;
 }
 }
@@ -104,8 +86,8 @@
   font-weight: 350;
   position: absolute;
   top: -6.2px;
-  left: 15px;
-  color: #7585A1;
+  left: 12px;
+  color: #899DA8;
   background-color: white;
   padding-right: 2px;
   padding-left: 2px;
@@ -115,37 +97,45 @@
   margin-bottom: 3px;
   font-size: 10px;
   line-height: 13px;
+  letter-spacing: 0.05em;
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   font-size:13px;
 }
 }
 
+.field--error {
+  .field__input {
+    border-color: #FF312C;
+  }
+}
+
 .field__error-message {
-  @apply .text-accentRed;
+  color: #FF312C;
   height: 0;
   font-size: 13px;
   line-height: 13px;
-  text-align: right;
 }
 
 .pass-fields {
   min-width: 270px;
   max-width: 270px;
 
-@media (max-width: 1199px) {
-  min-width:235px;
-  max-width:245px;
+  @media (max-width: 1279px) {
+    min-width:235px;
+    max-width:245px;
+  }
+
+  @media (max-width: 767px) {
+    min-width: auto;
+    max-width: none;
+    flex-grow: 1;
+  }
 }
 
-@media (max-width: 479px) {
-  width:85%;
-  max-width:100%;
-}
-}
 @media only screen and (min-width: 1280px) {
   .reg-fields {
-    width: 242px;
+    min-width: 242px;
     height: 48px;
     font-size: 16px;
   }
@@ -153,7 +143,7 @@
 
   @media only screen and (min-width: 768px) and (max-width: 1279px) {
     .reg-fields {
-      width: 226px;
+      min-width: 226px;
       height: 44px;
       font-size: 15px;
     }
@@ -161,7 +151,7 @@
 
   @media only screen and (max-width: 767px) {
     .reg-fields {
-      width: 288px;
+      min-width: 288px;
       height: 40px;
       font-size: 14px;
     }
@@ -171,31 +161,13 @@
 .pass-fields--change-pass {
   min-width: unset;
 
-@media (max-width: 1199px) {
-  min-width:210px;
-}
+  @media (max-width: 1279px) {
+    min-width:210px;
+  }
 
-@media (max-width: 479px) {
-  width:100%;
-}
-}
-
-
-.field__input--city {
-  width: 696px;
-
-@media (max-width: 1199px) {
-  width: 696px;
-}
-
-
-@media (max-width: 768px) {
-  width: 696px;
-}
-
-@media (max-width: 320px) {
-  width: 288px;
-}
+  @media (max-width: 767px) {
+    width:100%;
+  }
 }
 
 .generated-password-text {
@@ -204,9 +176,9 @@
   white-space: nowrap;
   opacity: 0.5;
 
-@media (max-width: 1199px) {
-  font-size:14px;
-}
+  @media (max-width: 1279px) {
+    font-size:14px;
+  }
 }
 
 .generated-password-field {
@@ -215,9 +187,9 @@
   align-items: center;
   height: 48px;
 
-@media (max-width: 1199px) {
-  height:40px;
-}
+  @media (max-width: 1279px) {
+    height: 40px;
+  }
 }
 
 
@@ -247,7 +219,6 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 18px;
   align-self: stretch;
 }
 /*my*/
@@ -306,7 +277,7 @@
 .code {
   color: var(--light, #16629A);
   /* Tablet/Ссылка_17-23_Tablet */
-  font-family: CoFo Sans;
+  font-family: CoFo Sans, sans-serif;
   font-size: 17px;
   font-style: normal;
   font-weight: 400;
@@ -328,7 +299,7 @@
 .enter-login-link {
   color: var(--light, #16629A);
   /* Tablet/Ссылка_17-23_Tablet */
-  font-family: CoFo Sans;
+  font-family: CoFo Sans, sans-serif;
   font-size: 17px;
   font-style: normal;
   font-weight: 400;
@@ -353,45 +324,40 @@
 }
 
 .timer-new {
-  color: var(--light, #899DA8);
+  color: #899DA8;
   text-align: right;
-  /* Tablet/Подпись_14-18_Tablet */
-  font-family: CoFo Sans;
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 18px; /* 128.571% */
-  letter-spacing: 0.42px;
-}
-
-.timer-new-countdown {
-  color: var(--light, #222);
-  /* Tablet/Подпись_14-18_Tablet */
-  font-family: CoFo Sans;
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
   line-height: 18px;
-  letter-spacing: 0.42px;
+  letter-spacing: 0.03em;
+}
+
+.timer-new-countdown {
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 18px;
+  letter-spacing: 0.03em;
 }
 
 /*my*/
 .resend {
   color: var(--light, #16629A);
-  text-align: right;
-  /* Tablet/Ссылка_17-23_Tablet */
-  font-family: CoFo Sans;
+  text-align: center;
   font-size: 17px;
   font-style: normal;
   font-weight: 400;
   line-height: 23px; /* 135.294% */
 }
 
+.field__input {
+  border-color: #CFDBE0;
+}
 
 .field__input.field__input--error {
   border-color: #FF312C;
 }
-
 
 .login-password-forgot {
   display: flex;
@@ -440,7 +406,7 @@
   flex-grow: 0;
 }
 
-@media only screen and (min-width: 1279px) {
+@media only screen and (min-width: 1280px) {
   .login-pass {
     color: #16629A;
     display: flex;
@@ -628,20 +594,11 @@
   }
 }
 
-.enter-reg-mobile{
-
-}
-
 @media (max-width: 767px){
   .enter-reg-mobile{
     display: flex;
     justify-content: space-between;
   }
-}
-
-
-.info-text-code{
-
 }
 
 @media (max-width: 767px){

@@ -16,6 +16,8 @@
 
     import './selection';
     import {selectCity, setAllSelected, setSelectedCity} from "./selection";
+    import CloseButton from "../Common/Buttons/CloseButton.svelte";
+    import SearchIcon from "../Common/Icons/SearchIcon.svelte";
 
     let search;
 
@@ -45,51 +47,26 @@
             class="flex flex-col fixed transparent-bg w-screen bg-white inset-0 py-4 md:py-6 xl:py-8 {$status === STATUS.INITIAL && 'opacity-90'} scrollable-container overflow-x-hidden overflow-y-auto"
             id="location-selection-window" style={$status === STATUS.SELECTING ? "background-color: white" : ''}>
         <header id="cities-header" class="flex items-center pb-4 px-4 sm:px-6 lg:px-8 xl:px-6">
-            <div id="cities-header-div" class="w-full flex justify-between items-center">
-              <!--ydalit-->
-                <!--<a id="cities-header-logo" href="https://newlkb2b.dom.ru/" class={$status === STATUS.SELECTING && 'hidden sm:block'}>
-                    <div
-                            class="h-30px w-60px md:h-10 md:w-20 xl:h-16 xl:w-32 bg-contain bg-no-repeat logo logo&#45;&#45;domru" />
-                </a>-->
-
+            <div id="cities-header-div" class="w-full">
               {#if $status === STATUS.SELECTING}
-                  <form
-                          class="md:flex md:flex-wrap md:justify-between"
-                          on:submit|preventDefault={handleSelectCity}>
-                      <fieldset>
-                          <div class="field field--row md:w-full">
-                              <label for="search-city" class="choose-city-text hidden lg:block">Выбрать город</label>
-                              <input
-                                      name="Поиск города"
-                                      id="search-city"
-                                      class="field__input field__input--city"
-                                      placeholder="Название города"
-                                      bind:value={search}
-                                      on:input={handleInputChange} />
-
-                          </div>
-                      </fieldset>
-                  </form>
-
-                  <button id="close-cities" on:click={handleClose}>
-                      <svg
-                              width="32"
-                              height="32"
-                              viewBox="0 0 32 32"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg">
-                          <g opacity="0.5">
-                              <path
-                                      fill-rule="evenodd"
-                                      clip-rule="evenodd"
-                                      d="M17.4142 16.0002L27.7072 5.70718L26.293 4.29297L16
-                  14.5859L5.70718 4.29312L4.29297 5.70733L14.5858
-                  16.0002L4.29297 26.293L5.70718 27.7072L16 17.4144L26.293
-                  27.7073L27.7072 26.2931L17.4142 16.0002Z"
-                                      fill="black" />
-                          </g>
-                      </svg>
-                  </button>
+                <div class="w-full">
+                  <div class="flex justify-between items-center custom-mb-md">
+                    <label for="search-city" class="choose-city-text">Выбрать город</label>
+                    <CloseButton on:click={handleClose} class="custom-icon"/>
+                  </div>
+                  <div class="field field__container search-city-form">
+                    <form on:submit|preventDefault={handleSelectCity} class="flex items-center search-city-input field__input">
+                      <input
+                        name="Поиск города"
+                        id="search-city"
+                        placeholder="Название города"
+                        bind:value={search}
+                        on:input={handleInputChange} />
+                      <SearchIcon/>
+                    </form>
+                    <label class="field__label" for="search-city">Название города</label>
+                  </div>
+                </div>
               {/if}
 
               {#if $status === STATUS.INITIAL}

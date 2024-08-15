@@ -20,6 +20,7 @@ import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.CustomFreeMarkerUtil;
+import ru.alamics.sso.util.HtmlUtil;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -153,6 +154,13 @@ public class EmailSender {
                 }
             } catch (final FreeMarkerException e) {
                 htmlBody = null;
+            }
+            if(htmlBody != null) {
+                try {
+                    htmlBody = HtmlUtil.applyEmailCssToHtml(htmlBody);
+                } catch (Throwable e) {
+                    log.warn(e.getMessage(), e);
+                }
             }
 
             return new EmailTemplate(subject, textBody, htmlBody);

@@ -25,4 +25,25 @@ public class UserConstants {
     public static final String SELF = "self";
 
     public static final String DISABLE_TWO_STEP_AUTH = "disable_two_step_auth";
+
+    /**
+     * Атрибут пользователя с ID и хэш-суммой отправленного кода
+     * (т.к. для direct grant flow сессия на token endpoint не поддерживается)
+     */
+    public static final String ATTR_REST_SMS_OR_PHONE_CALL_CODE_ID_AND_HASH_KEY
+            = "rest_sms_or_phone_call_code_id_and_hash_key";
+
+    /**
+     * Атрибут пользователя с меткой времени последней отправки кода в REST авторизации
+     */
+    public static final String ATTR_REST_SMS_OR_PHONE_CALL_CODE_SENT_AT = "rest_sms_or_phone_call_code_sent_at";
+
+    /**
+     * Атрибут пользователя с меткой времени очередной проверки временной блокировки в REST авторизации
+     * (кэш на уровне атрибутов пользователя, для того чтобы сократить кол-во обращений в БД)
+     */
+    public static final String ATTR_REST_SMS_OR_PHONE_CALL_BLOCKED_AT = "attr_rest_sms_or_phone_call_blocked_at";
+
+    public static final String AUTH_NOTE_REST_SMS_OR_PHONE_CALL_END_REQUIRED_ACTION =
+            "auth_note_rest_sms_or_phone_call_end_required_action";
 }

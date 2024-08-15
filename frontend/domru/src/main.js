@@ -9,6 +9,7 @@ import './scripts/login-reset-password.js';
 import './scripts/login-update-password.js';
 import './scripts/totp.js';
 import './scripts/iframeResizer.contentWindow.min.js';
+import './scripts/handlers.js';
 
 import './css/tailwind-base.css';
 import './css/tailwind-advanced.css';
@@ -28,7 +29,6 @@ import './css/components/cities.css';
 import './css/components/confirmation.css';
 import './css/components/customers.css';
 import './css/components/verification.css';
-import './css/components/chat.css';
 import './css/components/message.css';
 import './css/components/error.css';
 

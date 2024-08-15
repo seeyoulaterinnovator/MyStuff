@@ -43,7 +43,7 @@
         </#if>
 
     </head>
-    <body class="min-h-full flex flex-col p-4 sm:px-6 md:py-6 lg:px-8 xl:py-8 xl:px-6">
+    <body class="min-h-full flex flex-col p-4 sm:px-6 md:py-6 lg:px-8 xl:py-8 xl:px-6 custom">
     <#if displayMessage && message?has_content && message.summary == 'Регистрация временно недоступна, попробуйте повторить попытку позже'>
         <#if iframe == false>
             <@header.defaultTemplate withCity=displayCity></@header.defaultTemplate>
@@ -67,7 +67,7 @@
                     <#if section = "header">
                         Восстановление пароля
                     <#elseif section = "description">
-                        <span>На почту: ${login.username!"указанную при регистрации"}</span><br>
+                        <span>На e-mail: ${login.username!"указанную при регистрации"}</span><br>
                         Отправлены инструкции по восстановлению пароля
                     </#if>
                 </@emailSent.defaultTemplate>
@@ -172,7 +172,7 @@
         </main>
 
         <#if iframe == false>
-            <footer id="page-footer" class="w-full fixed bottom-0 footer">
+            <footer id="page-footer" class="w-full footer">
                 <a href="${(phoneConstLink)!"tel:88005500479"}" class= "show-small-tell">
                     <div class="flex h-6 items-center">
                         <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -181,11 +181,7 @@
                         <span class="phone-number">${(phoneConst)!"8 800 550 0479"}</span>
                     </div>
                 </a>
-                <span class="text-main-500">${(footer)!"© АО «ЭР-Телеком Холдинг» 2011-"}
-                <script>
-                        document.write(new Date().getFullYear())
-                </script>
-            </span>
+                <span class="text-main-500 copyright">${(footer)!"© АО «ЭР-Телеком Холдинг» 2011—"}${.now?string('yyyy')}</span>
             </footer>
         </#if>
 

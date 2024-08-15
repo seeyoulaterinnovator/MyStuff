@@ -97,14 +97,14 @@
       <ul class="flex flex-col cities-column">
       {#each groupPart as group}
 
-        <ul class="flex mb-4 capital flex-col md:flex-row px-0 md:px-2 capital">
-          <h2 class="text-extra mr-2 capitalize text-left md:text-center mb-2 mbd:mb-0 leading-none w-5 ">
+        <ul class="flex mb-4 capital flex-col px-0 md:px-2 capital">
+          <h2 class="city-group-letter capitalize custom-mb-sm sm:px-2">
             {group.firstCharacter}
           </h2>
 
            <ul class="flex flex-col">
            {#each group.cities as city}
-              <li class="mb-2 sm:px-2 hover:bg-extra city">
+              <li class="mb-2 sm:px-2 city">
                 <button class="city text-left" on:click={() => handleClick(city)}>{city.name}</button>
               </li>
             {:else}

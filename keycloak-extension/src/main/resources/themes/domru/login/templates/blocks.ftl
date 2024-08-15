@@ -2,7 +2,7 @@
 <#import "./svg.ftl" as svg>
 
 <#macro password firstFieldName="password">
-    <div id="password-block" class="mb-7 sm:mb-8">
+    <div id="password-block">
         <p class="text-black-80">Пароль должен состоять из комбинации букв, цифр и быть не менее 8 и не более 16
             символов</p>
         <div class="flex text-black-50 py-6">
@@ -17,7 +17,7 @@
         </div>
         <p class="text-black-80 mb-8 mt-8">Не забудьте записать пароль <span id="generated-password"
                                                                              class="text-base"></span></p>
-        <div class="flex sm:flex-row">
+        <div class="flex">
             <div class="pass-fields">
                 <@components.field class="mb-3 sm:mb-4" fieldName="${firstFieldName}" label="${msg('password')}" placeholder="${msg(passwordPlaceholder)}" type="password" required=true value="" />
             </div>
@@ -37,33 +37,30 @@
 </#macro>
 
 <#macro contentHeader mainTitle secondaryTitle="" secondaryHref="" withBorder=false >
-    <header class="flex items-center mb-10 enter-reg-mobile">
+    <div class="page-title-wrapper flex items-center enter-reg-mobile">
         <h1 id="page-title"
             class="<#if secondaryTitle != ''>enter-text</#if>">
-            <b <#if secondaryTitle == ''>class="titleAllPage"</#if>>
+            <b class="titleAllPage">
                 ${mainTitle}
             </b>
         </h1>
 
         <#if secondaryTitle != "">
-            <h2 class="text-secondary-title pl-8 text-3xl">
+            <h2 class="page-title text-secondary-title">
                 <a href="${secondaryHref}">
-                    <b>
+                    <b class="titleAllPage">
                         ${secondaryTitle}
                     </b>
                 </a>
             </h2>
         </#if>
-    </header>
+    </div>
 </#macro>
 
 <#macro verificationHeader mainTitle>
-    <header class="pb-2 sm:pb-3 md:pb-4">
-        <h1
-                id="page-title"
-                class="verification__title"
-        >
-            ${mainTitle}
+    <div class="page-title-wrapper">
+        <h1 id="page-title" class="verification__title">
+            <b class="titleAllPage">${mainTitle}</b>
         </h1>
-    </header>
+    </div>
 </#macro>

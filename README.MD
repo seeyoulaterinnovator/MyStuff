@@ -3,7 +3,8 @@ https://gitlab.ertelecom.ru/b2bweb/sso
 
 # Поднятие проекта
 1) Скачиваем КС 6.0.1 по ссылке https://downloads.jboss.org/keycloak/6.0.1/keycloak-6.0.1.zip
-2) Вот этот [файл](org.zip) положить в сам КС в папку modules ![img.png](img.png)
+2) Вот этот [файл](org.zip) положить в сам КС в папку modules ![img.png](img.png) 
+   1) Скопировать также [папку](./tools/modules) в папку modules у КС
 3) Файл [standalone](standalone.xml) вот сюда ![img_1.png](img_1.png)
 4) Далее настраиваем файл конфигурацию запуска ![img_2.png](img_2.png) добавить строку KEYCLOAK_DEPLOY_DIR=C:\keycloak-6.0.1\keycloak-6.0.1.
 5) Запуск проекта после Деплоя через этот файл ![img_3.png](img_3.png)
@@ -15,15 +16,39 @@ https://gitlab.ertelecom.ru/b2bweb/sso
 update REALM
 set ssl_required = 'NONE';
 -- Если будут использоваться сохраненные run config-и для Idea
+-- 1
 update APP_PROPERTIES
 set value = 'http://localhost:1080/cities/domains'
 where name = 'cities.url';
+-- 2
 update REALM_SMTP_CONFIG
 set VALUE = 'localhost'
 where NAME = 'host';
+-- 3
 update SETTINGS
 set VALUE = 'http://localhost:1080/dadata/suggestions/api/4_1/rs/iplocate/address'
 where EXT_ID = 'urlDaDataRequestLocationIp';
+-- 4
+update CLIENT
+set SECRET = 'secret'
+where CLIENT_ID in ('b2b') and REALM_ID = 'user';
+-- 5
+delete from REDIRECT_URIS
+where CLIENT_ID in (select ID
+                    from CLIENT
+                    where CLIENT_ID in ('b2b') and REALM_ID = 'user');
+-- 6
+INSERT INTO REDIRECT_URIS(CLIENT_ID, VALUE)
+select ID, '*'
+from CLIENT
+where CLIENT_ID in ('b2b') and REALM_ID = 'user';
+-- 7
+update APP_PROPERTIES
+set VALUE = 'localhost:1080'
+where NAME in ('tbapi.registration.ip', 'tbapi.registration.host');
+update APP_PROPERTIES
+set VALUE = '/tbapi/api/v1/customerManagement/customerAccount'
+where NAME = 'tbapi.registration.find.path';
 ```
 
 # Запуск проекта с Дебагом
