@@ -1,17 +1,15 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import ru.alamics.sso.jpa.entity.auth_reg.ClientsForMonitoringEntity;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
-@LocalBean
-@Stateless
+@ApplicationScoped
 public class ClientsForMonitoringRepository {
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public ClientsForMonitoringEntity findAndReturnClientForMonitoring(String clientName, String realm) {

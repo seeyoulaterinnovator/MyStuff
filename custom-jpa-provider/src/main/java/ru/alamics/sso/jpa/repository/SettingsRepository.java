@@ -1,22 +1,18 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import org.hibernate.jpa.QueryHints;
 import ru.alamics.sso.jpa.entity.Settings;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.UUID;
 
-@Stateless
-@LocalBean
+@ApplicationScoped
 public class SettingsRepository {
-
-    @PersistenceContext
+    @Inject
     private EntityManager em;
-
 
     public Settings getSettings(final String keyName, final String realmId) {
         Settings ret = null;

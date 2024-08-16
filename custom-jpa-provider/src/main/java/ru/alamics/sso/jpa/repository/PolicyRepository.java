@@ -1,25 +1,18 @@
 package ru.alamics.sso.jpa.repository;
 
-import lombok.extern.slf4j.Slf4j;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import org.keycloak.models.jpa.entities.RealmEntity;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
-@Stateless
-@LocalBean
-@Slf4j
+@ApplicationScoped
 public class PolicyRepository {
-
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public List<RealmEntity> findRealmWithPolicy(final String policy) {
-        final String DEBUG_STR = "findRealmWithPolicy";
-
         return em.createQuery(
                         "select re from RealmEntity re " +
                                 "where re.passwordPolicy LIKE CONCAT('%', :policy, '%') ", RealmEntity.class)

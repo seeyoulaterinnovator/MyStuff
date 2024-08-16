@@ -1,24 +1,21 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.jpa.entity.UserLoginHistory;
-import ru.alamics.sso.jpa.entity.antifraud.AttemptFailsEntity;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+@ApplicationScoped
 @Slf4j
-@Stateless
 public class UserHistoryLoginRepository {
-
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public void findInactiveUsers(final long absenceTime, final String realmId) {

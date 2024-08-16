@@ -1,21 +1,20 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.AutoLockNotification;
 import ru.alamics.sso.jpa.entity.common.NotificationStatus;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@ApplicationScoped
 @Slf4j
-@Stateless
 public class AutoLockNotificationRepository {
-
-    @PersistenceContext
+    @Inject
     private EntityManager entityManager;
 
     public void save(List<AutoLockNotification> autoLockNotifications) {

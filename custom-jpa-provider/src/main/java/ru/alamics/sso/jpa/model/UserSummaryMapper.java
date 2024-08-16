@@ -1,9 +1,9 @@
 package ru.alamics.sso.jpa.model;
 
-import javax.persistence.ColumnResult;
-import javax.persistence.ConstructorResult;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.SqlResultSetMapping;
+import jakarta.persistence.ColumnResult;
+import jakarta.persistence.ConstructorResult;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.SqlResultSetMapping;
 
 @MappedSuperclass
 @SqlResultSetMapping(name="UserSummaryMapper",

@@ -1,25 +1,21 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.PersonalAccountEntity;
 import ru.alamics.sso.jpa.entity.PersonalAccountPostEntity;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Stateless
-@LocalBean
+@ApplicationScoped
 @Slf4j
-@TransactionAttribute(TransactionAttributeType.REQUIRED)
+@Transactional(Transactional.TxType.REQUIRED)
 public class PersonalAccountRepository {
-
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public PersonalAccountPostEntity getAccount(final String postId) {

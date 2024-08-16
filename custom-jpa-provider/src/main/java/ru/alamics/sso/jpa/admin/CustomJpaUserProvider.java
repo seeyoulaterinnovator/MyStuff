@@ -12,11 +12,12 @@ import ru.alamics.sso.jpa.entity.AutoLockNotification;
 import ru.alamics.sso.jpa.entity.UserLoginHistory;
 import ru.alamics.sso.jpa.entity.UserPostEntity;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Slf4j
 public class CustomJpaUserProvider extends JpaUserProvider {
@@ -29,7 +30,7 @@ public class CustomJpaUserProvider extends JpaUserProvider {
     }
 
     @Override
-    public List<UserModel> searchForUser(String search, RealmModel realm, int firstResult, int maxResults) {
+    public Stream<UserModel> searchForUserStream(RealmModel realm, String search, Integer firstResult, Integer maxResults) {
         log.info("searchForUser");
 
         TypedQuery<UserEntity> query = em.createQuery(
@@ -57,7 +58,7 @@ public class CustomJpaUserProvider extends JpaUserProvider {
         List<UserEntity> results = query.getResultList();
         List<UserModel> users = new LinkedList<>();
         for (UserEntity entity : results) users.add(new UserAdapter(session, realm, em, entity));
-        return users;
+        return users.stream(); // TODO
     }
 
     @Override

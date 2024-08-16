@@ -1,26 +1,22 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
 import ru.alamics.sso.jpa.entity.common.ImportUsersDataStatus;
 import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
-@LocalBean
-@Stateless
-@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+@ApplicationScoped
+@Transactional(Transactional.TxType.REQUIRES_NEW)
 @Slf4j
 public class ImportUsersReportRepository {
-
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public ImportUsersReportEntity findImportUsersReportByImportId(final String importId) {

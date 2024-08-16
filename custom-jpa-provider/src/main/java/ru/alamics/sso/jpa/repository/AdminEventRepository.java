@@ -1,23 +1,19 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import org.keycloak.events.jpa.AdminEventEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
-@LocalBean
-@Stateless
+@ApplicationScoped
 public class AdminEventRepository {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Transactional(Transactional.TxType.REQUIRED)
     public AdminEventEntity save(AdminEventEntity adminEventEntity) {
         if (adminEventEntity.getId() == null) {
             adminEventEntity.setId(KeycloakModelUtils.generateId());

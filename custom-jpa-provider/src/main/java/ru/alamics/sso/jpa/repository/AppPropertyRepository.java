@@ -1,20 +1,16 @@
 package ru.alamics.sso.jpa.repository;
 
-import lombok.extern.slf4j.Slf4j;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import ru.alamics.sso.jpa.entity.AppProperty;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
-@Stateless
-@LocalBean
-@Slf4j
+@ApplicationScoped
 public class AppPropertyRepository {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public List<AppProperty> findAll() {

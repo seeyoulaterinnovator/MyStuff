@@ -8,7 +8,7 @@ import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.UserProvider;
 import org.keycloak.models.UserProviderFactory;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 @Slf4j
 public class CustomJpaProviderFactory implements UserProviderFactory {

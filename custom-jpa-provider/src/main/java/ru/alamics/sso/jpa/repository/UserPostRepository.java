@@ -1,5 +1,9 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.jpa.entity.ExternalSystemEntity;
@@ -8,19 +12,12 @@ import ru.alamics.sso.jpa.entity.UserPostEntity;
 import ru.alamics.sso.jpa.entity.UserPostRoleEntity;
 import ru.alamics.sso.jpa.util.CollectionUtils;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.ws.rs.NotFoundException;
 import java.util.*;
 
+@ApplicationScoped
 @Slf4j
-@Stateless
-@LocalBean
 public class UserPostRepository {
-
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public UserPostEntity save(UserPostEntity userPost) {

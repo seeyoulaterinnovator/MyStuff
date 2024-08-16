@@ -1,26 +1,22 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.OptimisticLockException;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import ru.alamics.sso.jpa.entity.status.CheckTableEntity;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.OptimisticLockException;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 
-@Stateless
-@LocalBean
+@ApplicationScoped
 @Slf4j
 public class StatusRepository {
-
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public void tryInsertNodeName(String nodeName) {
@@ -47,11 +43,10 @@ public class StatusRepository {
         }
     }
 
-    @Transactional
-    @Lock(LockType.WRITE)
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public boolean checkStatusDb(String nodeName) {
         try {
-            CheckTableEntity ent = em.find(CheckTableEntity.class, nodeName);
+            CheckTableEntity ent = em.find(CheckTableEntity.class, nodeName, LockModeType.PESSIMISTIC_WRITE);
 
             ent.setUpdateTime(LocalDateTime.now());
 

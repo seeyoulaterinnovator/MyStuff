@@ -1,22 +1,18 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.RealmAdapter;
 import org.keycloak.models.jpa.entities.RealmEntity;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
-@Stateless
-@LocalBean
+@ApplicationScoped
 public class RealmRepository {
-
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public RealmModel findRealmById(final String id) {

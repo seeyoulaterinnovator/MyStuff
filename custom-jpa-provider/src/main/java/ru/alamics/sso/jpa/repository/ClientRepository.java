@@ -1,20 +1,16 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import org.keycloak.models.jpa.entities.ClientEntity;
 import ru.alamics.sso.jpa.entity.MainRedirectUri;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
-
-@Stateless
-@LocalBean
+@ApplicationScoped
 public class ClientRepository {
-
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public ClientEntity findClientById(final String clientId, final String realmId) {

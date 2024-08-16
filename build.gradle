@@ -1,13 +1,4 @@
-plugins {
-    id 'com.bmuschko.docker-remote-api' version '4.10.0'
-}
-
-import com.bmuschko.gradle.docker.tasks.container.*
-import com.bmuschko.gradle.docker.tasks.image.*
-
-// test branch
-
-version = '0.0.1'
+version = '1.0.1'
 
 allprojects {
     apply plugin: 'java'
@@ -21,14 +12,15 @@ allprojects {
     }
 
     repositories {
-        jcenter()
-        maven { url "https://repository.jboss.org/nexus/content/repositories/thirdparty-releases/" }
+        mavenCentral()
     }
 
     ext {
-        keycloakVersion = '6.0.1'
-        lombokVersion = '1.18.8'
-        junitVersion = '5.5.0'
+        keycloakVersion = '25.0.2'
+        bouncycastleVersion = '1.78.1'
+        lombokVersion = '1.18.34'
+        junitVersion = '5.11.0'
+        mapstructVersion = '1.5.5.Final'
         generatedMapperSourcesDir = "${buildDir}/generated-src/mapstruct/main"
         toolsDir = new File(projectDir, "tools")
     }
@@ -40,8 +32,8 @@ allprojects {
     }
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaLanguageVersion.of(17)
+        targetCompatibility = JavaLanguageVersion.of(17)
     }
 }
 
@@ -53,23 +45,20 @@ subprojects {
     buildDir = new File(rootProject.projectDir, "build/" + project.name)
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaLanguageVersion.of(17)
+        targetCompatibility = JavaLanguageVersion.of(17)
     }
 
     dependencies {
-        annotationProcessor "org.projectlombok:lombok:$lombokVersion"
         compileOnly "org.projectlombok:lombok:$lombokVersion"
-        implementation "org.projectlombok:lombok:$lombokVersion"
-        // https://mvnrepository.com/artifact/org.mapstruct/mapstruct
-        implementation 'org.mapstruct:mapstruct:1.3.0.Final'
-//        compileOnly 'org.mapstruct:mapstruct-processor:1.3.0.Final'
-        annotationProcessor  'org.mapstruct:mapstruct-processor:1.3.0.Final'
+        annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+        compileOnly "org.mapstruct:mapstruct:$mapstructVersion"
+        annotationProcessor "org.mapstruct:mapstruct-processor:$mapstructVersion"
 
         testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
         testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
-        testImplementation 'org.assertj:assertj-core:3.12.2'
-        testImplementation 'org.mockito:mockito-junit-jupiter:2.28.2'
+        testImplementation 'org.assertj:assertj-core:3.26.3'
+        testImplementation "org.mockito:mockito-junit-jupiter:5.12.0"
     }
 
     test {
@@ -94,29 +83,12 @@ test {
     dependsOn(':keycloak-extension:test')
 }
 
-//////////// DOCKER
-// POSTGRES
-task postgresPull(type: DockerPullImage) {
-    repository = 'postgres'
-    tag = "latest"
-}
-
-task postgresCreate(type: DockerCreateContainer) {
-    dependsOn postgresPull
-    targetImageId postgresPull.getImageId()
-    containerName = "$project.group-postgres"
-    portBindings = ['5433:5432']
-    withEnvVar('POSTGRES_USER', 'postgres')
-    withEnvVar('POSTGRES_PASSWORD', 'postgres')
-    withEnvVar('POSTGRES_DB', 'keycloak')
-}
-
 task deploy {
 
     dependsOn(':keycloak-extension:war')
     dependsOn(':custom-jpa-provider:jar')
 
-    def warArchive =  tasks.getByPath(':keycloak-extension:war').getArchiveFile()
+    def warArchive =  tasks.getByPath(':keycloak-extension:jar').getArchiveFile()
     def jarArchive =  tasks.getByPath(':custom-jpa-provider:jar').getArchiveFile()
     def jarModuleXml = new File("$toolsDir", "module.xml")
     def themesFolder = tasks.getByPath(':keycloak-extension:processResources').getDestinationDir().getAbsolutePath() + '/themes'
@@ -184,14 +156,4 @@ task deploy {
             fileset(dir: themesTargetFolder + '/ertelecom/login', includes: 'template.ftl')
         }
     }
-}
-
-task postgresStart(type: DockerStartContainer) {
-    dependsOn postgresCreate
-    targetContainerId postgresCreate.getContainerId()
-}
-
-task postgresRemove(type: DockerRemoveContainer) {
-    force = true
-    targetContainerId "$project.group-postgres"
 }

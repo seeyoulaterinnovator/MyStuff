@@ -1,21 +1,17 @@
 package ru.alamics.sso.jpa.repository;
 
-import lombok.extern.slf4j.Slf4j;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.jpa.entity.antifraud.AttemptFailsEntity;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import java.util.List;
 
-@Stateless
-@LocalBean
-@Slf4j
+@ApplicationScoped
 public class AttemptFailsRepository {
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public List<AttemptFailsEntity> getFailAttemptsByPhoneAndRealm(String phone, String realm, String cause) {

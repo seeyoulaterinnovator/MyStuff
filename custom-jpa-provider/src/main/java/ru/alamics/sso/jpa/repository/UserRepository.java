@@ -1,5 +1,11 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.persistence.Tuple;
+import jakarta.transaction.Transactional;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.UserAttributeEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
@@ -8,20 +14,11 @@ import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.jpa.model.UserSummaryView;
 import ru.alamics.sso.jpa.util.CollectionUtils;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.persistence.Tuple;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@LocalBean
-@Stateless
+@ApplicationScoped
 public class UserRepository {
 
     private final static String USER_SUMMARY_MAPPER_NAME = "UserSummaryMapper";
@@ -29,7 +26,7 @@ public class UserRepository {
     private final static String SORT_FIELD_NAME = "firstName";
     private final static String SORT_FIELD_EMAIL = "email";
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public UserEntity findUser(final String userId) {
@@ -38,7 +35,7 @@ public class UserRepository {
         return ret;
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Transactional(Transactional.TxType.REQUIRED)
     public List<UserEntity> save(List<UserEntity> entities) {
         entities.forEach(entity -> {
             if (entity.getId() == null) {
@@ -53,7 +50,7 @@ public class UserRepository {
         return entities;
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Transactional(Transactional.TxType.REQUIRED)
     public UserEntity save(UserEntity user) {
         if (user.getId() == null) {
             user.setId(KeycloakModelUtils.generateId());
@@ -66,7 +63,7 @@ public class UserRepository {
         return user;
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Transactional(Transactional.TxType.REQUIRED)
     public UserAttributeEntity saveAttributes(UserAttributeEntity attr) {
         if (attr.getId() == null) {
             attr.setId(KeycloakModelUtils.generateId());
