@@ -47,7 +47,7 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
 
         RealmProvider model = session.realms();
         RealmModel realm = model.getRealm(event.getRealmId());
-        UserModel userModel = session.users().getUserById(userId, realm);
+        UserModel userModel = session.users().getUserById(realm, userId);
 
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");

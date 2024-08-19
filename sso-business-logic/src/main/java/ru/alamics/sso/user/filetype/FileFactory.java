@@ -1,10 +1,11 @@
 package ru.alamics.sso.user.filetype;
 
+import com.opencsv.exceptions.CsvException;
+import jakarta.activation.UnsupportedDataTypeException;
 import ru.alamics.sso.user.format.ImportFormat;
 import ru.alamics.sso.user.format.MigrationImportFormat;
 import ru.alamics.sso.user.format.StandartImportFormat;
 
-import javax.activation.UnsupportedDataTypeException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -14,7 +15,7 @@ public class FileFactory {
     public static final String CSV = "csv";
     public static final String CTL = "ctl";
 
-    public static FileModel createFileModel(InputStream inputStream, String type) throws IOException, UnsupportedDataTypeException {
+    public static FileModel createFileModel(InputStream inputStream, String type) throws IOException {
 
         if (XLSX.equalsIgnoreCase(type)){
             return new XlsxImpl(type, inputStream);
@@ -28,7 +29,7 @@ public class FileFactory {
         throw new UnsupportedDataTypeException("Unsupported file format!");
     }
 
-    public static FileModel createFileModel(String type) throws IOException, UnsupportedDataTypeException {
+    public static FileModel createFileModel(String type) throws IOException {
 
         if (XLSX.equalsIgnoreCase(type)){
             return new XlsxImpl(type);

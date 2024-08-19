@@ -1,9 +1,8 @@
 package ru.alamics.sso.keycloak.create.rest;
 
+import jakarta.ws.rs.Path;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
-
-import javax.ws.rs.Path;
 
 public class CustomRestResource {
 

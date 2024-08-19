@@ -1,10 +1,16 @@
 package ru.alamics.sso.schedule;
 
-
+import io.quarkus.runtime.StartupEvent;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.*;
+import jakarta.ws.rs.core.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.common.util.Time;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.jpa.AdminEventEntity;
+import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.PasswordPolicy;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -13,6 +19,9 @@ import org.keycloak.models.jpa.entities.ClientEntity;
 import org.keycloak.models.jpa.entities.RealmEntity;
 import org.keycloak.models.jpa.entities.UserAttributeEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
+import org.keycloak.timer.ScheduledTask;
+import org.keycloak.timer.TimerProvider;
 import org.keycloak.util.JsonSerialization;
 import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.emailer.EmailModel;
@@ -22,97 +31,80 @@ import ru.alamics.sso.jpa.entity.common.BlockType;
 import ru.alamics.sso.jpa.entity.common.NotificationType;
 import ru.alamics.sso.jpa.repository.*;
 import ru.alamics.sso.keycloak.GeneralRealm;
-import ru.alamics.sso.keycloak.lookup.Lookup;
-import ru.alamics.sso.property.ApplicationProperties;
-import ru.alamics.sso.registration.AttributeFormatException;
-import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.mapper.DataMapper;
-import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsDto;
 import ru.alamics.sso.settings.SettingsService;
-import ru.alamics.sso.user.UserAttributeService;
-import ru.alamics.sso.user.web.AttributeRequest;
 import ru.alamics.sso.util.Util;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.ejb.Timer;
-import javax.ejb.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+@ApplicationScoped
 @Slf4j
-@Startup
-@Singleton
-@DependsOn("ApplicationProperties")
-public class UserSchedule {
+public class UserSchedule implements ScheduledTask {
     private static final String TIMER_NAME = "User Schedule Timer";
     private static final long DEFAULT_INTERVAL_DURATION = 300000;
-
     private final static String DEFAULT_CLIENT_ID = "account";
-    @EJB
-    private EmailSender sender;
-    @EJB
-    private PolicyRepository policyRepository;
-    @EJB
-    private AutoLockNotificationRepository autoLockNotificationRepository;
-    @EJB
-    private UserHistoryLoginRepository userHistoryLoginRepository;
-    @EJB
-    private RealmRepository realmRepository;
-    @EJB
-    private ClientRepository clientRepository;
-    @EJB
-    private AdminEventRepository adminEventRepository;
-    @EJB
-    private ApplicationProperties properties;
-    @EJB
-    private SettingsService settingsService;
-    @Resource
-    private TimerService timerService;
-    @EJB
-    private ClientService сlientService;
-    @EJB
-    private UserRepository userRepository;
 
-    private Timer timer;
+    @Inject
+    EmailSender sender;
+    @Inject
+    PolicyRepository policyRepository;
+    @Inject
+    AutoLockNotificationRepository autoLockNotificationRepository;
+    @Inject
+    UserHistoryLoginRepository userHistoryLoginRepository;
+    @Inject
+    RealmRepository realmRepository;
+    @Inject
+    ClientRepository clientRepository;
+    @Inject
+    AdminEventRepository adminEventRepository;
+    @Inject
+    SettingsService settingsService;
+    @Inject
+    ClientService clientService;
+    @Inject
+    UserRepository userRepository;
+
+    @Context
+    KeycloakSession session;
+
+    TimerProvider timerProvider;
 
     @PostConstruct
-    private void init() {
-        final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
-        long initialDuration = Math.round(Math.random() * getTime());
+    void init() {
+        timerProvider = session.getProvider(TimerProvider.class);
+    }
 
-        timer = timerService.createIntervalTimer(initialDuration, getTime(), timerConfig);
-        log.info("Timer:{} is created, interval duration value = {} ms, initial duration value = {} ms ", TIMER_NAME, getTime(), initialDuration);
+    void onStart(@Observes StartupEvent ev) {
+        changeScheduleTimer();
     }
 
     public void changeScheduleTimer() {
-        final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
-        long initialDuration = Math.round(Math.random() * getTime());
-
-        timer.cancel();
-        timer = timerService.createIntervalTimer(initialDuration, getTime(), timerConfig);
-        log.info("Timer:{} is created, interval duration value = {} ms, initial duration value = {} ms ", TIMER_NAME, getTime(), initialDuration);
-    }
-
-    private long getTime() {
         long intervalDuration = settingsService.getSettingsLongValue(SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY, GeneralRealm.MASTER) * 1000;
-
         if (intervalDuration <= 0) {
             intervalDuration = DEFAULT_INTERVAL_DURATION;
         }
 
-        return intervalDuration;
+        timerProvider.cancelTask(TIMER_NAME);
+        timerProvider.schedule(
+                new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), this, intervalDuration),
+                intervalDuration
+        );
+        log.info("Timer:{} is created, interval duration value = {} ms, initial duration value = {} ms ", TIMER_NAME, intervalDuration, intervalDuration);
     }
 
-    @Timeout
-    public void schedule(Timer timer) {
-        if (!TIMER_NAME.equals(timer.getInfo().toString())) {
-            return;
-        }
+    @Override
+    public String getTaskName() {
+        return TIMER_NAME;
+    }
+
+    @Override
+    public void run(KeycloakSession session) {
         findExpiredPassword();
 
         for (RealmModel model : realmRepository.getAllRealms()) {
@@ -230,7 +222,7 @@ public class UserSchedule {
         final String template = "block-notification.ftl";
         Map<String, Object> body = new HashMap<>();
         body.put("userName", userModel.getUsername());
-        List<String> phones = userModel.getAttribute("phone");
+        List<String> phones = userModel.getAttributeStream("phone").toList();
         if (!phones.isEmpty() && phones.get(0).length() == 11) {
             String formatNumber = Util.getFormatNumber(phones.get(0));
             body.put("phone", formatNumber);
@@ -265,7 +257,7 @@ public class UserSchedule {
         String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
         body.put("expTimePass", expirationStrRusPass);
 
-        List<String> phones = userModel.getAttribute("phone");
+        List<String> phones = userModel.getAttributeStream("phone").toList();
         if (!phones.isEmpty() && phones.get(0).length() == 11) {
             String formatNumber = Util.getFormatNumber(phones.get(0));
             body.put("phone", formatNumber);
@@ -292,7 +284,7 @@ public class UserSchedule {
 
     private String getClientLink(ClientEntity client) {
 
-        String uri = сlientService.findMainRedirectUri(client);
+        String uri = clientService.findMainRedirectUri(client);
 
         if (uri != null)
             return uri;
@@ -310,7 +302,7 @@ public class UserSchedule {
         try {
             adminEvent.setRepresentation(JsonSerialization.writeValueAsString(DataMapper.toUserEntityRepresentation(userEntity)));
         } catch (IOException e) {
-            e.printStackTrace();
+            log.warn(e.getMessage(), e);
         }
         adminEvent.setResourceType("USER");
         adminEventRepository.save(adminEvent);

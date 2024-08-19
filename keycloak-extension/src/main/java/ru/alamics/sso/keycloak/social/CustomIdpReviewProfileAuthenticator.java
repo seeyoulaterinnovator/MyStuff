@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.social;
 
+import jakarta.ws.rs.core.MultivaluedMap;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -11,6 +12,7 @@ import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.authenticators.broker.IdpReviewProfileAuthenticator;
 import org.keycloak.authentication.authenticators.broker.IdpReviewProfileAuthenticatorFactory;
 import org.keycloak.authentication.authenticators.broker.util.SerializedBrokeredIdentityContext;
+import org.keycloak.authentication.requiredactions.util.UpdateProfileContext;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.common.util.ObjectUtil;
 import org.keycloak.connections.httpclient.HttpClientProvider;
@@ -26,10 +28,10 @@ import org.keycloak.models.utils.FormMessage;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.messages.Messages;
-import org.keycloak.services.resources.AttributeFormDataProcessor;
 import org.keycloak.services.validation.Validation;
 import org.keycloak.util.JsonSerialization;
 import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.keycloak.util.AttributeFormDataProcessor;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.UserExtension;
 import ru.alamics.sso.registration.model.FormConstants;
@@ -41,12 +43,12 @@ import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 import ru.alamics.sso.util.Util;
 
-import javax.ws.rs.core.MultivaluedMap;
 import java.io.InputStream;
 import java.util.*;
 import java.util.regex.Pattern;
 
 import static org.keycloak.authentication.forms.RegistrationRecaptcha.G_RECAPTCHA_RESPONSE;
+import static org.keycloak.common.util.ObjectUtil.isBlank;
 
 @Slf4j
 public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthenticator {
@@ -110,9 +112,8 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
             updateProfileFirstLogin = authenticatorConfig.getConfig().get(IdpReviewProfileAuthenticatorFactory.UPDATE_PROFILE_ON_FIRST_LOGIN);
         }
 
-        RealmModel realm = context.getRealm();
         return IdentityProviderRepresentation.UPFLM_ON.equals(updateProfileFirstLogin)
-                || (IdentityProviderRepresentation.UPFLM_MISSING.equals(updateProfileFirstLogin) && !Validation.validateUserMandatoryFields(realm, userCtx));
+                || (IdentityProviderRepresentation.UPFLM_MISSING.equals(updateProfileFirstLogin) && !validateUserMandatoryFields(userCtx));
     }
 
     @Override
@@ -161,7 +162,7 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
             context.getAuthenticationSession().setAuthNote(UPDATE_PROFILE_EMAIL_CHANGED, "true");
         }
 
-        AttributeFormDataProcessor.process(formData, realm, userCtx);
+        AttributeFormDataProcessor.process(formData, userCtx);
 
         userCtx.saveToAuthenticationSession(context.getAuthenticationSession(), BROKERED_CONTEXT_NOTE);
 
@@ -242,5 +243,9 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
         userExtension.extendUser(user, attributes);
 
         return user;
+    }
+
+    private boolean validateUserMandatoryFields(UpdateProfileContext user){
+        return!(isBlank(user.getFirstName()) || isBlank(user.getLastName()) || isBlank(user.getEmail()));
     }
 }

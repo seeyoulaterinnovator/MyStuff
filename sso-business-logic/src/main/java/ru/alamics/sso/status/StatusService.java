@@ -1,30 +1,19 @@
 package ru.alamics.sso.status;
 
-import lombok.extern.slf4j.Slf4j;
+import io.quarkus.runtime.StartupEvent;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 import ru.alamics.sso.jpa.repository.StatusRepository;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.*;
-
-@Singleton
-@Startup
-@Slf4j
-@Lock(LockType.READ)
+@ApplicationScoped
 public class StatusService {
+    private final String NODE_NAME = System.getProperty("jboss.node.name"); // TODO upgrade: check
 
-    private final String NODE_NAME = System.getProperty("jboss.node.name");
+    @Inject
+    StatusRepository statusRepository;
 
-    @EJB
-    private StatusRepository statusRepository;
-
-    @PostConstruct
-    @Lock(LockType.WRITE)
-    public void init() {
-
-        tryInsertNodeName();
-    }
-
-    private void tryInsertNodeName() {
+    void onStart(@Observes StartupEvent ev) {
         statusRepository.tryInsertNodeName(NODE_NAME);
     }
 

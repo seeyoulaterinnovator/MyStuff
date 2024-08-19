@@ -1,9 +1,11 @@
 package ru.alamics.sso.util;
 
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.core.MultivaluedMap;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
+import org.keycloak.http.HttpRequest;
 import org.keycloak.jose.jws.JWSInput;
 import org.keycloak.jose.jws.JWSInputException;
 import org.keycloak.models.KeycloakSession;
@@ -16,8 +18,6 @@ import org.keycloak.services.managers.RealmManager;
 import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.jpa.util.CollectionUtils;
 
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.core.MultivaluedMap;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -40,7 +40,7 @@ public class Util {
     public final static String CLIENT_B2B = "b2b";
 
     public static boolean isPasswordGrandType(KeycloakSession session) {
-        HttpRequest contextObject = session.getContext().getContextObject(HttpRequest.class);
+        HttpRequest contextObject = session.getContext().getHttpRequest();
         MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
         if (!CollectionUtils.isEmpty(parameters)) {
             return OAuth2Constants.PASSWORD.equals(parameters.getFirst(OIDCLoginProtocol.GRANT_TYPE_PARAM));
@@ -50,7 +50,7 @@ public class Util {
     }
 
     public static boolean isRegistrationGrandType(KeycloakSession session) {
-        HttpRequest contextObject = session.getContext().getContextObject(HttpRequest.class);
+        HttpRequest contextObject = session.getContext().getHttpRequest();
         MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
         if (!CollectionUtils.isEmpty(parameters)) {
             return "registration".equals(parameters.getFirst(OIDCLoginProtocol.GRANT_TYPE_PARAM));

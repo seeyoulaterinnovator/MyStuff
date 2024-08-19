@@ -1,10 +1,18 @@
 dependencies {
+    compileOnly "org.keycloak:keycloak-dependencies-server-all:$keycloakVersion"
+    //compileOnly "org.keycloak:keycloak-core:$keycloakVersion"
+
+    compileOnly(platform("io.quarkus:quarkus-bom:$quarkusVersion"))
+    compileOnly "org.jboss.resteasy:resteasy-client"
+    compileOnly "org.jboss.resteasy:resteasy-jackson2-provider"
+    implementation "org.jboss.resteasy:resteasy-multipart-provider"
+
+    compileOnly "org.bouncycastle:bcprov-jdk18on:bouncycastleVersion"
+    compileOnly "org.bouncycastle:bcmail-jdk18on:$bouncycastleVersion"
+
     implementation(
             project(":sso-business-logic"),
             project(":tbapi-remote-service"),
             project(":custom-jpa-provider"),
     )
-    compileOnly(group: "org.keycloak", name: "keycloak-dependencies-server-all", version: "$keycloakVersion")
-    compileOnly(group: "org.bouncycastle", name: "bcprov-jdk18on", version: "$bouncycastleVersion")
-    compileOnly(group: "org.bouncycastle", name: "bcmail-jdk18on", version: "$bouncycastleVersion")
 }

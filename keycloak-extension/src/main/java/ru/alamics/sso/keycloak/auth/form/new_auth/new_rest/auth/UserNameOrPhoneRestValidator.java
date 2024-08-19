@@ -20,8 +20,8 @@ import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.util.Util;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import java.util.Objects;
 
 import static ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth.RestAuthHelper.isRestAuthRequestValid;

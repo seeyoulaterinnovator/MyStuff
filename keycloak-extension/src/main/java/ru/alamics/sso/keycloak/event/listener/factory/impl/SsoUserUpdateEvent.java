@@ -18,7 +18,7 @@ import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.stats.LoginHistory;
 import ru.alamics.sso.util.Util;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +71,7 @@ public class SsoUserUpdateEvent extends SsoEvent {
             log.info("ExtendedEventListener: admin update user");
 
             RealmModel realm = model.getRealm(this.event.getRealmId());
-            UserModel user = session.users().getUserById(userId, realm);
+            UserModel user = session.users().getUserById(realm, userId);
 
             if (user == null || user.getEmail() == null) {
                 log.error(String.format("User '%s' not found or do not have email", userId));
@@ -83,9 +83,9 @@ public class SsoUserUpdateEvent extends SsoEvent {
             attributes.put("userFirstName", user.getFirstName());
             attributes.put("userLastName", user.getLastName());
 
-            List<String> phones = user.getAttribute("phone");
-            if (!phones.isEmpty() && phones.get(0).length() == 11) {
-                attributes.put("phone", Util.getFormatNumber(phones.get(0)));
+            String phone = user.getFirstAttribute("phone");
+            if (phone != null && phone.length() == 11) {
+                attributes.put("phone", Util.getFormatNumber(phone));
             }
 
             attributes.put("emailEnabledAccountBodyHtml", settingsService.getSettingsStringValue(EMAIL_ENABLE_ACCOUNT, realm.getName()));

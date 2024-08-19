@@ -6,6 +6,8 @@ import org.keycloak.models.*;
 import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.alamics.sso.jpa.entity.common.BlockType;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
@@ -15,9 +17,9 @@ import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.user.UserAttributeService;
 import ru.alamics.sso.user.web.AttributeRequest;
 
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Response;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +27,7 @@ import java.util.Objects;
 
 public class UserManageResource {
 
+    private static final Logger log = LoggerFactory.getLogger(UserManageResource.class);
     private final KeycloakSession session;
     private final RealmModel realm;
     private final AdminEventBuilder eventBuilder;
@@ -63,7 +66,7 @@ public class UserManageResource {
         UserProvider userProvider = getUsers();
         if (ids != null) {
             ids.forEach(id -> {
-                UserModel user = userProvider.getUserById(id, realm);
+                UserModel user = userProvider.getUserById(realm, id);
                 user.addRequiredAction(UserModel.RequiredAction.UPDATE_PASSWORD);
             });
         }
@@ -76,7 +79,7 @@ public class UserManageResource {
         UserProvider userProvider = getUsers();
         if (ids != null) {
             ids.forEach(id -> {
-                UserModel user = userProvider.getUserById(id, realm);
+                UserModel user = userProvider.getUserById(realm, id);
                 if (user != null) {
                     user.setEnabled(unlocking);
                     addManagerBlockAttribute(user);
@@ -94,19 +97,19 @@ public class UserManageResource {
     private void addManagerBlockAttribute(UserModel user) {
         if (!user.isEnabled()) {
             try {
-                if (Objects.nonNull(user.getAttribute(BlockType.SYSTEM_BLOCK.getType()))) {
+                if (user.getFirstAttribute(BlockType.SYSTEM_BLOCK.getType()) != null) {
                     attributeService.deleteAttributes(user.getId(), Collections.singletonList(BlockType.SYSTEM_BLOCK.getType()));
                 }
                 attributeService.createAttributes(user.getId(),
                         Collections.singletonList(new AttributeRequest(BlockType.MANAGER_BLOCK.getType(), LocalDateTime.now().toString())));
 
             } catch (FoundException | AttributeFormatException e) {
-                e.printStackTrace();
+                log.warn(e.getMessage(), e);
             }
         } else {
             attributeService.deleteAttributes(user.getId(), Collections.singletonList(BlockType.MANAGER_BLOCK.getType()));
 
-            if (Objects.nonNull(user.getAttribute(BlockType.SYSTEM_BLOCK.getType()))) {
+            if (user.getFirstAttribute(BlockType.SYSTEM_BLOCK.getType()) != null) {
                 attributeService.deleteAttributes(user.getId(), Collections.singletonList(BlockType.SYSTEM_BLOCK.getType()));
             }
         }

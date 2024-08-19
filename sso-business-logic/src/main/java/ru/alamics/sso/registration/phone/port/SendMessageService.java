@@ -3,9 +3,6 @@ package ru.alamics.sso.registration.phone.port;
 import ru.alamics.sso.registration.phone.exception.SendMessageException;
 import ru.alamics.sso.registration.phone.model.MessageRequest;
 
-import javax.ejb.Remote;
-import java.util.List;
-
 public interface SendMessageService {
     String sendMessageByRequestAndLogInfo(MessageRequest messageRequest) throws SendMessageException;
     String sendMessageByRequest(MessageRequest messageRequest) throws SendMessageException;

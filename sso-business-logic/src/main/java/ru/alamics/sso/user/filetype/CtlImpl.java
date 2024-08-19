@@ -1,6 +1,7 @@
 package ru.alamics.sso.user.filetype;
 
 import com.opencsv.*;
+import com.opencsv.exceptions.CsvException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -23,7 +24,11 @@ public class CtlImpl implements FileModel {
         CSVParser parser = new CSVParserBuilder().withSeparator(';').withIgnoreLeadingWhiteSpace(true).withIgnoreQuotations(true).build();
         csvReader = new CSVReaderBuilder(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).withCSVParser(parser).build();
 
-        this.rows = csvReader.readAll();
+        try {
+            this.rows = csvReader.readAll();
+        } catch (CsvException e) {
+            throw new IOException(e.getMessage());
+        }
         //rows.removeAll(rows.stream().limit(COUNT_ROW_INDENT).skip(1).collect(Collectors.toList()));
 
         Optional.ofNullable(this.rows).orElseGet(Collections::emptyList)

@@ -1,5 +1,8 @@
 package ru.alamics.sso.user;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.PersonalAccountPostEntity;
 import ru.alamics.sso.jpa.entity.UserPostEntity;
@@ -8,26 +11,16 @@ import ru.alamics.sso.jpa.repository.UserPostRepository;
 import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.user.model.PersonalAccountPostModel;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ws.rs.NotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Stateless
+@ApplicationScoped
 @Slf4j
 public class PersonalAccountService {
-
-    //private final KeycloakSession session;
-
-    @EJB
-    private PersonalAccountRepository paRepository;
-    @EJB
-    private UserPostRepository userPostRepository;
-
-    public PersonalAccountService(/*KeycloakSession session*/) {
-        //this.session = session;
-    }
+    @Inject
+    PersonalAccountRepository paRepository;
+    @Inject
+    UserPostRepository userPostRepository;
 
     private void checkPost(final String postId) throws NotFoundException {
 

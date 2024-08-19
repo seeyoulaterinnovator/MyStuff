@@ -1,10 +1,18 @@
 package ru.alamics.sso.remote.rias;
 
+import jakarta.annotation.Resource;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
+import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
-import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.property.PropertyException;
 import ru.alamics.sso.registration.phone.HashGenerator;
@@ -13,22 +21,17 @@ import ru.alamics.sso.registration.rias.model.RiasLogin;
 import ru.alamics.sso.registration.rias.port.RiasLoginService;
 import ru.alamics.sso.util.Util;
 
-import javax.annotation.Resource;
-import javax.ejb.Stateless;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
 
+@ApplicationScoped
+@Named("RiasLoginService")
 @Slf4j
-@Stateless(name = "RiasLoginService")
 public class RiasUserLoginImpl implements RiasLoginService {
 
-    private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
+    private static final ResteasyClientBuilder clientBuilder = ((ResteasyClientBuilder) ClientBuilder.newBuilder())
             .connectTimeout(3, TimeUnit.SECONDS)
             .readTimeout(10, TimeUnit.SECONDS);
 
@@ -65,8 +68,7 @@ public class RiasUserLoginImpl implements RiasLoginService {
         // {"error":"UNAUTHORIZED_CLIENT", "error_description":"Данный тип авторизации не поддерживается для заданного клиента."}
 
         try {
-
-            URI uri = new ResteasyUriBuilder()
+            URI uri = UriBuilder.newInstance()
                     .scheme(properties.getProperty(AUTH_SCHEME))
                     .host(String.format("%s.%s", domain == null ? properties.getProperty(AUTH_DEF_CITY) : domain, properties.getProperty(AUTH_DOMAIN)))
                     .port(properties.getPropertyInt(AUTH_PORT))

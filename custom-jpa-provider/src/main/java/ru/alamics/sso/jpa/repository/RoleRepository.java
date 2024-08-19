@@ -17,6 +17,10 @@ public class RoleRepository {
     @Inject
     private EntityManager em;
 
+    public RoleEntity findById(String id) {
+        return em.find(RoleEntity.class, id);
+    }
+
     public RoleEntity findRoleEntityByName(final String roleName, final String realmId) {
 
         List<RoleEntity> resultList = em.createQuery("select re from RoleEntity re where re.name =:roleName and re.realm.id =:realmId", RoleEntity.class)

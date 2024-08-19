@@ -1,11 +1,19 @@
 dependencies {
+    compileOnly "org.keycloak:keycloak-dependencies-server-all:$keycloakVersion"
+
+    compileOnly(platform("io.quarkus:quarkus-bom:$quarkusVersion"))
+    compileOnly "io.quarkus:quarkus-core"
+    compileOnly "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+    implementation "org.hibernate.validator:hibernate-validator"
+    implementation "org.glassfish.expressly:expressly"
+
+    implementation "org.apache.poi:poi:5.3.0"
+    implementation "org.apache.poi:poi-ooxml:5.3.0"
+    implementation "com.opencsv:opencsv:5.9"
+    implementation "org.jsoup:jsoup:1.18.1"
+    implementation "com.helger:ph-css:7.0.2"
+
     implementation (
-            project(':custom-jpa-provider'),
+            project(":custom-jpa-provider"),
     )
-    compileOnly(group: "org.keycloak", name: "keycloak-dependencies-server-all", version: "$keycloakVersion")
-    implementation group: 'org.apache.poi', name: 'poi', version: '5.3.0'
-    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.3.0'
-    implementation group: 'com.opencsv', name: 'opencsv', version: '5.9'
-    implementation 'org.jsoup:jsoup:1.18.1'
-    implementation group: 'com.helger', name: 'ph-css', version: '7.0.2'
 }

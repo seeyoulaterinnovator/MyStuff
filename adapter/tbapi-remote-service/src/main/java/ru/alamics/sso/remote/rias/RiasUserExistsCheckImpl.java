@@ -1,5 +1,13 @@
 package ru.alamics.sso.remote.rias;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.MediaType;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -12,42 +20,32 @@ import ru.alamics.sso.remote.rias.model.RiasCheckStatus;
 import ru.alamics.sso.remote.rias.model.RiasData;
 import ru.alamics.sso.util.Util;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.ejb.Stateless;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
 
-@Slf4j
-@Stateless(name = "RiasApiService")
+@ApplicationScoped
+@Named("RiasApiService")
 @NoArgsConstructor
+@Slf4j
 public class RiasUserExistsCheckImpl implements RiasApiService {
     private static final String RIAS_API_URI = "riasApi.uri";
     private static final String CLIENT_NAME = "riasApi.client.name";
     private static final String CLIENT_SALT = "riasApi.client.salt";
 
-    private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
+    private static final ResteasyClientBuilder clientBuilder = ((ResteasyClientBuilder) ClientBuilder.newBuilder())
             .connectTimeout(3, TimeUnit.SECONDS)
             .readTimeout(10, TimeUnit.SECONDS);
 
     private static final ResteasyClient client = clientBuilder.build();
 
-    @Resource(lookup = "java:global/domru-sso/ApplicationProperties")
-    private ApplicationProperties properties;
+    @Inject
+    ApplicationProperties properties;
 
     private URI uri;
 
-    public RiasUserExistsCheckImpl(URI uri) {
-        this.uri = uri;
-    }
-
     public RiasUserExistsCheckImpl(ApplicationProperties properties, URI uri) {
-
         this.properties = properties;
         this.uri = uri;
     }

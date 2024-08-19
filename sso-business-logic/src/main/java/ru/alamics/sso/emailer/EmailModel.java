@@ -1,5 +1,6 @@
 package ru.alamics.sso.emailer;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,7 +9,6 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.theme.Theme;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;

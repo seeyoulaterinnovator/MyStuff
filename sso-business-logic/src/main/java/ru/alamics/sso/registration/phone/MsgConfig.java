@@ -1,10 +1,10 @@
 package ru.alamics.sso.registration.phone;
 
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 import lombok.Builder;
 import lombok.Data;
 
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
 import java.nio.charset.Charset;
 

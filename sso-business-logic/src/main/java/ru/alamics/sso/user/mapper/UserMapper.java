@@ -1,5 +1,6 @@
 package ru.alamics.sso.user.mapper;
 
+import jakarta.persistence.Tuple;
 import org.keycloak.authentication.FormContext;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
@@ -15,7 +16,6 @@ import ru.alamics.sso.user.web.UserDto;
 import ru.alamics.sso.user.web.UserSearch;
 import ru.alamics.sso.user.web.UserSearchDto;
 
-import javax.persistence.Tuple;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -168,14 +168,14 @@ public class UserMapper {
     public static UserPostRequest toUserPostRequest(UserModel userModel) {
         UserPostRequest userPostRequest = new UserPostRequest();
         userPostRequest.setUserId(userModel.getId());
-        if (!userModel.getAttribute(ATTR_TOMS_NAME).isEmpty()) {
-            userPostRequest.setTomsId(userModel.getAttribute(ATTR_TOMS_NAME).get(0));
+        if (userModel.getFirstAttribute(ATTR_TOMS_NAME) != null) {
+            userPostRequest.setTomsId(userModel.getFirstAttribute(ATTR_TOMS_NAME));
         }
-        if (!userModel.getAttribute(ATTR_DMP_NAME).isEmpty()) {
-            userPostRequest.setDmpId(userModel.getAttribute(ATTR_DMP_NAME).get(0));
+        if (userModel.getFirstAttribute(ATTR_DMP_NAME) != null) {
+            userPostRequest.setDmpId(userModel.getFirstAttribute(ATTR_DMP_NAME));
         }
-        if (!userModel.getAttribute(ATTR_ORG_NAME).isEmpty()) {
-            userPostRequest.setOrgName(userModel.getAttribute(ATTR_ORG_NAME).get(0));
+        if (userModel.getFirstAttribute(ATTR_ORG_NAME) != null) {
+            userPostRequest.setOrgName(userModel.getFirstAttribute(ATTR_ORG_NAME));
         }
         return userPostRequest;
     }

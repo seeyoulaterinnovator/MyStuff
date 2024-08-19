@@ -22,9 +22,9 @@ import ru.alamics.sso.registration.model.UserConstants;
 import ru.alamics.sso.util.Util;
 import ru.alamics.sso.jpa.util.CollectionUtils;
 
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.Map;
 
 @Slf4j

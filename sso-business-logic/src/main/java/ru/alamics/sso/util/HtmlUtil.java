@@ -51,14 +51,6 @@ public final class HtmlUtil {
             );
             element.removeAttr("old-style");
         }
-        for (Element element : document.select("[style]")) {
-            element.attr(
-                    "style",
-                    element.attr("style")
-                            .replaceAll("^;", "")
-                            .replaceAll(";\\s*;", ";")
-            );
-        }
         return document.toString();
     }
 
@@ -80,7 +72,10 @@ public final class HtmlUtil {
                                     .style(cssStyleRule.getAllDeclarations()
                                             .stream()
                                             .map(ICSSWriteable::getAsCSSString)
-                                            .collect(Collectors.joining(";")))
+                                            .collect(Collectors.joining(";"))
+                                            .replaceAll("^;", "")
+                                            .replaceAll(";\\s*;", "")
+                                    )
                                     .build()
                     );
                 }

@@ -9,7 +9,6 @@ import org.keycloak.email.freemarker.FreeMarkerEmailTemplateProvider;
 import org.keycloak.email.freemarker.beans.ProfileBean;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.theme.FreeMarkerException;
-import org.keycloak.theme.FreeMarkerUtil;
 import org.keycloak.theme.Theme;
 import org.keycloak.theme.beans.LinkExpirationFormatterMethod;
 import org.keycloak.theme.beans.MessageFormatterMethod;
@@ -36,15 +35,15 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
 
     private SettingsService settingsService;
 
-    public SsoEmailTemplateProvider(KeycloakSession session, FreeMarkerUtil freeMarker) {
-        super(session, freeMarker);
+    public SsoEmailTemplateProvider(KeycloakSession session) {
+        super(session);
         settingsService = Lookup.lookup(SettingsService.class);
     }
 
     @Override
     public void sendExecuteActions(String link, long expirationInMinutes) throws EmailException {
         Map<String, Object> attributes = new HashMap<String, Object>(this.attributes);
-        attributes.put("user", new ProfileBean(user));
+        attributes.put("user", new ProfileBean(user, session));
         addLinkInfoIntoAttributes(link, expirationInMinutes, attributes);
 
         attributes.put("realmName", getRealmName());
@@ -57,7 +56,7 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
     @Override
     public void sendVerifyEmail(String link, long expirationInMinutes) throws EmailException {
         Map<String, Object> attributes = new HashMap<String, Object>(this.attributes);
-        attributes.put("user", new ProfileBean(user));
+        attributes.put("user", new ProfileBean(user, session));
         addLinkInfoIntoAttributes(link, expirationInMinutes, attributes);
 
         attributes.put("realmName", getRealmName());
@@ -69,7 +68,7 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
     @Override
     public void sendConfirmIdentityBrokerLink(String link, long expirationInMinutes) throws EmailException {
         Map<String, Object> attributes = new HashMap<String, Object>(this.attributes);
-        attributes.put("user", new ProfileBean(user));
+        attributes.put("user", new ProfileBean(user, session));
         addLinkInfoIntoAttributes(link, expirationInMinutes, attributes);
 
         attributes.put("realmName", getRealmName());
@@ -89,14 +88,14 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
     @Override
     public void sendPasswordReset(String link, long expirationInMinutes) throws EmailException {
         Map<String, Object> attributes = new HashMap<String, Object>(this.attributes);
-        attributes.put("user", new ProfileBean(user));
+        attributes.put("user", new ProfileBean(user, session));
         addLinkInfoIntoAttributes(link, expirationInMinutes, attributes);
 
         attributes.put("realmName", getRealmName());
 
         attributes.put("passwordResetBodyHtml", settingsService.getSettingsStringValue(EMAIL_RESET, realm.getName()));
 
-        if (user.getAttribute(BlockType.MANAGER_BLOCK.getType()).isEmpty()) {
+        if (user.getFirstAttribute(BlockType.MANAGER_BLOCK.getType()) == null) {
             send(settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_RESET, realm.getName()), BODY_TEMPLATE_PASS_RESET, attributes);
         }
     }

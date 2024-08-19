@@ -2,7 +2,7 @@ package ru.alamics.sso.remote.sms;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.matching.StringValuePattern;
-import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
+import jakarta.ws.rs.core.UriBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -41,7 +41,7 @@ class MsgSendServiceImplTest {
         server.start();
 
         MsgConfig.builder()
-                .url(new ResteasyUriBuilder()
+                .url(UriBuilder.newInstance()
                         .scheme("http")
                         .host("127.0.0.1")
                         .port(server.port())

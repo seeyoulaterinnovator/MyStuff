@@ -1,5 +1,8 @@
 package ru.alamics.sso.keycloak.rest;
 
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.core.MultivaluedMap;
 import org.keycloak.jose.jws.JWSInput;
 import org.keycloak.jose.jws.JWSInputException;
 import org.keycloak.models.*;
@@ -12,9 +15,6 @@ import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.services.resources.admin.permissions.AdminPermissions;
 
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.core.MultivaluedMap;
 import java.util.Optional;
 
 public interface BaseResourceProvider<T> extends RealmResourceProvider {
@@ -83,4 +83,5 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
 
         return new InitSession(session, realmFromToken, auth);
     }
+
 }

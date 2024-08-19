@@ -5,22 +5,17 @@ import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.forms.login.LoginFormsProviderFactory;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
-import org.keycloak.theme.FreeMarkerUtil;
 
 public class SsoFreeMarkerFormsFactory implements LoginFormsProviderFactory {
     private static final String PROVIDER_ID = "freemarker";
 
-    private FreeMarkerUtil freeMarker;
-
     @Override
     public LoginFormsProvider create(KeycloakSession session) {
-        return new SsoFreeMarkerLoginForm(session, freeMarker);
+        return new SsoFreeMarkerLoginForm(session);
     }
 
     @Override
-    public void init(Config.Scope config) {
-        freeMarker = new FreeMarkerUtil();
-    }
+    public void init(Config.Scope config) {}
 
     @Override
     public void postInit(KeycloakSessionFactory factory) {
@@ -28,9 +23,7 @@ public class SsoFreeMarkerFormsFactory implements LoginFormsProviderFactory {
     }
 
     @Override
-    public void close() {
-        freeMarker = null;
-    }
+    public void close() {}
 
     @Override
     public String getId() {

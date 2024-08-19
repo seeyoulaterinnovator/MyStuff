@@ -7,7 +7,7 @@ import org.keycloak.services.resources.RealmsResource;
 import org.keycloak.theme.Theme;
 import ru.alamics.sso.util.Util;
 
-import javax.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriBuilder;
 import java.net.URI;
 
 import static ru.alamics.sso.registration.model.UserConstants.I_FRAME;

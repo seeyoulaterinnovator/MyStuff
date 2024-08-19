@@ -1,13 +1,13 @@
 package ru.alamics.sso.keycloak.user.resource.ls;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.annotations.cache.NoCache;
+import org.jboss.resteasy.reactive.NoCache;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.user.PersonalAccountService;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.List;
 
 @Slf4j

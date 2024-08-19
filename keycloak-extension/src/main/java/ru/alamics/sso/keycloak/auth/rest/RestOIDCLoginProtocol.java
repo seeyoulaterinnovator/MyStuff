@@ -11,8 +11,8 @@ import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.util.TokenUtil;
 import ru.alamics.sso.util.Util;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 @Slf4j
 public class RestOIDCLoginProtocol extends OIDCLoginProtocol {
     @Override

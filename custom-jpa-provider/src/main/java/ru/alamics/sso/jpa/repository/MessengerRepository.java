@@ -8,8 +8,8 @@ import ru.alamics.sso.jpa.entity.MessengerEntity;
 
 import java.util.List;
 
-@Slf4j
 @ApplicationScoped
+@Slf4j
 public class MessengerRepository {
     @Inject
     private EntityManager em;

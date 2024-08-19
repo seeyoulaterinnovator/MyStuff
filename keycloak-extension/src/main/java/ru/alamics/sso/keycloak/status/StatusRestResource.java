@@ -1,8 +1,7 @@
 package ru.alamics.sso.keycloak.status;
 
+import jakarta.ws.rs.Path;
 import org.keycloak.models.KeycloakSession;
-
-import javax.ws.rs.Path;
 
 public class StatusRestResource {
 

@@ -1,8 +1,9 @@
 package ru.alamics.sso.keycloak.auth.form;
 
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
-import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
@@ -21,15 +22,11 @@ import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.messages.Messages;
 import ru.alamics.sso.jpa.entity.common.BlockType;
-import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.stats.LoginHistory;
 import ru.alamics.sso.user.UserAttributeService;
 import ru.alamics.sso.util.Util;
-
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 
 import java.util.Collections;
 
@@ -66,7 +63,7 @@ public abstract class AbstractAuthMailPhoneForm extends AbstractUsernameFormAuth
     public void authenticate(AuthenticationFlowContext context) {
         MultivaluedMap<String, String> formData = new MultivaluedMapImpl<>();
         String loginHint = context.getAuthenticationSession().getClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM);
-        String rememberMeUsername = AuthenticationManager.getRememberMeUsername(context.getRealm(), context.getHttpRequest().getHttpHeaders());
+        String rememberMeUsername = AuthenticationManager.getRememberMeUsername(context.getSession());
 
         if (loginHint != null) {
             formData.add(AuthenticationManager.FORM_USERNAME, loginHint);
@@ -124,14 +121,15 @@ public abstract class AbstractAuthMailPhoneForm extends AbstractUsernameFormAuth
             return false;
         }
 
-        if (invalidUser(context, user)) {
+        testInvalidUser(context, context.getUser());
+        if (context.getError() != null) {
             return false;
         }
 
-        if (!validatePassword(context, user, inputData)) {
+        if (!validatePassword(context, user, inputData, true)) {
             return false;
         }
-        if(user.getAttribute(BlockType.MANAGER_BLOCK.getType()).isEmpty()) {
+        if(user.getFirstAttribute(BlockType.MANAGER_BLOCK.getType()) == null) {
             user.setEnabled(true);
 
             attributeService = new UserAttributeService(context.getSession(), userFindService);
@@ -151,7 +149,7 @@ public abstract class AbstractAuthMailPhoneForm extends AbstractUsernameFormAuth
             context.getAuthenticationSession().removeAuthNote(Details.REMEMBER_ME);
         }
         context.setUser(user);
-        if (user.getRequiredActions().isEmpty()) {
+        if (user.getRequiredActionsStream().findAny().isEmpty()) {
             UserEntity userEntity = new UserEntity();
             userEntity.setId(user.getId());
             loginHistory.createSuccessAuth(userEntity, context.getRealm().getName());
@@ -174,7 +172,7 @@ public abstract class AbstractAuthMailPhoneForm extends AbstractUsernameFormAuth
 
         if (formData.size() > 0) forms.setFormData(formData);
 
-        return forms.createLogin();
+        return forms.createLoginUsernamePassword();
     }
 
     @Override

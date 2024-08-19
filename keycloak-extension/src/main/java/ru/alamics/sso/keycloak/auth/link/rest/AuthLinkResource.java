@@ -1,7 +1,7 @@
 package ru.alamics.sso.keycloak.auth.link.rest;
 
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.annotations.cache.NoCache;
+import org.jboss.resteasy.reactive.NoCache;
 import org.keycloak.authentication.AuthenticationProcessor;
 import org.keycloak.authentication.actiontoken.resetcred.ResetCredentialsActionToken;
 import org.keycloak.common.util.Time;
@@ -16,11 +16,11 @@ import org.keycloak.sessions.RootAuthenticationSessionModel;
 import ru.alamics.sso.keycloak.auth.link.token.AuthLinkActionToken;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
 
 @Slf4j
 public class AuthLinkResource {

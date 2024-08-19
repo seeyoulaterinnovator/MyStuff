@@ -1,11 +1,19 @@
 package ru.alamics.sso.keycloak.cities;
 
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.GenericType;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.plugins.providers.StringTextStar;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
+import org.jboss.resteasy.reactive.NoCache;
 import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.GeneralRealm;
 import ru.alamics.sso.keycloak.cities.model.CityDadataModel;
@@ -18,13 +26,6 @@ import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.StandResolver;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -33,8 +34,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
 public class CitiesResource {
-
-    private static final ResteasyClient client = new ResteasyClientBuilder()
+    private static final ResteasyClient client = ((ResteasyClientBuilder) ClientBuilder.newBuilder())
             .connectTimeout(3, TimeUnit.SECONDS)
             .readTimeout(10, TimeUnit.SECONDS)
             .disableTrustManager()
@@ -62,10 +62,6 @@ public class CitiesResource {
         }
     }
 
-    public static List<CityMigration> getCityList() {
-        return cityList;
-    }
-
     public static CityMigration getCityMigrationByCity(String city) {
 
         if (city == null)
@@ -86,19 +82,6 @@ public class CitiesResource {
 
         for (CityMigration cm : cityList) {
             if (city.equalsIgnoreCase(cm.getName()))
-                return cm;
-        }
-
-        return null;
-    }
-
-    public static CityMigration getCityMigrationByDomain(String domain) {
-
-        if (domain == null)
-            return null;
-
-        for (CityMigration cm : cityList) {
-            if (domain.equalsIgnoreCase(cm.getDomain()))
                 return cm;
         }
 

@@ -1,5 +1,8 @@
 package ru.alamics.sso.keycloak.user.resource.attributes;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import lombok.Data;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.AttributeFormatException;
@@ -8,9 +11,6 @@ import ru.alamics.sso.user.UserAttributeService;
 import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.user.web.AttributeRequest;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.List;
 
 @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")

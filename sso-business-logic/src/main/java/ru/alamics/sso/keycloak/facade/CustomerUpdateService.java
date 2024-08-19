@@ -1,23 +1,21 @@
 package ru.alamics.sso.keycloak.facade;
 
+import io.quarkus.runtime.StartupEvent;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
 import lombok.extern.slf4j.Slf4j;
 import org.infinispan.Cache;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.property.ApplicationProperties;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.*;
 
+@ApplicationScoped
 @Slf4j
-@Startup
-@Singleton
 public class CustomerUpdateService {
     private static final int MAX_SIZE_POOL = 1;
     private static final String TBAPI_REQUEST_INTERVAL_PROPERTY = "tbapi.customer.request.interval.milliseconds";
@@ -37,18 +35,14 @@ public class CustomerUpdateService {
     }
 
     @PostConstruct
-    private void init() {
-
+    void init() {
         ApplicationProperties properties = Lookup.lookup(ApplicationProperties.class);
         tbapiRequestInterval = properties.getPropertyLong(TBAPI_REQUEST_INTERVAL_PROPERTY, TBAPI_REQUEST_INTERVAL_DEFAULT, "CustomerUpdateService: default value used: '%s' = '%s'");
         log.info("tbapiRequestInterval set to value={}", tbapiRequestInterval);
-
-        tasksPool.offer(executorService.scheduleAtFixedRate(new UpdateTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
     }
 
-    @Lock(LockType.READ)
-    public int getTasksPoolSize() {
-        return tasksPool.size();
+    void onStart(@Observes StartupEvent ev) {
+        tasksPool.offer(executorService.scheduleAtFixedRate(new UpdateTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
     }
 
     private class UpdateTask implements Runnable {

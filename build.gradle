@@ -17,6 +17,7 @@ allprojects {
 
     ext {
         keycloakVersion = '25.0.2'
+        quarkusVersion = '3.8.5'
         bouncycastleVersion = '1.78.1'
         lombokVersion = '1.18.34'
         junitVersion = '5.11.0'
@@ -50,6 +51,8 @@ subprojects {
     }
 
     dependencies {
+        compileOnly(platform("io.quarkus:quarkus-bom:$quarkusVersion"))
+
         compileOnly "org.projectlombok:lombok:$lombokVersion"
         annotationProcessor "org.projectlombok:lombok:$lombokVersion"
         compileOnly "org.mapstruct:mapstruct:$mapstructVersion"

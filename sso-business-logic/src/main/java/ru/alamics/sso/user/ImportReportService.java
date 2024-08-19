@@ -1,5 +1,7 @@
 package ru.alamics.sso.user;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
@@ -12,19 +14,15 @@ import ru.alamics.sso.user.model.ImportUsersDataModel;
 import ru.alamics.sso.user.model.ImportUsersReportModel;
 import ru.alamics.sso.user.web.ImportUsersReportDto;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@ApplicationScoped
 @Slf4j
-@Stateless
-@LocalBean
 public class ImportReportService {
 
-    @EJB
-    private ImportUsersReportRepository importUsersReportRepository;
+    @Inject
+    ImportUsersReportRepository importUsersReportRepository;
 
     public void setReportStatus(ImportUsersReportModel report, ImportUsersReportStatus status) {
 

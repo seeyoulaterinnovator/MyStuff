@@ -1,12 +1,12 @@
 package ru.alamics.sso.keycloak.auth.requiredactions;
 
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.email.EmailException;
 import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.forms.login.LoginFormsProvider;
+import org.keycloak.http.HttpRequest;
 import org.keycloak.models.UserModel;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaType;
@@ -30,8 +30,8 @@ import ru.alamics.sso.registration.phone.port.SendMessageService;
 import ru.alamics.sso.registration.service.AuthorisedUsersService;
 import ru.alamics.sso.settings.SettingsService;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -194,7 +194,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
                     .setAttribute("footer", settingsService.getSettingsStringValue(FOOTER, context.getRealm().getId()))
                     .setAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, context.getRealm().getId()))
                     .setAttribute("secondPhaseLogin", isLoginSecondPhaseActivated(context))
-                    .setAttribute("smsMessage", context.getUser().getRequiredActions().contains("phone_verificator_sms"))
+                    .setAttribute("smsMessage", context.getUser().getRequiredActionsStream().anyMatch("phone_verificator_sms"::equals))
                     .setAttribute("enableRepeatCall", true);// just for stelecom
 
             context.challenge(createForm(context, loginFormsProvider));
@@ -401,7 +401,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
             return Response.ok().entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
         }
         if (mp != null) {
-            HttpRequest contextObject = context.getSession().getContext().getContextObject(HttpRequest.class);
+            HttpRequest contextObject = context.getSession().getContext().getHttpRequest();
             MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
             parameters.add(GRANT_TYPE, "password");
         }

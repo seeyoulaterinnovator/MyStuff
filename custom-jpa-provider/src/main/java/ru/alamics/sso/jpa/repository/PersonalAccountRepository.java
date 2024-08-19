@@ -12,8 +12,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-@Slf4j
 @Transactional(Transactional.TxType.REQUIRED)
+@Slf4j
 public class PersonalAccountRepository {
     @Inject
     private EntityManager em;

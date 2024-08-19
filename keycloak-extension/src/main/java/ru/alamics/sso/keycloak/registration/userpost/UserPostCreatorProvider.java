@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.registration.userpost;
 
+import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormContext;
@@ -14,8 +15,6 @@ import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.util.validator.NotValidException;
-
-import javax.ws.rs.NotFoundException;
 
 @Slf4j
 public class UserPostCreatorProvider implements FormAction {

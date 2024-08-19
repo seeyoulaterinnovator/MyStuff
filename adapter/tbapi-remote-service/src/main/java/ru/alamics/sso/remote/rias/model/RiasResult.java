@@ -2,7 +2,7 @@ package ru.alamics.sso.remote.rias.model;
 
 import lombok.ToString;
 
-import javax.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElement;
 
 @ToString
 public class RiasResult {

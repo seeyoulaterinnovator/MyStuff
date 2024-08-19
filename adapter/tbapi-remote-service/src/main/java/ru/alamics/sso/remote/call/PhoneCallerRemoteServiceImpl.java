@@ -1,5 +1,13 @@
 package ru.alamics.sso.remote.call;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.ClientBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -11,24 +19,18 @@ import ru.alamics.sso.registration.phone.exception.PhoneCallException;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 import ru.alamics.sso.util.Util;
 
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.ejb.Stateless;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
+@ApplicationScoped
+@Named("PhoneCallerService")
 @Slf4j
-@Stateless(name = "PhoneCallerService")
 public class PhoneCallerRemoteServiceImpl implements PhoneCallerRemoteService {
 
     private static final String URI_PERM = "phoneCaller.uri.perm";
     private static final String URI_VORONEZH = "phoneCaller.uri.voronezh";
 
-    private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
+    private static final ResteasyClientBuilder clientBuilder = ((ResteasyClientBuilder) ClientBuilder.newBuilder())
             .connectTimeout(3, TimeUnit.SECONDS)
             .readTimeout(10, TimeUnit.SECONDS);
 

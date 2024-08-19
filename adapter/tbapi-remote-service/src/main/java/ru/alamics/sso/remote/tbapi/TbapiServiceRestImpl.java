@@ -1,23 +1,25 @@
 package ru.alamics.sso.remote.tbapi;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.GenericType;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.plugins.providers.StringTextStar;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
-import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.tbapi.model.TbapiRequest;
 import ru.alamics.sso.registration.tbapi.model.TbapiResponse;
 import ru.alamics.sso.registration.tbapi.port.TbapiRemoteService;
 
-import javax.ejb.Stateless;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,13 +27,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+@ApplicationScoped
+@Named("TbapiRemoteService")
 @Slf4j
-@Stateless(name = "TbapiRemoteService")
 public class TbapiServiceRestImpl implements TbapiRemoteService {
 
     private static final Map<String, Object> mapExample = Collections.unmodifiableMap(new HashMap<>());
 
-    private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
+    private static final ResteasyClientBuilder clientBuilder = ((ResteasyClientBuilder) ClientBuilder.newBuilder())
             .connectTimeout(3, TimeUnit.SECONDS)
             .readTimeout(10, TimeUnit.SECONDS)
             .disableTrustManager();
@@ -52,7 +55,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
     private TbapiResponse createCustomerBattle(TbapiRequest request, TbapiConnectConfig connectConfig) throws TbapiRegisterException {
         log.info("TbapiServiceRestImpl");
 
-        URI uri = new ResteasyUriBuilder()
+        URI uri = UriBuilder.newInstance()
                 .scheme(connectConfig.isSecure() ? "https" : "http")
                 .host(connectConfig.getIp())
                 .port(connectConfig.getPort())
@@ -106,7 +109,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
         Response response = null;
 
         try {
-            URI uri = new ResteasyUriBuilder()
+            URI uri = UriBuilder.newInstance()
                     .scheme(connectConfig.isSecure() ? "https" : "http")
                     .host(connectConfig.getIp())
                     .port(connectConfig.getPort())

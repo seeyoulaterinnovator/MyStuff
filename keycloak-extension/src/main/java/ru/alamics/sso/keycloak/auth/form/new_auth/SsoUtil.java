@@ -33,9 +33,9 @@ import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaType;
 import ru.alamics.sso.keycloak.auth.form.new_auth.common_mail_sender.EmailSenderService;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static ru.alamics.sso.registration.model.UserConstants.REDIRECT_URI;
 
@@ -96,7 +97,7 @@ public interface SsoUtil {
     static boolean addRequiredAction(AuthenticationFlowContext context, String providerName, UserModel userModel) {
         RequiredActionProviderModel providerModel = context.getRealm().getRequiredActionProviderByAlias(providerName);
 
-        if (providerModel.isEnabled() && !userModel.getRequiredActions().contains(providerName)) {
+        if (providerModel.isEnabled() && userModel.getRequiredActionsStream().noneMatch(providerName::equals)) {
             userModel.addRequiredAction(providerName);
             return true;
         }
@@ -133,10 +134,11 @@ public interface SsoUtil {
 
     static UserSessionModel isUserAuthenticated(AuthenticationFlowContext context, AuthenticationSessionModel sessionModel) {
         UserSessionProvider userSessionProvider = context.getSession().sessions();
-        List<UserSessionModel> activeSessions = userSessionProvider.getUserSessions(context.getSession().getContext().getRealm(), context.getUser());
-        if (!activeSessions.isEmpty()) {
+        Stream<UserSessionModel> activeSessions = userSessionProvider.getUserSessionsStream(context.getSession().getContext().getRealm(), context.getUser());
+        UserSessionModel session = activeSessions.findFirst().orElse(null);
+        if (session != null) {
             sessionModel.setAuthNote("authenticated", "");
-            return activeSessions.get(0);
+            return session;
         }
         return null;
     }
@@ -181,13 +183,16 @@ public interface SsoUtil {
         String nonce = authSession.getClientNote(OIDCLoginProtocol.NONCE_PARAM);
         clientSessionCtx.setAttribute(OIDCLoginProtocol.NONCE_PARAM, nonce);
 
-        OAuth2Code codeData = new OAuth2Code(UUID.randomUUID(),
+        OAuth2Code codeData = new OAuth2Code(
+                UUID.randomUUID().toString(),
                 Time.currentTime() + userSession.getRealm().getAccessCodeLifespan(),
                 nonce,
                 authSession.getClientNote(OAuth2Constants.SCOPE),
                 authSession.getClientNote(OIDCLoginProtocol.REDIRECT_URI_PARAM),
                 authSession.getClientNote(OIDCLoginProtocol.CODE_CHALLENGE_PARAM),
-                authSession.getClientNote(OIDCLoginProtocol.CODE_CHALLENGE_METHOD_PARAM));
+                authSession.getClientNote(OIDCLoginProtocol.CODE_CHALLENGE_METHOD_PARAM),
+                userSession.getId()
+        );
 
         String code = OAuth2CodeParser.persistCode(session, clientSession, codeData);
         responseBody.put("code", code);

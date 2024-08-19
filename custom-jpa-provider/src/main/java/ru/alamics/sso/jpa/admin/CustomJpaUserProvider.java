@@ -1,5 +1,7 @@
 package ru.alamics.sso.jpa.admin;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -12,17 +14,12 @@ import ru.alamics.sso.jpa.entity.AutoLockNotification;
 import ru.alamics.sso.jpa.entity.UserLoginHistory;
 import ru.alamics.sso.jpa.entity.UserPostEntity;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
-import java.net.URI;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
 
 @Slf4j
 public class CustomJpaUserProvider extends JpaUserProvider {
-
-    private KeycloakSession session;
+    private final KeycloakSession session;
 
     public CustomJpaUserProvider(KeycloakSession session, EntityManager em) {
         super(session, em);
@@ -55,10 +52,7 @@ public class CustomJpaUserProvider extends JpaUserProvider {
         if (maxResults != -1) {
             query.setMaxResults(maxResults);
         }
-        List<UserEntity> results = query.getResultList();
-        List<UserModel> users = new LinkedList<>();
-        for (UserEntity entity : results) users.add(new UserAdapter(session, realm, em, entity));
-        return users.stream(); // TODO
+        return query.getResultStream().map(entity -> new UserAdapter(session, realm, em, entity));
     }
 
     @Override

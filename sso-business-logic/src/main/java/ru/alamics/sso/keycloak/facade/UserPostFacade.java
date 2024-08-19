@@ -1,5 +1,8 @@
 package ru.alamics.sso.keycloak.facade;
 
+import jakarta.annotation.Resource;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.infinispan.Cache;
 import ru.alamics.sso.keycloak.lookup.Lookup;
@@ -10,16 +13,13 @@ import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.util.validator.NotValidException;
 
-import javax.annotation.Resource;
-import javax.ejb.Stateless;
-import javax.ws.rs.NotFoundException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@ApplicationScoped
 @Slf4j
-@Stateless
 public class UserPostFacade {
     private static final String CUSTOMER_CACHE_LIFESPAN_IN_DB_PROPERTY = "user.post.cache.db.lifespan.days";
     private static final int CUSTOMER_CACHE_LIFESPAN_IN_DB = 1;

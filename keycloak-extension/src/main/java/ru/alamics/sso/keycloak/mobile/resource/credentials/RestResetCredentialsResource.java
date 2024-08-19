@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.mobile.resource.credentials;
 
-import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.AuthenticationProcessor;
 import org.keycloak.authentication.actiontoken.resetcred.ResetCredentialsActionTokenHandler;
@@ -8,6 +7,7 @@ import org.keycloak.common.ClientConnection;
 import org.keycloak.events.Errors;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.events.EventType;
+import org.keycloak.http.HttpRequest;
 import org.keycloak.models.*;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
@@ -22,16 +22,14 @@ import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.sessions.RootAuthenticationSessionModel;
 import ru.alamics.sso.keycloak.mobile.util.CustomAuthenticationFlowResolver;
 
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilderException;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilderException;
 import java.io.IOException;
 import java.util.Map;
-
-import static org.jboss.resteasy.spi.ResteasyProviderFactory.getContextData;
 
 public class RestResetCredentialsResource {
 
@@ -55,7 +53,7 @@ public class RestResetCredentialsResource {
 
         this.event = new EventBuilder(realm, session, clientConnection);
 
-        this.request = getContextData(HttpRequest.class);
+        this.request = session.getContext().getHttpRequest();
     }
 
     @Path(RESET_CREDENTIALS_PATH)
@@ -90,11 +88,11 @@ public class RestResetCredentialsResource {
             if (!realm.isResetPasswordAllowed()) {
                 event.event(EventType.RESET_PASSWORD);
                 event.error(Errors.NOT_ALLOWED);
-                return ErrorResponse.error(Messages.RESET_CREDENTIAL_NOT_ALLOWED, Response.Status.BAD_REQUEST);
+                return ErrorResponse.error(Messages.RESET_CREDENTIAL_NOT_ALLOWED, Response.Status.BAD_REQUEST).getResponse();
             }
             return processResetCredentials(false, null, createAuthenticationSessionForClient(client), null);
         }
-        return ErrorResponse.error("Не удалось создать flow", Response.Status.NOT_FOUND);
+        return ErrorResponse.error("Не удалось создать flow", Response.Status.NOT_FOUND).getResponse();
     }
 
     protected Response processResetCredentials(boolean actionRequest, String execution, AuthenticationSessionModel authSession, String errorMessage) {
@@ -132,7 +130,9 @@ public class RestResetCredentialsResource {
     }
 
     private SessionCodeChecks checksForCode(String authSessionId, String code, String execution, String clientId, String tabId, String flowPath) {
-        SessionCodeChecks res = new SessionCodeChecks(realm, session.getContext().getUri(), request, clientConnection, session, event, authSessionId, code, execution, clientId, tabId, flowPath);
+        SessionCodeChecks res = new SessionCodeChecks(realm, session.getContext().getUri(), request, clientConnection,
+                session, event, authSessionId, code, execution, clientId, tabId,
+                request.getDecodedFormParameters().getFirst(Constants.CLIENT_DATA), flowPath);
         res.initialVerify();
         return res;
     }

@@ -1,6 +1,7 @@
 package ru.alamics.sso.keycloak.credential;
 
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.authentication.AuthenticationProcessor;
 import org.keycloak.authentication.actiontoken.resetcred.ResetCredentialsActionToken;
 import org.keycloak.common.util.Time;
 import org.keycloak.credential.CredentialModel;
@@ -16,6 +17,7 @@ import org.keycloak.services.Urls;
 import org.keycloak.services.managers.AuthenticationSessionManager;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import org.keycloak.storage.ClientStorageManager;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.keycloak.util.PhoneFormatter;
@@ -23,7 +25,7 @@ import ru.alamics.sso.schedule.Translator;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 
-import javax.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriBuilder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,9 +66,9 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
 
 
         String clientId = settingsService.getSettingsStringValue(DEFAULT_REALM_CLIENT_ID, realm.getName());
-        ClientModel clientModel = session.clientStorageManager().getClientByClientId(clientId, realm);
+        ClientModel clientModel = session.getProvider(ClientStorageManager.class).getClientByClientId(realm, clientId);
         if (clientModel == null)
-            clientModel = session.clientStorageManager().getClientByClientId(DEFAULT_CLIENT_ID, realm);
+            clientModel = session.getProvider(ClientStorageManager.class).getClientByClientId(realm, DEFAULT_CLIENT_ID);
         clientModel.setAttribute(OIDCConfigAttributes.EXCLUDE_SESSION_STATE_FROM_AUTH_RESPONSE, "true");
 
         AuthenticationSessionManager authenticationSessionManager = new AuthenticationSessionManager(this.session);
@@ -76,9 +78,20 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
                 .createAuthenticationSession(clientModel);
 
         String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
-        ResetCredentialsActionToken token = new ResetCredentialsActionToken(user.getId(), Time.currentTime() + expirationTime, authSessionEncodedId, clientModel.getClientId());
-        UriBuilder builder = Urls.actionTokenBuilder(session.getContext().getUri().getBaseUri(), token.serialize(session, realm, session.getContext().getUri()),
-                clientModel.getClientId(), authenticationSession.getTabId());
+        ResetCredentialsActionToken token = new ResetCredentialsActionToken(
+                user.getId(),
+                user.getEmail(),
+                Time.currentTime() + expirationTime,
+                authSessionEncodedId,
+                clientModel.getClientId()
+        );
+        UriBuilder builder = Urls.actionTokenBuilder(
+                session.getContext().getUri().getBaseUri(),
+                token.serialize(session, realm, session.getContext().getUri()),
+                clientModel.getClientId(),
+                authenticationSession.getTabId(),
+                AuthenticationProcessor.getClientData(session, session.getContext().getAuthenticationSession())
+        );
 
         int timeTokenResetPass = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm.getName());
         String expirationStrRus = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);

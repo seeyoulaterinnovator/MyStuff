@@ -1,9 +1,8 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest;
 
+import jakarta.ws.rs.Path;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
-
-import javax.ws.rs.Path;
 
 public class CustomNewRestResource {
 

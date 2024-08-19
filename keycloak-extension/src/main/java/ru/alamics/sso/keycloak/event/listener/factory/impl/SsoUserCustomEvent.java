@@ -48,7 +48,7 @@ public class SsoUserCustomEvent extends SsoEvent {
             UserEntityRepresentation userRepresentation = this.getUserEntityRepresentation(representation);
             RealmModel realm = session.realms().getRealm(event.getRealmId());
             String userId = userRepresentation.getId();
-            UserModel user = session.users().getUserById(userId, realm);
+            UserModel user = session.users().getUserById(realm, userId);
 
             if (user != null && user.getEmail() != null) {
                 Map<String, Object> attributes = new HashMap<>();
@@ -61,7 +61,7 @@ public class SsoUserCustomEvent extends SsoEvent {
                 int timeTokenResetPass = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm.getName());
                 String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
                 attributes.put("expTimePass", expirationStrRusPass);
-                List<String> phones = user.getAttribute("phone");
+                List<String> phones = user.getAttributeStream("phone").toList();
                 if (!phones.isEmpty() && phones.get(0).length() == 11) {
                     attributes.put("phone", Util.getFormatNumber(phones.get(0)));
                 }

@@ -1,5 +1,7 @@
 package ru.alamics.sso.keycloak.auth.requiredactions;
 
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.OAuth2Constants;
@@ -23,8 +25,6 @@ import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -70,8 +70,7 @@ public class SsoUpdatePassword extends UpdatePassword {
         }
 
         try {
-            context.getSession().userCredentialManager().updateCredential(context.getRealm(), context.getUser(), UserCredentialModel.password(passwordNew, false));
-
+            context.getUser().credentialManager().updateCredential(UserCredentialModel.password(passwordNew, false));
             context.success();
         } catch (ModelException me) {
             errorEvent.detail(Details.REASON, me.getMessage()).error(Errors.PASSWORD_REJECTED);
@@ -120,7 +119,7 @@ public class SsoUpdatePassword extends UpdatePassword {
         String mp = context.getAuthenticationSession().getAuthNote(MOBILE_APP);
 
         if (mp != null) {
-            HttpRequest contextObject = context.getSession().getContext().getContextObject(HttpRequest.class);
+            HttpRequest contextObject = context.getSession().getContext().getHttpRequest();
             MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
             parameters.add(GRANT_TYPE, PASSWORD);
         }

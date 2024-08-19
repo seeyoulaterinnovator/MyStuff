@@ -2,6 +2,13 @@ dependencies {
     implementation (
             project(':sso-business-logic'),
     )
+
     compileOnly(group: "org.keycloak", name: "keycloak-dependencies-server-all", version: "$keycloakVersion")
+
+    compileOnly(platform("io.quarkus:quarkus-bom:$quarkusVersion"))
+    compileOnly(group: "org.jboss.resteasy", name: "resteasy-client")
+    compileOnly(group: "org.jboss.resteasy", name: "resteasy-jackson2-provider")
+
+    testImplementation(group: "org.jboss.resteasy", name: "resteasy-client")
     testImplementation group: 'org.wiremock', name: 'wiremock', version: '3.9.1'
 }

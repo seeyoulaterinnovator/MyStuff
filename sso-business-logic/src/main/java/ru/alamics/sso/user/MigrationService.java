@@ -1,5 +1,8 @@
 package ru.alamics.sso.user;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.keycloak.common.util.Time;
@@ -24,38 +27,33 @@ import ru.alamics.sso.util.validator.NotValidException;
 import ru.alamics.sso.util.validator.StringValidator;
 import ru.alamics.sso.util.validator.ValidatorBuilder;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.ws.rs.NotFoundException;
 import java.util.*;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
+@ApplicationScoped
 @Slf4j
-@Stateless
-@LocalBean
 public class MigrationService {
 
     private final static Long DEFAULT_ROLE_ID = 1L;   //Соответствует роли LPR, но это не точно
     private final static String DEFAULT_ROLE_STR = "LPR";
 
-    @EJB
-    private ImportUsersReportRepository importUsersReportRepository;
-    @EJB
-    private UserRepository userRepository;
-    @EJB
-    private RealmRepository realmRepository;
-    @EJB
-    private RoleRepository roleRepository;
-    @EJB
-    private AdminEventRepository adminEventRepository;
-    @EJB
-    private UserPostService userPostService;
-    @EJB
-    private ImportReportService importReportService;
-    @EJB
-    private PersonalAccountService personalAccountService;
+    @Inject
+    ImportUsersReportRepository importUsersReportRepository;
+    @Inject
+    UserRepository userRepository;
+    @Inject
+    RealmRepository realmRepository;
+    @Inject
+    RoleRepository roleRepository;
+    @Inject
+    AdminEventRepository adminEventRepository;
+    @Inject
+    UserPostService userPostService;
+    @Inject
+    ImportReportService importReportService;
+    @Inject
+    PersonalAccountService personalAccountService;
 
     public List<UserEntity> createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart) {
 
@@ -248,22 +246,12 @@ public class MigrationService {
         user = userRepository.save(user);
 
         RealmEntity realm = realmRepository.findRealmEntityById(realmId);
-        if (realm.getDefaultRoles() != null && !realm.getDefaultRoles().isEmpty()) {
-            UserEntity finalUser = user;
-            realm.getDefaultRoles().forEach(o -> {
-                UserRoleMappingEntity roleMapping = new UserRoleMappingEntity();
-                roleMapping.setRoleId(o.getId());
-                roleMapping.setUser(finalUser);
-                roleRepository.save(roleMapping);
-            });
 
-            ClientEntity client = roleRepository.findClientByName("account", realmId);
-            client.getDefaultRoles().forEach(o -> {
-                UserRoleMappingEntity roleMapping = new UserRoleMappingEntity();
-                roleMapping.setRoleId(o.getId());
-                roleMapping.setUser(finalUser);
-                roleRepository.save(roleMapping);
-            });
+        if (realm.getDefaultRoleId() != null) {
+            UserRoleMappingEntity roleMapping = new UserRoleMappingEntity();
+            roleMapping.setRoleId(realm.getDefaultRoleId());
+            roleMapping.setUser(user);
+            roleRepository.save(roleMapping);
         }
         UserAttributeEntity attributeEntity = new UserAttributeEntity();
         attributeEntity.setId(UUID.randomUUID().toString());

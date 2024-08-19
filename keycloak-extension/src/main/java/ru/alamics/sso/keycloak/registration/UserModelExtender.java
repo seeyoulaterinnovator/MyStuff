@@ -1,6 +1,7 @@
 package ru.alamics.sso.keycloak.registration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.ws.rs.core.MultivaluedMap;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormContext;
@@ -23,14 +24,14 @@ import ru.alamics.sso.registration.tbapi.model.TbapiConnect;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
-import javax.ws.rs.core.MultivaluedMap;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static ru.alamics.sso.registration.model.FormConstants.*;
+import static ru.alamics.sso.registration.model.FormConstants.FIELD_EMAIL;
+import static ru.alamics.sso.registration.model.FormConstants.FIELD_PHONE;
 
 public class UserModelExtender extends AbstractFormActionFactory implements FormAction {
 

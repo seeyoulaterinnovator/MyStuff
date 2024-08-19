@@ -1,24 +1,20 @@
 package ru.alamics.sso.stats;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.jpa.entity.UserLoginHistory;
 import ru.alamics.sso.jpa.repository.UserHistoryLoginRepository;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ws.rs.core.Context;
 import java.time.LocalDateTime;
 
+@ApplicationScoped
 @Slf4j
-@Stateless
 public class LoginHistory {
 
-    @EJB
-    private UserHistoryLoginRepository repository;
-    @Context
-    private KeycloakSession session;
+    @Inject
+    UserHistoryLoginRepository repository;
 
     public void create(UserEntity user) {
         UserLoginHistory history = UserLoginHistory.builder()

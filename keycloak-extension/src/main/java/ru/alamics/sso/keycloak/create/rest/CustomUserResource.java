@@ -1,8 +1,17 @@
 package ru.alamics.sso.keycloak.create.rest;
 
+import jakarta.activation.UnsupportedDataTypeException;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.jboss.resteasy.annotations.cache.NoCache;
+import org.jboss.resteasy.reactive.NoCache;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.common.ClientConnection;
@@ -14,13 +23,13 @@ import org.keycloak.events.EventType;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.*;
+import org.keycloak.models.cache.UserCache;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.managers.AuthenticationManager;
-import org.keycloak.services.resources.account.AccountFormService;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.ClientsResource;
 import org.keycloak.services.resources.admin.RoleMapperResource;
@@ -44,15 +53,6 @@ import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.util.Util;
 import ru.alamics.sso.util.validator.NotValidException;
 
-import javax.activation.UnsupportedDataTypeException;
-import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -89,16 +89,16 @@ public class CustomUserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUser(final UserRequest request, final HttpHeaders headers) {
         if (Util.isEmpty(request.getPhone())) {
-            return ErrorResponse.error("Поле Phone должно быть заполнено", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле Phone должно быть заполнено", Response.Status.BAD_REQUEST).getResponse();
         }
         if (!validatePhone(request.getPhone())) {
-            return ErrorResponse.error("Поле Phone невалидно", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле Phone невалидно", Response.Status.BAD_REQUEST).getResponse();
         }
         if (Util.isEmpty(request.getEmail())) {
-            return ErrorResponse.error("Поле Email должно быть заполнено", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле Email должно быть заполнено", Response.Status.BAD_REQUEST).getResponse();
         }
         if (!validateEmail(request.getEmail())) {
-            return ErrorResponse.error("Поле Email невалидно", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле Email невалидно", Response.Status.BAD_REQUEST).getResponse();
         }
         return getUserResponse(request, false);
     }
@@ -109,22 +109,22 @@ public class CustomUserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUserBss(final UserRequest request, final HttpHeaders headers) {
         if (Util.isEmpty(request.getPhone())) {
-            return ErrorResponse.error("Поле Phone должно быть заполнено", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле Phone должно быть заполнено", Response.Status.BAD_REQUEST).getResponse();
         }
         if (!validatePhone(request.getPhone())) {
-            return ErrorResponse.error("Поле Phone невалидно", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле Phone невалидно", Response.Status.BAD_REQUEST).getResponse();
         }
         if (Util.isEmpty(request.getTomsId())) {
-            return ErrorResponse.error("Поле TomsId должно быть заполнено", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле TomsId должно быть заполнено", Response.Status.BAD_REQUEST).getResponse();
         }
         if (Util.isEmpty(request.getName())) {
-            return ErrorResponse.error("Поле name должно быть заполнено", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле name должно быть заполнено", Response.Status.BAD_REQUEST).getResponse();
         }
         if (Util.isEmpty(request.getEmail())) {
-            return ErrorResponse.error("Поле Email должно быть заполнено", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле Email должно быть заполнено", Response.Status.BAD_REQUEST).getResponse();
         }
         if (!validateEmail(request.getEmail())) {
-            return ErrorResponse.error("Поле Email невалидно", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле Email невалидно", Response.Status.BAD_REQUEST).getResponse();
         }
 
         return getUserResponse(request, true);
@@ -364,10 +364,10 @@ public class CustomUserResource {
     @NoCache
     @Produces(MediaType.APPLICATION_JSON)
     public Map<String, Object> impersonate(@PathParam("id") String id) {
-        session.userCache().clear();
+        clearUserCache(session);
         ProfileHelper.requireFeature(Profile.Feature.IMPERSONATION);
 
-        UserModel user = session.users().getUserById(id, realm);
+        UserModel user = session.users().getUserById(realm, id);
         auth.users().requireImpersonate(user);
         // if same realm logout before impersonation
         RealmModel authenticatedRealm = auth.adminAuth().getRealm();
@@ -376,8 +376,8 @@ public class CustomUserResource {
         if (authenticatedRealm.getId().equals(realm.getId())) {
             sameRealm = true;
             UserSessionModel userSession = session.sessions().getUserSession(realm, auth.adminAuth().getToken().getSessionState());
-            AuthenticationManager.expireIdentityCookie(realm, session.getContext().getUri(), clientConnection);
-            AuthenticationManager.expireRememberMeCookie(realm, session.getContext().getUri(), clientConnection);
+            AuthenticationManager.expireIdentityCookie(session);
+            AuthenticationManager.expireRememberMeCookie(session);
             AuthenticationManager.backchannelLogout(session, realm, userSession, session.getContext().getUri(), clientConnection, session.getContext().getRequestHeaders(), true);
         }
         EventBuilder event = new EventBuilder(realm, session, clientConnection);
@@ -417,7 +417,7 @@ public class CustomUserResource {
 
         AdminPermissionEvaluator.RequirePermissionCheck manageCheck = () -> auth.users().requireMapRoles(user);
         AdminPermissionEvaluator.RequirePermissionCheck viewCheck = () -> auth.users().requireView(user);
-        RoleMapperResource resource = new RoleMapperResource(realm, auth, user, adminEvent, manageCheck, viewCheck);
+        RoleMapperResource resource = new RoleMapperResource(session, auth, user, adminEvent, manageCheck, viewCheck);
         ResteasyProviderFactory.getInstance().injectProperties(resource);
         return resource;
     }
@@ -427,7 +427,7 @@ public class CustomUserResource {
         AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
                 .realm(realm)
                 .resource(ResourceType.REALM);
-        ClientsResource clientsResource = new ClientsResource(realm, auth, adminEvent);
+        ClientsResource clientsResource = new ClientsResource(session, auth, adminEvent);
         ResteasyProviderFactory.getInstance().injectProperties(clientsResource);
         return clientsResource;
     }
@@ -435,12 +435,12 @@ public class CustomUserResource {
 
     @Path("users")
     public UsersResource users() {
-        session.userCache().clear();
+        clearUserCache(session);
 
         AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
                 .realm(realm)
                 .resource(ResourceType.REALM);
-        UsersResource users = new UsersResource(realm, auth, adminEvent);
+        UsersResource users = new UsersResource(session, auth, adminEvent);
         ResteasyProviderFactory.getInstance().injectProperties(users);
 
         return users;
@@ -472,7 +472,7 @@ public class CustomUserResource {
         UserProvider userProvider = session.users();
         if (ids != null) {
             for (String id : ids) {
-                UserModel user = userProvider.getUserById(id, realm);
+                UserModel user = userProvider.getUserById(realm, id);
                 if (user != null) {
                     UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
                     rep.getRequiredActions().add(requiredAction);
@@ -486,4 +486,10 @@ public class CustomUserResource {
         }
     }
 
+    private void clearUserCache(KeycloakSession session) {
+        UserCache cache = session.getProvider(UserCache.class);
+        if (cache != null) {
+            cache.evict(session.getContext().getRealm());
+        }
+    }
 }

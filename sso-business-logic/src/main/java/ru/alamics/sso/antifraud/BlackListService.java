@@ -1,5 +1,7 @@
 package ru.alamics.sso.antifraud;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.models.jpa.entities.UserEntity;
@@ -7,29 +9,24 @@ import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.jpa.entity.antifraud.BlackListEntity;
 import ru.alamics.sso.jpa.repository.BlackListRepository;
 import ru.alamics.sso.jpa.repository.UserRepository;
-import ru.alamics.sso.jpa.util.LimitationCauseType;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.phone.ActivationCodeType;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.BlackListMapper;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Stateless
-@LocalBean
+@ApplicationScoped
 public class BlackListService {
-    @EJB
+    @Inject
     private BlackListRepository blackListRepository;
-    @EJB
+    @Inject
     private UserRepository userRepository;
-    @EJB
+    @Inject
     private SettingsService settingsService;
     // 43200L 12 часов
 

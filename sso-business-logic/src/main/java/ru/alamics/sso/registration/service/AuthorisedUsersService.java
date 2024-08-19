@@ -1,5 +1,7 @@
 package ru.alamics.sso.registration.service;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
@@ -12,25 +14,21 @@ import ru.alamics.sso.jpa.repository.UserRepository;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.model.User;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Stateless
-@LocalBean
+@ApplicationScoped
 @Slf4j
 public class AuthorisedUsersService {
+    @Inject
+    AuthorisedUsersRepository authorisedUsersRepository;
 
-    @EJB
-    private final AuthorisedUsersRepository authorisedUsersRepository;
-    @EJB
-    private final UserRepository userRepository;
+    @Inject
+    UserRepository userRepository;
+
     private final AuthOrRegTypeService authOrRegTypeService;
 
     private final ClientsForMonitoringService clientsForMonitoringService;
-
 
     public AuthorisedUsersService() {
         this.authorisedUsersRepository = Lookup.lookup(AuthorisedUsersRepository.class);

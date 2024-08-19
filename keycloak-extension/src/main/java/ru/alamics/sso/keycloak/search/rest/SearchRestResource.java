@@ -1,9 +1,8 @@
 package ru.alamics.sso.keycloak.search.rest;
 
+import jakarta.ws.rs.Path;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.resources.admin.AdminAuth;
-
-import javax.ws.rs.Path;
 
 public class SearchRestResource {
 

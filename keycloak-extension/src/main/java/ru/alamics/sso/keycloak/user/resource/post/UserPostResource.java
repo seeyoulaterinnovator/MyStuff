@@ -1,7 +1,11 @@
 package ru.alamics.sso.keycloak.user.resource.post;
 
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.annotations.cache.NoCache;
+import org.jboss.resteasy.reactive.NoCache;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
@@ -14,14 +18,8 @@ import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostEditRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.service.UserPostService;
+import ru.alamics.sso.service.ValidateService;
 import ru.alamics.sso.util.Util;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 @Slf4j
 public class UserPostResource {
@@ -32,7 +30,9 @@ public class UserPostResource {
     private final CachedUserPostFacade cachedUserPostFacade;
     private final UserPostFacade userPostFacade;
     private final AdminPermissionEvaluator auth;
+    private final ValidateService validateService;
 
+    @Inject
     public UserPostResource(KeycloakSession session, AdminPermissionEvaluator auth) {
         this.session = session;
         this.auth = auth;
@@ -40,7 +40,7 @@ public class UserPostResource {
         this.userPostService = Lookup.lookup(UserPostService.class);
         this.cachedUserPostFacade = Lookup.lookup(CachedUserPostFacade.class);
         this.userPostFacade = Lookup.lookup(UserPostFacade.class);
-
+        this.validateService = Lookup.lookup(ValidateService.class);
     }
 
     @PUT
@@ -50,7 +50,7 @@ public class UserPostResource {
     @NoCache
     public Response select(@QueryParam("userId") String userId, @QueryParam("postId") String postId) {
         auth.users().requireManage();
-        UserModel userModelById = session.users().getUserById(userId, session.getContext().getRealm());
+        UserModel userModelById = session.users().getUserById(session.getContext().getRealm(), userId);
         userRole.selectPostByUser(userModelById, postId);
         return JsonResponse.success()
                 .build();
@@ -60,9 +60,9 @@ public class UserPostResource {
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response create(@NotNull @Valid UserPostRequest userPostRequest, HttpHeaders headers) {
+    public Response create(UserPostRequest userPostRequest) {
         auth.users().requireManage();
-
+        validateService.validate(userPostRequest);
         try {
             return JsonResponse.success()
                     .addResult("user_post", cachedUserPostFacade.save(userPostRequest))
@@ -78,9 +78,9 @@ public class UserPostResource {
     @Path("/edit")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response edit(@Valid UserPostEditRequest userPostEditRequest, HttpHeaders headers) {
+    public Response edit(UserPostEditRequest userPostEditRequest) {
         auth.users().requireManage();
-
+        validateService.validate(userPostEditRequest);
         try {
             return JsonResponse.success()
                     .addResult("user_post", cachedUserPostFacade.edit(userPostEditRequest))
@@ -198,9 +198,9 @@ public class UserPostResource {
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response addSystemRole(@NotNull @Valid ExternalSystemRoleRequest externalSystemRoleRequest) {
+    public Response addSystemRole(ExternalSystemRoleRequest externalSystemRoleRequest) {
         auth.users().requireManage();
-
+        validateService.validate(externalSystemRoleRequest);
         try {
             return JsonResponse.success()
                     .addResult("user-post", cachedUserPostFacade.addSystemRole(externalSystemRoleRequest))
@@ -217,9 +217,9 @@ public class UserPostResource {
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response removeSystemRole(@NotNull @Valid ExternalSystemRoleRequest externalSystemRoleRequest) {
+    public Response removeSystemRole(ExternalSystemRoleRequest externalSystemRoleRequest) {
         auth.users().requireManage();
-
+        validateService.validate(externalSystemRoleRequest);
         try {
             return JsonResponse.success()
                     .addResult("user-post", cachedUserPostFacade.removeSystemRole(externalSystemRoleRequest))

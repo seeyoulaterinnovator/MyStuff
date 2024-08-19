@@ -1,5 +1,7 @@
 package ru.alamics.sso.keycloak.facade;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.Locked;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.customer.CustomerDto;
 import ru.alamics.sso.customer.CustomerService;
@@ -10,15 +12,11 @@ import ru.alamics.sso.registration.tbapi.model.TbapiConnect;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.tbapi.port.TbapiRemoteService;
 
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Singleton;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 
+@ApplicationScoped
 @Slf4j
-@Singleton
-@Lock(LockType.READ)
 public class CustomerRequestService {
     private static final String TBAPI_REQUEST_MAX_SIZE_PROPERTY = "tbapi.customer.request.max.size";
     private static final int TBAPI_REQUEST_MAX_SIZE = 10;
@@ -28,7 +26,7 @@ public class CustomerRequestService {
 
     private int tbapiRequestMaxSize;
     private int loadCoeff;
-    private boolean dontRequest = false;
+    private boolean dontRequest;
 
     private TbapiService tbapiService;
     private CustomerService customerService;
@@ -48,7 +46,7 @@ public class CustomerRequestService {
         dontRequest = Boolean.parseBoolean(properties.getProperty(TBAPI_CUSTOMER_DONT_REQUEST));
     }
 
-    @Lock(LockType.WRITE)
+    @Locked.Write
     public Map<String, String> updateCustomerNames() {
         List<String> currentTomsIds = extractListFromQueue(tbapiRequestMaxSize);
         if (currentTomsIds.isEmpty()) {
@@ -72,7 +70,6 @@ public class CustomerRequestService {
         }
     }
 
-    @Lock(LockType.WRITE)
     private Map<String, Object> requestCustomerNames(List<String> currentTomsIds) {
 
         if (dontRequest) {
@@ -84,6 +81,7 @@ public class CustomerRequestService {
 
     }
 
+    @Locked.Read
     public void addTomsIdsInQueue(List<String> updatingTomsId) {
 
         for (String tomsId : updatingTomsId) {
@@ -91,16 +89,9 @@ public class CustomerRequestService {
         }
     }
 
+    @Locked.Read
     public int getLoadCoeff() {
         return tomsIdQueue.size() / tbapiRequestMaxSize / loadCoeff;
-    }
-
-    public int getTomsIdQueueSize() {
-        return tomsIdQueue.size();
-    }
-
-    public int getTbapiRequestMaxSize() {
-        return tbapiRequestMaxSize;
     }
 
     private List<String> extractListFromQueue(int countElements) {
@@ -111,10 +102,14 @@ public class CustomerRequestService {
 
         int currentElement = 0;
         while (!tomsIdQueue.isEmpty() && currentElement <= countElements) {
-            result.add(tomsIdQueue.poll());
-            currentElement++;
+            String tomsId = tomsIdQueue.poll();
+            if(tomsId != null) {
+                result.add(tomsId);
+                currentElement++;
+            } else {
+                break;
+            }
         }
         return result;
     }
-
 }

@@ -1,5 +1,8 @@
 package ru.alamics.sso.registration.service;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.keycloak.models.jpa.entities.UserEntity;
@@ -17,24 +20,22 @@ import ru.alamics.sso.util.validator.DmpIdValidator;
 import ru.alamics.sso.util.validator.NotValidException;
 import ru.alamics.sso.util.validator.TomsIdValidator;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ws.rs.NotFoundException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Stateless
+@ApplicationScoped
 @Slf4j
 public class UserPostService {
+    @Inject
+    UserPostRepository userPostRepository;
 
-    @EJB
-    private UserPostRepository userPostRepository;
-    @EJB
-    private UserRepository userRepository;
-    @EJB
-    private CustomerRepository customerRepository;
+    @Inject
+    UserRepository userRepository;
+
+    @Inject
+    CustomerRepository customerRepository;
 
     public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException, NotValidException {
         UserEntity user = userRepository.findUser(userPostRequest.getUserId());

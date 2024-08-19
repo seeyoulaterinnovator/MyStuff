@@ -1,34 +1,23 @@
 package ru.alamics.sso.registration.rias;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.model.RiasLogin;
 import ru.alamics.sso.registration.rias.port.RiasApiService;
 import ru.alamics.sso.registration.rias.port.RiasLoginService;
-import ru.alamics.sso.jpa.util.CollectionUtils;
 import ru.alamics.sso.util.Util;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-
+@ApplicationScoped
 @Slf4j
-@Stateless
 public class RiasService {
+    @Inject
+    RiasApiService riasApiService;
 
-    @EJB
-    private RiasApiService riasApiService;
-
-    @EJB
-    private RiasLoginService riasLoginService;
-
-    public RiasService(RiasApiService riasApiService) {
-        this.riasApiService = riasApiService;
-    }
-
-    public RiasService() {
-
-    }
+    @Inject
+    RiasLoginService riasLoginService;
 
     public boolean checkEmail(User user) {
 

@@ -1,10 +1,10 @@
 package ru.alamics.sso.keycloak.auth.requiredactions;
 
+import jakarta.ws.rs.core.MultivaluedMap;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.services.messages.Messages;
 
-import javax.ws.rs.core.MultivaluedMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;

@@ -1,7 +1,7 @@
 package ru.alamics.sso.remote.rias;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
+import jakarta.ws.rs.core.UriBuilder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.alamics.sso.property.ApplicationProperties;
@@ -27,7 +27,7 @@ class RiasUserExistsCheckImplTest {
         server = new WireMockServer(wireMockConfig().dynamicPort());
         server.start();
 
-        URI uri = new ResteasyUriBuilder()
+        URI uri = UriBuilder.newInstance()
                 .scheme("http")
                 .host("localhost")
                 .port(server.port())

@@ -1,15 +1,12 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth.newAuthReqActions;
 
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.UserModel;
-import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil;
-import ru.alamics.sso.registration.model.User;
-
-import javax.ws.rs.core.Response;
 
 @Slf4j
 public class EmailReqAction implements RequiredActionProvider {
@@ -25,8 +22,7 @@ public class EmailReqAction implements RequiredActionProvider {
     @Override
     public void requiredActionChallenge(RequiredActionContext context) {
         UserModel user = context.getUser();
-        boolean isContainsPhone = user.getAttribute("phone").size() == 0;
-        if (isContainsPhone) {
+        if (user.getFirstAttribute("phone") == null) {
             context.form().setInfo("Ваш E-mail успешно подтверждён!");
         } else {
             context.form().setInfo("На указанный E-mail отправлена инструкция для подтверждения данных.");

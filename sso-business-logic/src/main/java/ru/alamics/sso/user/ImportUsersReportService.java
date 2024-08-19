@@ -1,5 +1,8 @@
 package ru.alamics.sso.user;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.*;
+import jakarta.transaction.Transactional;
 import org.keycloak.models.RealmModel;
 import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.user.mapper.UserMapper;
@@ -7,14 +10,12 @@ import ru.alamics.sso.user.model.ImportUsersDataModel;
 import ru.alamics.sso.user.model.ImportUsersReportModel;
 import ru.alamics.sso.util.Util;
 
-import javax.ejb.*;
 import java.util.List;
 
-@Stateless
-@LocalBean
+@ApplicationScoped
 public class ImportUsersReportService {
-    @EJB
-    private ImportReportService importReportService;
+    @Inject
+    ImportReportService importReportService;
 
     public String createImportUsersReportAsync(RealmModel realm, String filename, List<ImportUsersDataModel> dataList) {
 
@@ -28,7 +29,7 @@ public class ImportUsersReportService {
         return reportId;
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public ImportUsersReportModel createImportUsersReport(RealmModel realm, String filename, List<ImportUsersDataModel> dataList) {
 
         ImportUsersReportModel importUsersReport = UserMapper.toImportUsersReportEntity(realm.getName(), filename, dataList);
@@ -42,7 +43,7 @@ public class ImportUsersReportService {
         return importUsersReport;
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void updateReportStatus(ImportUsersReportModel reportModel) {
 
         importReportService.updateReport(reportModel);

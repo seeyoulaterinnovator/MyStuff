@@ -1,9 +1,10 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth;
 
 
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
-import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
@@ -11,7 +12,11 @@ import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAu
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
-import org.keycloak.models.*;
+import org.keycloak.http.HttpRequest;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.ModelDuplicateException;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ServicesLogger;
@@ -20,12 +25,6 @@ import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.utils.MediaType;
 import ru.alamics.sso.antifraud.*;
-import ru.alamics.sso.jpa.repository.AttemptFailsRepository;
-import ru.alamics.sso.jpa.repository.WroteCodeAttemptsRepository;
-import ru.alamics.sso.antifraud.AttemptFailsDto;
-import ru.alamics.sso.antifraud.AttemptFailsService;
-import ru.alamics.sso.antifraud.BlackListDto;
-import ru.alamics.sso.antifraud.BlackListService;
 import ru.alamics.sso.auth_n_regi.AuthOrRegTypeNotFoundException;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
@@ -41,30 +40,25 @@ import ru.alamics.sso.registration.phone.exception.*;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 import ru.alamics.sso.registration.phone.port.SendMessageService;
 import ru.alamics.sso.registration.rias.RiasService;
-import ru.alamics.sso.registration.service.AuthOrRegTypeService;
 import ru.alamics.sso.registration.service.AuthorisedUsersService;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil.addRequiredAction;
-import static ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil.getAuthOrRegType;
-import static ru.alamics.sso.keycloak.auth.form.new_auth.newAuthReqActions.TwoStepAuthFactory.CLIENT_B2B;
 import static ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil.*;
+import static ru.alamics.sso.keycloak.auth.form.new_auth.newAuthReqActions.TwoStepAuthFactory.CLIENT_B2B;
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_FORM_SUCCESS;
-import static ru.alamics.sso.registration.phone.ActivationCodeType.*;
+import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_BY_PHONE_NUMBER;
+import static ru.alamics.sso.registration.phone.ActivationCodeType.CODE_TO_SMS;
 import static ru.alamics.sso.registration.phone.UserPhoneVerifier.*;
 import static ru.alamics.sso.settings.SettingConstants.*;
 
@@ -123,9 +117,9 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
-        MultivaluedMap<String, String> formData = new MultivaluedMapImpl<>();
+        MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
         String loginHint = context.getAuthenticationSession().getClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM);
-        String rememberMeUsername = AuthenticationManager.getRememberMeUsername(context.getRealm(), context.getHttpRequest().getHttpHeaders());
+        String rememberMeUsername = AuthenticationManager.getRememberMeUsername(session);
         AuthenticationSessionModel authSession = context.getAuthenticationSession();
         decideResponseFormat(context, authSession);
 
@@ -292,7 +286,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
             return Response.ok().entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
         }
         if (mp != null) {
-            HttpRequest contextObject = context.getSession().getContext().getContextObject(HttpRequest.class);
+            HttpRequest contextObject = context.getHttpRequest();
             MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
             parameters.add(GRANT_TYPE, "password");
         }
@@ -481,12 +475,13 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 //            return false;
 //        }
 
-        if (invalidUser(context, user)) {
+        testInvalidUser(context, context.getUser());
+        if (context.getError() != null) {
             return false;
         }
 
         if (context.getHttpRequest().getDecodedFormParameters().containsKey("loginPasswordButton")) {
-            if (!validatePassword(context, user, inputData)) {
+            if (!validatePassword(context, user, inputData, true)) {
                 return false;
             }
         }
@@ -759,7 +754,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
     public abstract boolean isSuccessCheckUser(AuthenticationFlowContext context, UserModel user);
 
     private void addEmptyReqForB2b(AuthenticationFlowContext context, UserModel model) {
-        if (context.getAuthenticationSession().getClient().getClientId().equals(CLIENT_B2B) && !model.getRequiredActions().isEmpty()) {
+        if (context.getAuthenticationSession().getClient().getClientId().equals(CLIENT_B2B) && model.getRequiredActionsStream().findAny().isPresent()) {
             addRequiredAction(context, "empty_req", model);
         }
     }

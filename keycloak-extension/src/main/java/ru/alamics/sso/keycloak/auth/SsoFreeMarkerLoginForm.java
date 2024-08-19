@@ -1,12 +1,16 @@
 package ru.alamics.sso.keycloak.auth;
 
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.common.util.ObjectUtil;
 import org.keycloak.forms.login.LoginFormsPages;
 import org.keycloak.forms.login.LoginFormsProvider;
+import org.keycloak.forms.login.MessageType;
 import org.keycloak.forms.login.freemarker.AuthenticatorConfiguredMethod;
 import org.keycloak.forms.login.freemarker.FreeMarkerLoginFormsProvider;
 import org.keycloak.forms.login.freemarker.LoginFormsUtil;
@@ -20,12 +24,9 @@ import org.keycloak.services.ErrorPage;
 import org.keycloak.services.Urls;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.resources.LoginActionsService;
-import org.keycloak.theme.BrowserSecurityHeaderSetup;
 import org.keycloak.theme.FreeMarkerException;
-import org.keycloak.theme.FreeMarkerUtil;
 import org.keycloak.theme.Theme;
 import org.keycloak.theme.beans.LocaleBean;
-import org.keycloak.theme.beans.MessageType;
 import org.keycloak.utils.MediaType;
 import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.keycloak.auth.model.AuthType;
@@ -37,21 +38,17 @@ import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-import java.io.IOException;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
+import static org.keycloak.models.Constants.TAB_ID;
 import static ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth.RestAuthHelper.chooseYourDestiny;
+import static ru.alamics.sso.keycloak.util.MiscUtil.notEmptySettingsValue;
 import static ru.alamics.sso.registration.model.UserConstants.*;
 import static ru.alamics.sso.settings.SettingConstants.*;
 import static ru.alamics.sso.util.Util.CLIENT_B2B;
-import static ru.alamics.sso.keycloak.util.MiscUtil.*;
-import static org.keycloak.models.Constants.*;
 
 @Slf4j
 public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
@@ -73,8 +70,8 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
     private SettingsService settingsService = null;
 
-    public SsoFreeMarkerLoginForm(KeycloakSession session, FreeMarkerUtil freeMarker) {
-        super(session, freeMarker);
+    public SsoFreeMarkerLoginForm(KeycloakSession session) {
+        super(session);
         attributes.put("redirectUrl", getRedirectUrl());
         attributes.put("hideRegistration", isHideRegistration());
         attributes.put("iframe", Util.isFrame(session));
@@ -105,7 +102,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         URI baseUriWithCodeAndClientId = baseUriBuilder.build();
 
         if (client != null) {
-            attributes.put("client", new ClientBean(client, baseUri));
+            attributes.put("client", new ClientBean(session, client));
         }
 
         if (realm != null) {
@@ -115,8 +112,8 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                 settingsService = Lookup.lookup(SettingsService.class);
             }
 
-            List<IdentityProviderModel> identityProviders = realm.getIdentityProviders();
-            identityProviders = LoginFormsUtil.filterIdentityProviders(identityProviders, session, realm, attributes, formData);
+            List<IdentityProviderModel> identityProviders = realm.getIdentityProvidersStream().toList();
+            identityProviders = LoginFormsUtil.filterIdentityProviders(identityProviders.stream(), session, context);
             if (Util.isFrame(session)) {
                 identityProviders = identityProviders.stream().filter(
                         model -> {
@@ -250,10 +247,10 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         }
         if (realm != null && user != null && session != null) {
             attributes.put("authenticatorConfigured", new AuthenticatorConfiguredMethod(realm, user, session));
-            attributes.put("actionIsNull", user.getRequiredActions() == null || user.getRequiredActions().size() == 0);
-            attributes.put("actionIsEmpty", user.getRequiredActions() != null && user.getRequiredActions().size() == 1);
+            attributes.put("actionIsNull", user.getRequiredActionsStream().findAny().isEmpty());
+            attributes.put("actionIsEmpty", user.getRequiredActionsStream().count() == 1);
 
-            log.info(String.format("actionIsEmpty is %s", user.getRequiredActions() != null && user.getRequiredActions().size() == 1));
+            log.info(String.format("actionIsEmpty is %s", user.getRequiredActionsStream().count() == 1));
 
             attributes.put("clientIsB2B", CLIENT_B2B.equals(client.getClientId()));
         }
@@ -265,7 +262,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                 .map(String::trim)
                 .map(String::toLowerCase)
                 .filter(s -> !s.isEmpty())
-                .collect(Collectors.toList())
+                .toList()
                 .contains(client.getClientId().toLowerCase());
     }
 
@@ -318,16 +315,6 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         return settingsService.getSettingsStringValue(HOME_PAGE, realm.getName());
     }
 
-    private String getHash(String fileName) {
-        String hash = "";
-        try {
-            hash = DigestUtils.md5Hex(SsoFreeMarkerLoginForm.class.getResourceAsStream("/themes/domru/login/resources/build/" + fileName));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return hash;
-    }
-
     @Override
     protected UriBuilder prepareBaseUriBuilder(boolean resetRequestUriParams) {
         UriBuilder ret = super.prepareBaseUriBuilder(resetRequestUriParams);
@@ -370,9 +357,13 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     protected Response processTemplate(Theme theme, String templateName, Locale locale) {
         try {
             String result = freeMarker.processTemplate(attributes, templateName, theme);
-            javax.ws.rs.core.MediaType mediaType = contentType == null ? MediaType.TEXT_HTML_UTF_8_TYPE : contentType;
-            Response.ResponseBuilder builder = Response.status(status == null ? Response.Status.OK : status).type(mediaType).language(locale).entity(result);
-            BrowserSecurityHeaderSetup.headers(builder, realm);
+            Response.ResponseBuilder builder = Response.status(status == null ? Response.Status.OK : status)
+                    .type(httpResponseHeaders.getOrDefault(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML_UTF_8))
+                    .language(locale)
+                    .entity(result);
+            for (Map.Entry<String, String> entry : context.getRealm().getBrowserSecurityHeaders().entrySet()) {
+                builder.header(entry.getKey(), entry.getValue());
+            }
             for (Map.Entry<String, String> entry : httpResponseHeaders.entrySet()) {
                 builder.header(entry.getKey(), entry.getValue());
             }
@@ -414,14 +405,13 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     @Override
     public Response createRegistration() {
         if (isHideRegistration()) {
-            final URI redirectUri = Urls.accountLogPage(uriInfo.getBaseUri(), realm.getName());
+            URI redirectUri = Urls.realmLoginPage(uriInfo.getBaseUri(), realm.getName());
             return Response.status(302).location(redirectUri).build();
         }
 
         authenticationSession.setAuthNote("REGISTRATION", "REGISTRATION");
         RealmModel realm = this.session.getContext().getRealm();
-        List<RequiredActionProviderModel> requiredActionsProvider = realm.getRequiredActionProviders();
-        List<String> twoStepAuth = requiredActionsProvider.stream()
+        List<String> twoStepAuth = realm.getRequiredActionProvidersStream()
                 .filter(RequiredActionProviderModel::isDefaultAction)
                 .map(RequiredActionProviderModel::getAlias)
                 .collect(Collectors.toList());
@@ -463,7 +453,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
     }
 
     @Override
-    public Response createLogin() {
+    public Response createLoginUsernamePassword() {
         if(authenticationSession != null) {
             authenticationSession.removeAuthNote(AUTH_NOTE_LAST_LOGIN_PHONE);
             authenticationSession.removeAuthNote(AUTH_NOTE_LAST_LOGIN_USERNAME);
@@ -478,7 +468,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                 }
             }
         }
-        return super.createLogin();
+        return super.createLoginUsernamePassword();
     }
 
     private String getAndRemoveLastLoginPhone() {

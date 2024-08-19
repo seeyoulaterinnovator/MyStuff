@@ -1,9 +1,15 @@
 package ru.alamics.sso.keycloak.client;
 
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.annotations.cache.NoCache;
+import org.jboss.resteasy.reactive.NoCache;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.authorization.admin.AuthorizationService;
 import org.keycloak.events.admin.OperationType;
@@ -22,16 +28,11 @@ import org.keycloak.services.resources.admin.AdminRoot;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.services.validation.ClientValidator;
 import org.keycloak.services.validation.PairwiseClientValidator;
+import org.keycloak.services.validation.Validation;
 import org.keycloak.services.validation.ValidationMessages;
 import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.Properties;
 
 import static java.lang.Boolean.TRUE;
@@ -93,7 +94,7 @@ public class ClientResource {
             updateAuthorizationSettings(rep);
             return Response.noContent().build();
         } catch (ModelDuplicateException e) {
-            return ErrorResponse.exists("Client " + rep.getClientId() + " already exists");
+            return ErrorResponse.exists("Client " + rep.getClientId() + " already exists").getResponse();
         }
     }
 
@@ -111,14 +112,14 @@ public class ClientResource {
         }
 
         if (!rep.getClientId().equals(client.getClientId())) {
-            new ClientManager(new RealmManager(session)).clientIdChanged(client, rep.getClientId());
+            new ClientManager(new RealmManager(session)).clientIdChanged(client, rep);
         }
 
         if (rep.isFullScopeAllowed() != null && rep.isFullScopeAllowed() != client.isFullScopeAllowed()) {
             auth.clients().requireManage(client);
         }
 
-        RepresentationToModel.updateClient(rep, client);
+        RepresentationToModel.updateClient(rep, client, session);
     }
 
     private void updateAuthorizationSettings(ClientRepresentation rep) {
@@ -136,6 +137,7 @@ public class ClientResource {
 
         return resource;
     }
+
 
     @Data
     @NoArgsConstructor

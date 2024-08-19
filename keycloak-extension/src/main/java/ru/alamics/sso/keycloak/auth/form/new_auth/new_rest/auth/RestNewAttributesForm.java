@@ -1,30 +1,20 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth;
 
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
-import org.keycloak.forms.login.LoginFormsProvider;
-import org.keycloak.models.UserModel;
-import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.auth.UserRole;
 import ru.alamics.sso.keycloak.facade.CachedUserPostFacade;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.dto.UserPostResponse;
-import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
-import ru.alamics.sso.util.Util;
 
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_TOMS_NAME;
 
 
 @Slf4j
