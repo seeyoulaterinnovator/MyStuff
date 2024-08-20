@@ -1,12 +1,15 @@
 package ru.alamics.sso.keycloak.auth.rest;
 
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.AuthenticationProcessor;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.events.EventBuilder;
+import org.keycloak.http.HttpRequest;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -20,11 +23,7 @@ import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.keycloak.auth.AbstractAuthenticator;
 import ru.alamics.sso.registration.model.UserConstants;
 import ru.alamics.sso.util.Util;
-import ru.alamics.sso.jpa.util.CollectionUtils;
 
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import java.util.Map;
 
 @Slf4j

@@ -14,7 +14,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.services.messages.Messages;
 import ru.alamics.sso.keycloak.lookup.Lookup;
-import ru.alamics.sso.keycloak.util.AttributeFormDataProcessor;
+import org.keycloak.services.resources.AttributeFormDataProcessor;
 import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.util.Util;

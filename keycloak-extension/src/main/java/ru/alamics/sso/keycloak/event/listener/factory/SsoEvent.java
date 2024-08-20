@@ -8,14 +8,12 @@ import org.keycloak.authentication.actiontoken.resetcred.ResetCredentialsActionT
 import org.keycloak.authentication.actiontoken.verifyemail.VerifyEmailActionToken;
 import org.keycloak.common.util.Time;
 import org.keycloak.events.admin.AdminEvent;
-import org.keycloak.models.ClientModel;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
 import org.keycloak.services.Urls;
 import org.keycloak.services.managers.AuthenticationSessionManager;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import org.keycloak.storage.ClientStorageManager;
 import org.keycloak.theme.Theme;
 import ru.alamics.sso.emailer.EmailModel;
 import ru.alamics.sso.emailer.EmailSender;
@@ -49,9 +47,9 @@ public abstract class SsoEvent {
     protected void sendEmail(UserModel user, RealmModel realm, String subject, String template, Map<String, Object> attributes) {
         try {
             String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, realm.getId());
-            ClientModel clientModel = session.clientStorageManager().getClientByClientId(defaultClientRealm, realm);
+            ClientModel clientModel = session.getProvider(ClientStorageManager.class).getClientByClientId(realm, defaultClientRealm);
             if (clientModel == null)
-                clientModel = session.clientStorageManager().getClientByClientId(DEFAULT_CLIENT_ID, realm);
+                clientModel = session.getProvider(ClientStorageManager.class).getClientByClientId(realm, DEFAULT_CLIENT_ID);
             if (clientModel == null) {
                 log.error("Failed to send email: {}", "have no client=\"" + defaultClientRealm + "\" to redirect!");
                 return;
@@ -65,7 +63,7 @@ public abstract class SsoEvent {
             int timeTokenCreateUser = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_SET_FIRST_PASS, realm.getName());
             int absoluteExpirationInSecs = Time.currentTime() + timeTokenCreateUser;
 
-              boolean isContainsPhone = user.getAttribute("phone").size() != 0;
+            boolean isContainsPhone = user.getFirstAttribute("phone") != null;
             String keyPrefix = "migration";
             boolean isContainsMigration = user.getAttributes().keySet().stream()
                     .anyMatch(key -> key.startsWith(keyPrefix));
@@ -78,7 +76,8 @@ public abstract class SsoEvent {
                 UriInfo uriInfo = session.getContext().getUri();
 
                 UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
-                        clientModel.getClientId(), authenticationSession.getTabId());
+                        clientModel.getClientId(), authenticationSession.getTabId(),
+                        session.getContext().getHttpRequest().getDecodedFormParameters().getFirst(Constants.CLIENT_DATA));
 
 
                 String link = builder.build(realm.getName()).toString();
@@ -98,13 +97,15 @@ public abstract class SsoEvent {
                 // We send the secret in the email in a link as a query param.
                 String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
 
-                ResetCredentialsActionToken token = new ResetCredentialsActionToken(
-                        user.getId(), absoluteExpirationInSecs, authSessionEncodedId, authenticationSession.getClient().getClientId());
+                ResetCredentialsActionToken token = new ResetCredentialsActionToken(user.getId(), user.getEmail(),
+                        absoluteExpirationInSecs, authSessionEncodedId,
+                        authenticationSession.getClient().getClientId());
 
                 UriInfo uriInfo = session.getContext().getUri();
 
                 UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
-                        clientModel.getClientId(), authenticationSession.getTabId());
+                        clientModel.getClientId(), authenticationSession.getTabId(),
+                        session.getContext().getHttpRequest().getDecodedFormParameters().getFirst(Constants.CLIENT_DATA));
 
 
                 String link = builder.build(realm.getName()).toString();

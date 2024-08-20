@@ -70,7 +70,7 @@ public class AuthMailPhoneWithRiasForm extends AbstractAuthMailPhoneForm {
                 if (Util.isEmpty(withCity) || !withCity.equals("TRUE")) {
                     context.form().setAttribute(FormConstants.WITH_CITY, "TRUE");
                     context.form().setAttribute("showModal", "TRUE");
-                    context.challenge(context.form().createLogin());
+                    context.challenge(context.form().createLoginUsernamePassword());
                 } else if (!checkAuthRias(context, CHOOSE_REDIRECT_TO_LK_FORM)) {
                     context.getEvent().error(Errors.USER_NOT_FOUND);
                     context.form().setAttribute("showModal", "FALSE");

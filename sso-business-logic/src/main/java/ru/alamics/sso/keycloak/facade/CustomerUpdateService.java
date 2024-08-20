@@ -2,11 +2,13 @@ package ru.alamics.sso.keycloak.facade;
 
 import io.quarkus.runtime.StartupEvent;
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.Resource;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
+import jakarta.ws.rs.core.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.infinispan.Cache;
+import org.keycloak.connections.infinispan.InfinispanConnectionProvider;
+import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.property.ApplicationProperties;
 
@@ -19,16 +21,20 @@ import java.util.concurrent.*;
 public class CustomerUpdateService {
     private static final int MAX_SIZE_POOL = 1;
     private static final String TBAPI_REQUEST_INTERVAL_PROPERTY = "tbapi.customer.request.interval.milliseconds";
-    private long TBAPI_REQUEST_INTERVAL_DEFAULT = 10000;
+    private static final long TBAPI_REQUEST_INTERVAL_DEFAULT = 10000;
+
+    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MAX_SIZE_POOL);
+
+    private final ConcurrentLinkedQueue<ScheduledFuture> tasksPool = new ConcurrentLinkedQueue<>();
 
     private CustomerRequestService customerRequestService;
-    @Resource(lookup = "infinispan/custom_container/customer_cache")
+
+    @Context
+    KeycloakSession session;
+
     private Cache<String, String> customerCache;
 
     private long tbapiRequestInterval;
-
-    private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MAX_SIZE_POOL);
-    private ConcurrentLinkedQueue<ScheduledFuture> tasksPool = new ConcurrentLinkedQueue<>();
 
     public CustomerUpdateService() {
         customerRequestService = Lookup.lookup(CustomerRequestService.class);
@@ -39,6 +45,8 @@ public class CustomerUpdateService {
         ApplicationProperties properties = Lookup.lookup(ApplicationProperties.class);
         tbapiRequestInterval = properties.getPropertyLong(TBAPI_REQUEST_INTERVAL_PROPERTY, TBAPI_REQUEST_INTERVAL_DEFAULT, "CustomerUpdateService: default value used: '%s' = '%s'");
         log.info("tbapiRequestInterval set to value={}", tbapiRequestInterval);
+
+        customerCache = session.getProvider(InfinispanConnectionProvider.class).getCache("customer_cache");
     }
 
     void onStart(@Observes StartupEvent ev) {

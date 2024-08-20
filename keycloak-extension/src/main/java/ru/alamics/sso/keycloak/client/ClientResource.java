@@ -7,6 +7,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.reactive.NoCache;
@@ -138,8 +139,8 @@ public class ClientResource {
         return resource;
     }
 
-
     @Data
+    @EqualsAndHashCode(callSuper = true)
     @NoArgsConstructor
     private static class CustomClientRepresentation extends ClientRepresentation {
         private String mainRedirectUri;

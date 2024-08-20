@@ -62,16 +62,6 @@ public class PersonalAccountMapper extends AbstractOIDCProtocolMapper implements
         configProperties.add(property);
     }
 
-    public static ProtocolMapperModel createClaimMapper(String name,
-                                                        String userAttribute,
-                                                        String tokenClaimName, String claimType,
-                                                        boolean accessToken, boolean idToken) {
-        return OIDCAttributeMapperHelper.createClaimMapper(name, userAttribute,
-                tokenClaimName, claimType,
-                accessToken, idToken,
-                PROVIDER_ID);
-    }
-
     public static Object getModelValue(PersonalAccountPostModel accountModel) {
         return accountModel;
     }

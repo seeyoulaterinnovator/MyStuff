@@ -55,7 +55,7 @@ public class CustomUserCacheSession extends UserCacheSession implements UserCach
     private void clearUserCache() {
         UserCache cache = session.getProvider(UserCache.class);
         if (cache != null) {
-            cache.evict(session.getContext().getRealm());
+            cache.clear();
         }
     }
 }

@@ -13,7 +13,7 @@ public class RestRequiredActionsAuthFactory extends AbstractAuthenticatorFactory
     private static final String PROVIDER_ID = "rest-actions";
     public static final String DISPLAY_TYPE = "REST Actions";
     private static final String HELP_TEXT = "";
-    private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {REQUIRED, OPTIONAL, DISABLED};
+    private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {REQUIRED, CONDITIONAL, DISABLED};
 
     @Override
     public String getDisplayType() {

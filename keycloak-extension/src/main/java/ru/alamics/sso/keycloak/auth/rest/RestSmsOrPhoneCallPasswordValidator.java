@@ -51,7 +51,7 @@ public class RestSmsOrPhoneCallPasswordValidator extends ValidatePassword {
         setPostSelector(user, attributes);
 
         if (password != null) {
-            boolean valid = context.getSession().userCredentialManager().isValid(context.getRealm(), context.getUser(), UserCredentialModel.password(password));
+            boolean valid = context.getUser().credentialManager().isValid(UserCredentialModel.password(password));
             if (!valid) {
                 context.getEvent().user(context.getUser());
                 context.getEvent().error(Errors.INVALID_USER_CREDENTIALS);

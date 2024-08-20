@@ -83,7 +83,7 @@ public class UserNameOrPhoneRestValidator extends ValidateUsername {
             return;
         }
 
-        if (!user.getAttribute(BlockType.MANAGER_BLOCK.getType()).isEmpty()) {
+        if (user.getFirstAttribute(BlockType.MANAGER_BLOCK.getType()) != null) {
             context.getEvent().user(user);
             context.getEvent().error(Errors.USER_DISABLED);
             Response challengeResponse = errorResponse(Response.Status.BAD_REQUEST.getStatusCode(), "invalid_grant", "Account disabled");

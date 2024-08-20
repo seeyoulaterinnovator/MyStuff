@@ -171,7 +171,7 @@ public class NewAttributesForm implements Authenticator {
     private void clearUserCache(KeycloakSession session) {
         UserCache cache = session.getProvider(UserCache.class);
         if (cache != null) {
-            cache.evict(session.getContext().getRealm());
+            cache.clear();
         }
     }
 }

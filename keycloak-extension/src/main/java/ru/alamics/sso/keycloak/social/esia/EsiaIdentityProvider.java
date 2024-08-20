@@ -131,7 +131,7 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
 
     private BrokeredIdentityContext extractIdentityFromProfile(JsonNode profile, String userId) {
         log.info("profile={}", profile);
-        BrokeredIdentityContext user = new BrokeredIdentityContext(userId);
+        BrokeredIdentityContext user = new BrokeredIdentityContext(userId, getConfig());
 
 //        String email = getJsonProperty(profile, "email");
 //
@@ -151,8 +151,6 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
         user.setLastName("-");
         user.setUsername(username);
         user.getContextData().put("firstName", username);
-
-        user.setIdpConfig(getConfig());
         user.setIdp(this);
 
         AbstractJsonUserAttributeMapper.storeUserProfileForMapper(user, profile, getConfig().getAlias());
@@ -215,10 +213,10 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
                 //logger.error("Failed " + getConfig().getAlias() + " broker login: " + error);
                 if (error.equals(ACCESS_DENIED)) {
                     logger.error(ACCESS_DENIED + " for broker login " + getConfig().getProviderId());
-                    return callback.cancelled(state);
+                    return callback.cancelled(getConfig());
                 } else {
                     logger.error(error + " for broker login " + getConfig().getProviderId());
-                    return callback.error(state, Messages.IDENTITY_PROVIDER_UNEXPECTED_ERROR);
+                    return callback.error(Messages.IDENTITY_PROVIDER_UNEXPECTED_ERROR);
                 }
             }
 
@@ -238,9 +236,8 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
                         if (federatedIdentity.getToken() == null) federatedIdentity.setToken(response);
                     }
 
-                    federatedIdentity.setIdpConfig(getConfig());
                     federatedIdentity.setIdp(EsiaIdentityProvider.this);
-                    federatedIdentity.setCode(uuidToState.remove(state));
+                    // federatedIdentity.setCode(uuidToState.remove(state));
 
                     /*
                         AuthenticationSessionModel asm = session.getContext().getAuthenticationSession();

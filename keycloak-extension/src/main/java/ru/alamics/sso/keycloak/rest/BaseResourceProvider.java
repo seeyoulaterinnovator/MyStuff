@@ -68,8 +68,12 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
 
         session.getContext().setRealm(realmFromToken);
 
-        AuthenticationManager.AuthResult authResult = Optional.ofNullable(appAuthManager.authenticateBearerToken(session, realmFromToken))
-                .orElseThrow(() -> new NotAuthorizedException("Bearer"));
+        AppAuthManager.BearerTokenAuthenticator authenticator = new AppAuthManager.BearerTokenAuthenticator(session);
+
+        AuthenticationManager.AuthResult authResult = authenticator.authenticate();
+        if(authResult == null) {
+            throw new NotAuthorizedException("Bearer");
+        }
 
         ClientModel client = Optional.ofNullable(realmFromToken.getClientByClientId(token.getIssuedFor()))
                 .orElseThrow(() -> new NotAuthorizedException("Could not find client for authorization"));
@@ -83,5 +87,4 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
 
         return new InitSession(session, realmFromToken, auth);
     }
-
 }

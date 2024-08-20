@@ -3,7 +3,6 @@ package ru.alamics.sso.keycloak.auth.requiredactions;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.requiredactions.UpdatePassword;
@@ -12,6 +11,7 @@ import org.keycloak.events.Errors;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.events.EventType;
 import org.keycloak.forms.login.LoginFormsProvider;
+import org.keycloak.http.HttpRequest;
 import org.keycloak.models.*;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.Urls;
@@ -19,6 +19,7 @@ import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import org.keycloak.storage.ClientStorageManager;
 import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.settings.SettingConstants;
@@ -138,9 +139,9 @@ public class SsoUpdatePassword extends UpdatePassword {
 
         if (client == null) {
             String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, context.getRealm().getId());
-            client = session.clientStorageManager().getClientByClientId(defaultClientRealm, currentAuthenticationSession.getRealm());
+            client = session.getProvider(ClientStorageManager.class).getClientByClientId(currentAuthenticationSession.getRealm(), defaultClientRealm);
             if (client == null) {
-                client = session.clientStorageManager().getClientByClientId(DEFAULT_CLIENT_ID, currentAuthenticationSession.getRealm());
+                client = session.getProvider(ClientStorageManager.class).getClientByClientId(currentAuthenticationSession.getRealm(), DEFAULT_CLIENT_ID);
                 if (client == null) {
                     log.error("Redirect after UPDATE_PASSWORD is not setup: clientId={} not found", defaultClientRealm);
                     return;

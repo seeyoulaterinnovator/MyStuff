@@ -18,7 +18,7 @@ import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
-import ru.alamics.sso.keycloak.util.AttributeFormDataProcessor;
+import org.keycloak.services.resources.AttributeFormDataProcessor;
 
 import java.util.ArrayList;
 import java.util.List;

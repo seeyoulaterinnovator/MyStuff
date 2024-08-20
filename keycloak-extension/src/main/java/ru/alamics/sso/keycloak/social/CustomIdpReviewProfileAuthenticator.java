@@ -31,7 +31,7 @@ import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
 import org.keycloak.util.JsonSerialization;
 import ru.alamics.sso.keycloak.lookup.Lookup;
-import ru.alamics.sso.keycloak.util.AttributeFormDataProcessor;
+import org.keycloak.services.resources.AttributeFormDataProcessor;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.UserExtension;
 import ru.alamics.sso.registration.model.FormConstants;

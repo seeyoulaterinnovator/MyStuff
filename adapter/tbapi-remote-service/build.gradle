@@ -1,14 +1,20 @@
 dependencies {
+    compileOnly "org.keycloak:keycloak-dependencies-server-all:$keycloakVersion"
+    compileOnly "org.keycloak:keycloak-core:$keycloakVersion"
+
+    implementation(platform("io.quarkus:quarkus-bom:$quarkusVersion"))
+    compileOnly "org.jboss.resteasy:resteasy-client"
+    compileOnly "org.jboss.resteasy:resteasy-jackson2-provider"
+
     implementation (
             project(':sso-business-logic'),
     )
 
-    compileOnly(group: "org.keycloak", name: "keycloak-dependencies-server-all", version: "$keycloakVersion")
-
-    compileOnly(platform("io.quarkus:quarkus-bom:$quarkusVersion"))
-    compileOnly(group: "org.jboss.resteasy", name: "resteasy-client")
-    compileOnly(group: "org.jboss.resteasy", name: "resteasy-jackson2-provider")
-
-    testImplementation(group: "org.jboss.resteasy", name: "resteasy-client")
-    testImplementation group: 'org.wiremock', name: 'wiremock', version: '3.9.1'
+    testImplementation "org.keycloak:keycloak-dependencies-server-all:$keycloakVersion"
+    testImplementation "org.keycloak:keycloak-core:$keycloakVersion"
+    testImplementation "io.quarkus:quarkus-core"
+    testImplementation "org.jboss.resteasy:resteasy-client"
+    testImplementation "org.jboss.resteasy:resteasy-jackson2-provider"
+    testImplementation "org.jboss.resteasy:resteasy-jaxb-provider"
+    testImplementation "org.wiremock:wiremock:3.9.1"
 }

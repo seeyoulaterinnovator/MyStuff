@@ -49,9 +49,9 @@ public class LetterSenderProvider implements FormAction {
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("userName", context.getUser().getUsername());
 
-        List<String> phones = context.getUser().getAttribute("phone");
-        if (!phones.isEmpty() && phones.get(0).length() == 11) {
-            attributes.put("phone", Util.getFormatNumber(phones.get(0)));
+        String phone = context.getUser().getFirstAttribute("phone");
+        if (phone != null && phone.length() == 11) {
+            attributes.put("phone", Util.getFormatNumber(phone));
         }
 
         attributes.put("emailAccountCreateBodyHtml", settingsService.getSettingsStringValue(EMAIL_CREATE_ACCOUNT, context.getRealm().getName()));

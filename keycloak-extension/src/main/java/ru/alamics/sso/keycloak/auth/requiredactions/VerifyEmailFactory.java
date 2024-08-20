@@ -87,7 +87,8 @@ public class VerifyEmailFactory extends VerifyEmail {
             String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authSession).getEncodedId();
             VerifyEmailActionToken token = new VerifyEmailActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, user.getEmail(), authSession.getClient().getClientId());
             UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
-                    authSession.getClient().getClientId(), authSession.getTabId());
+                    authSession.getClient().getClientId(), authSession.getTabId(),
+                    session.getContext().getHttpRequest().getDecodedFormParameters().getFirst(Constants.CLIENT_DATA));
             String link = builder.build(realm.getName()).toString();
             long expirationInMinutes = TimeUnit.SECONDS.toMinutes(timeTokenVerifyEmail);
 
@@ -122,7 +123,7 @@ public class VerifyEmailFactory extends VerifyEmail {
         SettingsService settingsService = Lookup.lookup(SettingsService.class);
 
         Map<String, Object> attributes = new HashMap<String, Object>();
-        attributes.put("user", new ProfileBean(user));
+        attributes.put("user", new ProfileBean(user, session));
         attributes.put("link", link);
         attributes.put("linkExpiration", expirationInMinutes);
         attributes.put("expTime", expirationStrRus);

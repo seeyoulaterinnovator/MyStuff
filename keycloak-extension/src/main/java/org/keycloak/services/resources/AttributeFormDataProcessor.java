@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.util;
+package org.keycloak.services.resources;
 
 import jakarta.ws.rs.core.MultivaluedMap;
 import lombok.AccessLevel;

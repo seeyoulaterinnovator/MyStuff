@@ -1,5 +1,10 @@
 package ru.alamics.sso.keycloak.auth.link.rest;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.reactive.NoCache;
 import org.keycloak.authentication.AuthenticationProcessor;
@@ -13,14 +18,9 @@ import org.keycloak.services.managers.RealmManager;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.sessions.RootAuthenticationSessionModel;
+import org.keycloak.storage.ClientStorageManager;
 import ru.alamics.sso.keycloak.auth.link.token.AuthLinkActionToken;
 import ru.alamics.sso.keycloak.response.JsonResponse;
-
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriBuilder;
-import jakarta.ws.rs.core.UriInfo;
 
 @Slf4j
 public class AuthLinkResource {
@@ -42,7 +42,7 @@ public class AuthLinkResource {
         if (realm == null)
             throw new NotFoundException("Realm not found.");
 
-        ClientModel clientModel = session.clientStorageManager().getClientByClientId(clientId, realm);
+        ClientModel clientModel = session.getProvider(ClientStorageManager.class).getClientByClientId(realm, clientId);
         if (clientModel == null)
             throw new NotFoundException("Client not found.");
 
@@ -66,7 +66,7 @@ public class AuthLinkResource {
         UriInfo uriInfo = session.getContext().getUri();
 
         UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
-                clientModel.getClientId(), authenticationSession.getTabId());
+                clientModel.getClientId(), authenticationSession.getTabId(), null);
 
         String link = builder.build(realm.getName()).toString();
 

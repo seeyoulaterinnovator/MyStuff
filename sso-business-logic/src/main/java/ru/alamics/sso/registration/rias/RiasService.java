@@ -13,11 +13,18 @@ import ru.alamics.sso.util.Util;
 @ApplicationScoped
 @Slf4j
 public class RiasService {
-    @Inject
-    RiasApiService riasApiService;
+    final RiasApiService riasApiService;
+
+    final RiasLoginService riasLoginService;
 
     @Inject
-    RiasLoginService riasLoginService;
+    public RiasService(
+            RiasApiService riasApiService,
+            RiasLoginService riasLoginService
+    ) {
+        this.riasApiService = riasApiService;
+        this.riasLoginService = riasLoginService;
+    }
 
     public boolean checkEmail(User user) {
 

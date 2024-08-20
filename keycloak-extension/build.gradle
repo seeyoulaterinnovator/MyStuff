@@ -1,8 +1,8 @@
 dependencies {
     compileOnly "org.keycloak:keycloak-dependencies-server-all:$keycloakVersion"
-    //compileOnly "org.keycloak:keycloak-core:$keycloakVersion"
+    compileOnly "org.keycloak:keycloak-core:$keycloakVersion"
 
-    compileOnly(platform("io.quarkus:quarkus-bom:$quarkusVersion"))
+    implementation(platform("io.quarkus:quarkus-bom:$quarkusVersion"))
     compileOnly "org.jboss.resteasy:resteasy-client"
     compileOnly "org.jboss.resteasy:resteasy-jackson2-provider"
     implementation "org.jboss.resteasy:resteasy-multipart-provider"

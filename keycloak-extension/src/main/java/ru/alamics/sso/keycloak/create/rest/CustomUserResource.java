@@ -11,8 +11,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.jboss.resteasy.reactive.NoCache;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
+import org.jboss.resteasy.reactive.NoCache;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.common.Profile;
@@ -29,6 +29,7 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.services.ErrorResponse;
+import org.keycloak.services.Urls;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.ClientsResource;
@@ -391,7 +392,7 @@ public class CustomUserResource {
         userSession.setNote(IMPERSONATOR_USERNAME.toString(), impersonator);
 
         AuthenticationManager.createLoginCookie(session, realm, userSession.getUser(), userSession, session.getContext().getUri(), clientConnection);
-        URI redirect = AccountFormService.accountServiceApplicationPage(session.getContext().getUri()).build(realm.getName());
+        URI redirect = Urls.accountBase(session.getContext().getUri().getBaseUri()).build(realm.getName());
         Map<String, Object> result = new HashMap<>();
         result.put("sameRealm", sameRealm);
         result.put("redirect", redirect.toString());
@@ -489,7 +490,7 @@ public class CustomUserResource {
     private void clearUserCache(KeycloakSession session) {
         UserCache cache = session.getProvider(UserCache.class);
         if (cache != null) {
-            cache.evict(session.getContext().getRealm());
+            cache.clear();
         }
     }
 }

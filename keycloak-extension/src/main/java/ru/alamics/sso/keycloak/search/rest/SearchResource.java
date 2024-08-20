@@ -8,6 +8,7 @@ import org.jboss.resteasy.reactive.NoCache;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.RoleModel;
+import org.keycloak.models.cache.UserCache;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.representations.idm.RequiredActionProviderRepresentation;
 import org.keycloak.services.resources.admin.AdminAuth;
@@ -58,7 +59,7 @@ public class SearchResource {
                                                 @QueryParam("sortAsc") boolean sortAsc, @QueryParam("searchRealm") String searchRealm,
                                                 @DefaultValue("1") @QueryParam("pageNum") int pageNum, @DefaultValue("100") @QueryParam("pageSize") int pageSize) {
 
-        session.userCache().clear();
+        clearUserCache();
         String rawPath = session.getContext().getUri().getAbsolutePath().getRawPath();
 
         searchRealm = Util.getRealm(searchRealm, rawPath);
@@ -84,7 +85,7 @@ public class SearchResource {
 
         searchRealm = Util.getRealm(searchRealm, rawPath);
 
-        session.userCache().clear();
+        clearUserCache();
 
         log.info("getUsersInfo 1");
 
@@ -136,8 +137,8 @@ public class SearchResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public List<String> getAccessibleRealms() {
-        final List<RealmModel> realms = session.realms().getRealms();
-        final Set<RoleModel> userRoles = adminAuth.getUser().getRoleMappings();
+        final List<RealmModel> realms = session.realms().getRealmsStream().toList();
+        final Set<RoleModel> userRoles = adminAuth.getUser().getRoleMappingsStream().collect(Collectors.toSet());
         List<String> userViewRoles = new ArrayList<>();
         for (RealmModel realm : realms) {
             for (RoleModel role : userRoles) {
@@ -180,6 +181,13 @@ public class SearchResource {
                 return realm -> roles.stream()
                         .anyMatch(role -> formatViewRole(realm).equalsIgnoreCase(role.getName()));
             }
+        }
+    }
+
+    private void clearUserCache() {
+        UserCache cache = session.getProvider(UserCache.class);
+        if (cache != null) {
+            cache.clear();
         }
     }
 }

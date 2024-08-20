@@ -1,7 +1,7 @@
 package ru.alamics.sso.keycloak.registration.mapper;
 
 import jakarta.ws.rs.core.MultivaluedMap;
-import org.jboss.resteasy.spi.HttpRequest;
+import org.keycloak.http.HttpRequest;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.util.Util;
