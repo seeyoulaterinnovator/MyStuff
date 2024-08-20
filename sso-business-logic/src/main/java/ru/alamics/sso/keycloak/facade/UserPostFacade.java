@@ -1,10 +1,14 @@
 package ru.alamics.sso.keycloak.facade;
 
-import jakarta.annotation.Resource;
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Context;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.infinispan.Cache;
+import org.keycloak.connections.infinispan.InfinispanConnectionProvider;
+import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.FoundUserPostException;
@@ -23,12 +27,15 @@ import java.util.stream.Collectors;
 public class UserPostFacade {
     private static final String CUSTOMER_CACHE_LIFESPAN_IN_DB_PROPERTY = "user.post.cache.db.lifespan.days";
     private static final int CUSTOMER_CACHE_LIFESPAN_IN_DB = 1;
-    @Resource(lookup = "infinispan/custom_container/customer_cache")
     protected Cache<String, String> customerCache;
+    @Getter
     protected UserPostService userPostService;
     protected ApplicationProperties properties;
     private final int customerCacheLifespanInDb;
     private final CustomerRequestService customerRequestService;
+
+    @Context
+    KeycloakSession session;
 
     public UserPostFacade() {
 
@@ -40,8 +47,9 @@ public class UserPostFacade {
         customerCacheLifespanInDb = properties.getPropertyInt(CUSTOMER_CACHE_LIFESPAN_IN_DB_PROPERTY, CUSTOMER_CACHE_LIFESPAN_IN_DB, "UserPostFacade: default value used: '{}' = '{}'");
     }
 
-    public UserPostService getUserPostService() {
-        return userPostService;
+    @PostConstruct
+    void init() {
+        customerCache = session.getProvider(InfinispanConnectionProvider.class).getCache("customer_cache");
     }
 
     public List<UserPostResponse> findByUserId(String userId) throws NotFoundException {

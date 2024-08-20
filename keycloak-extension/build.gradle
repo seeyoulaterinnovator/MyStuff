@@ -1,3 +1,7 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "8.1.1"
+}
+
 dependencies {
     compileOnly "org.keycloak:keycloak-dependencies-server-all:$keycloakVersion"
     compileOnly "org.keycloak:keycloak-core:$keycloakVersion"
@@ -7,7 +11,7 @@ dependencies {
     compileOnly "org.jboss.resteasy:resteasy-jackson2-provider"
     implementation "org.jboss.resteasy:resteasy-multipart-provider"
 
-    compileOnly "org.bouncycastle:bcprov-jdk18on:bouncycastleVersion"
+    compileOnly "org.bouncycastle:bcprov-jdk18on:$bouncycastleVersion"
     compileOnly "org.bouncycastle:bcmail-jdk18on:$bouncycastleVersion"
 
     implementation(
@@ -16,3 +20,12 @@ dependencies {
             project(":custom-jpa-provider"),
     )
 }
+
+shadowJar {
+    manifest {
+        attributes "Main-Class": "Main"
+    }
+    mergeServiceFiles()
+}
+
+build.dependsOn(shadowJar)
