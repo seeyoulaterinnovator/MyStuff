@@ -8,6 +8,7 @@ import ru.alamics.sso.customer.CustomerService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.tbapi.TbapiService;
+import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnect;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.tbapi.port.TbapiRemoteService;
@@ -65,12 +66,12 @@ public class CustomerRequestService {
             }
             return customers;
         } catch (Exception e) {
-            log.error("Fail getting customer names by tomsIds={}", currentTomsIds.toString(), e);
+            log.error("Fail getting customer names by tomsIds={}", currentTomsIds, e);
             return new HashMap<>();
         }
     }
 
-    private Map<String, Object> requestCustomerNames(List<String> currentTomsIds) {
+    private Map<String, Object> requestCustomerNames(List<String> currentTomsIds) throws TbapiRegisterException {
 
         if (dontRequest) {
             log.info("FAKE customer names request due to properties: customerIds={}", currentTomsIds);

@@ -3,17 +3,16 @@ package ru.alamics.sso.keycloak.create.rest;
 import jakarta.activation.UnsupportedDataTypeException;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.jboss.resteasy.reactive.NoCache;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.jboss.resteasy.reactive.server.multipart.FileItem;
+import org.jboss.resteasy.reactive.server.multipart.FormValue;
+import org.jboss.resteasy.reactive.server.multipart.MultipartFormDataInput;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.common.Profile;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
@@ -42,6 +41,7 @@ import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
+import ru.alamics.sso.service.ValidateService;
 import ru.alamics.sso.user.FileServiceException;
 import ru.alamics.sso.user.ImportReportService;
 import ru.alamics.sso.user.UserService;
@@ -54,9 +54,7 @@ import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.util.Util;
 import ru.alamics.sso.util.validator.NotValidException;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +69,7 @@ public class CustomUserResource {
     private final UserService userService;
     private final AdminPermissionEvaluator auth;
     private final ImportReportService importReportService;
+    private final ValidateService validateService;
     private final RealmModel realm;
     protected KeycloakSession session;
 
@@ -80,7 +79,7 @@ public class CustomUserResource {
         auth.users().requireManage();
         this.userService = new UserServiceImpl(session, auth.adminAuth());
         this.importReportService = Lookup.lookup(ImportReportService.class);
-
+        this.validateService = Lookup.lookup(ValidateService.class);
         this.realm = session.getContext().getRealm();
     }
 
@@ -184,21 +183,28 @@ public class CustomUserResource {
                 .addResult("user-parameters", UserParameter.values())
                 .build();
     }
+
     @POST
     @Path("/uploadUsers")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @NoCache
     @Transactional(Transactional.TxType.NEVER)
-    public Response uploadUsers(@MultipartForm FileDto file, @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content) {
-
-        if (file == null ||
-                content == null || content.isEmpty()) {
-            return JsonResponse.error(Response.Status.BAD_REQUEST).build();
-        }
-        try (InputStream bas = new ByteArrayInputStream(file.getFileData())) {
+    public Response uploadUsers(
+            @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content,
+            MultipartFormDataInput input
+    ) {
+        try {
+            FileItem fileItem = input.getValues().get("file")
+                    .stream()
+                    .findFirst()
+                    .map(FormValue::getFileItem)
+                    .orElse(null);
+            if (fileItem == null) {
+                return JsonResponse.error(Response.Status.BAD_REQUEST).build();
+            }
             return JsonResponse.success()
                     .addResult("import-report",
-                            userService.importUsers(bas, content))
+                            userService.importUsers(fileItem.getInputStream(), content))
                     .build();
         } catch (UnsupportedDataTypeException | FileServiceException e) {
             log.error("Could not upload users", e);
@@ -217,7 +223,8 @@ public class CustomUserResource {
     @Path("/downloadUsers")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response downloadUsers(@NotNull @Valid DownloadUserRequest downloadUserRequest) {
+    public Response downloadUsers(DownloadUserRequest downloadUserRequest) {
+        validateService.validate(downloadUserRequest);
         try {
             log.info("Start download users");
             byte[] bytes = userService.exportUsers(downloadUserRequest);
@@ -235,7 +242,7 @@ public class CustomUserResource {
             } else {
                 response.header("Content-Type", MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8");
             }
-            log.info("Download users success!", "filename = users_info." + downloadUserRequest.getType());
+            log.info("Download users success! filename = users_info." + downloadUserRequest.getType());
             return response.build();
         } catch (UnsupportedDataTypeException e) {
             log.error("Could not download users", e);
@@ -264,12 +271,20 @@ public class CustomUserResource {
     @Path("/uploadImportUsersFile")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @NoCache
-    public Response uploadImportUsersFile(@MultipartForm FileDto file, @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content) {
-        if (file == null || content == null || content.isEmpty()) {
-            return JsonResponse.error(Response.Status.BAD_REQUEST).build();
-        }
-        try (InputStream bas = new ByteArrayInputStream(file.getFileData())) {
-            userService.uploadImportUsersFile(bas, content);
+    public Response uploadImportUsersFile(
+            @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content,
+            MultipartFormDataInput input
+    ) {
+        try {
+            FileItem fileItem = input.getValues().get("file")
+                    .stream()
+                    .findFirst()
+                    .map(FormValue::getFileItem)
+                    .orElse(null);
+            if (fileItem == null) {
+                return JsonResponse.error(Response.Status.BAD_REQUEST).build();
+            }
+            userService.uploadImportUsersFile(fileItem.getInputStream(), content);
             return JsonResponse.success()
                     .build();
         } catch (UnsupportedDataTypeException | FileServiceException e) {
@@ -419,7 +434,6 @@ public class CustomUserResource {
         AdminPermissionEvaluator.RequirePermissionCheck manageCheck = () -> auth.users().requireMapRoles(user);
         AdminPermissionEvaluator.RequirePermissionCheck viewCheck = () -> auth.users().requireView(user);
         RoleMapperResource resource = new RoleMapperResource(session, auth, user, adminEvent, manageCheck, viewCheck);
-        ResteasyProviderFactory.getInstance().injectProperties(resource);
         return resource;
     }
 
@@ -429,7 +443,6 @@ public class CustomUserResource {
                 .realm(realm)
                 .resource(ResourceType.REALM);
         ClientsResource clientsResource = new ClientsResource(session, auth, adminEvent);
-        ResteasyProviderFactory.getInstance().injectProperties(clientsResource);
         return clientsResource;
     }
 
@@ -441,10 +454,8 @@ public class CustomUserResource {
         AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
                 .realm(realm)
                 .resource(ResourceType.REALM);
-        UsersResource users = new UsersResource(session, auth, adminEvent);
-        ResteasyProviderFactory.getInstance().injectProperties(users);
 
-        return users;
+        return new UsersResource(session, auth, adminEvent);
     }
 
 

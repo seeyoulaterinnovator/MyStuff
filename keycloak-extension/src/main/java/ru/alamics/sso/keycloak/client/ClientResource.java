@@ -11,7 +11,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.reactive.NoCache;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.authorization.admin.AuthorizationService;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
@@ -132,11 +131,7 @@ public class ClientResource {
     }
 
     private AuthorizationService authorization() {
-        AuthorizationService resource = new AuthorizationService(this.session, this.client, this.auth, adminEvent);
-
-        ResteasyProviderFactory.getInstance().injectProperties(resource);
-
-        return resource;
+        return new AuthorizationService(this.session, this.client, this.auth, adminEvent);
     }
 
     @Data

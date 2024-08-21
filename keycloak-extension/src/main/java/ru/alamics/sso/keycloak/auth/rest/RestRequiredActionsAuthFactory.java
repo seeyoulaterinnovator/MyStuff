@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.auth.rest;
 
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
@@ -33,7 +32,6 @@ public class RestRequiredActionsAuthFactory extends AbstractAuthenticatorFactory
     @Override
     public Authenticator create(KeycloakSession session) {
         RestRequiredActionsAuthenticator restRequiredActionsAuthenticator = new RestRequiredActionsAuthenticator(session);
-        ResteasyProviderFactory.getInstance().injectProperties(restRequiredActionsAuthenticator);
         restRequiredActionsAuthenticator.init();
         return restRequiredActionsAuthenticator;
     }

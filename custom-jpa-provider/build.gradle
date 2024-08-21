@@ -1,4 +1,3 @@
 dependencies {
-    compileOnly "org.keycloak:keycloak-dependencies-server-all:$keycloakVersion"
-    compileOnly "org.keycloak:keycloak-core:$keycloakVersion"
+    compileOnly "org.keycloak:keycloak-quarkus-server-app:$keycloakVersion"
 }

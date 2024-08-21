@@ -10,5 +10,5 @@ import java.util.Map;
 
 public interface TbapiRemoteService {
     TbapiResponse createCustomer(TbapiRequest request, TbapiConnectConfig connectConfig) throws TbapiRegisterException;
-    Map<String, Object> getCustomerName(List<String> id, TbapiConnectConfig connectConfig);
+    Map<String, Object> getCustomerName(List<String> id, TbapiConnectConfig connectConfig) throws TbapiRegisterException;
 }

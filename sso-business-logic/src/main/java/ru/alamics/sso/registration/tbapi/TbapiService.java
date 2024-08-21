@@ -85,7 +85,7 @@ public class TbapiService {
         return ret;
     }
 
-    public Map<String, Object> customerNames(TbapiConnectConfig connectConfig, List<String> customerIds) {
+    public Map<String, Object> customerNames(TbapiConnectConfig connectConfig, List<String> customerIds) throws TbapiRegisterException {
         return remoteService.getCustomerName(customerIds, connectConfig);
     }
 }

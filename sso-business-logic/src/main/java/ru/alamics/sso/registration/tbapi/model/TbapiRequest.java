@@ -3,6 +3,7 @@ package ru.alamics.sso.registration.tbapi.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.Setter;
 
 import static ru.alamics.sso.registration.model.TbapiConstants.*;
 
@@ -18,12 +19,14 @@ public class TbapiRequest {
 
     private String name;
 
+    //getExtendedMap().getPhoneHolder().getSingleValue().setAttributeValue(phoneNumber);
+    @Setter
     private String phoneNumber;
 
     private String legalName;
 
     @Data
-    private class CustomerCategory {
+    public static class CustomerCategory {
 
         final private String id = "9149000490413788409";
 
@@ -31,7 +34,7 @@ public class TbapiRequest {
     }
 
     @Data
-    private class ExtendedMap {
+    public static class ExtendedMap {
 
         //@JsonProperty(TBAPI_PHONE_ID)
         //private MapObjectHolder phoneHolder = new MapObjectHolder(TBAPI_PHONE_NAME);
@@ -40,21 +43,18 @@ public class TbapiRequest {
         private MapObjectHolder emailHolder = new MapObjectHolder(TBAPI_EMAIL_NAME);
 
         @Data
-        private class MapObjectHolder {
+        public static class MapObjectHolder {
 
             private int attributeType = 0;
             private String attributeName;
             private SingleValue singleValue = new SingleValue();
-
-            public MapObjectHolder() {
-            }
 
             public MapObjectHolder(String attributeName) {
                 this.attributeName = attributeName;
             }
 
             @Data
-            private class SingleValue {
+            public static class SingleValue {
 
                 private String attributeValue;
             }
@@ -64,10 +64,5 @@ public class TbapiRequest {
     public void setEmail(String email) {
         this.email = email;
         getExtendedMap().getEmailHolder().getSingleValue().setAttributeValue(email);
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-        //getExtendedMap().getPhoneHolder().getSingleValue().setAttributeValue(phoneNumber);
     }
 }

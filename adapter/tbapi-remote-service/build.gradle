@@ -1,20 +1,17 @@
 dependencies {
-    compileOnly "org.keycloak:keycloak-dependencies-server-all:$keycloakVersion"
-    compileOnly "org.keycloak:keycloak-core:$keycloakVersion"
+    compileOnly "org.keycloak:keycloak-quarkus-server-app:$keycloakVersion"
 
     implementation(platform("io.quarkus:quarkus-bom:$quarkusVersion"))
-    compileOnly "org.jboss.resteasy:resteasy-client"
-    compileOnly "org.jboss.resteasy:resteasy-jackson2-provider"
+    compileOnly "com.fasterxml.jackson.dataformat:jackson-dataformat-xml"
 
     implementation (
             project(':sso-business-logic'),
     )
 
-    testImplementation "org.keycloak:keycloak-dependencies-server-all:$keycloakVersion"
-    testImplementation "org.keycloak:keycloak-core:$keycloakVersion"
-    testImplementation "io.quarkus:quarkus-core"
-    testImplementation "org.jboss.resteasy:resteasy-client"
-    testImplementation "org.jboss.resteasy:resteasy-jackson2-provider"
-    testImplementation "org.jboss.resteasy:resteasy-jaxb-provider"
+    testImplementation "org.keycloak:keycloak-quarkus-server-app:$keycloakVersion"
+
+    testImplementation(platform("io.quarkus:quarkus-bom:$quarkusVersion"))
+    testImplementation "com.fasterxml.jackson.dataformat:jackson-dataformat-xml"
+
     testImplementation "org.wiremock:wiremock:3.9.1"
 }

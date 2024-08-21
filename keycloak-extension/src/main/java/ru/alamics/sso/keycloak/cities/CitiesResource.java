@@ -1,18 +1,21 @@
 package ru.alamics.sso.keycloak.cities;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.plugins.providers.StringTextStar;
-import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.TrustAllStrategy;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.jboss.resteasy.reactive.NoCache;
 import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.GeneralRealm;
@@ -26,19 +29,33 @@ import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.StandResolver;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
 public class CitiesResource {
-    private static final ResteasyClient client = ((ResteasyClientBuilder) ClientBuilder.newBuilder())
-            .connectTimeout(3, TimeUnit.SECONDS)
-            .readTimeout(10, TimeUnit.SECONDS)
-            .disableTrustManager()
-            .build();
+    private static final HttpClient client;
+    static {
+        try {
+            client = HttpClients.custom()
+                    .setSSLContext(new SSLContextBuilder()
+                            .loadTrustMaterial(null, TrustAllStrategy.INSTANCE)
+                            .build())
+                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                    .setDefaultRequestConfig(RequestConfig.custom()
+                            .setConnectTimeout(3_000)
+                            .setSocketTimeout(10_000)
+                            .build())
+                    .build();
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+
+    private static final ObjectMapper mapper = new ObjectMapper();
     private static final String CITIES_URL = "cities.url";
     private static final long CACHE_TIME = 60 * 60 * 1000; // 1h
     private static final ReentrantLock lock = new ReentrantLock();
@@ -100,22 +117,15 @@ public class CitiesResource {
             lock.lock();
             try {
                 if (cityList.isEmpty() || now > updated.get() + CACHE_TIME) {
-                    try (Response response = client.target(url)
-                            .register(ResteasyJackson2Provider.class)
-                            .register(StringTextStar.class)
-                            .request()
-                            .accept(MediaType.APPLICATION_JSON)
-                            .get()) {
-                        log.info("response media type {}, status {}", response.getMediaType(), response.getStatus());
-                        if (response.getMediaType().toString().equalsIgnoreCase("text/html")) {
-                            log.error("response " + response.readEntity(String.class));
-                        } else {
-                            cityList = response.readEntity(new GenericType<List<CityMigration>>() {
-                            });
-                        }
+                    HttpGet request = new HttpGet(url);
+                    request.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
+                    try (InputStream stream = client.execute(new HttpGet(url)).getEntity().getContent()) {
+                        cityList = List.of(mapper.readValue(stream, CityMigration[].class));
                     }
                     updated.set(now);
                 }
+            } catch (Exception e) {
+                log.warn(e.getMessage(), e);
             } finally {
                 lock.unlock();
             }
@@ -128,7 +138,7 @@ public class CitiesResource {
     @GET
     @Path("/current")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-    public Response getCityTitle() {
+    public Response getCityTitle() throws Exception {
         String ipAddress = session.getContext().getConnection().getRemoteAddr();
         String url = settingsService.getSettingsStringValue(SettingConstants.URL_DADATA_REQUEST_LOCATION_IP, GeneralRealm.MASTER);
         String token = settingsService.getSettingsStringValue(SettingConstants.TOKEN_DADATA, GeneralRealm.MASTER);
@@ -139,13 +149,17 @@ public class CitiesResource {
 
         log.info(String.format("Sending request with address %s to dadata", ipAddress));
 
-        CityDadataModel cityDadataModel = client.target(url)
+        HttpGet request = new HttpGet(UriBuilder.fromUri(url)
                 .queryParam("ip", ipAddress)
                 .queryParam("language", LANGUAGE_RU)
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, "TOKEN " + token)
-                .get(CityDadataModel.class);
+                .build());
+        request.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
+        request.setHeader(HttpHeaders.AUTHORIZATION, "TOKEN " + token);
+
+        CityDadataModel cityDadataModel;
+        try(InputStream stream = client.execute(request).getEntity().getContent()) {
+            cityDadataModel = mapper.readValue(stream, CityDadataModel.class);
+        }
 
         String title = null;
         if (cityDadataModel != null) {

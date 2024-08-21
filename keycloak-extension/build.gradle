@@ -3,22 +3,23 @@ plugins {
 }
 
 dependencies {
-    compileOnly "org.keycloak:keycloak-dependencies-server-all:$keycloakVersion"
-    compileOnly "org.keycloak:keycloak-core:$keycloakVersion"
+    compileOnly "org.keycloak:keycloak-quarkus-server-app:$keycloakVersion"
 
     implementation(platform("io.quarkus:quarkus-bom:$quarkusVersion"))
-    compileOnly "org.jboss.resteasy:resteasy-client"
-    compileOnly "org.jboss.resteasy:resteasy-jackson2-provider"
-    implementation "org.jboss.resteasy:resteasy-multipart-provider"
-
-    compileOnly "org.bouncycastle:bcprov-jdk18on:$bouncycastleVersion"
-    compileOnly "org.bouncycastle:bcmail-jdk18on:$bouncycastleVersion"
+    implementation ("com.fasterxml.jackson.dataformat:jackson-dataformat-xml") {
+        exclude group: 'com.fasterxml.jackson.core', module: 'jackson-annotations'
+        exclude group: 'com.fasterxml.jackson.core', module: 'jackson-core'
+        exclude group: 'com.fasterxml.jackson.core', module: 'jackson-databind'
+        exclude group: 'net.bytebuddy', module: 'byte-buddy'
+    }
 
     implementation(
             project(":sso-business-logic"),
             project(":tbapi-remote-service"),
             project(":custom-jpa-provider"),
     )
+
+    testImplementation "org.keycloak:keycloak-quarkus-server-app:$keycloakVersion"
 }
 
 shadowJar {

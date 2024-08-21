@@ -19,14 +19,14 @@ public class TbapiResponse {
 
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public class ExtendedMap {
+    public static class ExtendedMap {
 
         @JsonProperty(TBAPI_DMP_CUSTOMER_ID)
         private MapObjectHolder customerHolder;
 
         @Data
         @JsonIgnoreProperties(ignoreUnknown = true)
-        public class MapObjectHolder {
+        public static class MapObjectHolder {
 
             private Integer attributeType;
             private String attributeName;
@@ -34,7 +34,7 @@ public class TbapiResponse {
 
             @Data
             @JsonIgnoreProperties(ignoreUnknown = true)
-            public class SingleValue {
+            public static class SingleValue {
 
                 private String attributeValue;
                 private String attributeValueName;

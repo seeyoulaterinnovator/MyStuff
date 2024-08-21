@@ -3,15 +3,16 @@ package ru.alamics.sso.remote.message;
 import jakarta.annotation.Resource;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
-import jakarta.ws.rs.ProcessingException;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.internal.ClientInvocationBuilder;
-import org.jboss.resteasy.plugins.providers.StringTextStar;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClients;
 import ru.alamics.sso.registration.phone.MsgConfig;
 import ru.alamics.sso.registration.phone.exception.SendMessageException;
 import ru.alamics.sso.registration.phone.model.MessageRequest;
@@ -21,10 +22,10 @@ import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.StandResolver;
 import ru.alamics.sso.util.Util;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static ru.alamics.sso.settings.SettingConstants.*;
 
@@ -32,12 +33,19 @@ import static ru.alamics.sso.settings.SettingConstants.*;
 @Named("MessageSender")
 @Slf4j
 public class SendMessageServiceImpl implements SendMessageService {
-
-    private static final ResteasyClientBuilder clientBuilder = ((ResteasyClientBuilder) ClientBuilder.newBuilder())
-            .connectTimeout(3, TimeUnit.SECONDS)
-            .readTimeout(10, TimeUnit.SECONDS);
-
-    private static final ResteasyClient client = clientBuilder.build();
+    private static final HttpClient client;
+    static {
+        try {
+            client = HttpClients.custom()
+                    .setDefaultRequestConfig(RequestConfig.custom()
+                            .setConnectTimeout(3_000)
+                            .setSocketTimeout(10_000)
+                            .build())
+                    .build();
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 
     @Resource(lookup = "java:global/domru-sso/SettingsService")
     private SettingsService settingsService;
@@ -90,17 +98,22 @@ public class SendMessageServiceImpl implements SendMessageService {
 
         log.info(String.format("Api %s, Sending %s code to number: %s", uri.getHost(), messageRequest.getMessengerName().toString(), messageRequest.getUserPhone()));
 
-        WebTarget target = client.register(StringTextStar.class).target(uri);
-        msgConfig.getConfigForQuery().forEach(target::queryParam);
-        target = target.queryParam("to", Util.getCleanUserPhone(messageRequest.getUserPhone()))
-                .queryParam("text", Util.rfc3986Encoder(messageRequest.getText()));
-
-        ClientInvocationBuilder builder = (ClientInvocationBuilder) target.request();
+        HttpGet request = new HttpGet(UriBuilder.fromUri(uri)
+                .queryParam("to", Util.getCleanUserPhone(messageRequest.getUserPhone()))
+                .queryParam("text", Util.rfc3986Encoder(messageRequest.getText()))
+                .build());
+        request.setHeader(HttpHeaders.ACCEPT, MediaType.WILDCARD);
         try {
-            return builder.get(String.class);
-        } catch (ProcessingException | WebApplicationException wae) {
-            log.error(wae.getMessage(), wae);
-            throw new SendMessageException(wae);
+            HttpResponse response = client.execute(request);
+            if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                try(InputStream stream = response.getEntity().getContent()) {
+                    return new String(stream.readAllBytes());
+                }
+            }
+            throw new SendMessageException(response.getStatusLine().getReasonPhrase());
+        } catch (Exception e) {
+            log.warn(e.getMessage(), e);
+            throw new SendMessageException(e.getMessage(), e);
         }
     }
 

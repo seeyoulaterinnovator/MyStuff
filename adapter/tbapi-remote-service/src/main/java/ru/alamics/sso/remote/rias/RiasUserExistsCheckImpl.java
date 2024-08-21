@@ -1,17 +1,22 @@
 package ru.alamics.sso.remote.rias;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import jakarta.ws.rs.ProcessingException;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.UriBuilder;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClients;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
@@ -20,10 +25,10 @@ import ru.alamics.sso.remote.rias.model.RiasCheckStatus;
 import ru.alamics.sso.remote.rias.model.RiasData;
 import ru.alamics.sso.util.Util;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.TimeUnit;
 
 @ApplicationScoped
 @Named("RiasApiService")
@@ -34,11 +39,21 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
     private static final String CLIENT_NAME = "riasApi.client.name";
     private static final String CLIENT_SALT = "riasApi.client.salt";
 
-    private static final ResteasyClientBuilder clientBuilder = ((ResteasyClientBuilder) ClientBuilder.newBuilder())
-            .connectTimeout(3, TimeUnit.SECONDS)
-            .readTimeout(10, TimeUnit.SECONDS);
+    private static final HttpClient client;
+    static {
+        try {
+            client = HttpClients.custom()
+                    .setDefaultRequestConfig(RequestConfig.custom()
+                            .setConnectTimeout(3_000)
+                            .setSocketTimeout(10_000)
+                            .build())
+                    .build();
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 
-    private static final ResteasyClient client = clientBuilder.build();
+    private static final XmlMapper mapper = new XmlMapper();
 
     @Inject
     ApplicationProperties properties;
@@ -68,20 +83,26 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
         String namesV = Util.encodeUTF8("data_for_check$c,timestamp,client,client_secret");
         String valuesV = Util.encodeUTF8(param + "," + timestamp + "," + properties.getProperty(CLIENT_NAME) + "," + secretHash);
 
+        HttpGet request = new HttpGet(UriBuilder.fromUri(uri)
+                .queryParam("params", paramsV)
+                .queryParam("param_names_arr$c", namesV)
+                .queryParam("param_values_arr$c", valuesV)
+                .build());
+        request.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML);
+
         RiasData response;
-
         try {
-            response = client.target(uri)
-                    .queryParam("params", paramsV)
-                    .queryParam("param_names_arr$c", namesV)
-                    .queryParam("param_values_arr$c", valuesV)
-                    .request(MediaType.APPLICATION_XML)
-                    .get(RiasData.class);
-
-            log.info("response result {}, status {}, message {}", response.getResult(), response.getStatus(), response.getMessages());
-
-        } catch (ProcessingException | WebApplicationException wae) {
-            throw new RiasCheckException(wae);
+            HttpResponse httpResponse = client.execute(request);
+            if(httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                try(InputStream stream = httpResponse.getEntity().getContent()) {
+                    response = mapper.readValue(stream, RiasData.class);
+                    log.info("response result {}, status {}, message {}", response.getResult(), response.getStatus(), response.getMessages());
+                }
+            } else {
+                throw new RiasCheckException(httpResponse.getStatusLine().getReasonPhrase());
+            }
+        } catch (Exception e) {
+            throw new RiasCheckException(e);
         }
 
         if (response.getStatus() == RiasCheckStatus.DATA_NOT_FOUND)
