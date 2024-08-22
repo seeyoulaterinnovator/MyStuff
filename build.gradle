@@ -1,8 +1,8 @@
-version = '1.0.1'
+version = "1.0.1"
 
 allprojects {
-    apply plugin: 'java'
-    apply plugin: 'idea'
+    apply plugin: "java"
+    apply plugin: "idea"
 
     idea {
         module {
@@ -17,20 +17,18 @@ allprojects {
     }
 
     ext {
-        keycloakVersion = '25.0.2'
-        quarkusVersion = '3.8.5'
-        bouncycastleVersion = '1.78.1'
-        lombokVersion = '1.18.34'
-        junitVersion = '5.11.0'
-        mapstructVersion = '1.5.5.Final'
+        keycloakVersion = "25.0.2"
+        quarkusVersion = "3.8.5"
+        lombokVersion = "1.18.34"
+        mapstructVersion = "1.5.5.Final"
         generatedMapperSourcesDir = "${buildDir}/generated-src/mapstruct/main"
         toolsDir = new File(projectDir, "tools")
     }
 
-    compileJava.options.encoding = 'UTF-8'
+    compileJava.options.encoding = "UTF-8"
 
     tasks.withType(JavaCompile) {
-        options.encoding = 'UTF-8'
+        options.encoding = "UTF-8"
     }
 
     java {
@@ -41,8 +39,8 @@ allprojects {
 
 subprojects {
 
-    version = rootProject.version // + '-' + (System.getenv('CI_PIPELINE_ID') != null ? System.getenv('CI_PIPELINE_ID') : 'SNAPSHOT')
-    group = 'ru.alamics.sso'
+    version = rootProject.version // + "-" + (System.getenv("CI_PIPELINE_ID") != null ? System.getenv("CI_PIPELINE_ID") : "SNAPSHOT")
+    group = "ru.alamics.sso"
 
     buildDir = new File(rootProject.projectDir, "build/" + project.name)
 
@@ -59,10 +57,13 @@ subprojects {
         compileOnly "org.mapstruct:mapstruct:$mapstructVersion"
         annotationProcessor "org.mapstruct:mapstruct-processor:$mapstructVersion"
 
-        testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
-        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
-        testImplementation 'org.assertj:assertj-core:3.26.3'
+        testImplementation "org.projectlombok:lombok:$lombokVersion"
+        testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
+        testImplementation "org.junit.jupiter:junit-jupiter-api:5.11.0"
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.11.0"
+        testImplementation "org.assertj:assertj-core:3.26.3"
         testImplementation "org.mockito:mockito-junit-jupiter:5.12.0"
+        testImplementation 'org.slf4j:slf4j-simple:2.0.16'
     }
 
     test {
@@ -75,10 +76,6 @@ subprojects {
 
 dependencies {
     implementation (
-            project(':keycloak-extension'),
+            project(":keycloak-extension"),
     )
-}
-
-test {
-    dependsOn(':e2e:test')
 }

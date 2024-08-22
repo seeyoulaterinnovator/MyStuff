@@ -17,11 +17,13 @@ import java.util.List;
 @ApplicationScoped
 public class AttemptFailsService {
     @Inject
-    private AttemptFailsRepository repository;
+    AttemptFailsRepository repository;
+
     @Inject
-    private BlackListRepository blackListRepository;
+    BlackListRepository blackListRepository;
+
     @Inject
-    private UserHistoryLoginRepository userHistoryLoginRepository;
+    UserHistoryLoginRepository userHistoryLoginRepository;
 
     public AttemptFailsService() {
         this.repository = Lookup.lookup(AttemptFailsRepository.class);

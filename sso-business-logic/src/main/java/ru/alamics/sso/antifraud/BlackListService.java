@@ -23,11 +23,14 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class BlackListService {
     @Inject
-    private BlackListRepository blackListRepository;
+    BlackListRepository blackListRepository;
+
     @Inject
-    private UserRepository userRepository;
+    UserRepository userRepository;
+
     @Inject
-    private SettingsService settingsService;
+    SettingsService settingsService;
+
     // 43200L 12 часов
 
     public void limitUserBySmsOrPhone(User user, String cause, AuthenticationSessionModel context) {

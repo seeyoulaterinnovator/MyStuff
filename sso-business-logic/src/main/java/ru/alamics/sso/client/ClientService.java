@@ -15,7 +15,7 @@ import java.util.Set;
 @Slf4j
 public class ClientService {
     @Inject
-    private ClientRepository repository;
+    ClientRepository repository;
 
     public String getMainRedirectUri(String clientId) {
         MainRedirectUri uri = repository.findMainRedirectUriByClientId(clientId);

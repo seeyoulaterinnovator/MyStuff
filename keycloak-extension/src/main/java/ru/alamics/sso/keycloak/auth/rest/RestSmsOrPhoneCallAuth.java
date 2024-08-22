@@ -120,6 +120,8 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                 config.get(RestSmsOrPhoneCallAuthFactory.PHONE_VERIFICATION_REQUIRED.getName())
         );
 
+        ActivationCodeType.init(context.getRealm().getName());
+
         // Parameters
         String host = context.getHttpRequest().getUri().getBaseUri().getHost();
         MultivaluedMap<String, String> params = context.getHttpRequest().getDecodedFormParameters();

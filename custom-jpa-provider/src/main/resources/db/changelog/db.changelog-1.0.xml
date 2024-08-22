@@ -697,9 +697,14 @@
         <modifyDataType tableName="REALM_ATTRIBUTE" columnName="VALUE" newDataType="varchar(2000)"/>
     </changeSet>
 
+
     <changeSet id="40" author="strukov-av">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="USER_POST"/>
+            <!-- errno: 150 "Foreign key constraint is incorrectly formed" -->
+            <sqlCheck expectedResult="1">
+                select count(*) > 0 from USER_POST;
+            </sqlCheck>
         </preConditions>
 
         <addUniqueConstraint tableName="USER_POST"
@@ -2307,8 +2312,12 @@
         </sql>
     </changeSet>
 
-
     <changeSet id="131" author="slabunov-yv">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT count(*) FROM REALM WHERE ID = 'S-TELECOM'
+            </sqlCheck>
+        </preConditions>
         <sql>
             INSERT INTO REALM_ATTRIBUTE (NAME, VALUE, REALM_ID) VALUES ('hideChat', 'false', 'S-TELECOM');
         </sql>

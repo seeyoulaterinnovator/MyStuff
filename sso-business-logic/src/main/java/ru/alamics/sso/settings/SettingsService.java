@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.Settings;
 import ru.alamics.sso.jpa.repository.SettingsRepository;
 import ru.alamics.sso.registration.mapper.DataMapper;
+import ru.alamics.sso.schedule.ImportSchedule;
 import ru.alamics.sso.schedule.UserSchedule;
 
 import java.util.List;
@@ -16,10 +17,13 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SettingsService {
     @Inject
-    private SettingsRepository repository;
+    SettingsRepository repository;
 
     @Inject
-    private UserSchedule userSchedule;
+    UserSchedule userSchedule;
+
+    @Inject
+    ImportSchedule importSchedule;
 
     public List<SettingsDto> getRealmSettings(final String realmId) {
         List<SettingsDto> ret = repository.findRealmSettings(realmId)
@@ -50,6 +54,7 @@ public class SettingsService {
         //При вызове метода save с Админконсоли для времени шедулера мы обновляем таймер
         if (SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY.getKey().equals(save.getExtId())) {
             userSchedule.changeScheduleTimer();
+            importSchedule.changeScheduleTimer();
         }
         return DataMapper.toDto(save);
     }

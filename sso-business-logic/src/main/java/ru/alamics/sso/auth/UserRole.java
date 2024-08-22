@@ -32,11 +32,13 @@ import static ru.alamics.sso.registration.model.UserConstants.ATTR_TOMS_NAME;
 @Slf4j
 public class UserRole {
     @Inject
-    private RoleRepository roleRepository;
+    RoleRepository roleRepository;
+
     @Inject
-    private UserRepository userRepository;
+    UserRepository userRepository;
+
     @Inject
-    private UserPostRepository postRepository;
+    UserPostRepository postRepository;
 
     public void setUserPost(AuthenticationFlowContext context) {
         final String DEBUG_STR = "setUserPost";

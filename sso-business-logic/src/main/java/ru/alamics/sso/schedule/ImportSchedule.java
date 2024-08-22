@@ -18,6 +18,7 @@ import ru.alamics.sso.user.ImportReportService;
 import ru.alamics.sso.user.ImportService;
 import ru.alamics.sso.user.model.ImportUsersReportModel;
 import ru.alamics.sso.user.model.RepeatNextTimeException;
+import ru.alamics.sso.util.E2EUtil;
 
 import java.util.List;
 
@@ -58,7 +59,20 @@ public class ImportSchedule implements ScheduledTask {
     }
 
     void onStart(@Observes StartupEvent ev) {
-        long intervalDuration = properties.getPropertyLong(TIMER_INTERVAL_DURATION_PROPERTY, DEFAULT_INTERVAL_DURATION);
+        changeScheduleTimer();
+    }
+
+    public void changeScheduleTimer() {
+        long intervalDuration = DEFAULT_INTERVAL_DURATION;
+        try {
+            intervalDuration = properties.getPropertyLong(TIMER_INTERVAL_DURATION_PROPERTY, DEFAULT_INTERVAL_DURATION);
+        } catch (Exception e) {
+            if(E2EUtil.isE2E()) {
+                log.error(e.getMessage(), e);
+            } else {
+                throw e;
+            }
+        }
         if (intervalDuration <= 0) {
             intervalDuration = DEFAULT_INTERVAL_DURATION;
         }

@@ -9,7 +9,7 @@ import ru.alamics.sso.keycloak.lookup.Lookup;
 @ApplicationScoped
 public class ClientsForMonitoringService {
     @Inject
-    private ClientsForMonitoringRepository clientsForMonitoringRepository;
+    ClientsForMonitoringRepository clientsForMonitoringRepository;
 
     public ClientsForMonitoringService() {
         this.clientsForMonitoringRepository = Lookup.lookup(ClientsForMonitoringRepository.class);

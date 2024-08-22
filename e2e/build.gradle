@@ -1,3 +1,11 @@
 dependencies {
-    compileOnly "org.keycloak:keycloak-quarkus-server-app:$keycloakVersion"
+    testRuntimeOnly project(":keycloak-extension")
+    testImplementation platform("org.testcontainers:testcontainers-bom:1.20.1")
+    testImplementation "org.testcontainers:junit-jupiter"
+    testImplementation "org.testcontainers:mariadb"
+    testImplementation "com.github.dasniko:testcontainers-keycloak:3.4.0"
+    testImplementation "io.rest-assured:rest-assured:5.5.0"
+    testImplementation "io.rest-assured:json-path:5.5.0"
+    testImplementation "org.jsoup:jsoup:1.18.1"
+    testImplementation "org.mariadb.jdbc:mariadb-java-client:3.4.1"
 }

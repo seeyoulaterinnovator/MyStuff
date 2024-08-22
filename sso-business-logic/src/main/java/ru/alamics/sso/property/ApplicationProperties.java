@@ -10,6 +10,7 @@ import lombok.Locked;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.AppProperty;
 import ru.alamics.sso.jpa.repository.AppPropertyRepository;
+import ru.alamics.sso.util.E2EUtil;
 import ru.alamics.sso.util.StandResolver;
 
 import java.io.IOException;
@@ -121,8 +122,16 @@ public class ApplicationProperties {
     @PostConstruct
     @Locked.Write
     public void init() throws IOException {
-        initDbProperties();
         initFileProperties();
+        try {
+            initDbProperties();
+        } catch (Exception e) {
+            if(E2EUtil.isE2E()) {
+                log.error(e.getMessage(), e);
+            } else {
+                throw e;
+            }
+        }
     }
 
     private void initFileProperties() throws IOException {

@@ -35,6 +35,7 @@ import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsDto;
 import ru.alamics.sso.settings.SettingsService;
+import ru.alamics.sso.util.E2EUtil;
 import ru.alamics.sso.util.Util;
 
 import java.io.IOException;
@@ -85,10 +86,23 @@ public class UserSchedule implements ScheduledTask {
     }
 
     public void changeScheduleTimer() {
-        long intervalDuration = settingsService.getSettingsLongValue(SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY, GeneralRealm.MASTER) * 1000;
+        long intervalDuration = DEFAULT_INTERVAL_DURATION;
+        try {
+            intervalDuration = settingsService.getSettingsLongValue(
+                    SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY,
+                    GeneralRealm.MASTER
+            );
+        } catch (Exception e) {
+            if(E2EUtil.isE2E()) {
+                log.error(e.getMessage(), e);
+            } else {
+                throw e;
+            }
+        }
         if (intervalDuration <= 0) {
             intervalDuration = DEFAULT_INTERVAL_DURATION;
         }
+        intervalDuration *= 1000;
 
         timerProvider.cancelTask(TIMER_NAME);
         timerProvider.schedule(

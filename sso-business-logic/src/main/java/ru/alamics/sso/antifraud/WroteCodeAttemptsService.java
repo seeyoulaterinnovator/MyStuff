@@ -15,10 +15,10 @@ import java.util.UUID;
 @ApplicationScoped
 public class WroteCodeAttemptsService {
     @Inject
-    private WroteCodeAttemptsRepository wroteCodeAttemptsRepository;
+    WroteCodeAttemptsRepository wroteCodeAttemptsRepository;
 
     @Inject
-    private UserRepository userRepository;
+    UserRepository userRepository;
 
     public WroteCodeAttemptsService() {
         this.wroteCodeAttemptsRepository = Lookup.lookup(WroteCodeAttemptsRepository.class);

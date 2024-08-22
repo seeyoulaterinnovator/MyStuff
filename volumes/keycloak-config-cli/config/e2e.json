@@ -1,0 +1,153 @@
+{
+  "id": "e2e",
+  "realm": "e2e",
+  "enabled": true,
+  "displayName": "e2e",
+  "smtpServer": {
+    "host": "smtp4dev",
+    "from": "noreply@domru.ru"
+  },
+  "loginTheme": "domru",
+  "emailTheme": "domru",
+  "users": [
+    {
+      "username": "tester@nomail.tld",
+      "email": "tester@nomail.tld",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Tester",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "qwerty"
+        }
+      ],
+      "attributes": {
+        "phone": ["79602408221"],
+        "phone_validated_on": ["2024-08-22T00:00:00"]
+      }
+    }
+  ],
+  "clients": [
+    {
+      "id": "app",
+      "name": "app",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "secret",
+      "redirectUris": [
+        "*"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "authorizationServicesEnabled": true
+    }
+  ],
+  "components": {
+    "org.keycloak.userprofile.UserProfileProvider": [
+      {
+        "providerId": "declarative-user-profile",
+        "config": {
+          "kc.user.profile.config": [
+            "{\"attributes\":[{\"name\":\"username\",\"displayName\":\"${username}\",\"validations\":{\"length\":{\"min\":3,\"max\":255},\"username-prohibited-characters\":{},\"up-username-not-idn-homograph\":{}},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"email\",\"displayName\":\"${email}\",\"validations\":{\"email\":{},\"length\":{\"max\":255}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"firstName\",\"displayName\":\"${firstName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"lastName\",\"displayName\":\"${lastName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false}],\"groups\":[{\"name\":\"user-metadata\",\"displayHeader\":\"User metadata\",\"displayDescription\":\"Attributes, which refer to user metadata\"}],\"unmanagedAttributePolicy\":\"ENABLED\"}"
+          ]
+        }
+      }
+    ]
+  },
+  "requiredActions": [
+    {
+      "alias": "phone_verificator_sms",
+      "name": "Phone Verification (sms)",
+      "providerId": "phone_verificator_sms",
+      "priority": 25
+    },
+    {
+      "alias": "incoming_call_phone_verificator",
+      "name": "Phone Verification (incoming call)",
+      "providerId": "incoming_call_phone_verificator",
+      "enabled": true,
+      "priority": 30
+    },
+    {
+      "alias": "login_stats_recordings",
+      "name": "Record Login Statistics Action",
+      "providerId": "login_stats_recordings",
+      "enabled": true,
+      "priority": 54
+    },
+    {
+      "alias": "email_sender",
+      "name": "New Email Sender",
+      "providerId": "email_sender",
+      "enabled": true,
+      "defaultAction": true,
+      "priority": 55
+    },
+    {
+      "alias": "VERIFY_PROFILE",
+      "name": "Verify Profile",
+      "providerId": "VERIFY_PROFILE",
+      "enabled": false
+    }
+  ],
+  "browserFlow": "Copy of Browser two steep new",
+  "authenticationFlows": [
+    {
+      "alias": "Copy of Browser two steep new",
+      "description": "browser based authentication",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "authenticationExecutions": [
+        {
+          "authenticatorFlow": true,
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "autheticatorFlow": true,
+          "flowAlias": "Copy of Browser two steep new - Alternatives - 0"
+        },
+        {
+          "authenticator": "new-attributes-form",
+          "requirement": "REQUIRED",
+          "priority": 32
+        }
+      ]
+    },
+    {
+      "alias": "Copy of Browser two steep new - Alternatives - 0",
+      "description": "Subflow of Copy of Browser two steep new with alternative executions",
+      "providerId": "basic-flow",
+      "authenticationExecutions": [
+        {
+          "authenticator": "auth-cookie",
+          "requirement": "ALTERNATIVE",
+          "priority": 10
+        },
+        {
+          "authenticator": "identity-provider-redirector",
+          "requirement": "ALTERNATIVE",
+          "priority": 20
+        },
+        {
+          "authenticatorFlow": true,
+          "requirement": "ALTERNATIVE",
+          "priority": 30,
+          "autheticatorFlow": true,
+          "flowAlias": "Copy of Browser two steep new Browser two steep new forms"
+        }
+      ]
+    },
+    {
+      "alias": "Copy of Browser two steep new Browser two steep new forms",
+      "description": "Username, password, otp and other auth forms.",
+      "providerId": "basic-flow",
+      "authenticationExecutions": [
+        {
+          "authenticator": "new-with-RIAS-formq",
+          "requirement": "REQUIRED"
+        }
+      ]
+    }
+  ]
+}
