@@ -9,11 +9,10 @@ import org.keycloak.models.utils.KeycloakModelUtils;
 
 @ApplicationScoped
 public class AdminEventRepository {
-
     @Inject
-    private EntityManager em;
+    EntityManager em;
 
-    @Transactional(Transactional.TxType.REQUIRED)
+    @Transactional
     public AdminEventEntity save(AdminEventEntity adminEventEntity) {
         if (adminEventEntity.getId() == null) {
             adminEventEntity.setId(KeycloakModelUtils.generateId());

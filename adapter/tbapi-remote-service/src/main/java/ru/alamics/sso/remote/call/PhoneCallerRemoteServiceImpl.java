@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.ProcessingException;
@@ -48,10 +50,8 @@ public class PhoneCallerRemoteServiceImpl implements PhoneCallerRemoteService {
         }
     }
 
-    private static final ObjectMapper mapper = new ObjectMapper();
-
-    @Resource(lookup = "java:global/domru-sso/ApplicationProperties")
-    private ApplicationProperties properties;
+    @Inject
+    ApplicationProperties properties;
 
     private URI uriPerm;
     private URI uriVoronezh;

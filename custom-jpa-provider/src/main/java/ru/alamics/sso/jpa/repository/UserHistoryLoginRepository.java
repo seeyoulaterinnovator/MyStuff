@@ -3,6 +3,7 @@ package ru.alamics.sso.jpa.repository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.jpa.entity.UserLoginHistory;
@@ -16,8 +17,9 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class UserHistoryLoginRepository {
     @Inject
-    private EntityManager em;
+    EntityManager em;
 
+    @Transactional
     public void findInactiveUsers(final long absenceTime, final String realmId) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime absenceDate = now.minusSeconds(absenceTime);
@@ -58,6 +60,7 @@ public class UserHistoryLoginRepository {
         }
     }
 
+    @Transactional
     public void findUsersToBlock(final long absenceTimeBlock, final String realmId) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime absence = now.minusSeconds(absenceTimeBlock);
@@ -85,6 +88,7 @@ public class UserHistoryLoginRepository {
         }
     }
 
+    @Transactional
     public UserLoginHistory save(UserLoginHistory history) {
         final String id = UUID.randomUUID().toString();
         history.setId(id);
@@ -93,6 +97,7 @@ public class UserHistoryLoginRepository {
         return history;
     }
 
+    @Transactional
     public void saveSuccessAuth(UserLoginHistory history) {
         final String id = UUID.randomUUID().toString();
         history.setId(id);

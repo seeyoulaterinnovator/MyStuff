@@ -1,4 +1,4 @@
-name: "sso"
+name: "sso-new"
 services:
 
   mariadb:

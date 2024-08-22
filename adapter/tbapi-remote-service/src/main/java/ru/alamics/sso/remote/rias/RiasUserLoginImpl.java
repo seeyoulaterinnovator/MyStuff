@@ -3,6 +3,7 @@ package ru.alamics.sso.remote.rias;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import jakarta.annotation.Resource;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
@@ -55,8 +56,9 @@ public class RiasUserLoginImpl implements RiasLoginService {
     private static final String CLIENT_NAME = "riasLogin.client.name";
     private static final String CLIENT_SALT = "riasLogin.client.salt";
     private static final String GRANT_TYPE = "riasLogin.grantType";
-    @Resource(lookup = "java:global/domru-sso/ApplicationProperties")
-    private ApplicationProperties properties;
+
+    @Inject
+    ApplicationProperties properties;
 
     public RiasUserLoginImpl() {
     }

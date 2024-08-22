@@ -1,0 +1,149 @@
+package ru.alamics.sso.keycloak.theme;
+
+import org.keycloak.models.RealmModel;
+import org.keycloak.services.util.LocaleUtil;
+import org.keycloak.theme.PropertiesUtil;
+import org.keycloak.theme.Theme;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Collections;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+
+/**
+ * @see org.keycloak.theme.ClassLoaderTheme
+ */
+public class CustomClassLoaderTheme implements Theme  {
+    private String name;
+
+    private String parentName;
+
+    private String importName;
+
+    private Type type;
+
+    private ClassLoader classLoader;
+
+    private String templateRoot;
+
+    private String resourceRoot;
+
+    private String messageRoot;
+
+    private Properties properties;
+
+    public CustomClassLoaderTheme(String name, Type type, ClassLoader classLoader) throws IOException {
+        init(name, type, classLoader);
+    }
+
+    public void init(String name, Type type, ClassLoader classLoader) throws IOException {
+        this.name = name;
+        this.type = type;
+        this.classLoader = classLoader;
+
+        String themeRoot = "themes/" + name + "/" + type.toString().toLowerCase() + "/";
+
+        this.templateRoot = themeRoot;
+        this.resourceRoot = themeRoot + "resources/";
+        this.messageRoot = themeRoot + "messages/";
+        this.properties = new Properties();
+
+        URL p = classLoader.getResource(themeRoot + "theme.properties");
+        if (p != null) {
+            try (InputStream stream = p.openStream()) {
+                PropertiesUtil.readCharsetAware(properties, stream);
+            }
+            this.parentName = properties.getProperty("parent");
+            this.importName = properties.getProperty("import");
+        } else {
+            this.parentName = null;
+            this.importName = null;
+        }
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getParentName() {
+        return parentName;
+    }
+
+    @Override
+    public String getImportName() {
+        return importName;
+    }
+
+    @Override
+    public Type getType() {
+        return type;
+    }
+
+    @Override
+    public URL getTemplate(String name) {
+        return classLoader.getResource(templateRoot + name);
+    }
+
+    @Override
+    public InputStream getResourceAsStream(String path) throws IOException {
+        final URL rootResourceURL = classLoader.getResource(resourceRoot);
+        if (rootResourceURL == null) {
+            return null;
+        }
+        String rootPath = rootResourceURL.getPath();
+
+        if (rootPath.endsWith("//")) {
+            // needed for asset loading in quarkus IDELauncher - see gh issue #9942
+            rootPath = rootPath.substring(0, rootPath.length() -1);
+        }
+
+        final URL resourceURL = classLoader.getResource(resourceRoot + path);
+        if(resourceURL == null || !resourceURL.getPath().startsWith(rootPath)) {
+            return null;
+        }
+        else {
+            return resourceURL.openConnection().getInputStream();
+        }
+    }
+
+    @Override
+    public Properties getMessages(Locale locale) throws IOException {
+        return getMessages("messages", locale);
+    }
+
+    @Override
+    public Properties getMessages(String baseBundlename, Locale locale) throws IOException {
+        if(locale == null){
+            return null;
+        }
+        Properties m = new Properties();
+
+        URL url = classLoader.getResource(this.messageRoot + baseBundlename + "_" + locale + ".properties");
+        if (url != null) {
+            try (InputStream stream = url.openStream()) {
+                PropertiesUtil.readCharsetAware(m, stream);
+            }
+        }
+        return m;
+    }
+
+    @Override
+    public Properties getEnhancedMessages(RealmModel realm, Locale locale) throws IOException {
+        if (locale == null){
+            return null;
+        }
+
+        Map<Locale, Properties> localeMessages = Collections.singletonMap(locale, getMessages(locale));
+        return LocaleUtil.enhancePropertiesWithRealmLocalizationTexts(realm, locale, localeMessages);
+    }
+
+    @Override
+    public Properties getProperties() {
+        return properties;
+    }
+}

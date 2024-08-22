@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class RealmRepository {
     @Inject
-    private EntityManager em;
+    EntityManager em;
 
     public RealmModel findRealmById(final String id) {
         RealmEntity realm = em.createQuery("select r from RealmEntity r " +
@@ -22,8 +22,7 @@ public class RealmRepository {
                 .setParameter("id", id)
                 .getSingleResult();
         if (realm == null) return null;
-        RealmAdapter adapter = new RealmAdapter(null, em, realm);
-        return adapter;
+        return new RealmAdapter(null, em, realm);
     }
 
     public List<RealmModel> getAllRealms() {

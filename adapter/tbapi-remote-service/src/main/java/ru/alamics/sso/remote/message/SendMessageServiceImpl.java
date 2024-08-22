@@ -2,6 +2,7 @@ package ru.alamics.sso.remote.message;
 
 import jakarta.annotation.Resource;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
@@ -47,8 +48,8 @@ public class SendMessageServiceImpl implements SendMessageService {
         }
     }
 
-    @Resource(lookup = "java:global/domru-sso/SettingsService")
-    private SettingsService settingsService;
+    @Inject
+    SettingsService settingsService;
 
     public SendMessageServiceImpl() {
     }

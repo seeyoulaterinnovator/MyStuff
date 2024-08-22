@@ -9,15 +9,10 @@ import java.util.List;
 
 @ApplicationScoped
 public class AppPropertyRepository {
-
     @Inject
-    private EntityManager em;
+    EntityManager em;
 
     public List<AppProperty> findAll() {
         return em.createQuery("select ap from AppProperty ap ", AppProperty.class).getResultList();
-    }
-
-    public AppProperty findByName(String name) {
-        return em.find(AppProperty.class, name);
     }
 }

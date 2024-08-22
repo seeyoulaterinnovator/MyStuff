@@ -3,6 +3,8 @@ package ru.alamics.sso.jpa.repository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
+import org.hibernate.jpa.AvailableHints;
 import org.hibernate.jpa.QueryHints;
 import ru.alamics.sso.jpa.entity.Settings;
 
@@ -12,7 +14,7 @@ import java.util.UUID;
 @ApplicationScoped
 public class SettingsRepository {
     @Inject
-    private EntityManager em;
+    EntityManager em;
 
     public Settings getSettings(final String keyName, final String realmId) {
         Settings ret = null;
@@ -20,7 +22,7 @@ public class SettingsRepository {
             List<Settings> values = em.createQuery("select s from Settings s where s.extId = :extId and s.realmId =:realmId", Settings.class)
                     .setParameter("extId", keyName)
                     .setParameter("realmId", realmId)
-                    .setHint(QueryHints.HINT_READONLY, true)
+                    .setHint(AvailableHints.HINT_READ_ONLY, true)
                     .getResultList();
             if (!values.isEmpty()) {
                 ret = values.get(0);
@@ -37,13 +39,14 @@ public class SettingsRepository {
                 .getResultList();
     }
 
+    @Transactional
     public void deleteSetting(final String settingId) {
         em.createQuery("delete from Settings s where s.id =: settingId")
                 .setParameter("settingId", settingId)
                 .executeUpdate();
     }
 
-
+    @Transactional
     public Settings save(Settings settings) {
         if(settings != null) {
             if(settings.getId() == null) {

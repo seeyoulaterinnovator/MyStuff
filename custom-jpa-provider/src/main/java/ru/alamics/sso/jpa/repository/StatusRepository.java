@@ -17,8 +17,9 @@ import java.time.LocalDateTime;
 @Slf4j
 public class StatusRepository {
     @Inject
-    private EntityManager em;
+    EntityManager em;
 
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void tryInsertNodeName(String nodeName) {
 
         try {

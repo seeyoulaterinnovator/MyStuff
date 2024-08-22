@@ -3,6 +3,7 @@ package ru.alamics.sso.jpa.repository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import ru.alamics.sso.jpa.entity.Customer;
 
 import java.util.List;
@@ -10,8 +11,9 @@ import java.util.List;
 @ApplicationScoped
 public class CustomerRepository {
     @Inject
-    private EntityManager em;
+    EntityManager em;
 
+    @Transactional
     public Customer save(Customer customer) {
         Customer customerInDb = findByTomsId(customer.getId());
         if (customerInDb == null) {

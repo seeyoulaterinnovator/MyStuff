@@ -5,27 +5,35 @@ import liquibase.statement.core.InsertStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.core.Table;
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.Constants;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-/*
-https://github.com/keycloak/keycloak/issues/23220
-https://github.com/keycloak/keycloak/pull/23560
-TODO
+/**
+ * Copied class with fix of error "duplicate key value violates unique constraint "UK_J3RWUVD56ONTGSUHOGM184WW2-2"
+ * @link <a href="https://github.com/keycloak/keycloak/issues/23220">Issue</a>
+ * @link <a href="https://github.com/keycloak/keycloak/pull/23560">MR</a>
  */
+@Slf4j
 public class JpaUpdate13_0_0_MigrateDefaultRoles extends CustomKeycloakTask {
+    private static final AtomicBoolean IS_EXECUTED = new AtomicBoolean(false);
+
     private final Map<String, String> realmIdsAndNames = new HashMap<>();
 
     @Override
     protected void generateStatementsImpl() throws CustomChangeException {
-        if(isAlreadyRun()) return;
+        if(IS_EXECUTED.get()) {
+            log.warn("Task \"{}\" is already executed", getTaskId());
+            return;
+        }
+        IS_EXECUTED.set(true);
+        log.info("Task \"{}\" is running", getTaskId());
 
         extractRealmIdsAndNames("SELECT ID,NAME FROM " + getTableName("REALM"));
 
@@ -104,7 +112,7 @@ public class JpaUpdate13_0_0_MigrateDefaultRoles extends CustomKeycloakTask {
             statement.setString(1, realmId);
             statement.setString(2, roleName);
             try (ResultSet rs = statement.executeQuery()) {
-                return ! rs.next(); //name is available
+                return !rs.next(); //name is available
             }
         } catch (Exception e) {
             throw new CustomChangeException(getTaskId() + ": Exception when extracting data from previous version", e);
@@ -114,23 +122,5 @@ public class JpaUpdate13_0_0_MigrateDefaultRoles extends CustomKeycloakTask {
     @Override
     protected String getTaskId() {
         return "Migrate Default roles (13.0.0)";
-    }
-
-
-    private boolean isAlreadyRun() throws CustomChangeException {
-        try (Statement statement = jdbcConnection.createStatement()) {
-            try (ResultSet rs = statement.executeQuery("SELECT * FROM " + getTableName("REALM"))) {
-                ResultSetMetaData rsmd = rs.getMetaData();
-                int columns = rsmd.getColumnCount();
-                for (int x = 1; x <= columns; x++) {
-                    if ("DEFAULT_ROLE".equals(rsmd.getColumnName(x))) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        } catch (Exception e) {
-            throw new CustomChangeException(e);
-        }
     }
 }

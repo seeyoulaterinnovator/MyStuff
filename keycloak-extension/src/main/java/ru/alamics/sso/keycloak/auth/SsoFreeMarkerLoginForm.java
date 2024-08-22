@@ -15,10 +15,7 @@ import org.keycloak.forms.login.freemarker.AuthenticatorConfiguredMethod;
 import org.keycloak.forms.login.freemarker.FreeMarkerLoginFormsProvider;
 import org.keycloak.forms.login.freemarker.LoginFormsUtil;
 import org.keycloak.forms.login.freemarker.Templates;
-import org.keycloak.forms.login.freemarker.model.ClientBean;
-import org.keycloak.forms.login.freemarker.model.IdentityProviderBean;
-import org.keycloak.forms.login.freemarker.model.RealmBean;
-import org.keycloak.forms.login.freemarker.model.RequiredActionUrlFormatterMethod;
+import org.keycloak.forms.login.freemarker.model.*;
 import org.keycloak.models.*;
 import org.keycloak.services.ErrorPage;
 import org.keycloak.services.Urls;
@@ -124,6 +121,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                 ).collect(Collectors.toList());
             }
             attributes.put("social", new IdentityProviderBean(realm, session, identityProviders, baseUriWithCodeAndClientId));
+            attributes.put("auth", new AuthenticationContextBean(context, page));
 
             //register page
             attributes.put("placeholderUsername", settingsService.getSettingsStringValue(PLACEHOLDER_USERNAME, realm.getName()));

@@ -13,11 +13,11 @@ import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import java.util.List;
 
 @ApplicationScoped
-@Transactional(Transactional.TxType.REQUIRES_NEW)
+@Transactional
 @Slf4j
 public class ImportUsersReportRepository {
     @Inject
-    private EntityManager em;
+    EntityManager em;
 
     public ImportUsersReportEntity findImportUsersReportByImportId(final String importId) {
         return em.find(ImportUsersReportEntity.class, importId);
@@ -42,13 +42,6 @@ public class ImportUsersReportRepository {
                         "from ImportUsersReportEntity ire where ire.realmId = :realmId " +
                         "order by ire.importDate desc ", ImportUsersReportEntity.class)
                 .setParameter("realmId", realmId)
-                .getResultList();
-    }
-
-    public List<ImportUsersReportEntity> findAllImportUsersReports() {
-        return em.createQuery(
-                "select ire " +
-                        "from ImportUsersReportEntity ire ", ImportUsersReportEntity.class)
                 .getResultList();
     }
 

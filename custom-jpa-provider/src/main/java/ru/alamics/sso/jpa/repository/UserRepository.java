@@ -27,15 +27,13 @@ public class UserRepository {
     private final static String SORT_FIELD_EMAIL = "email";
 
     @Inject
-    private EntityManager em;
+    EntityManager em;
 
     public UserEntity findUser(final String userId) {
-        UserEntity ret = em.find(UserEntity.class, userId);
-
-        return ret;
+        return em.find(UserEntity.class, userId);
     }
 
-    @Transactional(Transactional.TxType.REQUIRED)
+    @Transactional
     public List<UserEntity> save(List<UserEntity> entities) {
         entities.forEach(entity -> {
             if (entity.getId() == null) {
@@ -50,7 +48,7 @@ public class UserRepository {
         return entities;
     }
 
-    @Transactional(Transactional.TxType.REQUIRED)
+    @Transactional
     public UserEntity save(UserEntity user) {
         if (user.getId() == null) {
             user.setId(KeycloakModelUtils.generateId());
@@ -63,7 +61,7 @@ public class UserRepository {
         return user;
     }
 
-    @Transactional(Transactional.TxType.REQUIRED)
+    @Transactional
     public UserAttributeEntity saveAttributes(UserAttributeEntity attr) {
         if (attr.getId() == null) {
             attr.setId(KeycloakModelUtils.generateId());
@@ -115,22 +113,6 @@ public class UserRepository {
         if (users != null && !users.isEmpty())
             return users.get(0);
 
-        return null;
-    }
-
-    public UserEntity getFirstUserByPhone(String phone) {
-        List<UserEntity> users = em.createQuery(
-                "select u from UserEntity u " +
-                        "join u.attributes attr \n" +
-                        "  where attr.name = :name " +
-                        "       and attr.value = :phoneNmbr", UserEntity.class)
-                .setParameter("name", "phone")
-                .setParameter("phoneNmbr", phone)
-                .setMaxResults(1)
-                .getResultList();
-        if (users != null && users.size() > 0) {
-            return users.get(0);
-        }
         return null;
     }
 

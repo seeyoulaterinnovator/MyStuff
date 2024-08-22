@@ -121,7 +121,7 @@ public abstract class AbstractAuthMailPhoneForm extends AbstractUsernameFormAuth
             return false;
         }
 
-        testInvalidUser(context, context.getUser());
+        testInvalidUser(context, user);
         if (context.getError() != null) {
             return false;
         }

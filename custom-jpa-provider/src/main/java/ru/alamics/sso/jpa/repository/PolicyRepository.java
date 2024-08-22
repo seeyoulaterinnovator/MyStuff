@@ -3,6 +3,7 @@ package ru.alamics.sso.jpa.repository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import org.keycloak.models.jpa.entities.RealmEntity;
 
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.List;
 @ApplicationScoped
 public class PolicyRepository {
     @Inject
-    private EntityManager em;
+    EntityManager em;
 
     public List<RealmEntity> findRealmWithPolicy(final String policy) {
         return em.createQuery(
@@ -20,6 +21,7 @@ public class PolicyRepository {
                 .getResultList();
     }
 
+    @Transactional
     public void findExpiredPasswords(final String realm, final long millis) {
         em.createNativeQuery("insert into AUTO_LOCK_NOTIFICATION(id, user_id, sended_at, type, status)\n" +
                         "SELECT uuid(), cred.USER_ID, null, 'PASSWORD_EXPIRED', 'PREPARE'\n" +

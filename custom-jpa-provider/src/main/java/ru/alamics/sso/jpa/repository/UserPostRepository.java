@@ -3,6 +3,7 @@ package ru.alamics.sso.jpa.repository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.jpa.entities.UserEntity;
@@ -12,14 +13,18 @@ import ru.alamics.sso.jpa.entity.UserPostEntity;
 import ru.alamics.sso.jpa.entity.UserPostRoleEntity;
 import ru.alamics.sso.jpa.util.CollectionUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 @ApplicationScoped
 @Slf4j
 public class UserPostRepository {
     @Inject
-    private EntityManager em;
+    EntityManager em;
 
+    @Transactional
     public UserPostEntity save(UserPostEntity userPost) {
         if (userPost.getId() == null || userPost.getId().isEmpty()) {
             userPost.setId(UUID.randomUUID().toString());
@@ -29,12 +34,14 @@ public class UserPostRepository {
         return userPost;
     }
 
+    @Transactional
     public UserPostEntity update(UserPostEntity userPost) {
         em.merge(userPost);
         em.flush();
         return userPost;
     }
 
+    @Transactional
     public void remove(UserPostEntity post) {
         em.remove(post);
     }
@@ -169,16 +176,5 @@ public class UserPostRepository {
 
     public ExternalSystemRoleEntity findExternalSystemRole(Long id) {
         return em.find(ExternalSystemRoleEntity.class, id);
-    }
-
-    public UserPostEntity findUserPostByParam(String userId, final String tomsId, final String roleName) {
-
-        List<UserPostEntity> ret = em.createQuery("select upe from UserPostEntity upe where upe.customer.id =:toms and upe.role.name =:role and upe.user.id = :user_id ", UserPostEntity.class)
-                .setParameter("toms", tomsId)
-                .setParameter("role", roleName)
-                .setParameter("user_id", userId)
-                .getResultList();
-
-        return Optional.of(ret.get(0)).orElseThrow(() -> new IllegalArgumentException("Cannot find user post with"));
     }
 }

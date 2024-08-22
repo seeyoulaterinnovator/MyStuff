@@ -6,6 +6,7 @@
         <option name="services">
           <list>
             <option value="mariadb" />
+            <option value="keycloak" />
           </list>
         </option>
         <option name="sourceFilePath" value="docker-compose-local.yml" />

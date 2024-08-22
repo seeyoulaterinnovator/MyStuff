@@ -3,6 +3,7 @@ package ru.alamics.sso.jpa.repository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.RequiredActionContext;
 import ru.alamics.sso.jpa.entity.antifraud.BlackListEntity;
@@ -13,19 +14,7 @@ import java.util.List;
 @ApplicationScoped
 public class BlackListRepository {
     @Inject
-    private EntityManager em;
-
-    public BlackListEntity findByIp(String ip) {
-        return em.createQuery("select be from BlackListEntity be where be.ip = :ip", BlackListEntity.class)
-                .setParameter("ip", ip)
-                .getSingleResult();
-    }
-
-    public BlackListEntity findFirstByIp(String ip) {
-        return em.createQuery("select be from BlackListEntity be where be.unblockedAt >= current_timestamp and be.ip =:ip", BlackListEntity.class)
-                .setParameter("ip", ip)
-                .getSingleResult();
-    }
+    EntityManager em;
 
     public List<BlackListEntity> findByEmail(String email) {
         return em.createQuery("select be from BlackListEntity be where be.email = :email ORDER BY be.createdAt desc", BlackListEntity.class)
@@ -40,12 +29,6 @@ public class BlackListRepository {
                 .setParameter("phone", phone)
                 .setParameter("limitationCause", limitationCause)
                 .getResultList();
-    }
-
-    public BlackListEntity findFirstByLogin(String login) {
-        return em.createQuery("select be from BlackListEntity be where be.unblockedAt >= current_timestamp and be.userLogin =:login", BlackListEntity.class)
-                .setParameter("login", login)
-                .getSingleResult();
     }
 
     public List<BlackListEntity> findBlockedByPhone(String phone, AuthenticationFlowContext context) {
@@ -63,11 +46,13 @@ public class BlackListRepository {
                 .getResultList();
     }
 
+    @Transactional
     public void save(BlackListEntity entity) {
         em.persist(entity);
         em.flush();
     }
 
+    @Transactional
     public void update(BlackListEntity entity) {
         em.createNativeQuery("update BLACK_LIST set created=:now, unblocked=:unblocked, block_count=:count, block_duration=:block_dur" +
                         " where phone =:phone and realm=:realm" +

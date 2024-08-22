@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CustomerService {
     @Inject
-    private CustomerRepository customerRepository;
+    CustomerRepository customerRepository;
 
     public CustomerDto save(CustomerDto customer) {
         return toCustomerDto(customerRepository.save(toCustomer(customer)));

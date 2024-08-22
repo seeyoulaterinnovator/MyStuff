@@ -3,6 +3,7 @@ package ru.alamics.sso.jpa.repository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.AutoLockNotification;
 import ru.alamics.sso.jpa.entity.common.NotificationStatus;
@@ -15,8 +16,9 @@ import java.util.UUID;
 @Slf4j
 public class AutoLockNotificationRepository {
     @Inject
-    private EntityManager entityManager;
+    EntityManager entityManager;
 
+    @Transactional
     public void save(List<AutoLockNotification> autoLockNotifications) {
         autoLockNotifications.forEach(autoLockNotification -> {
             autoLockNotification.setId(UUID.randomUUID().toString());

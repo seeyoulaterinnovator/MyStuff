@@ -600,4 +600,11 @@
     "templateType": "MUSTACHE",
     "template": "{ body: { id: '{{ now_epoch }}', extendedMap: { '9152455932013395741': { singleValue: { attributeValue: '{{ uuid }}' } } } } }"
   }
+}, {
+  "httpRequest": {
+    "path": "/tbapi/api/v1/customerManagement/customerAccounts/names"
+  },
+  "httpResponse" : {
+    "body": {}
+  }
 }]

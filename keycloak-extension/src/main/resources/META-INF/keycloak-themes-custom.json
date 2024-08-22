@@ -1,0 +1,6 @@
+{
+  "themes": [{
+    "name" : "domru",
+    "types": [ "login", "email" ]
+  }]
+}

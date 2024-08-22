@@ -8,7 +8,7 @@ import ru.alamics.sso.jpa.entity.auth_reg.AuthOrRegTypeEntity;
 @ApplicationScoped
 public class AuthOrRegTypeRepository {
     @Inject
-    private EntityManager em;
+    EntityManager em;
 
     public AuthOrRegTypeEntity findAuthOrRegType(int id) {
         return em.find(AuthOrRegTypeEntity.class, id);

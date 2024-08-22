@@ -73,10 +73,6 @@ subprojects {
 
 }
 
-task bundle {
-    dependsOn(':keycloak-extension:bundle')
-}
-
 dependencies {
     implementation (
             project(':keycloak-extension'),
@@ -84,80 +80,5 @@ dependencies {
 }
 
 test {
-    dependsOn(':keycloak-extension:test')
-}
-
-task deploy {
-
-    dependsOn(':keycloak-extension:war')
-    dependsOn(':custom-jpa-provider:jar')
-
-    def warArchive =  tasks.getByPath(':keycloak-extension:jar').getArchiveFile()
-    def jarArchive =  tasks.getByPath(':custom-jpa-provider:jar').getArchiveFile()
-    def jarModuleXml = new File("$toolsDir", "module.xml")
-    def themesFolder = tasks.getByPath(':keycloak-extension:processResources').getDestinationDir().getAbsolutePath() + '/themes'
-    def blacklistFolder = tasks.getByPath(':keycloak-extension:processResources').getDestinationDir().getAbsolutePath() + '/standalone'
-
-    def deployDir = System.getenv('KEYCLOAK_DEPLOY_DIR') != null ? System.getenv('KEYCLOAK_DEPLOY_DIR'): "$rootProject.buildDir/deploy"
-    def archiveTargetFolder = deployDir + '/standalone/deployments'
-    def themesTargetFolder = deployDir + '/themes'
-    def blacklistTargetFolder = deployDir + '/standalone'
-    def jarModuleFolder = deployDir + '/modules/system/layers/base/ru/alamics/sso/jpa/main'
-
-    inputs.files(warArchive, themesFolder, blacklistFolder)
-    outputs.dirs(archiveTargetFolder, themesTargetFolder, blacklistTargetFolder)
-
-    doLast {
-
-        copy {
-            from file(warArchive)
-            into(archiveTargetFolder)
-            rename { String fileName ->
-                fileName = "domru-sso.war"
-            }
-        }
-        copy {
-            from file(jarArchive)
-            into(jarModuleFolder)
-            rename { String fileName ->
-                fileName = "custom-jpa.jar"
-            }
-        }
-        copy {
-            from file(jarArchive)
-            into(archiveTargetFolder)
-            rename { String fileName ->
-                fileName = "custom-jpa.jar"
-            }
-        }
-        copy {
-            from file(jarModuleXml)
-            into(jarModuleFolder)
-        }
-        copy {
-            from file(themesFolder)
-            into(themesTargetFolder)
-        }
-        copy {
-            from file(blacklistFolder)
-            into(blacklistTargetFolder)
-        }
-        copy {
-            from file('/configs/local/standalone.xml')
-            into(deployDir + '/standalone/configuration')
-        }
-
-
-        //setup hash to front resources
-        def currentTime = new Date().format('yyyyMMddHHmmss')
-        ant.replaceregexp(match:'hash=', replace:'hash='+currentTime, flags:'g', byline:true) {
-            fileset(dir: themesTargetFolder + '/domru/login', includes: 'template.ftl')
-        }
-        ant.replaceregexp(match:'hash=', replace:'hash='+currentTime, flags:'g', byline:true) {
-            fileset(dir: themesTargetFolder + '/stelecom/login', includes: 'template.ftl')
-        }
-        ant.replaceregexp(match:'hash=', replace:'hash='+currentTime, flags:'g', byline:true) {
-            fileset(dir: themesTargetFolder + '/ertelecom/login', includes: 'template.ftl')
-        }
-    }
+    dependsOn(':e2e:test')
 }

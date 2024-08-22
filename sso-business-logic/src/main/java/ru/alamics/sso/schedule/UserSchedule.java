@@ -174,9 +174,9 @@ public class UserSchedule implements ScheduledTask {
         for (AutoLockNotification notification : autoLockNotifications) {
             UserEntity user = notification.getUser();
             RealmModel realm = realmRepository.findRealmById(user.getRealmId());
-            ClientEntity client = clientRepository.findClientById(settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, realm.getName()), realm.getName());
+            ClientEntity client = clientRepository.findClientByIdAndRealmName(settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, realm.getName()), realm.getName());
             if (client == null)
-                client = clientRepository.findClientById(DEFAULT_CLIENT_ID, realm.getName());
+                client = clientRepository.findClientByIdAndRealmName(DEFAULT_CLIENT_ID, realm.getName());
             UserModel userModel = new UserAdapter(null, realm, null, user);
             if (notification.getType() == NotificationType.ABSENCE_NOTIFICATION) {
                 long blockValue = settingsService.getSettingsLongValue(SettingConstants.BLOCK_NOTIFICATION_OF_WARNING, realm.getName());

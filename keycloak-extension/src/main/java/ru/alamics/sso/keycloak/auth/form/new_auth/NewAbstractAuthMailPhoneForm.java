@@ -39,7 +39,6 @@ import ru.alamics.sso.registration.phone.UserPhoneVerifier;
 import ru.alamics.sso.registration.phone.exception.*;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 import ru.alamics.sso.registration.phone.port.SendMessageService;
-import ru.alamics.sso.registration.rias.RiasService;
 import ru.alamics.sso.registration.service.AuthorisedUsersService;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.settings.SettingsService;
@@ -98,7 +97,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
     private static final int COUNT_BY_ONE_CODE = 5;
 
     private final KeycloakSession session;
-    private final RiasService riasService;
 
 
     public NewAbstractAuthMailPhoneForm(UserFindService userFindService, KeycloakSession session) {
@@ -111,7 +109,6 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         this.messageSendService = Lookup.lookup(SendMessageService.class, "MessageSender");
         this.phoneCallerService = Lookup.lookup(PhoneCallerRemoteService.class, "PhoneCallerService");
         this.session = session;
-        this.riasService = Lookup.lookup(RiasService.class);
         this.authorisedUsersService = Lookup.lookup(AuthorisedUsersService.class);
     }
 
@@ -475,7 +472,7 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
 //            return false;
 //        }
 
-        testInvalidUser(context, context.getUser());
+        testInvalidUser(context, user);
         if (context.getError() != null) {
             return false;
         }

@@ -12,11 +12,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-@Transactional(Transactional.TxType.REQUIRED)
+@Transactional
 @Slf4j
 public class PersonalAccountRepository {
     @Inject
-    private EntityManager em;
+    EntityManager em;
 
     public PersonalAccountPostEntity getAccount(final String postId) {
 
