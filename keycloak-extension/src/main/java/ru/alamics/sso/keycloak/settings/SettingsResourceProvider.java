@@ -15,6 +15,7 @@ public class SettingsResourceProvider implements BaseResourceProvider<SettingsRe
 
     @Override
     public SettingsResource getResource() {
+        initAuthByWorkingRealm(session).realm().requireManageRealm();
         SettingsService service = Lookup.lookup(SettingsService.class);
         return new SettingsResource(session, service);
     }
