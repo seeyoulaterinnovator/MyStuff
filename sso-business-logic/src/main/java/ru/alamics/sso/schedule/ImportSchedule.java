@@ -68,7 +68,7 @@ public class ImportSchedule implements ScheduledTask {
             intervalDuration = properties.getPropertyLong(TIMER_INTERVAL_DURATION_PROPERTY, DEFAULT_INTERVAL_DURATION);
         } catch (Exception e) {
             if(E2EUtil.isE2E()) {
-                log.error(e.getMessage(), e);
+                log.error(e.getMessage());
             } else {
                 throw e;
             }

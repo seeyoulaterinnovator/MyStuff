@@ -359,8 +359,10 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                     .type(httpResponseHeaders.getOrDefault(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML_UTF_8))
                     .language(locale)
                     .entity(result);
-            for (Map.Entry<String, String> entry : context.getRealm().getBrowserSecurityHeaders().entrySet()) {
-                builder.header(entry.getKey(), entry.getValue());
+            if(context != null) {
+                for (Map.Entry<String, String> entry : context.getRealm().getBrowserSecurityHeaders().entrySet()) {
+                    builder.header(entry.getKey(), entry.getValue());
+                }
             }
             for (Map.Entry<String, String> entry : httpResponseHeaders.entrySet()) {
                 builder.header(entry.getKey(), entry.getValue());

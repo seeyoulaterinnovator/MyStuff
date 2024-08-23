@@ -32,7 +32,6 @@ public class SettingsResource {
     @Path("/{settingId}")
     @DELETE
     public Response deleteSetting(@PathParam("settingId") final String settingId) {
-        String realmId = session.getContext().getRealm().getId();
         service.deleteSetting(settingId);
         return JsonResponse.success()
                 .httpStatus(Response.Status.NO_CONTENT)

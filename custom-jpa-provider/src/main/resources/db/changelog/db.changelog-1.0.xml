@@ -227,7 +227,7 @@
 
     <changeSet id="17" author="tretyakov-da">
         <preConditions onFail="MARK_RAN">
-            <dbms type="mysql"/>
+            <dbms type="mariadb"/>
         </preConditions>
         <sql>
             alter table ADMIN_EVENT_ENTITY change `REPRESENTATION` `REPRESENTATION` TEXT CHARACTER SET utf8mb4 COLLATE
@@ -257,7 +257,7 @@
 
     <changeSet id="20" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <dbms type="mysql"/>
+            <dbms type="mariadb"/>
         </preConditions>
         <sql>
             ALTER TABLE EXTERNAL_SYSTEM CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -276,7 +276,7 @@
     </changeSet>
     <changeSet id="22" author="dautova-lr">
         <preConditions onFail="MARK_RAN">
-            <dbms type="mysql"/>
+            <dbms type="mariadb"/>
         </preConditions>
         <sql>
             alter table EVENT_ENTITY change DETAILS_JSON DETAILS_JSON varchar(2550) CHARACTER SET utf8mb4 COLLATE
@@ -286,7 +286,7 @@
 
     <changeSet id="23" author="dautova-lr">
         <preConditions onFail="MARK_RAN">
-            <dbms type="mysql"/>
+            <dbms type="mariadb"/>
         </preConditions>
         <sql>
             ALTER TABLE FEDERATED_IDENTITY CHANGE FEDERATED_USERNAME FEDERATED_USERNAME varchar(255) CHARACTER SET
@@ -320,7 +320,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="24_3" author="plyusnin-da" dbms="mysql">
+    <changeSet id="24_3" author="plyusnin-da" dbms="mariadb">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="USER_POST"/>
             <not>
@@ -393,7 +393,7 @@
 
     <changeSet id="27" author="strukov-av">
         <preConditions onFail="MARK_RAN">
-            <dbms type="mysql"/>
+            <dbms type="mariadb"/>
             <tableExists tableName="IMPORT_USERS_DATA"></tableExists>
         </preConditions>
         <sql>
@@ -421,7 +421,7 @@
 
     <changeSet id="29" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <dbms type="mysql"/>
+            <dbms type="mariadb"/>
             <tableExists tableName="IDP_MAPPER_CONFIG"></tableExists>
             <tableExists tableName="ADMIN_EVENT_ENTITY"></tableExists>
         </preConditions>
@@ -461,7 +461,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="32_mysql" author="strukov-av" dbms="mysql">
+    <changeSet id="32_mysql" author="strukov-av" dbms="mariadb">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="CUSTOMER"/>
             <tableExists tableName="USER_POST"/>
@@ -671,7 +671,7 @@
 
     <changeSet id="38" author="plyusnin-da">
         <preConditions onFail="MARK_RAN">
-            <dbms type="mysql"/>
+            <dbms type="mariadb"/>
             <tableExists tableName="CUSTOMER"></tableExists>
         </preConditions>
         <sql>
@@ -679,7 +679,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="39_mysql" author="plyusnin-da" dbms="mysql">
+    <changeSet id="39_mysql" author="plyusnin-da" dbms="mariadb">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="REALM_ATTRIBUTE"></tableExists>
         </preConditions>
@@ -697,14 +697,9 @@
         <modifyDataType tableName="REALM_ATTRIBUTE" columnName="VALUE" newDataType="varchar(2000)"/>
     </changeSet>
 
-
     <changeSet id="40" author="strukov-av">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="USER_POST"/>
-            <!-- errno: 150 "Foreign key constraint is incorrectly formed" -->
-            <sqlCheck expectedResult="1">
-                select count(*) > 0 from USER_POST;
-            </sqlCheck>
         </preConditions>
 
         <addUniqueConstraint tableName="USER_POST"
@@ -843,7 +838,7 @@
         </addColumn>
     </changeSet>
 
-    <changeSet id="42_mysql" author="strukov-av" dbms="mysql">
+    <changeSet id="42_mysql" author="strukov-av" dbms="mariadb">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="USER_POST_ROLE"/>
             <columnExists tableName="USER_POST_ROLE" columnName="DESCRIPTION"/>
@@ -951,7 +946,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="49_p" author="plyusnin-da" dbms="mysql">
+    <changeSet id="49_p" author="plyusnin-da" dbms="mariadb">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="USER_ATTRIBUTE"/>
             <not>
@@ -963,7 +958,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="50_p" author="plyusnin-da" dbms="mysql">
+    <changeSet id="50_p" author="plyusnin-da" dbms="mariadb">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="USER_ENTITY"/>
             <columnExists tableName="USER_ENTITY" columnName="EMAIL"/>
@@ -1038,7 +1033,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="51_p" author="plyusnin-da" dbms="mysql">
+    <changeSet id="51_p" author="plyusnin-da" dbms="mariadb">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="USER_ENTITY"/>
             <columnExists tableName="USER_ENTITY" columnName="FIRST_NAME"/>
@@ -1049,7 +1044,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="52_p" author="plyusnin-da" dbms="mysql">
+    <changeSet id="52_p" author="plyusnin-da" dbms="mariadb">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="USER_ENTITY"/>
             <columnExists tableName="USER_ENTITY" columnName="USERNAME"/>
@@ -1060,7 +1055,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="53_p" author="plyusnin-da" dbms="mysql">
+    <changeSet id="53_p" author="plyusnin-da" dbms="mariadb">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="USER_ENTITY"/>
             <not>
@@ -1124,7 +1119,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="57" author="strukov-av" dbms="mysql">
+    <changeSet id="57" author="strukov-av" dbms="mariadb">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="MAIN_REDIRECT_URIS"/>
             <columnExists tableName="MAIN_REDIRECT_URIS" columnName="URI"/>
@@ -2311,6 +2306,7 @@
                 charset = utf8mb4;
         </sql>
     </changeSet>
+
 
     <changeSet id="131" author="slabunov-yv">
         <preConditions onFail="MARK_RAN">

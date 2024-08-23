@@ -127,7 +127,7 @@ public class ApplicationProperties {
             initDbProperties();
         } catch (Exception e) {
             if(E2EUtil.isE2E()) {
-                log.error(e.getMessage(), e);
+                log.error(e.getMessage());
             } else {
                 throw e;
             }
