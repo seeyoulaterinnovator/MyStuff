@@ -38,12 +38,17 @@ public class SsoUpdatePassword extends UpdatePassword {
     private static final String MOBILE_APP = "MP";
     private SettingsService settingsService;
 
+    public SsoUpdatePassword () {
+        super(null);
+    }
+
     @Override
     public void processAction(RequiredActionContext context) {
         EventBuilder event = context.getEvent();
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         event.event(EventType.UPDATE_PASSWORD);
         String passwordNew = formData.getFirst("password-new");
+        log.info("passwordNew = {}", passwordNew);
 
         EventBuilder errorEvent = event.clone().event(EventType.UPDATE_PASSWORD_ERROR)
                 .client(context.getAuthenticationSession().getClient())
@@ -71,9 +76,11 @@ public class SsoUpdatePassword extends UpdatePassword {
         }
 
         try {
+            log.info("try = {}", true);
             context.getUser().credentialManager().updateCredential(UserCredentialModel.password(passwordNew, false));
             context.success();
         } catch (ModelException me) {
+            log.info("catch ModelException = {}", me.getMessage());
             errorEvent.detail(Details.REASON, me.getMessage()).error(Errors.PASSWORD_REJECTED);
             Response challenge = context.form()
                     .setAttribute("username", context.getAuthenticationSession().getAuthenticatedUser().getUsername())
@@ -82,6 +89,7 @@ public class SsoUpdatePassword extends UpdatePassword {
             context.challenge(challenge);
             return;
         } catch (Exception ape) {
+            log.info("catch Exception = {}", ape.getMessage());
             errorEvent.detail(Details.REASON, ape.getMessage()).error(Errors.PASSWORD_REJECTED);
             Response challenge = context.form()
                     .setAttribute("username", context.getAuthenticationSession().getAuthenticatedUser().getUsername())
@@ -107,6 +115,9 @@ public class SsoUpdatePassword extends UpdatePassword {
 
     @Override
     public void requiredActionChallenge(RequiredActionContext context) {
+        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
+        String passwordNew = formData.getFirst("password-new");
+        log.info("passwordNew = {}", passwordNew);
         LoginFormsProvider lfp = context.form();
 
         verifyEmailHandler(context, lfp);

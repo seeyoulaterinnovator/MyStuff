@@ -60,6 +60,7 @@ subprojects {
         testImplementation "org.projectlombok:lombok:$lombokVersion"
         testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
         testImplementation "org.junit.jupiter:junit-jupiter-api:5.11.0"
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
         testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.11.0"
         testImplementation "org.assertj:assertj-core:3.26.3"
         testImplementation "org.mockito:mockito-junit-jupiter:5.12.0"
@@ -68,8 +69,8 @@ subprojects {
 
     test {
         useJUnitPlatform()
-        reports.junitXml.destination = new File(rootProject.projectDir, "build/test-results/" + project.name)
-        reports.html.destination = new File(rootProject.projectDir, "build/test-results/" + project.name + "/reports")
+        reports.junitXml.outputLocation = new File(rootProject.projectDir, "build/test-results/" + project.name)
+        reports.html.outputLocation = new File(rootProject.projectDir, "build/test-results/" + project.name + "/reports")
     }
 
 }
