@@ -5,6 +5,7 @@ import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.RequiredActionContext;
+import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.authentication.requiredactions.UpdatePassword;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
@@ -21,6 +22,7 @@ import org.keycloak.services.validation.Validation;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.storage.ClientStorageManager;
 import ru.alamics.sso.client.ClientService;
+import ru.alamics.sso.db.TestLogService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
@@ -36,10 +38,21 @@ public class SsoUpdatePassword extends UpdatePassword {
     private static final String UPDATE_PASSWORD_FTL = "login-update-password.ftl";
     private static final String PASSWORD = "password";
     private static final String MOBILE_APP = "MP";
+
     private SettingsService settingsService;
+    private TestLogService testLogService;
+
+    @Override
+    public RequiredActionProvider create(KeycloakSession session) {
+        return new SsoUpdatePassword();
+    }
 
     @Override
     public void processAction(RequiredActionContext context) {
+        if (testLogService == null) {
+            testLogService = Lookup.lookup(TestLogService.class);
+        }
+        testLogService.logIntoBd("SsoUpdatePassword.processAction");
         EventBuilder event = context.getEvent();
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         event.event(EventType.UPDATE_PASSWORD);
@@ -107,6 +120,11 @@ public class SsoUpdatePassword extends UpdatePassword {
 
     @Override
     public void requiredActionChallenge(RequiredActionContext context) {
+        if (testLogService == null) {
+            testLogService = Lookup.lookup(TestLogService.class);
+        }
+        testLogService.logIntoBd("SsoUpdatePassword.requiredActionChallenge");
+
         LoginFormsProvider lfp = context.form();
 
         verifyEmailHandler(context, lfp);

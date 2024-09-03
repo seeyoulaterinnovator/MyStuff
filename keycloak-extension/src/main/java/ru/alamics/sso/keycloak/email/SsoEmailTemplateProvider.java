@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.common.util.ObjectUtil;
 import org.keycloak.email.EmailException;
-import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.email.freemarker.FreeMarkerEmailTemplateProvider;
 import org.keycloak.email.freemarker.beans.ProfileBean;
 import org.keycloak.models.KeycloakSession;
@@ -14,6 +13,7 @@ import org.keycloak.theme.beans.LinkExpirationFormatterMethod;
 import org.keycloak.theme.beans.MessageFormatterMethod;
 import ru.alamics.sso.jpa.entity.common.BlockType;
 import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.db.TestLogService;
 import ru.alamics.sso.schedule.Translator;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
@@ -26,7 +26,7 @@ import java.util.*;
 import static ru.alamics.sso.settings.SettingConstants.*;
 
 @Slf4j
-public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider implements EmailTemplateProvider {
+public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider {
 
     private static final String BODY_TEMPLATE_PASS_RESET = "password-reset.ftl";
     private static final String BODY_TEMPLATE_EXECUTE_ACTIONS = "executeActions.ftl";
@@ -34,14 +34,17 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
     private static final String BODY_TEMPLATE_EMAIL_VERIFICATION = "email-verification.ftl";
 
     private SettingsService settingsService;
+    private TestLogService testLogService;
 
     public SsoEmailTemplateProvider(KeycloakSession session) {
         super(session);
         settingsService = Lookup.lookup(SettingsService.class);
+        testLogService = Lookup.lookup(TestLogService.class);
     }
 
     @Override
     public void sendExecuteActions(String link, long expirationInMinutes) throws EmailException {
+        testLogService.logIntoBd("SsoEmailTemplateProvider.sendExecuteActions");
         Map<String, Object> attributes = new HashMap<String, Object>(this.attributes);
         attributes.put("user", new ProfileBean(user, session));
         addLinkInfoIntoAttributes(link, expirationInMinutes, attributes);
@@ -55,6 +58,7 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
 
     @Override
     public void sendVerifyEmail(String link, long expirationInMinutes) throws EmailException {
+        testLogService.logIntoBd("SsoEmailTemplateProvider.sendVerifyEmail");
         Map<String, Object> attributes = new HashMap<String, Object>(this.attributes);
         attributes.put("user", new ProfileBean(user, session));
         addLinkInfoIntoAttributes(link, expirationInMinutes, attributes);
@@ -67,6 +71,7 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
 
     @Override
     public void sendConfirmIdentityBrokerLink(String link, long expirationInMinutes) throws EmailException {
+        testLogService.logIntoBd("SsoEmailTemplateProvider.sendConfirmIdentityBrokerLink");
         Map<String, Object> attributes = new HashMap<String, Object>(this.attributes);
         attributes.put("user", new ProfileBean(user, session));
         addLinkInfoIntoAttributes(link, expirationInMinutes, attributes);
@@ -87,6 +92,7 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
 
     @Override
     public void sendPasswordReset(String link, long expirationInMinutes) throws EmailException {
+        testLogService.logIntoBd("SsoEmailTemplateProvider.sendPasswordReset");
         Map<String, Object> attributes = new HashMap<String, Object>(this.attributes);
         attributes.put("user", new ProfileBean(user, session));
         addLinkInfoIntoAttributes(link, expirationInMinutes, attributes);
@@ -102,6 +108,7 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
 
     @Override
     protected EmailTemplate processTemplate(String subjectKey, List<Object> subjectAttributes, String template, Map<String, Object> attributes) throws EmailException {
+        testLogService.logIntoBd("SsoEmailTemplateProvider.processTemplate");
         try {
             Theme theme = getTheme();
             Locale locale = session.getContext().resolveLocale(user);
@@ -131,7 +138,7 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
             } catch (final FreeMarkerException e) {
                 htmlBody = null;
             }
-            if(htmlBody != null) {
+            if (htmlBody != null) {
                 try {
                     htmlBody = HtmlUtil.applyEmailCssToHtml(htmlBody);
                 } catch (Throwable e) {
@@ -147,6 +154,7 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
 
     @Override
     protected void addLinkInfoIntoAttributes(String link, long expirationInMinutes, Map<String, Object> attributes) throws EmailException {
+        testLogService.logIntoBd("SsoEmailTemplateProvider.addLinkInfoIntoAttributes");
         attributes.put("link", link);
         attributes.put("linkExpiration", expirationInMinutes);
         try {
@@ -156,4 +164,5 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider im
             throw new EmailException("Failed to template email", e);
         }
     }
+
 }
