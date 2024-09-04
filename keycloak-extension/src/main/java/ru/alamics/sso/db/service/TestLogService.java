@@ -1,20 +1,24 @@
-package ru.alamics.sso.db;
+package ru.alamics.sso.db.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import ru.alamics.sso.jpa.entity.TestLogEntity;
 import ru.alamics.sso.jpa.repository.TestLogRepository;
 
 @ApplicationScoped
-@Slf4j
 public class TestLogService {
 
     @Inject
     TestLogRepository testLogRepository;
 
+    @ConfigProperty(name = "TEST_LOG_DB_ENABLED", defaultValue = "false")
+    Boolean useTestLog;
+
     public void logIntoBd(String logInfo) {
-        testLogRepository.save(TestLogEntity.builder().log(logInfo).build());
+        if (useTestLog) {
+            testLogRepository.save(TestLogEntity.builder().log(logInfo).build());
+        }
     }
 
 }

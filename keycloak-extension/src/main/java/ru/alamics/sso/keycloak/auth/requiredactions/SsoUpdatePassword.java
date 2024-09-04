@@ -22,7 +22,7 @@ import org.keycloak.services.validation.Validation;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.storage.ClientStorageManager;
 import ru.alamics.sso.client.ClientService;
-import ru.alamics.sso.db.TestLogService;
+import ru.alamics.sso.db.service.TestLogService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
@@ -44,14 +44,13 @@ public class SsoUpdatePassword extends UpdatePassword {
 
     @Override
     public RequiredActionProvider create(KeycloakSession session) {
-        return new SsoUpdatePassword();
+        SsoUpdatePassword classObject = new SsoUpdatePassword();
+        classObject.testLogService = Lookup.lookup(TestLogService.class);
+        return classObject;
     }
 
     @Override
     public void processAction(RequiredActionContext context) {
-        if (testLogService == null) {
-            testLogService = Lookup.lookup(TestLogService.class);
-        }
         testLogService.logIntoBd("SsoUpdatePassword.processAction");
         EventBuilder event = context.getEvent();
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
@@ -120,9 +119,6 @@ public class SsoUpdatePassword extends UpdatePassword {
 
     @Override
     public void requiredActionChallenge(RequiredActionContext context) {
-        if (testLogService == null) {
-            testLogService = Lookup.lookup(TestLogService.class);
-        }
         testLogService.logIntoBd("SsoUpdatePassword.requiredActionChallenge");
 
         LoginFormsProvider lfp = context.form();

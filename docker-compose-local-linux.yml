@@ -43,6 +43,7 @@ services:
       - "8787:8787"
     command: [ "start-dev" ]
     environment:
+      TEST_LOG_DB_ENABLED: true
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_DB: mariadb
