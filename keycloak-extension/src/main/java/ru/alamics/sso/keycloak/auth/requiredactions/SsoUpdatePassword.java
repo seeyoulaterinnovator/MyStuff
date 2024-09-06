@@ -5,6 +5,7 @@ import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.RequiredActionContext;
+import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.authentication.requiredactions.UpdatePassword;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
@@ -37,6 +38,15 @@ public class SsoUpdatePassword extends UpdatePassword {
     private static final String PASSWORD = "password";
     private static final String MOBILE_APP = "MP";
     private SettingsService settingsService;
+
+    public SsoUpdatePassword () {
+        super(null);
+    }
+
+    @Override
+    public RequiredActionProvider create(KeycloakSession session) {
+        return new SsoUpdatePassword();
+    }
 
     @Override
     public void processAction(RequiredActionContext context) {

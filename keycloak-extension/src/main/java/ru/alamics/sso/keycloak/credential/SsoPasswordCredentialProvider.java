@@ -12,6 +12,7 @@ import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.credential.PasswordCredentialModel;
 import org.keycloak.protocol.oidc.OIDCConfigAttributes;
 import org.keycloak.services.Urls;
 import org.keycloak.services.managers.AuthenticationSessionManager;
@@ -47,7 +48,7 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
     public void disableCredentialType(RealmModel realm, UserModel user, String credentialType) {
         super.disableCredentialType(realm, user, credentialType);
 
-        if (CredentialModel.PASSWORD.equals(credentialType)) {
+        if (PasswordCredentialModel.TYPE.equals(credentialType)) {
             user.addRequiredAction(UserModel.RequiredAction.UPDATE_PASSWORD);
             sendDisableCredentialEmail(realm, user, VALIDITY_IN_SECS, settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_CREDENTIAL_DISABLE, realm.getName()), "credential-disable-password.ftl", new HashMap<>());
         }
@@ -56,7 +57,7 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
     public void disableCredentialType(RealmModel realm, UserModel user, String credentialType, int expirationTimeSeconds, String subject, String template, Map<String, Object> attributes) {
         super.disableCredentialType(realm, user, credentialType);
 
-        if (CredentialModel.PASSWORD.equals(credentialType)) {
+        if (PasswordCredentialModel.TYPE.equals(credentialType)) {
             user.addRequiredAction(UserModel.RequiredAction.UPDATE_PASSWORD);
             sendDisableCredentialEmail(realm, user, expirationTimeSeconds, subject, template, attributes);
         }
