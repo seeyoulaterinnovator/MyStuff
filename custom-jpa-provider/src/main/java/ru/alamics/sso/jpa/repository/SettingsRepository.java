@@ -5,8 +5,8 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.hibernate.jpa.AvailableHints;
-import org.hibernate.jpa.QueryHints;
 import ru.alamics.sso.jpa.entity.Settings;
+import ru.alamics.sso.jpa.entity.common.SettingType;
 
 import java.util.List;
 import java.util.UUID;
@@ -36,6 +36,14 @@ public class SettingsRepository {
 
         return em.createQuery("select s from Settings s where s.realmId =:realmId", Settings.class)
                 .setParameter("realmId", realmId)
+                .getResultList();
+    }
+
+    public List<Settings> findRealmSettings(String realmId, SettingType type) {
+        return em.createQuery("select s from Settings s " +
+                        "where s.realmId = :realmId and s.type = :type", Settings.class)
+                .setParameter("realmId", realmId)
+                .setParameter("type", type)
                 .getResultList();
     }
 
