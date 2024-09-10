@@ -22,6 +22,7 @@ import org.keycloak.services.validation.Validation;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.storage.ClientStorageManager;
 import ru.alamics.sso.client.ClientService;
+import ru.alamics.sso.db.service.TestLogService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
@@ -37,19 +38,24 @@ public class SsoUpdatePassword extends UpdatePassword {
     private static final String UPDATE_PASSWORD_FTL = "login-update-password.ftl";
     private static final String PASSWORD = "password";
     private static final String MOBILE_APP = "MP";
+
     private SettingsService settingsService;
+    private TestLogService testLogService;
+
+    @Override
+    public RequiredActionProvider create(KeycloakSession session) {
+        SsoUpdatePassword classObject = new SsoUpdatePassword();
+        classObject.testLogService = Lookup.lookup(TestLogService.class);
+        return classObject;
+    }
 
     public SsoUpdatePassword () {
         super(null);
     }
 
     @Override
-    public RequiredActionProvider create(KeycloakSession session) {
-        return new SsoUpdatePassword();
-    }
-
-    @Override
     public void processAction(RequiredActionContext context) {
+        testLogService.logIntoBd("SsoUpdatePassword.processAction");
         EventBuilder event = context.getEvent();
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         event.event(EventType.UPDATE_PASSWORD);
@@ -117,6 +123,8 @@ public class SsoUpdatePassword extends UpdatePassword {
 
     @Override
     public void requiredActionChallenge(RequiredActionContext context) {
+        testLogService.logIntoBd("SsoUpdatePassword.requiredActionChallenge");
+
         LoginFormsProvider lfp = context.form();
 
         verifyEmailHandler(context, lfp);
