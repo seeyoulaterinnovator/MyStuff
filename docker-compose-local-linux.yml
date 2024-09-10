@@ -1,4 +1,4 @@
-name: "sso-new"
+name: "sso-new-linux"
 services:
 
   mariadb:
@@ -10,6 +10,7 @@ services:
       MYSQL_USER: sso
       MYSQL_PASSWORD: sso
       MYSQL_ROOT_PASSWORD: sa
+      TZ: Asia/Yekaterinburg
     healthcheck:
       test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
     volumes:
@@ -42,6 +43,7 @@ services:
       - "8787:8787"
     command: [ "start-dev" ]
     environment:
+      TEST_LOG_DB_ENABLED: true
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_DB: mariadb
@@ -50,7 +52,7 @@ services:
       KC_DB_URL_DATABASE: sso
       KC_DB_USERNAME: sso
       KC_DB_PASSWORD: sso
-      KC_LOG_LEVEL: INFO
+      KC_LOG_LEVEL: DEBUG
       KC_LOG_CONSOLE_COLOR: true
       KC_HTTP_ENABLED: true
       KC_HTTP_RELATIVE_PATH: /auth
@@ -61,8 +63,6 @@ services:
       JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:8787,server=y,suspend=n"
       KC_CACHE: ispn
       KC_CACHE_CONFIG_FILE: cache-ispn-custom.xml
-      KC_ADMIN_VITE_URL: "http://localhost:5174"
-      SITE: STAGE5
     volumes:
       - ./volumes/keycloak/opt/keycloak/conf/cache-ispn-custom.xml:/opt/keycloak/conf/cache-ispn-custom.xml:ro
       - ./build/keycloak-extension/libs/keycloak-extension-1.0.1-all.jar:/opt/keycloak/providers/keycloak-extension.jar:ro
@@ -70,8 +70,8 @@ services:
       test: [
         "CMD-SHELL",
         'exec 3<>/dev/tcp/localhost/9000;
-         echo -e "GET /health/ready HTTP/1.1\nhost: localhost:9000\n" >&3; 
-         timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; 
+         echo -e "GET /health/ready HTTP/1.1\nhost: localhost:9000\n" >&3;
+         timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP;
          ERROR=$?; exec 3<&-; exec 3>&-; exit $ERROR'
       ]
       interval: 5s
@@ -94,6 +94,8 @@ services:
 
   nginx:
     image: nginx:1.15.3
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "8180:80"
     volumes:
