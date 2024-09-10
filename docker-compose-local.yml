@@ -50,7 +50,7 @@ services:
       KC_DB_URL_DATABASE: sso
       KC_DB_USERNAME: sso
       KC_DB_PASSWORD: sso
-      KC_LOG_LEVEL: DEBUG
+      KC_LOG_LEVEL: INFO
       KC_LOG_CONSOLE_COLOR: true
       KC_HTTP_ENABLED: true
       KC_HTTP_RELATIVE_PATH: /auth
@@ -61,6 +61,7 @@ services:
       JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:8787,server=y,suspend=n"
       KC_CACHE: ispn
       KC_CACHE_CONFIG_FILE: cache-ispn-custom.xml
+      SITE: STAGE5
     volumes:
       - ./volumes/keycloak/opt/keycloak/conf/cache-ispn-custom.xml:/opt/keycloak/conf/cache-ispn-custom.xml:ro
       - ./build/keycloak-extension/libs/keycloak-extension-1.0.1-all.jar:/opt/keycloak/providers/keycloak-extension.jar:ro

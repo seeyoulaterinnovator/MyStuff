@@ -3,6 +3,7 @@
   "realm": "e2e",
   "enabled": true,
   "displayName": "e2e",
+  "resetPasswordAllowed": true,
   "smtpServer": {
     "host": "smtp4dev",
     "from": "noreply@domru.ru"
@@ -92,6 +93,7 @@
     }
   ],
   "browserFlow": "Copy of Browser two steep new",
+  "resetCredentialsFlow": "Correct reset credential",
   "authenticationFlows": [
     {
       "alias": "Copy of Browser two steep new",
@@ -145,6 +147,70 @@
         {
           "authenticator": "new-with-RIAS-formq",
           "requirement": "REQUIRED"
+        }
+      ]
+    },
+    {
+      "alias": "Correct reset credential",
+      "description": "Reset credentials for a user if they forgot their password or something",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "authenticationExecutions": [
+        {
+          "authenticator": "reset-credentials-choose-user",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "reset-credential-email-or-phone",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 30,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "reset-password",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 40,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticatorFlow": true,
+          "requirement": "CONDITIONAL",
+          "priority": 41,
+          "autheticatorFlow": true,
+          "flowAlias": "Correct reset credential - reset-otp - Conditional"
+        }
+      ]
+    },
+    {
+      "alias": "Correct reset credential - reset-otp - Conditional",
+      "description": "Flow to determine if the reset-otp authenticator should be used or not.",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "conditional-user-configured",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "reset-otp",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 20,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
         }
       ]
     }

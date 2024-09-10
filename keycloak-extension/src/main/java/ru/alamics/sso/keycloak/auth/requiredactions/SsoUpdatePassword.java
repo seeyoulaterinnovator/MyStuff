@@ -49,6 +49,15 @@ public class SsoUpdatePassword extends UpdatePassword {
         return classObject;
     }
 
+    public SsoUpdatePassword () {
+        super(null);
+    }
+
+    @Override
+    public RequiredActionProvider create(KeycloakSession session) {
+        return new SsoUpdatePassword();
+    }
+
     @Override
     public void processAction(RequiredActionContext context) {
         testLogService.logIntoBd("SsoUpdatePassword.processAction");
