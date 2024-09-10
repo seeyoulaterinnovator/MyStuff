@@ -99,7 +99,9 @@ node
 .wireit
 
 # Vite
-dist
+**/dist/*
+!js/libs/keycloak-js/dist/keycloak.d.ts
+!js/libs/keycloak-js/dist/keycloak-authz.d.ts
 
 # ESLint
 .eslintcache
