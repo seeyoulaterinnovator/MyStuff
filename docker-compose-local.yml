@@ -40,6 +40,7 @@ services:
       - "8080:8080"
       - "9000:9000"
       - "8787:8787"
+    entrypoint: /opt/keycloak/bin/kc-custom.sh
     command: [ "start-dev" ]
     environment:
       KEYCLOAK_ADMIN: admin
@@ -61,9 +62,10 @@ services:
       JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:8787,server=y,suspend=n"
       KC_CACHE: ispn
       KC_CACHE_CONFIG_FILE: cache-ispn-custom.xml
-      KC_ADMIN_VITE_URL: "http://localhost:5174"
+      KC_ADMIN_VITE_ENABLED: ${KC_ADMIN_VITE_ENABLED}
       SITE: STAGE5
     volumes:
+      - ./volumes/keycloak/opt/keycloak/bin/kc-custom.sh:/opt/keycloak/bin/kc-custom.sh:ro
       - ./volumes/keycloak/opt/keycloak/conf/cache-ispn-custom.xml:/opt/keycloak/conf/cache-ispn-custom.xml:ro
       - ./build/keycloak-extension/libs/keycloak-extension-1.0.1-all.jar:/opt/keycloak/providers/keycloak-extension.jar:ro
     healthcheck:
