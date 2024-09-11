@@ -35,7 +35,7 @@ public class SettingsService {
     }
 
     public List<SettingsDto> getRealmSettings(String realmId, SettingType type) {
-        return repository.findRealmSettings(realmId)
+        return repository.findRealmSettings(realmId, type)
                 .stream()
                 .map(DataMapper::toDto)
                 .collect(Collectors.toList());

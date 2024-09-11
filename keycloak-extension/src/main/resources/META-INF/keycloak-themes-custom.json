@@ -2,5 +2,14 @@
   "themes": [{
     "name" : "domru",
     "types": [ "login", "email" ]
+  }, {
+    "name" : "ertelecom",
+    "types": [ "login", "email" ]
+  }, {
+    "name" : "stelecom",
+    "types": [ "login", "email" ]
+  }, {
+    "name" : "keycloak.v2",
+    "types": [ "admin" ]
   }]
 }
