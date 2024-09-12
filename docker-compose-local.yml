@@ -10,6 +10,7 @@ services:
       MYSQL_USER: sso
       MYSQL_PASSWORD: sso
       MYSQL_ROOT_PASSWORD: sa
+      TZ: Asia/Yekaterinburg
     healthcheck:
       test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
     volumes:
@@ -68,12 +69,13 @@ services:
       - ./volumes/keycloak/opt/keycloak/bin/kc-custom.sh:/opt/keycloak/bin/kc-custom.sh:ro
       - ./volumes/keycloak/opt/keycloak/conf/cache-ispn-custom.xml:/opt/keycloak/conf/cache-ispn-custom.xml:ro
       - ./build/keycloak-extension/libs/keycloak-extension-1.0.1-all.jar:/opt/keycloak/providers/keycloak-extension.jar:ro
+      - ./keycloak-extension/src/main/resources/themes/keycloak.v2/admin:/opt/keycloak/themes-custom/keycloak.v2/admin:ro
     healthcheck:
       test: [
         "CMD-SHELL",
         'exec 3<>/dev/tcp/localhost/9000;
-         echo -e "GET /health/ready HTTP/1.1\nhost: localhost:9000\n" >&3; 
-         timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; 
+         echo -e "GET /health/ready HTTP/1.1\nhost: localhost:9000\n" >&3;
+         timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP;
          ERROR=$?; exec 3<&-; exec 3>&-; exit $ERROR'
       ]
       interval: 5s
