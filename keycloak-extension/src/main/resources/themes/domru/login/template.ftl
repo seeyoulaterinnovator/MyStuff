@@ -33,7 +33,7 @@
 
         <#if properties.styles?has_content>
             <#list properties.styles?split(' ') as style>
-                <link href="${url.resourcesPath}/${style}?hash=" rel="stylesheet"/>
+                <link href="${url.resourcesPath}/${style}?hash=@hash@" rel="stylesheet"/>
             </#list>
         </#if>
         <#if redirectTo?has_content>
@@ -191,7 +191,7 @@
 
     <#if properties.scripts?has_content>
         <#list properties.scripts?split(' ') as script>
-            <script src="${url.resourcesPath}/${script}?hash=" async></script>
+            <script src="${url.resourcesPath}/${script}?hash=@hash@" async></script>
         </#list>
     </#if>
 

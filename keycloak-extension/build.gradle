@@ -1,3 +1,5 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
 plugins {
     id "com.github.johnrengelman.shadow" version "8.1.1"
 }
@@ -20,6 +22,16 @@ dependencies {
     )
 
     testImplementation "org.keycloak:keycloak-quarkus-server-app:$keycloakVersion"
+}
+
+processResources {
+    def hash = new Date().format('yyyyMMddHHmmss')
+    with copySpec {
+        from 'src/main/resources'
+        include 'themes/*/login/template.ftl'
+        duplicatesStrategy DuplicatesStrategy.INCLUDE
+        filter(ReplaceTokens, tokens: [hash: hash])
+    }
 }
 
 shadowJar {

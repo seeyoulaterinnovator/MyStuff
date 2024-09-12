@@ -75,8 +75,6 @@ subprojects {
 
 }
 
-// FIXME restore deploy front resources hash
-
 dependencies {
     implementation (
             project(":keycloak-extension"),
