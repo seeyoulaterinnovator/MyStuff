@@ -59,7 +59,7 @@ public class UserExtService {
         this.realm = session.getContext().getRealm();
 
         this.userFindService = Lookup.lookup(UserFindService.class);
-        this.userPostFacade = Lookup.lookup(UserPostFacade.class);
+        this.userPostFacade = Lookup.lookup(UserPostFacade.class, "UserPostFacade");
         this.registeredUsersService = Lookup.lookup(RegisteredUsersService.class);
     }
 

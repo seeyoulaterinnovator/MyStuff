@@ -2,6 +2,7 @@ package ru.alamics.sso.keycloak.facade;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Context;
 import lombok.Getter;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
+@Named("UserPostFacade")
 @Slf4j
 public class UserPostFacade {
     private static final String CUSTOMER_CACHE_LIFESPAN_IN_DB_PROPERTY = "user.post.cache.db.lifespan.days";
