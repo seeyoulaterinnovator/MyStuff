@@ -4,6 +4,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.keycloak.models.KeycloakSession;
+import ru.alamics.sso.jpa.entity.common.SettingType;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.settings.SettingsDto;
 import ru.alamics.sso.settings.SettingsService;
@@ -28,6 +29,16 @@ public class SettingsResource {
                 .addResult("settings", service.getRealmSettings(realmId))
                 .build();
     }
+
+    @Path("/search")
+    @GET
+    public Response searchSettings(@QueryParam("type") @DefaultValue("REALM") final SettingType type) {
+        String realmId = session.getContext().getRealm().getId();
+        return JsonResponse.success()
+                .addResult("settings", service.getRealmSettings(realmId, type))
+                .build();
+    }
+
 
     @Path("/{settingId}")
     @DELETE

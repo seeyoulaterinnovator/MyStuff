@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.Settings;
+import ru.alamics.sso.jpa.entity.common.SettingType;
 import ru.alamics.sso.jpa.repository.SettingsRepository;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.schedule.ImportSchedule;
@@ -31,6 +32,13 @@ public class SettingsService {
                 .map(DataMapper::toDto)
                 .collect(Collectors.toList());
         return ret;
+    }
+
+    public List<SettingsDto> getRealmSettings(String realmId, SettingType type) {
+        return repository.findRealmSettings(realmId, type)
+                .stream()
+                .map(DataMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     public void deleteSetting(final String settingId) {

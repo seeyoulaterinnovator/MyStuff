@@ -1,0 +1,103 @@
+name: "sso-new-linux"
+services:
+
+  mariadb:
+    image: mariadb:10.11
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: sso
+      MYSQL_USER: sso
+      MYSQL_PASSWORD: sso
+      MYSQL_ROOT_PASSWORD: sa
+      TZ: Asia/Yekaterinburg
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
+    volumes:
+      - ./volumes/mariadb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/:ro
+
+  mockserver:
+    image: mockserver/mockserver:5.15.0
+    ports:
+      - "1080:1080"
+    environment:
+      MOCKSERVER_INITIALIZATION_JSON_PATH: /var/mockserver/initialization.json
+      MOCKSERVER_WATCH_INITIALIZATION_JSON: true
+    volumes:
+      - ./volumes/mockserver/:/var/mockserver/:ro
+
+  smtp4dev:
+    image: rnwood/smtp4dev:v3
+    ports:
+      - "25:25"
+      - "8025:80"
+
+  keycloak:
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    image: quay.io/keycloak/keycloak:25.0.2
+    ports:
+      - "8080:8080"
+      - "9000:9000"
+      - "8787:8787"
+    command: [ "start-dev" ]
+    environment:
+      TEST_LOG_DB_ENABLED: true
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: mariadb
+      KC_DB_URL_HOST: mariadb
+      KC_DB_URL_PORT: 3306
+      KC_DB_URL_DATABASE: sso
+      KC_DB_USERNAME: sso
+      KC_DB_PASSWORD: sso
+      KC_LOG_LEVEL: DEBUG
+      KC_LOG_CONSOLE_COLOR: true
+      KC_HTTP_ENABLED: true
+      KC_HTTP_RELATIVE_PATH: /auth
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_METRICS_ENABLED: true
+      KC_HOSTNAME_DEBUG: true
+      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:8787,server=y,suspend=n"
+      KC_CACHE: ispn
+      KC_CACHE_CONFIG_FILE: cache-ispn-custom.xml
+    volumes:
+      - ./volumes/keycloak/opt/keycloak/conf/cache-ispn-custom.xml:/opt/keycloak/conf/cache-ispn-custom.xml:ro
+      - ./build/keycloak-extension/libs/keycloak-extension-1.0.1-all.jar:/opt/keycloak/providers/keycloak-extension.jar:ro
+    healthcheck:
+      test: [
+        "CMD-SHELL",
+        'exec 3<>/dev/tcp/localhost/9000;
+         echo -e "GET /health/ready HTTP/1.1\nhost: localhost:9000\n" >&3;
+         timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP;
+         ERROR=$?; exec 3<&-; exec 3>&-; exit $ERROR'
+      ]
+      interval: 5s
+      retries: 36
+
+  keycloak-config-cli:
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    image: adorsys/keycloak-config-cli:latest-25.0.1
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080/auth
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      KEYCLOAK_AVAILABILITYCHECK_ENABLED: true
+      IMPORT_FILES_LOCATIONS: /config/*
+    volumes:
+      - ./volumes/keycloak-config-cli/config/:/config/:ro
+    restart: no
+
+  nginx:
+    image: nginx:1.15.3
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8180:80"
+    volumes:
+      - ./volumes/nginx/etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./volumes/nginx/usr/share/nginx/html:/usr/share/nginx/html:ro
