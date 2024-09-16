@@ -65,6 +65,7 @@ services:
       KC_CACHE_CONFIG_FILE: cache-ispn-custom.xml
       KC_ADMIN_VITE_ENABLED: ${KC_ADMIN_VITE_ENABLED}
       SITE: STAGE5
+      LIQUIBASE_COMMAND_CHANGE_EXEC_LISTENER_CLASS: ru.alamics.sso.keycloak.migration.CustomChangeExecListener
     volumes:
       - ./volumes/keycloak/opt/keycloak/bin/kc-custom.sh:/opt/keycloak/bin/kc-custom.sh:ro
       - ./volumes/keycloak/opt/keycloak/conf/cache-ispn-custom.xml:/opt/keycloak/conf/cache-ispn-custom.xml:ro
