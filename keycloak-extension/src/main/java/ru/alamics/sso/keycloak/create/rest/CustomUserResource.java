@@ -10,7 +10,6 @@ import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.reactive.NoCache;
-import org.jboss.resteasy.reactive.server.multipart.FileItem;
 import org.jboss.resteasy.reactive.server.multipart.FormValue;
 import org.jboss.resteasy.reactive.server.multipart.MultipartFormDataInput;
 import org.keycloak.common.ClientConnection;
@@ -189,23 +188,22 @@ public class CustomUserResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @NoCache
     @Transactional(Transactional.TxType.NEVER)
-    public Response uploadUsers(
-            @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content,
-            MultipartFormDataInput input
-    ) {
+    public Response uploadUsers(MultipartFormDataInput input) {
         try {
-            FileItem fileItem = input.getValues().get("file")
-                    .stream()
-                    .findFirst()
-                    .map(FormValue::getFileItem)
-                    .orElse(null);
-            if (fileItem == null) {
+            FormValue formValue = input.getValues().get("file").stream().findFirst().orElse(null);
+            if(formValue != null) {
+                return JsonResponse.success()
+                        .addResult(
+                                "import-report",
+                                userService.importUsers(
+                                        formValue.getFileItem().getInputStream(),
+                                        formValue.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION)
+                                )
+                        )
+                        .build();
+            } else {
                 return JsonResponse.error(Response.Status.BAD_REQUEST).build();
             }
-            return JsonResponse.success()
-                    .addResult("import-report",
-                            userService.importUsers(fileItem.getInputStream(), content))
-                    .build();
         } catch (UnsupportedDataTypeException | FileServiceException e) {
             log.error("Could not upload users", e);
             return JsonResponse.fail()
@@ -271,22 +269,19 @@ public class CustomUserResource {
     @Path("/uploadImportUsersFile")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @NoCache
-    public Response uploadImportUsersFile(
-            @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content,
-            MultipartFormDataInput input
-    ) {
+    public Response uploadImportUsersFile(MultipartFormDataInput input) {
         try {
-            FileItem fileItem = input.getValues().get("file")
-                    .stream()
-                    .findFirst()
-                    .map(FormValue::getFileItem)
-                    .orElse(null);
-            if (fileItem == null) {
+            FormValue formValue = input.getValues().get("file").stream().findFirst().orElse(null);
+            if(formValue != null) {
+                userService.uploadImportUsersFile(
+                        formValue.getFileItem().getInputStream(),
+                        formValue.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION)
+                );
+                return JsonResponse.success()
+                        .build();
+            } else {
                 return JsonResponse.error(Response.Status.BAD_REQUEST).build();
             }
-            userService.uploadImportUsersFile(fileItem.getInputStream(), content);
-            return JsonResponse.success()
-                    .build();
         } catch (UnsupportedDataTypeException | FileServiceException e) {
             log.error("Could not upload users", e);
             return JsonResponse.fail()

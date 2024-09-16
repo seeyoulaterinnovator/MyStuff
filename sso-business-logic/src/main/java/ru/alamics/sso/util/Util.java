@@ -161,18 +161,20 @@ public class Util {
     }
 
     public static String getFileName(String contentDisposition) {
-        String[] contentList = contentDisposition.split(";");
-        for (String filename : contentList) {
-            if ((filename.trim().startsWith("filename"))) {
-                String[] name = filename.split("=");
-                return name[1].trim().replaceAll("\"", "");
+        if(contentDisposition != null) {
+            String[] contentList = contentDisposition.split(";");
+            for (String filename : contentList) {
+                if ((filename.trim().startsWith("filename"))) {
+                    String[] name = filename.split("=");
+                    return name[1].trim().replaceAll("\"", "");
+                }
             }
         }
         return "unknown";
     }
 
     public static boolean isEmpty(String val) {
-        return val == null || val.length() == 0;
+        return val == null || val.isEmpty();
     }
 
     public static String join(Iterable<String> iterable, String separator) {
