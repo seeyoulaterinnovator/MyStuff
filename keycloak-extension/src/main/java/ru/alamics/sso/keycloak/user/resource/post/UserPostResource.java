@@ -38,7 +38,7 @@ public class UserPostResource {
         this.auth = auth;
         this.userRole = Lookup.lookup(UserRole.class);
         this.userPostService = Lookup.lookup(UserPostService.class);
-        this.cachedUserPostFacade = Lookup.lookup(CachedUserPostFacade.class);
+        this.cachedUserPostFacade = Lookup.lookup(CachedUserPostFacade.class, "CachedUserPostFacade");
         this.userPostFacade = Lookup.lookup(UserPostFacade.class, "UserPostFacade");
         this.validateService = Lookup.lookup(ValidateService.class);
     }
