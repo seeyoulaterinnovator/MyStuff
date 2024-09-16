@@ -1,6 +1,7 @@
 package ru.alamics.sso.keycloak.facade;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.keycloak.cache.impl.UserPostCache;
@@ -19,6 +20,7 @@ import java.util.Set;
 
 @ApplicationScoped
 @Slf4j
+@Named("CachedUserPostFacade")
 public class CachedUserPostFacade extends UserPostFacade {
     private final UserPostCache cache;
 
