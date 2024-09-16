@@ -85,6 +85,15 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
             throw new ForbiddenException();
         }
 
+        // see org.keycloak.services.resources.RealmsResource#init in version 6.0.1
+        // https://github.com/keycloak/keycloak/blob/6.0.1/services/src/main/java/org/keycloak/services/resources/RealmsResource.java#L202
+        KeycloakUriInfo uri = context.getUri();
+        MultivaluedMap<String, String> pathParameters = uri.getPathParameters();
+        String realmFromRequestName = pathParameters.getFirst("realm");
+        RealmModel realmFromRequest = Optional.ofNullable(realmManager.getRealmByName(realmFromRequestName))
+                .orElseThrow(() -> new NotAuthorizedException("Unknown realm in path param"));
+        session.getContext().setRealm(realmFromRequest);
+
         return new InitSession(session, realmFromToken, auth);
     }
 }
