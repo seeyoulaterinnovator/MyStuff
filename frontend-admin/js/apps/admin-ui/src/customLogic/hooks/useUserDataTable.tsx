@@ -1,6 +1,6 @@
 import type ComponentRepresentation from "@keycloak/keycloak-admin-client/lib/defs/componentRepresentation";
 import type { CustomUserQuery } from "@keycloak/keycloak-admin-client/lib/resources/custom/users";
-import type UserRepresentation from "@keycloak/keycloak-admin-client/lib/defs/UserRepresentation";
+import type UserRepresentation from "@keycloak/keycloak-admin-client/lib/defs/userRepresentation";
 import type { UserInfoRepresentation } from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
 import { AlertVariant, Button, Checkbox } from "@patternfly/react-core";
 import { useCallback, useMemo, useState } from "react";
