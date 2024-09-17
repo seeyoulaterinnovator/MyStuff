@@ -7,12 +7,12 @@ dependencies {
         exclude group: 'jakarta.el', module: 'jakarta.el-api'
     }
 
-    implementation ("org.apache.poi:poi:5.3.0") {
+    implementation ("org.apache.poi:poi:5.2.5") {
         exclude group: 'commons-codec', module: 'commons-codec'
         exclude group: 'commons-io', module: 'commons-io'
         exclude group: 'org.apache.commons', module: 'commons-collections4'
     }
-    implementation ("org.apache.poi:poi-ooxml:5.3.0") {
+    implementation ("org.apache.poi:poi-ooxml:5.2.5") {
         exclude group: 'commons-codec', module: 'commons-codec'
         exclude group: 'commons-io', module: 'commons-io'
         exclude group: 'org.apache.commons', module: 'commons-collections4'
