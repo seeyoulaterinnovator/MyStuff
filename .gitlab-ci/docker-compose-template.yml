@@ -1,0 +1,55 @@
+version: '3.8'
+
+networks:
+  traefik:
+    external: true
+
+services:
+  keycloak:
+    image: $REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_PIPELINE_ID
+    networks:
+      - traefik
+    extra_hosts:
+      - "mariadb:192.168.57.79"
+    command: [ "start", "--proxy=edge" ]
+    user: 1000:0
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_DB=mariadb
+      - KC_DB_URL_HOST=mariadb
+      - KC_DB_URL_PORT=3306
+      - KC_DB_URL_DATABASE=sso
+      - KC_DB_USERNAME=sso
+      - KC_DB_PASSWORD=sso
+      - KC_LOG_LEVEL=DEBUG
+      - KC_LOG_CONSOLE_COLOR=true
+      - KC_HTTP_ENABLED=true
+      - KC_HTTP_RELATIVE_PATH=/auth
+      - KC_HOSTNAME_STRICT=false
+      - KC_HOSTNAME_STRICT_HTTPS=false
+      - KC_METRICS_ENABLED=true
+      - KC_HOSTNAME_DEBUG=true
+#      - JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:8787,server=y,suspend=n"
+      - KC_CACHE=ispn
+      - KC_CACHE_CONFIG_FILE=cache-ispn-custom.xml
+#    healthcheck:
+#      test: [
+#        "CMD-SHELL",
+#        'exec 3<>/dev/tcp/localhost/9000;
+#           echo -e "GET /health/ready HTTP/1.1\nhost: localhost:9000\n" >&3; 
+#           timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; 
+#           ERROR=$?; exec 3<&-; exec 3>&-; exit $ERROR'
+#      ]
+#      interval: 5s
+#      retries: 36
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.frontend.rule=Host:er-sso.dev.it-resource.team;PathPrefix:/"
+#        - "traefik.second.frontend.rule=Host:er-sso-mgmt.dev.it-resource.team;PathPrefix:/"
+        - "traefik.http.middlewares.keycloak.forwardauth.trustForwardHeader=true"
+        - "traefik.frontend.passHostHeader=true"
+        - "traefik.first.port=8080"
+        - "traefik.second.port=9000"
+        - "traefik.docker.network=traefik"
