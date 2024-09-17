@@ -18,6 +18,7 @@ import {
   Th,
   Thead,
   Tr,
+  type TdProps,
 } from "@patternfly/react-table";
 import { cloneDeep, differenceBy, get } from "lodash-es";
 import {
@@ -78,9 +79,13 @@ type CellRendererProps = {
 const CellRenderer = ({ row }: CellRendererProps) => {
   const isRow = (c: ReactNode | IRowCell): c is IRowCell =>
     !!c && (c as IRowCell).title !== undefined;
-  return row.cells!.map((c, i) => (
-    <Td key={`cell-${i}`}>{(isRow(c) ? c.title : c) as ReactNode}</Td>
-  ));
+  return row.cells!.map((c, i) => {
+    return (
+      <Td key={`cell-${i}`} {...(isRow(c) ? c.props : null)}>
+        {(isRow(c) ? c.title : c) as ReactNode}
+      </Td>
+    );
+  });
 };
 
 function DataTable<T>({
@@ -205,12 +210,39 @@ function DataTable<T>({
                     },
                   }}
                 />
+                {onSelect && (
+                  <Td
+                    select={{
+                      rowIndex: index,
+                      onSelect: (_, isSelected, rowIndex) => {
+                        onSelect!(isSelected, rowIndex);
+                        updateState(rowIndex, isSelected);
+                      },
+                      isSelected: selectedRows[index],
+                      variant: isRadio ? "radio" : "checkbox",
+                    }}
+                  />
+                )}
                 <CellRenderer row={row} />
+                {(actions || actionResolver) && (
+                  <Td isActionCell>
+                    <ActionsColumn
+                      items={actions || actionResolver?.(row, {})!}
+                      extraData={{ rowIndex: index }}
+                    />
+                  </Td>
+                )}
               </Tr>
             ) : (
               <Tr isExpanded={!!expandedRows[index - 1]}>
                 <Td />
-                <Td colSpan={columns.length}>
+                <Td
+                  colSpan={
+                    columns.length +
+                    (onSelect ? 1 : 0) +
+                    (actionResolver || actions ? 1 : 0)
+                  }
+                >
                   <ExpandableRowContent>
                     <CellRenderer row={row} />
                   </ExpandableRowContent>
@@ -229,11 +261,13 @@ export type Field<T> = {
   displayKey?: string;
   cellFormatters?: IFormatter[];
   transforms?: ITransform[];
+  cellProps?: TdProps | ((value: T, col: DetailField<T> | Field<T>) => TdProps);
   cellRenderer?: (row: T) => JSX.Element | string;
 };
 
 export type DetailField<T> = {
   name: string;
+  cellProps?: TdProps | ((value: T, col: DetailField<T> | Field<T>) => TdProps);
   enabled?: (row: T) => boolean;
   cellRenderer?: (row: T) => JSX.Element | string;
 };
@@ -271,6 +305,7 @@ export type DataListProps<T> = Omit<
   isNotCompact?: boolean;
   isRadio?: boolean;
   isSearching?: boolean;
+  onlyTable?: boolean;
 };
 
 /**
@@ -316,6 +351,7 @@ export function KeycloakDataTable<T>({
   emptyState,
   icon,
   isSearching = false,
+  onlyTable = false,
   ...props
 }: DataListProps<T>) {
   const { t } = useTranslation();
@@ -340,18 +376,37 @@ export function KeycloakDataTable<T>({
   const refresh = () => setKey(key + 1);
   const id = useId();
 
-  const renderCell = (columns: (Field<T> | DetailField<T>)[], value: T) => {
+  const renderCell = (
+    columns: (Field<T> | DetailField<T>)[],
+    value: T,
+  ): Array<Cell<T>> => {
     return columns.map((col) => {
+      const cellProps =
+        typeof col.cellProps === "function"
+          ? col.cellProps(value, col)
+          : col.cellProps;
+
       if ("cellFormatters" in col) {
         const v = get(value, col.name);
-        return col.cellFormatters?.reduce((s, f) => f(s), v);
+
+        return {
+          title: col.cellFormatters?.reduce((s, f) => f(s), v),
+          props: cellProps,
+        };
       }
       if (col.cellRenderer) {
         const Component = col.cellRenderer;
-        //@ts-ignore
-        return { title: <Component {...value} /> };
+
+        return {
+          //@ts-ignore
+          title: <Component {...value} />,
+          props: cellProps,
+        };
       }
-      return get(value, col.name);
+      return {
+        title: <>{get(value, col.name)}</>,
+        props: cellProps,
+      };
     });
   };
 
@@ -520,6 +575,53 @@ export function KeycloakDataTable<T>({
   const maxRows = detailColumns ? max * 2 : max;
   const rowLength = detailColumns ? (data?.length || 0) / 2 : data?.length || 0;
 
+  const renderTable = () => {
+    return (
+      <>
+        {!loading && !noData && (
+          <DataTable
+            {...props}
+            canSelectAll={canSelectAll}
+            onSelect={onSelect ? _onSelect : undefined}
+            onCollapse={detailColumns ? onCollapse : undefined}
+            actions={convertAction()}
+            actionResolver={actionResolver}
+            rows={data.slice(0, maxRows)}
+            columns={columns}
+            isNotCompact={isNotCompact}
+            isRadio={isRadio}
+            ariaLabelKey={ariaLabelKey}
+          />
+        )}
+        {!loading && noData && searching && (
+          <ListEmptyState
+            hasIcon={true}
+            icon={icon}
+            isSearchVariant={true}
+            message={t("noSearchResults")}
+            instructions={t("noSearchResultsInstructions")}
+            secondaryActions={
+              !isSearching
+                ? [
+                    {
+                      text: t("clearAllFilters"),
+                      onClick: () => setSearch(""),
+                      type: ButtonVariant.link,
+                    },
+                  ]
+                : []
+            }
+          />
+        )}
+        {loading && <KeycloakSpinner />}
+      </>
+    );
+  };
+
+  if (onlyTable) {
+    return renderTable();
+  }
+
   return (
     <>
       {(loading || !noData || searching) && (
@@ -553,42 +655,7 @@ export function KeycloakDataTable<T>({
           }
           subToolbar={subToolbar}
         >
-          {!loading && !noData && (
-            <DataTable
-              {...props}
-              canSelectAll={canSelectAll}
-              onSelect={onSelect ? _onSelect : undefined}
-              onCollapse={detailColumns ? onCollapse : undefined}
-              actions={convertAction()}
-              actionResolver={actionResolver}
-              rows={data.slice(0, maxRows)}
-              columns={columns}
-              isNotCompact={isNotCompact}
-              isRadio={isRadio}
-              ariaLabelKey={ariaLabelKey}
-            />
-          )}
-          {!loading && noData && searching && (
-            <ListEmptyState
-              hasIcon={true}
-              icon={icon}
-              isSearchVariant={true}
-              message={t("noSearchResults")}
-              instructions={t("noSearchResultsInstructions")}
-              secondaryActions={
-                !isSearching
-                  ? [
-                      {
-                        text: t("clearAllFilters"),
-                        onClick: () => setSearch(""),
-                        type: ButtonVariant.link,
-                      },
-                    ]
-                  : []
-              }
-            />
-          )}
-          {loading && <KeycloakSpinner />}
+          {renderTable()}
         </PaginatingTableToolbar>
       )}
       {!loading && noData && !searching && emptyState}

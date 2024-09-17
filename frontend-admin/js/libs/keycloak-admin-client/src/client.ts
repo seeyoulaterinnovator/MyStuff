@@ -17,7 +17,8 @@ import { UserStorageProvider } from "./resources/userStorageProvider.js";
 import { WhoAmI } from "./resources/whoAmI.js";
 import { Credentials, getToken } from "./utils/auth.js";
 import { defaultBaseUrl, defaultRealm } from "./utils/constants.js";
-import {CustomSettings} from "./resources/customSettings.js";
+import { CustomSettings } from "./resources/customSettings.js";
+import { CustomUsers } from "./resources/custom/users.js";
 
 export interface TokenProvider {
   getAccessToken: () => Promise<string | undefined>;
@@ -49,6 +50,7 @@ export class KeycloakAdminClient {
   public authenticationManagement: AuthenticationManagement;
   public cache: Cache;
   public customSettings: CustomSettings;
+  public customUsers: CustomUsers;
 
   // Members
   public baseUrl: string;
@@ -85,6 +87,7 @@ export class KeycloakAdminClient {
     this.attackDetection = new AttackDetection(this);
     this.cache = new Cache(this);
     this.customSettings = new CustomSettings(this);
+    this.customUsers = new CustomUsers(this);
   }
 
   public async auth(credentials: Credentials) {
