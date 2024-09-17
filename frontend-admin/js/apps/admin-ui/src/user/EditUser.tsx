@@ -57,6 +57,7 @@ import { toUsers } from "./routes/Users";
 import { isLightweightUser } from "./utils";
 
 import "./user-section.css";
+import {UserCustomer} from "./UserCustomer";
 
 export default function EditUser() {
   const { adminClient } = useAdminClient();
@@ -104,6 +105,7 @@ export default function EditUser() {
   const consentsTab = useTab("consents");
   const identityProviderLinksTab = useTab("identity-provider-links");
   const sessionsTab = useTab("sessions");
+  const customerTab = useTab("customer");
 
   useFetch(
     async () =>
@@ -228,7 +230,7 @@ export default function EditUser() {
     continueButtonLabel: "impersonate",
     onConfirm: async () => {
       try {
-        const data = await adminClient.users.impersonation(
+        const data = await adminClient.customUsers.impersonation(
           { id: user!.id! },
           { user: user!.id!, realm: realmName },
         );
@@ -378,6 +380,13 @@ export default function EditUser() {
                 {...sessionsTab}
               >
                 <UserSessions />
+              </Tab>
+              <Tab
+                data-testid="user-customer"
+                title={<TabTitleText>{t("titleCustomer")}</TabTitleText>}
+                {...customerTab}
+              >
+                <UserCustomer />
               </Tab>
             </RoutableTabs>
           </FormProvider>

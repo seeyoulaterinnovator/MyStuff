@@ -20,6 +20,7 @@ export type UserProfileGroupProps = {
   form: UseFormReturn<UserFormFields>;
   attribute: UserProfileAttributeMetadata;
   renderer?: (attribute: UserProfileAttributeMetadata) => ReactNode;
+  hidden?: boolean;
 };
 
 export const UserProfileGroup = ({
@@ -28,6 +29,7 @@ export const UserProfileGroup = ({
   attribute,
   renderer,
   children,
+  hidden,
 }: PropsWithChildren<UserProfileGroupProps>) => {
   const helpText = label(
     t,
@@ -50,6 +52,9 @@ export const UserProfileGroup = ({
           <HelpItem helpText={helpText} fieldLabelId={attribute.name!} />
         ) : undefined
       }
+      style={{
+        display: hidden ? 'none' : undefined
+      }}
     >
       {component ? (
         <InputGroup>

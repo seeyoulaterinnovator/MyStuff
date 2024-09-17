@@ -91,3 +91,9 @@ export type DownloadedUsersRepresentation = {
 	userIds: string[];
 	userParameters: UserParameters[];
 };
+
+export type UserPostsRepresentation = {
+	user_post: UserPostRepresentation[];
+}
+
+export interface UserPostsResponseRepresentation extends Response<UserPostsRepresentation> {}

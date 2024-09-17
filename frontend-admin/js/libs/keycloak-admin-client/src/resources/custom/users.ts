@@ -116,6 +116,16 @@ export class CustomUsers extends Resource<{ realm?: string }> {
 		path: '/manage/unlock',
 	});
 
+	public impersonation = this.makeUpdateRequest<
+		{ id: string },
+		{ user: string; realm: string },
+		Record<string, any>
+	>({
+		method: 'POST',
+		path: '/users-toms/impersonation/{id}',
+		urlParamKeys: ["id"],
+	});
+
 	constructor(client: KeycloakAdminClient) {
 		super(client, {
 			path: '/realms/{realm}',

@@ -19,6 +19,8 @@ import { Credentials, getToken } from "./utils/auth.js";
 import { defaultBaseUrl, defaultRealm } from "./utils/constants.js";
 import { CustomSettings } from "./resources/customSettings.js";
 import { CustomUsers } from "./resources/custom/users.js";
+import {UserPosts} from "./resources/custom/userPosts.js";
+import {PersonalAccounts} from "./resources/custom/personalAccounts.js";
 
 export interface TokenProvider {
   getAccessToken: () => Promise<string | undefined>;
@@ -51,6 +53,8 @@ export class KeycloakAdminClient {
   public cache: Cache;
   public customSettings: CustomSettings;
   public customUsers: CustomUsers;
+  public userPosts: UserPosts;
+  public personalAccounts: PersonalAccounts;
 
   // Members
   public baseUrl: string;
@@ -88,6 +92,8 @@ export class KeycloakAdminClient {
     this.cache = new Cache(this);
     this.customSettings = new CustomSettings(this);
     this.customUsers = new CustomUsers(this);
+    this.userPosts = new UserPosts(this);
+    this.personalAccounts = new PersonalAccounts(this);
   }
 
   public async auth(credentials: Credentials) {
