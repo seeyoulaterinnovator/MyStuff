@@ -40,6 +40,8 @@ import { ListEmptyState } from "../list-empty-state/ListEmptyState";
 import { BruteUser, findUsers } from "../role-mapping/resource";
 import { KeycloakDataTable } from "../table-toolbar/KeycloakDataTable";
 import { UserDataTableToolbarItems } from "./UserDataTableToolbarItems";
+import { useUserDataTable } from "../../customLogic/hooks/useUserDataTable";
+import type { UserInfoRepresentation } from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
 
 export type UserAttribute = {
   name: string;
@@ -101,15 +103,32 @@ export function UserDataTable() {
   const navigate = useNavigate();
   const [userStorage, setUserStorage] = useState<ComponentRepresentation[]>();
   const [searchUser, setSearchUser] = useState("");
-  const [selectedRows, setSelectedRows] = useState<UserRepresentation[]>([]);
-  const [searchType, setSearchType] = useState<SearchType>("default");
   const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState<UserAttribute[]>([]);
   const [profile, setProfile] = useState<UserProfileConfig>({});
   const [query, setQuery] = useState("");
+  const [selectedRows, setSelectedRows] = useState<
+    Array<UserRepresentation | UserInfoRepresentation>
+  >([]);
 
   const [key, setKey] = useState(0);
   const refresh = () => setKey(key + 1);
+
+  const {
+    userColumns,
+    customFilters,
+    isCustomTheme,
+    realms,
+    userDetailColumns,
+    handleCustomAction,
+    searchUserWithCustomFilters,
+    UploadUserInfo,
+    customLoader,
+  } = useUserDataTable({ selectedRows, refresh, userStorage });
+
+  const [searchType, setSearchType] = useState<SearchType>(
+    isCustomTheme ? "custom" : "default",
+  );
 
   useFetch(
     async () => {
@@ -189,7 +208,11 @@ export function UserDataTable() {
     onConfirm: async () => {
       try {
         for (const user of selectedRows) {
-          await adminClient.users.del({ id: user.id! });
+          if (searchType === "custom") {
+            await adminClient.customUsers.delete?.({ id: user.id! });
+          } else {
+            await adminClient.users.del({ id: user.id! });
+          }
         }
         setSelectedRows([]);
         clearAllFilters();
@@ -289,12 +312,16 @@ export function UserDataTable() {
         clearAllFilters={clearAllFilters}
         createAttributeSearchChips={createAttributeSearchChips}
         searchUserWithAttributes={searchUserWithAttributes}
+        realms={realms}
+        customFilters={customFilters}
+        searchUserWithCustomFilters={searchUserWithCustomFilters}
+        onCustomAction={handleCustomAction}
       />
     );
   };
 
   const subtoolbar = () => {
-    if (!activeFilters.length) {
+    if (!activeFilters.length || searchType === "custom") {
       return;
     }
     return (
@@ -314,11 +341,96 @@ export function UserDataTable() {
     );
   };
 
+  if (searchType === "custom") {
+    return (
+      <>
+        <DeleteConfirm />
+        <UnlockUsersConfirm />
+        <UploadUserInfo />
+        <KeycloakDataTable
+          isSearching={
+            searchUser !== "" ||
+            activeFilters.length !== 0 ||
+            searchType === "custom"
+          }
+          key={key}
+          loader={customLoader}
+          isPaginated
+          ariaLabelKey="titleUsers"
+          canSelectAll
+          onSelect={(rows: UserInfoRepresentation[]) =>
+            setSelectedRows([...rows])
+          }
+          emptyState={
+            !listUsers ? (
+              <>
+                <Toolbar>
+                  <ToolbarContent>{toolbar()}</ToolbarContent>
+                </Toolbar>
+                <EmptyState data-testid="empty-state" variant="lg">
+                  <TextContent className="kc-search-users-text">
+                    <Text>{t("searchForUserDescription")}</Text>
+                  </TextContent>
+                </EmptyState>
+              </>
+            ) : (
+              <ListEmptyState
+                message={t("noUsersFound")}
+                instructions={t("emptyInstructions")}
+                primaryActionText={t("createNewUser")}
+                onPrimaryAction={goToCreate}
+              />
+            )
+          }
+          toolbarItem={toolbar()}
+          subToolbar={subtoolbar()}
+          isExpandable
+          isStriped
+          actionResolver={(rowData: IRowData) => {
+            const user: UserInfoRepresentation = rowData.data;
+
+            const actionResolvers = [
+              {
+                title: t("edit"),
+                onClick: () => {
+                  if (user.id) {
+                    setSelectedRows([user]);
+                    navigate(
+                      toUser({
+                        id: user.id,
+                        realm: realmName,
+                        tab: "settings",
+                      }),
+                    );
+                  }
+                },
+              },
+            ];
+
+            if (searchType === "custom") {
+              actionResolvers.push({
+                title: t("delete"),
+                onClick: () => {
+                  setSelectedRows([user]);
+                  toggleDeleteDialog();
+                },
+              });
+            }
+
+            return actionResolvers;
+          }}
+          columns={userColumns}
+          detailColumns={userDetailColumns}
+        />
+      </>
+    );
+  }
+
   return (
     <>
       <DeleteConfirm />
       <UnlockUsersConfirm />
-      <KeycloakDataTable
+      <KeycloakDataTable<BruteUser | UserInfoRepresentation>
         isSearching={searchUser !== "" || activeFilters.length !== 0}
         key={key}
         loader={loader}

@@ -1,9 +1,9 @@
 import type RealmRepresentation from "@keycloak/keycloak-admin-client/lib/defs/realmRepresentation";
 import type { UserProfileConfig } from "@keycloak/keycloak-admin-client/lib/defs/userProfileMetadata";
+import type { CustomUserQuery } from "@keycloak/keycloak-admin-client/lib/resources/custom/users";
 import {
   Button,
   ButtonVariant,
-  InputGroup,
   SearchInput,
   ToolbarItem,
   InputGroupItem,
@@ -11,6 +11,7 @@ import {
   MenuToggle,
   DropdownList,
   DropdownItem,
+  ToolbarGroup,
 } from "@patternfly/react-core";
 import { ArrowRightIcon, EllipsisVIcon } from "@patternfly/react-icons";
 import { ReactNode, useState } from "react";
@@ -21,6 +22,11 @@ import { SearchDropdown, SearchType } from "../../user/details/SearchFilter";
 import { UserAttribute } from "./UserDataTable";
 import { UserDataTableAttributeSearchForm } from "./UserDataTableAttributeSearchForm";
 import DropdownPanel from "../dropdown-panel/DropdownPanel";
+import { UserDataTableCustomSearchForm } from "./UserDataTableCustomSearchForm";
+import type { RealmNameRepresentation } from "../../context/RealmsContext";
+import { CustomUserToolbarAction } from "../../customLogic/constants/user";
+import { UploadButton } from "../../customLogic/ui/UploadButton";
+import type { CustomUsersActions } from "../../customLogic/types/users";
 
 type UserDataTableToolbarItemsProps = {
   searchDropdownOpen: boolean;
@@ -41,6 +47,10 @@ type UserDataTableToolbarItemsProps = {
   clearAllFilters: () => void;
   createAttributeSearchChips: () => ReactNode;
   searchUserWithAttributes: () => void;
+  realms: RealmNameRepresentation[];
+  customFilters: CustomUserQuery;
+  searchUserWithCustomFilters: (customFilters: CustomUserQuery) => void;
+  onCustomAction?: (action: CustomUsersActions) => void;
 };
 
 export function UserDataTableToolbarItems({
@@ -62,6 +72,10 @@ export function UserDataTableToolbarItems({
   clearAllFilters,
   createAttributeSearchChips,
   searchUserWithAttributes,
+  realms,
+  customFilters,
+  searchUserWithCustomFilters,
+  onCustomAction,
 }: UserDataTableToolbarItemsProps) {
   const { t } = useTranslation();
   const [kebabOpen, setKebabOpen] = useState(false);
@@ -77,7 +91,7 @@ export function UserDataTableToolbarItems({
   const searchItem = () => {
     return (
       <ToolbarItem>
-        <InputGroup>
+        <ToolbarGroup className="pf-m-wrap" variant="filter-group">
           <InputGroupItem>
             <SearchDropdown
               searchType={searchType}
@@ -89,7 +103,8 @@ export function UserDataTableToolbarItems({
           </InputGroupItem>
           {searchType === "default" && defaultSearchInput()}
           {searchType === "attribute" && attributeSearchInput()}
-        </InputGroup>
+          {searchType === "custom" && customSearchInput()}
+        </ToolbarGroup>
       </ToolbarItem>
     );
   };
@@ -155,6 +170,19 @@ export function UserDataTableToolbarItems({
     );
   };
 
+  const customSearchInput = () => {
+    return (
+      <UserDataTableCustomSearchForm
+        customFilters={customFilters}
+        realms={realms}
+        searchUserWithCustomFilters={(newCustomFilters) => {
+          searchUserWithCustomFilters(newCustomFilters);
+          setSearchDropdownOpen(false);
+        }}
+      />
+    );
+  };
+
   const bruteForceProtectionToolbarItem = !realm.bruteForceProtected ? (
     <ToolbarItem>
       <Button
@@ -212,12 +240,112 @@ export function UserDataTableToolbarItems({
 
   const actionItems = (
     <>
-      <ToolbarItem>
-        <Button data-testid="add-user" onClick={goToCreate}>
-          {t("addUser")}
-        </Button>
-      </ToolbarItem>
-      {bruteForceProtectionToolbarItem}
+      <ToolbarGroup
+        align={{
+          md: "alignLeft",
+          "2xl": "alignRight",
+        }}
+        className="pf-m-wrap"
+      >
+        <ToolbarItem>
+          <Button
+            onClick={() => onCustomAction?.({ type: CustomUserToolbarAction.SEND_LOGIN })}
+          >
+            {t("sendLogin")}
+          </Button>
+        </ToolbarItem>
+        <ToolbarItem>
+          <Button
+            onClick={() =>
+              onCustomAction?.(
+                { type: CustomUserToolbarAction.SEND_LOGIN_AND_RESET_PASSWORD, }
+              )
+            }
+          >
+            {t("sendLoginAndResetPassword")}
+          </Button>
+        </ToolbarItem>
+      </ToolbarGroup>
+      <ToolbarGroup
+        align={{ md: "alignLeft", "2xl": "alignRight" }}
+        className="pf-m-wrap"
+      >
+        {/* <ToolbarItem>
+          <Button
+            onClick={() =>
+              onCustomAction?.({ type: CustomUserToolbarAction.DOWNLOAD_TEMPLATE_CSV })
+            }
+          >
+            {t("downloadTemplateCSV")}
+          </Button>
+        </ToolbarItem>
+        <ToolbarItem>
+          <Button
+            onClick={() =>
+              onCustomAction?.({ type: CustomUserToolbarAction.DOWNLOAD_TEMPLATE_EXCEL })
+            }
+          >
+            {t("downloadTemplateExcel")}
+          </Button>
+        </ToolbarItem> */}
+        <ToolbarItem>
+          <UploadButton 
+            extensions={".csv,.xls,.xlsx,.ctl"}
+            onUpload={(event) => onCustomAction?.({ type: CustomUserToolbarAction.IMPORT_FILE, payload: event.target.files?.[0] })}
+          >
+            {t("importFile")}
+          </UploadButton>
+        </ToolbarItem>
+        {/* <ToolbarItem>
+          <Button
+            onClick={() => onCustomAction?.({ type: CustomUserToolbarAction.EXPORT_CSV })}
+          >
+            {t("exportCSV")}
+          </Button>
+        </ToolbarItem>
+        <ToolbarItem>
+          <Button
+            onClick={() =>
+              onCustomAction?.({ type: CustomUserToolbarAction.EXPORT_EXCEL })
+            }
+          >
+            {t("exportExcel")}
+          </Button>
+        </ToolbarItem> */}
+        <ToolbarItem>
+          <Button
+            onClick={() =>
+              onCustomAction?.({ type: CustomUserToolbarAction.RESET_PASSWORD })
+            }
+          >
+            {t("resetPassword")}
+          </Button>
+        </ToolbarItem>
+        <ToolbarItem>
+          <Button
+            onClick={() =>
+              onCustomAction?.({ type: CustomUserToolbarAction.BLOCK_USERS })
+            }
+          >
+            {t("blockUsers")}
+          </Button>
+        </ToolbarItem>
+        <ToolbarItem>
+          <Button
+            onClick={() =>
+              onCustomAction?.({ type: CustomUserToolbarAction.UNLOCK_USERS })
+            }
+          >
+            {t("unlockUsers")}
+          </Button>
+        </ToolbarItem>
+        <ToolbarItem>
+          <Button data-testid="add-user" onClick={goToCreate}>
+            {t("addUser")}
+          </Button>
+        </ToolbarItem>
+        {bruteForceProtectionToolbarItem}
+      </ToolbarGroup>
     </>
   );
 

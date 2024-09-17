@@ -8,10 +8,12 @@ import {
   ToolbarItem,
 } from "@patternfly/react-core";
 import { FilterIcon } from "@patternfly/react-icons";
+import { useRealm } from "../../context/realm-context/RealmContext";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { AdminTheme } from "../../customLogic/constants/theme";
 
-export type SearchType = "default" | "attribute";
+export type SearchType = "default" | "attribute" | "custom";
 
 type SearchToolbarProps = SearchDropdownProps;
 
@@ -25,6 +27,8 @@ export const SearchDropdown = ({
   onSelect,
 }: SearchDropdownProps) => {
   const { t } = useTranslation();
+  const { realmRepresentation: realm } = useRealm();
+  const isCustomTheme = realm?.adminTheme === AdminTheme.KEYCLOAK_V2;
   const [searchToggle, setSearchToggle] = useState(false);
 
   const createDropdown = (searchType: SearchType) => (
@@ -39,6 +43,9 @@ export const SearchDropdown = ({
     </DropdownItem>
   );
   const options = [createDropdown("default"), createDropdown("attribute")];
+  if (isCustomTheme) {
+    options.unshift(createDropdown("custom"));
+  }
 
   return (
     <Dropdown
