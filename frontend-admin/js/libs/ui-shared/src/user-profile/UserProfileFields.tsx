@@ -52,6 +52,7 @@ export type UserProfileFieldProps = {
   inputType: InputType;
   attribute: UserProfileAttributeMetadata;
   renderer?: (attribute: UserProfileAttributeMetadata) => ReactNode;
+  disabled?: boolean;
 };
 
 export type OptionLabel = Record<string, string> | undefined;
@@ -158,6 +159,7 @@ export const UserProfileFields = ({
                   currentLocale={currentLocale}
                   renderer={renderer}
                   attribute={attribute}
+                  disabled={attribute.name === 'lastName'}
                 />
               ))}
             </div>
@@ -176,6 +178,7 @@ type FormFieldProps = {
   renderer?: (
     attribute: UserProfileAttributeMetadata,
   ) => JSX.Element | undefined;
+  disabled?: boolean;
 };
 
 const FormField = ({
@@ -185,6 +188,7 @@ const FormField = ({
   supportedLocales,
   currentLocale,
   attribute,
+  disabled,
 }: FormFieldProps) => {
   const value = form.watch(
     fieldName(attribute.name) as FieldPath<UserFormFields>,
@@ -214,6 +218,7 @@ const FormField = ({
       inputType={inputType}
       attribute={attribute}
       renderer={renderer}
+      disabled={disabled}
     />
   );
 };

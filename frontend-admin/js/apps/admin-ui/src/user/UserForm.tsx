@@ -184,6 +184,7 @@ export const UserForm = ({
           name="requiredActions"
           label="requiredUserActions"
           help="requiredUserActionsHelp"
+          disabled={!user?.id}
         />
         {(user?.federationLink || user?.origin) && canViewFederationLink && (
           <FormGroup
