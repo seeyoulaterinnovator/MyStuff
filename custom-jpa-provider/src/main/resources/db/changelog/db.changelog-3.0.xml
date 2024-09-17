@@ -42,7 +42,7 @@
                     from COMPONENT_CONFIG cf
                     join COMPONENT c on c.ID = cf.COMPONENT_ID
                     join REALM r on r.ID = c.REALM_ID
-                    where cf.NAME = 'kc.user.profile.config' and r.NAME = 'user'
+                    where cf.NAME = 'kc.user.profile.config' and r.NAME in ('user', 'ER-TELECOM', 'S-TELECOM')
                 ) as q2
             set q1.value = q2.new_value
             where q1.id = q2.id;
