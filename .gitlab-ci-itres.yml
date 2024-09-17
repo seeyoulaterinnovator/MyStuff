@@ -34,53 +34,34 @@ stages:
   tags:
     - sso-build-k8s
 
-frontend:domru:build:
+.frontend:theme:build:
   stage: build
-  except:
-    - master
   script:
     - export PATH=/usr/nodejs/node-v20/bin:$PATH
-    - cd frontend/domru
+    - cd frontend/$BUILD_THEME
     - cp $_NPMRC .npmrc
     - npm i && npm run build
   artifacts:
     paths:
-      - keycloak-extension/src/main/resources/themes/domru/login/resources/build/
+      - keycloak-extension/src/main/resources/themes/$BUILD_THEME/login/resources/build/
     name: "domru-sso-$CI_PIPELINE_ID"
     expire_in: 1 day
   allow_failure: false
+
+frontend:domru:build:
+  extends: .frontend:theme:build
+  variables:
+    BUILD_THEME: domru
 
 frontend:ertelecom:build:
-  stage: build
-  except:
-    - master
-  script:
-    - export PATH=/usr/nodejs/node-v20/bin:$PATH
-    - cd frontend/ertelecom
-    - cp $_NPMRC .npmrc
-    - npm i && npm run build
-  artifacts:
-    paths:
-      - keycloak-extension/src/main/resources/themes/ertelecom/login/resources/build/
-    name: "domru-sso-$CI_PIPELINE_ID"
-    expire_in: 1 day
-  allow_failure: false
+  extends: .frontend:theme:build
+  variables:
+    BUILD_THEME: ertelecom
 
 frontend:stelecom:build:
-  stage: build
-  except:
-    - master
-  script:
-    - export PATH=/usr/nodejs/node-v20/bin:$PATH
-    - cd frontend/stelecom
-    - cp $_NPMRC .npmrc
-    - npm i && npm run build
-  artifacts:
-    paths:
-      - keycloak-extension/src/main/resources/themes/stelecom/login/resources/build/
-    name: "domru-sso-$CI_PIPELINE_ID"
-    expire_in: 1 day
-  allow_failure: false
+  extends: .frontend:theme:build
+  variables:
+    BUILD_THEME: stelecom
 
 frontend:admin:build:
   stage: build
@@ -148,6 +129,10 @@ container-image:
   artifacts:
     paths:
       - .ci_status/
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH == "cicd"
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: manual
   tags:
     - sso-build-shell
   needs:
@@ -157,13 +142,17 @@ domru:devel:
   stage: deploy
   variables:
     DOCKER_HOST: ssh://swarm2.dev.it-resource.team
+  environment:
+    name: devel
+    url: https://er-sso.dev.it-resource.team
   script:
     - envsubst < .gitlab-ci/docker-compose-template.yml > docker-compose.yml
     - docker login $REGISTRY -u $GROUP_DEPLOYER -p $GROUP_DEPLOYER_PASS
     - docker stack deploy --with-registry-auth -c docker-compose.yml ertelecom-sso
-  environment:
-    name: devel
-    url: https://sso.dev.it-resource.team
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH == "cicd"
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: manual
   needs: ["container-image"]
 
 domru:stage:
