@@ -5,7 +5,7 @@ import { UserProfileGroup } from "./UserProfileGroup";
 import { fieldName, isRequiredAttribute, label } from "./utils";
 
 export const TextComponent = (props: UserProfileFieldProps) => {
-  const { form, inputType, attribute } = props;
+  const { form, inputType, attribute, disabled } = props;
   const isRequired = isRequiredAttribute(attribute);
   const type = inputType.startsWith("html")
     ? (inputType.substring("html".length + 2) as TextInputTypes)
@@ -21,8 +21,9 @@ export const TextComponent = (props: UserProfileFieldProps) => {
           props.t,
           attribute.annotations?.["inputTypePlaceholder"] as string,
         )}
-        readOnly={attribute.readOnly}
+        readOnly={attribute.readOnly || disabled}
         isRequired={isRequired}
+        isDisabled={disabled}
         {...form.register(fieldName(attribute.name))}
       />
     </UserProfileGroup>

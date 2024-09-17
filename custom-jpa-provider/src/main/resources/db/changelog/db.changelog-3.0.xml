@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet id="1" author="korotaev.miu">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mariadb"/>
+        </preConditions>
+        <comment>Make first name profile attribute as required</comment>
+        <sql>
+            update
+                COMPONENT_CONFIG as q1,
+                (
+                    select
+                        cf.id,
+                        @path_to_name := json_unquote(json_search(value, 'one', 'firstName', null, '$.attributes[*].name')) as path_to_name,
+                        @path := concat(trim (trailing '.name' from @path_to_name), '.required.roles') as path,
+                        @new_value := json_set(value, @path, json_array('admin', 'user')) as new_value
+                    from COMPONENT_CONFIG cf
+                    join COMPONENT c on c.ID = cf.COMPONENT_ID
+                    join REALM r on r.ID = c.REALM_ID
+                    where cf.NAME = 'kc.user.profile.config' and r.NAME in ('user', 'ER-TELECOM', 'S-TELECOM')
+                ) as q2
+            set q1.value = q2.new_value
+            where q1.id = q2.id;
+        </sql>
+    </changeSet>
+    <changeSet id="2" author="korotaev.miu">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mariadb"/>
+        </preConditions>
+        <comment>Make last name profile attribute as optional</comment>
+        <sql>
+            update
+                COMPONENT_CONFIG as q1,
+                (
+                    select
+                        cf.id,
+                        @path_to_name := json_unquote(json_search(value, 'one', 'lastName', null, '$.attributes[*].name')) as path_to_name,
+                        @path := concat(trim(trailing '.name' from @path_to_name), '.required') as path,
+                        @new_value := json_remove(value, @path) as new_value
+                    from COMPONENT_CONFIG cf
+                    join COMPONENT c on c.ID = cf.COMPONENT_ID
+                    join REALM r on r.ID = c.REALM_ID
+                    where cf.NAME = 'kc.user.profile.config' and r.NAME = 'user'
+                ) as q2
+            set q1.value = q2.new_value
+            where q1.id = q2.id;
+        </sql>
+    </changeSet>
+</databaseChangeLog>
