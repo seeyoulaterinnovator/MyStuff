@@ -23,6 +23,9 @@ export type AccessType =
   | "manage-clients"
   | "query-groups"
   | "anyone"
+  | "button-add-customer"
+  | "button-delete-customer"
+  | "edit-customer"
   | AccessTypeFunc;
 
 export default interface WhoAmIRepresentation {

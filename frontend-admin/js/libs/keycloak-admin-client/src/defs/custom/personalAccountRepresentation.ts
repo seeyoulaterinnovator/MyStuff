@@ -3,8 +3,6 @@ import type {Response} from "../jsonResponse.js";
 export type PersonalAccountRepresentation = {
   uuid: string;
 
-  post_id: string;
-
   value: string;
 };
 

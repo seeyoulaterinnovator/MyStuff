@@ -3,34 +3,76 @@ import {useParams} from "../utils/useParams";
 import type {UserParams} from "./routes/User";
 import {useRealm} from "../context/realm-context/RealmContext";
 import {useTranslation} from "react-i18next";
-import {Button, PageSection} from "@patternfly/react-core";
+import {Button, PageSection, ToolbarItem} from "@patternfly/react-core";
 import {KeycloakDataTable} from "../components/table-toolbar/KeycloakDataTable";
 import {ListEmptyState} from "../components/list-empty-state/ListEmptyState";
 import {
   PersonalAccountRepresentation
 } from "@keycloak/keycloak-admin-client/lib/defs/custom/personalAccountRepresentation";
 import {UserPostRepresentation} from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
+import {useAccess} from "../context/access/Access";
+import {Link} from "react-router-dom";
+import {toAddClient} from "../clients/routes/AddClient";
+import {useState} from "react";
+import {useWhoAmI} from "../context/whoami/WhoAmI";
+
+import {useFetch} from "../utils/useFetch";
+import {UserPostRoleDropdown} from "./user-customer/UserPostRoleDropdown";
+import {KeycloakSpinner} from "../components/keycloak-spinner/KeycloakSpinner";
+import {UserPostRoleRepresentation} from "@keycloak/keycloak-admin-client/lib/defs/custom/userPostRoleRepresentation";
+import {UserPostAccountsMultiInput} from "./user-customer/UserPostAccountsMultiInput";
 
 export type UserPostFullRepresentation = UserPostRepresentation & {
   accounts: PersonalAccountRepresentation[];
 }
 
-const AccountCell = ({ post } : { post: UserPostFullRepresentation }) => {
-  // TODO
-  return (<></>);
-};
+const ToolbarItems = () => {
+  const { realm } = useRealm();
+  const { hasAccess } = useAccess();
+  const { t } = useTranslation();
 
-const RoleCell = ({ post } : { post: UserPostFullRepresentation }) => {
-  // TODO
-  return (<></>);
+  const canCreate = hasAccess("manage-users") && (realm === "master" || hasAccess("button-add-customer"));
+
+  return (
+    <>
+      <ToolbarItem>
+        <Button
+          disabled={!canCreate}
+          component={(props) => <Link {...props} to={toAddClient({ realm })} />}
+        >
+          {t("createUserPost")}
+        </Button>
+      </ToolbarItem>
+    </>
+  );
 };
 
 export const UserCustomer = () => {
   const {adminClient} = useAdminClient();
-
   const { id } = useParams<UserParams>();
   const { realm } = useRealm();
+  const { whoAmI } = useWhoAmI();
+  const { hasAccess } = useAccess();
   const { t } = useTranslation();
+
+  const [roles, setRoles] = useState<UserPostRoleRepresentation[] | null>(null);
+  const [tableKey, setTableKey] = useState(0);
+
+  const refresh = () => setTableKey(prevKey => prevKey + 1);
+
+  const canDelete = hasAccess("manage-users")
+    && (whoAmI.getRealm() === "master" || hasAccess("button-delete-customer"));
+
+  const canEdit = hasAccess("manage-users")
+    && (whoAmI.getRealm() === "master" || hasAccess("edit-customer"));
+
+  useFetch(
+    async () => {
+      return (await adminClient.userPosts.findUserPostRoles({ realm })).results.roles;
+    },
+    setRoles,
+    [realm],
+  );
 
   const loader = async () => {
     const postsResponse = await adminClient.userPosts.findUserPosts({ userId: id, realm });
@@ -41,16 +83,20 @@ export const UserCustomer = () => {
         realm
       }))
     ));
-    const accounts = postAccountsResponses.flatMap(response => response.results.data.accounts);
+    const accountDatas = postAccountsResponses.flatMap(response => response.results.data);
     return posts.map(post => ({
       ...post,
-      accounts: accounts.filter(account => account.post_id === post.id)
+      accounts: accountDatas.filter(data => data.post_id === post.id)
+        .flatMap(data => data.accounts)
     } as UserPostFullRepresentation));
   };
+
+  if (!roles) return <KeycloakSpinner />;
 
   return (
     <PageSection variant="light" className="pf-v5-u-p-0">
       <KeycloakDataTable
+        key={tableKey}
         loader={loader}
         ariaLabelKey="titleCustomer"
         columns={[{
@@ -59,24 +105,42 @@ export const UserCustomer = () => {
           cellRenderer: (post) => `${post.selected ? t('selected') : ''}`
         },{
           name: "id",
-          displayKey: "id"
+          displayKey: "id",
+          cellRenderer: (post) => <span style={{wordWrap: 'break-word'}}>{post.id}</span>
         }, {
           name: "organization",
           displayKey: "organization"
         }, {
           name: "account",
           displayKey: "account",
-          cellRenderer: (post) => <AccountCell post={post} />
+          cellRenderer: (post) => (
+            <UserPostAccountsMultiInput
+              userPostId={post.id}
+              accounts={post.accounts}
+              onChange={refresh}
+              isReadonly={!canEdit}
+            />
+          )
         }, {
           name: "tomsId",
-          displayKey: "tomsId"
+          displayKey: "tomsId",
+          cellRenderer: (post) => <span style={{wordWrap: 'break-word'}}>{post.tomsId}</span>
         }, {
           name: "dmpId",
-          displayKey: "dmp"
+          displayKey: "dmpId",
+          cellRenderer: (post) => <span style={{wordWrap: 'break-word'}}>{post.dmpId}</span>
         }, {
           name: "role",
           displayKey: "role",
-          cellRenderer: (post) => <RoleCell post={post} />
+          cellRenderer: (post) =>  (
+            <UserPostRoleDropdown
+              userPostId={post.id}
+              defaultUserPostRoleId={post.userRole.id}
+              userPostRoles={roles}
+              onChange={refresh}
+              isReadonly={!canEdit}
+            />
+          )
         }, {
           name: "systems",
           displayKey: "systems",
@@ -88,6 +152,7 @@ export const UserCustomer = () => {
               <Button
                 style={{float: 'right'}}
                 type="button"
+                disabled={!canDelete}
                 onClick={async () => {
                   // TODO
                 }}
@@ -103,6 +168,7 @@ export const UserCustomer = () => {
             instructions={t("noUserPostsInstructions")}
           />
         }
+        toolbarItem={<ToolbarItems/>}
       />
     </PageSection>
   );
