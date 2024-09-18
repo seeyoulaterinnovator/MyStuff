@@ -1,136 +1,169 @@
-import type { DownloadedUsersRepresentation } from '../../defs/custom/userRepresentation.js';
-import type { UsersResponseRepresentation } from '../../defs/custom/userRepresentation.js';
-import type { KeycloakAdminClient } from '../../client.js';
-import Resource from '../resource.js';
-import { CustomAdminRealm } from './adminRealm.js';
+import type {
+  ActiveImportUsersResponseRepresentation,
+  DownloadedUsersRepresentation,
+  ImportUsersReportResponseRepresentation,
+} from "../../defs/custom/userRepresentation.js";
+import type { UsersResponseRepresentation } from "../../defs/custom/userRepresentation.js";
+import type { KeycloakAdminClient } from "../../client.js";
+import Resource from "../resource.js";
+import { CustomAdminRealm } from "./adminRealm.js";
 
 export type CustomUserQuery = Partial<{
-	searchRealm: string;
-	search: string;
-	searchUser: string;
-	searchToms: string;
-	searchPhone: string;
-	first: number;
-	max: number;
-	sortAsc: string;
-	sortField: string;
+  searchRealm: string;
+  search: string;
+  searchUser: string;
+  searchToms: string;
+  searchPhone: string;
+  first: number;
+  max: number;
+  sortAsc: string;
+  sortField: string;
+}>;
+
+export type CustomImportUsersQuery = Partial<{
+  first: number;
+  max: number;
 }>;
 
 export class CustomUsers extends Resource<{ realm?: string }> {
-	private customAdminRealm: CustomAdminRealm;
+  protected customAdminRealm: CustomAdminRealm;
 
-	public delete;
+  public delete;
 
-	public findUsers = this.makeRequest<CustomUserQuery, UsersResponseRepresentation>({
-		method: 'GET',
-		path: '/users-info/search',
-		queryParamKeys: [
-			'searchRealm',
-			'search',
-			'searchUser',
-			'searchToms',
-			'searchPhone',
-			'first',
-			'max',
-			'sortAsc',
-			'sortField',
-		],
-	});
+  public findUsers = this.makeRequest<CustomUserQuery, UsersResponseRepresentation>({
+    method: 'GET',
+    path: '/users-info/search',
+    queryParamKeys: [
+      'searchRealm',
+      'search',
+      'searchUser',
+      'searchToms',
+      'searchPhone',
+      'first',
+      'max',
+      'sortAsc',
+      'sortField',
+    ],
+  });
 
-	public sendLogin = this.makeUpdateRequest<
-		unknown,
-		string[], // userIds
-		void
-	>({
-		method: 'POST',
-		path: '/users-toms/send/login',
-	});
+  public sendLogin = this.makeUpdateRequest<
+    unknown,
+    string[], // userIds
+    void
+  >({
+    method: 'POST',
+    path: '/users-toms/send/login',
+  });
 
-	public sendLoginAndResetPassword = this.makeUpdateRequest<
-		unknown,
-		string[], // userIds
-		void
-	>({
-		method: 'POST',
-		path: '/users-toms/credential/reset-with-send-login',
-	});
+  public sendLoginAndResetPassword = this.makeUpdateRequest<
+    unknown,
+    string[], // userIds
+    void
+  >({
+    method: 'POST',
+    path: '/users-toms/credential/reset-with-send-login',
+  });
 
-	public downloadCSVTemplate = this.makeRequest<unknown, ArrayBuffer>({
-		method: 'POST',
-		path: '/users-toms/downloadImportUsersTemplate/csv',
-		headers: {
-			accept: 'application/octet-stream',
-		},
-	});
+  public downloadCSVTemplate = this.makeRequest<unknown, ArrayBuffer>({
+    method: 'POST',
+    path: '/users-toms/downloadImportUsersTemplate/csv',
+    headers: {
+      accept: 'application/octet-stream',
+    },
+  });
 
-	public downloadExcelTemplate = this.makeRequest<unknown, ArrayBuffer>({
-		method: 'POST',
-		path: '/users-toms/downloadImportUsersTemplate/xlsx',
-		headers: {
-			accept: 'application/octet-stream',
-		},
-	});
+  public downloadExcelTemplate = this.makeRequest<unknown, ArrayBuffer>({
+    method: 'POST',
+    path: '/users-toms/downloadImportUsersTemplate/xlsx',
+    headers: {
+      accept: 'application/octet-stream',
+    },
+  });
 
-	public importFile = (filename?: string) =>
-		this.makeUpdateRequest<unknown, FormData>({
-			method: 'POST',
-			path: '/users-toms/uploadUsers',
-			headers: {
-				'Content-Disposition': `form-data; name="file"; filename=${filename}`,
-			},
-		});
+  public importFile = (filename?: string) =>
+    this.makeUpdateRequest<unknown, FormData>({
+      method: 'POST',
+      path: '/users-toms/uploadUsers',
+      headers: {
+        'Content-Disposition': `form-data; name="file"; filename=${filename}`,
+      },
+    });
 
-	public downloadUsers = this.makeUpdateRequest<
-		unknown,
-		DownloadedUsersRepresentation,
-		ArrayBuffer
-	>({
-		method: 'POST',
-		path: '/users-toms/downloadUsers',
-	});
+  public downloadUsers = this.makeUpdateRequest<
+    unknown,
+    DownloadedUsersRepresentation,
+    ArrayBuffer
+  >({
+    method: 'POST',
+    path: '/users-toms/downloadUsers',
+  });
 
-	public resetPassword = this.makeUpdateRequest<
-		unknown,
-		string[], // userIds
-		void
-	>({
-		method: 'POST',
-		path: '/manage/credential/reset',
-	});
+  public getImportsReport = this.makeRequest<
+    CustomImportUsersQuery,
+    ImportUsersReportResponseRepresentation
+  >({
+    method: 'GET',
+    path: '/users-toms/importUsersReports',
+    queryParamKeys: ['first', 'max'],
+  });
 
-	public block = this.makeUpdateRequest<
-		unknown,
-		string[], // userIds
-		void
-	>({
-		method: 'POST',
-		path: '/manage/block',
-	});
+  public downloadImportUsersReport = this.makeRequest<{ id: string }, ArrayBuffer>({
+    method: 'POST',
+    path: '/users-toms/downloadImportUsersReport/{id}',
+    urlParamKeys: ['id'],
+  });
 
-	public unlock = this.makeUpdateRequest<
-		unknown,
-		string[], // userIds
-		void
-	>({
-		method: 'POST',
-		path: '/manage/unlock',
-	});
+  public activeImportUsersReport = this.makeRequest<
+    { id: string },
+    ActiveImportUsersResponseRepresentation
+  >({
+    method: 'POST',
+    path: '/users-toms/activateImportUsersReport/{id}',
+    urlParamKeys: ['id'],
+  });
 
-	constructor(client: KeycloakAdminClient) {
-		super(client, {
-			path: '/realms/{realm}',
-			getUrlParams: () => ({
-				realm: client.realmName,
-			}),
-			getBaseUrl: () => client.baseUrl,
-		});
+  public resetPassword = this.makeUpdateRequest<
+    unknown,
+    string[], // userIds
+    void
+  >({
+    method: 'POST',
+    path: '/manage/credential/reset',
+  });
 
-		this.customAdminRealm = new CustomAdminRealm(client);
+  public block = this.makeUpdateRequest<
+    unknown,
+    string[], // userIds
+    void
+  >({
+    method: 'POST',
+    path: '/manage/block',
+  });
 
-		this.delete = this.customAdminRealm.makeRequest<{ id: string }, void>({
-			method: 'DELETE',
-			path: '/users/{id}',
-			urlParamKeys: ['id'],
-		});
-	}
+  public unlock = this.makeUpdateRequest<
+    unknown,
+    string[], // userIds
+    void
+  >({
+    method: 'POST',
+    path: '/manage/unlock',
+  });
+
+  constructor(client: KeycloakAdminClient) {
+    super(client, {
+      path: '/realms/{realm}',
+      getUrlParams: () => ({
+        realm: client.realmName,
+      }),
+      getBaseUrl: () => client.baseUrl,
+    });
+
+    this.customAdminRealm = new CustomAdminRealm(client);
+
+    this.delete = this.customAdminRealm.makeRequest<{ id: string }, void>({
+      method: 'DELETE',
+      path: '/users/{id}',
+      urlParamKeys: ['id'],
+    });
+  }
 }
