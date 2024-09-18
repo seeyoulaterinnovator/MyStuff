@@ -10,3 +10,7 @@ export enum CustomUserToolbarAction {
   BLOCK_USERS = "blockUsers",
   UNLOCK_USERS = "unlockUsers",
 }
+
+export enum CustomImportUsersToolbarAction {
+  IMPORT_FILE = "importFile",
+}

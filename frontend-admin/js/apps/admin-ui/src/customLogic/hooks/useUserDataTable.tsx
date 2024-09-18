@@ -22,7 +22,7 @@ import { useTranslation } from "react-i18next";
 import { saveAs } from "file-saver";
 import { useConfirmDialog } from "../../components/confirm-dialog/ConfirmDialog";
 import { isExistGuard } from "../helpers/guards";
-import type { CustomUsersActions } from "../types/users";
+import type { CustomUsersAction } from "../types/users";
 
 const getBlockedUsers = (
   users?: Array<UserRepresentation | UserInfoRepresentation>,
@@ -217,7 +217,7 @@ export const useUserDataTable = ({
     return false;
   }, [selectedRows]);
 
-  const handleCustomAction = async (action: CustomUsersActions) => {
+  const handleCustomAction = async (action: CustomUsersAction) => {
     const { type } = action;
 
     switch (action.type) {

@@ -26,7 +26,7 @@ import { UserDataTableCustomSearchForm } from "./UserDataTableCustomSearchForm";
 import type { RealmNameRepresentation } from "../../context/RealmsContext";
 import { CustomUserToolbarAction } from "../../customLogic/constants/user";
 import { UploadButton } from "../../customLogic/ui/UploadButton";
-import type { CustomUsersActions } from "../../customLogic/types/users";
+import type { CustomUsersAction } from "../../customLogic/types/users";
 
 type UserDataTableToolbarItemsProps = {
   searchDropdownOpen: boolean;
@@ -50,7 +50,7 @@ type UserDataTableToolbarItemsProps = {
   realms: RealmNameRepresentation[];
   customFilters: CustomUserQuery;
   searchUserWithCustomFilters: (customFilters: CustomUserQuery) => void;
-  onCustomAction?: (action: CustomUsersActions) => void;
+  onCustomAction?: (action: CustomUsersAction) => void;
 };
 
 export function UserDataTableToolbarItems({
@@ -249,7 +249,9 @@ export function UserDataTableToolbarItems({
       >
         <ToolbarItem>
           <Button
-            onClick={() => onCustomAction?.({ type: CustomUserToolbarAction.SEND_LOGIN })}
+            onClick={() =>
+              onCustomAction?.({ type: CustomUserToolbarAction.SEND_LOGIN })
+            }
           >
             {t("sendLogin")}
           </Button>
@@ -257,9 +259,9 @@ export function UserDataTableToolbarItems({
         <ToolbarItem>
           <Button
             onClick={() =>
-              onCustomAction?.(
-                { type: CustomUserToolbarAction.SEND_LOGIN_AND_RESET_PASSWORD, }
-              )
+              onCustomAction?.({
+                type: CustomUserToolbarAction.SEND_LOGIN_AND_RESET_PASSWORD,
+              })
             }
           >
             {t("sendLoginAndResetPassword")}
@@ -289,9 +291,14 @@ export function UserDataTableToolbarItems({
           </Button>
         </ToolbarItem> */}
         <ToolbarItem>
-          <UploadButton 
+          <UploadButton
             extensions={".csv,.xls,.xlsx,.ctl"}
-            onUpload={(event) => onCustomAction?.({ type: CustomUserToolbarAction.IMPORT_FILE, payload: event.target.files?.[0] })}
+            onUpload={(event) =>
+              onCustomAction?.({
+                type: CustomUserToolbarAction.IMPORT_FILE,
+                payload: event.target.files?.[0],
+              })
+            }
           >
             {t("importFile")}
           </UploadButton>
