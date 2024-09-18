@@ -1,0 +1,362 @@
+variables:
+  GIT_STRATEGY: fetch
+  BASE_DIR: /opt/gitlab-ci
+  REGISTRY: registry.dev.it-resource.team
+
+stages:
+  - compile
+  - test
+  - build
+  - createwar
+  - docker
+  - deploy
+
+.build: &build-template
+  before_script:
+  - if [ -f ./gradlew ]; then
+  - chmod 775 ./gradlew
+  - fi
+
+.init_vars: &init-variables
+  before_script:
+  - cp ${ERTK_PEM} configs/ertk.pem
+  - envsubst < configs/sso.tmpl > configs/sso
+
+.domru:stage:template:
+  stage: deploy
+  image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
+  when: manual
+  script:
+    - export FQDN=`echo "${CI_ENVIRONMENT_URL}" | sed 's/^http\(\|s\):\/\///g'`
+    - consul-template -once -template ".helm/values-dev.yaml.tpl:values.yaml"
+    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml ./.helm -n ${NAMESPACE} --atomic --timeout 5m
+    - helm history -n ${NAMESPACE} ${CI_ENVIRONMENT_SLUG} --max 5
+  tags:
+    - sso-build-k8s
+
+.frontend:theme:build:
+  stage: build
+  script:
+    - export PATH=/usr/nodejs/node-v20/bin:$PATH
+    - cd frontend/$BUILD_THEME
+    - cp $_NPMRC .npmrc
+    - npm i && npm run build
+  artifacts:
+    paths:
+      - keycloak-extension/src/main/resources/themes/$BUILD_THEME/login/resources/build/
+    name: "domru-sso-$CI_PIPELINE_ID"
+    expire_in: 1 day
+  allow_failure: false
+
+frontend:domru:build:
+  extends: .frontend:theme:build
+  variables:
+    BUILD_THEME: domru
+
+frontend:ertelecom:build:
+  extends: .frontend:theme:build
+  variables:
+    BUILD_THEME: ertelecom
+
+frontend:stelecom:build:
+  extends: .frontend:theme:build
+  variables:
+    BUILD_THEME: stelecom
+
+frontend:admin:build:
+  stage: build
+  except:
+    - master
+  script:
+    - export PATH=/usr/nodejs/node-v20/bin:$PATH
+    - cd frontend-admin
+    - cp $_NPMRC .npmrc
+    - pnpm install
+    - cd ../frontend-admin/js/apps/admin-ui
+    - pnpm run build
+  artifacts:
+    paths:
+      - keycloak-extension/src/main/resources/themes/keycloak.v2/admin/resources/
+    name: "domru-sso-$CI_PIPELINE_ID"
+    expire_in: 1 day
+  allow_failure: false
+
+back:build:
+  stage: build
+  <<: *build-template
+  except:
+    - master
+  variables:
+    JAVA_HOME: /usr/java/jdk-17
+  script:
+    - if [ -f ./gradlew ]; then chmod 775 ./gradlew; fi
+    - ./gradlew --stacktrace --console=plain build -Dorg.gradle.java.home=$JAVA_HOME
+  allow_failure: false
+  artifacts:
+    paths:
+      - build/keycloak-extension/libs/keycloak-extension-1.0.1-all.jar
+    name: "domru-sso-$CI_PIPELINE_ID"
+    expire_in: 1 day
+  cache:
+    key: "$CI_COMMIT_SHA"
+    paths:
+      - .gradle/
+  needs:
+    - "frontend:domru:build"
+    - "frontend:ertelecom:build"
+    - "frontend:stelecom:build"
+    - "frontend:admin:build"
+
+container-image:source:
+  stage: docker
+  <<: *init-variables
+  when: manual
+  script:
+    - docker build -t harbor.ertelecom.ru/sso-protected/keycloak:6.0.1 -f Dockerfile.intermediate .
+    - docker push harbor.ertelecom.ru/sso-protected/keycloak:6.0.1
+  artifacts:
+    paths:
+      - .ci_status/
+  tags:
+    - sso-build-shell
+
+container-image:
+  stage: docker
+  script:
+    - docker build --progress=plain -t $REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_PIPELINE_ID -f .gitlab-ci/Dockerfile .
+    - docker login $REGISTRY -u $GROUP_DEPLOYER -p $GROUP_DEPLOYER_PASS
+    - docker push $REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_PIPELINE_ID
+  artifacts:
+    paths:
+      - .ci_status/
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH == "cicd"
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: manual
+  tags:
+    - sso-build-shell
+  needs:
+    - "back:build"
+
+domru:devel:
+  stage: deploy
+  variables:
+    DOCKER_HOST: ssh://swarm2.dev.it-resource.team
+  environment:
+    name: devel
+    url: https://er-sso.dev.it-resource.team
+  script:
+    - envsubst < .gitlab-ci/docker-compose-template.yml > docker-compose.yml
+    - docker login $REGISTRY -u $GROUP_DEPLOYER -p $GROUP_DEPLOYER_PASS
+    - docker stack deploy --with-registry-auth -c docker-compose.yml ertelecom-sso
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH == "cicd"
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: manual
+  needs: ["container-image"]
+
+domru:stage:
+  extends: .domru:stage:template
+  environment:
+    name: stage
+    url: https://sso-balancer.testing.srv.loc
+  variables:
+    NAMESPACE: 'sso'
+    NODE_PORT: '30081'
+    REPLICA_COUNT: '1'
+
+domru:stage2:
+  extends: .domru:stage:template
+  environment:
+    name: stage2
+    url: https://sso-balancer2.testing.srv.loc
+  variables:
+    NAMESPACE: 'sso'
+    NODE_PORT: '30082'
+    REPLICA_COUNT: '1'
+
+domru:stage3:
+  extends: .domru:stage:template
+  environment:
+    name: stage3
+    url: https://sso-balancer3.testing.srv.loc
+  variables:
+    NAMESPACE: 'sso'
+    NODE_PORT: '30083'
+    REPLICA_COUNT: '1'
+
+domru:stage4:
+  extends: .domru:stage:template
+  environment:
+    name: stage4
+    url: https://sso-balancer4.testing.srv.loc
+  variables:
+    NAMESPACE: 'sso'
+    NODE_PORT: '30084'
+    REPLICA_COUNT: '1'
+
+domru:stage5:
+  extends: .domru:stage:template
+  environment:
+    name: stage5
+    url: https://sso-balancer5.testing.srv.loc
+  variables:
+    NAMESPACE: 'sso'
+    NODE_PORT: '30085'
+    REPLICA_COUNT: '3'
+
+infinispan:stage5:
+  stage: deploy
+  image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
+  when: manual
+  variables:
+    NAMESPACE: 'sso'
+    INFINISPAN_REPLICA_COUNT: '3'
+  script:
+    - export DTD=$(date | sha256sum)
+    - consul-template -once -template "./configs/infinispan/.helm/values-dev.yaml.tpl:values.yaml"
+    - ln -s ${INFINISPAN_MGMT_USERS} ./configs/infinispan/.helm/configs/mgmt-users.properties
+    - ln -s ${INFINISPAN_MGMT_GROUPS} ./configs/infinispan/.helm/configs/mgmt-groups.properties
+    - helm upgrade -i infinispan --values values.yaml ./configs/infinispan/.helm -n ${NAMESPACE} --atomic --timeout 5m
+    - helm history -n ${NAMESPACE} infinispan --max 5
+  tags:
+    - sso-build-k8s
+
+domru:perm:primary:
+  stage: deploy
+  <<: *init-variables
+  when: manual
+  only:
+    - tags
+  environment:
+    name: production-perm-primary
+    url: https://auth.dom.ru/auth
+  script:
+    - for i in domru stelecom ertelecom; do cp -r build/deploy/themes/${i} /usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app02:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app03:/usr/local/keycloak/themes; done
+    - mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - cp build/deploy/standalone/data/password-blacklists/black_list_password.txt /usr/local/keycloak/domain/servers/server-one/data/password-blacklists
+    - ssh sso-app02 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app02:/usr/local/keycloak/domain/servers/server-two/data/password-blacklists
+    - ssh sso-app03 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app03:/usr/local/keycloak/domain/servers/server-three/data/password-blacklists
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app02:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app02:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app03:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app03:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - ~/scripts/deploy.sh primary
+  resource_group: "${CI_PROJECT_NAMESPACE}${CI_PROJECT_NAME}"
+  tags:
+    - sso-domain-controller-perm
+
+domru:perm:secondary:
+  stage: deploy
+  <<: *init-variables
+  when: manual
+  only:
+    - tags
+  environment:
+    name: production-perm-secondary
+    url: https://auth.dom.ru/auth
+  script:
+    - for i in domru stelecom ertelecom; do scp -r build/deploy/themes/${i} sso-app04:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app05:/usr/local/keycloak/themes; done
+    - ssh sso-app04 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app04:/usr/local/keycloak/domain/servers/server-four/data/password-blacklists
+    - ssh sso-app05 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app05:/usr/local/keycloak/domain/servers/server-five/data/password-blacklists
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - ~/scripts/deploy.sh secondary
+  resource_group: "${CI_PROJECT_NAMESPACE}${CI_PROJECT_NAME}"
+  tags:
+    - sso-domain-controller-perm
+
+domru:voronezh:primary:
+  stage: deploy
+  <<: *init-variables
+  when: manual
+  only:
+    - tags
+  environment:
+    name: production-voronezh-primary
+    url: https://auth.dom.ru/auth
+  script:
+    - for i in domru stelecom ertelecom; do cp -r build/deploy/themes/${i} /usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app02:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app03:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app04:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app05:/usr/local/keycloak/themes; done
+    - mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - cp build/deploy/standalone/data/password-blacklists/black_list_password.txt /usr/local/keycloak/domain/servers/server-one/data/password-blacklists
+    - ssh sso-app02 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app02:/usr/local/keycloak/domain/servers/server-two/data/password-blacklists
+    - ssh sso-app03 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app03:/usr/local/keycloak/domain/servers/server-three/data/password-blacklists
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app02:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app02:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app03:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app03:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - cp tools/module.xml /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - ~/scripts/deploy.sh primary
+  resource_group: "${CI_PROJECT_NAMESPACE}${CI_PROJECT_NAME}"
+  tags:
+    - sso-domain-controller-voronezh
+
+domru:voronezh:secondary:
+  stage: deploy
+  <<: *init-variables
+  when: manual
+  only:
+    - tags
+  environment:
+    name: production-voronezh-secondary
+    url: https://auth.dom.ru/auth
+  script:
+    - for i in domru stelecom ertelecom; do scp -r build/deploy/themes/${i} sso-app04:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app05:/usr/local/keycloak/themes; done
+    - ssh sso-app04 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app04:/usr/local/keycloak/domain/servers/server-four/data/password-blacklists
+    - ssh sso-app05 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
+    - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app05:/usr/local/keycloak/domain/servers/server-five/data/password-blacklists
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app04:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp build/deploy/standalone/deployments/custom-jpa.jar sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - scp tools/module.xml sso-app05:/usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - cp build/deploy/standalone/deployments/custom-jpa.jar /usr/local/keycloak/modules/system/layers/base/ru/alamics/sso/jpa/main
+    - ~/scripts/deploy.sh secondary
+  resource_group: "${CI_PROJECT_NAMESPACE}${CI_PROJECT_NAME}"
+  tags:
+    - sso-domain-controller-voronezh
+
+domru:voronezh:xml:
+  stage: deploy
+  when: manual
+  only:
+    - tags
+  environment:
+    name: production
+    url: http://sso.dev.itrev.ru
+  script:
+    - rm /usr/local/keycloak/domain/configuration/domain.xml
+    - cp -r configs/domain.xml.voronezh /usr/local/keycloak/domain/configuration/domain.xml
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect --command-timeout=180 --user=${JBOSS_CLI_USER} --password=${JBOSS_CLI_PASS} --command="reload --host=master --restart-servers=true"
+  artifacts: {}
+  resource_group: "${CI_PROJECT_NAMESPACE}${CI_PROJECT_NAME}"
+  tags:
+    - sso-domain-controller-voronezh
+
+domru:perm:xml:
+  stage: deploy
+  when: manual
+  only:
+    - tags
+  environment:
+    name: production
+    url: http://sso.dev.itrev.ru
+  script:
+    - rm /usr/local/keycloak/domain/configuration/domain.xml
+    - cp -r configs/domain.xml.perm /usr/local/keycloak/domain/configuration/domain.xml
+    - /usr/local/keycloak/bin/jboss-cli.sh --connect --command-timeout=180 --user=${JBOSS_CLI_USER} --password=${JBOSS_CLI_PASS} --command="reload --host=master --restart-servers=true"
+  artifacts: {}
+  resource_group: "${CI_PROJECT_NAMESPACE}${CI_PROJECT_NAME}"
+  tags:
+    - sso-domain-controller-perm

@@ -20,6 +20,7 @@ import sessionRoutes from "./sessions/routes";
 import userFederationRoutes from "./user-federation/routes";
 import userRoutes from "./user/routes";
 import customSettingsRoutes from "./custom-settings/routes";
+import customImportUsersRoutes from "./custom-import-users/routes";
 
 export type AppRouteObjectHandle = {
   access: AccessType | AccessType[];
@@ -56,6 +57,7 @@ export const routes: AppRouteObject[] = [
   ...dashboardRoutes,
   ...pageRoutes,
   ...customSettingsRoutes,
+  ...customImportUsersRoutes,
   NotFoundRoute,
 ];
 
