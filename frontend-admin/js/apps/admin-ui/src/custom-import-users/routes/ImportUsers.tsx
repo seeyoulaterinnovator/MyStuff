@@ -12,7 +12,7 @@ export const ImportUsersRoute: AppRouteObject = {
   element: <ImportUsers />,
   breadcrumb: (t) => t("titleUsers"),
   handle: {
-    access: "query-users",
+    access: "view-realm",
   },
 };
 
