@@ -282,6 +282,12 @@ export type LoaderFunction<T> = (
   search?: string,
 ) => Promise<T[]>;
 
+export type NestedFiltersFunction = (
+  first?: number,
+  max?: number,
+  search?: string,
+) => void;
+
 export type DataListProps<T> = Omit<
   TableProps,
   "rows" | "cells" | "onSelect"
@@ -306,6 +312,8 @@ export type DataListProps<T> = Omit<
   isRadio?: boolean;
   isSearching?: boolean;
   onlyTable?: boolean;
+  withoutRefreshButton?: boolean;
+  onPaginationChange?: NestedFiltersFunction
 };
 
 /**
@@ -352,6 +360,8 @@ export function KeycloakDataTable<T>({
   icon,
   isSearching = false,
   onlyTable = false,
+  withoutRefreshButton = false,
+  onPaginationChange,
   ...props
 }: DataListProps<T>) {
   const { t } = useTranslation();
@@ -474,6 +484,10 @@ export function KeycloakDataTable<T>({
     [search, first, max],
   );
 
+  const unPaginatedRows = useMemo(() => {
+    return unPaginatedData ? convertToColumns(unPaginatedData) : [];
+  }, [unPaginatedData]);
+
   useFetch(
     async () => {
       setLoading(true);
@@ -512,6 +526,10 @@ export function KeycloakDataTable<T>({
       typeof loader !== "function" ? loader : undefined,
     ],
   );
+
+  useEffect(() => {
+    onPaginationChange?.(first, max, search);
+  }, [onPaginationChange, first, max, search])
 
   const convertAction = () =>
     actions &&
@@ -586,7 +604,7 @@ export function KeycloakDataTable<T>({
             onCollapse={detailColumns ? onCollapse : undefined}
             actions={convertAction()}
             actionResolver={actionResolver}
-            rows={data.slice(0, maxRows)}
+            rows={onlyTable ? unPaginatedRows : data.slice(0, maxRows)}
             columns={columns}
             isNotCompact={isNotCompact}
             isRadio={isRadio}
@@ -645,12 +663,17 @@ export function KeycloakDataTable<T>({
           searchTypeComponent={searchTypeComponent}
           toolbarItem={
             <>
-              {toolbarItem} <ToolbarItem variant="separator" />{" "}
-              <ToolbarItem>
-                <Button variant="link" onClick={refresh}>
-                  <SyncAltIcon /> {t("refresh")}
-                </Button>
-              </ToolbarItem>
+              {toolbarItem}
+              {!withoutRefreshButton && (
+                <>
+                  <ToolbarItem variant="separator" />{" "}
+                  <ToolbarItem>
+                    <Button variant="link" onClick={refresh}>
+                      <SyncAltIcon /> {t("refresh")}
+                    </Button>
+                  </ToolbarItem>
+                </>
+              )}
             </>
           }
           subToolbar={subToolbar}
