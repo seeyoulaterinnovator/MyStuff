@@ -640,7 +640,7 @@ describe("Users", () => {
     });
 
     it("impersonate user", async () => {
-      const result = await kcAdminClient.users.impersonation(
+      const result = await kcAdminClient.customUsers.impersonation(
         { id: currentUser.id! },
         { user: currentUser.id!, realm: kcAdminClient.realmName },
       );

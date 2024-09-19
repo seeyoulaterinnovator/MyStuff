@@ -12,6 +12,8 @@ export enum UserRoleName {
   GUEST = "GUEST",
 }
 
+export const DEFAULT_USER_ROLE_ID = 1;
+
 export enum SystemRoleName {
   ACCESS_GRANTED = "access_granted",
 }
@@ -59,7 +61,7 @@ export interface UserPostRepresentation {
   tomsId: string;
   dmpId: string;
   userRole: UserRoleRepresentation;
-  systemRoles: SystemRoleRepresentation[];
+  systemRoles?: SystemRoleRepresentation[];
   selected: boolean;
   organization: string;
   updateTime: ArrayTimeRepresentation;
@@ -126,3 +128,15 @@ export type ImportUsersReportResponseRepresentation =
   Response<ImportUsersReportResultRepresentation>;
 
 export type ActiveImportUsersResponseRepresentation = ConditionalResponseStatus;
+
+export type UserPostsResultRepresentation = {
+  user_post: UserPostRepresentation[];
+};
+
+export interface UserPostsResponseRepresentation
+  extends Response<UserPostsResultRepresentation> {}
+
+export type UserPostSystemRoleRepresentation = {
+  systemRoleId: number;
+  userPostId: string;
+};

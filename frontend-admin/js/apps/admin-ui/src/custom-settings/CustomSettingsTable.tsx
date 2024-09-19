@@ -3,11 +3,11 @@ import {Field, KeycloakDataTable} from "../components/table-toolbar/KeycloakData
 import {ListEmptyState} from "../components/list-empty-state/ListEmptyState";
 import {useTranslation} from "react-i18next";
 import {useRealm} from "../context/realm-context/RealmContext";
-import CustomSettingRepresentation, {CustomSettingType} from "@keycloak/keycloak-admin-client/lib/defs/customSettingRepresentation";
+import {CustomSettingRepresentation, CustomSettingType} from "@keycloak/keycloak-admin-client/lib/defs/custom/customSettingRepresentation";
 import {AlertVariant, Button, SelectOption, TextInput} from "@patternfly/react-core";
 import {useMemo, useRef, useState} from "react";
 import {useAlerts} from "../components/alert/Alerts";
-import TimeUnit from "@keycloak/keycloak-admin-client/lib/defs/timeUnits";
+import TimeUnit from "@keycloak/keycloak-admin-client/lib/defs/custom/timeUnits";
 import {KeycloakSelect, SelectVariant} from "@keycloak/keycloak-ui-shared";
 
 type CustomSettingsTableProps = {
