@@ -15,7 +15,9 @@ stages:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH == "cicd"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: on_success
 
 .build: &build-template
   before_script:
@@ -138,9 +140,9 @@ container-image:
     paths:
       - .ci_status/
   rules:
-    - !reference [.default_rules, rules]
     - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
       when: manual
+    - !reference [.default_rules, rules]
   allow_failure: false
   tags:
     - sso-build-shell
@@ -159,9 +161,9 @@ domru:devel:
     - docker login $REGISTRY -u $GROUP_DEPLOYER -p $GROUP_DEPLOYER_PASS
     - docker stack deploy --with-registry-auth -c docker-compose.yml ertelecom-sso
   rules:
-    - !reference [.default_rules, rules]
     - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
       when: manual
+    - !reference [.default_rules, rules]
   needs: ["container-image"]
 
 domru:stage:
