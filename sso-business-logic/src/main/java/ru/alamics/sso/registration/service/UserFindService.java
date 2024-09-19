@@ -77,10 +77,10 @@ public class UserFindService {
             String searchPhone,
             String sortField,
             boolean sortAsc,
-            Integer pageNum,
-            Integer pageSize
+            Integer first,
+            Integer max
     ) {
-        List<UserSummaryView> users = userRepository.findUsersByParameters(realm, search, searchUser, searchEmail, searchPhone, searchToms, sortField, sortAsc, pageNum, pageSize);
+        List<UserSummaryView> users = userRepository.findUsersByParameters(realm, search, searchUser, searchEmail, searchPhone, searchToms, sortField, sortAsc, first, max);
 
         if (users.isEmpty()) {
             return Collections.emptyList();

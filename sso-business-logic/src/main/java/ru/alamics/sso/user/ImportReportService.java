@@ -113,8 +113,8 @@ public class ImportReportService {
         }
     }
 
-    public List<ImportUsersReportDto> findImportUsersReportsByRealmId(String realmId) {
-        return UserMapper.toImportUsersReportDtos(importUsersReportRepository.findImportUsersReports(realmId));
+    public List<ImportUsersReportDto> findImportUsersReportsByRealmId(String realmId, int first, int max) {
+        return UserMapper.toImportUsersReportDtos(importUsersReportRepository.findImportUsersReports(realmId, first, max));
     }
 
     public ImportUsersReportEntity findImportUsersReportByImportId(String importId) {
