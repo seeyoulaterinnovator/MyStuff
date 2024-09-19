@@ -11,6 +11,12 @@ stages:
   - docker
   - deploy
 
+.default_rules:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH == "cicd"
+
 .build: &build-template
   before_script:
   - if [ -f ./gradlew ]; then
@@ -46,6 +52,8 @@ stages:
       - keycloak-extension/src/main/resources/themes/$BUILD_THEME/login/resources/build/
     name: "domru-sso-$CI_PIPELINE_ID"
     expire_in: 1 day
+  rules:
+    - !reference [.default_rules, rules]
   allow_failure: false
 
 frontend:domru:build:
@@ -77,6 +85,8 @@ frontend:admin:build:
       - keycloak-extension/src/main/resources/themes/keycloak.v2/admin/resources/
     name: "domru-sso-$CI_PIPELINE_ID"
     expire_in: 1 day
+  rules:
+    - !reference [.default_rules, rules]
   allow_failure: false
 
 back:build:
@@ -87,7 +97,6 @@ back:build:
   script:
     - if [ -f ./gradlew ]; then chmod 775 ./gradlew; fi
     - ./gradlew --stacktrace --console=plain build -Dorg.gradle.java.home=$JAVA_HOME
-  allow_failure: false
   artifacts:
     paths:
       - build/keycloak-extension/libs/keycloak-extension-1.0.1-all.jar
@@ -97,6 +106,9 @@ back:build:
     key: "$CI_COMMIT_SHA"
     paths:
       - .gradle/
+  rules:
+    - !reference [.default_rules, rules]
+  allow_failure: false
   needs:
     - "frontend:domru:build"
     - "frontend:ertelecom:build"
@@ -126,9 +138,10 @@ container-image:
     paths:
       - .ci_status/
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH == "cicd"
+    - !reference [.default_rules, rules]
     - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
       when: manual
+  allow_failure: false
   tags:
     - sso-build-shell
   needs:
@@ -146,7 +159,7 @@ domru:devel:
     - docker login $REGISTRY -u $GROUP_DEPLOYER -p $GROUP_DEPLOYER_PASS
     - docker stack deploy --with-registry-auth -c docker-compose.yml ertelecom-sso
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH == "cicd"
+    - !reference [.default_rules, rules]
     - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
       when: manual
   needs: ["container-image"]
