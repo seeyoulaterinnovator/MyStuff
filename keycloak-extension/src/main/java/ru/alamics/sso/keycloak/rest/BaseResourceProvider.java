@@ -28,7 +28,7 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
 
     default AdminPermissionEvaluator initAuthByWorkingRealm(KeycloakSession session) {
         KeycloakContext context = session.getContext();
-        InitSession initSession = initAdminAuth(session);
+        InitSession initSession = initAdminAuth(session, true);
 
         RealmManager realmManager = new RealmManager(session);
         KeycloakUriInfo uri = context.getUri();
@@ -42,12 +42,12 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
         return AdminPermissions.evaluator(session, realmFromRequest, initSession.getAdminAuth());
     }
 
-    default AdminPermissionEvaluator initAuth(KeycloakSession session) {
-        InitSession initSession = initAdminAuth(session);
+    default AdminPermissionEvaluator initAuth(KeycloakSession session, boolean restoreRealm) {
+        InitSession initSession = initAdminAuth(session, restoreRealm);
         return AdminPermissions.evaluator(session, initSession.getRealmFromToken(), initSession.getAdminAuth());
     }
 
-    default InitSession initAdminAuth(KeycloakSession session) {
+    default InitSession initAdminAuth(KeycloakSession session, boolean restoreRealm) {
         KeycloakContext context = session.getContext();
         AppAuthManager appAuthManager = new AppAuthManager();
         String tokenString = Optional.ofNullable(appAuthManager.extractAuthorizationHeaderToken(context.getRequestHeaders())).orElseThrow(() -> new NotAuthorizedException("Bearer"));
@@ -85,14 +85,16 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
             throw new ForbiddenException();
         }
 
-        // see org.keycloak.services.resources.RealmsResource#init in version 6.0.1
-        // https://github.com/keycloak/keycloak/blob/6.0.1/services/src/main/java/org/keycloak/services/resources/RealmsResource.java#L202
-        KeycloakUriInfo uri = context.getUri();
-        MultivaluedMap<String, String> pathParameters = uri.getPathParameters();
-        String realmFromRequestName = pathParameters.getFirst("realm");
-        RealmModel realmFromRequest = Optional.ofNullable(realmManager.getRealmByName(realmFromRequestName))
-                .orElseThrow(() -> new NotAuthorizedException("Unknown realm in path param"));
-        session.getContext().setRealm(realmFromRequest);
+        if(restoreRealm) {
+            // see org.keycloak.services.resources.RealmsResource#init in version 6.0.1
+            // https://github.com/keycloak/keycloak/blob/6.0.1/services/src/main/java/org/keycloak/services/resources/RealmsResource.java#L202
+            KeycloakUriInfo uri = context.getUri();
+            MultivaluedMap<String, String> pathParameters = uri.getPathParameters();
+            String realmFromRequestName = pathParameters.getFirst("realm");
+            RealmModel realmFromRequest = Optional.ofNullable(realmManager.getRealmByName(realmFromRequestName))
+                    .orElseThrow(() -> new NotAuthorizedException("Unknown realm in path param"));
+            session.getContext().setRealm(realmFromRequest);
+        }
 
         return new InitSession(session, realmFromToken, auth);
     }
