@@ -80,34 +80,16 @@ public class SearchResource {
                                  @QueryParam("searchToms") String searchToms, @QueryParam("searchPhone") String searchPhone,
                                  @QueryParam("sortField") String sortField, @QueryParam("sortAsc") boolean sortAsc,
                                  @QueryParam("searchRealm") String searchRealm,
-                                 @QueryParam("pageNum") int pageNum, @QueryParam("pageSize") int pageSize) {
+                                 @QueryParam("first") int first, @QueryParam("max") int max) {
         String rawPath = session.getContext().getUri().getAbsolutePath().getRawPath();
 
         searchRealm = Util.getRealm(searchRealm, rawPath);
 
         clearUserCache();
 
-        log.info("getUsersInfo 1");
-
-        List<UserSearch> users = userFindService.getUsersByParameters(searchRealm, search, searchUser, searchEmail, searchToms, searchPhone, sortField, sortAsc, pageNum, pageSize);
-
-        log.info("getUsersInfo 2");
-
-        long total = 200; // userFindService.getTotalUsersByParameters(searchRealm, search, searchUser, searchToms);
-
-        log.info("getUsersInfo 3");
-
-        Response respB = JsonResponse.success()
-                .addResult("users-info", users)
-                .addResult("page-info",
-                        DataMapper.toPageDto(users,
-                                total,
-                                pageNum, pageSize))
+        return JsonResponse.success()
+                .addResult("users-info", userFindService.getUsersByParameters(searchRealm, search, searchUser, searchEmail, searchToms, searchPhone, sortField, sortAsc, first, max))
                 .build();
-
-        log.info("getUsersInfo 4");
-
-        return respB;
     }
 
     @GET

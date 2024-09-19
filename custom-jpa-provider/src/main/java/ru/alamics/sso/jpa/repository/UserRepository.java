@@ -240,8 +240,8 @@ public class UserRepository {
             String searchToms,
             String sortField,
             boolean sortAsc,
-            int pageNum,
-            int pageSize
+            int first,
+            int max
     ) {
         if (CollectionUtils.isNotEmpty(search)) {
             search = "%" + search.replace("-", "\\-") + "%";
@@ -282,11 +282,8 @@ public class UserRepository {
                 .setParameter("searchPhone", searchPhone)
                 .setParameter("realm", realm);
 
-        pageNum = Math.max(1, pageNum);
-        pageSize = Math.max(1, pageSize);
-
-        query.setFirstResult((pageNum - 1) * pageSize);
-        query.setMaxResults(pageSize);
+        query.setFirstResult(first);
+        query.setMaxResults(max);
 
         return query.getResultList();
     }

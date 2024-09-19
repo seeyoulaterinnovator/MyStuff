@@ -36,12 +36,14 @@ public class ImportUsersReportRepository {
         return em.find(ImportUsersDataEntity.class, id);
     }
 
-    public List<ImportUsersReportEntity> findImportUsersReports(String realmId) {
+    public List<ImportUsersReportEntity> findImportUsersReports(String realmId, int first, int max) {
         return em.createQuery(
                 "select ire " +
                         "from ImportUsersReportEntity ire where ire.realmId = :realmId " +
                         "order by ire.importDate desc ", ImportUsersReportEntity.class)
                 .setParameter("realmId", realmId)
+                .setFirstResult(first)
+                .setMaxResults(max)
                 .getResultList();
     }
 

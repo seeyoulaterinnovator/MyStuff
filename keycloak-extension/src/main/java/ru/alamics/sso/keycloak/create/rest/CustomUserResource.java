@@ -261,11 +261,14 @@ public class CustomUserResource {
     @Path("/importUsersReports")
     @NoCache
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getImportUsersReports() {
+//    first - позиция начала передаваемых в ответе записей из результатов поиска
+//    max - максимальное количество записей в ответе
+    public Response getImportUsersReports(@QueryParam("first") int first, @QueryParam("max") int max) {
         return JsonResponse.success()
-                .addResult("importUsersReports", importReportService.findImportUsersReportsByRealmId(session.getContext().getRealm().getName()))
+                .addResult("importUsersReports", importReportService.findImportUsersReportsByRealmId(session.getContext().getRealm().getName(), first, max))
                 .build();
     }
+
     @POST
     @Path("/uploadImportUsersFile")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
