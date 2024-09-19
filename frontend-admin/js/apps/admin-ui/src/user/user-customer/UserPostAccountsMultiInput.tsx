@@ -120,7 +120,6 @@ export const UserPostAccountsMultiInput = (
                   );
                   setAccounts(accounts.concat(newAccounts));
                   setValue("");
-                  setIsAdding(false);
                 } catch (error) {
                   addError(t("addUserPostAccountError", { postId }), error);
                 } finally {

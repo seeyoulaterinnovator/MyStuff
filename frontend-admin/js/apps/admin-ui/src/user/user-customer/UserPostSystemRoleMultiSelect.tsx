@@ -131,6 +131,7 @@ export const UserPostSystemRoleMultiSelect = (
         >
           <FlexItem>
             <SelectControl
+              key={allowableSystems[0]}
               name={`user.post.${postId}.system.${allowableSystems.join("-")}`}
               controller={{
                 defaultValue: allowableSystems[0],
@@ -160,7 +161,6 @@ export const UserPostSystemRoleMultiSelect = (
                   );
                   setSystems(systems.concat(system));
                   setSystem(null);
-                  setIsAdding(false);
                 } catch (error) {
                   addError(
                     t("addUserPostSystemError", { postId, system }),
