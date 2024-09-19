@@ -43,5 +43,4 @@ update APP_PROPERTIES
 set VALUE = '/tbapi/api/v1/customerManagement/customerAccounts/names'
 where NAME = 'tbapi.customer.find.path';
 
--- TODO
-update REALM set ADMIN_THEME = null;
+update REALM set ADMIN_THEME = 'keycloak.v2';

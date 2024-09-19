@@ -17,7 +17,7 @@ import { UserStorageProvider } from "./resources/userStorageProvider.js";
 import { WhoAmI } from "./resources/whoAmI.js";
 import { Credentials, getToken } from "./utils/auth.js";
 import { defaultBaseUrl, defaultRealm } from "./utils/constants.js";
-import { CustomSettings } from "./resources/customSettings.js";
+import { CustomSettings } from "./resources/custom/customSettings.js";
 import { CustomUsers } from "./resources/custom/users.js";
 import {UserPosts} from "./resources/custom/userPosts.js";
 import {PersonalAccounts} from "./resources/custom/personalAccounts.js";

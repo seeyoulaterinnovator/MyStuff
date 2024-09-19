@@ -158,7 +158,7 @@ export const useUserDataTable = ({
                 cellRenderer: (row) => {
                   return (
                     <p style={{ whiteSpace: "pre-wrap" }}>
-                      {row.systemRoles
+                      {(row.systemRoles || [])
                         .map((systemRole) => systemRole.externalSystem.name)
                         .join("\n")}
                     </p>

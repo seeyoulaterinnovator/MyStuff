@@ -9,10 +9,12 @@ import ru.alamics.sso.jpa.entity.UserPostEntity;
 import ru.alamics.sso.jpa.repository.PersonalAccountRepository;
 import ru.alamics.sso.jpa.repository.UserPostRepository;
 import ru.alamics.sso.user.mapper.UserMapper;
+import ru.alamics.sso.user.model.PersonalAccountModel;
 import ru.alamics.sso.user.model.PersonalAccountPostModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 @Slf4j
@@ -78,11 +80,13 @@ public class PersonalAccountService {
         paRepository.setAccountList(postId, paList);
     }
 
-    public void addAccountList(final String postId, List<String> paList) throws NotFoundException {
+    public List<PersonalAccountModel> addAccountList(final String postId, List<String> paList) throws NotFoundException {
 
         checkPost(postId);
 
-        paRepository.addAccountList(postId, paList);
+        return paRepository.addAccountList(postId, paList).stream()
+                .map(UserMapper::toPADto)
+                .collect(Collectors.toList());
     }
 
     public void subAccountUuidList(final String postId, List<String> paUuidList) throws NotFoundException {

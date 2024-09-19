@@ -1,9 +1,12 @@
-import {PageSection, Tab, TabTitleText} from "@patternfly/react-core";
-import {useTranslation} from "react-i18next";
-import {useRealm} from "../context/realm-context/RealmContext";
-import {ViewHeader} from "../components/view-header/ViewHeader";
-import {RoutableTabs, useRoutableTab} from "../components/routable-tabs/RoutableTabs";
-import {CustomSettingsTab, toCustomSettings} from "./routes/CustomSettings";
+import { PageSection, Tab, TabTitleText } from "@patternfly/react-core";
+import { useTranslation } from "react-i18next";
+import { useRealm } from "../context/realm-context/RealmContext";
+import { ViewHeader } from "../components/view-header/ViewHeader";
+import {
+  RoutableTabs,
+  useRoutableTab,
+} from "../components/routable-tabs/RoutableTabs";
+import { CustomSettingsTab, toCustomSettings } from "./routes/CustomSettings";
 import CustomSettingsTable from "./CustomSettingsTable";
 
 export default function CustomSettingsSection() {

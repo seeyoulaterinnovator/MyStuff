@@ -1,4 +1,4 @@
-import { Button, ButtonVariant, ToolbarItem } from "@patternfly/react-core";
+import {Button, ButtonVariant, Divider, Toolbar, ToolbarContent, ToolbarItem} from "@patternfly/react-core";
 import type { SVGIconProps } from "@patternfly/react-icons/dist/js/createIcon";
 import {
   ActionsColumn,
@@ -305,6 +305,7 @@ export type DataListProps<T> = Omit<
   actionResolver?: IActionsResolver;
   searchTypeComponent?: ReactNode;
   toolbarItem?: ReactNode;
+  onlyTableToolbarItem?: ReactNode;
   subToolbar?: ReactNode;
   emptyState?: ReactNode;
   icon?: ComponentClass<SVGIconProps>;
@@ -355,6 +356,7 @@ export function KeycloakDataTable<T>({
   actionResolver,
   searchTypeComponent,
   toolbarItem,
+  onlyTableToolbarItem,
   subToolbar,
   emptyState,
   icon,
@@ -597,19 +599,31 @@ export function KeycloakDataTable<T>({
     return (
       <>
         {!loading && !noData && (
-          <DataTable
-            {...props}
-            canSelectAll={canSelectAll}
-            onSelect={onSelect ? _onSelect : undefined}
-            onCollapse={detailColumns ? onCollapse : undefined}
-            actions={convertAction()}
-            actionResolver={actionResolver}
-            rows={onlyTable ? unPaginatedRows : data.slice(0, maxRows)}
-            columns={columns}
-            isNotCompact={isNotCompact}
-            isRadio={isRadio}
-            ariaLabelKey={ariaLabelKey}
-          />
+          <>
+            {onlyTableToolbarItem && (
+              <>
+                <Toolbar>
+                  <ToolbarContent>
+                    {onlyTableToolbarItem}
+                  </ToolbarContent>
+                </Toolbar>
+                <Divider />
+              </>
+            )}
+            <DataTable
+              {...props}
+              canSelectAll={canSelectAll}
+              onSelect={onSelect ? _onSelect : undefined}
+              onCollapse={detailColumns ? onCollapse : undefined}
+              actions={convertAction()}
+              actionResolver={actionResolver}
+              rows={onlyTable ? unPaginatedRows : data.slice(0, maxRows)}
+              columns={columns}
+              isNotCompact={isNotCompact}
+              isRadio={isRadio}
+              ariaLabelKey={ariaLabelKey}
+            />
+          </>
         )}
         {!loading && noData && searching && (
           <ListEmptyState

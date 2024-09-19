@@ -10,6 +10,7 @@ export type FieldProps<T extends FieldValues = FieldValues> = {
   labelIcon?: string | ReactNode;
   error?: FieldError | Merge<FieldError, T>;
   isRequired: boolean;
+  withoutLabel?: boolean;
 };
 
 type FormLabelProps = FieldProps & Omit<FormGroupProps, "label" | "labelIcon">;
@@ -19,11 +20,12 @@ export const FormLabel = ({
   label,
   labelIcon,
   error,
+  withoutLabel,
   children,
   ...rest
 }: PropsWithChildren<FormLabelProps>) => (
   <FormGroup
-    label={label || name}
+    label={withoutLabel ? '' : label || name}
     fieldId={name}
     labelIcon={
       labelIcon ? (

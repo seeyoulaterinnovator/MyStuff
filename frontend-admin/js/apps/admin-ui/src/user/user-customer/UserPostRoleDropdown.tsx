@@ -1,33 +1,35 @@
-import {AlertVariant, MenuToggle, Select, SelectList, SelectOption,} from "@patternfly/react-core";
-import {useState} from "react";
-import {useTranslation} from "react-i18next";
-import {UserPostRoleRepresentation} from "@keycloak/keycloak-admin-client/lib/defs/custom/userPostRoleRepresentation";
-import {useAdminClient} from "../../admin-client";
-import {useAlerts} from "@keycloak/keycloak-ui-shared";
-import {useRealm} from "../../context/realm-context/RealmContext";
+import {
+  AlertVariant,
+  MenuToggle,
+  Select,
+  SelectList,
+  SelectOption,
+} from "@patternfly/react-core";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { UserPostRoleRepresentation } from "js/libs/keycloak-admin-client/src/defs/custom/userPostRepresentation";
+import { useAdminClient } from "../../admin-client";
+import { useAlerts } from "../../components/alert/Alerts";
+import { useRealm } from "../../context/realm-context/RealmContext";
 
-type ChangeTypeDropdownProps = {
-  userPostId: string;
-  defaultUserPostRoleId: number;
-  userPostRoles: UserPostRoleRepresentation[];
-  onChange: () => void;
+type UserPostRoleDropdownProps = {
+  postId?: string;
+  defaultRoleId?: number;
+  roles: UserPostRoleRepresentation[];
   isReadonly?: boolean;
+  onChange?: (role: UserPostRoleRepresentation) => void;
 };
 
-export const UserPostRoleDropdown = ({
-                                       userPostId,
-                                       defaultUserPostRoleId,
-                                       userPostRoles,
-                                       onChange,
-                                       isReadonly
-                                     }: ChangeTypeDropdownProps) => {
-  const {adminClient} = useAdminClient();
-  const {realm} = useRealm();
-  const {t} = useTranslation();
+export const UserPostRoleDropdown = (props: UserPostRoleDropdownProps) => {
+  const { postId, defaultRoleId, roles, isReadonly, onChange } = props;
+
+  const { adminClient } = useAdminClient();
+  const { realm } = useRealm();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const {addAlert, addError} = useAlerts();
+  const { addAlert, addError } = useAlerts();
   const [isChanging, setIsChanging] = useState(false);
-  const [userPostRoleId, setUserPostRoleId] = useState(defaultUserPostRoleId);
+  const [roleId, setRoleId] = useState(defaultRoleId);
 
   return (
     <Select
@@ -39,34 +41,48 @@ export const UserPostRoleDropdown = ({
           isExpanded={open}
           isDisabled={isReadonly || isChanging}
         >
-          {userPostRoles.find(role => role.id === userPostRoleId)?.name
-            || t("changeUserPostRoleTo")}
+          {roles.find((role) => role.id === roleId)?.name || t("changeRoleTo")}
         </MenuToggle>
       )}
-      selected={userPostRoleId}
-      defaultValue={defaultUserPostRoleId}
+      selected={roleId}
+      defaultValue={defaultRoleId}
       onSelect={async (_, value) => {
-        setIsChanging(true);
-        try {
-          await adminClient.userPosts.updateUserPostRole({
-            realm
-          }, {
-            id: userPostId,
-            roleId: value as number
-          });
+        const role = roles.find((r) => r.id === value);
+        if (!role) return;
+        if (postId) {
+          setIsChanging(true);
+          try {
+            await adminClient.userPosts.updateUserPostRole(
+              {
+                realm,
+              },
+              {
+                id: postId,
+                roleId: value as number,
+              },
+            );
+            setRoleId(value as number);
+            setOpen(false);
+            addAlert(
+              t("changeUserPostRoleSuccess", { postId }),
+              AlertVariant.success,
+            );
+            onChange?.(role);
+          } catch (error) {
+            addError(t("changeUserPostRoleError", { postId }), error);
+            setRoleId(defaultRoleId);
+          } finally {
+            setIsChanging(false);
+          }
+        } else {
+          setRoleId(value as number);
           setOpen(false);
-          addAlert(t("changeUserPostRoleSuccess", {userPostId}), AlertVariant.success);
-          onChange?.();
-        } catch (error) {
-          addError(t("changeUserPostRoleError", {userPostId, error}));
-          setUserPostRoleId(defaultUserPostRoleId);
-        } finally {
-          setIsChanging(false);
+          onChange?.(role);
         }
       }}
     >
       <SelectList>
-        {userPostRoles.map((role) => (
+        {roles.map((role) => (
           <SelectOption key={role.id} value={role.id}>
             {role.name}
           </SelectOption>
