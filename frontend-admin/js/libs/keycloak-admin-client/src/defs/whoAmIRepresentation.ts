@@ -1,8 +1,47 @@
 export type AccessChecker = {
-  hasAll: (...types: AccessType[]) => boolean;
-  hasAny: (...types: AccessType[]) => boolean;
+  hasAll: (accessOrTypes: (readonly AccessType[]) | AccessType, ...types: AccessType[]) => boolean;
+  hasAny: (accessOrTypes: (readonly AccessType[]) | AccessType, ...types: AccessType[]) => boolean;
 };
 export type AccessTypeFunc = (accessChecker: AccessChecker) => boolean;
+
+export type CustomAccessType =
+  | "hide-manage-buttons"
+  | "button-download-template-csv"
+  | "button-download-template-xlsx"
+  | "button-import-file-csv"
+  | "button-export-csv"
+  | "button-export-xlsx"
+  | "button-reset-password"
+  | "button-block-users"
+  | "button-unlock-users"
+  | "button-add-user"
+  | "button-required-actions"
+  | "button-delete-customer"
+  | "button-add-customer"
+  | "edit-attributes"
+  | "edit-sessions"
+  | "edit-role-mappings"
+  | "edit-consents"
+  | "edit-credentials"
+  | "hide-select-all"
+  | "hide-user-search"
+  | "edit-federated-identity"
+  | "edit-customer"
+  | "edit-groups"
+  | "edit-details"
+  | "create-realm"
+  | "custom-query-users"
+  | "custom-query-groups"
+  | "custom-query-clients"
+  | "custom-view-realm"
+  | "custom-view-clients"
+  | "custom-view-users"
+  | "custom-view-events"
+  | "custom-view-identity-providers"
+  | "custom-view-authorization"
+  | "manage-bss"
+  | "impersonation";
+
 export type AccessType =
   | "view-realm"
   | "view-identity-providers"
@@ -23,9 +62,7 @@ export type AccessType =
   | "manage-clients"
   | "query-groups"
   | "anyone"
-  | "button-add-customer"
-  | "button-delete-customer"
-  | "edit-customer"
+  | CustomAccessType
   | AccessTypeFunc;
 
 export default interface WhoAmIRepresentation {
