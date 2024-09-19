@@ -65,8 +65,6 @@ frontend:stelecom:build:
 
 frontend:admin:build:
   stage: build
-  except:
-    - master
   script:
     - export PATH=/usr/nodejs/node-v20/bin:$PATH
     - cd frontend-admin
@@ -84,8 +82,6 @@ frontend:admin:build:
 back:build:
   stage: build
   <<: *build-template
-  except:
-    - master
   variables:
     JAVA_HOME: /usr/java/jdk-17
   script:
