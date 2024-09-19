@@ -33,7 +33,7 @@ public class SearchRealmResourceProvider implements RealmResourceProvider, BaseR
 
     @Override
     public Object getResource() {
-        AdminPermissionEvaluator adminPermissionEvaluator = initAuth(session);
+        AdminPermissionEvaluator adminPermissionEvaluator = initAuth(session, false);
         adminPermissionEvaluator.users().requireView();
 
         return new SearchRestResource(session, adminPermissionEvaluator.adminAuth());
