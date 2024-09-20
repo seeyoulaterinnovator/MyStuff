@@ -125,4 +125,11 @@ public class CustomJpaUserProvider extends JpaUserProvider {
 
         return addUser(realm, KeycloakModelUtils.generateId(), username.toLowerCase(), true, true);
     }
+
+    // версия 6.0.1 без проверки realm-а (необходима для менеджеров)
+    @Override
+    public UserModel getUserById(RealmModel realm, String id) {
+        UserEntity userEntity = this.em.find(UserEntity.class, id);
+        return userEntity == null ? null : new UserAdapter(this.session, realm, this.em, userEntity);
+    }
 }
