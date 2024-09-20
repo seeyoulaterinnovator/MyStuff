@@ -74,13 +74,12 @@ export const ResetCredentialDialog = ({
       <ConfirmDialogModal
         variant={ModalVariant.small}
         titleKey="credentialReset"
+        messageKey={hasPhone ? "resetCredentialsDisabledByEmail" : "resetCredentialsDisabledByPhone"}
         open
         onCancel={onClose}
         toggleDialog={onClose}
         noContinueButton
-      >
-        {t(hasPhone ? "resetCredentialsDisabledByEmail" : "resetCredentialsDisabledByPhone")}
-      </ConfirmDialogModal>
+      />
     )
   }
 

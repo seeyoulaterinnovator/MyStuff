@@ -118,7 +118,6 @@ export function UserDataTable() {
     userColumns,
     customFilters,
     isCustomTheme,
-    realms,
     userDetailColumns,
     handleCustomAction,
     searchUserWithCustomFilters,
@@ -312,7 +311,6 @@ export function UserDataTable() {
         clearAllFilters={clearAllFilters}
         createAttributeSearchChips={createAttributeSearchChips}
         searchUserWithAttributes={searchUserWithAttributes}
-        realms={realms}
         customFilters={customFilters}
         searchUserWithCustomFilters={searchUserWithCustomFilters}
         onCustomAction={handleCustomAction}

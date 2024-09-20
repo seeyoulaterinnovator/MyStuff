@@ -31,7 +31,6 @@ import { UserPostRoleDropdown } from "./user-customer/UserPostRoleDropdown";
 import { KeycloakSpinner } from "../components/keycloak-spinner/KeycloakSpinner";
 import { UserPostAccountsMultiInput } from "./user-customer/UserPostAccountsMultiInput";
 import { SyncAltIcon } from "@patternfly/react-icons";
-import { useAlerts } from "../components/alert/Alerts";
 import { UserPostSystemRoleMultiSelect } from "./user-customer/UserPostSystemRoleMultiSelect";
 import { UserPostRoleRepresentation } from "@keycloak/keycloak-admin-client/lib/defs/custom/userPostRepresentation";
 
@@ -50,10 +49,14 @@ export const UserCustomer = () => {
   const { adminClient } = useAdminClient();
   const { id: userId } = useParams<UserParams>();
   const { realm } = useRealm();
-  const { whoAmI } = useWhoAmI();
-  const { hasAccess } = useAccess();
+  const { isMeInMaster } = useWhoAmI();
+  const { getAccesses } = useAccess();
   const { t } = useTranslation();
-  const { addAlert, addError } = useAlerts();
+  const {
+    withManageUsersAccess,
+    withButtonAddCustomerAccess,
+    withEditCustomerAccess
+  } = getAccesses(["manage-users", "button-add-customer", "edit-customer"]);
 
   const [key, setKey] = useState(0);
   const [posts, setPosts] = useState<Post[] | null>(null);
@@ -67,12 +70,12 @@ export const UserCustomer = () => {
   const newRoleIdRef = useRef<number>(DEFAULT_USER_ROLE_ID);
 
   const canCreate =
-    hasAccess("manage-users") &&
-    (whoAmI.getRealm() || hasAccess("button-add-customer"));
+    withManageUsersAccess &&
+    (isMeInMaster || withButtonAddCustomerAccess);
 
   const canEdit =
-    hasAccess("manage-users") &&
-    (whoAmI.getRealm() === "master" || hasAccess("edit-customer"));
+    withManageUsersAccess &&
+    (isMeInMaster || withEditCustomerAccess);
 
   const refresh = useCallback(() => {
     setRoles(null);

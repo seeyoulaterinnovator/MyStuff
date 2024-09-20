@@ -133,6 +133,8 @@ export type ImportUsersReportResponseRepresentation =
 
 export type ActiveImportUsersResponseRepresentation = ConditionalResponseStatus;
 
+export type UserAccessibleRealmsRepresentation = RealmName[]
+
 export type UserPostsResultRepresentation = {
   user_post: UserPostRepresentation[];
 };
