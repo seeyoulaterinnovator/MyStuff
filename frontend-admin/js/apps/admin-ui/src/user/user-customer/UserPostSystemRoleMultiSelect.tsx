@@ -144,6 +144,7 @@ export const UserPostSystemRoleMultiSelect = (
             <Button
               type="button"
               disabled={!system || isChanging}
+              isLoading={isChanging}
               onClick={async () => {
                 if (!system || systemId == null) return;
                 setIsChanging(true);

@@ -104,6 +104,7 @@ export const UserPostAccountsMultiInput = (
             <Button
               type="button"
               disabled={!value?.trim() || isChanging}
+              isLoading={isChanging}
               onClick={async () => {
                 if (!value) return;
                 setIsChanging(true);

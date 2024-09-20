@@ -1,9 +1,10 @@
-import type {
+import type { UsersResponseRepresentation } from "../../defs/custom/userRepresentation.js";
+import {
   ActiveImportUsersResponseRepresentation,
   DownloadedUsersRepresentation,
   ImportUsersReportResponseRepresentation,
+  UserFindResponseRepresentation,
 } from "../../defs/custom/userRepresentation.js";
-import type { UsersResponseRepresentation } from "../../defs/custom/userRepresentation.js";
 import type { KeycloakAdminClient } from "../../client.js";
 import Resource from "../resource.js";
 import { CustomAdminRealm } from "./adminRealm.js";
@@ -159,6 +160,15 @@ export class CustomUsers extends Resource<{ realm?: string }> {
     urlParamKeys: ["id"],
   });
 
+  public findUserByAttribute = this.makeRequest<
+    { realm: string, phone: string, excludedUserId: string, realmId: string },
+    UserFindResponseRepresentation
+  >({
+    method: "GET",
+    path: "/users-info/attribute",
+    urlParamKeys: ["realm"],
+    queryParamKeys: ["phone", "excludedUserId", "realmId"]
+  });
 
   constructor(client: KeycloakAdminClient) {
     super(client, {

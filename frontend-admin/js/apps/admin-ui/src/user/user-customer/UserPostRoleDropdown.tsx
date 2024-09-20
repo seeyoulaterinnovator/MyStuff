@@ -4,6 +4,7 @@ import {
   Select,
   SelectList,
   SelectOption,
+  Spinner,
 } from "@patternfly/react-core";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -40,6 +41,7 @@ export const UserPostRoleDropdown = (props: UserPostRoleDropdownProps) => {
           onClick={() => setOpen(!open)}
           isExpanded={open}
           isDisabled={isReadonly || isChanging}
+          icon={isChanging && <Spinner isInline />}
         >
           {roles.find((role) => role.id === roleId)?.name || t("changeRoleTo")}
         </MenuToggle>
@@ -51,6 +53,8 @@ export const UserPostRoleDropdown = (props: UserPostRoleDropdownProps) => {
         if (!role) return;
         if (postId) {
           setIsChanging(true);
+          setOpen(false);
+          setRoleId(value as number);
           try {
             await adminClient.userPosts.updateUserPostRole(
               {
@@ -61,8 +65,6 @@ export const UserPostRoleDropdown = (props: UserPostRoleDropdownProps) => {
                 roleId: value as number,
               },
             );
-            setRoleId(value as number);
-            setOpen(false);
             addAlert(
               t("changeUserPostRoleSuccess", { postId }),
               AlertVariant.success,

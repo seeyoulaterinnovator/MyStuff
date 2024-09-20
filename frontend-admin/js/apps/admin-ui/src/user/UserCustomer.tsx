@@ -4,8 +4,9 @@ import type { UserParams } from "./routes/User";
 import { useRealm } from "../context/realm-context/RealmContext";
 import { useTranslation } from "react-i18next";
 import {
-  AlertVariant,
+  Badge,
   Button,
+  ClipboardCopy,
   PageSection,
   TextInput,
   ToolbarItem,
@@ -35,6 +36,7 @@ import { UserPostSystemRoleMultiSelect } from "./user-customer/UserPostSystemRol
 import { UserPostRoleRepresentation } from "@keycloak/keycloak-admin-client/lib/defs/custom/userPostRepresentation";
 
 import "./user-customer.css";
+import { UserPostActions } from "./user-customer/UserPostActions";
 
 type Post =
   | (UserPostRepresentation & {
@@ -59,7 +61,6 @@ export const UserCustomer = () => {
   const [systemRoles, setSystemRoles] = useState<
     SystemRoleRepresentation[] | null
   >(null);
-  const [isChanging, setIsChanging] = useState(false);
 
   const newTomsIdRef = useRef("");
   const newDmpIdRef = useRef("");
@@ -72,10 +73,6 @@ export const UserCustomer = () => {
   const canEdit =
     hasAccess("manage-users") &&
     (whoAmI.getRealm() === "master" || hasAccess("edit-customer"));
-
-  const canDelete =
-    hasAccess("manage-users") &&
-    (whoAmI.getRealm() === "master" || hasAccess("button-delete-customer"));
 
   const refresh = useCallback(() => {
     setRoles(null);
@@ -97,7 +94,7 @@ export const UserCustomer = () => {
       return (
         await adminClient.userPosts.findUserPostSystemRoles({
           realm,
-          realmId: realm,
+          realmId: realm, // TODO
         })
       ).results["system-roles"];
     },
@@ -158,12 +155,29 @@ export const UserCustomer = () => {
         name: "selected",
         displayKey: "currentSelect",
         cellRenderer: (post) =>
-          post.id !== null ? `${post.selected ? t("selected") : ""}` : "",
+          post.id !== null && post.selected ? (
+            <Badge>{t("selected")}</Badge>
+          ) : (
+            ""
+          ),
       },
       {
         name: "id",
         displayKey: "id",
-        cellRenderer: (post) => (post.id !== null ? post.id : ""),
+        cellRenderer: (post) =>
+          post.id !== null ? (
+            <>
+              <ClipboardCopy
+                hoverTip="Copy"
+                clickTip="Copied"
+                variant="inline-compact"
+              >
+                {post.id}
+              </ClipboardCopy>
+            </>
+          ) : (
+            ""
+          ),
       },
       {
         name: "organization",
@@ -177,7 +191,7 @@ export const UserCustomer = () => {
             <UserPostAccountsMultiInput
               postId={post.id}
               defaultAccounts={post.accounts}
-              isReadonly={!canEdit || isChanging}
+              isReadonly={!canEdit}
             />
           ) : (
             ""
@@ -188,14 +202,19 @@ export const UserCustomer = () => {
         displayKey: "tomsId",
         cellRenderer: (post) =>
           post.id !== null ? (
-            post?.tomsId
+            <ClipboardCopy
+              hoverTip="Copy"
+              clickTip="Copied"
+              variant="inline-compact"
+            >
+              {post.tomsId}
+            </ClipboardCopy>
           ) : (
             <TextInput
               aria-label={t("tomsId")}
               onChange={(_event, value) => {
                 newTomsIdRef.current = value;
               }}
-              isDisabled={isChanging}
               placeholder={t("tomsId")}
             />
           ),
@@ -205,14 +224,19 @@ export const UserCustomer = () => {
         displayKey: "dmpId",
         cellRenderer: (post) =>
           post.id !== null ? (
-            post.dmpId
+            <ClipboardCopy
+              hoverTip="Copy"
+              clickTip="Copied"
+              variant="inline-compact"
+            >
+              {post.dmpId}
+            </ClipboardCopy>
           ) : (
             <TextInput
               aria-label={t("dmpId")}
               onChange={(_event, value) => {
                 newDmpIdRef.current = value;
               }}
-              isDisabled={isChanging}
               placeholder={t("dmpId")}
             />
           ),
@@ -226,7 +250,7 @@ export const UserCustomer = () => {
               postId={post.id}
               defaultRoleId={post.userRole.id}
               roles={roles}
-              isReadonly={!canEdit || isChanging}
+              isReadonly={!canEdit}
             />
           ) : (
             <UserPostRoleDropdown
@@ -235,7 +259,7 @@ export const UserCustomer = () => {
               onChange={(role) => {
                 newRoleIdRef.current = role.id;
               }}
-              isReadonly={!canEdit || isChanging}
+              isReadonly={!canEdit}
             />
           ),
       },
@@ -248,7 +272,7 @@ export const UserCustomer = () => {
               postId={post.id}
               allSystemRoles={systemRoles}
               defaultSystemRoles={post.systemRoles}
-              isReadonly={!canEdit || isChanging}
+              isReadonly={!canEdit}
             />
           ) : (
             ""
@@ -257,83 +281,21 @@ export const UserCustomer = () => {
       {
         name: "",
         displayKey: " ",
-        cellRenderer: (post) => {
-          return post.id !== null ? (
-            <Button
-              style={{ float: "right" }}
-              type="button"
-              disabled={!canDelete || isChanging}
-              onClick={async () => {
-                setIsChanging(true);
-                try {
-                  await adminClient.userPosts.deleteUserPost({
-                    realm,
-                    postId: post.id,
-                  });
-                  addAlert(
-                    t("deleteUserPostSuccess", { postId: post.id }),
-                    AlertVariant.success,
-                  );
-                  refresh();
-                } catch (error) {
-                  addError(
-                    t("deleteUserPostError", { postId: post.id }),
-                    error,
-                  );
-                } finally {
-                  setIsChanging(false);
-                }
-              }}
-            >
-              {t("delete")}
-            </Button>
-          ) : (
-            <Button
-              style={{ float: "right" }}
-              type="button"
-              disabled={isChanging}
-              onClick={async () => {
-                setIsChanging(true);
-                try {
-                  await adminClient.userPosts.createUserPost(
-                    { realm },
-                    {
-                      userId,
-                      dmpId: newDmpIdRef.current,
-                      tomsId: newTomsIdRef.current,
-                      roleId: newRoleIdRef.current,
-                    },
-                  );
-                  addAlert(
-                    t("addUserPostSuccess", { postId: post.id }),
-                    AlertVariant.success,
-                  );
-                  refresh();
-                } catch (error) {
-                  addError(t("addUserPostError", { postId: post.id }), error);
-                } finally {
-                  setIsChanging(false);
-                }
-              }}
-            >
-              {t("add")}
-            </Button>
-          );
-        },
+        cellRenderer: (post) => (
+          <UserPostActions
+            userId={userId}
+            postId={post.id}
+            newTomsIdRef={newTomsIdRef}
+            newDmpIdRef={newDmpIdRef}
+            newRoleIdRef={newRoleIdRef}
+            onChanged={() => {
+              refresh();
+            }}
+          />
+        ),
       },
     ];
-  }, [
-    roles,
-    t,
-    isChanging,
-    addAlert,
-    addError,
-    adminClient.userPosts,
-    realm,
-    userId,
-    refresh,
-    systemRoles,
-  ]);
+  }, [roles, t, userId, refresh, systemRoles]);
 
   if (!roles || !systemRoles || !posts) return <KeycloakSpinner />;
 

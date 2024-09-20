@@ -31,6 +31,7 @@ import { CredentialRow } from "./user-credentials/CredentialRow";
 import { InlineLabelEdit } from "./user-credentials/InlineLabelEdit";
 import { ResetCredentialDialog } from "./user-credentials/ResetCredentialDialog";
 import { ResetPasswordDialog } from "./user-credentials/ResetPasswordDialog";
+import {UserAttribute} from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
 
 import "./user-credentials.css";
 
@@ -374,6 +375,10 @@ export const UserCredentials = ({ user, setUser }: UserCredentialsProps) => {
   const emptyState =
     noCredentials && noFederatedCredentials && !hasCredentialTypes;
 
+  const fixedUser = user as UserRepresentation & {
+    unmanagedAttributes: Record<string, any>
+  };
+
   return (
     <>
       {isOpen && (
@@ -388,6 +393,9 @@ export const UserCredentials = ({ user, setUser }: UserCredentialsProps) => {
       {openCredentialReset && (
         <ResetCredentialDialog
           userId={user.id!}
+          isEmailVerified={!!user.emailVerified}
+          hasPhone={(user.attributes?.[UserAttribute.PHONE]
+            || fixedUser.unmanagedAttributes?.[UserAttribute.PHONE]) !== undefined}
           onClose={() => setOpenCredentialReset(false)}
         />
       )}
