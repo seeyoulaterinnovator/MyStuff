@@ -29,6 +29,10 @@ export enum ExternalSystemName {
   B2B = "b2b",
 }
 
+export enum UserAttribute {
+  PHONE = "phone"
+}
+
 export interface UserRoleRepresentation {
   id: number;
   name: UserRoleName;
@@ -140,3 +144,9 @@ export type UserPostSystemRoleRepresentation = {
   systemRoleId: number;
   userPostId: string;
 };
+
+export interface UserFindResultRepresentation {
+  foundUserId: string;
+}
+
+export interface UserFindResponseRepresentation extends Response<UserFindResultRepresentation> {}

@@ -35,13 +35,14 @@ export interface ConfirmDialogModalProps extends ConfirmDialogProps {
 export type ConfirmDialogProps = {
   titleKey: string;
   messageKey?: string;
+  noContinueButton?: boolean;
   noCancelButton?: boolean;
   confirmButtonDisabled?: boolean;
   cancelButtonLabel?: string;
   continueButtonLabel?: string;
   continueButtonVariant?: ButtonVariant;
   variant?: ModalVariant;
-  onConfirm: () => void;
+  onConfirm?: () => void;
   onCancel?: () => void;
   children?: ReactNode;
 };
@@ -49,6 +50,7 @@ export type ConfirmDialogProps = {
 export const ConfirmDialogModal = ({
   titleKey,
   messageKey,
+  noContinueButton,
   noCancelButton,
   cancelButtonLabel,
   continueButtonLabel,
@@ -69,6 +71,7 @@ export const ConfirmDialogModal = ({
       onClose={toggleDialog}
       variant={variant}
       actions={[
+        !noContinueButton && (
         <Button
           id="modal-confirm"
           data-testid="confirm"
@@ -76,12 +79,13 @@ export const ConfirmDialogModal = ({
           isDisabled={confirmButtonDisabled}
           variant={continueButtonVariant || ButtonVariant.primary}
           onClick={() => {
-            onConfirm();
+            onConfirm?.();
             toggleDialog();
           }}
         >
           {t(continueButtonLabel || "continue")}
-        </Button>,
+        </Button>
+        ),
         !noCancelButton && (
           <Button
             id="modal-cancel"
