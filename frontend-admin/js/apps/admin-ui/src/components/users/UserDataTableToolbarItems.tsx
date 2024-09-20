@@ -23,7 +23,6 @@ import { UserAttribute } from "./UserDataTable";
 import { UserDataTableAttributeSearchForm } from "./UserDataTableAttributeSearchForm";
 import DropdownPanel from "../dropdown-panel/DropdownPanel";
 import { UserDataTableCustomSearchForm } from "./UserDataTableCustomSearchForm";
-import type { RealmNameRepresentation } from "../../context/RealmsContext";
 import { CustomUserToolbarAction } from "../../customLogic/constants/user";
 import { UploadButton } from "../../customLogic/ui/UploadButton";
 import type { CustomUsersAction } from "../../customLogic/types/users";
@@ -47,7 +46,6 @@ type UserDataTableToolbarItemsProps = {
   clearAllFilters: () => void;
   createAttributeSearchChips: () => ReactNode;
   searchUserWithAttributes: () => void;
-  realms: RealmNameRepresentation[];
   customFilters: CustomUserQuery;
   searchUserWithCustomFilters: (customFilters: CustomUserQuery) => void;
   onCustomAction?: (action: CustomUsersAction) => void;
@@ -72,7 +70,6 @@ export function UserDataTableToolbarItems({
   clearAllFilters,
   createAttributeSearchChips,
   searchUserWithAttributes,
-  realms,
   customFilters,
   searchUserWithCustomFilters,
   onCustomAction,
@@ -174,7 +171,6 @@ export function UserDataTableToolbarItems({
     return (
       <UserDataTableCustomSearchForm
         customFilters={customFilters}
-        realms={realms}
         searchUserWithCustomFilters={(newCustomFilters) => {
           searchUserWithCustomFilters(newCustomFilters);
           setSearchDropdownOpen(false);

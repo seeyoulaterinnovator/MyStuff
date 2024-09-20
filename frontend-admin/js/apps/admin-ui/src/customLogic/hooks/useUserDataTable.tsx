@@ -231,6 +231,7 @@ export const useUserDataTable = ({
             { realm: realmName },
             selectedIds,
           );
+          
           addAlert(t("userLoginSentSuccess"), AlertVariant.success);
         } catch (error) {
           addError(t("userLoginSentError"), error);
@@ -249,6 +250,7 @@ export const useUserDataTable = ({
             { realm: realmName },
             selectedIds,
           );
+
           addAlert(
             t("userLoginSentAndPasswordResetSuccess"),
             AlertVariant.success,
@@ -267,7 +269,7 @@ export const useUserDataTable = ({
               realm: realmName,
             });
 
-          await saveAs(
+          saveAs(
             new Blob([downloadedFile], { type: "application/octet-stream" }),
             `user_template.csv`,
           );
@@ -285,6 +287,7 @@ export const useUserDataTable = ({
             await adminClient.customUsers.downloadExcelTemplate({
               realm: realmName,
             });
+
           saveAs(
             new Blob([downloadedFile], { type: "application/octet-stream" }),
             `user_template.xlsx`,
@@ -432,7 +435,7 @@ export const useUserDataTable = ({
 
   const customLoader = async (first?: number, max?: number) => {
     if (!listUsers) {
-      return []
+      return [];
     }
 
     try {
