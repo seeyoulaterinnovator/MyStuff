@@ -3,7 +3,8 @@ import {
   ActiveImportUsersResponseRepresentation,
   DownloadedUsersRepresentation,
   ImportUsersReportResponseRepresentation,
-  UserFindResponseRepresentation,
+  UserAccessibleRealmsRepresentation,
+  UserFindResponseRepresentation
 } from "../../defs/custom/userRepresentation.js";
 import type { KeycloakAdminClient } from "../../client.js";
 import Resource from "../resource.js";
@@ -45,6 +46,14 @@ export class CustomUsers extends Resource<{ realm?: string }> {
       'sortAsc',
       'sortField',
     ],
+  });
+
+  public getAccessibleRealms = this.makeRequest<
+    unknown,
+    UserAccessibleRealmsRepresentation
+  >({
+    method: 'GET',
+    path: '/users-info/accessible-realms',
   });
 
   public sendLogin = this.makeUpdateRequest<

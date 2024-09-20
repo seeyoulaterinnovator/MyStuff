@@ -9,14 +9,12 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Form } from "react-router-dom";
-import type { RealmNameRepresentation } from "../../context/RealmsContext";
 import { RealmSimpleSelector } from "../custom/realm-simple-selector/RealmSimpleSelector";
 
 const defaultCustomSearchForm: CustomUserQuery = {};
 
 type UserDataTableCustomSearchFormProps = {
   searchUserWithCustomFilters: (newFilters: CustomUserQuery) => void;
-  realms: RealmNameRepresentation[];
   customFilters: CustomUserQuery;
 };
 

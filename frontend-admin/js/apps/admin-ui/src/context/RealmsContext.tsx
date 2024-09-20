@@ -15,6 +15,7 @@ import { fetchAdminUI } from "./auth/admin-ui-endpoint";
 type RealmsContextProps = {
   /** A list of all the realms. */
   realms: RealmNameRepresentation[];
+  accessibleRealms: RealmNameRepresentation[];
   /** Refreshes the realms with the latest information. */
   refresh: () => Promise<void>;
 };
@@ -34,12 +35,20 @@ export const RealmsProvider = ({ children }: PropsWithChildren) => {
   const { adminClient } = useAdminClient();
 
   const [realms, setRealms] = useState<RealmNameRepresentation[]>([]);
+  const [accessibleRealms, setAccessibleRealms] = useState<RealmNameRepresentation[]>([]);
   const [refreshCount, setRefreshCount] = useState(0);
   const localeSort = useLocaleSort();
   const { t } = useTranslation();
 
   function updateRealms(realms: RealmNameRepresentation[]) {
     setRealms(localeSort(realms, (r) => label(t, r.displayName, r.name)));
+  }
+
+  const formatAccessibleRealms = (rawAccessibleRealms: string[]): RealmNameRepresentation[] => {
+    return rawAccessibleRealms.map(item => ({
+      name: item,
+      displayName: item,
+    }))
   }
 
   useFetch(
@@ -61,6 +70,12 @@ export const RealmsProvider = ({ children }: PropsWithChildren) => {
     (realms) => updateRealms(realms),
     [refreshCount],
   );
+  useFetch(
+    async () => adminClient.customUsers.getAccessibleRealms(),
+    (data) => setAccessibleRealms(formatAccessibleRealms(data)),
+    [],
+  );
+
 
   const refresh = useCallback(async () => {
     //this is needed otherwise the realm find function will not return
@@ -70,7 +85,7 @@ export const RealmsProvider = ({ children }: PropsWithChildren) => {
   }, []);
 
   const value = useMemo<RealmsContextProps>(
-    () => ({ realms, refresh }),
+    () => ({ realms, refresh, accessibleRealms }),
     [realms, refresh],
   );
 

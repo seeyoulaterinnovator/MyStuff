@@ -21,6 +21,8 @@ import { useRecentRealms } from "../../../context/RecentRealms";
 
 import "./realm-simple-selector.css";
 
+type RealmsSource = 'default' | 'accessible'
+
 type RealmTextProps = {
   displayName?: string;
   name?: string;
@@ -50,6 +52,7 @@ const RealmText = ({ name, displayName, isSelected }: RealmTextProps) => {
 interface RealmSimpleSelectorProps {
   id: string;
   value?: string;
+  realmsSource?: RealmsSource;
   onChange?: (realmName: string) => void;
 }
 
@@ -57,26 +60,29 @@ interface RealmSimpleSelectorProps {
 export const RealmSimpleSelector = ({
   id,
   value,
+  realmsSource = 'default',
   onChange,
 }: RealmSimpleSelectorProps) => {
-  const { realms } = useRealms();
+  const { realms, accessibleRealms } = useRealms();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const { t } = useTranslation();
   const recentRealms = useRecentRealms();
   const [currentRealmName, setCurrentRealmName] = useState(value);
 
+  const resRealms = realmsSource === 'default' ? realms : accessibleRealms;
+
   useEffect(() => {
     setCurrentRealmName(value);
   }, [value]);
 
   const selectedRealm = useMemo(() => {
-    return realms.find((item) => item.name === currentRealmName);
-  }, [realms, currentRealmName]);
+    return resRealms.find((item) => item.name === currentRealmName);
+  }, [resRealms, currentRealmName]);
 
   const all = useMemo(
     () =>
-      realms
+      resRealms
         .map((realm) => {
           const used = recentRealms.some((name) => name === realm.name);
           return { realm, used };
@@ -87,7 +93,7 @@ export const RealmSimpleSelector = ({
           if (r2.used) return 1;
           return 0;
         }),
-    [recentRealms, realms],
+    [recentRealms, resRealms],
   );
 
   const filteredItems = useMemo(() => {
@@ -127,7 +133,7 @@ export const RealmSimpleSelector = ({
       )}
     >
       <DropdownList>
-        {realms.length > 5 && (
+        {resRealms.length > 5 && (
           <>
             <DropdownGroup>
               <DropdownList>
@@ -141,7 +147,7 @@ export const RealmSimpleSelector = ({
             <Divider component="li" />
           </>
         )}
-        {realms.length !== 0
+        {resRealms.length !== 0
           ? filteredItems.map((i) => (
               <DropdownItem
                 key={i.realm.name}
