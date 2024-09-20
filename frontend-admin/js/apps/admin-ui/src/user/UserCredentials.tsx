@@ -4,7 +4,7 @@ import {
   AlertVariant,
   Button,
   ButtonVariant,
-  Divider,
+  Divider, ModalVariant,
   PageSection,
   PageSectionVariants,
 } from "@patternfly/react-core";
@@ -124,6 +124,13 @@ export const UserCredentials = ({ user, setUser }: UserCredentialsProps) => {
     tempItemOrder: [""],
   });
 
+  const fixedUser = user as UserRepresentation & {
+    unmanagedAttributes: Record<string, any>
+  };
+
+  const hasPhone = (user.attributes?.[UserAttribute.PHONE]
+    || fixedUser.unmanagedAttributes?.[UserAttribute.PHONE]) !== undefined;
+
   useFetch(
     () => adminClient.users.getCredentials({ id: user.id! }),
     (credentials) => {
@@ -181,6 +188,13 @@ export const UserCredentials = ({ user, setUser }: UserCredentialsProps) => {
         addError("deleteCredentialsError", error);
       }
     },
+  });
+
+  const [toggleDeleteInvalidDialog, DeleteInvalidConfirm] = useConfirmDialog({
+    titleKey: t("deleteCredentialsConfirmTitle"),
+    variant: ModalVariant.small,
+    messageKey: hasPhone ? "resetCredentialsDisabledByEmail" : "resetCredentialsDisabledByPhone",
+    noContinueButton: true
   });
 
   const itemOrder = useMemo(
@@ -352,7 +366,11 @@ export const UserCredentials = ({ user, setUser }: UserCredentialsProps) => {
 
   const onToggleDelete = (credential: CredentialRepresentation) => {
     setSelectedCredential(credential);
-    toggleDeleteDialog();
+    if(!!user.emailVerified) {
+      toggleDeleteDialog();
+    } else {
+      toggleDeleteInvalidDialog();
+    }
   };
 
   const useFederatedCredentials = user.federationLink || user.origin;
@@ -375,10 +393,6 @@ export const UserCredentials = ({ user, setUser }: UserCredentialsProps) => {
   const emptyState =
     noCredentials && noFederatedCredentials && !hasCredentialTypes;
 
-  const fixedUser = user as UserRepresentation & {
-    unmanagedAttributes: Record<string, any>
-  };
-
   return (
     <>
       {isOpen && (
@@ -394,12 +408,12 @@ export const UserCredentials = ({ user, setUser }: UserCredentialsProps) => {
         <ResetCredentialDialog
           userId={user.id!}
           isEmailVerified={!!user.emailVerified}
-          hasPhone={(user.attributes?.[UserAttribute.PHONE]
-            || fixedUser.unmanagedAttributes?.[UserAttribute.PHONE]) !== undefined}
+          hasPhone={hasPhone}
           onClose={() => setOpenCredentialReset(false)}
         />
       )}
       <DeleteConfirm />
+      <DeleteInvalidConfirm />
       {user.email && !emptyState && (
         <Button
           className="kc-resetCredentialBtn-header"

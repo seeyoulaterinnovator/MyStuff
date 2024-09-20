@@ -1,11 +1,11 @@
-import {useAdminClient} from "../../admin-client";
-import {useRealm} from "../../context/realm-context/RealmContext";
-import {useWhoAmI} from "../../context/whoami/WhoAmI";
-import {useAccess} from "../../context/access/Access";
-import {useTranslation} from "react-i18next";
-import {useAlerts} from "../../components/alert/Alerts";
-import {MutableRefObject, useState} from "react";
-import {AlertVariant, Button} from "@patternfly/react-core";
+import { useAdminClient } from "../../admin-client";
+import { useRealm } from "../../context/realm-context/RealmContext";
+import { useWhoAmI } from "../../context/whoami/WhoAmI";
+import { useAccess } from "../../context/access/Access";
+import { useTranslation } from "react-i18next";
+import { useAlerts } from "../../components/alert/Alerts";
+import { MutableRefObject, useState } from "react";
+import { AlertVariant, Button } from "@patternfly/react-core";
 
 type UserPostActionsProps = {
   userId: string;
@@ -28,14 +28,16 @@ export const UserPostActions = (props: UserPostActionsProps) => {
 
   const { adminClient } = useAdminClient();
   const { realm } = useRealm();
-  const { whoAmI } = useWhoAmI();
-  const { hasAccess } = useAccess();
+  const { isMeInMaster } = useWhoAmI();
+  const { getAccesses } = useAccess();
   const { t } = useTranslation();
   const { addAlert, addError } = useAlerts();
+  const { withManageUsersAccess, withButtonDeleteCustomerAccess } = getAccesses(
+    ["manage-users", "button-delete-customer"],
+  );
 
   const canDelete =
-    hasAccess("manage-users") &&
-    (whoAmI.getRealm() === "master" || hasAccess("button-delete-customer"));
+    withManageUsersAccess && (isMeInMaster || withButtonDeleteCustomerAccess);
 
   const [isChanging, setIsChanging] = useState(false);
 
