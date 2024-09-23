@@ -32,6 +32,7 @@ export const ImportUsersDataTable = () => {
   const { realm: realmName } = useRealm();
   const { addAlert, addError } = useAlerts();
 
+  const [isLoading, setIsLoading] = useState(false);
   const [importUsersReportData, setImportUsersReportData] =
     useState<ImportUsersReportRepresentation[]>([]);
   const [first, setFirst] = useState<number>();
@@ -71,7 +72,7 @@ export const ImportUsersDataTable = () => {
                   const formData = new FormData();
                   formData.append("file", payload);
 
-                  const response = await adminClient.customUsers.importFile(
+                  await adminClient.customUsers.importFile(
                     payload.name,
                   )({ realm: realmName }, formData);
 
@@ -107,6 +108,7 @@ export const ImportUsersDataTable = () => {
 
   useEffect(() => {
     resetImportUsersInterval();
+    setIsLoading(true);
 
     importUsersInterval = setInterval(async () => {
       const dataLoader = await loader();
@@ -114,6 +116,8 @@ export const ImportUsersDataTable = () => {
       setImportUsersReportData((prevData) => {
         return isEqual(prevData, dataLoader) ? prevData : dataLoader;
       });
+
+      setIsLoading(false);
     }, 1000);
 
     return () => {
@@ -129,6 +133,7 @@ export const ImportUsersDataTable = () => {
       onPaginationChange={handlePaginationChange}
       withoutRefreshButton
       isPaginated
+      isLoading={isLoading}
       emptyState={
         <>
           <Toolbar>

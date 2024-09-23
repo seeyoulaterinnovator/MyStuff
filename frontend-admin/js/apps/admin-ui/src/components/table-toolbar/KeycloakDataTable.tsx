@@ -314,7 +314,8 @@ export type DataListProps<T> = Omit<
   isSearching?: boolean;
   onlyTable?: boolean;
   withoutRefreshButton?: boolean;
-  onPaginationChange?: NestedFiltersFunction
+  onPaginationChange?: NestedFiltersFunction;
+  isLoading?: boolean;
 };
 
 /**
@@ -364,6 +365,7 @@ export function KeycloakDataTable<T>({
   onlyTable = false,
   withoutRefreshButton = false,
   onPaginationChange,
+  isLoading = false,
   ...props
 }: DataListProps<T>) {
   const { t } = useTranslation();
@@ -531,7 +533,11 @@ export function KeycloakDataTable<T>({
 
   useEffect(() => {
     onPaginationChange?.(first, (max || 0) + 1, search);
-  }, [onPaginationChange, first, max, search])
+  }, [onPaginationChange, first, max, search]);
+  
+  useEffect(() => {
+    setLoading(isLoading)
+  }, [isLoading]);
 
   const convertAction = () =>
     actions &&
