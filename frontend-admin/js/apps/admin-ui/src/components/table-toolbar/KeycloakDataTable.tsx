@@ -528,7 +528,7 @@ export function KeycloakDataTable<T>({
   );
 
   useEffect(() => {
-    onPaginationChange?.(first, max, search);
+    onPaginationChange?.(first, (max || 0) + 1, search);
   }, [onPaginationChange, first, max, search])
 
   const convertAction = () =>

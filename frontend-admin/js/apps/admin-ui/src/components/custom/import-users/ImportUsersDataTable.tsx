@@ -52,7 +52,7 @@ export const ImportUsersDataTable = () => {
 
   const handlePaginationChange = (newFirst?: number, newMax?: number) => {
     setFirst(newFirst);
-    setMax((newMax || 0) + 1);
+    setMax(newMax);
   }
 
   const toolbar = () => {
