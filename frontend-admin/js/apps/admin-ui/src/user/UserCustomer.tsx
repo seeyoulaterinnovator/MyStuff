@@ -48,7 +48,7 @@ type Post =
 export const UserCustomer = () => {
   const { adminClient } = useAdminClient();
   const { id: userId } = useParams<UserParams>();
-  const { realm } = useRealm();
+  const { realm, searchRealm } = useRealm();
   const { isMeInMaster } = useWhoAmI();
   const { getAccesses } = useAccess();
   const { t } = useTranslation();
@@ -97,12 +97,12 @@ export const UserCustomer = () => {
       return (
         await adminClient.userPosts.findUserPostSystemRoles({
           realm,
-          realmId: realm, // TODO
+          realmId: searchRealm
         })
-      ).results["system-roles"];
+      ).results["system-roles"] || [];
     },
     setSystemRoles,
-    [realm, key],
+    [realm, searchRealm, key],
   );
 
   useFetch(
@@ -147,7 +147,7 @@ export const UserCustomer = () => {
         );
     },
     setPosts,
-    [key],
+    [realm, key],
   );
 
   const columns = useMemo<Field<Post>[]>(() => {

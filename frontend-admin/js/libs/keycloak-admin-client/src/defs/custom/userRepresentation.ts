@@ -152,3 +152,7 @@ export interface UserFindResultRepresentation {
 }
 
 export interface UserFindResponseRepresentation extends Response<UserFindResultRepresentation> {}
+
+export interface RealmNameRepresentation {
+  realm: string;
+}

@@ -52,7 +52,7 @@ services:
       KC_DB_URL_DATABASE: sso
       KC_DB_USERNAME: sso
       KC_DB_PASSWORD: sso
-      KC_LOG_LEVEL: INFO
+      KC_LOG_LEVEL: DEBUG
       KC_LOG_CONSOLE_COLOR: true
       KC_HTTP_ENABLED: true
       KC_HTTP_RELATIVE_PATH: /auth

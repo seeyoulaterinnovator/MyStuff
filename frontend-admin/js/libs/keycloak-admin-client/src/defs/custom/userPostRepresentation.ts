@@ -28,7 +28,7 @@ export type UserPostRolesEditRepresentation = {
 
 export type UserPostSystemRolesResultRepresentation = Record<
   "system-roles",
-  SystemRoleRepresentation[]
+  SystemRoleRepresentation[] | null
 >;
 
 export interface UserPostSystemRolesResponseRepresentation
