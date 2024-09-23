@@ -56,7 +56,7 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
 
   useFetch(
     () => {
-      if (isOnUserPage && userId) {
+      if (isOnUserPage && userId && realm === "manager") {
         return adminClient.customUsers.findRealmNameByUserId({
           userId,
         });
@@ -71,7 +71,7 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
         setSearchRealm(null);
       }
     },
-    [isOnUserPage, userId],
+    [isOnUserPage, userId, realm],
   );
   useEffect(() => {
     if (isOnUserPage) {
