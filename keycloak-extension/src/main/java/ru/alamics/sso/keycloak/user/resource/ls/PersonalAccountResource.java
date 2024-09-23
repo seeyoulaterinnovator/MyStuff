@@ -78,6 +78,22 @@ public class PersonalAccountResource {
         }
     }
 
+    @PATCH
+    @Path("/{postId}/addV2")
+    public Response addV2(@PathParam("postId") String postId, List<String> paList) {
+        try {
+            return JsonResponse.success()
+                    .addResult("accounts", service.addAccountList(postId, paList))
+                    .build();
+
+        } catch (/*NotFoundException*/ Exception e) {
+            log.error("", e);
+            return JsonResponse.fail()
+                    .message(e.getMessage())
+                    .build();
+        }
+    }
+
     // убрать часть лс из должности
     // PATCH ?
     @PATCH

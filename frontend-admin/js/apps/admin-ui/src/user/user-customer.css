@@ -1,0 +1,20 @@
+.kc-user-customer-chip > .pf-v5-c-chip__content > .pf-v5-c-chip__text {
+    font-size: var(--pf-v5-c-table--cell--FontSize);
+    max-width: none;
+    text-wrap: wrap;
+    word-break: break-all;
+}
+
+.kc-user-customer-chip > .pf-v5-c-chip__actions > .pf-v5-c-button {
+    font-size: var(--pf-v5-c-table--cell--FontSize);
+    vertical-align: middle;
+}
+
+.kc-user-customer-table .pf-v5-c-table__tbody .pf-v5-c-table__td {
+    text-wrap: wrap;
+    word-break: break-all;
+}
+
+.kc-user-customer-table .pf-v5-c-table__thead .pf-v5-c-table__th {
+    text-wrap: wrap;
+}

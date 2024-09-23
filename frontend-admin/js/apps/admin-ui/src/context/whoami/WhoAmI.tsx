@@ -61,6 +61,7 @@ export class WhoAmI {
 type WhoAmIProps = {
   refresh: () => void;
   whoAmI: WhoAmI;
+  isMeInMaster: boolean;
 };
 
 export const WhoAmIContext = createNamedContext<WhoAmIProps | undefined>(
@@ -91,8 +92,10 @@ export const WhoAmIContextProvider = ({ children }: PropsWithChildren) => {
     [key, realm],
   );
 
+  const isMeInMaster = whoAmI.getRealm() === "master";
+
   return (
-    <WhoAmIContext.Provider value={{ refresh: () => setKey(key + 1), whoAmI }}>
+    <WhoAmIContext.Provider value={{ refresh: () => setKey(key + 1), whoAmI, isMeInMaster }}>
       {children}
     </WhoAmIContext.Provider>
   );

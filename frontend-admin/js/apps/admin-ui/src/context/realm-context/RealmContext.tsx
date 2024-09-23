@@ -9,9 +9,12 @@ import { useAdminClient } from "../../admin-client";
 import { DashboardRouteWithRealm } from "../../dashboard/routes/Dashboard";
 import RealmRepresentation from "@keycloak/keycloak-admin-client/lib/defs/realmRepresentation";
 import { useFetch } from "../../utils/useFetch";
+import {UserParams, UserRoute} from "../../user/routes/User";
+import {useParams} from "../../utils/useParams";
 
 type RealmContextType = {
   realm: string;
+  searchRealm: string;
   realmRepresentation?: RealmRepresentation;
   refresh: () => void;
 };
@@ -28,6 +31,9 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
   const refresh = () => setKey(key + 1);
   const [realmRepresentation, setRealmRepresentation] =
     useState<RealmRepresentation>();
+  const isOnUserPage = !!useMatch(UserRoute.path);
+  const { id: userId } = useParams<UserParams>();
+  const [searchRealm, setSearchRealm] = useState<string | null>(null);
 
   const routeMatch = useMatch({
     path: DashboardRouteWithRealm.path,
@@ -48,8 +54,36 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
     [realm, key],
   );
 
+  // TODO
+  /*useFetch(
+    () => {
+      if (isOnUserPage && userId && realm === "manager") {
+        // TODO
+        return adminClient.customUsers.findRealmNameByUserId({
+          userId,
+        });
+      } else {
+        return Promise.resolve(null);
+      }
+    },
+    (result) => {
+      if (result) {
+        setSearchRealm(result.realm);
+      } else {
+        setSearchRealm(null);
+      }
+    },
+    [isOnUserPage, userId, realm],
+  );*/
+  useEffect(() => {
+    if (isOnUserPage) {
+    } else {
+      setSearchRealm(null);
+    }
+  }, [isOnUserPage]);
+
   return (
-    <RealmContext.Provider value={{ realm, realmRepresentation, refresh }}>
+    <RealmContext.Provider value={{ realm, searchRealm: searchRealm || realm, realmRepresentation, refresh }}>
       {children}
     </RealmContext.Provider>
   );

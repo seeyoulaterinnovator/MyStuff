@@ -5,8 +5,8 @@ export type AccessChecker = {
 export type AccessTypeFunc = (accessChecker: AccessChecker) => boolean;
 
 export type CustomAccessType =
-  | "hide-manage-buttons" 
-  | "button-download-template-csv" 
+  | "hide-manage-buttons"
+  | "button-download-template-csv"
   | "button-download-template-xlsx"
   | "button-import-file-csv"
   | "button-export-csv"

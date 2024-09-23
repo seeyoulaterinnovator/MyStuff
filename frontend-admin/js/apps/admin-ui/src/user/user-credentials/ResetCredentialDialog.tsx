@@ -11,6 +11,8 @@ import { RequiredActionMultiSelect } from "./RequiredActionMultiSelect";
 
 type ResetCredentialDialogProps = {
   userId: string;
+  isEmailVerified: boolean;
+  hasPhone: boolean;
   onClose: () => void;
 };
 
@@ -26,6 +28,8 @@ export const credResetFormDefaultValues: CredentialResetForm = {
 
 export const ResetCredentialDialog = ({
   userId,
+  isEmailVerified,
+  hasPhone,
   onClose,
 }: ResetCredentialDialogProps) => {
   const { adminClient } = useAdminClient();
@@ -64,6 +68,20 @@ export const ResetCredentialDialog = ({
       addError("credentialResetEmailError", error);
     }
   };
+
+  if(!isEmailVerified) {
+    return (
+      <ConfirmDialogModal
+        variant={ModalVariant.small}
+        titleKey="credentialReset"
+        messageKey={hasPhone ? "resetCredentialsDisabledByEmail" : "resetCredentialsDisabledByPhone"}
+        open
+        onCancel={onClose}
+        toggleDialog={onClose}
+        noContinueButton
+      />
+    )
+  }
 
   return (
     <ConfirmDialogModal

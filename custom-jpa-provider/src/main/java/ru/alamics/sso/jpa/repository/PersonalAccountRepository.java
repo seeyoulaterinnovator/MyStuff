@@ -45,7 +45,10 @@ public class PersonalAccountRepository {
         em.flush();
     }
 
-    public void addAccountList(final String postId, List<String> paList) {
+    public Set<PersonalAccountEntity> addAccountList(final String postId, List<String> paList) {
+        if(paList == null) {
+            return Collections.emptySet();
+        }
 
         PersonalAccountPostEntity pe = em.find(PersonalAccountPostEntity.class, postId);
 
@@ -57,9 +60,6 @@ public class PersonalAccountRepository {
             pe = em.find(PersonalAccountPostEntity.class, postId);
         }
 
-
-        if (paList == null)
-            paList = new LinkedList<>();
         Set<PersonalAccountEntity> paEnList = new HashSet<>();
         for (String pa : paList) {
             String[] accountsNumber = pa.split(",");
@@ -85,6 +85,8 @@ public class PersonalAccountRepository {
         em.persist(pe); // ?
 
         em.flush();
+
+        return pe.getAccounts().stream().filter(pa -> paList.contains(pa.getValue())).collect(Collectors.toSet());
     }
 
     public void subAccountUuidList(final String postId, List<String> paUuidList) {

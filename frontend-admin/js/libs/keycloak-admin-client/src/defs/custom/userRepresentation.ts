@@ -12,6 +12,8 @@ export enum UserRoleName {
   GUEST = "GUEST",
 }
 
+export const DEFAULT_USER_ROLE_ID = 1;
+
 export enum SystemRoleName {
   ACCESS_GRANTED = "access_granted",
 }
@@ -25,6 +27,10 @@ export enum ExternalSystemName {
   WIFI = "wifi",
   APP_B2B = "app_b2b",
   B2B = "b2b",
+}
+
+export enum UserAttribute {
+  PHONE = "phone"
 }
 
 export interface UserRoleRepresentation {
@@ -59,7 +65,7 @@ export interface UserPostRepresentation {
   tomsId: string;
   dmpId: string;
   userRole: UserRoleRepresentation;
-  systemRoles: SystemRoleRepresentation[];
+  systemRoles?: SystemRoleRepresentation[];
   selected: boolean;
   organization: string;
   updateTime: ArrayTimeRepresentation;
@@ -127,4 +133,26 @@ export type ImportUsersReportResponseRepresentation =
 
 export type ActiveImportUsersResponseRepresentation = ConditionalResponseStatus;
 
-export type UserAccessibleRealmsRepresentation = RealmName[]
+export type UserAccessibleRealmsRepresentation = RealmName[];
+
+export type UserPostsResultRepresentation = {
+  user_post: UserPostRepresentation[];
+};
+
+export interface UserPostsResponseRepresentation
+  extends Response<UserPostsResultRepresentation> {}
+
+export type UserPostSystemRoleRepresentation = {
+  systemRoleId: number;
+  userPostId: string;
+};
+
+export interface UserFindResultRepresentation {
+  foundUserId: string;
+}
+
+export interface UserFindResponseRepresentation extends Response<UserFindResultRepresentation> {}
+
+export interface RealmNameRepresentation {
+  realm: string;
+}

@@ -53,6 +53,7 @@ export type UserProfileFieldProps = {
   attribute: UserProfileAttributeMetadata;
   renderer?: (attribute: UserProfileAttributeMetadata) => ReactNode;
   disabled?: boolean;
+  hidden?: boolean;
 };
 
 export type OptionLabel = Record<string, string> | undefined;
@@ -160,6 +161,7 @@ export const UserProfileFields = ({
                   renderer={renderer}
                   attribute={attribute}
                   disabled={attribute.name === 'lastName'}
+                  hidden={attribute.name === 'username'}
                 />
               ))}
             </div>
@@ -179,6 +181,7 @@ type FormFieldProps = {
     attribute: UserProfileAttributeMetadata,
   ) => JSX.Element | undefined;
   disabled?: boolean;
+  hidden?: boolean;
 };
 
 const FormField = ({
@@ -189,6 +192,7 @@ const FormField = ({
   currentLocale,
   attribute,
   disabled,
+  hidden,
 }: FormFieldProps) => {
   const value = form.watch(
     fieldName(attribute.name) as FieldPath<UserFormFields>,
@@ -219,6 +223,7 @@ const FormField = ({
       attribute={attribute}
       renderer={renderer}
       disabled={disabled}
+      hidden={hidden}
     />
   );
 };
