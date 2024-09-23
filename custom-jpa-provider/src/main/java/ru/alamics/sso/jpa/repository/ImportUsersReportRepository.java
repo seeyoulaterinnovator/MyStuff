@@ -48,13 +48,13 @@ public class ImportUsersReportRepository {
     }
 
     public void saveImportUsersReport(ImportUsersReportEntity importUsersReportEntity) {
-        log.info("import report with id = {} saved, status = {}", importUsersReportEntity.getId(), importUsersReportEntity.getStatus());
+        log.debug("import report with id = {} saved, status = {}", importUsersReportEntity.getId(), importUsersReportEntity.getStatus());
         em.persist(importUsersReportEntity);
         em.flush();
     }
 
     public void saveImportUsersData(ImportUsersDataEntity entity) {
-        log.info("importUserData with id = {} saved", entity.getId());
+        log.debug("importUserData with id = {} saved", entity.getId());
         em.persist(entity);
         em.flush();
     }
@@ -87,7 +87,7 @@ public class ImportUsersReportRepository {
     }
 
     public void updateReport(String id, ImportUsersReportStatus status, int clones, int created) {
-        log.info("report with id = {} was updated", id);
+        log.debug("report with id = {} was updated", id);
         em.createQuery("update ImportUsersReportEntity rep " +
                 "set rep.status = :status, rep.countClones = :clones, rep.countCreatedUsers = :created where rep.id = :id")
                 .setParameter("id", id)

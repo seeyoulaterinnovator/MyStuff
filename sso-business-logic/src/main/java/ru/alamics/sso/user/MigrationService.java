@@ -62,13 +62,9 @@ public class MigrationService {
 
         List<UserEntity> entities = new ArrayList<>();
 
-        reportModel.setStatus(ImportUsersReportStatus.IN_PROGRESS);
         int createdUsers = reportModel.getCountCreatedUsers();
         int countClones = reportModel.getCountClones();
         int processedUsers = 0;
-
-        if (dataList == null)
-            dataList = importReportService.getDataListAwaiting(reportModel.getId());
 
         try {
             for (ImportUsersDataModel data : dataList) {

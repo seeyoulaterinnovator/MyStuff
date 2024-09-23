@@ -16,6 +16,7 @@ import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.user.ImportReportService;
 import ru.alamics.sso.user.ImportService;
+import ru.alamics.sso.user.model.ImportUsersDataModel;
 import ru.alamics.sso.user.model.ImportUsersReportModel;
 import ru.alamics.sso.user.model.RepeatNextTimeException;
 import ru.alamics.sso.util.E2EUtil;
@@ -97,8 +98,9 @@ public class ImportSchedule implements ScheduledTask {
         List<ImportUsersReportModel> reportList = importReportService.getReportListByStatus(ImportUsersReportStatus.AWAITING);
 
         for (ImportUsersReportModel reportModel : reportList) {
-            importReportService.setReportStatus(reportModel, ImportUsersReportStatus.IN_PROGRESS);
-            importService.createImportUsers(reportModel, null, scheduleStart, null, null);
+            reportModel.setStatus(ImportUsersReportStatus.IN_PROGRESS);
+            importReportService.updateReport(reportModel);
+            importService.createImportUsers(reportModel, importReportService.getDataListAwaiting(reportModel.getId()), scheduleStart, null, null);
             importReportService.updateReport(reportModel);
         }
     }

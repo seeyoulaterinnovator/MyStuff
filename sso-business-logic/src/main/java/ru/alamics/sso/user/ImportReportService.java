@@ -2,6 +2,7 @@ package ru.alamics.sso.user;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
@@ -51,6 +52,7 @@ public class ImportReportService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void updateReport(ImportUsersReportModel report) {
 
         importUsersReportRepository.updateReport(report.getId(), report.getStatus(), report.getCountClones(), report.getCountCreatedUsers());
