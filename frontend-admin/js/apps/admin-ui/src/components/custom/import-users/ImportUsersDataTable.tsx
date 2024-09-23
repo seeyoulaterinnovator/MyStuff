@@ -2,6 +2,7 @@ import {
   UserReportStatus,
   type ImportUsersReportRepresentation,
 } from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
+import { NetworkError } from "@keycloak/keycloak-admin-client/lib";
 import { KeycloakDataTable } from "../../table-toolbar/KeycloakDataTable";
 import { useTranslation } from "react-i18next";
 import { useAdminClient } from "../../../admin-client";
@@ -74,18 +75,21 @@ export const ImportUsersDataTable = () => {
                     payload.name,
                   )({ realm: realmName }, formData);
 
-                  if (response.status === 200) {
-                    addAlert(t("usersImportedSuccess"), AlertVariant.success);
-                  }
+                  addAlert(t("usersImportedSuccess"), AlertVariant.success);
                 }
-              } catch (error: any) {
-                if ("status" in error) {
-                  if (error.status === 400) {
-                    addError(error.data.message, error);
-                  } else if (error.status === 502) {
-                    addAlert(t("tooManyUsersToImport"), AlertVariant.info);
-                  } else {
-                    addError(error.statusText, error);
+              } catch (error: unknown) {
+                if (error instanceof NetworkError) {
+                  switch (error.response.status) {
+                    case 400:
+                      addError(error.message, error);
+                      break;
+
+                    case 502:
+                      addAlert(t("tooManyUsersToImport"), AlertVariant.info);
+                      break;
+
+                    default:
+                      addError(error.response.statusText, error);;
                   }
                 }
               }
@@ -179,9 +183,9 @@ export const ImportUsersDataTable = () => {
                   id: importUsersReport.id,
                 });
 
-                addAlert(t("activeImportUsersReportSuccess"));
+                addAlert(t("activateImportUsersReportSuccess"));
               } catch (error) {
-                addError("activeImportUsersReportError", error);
+                addError("activateImportUsersReportError", error);
               }
             },
           },

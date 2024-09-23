@@ -2,6 +2,7 @@ import type ComponentRepresentation from "@keycloak/keycloak-admin-client/lib/de
 import type { CustomUserQuery } from "@keycloak/keycloak-admin-client/lib/resources/custom/users";
 import type UserRepresentation from "@keycloak/keycloak-admin-client/lib/defs/userRepresentation";
 import type { UserInfoRepresentation } from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
+import { NetworkError } from "@keycloak/keycloak-admin-client/lib";
 import { AlertVariant, Button, Checkbox } from "@patternfly/react-core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -295,7 +296,6 @@ export const useUserDataTable = ({
             new Blob([downloadedFile], { type: "application/octet-stream" }),
             `user_template.csv`,
           );
-          addAlert(t("userCSVTemplateDownloadSuccess"), AlertVariant.success);
         } catch (error) {
           addError(t("userCSVTemplateDownloadError"), error);
         }
@@ -314,7 +314,6 @@ export const useUserDataTable = ({
             new Blob([downloadedFile], { type: "application/octet-stream" }),
             `user_template.xlsx`,
           );
-          addAlert(t("userExcelTemplateDownloadSuccess"), AlertVariant.success);
         } catch (error) {
           addError(t("userExcelTemplateDownloadError"), error);
         }
@@ -337,14 +336,19 @@ export const useUserDataTable = ({
 
             toggleUploadUserInfo();
           }
-        } catch (error: any) {
-          if ("status" in error) {
-            if (error.status === 400) {
-              addError(error.data.message, error);
-            } else if (error.status === 502) {
-              addAlert(t("tooManyUsersToImport"), AlertVariant.info);
-            } else {
-              addError(error.statusText, error);
+        } catch (error: unknown) {
+          if (error instanceof NetworkError) {
+            switch (error.response.status) {
+              case 400:
+                addError(error.message, error);
+                break;
+
+              case 502:
+                addAlert(t("tooManyUsersToImport"), AlertVariant.info);
+                break;
+            
+              default:
+                addError(error.response.statusText, error);;
             }
           }
         }
@@ -378,7 +382,6 @@ export const useUserDataTable = ({
             new Blob([downloadedFile], { type: "application/octet-stream" }),
             `user_info.${CustomUserToolbarAction.EXPORT_CSV ? "csv" : "xlsx"}`,
           );
-          addAlert(t("usersExportedSuccess"), AlertVariant.success);
         } catch (error) {
           addError(t("usersExportedError"), error);
         }
