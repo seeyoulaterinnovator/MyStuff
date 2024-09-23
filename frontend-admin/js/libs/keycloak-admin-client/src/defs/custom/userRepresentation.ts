@@ -127,5 +127,4 @@ export type ImportUsersReportResponseRepresentation =
 
 export type ActiveImportUsersResponseRepresentation = ConditionalResponseStatus;
 
-
 export type UserAccessibleRealmsRepresentation = RealmName[]
