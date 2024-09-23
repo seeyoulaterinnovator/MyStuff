@@ -182,12 +182,11 @@ export const useUserDataTable = ({
           ...query,
         },
       });
-      const { "page-info": pageInfo, "users-info": userInfo } =
-        response.results;
+      const { "users-info": userInfo } = response.results;
 
       return userInfo;
     },
-    [adminClient],
+    [adminClient, customFilters],
   );
 
   const searchUserWithCustomFilters = (newCustomFilters: CustomUserQuery) => {
