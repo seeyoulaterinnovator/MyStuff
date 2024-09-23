@@ -16,9 +16,11 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-// @Provider
+@Provider
 @PreMatching
 public class ManagerUserRequestInterceptor implements ContainerRequestFilter {
+    private static final String MANAGER_REALM = "manager";
+
     @Context
     KeycloakSession session;
 
@@ -33,6 +35,8 @@ public class ManagerUserRequestInterceptor implements ContainerRequestFilter {
         String userId = matcher.group(2);
         String path = matcher.group(3);
 
+        if(!realm.equals(MANAGER_REALM)) return;
+
         UserModel user = session.getProvider(UserProvider.class).getUserById(session.getContext().getRealm(), userId);
 
         if(!(user instanceof CustomUserAdapter)) return;
@@ -41,9 +45,9 @@ public class ManagerUserRequestInterceptor implements ContainerRequestFilter {
 
         if (RealmManager.isAdministrationRealm(userRealm)) return;
 
-        if(!realm.equals("manager")) return;
+        if (userRealm.getName().equals(MANAGER_REALM)) return;
 
-        if(!path.equals("/")) return;
+        if(!path.isEmpty()) return;
 
         // TODO custom role checks
 

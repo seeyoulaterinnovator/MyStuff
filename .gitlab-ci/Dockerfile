@@ -4,3 +4,4 @@ COPY --chown=keycloak ./volumes/keycloak/opt/keycloak/conf/cache-ispn-custom.xml
 COPY --chown=keycloak ./build/keycloak-extension/libs/keycloak-extension-1.0.1-all.jar /opt/keycloak/providers/
 
 ENV LIQUIBASE_COMMAND_CHANGE_EXEC_LISTENER_CLASS=ru.alamics.sso.keycloak.migration.CustomChangeExecListener
+ENV KC_SPI_USER_PROVIDER=customjpa
