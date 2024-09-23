@@ -41,8 +41,7 @@ services:
       - "8080:8080"
       - "9000:9000"
       - "8787:8787"
-    entrypoint: /opt/keycloak/bin/kc-custom.sh
-    command: [ "start-dev" ]
+    entrypoint: /bin/sh -c "/opt/keycloak/bin/kc-custom.sh"
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
@@ -52,7 +51,7 @@ services:
       KC_DB_URL_DATABASE: sso
       KC_DB_USERNAME: sso
       KC_DB_PASSWORD: sso
-      KC_LOG_LEVEL: DEBUG
+      KC_LOG_LEVEL: INFO
       KC_LOG_CONSOLE_COLOR: true
       KC_HTTP_ENABLED: true
       KC_HTTP_RELATIVE_PATH: /auth
