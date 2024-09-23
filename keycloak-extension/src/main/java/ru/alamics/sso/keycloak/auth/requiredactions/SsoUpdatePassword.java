@@ -20,7 +20,6 @@ import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
 import org.keycloak.sessions.AuthenticationSessionModel;
-import org.keycloak.storage.ClientStorageManager;
 import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.db.service.TestLogService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
@@ -157,9 +156,9 @@ public class SsoUpdatePassword extends UpdatePassword {
 
         if (client == null) {
             String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, context.getRealm().getId());
-            client = session.getProvider(ClientStorageManager.class).getClientByClientId(currentAuthenticationSession.getRealm(), defaultClientRealm);
+            client = session.getProvider(ClientProvider.class).getClientByClientId(currentAuthenticationSession.getRealm(), defaultClientRealm);
             if (client == null) {
-                client = session.getProvider(ClientStorageManager.class).getClientByClientId(currentAuthenticationSession.getRealm(), DEFAULT_CLIENT_ID);
+                client = session.getProvider(ClientProvider.class).getClientByClientId(currentAuthenticationSession.getRealm(), DEFAULT_CLIENT_ID);
                 if (client == null) {
                     log.error("Redirect after UPDATE_PASSWORD is not setup: clientId={} not found", defaultClientRealm);
                     return;

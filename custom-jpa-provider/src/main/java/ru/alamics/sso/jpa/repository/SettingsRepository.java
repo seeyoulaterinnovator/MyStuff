@@ -16,6 +16,7 @@ public class SettingsRepository {
     @Inject
     EntityManager em;
 
+    @Transactional(Transactional.TxType.REQUIRED)
     public Settings getSettings(final String keyName, final String realmId) {
         Settings ret = null;
         if (keyName != null) {

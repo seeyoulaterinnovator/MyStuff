@@ -13,7 +13,6 @@ import org.keycloak.services.Urls;
 import org.keycloak.services.managers.AuthenticationSessionManager;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
-import org.keycloak.storage.ClientStorageManager;
 import org.keycloak.theme.Theme;
 import ru.alamics.sso.emailer.EmailModel;
 import ru.alamics.sso.emailer.EmailSender;
@@ -47,9 +46,9 @@ public abstract class SsoEvent {
     protected void sendEmail(UserModel user, RealmModel realm, String subject, String template, Map<String, Object> attributes) {
         try {
             String defaultClientRealm = settingsService.getSettingsStringValue(SettingConstants.DEFAULT_REALM_CLIENT_ID, realm.getId());
-            ClientModel clientModel = session.getProvider(ClientStorageManager.class).getClientByClientId(realm, defaultClientRealm);
+            ClientModel clientModel = session.getProvider(ClientProvider.class).getClientByClientId(realm, defaultClientRealm);
             if (clientModel == null)
-                clientModel = session.getProvider(ClientStorageManager.class).getClientByClientId(realm, DEFAULT_CLIENT_ID);
+                clientModel = session.getProvider(ClientProvider.class).getClientByClientId(realm, DEFAULT_CLIENT_ID);
             if (clientModel == null) {
                 log.error("Failed to send email: {}", "have no client=\"" + defaultClientRealm + "\" to redirect!");
                 return;
