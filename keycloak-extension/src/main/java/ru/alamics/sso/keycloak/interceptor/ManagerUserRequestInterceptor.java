@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Provider
+// @Provider
 @PreMatching
 public class ManagerUserRequestInterceptor implements ContainerRequestFilter {
     @Context
