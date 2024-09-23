@@ -1,24 +1,20 @@
 package ru.alamics.sso.keycloak.credential;
 
+import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationProcessor;
 import org.keycloak.authentication.actiontoken.resetcred.ResetCredentialsActionToken;
 import org.keycloak.common.util.Time;
-import org.keycloak.credential.CredentialModel;
 import org.keycloak.credential.PasswordCredentialProvider;
 import org.keycloak.email.EmailException;
 import org.keycloak.email.EmailTemplateProvider;
-import org.keycloak.models.ClientModel;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
 import org.keycloak.models.credential.PasswordCredentialModel;
 import org.keycloak.protocol.oidc.OIDCConfigAttributes;
 import org.keycloak.services.Urls;
 import org.keycloak.services.managers.AuthenticationSessionManager;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
-import org.keycloak.storage.ClientStorageManager;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.keycloak.util.PhoneFormatter;
@@ -26,7 +22,6 @@ import ru.alamics.sso.schedule.Translator;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 
-import jakarta.ws.rs.core.UriBuilder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,9 +62,9 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
 
 
         String clientId = settingsService.getSettingsStringValue(DEFAULT_REALM_CLIENT_ID, realm.getName());
-        ClientModel clientModel = session.getProvider(ClientStorageManager.class).getClientByClientId(realm, clientId);
+        ClientModel clientModel = session.getProvider(ClientProvider.class).getClientByClientId(realm, clientId);
         if (clientModel == null)
-            clientModel = session.getProvider(ClientStorageManager.class).getClientByClientId(realm, DEFAULT_CLIENT_ID);
+            clientModel = session.getProvider(ClientProvider.class).getClientByClientId(realm, DEFAULT_CLIENT_ID);
         clientModel.setAttribute(OIDCConfigAttributes.EXCLUDE_SESSION_STATE_FROM_AUTH_RESPONSE, "true");
 
         AuthenticationSessionManager authenticationSessionManager = new AuthenticationSessionManager(this.session);

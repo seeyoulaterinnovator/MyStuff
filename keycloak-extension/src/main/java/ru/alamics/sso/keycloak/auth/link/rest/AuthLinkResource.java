@@ -11,6 +11,7 @@ import org.keycloak.authentication.AuthenticationProcessor;
 import org.keycloak.authentication.actiontoken.resetcred.ResetCredentialsActionToken;
 import org.keycloak.common.util.Time;
 import org.keycloak.models.ClientModel;
+import org.keycloak.models.ClientProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.services.Urls;
@@ -18,7 +19,6 @@ import org.keycloak.services.managers.RealmManager;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.sessions.RootAuthenticationSessionModel;
-import org.keycloak.storage.ClientStorageManager;
 import ru.alamics.sso.keycloak.auth.link.token.AuthLinkActionToken;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 
@@ -42,7 +42,7 @@ public class AuthLinkResource {
         if (realm == null)
             throw new NotFoundException("Realm not found.");
 
-        ClientModel clientModel = session.getProvider(ClientStorageManager.class).getClientByClientId(realm, clientId);
+        ClientModel clientModel = session.getProvider(ClientProvider.class).getClientByClientId(realm, clientId);
         if (clientModel == null)
             throw new NotFoundException("Client not found.");
 
