@@ -5,6 +5,7 @@ import jakarta.persistence.TypedQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.RealmProvider;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.JpaUserProvider;
 import org.keycloak.models.jpa.UserAdapter;
@@ -13,6 +14,7 @@ import org.keycloak.models.utils.KeycloakModelUtils;
 import ru.alamics.sso.jpa.entity.AutoLockNotification;
 import ru.alamics.sso.jpa.entity.UserLoginHistory;
 import ru.alamics.sso.jpa.entity.UserPostEntity;
+import ru.alamics.sso.jpa.model.CustomUserAdapter;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -130,6 +132,12 @@ public class CustomJpaUserProvider extends JpaUserProvider {
     @Override
     public UserModel getUserById(RealmModel realm, String id) {
         UserEntity userEntity = this.em.find(UserEntity.class, id);
-        return userEntity == null ? null : new UserAdapter(this.session, realm, this.em, userEntity);
+        if(userEntity == null) return null;
+        return new CustomUserAdapter(
+                this.session,
+                session.getProvider(RealmProvider.class).getRealm(userEntity.getRealmId()),
+                this.em,
+                userEntity
+        );
     }
 }

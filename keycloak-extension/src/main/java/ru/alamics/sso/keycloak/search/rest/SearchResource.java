@@ -5,20 +5,20 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.reactive.NoCache;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.RoleModel;
+import org.keycloak.models.*;
 import org.keycloak.models.cache.UserCache;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.representations.idm.RequiredActionProviderRepresentation;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.validation.Validation;
+import ru.alamics.sso.jpa.model.CustomUserAdapter;
 import ru.alamics.sso.keycloak.GeneralRealm;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.service.RequiredActionService;
+import ru.alamics.sso.user.web.RealmNameDto;
 import ru.alamics.sso.user.web.UserSearch;
 import ru.alamics.sso.util.Util;
 
@@ -142,6 +142,21 @@ public class SearchResource {
     @NoCache
     public List<RequiredActionProviderRepresentation> getRequestActionRealms(@QueryParam("realmId") String realmId) {
         return requiredActionService.getRequiredActions(realmId);
+    }
+
+    @GET
+    @Path("/realm-name-by-user-id")
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public RealmNameDto getRealmNameByUserId(@QueryParam("userId") String userId) {
+        UserModel user = session.getProvider(UserProvider.class).getUserById(session.getContext().getRealm(), userId);
+        if(user == null) {
+            throw new NotFoundException();
+        }
+        if(user instanceof CustomUserAdapter) {
+            return new RealmNameDto(((CustomUserAdapter) user).getRealm().getName());
+        }
+        throw new InternalServerErrorException();
     }
 
     private Predicate<RealmModel> getPredicateByViewRoles(Set<RoleModel> roles, boolean userDontHaveViewRoles) {

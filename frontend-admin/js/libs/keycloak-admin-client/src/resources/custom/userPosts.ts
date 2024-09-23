@@ -64,7 +64,7 @@ export class UserPosts extends Resource {
     UserPostSystemRolesResponseRepresentation
   >({
     method: "GET",
-    path: "/realms/user/user-post/system-roles",
+    path: "/realms/{realm}/user-post/system-roles",
     urlParamKeys: ["realm"],
     queryParamKeys: ["realmId"],
   });
