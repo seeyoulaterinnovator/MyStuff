@@ -29,6 +29,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.Urls;
 import org.keycloak.services.managers.AuthenticationManager;
+import org.keycloak.services.resources.account.AccountRestService;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.ClientsResource;
 import org.keycloak.services.resources.admin.RoleMapperResource;
@@ -405,7 +406,9 @@ public class CustomUserResource {
         userSession.setNote(IMPERSONATOR_USERNAME.toString(), impersonator);
 
         AuthenticationManager.createLoginCookie(session, realm, userSession.getUser(), userSession, session.getContext().getUri(), clientConnection);
-        URI redirect = Urls.accountBase(session.getContext().getUri().getBaseUri()).build(realm.getName());
+        URI redirect = Urls.accountBase(session.getContext().getUri().getBaseUri())
+                .path(AccountRestService.class, "applications")
+                .build(realm.getName());
         Map<String, Object> result = new HashMap<>();
         result.put("sameRealm", sameRealm);
         result.put("redirect", redirect.toString());

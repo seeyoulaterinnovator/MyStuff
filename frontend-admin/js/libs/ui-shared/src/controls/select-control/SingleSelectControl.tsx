@@ -31,6 +31,7 @@ export const SingleSelectControl = <
   options,
   controller,
   labelIcon,
+  withoutLabel,
   ...rest
 }: SelectControlProps<T, P>) => {
   const {
@@ -46,6 +47,7 @@ export const SingleSelectControl = <
       isRequired={!!controller.rules?.required}
       error={get(errors, name)}
       labelIcon={labelIcon}
+      withoutLabel={withoutLabel}
     >
       <Controller
         {...controller}

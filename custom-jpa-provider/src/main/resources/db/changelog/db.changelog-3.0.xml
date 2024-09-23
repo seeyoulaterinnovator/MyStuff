@@ -48,4 +48,9 @@
             where q1.id = q2.id;
         </sql>
     </changeSet>
+    <changeSet id="3" author="korotaev.miu">
+        <sql>
+            update REALM set ADMIN_THEME = 'keycloak.v2';
+        </sql>
+    </changeSet>
 </databaseChangeLog>

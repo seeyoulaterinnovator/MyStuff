@@ -101,7 +101,7 @@ function getErrorMessage(error: unknown) {
 function getNetworkErrorMessage({ responseData }: NetworkError) {
   const data = responseData as Record<string, unknown>;
 
-  for (const key of ["error_description", "errorMessage", "error"]) {
+  for (const key of ["error_description", "errorMessage", "error", "message"]) {
     const value = data[key];
 
     if (typeof value === "string") {

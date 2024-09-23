@@ -49,6 +49,7 @@ export type SelectControlProps<
     menuAppendTo?: string;
     placeholderText?: string;
     chipGroupProps?: ChipGroupProps;
+    withoutLabel?: boolean;
   };
 
 export const isSelectBasedOptions = (

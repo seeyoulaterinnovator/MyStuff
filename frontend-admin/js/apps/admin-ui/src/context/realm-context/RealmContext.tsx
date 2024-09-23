@@ -1,5 +1,5 @@
 import { PropsWithChildren, useEffect, useMemo, useState } from "react";
-import { useMatch } from "react-router-dom";
+import {useMatch, useNavigate} from "react-router-dom";
 import {
   createNamedContext,
   useEnvironment,
@@ -9,9 +9,12 @@ import { useAdminClient } from "../../admin-client";
 import { DashboardRouteWithRealm } from "../../dashboard/routes/Dashboard";
 import RealmRepresentation from "@keycloak/keycloak-admin-client/lib/defs/realmRepresentation";
 import { useFetch } from "../../utils/useFetch";
+import {UserParams, UserRoute} from "../../user/routes/User";
+import {useParams} from "../../utils/useParams";
 
 type RealmContextType = {
   realm: string;
+  searchRealm: string;
   realmRepresentation?: RealmRepresentation;
   refresh: () => void;
 };
@@ -28,6 +31,10 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
   const refresh = () => setKey(key + 1);
   const [realmRepresentation, setRealmRepresentation] =
     useState<RealmRepresentation>();
+  const isOnUserPage = !!useMatch(UserRoute.path);
+  const { id: userId } = useParams<UserParams>();
+  const [searchRealm, setSearchRealm] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const routeMatch = useMatch({
     path: DashboardRouteWithRealm.path,
@@ -48,8 +55,42 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
     [realm, key],
   );
 
+  useFetch(
+    () => {
+      if (isOnUserPage && userId && realm === "manager") {
+        return adminClient.customUsers.findRealmNameByUserId({
+          userId,
+        });
+      } else {
+        return Promise.resolve(null);
+      }
+    },
+    (result) => {
+      if (result) {
+        setSearchRealm(result.realm);
+      } else {
+        setSearchRealm(null);
+      }
+    },
+    [isOnUserPage, userId, realm],
+  );
+  useEffect(() => {
+    if (isOnUserPage) {
+    } else {
+      setSearchRealm(null);
+    }
+  }, [isOnUserPage]);
+
+  useEffect(() => {
+    if(realm === "realms") {
+      // fix для случая входа под админом после выхода из-под менеджера (слетает realm из-за разницы в base uri)
+      navigate("/master/console");
+      window.location.href = window.location.origin + window.location.pathname;
+    }
+  }, [realm]);
+
   return (
-    <RealmContext.Provider value={{ realm, realmRepresentation, refresh }}>
+    <RealmContext.Provider value={{ realm, searchRealm: searchRealm || realm, realmRepresentation, refresh }}>
       {children}
     </RealmContext.Provider>
   );

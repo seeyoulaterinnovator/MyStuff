@@ -41,8 +41,7 @@ services:
       - "8080:8080"
       - "9000:9000"
       - "8787:8787"
-    entrypoint: /opt/keycloak/bin/kc-custom.sh
-    command: [ "start-dev" ]
+    entrypoint: /bin/sh -c "/opt/keycloak/bin/kc-custom.sh"
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
@@ -65,6 +64,7 @@ services:
       KC_CACHE_CONFIG_FILE: cache-ispn-custom.xml
       KC_ADMIN_VITE_ENABLED: ${KC_ADMIN_VITE_ENABLED}
       SITE: STAGE5
+      KC_SPI_USER_PROVIDER: customjpa
       LIQUIBASE_COMMAND_CHANGE_EXEC_LISTENER_CLASS: ru.alamics.sso.keycloak.migration.CustomChangeExecListener
     volumes:
       - ./volumes/keycloak/opt/keycloak/bin/kc-custom.sh:/opt/keycloak/bin/kc-custom.sh:ro

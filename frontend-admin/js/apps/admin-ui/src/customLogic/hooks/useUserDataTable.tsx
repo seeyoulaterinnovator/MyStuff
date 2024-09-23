@@ -158,7 +158,7 @@ export const useUserDataTable = ({
                 cellRenderer: (row) => {
                   return (
                     <p style={{ whiteSpace: "pre-wrap" }}>
-                      {row.systemRoles
+                      {(row.systemRoles || [])
                         .map((systemRole) => systemRole.externalSystem.name)
                         .join("\n")}
                     </p>
@@ -180,12 +180,11 @@ export const useUserDataTable = ({
           ...query,
         },
       });
-      const { "page-info": pageInfo, "users-info": userInfo } =
-        response.results;
+      const { "users-info": userInfo } = response.results;
 
       return userInfo;
     },
-    [adminClient],
+    [adminClient, customFilters],
   );
 
   const searchUserWithCustomFilters = (newCustomFilters: CustomUserQuery) => {
@@ -231,6 +230,7 @@ export const useUserDataTable = ({
             { realm: realmName },
             selectedIds,
           );
+          
           addAlert(t("userLoginSentSuccess"), AlertVariant.success);
         } catch (error) {
           addError(t("userLoginSentError"), error);
@@ -249,6 +249,7 @@ export const useUserDataTable = ({
             { realm: realmName },
             selectedIds,
           );
+
           addAlert(
             t("userLoginSentAndPasswordResetSuccess"),
             AlertVariant.success,
@@ -267,7 +268,7 @@ export const useUserDataTable = ({
               realm: realmName,
             });
 
-          await saveAs(
+          saveAs(
             new Blob([downloadedFile], { type: "application/octet-stream" }),
             `user_template.csv`,
           );
@@ -285,6 +286,7 @@ export const useUserDataTable = ({
             await adminClient.customUsers.downloadExcelTemplate({
               realm: realmName,
             });
+
           saveAs(
             new Blob([downloadedFile], { type: "application/octet-stream" }),
             `user_template.xlsx`,
@@ -432,7 +434,7 @@ export const useUserDataTable = ({
 
   const customLoader = async (first?: number, max?: number) => {
     if (!listUsers) {
-      return []
+      return [];
     }
 
     try {

@@ -57,6 +57,8 @@ import { toUsers } from "./routes/Users";
 import { isLightweightUser } from "./utils";
 
 import "./user-section.css";
+import {UserCustomer} from "./UserCustomer";
+import {UserAttribute} from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
 
 export default function EditUser() {
   const { adminClient } = useAdminClient();
@@ -66,7 +68,7 @@ export default function EditUser() {
   const navigate = useNavigate();
   const { hasAccess } = useAccess();
   const { id } = useParams<UserParams>();
-  const { realm: realmName, realmRepresentation: realm } = useRealm();
+  const { realm: realmName, realmRepresentation: realm, searchRealm } = useRealm();
   // Validation of form fields is performed on server, thus we need to clear all errors before submit
   const clearAllErrorsBeforeSubmit = async (values: UserFormFields) => ({
     values,
@@ -104,6 +106,7 @@ export default function EditUser() {
   const consentsTab = useTab("consents");
   const identityProviderLinksTab = useTab("identity-provider-links");
   const sessionsTab = useTab("sessions");
+  const customerTab = useTab("customer");
 
   useFetch(
     async () =>
@@ -147,10 +150,40 @@ export default function EditUser() {
   );
 
   const save = async (data: UserFormFields) => {
+    const representation = toUserRepresentation(data);
+
+    if(representation.attributes) {
+      let phone = representation.attributes[UserAttribute.PHONE];
+      if(phone !== undefined) {
+        if(Array.isArray(phone)) {
+          phone = phone[0];
+        }
+        if (!Number(phone)) {
+          addError(t("invalidPhone"), "");
+          return;
+        }
+        if (phone.length !== 11) {
+          addError(t("invalidPhoneLength"), "");
+          return;
+        }
+
+        const phoneCheck = await adminClient.customUsers.findUserByAttribute({
+          realm: realmName,
+          realmId: realmName, // TODO
+          phone,
+          excludedUserId: id
+        });
+        if(phoneCheck.results.foundUserId) {
+          addError(t("duplicatePhone"), "");
+          return;
+        }
+      }
+    }
+
     try {
       await adminClient.users.update(
         { id: user!.id! },
-        toUserRepresentation(data),
+        representation,
       );
       addAlert(t("userSaved"), AlertVariant.success);
       refresh();
@@ -228,7 +261,7 @@ export default function EditUser() {
     continueButtonLabel: "impersonate",
     onConfirm: async () => {
       try {
-        const data = await adminClient.users.impersonation(
+        const data = await adminClient.customUsers.impersonation(
           { id: user!.id! },
           { user: user!.id!, realm: realmName },
         );
@@ -378,6 +411,13 @@ export default function EditUser() {
                 {...sessionsTab}
               >
                 <UserSessions />
+              </Tab>
+              <Tab
+                data-testid="user-customer"
+                title={<TabTitleText>{t("titleCustomer")}</TabTitleText>}
+                {...customerTab}
+              >
+                <UserCustomer />
               </Tab>
             </RoutableTabs>
           </FormProvider>

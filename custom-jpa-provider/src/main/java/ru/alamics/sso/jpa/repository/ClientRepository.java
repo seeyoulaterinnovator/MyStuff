@@ -22,7 +22,9 @@ public class ClientRepository {
                 )
                 .setParameter("clientId", clientId)
                 .setParameter("realmName", realmName)
-                .getSingleResult();
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
     }
 
     public MainRedirectUri findMainRedirectUriByClientId(final String clientId) {

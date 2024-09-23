@@ -69,7 +69,7 @@ public class UserPostFacade {
     private void addCustomersToRequest(List<UserPostResponse> userPosts) {
         List<String> updatingTomsId = userPosts.stream()
                 .filter(post -> !customerCache.containsKey(post.getTomsId()))
-                .filter(post -> post.getUpdateTime().isBefore(LocalDateTime.now().minusHours(customerCacheLifespanInDb)) ||
+                .filter(post -> !post.getUpdateTime().isBefore(LocalDateTime.now().minusHours(customerCacheLifespanInDb)) ||
                         post.getOrganization() == null)
                 .map(post -> {
                     customerCache.put(post.getTomsId(), post.getOrganization() == null ? " " : post.getOrganization());
