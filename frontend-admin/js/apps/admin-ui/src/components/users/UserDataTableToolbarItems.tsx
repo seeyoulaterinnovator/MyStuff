@@ -102,8 +102,8 @@ export function UserDataTableToolbarItems({
     // withButtonDownloadTemplateCsvAccess,
     // withButtonDownloadTemplateXlsxAccess,
     withButtonImportFileCsvAccess,
-    // withButtonExportCsvAccess,
-    // withButtonExportXlsxAccess,
+    withButtonExportCsvAccess,
+    withButtonExportXlsxAccess,
     withButtonResetPasswordAccess,
     withButtonBlockUsersAccess,
     withButtonUnlockUsersAccess,
@@ -118,8 +118,8 @@ export function UserDataTableToolbarItems({
     // 'button-download-template-csv',
     // 'button-download-template-xlsx',
     "button-import-file-csv",
-    // 'button-export-csv',
-    // 'button-export-xlsx',
+    "button-export-csv",
+    "button-export-xlsx",
     "button-reset-password",
     "button-block-users",
     "button-unlock-users",
@@ -333,24 +333,36 @@ export function UserDataTableToolbarItems({
         align={{ md: "alignLeft", "2xl": "alignRight" }}
         className="pf-m-wrap"
       >
-        {/* {isCustomTheme && canCustomViewRealm && (canDownloadTemplateCSV || isMasterAuthRealm) && <ToolbarItem>
-            <Button
-              onClick={() =>
-                onCustomAction?.({ type: CustomUserToolbarAction.DOWNLOAD_TEMPLATE_CSV })
-              }
-            >
-              {t("downloadTemplateCSV")}
-            </Button>
-          </ToolbarItem>} */}
-        {/* {isCustomTheme && canCustomViewRealm && (canDownloadTemplateXlsx || isMasterAuthRealm) && <ToolbarItem>
-            <Button
-              onClick={() =>
-                onCustomAction?.({ type: CustomUserToolbarAction.DOWNLOAD_TEMPLATE_EXCEL })
-              }
-            >
-              {t("downloadTemplateExcel")}
-            </Button>
-          </ToolbarItem>} */}
+        {/* {isCustomTheme &&
+          withCustomViewRealmAccess &&
+          (withButtonDownloadTemplateCsvAccess || isMasterAuthRealm) && (
+            <ToolbarItem>
+              <Button
+                onClick={() =>
+                  onCustomAction?.({
+                    type: CustomUserToolbarAction.DOWNLOAD_TEMPLATE_CSV,
+                  })
+                }
+              >
+                {t("downloadTemplateCSV")}
+              </Button>
+            </ToolbarItem>
+          )} */}
+        {/* {isCustomTheme &&
+          withCustomViewRealmAccess &&
+          (withButtonDownloadTemplateXlsxAccess || isMasterAuthRealm) && (
+            <ToolbarItem>
+              <Button
+                onClick={() =>
+                  onCustomAction?.({
+                    type: CustomUserToolbarAction.DOWNLOAD_TEMPLATE_EXCEL,
+                  })
+                }
+              >
+                {t("downloadTemplateExcel")}
+              </Button>
+            </ToolbarItem>
+          )} */}
         {isCustomTheme &&
           withShowManageButtonAndManageUsersAccess &&
           withCustomViewRealmAccess &&
@@ -369,22 +381,34 @@ export function UserDataTableToolbarItems({
               </UploadButton>
             </ToolbarItem>
           )}
-        {/* {isCustomTheme && withHideManageButtonAndManageUsersAccess && (withButtonExportCsvAccess || isMasterAuthRealm) && <ToolbarItem>
-            <Button
-              onClick={() => onCustomAction?.({ type: CustomUserToolbarAction.EXPORT_CSV })}
-            >
-              {t("exportCSV")}
-            </Button>
-          </ToolbarItem>} */}
-        {/* {isCustomTheme && withHideManageButtonAndManageUsersAccess && (withButtonExportXlsxAccess || isMasterAuthRealm) && <ToolbarItem>
-            <Button
-              onClick={() =>
-                onCustomAction?.({ type: CustomUserToolbarAction.EXPORT_EXCEL })
-              }
-            >
-              {t("exportExcel")}
-            </Button>
-          </ToolbarItem>} */}
+        {isCustomTheme &&
+          withShowManageButtonAndManageUsersAccess &&
+          (withButtonExportCsvAccess || isMasterAuthRealm) && (
+            <ToolbarItem>
+              <Button
+                onClick={() =>
+                  onCustomAction?.({ type: CustomUserToolbarAction.EXPORT_CSV })
+                }
+              >
+                {t("exportCSV")}
+              </Button>
+            </ToolbarItem>
+          )}
+        {isCustomTheme &&
+          withShowManageButtonAndManageUsersAccess &&
+          (withButtonExportXlsxAccess || isMasterAuthRealm) && (
+            <ToolbarItem>
+              <Button
+                onClick={() =>
+                  onCustomAction?.({
+                    type: CustomUserToolbarAction.EXPORT_EXCEL,
+                  })
+                }
+              >
+                {t("exportExcel")}
+              </Button>
+            </ToolbarItem>
+          )}
         {isCustomTheme &&
           withShowManageButtonAndManageUsersAccess &&
           (withButtonResetPasswordAccess || isMasterAuthRealm) && (
