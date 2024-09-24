@@ -14,6 +14,8 @@ import { ClusteringPanel } from "./advanced/ClusteringPanel";
 import { FineGrainOpenIdConnect } from "./advanced/FineGrainOpenIdConnect";
 import { FineGrainSamlEndpointConfig } from "./advanced/FineGrainSamlEndpointConfig";
 import { OpenIdConnectCompatibilityModes } from "./advanced/OpenIdConnectCompatibilityModes";
+import { useRealm } from "../context/realm-context/RealmContext";
+import { AdminTheme } from "../customLogic/constants/theme";
 
 export const parseResult = (
   result: GlobalRequestResult,
@@ -51,6 +53,8 @@ export type AdvancedProps = {
 export const AdvancedTab = ({ save, client }: AdvancedProps) => {
   const { t } = useTranslation();
   const openIdConnect = "openid-connect";
+  const { realmRepresentation: realm } = useRealm();
+  const isCustomTheme = realm?.adminTheme === AdminTheme.KEYCLOAK_V2;
 
   const { setValue } = useFormContext();
   const {
@@ -206,6 +210,17 @@ export const AdvancedTab = ({ save, client }: AdvancedProps) => {
                       "authenticationFlowBindingOverrides.direct_grant",
                       authenticationFlowBindingOverrides?.direct_grant,
                     );
+
+                    if (isCustomTheme) {
+                      setValue(
+                        "authenticationFlowBindingOverrides.reset_credential",
+                        authenticationFlowBindingOverrides?.reset_credential,
+                      );
+                      setValue(
+                        "authenticationFlowBindingOverrides.registration",
+                        authenticationFlowBindingOverrides?.registration,
+                      );
+                    }
                   }}
                 />
               </>

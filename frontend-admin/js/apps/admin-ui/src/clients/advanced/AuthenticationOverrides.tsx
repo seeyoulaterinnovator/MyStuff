@@ -1,12 +1,15 @@
 import AuthenticationFlowRepresentation from "@keycloak/keycloak-admin-client/lib/defs/authenticationFlowRepresentation";
+import type { OptionType } from "@keycloak/keycloak-ui-shared/dist/controls/select-control/SelectControl";
 import { ActionGroup, Button } from "@patternfly/react-core";
 import { sortBy } from "lodash-es";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { SelectControl } from "@keycloak/keycloak-ui-shared";
 import { useAdminClient } from "../../admin-client";
 import { FormAccess } from "../../components/form/FormAccess";
 import { useFetch } from "../../utils/useFetch";
+import { AdminTheme } from "../../../src/customLogic/constants/theme";
+import { useRealm } from "../../context/realm-context/RealmContext";
 
 type AuthenticationOverridesProps = {
   save: () => void;
@@ -22,6 +25,9 @@ export const AuthenticationOverrides = ({
   hasConfigureAccess,
 }: AuthenticationOverridesProps) => {
   const { adminClient } = useAdminClient();
+  const openIdConnect = "openid-connect";
+  const { realmRepresentation: realm } = useRealm();
+  const isCustomTheme = realm?.adminTheme === AdminTheme.KEYCLOAK_V2;
 
   const { t } = useTranslation();
   const [flows, setFlows] = useState<AuthenticationFlowRepresentation[]>([]);
@@ -38,6 +44,13 @@ export const AuthenticationOverrides = ({
     [],
   );
 
+  const flowOptions = useMemo<OptionType>(() => {
+    return [
+      { key: "", value: t("choose") },
+      ...flows.map(({ id, alias }) => ({ key: id!, value: alias! })),
+    ]
+  }, [flows]);
+
   return (
     <FormAccess
       role="manage-clients"
@@ -51,12 +64,9 @@ export const AuthenticationOverrides = ({
         controller={{
           defaultValue: "",
         }}
-        options={[
-          { key: "", value: t("choose") },
-          ...flows.map(({ id, alias }) => ({ key: id!, value: alias! })),
-        ]}
+        options={flowOptions}
       />
-      {protocol === "openid-connect" && (
+      {protocol === openIdConnect && (
         <SelectControl
           name="authenticationFlowBindingOverrides.direct_grant"
           label={t("directGrant")}
@@ -64,10 +74,29 @@ export const AuthenticationOverrides = ({
           controller={{
             defaultValue: "",
           }}
-          options={[
-            { key: "", value: t("choose") },
-            ...flows.map(({ id, alias }) => ({ key: id!, value: alias! })),
-          ]}
+          options={flowOptions}
+        />
+      )}
+      {isCustomTheme && protocol === openIdConnect && (
+        <SelectControl
+          name="authenticationFlowBindingOverrides.reset_credential"
+          label={t("restResetCredentialsFlow")}
+          labelIcon={t("restResetCredentialsFlowHelp")}
+          controller={{
+            defaultValue: "",
+          }}
+          options={flowOptions}
+        />
+      )}
+      {isCustomTheme && protocol === openIdConnect && (
+        <SelectControl
+          name="authenticationFlowBindingOverrides.registration"
+          label={t("restRegistrationFlow")}
+          labelIcon={t("restRegistrationFlowHelp")}
+          controller={{
+            defaultValue: "",
+          }}
+          options={flowOptions}
         />
       )}
       <ActionGroup>

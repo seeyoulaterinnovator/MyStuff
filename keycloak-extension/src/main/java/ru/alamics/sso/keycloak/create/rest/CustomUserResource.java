@@ -269,8 +269,10 @@ public class CustomUserResource {
 //    first - позиция начала передаваемых в ответе записей из результатов поиска
 //    max - максимальное количество записей в ответе
     public Response getImportUsersReports(@QueryParam("first") int first, @QueryParam("max") int max) {
+        String realmId = session.getContext().getRealm().getName();
         return JsonResponse.success()
-                .addResult("importUsersReports", importReportService.findImportUsersReportsByRealmId(session.getContext().getRealm().getName(), first, max))
+                .addResult("importUsersReports", importReportService.findImportUsersReportsByRealmId(realmId, first, max))
+                .addResult("nextUpdate", importReportService.getTimeNextUpdate(realmId))
                 .build();
     }
 
@@ -286,7 +288,10 @@ public class CustomUserResource {
                         formValue.getFileItem().getInputStream(),
                         formValue.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION)
                 );
+                String realmId = session.getContext().getRealm().getName();
                 return JsonResponse.success()
+                        .addResult("importUsersReports", importReportService.findImportUsersReportsByRealmId(realmId, 0, 11))
+                        .addResult("nextUpdate", importReportService.getTimeNextUpdate(realmId))
                         .build();
             } else {
                 return JsonResponse.error(Response.Status.BAD_REQUEST).build();

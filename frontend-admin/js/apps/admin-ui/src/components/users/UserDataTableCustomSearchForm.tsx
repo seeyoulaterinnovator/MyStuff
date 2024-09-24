@@ -10,6 +10,9 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Form } from "react-router-dom";
 import { RealmSimpleSelector } from "../custom/realm-simple-selector/RealmSimpleSelector";
+import { useAccess } from "../../context/access/Access";
+import { useRealm } from "../../context/realm-context/RealmContext";
+import { AdminTheme } from "../../customLogic/constants/theme";
 
 const defaultCustomSearchForm: CustomUserQuery = {};
 
@@ -23,6 +26,10 @@ export function UserDataTableCustomSearchForm({
   customFilters,
 }: UserDataTableCustomSearchFormProps) {
   const { t } = useTranslation();
+  const { realmRepresentation: realm } = useRealm();
+  const { hasAccess } = useAccess();
+  const withHideUserSearchAccess = hasAccess("hide-user-search");
+  const isCustomTheme = realm?.adminTheme === AdminTheme.KEYCLOAK_V2;
 
   const { register, reset, handleSubmit, watch, setValue, getValues } =
     useForm<CustomUserQuery>({
@@ -45,71 +52,73 @@ export function UserDataTableCustomSearchForm({
 
   return (
     <Form onSubmit={handleSubmit(searchUserWithCustomFilters)}>
-      <ToolbarGroup className="pf-m-wrap" variant="filter-group">
-        <ToolbarItem>
-          <TextInput
-            id="value"
-            style={{ maxWidth: "150px" }}
-            placeholder={t("search")}
-            {...register("search")}
-          />
-        </ToolbarItem>
-        <ToolbarItem>
-          <TextInput
-            id="userId"
-            style={{ maxWidth: "150px" }}
-            placeholder={t("searchByUserId")}
-            {...register("searchUser")}
-          />
-        </ToolbarItem>
-        <ToolbarItem>
-          <TextInput
-            id="tomsId"
-            style={{ maxWidth: "150px" }}
-            placeholder={t("searchByTomsId")}
-            {...register("searchToms")}
-          />
-        </ToolbarItem>
-        <ToolbarItem>
-          <TextInput
-            id="phone"
-            style={{ maxWidth: "150px" }}
-            placeholder={t("searchByPhone")}
-            {...register("searchPhone")}
-          />
-        </ToolbarItem>
-
-        <ToolbarItem>
-          <Button
-            style={{ maxWidth: "150px" }}
-            data-testid="search-user-attribute-btn"
-            variant="primary"
-            type="submit"
-          >
-            {t("search")}
-          </Button>
-        </ToolbarItem>
-        <ToolbarItem>
-          <Button variant="primary" onClick={clearCustomFilters}>
-            {t("viewAllUsers")}
-          </Button>
-        </ToolbarItem>
-        <ToolbarItem>
-          <RealmSimpleSelector
-            id="searchRealm"
-            {...register("searchRealm")}
-            value={watch("searchRealm")}
-            onChange={(newSearchRealm) => {
-              setValue("searchRealm", newSearchRealm);
-              handleSubmit(() =>
-                searchUserWithCustomFilters({
-                  searchRealm: newSearchRealm,
-                }),
-              )();
-            }}
-          />
-        </ToolbarItem>
-      </ToolbarGroup>
+      {isCustomTheme && !withHideUserSearchAccess && (
+        <ToolbarGroup className="pf-m-wrap" variant="filter-group">
+          <ToolbarItem>
+            <TextInput
+              id="value"
+              style={{ maxWidth: "150px" }}
+              placeholder={t("search")}
+              {...register("search")}
+            />
+          </ToolbarItem>
+          <ToolbarItem>
+            <TextInput
+              id="userId"
+              style={{ maxWidth: "150px" }}
+              placeholder={t("searchByUserId")}
+              {...register("searchUser")}
+            />
+          </ToolbarItem>
+          <ToolbarItem>
+            <TextInput
+              id="tomsId"
+              style={{ maxWidth: "150px" }}
+              placeholder={t("searchByTomsId")}
+              {...register("searchToms")}
+            />
+          </ToolbarItem>
+          <ToolbarItem>
+            <TextInput
+              id="phone"
+              style={{ maxWidth: "150px" }}
+              placeholder={t("searchByPhone")}
+              {...register("searchPhone")}
+            />
+          </ToolbarItem>
+          <ToolbarItem>
+            <Button
+              style={{ maxWidth: "150px" }}
+              data-testid="search-user-attribute-btn"
+              variant="primary"
+              type="submit"
+            >
+              {t("search")}
+            </Button>
+          </ToolbarItem>
+          <ToolbarItem>
+            <Button variant="primary" onClick={clearCustomFilters}>
+              {t("viewAllUsers")}
+            </Button>
+          </ToolbarItem>
+          <ToolbarItem>
+            <RealmSimpleSelector
+              id="searchRealm"
+              {...register("searchRealm")}
+              value={watch("searchRealm")}
+              realmsSource="accessible"
+              onChange={(newSearchRealm) => {
+                setValue("searchRealm", newSearchRealm);
+                handleSubmit(() =>
+                  searchUserWithCustomFilters({
+                    searchRealm: newSearchRealm,
+                  }),
+                )();
+              }}
+            />
+          </ToolbarItem>
+        </ToolbarGroup>
+      )}
     </Form>
   );
 }
