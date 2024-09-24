@@ -22,6 +22,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ImportReportService {
 
+    private static final int SHORT_TIME_NEXT_UPDATE = 5; //сек
+    private static final int LONG_TIME_NEXT_UPDATE = 30; //сек
+
     @Inject
     ImportUsersReportRepository importUsersReportRepository;
 
@@ -125,5 +128,12 @@ public class ImportReportService {
 
     public List<ImportUsersDataEntity> findImportUsersDataByImportId(String importId) {
         return importUsersReportRepository.findImportUsersDataByImportId(importId);
+    }
+
+    public int getTimeNextUpdate(String realmId) {
+        if(importUsersReportRepository.findReportsInWork(realmId, ImportUsersReportStatus.DONE) > 0){
+            return SHORT_TIME_NEXT_UPDATE;
+        }
+        return LONG_TIME_NEXT_UPDATE;
     }
 }

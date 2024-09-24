@@ -47,6 +47,15 @@ public class ImportUsersReportRepository {
                 .getResultList();
     }
 
+    public int findReportsInWork (String realmId, ImportUsersReportStatus status) {
+        return em.createQuery("select ire " +
+                                "from ImportUsersReportEntity ire where ire.realmId = :realmId " +
+                                "and ire.status not in(:status) ", ImportUsersReportEntity.class)
+                .setParameter("realmId", realmId)
+                .setParameter("status", status)
+                .getResultList().size();
+    }
+
     public void saveImportUsersReport(ImportUsersReportEntity importUsersReportEntity) {
         log.debug("import report with id = {} saved, status = {}", importUsersReportEntity.getId(), importUsersReportEntity.getStatus());
         em.persist(importUsersReportEntity);
