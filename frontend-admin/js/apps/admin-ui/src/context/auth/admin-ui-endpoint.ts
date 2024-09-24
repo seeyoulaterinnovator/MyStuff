@@ -8,6 +8,7 @@ export async function fetchAdminUI<T>(
   adminClient: KeycloakAdminClient,
   endpoint: string,
   query?: Record<string, string>,
+  basePath?: string,
 ): Promise<T> {
   const accessToken = await adminClient.getAccessToken();
   const baseUrl = adminClient.baseUrl;
@@ -15,8 +16,7 @@ export async function fetchAdminUI<T>(
   const response = await fetchWithError(
     joinPath(
       baseUrl,
-      "admin/realms",
-      encodeURIComponent(adminClient.realmName),
+      basePath || `admin/realms/${encodeURIComponent(adminClient.realmName)}`,
       endpoint,
     ) + (query ? "?" + new URLSearchParams(query) : ""),
     {

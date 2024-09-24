@@ -6,6 +6,7 @@ import KeycloakAdminClient from "@keycloak/keycloak-admin-client";
 type IDQuery = {
   id: string;
   type: string;
+  basePath?: string;
 };
 
 type PaginatingQuery = IDQuery & {
@@ -18,6 +19,7 @@ type EffectiveClientRolesQuery = IDQuery;
 
 type Query = Partial<Omit<PaginatingQuery, "adminClient">> & {
   endpoint: string;
+  basePath?: string;
 };
 
 type ClientRole = {
@@ -30,13 +32,13 @@ type ClientRole = {
 
 const fetchEndpoint = async (
   adminClient: KeycloakAdminClient,
-  { id, type, first, max, search, endpoint }: Query,
+  { id, type, first, max, search, endpoint, basePath }: Query,
 ): Promise<any> =>
   fetchAdminUI(adminClient, `/ui-ext/${endpoint}/${type}/${id}`, {
     first: (first || 0).toString(),
     max: (max || 10).toString(),
-    search: search || "",
-  });
+    search: search || ""
+  }, basePath);
 
 export const getAvailableClientRoles = (
   adminClient: KeycloakAdminClient,

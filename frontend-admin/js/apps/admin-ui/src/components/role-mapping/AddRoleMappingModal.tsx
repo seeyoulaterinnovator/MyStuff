@@ -19,6 +19,7 @@ import { KeycloakDataTable } from "../table-toolbar/KeycloakDataTable";
 import { ResourcesKey, Row, ServiceRole } from "./RoleMapping";
 import { getAvailableRoles } from "./queries";
 import { getAvailableClientRoles } from "./resource";
+import {useRealm} from "../../context/realm-context/RealmContext";
 
 type AddRoleMappingModalProps = {
   id: string;
@@ -42,6 +43,7 @@ export const AddRoleMappingModal = ({
   onClose,
 }: AddRoleMappingModalProps) => {
   const { adminClient } = useAdminClient();
+  const { realm, searchRealm } = useRealm();
 
   const { t } = useTranslation();
   const { hasAccess } = useAccess();
@@ -57,6 +59,8 @@ export const AddRoleMappingModal = ({
   const localeSort = useLocaleSort();
   const compareRow = ({ role: { name } }: Row) => name?.toUpperCase();
 
+  const isCustomUsers = type === "users" && realm !== searchRealm;
+
   const loader = async (
     first?: number,
     max?: number,
@@ -71,7 +75,11 @@ export const AddRoleMappingModal = ({
       params.search = search;
     }
 
-    const roles = await getAvailableRoles(adminClient, type, { ...params, id });
+    const roles = await getAvailableRoles(
+      adminClient,
+      isCustomUsers ? "customUsers" : type,
+      { ...params, id, realm: searchRealm }
+    );
     const sorted = localeSort(roles, compareRow);
     return sorted.map((row) => {
       return {
@@ -92,6 +100,7 @@ export const AddRoleMappingModal = ({
       first: first || 0,
       max: max || 10,
       search,
+      basePath: isCustomUsers ? `realms/${searchRealm}/users-toms` : undefined
     });
 
     return localeSort(
