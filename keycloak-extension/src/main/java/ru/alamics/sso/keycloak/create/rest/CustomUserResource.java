@@ -12,6 +12,10 @@ import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.reactive.NoCache;
 import org.jboss.resteasy.reactive.server.multipart.FormValue;
 import org.jboss.resteasy.reactive.server.multipart.MultipartFormDataInput;
+import org.keycloak.Config;
+import org.keycloak.admin.ui.rest.AvailableRoleMappingResource;
+import org.keycloak.admin.ui.rest.EffectiveRoleMappingResource;
+import org.keycloak.admin.ui.rest.model.ClientRole;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.common.Profile;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
@@ -36,6 +40,7 @@ import org.keycloak.services.resources.admin.RoleMapperResource;
 import org.keycloak.services.resources.admin.UsersResource;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.utils.ProfileHelper;
+import ru.alamics.sso.jpa.model.CustomUserAdapter;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundException;
@@ -443,6 +448,28 @@ public class CustomUserResource {
         return resource;
     }
 
+    @Path("ui-ext/effective-roles/users/{id}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public List<ClientRole> listCompositeUsersRoleMappings(@PathParam("id") String id) {
+        checkUser(id);
+        return new EffectiveRoleMappingResource(session, realm, auth).listCompositeUsersRoleMappings(id);
+    }
+
+    @Path("ui-ext/available-roles/users/{id}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public List<ClientRole> getEffectiveRoleMappings(
+            @PathParam("id") String id, @QueryParam("first") @DefaultValue("0") int first,
+            @QueryParam("max") @DefaultValue("10") int max, @QueryParam("search") @DefaultValue("") String search
+    ) {
+        checkUser(id);
+        return new AvailableRoleMappingResource(session, realm, auth)
+                .listAvailableUserRoleMappings(id, first, max, search);
+    }
+
     @Path("clients")
     public ClientsResource getClients() {
         AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
@@ -508,6 +535,18 @@ public class CustomUserResource {
         UserCache cache = session.getProvider(UserCache.class);
         if (cache != null) {
             cache.clear();
+        }
+    }
+
+    private void checkUser(String userId) {
+        UserModel user = session.getProvider(UserProvider.class).getUserById(session.getContext().getRealm(), userId);
+
+        if (user == null) throw new NotFoundException("User not found");
+
+        if(!(user instanceof CustomUserAdapter customUser)) throw new InternalServerErrorException();
+
+        if(customUser.getRealm().getName().equals(Config.getAdminRealm())) {
+            throw new ForbiddenException();
         }
     }
 }

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useAdminClient } from "../admin-client";
 import { useAlerts } from "../components/alert/Alerts";
 import { RoleMapping, Row } from "../components/role-mapping/RoleMapping";
+import {useRealm} from "../context/realm-context/RealmContext";
 
 type UserRoleMappingProps = {
   id: string;
@@ -12,6 +13,7 @@ type UserRoleMappingProps = {
 
 export const UserRoleMapping = ({ id, name }: UserRoleMappingProps) => {
   const { adminClient } = useAdminClient();
+  const { realm, searchRealm } = useRealm();
 
   const { t } = useTranslation();
   const { addAlert, addError } = useAlerts();
@@ -22,20 +24,37 @@ export const UserRoleMapping = ({ id, name }: UserRoleMappingProps) => {
         .filter((row) => row.client === undefined)
         .map((row) => row.role as RoleMappingPayload)
         .flat();
-      await adminClient.users.addRealmRoleMappings({
-        id,
-        roles: realmRoles,
-      });
+      if(realm != searchRealm) {
+        await adminClient.customUsers.addRealmRoleMappings({
+          id,
+          realm: searchRealm,
+          roles: realmRoles,
+        });
+      } else {
+        await adminClient.users.addRealmRoleMappings({
+          id,
+          roles: realmRoles,
+        });
+      }
       await Promise.all(
         rows
           .filter((row) => row.client !== undefined)
-          .map((row) =>
-            adminClient.users.addClientRoleMappings({
-              id,
-              clientUniqueId: row.client!.id!,
-              roles: [row.role as RoleMappingPayload],
-            }),
-          ),
+          .map((row) => {
+            if(realm != searchRealm) {
+              return adminClient.customUsers.addClientRoleMappings({
+                id,
+                clientUniqueId: row.client!.id!,
+                realm: searchRealm,
+                roles: [row.role as RoleMappingPayload]
+              });
+            } else {
+              return adminClient.users.addClientRoleMappings({
+                id,
+                clientUniqueId: row.client!.id!,
+                roles: [row.role as RoleMappingPayload]
+              });
+            }
+          }),
       );
       addAlert(t("userRoleMappingUpdatedSuccess"), AlertVariant.success);
     } catch (error) {

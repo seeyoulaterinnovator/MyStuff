@@ -68,7 +68,7 @@ export default function EditUser() {
   const navigate = useNavigate();
   const { hasAccess } = useAccess();
   const { id } = useParams<UserParams>();
-  const { realm: realmName, realmRepresentation: realm, searchRealm } = useRealm();
+  const { realm: realmName, realmRepresentation: realm } = useRealm();
   // Validation of form fields is performed on server, thus we need to clear all errors before submit
   const clearAllErrorsBeforeSubmit = async (values: UserFormFields) => ({
     values,

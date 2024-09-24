@@ -1,14 +1,16 @@
-import {RealmNameRepresentation, UsersResponseRepresentation} from "../../defs/custom/userRepresentation.js";
 import {
   ActiveImportUsersResponseRepresentation,
   DownloadedUsersRepresentation,
   ImportUsersReportResponseRepresentation,
+  RealmNameRepresentation,
   UserAccessibleRealmsRepresentation,
-  UserFindResponseRepresentation
+  UserFindResponseRepresentation,
+  UsersResponseRepresentation,
 } from "../../defs/custom/userRepresentation.js";
 import type { KeycloakAdminClient } from "../../client.js";
 import Resource from "../resource.js";
 import { CustomAdminRealm } from "./adminRealm.js";
+import RoleRepresentation, {RoleMappingPayload} from "../../defs/roleRepresentation.js";
 
 export type CustomUserQuery = Partial<{
   searchRealm: string;
@@ -194,6 +196,72 @@ export class CustomUsers extends Resource<{ realm?: string }> {
     queryParamKeys: [
       "userId",
     ],
+  });
+
+  // name fixed
+  public listAvailableRealmRoleMappings = this.makeRequest<
+    { id: string },
+    RoleRepresentation[]
+  >({
+    method: "GET",
+    path: "/users-toms/role-mappings/{id}/realm/available",
+    urlParamKeys: ["id"],
+  });
+
+  // name fixed
+  public listAvailableClientRoleMappings = this.makeRequest<
+    { id: string; clientUniqueId: string },
+    RoleRepresentation[]
+  >({
+    method: "GET",
+    path: "/users-toms/role-mappings/{id}/clients/{clientUniqueId}/available",
+    urlParamKeys: ["id", "clientUniqueId"],
+  });
+
+  public addRealmRoleMappings = this.makeRequest<
+    { id: string; roles: RoleMappingPayload[] },
+    void
+  >({
+    method: "POST",
+    path: "/users-toms/role-mappings/{id}/realm",
+    urlParamKeys: ["id"],
+    payloadKey: "roles",
+  });
+
+  public addClientRoleMappings = this.makeRequest<
+    {
+      id: string;
+      clientUniqueId: string;
+      roles: RoleMappingPayload[];
+    },
+    void
+  >({
+    method: "POST",
+    path: "/users-toms/role-mappings/{id}/clients/{clientUniqueId}",
+    urlParamKeys: ["id", "clientUniqueId"],
+    payloadKey: "roles",
+  });
+
+  // name fixed
+  public delRealmRoleMappings = this.makeRequest<
+    { id: string; roles: RoleMappingPayload[] },
+    void
+  >({
+    method: "DELETE",
+    path: "/users-toms/role-mappings/{id}/realm",
+    urlParamKeys: ["id"],
+    payloadKey: "roles",
+  });
+
+  // name fixed
+  public delClientRoleMappings = this.makeRequest<
+    { id: string; clientUniqueId: string; roles: RoleMappingPayload[] },
+    void
+  >({
+    method: "DELETE",
+    path: "/users-toms/role-mappings/{id}/clients/{clientUniqueId}",
+    urlParamKeys: ["id", "clientUniqueId"],
+    payloadKey: "roles",
   });
 
   constructor(client: KeycloakAdminClient) {

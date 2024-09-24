@@ -23,6 +23,7 @@ import { deleteMapping, getEffectiveRoles, getMapping } from "./queries";
 import { getEffectiveClientRoles } from "./resource";
 
 import "./role-mapping.css";
+import {useRealm} from "../../context/realm-context/RealmContext";
 
 export type CompositeRole = RoleRepresentation & {
   parent: RoleRepresentation;
@@ -87,6 +88,7 @@ export const RoleMapping = ({
   save,
 }: RoleMappingProps) => {
   const { adminClient } = useAdminClient();
+  const { realm, searchRealm } = useRealm();
 
   const { t } = useTranslation();
   const { addAlert, addError } = useAlerts();
@@ -97,6 +99,8 @@ export const RoleMapping = ({
   const [hide, setHide] = useState(true);
   const [showAssign, setShowAssign] = useState(false);
   const [selected, setSelected] = useState<Row[]>([]);
+
+  const isCustomUsers = type === "users" && realm !== searchRealm;
 
   const assignRoles = async (rows: Row[]) => {
     await save(rows);
@@ -111,8 +115,9 @@ export const RoleMapping = ({
 
       effectiveClientRoles = (
         await getEffectiveClientRoles(adminClient, {
-          type,
           id,
+          type,
+          basePath: isCustomUsers ? `realms/${searchRealm}/users-toms` : undefined
         })
       ).map((e) => ({
         client: { clientId: e.client, id: e.clientId },
@@ -152,7 +157,11 @@ export const RoleMapping = ({
     },
     onConfirm: async () => {
       try {
-        await Promise.all(deleteMapping(adminClient, type, id, selected));
+        if(isCustomUsers) {
+          await Promise.all(deleteMapping(adminClient, "customUsers", id, selected, searchRealm));
+        } else {
+          await Promise.all(deleteMapping(adminClient, type, id, selected));
+        }
         addAlert(t("clientScopeRemoveSuccess"), AlertVariant.success);
         setSelected([]);
         refresh();
