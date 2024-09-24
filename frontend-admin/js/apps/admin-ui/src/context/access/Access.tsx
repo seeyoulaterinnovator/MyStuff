@@ -63,10 +63,14 @@ export const AccessContextProvider = ({ children }: PropsWithChildren) => {
         case hasBaseAccess("view-clients") || hasBaseAccess("manage-clients"):
           extendedAccess.push("custom-view-clients");
 
-        case hasBaseAccess("view-users") || hasBaseAccess("manage-users"):
+        case hasBaseAccess("view-users") ||
+          hasBaseAccess("manage-users") ||
+          hasBaseAccess("manage-clients"):
           extendedAccess.push("custom-view-users");
 
-        case hasBaseAccess("view-events") || hasBaseAccess("manage-events"):
+        case hasBaseAccess("view-events") ||
+          hasBaseAccess("manage-events") ||
+          hasBaseAccess("manage-clients"):
           extendedAccess.push("custom-view-events");
 
         case hasBaseAccess("view-identity-providers") ||
