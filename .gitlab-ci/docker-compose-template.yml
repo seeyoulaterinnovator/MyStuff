@@ -53,3 +53,6 @@ services:
         - "traefik.first.port=8080"
         - "traefik.second.port=9000"
         - "traefik.docker.network=traefik"
+      resources:
+        limits:
+          memory: 2048m

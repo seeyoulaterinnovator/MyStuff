@@ -42,6 +42,7 @@ import { KeycloakDataTable } from "../table-toolbar/KeycloakDataTable";
 import { UserDataTableToolbarItems } from "./UserDataTableToolbarItems";
 import { useUserDataTable } from "../../customLogic/hooks/useUserDataTable";
 import type { UserInfoRepresentation } from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
+import { useAccess } from "../../context/access/Access";
 
 export type UserAttribute = {
   name: string;
@@ -124,6 +125,18 @@ export function UserDataTable() {
     UploadUserInfo,
     customLoader,
   } = useUserDataTable({ selectedRows, refresh, userStorage });
+  const { getAccesses } = useAccess();
+  const {
+    withHideSelectAllAccess,
+    withCreateRealmAccess,
+    withManageRealmAccess,
+    withManageUsersAccess,
+  } = getAccesses([
+    "hide-select-all",
+    "create-realm",
+    "manage-realm",
+    "manage-users",
+  ]);
 
   const [searchType, setSearchType] = useState<SearchType>(
     isCustomTheme ? "custom" : "default",
@@ -355,7 +368,9 @@ export function UserDataTable() {
           loader={customLoader}
           isPaginated
           ariaLabelKey="titleUsers"
-          canSelectAll
+          canSelectAll={
+            (isCustomTheme && !withHideSelectAllAccess) || !isCustomTheme
+          }
           onSelect={(rows: UserInfoRepresentation[]) =>
             setSelectedRows([...rows])
           }
@@ -404,8 +419,13 @@ export function UserDataTable() {
                 },
               },
             ];
-
-            if (searchType === "custom") {
+            if (
+              isCustomTheme &&
+              withCreateRealmAccess &&
+              withManageRealmAccess &&
+              withManageUsersAccess &&
+              searchType === "custom"
+            ) {
               actionResolvers.push({
                 title: t("delete"),
                 onClick: () => {

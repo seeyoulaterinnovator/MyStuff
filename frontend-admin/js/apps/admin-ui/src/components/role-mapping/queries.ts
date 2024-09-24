@@ -78,6 +78,7 @@ const clientFunctions: FunctionMapping = {
 const mapping: ResourceMapping = {
   groups: groupFunctions,
   users: groupFunctions,
+  customUsers: groupFunctions,
   clientScopes: clientFunctions,
   clients: clientFunctions,
   roles: {
@@ -117,6 +118,7 @@ export const deleteMapping = (
   type: ResourcesKey,
   id: string,
   rows: Row[],
+  realm?: string
 ) =>
   rows.map((row) => {
     const role = { id: row.role.id!, name: row.role.name! };
@@ -130,6 +132,7 @@ export const deleteMapping = (
         id,
         clientUniqueId: row.client?.id,
         client: row.client?.id,
+        realm,
         roles: [role],
       },
       [role],
