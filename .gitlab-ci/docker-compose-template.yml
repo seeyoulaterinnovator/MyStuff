@@ -55,4 +55,4 @@ services:
         - "traefik.docker.network=traefik"
       resources:
         limits:
-          memory: 2048
+          memory: 2048m
