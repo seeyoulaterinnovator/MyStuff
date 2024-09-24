@@ -43,7 +43,11 @@ import { useServerInfo } from "../context/server-info/ServerInfoProvider";
 import helpUrls from "../help-urls";
 import useLocaleSort, { mapByKey } from "../utils/useLocaleSort";
 import { ProviderInfo } from "./ProviderInfo";
-import { DashboardTab, toDashboard } from "./routes/Dashboard";
+import { DashboardRoute, DashboardTab, toDashboard } from "./routes/Dashboard";
+import { DashboardRealms } from "./DashboardRealms";
+import { AdminTheme } from "../customLogic/constants/theme";
+import { useMatch } from "react-router-dom";
+import { useRealms } from "../context/RealmsContext";
 
 import "./dashboard.css";
 
@@ -330,12 +334,23 @@ const Dashboard = () => {
 };
 
 export default function DashboardSection() {
-  const { realm } = useRealm();
+  const { realm, realmRepresentation } = useRealm();
+  const { realms } = useRealms();
   const isMasterRealm = realm === "master";
+  const isCustomTheme =
+    realmRepresentation?.adminTheme === AdminTheme.KEYCLOAK_V2;
+  const isRootPage = !!useMatch(DashboardRoute.path);
+  const isCustomRootPage =
+    isCustomTheme && isRootPage && realms.length > 1;
+
   return (
     <>
       {!isMasterRealm && <EmptyDashboard />}
-      {isMasterRealm && <Dashboard />}
+      {isCustomRootPage ? (
+        <DashboardRealms />
+      ) : (
+        isMasterRealm && <Dashboard />
+      )}
     </>
   );
 }
