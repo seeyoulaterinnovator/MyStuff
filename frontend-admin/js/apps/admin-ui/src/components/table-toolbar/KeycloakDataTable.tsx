@@ -1,4 +1,11 @@
-import {Button, ButtonVariant, Divider, Toolbar, ToolbarContent, ToolbarItem} from "@patternfly/react-core";
+import {
+  Button,
+  ButtonVariant,
+  Divider,
+  Toolbar,
+  ToolbarContent,
+  ToolbarItem,
+} from "@patternfly/react-core";
 import type { SVGIconProps } from "@patternfly/react-icons/dist/js/createIcon";
 import {
   ActionsColumn,
@@ -74,6 +81,10 @@ type DataTableProps<T> = {
 
 type CellRendererProps = {
   row: IRow;
+};
+
+export const isSubRow = <T,>(data?: Row<T> | SubRow<T>): data is SubRow<T> => {
+  return !!data && "parent" in data;
 };
 
 const CellRenderer = ({ row }: CellRendererProps) => {
@@ -193,64 +204,78 @@ function DataTable<T>({
           ))}
         </Tbody>
       ) : (
-        (rows as IRow[]).map((row, index) => (
-          <Tbody key={index}>
-            {index % 2 === 0 ? (
-              <Tr>
-                <Td
-                  expand={{
-                    isExpanded: !!expandedRows[index],
-                    rowIndex: index,
-                    expandId: `${index}`,
-                    onToggle: (_, rowIndex, isOpen) => {
-                      onCollapse(isOpen, rowIndex);
-                      const expand = [...expandedRows];
-                      expand[index] = isOpen;
-                      setExpandedRows(expand);
-                    },
-                  }}
-                />
-                {onSelect && (
-                  <Td
-                    select={{
-                      rowIndex: index,
-                      onSelect: (_, isSelected, rowIndex) => {
-                        onSelect!(isSelected, rowIndex);
-                        updateState(rowIndex, isSelected);
-                      },
-                      isSelected: selectedRows[index],
-                      variant: isRadio ? "radio" : "checkbox",
-                    }}
-                  />
-                )}
-                <CellRenderer row={row} />
-                {(actions || actionResolver) && (
-                  <Td isActionCell>
-                    <ActionsColumn
-                      items={actions || actionResolver?.(row, {})!}
-                      extraData={{ rowIndex: index }}
+        (rows as IRow[]).map((row, index) => {
+          const nextRow = rows[index + 1];
+          const hasExpandableContent =
+            isSubRow<T>(nextRow) &&
+            nextRow.parent !== null &&
+            !!nextRow.cells.length;
+
+          return (
+            <Tbody key={index}>
+              {index % 2 === 0 ? (
+                <Tr>
+                  {hasExpandableContent ? (
+                    <Td
+                      expand={{
+                        isExpanded: !!expandedRows[index],
+                        rowIndex: index,
+                        expandId: `${index}`,
+                        onToggle: (_, rowIndex, isOpen) => {
+                          onCollapse(isOpen, rowIndex);
+                          const expand = [...expandedRows];
+                          expand[index] = isOpen;
+                          setExpandedRows(expand);
+                        },
+                      }}
                     />
+                  ) : (
+                    <Td>
+                      <div />
+                    </Td>
+                  )}
+                  {onSelect && (
+                    <Td
+                      select={{
+                        rowIndex: index,
+                        onSelect: (_, isSelected, rowIndex) => {
+                          onSelect!(isSelected, rowIndex);
+                          updateState(rowIndex, isSelected);
+                        },
+                        isSelected: selectedRows[index],
+                        variant: isRadio ? "radio" : "checkbox",
+                      }}
+                    />
+                  )}
+                  <CellRenderer row={row} />
+                  {(actions || actionResolver) && (
+                    <Td isActionCell>
+                      <ActionsColumn
+                        items={actions || actionResolver?.(row, {})!}
+                        extraData={{ rowIndex: index }}
+                      />
+                    </Td>
+                  )}
+                </Tr>
+              ) : (
+                <Tr isExpanded={!!expandedRows[index - 1]}>
+                  <Td />
+                  <Td
+                    colSpan={
+                      columns.length +
+                      (onSelect ? 1 : 0) +
+                      (actionResolver || actions ? 1 : 0)
+                    }
+                  >
+                    <ExpandableRowContent>
+                      <CellRenderer row={row} />
+                    </ExpandableRowContent>
                   </Td>
-                )}
-              </Tr>
-            ) : (
-              <Tr isExpanded={!!expandedRows[index - 1]}>
-                <Td />
-                <Td
-                  colSpan={
-                    columns.length +
-                    (onSelect ? 1 : 0) +
-                    (actionResolver || actions ? 1 : 0)
-                  }
-                >
-                  <ExpandableRowContent>
-                    <CellRenderer row={row} />
-                  </ExpandableRowContent>
-                </Td>
-              </Tr>
-            )}
-          </Tbody>
-        ))
+                </Tr>
+              )}
+            </Tbody>
+          );
+        })
       )}
     </Table>
   );
@@ -314,7 +339,7 @@ export type DataListProps<T> = Omit<
   isSearching?: boolean;
   onlyTable?: boolean;
   withoutRefreshButton?: boolean;
-  onPaginationChange?: NestedFiltersFunction
+  onPaginationChange?: NestedFiltersFunction;
 };
 
 /**
@@ -531,7 +556,7 @@ export function KeycloakDataTable<T>({
 
   useEffect(() => {
     onPaginationChange?.(first, max, search);
-  }, [onPaginationChange, first, max, search])
+  }, [onPaginationChange, first, max, search]);
 
   const convertAction = () =>
     actions &&
@@ -603,9 +628,7 @@ export function KeycloakDataTable<T>({
             {onlyTableToolbarItem && (
               <>
                 <Toolbar>
-                  <ToolbarContent>
-                    {onlyTableToolbarItem}
-                  </ToolbarContent>
+                  <ToolbarContent>{onlyTableToolbarItem}</ToolbarContent>
                 </Toolbar>
                 <Divider />
               </>
