@@ -34,6 +34,7 @@ import { ResetPasswordDialog } from "./user-credentials/ResetPasswordDialog";
 import {UserAttribute} from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
 
 import "./user-credentials.css";
+import {useCustomConfig} from "../customLogic/context/CustomConfigContext";
 
 type UserCredentialsProps = {
   user: UserRepresentation;
@@ -98,7 +99,6 @@ const UserCredentialsRow = ({
 
 export const UserCredentials = ({ user, setUser }: UserCredentialsProps) => {
   const { adminClient } = useAdminClient();
-
   const { t } = useTranslation();
   const { addAlert, addError } = useAlerts();
   const [key, setKey] = useState(0);
@@ -130,6 +130,8 @@ export const UserCredentials = ({ user, setUser }: UserCredentialsProps) => {
 
   const hasPhone = (user.attributes?.[UserAttribute.PHONE]
     || fixedUser.unmanagedAttributes?.[UserAttribute.PHONE]) !== undefined;
+
+  const { isCustomTheme } = useCustomConfig();
 
   useFetch(
     () => adminClient.users.getCredentials({ id: user.id! }),
@@ -366,7 +368,7 @@ export const UserCredentials = ({ user, setUser }: UserCredentialsProps) => {
 
   const onToggleDelete = (credential: CredentialRepresentation) => {
     setSelectedCredential(credential);
-    if(!!user.emailVerified) {
+    if(!isCustomTheme || !!user.emailVerified) {
       toggleDeleteDialog();
     } else {
       toggleDeleteInvalidDialog();

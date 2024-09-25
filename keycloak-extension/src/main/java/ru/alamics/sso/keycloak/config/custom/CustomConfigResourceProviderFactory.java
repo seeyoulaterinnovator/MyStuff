@@ -14,6 +14,6 @@ public class CustomConfigResourceProviderFactory implements BaseResourceProvider
 
     @Override
     public RealmResourceProvider create(KeycloakSession session) {
-        return new CustomConfigResourceProvider();
+        return new CustomConfigResourceProvider(session);
     }
 }

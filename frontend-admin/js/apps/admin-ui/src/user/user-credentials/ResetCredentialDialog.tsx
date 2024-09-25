@@ -8,6 +8,9 @@ import { useAlerts } from "../../components/alert/Alerts";
 import { ConfirmDialogModal } from "../../components/confirm-dialog/ConfirmDialog";
 import { LifespanField } from "./LifespanField";
 import { RequiredActionMultiSelect } from "./RequiredActionMultiSelect";
+import {AdminTheme} from "../../customLogic/constants/theme";
+import {useRealm} from "../../context/realm-context/RealmContext";
+import {useCustomConfig} from "../../customLogic/context/CustomConfigContext";
 
 type ResetCredentialDialogProps = {
   userId: string;
@@ -33,6 +36,7 @@ export const ResetCredentialDialog = ({
   onClose,
 }: ResetCredentialDialogProps) => {
   const { adminClient } = useAdminClient();
+  const { realm: realmName, realmRepresentation: realm } = useRealm();
 
   const { t } = useTranslation();
   const form = useForm<CredentialResetForm>({
@@ -47,6 +51,8 @@ export const ResetCredentialDialog = ({
   const resetIsNotDisabled = !isEmpty(resetActionWatcher);
 
   const { addAlert, addError } = useAlerts();
+
+  const { isCustomTheme } = useCustomConfig();
 
   const sendCredentialsResetEmail = async ({
     actions,
@@ -69,7 +75,7 @@ export const ResetCredentialDialog = ({
     }
   };
 
-  if(!isEmailVerified) {
+  if(isCustomTheme && !isEmailVerified) {
     return (
       <ConfirmDialogModal
         variant={ModalVariant.small}

@@ -59,6 +59,7 @@ import { isLightweightUser } from "./utils";
 import "./user-section.css";
 import {UserCustomer} from "./UserCustomer";
 import {UserAttribute} from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
+import {useCustomConfig} from "../customLogic/context/CustomConfigContext";
 
 export default function EditUser() {
   const { adminClient } = useAdminClient();
@@ -107,6 +108,8 @@ export default function EditUser() {
   const identityProviderLinksTab = useTab("identity-provider-links");
   const sessionsTab = useTab("sessions");
   const customerTab = useTab("customer");
+
+  const { isCustomTheme } = useCustomConfig();
 
   useFetch(
     async () =>
@@ -412,13 +415,15 @@ export default function EditUser() {
               >
                 <UserSessions />
               </Tab>
-              <Tab
-                data-testid="user-customer"
-                title={<TabTitleText>{t("titleCustomer")}</TabTitleText>}
-                {...customerTab}
-              >
-                <UserCustomer />
-              </Tab>
+              {isCustomTheme && (
+                <Tab
+                  data-testid="user-customer"
+                  title={<TabTitleText>{t("titleCustomer")}</TabTitleText>}
+                  {...customerTab}
+                >
+                  <UserCustomer />
+                </Tab>
+              )}
             </RoutableTabs>
           </FormProvider>
         </UserProfileProvider>

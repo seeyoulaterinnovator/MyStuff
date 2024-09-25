@@ -14,8 +14,7 @@ import { ClusteringPanel } from "./advanced/ClusteringPanel";
 import { FineGrainOpenIdConnect } from "./advanced/FineGrainOpenIdConnect";
 import { FineGrainSamlEndpointConfig } from "./advanced/FineGrainSamlEndpointConfig";
 import { OpenIdConnectCompatibilityModes } from "./advanced/OpenIdConnectCompatibilityModes";
-import { useRealm } from "../context/realm-context/RealmContext";
-import { AdminTheme } from "../customLogic/constants/theme";
+import {useCustomConfig} from "../customLogic/context/CustomConfigContext";
 
 export const parseResult = (
   result: GlobalRequestResult,
@@ -53,8 +52,7 @@ export type AdvancedProps = {
 export const AdvancedTab = ({ save, client }: AdvancedProps) => {
   const { t } = useTranslation();
   const openIdConnect = "openid-connect";
-  const { realmRepresentation: realm } = useRealm();
-  const isCustomTheme = realm?.adminTheme === AdminTheme.KEYCLOAK_V2;
+  const { isCustomTheme } = useCustomConfig();
 
   const { setValue } = useFormContext();
   const {

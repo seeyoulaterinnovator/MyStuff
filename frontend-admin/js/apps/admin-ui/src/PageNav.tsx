@@ -20,6 +20,7 @@ import { routes } from "./routes";
 import useIsFeatureEnabled, { Feature } from "./utils/useIsFeatureEnabled";
 
 import "./page-nav.css";
+import {useCustomConfig} from "./customLogic/context/CustomConfigContext";
 
 type LeftNavProps = { title: string; path: string; id?: string };
 
@@ -67,6 +68,7 @@ export const PageNav = () => {
     componentTypes?.["org.keycloak.services.ui.extend.UiPageProvider"];
   const navigate = useNavigate();
   const { realmRepresentation } = useRealm();
+  const { isCustomTheme } = useCustomConfig();
 
   type SelectedItem = {
     groupId: number | string;
@@ -120,7 +122,9 @@ export const PageNav = () => {
               <LeftNav title="groups" path="/groups" />
               <LeftNav title="sessions" path="/sessions" />
               <LeftNav title="events" path="/events" />
-              <LeftNav title="customSettings" path="/custom-settings" />
+              {isCustomTheme && (
+                <LeftNav title="customSettings" path="/custom-settings" />
+              )}
             </NavGroup>
           )}
 

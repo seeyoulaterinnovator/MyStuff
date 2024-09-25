@@ -20,6 +20,7 @@ import { ResourcesKey, Row, ServiceRole } from "./RoleMapping";
 import { getAvailableRoles } from "./queries";
 import { getAvailableClientRoles } from "./resource";
 import {useRealm} from "../../context/realm-context/RealmContext";
+import {useCustomConfig} from "../../customLogic/context/CustomConfigContext";
 
 type AddRoleMappingModalProps = {
   id: string;
@@ -59,7 +60,8 @@ export const AddRoleMappingModal = ({
   const localeSort = useLocaleSort();
   const compareRow = ({ role: { name } }: Row) => name?.toUpperCase();
 
-  const isCustomUsers = type === "users" && realm !== searchRealm;
+  const { isCustomTheme } = useCustomConfig();
+  const isCustomUsers = isCustomTheme && type === "users" && realm !== searchRealm;
 
   const loader = async (
     first?: number,

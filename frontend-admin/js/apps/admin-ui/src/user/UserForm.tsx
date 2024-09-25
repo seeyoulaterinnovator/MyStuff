@@ -40,6 +40,7 @@ import { FederatedUserLink } from "./FederatedUserLink";
 import { UserFormFields, toUserFormFields } from "./form-state";
 import { toUsers } from "./routes/Users";
 import { RequiredActionMultiSelect } from "./user-credentials/RequiredActionMultiSelect";
+import {useCustomConfig} from "../customLogic/context/CustomConfigContext";
 
 export type BruteForced = {
   isBruteForceProtected?: boolean;
@@ -88,6 +89,8 @@ export const UserForm = ({
   );
   const [open, setOpen] = useState(false);
   const [locked, setLocked] = useState(isLocked);
+
+  const { isCustomTheme } = useCustomConfig();
 
   useEffect(() => {
     setValue("requiredActions", user?.requiredActions || []);
@@ -184,7 +187,7 @@ export const UserForm = ({
           name="requiredActions"
           label="requiredUserActions"
           help="requiredUserActionsHelp"
-          disabled={!user?.id}
+          disabled={isCustomTheme && !user?.id}
         />
         {(user?.federationLink || user?.origin) && canViewFederationLink && (
           <FormGroup

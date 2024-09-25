@@ -12,7 +12,6 @@ import { useAlerts } from "../../components/alert/Alerts";
 import { useRealm } from "../../context/realm-context/RealmContext";
 import { useRealms } from "../../context/RealmsContext";
 import { toUser } from "../../user/routes/User";
-import { AdminTheme } from "../constants/theme";
 import {
   KeycloakDataTable,
   type DetailField,
@@ -25,6 +24,7 @@ import { useConfirmDialog } from "../../components/confirm-dialog/ConfirmDialog"
 import { isExistGuard } from "../helpers/guards";
 import type { CustomUsersAction } from "../types/users";
 import { QueryParam } from "../../customLogic/constants/queryParams";
+import {useCustomConfig} from "../context/CustomConfigContext";
 
 const getBlockedUsers = (
   users?: Array<UserRepresentation | UserInfoRepresentation>,
@@ -52,12 +52,13 @@ export const useUserDataTable = ({
   const { addAlert, addError } = useAlerts();
   const { t } = useTranslation();
   const { realms } = useRealms();
-  const { realm: realmName, realmRepresentation: realm } = useRealm();
+  const { realm: realmName } = useRealm();
   const [customFilters, setCustomFilters] = useState<CustomUserQuery>({
     searchRealm: realmName,
   });
 
-  const isCustomTheme = realm?.adminTheme === AdminTheme.KEYCLOAK_V2;
+  const { isCustomTheme } = useCustomConfig();
+
   //should *only* list users when no user federation is configured
   const listUsers = !(userStorage && userStorage.length > 0);
 
@@ -194,7 +195,7 @@ export const useUserDataTable = ({
     refresh();
 
     const url = new URL(window.location.href);
-    
+
     if (newCustomFilters.searchRealm) {
       url.searchParams.set(QueryParam.SEARCH_REALM, newCustomFilters.searchRealm);
       history.pushState({}, '', url);
@@ -253,7 +254,7 @@ export const useUserDataTable = ({
             { realm: realmName },
             selectedIds,
           );
-          
+
           addAlert(t("userLoginSentSuccess"), AlertVariant.success);
         } catch (error) {
           addError(t("userLoginSentError"), error);
@@ -345,7 +346,7 @@ export const useUserDataTable = ({
               case 502:
                 addAlert(t("tooManyUsersToImport"), AlertVariant.info);
                 break;
-            
+
               default:
                 addError(error.response.statusText, error);;
             }
