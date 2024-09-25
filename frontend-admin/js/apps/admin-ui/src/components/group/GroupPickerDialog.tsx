@@ -27,6 +27,8 @@ import { PaginatingTableToolbar } from "../table-toolbar/PaginatingTableToolbar"
 import { GroupPath } from "./GroupPath";
 
 import "./group-picker-dialog.css";
+import { useCustomConfig } from "../../customLogic/context/CustomConfigContext";
+import { useRealm } from "../../context/realm-context/RealmContext";
 
 export type GroupPickerDialogProps = {
   id?: string;
@@ -54,6 +56,7 @@ export const GroupPickerDialog = ({
   onConfirm,
 }: GroupPickerDialogProps) => {
   const { adminClient } = useAdminClient();
+  const { realm, searchRealm } = useRealm();
 
   const { t } = useTranslation();
   const [selectedRows, setSelectedRows] = useState<SelectableGroup[]>([]);
@@ -69,6 +72,8 @@ export const GroupPickerDialog = ({
   const [first, setFirst] = useState(0);
 
   const [count, setCount] = useState(0);
+
+  const { isCustomTheme } = useCustomConfig();
 
   const currentGroup = () => navigation[navigation.length - 1];
 
@@ -86,10 +91,16 @@ export const GroupPickerDialog = ({
         if (isSearching) {
           args.search = filter;
         }
-        groups = await adminClient.groups.find(args);
+        groups = await adminClient.groups.find({
+          ...args,
+          realm: isCustomTheme ? searchRealm : realm
+        });
       } else {
         if (!navigation.map(({ id }) => id).includes(groupId)) {
-          group = await adminClient.groups.findOne({ id: groupId });
+          group = await adminClient.groups.findOne({
+            id: groupId,
+            realm: isCustomTheme ? searchRealm : realm
+          });
           if (!group) {
             throw new Error(t("notFound"));
           }
@@ -100,12 +111,16 @@ export const GroupPickerDialog = ({
           max,
           parentId: groupId,
         };
-        groups = await adminClient.groups.listSubGroups(args);
+        groups = await adminClient.groups.listSubGroups({
+          ...args,
+          realm: isCustomTheme ? searchRealm : realm
+        });
       }
 
       if (id) {
         existingUserGroups = await adminClient.users.listGroups({
           id,
+          realm: isCustomTheme ? searchRealm : realm
         });
       }
 

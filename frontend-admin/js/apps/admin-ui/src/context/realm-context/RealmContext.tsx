@@ -16,6 +16,7 @@ type RealmContextType = {
   realm: string;
   searchRealm: string;
   realmRepresentation?: RealmRepresentation;
+  searchRealmRepresentation?: RealmRepresentation;
   refresh: () => void;
 };
 
@@ -34,6 +35,8 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
   const isOnUserPage = !!useMatch(UserRoute.path);
   const { id: userId } = useParams<UserParams>();
   const [searchRealm, setSearchRealm] = useState<string | null>(null);
+  const [searchRealmRepresentation, setSearchRealmRepresentation] =
+    useState<RealmRepresentation>();
   const navigate = useNavigate();
 
   const routeMatch = useMatch({
@@ -75,8 +78,7 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
     [isOnUserPage, userId, realm],
   );
   useEffect(() => {
-    if (isOnUserPage) {
-    } else {
+    if (!isOnUserPage) {
       setSearchRealm(null);
     }
   }, [isOnUserPage]);
@@ -89,8 +91,26 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
     }
   }, [realm]);
 
+  useFetch(
+    async () => {
+      if (userId && searchRealm && realm !== searchRealm) {
+        return adminClient.customUsers.findUserRealm({ id: userId, realm: searchRealm });
+      } else {
+        return Promise.resolve(undefined);
+      }
+    },
+    setSearchRealmRepresentation,
+    [realm, searchRealm, userId]
+  );
+
   return (
-    <RealmContext.Provider value={{ realm, searchRealm: searchRealm || realm, realmRepresentation, refresh }}>
+    <RealmContext.Provider value={{
+      realm,
+      searchRealm: searchRealm || realm,
+      realmRepresentation,
+      searchRealmRepresentation: searchRealm && searchRealm !== realm ? searchRealmRepresentation : realmRepresentation,
+      refresh
+    }}>
       {children}
     </RealmContext.Provider>
   );

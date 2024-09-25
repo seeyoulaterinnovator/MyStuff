@@ -18,6 +18,8 @@ import { DeleteGroup } from "./components/DeleteGroup";
 import { GroupToolbar } from "./components/GroupToolbar";
 import { MoveDialog } from "./components/MoveDialog";
 import { getLastId } from "./groupIdUtils";
+import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
+import { useRealm } from "../context/realm-context/RealmContext";
 
 type GroupTableProps = {
   refresh: () => void;
@@ -25,6 +27,7 @@ type GroupTableProps = {
 
 export const GroupTable = ({ refresh: viewRefresh }: GroupTableProps) => {
   const { adminClient } = useAdminClient();
+  const { realm, searchRealm } = useRealm();
 
   const { t } = useTranslation();
 
@@ -46,6 +49,7 @@ export const GroupTable = ({ refresh: viewRefresh }: GroupTableProps) => {
 
   const { hasAccess } = useAccess();
   const isManager = hasAccess("manage-users") || currentGroup()?.access?.manage;
+  const { isCustomTheme } = useCustomConfig();
 
   const loader = async (first?: number, max?: number) => {
     let groupsData = undefined;
@@ -56,14 +60,20 @@ export const GroupTable = ({ refresh: viewRefresh }: GroupTableProps) => {
         max: max,
         parentId: id,
       };
-      groupsData = await adminClient.groups.listSubGroups(args);
+      groupsData = await adminClient.groups.listSubGroups({
+        ...args,
+        realm: isCustomTheme ? searchRealm : realm
+      });
     } else {
       const args: GroupQuery = {
         search: search || "",
         first: first || undefined,
         max: max || undefined,
       };
-      groupsData = await adminClient.groups.find(args);
+      groupsData = await adminClient.groups.find({
+        ...args,
+        realm: isCustomTheme ? searchRealm : realm
+      });
     }
 
     return groupsData;

@@ -25,6 +25,7 @@ import { toIdentityProvider } from "../identity-providers/routes/IdentityProvide
 import { emptyFormatter, upperCaseFormatter } from "../util";
 import { UserIdpModal } from "./UserIdPModal";
 import { useAccess } from "../context/access/Access";
+import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
 
 type UserIdentityProviderLinksProps = {
   userId: string;
@@ -39,10 +40,11 @@ export const UserIdentityProviderLinks = ({
   const [federatedId, setFederatedId] = useState("");
   const [isLinkIdPModalOpen, setIsLinkIdPModalOpen] = useState(false);
 
-  const { realm, realmRepresentation } = useRealm();
+  const { realm, realmRepresentation, searchRealm, searchRealmRepresentation } = useRealm();
   const { addAlert, addError } = useAlerts();
   const { t } = useTranslation();
   const { hasAccess, hasSomeAccess } = useAccess();
+  const { isCustomTheme } = useCustomConfig();
 
   const canQueryIDPDetails = hasSomeAccess(
     "manage-identity-providers",
@@ -60,6 +62,7 @@ export const UserIdentityProviderLinks = ({
   const getFederatedIdentities = async () => {
     const allFedIds = (await adminClient.users.listFederatedIdentities({
       id: userId,
+      realm
     })) as WithProviderId[];
 
     if (canQueryIDPDetails) {
@@ -75,7 +78,7 @@ export const UserIdentityProviderLinks = ({
   };
 
   const getAvailableIdPs = () => {
-    return realmRepresentation?.identityProviders;
+    return isCustomTheme ? searchRealmRepresentation?.identityProviders : realmRepresentation?.identityProviders;
   };
 
   const linkedIdPsLoader = async () => {
@@ -122,7 +125,7 @@ export const UserIdentityProviderLinks = ({
     return (
       <Link
         to={toIdentityProvider({
-          realm,
+          realm: searchRealm,
           providerId: idp.providerId,
           alias: idp.identityProvider!,
           tab: "settings",

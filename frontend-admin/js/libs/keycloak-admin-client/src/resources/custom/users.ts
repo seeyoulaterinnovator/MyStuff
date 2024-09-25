@@ -11,6 +11,7 @@ import type { KeycloakAdminClient } from "../../client.js";
 import Resource from "../resource.js";
 import { CustomAdminRealm } from "./adminRealm.js";
 import RoleRepresentation, {RoleMappingPayload} from "../../defs/roleRepresentation.js";
+import RealmRepresentation from "../../defs/realmRepresentation.js";
 
 export type CustomUserQuery = Partial<{
   searchRealm: string;
@@ -262,6 +263,15 @@ export class CustomUsers extends Resource<{ realm?: string }> {
     path: "/users-toms/role-mappings/{id}/clients/{clientUniqueId}",
     urlParamKeys: ["id", "clientUniqueId"],
     payloadKey: "roles",
+  });
+
+  public findUserRealm = this.makeRequest<
+    { id: string },
+    RealmRepresentation
+  >({
+    method: "GET",
+    path: "/users-toms/realm/{id}",
+    urlParamKeys: ["id"],
   });
 
   constructor(client: KeycloakAdminClient) {
