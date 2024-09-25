@@ -16,8 +16,11 @@ import { useRealm } from "./context/realm-context/RealmContext";
 import { useServerInfo } from "./context/server-info/ServerInfoProvider";
 import { toPage } from "./page/routes";
 import { AddRealmRoute } from "./realm/routes/AddRealm";
+import { DashboardRoute } from "./dashboard/routes/Dashboard";
 import { routes } from "./routes";
 import useIsFeatureEnabled, { Feature } from "./utils/useIsFeatureEnabled";
+import { AdminTheme } from "./customLogic/constants/theme";
+import { useRealms } from "./context/RealmsContext";
 
 import "./page-nav.css";
 import {useCustomConfig} from "./customLogic/context/CustomConfigContext";
@@ -68,6 +71,7 @@ export const PageNav = () => {
     componentTypes?.["org.keycloak.services.ui.extend.UiPageProvider"];
   const navigate = useNavigate();
   const { realmRepresentation } = useRealm();
+  const { realms } = useRealms();
   const { isCustomTheme } = useCustomConfig();
 
   type SelectedItem = {
@@ -97,6 +101,12 @@ export const PageNav = () => {
   );
 
   const isOnAddRealm = !!useMatch(AddRealmRoute.path);
+  const isRootPage = !!useMatch(DashboardRoute.path);
+  const isCustomTheme =
+    realmRepresentation?.adminTheme === AdminTheme.KEYCLOAK_V2;
+  const isCustomRootPage =
+    (isCustomTheme && isRootPage && realms.length > 1) ||
+    !isCustomTheme;
 
   return (
     <PageSidebar className="keycloak__page_nav__nav">
@@ -108,7 +118,7 @@ export const PageNav = () => {
             </NavItem>
           </NavList>
           <Divider />
-          {showManage && !isOnAddRealm && (
+          {!isCustomRootPage && showManage && !isOnAddRealm && (
             <NavGroup aria-label={t("manage")} title={t("manage")}>
               {isFeatureEnabled(Feature.Organizations) &&
                 realmRepresentation?.organizationsEnabled && (
@@ -125,7 +135,7 @@ export const PageNav = () => {
             </NavGroup>
           )}
 
-          {showConfigure && !isOnAddRealm && (
+          {!isCustomRootPage && showConfigure && !isOnAddRealm && (
             <NavGroup aria-label={t("configure")} title={t("configure")}>
               <LeftNav title="realmSettings" path="/realm-settings" />
               <LeftNav title="authentication" path="/authentication" />
