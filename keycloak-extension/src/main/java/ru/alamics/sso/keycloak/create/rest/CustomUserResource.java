@@ -29,15 +29,13 @@ import org.keycloak.models.cache.UserCache;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.ModelToRepresentation;
+import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.Urls;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.resources.account.AccountRestService;
-import org.keycloak.services.resources.admin.AdminEventBuilder;
-import org.keycloak.services.resources.admin.ClientsResource;
-import org.keycloak.services.resources.admin.RoleMapperResource;
-import org.keycloak.services.resources.admin.UsersResource;
+import org.keycloak.services.resources.admin.*;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.utils.ProfileHelper;
 import ru.alamics.sso.jpa.model.CustomUserAdapter;
@@ -65,6 +63,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.keycloak.models.ImpersonationSessionNote.IMPERSONATOR_ID;
 import static org.keycloak.models.ImpersonationSessionNote.IMPERSONATOR_USERNAME;
@@ -510,6 +509,28 @@ public class CustomUserResource {
                 .build();
     }
 
+    /**
+     * see {@link RealmAdminResource#getRealm()}
+     */
+    @Path("realm/{id}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public RealmRepresentation getUserRealm(@PathParam("id") String id) {
+        checkUser(id);
+        RealmRepresentation rep = new RealmRepresentation();
+        rep.setRealm(realm.getName());
+        rep.setDefaultLocale(realm.getDefaultLocale());
+        rep.setDisplayName(realm.getDisplayName());
+        rep.setDisplayNameHtml(realm.getDisplayNameHtml());
+        rep.setSupportedLocales(realm.getSupportedLocalesStream().collect(Collectors.toSet()));
+        rep.setRegistrationEmailAsUsername(realm.isRegistrationEmailAsUsername());
+        RealmRepresentation r = ModelToRepresentation.toRepresentation(session, realm, false);
+        rep.setIdentityProviders(r.getIdentityProviders());
+        rep.setIdentityProviderMappers(r.getIdentityProviderMappers());
+        return rep;
+    }
+
     private void sendLogin(List<String> ids, final String requiredAction) {
         KeycloakContext context = session.getContext();
         AdminEventBuilder eventBuilder = new AdminEventBuilder(context.getRealm(), auth.adminAuth(), session, context.getConnection());
@@ -538,7 +559,7 @@ public class CustomUserResource {
         }
     }
 
-    private void checkUser(String userId) {
+    private CustomUserAdapter checkUser(String userId) {
         UserModel user = session.getProvider(UserProvider.class).getUserById(session.getContext().getRealm(), userId);
 
         if (user == null) throw new NotFoundException("User not found");
@@ -548,5 +569,6 @@ public class CustomUserResource {
         if(customUser.getRealm().getName().equals(Config.getAdminRealm())) {
             throw new ForbiddenException();
         }
+        return customUser;
     }
 }

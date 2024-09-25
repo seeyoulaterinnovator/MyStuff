@@ -22,20 +22,25 @@ import java.util.regex.Pattern;
 
 @Provider
 @PreMatching
-public class ManagerUserAdminRequestInterceptor implements ContainerRequestFilter {
-    public static final String DISABLE_STRICT_AUTH_PROPERTY = "X-Manager-DisableStrictAuth";
-
+public class ManagerUsersAdminRequestInterceptor implements ContainerRequestFilter {
     private static final String USER_ID_REGEX = "[a-f0-9\\-]+";
 
     private static final List<Rule> RULES = List.of(
             Rule.builder()
                     .pathPattern(Pattern.compile(
-                            "/admin/realms/" + RealmNames.MANAGER + "/users/" + USER_ID_REGEX + "(" +
-                                    "|/role-mappings/realm/composite" +
-                                    "|/groups" +
-                                    ")"
+                            "/admin/realms/" + RealmNames.MANAGER + "/users/" + USER_ID_REGEX
+                                    + "(|/role-mappings/realm/composite)"
                     ))
                     .disableStrictAuth(true)
+                    .userId(uri -> uri.getPathSegments().get(4).getPath())
+                    .build(),
+            Rule.builder()
+                    .pathPattern(Pattern.compile(
+                            "/admin/realms/" + RealmNames.MANAGER + "/users/" + USER_ID_REGEX
+                                    + "(/federated-identity|/groups)(|/.*)"
+                    ))
+                    .disableStrictAuth(true)
+                    .replaceContextRealm(true)
                     .userId(uri -> uri.getPathSegments().get(4).getPath())
                     .build()
     );
@@ -63,7 +68,13 @@ public class ManagerUserAdminRequestInterceptor implements ContainerRequestFilte
 
         if (userRealm.equals(Config.getAdminRealm()) || userRealm.equals(RealmNames.MANAGER)) return;
 
-        if(rule.disableStrictAuth) requestContext.setProperty(DISABLE_STRICT_AUTH_PROPERTY, true);
+        if(rule.disableStrictAuth) {
+            requestContext.setProperty(ManagerRequestProperties.DISABLE_STRICT_ADMIN_AUTH, true);
+        }
+
+        if(rule.replaceContextRealm) {
+            requestContext.setProperty(ManagerRequestProperties.ADMIN_CONTEXT_REALM, userRealm);
+        }
 
         requestContext.setRequestUri(
                 requestContext.getUriInfo()
@@ -76,10 +87,12 @@ public class ManagerUserAdminRequestInterceptor implements ContainerRequestFilte
     }
 
     @Builder
-    static class Rule {
+    private static class Rule {
         final Pattern pathPattern;
 
         final boolean disableStrictAuth;
+
+        final boolean replaceContextRealm;
 
         @NonNull
         final Function<UriInfo, String> userId;
