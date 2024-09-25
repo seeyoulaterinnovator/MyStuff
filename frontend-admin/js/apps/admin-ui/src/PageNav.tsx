@@ -122,9 +122,6 @@ export const PageNav = () => {
               <LeftNav title="groups" path="/groups" />
               <LeftNav title="sessions" path="/sessions" />
               <LeftNav title="events" path="/events" />
-              {isCustomTheme && (
-                <LeftNav title="customSettings" path="/custom-settings" />
-              )}
             </NavGroup>
           )}
 
@@ -143,6 +140,9 @@ export const PageNav = () => {
                     id="/page-section"
                   />
                 ))}
+              {isCustomTheme && (
+                <LeftNav title="customSettings" path="/custom-settings" />
+              )}
             </NavGroup>
           )}
         </Nav>
