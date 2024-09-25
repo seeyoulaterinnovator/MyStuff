@@ -86,7 +86,7 @@ export const RealmsProvider = ({ children }: PropsWithChildren) => {
 
   const value = useMemo<RealmsContextProps>(
     () => ({ realms, refresh, accessibleRealms }),
-    [realms, refresh],
+    [realms, refresh, accessibleRealms],
   );
 
   return (

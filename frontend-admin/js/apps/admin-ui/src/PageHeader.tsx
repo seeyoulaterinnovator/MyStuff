@@ -23,6 +23,7 @@ import { HelpHeader } from "./components/help-enabler/HelpHeader";
 import { useRealm } from "./context/realm-context/RealmContext";
 import { useWhoAmI } from "./context/whoami/WhoAmI";
 import { toDashboard } from "./dashboard/routes/Dashboard";
+import { AdminTheme } from "./customLogic/constants/theme";
 
 const ManageAccountDropdownItem = () => {
   const { keycloak } = useEnvironment();
@@ -148,11 +149,16 @@ const UserDropdown = () => {
 export const Header = () => {
   const { environment, keycloak } = useEnvironment();
   const { t } = useTranslation();
-  const { realm } = useRealm();
+  const { realm, realmRepresentation } = useRealm();
 
+  const isCustomTheme =
+    realmRepresentation?.adminTheme === AdminTheme.KEYCLOAK_V2;
   const picture = keycloak.tokenParsed?.picture;
   const logo = environment.logo ? environment.logo : "/logo.svg";
-  const url = useHref(toDashboard({ realm }));
+  const url = useHref(
+    toDashboard({ realm: isCustomTheme ? undefined : realm }),
+  );
+
   const logoUrl = environment.logoUrl ? environment.logoUrl : url;
 
   return (
