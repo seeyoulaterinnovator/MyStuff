@@ -60,6 +60,7 @@ import "./user-section.css";
 import {UserCustomer} from "./UserCustomer";
 import {UserAttribute} from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
 import {useCustomConfig} from "../customLogic/context/CustomConfigContext";
+import {useWhoAmI} from "../context/whoami/WhoAmI";
 
 export default function EditUser() {
   const { adminClient } = useAdminClient();
@@ -69,7 +70,8 @@ export default function EditUser() {
   const navigate = useNavigate();
   const { hasAccess } = useAccess();
   const { id } = useParams<UserParams>();
-  const { realm: realmName, realmRepresentation: realm } = useRealm();
+  const { realm: realmName, realmRepresentation: realm, searchRealm } = useRealm();
+  const { isMeInManager } = useWhoAmI();
   // Validation of form fields is performed on server, thus we need to clear all errors before submit
   const clearAllErrorsBeforeSubmit = async (values: UserFormFields) => ({
     values,
@@ -265,10 +267,10 @@ export default function EditUser() {
     onConfirm: async () => {
       try {
         let data;
-        if(isCustomTheme) {
+        if(isCustomTheme && isMeInManager) {
           data = await adminClient.customUsers.impersonation(
-            { id: user!.id! },
-            { user: user!.id!, realm: realmName },
+            { id: user!.id!, realm: searchRealm },
+            { user: user!.id!, realm: searchRealm },
           );
         } else {
           data = await adminClient.users.impersonation(
