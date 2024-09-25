@@ -21,6 +21,8 @@ import { GroupPickerDialog } from "../components/group/GroupPickerDialog";
 import { ListEmptyState } from "../components/list-empty-state/ListEmptyState";
 import { KeycloakDataTable } from "../components/table-toolbar/KeycloakDataTable";
 import { useAccess } from "../context/access/Access";
+import { useRealm } from "../context/realm-context/RealmContext";
+import { useWhoAmI } from "../context/whoami/WhoAmI";
 
 type UserGroupsProps = {
   user: UserRepresentation;
@@ -28,6 +30,8 @@ type UserGroupsProps = {
 
 export const UserGroups = ({ user }: UserGroupsProps) => {
   const { adminClient } = useAdminClient();
+  const { realm, searchRealm } = useRealm();
+  const { isMeInMaster } = useWhoAmI();
 
   const { t } = useTranslation();
   const { addAlert, addError } = useAlerts();
@@ -67,6 +71,7 @@ export const UserGroups = ({ user }: UserGroupsProps) => {
     const joinedUserGroups = await adminClient.users.listGroups({
       ...params,
       id: user.id!,
+      realm: isMeInMaster ? searchRealm : realm
     });
 
     setDirectMembershipList([...joinedUserGroups]);
@@ -112,6 +117,7 @@ export const UserGroups = ({ user }: UserGroupsProps) => {
             adminClient.users.delFromGroup({
               id: user.id!,
               groupId: group.id!,
+              realm: isMeInMaster ? searchRealm : realm
             }),
           ),
         );
@@ -137,6 +143,7 @@ export const UserGroups = ({ user }: UserGroupsProps) => {
           adminClient.users.addToGroup({
             id: user.id!,
             groupId: group.id!,
+            realm: isMeInMaster ? searchRealm : realm
           }),
         ),
       );

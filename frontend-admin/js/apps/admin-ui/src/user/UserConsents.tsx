@@ -21,9 +21,13 @@ import {
 import { emptyFormatter } from "../util";
 import useFormatDate from "../utils/useFormatDate";
 import { useParams } from "../utils/useParams";
+import { useRealm } from "../context/realm-context/RealmContext";
+import { useWhoAmI } from "../context/whoami/WhoAmI";
 
 export const UserConsents = () => {
   const { adminClient } = useAdminClient();
+  const { realm, searchRealm } = useRealm();
+  const { isMeInMaster } = useWhoAmI();
 
   const [selectedClient, setSelectedClient] =
     useState<UserConsentRepresentation>();
@@ -40,7 +44,10 @@ export const UserConsents = () => {
   const refresh = () => setKey(new Date().getTime());
 
   const loader = async () => {
-    const getConsents = await adminClient.users.listConsents({ id });
+    const getConsents = await adminClient.users.listConsents({
+      id,
+      realm: isMeInMaster ? searchRealm : realm
+    });
 
     return alphabetize(getConsents);
   };
@@ -71,6 +78,7 @@ export const UserConsents = () => {
         await adminClient.users.revokeConsent({
           id,
           clientId: selectedClient!.clientId!,
+          realm: isMeInMaster ? searchRealm : realm
         });
 
         refresh();

@@ -23,9 +23,8 @@ import { deleteMapping, getEffectiveRoles, getMapping } from "./queries";
 import { getEffectiveClientRoles } from "./resource";
 
 import "./role-mapping.css";
-import {useRealm} from "../../context/realm-context/RealmContext";
-import {useCustomConfig} from "../../customLogic/context/CustomConfigContext";
-import {useWhoAmI} from "../../context/whoami/WhoAmI";
+import { useRealm } from "../../context/realm-context/RealmContext";
+import { useCustomConfig } from "../../customLogic/context/CustomConfigContext";
 
 export type CompositeRole = RoleRepresentation & {
   parent: RoleRepresentation;
@@ -91,7 +90,6 @@ export const RoleMapping = ({
 }: RoleMappingProps) => {
   const { adminClient } = useAdminClient();
   const { realm, searchRealm } = useRealm();
-  const { isMeInManager } = useWhoAmI();
 
   const { t } = useTranslation();
   const { addAlert, addError } = useAlerts();
@@ -104,7 +102,8 @@ export const RoleMapping = ({
   const [selected, setSelected] = useState<Row[]>([]);
 
   const { isCustomTheme } = useCustomConfig();
-  const isCustomUsers = isCustomTheme && isMeInManager && realm !== searchRealm && type === "users";
+  const isCustomUsers =
+    isCustomTheme && realm !== searchRealm && type === "users";
 
   const assignRoles = async (rows: Row[]) => {
     await save(rows);
@@ -115,13 +114,20 @@ export const RoleMapping = ({
     let effectiveRoles: Row[] = [];
     let effectiveClientRoles: Row[] = [];
     if (!hide) {
-      effectiveRoles = await getEffectiveRoles(adminClient, type, id);
+      effectiveRoles = await getEffectiveRoles(
+        adminClient,
+        isCustomUsers ? "customUsers" : type,
+        id,
+        searchRealm,
+      );
 
       effectiveClientRoles = (
         await getEffectiveClientRoles(adminClient, {
           id,
           type,
-          basePath: isCustomUsers ? `realms/${searchRealm}/users-toms` : undefined
+          basePath: isCustomUsers
+            ? `realms/${searchRealm}/users-toms`
+            : undefined,
         })
       ).map((e) => ({
         client: { clientId: e.client, id: e.clientId },
@@ -129,7 +135,11 @@ export const RoleMapping = ({
       }));
     }
 
-    const roles = await getMapping(adminClient, type, id);
+    const roles = await getMapping(
+      adminClient,
+      isCustomUsers ? "customUsers" : type,
+      id,
+    );
     const realmRolesMapping =
       roles.realmMappings?.map((role) => ({ role })) || [];
     const clientMapping = Object.values(roles.clientMappings || {})

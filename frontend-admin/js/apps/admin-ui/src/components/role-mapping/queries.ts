@@ -173,10 +173,11 @@ export const getEffectiveRoles = async (
   adminClient: KeycloakAdminClient,
   type: ResourcesKey,
   id: string,
+  realm: string,
 ): Promise<Row[]> => {
   const query = mapping[type]!.listEffective[1];
   if (type !== "roles") {
-    return (await applyQuery(adminClient, type, query, { id })).map((role) => ({
+    return (await applyQuery(adminClient, type, query, { id, realm })).map((role) => ({
       role,
     }));
   }

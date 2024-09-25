@@ -10,7 +10,7 @@ import { useAdminClient } from "../../admin-client";
 import { DEFAULT_LOCALE, i18n } from "../../i18n/i18n";
 import { useFetch } from "../../utils/useFetch";
 import { useRealm } from "../realm-context/RealmContext";
-import {RealmName} from "@keycloak/keycloak-admin-client/lib/defs/custom/realmTypes";
+import { RealmName } from "@keycloak/keycloak-admin-client/lib/defs/custom/realmTypes";
 
 export class WhoAmI {
   #me?: WhoAmIRepresentation;

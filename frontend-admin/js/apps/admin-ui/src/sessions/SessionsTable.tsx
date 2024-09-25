@@ -102,7 +102,7 @@ export default function SessionsTable({
   const { adminClient } = useAdminClient();
 
   const { realm, searchRealm } = useRealm();
-  const { whoAmI } = useWhoAmI();
+  const { whoAmI, isMeInMaster } = useWhoAmI();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { addError } = useAlerts();
@@ -110,7 +110,6 @@ export default function SessionsTable({
   const [key, setKey] = useState(0);
   const refresh = () => setKey((value) => value + 1);
   const isOnUserPage = !!useMatch(UserRoute.path);
-  const { isCustomTheme } = useCustomConfig();
 
   const columns = useMemo(() => {
     const defaultColumns: Field<UserSessionRepresentation>[] = [
@@ -155,7 +154,10 @@ export default function SessionsTable({
     continueButtonLabel: "confirm",
     onConfirm: async () => {
       try {
-        await adminClient.users.logout({ id: logoutUser! });
+        await adminClient.users.logout({
+          id: logoutUser!,
+          realm: isMeInMaster ? searchRealm : realm,
+        });
         if (isOnUserPage && isLightweightUser(logoutUser)) {
           navigate(toUsers({ realm: realm }));
         } else {
@@ -170,10 +172,10 @@ export default function SessionsTable({
   async function onClickRevoke(rowData: IRowData) {
     const session = rowData.data as UserSessionRepresentation;
     await adminClient.realms.deleteSession({
-      realm,
+      realm: isMeInMaster ? searchRealm : realm,
       session: session.id!,
       isOffline: true,
-      searchRealm: isCustomTheme ? searchRealm : ""
+      searchRealm
     });
 
     refresh();
@@ -182,10 +184,10 @@ export default function SessionsTable({
   async function onClickSignOut(rowData: IRowData) {
     const session = rowData.data as UserSessionRepresentation;
     await adminClient.realms.deleteSession({
-      realm,
+      realm: isMeInMaster ? searchRealm : realm,
       session: session.id!,
       isOffline: false,
-      searchRealm: isCustomTheme ? searchRealm : ""
+      searchRealm
     });
 
     if (session.userId === whoAmI.getUserId()) {

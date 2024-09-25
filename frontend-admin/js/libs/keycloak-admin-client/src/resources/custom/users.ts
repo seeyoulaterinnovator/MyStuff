@@ -14,6 +14,7 @@ import RoleRepresentation, {RoleMappingPayload} from "../../defs/roleRepresentat
 import RealmRepresentation from "../../defs/realmRepresentation.js";
 import type GroupRepresentation from "../../defs/groupRepresentation.js";
 import {GroupQuery} from "../groups.js";
+import type MappingsRepresentation from "../../defs/mappingsRepresentation.js";
 
 export type CustomUserQuery = Partial<{
   searchRealm: string;
@@ -197,6 +198,36 @@ export class CustomUsers extends Resource<{ realm?: string }> {
     method: "GET",
     path: "/users-info/realm-name-by-user-id",
     queryParamKeys: ["userId"],
+  });
+
+  // name fixed
+  public listRoleMappings = this.makeRequest<
+      { id: string },
+      MappingsRepresentation
+  >({
+    method: "GET",
+    path: "/users-toms/role-mappings/{id}",
+    urlParamKeys: ["id"],
+  });
+
+  // name fixed
+  public listCompositeRealmRoleMappings = this.makeRequest<
+      { id: string },
+      RoleRepresentation[]
+  >({
+    method: "GET",
+    path: "/users-toms/role-mappings/{id}/realm/composite",
+    urlParamKeys: ["id"],
+  });
+
+  // name fixed
+  public listCompositeClientRoleMappings = this.makeRequest<
+      { id: string; clientUniqueId: string },
+      RoleRepresentation[]
+  >({
+    method: "GET",
+    path: "/users-toms/role-mappings/{id}/clients/{clientUniqueId}/composite",
+    urlParamKeys: ["id", "clientUniqueId"],
   });
 
   // name fixed

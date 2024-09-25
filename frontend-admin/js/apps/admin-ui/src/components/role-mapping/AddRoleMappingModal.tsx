@@ -19,9 +19,8 @@ import { KeycloakDataTable } from "../table-toolbar/KeycloakDataTable";
 import { ResourcesKey, Row, ServiceRole } from "./RoleMapping";
 import { getAvailableRoles } from "./queries";
 import { getAvailableClientRoles } from "./resource";
-import {useRealm} from "../../context/realm-context/RealmContext";
-import {useCustomConfig} from "../../customLogic/context/CustomConfigContext";
-import {useWhoAmI} from "../../context/whoami/WhoAmI";
+import { useRealm } from "../../context/realm-context/RealmContext";
+import { useCustomConfig } from "../../customLogic/context/CustomConfigContext";
 
 type AddRoleMappingModalProps = {
   id: string;
@@ -46,7 +45,6 @@ export const AddRoleMappingModal = ({
 }: AddRoleMappingModalProps) => {
   const { adminClient } = useAdminClient();
   const { realm, searchRealm } = useRealm();
-  const { isMeInManager } = useWhoAmI();
 
   const { t } = useTranslation();
   const { hasAccess } = useAccess();
@@ -63,7 +61,7 @@ export const AddRoleMappingModal = ({
   const compareRow = ({ role: { name } }: Row) => name?.toUpperCase();
 
   const { isCustomTheme } = useCustomConfig();
-  const isCustomUsers = isCustomTheme && isMeInManager && realm !== searchRealm && type === "users";
+  const isCustomUsers = isCustomTheme && realm !== searchRealm && type === "users";
 
   const loader = async (
     first?: number,

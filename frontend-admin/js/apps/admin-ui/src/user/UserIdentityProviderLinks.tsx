@@ -26,6 +26,7 @@ import { emptyFormatter, upperCaseFormatter } from "../util";
 import { UserIdpModal } from "./UserIdPModal";
 import { useAccess } from "../context/access/Access";
 import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
+import { useWhoAmI } from "../context/whoami/WhoAmI";
 
 type UserIdentityProviderLinksProps = {
   userId: string;
@@ -41,6 +42,7 @@ export const UserIdentityProviderLinks = ({
   const [isLinkIdPModalOpen, setIsLinkIdPModalOpen] = useState(false);
 
   const { realm, realmRepresentation, searchRealm, searchRealmRepresentation } = useRealm();
+  const { isMeInMaster } = useWhoAmI();
   const { addAlert, addError } = useAlerts();
   const { t } = useTranslation();
   const { hasAccess, hasSomeAccess } = useAccess();
@@ -62,7 +64,7 @@ export const UserIdentityProviderLinks = ({
   const getFederatedIdentities = async () => {
     const allFedIds = (await adminClient.users.listFederatedIdentities({
       id: userId,
-      realm
+      realm: isMeInMaster ? searchRealm : realm
     })) as WithProviderId[];
 
     if (canQueryIDPDetails) {

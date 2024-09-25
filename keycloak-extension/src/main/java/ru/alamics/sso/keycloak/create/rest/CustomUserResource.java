@@ -443,10 +443,8 @@ public class CustomUserResource {
 
     @Path("role-mappings/{id}")
     public RoleMapperResource getRoleMappings(@PathParam("id") String id) {
-        EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
-        UserEntity userEntity = em.find(UserEntity.class, id);
-        if (userEntity == null) throw new NotFoundException("User not found");
-        UserModel user = new UserAdapter(session, realm, em, userEntity);
+        UserModel user = session.getProvider(UserProvider.class).getUserById(realm, id);
+        if (user == null) throw new NotFoundException("User not found");
 
         AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
                 .realm(realm)
