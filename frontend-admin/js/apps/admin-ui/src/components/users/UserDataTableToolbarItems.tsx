@@ -27,8 +27,8 @@ import { UserDataTableCustomSearchForm } from "./UserDataTableCustomSearchForm";
 import { CustomUserToolbarAction } from "../../customLogic/constants/user";
 import { UploadButton } from "../../customLogic/ui/UploadButton";
 import { CustomUsersAction } from "../../customLogic/types/users";
-import { AdminTheme } from "../../customLogic/constants/theme";
 import { useWhoAmI } from "../../context/whoami/WhoAmI";
+import { useCustomConfig } from "../../customLogic/context/CustomConfigContext";
 
 type UserDataTableToolbarItemsProps = {
   searchDropdownOpen: boolean;
@@ -82,7 +82,7 @@ export function UserDataTableToolbarItems({
 
   const { hasAccess, getAccesses } = useAccess();
   const { whoAmI } = useWhoAmI();
-  const isCustomTheme = realm.adminTheme === AdminTheme.KEYCLOAK_V2;
+  const { isCustomTheme } = useCustomConfig();
   const isMasterAuthRealm = whoAmI.getRealm() === RealmName.MASTER;
   const isMasterSearchRealm = customFilters.searchRealm === RealmName.MASTER;
   const isManagerSearchRealm = customFilters.searchRealm === RealmName.MANAGER;

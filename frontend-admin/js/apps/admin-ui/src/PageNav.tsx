@@ -19,7 +19,6 @@ import { AddRealmRoute } from "./realm/routes/AddRealm";
 import { DashboardRoute } from "./dashboard/routes/Dashboard";
 import { routes } from "./routes";
 import useIsFeatureEnabled, { Feature } from "./utils/useIsFeatureEnabled";
-import { AdminTheme } from "./customLogic/constants/theme";
 import { useRealms } from "./context/RealmsContext";
 
 import "./page-nav.css";
@@ -102,8 +101,6 @@ export const PageNav = () => {
 
   const isOnAddRealm = !!useMatch(AddRealmRoute.path);
   const isRootPage = !!useMatch(DashboardRoute.path);
-  const isCustomTheme =
-    realmRepresentation?.adminTheme === AdminTheme.KEYCLOAK_V2;
   const isCustomRootPage =
     (isCustomTheme && isRootPage && realms.length > 1) ||
     !isCustomTheme;

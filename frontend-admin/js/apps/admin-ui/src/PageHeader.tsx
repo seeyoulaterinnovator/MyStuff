@@ -23,7 +23,7 @@ import { HelpHeader } from "./components/help-enabler/HelpHeader";
 import { useRealm } from "./context/realm-context/RealmContext";
 import { useWhoAmI } from "./context/whoami/WhoAmI";
 import { toDashboard } from "./dashboard/routes/Dashboard";
-import { AdminTheme } from "./customLogic/constants/theme";
+import { useCustomConfig } from "./customLogic/context/CustomConfigContext";
 
 const ManageAccountDropdownItem = () => {
   const { keycloak } = useEnvironment();
@@ -151,8 +151,7 @@ export const Header = () => {
   const { t } = useTranslation();
   const { realm, realmRepresentation } = useRealm();
 
-  const isCustomTheme =
-    realmRepresentation?.adminTheme === AdminTheme.KEYCLOAK_V2;
+  const { isCustomTheme } = useCustomConfig();
   const picture = keycloak.tokenParsed?.picture;
   const logo = environment.logo ? environment.logo : "/logo.svg";
   const url = useHref(
