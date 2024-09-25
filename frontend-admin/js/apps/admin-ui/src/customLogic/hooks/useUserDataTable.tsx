@@ -24,7 +24,8 @@ import { useConfirmDialog } from "../../components/confirm-dialog/ConfirmDialog"
 import { isExistGuard } from "../helpers/guards";
 import type { CustomUsersAction } from "../types/users";
 import { QueryParam } from "../../customLogic/constants/queryParams";
-import {useCustomConfig} from "../context/CustomConfigContext";
+import { useCustomConfig } from "../context/CustomConfigContext";
+import type { SortingOptions } from "../../customLogic/types/sorting";
 
 const getBlockedUsers = (
   users?: Array<UserRepresentation | UserInfoRepresentation>,
@@ -104,11 +105,13 @@ export const useUserDataTable = ({
       {
         name: "email",
         displayKey: "email",
+        isSortable: true,
       },
       {
         name: "firstName",
         displayKey: "firstName",
         cellFormatters: [emptyFormatter()],
+        isSortable: true,
       },
       {
         name: "enabled",
@@ -197,8 +200,11 @@ export const useUserDataTable = ({
     const url = new URL(window.location.href);
 
     if (newCustomFilters.searchRealm) {
-      url.searchParams.set(QueryParam.SEARCH_REALM, newCustomFilters.searchRealm);
-      history.pushState({}, '', url);
+      url.searchParams.set(
+        QueryParam.SEARCH_REALM,
+        newCustomFilters.searchRealm,
+      );
+      history.pushState({}, "", url);
     } else {
       url.searchParams.delete(QueryParam.SEARCH_REALM);
     }
@@ -207,13 +213,16 @@ export const useUserDataTable = ({
   useEffect(() => {
     const url = new URL(window.location.href);
     const querySearchRealm = url.searchParams.get(QueryParam.SEARCH_REALM);
-    setCustomFilters(prevCustomFilters => ({ ...prevCustomFilters, searchRealm: querySearchRealm || prevCustomFilters.searchRealm }));
+    setCustomFilters((prevCustomFilters) => ({
+      ...prevCustomFilters,
+      searchRealm: querySearchRealm || prevCustomFilters.searchRealm,
+    }));
 
     return () => {
       const url = new URL(window.location.href);
       url.searchParams.delete(QueryParam.SEARCH_REALM);
-      history.pushState({}, '', url);
-    }
+      history.pushState({}, "", url);
+    };
   }, []);
 
   const checkIsSelectedUsersBlocked = useCallback(() => {
@@ -348,7 +357,7 @@ export const useUserDataTable = ({
                 break;
 
               default:
-                addError(error.response.statusText, error);;
+                addError(error.response.statusText, error);
             }
           }
         }
@@ -458,15 +467,26 @@ export const useUserDataTable = ({
     onConfirm: () => {},
   });
 
-  const customLoader = async (first?: number, max?: number) => {
+  const [sortingOptions, setSortingOptions] = useState<SortingOptions>();
+
+  const customLoader = async (
+    first?: number,
+    max?: number,
+    search?: string,
+    newSortingOptions?: SortingOptions,
+  ) => {
     if (!listUsers) {
       return [];
     }
 
     try {
+      setSortingOptions(newSortingOptions);
+
       return await getUsers({
         first,
         max,
+        sortAsc: sortingOptions?.order === "asc",
+        sortField: sortingOptions?.orderBy,
       });
     } catch (error) {
       if (userStorage?.length) {
@@ -479,6 +499,7 @@ export const useUserDataTable = ({
   };
 
   return {
+    sortingOptions,
     customFilters,
     isCustomTheme,
     realms,
@@ -491,5 +512,6 @@ export const useUserDataTable = ({
     setCustomFilters,
     toggleUploadUserInfo,
     UploadUserInfo,
+    setSortingOptions,
   };
 };

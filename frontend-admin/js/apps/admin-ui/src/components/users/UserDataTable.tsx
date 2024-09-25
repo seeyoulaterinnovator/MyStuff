@@ -120,6 +120,7 @@ export function UserDataTable() {
     customFilters,
     isCustomTheme,
     userDetailColumns,
+    sortingOptions,
     handleCustomAction,
     searchUserWithCustomFilters,
     UploadUserInfo,
@@ -366,6 +367,7 @@ export function UserDataTable() {
           }
           key={key}
           loader={customLoader}
+          sortingOptions={sortingOptions}
           isPaginated
           ariaLabelKey="titleUsers"
           canSelectAll={

@@ -20,7 +20,7 @@ export type CustomUserQuery = Partial<{
   searchPhone: string;
   first: number;
   max: number;
-  sortAsc: string;
+  sortAsc: boolean;
   sortField: string;
 }>;
 
