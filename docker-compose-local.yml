@@ -99,6 +99,9 @@ services:
 
   nginx:
     image: nginx:1.15.3
+    # NEED ON LINUX
+#    extra_hosts:
+#      - "host.docker.internal:host-gateway"
     ports:
       - "8180:80"
     volumes:
