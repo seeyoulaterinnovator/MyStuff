@@ -4,5 +4,5 @@ export type CustomConfigRepresentation = {
   adminTheme?: string;
 };
 
-export interface CustomSettingResponseRepresentation
+export interface CustomConfigResponseRepresentation
   extends Response<CustomConfigRepresentation> {}

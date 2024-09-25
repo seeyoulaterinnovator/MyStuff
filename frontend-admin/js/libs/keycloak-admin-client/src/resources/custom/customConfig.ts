@@ -1,11 +1,11 @@
 import Resource from "../resource.js";
 import type { KeycloakAdminClient } from "../../client.js";
-import { CustomSettingResponseRepresentation } from "../../defs/custom/customConfigRepresentation.js";
+import { CustomConfigResponseRepresentation } from "../../defs/custom/customConfigRepresentation.js";
 
 export class CustomConfig extends Resource<{ realm?: string }> {
   public getCustomConfig = this.makeRequest<
     {},
-    CustomSettingResponseRepresentation
+    CustomConfigResponseRepresentation
   >({
     method: "GET",
     path: "/config-custom/admin",
