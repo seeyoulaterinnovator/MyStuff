@@ -25,6 +25,7 @@ import { getEffectiveClientRoles } from "./resource";
 import "./role-mapping.css";
 import {useRealm} from "../../context/realm-context/RealmContext";
 import {useCustomConfig} from "../../customLogic/context/CustomConfigContext";
+import {useWhoAmI} from "../../context/whoami/WhoAmI";
 
 export type CompositeRole = RoleRepresentation & {
   parent: RoleRepresentation;
@@ -90,6 +91,7 @@ export const RoleMapping = ({
 }: RoleMappingProps) => {
   const { adminClient } = useAdminClient();
   const { realm, searchRealm } = useRealm();
+  const { isMeInManager } = useWhoAmI();
 
   const { t } = useTranslation();
   const { addAlert, addError } = useAlerts();
@@ -102,7 +104,7 @@ export const RoleMapping = ({
   const [selected, setSelected] = useState<Row[]>([]);
 
   const { isCustomTheme } = useCustomConfig();
-  const isCustomUsers = isCustomTheme && type === "users" && realm !== searchRealm;
+  const isCustomUsers = isCustomTheme && isMeInManager && realm !== searchRealm && type === "users";
 
   const assignRoles = async (rows: Row[]) => {
     await save(rows);
