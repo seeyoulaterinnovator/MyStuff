@@ -29,6 +29,7 @@ import { GroupPath } from "./GroupPath";
 import "./group-picker-dialog.css";
 import { useCustomConfig } from "../../customLogic/context/CustomConfigContext";
 import { useRealm } from "../../context/realm-context/RealmContext";
+import {useWhoAmI} from "../../context/whoami/WhoAmI";
 
 export type GroupPickerDialogProps = {
   id?: string;
@@ -57,6 +58,7 @@ export const GroupPickerDialog = ({
 }: GroupPickerDialogProps) => {
   const { adminClient } = useAdminClient();
   const { realm, searchRealm, searchRealmUserId } = useRealm();
+  const { isMeInManager } = useWhoAmI();
 
   const { t } = useTranslation();
   const [selectedRows, setSelectedRows] = useState<SelectableGroup[]>([]);
@@ -91,7 +93,7 @@ export const GroupPickerDialog = ({
         if (isSearching) {
           args.search = filter;
         }
-        if(isCustomTheme && searchRealmUserId) {
+        if(isCustomTheme && isMeInManager && searchRealmUserId) {
           groups = await adminClient.customUsers.findUserRealmGroups({
             ...args,
             id: searchRealmUserId
@@ -101,7 +103,7 @@ export const GroupPickerDialog = ({
         }
       } else {
         if (!navigation.map(({ id }) => id).includes(groupId)) {
-          if(isCustomTheme && searchRealmUserId) {
+          if(isCustomTheme && isMeInManager && searchRealmUserId) {
             group = await adminClient.customUsers.findOneUserRealmGroup({
               id: searchRealmUserId,
               groupId

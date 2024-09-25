@@ -174,7 +174,7 @@ export default function EditUser() {
 
         const phoneCheck = await adminClient.customUsers.findUserByAttribute({
           realm: realmName,
-          realmId: realmName, // TODO
+          realmId: searchRealm,
           phone,
           excludedUserId: id
         });

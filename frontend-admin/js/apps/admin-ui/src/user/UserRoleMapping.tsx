@@ -5,6 +5,7 @@ import { useAdminClient } from "../admin-client";
 import { useAlerts } from "../components/alert/Alerts";
 import { RoleMapping, Row } from "../components/role-mapping/RoleMapping";
 import {useRealm} from "../context/realm-context/RealmContext";
+import {useWhoAmI} from "../context/whoami/WhoAmI";
 
 type UserRoleMappingProps = {
   id: string;
@@ -14,6 +15,7 @@ type UserRoleMappingProps = {
 export const UserRoleMapping = ({ id, name }: UserRoleMappingProps) => {
   const { adminClient } = useAdminClient();
   const { realm, searchRealm } = useRealm();
+  const { isMeInManager } = useWhoAmI();
 
   const { t } = useTranslation();
   const { addAlert, addError } = useAlerts();
@@ -24,7 +26,7 @@ export const UserRoleMapping = ({ id, name }: UserRoleMappingProps) => {
         .filter((row) => row.client === undefined)
         .map((row) => row.role as RoleMappingPayload)
         .flat();
-      if(realm != searchRealm) {
+      if(isMeInManager && realm != searchRealm) {
         await adminClient.customUsers.addRealmRoleMappings({
           id,
           realm: searchRealm,
@@ -40,7 +42,7 @@ export const UserRoleMapping = ({ id, name }: UserRoleMappingProps) => {
         rows
           .filter((row) => row.client !== undefined)
           .map((row) => {
-            if(realm != searchRealm) {
+            if(isMeInManager && realm !== searchRealm) {
               return adminClient.customUsers.addClientRoleMappings({
                 id,
                 clientUniqueId: row.client!.id!,
