@@ -16,7 +16,7 @@ import org.keycloak.services.resources.admin.RealmAdminResource;
 import org.keycloak.services.resources.admin.RealmsAdminResource;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.services.resources.admin.permissions.AdminPermissions;
-import ru.alamics.sso.keycloak.consts.RealmNames;
+import ru.alamics.sso.keycloak.GeneralRealm;
 
 public class ManagerRealmsAdminResource extends RealmsAdminResource {
     final ContainerRequestContext requestContext;
@@ -39,7 +39,7 @@ public class ManagerRealmsAdminResource extends RealmsAdminResource {
 
         if (!RealmManager.isAdministrationRealm(auth.getRealm())
                 && !auth.getRealm().equals(realm)
-                && !auth.getRealm().getName().equals(RealmNames.MANAGER)) {
+                && !auth.getRealm().getName().equals(GeneralRealm.MANAGER)) {
             throw new ForbiddenException();
         }
 

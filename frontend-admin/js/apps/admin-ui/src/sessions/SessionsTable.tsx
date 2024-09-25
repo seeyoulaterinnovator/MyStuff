@@ -31,6 +31,7 @@ import { UserRoute, toUser } from "../user/routes/User";
 import { toUsers } from "../user/routes/Users";
 import { isLightweightUser } from "../user/utils";
 import useFormatDate from "../utils/useFormatDate";
+import {useCustomConfig} from "../customLogic/context/CustomConfigContext";
 
 export type ColumnName =
   | "username"
@@ -100,7 +101,7 @@ export default function SessionsTable({
   const { keycloak } = useEnvironment();
   const { adminClient } = useAdminClient();
 
-  const { realm } = useRealm();
+  const { realm, searchRealm } = useRealm();
   const { whoAmI } = useWhoAmI();
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -109,6 +110,7 @@ export default function SessionsTable({
   const [key, setKey] = useState(0);
   const refresh = () => setKey((value) => value + 1);
   const isOnUserPage = !!useMatch(UserRoute.path);
+  const { isCustomTheme } = useCustomConfig();
 
   const columns = useMemo(() => {
     const defaultColumns: Field<UserSessionRepresentation>[] = [
@@ -171,6 +173,7 @@ export default function SessionsTable({
       realm,
       session: session.id!,
       isOffline: true,
+      searchRealm: isCustomTheme ? searchRealm : ""
     });
 
     refresh();
@@ -182,6 +185,7 @@ export default function SessionsTable({
       realm,
       session: session.id!,
       isOffline: false,
+      searchRealm: isCustomTheme ? searchRealm : ""
     });
 
     if (session.userId === whoAmI.getUserId()) {

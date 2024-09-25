@@ -56,7 +56,7 @@ export const GroupPickerDialog = ({
   onConfirm,
 }: GroupPickerDialogProps) => {
   const { adminClient } = useAdminClient();
-  const { realm, searchRealm } = useRealm();
+  const { realm, searchRealm, searchRealmUserId } = useRealm();
 
   const { t } = useTranslation();
   const [selectedRows, setSelectedRows] = useState<SelectableGroup[]>([]);
@@ -91,16 +91,24 @@ export const GroupPickerDialog = ({
         if (isSearching) {
           args.search = filter;
         }
-        groups = await adminClient.groups.find({
-          ...args,
-          realm: isCustomTheme ? searchRealm : realm
-        });
+        if(isCustomTheme && searchRealmUserId) {
+          groups = await adminClient.customUsers.findUserRealmGroups({
+            ...args,
+            id: searchRealmUserId
+          });
+        } else {
+          groups = await adminClient.groups.find(args);
+        }
       } else {
         if (!navigation.map(({ id }) => id).includes(groupId)) {
-          group = await adminClient.groups.findOne({
-            id: groupId,
-            realm: isCustomTheme ? searchRealm : realm
-          });
+          if(isCustomTheme && searchRealmUserId) {
+            group = await adminClient.customUsers.findOneUserRealmGroup({
+              id: searchRealmUserId,
+              groupId
+            });
+          } else {
+            group = await adminClient.groups.findOne({id: groupId});
+          }
           if (!group) {
             throw new Error(t("notFound"));
           }
@@ -118,10 +126,7 @@ export const GroupPickerDialog = ({
       }
 
       if (id) {
-        existingUserGroups = await adminClient.users.listGroups({
-          id,
-          realm: isCustomTheme ? searchRealm : realm
-        });
+        existingUserGroups = await adminClient.users.listGroups({ id });
       }
 
       return { group, groups, existingUserGroups };

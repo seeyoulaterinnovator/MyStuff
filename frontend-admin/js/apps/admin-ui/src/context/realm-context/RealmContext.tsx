@@ -11,10 +11,12 @@ import RealmRepresentation from "@keycloak/keycloak-admin-client/lib/defs/realmR
 import { useFetch } from "../../utils/useFetch";
 import {UserParams, UserRoute} from "../../user/routes/User";
 import {useParams} from "../../utils/useParams";
+import {RealmName} from "@keycloak/keycloak-admin-client/lib/defs/custom/realmTypes";
 
 type RealmContextType = {
   realm: string;
   searchRealm: string;
+  searchRealmUserId?: string;
   realmRepresentation?: RealmRepresentation;
   searchRealmRepresentation?: RealmRepresentation;
   refresh: () => void;
@@ -60,7 +62,7 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
 
   useFetch(
     () => {
-      if (isOnUserPage && userId && realm === "manager") {
+      if (isOnUserPage && userId && realm === RealmName.MANAGER) {
         return adminClient.customUsers.findRealmNameByUserId({
           userId,
         });
@@ -109,6 +111,7 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
       searchRealm: searchRealm || realm,
       realmRepresentation,
       searchRealmRepresentation: searchRealm && searchRealm !== realm ? searchRealmRepresentation : realmRepresentation,
+      searchRealmUserId: isOnUserPage && searchRealm && searchRealm !== realm ? userId : undefined,
       refresh
     }}>
       {children}

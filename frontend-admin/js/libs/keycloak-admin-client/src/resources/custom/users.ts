@@ -12,6 +12,8 @@ import Resource from "../resource.js";
 import { CustomAdminRealm } from "./adminRealm.js";
 import RoleRepresentation, {RoleMappingPayload} from "../../defs/roleRepresentation.js";
 import RealmRepresentation from "../../defs/realmRepresentation.js";
+import type GroupRepresentation from "../../defs/groupRepresentation.js";
+import {GroupQuery} from "../groups.js";
 
 export type CustomUserQuery = Partial<{
   searchRealm: string;
@@ -194,9 +196,7 @@ export class CustomUsers extends Resource<{ realm?: string }> {
   >({
     method: "GET",
     path: "/users-info/realm-name-by-user-id",
-    queryParamKeys: [
-      "userId",
-    ],
+    queryParamKeys: ["userId"],
   });
 
   // name fixed
@@ -265,13 +265,37 @@ export class CustomUsers extends Resource<{ realm?: string }> {
     payloadKey: "roles",
   });
 
-  public findUserRealm = this.makeRequest<
-    { id: string },
-    RealmRepresentation
-  >({
+  public findUserRealm = this.makeRequest<{ id: string }, RealmRepresentation>({
     method: "GET",
     path: "/users-toms/realm/{id}",
     urlParamKeys: ["id"],
+  });
+
+  public findUserRealmGroups = this.makeRequest<
+    GroupQuery & { id: string },
+    GroupRepresentation[]
+  >({
+    method: "GET",
+    path: "/users-toms/realm/{id}/groups",
+    urlParamKeys: ["id"],
+    queryParamKeys: [
+      "search",
+      "q",
+      "exact",
+      "briefRepresentation",
+      "first",
+      "max",
+    ],
+  });
+
+  public findOneUserRealmGroup = this.makeRequest<
+    { id: string, groupId: string },
+    GroupRepresentation | undefined
+  >({
+    method: "GET",
+    path: "/users-toms/realm/{id}/groups/{groupId}",
+    urlParamKeys: ["id", "groupId"],
+    catchNotFound: true,
   });
 
   constructor(client: KeycloakAdminClient) {

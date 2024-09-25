@@ -7,18 +7,18 @@ import type { RoleMappingPayload } from "../defs/roleRepresentation.js";
 import type UserRepresentation from "../defs/userRepresentation.js";
 import Resource from "./resource.js";
 
-interface Query {
+export interface Query {
   q?: string;
   search?: string;
   exact?: boolean;
 }
 
-interface PaginatedQuery {
+export interface PaginatedQuery {
   first?: number;
   max?: number;
 }
 
-interface SummarizedQuery {
+export interface SummarizedQuery {
   briefRepresentation?: boolean;
 }
 

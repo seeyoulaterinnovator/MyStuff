@@ -155,7 +155,7 @@ export default function EditUser() {
   const save = async (data: UserFormFields) => {
     const representation = toUserRepresentation(data);
 
-    if(representation.attributes) {
+    if(isCustomTheme && representation.attributes) {
       let phone = representation.attributes[UserAttribute.PHONE];
       if(phone !== undefined) {
         if(Array.isArray(phone)) {
@@ -264,10 +264,19 @@ export default function EditUser() {
     continueButtonLabel: "impersonate",
     onConfirm: async () => {
       try {
-        const data = await adminClient.customUsers.impersonation(
-          { id: user!.id! },
-          { user: user!.id!, realm: realmName },
-        );
+        let data;
+        if(isCustomTheme) {
+          data = await adminClient.customUsers.impersonation(
+            { id: user!.id! },
+            { user: user!.id!, realm: realmName },
+          );
+        } else {
+          data = await adminClient.users.impersonation(
+            { id: user!.id! },
+            { user: user!.id!, realm: realmName },
+          );
+        }
+
         if (data.sameRealm) {
           window.location = data.redirect;
         } else {

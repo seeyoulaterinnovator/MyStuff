@@ -29,6 +29,7 @@ import org.keycloak.models.cache.UserCache;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.ModelToRepresentation;
+import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.services.ErrorResponse;
@@ -39,6 +40,7 @@ import org.keycloak.services.resources.admin.*;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.utils.ProfileHelper;
 import ru.alamics.sso.jpa.model.CustomUserAdapter;
+import ru.alamics.sso.keycloak.GeneralRealm;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundException;
@@ -64,6 +66,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.keycloak.models.ImpersonationSessionNote.IMPERSONATOR_ID;
 import static org.keycloak.models.ImpersonationSessionNote.IMPERSONATOR_USERNAME;
@@ -391,7 +394,15 @@ public class CustomUserResource {
         clearUserCache(session);
         ProfileHelper.requireFeature(Profile.Feature.IMPERSONATION);
 
-        UserModel user = session.users().getUserById(realm, id);
+        CustomUserAdapter user;
+        UserModel userModel = session.getProvider(UserProvider.class).getUserById(realm, id);
+        if(userModel instanceof CustomUserAdapter) {
+            user = (CustomUserAdapter) userModel;
+        } else {
+            throw new InternalServerErrorException();
+        }
+        RealmModel realm = user.getRealm();
+
         auth.users().requireImpersonate(user);
         // if same realm logout before impersonation
         RealmModel authenticatedRealm = auth.adminAuth().getRealm();
@@ -402,9 +413,9 @@ public class CustomUserResource {
             UserSessionModel userSession = session.sessions().getUserSession(realm, auth.adminAuth().getToken().getSessionState());
             AuthenticationManager.expireIdentityCookie(session);
             AuthenticationManager.expireRememberMeCookie(session);
-            AuthenticationManager.backchannelLogout(session, realm, userSession, session.getContext().getUri(), clientConnection, session.getContext().getRequestHeaders(), true);
+            AuthenticationManager.backchannelLogout(session, auth.adminAuth().getRealm(), userSession, session.getContext().getUri(), clientConnection, session.getContext().getRequestHeaders(), true);
         }
-        EventBuilder event = new EventBuilder(realm, session, clientConnection);
+        EventBuilder event = new EventBuilder(auth.adminAuth().getRealm(), session, clientConnection);
 
         UserSessionModel userSession = session.sessions().createUserSession(realm, user, user.getUsername(), clientConnection.getRemoteAddr(), "impersonate", false, null, null);
 
@@ -531,6 +542,44 @@ public class CustomUserResource {
         return rep;
     }
 
+    @Path("realm/{id}/groups")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Stream<GroupRepresentation> getUserRealmGroups(
+            @PathParam("id") String id,
+            @QueryParam("search") String search,
+            @QueryParam("q") String searchQuery,
+            @QueryParam("exact") @DefaultValue("false") Boolean exact,
+            @QueryParam("first") Integer firstResult,
+            @QueryParam("max") Integer maxResults,
+            @QueryParam("briefRepresentation") @DefaultValue("true") boolean briefRepresentation,
+            @QueryParam("populateHierarchy") @DefaultValue("true") boolean populateHierarchy
+    ) {
+        CustomUserAdapter user = checkUser(id);
+
+        AdminEventBuilder adminEvent = new AdminEventBuilder(user.getRealm(), auth.adminAuth(), session, session.getContext().getConnection())
+                .realm(user.getRealm())
+                .resource(ResourceType.REALM);
+
+        return new GroupsResource(user.getRealm(), session, auth, adminEvent)
+                .getGroups(search, searchQuery, exact, firstResult, maxResults, briefRepresentation, populateHierarchy);
+    }
+
+    @Path("realm/{id}/groups/{groupId}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public GroupResource getUserRealmGroupById(@PathParam("id") String id, @PathParam("id") String groupId) {
+        CustomUserAdapter user = checkUser(id);
+
+        AdminEventBuilder adminEvent = new AdminEventBuilder(user.getRealm(), auth.adminAuth(), session, session.getContext().getConnection())
+                .realm(user.getRealm())
+                .resource(ResourceType.REALM);
+
+        return new GroupsResource(user.getRealm(), session, auth, adminEvent).getGroupById(groupId);
+    }
+
     private void sendLogin(List<String> ids, final String requiredAction) {
         KeycloakContext context = session.getContext();
         AdminEventBuilder eventBuilder = new AdminEventBuilder(context.getRealm(), auth.adminAuth(), session, context.getConnection());
@@ -560,6 +609,11 @@ public class CustomUserResource {
     }
 
     private CustomUserAdapter checkUser(String userId) {
+        if(!auth.adminAuth().getRealm().getName().equals(Config.getAdminRealm())
+                && !auth.adminAuth().getRealm().getName().equals(GeneralRealm.MANAGER)) {
+            throw new ForbiddenException();
+        }
+
         UserModel user = session.getProvider(UserProvider.class).getUserById(session.getContext().getRealm(), userId);
 
         if (user == null) throw new NotFoundException("User not found");

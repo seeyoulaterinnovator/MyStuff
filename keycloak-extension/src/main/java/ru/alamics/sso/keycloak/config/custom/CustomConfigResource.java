@@ -8,6 +8,7 @@ import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.reactive.NoCache;
 import org.keycloak.models.KeycloakSession;
+import ru.alamics.sso.keycloak.GeneralRealm;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.property.ApplicationProperties;
@@ -41,6 +42,7 @@ public class CustomConfigResource {
     public Response getAdminPublicConfig() {
         return JsonResponse.success()
                 .addResult("adminTheme", session.getContext().getRealm().getAdminTheme())
+                .addResult("manageRealmName", GeneralRealm.MANAGER)
                 .build();
     }
 }

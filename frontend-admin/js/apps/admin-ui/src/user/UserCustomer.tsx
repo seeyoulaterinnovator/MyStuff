@@ -205,13 +205,17 @@ export const UserCustomer = () => {
         displayKey: "tomsId",
         cellRenderer: (post) =>
           post.id !== null ? (
-            <ClipboardCopy
-              hoverTip="Copy"
-              clickTip="Copied"
-              variant="inline-compact"
-            >
-              {post.tomsId}
-            </ClipboardCopy>
+            post.tomsId ? (
+              <ClipboardCopy
+                hoverTip="Copy"
+                clickTip="Copied"
+                variant="inline-compact"
+              >
+                {post.tomsId}
+              </ClipboardCopy>
+            ) : (
+              ""
+            )
           ) : (
             <TextInput
               aria-label={t("tomsId")}
@@ -227,13 +231,17 @@ export const UserCustomer = () => {
         displayKey: "dmpId",
         cellRenderer: (post) =>
           post.id !== null ? (
-            <ClipboardCopy
-              hoverTip="Copy"
-              clickTip="Copied"
-              variant="inline-compact"
-            >
-              {post.dmpId}
-            </ClipboardCopy>
+            post.dmpId ? (
+              <ClipboardCopy
+                hoverTip="Copy"
+                clickTip="Copied"
+                variant="inline-compact"
+              >
+                {post.dmpId}
+              </ClipboardCopy>
+            ) : (
+              ""
+            )
           ) : (
             <TextInput
               aria-label={t("dmpId")}
