@@ -23,6 +23,7 @@ import { AdminTheme } from "./customLogic/constants/theme";
 import { useRealms } from "./context/RealmsContext";
 
 import "./page-nav.css";
+import {useCustomConfig} from "./customLogic/context/CustomConfigContext";
 
 type LeftNavProps = { title: string; path: string; id?: string };
 
@@ -71,6 +72,7 @@ export const PageNav = () => {
   const navigate = useNavigate();
   const { realmRepresentation } = useRealm();
   const { realms } = useRealms();
+  const { isCustomTheme } = useCustomConfig();
 
   type SelectedItem = {
     groupId: number | string;
@@ -130,7 +132,6 @@ export const PageNav = () => {
               <LeftNav title="groups" path="/groups" />
               <LeftNav title="sessions" path="/sessions" />
               <LeftNav title="events" path="/events" />
-              <LeftNav title="customSettings" path="/custom-settings" />
             </NavGroup>
           )}
 
@@ -149,6 +150,9 @@ export const PageNav = () => {
                     id="/page-section"
                   />
                 ))}
+              {isCustomTheme && (
+                <LeftNav title="customSettings" path="/custom-settings" />
+              )}
             </NavGroup>
           )}
         </Nav>

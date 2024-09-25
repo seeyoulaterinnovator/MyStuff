@@ -45,7 +45,8 @@ import { useFetch } from "../../utils/useFetch";
 import { KeycloakSpinner } from "../keycloak-spinner/KeycloakSpinner";
 import { ListEmptyState } from "../list-empty-state/ListEmptyState";
 import { PaginatingTableToolbar } from "./PaginatingTableToolbar";
-import { SyncAltIcon } from "@patternfly/react-icons";
+import { SyncAltIcon, ArrowDownIcon } from "@patternfly/react-icons";
+import type { SortingOptions } from "../../customLogic/types/sorting";
 
 type TitleCell = { title: JSX.Element };
 type Cell<T> = keyof T | JSX.Element | TitleCell;
@@ -77,6 +78,8 @@ type DataTableProps<T> = {
   canSelectAll: boolean;
   isNotCompact?: boolean;
   isRadio?: boolean;
+  sortingOptions?: SortingOptions;
+  onSort?: (sortingOptions: SortingOptions) => void;
 };
 
 type CellRendererProps = {
@@ -110,12 +113,16 @@ function DataTable<T>({
   canSelectAll,
   isNotCompact,
   isRadio,
+  onSort,
+  sortingOptions,
   ...props
 }: DataTableProps<T>) {
   const { t } = useTranslation();
 
   const [selectedRows, setSelectedRows] = useState<boolean[]>([]);
   const [expandedRows, setExpandedRows] = useState<boolean[]>([]);
+  const [currentSortingOptions, setCurrentSortingOptions] =
+    useState(sortingOptions);
 
   const updateState = (rowIndex: number, isSelected: boolean) => {
     const items = [
@@ -124,6 +131,10 @@ function DataTable<T>({
     items[rowIndex] = isSelected;
     setSelectedRows(items);
   };
+
+  useEffect(() => {
+    setCurrentSortingOptions(sortingOptions);
+  }, [sortingOptions]);
 
   useEffect(() => {
     if (canSelectAll) {
@@ -136,6 +147,28 @@ function DataTable<T>({
       }
     }
   }, [selectedRows]);
+
+  const handleSort = (column: Field<T>) => {
+    if (!column.isSortable) {
+      return;
+    }
+
+    setCurrentSortingOptions((prev) => {
+      const newSortOptions: SortingOptions = {
+        orderBy: column.name,
+        order:
+          prev?.orderBy === column.name
+            ? prev.order === "asc"
+              ? "desc"
+              : "asc"
+            : "asc",
+      };
+
+      onSort?.(newSortOptions);
+
+      return newSortOptions;
+    });
+  };
 
   return (
     <Table
@@ -163,15 +196,33 @@ function DataTable<T>({
               }
             />
           )}
-          {columns.map((column) => (
-            <Th
-              key={column.displayKey}
-              aria-label={t(ariaLabelKey)}
-              className={column.transforms?.[0]().className}
-            >
-              {t(column.displayKey || column.name)}
-            </Th>
-          ))}
+          {columns.map((column) => {
+            const isSoringApplied =
+              column.isSortable &&
+              currentSortingOptions?.orderBy === column.name;
+            const arrowAngel = currentSortingOptions?.order === "asc" ? 0 : 180;
+
+            return (
+              <Th
+                key={column.displayKey}
+                aria-label={t(ariaLabelKey)}
+                className={column.transforms?.[0]().className}
+                style={{
+                  cursor: column.isSortable ? "pointer" : "unset",
+                }}
+                onClick={() => handleSort(column)}
+              >
+                {t(column.displayKey || column.name)}{" "}
+                {isSoringApplied && (
+                  <ArrowDownIcon
+                    style={{
+                      transform: `rotate(${arrowAngel}deg)`,
+                    }}
+                  />
+                )}
+              </Th>
+            );
+          })}
         </Tr>
       </Thead>
       {!onCollapse ? (
@@ -287,6 +338,7 @@ export type Field<T> = {
   cellFormatters?: IFormatter[];
   transforms?: ITransform[];
   cellProps?: TdProps | ((value: T, col: DetailField<T> | Field<T>) => TdProps);
+  isSortable?: boolean;
   cellRenderer?: (row: T) => JSX.Element | string;
 };
 
@@ -305,6 +357,7 @@ export type LoaderFunction<T> = (
   first?: number,
   max?: number,
   search?: string,
+  sortingOptions?: SortingOptions,
 ) => Promise<T[]>;
 
 export type NestedFiltersFunction = (
@@ -341,6 +394,8 @@ export type DataListProps<T> = Omit<
   withoutRefreshButton?: boolean;
   onPaginationChange?: NestedFiltersFunction;
   isLoading?: boolean;
+  sortingOptions?: SortingOptions;
+  onSort?: (sortingOptions: SortingOptions) => void;
 };
 
 /**
@@ -391,6 +446,8 @@ export function KeycloakDataTable<T>({
   withoutRefreshButton = false,
   onPaginationChange,
   isLoading = false,
+  sortingOptions,
+  onSort,
   ...props
 }: DataListProps<T>) {
   const { t } = useTranslation();
@@ -398,6 +455,8 @@ export function KeycloakDataTable<T>({
   const [rows, setRows] = useState<(Row<T> | SubRow<T>)[]>();
   const [unPaginatedData, setUnPaginatedData] = useState<T[]>();
   const [loading, setLoading] = useState(false);
+  const [currentSortingOptions, setCurrentSortingOptions] =
+    useState(sortingOptions);
 
   const [defaultPageSize, setDefaultPageSize] = useStoredState(
     localStorage,
@@ -529,7 +588,12 @@ export function KeycloakDataTable<T>({
       return typeof loader === "function"
         ? key === prevKey.current && unPaginatedData
           ? unPaginatedData
-          : await loader(newSearch ? 0 : first, max + 1, search)
+          : await loader(
+              newSearch ? 0 : first,
+              max + 1,
+              search,
+              currentSortingOptions,
+            )
         : loader;
     },
     (data) => {
@@ -552,6 +616,8 @@ export function KeycloakDataTable<T>({
       first,
       max,
       search,
+      currentSortingOptions?.order,
+      currentSortingOptions?.orderBy,
       typeof loader !== "function" ? loader : undefined,
     ],
   );
@@ -561,7 +627,11 @@ export function KeycloakDataTable<T>({
   }, [onPaginationChange, first, max, search]);
 
   useEffect(() => {
-    setLoading(isLoading)
+    setCurrentSortingOptions(sortingOptions);
+  }, [sortingOptions]);
+
+  useEffect(() => {
+    setLoading(isLoading);
   }, [isLoading]);
 
   const convertAction = () =>
@@ -619,6 +689,11 @@ export function KeycloakDataTable<T>({
     setRows([...data!]);
   };
 
+  const handleSort = (newSortOptions: SortingOptions) => {
+    setCurrentSortingOptions(newSortOptions);
+    onSort?.(newSortOptions);
+  }
+
   const data = filteredData || rows;
   const noData = !data || data.length === 0;
   const searching = search !== "" || isSearching;
@@ -651,6 +726,8 @@ export function KeycloakDataTable<T>({
               isNotCompact={isNotCompact}
               isRadio={isRadio}
               ariaLabelKey={ariaLabelKey}
+              sortingOptions={currentSortingOptions}
+              onSort={handleSort}
             />
           </>
         )}

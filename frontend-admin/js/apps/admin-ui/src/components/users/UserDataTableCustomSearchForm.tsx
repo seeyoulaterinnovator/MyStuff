@@ -11,8 +11,7 @@ import { useTranslation } from "react-i18next";
 import { Form } from "react-router-dom";
 import { RealmSimpleSelector } from "../custom/realm-simple-selector/RealmSimpleSelector";
 import { useAccess } from "../../context/access/Access";
-import { useRealm } from "../../context/realm-context/RealmContext";
-import { AdminTheme } from "../../customLogic/constants/theme";
+import {useCustomConfig} from "../../customLogic/context/CustomConfigContext";
 
 const defaultCustomSearchForm: CustomUserQuery = {};
 
@@ -26,10 +25,9 @@ export function UserDataTableCustomSearchForm({
   customFilters,
 }: UserDataTableCustomSearchFormProps) {
   const { t } = useTranslation();
-  const { realmRepresentation: realm } = useRealm();
   const { hasAccess } = useAccess();
   const withHideUserSearchAccess = hasAccess("hide-user-search");
-  const isCustomTheme = realm?.adminTheme === AdminTheme.KEYCLOAK_V2;
+  const { isCustomTheme } = useCustomConfig();
 
   const { register, reset, handleSubmit, watch, setValue, getValues } =
     useForm<CustomUserQuery>({

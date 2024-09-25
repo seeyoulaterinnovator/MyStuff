@@ -10,6 +10,7 @@ import { useAdminClient } from "../../admin-client";
 import { DEFAULT_LOCALE, i18n } from "../../i18n/i18n";
 import { useFetch } from "../../utils/useFetch";
 import { useRealm } from "../realm-context/RealmContext";
+import {RealmName} from "@keycloak/keycloak-admin-client/lib/defs/custom/realmTypes";
 
 export class WhoAmI {
   #me?: WhoAmIRepresentation;
@@ -62,6 +63,7 @@ type WhoAmIProps = {
   refresh: () => void;
   whoAmI: WhoAmI;
   isMeInMaster: boolean;
+  isMeInManager: boolean;
 };
 
 export const WhoAmIContext = createNamedContext<WhoAmIProps | undefined>(
@@ -92,10 +94,16 @@ export const WhoAmIContextProvider = ({ children }: PropsWithChildren) => {
     [key, realm],
   );
 
-  const isMeInMaster = whoAmI.getRealm() === "master";
+  const isMeInMaster = whoAmI.getRealm() === RealmName.MASTER;
+  const isMeInManager = whoAmI.getRealm() === RealmName.MANAGER;
 
   return (
-    <WhoAmIContext.Provider value={{ refresh: () => setKey(key + 1), whoAmI, isMeInMaster }}>
+    <WhoAmIContext.Provider value={{
+      refresh: () => setKey(key + 1),
+      whoAmI,
+      isMeInMaster,
+      isMeInManager
+    }}>
       {children}
     </WhoAmIContext.Provider>
   );

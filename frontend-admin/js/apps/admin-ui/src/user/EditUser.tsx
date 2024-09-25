@@ -59,6 +59,8 @@ import { isLightweightUser } from "./utils";
 import "./user-section.css";
 import {UserCustomer} from "./UserCustomer";
 import {UserAttribute} from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
+import {useCustomConfig} from "../customLogic/context/CustomConfigContext";
+import {useWhoAmI} from "../context/whoami/WhoAmI";
 
 export default function EditUser() {
   const { adminClient } = useAdminClient();
@@ -68,7 +70,8 @@ export default function EditUser() {
   const navigate = useNavigate();
   const { hasAccess } = useAccess();
   const { id } = useParams<UserParams>();
-  const { realm: realmName, realmRepresentation: realm } = useRealm();
+  const { realm: realmName, realmRepresentation: realm, searchRealm } = useRealm();
+  const { isMeInManager } = useWhoAmI();
   // Validation of form fields is performed on server, thus we need to clear all errors before submit
   const clearAllErrorsBeforeSubmit = async (values: UserFormFields) => ({
     values,
@@ -107,6 +110,8 @@ export default function EditUser() {
   const identityProviderLinksTab = useTab("identity-provider-links");
   const sessionsTab = useTab("sessions");
   const customerTab = useTab("customer");
+
+  const { isCustomTheme } = useCustomConfig();
 
   useFetch(
     async () =>
@@ -152,7 +157,7 @@ export default function EditUser() {
   const save = async (data: UserFormFields) => {
     const representation = toUserRepresentation(data);
 
-    if(representation.attributes) {
+    if(isCustomTheme && representation.attributes) {
       let phone = representation.attributes[UserAttribute.PHONE];
       if(phone !== undefined) {
         if(Array.isArray(phone)) {
@@ -261,10 +266,19 @@ export default function EditUser() {
     continueButtonLabel: "impersonate",
     onConfirm: async () => {
       try {
-        const data = await adminClient.customUsers.impersonation(
-          { id: user!.id! },
-          { user: user!.id!, realm: realmName },
-        );
+        let data;
+        if(isCustomTheme && isMeInManager) {
+          data = await adminClient.customUsers.impersonation(
+            { id: user!.id!, realm: searchRealm },
+            { user: user!.id!, realm: searchRealm },
+          );
+        } else {
+          data = await adminClient.users.impersonation(
+            { id: user!.id!, realm: searchRealm },
+            { user: user!.id!, realm: searchRealm },
+          );
+        }
+
         if (data.sameRealm) {
           window.location = data.redirect;
         } else {
@@ -412,13 +426,15 @@ export default function EditUser() {
               >
                 <UserSessions />
               </Tab>
-              <Tab
-                data-testid="user-customer"
-                title={<TabTitleText>{t("titleCustomer")}</TabTitleText>}
-                {...customerTab}
-              >
-                <UserCustomer />
-              </Tab>
+              {isCustomTheme && (
+                <Tab
+                  data-testid="user-customer"
+                  title={<TabTitleText>{t("titleCustomer")}</TabTitleText>}
+                  {...customerTab}
+                >
+                  <UserCustomer />
+                </Tab>
+              )}
             </RoutableTabs>
           </FormProvider>
         </UserProfileProvider>

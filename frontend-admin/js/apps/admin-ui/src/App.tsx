@@ -27,6 +27,7 @@ import { WhoAmIContextProvider } from "./context/whoami/WhoAmI";
 import type { Environment } from "./environment";
 import { SubGroups } from "./groups/SubGroupsContext";
 import { AuthWall } from "./root/AuthWall";
+import { CustomConfigContextProvider } from "./customLogic/context/CustomConfigContext";
 
 const AppContexts = ({ children }: PropsWithChildren) => (
   <ErrorBoundaryProvider>
@@ -37,7 +38,9 @@ const AppContexts = ({ children }: PropsWithChildren) => (
             <RecentRealmsProvider>
               <AccessContextProvider>
                 <AlertProvider>
-                  <SubGroups>{children}</SubGroups>
+                  <CustomConfigContextProvider>
+                    <SubGroups>{children}</SubGroups>
+                  </CustomConfigContextProvider>
                 </AlertProvider>
               </AccessContextProvider>
             </RecentRealmsProvider>

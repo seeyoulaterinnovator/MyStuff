@@ -8,8 +8,7 @@ import { SelectControl } from "@keycloak/keycloak-ui-shared";
 import { useAdminClient } from "../../admin-client";
 import { FormAccess } from "../../components/form/FormAccess";
 import { useFetch } from "../../utils/useFetch";
-import { AdminTheme } from "../../../src/customLogic/constants/theme";
-import { useRealm } from "../../context/realm-context/RealmContext";
+import {useCustomConfig} from "../../customLogic/context/CustomConfigContext";
 
 type AuthenticationOverridesProps = {
   save: () => void;
@@ -26,8 +25,7 @@ export const AuthenticationOverrides = ({
 }: AuthenticationOverridesProps) => {
   const { adminClient } = useAdminClient();
   const openIdConnect = "openid-connect";
-  const { realmRepresentation: realm } = useRealm();
-  const isCustomTheme = realm?.adminTheme === AdminTheme.KEYCLOAK_V2;
+  const { isCustomTheme } = useCustomConfig();
 
   const { t } = useTranslation();
   const [flows, setFlows] = useState<AuthenticationFlowRepresentation[]>([]);

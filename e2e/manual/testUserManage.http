@@ -1,0 +1,73 @@
+### Auth token set
+POST http://localhost:8080/auth/realms/master/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id = {{client_id}} &
+grant_type = password &
+username = {{username}} &
+password = {{password}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.global.set("access_token", response.body.access_token);
+%}
+
+### Find test user
+GET http://localhost:8080/auth/realms/e2e/users-info/search?searchRealm=e2e&first=0&max=11
+Authorization: Bearer {{access_token}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.global.set("testerId", response.body.results['users-info'][0].id);
+%}
+
+### Test block user
+POST http://localhost:8080/auth/realms/{{realm}}/manage/block
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+[
+  "{{testerId}}"
+]
+
+> {%
+    client.test("Request executed successfully empty", function () {
+        client.assert(response.status === 204, "Response status is not 204");
+    });
+%}
+
+### Test unlock user
+POST http://localhost:8080/auth/realms/{{realm}}/manage/unlock
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+[
+  "{{testerId}}"
+]
+
+> {%
+    client.test("Request executed successfully empty", function () {
+        client.assert(response.status === 204, "Response status is not 204");
+    });
+%}
+
+### Test credential reset
+POST http://localhost:8080/auth/realms/{{realm}}/manage/credential/reset
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+[
+  "{{testerId}}"
+]
+
+> {%
+    client.test("Request executed successfully empty", function () {
+        client.assert(response.status === 204, "Response status is not 204");
+    });
+%}

@@ -1,5 +1,5 @@
 import { PropsWithChildren, useEffect, useMemo, useState } from "react";
-import {useMatch, useNavigate} from "react-router-dom";
+import { useMatch, useNavigate } from "react-router-dom";
 import {
   createNamedContext,
   useEnvironment,
@@ -9,13 +9,15 @@ import { useAdminClient } from "../../admin-client";
 import { DashboardRouteWithRealm } from "../../dashboard/routes/Dashboard";
 import RealmRepresentation from "@keycloak/keycloak-admin-client/lib/defs/realmRepresentation";
 import { useFetch } from "../../utils/useFetch";
-import {UserParams, UserRoute} from "../../user/routes/User";
-import {useParams} from "../../utils/useParams";
+import { UserParams, UserRoute } from "../../user/routes/User";
+import { useParams } from "../../utils/useParams";
 
 type RealmContextType = {
   realm: string;
   searchRealm: string;
+  searchRealmUserId?: string;
   realmRepresentation?: RealmRepresentation;
+  searchRealmRepresentation?: RealmRepresentation;
   refresh: () => void;
 };
 
@@ -34,6 +36,8 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
   const isOnUserPage = !!useMatch(UserRoute.path);
   const { id: userId } = useParams<UserParams>();
   const [searchRealm, setSearchRealm] = useState<string | null>(null);
+  const [searchRealmRepresentation, setSearchRealmRepresentation] =
+    useState<RealmRepresentation>();
   const navigate = useNavigate();
 
   const routeMatch = useMatch({
@@ -57,7 +61,7 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
 
   useFetch(
     () => {
-      if (isOnUserPage && userId && realm === "manager") {
+      if (isOnUserPage && userId) {
         return adminClient.customUsers.findRealmNameByUserId({
           userId,
         });
@@ -75,8 +79,7 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
     [isOnUserPage, userId, realm],
   );
   useEffect(() => {
-    if (isOnUserPage) {
-    } else {
+    if (!isOnUserPage) {
       setSearchRealm(null);
     }
   }, [isOnUserPage]);
@@ -89,8 +92,27 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
     }
   }, [realm]);
 
+  useFetch(
+    async () => {
+      if (userId && searchRealm && realm !== searchRealm) {
+        return adminClient.customUsers.findUserRealm({ id: userId, realm: searchRealm });
+      } else {
+        return Promise.resolve(undefined);
+      }
+    },
+    setSearchRealmRepresentation,
+    [realm, searchRealm, userId]
+  );
+
   return (
-    <RealmContext.Provider value={{ realm, searchRealm: searchRealm || realm, realmRepresentation, refresh }}>
+    <RealmContext.Provider value={{
+      realm,
+      searchRealm: searchRealm || realm,
+      realmRepresentation,
+      searchRealmRepresentation: searchRealm && searchRealm !== realm ? searchRealmRepresentation : realmRepresentation,
+      searchRealmUserId: isOnUserPage && searchRealm && searchRealm !== realm ? userId : undefined,
+      refresh
+    }}>
       {children}
     </RealmContext.Provider>
   );
