@@ -274,8 +274,8 @@ export default function EditUser() {
           );
         } else {
           data = await adminClient.users.impersonation(
-            { id: user!.id! },
-            { user: user!.id!, realm: realmName },
+            { id: user!.id!, realm: searchRealm },
+            { user: user!.id!, realm: searchRealm },
           );
         }
 

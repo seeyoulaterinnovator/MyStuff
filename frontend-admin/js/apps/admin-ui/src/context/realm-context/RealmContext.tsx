@@ -1,5 +1,5 @@
 import { PropsWithChildren, useEffect, useMemo, useState } from "react";
-import {useMatch, useNavigate} from "react-router-dom";
+import { useMatch, useNavigate } from "react-router-dom";
 import {
   createNamedContext,
   useEnvironment,
@@ -9,9 +9,8 @@ import { useAdminClient } from "../../admin-client";
 import { DashboardRouteWithRealm } from "../../dashboard/routes/Dashboard";
 import RealmRepresentation from "@keycloak/keycloak-admin-client/lib/defs/realmRepresentation";
 import { useFetch } from "../../utils/useFetch";
-import {UserParams, UserRoute} from "../../user/routes/User";
-import {useParams} from "../../utils/useParams";
-import {RealmName} from "@keycloak/keycloak-admin-client/lib/defs/custom/realmTypes";
+import { UserParams, UserRoute } from "../../user/routes/User";
+import { useParams } from "../../utils/useParams";
 
 type RealmContextType = {
   realm: string;
@@ -62,7 +61,7 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
 
   useFetch(
     () => {
-      if (isOnUserPage && userId && realm === RealmName.MANAGER) {
+      if (isOnUserPage && userId) {
         return adminClient.customUsers.findRealmNameByUserId({
           userId,
         });
