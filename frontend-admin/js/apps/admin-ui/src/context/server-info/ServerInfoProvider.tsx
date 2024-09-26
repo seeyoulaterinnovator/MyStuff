@@ -10,6 +10,7 @@ import { sortProviders } from "../../util";
 import { useFetch } from "../../utils/useFetch";
 import { NetworkError } from "@keycloak/keycloak-admin-client/lib";
 import { useErrorBoundary } from "../ErrorBoundary";
+import { useTranslation } from "react-i18next";
 
 export const ServerInfoContext = createNamedContext<
   ServerInfoRepresentation | undefined
@@ -24,6 +25,7 @@ export const ServerInfoProvider = ({ children }: PropsWithChildren) => {
   const { adminClient } = useAdminClient();
   const [serverInfo, setServerInfo] = useState<ServerInfoRepresentation>();
   const { showBoundary } = useErrorBoundary();
+  const { t } = useTranslation();
 
   useFetch(
     async () => {
@@ -34,9 +36,7 @@ export const ServerInfoProvider = ({ children }: PropsWithChildren) => {
           switch (error.response.status) {
             case 403:
               showBoundary(
-                new Error(
-                  "Forbidden.\r\nYou don't have access to the requested resource.",
-                ),
+                new Error(`${t("forbidden")}. ${t("noAccessResource")}.`),
                 "context",
               );
               break;
