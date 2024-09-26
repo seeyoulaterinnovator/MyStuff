@@ -22,7 +22,8 @@ import useIsFeatureEnabled, { Feature } from "./utils/useIsFeatureEnabled";
 import { useRealms } from "./context/RealmsContext";
 
 import "./page-nav.css";
-import {useCustomConfig} from "./customLogic/context/CustomConfigContext";
+import { useCustomConfig } from "./customLogic/context/CustomConfigContext";
+import { useWhoAmI } from "./context/whoami/WhoAmI";
 
 type LeftNavProps = { title: string; path: string; id?: string };
 
@@ -71,6 +72,7 @@ export const PageNav = () => {
   const navigate = useNavigate();
   const { realmRepresentation } = useRealm();
   const { realms } = useRealms();
+  const { isMeInManager } = useWhoAmI();
   const { isCustomTheme } = useCustomConfig();
 
   type SelectedItem = {
@@ -117,22 +119,28 @@ export const PageNav = () => {
           <Divider />
           {!isCustomRootPage && showManage && !isOnAddRealm && (
             <NavGroup aria-label={t("manage")} title={t("manage")}>
-              {isFeatureEnabled(Feature.Organizations) &&
-                realmRepresentation?.organizationsEnabled && (
-                  <LeftNav title="organizations" path="/organizations" />
-                )}
-              <LeftNav title="clients" path="/clients" />
-              <LeftNav title="clientScopes" path="/client-scopes" />
-              <LeftNav title="realmRoles" path="/roles" />
-              <LeftNav title="users" path="/users" />
-              <LeftNav title="importUsers" path="/import-users" />
-              <LeftNav title="groups" path="/groups" />
-              <LeftNav title="sessions" path="/sessions" />
-              <LeftNav title="events" path="/events" />
+              {(isCustomTheme && isMeInManager) ? (
+                <LeftNav title="users" path="/users" />
+              ) : (
+                <>
+                  {isFeatureEnabled(Feature.Organizations) &&
+                    realmRepresentation?.organizationsEnabled && (
+                      <LeftNav title="organizations" path="/organizations" />
+                    )}
+                  <LeftNav title="clients" path="/clients" />
+                  <LeftNav title="clientScopes" path="/client-scopes" />
+                  <LeftNav title="realmRoles" path="/roles" />
+                  <LeftNav title="users" path="/users" />
+                  <LeftNav title="importUsers" path="/import-users" />
+                  <LeftNav title="groups" path="/groups" />
+                  <LeftNav title="sessions" path="/sessions" />
+                  <LeftNav title="events" path="/events" />
+                </>
+              )}
             </NavGroup>
           )}
 
-          {!isCustomRootPage && showConfigure && !isOnAddRealm && (
+          {!isCustomRootPage && showConfigure && !isOnAddRealm && !(isCustomTheme && isMeInManager) && (
             <NavGroup aria-label={t("configure")} title={t("configure")}>
               <LeftNav title="realmSettings" path="/realm-settings" />
               <LeftNav title="authentication" path="/authentication" />
