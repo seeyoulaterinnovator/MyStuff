@@ -68,8 +68,8 @@ public class CustomJpaUserProvider extends JpaUserProvider {
 
     private void removeUser(UserEntity user) {
         String id = user.getId();
-        em.createNativeQuery(AutoLockNotification.DELETE_BY_USER_SQL).setParameter("user", user).executeUpdate();
-        em.createNativeQuery(UserLoginHistory.DELETE_BY_USER_SQL).setParameter("user", user).executeUpdate();
+        em.createNativeQuery(AutoLockNotification.DELETE_BY_USER_SQL).setParameter("user", user.getId()).executeUpdate();
+        em.createNativeQuery(UserLoginHistory.DELETE_BY_USER_SQL).setParameter("user", user.getId()).executeUpdate();
         em.createNamedQuery("deleteUserRoleMappingsByUser").setParameter("user", user).executeUpdate();
         em.createNamedQuery("deleteUserGroupMembershipsByUser").setParameter("user", user).executeUpdate();
         em.createNamedQuery("deleteFederatedIdentityByUser").setParameter("user", user).executeUpdate();
@@ -81,7 +81,7 @@ public class CustomJpaUserProvider extends JpaUserProvider {
 
         removePostSystem(user);
 
-        em.createNativeQuery(UserPostEntity.DELETE_BY_USER_SQL).setParameter("user", user).executeUpdate();
+        em.createNativeQuery(UserPostEntity.DELETE_BY_USER_SQL).setParameter("user", user.getId()).executeUpdate();
 
         em.flush();
         // not sure why i have to do a clear() here.  I was getting some messed up errors that Hibernate couldn't

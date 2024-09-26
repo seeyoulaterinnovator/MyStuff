@@ -107,7 +107,7 @@ export const UserPostSystemRoleMultiSelect = (
                     setIsChanging(false);
                   }
                 }}
-                isReadOnly={isChanging}
+                isReadOnly={isChanging || isReadonly}
               >
                 {system}
               </Chip>
@@ -143,7 +143,7 @@ export const UserPostSystemRoleMultiSelect = (
           <FlexItem>
             <Button
               type="button"
-              disabled={!system || isChanging}
+              isDisabled={!system || isChanging}
               isLoading={isChanging}
               onClick={async () => {
                 if (!system || systemId == null) return;

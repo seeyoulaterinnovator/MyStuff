@@ -28,26 +28,34 @@ import type { Environment } from "./environment";
 import { SubGroups } from "./groups/SubGroupsContext";
 import { AuthWall } from "./root/AuthWall";
 import { CustomConfigContextProvider } from "./customLogic/context/CustomConfigContext";
+import { CustomAuthWall } from "./root/CustomAuthWall";
 
 const AppContexts = ({ children }: PropsWithChildren) => (
   <ErrorBoundaryProvider>
-    <ServerInfoProvider>
-      <RealmContextProvider>
-        <WhoAmIContextProvider>
-          <RealmsProvider>
-            <RecentRealmsProvider>
-              <AccessContextProvider>
-                <AlertProvider>
-                  <CustomConfigContextProvider>
-                    <SubGroups>{children}</SubGroups>
-                  </CustomConfigContextProvider>
-                </AlertProvider>
-              </AccessContextProvider>
-            </RecentRealmsProvider>
-          </RealmsProvider>
-        </WhoAmIContextProvider>
-      </RealmContextProvider>
-    </ServerInfoProvider>
+    <ErrorBoundaryFallback
+      domain="context"
+      fallback={(fallbackProps) => (
+        <ErrorRenderer {...fallbackProps} withSignOut />
+      )}
+    >
+      <ServerInfoProvider>
+        <RealmContextProvider>
+          <WhoAmIContextProvider>
+            <RealmsProvider>
+              <RecentRealmsProvider>
+                <AccessContextProvider>
+                  <AlertProvider>
+                    <CustomConfigContextProvider>
+                      <SubGroups>{children}</SubGroups>
+                    </CustomConfigContextProvider>
+                  </AlertProvider>
+                </AccessContextProvider>
+              </RecentRealmsProvider>
+            </RealmsProvider>
+          </WhoAmIContextProvider>
+        </RealmContextProvider>
+      </ServerInfoProvider>
+    </ErrorBoundaryFallback>
   </ErrorBoundaryProvider>
 );
 
@@ -77,7 +85,9 @@ export const App = () => {
           <ErrorBoundaryFallback fallback={ErrorRenderer}>
             <Suspense fallback={<KeycloakSpinner />}>
               <AuthWall>
-                <Outlet />
+                <CustomAuthWall>
+                  <Outlet />
+                </CustomAuthWall>
               </AuthWall>
             </Suspense>
           </ErrorBoundaryFallback>

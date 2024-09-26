@@ -11,6 +11,9 @@ import {
   UnmanagedAttributePolicy,
   UserProfileConfig,
 } from "@keycloak/keycloak-admin-client/lib/defs/userProfileMetadata";
+import { useAccess } from "../context/access/Access";
+import { useWhoAmI } from "../context/whoami/WhoAmI";
+import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
 
 type UserAttributesProps = {
   user: UserRepresentation;
@@ -24,6 +27,13 @@ export const UserAttributes = ({
   upConfig,
 }: UserAttributesProps) => {
   const form = useFormContext<UserFormFields>();
+  const { isCustomTheme } = useCustomConfig();
+  const { isMeInMaster } = useWhoAmI();
+  const { getAccesses } = useAccess();
+  const { withManageUsersAccess, withEditAttributesAccess } = getAccesses([
+    "manage-users",
+    "edit-attributes",
+  ]);
 
   return (
     <PageSection variant={PageSectionVariants.light}>
@@ -41,6 +51,10 @@ export const UserAttributes = ({
         isDisabled={
           UnmanagedAttributePolicy.AdminView ==
           upConfig?.unmanagedAttributePolicy
+        }
+        isReadonly={
+          isCustomTheme &&
+          !(withManageUsersAccess && (isMeInMaster || withEditAttributesAccess))
         }
       />
     </PageSection>

@@ -79,6 +79,7 @@ type RoleMappingProps = {
   type: ResourcesKey;
   isManager?: boolean;
   save: (rows: Row[]) => Promise<void>;
+  isReadonly?: boolean;
 };
 
 export const RoleMapping = ({
@@ -87,6 +88,7 @@ export const RoleMapping = ({
   type,
   isManager = true,
   save,
+  isReadonly,
 }: RoleMappingProps) => {
   const { adminClient } = useAdminClient();
   const { realm, searchRealm } = useRealm();
@@ -211,8 +213,8 @@ export const RoleMapping = ({
         data-testid="assigned-roles"
         key={`${id}${key}`}
         loader={loader}
-        canSelectAll
-        onSelect={(rows) => setSelected(rows)}
+        canSelectAll={!isReadonly}
+        onSelect={isReadonly ? undefined : (rows) => setSelected(rows)}
         searchPlaceholderKey="searchByName"
         ariaLabelKey="clientScopeList"
         isRowDisabled={(value) =>
@@ -232,7 +234,7 @@ export const RoleMapping = ({
                 }}
               />
             </ToolbarItem>
-            {isManager && (
+            {isManager && !isReadonly && (
               <>
                 <ToolbarItem>
                   <Button
@@ -257,7 +259,7 @@ export const RoleMapping = ({
           </>
         }
         actions={
-          isManager
+          isManager && !isReadonly
             ? [
                 {
                   title: t("unAssignRole"),
@@ -268,7 +270,7 @@ export const RoleMapping = ({
                   },
                 } as Action<Awaited<ReturnType<typeof loader>>[0]>,
               ]
-            : []
+            : undefined
         }
         columns={[
           {
@@ -292,8 +294,8 @@ export const RoleMapping = ({
           <ListEmptyState
             message={t(`noRoles-${type}`)}
             instructions={t(`noRolesInstructions-${type}`)}
-            primaryActionText={t("assignRole")}
-            onPrimaryAction={() => setShowAssign(true)}
+            primaryActionText={isReadonly ? undefined : t("assignRole")}
+            onPrimaryAction={isReadonly ? undefined : () => setShowAssign(true)}
             secondaryActions={[
               {
                 text: t("showInheritedRoles"),

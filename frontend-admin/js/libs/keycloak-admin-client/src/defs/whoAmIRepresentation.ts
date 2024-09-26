@@ -46,7 +46,8 @@ export type CustomAccessType =
   | "custom-view-identity-providers"
   | "custom-view-authorization"
   | "manage-bss"
-  | "impersonation";
+  | "impersonation"
+  | "required-actions";
 
 export type AccessType =
   | "view-realm"

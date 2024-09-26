@@ -249,6 +249,7 @@ const MapperLink = ({ name, mapperId, provider }: MapperLinkProps) => {
 
 export default function DetailSettings() {
   const { adminClient } = useAdminClient();
+  const { searchRealm } = useRealm();
 
   const { t } = useTranslation();
   const { alias, providerId } = useParams<IdentityProviderParams>();
@@ -283,7 +284,7 @@ export default function DetailSettings() {
   const refresh = () => setKey(key + 1);
 
   useFetch(
-    () => adminClient.identityProviders.findOne({ alias }),
+    () => adminClient.identityProviders.findOne({ alias, searchRealm }),
     (fetchedProvider) => {
       if (!fetchedProvider) {
         throw new Error(t("notFound"));

@@ -43,11 +43,20 @@ export const UserIdentityProviderLinks = ({
 
   const { realm, realmRepresentation, searchRealm, searchRealmRepresentation } =
     useRealm();
-  const { isMeInMaster } = useWhoAmI();
+  const { isMeInMaster, isMeInManager } = useWhoAmI();
   const { addAlert, addError } = useAlerts();
   const { t } = useTranslation();
   const { hasAccess, hasSomeAccess } = useAccess();
   const { isCustomTheme } = useCustomConfig();
+  const { getAccesses } = useAccess();
+  const { withManageUsersAccess, withEditFederatedIdentityAccess } =
+    getAccesses(["manage-users", "edit-federated-identity"]);
+  const isReadOnly =
+    isCustomTheme &&
+    !(
+      withManageUsersAccess &&
+      (isMeInMaster || withEditFederatedIdentityAccess)
+    );
 
   const canQueryIDPDetails = hasSomeAccess(
     "manage-identity-providers",
@@ -124,13 +133,13 @@ export const UserIdentityProviderLinks = ({
   });
 
   const idpLinkRenderer = (idp: WithProviderId) => {
-    if (!canQueryIDPDetails)
+    if (!canQueryIDPDetails || isReadOnly || isMeInManager)
       return <span>{capitalize(idp.identityProvider)}</span>;
 
     return (
       <Link
         to={toIdentityProvider({
-          realm: searchRealm,
+          realm: isMeInMaster ? searchRealm : realm,
           providerId: idp.providerId,
           alias: idp.identityProvider!,
           tab: "settings",
@@ -177,6 +186,7 @@ export const UserIdentityProviderLinks = ({
           setFederatedId(fedIdentity.identityProvider!);
           toggleUnlinkDialog();
         }}
+        isDisabled={isReadOnly}
       >
         {t("unlinkAccount")}
       </Button>
@@ -191,6 +201,7 @@ export const UserIdentityProviderLinks = ({
           setFederatedId(idp.alias!);
           setIsLinkIdPModalOpen(true);
         }}
+        isDisabled={isReadOnly}
       >
         {t("linkAccount")}
       </Button>

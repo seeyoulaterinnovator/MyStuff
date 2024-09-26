@@ -8,6 +8,7 @@ import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Provider;
 import lombok.Builder;
 import lombok.NonNull;
+import lombok.Singular;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
@@ -51,7 +52,8 @@ public class ManagerUsersAdminRequestInterceptor implements ContainerRequestFilt
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         for(Rule rule : RULES) {
-            if(rule.pathPattern.matcher(requestContext.getUriInfo().getPath()).matches()) {
+            if(rule.pathPatterns.stream()
+                    .anyMatch(pattern -> pattern.matcher(requestContext.getUriInfo().getPath()).matches())) {
                 filter(requestContext, rule);
                 return;
             }
@@ -88,7 +90,8 @@ public class ManagerUsersAdminRequestInterceptor implements ContainerRequestFilt
 
     @Builder
     private static class Rule {
-        final Pattern pathPattern;
+        @Singular
+        List<Pattern> pathPatterns;
 
         final boolean disableStrictAuth;
 

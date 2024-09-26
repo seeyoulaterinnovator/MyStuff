@@ -23,11 +23,22 @@ import useFormatDate from "../utils/useFormatDate";
 import { useParams } from "../utils/useParams";
 import { useRealm } from "../context/realm-context/RealmContext";
 import { useWhoAmI } from "../context/whoami/WhoAmI";
+import { useAccess } from "../context/access/Access";
+import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
 
 export const UserConsents = () => {
   const { adminClient } = useAdminClient();
   const { realm, searchRealm } = useRealm();
+  const { isCustomTheme } = useCustomConfig();
   const { isMeInMaster } = useWhoAmI();
+  const { getAccesses } = useAccess();
+  const { withManageUsersAccess, withEditConsentsAccess } = getAccesses([
+    "manage-users",
+    "edit-consents",
+  ]);
+  const isReadOnly =
+    isCustomTheme &&
+    !(withManageUsersAccess && (isMeInMaster || withEditConsentsAccess));
 
   const [selectedClient, setSelectedClient] =
     useState<UserConsentRepresentation>();
@@ -127,15 +138,19 @@ export const UserConsents = () => {
               lastUpdatedDate ? formatDate(new Date(lastUpdatedDate)) : "—",
           },
         ]}
-        actions={[
-          {
-            title: t("revoke"),
-            onRowClick: (client) => {
-              setSelectedClient(client);
-              toggleDeleteDialog();
-            },
-          } as Action<UserConsentRepresentation>,
-        ]}
+        actions={
+          isReadOnly
+            ? undefined
+            : [
+                {
+                  title: t("revoke"),
+                  onRowClick: (client) => {
+                    setSelectedClient(client);
+                    toggleDeleteDialog();
+                  },
+                } as Action<UserConsentRepresentation>,
+              ]
+        }
         emptyState={
           <ListEmptyState
             hasIcon={true}

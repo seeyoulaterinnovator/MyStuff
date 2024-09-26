@@ -18,6 +18,8 @@ type RealmsContextProps = {
   accessibleRealms: RealmNameRepresentation[];
   /** Refreshes the realms with the latest information. */
   refresh: () => Promise<void>;
+  searchRealm?: string;
+  setSearchRealm: (value?: string) => void;
 };
 
 export interface RealmNameRepresentation {
@@ -41,6 +43,7 @@ export const RealmsProvider = ({ children }: PropsWithChildren) => {
   const [refreshCount, setRefreshCount] = useState(0);
   const localeSort = useLocaleSort();
   const { t } = useTranslation();
+  const [searchRealm, setSearchRealm] = useState<string>();
 
   function updateRealms(realms: RealmNameRepresentation[]) {
     setRealms(localeSort(realms, (r) => label(t, r.displayName, r.name)));
@@ -88,8 +91,8 @@ export const RealmsProvider = ({ children }: PropsWithChildren) => {
   }, []);
 
   const value = useMemo<RealmsContextProps>(
-    () => ({ realms, refresh, accessibleRealms }),
-    [realms, refresh, accessibleRealms],
+    () => ({ realms, refresh, accessibleRealms, searchRealm, setSearchRealm }),
+    [realms, refresh, accessibleRealms, searchRealm, setSearchRealm],
   );
 
   return (

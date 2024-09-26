@@ -23,6 +23,7 @@ import { KeycloakDataTable } from "../components/table-toolbar/KeycloakDataTable
 import { useAccess } from "../context/access/Access";
 import { useRealm } from "../context/realm-context/RealmContext";
 import { useWhoAmI } from "../context/whoami/WhoAmI";
+import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
 
 type UserGroupsProps = {
   user: UserRepresentation;
@@ -31,7 +32,16 @@ type UserGroupsProps = {
 export const UserGroups = ({ user }: UserGroupsProps) => {
   const { adminClient } = useAdminClient();
   const { realm, searchRealm } = useRealm();
+  const { isCustomTheme } = useCustomConfig();
   const { isMeInMaster } = useWhoAmI();
+  const { getAccesses } = useAccess();
+  const { withManageUsersAccess, withEditGroupsAccess } = getAccesses([
+    "manage-users",
+    "edit-groups",
+  ]);
+  const isReadOnly =
+    isCustomTheme &&
+    !(withManageUsersAccess && (isMeInMaster || withEditGroupsAccess));
 
   const { t } = useTranslation();
   const { addAlert, addError } = useAlerts();
@@ -181,13 +191,16 @@ export const UserGroups = ({ user }: UserGroupsProps) => {
         isPaginated
         ariaLabelKey="roleList"
         searchPlaceholderKey="searchGroup"
-        canSelectAll
-        onSelect={(groups) =>
-          isDirectMembership
-            ? setSelectedGroups(groups)
-            : setSelectedGroups(
-                intersectionBy(groups, directMembershipList, "id"),
-              )
+        canSelectAll={!isReadOnly}
+        onSelect={
+          isReadOnly
+            ? undefined
+            : (groups) =>
+                isDirectMembership
+                  ? setSelectedGroups(groups)
+                  : setSelectedGroups(
+                      intersectionBy(groups, directMembershipList, "id"),
+                    )
         }
         isRowDisabled={(group) =>
           !isDirectMembership &&
@@ -195,14 +208,16 @@ export const UserGroups = ({ user }: UserGroupsProps) => {
         }
         toolbarItem={
           <>
-            <Button
-              className="kc-join-group-button"
-              onClick={toggleModal}
-              data-testid="add-group-button"
-              isDisabled={!user.access?.manageGroupMembership}
-            >
-              {t("joinGroup")}
-            </Button>
+            {!isReadOnly && (
+              <Button
+                className="kc-join-group-button"
+                onClick={toggleModal}
+                data-testid="add-group-button"
+                isDisabled={!user.access?.manageGroupMembership}
+              >
+                {t("joinGroup")}
+              </Button>
+            )}
             <Checkbox
               label={t("directMembership")}
               key="direct-membership-check"
@@ -214,14 +229,16 @@ export const UserGroups = ({ user }: UserGroupsProps) => {
               isChecked={isDirectMembership}
               className="direct-membership-check"
             />
-            <Button
-              onClick={() => leave(selectedGroups)}
-              data-testid="leave-group-button"
-              variant="link"
-              isDisabled={selectedGroups.length === 0}
-            >
-              {t("leave")}
-            </Button>
+            {!isReadOnly && (
+              <Button
+                onClick={() => leave(selectedGroups)}
+                data-testid="leave-group-button"
+                variant="link"
+                isDisabled={selectedGroups.length === 0}
+              >
+                {t("leave")}
+              </Button>
+            )}
 
             {enabled && (
               <Popover
@@ -269,7 +286,7 @@ export const UserGroups = ({ user }: UserGroupsProps) => {
                   data-testid={`leave-${group.name}`}
                   onClick={() => leave([group])}
                   variant="link"
-                  isDisabled={!user.access?.manageGroupMembership}
+                  isDisabled={!user.access?.manageGroupMembership || isReadOnly}
                 >
                   {t("leave")}
                 </Button>
@@ -285,8 +302,8 @@ export const UserGroups = ({ user }: UserGroupsProps) => {
             hasIcon
             message={t("noGroups")}
             instructions={t("noGroupsText")}
-            primaryActionText={t("joinGroup")}
-            onPrimaryAction={toggleModal}
+            primaryActionText={isReadOnly ? undefined : t("joinGroup")}
+            onPrimaryAction={isReadOnly ? undefined : toggleModal}
           />
         }
       />

@@ -47,6 +47,8 @@ export type SessionsTableProps = {
   filter?: ReactNode;
   isSearching?: boolean;
   isPaginated?: boolean;
+  isReadonly?: boolean;
+  isClientLinkDisabled?: boolean;
 };
 
 const UsernameCell = (row: UserSessionRepresentation) => {
@@ -73,15 +75,22 @@ const UsernameCell = (row: UserSessionRepresentation) => {
   );
 };
 
-const ClientsCell = (row: UserSessionRepresentation) => {
+const ClientsCell = (
+  row: UserSessionRepresentation,
+  isLinkDisabled?: boolean,
+) => {
   const { realm } = useRealm();
   return (
     <List variant={ListVariant.inline}>
       {Object.entries(row.clients!).map(([clientId, client]) => (
         <ListItem key={clientId}>
-          <Link to={toClient({ realm, clientId, tab: "sessions" })}>
-            {client}
-          </Link>
+          {isLinkDisabled ? (
+            client
+          ) : (
+            <Link to={toClient({ realm, clientId, tab: "sessions" })}>
+              {client}
+            </Link>
+          )}
         </ListItem>
       ))}
     </List>
@@ -96,6 +105,8 @@ export default function SessionsTable({
   filter,
   isSearching,
   isPaginated,
+  isReadonly,
+  isClientLinkDisabled,
 }: SessionsTableProps) {
   const { keycloak } = useEnvironment();
   const { adminClient } = useAdminClient();
@@ -138,14 +149,14 @@ export default function SessionsTable({
       {
         name: "clients",
         displayKey: "clients",
-        cellRenderer: ClientsCell,
+        cellRenderer: (row) => ClientsCell(row, isClientLinkDisabled),
       },
     ];
 
     return defaultColumns.filter(
       ({ name }) => !hiddenColumns.includes(name as ColumnName),
     );
-  }, [realm, hiddenColumns]);
+  }, [realm, hiddenColumns, isClientLinkDisabled]);
 
   const [toggleLogoutDialog, LogoutConfirm] = useConfirmDialog({
     titleKey: "logoutAllSessions",
@@ -210,7 +221,8 @@ export default function SessionsTable({
         isSearching={isSearching}
         searchTypeComponent={filter}
         toolbarItem={
-          logoutUser && (
+          logoutUser &&
+          !isReadonly && (
             <ToolbarItem>
               <Button onClick={toggleLogoutDialog}>
                 {t("logoutAllSessions")}
@@ -219,25 +231,29 @@ export default function SessionsTable({
           )
         }
         columns={columns}
-        actionResolver={(rowData: IRowData) => {
-          if (
-            rowData.data.type === "Offline" ||
-            rowData.data.type === "OFFLINE"
-          ) {
-            return [
-              {
-                title: t("revoke"),
-                onClick: () => onClickRevoke(rowData),
-              } as Action<UserSessionRepresentation>,
-            ];
-          }
-          return [
-            {
-              title: t("signOut"),
-              onClick: () => onClickSignOut(rowData),
-            } as Action<UserSessionRepresentation>,
-          ];
-        }}
+        actionResolver={
+          isReadonly
+            ? undefined
+            : (rowData: IRowData) => {
+                if (
+                  rowData.data.type === "Offline" ||
+                  rowData.data.type === "OFFLINE"
+                ) {
+                  return [
+                    {
+                      title: t("revoke"),
+                      onClick: () => onClickRevoke(rowData),
+                    } as Action<UserSessionRepresentation>,
+                  ];
+                }
+                return [
+                  {
+                    title: t("signOut"),
+                    onClick: () => onClickSignOut(rowData),
+                  } as Action<UserSessionRepresentation>,
+                ];
+              }
+        }
         emptyState={
           <ListEmptyState
             hasIcon

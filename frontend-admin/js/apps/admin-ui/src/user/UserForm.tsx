@@ -70,6 +70,21 @@ export const UserForm = ({
   onGroupsUpdate,
 }: UserFormProps) => {
   const { adminClient } = useAdminClient();
+  const { isCustomTheme } = useCustomConfig();
+  const { isMeInMaster } = useWhoAmI();
+  const { getAccesses } = useAccess();
+  const {
+    withManageUsersAccess,
+    withEditDetailsAccess,
+    withRequiredActionsAccess,
+  } = getAccesses(["manage-users", "edit-details", "required-actions"]);
+  const isReadOnly =
+    isCustomTheme &&
+    !(withManageUsersAccess && (isMeInMaster || withEditDetailsAccess));
+  const isRequiredActionsEnabled =
+    isCustomTheme &&
+    withManageUsersAccess &&
+    (isMeInMaster || withRequiredActionsAccess);
 
   const { t } = useTranslation();
   const formatDate = useFormatDate();
@@ -89,8 +104,6 @@ export const UserForm = ({
   );
   const [open, setOpen] = useState(false);
   const [locked, setLocked] = useState(isLocked);
-
-  const { isCustomTheme } = useCustomConfig();
 
   useEffect(() => {
     setValue("requiredActions", user?.requiredActions || []);
@@ -142,6 +155,7 @@ export const UserForm = ({
       role="query-users"
       fineGrainedAccess={user?.access?.manage}
       className="pf-v5-u-mt-lg"
+      isReadOnly={isReadOnly}
     >
       <FormProvider {...form}>
         {open && (
@@ -187,7 +201,8 @@ export const UserForm = ({
           name="requiredActions"
           label="requiredUserActions"
           help="requiredUserActionsHelp"
-          disabled={isCustomTheme && !user?.id}
+          isDisabled={isCustomTheme && !user?.id}
+          isReadOnly={!isRequiredActionsEnabled}
         />
         {(user?.federationLink || user?.origin) && canViewFederationLink && (
           <FormGroup
@@ -219,6 +234,7 @@ export const UserForm = ({
                 ((key: unknown, params) =>
                   t(key as string, params as any)) as TFunction
               }
+              isReadOnly={isReadOnly}
             />
           </>
         ) : (

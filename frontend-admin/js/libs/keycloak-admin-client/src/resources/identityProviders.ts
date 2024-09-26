@@ -38,12 +38,13 @@ export class IdentityProviders extends Resource<{ realm?: string }> {
   });
 
   public findOne = this.makeRequest<
-    { alias: string },
+    { alias: string; searchRealm?: string },
     IdentityProviderRepresentation | undefined
   >({
     method: "GET",
     path: "/instances/{alias}",
     urlParamKeys: ["alias"],
+    queryParamKeys: ["searchRealm"],
     catchNotFound: true,
   });
 

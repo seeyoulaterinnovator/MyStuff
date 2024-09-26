@@ -75,7 +75,6 @@ export default function EditUser() {
     realmRepresentation: realm,
     searchRealm,
   } = useRealm();
-  const { isMeInManager } = useWhoAmI();
   // Validation of form fields is performed on server, thus we need to clear all errors before submit
   const clearAllErrorsBeforeSubmit = async (values: UserFormFields) => ({
     values,
@@ -116,6 +115,20 @@ export default function EditUser() {
   const customerTab = useTab("customer");
 
   const { isCustomTheme } = useCustomConfig();
+  const { isMeInMaster } = useWhoAmI();
+  const { getAccesses } = useAccess();
+  const {
+    withManageUsersAccess,
+    withEditDetailsAccess,
+    withEditCredentialsAccess,
+  } = getAccesses(["manage-users", "edit-details", "edit-credentials"]);
+  const isCredentialsTabEnabled =
+    isCustomTheme &&
+    withManageUsersAccess &&
+    (isMeInMaster || withEditCredentialsAccess);
+  const isReadOnly =
+    isCustomTheme &&
+    !(withManageUsersAccess && (isMeInMaster || withEditDetailsAccess));
 
   useFetch(
     async () =>
@@ -268,7 +281,7 @@ export default function EditUser() {
     onConfirm: async () => {
       try {
         let data;
-        if (isCustomTheme && isMeInManager) {
+        if (isCustomTheme) {
           data = await adminClient.customUsers.impersonation(
             { id: user!.id!, realm: searchRealm },
             { user: user!.id!, realm: searchRealm },
@@ -331,17 +344,20 @@ export default function EditUser() {
           </DropdownItem>,
           <DropdownItem
             key="delete"
-            isDisabled={!user.access?.manage}
+            isDisabled={!user.access?.manage || isReadOnly}
             onClick={() => toggleDeleteDialog()}
           >
             {t("delete")}
           </DropdownItem>,
         ]}
-        onToggle={(value) =>
-          save({
-            ...toUserFormFields(user),
-            enabled: value,
-          })
+        onToggle={
+          isReadOnly
+            ? undefined
+            : (value) =>
+                save({
+                  ...toUserFormFields(user),
+                  enabled: value,
+                })
         }
         isEnabled={user.enabled}
       />
@@ -379,14 +395,16 @@ export default function EditUser() {
                   <UserAttributes user={user} save={save} upConfig={upConfig} />
                 </Tab>
               )}
-              <Tab
-                data-testid="credentials"
-                isHidden={!user.access?.view}
-                title={<TabTitleText>{t("credentials")}</TabTitleText>}
-                {...credentialsTab}
-              >
-                <UserCredentials user={user} setUser={setUser} />
-              </Tab>
+              {isCredentialsTabEnabled && (
+                <Tab
+                  data-testid="credentials"
+                  isHidden={!user.access?.view}
+                  title={<TabTitleText>{t("credentials")}</TabTitleText>}
+                  {...credentialsTab}
+                >
+                  <UserCredentials user={user} setUser={setUser} />
+                </Tab>
+              )}
               <Tab
                 data-testid="role-mapping-tab"
                 isHidden={!user.access?.view}

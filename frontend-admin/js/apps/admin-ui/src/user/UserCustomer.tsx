@@ -268,7 +268,6 @@ export const UserCustomer = () => {
               onChange={(role) => {
                 newRoleIdRef.current = role.id;
               }}
-              isReadonly={!canEdit}
             />
           ),
       },
