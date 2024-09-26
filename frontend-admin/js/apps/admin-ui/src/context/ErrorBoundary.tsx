@@ -10,9 +10,12 @@ import {
   useRequiredContext,
 } from "@keycloak/keycloak-ui-shared";
 
+type ErrorBoundaryDomain = "page" | "context";
+
 export interface ErrorBoundaryContextValue {
   error?: Error;
-  showBoundary: (error: Error) => void;
+  domain?: ErrorBoundaryDomain;
+  showBoundary: (error: Error, domain?: ErrorBoundaryDomain) => void;
 }
 
 const ErrorBoundaryContext = createNamedContext<
@@ -27,6 +30,7 @@ export interface ErrorBoundaryProviderProps {
 
 export interface ErrorBoundaryProviderState {
   error?: Error;
+  domain?: ErrorBoundaryDomain;
 }
 
 export class ErrorBoundaryProvider extends Component<
@@ -42,14 +46,18 @@ export class ErrorBoundaryProvider extends Component<
     return { error };
   };
 
-  showBoundary = (error: Error) => {
-    this.setState({ error });
+  showBoundary = (error: Error, domain?: ErrorBoundaryDomain) => {
+    this.setState({ error, domain });
   };
 
   render() {
     return (
       <ErrorBoundaryContext.Provider
-        value={{ error: this.state.error, showBoundary: this.showBoundary }}
+        value={{
+          error: this.state.error,
+          domain: this.state.domain,
+          showBoundary: this.showBoundary,
+        }}
       >
         {this.props.children}
       </ErrorBoundaryContext.Provider>
@@ -59,19 +67,27 @@ export class ErrorBoundaryProvider extends Component<
 
 export interface FallbackProps {
   error: Error;
+  withSignOut?: boolean;
 }
 
 export interface ErrorBoundaryFallbackProps {
   fallback: ComponentType<FallbackProps>;
   children: ReactNode;
+  domain?: ErrorBoundaryDomain;
 }
 
 export const ErrorBoundaryFallback: FunctionComponent<
   ErrorBoundaryFallbackProps
-> = ({ children, fallback: FallbackComponent }) => {
-  const { error } = useErrorBoundary();
+> = ({ children, fallback: FallbackComponent, domain }) => {
+  const { error, domain: errorDomain } = useErrorBoundary();
 
-  if (error) {
+  console.log(errorDomain, domain);
+
+  const isErrorBelongsDomain =
+    errorDomain === domain ||
+    ((!errorDomain || errorDomain === "page") && !domain);
+
+  if (error && isErrorBelongsDomain) {
     return <FallbackComponent error={error} />;
   }
 

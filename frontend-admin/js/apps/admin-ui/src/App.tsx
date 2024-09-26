@@ -31,23 +31,30 @@ import { CustomConfigContextProvider } from "./customLogic/context/CustomConfigC
 
 const AppContexts = ({ children }: PropsWithChildren) => (
   <ErrorBoundaryProvider>
-    <ServerInfoProvider>
-      <RealmContextProvider>
-        <WhoAmIContextProvider>
-          <RealmsProvider>
-            <RecentRealmsProvider>
-              <AccessContextProvider>
-                <AlertProvider>
-                  <CustomConfigContextProvider>
-                    <SubGroups>{children}</SubGroups>
-                  </CustomConfigContextProvider>
-                </AlertProvider>
-              </AccessContextProvider>
-            </RecentRealmsProvider>
-          </RealmsProvider>
-        </WhoAmIContextProvider>
-      </RealmContextProvider>
-    </ServerInfoProvider>
+    <ErrorBoundaryFallback
+      domain="context"
+      fallback={(fallbackProps) => (
+        <ErrorRenderer {...fallbackProps} withSignOut />
+      )}
+    >
+      <ServerInfoProvider>
+        <RealmContextProvider>
+          <WhoAmIContextProvider>
+            <RealmsProvider>
+              <RecentRealmsProvider>
+                <AccessContextProvider>
+                  <AlertProvider>
+                    <CustomConfigContextProvider>
+                      <SubGroups>{children}</SubGroups>
+                    </CustomConfigContextProvider>
+                  </AlertProvider>
+                </AccessContextProvider>
+              </RecentRealmsProvider>
+            </RealmsProvider>
+          </WhoAmIContextProvider>
+        </RealmContextProvider>
+      </ServerInfoProvider>
+    </ErrorBoundaryFallback>
   </ErrorBoundaryProvider>
 );
 
