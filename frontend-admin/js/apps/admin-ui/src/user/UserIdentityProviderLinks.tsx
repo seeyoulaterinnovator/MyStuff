@@ -42,7 +42,7 @@ export const UserIdentityProviderLinks = ({
   const [isLinkIdPModalOpen, setIsLinkIdPModalOpen] = useState(false);
 
   const { realm, realmRepresentation, searchRealm, searchRealmRepresentation } = useRealm();
-  const { isMeInMaster } = useWhoAmI();
+  const { isMeInMaster, isMeInManager } = useWhoAmI();
   const { addAlert, addError } = useAlerts();
   const { t } = useTranslation();
   const { hasAccess, hasSomeAccess } = useAccess();
@@ -126,7 +126,7 @@ export const UserIdentityProviderLinks = ({
   });
 
   const idpLinkRenderer = (idp: WithProviderId) => {
-    if (!canQueryIDPDetails || isReadOnly)
+    if (!canQueryIDPDetails || isReadOnly || isMeInManager)
       return <span>{capitalize(idp.identityProvider)}</span>;
 
     return (

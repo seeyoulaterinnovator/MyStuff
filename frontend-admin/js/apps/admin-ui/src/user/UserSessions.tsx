@@ -10,7 +10,7 @@ import { useAccess } from "../context/access/Access";
 
 export const UserSessions = () => {
   const { adminClient } = useAdminClient();
-  const { isMeInMaster } = useWhoAmI();
+  const { isMeInMaster, isMeInManager } = useWhoAmI();
   const { getAccesses } = useAccess();
   const { withManageUsersAccess, withEditSessionsAccess } = getAccesses(
     ["manage-users", "edit-sessions"],
@@ -32,6 +32,7 @@ export const UserSessions = () => {
         emptyInstructions={t("noSessionsForUser")}
         logoutUser={id}
         isReadonly={!(withManageUsersAccess && (isMeInMaster || withEditSessionsAccess))}
+        isClientLinkDisabled={isMeInManager}
       />
     </PageSection>
   );

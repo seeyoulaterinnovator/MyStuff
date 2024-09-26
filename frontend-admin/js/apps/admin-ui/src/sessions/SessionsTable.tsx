@@ -49,6 +49,7 @@ export type SessionsTableProps = {
   isSearching?: boolean;
   isPaginated?: boolean;
   isReadonly?: boolean;
+  isClientLinkDisabled?: boolean;
 };
 
 const UsernameCell = (row: UserSessionRepresentation) => {
@@ -75,15 +76,19 @@ const UsernameCell = (row: UserSessionRepresentation) => {
   );
 };
 
-const ClientsCell = (row: UserSessionRepresentation) => {
+const ClientsCell = (row: UserSessionRepresentation, isLinkDisabled?: boolean) => {
   const { realm } = useRealm();
   return (
     <List variant={ListVariant.inline}>
       {Object.entries(row.clients!).map(([clientId, client]) => (
         <ListItem key={clientId}>
-          <Link to={toClient({ realm, clientId, tab: "sessions" })}>
-            {client}
-          </Link>
+          {isLinkDisabled ? (
+            client
+          ) : (
+            <Link to={toClient({ realm, clientId, tab: "sessions" })}>
+              {client}
+            </Link>
+          )}
         </ListItem>
       ))}
     </List>
@@ -99,6 +104,7 @@ export default function SessionsTable({
   isSearching,
   isPaginated,
   isReadonly,
+  isClientLinkDisabled,
 }: SessionsTableProps) {
   const { keycloak } = useEnvironment();
   const { adminClient } = useAdminClient();
@@ -141,14 +147,14 @@ export default function SessionsTable({
       {
         name: "clients",
         displayKey: "clients",
-        cellRenderer: ClientsCell,
+        cellRenderer: (row) => ClientsCell(row, isClientLinkDisabled),
       },
     ];
 
     return defaultColumns.filter(
       ({ name }) => !hiddenColumns.includes(name as ColumnName),
     );
-  }, [realm, hiddenColumns]);
+  }, [realm, hiddenColumns, isClientLinkDisabled]);
 
   const [toggleLogoutDialog, LogoutConfirm] = useConfirmDialog({
     titleKey: "logoutAllSessions",
