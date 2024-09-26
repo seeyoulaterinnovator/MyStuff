@@ -103,7 +103,7 @@ export const UserPostAccountsMultiInput = (
           <FlexItem>
             <Button
               type="button"
-              disabled={!value?.trim() || isChanging}
+              isDisabled={!value?.trim() || isChanging}
               isLoading={isChanging}
               onClick={async () => {
                 if (!value) return;

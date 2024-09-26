@@ -18,6 +18,7 @@ export type AttributesFormProps = {
   fineGrainedAccess?: boolean;
   name?: string;
   isDisabled?: boolean;
+  isReadonly?: boolean;
 };
 
 export const AttributesForm = ({
@@ -27,9 +28,10 @@ export const AttributesForm = ({
   fineGrainedAccess,
   name = "attributes",
   isDisabled = false,
+  isReadonly = false,
 }: AttributesFormProps) => {
   const { t } = useTranslation();
-  const noSaveCancelButtons = !save && !reset;
+  const noSaveCancelButtons = !save && !reset || isReadonly;
   const {
     formState: { isDirty },
     handleSubmit,
@@ -40,6 +42,7 @@ export const AttributesForm = ({
       role="manage-realm"
       onSubmit={save ? handleSubmit(save) : undefined}
       fineGrainedAccess={fineGrainedAccess}
+      isReadOnly={isReadonly}
     >
       <FormProvider {...form}>
         <KeyValueInput name={name} isDisabled={isDisabled} />

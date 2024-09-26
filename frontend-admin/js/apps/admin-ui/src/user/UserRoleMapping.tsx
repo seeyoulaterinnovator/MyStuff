@@ -5,6 +5,8 @@ import { useAdminClient } from "../admin-client";
 import { useAlerts } from "../components/alert/Alerts";
 import { RoleMapping, Row } from "../components/role-mapping/RoleMapping";
 import { useRealm } from "../context/realm-context/RealmContext";
+import { useWhoAmI } from "../context/whoami/WhoAmI";
+import { useAccess } from "../context/access/Access";
 
 type UserRoleMappingProps = {
   id: string;
@@ -13,6 +15,11 @@ type UserRoleMappingProps = {
 
 export const UserRoleMapping = ({ id, name }: UserRoleMappingProps) => {
   const { adminClient } = useAdminClient();
+  const { isMeInMaster } = useWhoAmI();
+  const { getAccesses } = useAccess();
+  const { withManageUsersAccess, withEditRoleMappingsAccess } = getAccesses(
+    ["manage-users", "edit-role-mappings"],
+  );
   const { realm, searchRealm } = useRealm();
 
   const { t } = useTranslation();
@@ -62,5 +69,13 @@ export const UserRoleMapping = ({ id, name }: UserRoleMappingProps) => {
     }
   };
 
-  return <RoleMapping name={name} id={id} type="users" save={assignRoles} />;
+  return (
+    <RoleMapping
+      name={name}
+      id={id}
+      type="users"
+      save={assignRoles}
+      isReadonly={!(withManageUsersAccess && (isMeInMaster || withEditRoleMappingsAccess))}
+    />
+  );
 };

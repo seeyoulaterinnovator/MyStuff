@@ -48,6 +48,7 @@ export type SessionsTableProps = {
   filter?: ReactNode;
   isSearching?: boolean;
   isPaginated?: boolean;
+  isReadonly?: boolean;
 };
 
 const UsernameCell = (row: UserSessionRepresentation) => {
@@ -97,6 +98,7 @@ export default function SessionsTable({
   filter,
   isSearching,
   isPaginated,
+  isReadonly,
 }: SessionsTableProps) {
   const { keycloak } = useEnvironment();
   const { adminClient } = useAdminClient();
@@ -211,7 +213,7 @@ export default function SessionsTable({
         isSearching={isSearching}
         searchTypeComponent={filter}
         toolbarItem={
-          logoutUser && (
+          logoutUser && !isReadonly && (
             <ToolbarItem>
               <Button onClick={toggleLogoutDialog}>
                 {t("logoutAllSessions")}
@@ -220,7 +222,7 @@ export default function SessionsTable({
           )
         }
         columns={columns}
-        actionResolver={(rowData: IRowData) => {
+        actionResolver={isReadonly ? undefined : (rowData: IRowData) => {
           if (
             rowData.data.type === "Offline" ||
             rowData.data.type === "OFFLINE"

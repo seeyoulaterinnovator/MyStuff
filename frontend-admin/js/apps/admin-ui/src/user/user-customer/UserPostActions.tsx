@@ -45,7 +45,7 @@ export const UserPostActions = (props: UserPostActionsProps) => {
     <Button
       style={{ float: "right" }}
       type="button"
-      disabled={!canDelete || isChanging}
+      isDisabled={!canDelete || isChanging}
       isLoading={isChanging}
       onClick={async () => {
         setIsChanging(true);
@@ -75,7 +75,7 @@ export const UserPostActions = (props: UserPostActionsProps) => {
     <Button
       style={{ float: "right" }}
       type="button"
-      disabled={isChanging}
+      isDisabled={isChanging}
       isLoading={isChanging}
       onClick={async () => {
         setIsChanging(true);

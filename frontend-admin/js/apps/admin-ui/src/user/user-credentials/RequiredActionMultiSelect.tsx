@@ -13,7 +13,8 @@ export type RequiredActionMultiSelectProps<
   name: P;
   label: string;
   help: string;
-  disabled?: boolean;
+  isDisabled?: boolean;
+  isReadOnly?: boolean;
 };
 
 export const RequiredActionMultiSelect = <
@@ -23,7 +24,8 @@ export const RequiredActionMultiSelect = <
   name,
   label,
   help,
-  disabled,
+  isDisabled,
+  isReadOnly,
 }: RequiredActionMultiSelectProps<T, P>) => {
   const { adminClient } = useAdminClient();
 
@@ -43,10 +45,10 @@ export const RequiredActionMultiSelect = <
     [],
   );
 
-  if(disabled) {
+  if(isDisabled) {
     return (
       <TextControl
-        name={name}
+        name={`${name}-disabled`}
         label={t(label)}
         placeholder={t("requiredActionPlaceholder")}
         readOnly
@@ -73,6 +75,7 @@ export const RequiredActionMultiSelect = <
         key: alias!,
         value: name || alias!,
       }))}
+      isDisabled={isReadOnly}
     />
   );
 };

@@ -89,6 +89,7 @@ export type UserProfileFieldsProps = {
   renderer?: (
     attribute: UserProfileAttributeMetadata,
   ) => JSX.Element | undefined;
+  isReadOnly?: boolean;
 };
 
 type GroupWithAttributes = {
@@ -104,6 +105,7 @@ export const UserProfileFields = ({
   currentLocale,
   hideReadOnly = false,
   renderer,
+  isReadOnly = false,
 }: UserProfileFieldsProps) => {
   // Group attributes by group, for easier rendering.
   const groupsWithAttributes = useMemo(() => {
@@ -125,7 +127,10 @@ export const UserProfileFields = ({
       group,
       attributes: attributes.filter(
         (attribute) => attribute.group === group.name,
-      ),
+      ).map((attribute) => ({
+        ...attribute,
+        readOnly: isReadOnly || attribute.readOnly
+      })),
     }));
   }, [
     hideReadOnly,

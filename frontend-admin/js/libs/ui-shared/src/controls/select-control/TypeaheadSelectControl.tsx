@@ -47,6 +47,7 @@ export const TypeaheadSelectControl = <
   placeholderText,
   onFilter,
   variant,
+  isDisabled,
   ...rest
 }: SelectControlProps<T, P>) => {
   const {
@@ -181,7 +182,7 @@ export const TypeaheadSelectControl = <
                 isFullWidth
                 status={get(errors, name) ? MenuToggleStatus.danger : undefined}
               >
-                <TextInputGroup isPlain>
+                <TextInputGroup isPlain isDisabled={isDisabled}>
                   <TextInputGroupMain
                     placeholder={placeholderText}
                     value={
@@ -224,6 +225,7 @@ export const TypeaheadSelectControl = <
                                     ),
                                   );
                                 }}
+                                isReadOnly={isDisabled}
                               >
                                 {isSelectBasedOptions(options)
                                   ? options.find((o) => selection === o.key)
@@ -272,7 +274,7 @@ export const TypeaheadSelectControl = <
                 setOpen(false);
               }
             }}
-            isOpen={open}
+            isOpen={open && !isDisabled}
           >
             <SelectList>{convert}</SelectList>
           </Select>

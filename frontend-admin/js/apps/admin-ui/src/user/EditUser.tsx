@@ -113,6 +113,13 @@ export default function EditUser() {
 
   const { isCustomTheme } = useCustomConfig();
 
+  const { isMeInMaster } = useWhoAmI();
+  const { getAccesses } = useAccess();
+  const { withManageUsersAccess, withEditCredentialsAccess } = getAccesses(
+    ["manage-users", "edit-credentials"],
+  );
+  const isCredentialsTabEnabled = withManageUsersAccess && (isMeInMaster || withEditCredentialsAccess);
+
   useFetch(
     async () =>
       Promise.all([
@@ -267,7 +274,7 @@ export default function EditUser() {
     onConfirm: async () => {
       try {
         let data;
-        if(isCustomTheme && isMeInManager) {
+        if(isCustomTheme) {
           data = await adminClient.customUsers.impersonation(
             { id: user!.id!, realm: searchRealm },
             { user: user!.id!, realm: searchRealm },
@@ -378,14 +385,16 @@ export default function EditUser() {
                   <UserAttributes user={user} save={save} upConfig={upConfig} />
                 </Tab>
               )}
-              <Tab
-                data-testid="credentials"
-                isHidden={!user.access?.view}
-                title={<TabTitleText>{t("credentials")}</TabTitleText>}
-                {...credentialsTab}
-              >
-                <UserCredentials user={user} setUser={setUser} />
-              </Tab>
+              {isCredentialsTabEnabled && (
+                <Tab
+                  data-testid="credentials"
+                  isHidden={!user.access?.view}
+                  title={<TabTitleText>{t("credentials")}</TabTitleText>}
+                  {...credentialsTab}
+                >
+                  <UserCredentials user={user} setUser={setUser} />
+                </Tab>
+              )}
               <Tab
                 data-testid="role-mapping-tab"
                 isHidden={!user.access?.view}

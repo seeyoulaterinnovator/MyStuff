@@ -6,6 +6,7 @@ import jakarta.ws.rs.container.PreMatching;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.ext.Provider;
 import lombok.Builder;
+import lombok.Singular;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmProvider;
@@ -22,9 +23,8 @@ public class ManagerRealmsAdminRequestInterceptor implements ContainerRequestFil
 
     private static final List<Rule> RULES = List.of(
             Rule.builder()
-                    .pathPattern(Pattern.compile(
-                            "/admin/realms/" + GeneralRealm.MANAGER + "/sessions(|/.*)"
-                    ))
+                    .pathPattern(Pattern.compile("/admin/realms/" + GeneralRealm.MANAGER + "/sessions(|/.*)"))
+                    .pathPattern(Pattern.compile("/admin/realms/" + GeneralRealm.MANAGER + "/identity-provider/instances/.*"))
                     .disableStrictAuth(true)
                     .replaceContextRealm(true)
                     .build()
@@ -36,7 +36,8 @@ public class ManagerRealmsAdminRequestInterceptor implements ContainerRequestFil
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         for(Rule rule : RULES) {
-            if(rule.pathPattern.matcher(requestContext.getUriInfo().getPath()).matches()) {
+            if(rule.pathPatterns.stream()
+                    .anyMatch(pattern -> pattern.matcher(requestContext.getUriInfo().getPath()).matches())) {
                 filter(requestContext, rule);
                 return;
             }
@@ -72,7 +73,8 @@ public class ManagerRealmsAdminRequestInterceptor implements ContainerRequestFil
 
     @Builder
     private static class Rule {
-        final Pattern pathPattern;
+        @Singular
+        List<Pattern> pathPatterns;
 
         final boolean disableStrictAuth;
 
