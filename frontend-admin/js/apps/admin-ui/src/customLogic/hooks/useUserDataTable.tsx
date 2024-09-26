@@ -485,8 +485,8 @@ export const useUserDataTable = ({
       return await getUsers({
         first,
         max,
-        sortAsc: sortingOptions?.order === "asc",
-        sortField: sortingOptions?.orderBy,
+        sortAsc: newSortingOptions?.order === "asc",
+        sortField: newSortingOptions?.orderBy,
       });
     } catch (error) {
       if (userStorage?.length) {
