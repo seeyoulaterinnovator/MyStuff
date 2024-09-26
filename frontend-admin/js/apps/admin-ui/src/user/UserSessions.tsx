@@ -7,10 +7,12 @@ import { useParams } from "../utils/useParams";
 import type { UserParams } from "./routes/User";
 import { useWhoAmI } from "../context/whoami/WhoAmI";
 import { useAccess } from "../context/access/Access";
+import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
 
 export const UserSessions = () => {
   const { adminClient } = useAdminClient();
   const { isMeInMaster, isMeInManager } = useWhoAmI();
+  const { isCustomTheme } = useCustomConfig();
   const { getAccesses } = useAccess();
   const { withManageUsersAccess, withEditSessionsAccess } = getAccesses(
     ["manage-users", "edit-sessions"],
@@ -31,8 +33,8 @@ export const UserSessions = () => {
         hiddenColumns={["username", "type"]}
         emptyInstructions={t("noSessionsForUser")}
         logoutUser={id}
-        isReadonly={!(withManageUsersAccess && (isMeInMaster || withEditSessionsAccess))}
-        isClientLinkDisabled={isMeInManager}
+        isReadonly={isCustomTheme && !(withManageUsersAccess && (isMeInMaster || withEditSessionsAccess))}
+        isClientLinkDisabled={isCustomTheme && isMeInManager}
       />
     </PageSection>
   );

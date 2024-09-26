@@ -51,7 +51,7 @@ export const UserIdentityProviderLinks = ({
   const { withManageUsersAccess, withEditFederatedIdentityAccess } = getAccesses(
     ["manage-users", "edit-federated-identity"],
   );
-  const isReadOnly = !(withManageUsersAccess && (isMeInMaster || withEditFederatedIdentityAccess));
+  const isReadOnly = isCustomTheme && !(withManageUsersAccess && (isMeInMaster || withEditFederatedIdentityAccess));
 
   const canQueryIDPDetails = hasSomeAccess(
     "manage-identity-providers",

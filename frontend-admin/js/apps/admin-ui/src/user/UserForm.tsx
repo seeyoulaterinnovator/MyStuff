@@ -40,7 +40,7 @@ import { FederatedUserLink } from "./FederatedUserLink";
 import { UserFormFields, toUserFormFields } from "./form-state";
 import { toUsers } from "./routes/Users";
 import { RequiredActionMultiSelect } from "./user-credentials/RequiredActionMultiSelect";
-import {useCustomConfig} from "../customLogic/context/CustomConfigContext";
+import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
 
 export type BruteForced = {
   isBruteForceProtected?: boolean;
@@ -70,13 +70,21 @@ export const UserForm = ({
   onGroupsUpdate,
 }: UserFormProps) => {
   const { adminClient } = useAdminClient();
+  const { isCustomTheme } = useCustomConfig();
   const { isMeInMaster } = useWhoAmI();
   const { getAccesses } = useAccess();
-  const { withManageUsersAccess, withEditDetailsAccess, withRequiredActionsAccess } = getAccesses(
-    ["manage-users", "edit-details", "required-actions"],
-  );
-  const isReadOnly = !(withManageUsersAccess && (isMeInMaster || withEditDetailsAccess));
-  const isRequiredActionsEnabled = withManageUsersAccess && (isMeInMaster || withRequiredActionsAccess);
+  const {
+    withManageUsersAccess,
+    withEditDetailsAccess,
+    withRequiredActionsAccess,
+  } = getAccesses(["manage-users", "edit-details", "required-actions"]);
+  const isReadOnly =
+    isCustomTheme &&
+    !(withManageUsersAccess && (isMeInMaster || withEditDetailsAccess));
+  const isRequiredActionsEnabled =
+    isCustomTheme &&
+    withManageUsersAccess &&
+    (isMeInMaster || withRequiredActionsAccess);
 
   const { t } = useTranslation();
   const formatDate = useFormatDate();
@@ -96,8 +104,6 @@ export const UserForm = ({
   );
   const [open, setOpen] = useState(false);
   const [locked, setLocked] = useState(isLocked);
-
-  const { isCustomTheme } = useCustomConfig();
 
   useEffect(() => {
     setValue("requiredActions", user?.requiredActions || []);

@@ -24,16 +24,18 @@ import { useParams } from "../utils/useParams";
 import { useRealm } from "../context/realm-context/RealmContext";
 import { useWhoAmI } from "../context/whoami/WhoAmI";
 import { useAccess } from "../context/access/Access";
+import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
 
 export const UserConsents = () => {
   const { adminClient } = useAdminClient();
   const { realm, searchRealm } = useRealm();
+  const { isCustomTheme } = useCustomConfig();
   const { isMeInMaster } = useWhoAmI();
   const { getAccesses } = useAccess();
   const { withManageUsersAccess, withEditConsentsAccess } = getAccesses(
     ["manage-users", "edit-consents"],
   );
-  const isReadOnly = !(withManageUsersAccess && (isMeInMaster || withEditConsentsAccess));
+  const isReadOnly = isCustomTheme && !(withManageUsersAccess && (isMeInMaster || withEditConsentsAccess));
 
   const [selectedClient, setSelectedClient] =
     useState<UserConsentRepresentation>();

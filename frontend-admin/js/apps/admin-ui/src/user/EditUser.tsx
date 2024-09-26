@@ -57,10 +57,10 @@ import { toUsers } from "./routes/Users";
 import { isLightweightUser } from "./utils";
 
 import "./user-section.css";
-import {UserCustomer} from "./UserCustomer";
-import {UserAttribute} from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
-import {useCustomConfig} from "../customLogic/context/CustomConfigContext";
-import {useWhoAmI} from "../context/whoami/WhoAmI";
+import { UserCustomer } from "./UserCustomer";
+import { UserAttribute } from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
+import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
+import { useWhoAmI } from "../context/whoami/WhoAmI";
 
 export default function EditUser() {
   const { adminClient } = useAdminClient();
@@ -71,7 +71,6 @@ export default function EditUser() {
   const { hasAccess } = useAccess();
   const { id } = useParams<UserParams>();
   const { realm: realmName, realmRepresentation: realm, searchRealm } = useRealm();
-  const { isMeInManager } = useWhoAmI();
   // Validation of form fields is performed on server, thus we need to clear all errors before submit
   const clearAllErrorsBeforeSubmit = async (values: UserFormFields) => ({
     values,
@@ -112,14 +111,20 @@ export default function EditUser() {
   const customerTab = useTab("customer");
 
   const { isCustomTheme } = useCustomConfig();
-
   const { isMeInMaster } = useWhoAmI();
   const { getAccesses } = useAccess();
-  const { withManageUsersAccess, withEditDetailsAccess, withEditCredentialsAccess } = getAccesses(
-    ["manage-users", "edit-details", "edit-credentials"],
-  );
-  const isCredentialsTabEnabled = withManageUsersAccess && (isMeInMaster || withEditCredentialsAccess);
-  const isReadOnly = !(withManageUsersAccess && (isMeInMaster || withEditDetailsAccess));
+  const {
+    withManageUsersAccess,
+    withEditDetailsAccess,
+    withEditCredentialsAccess,
+  } = getAccesses(["manage-users", "edit-details", "edit-credentials"]);
+  const isCredentialsTabEnabled =
+    isCustomTheme &&
+    withManageUsersAccess &&
+    (isMeInMaster || withEditCredentialsAccess);
+  const isReadOnly =
+    isCustomTheme &&
+    !(withManageUsersAccess && (isMeInMaster || withEditDetailsAccess));
 
   useFetch(
     async () =>
