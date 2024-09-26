@@ -5,7 +5,7 @@ import type { UserInfoRepresentation } from "@keycloak/keycloak-admin-client/lib
 import { NetworkError } from "@keycloak/keycloak-admin-client/lib";
 import { AlertVariant, Button, Checkbox } from "@patternfly/react-core";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {useNavigate, useSearchParams} from "react-router-dom";
 import { CustomUserToolbarAction } from "../constants/user";
 import { useAdminClient } from "../../admin-client";
 import { useAlerts } from "../../components/alert/Alerts";
@@ -52,10 +52,12 @@ export const useUserDataTable = ({
   const { adminClient } = useAdminClient();
   const { addAlert, addError } = useAlerts();
   const { t } = useTranslation();
-  const { realms } = useRealms();
+  const { realms, setSearchRealm } = useRealms();
   const { realm: realmName } = useRealm();
+  const [params] = useSearchParams();
+  const paramSearchRealm = params.get(QueryParam.SEARCH_REALM);
   const [customFilters, setCustomFilters] = useState<CustomUserQuery>({
-    searchRealm: realmName,
+    searchRealm: paramSearchRealm || realmName,
   });
 
   const { isCustomTheme } = useCustomConfig();
@@ -222,6 +224,15 @@ export const useUserDataTable = ({
       const url = new URL(window.location.href);
       url.searchParams.delete(QueryParam.SEARCH_REALM);
       history.pushState({}, "", url);
+    };
+  }, []);
+
+  useEffect(() => {
+    setSearchRealm(customFilters.searchRealm);
+  }, [customFilters]);
+  useEffect(() => {
+    return () => {
+      setSearchRealm('');
     };
   }, []);
 
