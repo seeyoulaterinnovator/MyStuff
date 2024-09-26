@@ -115,10 +115,11 @@ export default function EditUser() {
 
   const { isMeInMaster } = useWhoAmI();
   const { getAccesses } = useAccess();
-  const { withManageUsersAccess, withEditCredentialsAccess } = getAccesses(
-    ["manage-users", "edit-credentials"],
+  const { withManageUsersAccess, withEditDetailsAccess, withEditCredentialsAccess } = getAccesses(
+    ["manage-users", "edit-details", "edit-credentials"],
   );
   const isCredentialsTabEnabled = withManageUsersAccess && (isMeInMaster || withEditCredentialsAccess);
+  const isReadOnly = !(withManageUsersAccess && (isMeInMaster || withEditDetailsAccess));
 
   useFetch(
     async () =>
@@ -337,13 +338,13 @@ export default function EditUser() {
           </DropdownItem>,
           <DropdownItem
             key="delete"
-            isDisabled={!user.access?.manage}
+            isDisabled={!user.access?.manage || isReadOnly}
             onClick={() => toggleDeleteDialog()}
           >
             {t("delete")}
           </DropdownItem>,
         ]}
-        onToggle={(value) =>
+        onToggle={isReadOnly ? undefined : (value) =>
           save({
             ...toUserFormFields(user),
             enabled: value,
