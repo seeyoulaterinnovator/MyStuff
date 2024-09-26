@@ -98,12 +98,14 @@ export const WhoAmIContextProvider = ({ children }: PropsWithChildren) => {
   const isMeInManager = whoAmI.getRealm() === RealmName.MANAGER;
 
   return (
-    <WhoAmIContext.Provider value={{
-      refresh: () => setKey(key + 1),
-      whoAmI,
-      isMeInMaster,
-      isMeInManager
-    }}>
+    <WhoAmIContext.Provider
+      value={{
+        refresh: () => setKey(key + 1),
+        whoAmI,
+        isMeInMaster,
+        isMeInManager,
+      }}
+    >
       {children}
     </WhoAmIContext.Provider>
   );

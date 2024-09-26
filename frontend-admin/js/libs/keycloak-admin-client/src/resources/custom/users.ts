@@ -10,10 +10,12 @@ import {
 import type { KeycloakAdminClient } from "../../client.js";
 import Resource from "../resource.js";
 import { CustomAdminRealm } from "./adminRealm.js";
-import RoleRepresentation, {RoleMappingPayload} from "../../defs/roleRepresentation.js";
+import RoleRepresentation, {
+  RoleMappingPayload,
+} from "../../defs/roleRepresentation.js";
 import RealmRepresentation from "../../defs/realmRepresentation.js";
 import type GroupRepresentation from "../../defs/groupRepresentation.js";
-import {GroupQuery} from "../groups.js";
+import { GroupQuery } from "../groups.js";
 import type MappingsRepresentation from "../../defs/mappingsRepresentation.js";
 
 export type CustomUserQuery = Partial<{
@@ -202,8 +204,8 @@ export class CustomUsers extends Resource<{ realm?: string }> {
 
   // name fixed
   public listRoleMappings = this.makeRequest<
-      { id: string },
-      MappingsRepresentation
+    { id: string },
+    MappingsRepresentation
   >({
     method: "GET",
     path: "/users-toms/role-mappings/{id}",
@@ -212,8 +214,8 @@ export class CustomUsers extends Resource<{ realm?: string }> {
 
   // name fixed
   public listCompositeRealmRoleMappings = this.makeRequest<
-      { id: string },
-      RoleRepresentation[]
+    { id: string },
+    RoleRepresentation[]
   >({
     method: "GET",
     path: "/users-toms/role-mappings/{id}/realm/composite",
@@ -222,8 +224,8 @@ export class CustomUsers extends Resource<{ realm?: string }> {
 
   // name fixed
   public listCompositeClientRoleMappings = this.makeRequest<
-      { id: string; clientUniqueId: string },
-      RoleRepresentation[]
+    { id: string; clientUniqueId: string },
+    RoleRepresentation[]
   >({
     method: "GET",
     path: "/users-toms/role-mappings/{id}/clients/{clientUniqueId}/composite",
@@ -320,7 +322,7 @@ export class CustomUsers extends Resource<{ realm?: string }> {
   });
 
   public findOneUserRealmGroup = this.makeRequest<
-    { id: string, groupId: string },
+    { id: string; groupId: string },
     GroupRepresentation | undefined
   >({
     method: "GET",

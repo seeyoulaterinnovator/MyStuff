@@ -40,7 +40,7 @@ import { FederatedUserLink } from "./FederatedUserLink";
 import { UserFormFields, toUserFormFields } from "./form-state";
 import { toUsers } from "./routes/Users";
 import { RequiredActionMultiSelect } from "./user-credentials/RequiredActionMultiSelect";
-import {useCustomConfig} from "../customLogic/context/CustomConfigContext";
+import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
 
 export type BruteForced = {
   isBruteForceProtected?: boolean;

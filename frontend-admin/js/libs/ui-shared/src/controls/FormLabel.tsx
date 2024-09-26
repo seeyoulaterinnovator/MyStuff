@@ -25,7 +25,7 @@ export const FormLabel = ({
   ...rest
 }: PropsWithChildren<FormLabelProps>) => (
   <FormGroup
-    label={withoutLabel ? '' : label || name}
+    label={withoutLabel ? "" : label || name}
     fieldId={name}
     labelIcon={
       labelIcon ? (

@@ -72,19 +72,19 @@ export const ConfirmDialogModal = ({
       variant={variant}
       actions={[
         !noContinueButton && (
-        <Button
-          id="modal-confirm"
-          data-testid="confirm"
-          key="confirm"
-          isDisabled={confirmButtonDisabled}
-          variant={continueButtonVariant || ButtonVariant.primary}
-          onClick={() => {
-            onConfirm?.();
-            toggleDialog();
-          }}
-        >
-          {t(continueButtonLabel || "continue")}
-        </Button>
+          <Button
+            id="modal-confirm"
+            data-testid="confirm"
+            key="confirm"
+            isDisabled={confirmButtonDisabled}
+            variant={continueButtonVariant || ButtonVariant.primary}
+            onClick={() => {
+              onConfirm?.();
+              toggleDialog();
+            }}
+          >
+            {t(continueButtonLabel || "continue")}
+          </Button>
         ),
         !noCancelButton && (
           <Button

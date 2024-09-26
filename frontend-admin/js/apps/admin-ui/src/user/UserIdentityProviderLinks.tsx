@@ -41,7 +41,8 @@ export const UserIdentityProviderLinks = ({
   const [federatedId, setFederatedId] = useState("");
   const [isLinkIdPModalOpen, setIsLinkIdPModalOpen] = useState(false);
 
-  const { realm, realmRepresentation, searchRealm, searchRealmRepresentation } = useRealm();
+  const { realm, realmRepresentation, searchRealm, searchRealmRepresentation } =
+    useRealm();
   const { isMeInMaster } = useWhoAmI();
   const { addAlert, addError } = useAlerts();
   const { t } = useTranslation();
@@ -64,7 +65,7 @@ export const UserIdentityProviderLinks = ({
   const getFederatedIdentities = async () => {
     const allFedIds = (await adminClient.users.listFederatedIdentities({
       id: userId,
-      realm: isMeInMaster ? searchRealm : realm
+      realm: isMeInMaster ? searchRealm : realm,
     })) as WithProviderId[];
 
     if (canQueryIDPDetails) {
@@ -80,7 +81,9 @@ export const UserIdentityProviderLinks = ({
   };
 
   const getAvailableIdPs = () => {
-    return isCustomTheme ? searchRealmRepresentation?.identityProviders : realmRepresentation?.identityProviders;
+    return isCustomTheme
+      ? searchRealmRepresentation?.identityProviders
+      : realmRepresentation?.identityProviders;
   };
 
   const linkedIdPsLoader = async () => {

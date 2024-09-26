@@ -22,7 +22,7 @@ import useIsFeatureEnabled, { Feature } from "./utils/useIsFeatureEnabled";
 import { useRealms } from "./context/RealmsContext";
 
 import "./page-nav.css";
-import {useCustomConfig} from "./customLogic/context/CustomConfigContext";
+import { useCustomConfig } from "./customLogic/context/CustomConfigContext";
 
 type LeftNavProps = { title: string; path: string; id?: string };
 
@@ -102,8 +102,7 @@ export const PageNav = () => {
   const isOnAddRealm = !!useMatch(AddRealmRoute.path);
   const isRootPage = !!useMatch(DashboardRoute.path);
   const isCustomRootPage =
-    (isCustomTheme && isRootPage && realms.length > 1) ||
-    !isCustomTheme;
+    (isCustomTheme && isRootPage && realms.length > 1) || !isCustomTheme;
 
   return (
     <PageSidebar className="keycloak__page_nav__nav">

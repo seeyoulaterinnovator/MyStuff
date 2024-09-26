@@ -1,6 +1,12 @@
 export type AccessChecker = {
-  hasAll: (accessOrTypes: (readonly AccessType[]) | AccessType, ...types: AccessType[]) => boolean;
-  hasAny: (accessOrTypes: (readonly AccessType[]) | AccessType, ...types: AccessType[]) => boolean;
+  hasAll: (
+    accessOrTypes: readonly AccessType[] | AccessType,
+    ...types: AccessType[]
+  ) => boolean;
+  hasAny: (
+    accessOrTypes: readonly AccessType[] | AccessType,
+    ...types: AccessType[]
+  ) => boolean;
 };
 export type AccessTypeFunc = (accessChecker: AccessChecker) => boolean;
 

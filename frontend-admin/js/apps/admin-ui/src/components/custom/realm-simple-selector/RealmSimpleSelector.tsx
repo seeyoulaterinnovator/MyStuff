@@ -21,7 +21,7 @@ import { useRecentRealms } from "../../../context/RecentRealms";
 
 import "./realm-simple-selector.css";
 
-type RealmsSource = 'default' | 'accessible'
+type RealmsSource = "default" | "accessible";
 
 type RealmTextProps = {
   displayName?: string;
@@ -60,7 +60,7 @@ interface RealmSimpleSelectorProps {
 export const RealmSimpleSelector = ({
   id,
   value,
-  realmsSource = 'default',
+  realmsSource = "default",
   onChange,
 }: RealmSimpleSelectorProps) => {
   const { realms, accessibleRealms } = useRealms();
@@ -70,7 +70,7 @@ export const RealmSimpleSelector = ({
   const recentRealms = useRecentRealms();
   const [currentRealmName, setCurrentRealmName] = useState(value);
 
-  const resRealms = realmsSource === 'default' ? realms : accessibleRealms;
+  const resRealms = realmsSource === "default" ? realms : accessibleRealms;
 
   useEffect(() => {
     setCurrentRealmName(value);

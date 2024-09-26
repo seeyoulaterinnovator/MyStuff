@@ -10,21 +10,15 @@ import { AlertVariant, Button } from "@patternfly/react-core";
 type UserPostActionsProps = {
   userId: string;
   postId: string | null;
-  newTomsIdRef: MutableRefObject<string>,
-  newDmpIdRef: MutableRefObject<string>,
-  newRoleIdRef: MutableRefObject<number>,
+  newTomsIdRef: MutableRefObject<string>;
+  newDmpIdRef: MutableRefObject<string>;
+  newRoleIdRef: MutableRefObject<number>;
   onChanged: () => void;
-}
+};
 
 export const UserPostActions = (props: UserPostActionsProps) => {
-  const {
-    userId,
-    postId,
-    newTomsIdRef,
-    newDmpIdRef,
-    newRoleIdRef,
-    onChanged,
-  } = props;
+  const { userId, postId, newTomsIdRef, newDmpIdRef, newRoleIdRef, onChanged } =
+    props;
 
   const { adminClient } = useAdminClient();
   const { realm } = useRealm();
@@ -60,10 +54,7 @@ export const UserPostActions = (props: UserPostActionsProps) => {
           );
           onChanged();
         } catch (error) {
-          addError(
-            t("deleteUserPostError", { postId }),
-            error,
-          );
+          addError(t("deleteUserPostError", { postId }), error);
         } finally {
           setIsChanging(false);
         }
@@ -89,10 +80,7 @@ export const UserPostActions = (props: UserPostActionsProps) => {
               roleId: newRoleIdRef.current,
             },
           );
-          addAlert(
-            t("addUserPostSuccess", { postId }),
-            AlertVariant.success,
-          );
+          addAlert(t("addUserPostSuccess", { postId }), AlertVariant.success);
           onChanged();
         } catch (error) {
           addError(t("addUserPostError", { postId }), error);
@@ -104,4 +92,4 @@ export const UserPostActions = (props: UserPostActionsProps) => {
       {t("add")}
     </Button>
   );
-}
+};

@@ -46,7 +46,7 @@ export const UserConsents = () => {
   const loader = async () => {
     const getConsents = await adminClient.users.listConsents({
       id,
-      realm: isMeInMaster ? searchRealm : realm
+      realm: isMeInMaster ? searchRealm : realm,
     });
 
     return alphabetize(getConsents);
@@ -78,7 +78,7 @@ export const UserConsents = () => {
         await adminClient.users.revokeConsent({
           id,
           clientId: selectedClient!.clientId!,
-          realm: isMeInMaster ? searchRealm : realm
+          realm: isMeInMaster ? searchRealm : realm,
         });
 
         refresh();

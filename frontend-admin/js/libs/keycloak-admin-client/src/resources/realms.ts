@@ -311,7 +311,12 @@ export class Realms extends Resource {
   });
 
   public deleteSession = this.makeRequest<
-    { realm: string; session: string; isOffline: boolean, searchRealm?: string },
+    {
+      realm: string;
+      session: string;
+      isOffline: boolean;
+      searchRealm?: string;
+    },
     void
   >({
     method: "DELETE",

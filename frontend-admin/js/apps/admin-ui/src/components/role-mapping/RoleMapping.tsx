@@ -171,10 +171,20 @@ export const RoleMapping = ({
     },
     onConfirm: async () => {
       try {
-        if(isCustomUsers) {
-          await Promise.all(deleteMapping(adminClient, "customUsers", id, selected, searchRealm));
+        if (isCustomUsers) {
+          await Promise.all(
+            deleteMapping(
+              adminClient,
+              "customUsers",
+              id,
+              selected,
+              searchRealm,
+            ),
+          );
         } else {
-          await Promise.all(deleteMapping(adminClient, type, id, selected, realm));
+          await Promise.all(
+            deleteMapping(adminClient, type, id, selected, realm),
+          );
         }
         addAlert(t("clientScopeRemoveSuccess"), AlertVariant.success);
         setSelected([]);

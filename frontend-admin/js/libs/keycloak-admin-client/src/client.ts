@@ -19,9 +19,9 @@ import { Credentials, getToken } from "./utils/auth.js";
 import { defaultBaseUrl, defaultRealm } from "./utils/constants.js";
 import { CustomSettings } from "./resources/custom/customSettings.js";
 import { CustomUsers } from "./resources/custom/users.js";
-import {UserPosts} from "./resources/custom/userPosts.js";
-import {PersonalAccounts} from "./resources/custom/personalAccounts.js";
-import {CustomConfig} from "./resources/custom/customConfig.js";
+import { UserPosts } from "./resources/custom/userPosts.js";
+import { PersonalAccounts } from "./resources/custom/personalAccounts.js";
+import { CustomConfig } from "./resources/custom/customConfig.js";
 
 export interface TokenProvider {
   getAccessToken: () => Promise<string | undefined>;

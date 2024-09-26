@@ -71,7 +71,7 @@ export const UserGroups = ({ user }: UserGroupsProps) => {
     const joinedUserGroups = await adminClient.users.listGroups({
       ...params,
       id: user.id!,
-      realm: isMeInMaster ? searchRealm : realm
+      realm: isMeInMaster ? searchRealm : realm,
     });
 
     setDirectMembershipList([...joinedUserGroups]);
@@ -117,7 +117,7 @@ export const UserGroups = ({ user }: UserGroupsProps) => {
             adminClient.users.delFromGroup({
               id: user.id!,
               groupId: group.id!,
-              realm: isMeInMaster ? searchRealm : realm
+              realm: isMeInMaster ? searchRealm : realm,
             }),
           ),
         );
@@ -143,7 +143,7 @@ export const UserGroups = ({ user }: UserGroupsProps) => {
           adminClient.users.addToGroup({
             id: user.id!,
             groupId: group.id!,
-            realm: isMeInMaster ? searchRealm : realm
+            realm: isMeInMaster ? searchRealm : realm,
           }),
         ),
       );

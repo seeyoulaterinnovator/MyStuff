@@ -118,7 +118,7 @@ export const deleteMapping = (
   type: ResourcesKey,
   id: string,
   rows: Row[],
-  realm?: string
+  realm?: string,
 ) =>
   rows.map((row) => {
     const role = { id: row.role.id!, name: row.role.name! };
@@ -177,9 +177,11 @@ export const getEffectiveRoles = async (
 ): Promise<Row[]> => {
   const query = mapping[type]!.listEffective[1];
   if (type !== "roles") {
-    return (await applyQuery(adminClient, type, query, { id, realm })).map((role) => ({
-      role,
-    }));
+    return (await applyQuery(adminClient, type, query, { id, realm })).map(
+      (role) => ({
+        role,
+      }),
+    );
   }
   const roles = await applyQuery(adminClient, type, query, { id });
   const parentRoles = await Promise.all(

@@ -24,7 +24,7 @@ export const UserRoleMapping = ({ id, name }: UserRoleMappingProps) => {
         .filter((row) => row.client === undefined)
         .map((row) => row.role as RoleMappingPayload)
         .flat();
-      if(realm != searchRealm) {
+      if (realm != searchRealm) {
         await adminClient.customUsers.addRealmRoleMappings({
           id,
           realm: searchRealm,
@@ -40,18 +40,18 @@ export const UserRoleMapping = ({ id, name }: UserRoleMappingProps) => {
         rows
           .filter((row) => row.client !== undefined)
           .map((row) => {
-            if(realm !== searchRealm) {
+            if (realm !== searchRealm) {
               return adminClient.customUsers.addClientRoleMappings({
                 id,
                 clientUniqueId: row.client!.id!,
                 realm: searchRealm,
-                roles: [row.role as RoleMappingPayload]
+                roles: [row.role as RoleMappingPayload],
               });
             } else {
               return adminClient.users.addClientRoleMappings({
                 id,
                 clientUniqueId: row.client!.id!,
-                roles: [row.role as RoleMappingPayload]
+                roles: [row.role as RoleMappingPayload],
               });
             }
           }),

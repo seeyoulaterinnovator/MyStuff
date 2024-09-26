@@ -14,8 +14,8 @@ export type PersonalAccountPostResultRepresentation = {
   data: PersonalAccountPostRepresentation;
 };
 
-export interface PersonalAccountPostResponseRepresentation
-  extends Response<PersonalAccountPostResultRepresentation> {}
+export type PersonalAccountPostResponseRepresentation =
+  Response<PersonalAccountPostResultRepresentation>;
 
 export type PersonalAccountValuesRepresentation = string[];
 
@@ -25,5 +25,5 @@ export type PersonalAccountsResultRepresentation = {
   accounts: PersonalAccountRepresentation[];
 };
 
-export interface PersonalAccountsResponseRepresentation
-  extends Response<PersonalAccountsResultRepresentation> {}
+export type PersonalAccountsResponseRepresentation =
+  Response<PersonalAccountsResultRepresentation>;

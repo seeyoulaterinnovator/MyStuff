@@ -8,9 +8,7 @@ import { useAlerts } from "../../components/alert/Alerts";
 import { ConfirmDialogModal } from "../../components/confirm-dialog/ConfirmDialog";
 import { LifespanField } from "./LifespanField";
 import { RequiredActionMultiSelect } from "./RequiredActionMultiSelect";
-import {AdminTheme} from "../../customLogic/constants/theme";
-import {useRealm} from "../../context/realm-context/RealmContext";
-import {useCustomConfig} from "../../customLogic/context/CustomConfigContext";
+import { useCustomConfig } from "../../customLogic/context/CustomConfigContext";
 
 type ResetCredentialDialogProps = {
   userId: string;
@@ -36,7 +34,6 @@ export const ResetCredentialDialog = ({
   onClose,
 }: ResetCredentialDialogProps) => {
   const { adminClient } = useAdminClient();
-  const { realm: realmName, realmRepresentation: realm } = useRealm();
 
   const { t } = useTranslation();
   const form = useForm<CredentialResetForm>({
@@ -75,18 +72,22 @@ export const ResetCredentialDialog = ({
     }
   };
 
-  if(isCustomTheme && !isEmailVerified) {
+  if (isCustomTheme && !isEmailVerified) {
     return (
       <ConfirmDialogModal
         variant={ModalVariant.small}
         titleKey="credentialReset"
-        messageKey={hasPhone ? "resetCredentialsDisabledByEmail" : "resetCredentialsDisabledByPhone"}
+        messageKey={
+          hasPhone
+            ? "resetCredentialsDisabledByEmail"
+            : "resetCredentialsDisabledByPhone"
+        }
         open
         onCancel={onClose}
         toggleDialog={onClose}
         noContinueButton
       />
-    )
+    );
   }
 
   return (

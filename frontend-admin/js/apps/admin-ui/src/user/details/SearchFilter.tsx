@@ -10,7 +10,7 @@ import {
 import { FilterIcon } from "@patternfly/react-icons";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import {useCustomConfig} from "../../customLogic/context/CustomConfigContext";
+import { useCustomConfig } from "../../customLogic/context/CustomConfigContext";
 
 export type SearchType = "default" | "attribute" | "custom";
 

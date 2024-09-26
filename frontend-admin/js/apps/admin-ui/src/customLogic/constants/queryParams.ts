@@ -1,3 +1,3 @@
 export enum QueryParam {
-  SEARCH_REALM = 'searchRealm'
+  SEARCH_REALM = "searchRealm",
 }

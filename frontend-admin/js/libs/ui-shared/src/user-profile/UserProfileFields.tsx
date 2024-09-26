@@ -160,8 +160,8 @@ export const UserProfileFields = ({
                   currentLocale={currentLocale}
                   renderer={renderer}
                   attribute={attribute}
-                  disabled={attribute.name === 'lastName'}
-                  hidden={attribute.name === 'username'}
+                  disabled={attribute.name === "lastName"}
+                  hidden={attribute.name === "username"}
                 />
               ))}
             </div>

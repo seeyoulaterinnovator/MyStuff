@@ -339,17 +339,12 @@ export default function DashboardSection() {
   const isMasterRealm = realm === "master";
   const { isCustomTheme } = useCustomConfig();
   const isRootPage = !!useMatch(DashboardRoute.path);
-  const isCustomRootPage =
-    isCustomTheme && isRootPage && realms.length > 1;
+  const isCustomRootPage = isCustomTheme && isRootPage && realms.length > 1;
 
   return (
     <>
       {!isMasterRealm && <EmptyDashboard />}
-      {isCustomRootPage ? (
-        <DashboardRealms />
-      ) : (
-        isMasterRealm && <Dashboard />
-      )}
+      {isCustomRootPage ? <DashboardRealms /> : isMasterRealm && <Dashboard />}
     </>
   );
 }

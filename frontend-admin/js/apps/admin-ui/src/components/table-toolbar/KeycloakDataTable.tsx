@@ -692,7 +692,7 @@ export function KeycloakDataTable<T>({
   const handleSort = (newSortOptions: SortingOptions) => {
     setCurrentSortingOptions(newSortOptions);
     onSort?.(newSortOptions);
-  }
+  };
 
   const data = filteredData || rows;
   const noData = !data || data.length === 0;

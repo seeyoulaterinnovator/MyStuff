@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import { Form } from "react-router-dom";
 import { RealmSimpleSelector } from "../custom/realm-simple-selector/RealmSimpleSelector";
 import { useAccess } from "../../context/access/Access";
-import {useCustomConfig} from "../../customLogic/context/CustomConfigContext";
+import { useCustomConfig } from "../../customLogic/context/CustomConfigContext";
 
 const defaultCustomSearchForm: CustomUserQuery = {};
 

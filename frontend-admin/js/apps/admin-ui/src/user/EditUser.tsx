@@ -57,10 +57,10 @@ import { toUsers } from "./routes/Users";
 import { isLightweightUser } from "./utils";
 
 import "./user-section.css";
-import {UserCustomer} from "./UserCustomer";
-import {UserAttribute} from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
-import {useCustomConfig} from "../customLogic/context/CustomConfigContext";
-import {useWhoAmI} from "../context/whoami/WhoAmI";
+import { UserCustomer } from "./UserCustomer";
+import { UserAttribute } from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
+import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
+import { useWhoAmI } from "../context/whoami/WhoAmI";
 
 export default function EditUser() {
   const { adminClient } = useAdminClient();
@@ -70,7 +70,11 @@ export default function EditUser() {
   const navigate = useNavigate();
   const { hasAccess } = useAccess();
   const { id } = useParams<UserParams>();
-  const { realm: realmName, realmRepresentation: realm, searchRealm } = useRealm();
+  const {
+    realm: realmName,
+    realmRepresentation: realm,
+    searchRealm,
+  } = useRealm();
   const { isMeInManager } = useWhoAmI();
   // Validation of form fields is performed on server, thus we need to clear all errors before submit
   const clearAllErrorsBeforeSubmit = async (values: UserFormFields) => ({
@@ -157,10 +161,10 @@ export default function EditUser() {
   const save = async (data: UserFormFields) => {
     const representation = toUserRepresentation(data);
 
-    if(isCustomTheme && representation.attributes) {
+    if (isCustomTheme && representation.attributes) {
       let phone = representation.attributes[UserAttribute.PHONE];
-      if(phone !== undefined) {
-        if(Array.isArray(phone)) {
+      if (phone !== undefined) {
+        if (Array.isArray(phone)) {
           phone = phone[0];
         }
         if (!Number(phone)) {
@@ -176,9 +180,9 @@ export default function EditUser() {
           realm: realmName,
           realmId: searchRealm,
           phone,
-          excludedUserId: id
+          excludedUserId: id,
         });
-        if(phoneCheck.results.foundUserId) {
+        if (phoneCheck.results.foundUserId) {
           addError(t("duplicatePhone"), "");
           return;
         }
@@ -186,10 +190,7 @@ export default function EditUser() {
     }
 
     try {
-      await adminClient.users.update(
-        { id: user!.id! },
-        representation,
-      );
+      await adminClient.users.update({ id: user!.id! }, representation);
       addAlert(t("userSaved"), AlertVariant.success);
       refresh();
     } catch (error) {
@@ -267,7 +268,7 @@ export default function EditUser() {
     onConfirm: async () => {
       try {
         let data;
-        if(isCustomTheme && isMeInManager) {
+        if (isCustomTheme && isMeInManager) {
           data = await adminClient.customUsers.impersonation(
             { id: user!.id!, realm: searchRealm },
             { user: user!.id!, realm: searchRealm },

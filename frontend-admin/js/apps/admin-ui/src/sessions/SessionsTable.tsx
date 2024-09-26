@@ -31,7 +31,6 @@ import { UserRoute, toUser } from "../user/routes/User";
 import { toUsers } from "../user/routes/Users";
 import { isLightweightUser } from "../user/utils";
 import useFormatDate from "../utils/useFormatDate";
-import {useCustomConfig} from "../customLogic/context/CustomConfigContext";
 
 export type ColumnName =
   | "username"
@@ -175,7 +174,7 @@ export default function SessionsTable({
       realm: isMeInMaster ? searchRealm : realm,
       session: session.id!,
       isOffline: true,
-      searchRealm
+      searchRealm,
     });
 
     refresh();
@@ -187,7 +186,7 @@ export default function SessionsTable({
       realm: isMeInMaster ? searchRealm : realm,
       session: session.id!,
       isOffline: false,
-      searchRealm
+      searchRealm,
     });
 
     if (session.userId === whoAmI.getUserId()) {

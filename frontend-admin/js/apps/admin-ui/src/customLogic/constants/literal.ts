@@ -1,4 +1,4 @@
 export enum Literal {
-  WITH = 'with',
-  ACCESS = 'Access',
+  WITH = "with",
+  ACCESS = "Access",
 }

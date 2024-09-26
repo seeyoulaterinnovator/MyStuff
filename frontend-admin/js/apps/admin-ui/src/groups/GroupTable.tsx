@@ -62,7 +62,7 @@ export const GroupTable = ({ refresh: viewRefresh }: GroupTableProps) => {
       };
       groupsData = await adminClient.groups.listSubGroups({
         ...args,
-        realm: isCustomTheme ? searchRealm : realm
+        realm: isCustomTheme ? searchRealm : realm,
       });
     } else {
       const args: GroupQuery = {
@@ -72,7 +72,7 @@ export const GroupTable = ({ refresh: viewRefresh }: GroupTableProps) => {
       };
       groupsData = await adminClient.groups.find({
         ...args,
-        realm: isCustomTheme ? searchRealm : realm
+        realm: isCustomTheme ? searchRealm : realm,
       });
     }
 
