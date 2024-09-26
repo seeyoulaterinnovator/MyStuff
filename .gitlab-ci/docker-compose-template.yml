@@ -55,4 +55,7 @@ services:
         - "traefik.docker.network=traefik"
       resources:
         limits:
-          memory: 2048m
+          memory: 1536m
+      placement:
+        constraints:
+          - "node.hostname==swarm2.dev.it-resource.team" # FIXME
