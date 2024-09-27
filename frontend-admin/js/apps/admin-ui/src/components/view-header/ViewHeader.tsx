@@ -164,6 +164,7 @@ export const ViewHeader = ({
                         </MenuToggle>
                       )}
                       isOpen={isDropdownOpen}
+                      onOpenChange={onDropdownToggle}
                     >
                       <DropdownList>{dropdownItems}</DropdownList>
                     </Dropdown>

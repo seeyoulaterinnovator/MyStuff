@@ -35,6 +35,7 @@ export const UserPostRoleDropdown = (props: UserPostRoleDropdownProps) => {
   return (
     <Select
       isOpen={open}
+      onOpenChange={setOpen}
       toggle={(ref) => (
         <MenuToggle
           ref={ref}
