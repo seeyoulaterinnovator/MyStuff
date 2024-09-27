@@ -132,7 +132,7 @@ public abstract class Tests {
                     );
 
     static {
-        if (!Boolean.TRUE.toString().equals(System.getenv(ENABLE_VARIABLE))) {
+        if (Boolean.TRUE.toString().equals(System.getenv(ENABLE_VARIABLE))) {
             try {
                 initialize();
                 log.info("Tests initialized");
