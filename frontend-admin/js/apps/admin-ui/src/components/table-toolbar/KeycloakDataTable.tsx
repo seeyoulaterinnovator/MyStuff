@@ -179,7 +179,7 @@ function DataTable<T>({
       <Thead>
         <Tr>
           {onCollapse && <Th />}
-          {canSelectAll && (
+          {canSelectAll ? (
             <Th
               select={
                 !isRadio
@@ -195,6 +195,12 @@ function DataTable<T>({
                   : undefined
               }
             />
+          ) : (
+            onSelect && (
+              <Th>
+                <div />
+              </Th>
+            )
           )}
           {columns.map((column) => {
             const isSoringApplied =
