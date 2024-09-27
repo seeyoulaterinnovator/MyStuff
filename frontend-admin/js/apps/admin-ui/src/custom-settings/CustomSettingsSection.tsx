@@ -13,7 +13,8 @@ export default function CustomSettingsSection() {
   const { t } = useTranslation();
   const { realm } = useRealm();
 
-  const useTab = (tab: CustomSettingsTab) => useRoutableTab(toCustomSettings({ realm, tab }));
+  const useTab = (tab: CustomSettingsTab) =>
+    useRoutableTab(toCustomSettings({ realm, tab }));
 
   const generalTab = useTab("general");
   const frontTab = useTab("front");
@@ -23,10 +24,7 @@ export default function CustomSettingsSection() {
 
   return (
     <>
-      <ViewHeader
-        titleKey="titleCustomSettings"
-        divider={false}
-      />
+      <ViewHeader titleKey="titleCustomSettings" divider={false} />
       <PageSection variant="light" className="pf-v5-u-p-0">
         <RoutableTabs
           isBox
@@ -36,31 +34,33 @@ export default function CustomSettingsSection() {
             title={<TabTitleText>{t("customSettingsGeneral")}</TabTitleText>}
             {...generalTab}
           >
-            <CustomSettingsTable type="REALM"/>
+            <CustomSettingsTable type="REALM" />
           </Tab>
           <Tab
             title={<TabTitleText>{t("customSettingsFront")}</TabTitleText>}
             {...frontTab}
           >
-            <CustomSettingsTable type="FRONT"/>
+            <CustomSettingsTable type="FRONT" />
           </Tab>
           <Tab
             title={<TabTitleText>{t("customSettingsMessage")}</TabTitleText>}
             {...messageTab}
           >
-            <CustomSettingsTable type="MESSAGE"/>
+            <CustomSettingsTable type="MESSAGE" />
           </Tab>
           <Tab
-            title={<TabTitleText>{t("customSettingsApplication")}</TabTitleText>}
+            title={
+              <TabTitleText>{t("customSettingsApplication")}</TabTitleText>
+            }
             {...applicationTab}
           >
-            <CustomSettingsTable type="APP"/>
+            <CustomSettingsTable type="APP" />
           </Tab>
           <Tab
             title={<TabTitleText>{t("customSettingsGateway")}</TabTitleText>}
             {...gatewayTab}
           >
-            <CustomSettingsTable type="EMAIL"/>
+            <CustomSettingsTable type="EMAIL" />
           </Tab>
         </RoutableTabs>
       </PageSection>

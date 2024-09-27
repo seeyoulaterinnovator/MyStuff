@@ -14,17 +14,19 @@ export const UserSessions = () => {
   const { isMeInMaster, isMeInManager } = useWhoAmI();
   const { isCustomTheme } = useCustomConfig();
   const { getAccesses } = useAccess();
-  const { withManageUsersAccess, withEditSessionsAccess } = getAccesses(
-    ["manage-users", "edit-sessions"],
-  );
+  const { withManageUsersAccess, withEditSessionsAccess } = getAccesses([
+    "manage-users",
+    "edit-sessions",
+  ]);
   const { id } = useParams<UserParams>();
   const { realm, searchRealm } = useRealm();
   const { t } = useTranslation();
 
-  const loader = () => adminClient.users.listSessions({
+  const loader = () =>
+    adminClient.users.listSessions({
       id,
-      realm: isMeInMaster ? searchRealm : realm
-  });
+      realm: isMeInMaster ? searchRealm : realm,
+    });
 
   return (
     <PageSection variant="light" className="pf-v5-u-p-0">
@@ -33,7 +35,10 @@ export const UserSessions = () => {
         hiddenColumns={["username", "type"]}
         emptyInstructions={t("noSessionsForUser")}
         logoutUser={id}
-        isReadonly={isCustomTheme && !(withManageUsersAccess && (isMeInMaster || withEditSessionsAccess))}
+        isReadonly={
+          isCustomTheme &&
+          !(withManageUsersAccess && (isMeInMaster || withEditSessionsAccess))
+        }
         isClientLinkDisabled={isCustomTheme && isMeInManager}
       />
     </PageSection>

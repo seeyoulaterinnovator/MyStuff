@@ -31,7 +31,7 @@ export const AttributesForm = ({
   isReadonly = false,
 }: AttributesFormProps) => {
   const { t } = useTranslation();
-  const noSaveCancelButtons = !save && !reset || isReadonly;
+  const noSaveCancelButtons = (!save && !reset) || isReadonly;
   const {
     formState: { isDirty },
     handleSubmit,

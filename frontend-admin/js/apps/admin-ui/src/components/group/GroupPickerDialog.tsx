@@ -91,23 +91,23 @@ export const GroupPickerDialog = ({
         if (isSearching) {
           args.search = filter;
         }
-        if(isCustomTheme && searchRealmUserId) {
+        if (isCustomTheme && searchRealmUserId) {
           groups = await adminClient.customUsers.findUserRealmGroups({
             ...args,
-            id: searchRealmUserId
+            id: searchRealmUserId,
           });
         } else {
           groups = await adminClient.groups.find(args);
         }
       } else {
         if (!navigation.map(({ id }) => id).includes(groupId)) {
-          if(isCustomTheme && searchRealmUserId) {
+          if (isCustomTheme && searchRealmUserId) {
             group = await adminClient.customUsers.findOneUserRealmGroup({
               id: searchRealmUserId,
-              groupId
+              groupId,
             });
           } else {
-            group = await adminClient.groups.findOne({id: groupId});
+            group = await adminClient.groups.findOne({ id: groupId });
           }
           if (!group) {
             throw new Error(t("notFound"));
@@ -121,7 +121,7 @@ export const GroupPickerDialog = ({
         };
         groups = await adminClient.groups.listSubGroups({
           ...args,
-          realm: isCustomTheme ? searchRealm : realm
+          realm: isCustomTheme ? searchRealm : realm,
         });
       }
 

@@ -8,7 +8,7 @@ import { SelectControl } from "@keycloak/keycloak-ui-shared";
 import { useAdminClient } from "../../admin-client";
 import { FormAccess } from "../../components/form/FormAccess";
 import { useFetch } from "../../utils/useFetch";
-import {useCustomConfig} from "../../customLogic/context/CustomConfigContext";
+import { useCustomConfig } from "../../customLogic/context/CustomConfigContext";
 
 type AuthenticationOverridesProps = {
   save: () => void;
@@ -46,7 +46,7 @@ export const AuthenticationOverrides = ({
     return [
       { key: "", value: t("choose") },
       ...flows.map(({ id, alias }) => ({ key: id!, value: alias! })),
-    ]
+    ];
   }, [flows]);
 
   return (

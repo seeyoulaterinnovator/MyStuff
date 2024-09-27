@@ -31,7 +31,6 @@ import { UserRoute, toUser } from "../user/routes/User";
 import { toUsers } from "../user/routes/Users";
 import { isLightweightUser } from "../user/utils";
 import useFormatDate from "../utils/useFormatDate";
-import {useCustomConfig} from "../customLogic/context/CustomConfigContext";
 
 export type ColumnName =
   | "username"
@@ -76,7 +75,10 @@ const UsernameCell = (row: UserSessionRepresentation) => {
   );
 };
 
-const ClientsCell = (row: UserSessionRepresentation, isLinkDisabled?: boolean) => {
+const ClientsCell = (
+  row: UserSessionRepresentation,
+  isLinkDisabled?: boolean,
+) => {
   const { realm } = useRealm();
   return (
     <List variant={ListVariant.inline}>
@@ -183,7 +185,7 @@ export default function SessionsTable({
       realm: isMeInMaster ? searchRealm : realm,
       session: session.id!,
       isOffline: true,
-      searchRealm
+      searchRealm,
     });
 
     refresh();
@@ -195,7 +197,7 @@ export default function SessionsTable({
       realm: isMeInMaster ? searchRealm : realm,
       session: session.id!,
       isOffline: false,
-      searchRealm
+      searchRealm,
     });
 
     if (session.userId === whoAmI.getUserId()) {
@@ -219,7 +221,8 @@ export default function SessionsTable({
         isSearching={isSearching}
         searchTypeComponent={filter}
         toolbarItem={
-          logoutUser && !isReadonly && (
+          logoutUser &&
+          !isReadonly && (
             <ToolbarItem>
               <Button onClick={toggleLogoutDialog}>
                 {t("logoutAllSessions")}
@@ -228,25 +231,29 @@ export default function SessionsTable({
           )
         }
         columns={columns}
-        actionResolver={isReadonly ? undefined : (rowData: IRowData) => {
-          if (
-            rowData.data.type === "Offline" ||
-            rowData.data.type === "OFFLINE"
-          ) {
-            return [
-              {
-                title: t("revoke"),
-                onClick: () => onClickRevoke(rowData),
-              } as Action<UserSessionRepresentation>,
-            ];
-          }
-          return [
-            {
-              title: t("signOut"),
-              onClick: () => onClickSignOut(rowData),
-            } as Action<UserSessionRepresentation>,
-          ];
-        }}
+        actionResolver={
+          isReadonly
+            ? undefined
+            : (rowData: IRowData) => {
+                if (
+                  rowData.data.type === "Offline" ||
+                  rowData.data.type === "OFFLINE"
+                ) {
+                  return [
+                    {
+                      title: t("revoke"),
+                      onClick: () => onClickRevoke(rowData),
+                    } as Action<UserSessionRepresentation>,
+                  ];
+                }
+                return [
+                  {
+                    title: t("signOut"),
+                    onClick: () => onClickSignOut(rowData),
+                  } as Action<UserSessionRepresentation>,
+                ];
+              }
+        }
         emptyState={
           <ListEmptyState
             hasIcon

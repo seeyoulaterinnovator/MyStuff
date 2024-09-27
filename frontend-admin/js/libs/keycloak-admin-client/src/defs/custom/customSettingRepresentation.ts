@@ -18,12 +18,16 @@ export type CustomSettingsResultRepresentation = {
   settings: CustomSettingRepresentation[];
 };
 
-export interface CustomSettingsResponseRepresentation
-  extends Response<CustomSettingsResultRepresentation, "httpStatus"> {}
+export type CustomSettingsResponseRepresentation = Response<
+  CustomSettingsResultRepresentation,
+  "httpStatus"
+>;
 
 export type CustomSettingResultRepresentation = {
   setting: CustomSettingRepresentation;
 };
 
-export interface CustomSettingResponseRepresentation
-  extends Response<CustomSettingResultRepresentation, "httpStatus"> {}
+export type CustomSettingResponseRepresentation = Response<
+  CustomSettingResultRepresentation,
+  "httpStatus"
+>;

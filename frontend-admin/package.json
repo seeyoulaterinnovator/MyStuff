@@ -3,7 +3,7 @@
   "type": "module",
   "packageManager": "pnpm@9.1.0+sha256.22e36fba7f4880ecf749a5ca128b8435da085ecd49575e7fb9e64d6bf4fad394",
   "scripts": {
-    "prepare": "husky js/.husky"
+    "prepare": "cd .. && husky frontend-admin/js/.husky"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.1.0",
@@ -53,6 +53,11 @@
     ]
   },
   "lint-staged": {
-    "*.{js,jsx,mjs,ts,tsx}": "eslint --cache --fix"
+    "*.{js,jsx,mjs,ts,tsx}": "eslint --cache --fix",
+    "**/*.{ts,tsx}": [
+      "prettier --write",
+      "prettier --list-different",
+      "eslint"
+    ]
   }
 }

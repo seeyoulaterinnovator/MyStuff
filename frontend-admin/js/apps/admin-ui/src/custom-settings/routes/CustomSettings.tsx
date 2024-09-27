@@ -1,10 +1,14 @@
-import type {AppRouteObject} from "../../routes";
-import {lazy} from "react";
-import type {Path} from "react-router-dom";
-import {generateEncodedPath} from "../../utils/generateEncodedPath";
-import {EventsParams, EventsRoute, EventsRouteWithTab} from "../../events/routes/Events";
+import type { AppRouteObject } from "../../routes";
+import { lazy } from "react";
+import type { Path } from "react-router-dom";
+import { generateEncodedPath } from "../../utils/generateEncodedPath";
 
-export type CustomSettingsTab = "general" | "front" | "message" | "application" | "gateway";
+export type CustomSettingsTab =
+  | "general"
+  | "front"
+  | "message"
+  | "application"
+  | "gateway";
 
 export type CustomSettingsParams = {
   realm: string;
@@ -27,8 +31,12 @@ export const CustomSettingsWithTab: AppRouteObject = {
   path: "/:realm/custom-settings/:tab",
 };
 
-export const toCustomSettings = (params: CustomSettingsParams): Partial<Path> => {
-  const path = params.tab ? CustomSettingsWithTab.path : CustomSettingsRoute.path;
+export const toCustomSettings = (
+  params: CustomSettingsParams,
+): Partial<Path> => {
+  const path = params.tab
+    ? CustomSettingsWithTab.path
+    : CustomSettingsRoute.path;
 
   return {
     pathname: generateEncodedPath(path, params),

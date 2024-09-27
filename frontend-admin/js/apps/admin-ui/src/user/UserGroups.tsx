@@ -35,10 +35,13 @@ export const UserGroups = ({ user }: UserGroupsProps) => {
   const { isCustomTheme } = useCustomConfig();
   const { isMeInMaster } = useWhoAmI();
   const { getAccesses } = useAccess();
-  const { withManageUsersAccess, withEditGroupsAccess } = getAccesses(
-    ["manage-users", "edit-groups"],
-  );
-  const isReadOnly = isCustomTheme && !(withManageUsersAccess && (isMeInMaster || withEditGroupsAccess));
+  const { withManageUsersAccess, withEditGroupsAccess } = getAccesses([
+    "manage-users",
+    "edit-groups",
+  ]);
+  const isReadOnly =
+    isCustomTheme &&
+    !(withManageUsersAccess && (isMeInMaster || withEditGroupsAccess));
 
   const { t } = useTranslation();
   const { addAlert, addError } = useAlerts();
@@ -78,7 +81,7 @@ export const UserGroups = ({ user }: UserGroupsProps) => {
     const joinedUserGroups = await adminClient.users.listGroups({
       ...params,
       id: user.id!,
-      realm: isMeInMaster ? searchRealm : realm
+      realm: isMeInMaster ? searchRealm : realm,
     });
 
     setDirectMembershipList([...joinedUserGroups]);
@@ -124,7 +127,7 @@ export const UserGroups = ({ user }: UserGroupsProps) => {
             adminClient.users.delFromGroup({
               id: user.id!,
               groupId: group.id!,
-              realm: isMeInMaster ? searchRealm : realm
+              realm: isMeInMaster ? searchRealm : realm,
             }),
           ),
         );
@@ -150,7 +153,7 @@ export const UserGroups = ({ user }: UserGroupsProps) => {
           adminClient.users.addToGroup({
             id: user.id!,
             groupId: group.id!,
-            realm: isMeInMaster ? searchRealm : realm
+            realm: isMeInMaster ? searchRealm : realm,
           }),
         ),
       );
@@ -189,12 +192,15 @@ export const UserGroups = ({ user }: UserGroupsProps) => {
         ariaLabelKey="roleList"
         searchPlaceholderKey="searchGroup"
         canSelectAll={!isReadOnly}
-        onSelect={isReadOnly ? undefined : (groups) =>
-          isDirectMembership
-            ? setSelectedGroups(groups)
-            : setSelectedGroups(
-                intersectionBy(groups, directMembershipList, "id"),
-              )
+        onSelect={
+          isReadOnly
+            ? undefined
+            : (groups) =>
+                isDirectMembership
+                  ? setSelectedGroups(groups)
+                  : setSelectedGroups(
+                      intersectionBy(groups, directMembershipList, "id"),
+                    )
         }
         isRowDisabled={(group) =>
           !isDirectMembership &&

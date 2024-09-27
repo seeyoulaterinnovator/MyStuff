@@ -53,7 +53,7 @@ export const UserProfileGroup = ({
         ) : undefined
       }
       style={{
-        display: hidden ? 'none' : undefined
+        display: hidden ? "none" : undefined,
       }}
     >
       {component ? (

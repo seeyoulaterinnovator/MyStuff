@@ -1,3 +1,3 @@
 export enum AdminTheme {
-	KEYCLOAK_V2 = 'keycloak.v2',
+  KEYCLOAK_V2 = "keycloak.v2",
 }

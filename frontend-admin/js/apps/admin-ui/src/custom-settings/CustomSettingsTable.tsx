@@ -114,21 +114,19 @@ const SaveButton = (props: SaveButtonProps) => {
 };
 
 export default function CustomSettingsTable(props: CustomSettingsTableProps) {
-  const {
-    type
-  } = props;
-  const {t} = useTranslation();
-  const {realm} = useRealm();
-  const {adminClient} = useAdminClient();
+  const { type } = props;
+  const { t } = useTranslation();
+  const { realm } = useRealm();
+  const { adminClient } = useAdminClient();
   const valuesRef = useRef<IdValueMap>({});
   const unitsRef = useRef<IdUnitMap>({});
 
-  const loader = async() => {
+  const loader = async () => {
     valuesRef.current = {};
     unitsRef.current = {};
     const response = await adminClient.customSettings.findSettings({
       realm,
-      type
+      type,
     });
     return response.results.settings;
   };
@@ -203,18 +201,16 @@ export default function CustomSettingsTable(props: CustomSettingsTableProps) {
   );
 
   return (
-    <>
-      <KeycloakDataTable
-        loader={loader}
-        ariaLabelKey="titleCustomSettings"
-        columns={columns}
-        emptyState={
-          <ListEmptyState
-            message={t("emptyCustomSettings")}
-            instructions={t("emptyCustomSettingsInstructions")}
-          />
-        }
-      />
-    </>
-  )
+    <KeycloakDataTable
+      loader={loader}
+      ariaLabelKey="titleCustomSettings"
+      columns={columns}
+      emptyState={
+        <ListEmptyState
+          message={t("emptyCustomSettings")}
+          instructions={t("emptyCustomSettingsInstructions")}
+        />
+      }
+    />
+  );
 }

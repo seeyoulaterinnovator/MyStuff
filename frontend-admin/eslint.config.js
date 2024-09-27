@@ -106,6 +106,12 @@ export default tseslint.config(
           ],
         },
       ],
+      "prettier/prettier": [
+        "error",
+        {
+          endOfLine: "auto",
+        },
+      ],
       // Prefer using the `#private` syntax for private class members, we want to keep this consistent and use the same syntax.
       "no-restricted-syntax": [
         "error",

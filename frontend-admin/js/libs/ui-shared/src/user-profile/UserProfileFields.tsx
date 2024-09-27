@@ -125,12 +125,12 @@ export const UserProfileFields = ({
       ...(userProfileMetadata.groups ?? []),
     ].map<GroupWithAttributes>((group) => ({
       group,
-      attributes: attributes.filter(
-        (attribute) => attribute.group === group.name,
-      ).map((attribute) => ({
-        ...attribute,
-        readOnly: isReadOnly || attribute.readOnly
-      })),
+      attributes: attributes
+        .filter((attribute) => attribute.group === group.name)
+        .map((attribute) => ({
+          ...attribute,
+          readOnly: isReadOnly || attribute.readOnly,
+        })),
     }));
   }, [
     hideReadOnly,
@@ -165,8 +165,8 @@ export const UserProfileFields = ({
                   currentLocale={currentLocale}
                   renderer={renderer}
                   attribute={attribute}
-                  disabled={attribute.name === 'lastName'}
-                  hidden={attribute.name === 'username'}
+                  disabled={attribute.name === "lastName"}
+                  hidden={attribute.name === "username"}
                 />
               ))}
             </div>

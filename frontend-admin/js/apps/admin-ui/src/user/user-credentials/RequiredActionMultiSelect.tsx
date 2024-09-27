@@ -2,7 +2,11 @@ import type RequiredActionProviderRepresentation from "@keycloak/keycloak-admin-
 import { useState } from "react";
 import { FieldPathByValue, FieldValues } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { SelectControl, SelectVariant, TextControl } from "@keycloak/keycloak-ui-shared";
+import {
+  SelectControl,
+  SelectVariant,
+  TextControl,
+} from "@keycloak/keycloak-ui-shared";
 import { useAdminClient } from "../../admin-client";
 import { useFetch } from "../../utils/useFetch";
 
@@ -45,7 +49,7 @@ export const RequiredActionMultiSelect = <
     [],
   );
 
-  if(isDisabled) {
+  if (isDisabled) {
     return (
       <TextControl
         name={`${name}-disabled`}
@@ -54,7 +58,7 @@ export const RequiredActionMultiSelect = <
         readOnly
         isDisabled
       />
-    )
+    );
   }
 
   return (

@@ -61,7 +61,8 @@ export const AddRoleMappingModal = ({
   const compareRow = ({ role: { name } }: Row) => name?.toUpperCase();
 
   const { isCustomTheme } = useCustomConfig();
-  const isCustomUsers = isCustomTheme && realm !== searchRealm && type === "users";
+  const isCustomUsers =
+    isCustomTheme && realm !== searchRealm && type === "users";
 
   const loader = async (
     first?: number,
@@ -80,7 +81,7 @@ export const AddRoleMappingModal = ({
     const roles = await getAvailableRoles(
       adminClient,
       isCustomUsers ? "customUsers" : type,
-      { ...params, id, realm: searchRealm }
+      { ...params, id, realm: searchRealm },
     );
     const sorted = localeSort(roles, compareRow);
     return sorted.map((row) => {
@@ -102,7 +103,7 @@ export const AddRoleMappingModal = ({
       first: first || 0,
       max: max || 10,
       search,
-      basePath: isCustomUsers ? `realms/${searchRealm}/users-toms` : undefined
+      basePath: isCustomUsers ? `realms/${searchRealm}/users-toms` : undefined,
     });
 
     return localeSort(

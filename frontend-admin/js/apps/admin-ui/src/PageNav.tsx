@@ -28,7 +28,13 @@ import "./page-nav.css";
 import { useCustomConfig } from "./customLogic/context/CustomConfigContext";
 import { useWhoAmI } from "./context/whoami/WhoAmI";
 
-type LeftNavProps = { title: string; path: string; id?: string, label?: string, realm?: string };
+type LeftNavProps = {
+  title: string;
+  path: string;
+  id?: string;
+  label?: string;
+  realm?: string;
+};
 
 const LeftNav = ({ title, path, id, label, realm }: LeftNavProps) => {
   const { t } = useTranslation();
@@ -54,18 +60,21 @@ const LeftNav = ({ title, path, id, label, realm }: LeftNavProps) => {
     <li>
       <NavLink
         id={"nav-item" + path.replace("/", "-")}
-        to={`/${encodedRealm}${path}` + (realm ? `?searchRealm=${encodeURIComponent(realm)}` : "")}
+        to={
+          `/${encodedRealm}${path}` +
+          (realm ? `?searchRealm=${encodeURIComponent(realm)}` : "")
+        }
         className={({ isActive }) =>
           `pf-v5-c-nav__link${isActive ? " pf-m-current" : ""}`
         }
       >
         <Flex>
-          <FlexItem>
-            {t(title)}
-          </FlexItem>
+          <FlexItem>{t(title)}</FlexItem>
           {label && (
             <FlexItem>
-              <Label isCompact color="blue">{label}</Label>
+              <Label isCompact color="blue">
+                {label}
+              </Label>
             </FlexItem>
           )}
         </Flex>
@@ -117,18 +126,29 @@ export const PageNav = () => {
   const isOnAddRealm = !!useMatch(AddRealmRoute.path);
   const isRootPage = !!useMatch(DashboardRoute.path);
   const isCustomRootPage =
-    (isCustomTheme && isRootPage && realms.length > 1) ||
-    !isCustomTheme;
+    (isCustomTheme && isRootPage && realms.length > 1) || !isCustomTheme;
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const UsersLeftNav = () => {
-    if(isCustomTheme) {
-      const otherRealm = realm !== cardSearchRealm ? cardSearchRealm :
-          listSearchRealm && realm !== listSearchRealm ? listSearchRealm : "";
-      return <LeftNav title="users" path="/users" realm={otherRealm} label={otherRealm} />;
+    if (isCustomTheme) {
+      const otherRealm =
+        realm !== cardSearchRealm
+          ? cardSearchRealm
+          : listSearchRealm && realm !== listSearchRealm
+            ? listSearchRealm
+            : "";
+      return (
+        <LeftNav
+          title="users"
+          path="/users"
+          realm={otherRealm}
+          label={otherRealm}
+        />
+      );
     } else {
       return <LeftNav title="users" path="/users" />;
     }
-  }
+  };
 
   return (
     <PageSidebar className="keycloak__page_nav__nav">
@@ -142,8 +162,8 @@ export const PageNav = () => {
           <Divider />
           {!isCustomRootPage && showManage && !isOnAddRealm && (
             <NavGroup aria-label={t("manage")} title={t("manage")}>
-              {(isCustomTheme && isMeInManager) ? (
-                  <UsersLeftNav/>
+              {isCustomTheme && isMeInManager ? (
+                <UsersLeftNav />
               ) : (
                 <>
                   {isFeatureEnabled(Feature.Organizations) &&
@@ -153,7 +173,7 @@ export const PageNav = () => {
                   <LeftNav title="clients" path="/clients" />
                   <LeftNav title="clientScopes" path="/client-scopes" />
                   <LeftNav title="realmRoles" path="/roles" />
-                  <UsersLeftNav/>
+                  <UsersLeftNav />
                   <LeftNav title="importUsers" path="/import-users" />
                   <LeftNav title="groups" path="/groups" />
                   <LeftNav title="sessions" path="/sessions" />
@@ -163,26 +183,29 @@ export const PageNav = () => {
             </NavGroup>
           )}
 
-          {!isCustomRootPage && showConfigure && !isOnAddRealm && !(isCustomTheme && isMeInManager) && (
-            <NavGroup aria-label={t("configure")} title={t("configure")}>
-              <LeftNav title="realmSettings" path="/realm-settings" />
-              <LeftNav title="authentication" path="/authentication" />
-              <LeftNav title="identityProviders" path="/identity-providers" />
-              <LeftNav title="userFederation" path="/user-federation" />
-              {isFeatureEnabled(Feature.DeclarativeUI) &&
-                pages?.map((p) => (
-                  <LeftNav
-                    key={p.id}
-                    title={p.id}
-                    path={toPage({ providerId: p.id }).pathname!}
-                    id="/page-section"
-                  />
-                ))}
-              {isCustomTheme && (
-                <LeftNav title="customSettings" path="/custom-settings" />
-              )}
-            </NavGroup>
-          )}
+          {!isCustomRootPage &&
+            showConfigure &&
+            !isOnAddRealm &&
+            !(isCustomTheme && isMeInManager) && (
+              <NavGroup aria-label={t("configure")} title={t("configure")}>
+                <LeftNav title="realmSettings" path="/realm-settings" />
+                <LeftNav title="authentication" path="/authentication" />
+                <LeftNav title="identityProviders" path="/identity-providers" />
+                <LeftNav title="userFederation" path="/user-federation" />
+                {isFeatureEnabled(Feature.DeclarativeUI) &&
+                  pages?.map((p) => (
+                    <LeftNav
+                      key={p.id}
+                      title={p.id}
+                      path={toPage({ providerId: p.id }).pathname!}
+                      id="/page-section"
+                    />
+                  ))}
+                {isCustomTheme && (
+                  <LeftNav title="customSettings" path="/custom-settings" />
+                )}
+              </NavGroup>
+            )}
         </Nav>
       </PageSidebarBody>
     </PageSidebar>

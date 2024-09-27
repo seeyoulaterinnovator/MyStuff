@@ -18,8 +18,8 @@ export type UserPostRolesResultRepresentation = {
   roles: UserPostRoleRepresentation[];
 };
 
-export interface UserPostRolesResponseRepresentation
-  extends Response<UserPostRolesResultRepresentation> {}
+export type UserPostRolesResponseRepresentation =
+  Response<UserPostRolesResultRepresentation>;
 
 export type UserPostRolesEditRepresentation = {
   id: string;
@@ -31,5 +31,5 @@ export type UserPostSystemRolesResultRepresentation = Record<
   SystemRoleRepresentation[] | null
 >;
 
-export interface UserPostSystemRolesResponseRepresentation
-  extends Response<UserPostSystemRolesResultRepresentation> {}
+export type UserPostSystemRolesResponseRepresentation =
+  Response<UserPostSystemRolesResultRepresentation>;

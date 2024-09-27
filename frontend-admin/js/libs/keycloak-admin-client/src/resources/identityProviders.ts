@@ -38,7 +38,7 @@ export class IdentityProviders extends Resource<{ realm?: string }> {
   });
 
   public findOne = this.makeRequest<
-    { alias: string, searchRealm?: string },
+    { alias: string; searchRealm?: string },
     IdentityProviderRepresentation | undefined
   >({
     method: "GET",

@@ -37,7 +37,9 @@ export const RealmsProvider = ({ children }: PropsWithChildren) => {
   const { adminClient } = useAdminClient();
 
   const [realms, setRealms] = useState<RealmNameRepresentation[]>([]);
-  const [accessibleRealms, setAccessibleRealms] = useState<RealmNameRepresentation[]>([]);
+  const [accessibleRealms, setAccessibleRealms] = useState<
+    RealmNameRepresentation[]
+  >([]);
   const [refreshCount, setRefreshCount] = useState(0);
   const localeSort = useLocaleSort();
   const { t } = useTranslation();
@@ -47,12 +49,14 @@ export const RealmsProvider = ({ children }: PropsWithChildren) => {
     setRealms(localeSort(realms, (r) => label(t, r.displayName, r.name)));
   }
 
-  const formatAccessibleRealms = (rawAccessibleRealms: string[]): RealmNameRepresentation[] => {
-    return rawAccessibleRealms.map(item => ({
+  const formatAccessibleRealms = (
+    rawAccessibleRealms: string[],
+  ): RealmNameRepresentation[] => {
+    return rawAccessibleRealms.map((item) => ({
       name: item,
       displayName: item,
-    }))
-  }
+    }));
+  };
 
   useFetch(
     async () => {
@@ -78,7 +82,6 @@ export const RealmsProvider = ({ children }: PropsWithChildren) => {
     (data) => setAccessibleRealms(formatAccessibleRealms(data)),
     [],
   );
-
 
   const refresh = useCallback(async () => {
     //this is needed otherwise the realm find function will not return

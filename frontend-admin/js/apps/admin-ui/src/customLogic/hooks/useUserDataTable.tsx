@@ -5,7 +5,7 @@ import type { UserInfoRepresentation } from "@keycloak/keycloak-admin-client/lib
 import { NetworkError } from "@keycloak/keycloak-admin-client/lib";
 import { AlertVariant, Button, Checkbox } from "@patternfly/react-core";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {useNavigate, useSearchParams} from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { CustomUserToolbarAction } from "../constants/user";
 import { useAdminClient } from "../../admin-client";
 import { useAlerts } from "../../components/alert/Alerts";
@@ -232,7 +232,7 @@ export const useUserDataTable = ({
   }, [customFilters]);
   useEffect(() => {
     return () => {
-      setSearchRealm('');
+      setSearchRealm("");
     };
   }, []);
 
@@ -475,7 +475,9 @@ export const useUserDataTable = ({
     messageKey: t("importUsersMessage", { count: selectedRows.length }),
     continueButtonLabel: "ok",
     noCancelButton: true,
-    onConfirm: () => {},
+    onConfirm: () => {
+      return;
+    },
   });
 
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>();

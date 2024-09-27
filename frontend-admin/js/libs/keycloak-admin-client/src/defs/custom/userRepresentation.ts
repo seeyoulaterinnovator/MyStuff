@@ -30,7 +30,7 @@ export enum ExternalSystemName {
 }
 
 export enum UserAttribute {
-  PHONE = "phone"
+  PHONE = "phone",
 }
 
 export interface UserRoleRepresentation {
@@ -139,8 +139,8 @@ export type UserPostsResultRepresentation = {
   user_post: UserPostRepresentation[];
 };
 
-export interface UserPostsResponseRepresentation
-  extends Response<UserPostsResultRepresentation> {}
+export type UserPostsResponseRepresentation =
+  Response<UserPostsResultRepresentation>;
 
 export type UserPostSystemRoleRepresentation = {
   systemRoleId: number;
@@ -151,7 +151,8 @@ export interface UserFindResultRepresentation {
   foundUserId: string;
 }
 
-export interface UserFindResponseRepresentation extends Response<UserFindResultRepresentation> {}
+export type UserFindResponseRepresentation =
+  Response<UserFindResultRepresentation>;
 
 export interface RealmNameRepresentation {
   realm: string;

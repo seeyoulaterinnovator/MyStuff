@@ -32,10 +32,13 @@ export const UserConsents = () => {
   const { isCustomTheme } = useCustomConfig();
   const { isMeInMaster } = useWhoAmI();
   const { getAccesses } = useAccess();
-  const { withManageUsersAccess, withEditConsentsAccess } = getAccesses(
-    ["manage-users", "edit-consents"],
-  );
-  const isReadOnly = isCustomTheme && !(withManageUsersAccess && (isMeInMaster || withEditConsentsAccess));
+  const { withManageUsersAccess, withEditConsentsAccess } = getAccesses([
+    "manage-users",
+    "edit-consents",
+  ]);
+  const isReadOnly =
+    isCustomTheme &&
+    !(withManageUsersAccess && (isMeInMaster || withEditConsentsAccess));
 
   const [selectedClient, setSelectedClient] =
     useState<UserConsentRepresentation>();
@@ -54,7 +57,7 @@ export const UserConsents = () => {
   const loader = async () => {
     const getConsents = await adminClient.users.listConsents({
       id,
-      realm: isMeInMaster ? searchRealm : realm
+      realm: isMeInMaster ? searchRealm : realm,
     });
 
     return alphabetize(getConsents);
@@ -86,7 +89,7 @@ export const UserConsents = () => {
         await adminClient.users.revokeConsent({
           id,
           clientId: selectedClient!.clientId!,
-          realm: isMeInMaster ? searchRealm : realm
+          realm: isMeInMaster ? searchRealm : realm,
         });
 
         refresh();
@@ -135,15 +138,19 @@ export const UserConsents = () => {
               lastUpdatedDate ? formatDate(new Date(lastUpdatedDate)) : "—",
           },
         ]}
-        actions={isReadOnly ? undefined : [
-          {
-            title: t("revoke"),
-            onRowClick: (client) => {
-              setSelectedClient(client);
-              toggleDeleteDialog();
-            },
-          } as Action<UserConsentRepresentation>,
-        ]}
+        actions={
+          isReadOnly
+            ? undefined
+            : [
+                {
+                  title: t("revoke"),
+                  onRowClick: (client) => {
+                    setSelectedClient(client);
+                    toggleDeleteDialog();
+                  },
+                } as Action<UserConsentRepresentation>,
+              ]
+        }
         emptyState={
           <ListEmptyState
             hasIcon={true}

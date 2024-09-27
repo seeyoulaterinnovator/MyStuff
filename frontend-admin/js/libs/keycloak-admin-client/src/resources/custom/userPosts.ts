@@ -46,7 +46,7 @@ export class UserPosts extends Resource {
   >({
     method: "POST",
     path: "/realms/{realm}/user-post/create",
-    urlParamKeys: ["realm"]
+    urlParamKeys: ["realm"],
   });
 
   public deleteUserPost = this.makeUpdateRequest<

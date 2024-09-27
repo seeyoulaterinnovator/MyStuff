@@ -85,7 +85,7 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
   }, [isOnUserPage]);
 
   useEffect(() => {
-    if(realm === "realms") {
+    if (realm === "realms") {
       // fix для случая входа под админом после выхода из-под менеджера (слетает realm из-за разницы в base uri)
       navigate("/master/console");
       window.location.href = window.location.origin + window.location.pathname;
@@ -95,24 +95,35 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
   useFetch(
     async () => {
       if (userId && searchRealm && realm !== searchRealm) {
-        return adminClient.customUsers.findUserRealm({ id: userId, realm: searchRealm });
+        return adminClient.customUsers.findUserRealm({
+          id: userId,
+          realm: searchRealm,
+        });
       } else {
         return Promise.resolve(undefined);
       }
     },
     setSearchRealmRepresentation,
-    [realm, searchRealm, userId]
+    [realm, searchRealm, userId],
   );
 
   return (
-    <RealmContext.Provider value={{
-      realm,
-      searchRealm: searchRealm || realm,
-      realmRepresentation,
-      searchRealmRepresentation: searchRealm && searchRealm !== realm ? searchRealmRepresentation : realmRepresentation,
-      searchRealmUserId: isOnUserPage && searchRealm && searchRealm !== realm ? userId : undefined,
-      refresh
-    }}>
+    <RealmContext.Provider
+      value={{
+        realm,
+        searchRealm: searchRealm || realm,
+        realmRepresentation,
+        searchRealmRepresentation:
+          searchRealm && searchRealm !== realm
+            ? searchRealmRepresentation
+            : realmRepresentation,
+        searchRealmUserId:
+          isOnUserPage && searchRealm && searchRealm !== realm
+            ? userId
+            : undefined,
+        refresh,
+      }}
+    >
       {children}
     </RealmContext.Provider>
   );

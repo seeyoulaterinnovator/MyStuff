@@ -55,7 +55,7 @@ export const UserCustomer = () => {
   const {
     withManageUsersAccess,
     withButtonAddCustomerAccess,
-    withEditCustomerAccess
+    withEditCustomerAccess,
   } = getAccesses(["manage-users", "button-add-customer", "edit-customer"]);
 
   const [key, setKey] = useState(0);
@@ -70,12 +70,10 @@ export const UserCustomer = () => {
   const newRoleIdRef = useRef<number>(DEFAULT_USER_ROLE_ID);
 
   const canCreate =
-    withManageUsersAccess &&
-    (isMeInMaster || withButtonAddCustomerAccess);
+    withManageUsersAccess && (isMeInMaster || withButtonAddCustomerAccess);
 
   const canEdit =
-    withManageUsersAccess &&
-    (isMeInMaster || withEditCustomerAccess);
+    withManageUsersAccess && (isMeInMaster || withEditCustomerAccess);
 
   const refresh = useCallback(() => {
     setRoles(null);
@@ -95,11 +93,13 @@ export const UserCustomer = () => {
   useFetch(
     async () => {
       return (
-        await adminClient.userPosts.findUserPostSystemRoles({
-          realm,
-          realmId: searchRealm
-        })
-      ).results["system-roles"] || [];
+        (
+          await adminClient.userPosts.findUserPostSystemRoles({
+            realm,
+            realmId: searchRealm,
+          })
+        ).results["system-roles"] || []
+      );
     },
     setSystemRoles,
     [realm, searchRealm, key],
@@ -169,15 +169,13 @@ export const UserCustomer = () => {
         displayKey: "id",
         cellRenderer: (post) =>
           post.id !== null ? (
-            <>
-              <ClipboardCopy
-                hoverTip="Copy"
-                clickTip="Copied"
-                variant="inline-compact"
-              >
-                {post.id}
-              </ClipboardCopy>
-            </>
+            <ClipboardCopy
+              hoverTip="Copy"
+              clickTip="Copied"
+              variant="inline-compact"
+            >
+              {post.id}
+            </ClipboardCopy>
           ) : (
             ""
           ),

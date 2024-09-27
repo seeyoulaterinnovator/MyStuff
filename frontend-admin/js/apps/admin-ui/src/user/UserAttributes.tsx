@@ -30,9 +30,10 @@ export const UserAttributes = ({
   const { isCustomTheme } = useCustomConfig();
   const { isMeInMaster } = useWhoAmI();
   const { getAccesses } = useAccess();
-  const { withManageUsersAccess, withEditAttributesAccess } = getAccesses(
-    ["manage-users", "edit-attributes"],
-  );
+  const { withManageUsersAccess, withEditAttributesAccess } = getAccesses([
+    "manage-users",
+    "edit-attributes",
+  ]);
 
   return (
     <PageSection variant={PageSectionVariants.light}>
@@ -51,7 +52,10 @@ export const UserAttributes = ({
           UnmanagedAttributePolicy.AdminView ==
           upConfig?.unmanagedAttributePolicy
         }
-        isReadonly={isCustomTheme && !(withManageUsersAccess && (isMeInMaster || withEditAttributesAccess))}
+        isReadonly={
+          isCustomTheme &&
+          !(withManageUsersAccess && (isMeInMaster || withEditAttributesAccess))
+        }
       />
     </PageSection>
   );

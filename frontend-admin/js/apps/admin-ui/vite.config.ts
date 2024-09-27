@@ -19,8 +19,9 @@ export default defineConfig({
       input: "src/main.tsx",
       external: ["react", "react/jsx-runtime", "react-dom"],
     },
-    outDir: "../../../../keycloak-extension/src/main/resources/themes/keycloak.v2/admin/resources",
-    emptyOutDir: false
+    outDir:
+      "../../../../keycloak-extension/src/main/resources/themes/keycloak.v2/admin/resources",
+    emptyOutDir: false,
   },
   plugins: [react(), checker({ typescript: true })],
   test: {

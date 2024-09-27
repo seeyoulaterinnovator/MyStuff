@@ -24,7 +24,7 @@ export const CustomAuthWall = ({ children }: any) => {
     }
   }, []);
 
-  if (isForbidden) return <></>;
+  if (isForbidden) return null;
 
   return children;
 };

@@ -7,4 +7,4 @@ if [ ! -f "$FILE" ]; then
   exit 0;
 fi
 
-pnpm exec lint-staged
+pnpm --prefix ./frontend-admin exec lint-staged --concurrent false

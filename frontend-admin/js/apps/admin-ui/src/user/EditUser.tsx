@@ -70,7 +70,11 @@ export default function EditUser() {
   const navigate = useNavigate();
   const { hasAccess } = useAccess();
   const { id } = useParams<UserParams>();
-  const { realm: realmName, realmRepresentation: realm, searchRealm } = useRealm();
+  const {
+    realm: realmName,
+    realmRepresentation: realm,
+    searchRealm,
+  } = useRealm();
   // Validation of form fields is performed on server, thus we need to clear all errors before submit
   const clearAllErrorsBeforeSubmit = async (values: UserFormFields) => ({
     values,
@@ -170,10 +174,10 @@ export default function EditUser() {
   const save = async (data: UserFormFields) => {
     const representation = toUserRepresentation(data);
 
-    if(isCustomTheme && representation.attributes) {
+    if (isCustomTheme && representation.attributes) {
       let phone = representation.attributes[UserAttribute.PHONE];
-      if(phone !== undefined) {
-        if(Array.isArray(phone)) {
+      if (phone !== undefined) {
+        if (Array.isArray(phone)) {
           phone = phone[0];
         }
         if (!Number(phone)) {
@@ -189,9 +193,9 @@ export default function EditUser() {
           realm: realmName,
           realmId: searchRealm,
           phone,
-          excludedUserId: id
+          excludedUserId: id,
         });
-        if(phoneCheck.results.foundUserId) {
+        if (phoneCheck.results.foundUserId) {
           addError(t("duplicatePhone"), "");
           return;
         }
@@ -199,10 +203,7 @@ export default function EditUser() {
     }
 
     try {
-      await adminClient.users.update(
-        { id: user!.id! },
-        representation,
-      );
+      await adminClient.users.update({ id: user!.id! }, representation);
       addAlert(t("userSaved"), AlertVariant.success);
       refresh();
     } catch (error) {
@@ -280,7 +281,7 @@ export default function EditUser() {
     onConfirm: async () => {
       try {
         let data;
-        if(isCustomTheme) {
+        if (isCustomTheme) {
           data = await adminClient.customUsers.impersonation(
             { id: user!.id!, realm: searchRealm },
             { user: user!.id!, realm: searchRealm },
@@ -349,11 +350,14 @@ export default function EditUser() {
             {t("delete")}
           </DropdownItem>,
         ]}
-        onToggle={isReadOnly ? undefined : (value) =>
-          save({
-            ...toUserFormFields(user),
-            enabled: value,
-          })
+        onToggle={
+          isReadOnly
+            ? undefined
+            : (value) =>
+                save({
+                  ...toUserFormFields(user),
+                  enabled: value,
+                })
         }
         isEnabled={user.enabled}
       />

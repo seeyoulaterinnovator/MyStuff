@@ -14,7 +14,7 @@ import { ClusteringPanel } from "./advanced/ClusteringPanel";
 import { FineGrainOpenIdConnect } from "./advanced/FineGrainOpenIdConnect";
 import { FineGrainSamlEndpointConfig } from "./advanced/FineGrainSamlEndpointConfig";
 import { OpenIdConnectCompatibilityModes } from "./advanced/OpenIdConnectCompatibilityModes";
-import {useCustomConfig} from "../customLogic/context/CustomConfigContext";
+import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
 
 export const parseResult = (
   result: GlobalRequestResult,

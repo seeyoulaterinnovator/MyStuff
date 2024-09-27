@@ -41,17 +41,22 @@ export const UserIdentityProviderLinks = ({
   const [federatedId, setFederatedId] = useState("");
   const [isLinkIdPModalOpen, setIsLinkIdPModalOpen] = useState(false);
 
-  const { realm, realmRepresentation, searchRealm, searchRealmRepresentation } = useRealm();
+  const { realm, realmRepresentation, searchRealm, searchRealmRepresentation } =
+    useRealm();
   const { isMeInMaster, isMeInManager } = useWhoAmI();
   const { addAlert, addError } = useAlerts();
   const { t } = useTranslation();
   const { hasAccess, hasSomeAccess } = useAccess();
   const { isCustomTheme } = useCustomConfig();
   const { getAccesses } = useAccess();
-  const { withManageUsersAccess, withEditFederatedIdentityAccess } = getAccesses(
-    ["manage-users", "edit-federated-identity"],
-  );
-  const isReadOnly = isCustomTheme && !(withManageUsersAccess && (isMeInMaster || withEditFederatedIdentityAccess));
+  const { withManageUsersAccess, withEditFederatedIdentityAccess } =
+    getAccesses(["manage-users", "edit-federated-identity"]);
+  const isReadOnly =
+    isCustomTheme &&
+    !(
+      withManageUsersAccess &&
+      (isMeInMaster || withEditFederatedIdentityAccess)
+    );
 
   const canQueryIDPDetails = hasSomeAccess(
     "manage-identity-providers",
@@ -69,7 +74,7 @@ export const UserIdentityProviderLinks = ({
   const getFederatedIdentities = async () => {
     const allFedIds = (await adminClient.users.listFederatedIdentities({
       id: userId,
-      realm: isMeInMaster ? searchRealm : realm
+      realm: isMeInMaster ? searchRealm : realm,
     })) as WithProviderId[];
 
     if (canQueryIDPDetails) {
@@ -85,7 +90,9 @@ export const UserIdentityProviderLinks = ({
   };
 
   const getAvailableIdPs = () => {
-    return isCustomTheme ? searchRealmRepresentation?.identityProviders : realmRepresentation?.identityProviders;
+    return isCustomTheme
+      ? searchRealmRepresentation?.identityProviders
+      : realmRepresentation?.identityProviders;
   };
 
   const linkedIdPsLoader = async () => {

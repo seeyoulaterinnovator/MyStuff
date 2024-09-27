@@ -4,7 +4,8 @@ import {
   AlertVariant,
   Button,
   ButtonVariant,
-  Divider, ModalVariant,
+  Divider,
+  ModalVariant,
   PageSection,
   PageSectionVariants,
 } from "@patternfly/react-core";
@@ -31,10 +32,10 @@ import { CredentialRow } from "./user-credentials/CredentialRow";
 import { InlineLabelEdit } from "./user-credentials/InlineLabelEdit";
 import { ResetCredentialDialog } from "./user-credentials/ResetCredentialDialog";
 import { ResetPasswordDialog } from "./user-credentials/ResetPasswordDialog";
-import {UserAttribute} from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
+import { UserAttribute } from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
 
 import "./user-credentials.css";
-import {useCustomConfig} from "../customLogic/context/CustomConfigContext";
+import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
 
 type UserCredentialsProps = {
   user: UserRepresentation;
@@ -125,11 +126,12 @@ export const UserCredentials = ({ user, setUser }: UserCredentialsProps) => {
   });
 
   const fixedUser = user as UserRepresentation & {
-    unmanagedAttributes: Record<string, any>
+    unmanagedAttributes: Record<string, any>;
   };
 
-  const hasPhone = (user.attributes?.[UserAttribute.PHONE]
-    || fixedUser.unmanagedAttributes?.[UserAttribute.PHONE]) !== undefined;
+  const hasPhone =
+    (user.attributes?.[UserAttribute.PHONE] ||
+      fixedUser.unmanagedAttributes?.[UserAttribute.PHONE]) !== undefined;
 
   const { isCustomTheme } = useCustomConfig();
 
@@ -195,8 +197,10 @@ export const UserCredentials = ({ user, setUser }: UserCredentialsProps) => {
   const [toggleDeleteInvalidDialog, DeleteInvalidConfirm] = useConfirmDialog({
     titleKey: t("deleteCredentialsConfirmTitle"),
     variant: ModalVariant.small,
-    messageKey: hasPhone ? "resetCredentialsDisabledByEmail" : "resetCredentialsDisabledByPhone",
-    noContinueButton: true
+    messageKey: hasPhone
+      ? "resetCredentialsDisabledByEmail"
+      : "resetCredentialsDisabledByPhone",
+    noContinueButton: true,
   });
 
   const itemOrder = useMemo(
@@ -368,7 +372,7 @@ export const UserCredentials = ({ user, setUser }: UserCredentialsProps) => {
 
   const onToggleDelete = (credential: CredentialRepresentation) => {
     setSelectedCredential(credential);
-    if(!isCustomTheme || !!user.emailVerified) {
+    if (!isCustomTheme || !!user.emailVerified) {
       toggleDeleteDialog();
     } else {
       toggleDeleteInvalidDialog();
