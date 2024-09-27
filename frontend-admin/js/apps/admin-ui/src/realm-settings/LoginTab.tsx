@@ -6,13 +6,15 @@ import { useAdminClient } from "../admin-client";
 import { useAlerts } from "../components/alert/Alerts";
 import { FormAccess } from "../components/form/FormAccess";
 import { useRealm } from "../context/realm-context/RealmContext";
+import { useForm, FieldPath } from "react-hook-form";
+import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
 
 type RealmSettingsLoginTabProps = {
   realm: RealmRepresentation;
   refresh: () => void;
 };
 
-type SwitchType = { [K in keyof RealmRepresentation]: boolean };
+type SwitchType = Partial<{ [K in FieldPath<RealmRepresentation>]: boolean }>;
 
 export const RealmSettingsLoginTab = ({
   realm,
@@ -24,25 +26,39 @@ export const RealmSettingsLoginTab = ({
 
   const { addAlert, addError } = useAlerts();
   const { realm: realmName } = useRealm();
+  const { setValue, getValues, reset } = useForm<RealmRepresentation>();
+  const { isCustomTheme } = useCustomConfig();
 
   const updateSwitchValue = async (switches: SwitchType | SwitchType[]) => {
     const name = Array.isArray(switches)
       ? Object.keys(switches[0])[0]
       : Object.keys(switches)[0];
 
+    const setValueFromSwitch = (switchItem: SwitchType) => {
+      Object.entries(switchItem).map(([key, value]) => {
+        setValue(key as FieldPath<RealmRepresentation>, value);
+      });
+    };
+
+    if (Array.isArray(switches)) {
+      switches.map(setValueFromSwitch);
+    } else {
+      setValueFromSwitch(switches);
+    }
+
     try {
       await adminClient.realms.update(
         {
           realm: realmName,
         },
-        Array.isArray(switches)
-          ? switches.reduce((realm, s) => Object.assign(realm, s), realm)
-          : Object.assign(realm, switches),
+        getValues(),
       );
       addAlert(t("enableSwitchSuccess", { switch: t(name) }));
       refresh();
     } catch (error) {
       addError(t("enableSwitchError"), error);
+    } finally {
+      reset();
     }
   };
 
@@ -126,6 +142,66 @@ export const RealmSettingsLoginTab = ({
               aria-label={t("rememberMe")}
             />
           </FormGroup>
+          {isCustomTheme && (
+            <>
+              <FormGroup
+                label={t("attributes.registrationOnlyInFrame")}
+                fieldId="kc-attributes-registration-only-in-frame"
+                labelIcon={
+                  <HelpItem
+                    helpText={t("attributes.registrationOnlyInFrameHelp")}
+                    fieldLabelId="attributes.registrationOnlyInFrame"
+                  />
+                }
+                hasNoPaddingTop
+              >
+                <Switch
+                  id="kc-attributes-registration-only-in-frame-switch"
+                  data-testid="attributes-registration-only-in-frame-switch"
+                  value={
+                    realm.attributes?.registrationOnlyInFrame === "true"
+                      ? "on"
+                      : "off"
+                  }
+                  label={t("on")}
+                  labelOff={t("off")}
+                  isChecked={
+                    realm.attributes?.registrationOnlyInFrame === "true"
+                  }
+                  onChange={(_event, value) => {
+                    updateSwitchValue({
+                      "attributes.registrationOnlyInFrame": value,
+                    });
+                  }}
+                  aria-label={t("attributes.registrationOnlyInFrame")}
+                />
+              </FormGroup>
+              <FormGroup
+                label={t("attributes.hideChat")}
+                fieldId="kc-attributes-hide-chat"
+                labelIcon={
+                  <HelpItem
+                    helpText={t("attributes.hideChatHelp")}
+                    fieldLabelId="attributes.hideChat"
+                  />
+                }
+                hasNoPaddingTop
+              >
+                <Switch
+                  id="kc-attributes-hide-chat-switch"
+                  data-testid="attributes-hide-chat-switch"
+                  value={realm.attributes?.hideChat !== "true" ? "on" : "off"}
+                  label={t("on")}
+                  labelOff={t("off")}
+                  isChecked={realm.attributes?.hideChat !== "true"}
+                  onChange={(_event, value) => {
+                    updateSwitchValue({ "attributes.hideChat": !value });
+                  }}
+                  aria-label={t("attributes.hideChat")}
+                />
+              </FormGroup>
+            </>
+          )}
         </FormAccess>
       </FormPanel>
       <FormPanel className="kc-email-settings" title={t("emailSettings")}>
@@ -148,6 +224,7 @@ export const RealmSettingsLoginTab = ({
               label={t("on")}
               labelOff={t("off")}
               isChecked={realm.registrationEmailAsUsername}
+              isDisabled={!isCustomTheme && !realm.registrationAllowed}
               onChange={(_event, value) => {
                 updateSwitchValue([
                   {
@@ -276,6 +353,68 @@ export const RealmSettingsLoginTab = ({
           </FormGroup>
         </FormAccess>
       </FormPanel>
+      {isCustomTheme && (
+        <FormPanel className="kc-other-settings" title={t("otherSettings")}>
+          <FormAccess isHorizontal role="manage-realm">
+            <FormGroup
+              label={t("attributes.checkInRiasIfNotFound")}
+              fieldId="kc-attributes-check-in-rias-if-not-found"
+              labelIcon={
+                <HelpItem
+                  helpText={t("attributes.checkInRiasIfNotFoundHelp")}
+                  fieldLabelId="attributes.checkInRiasIfNotFound"
+                />
+              }
+              hasNoPaddingTop
+            >
+              <Switch
+                id="kc-attributes-check-in-rias-if-not-found-switch"
+                data-testid="attributes-check-in-rias-if-not-found-switch"
+                value={
+                  realm.attributes?.checkInRiasIfNotFound === "true"
+                    ? "on"
+                    : "off"
+                }
+                label={t("on")}
+                labelOff={t("off")}
+                isChecked={realm.attributes?.checkInRiasIfNotFound === "true"}
+                onChange={(_event, value) => {
+                  updateSwitchValue({
+                    "attributes.checkInRiasIfNotFound": value,
+                  });
+                }}
+                aria-label={t("attributes.checkInRiasIfNotFound")}
+              />
+            </FormGroup>
+            <FormGroup
+              label={t("attributes.realmInSchedule")}
+              fieldId="kc-attributes-realm-in-schedule"
+              labelIcon={
+                <HelpItem
+                  helpText={t("attributes.realmInScheduleHelp")}
+                  fieldLabelId="attributes.realmInSchedule"
+                />
+              }
+              hasNoPaddingTop
+            >
+              <Switch
+                id="kc-attributes-realm-in-schedule-switch"
+                data-testid="attributes-realm-in-schedule-switch"
+                value={
+                  realm.attributes?.realmInSchedule === "true" ? "on" : "off"
+                }
+                label={t("on")}
+                labelOff={t("off")}
+                isChecked={realm.attributes?.realmInSchedule === "true"}
+                onChange={(_event, value) => {
+                  updateSwitchValue({ "attributes.realmInSchedule": value });
+                }}
+                aria-label={t("attributes.realmInSchedule")}
+              />
+            </FormGroup>
+          </FormAccess>
+        </FormPanel>
+      )}
     </PageSection>
   );
 };
