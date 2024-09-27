@@ -768,6 +768,7 @@ export function KeycloakDataTable<T>({
           count={rowLength}
           first={first}
           max={max}
+          isDisabled={loading}
           onNextClick={setFirst}
           onPreviousClick={setFirst}
           onPerPageSelect={(first, max) => {
