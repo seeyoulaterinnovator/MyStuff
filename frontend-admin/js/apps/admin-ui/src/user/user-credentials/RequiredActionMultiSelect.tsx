@@ -52,7 +52,7 @@ export const RequiredActionMultiSelect = <
   if (isDisabled) {
     return (
       <TextControl
-        name={`${name}-disabled`}
+        name={`${name}`}
         label={t(label)}
         placeholder={t("requiredActionPlaceholder")}
         readOnly
