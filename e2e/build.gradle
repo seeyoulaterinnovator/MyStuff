@@ -4,6 +4,7 @@ dependencies {
     testImplementation "org.testcontainers:junit-jupiter"
     testImplementation "org.testcontainers:mariadb"
     testImplementation "com.github.dasniko:testcontainers-keycloak:3.4.0"
+    testImplementation "org.testcontainers:mockserver"
     testImplementation "io.rest-assured:rest-assured:5.5.0"
     testImplementation "io.rest-assured:json-path:5.5.0"
     testImplementation "org.jsoup:jsoup:1.18.1"

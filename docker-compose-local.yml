@@ -21,10 +21,10 @@ services:
     ports:
       - "1080:1080"
     environment:
-      MOCKSERVER_INITIALIZATION_JSON_PATH: /var/mockserver/initialization.json
+      MOCKSERVER_INITIALIZATION_JSON_PATH: /initialization.json
       MOCKSERVER_WATCH_INITIALIZATION_JSON: true
     volumes:
-      - ./volumes/mockserver/:/var/mockserver/:ro
+      - ./volumes/mockserver/initialization.json:/initialization.json:ro
 
   smtp4dev:
     image: rnwood/smtp4dev:v3
@@ -66,6 +66,7 @@ services:
       SITE: STAGE5
       KC_SPI_USER_PROVIDER: customjpa
       LIQUIBASE_COMMAND_CHANGE_EXEC_LISTENER_CLASS: ru.alamics.sso.keycloak.migration.CustomChangeExecListener
+      APP_PROPS_UPDATE_DELAY_SECS: 60
     volumes:
       - ./volumes/keycloak/opt/keycloak/bin/kc-custom.sh:/opt/keycloak/bin/kc-custom.sh:ro
       - ./volumes/keycloak/opt/keycloak/conf/cache-ispn-custom.xml:/opt/keycloak/conf/cache-ispn-custom.xml:ro

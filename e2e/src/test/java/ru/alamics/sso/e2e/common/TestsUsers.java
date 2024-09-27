@@ -1,0 +1,18 @@
+package ru.alamics.sso.e2e.common;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+@Getter
+public enum TestsUsers {
+    TESTER(TestsRealms.E2E, "tester@nomail.tld", "qwerty", 10002408221L);
+
+    final TestsRealms realm;
+
+    final String username;
+
+    final String password;
+
+    final Long tomsId;
+}

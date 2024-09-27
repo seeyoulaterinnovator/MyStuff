@@ -19,6 +19,7 @@ import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
 public class ApplicationProperties {
     private final Properties fileProperties = new Properties();
 
-    private Properties dbProperties = new Properties();
+    private final AtomicReference<Properties> dbPropertiesRef = new AtomicReference<>(new Properties());
 
     @Inject
     AppPropertyRepository propertyRepository;
@@ -35,7 +36,17 @@ public class ApplicationProperties {
 
     void onStart(@Observes StartupEvent ev) {
         executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleWithFixedDelay(this::initDbProperties, 10, 10, TimeUnit.MINUTES);
+        int defaultDelay = 60 * 10;
+        int delay = defaultDelay;
+        try {
+            delay = Integer.parseInt(System.getenv("APP_PROPS_UPDATE_DELAY_SECS"));
+        } catch (Exception e) {
+            log.debug(e.getMessage(), e);
+        }
+        if(delay < 0) {
+            delay = defaultDelay;
+        }
+        executor.scheduleWithFixedDelay(this::initDbProperties, delay, delay, TimeUnit.SECONDS);
     }
 
     void onShutdown(@Observes ShutdownEvent ev) {
@@ -54,12 +65,19 @@ public class ApplicationProperties {
     @Locked.Read
     public String getProperty(final String name) {
         String result = System.getenv(name);
-
         if (result == null) {
             result = System.getProperty(name);
         }
         if (result == null) {
-            result = this.dbProperties.getProperty(name);
+            if (E2EUtil.isE2E()) {
+                try {
+                    result = this.propertyRepository.findByName(name).map(AppProperty::getValue).orElse(null);
+                } catch (Exception e) {
+                    log.debug(e.getMessage(), e);
+                }
+            } else {
+                result = this.dbPropertiesRef.get().getProperty(name);
+            }
         }
         if (result == null) {
             result = this.fileProperties.getProperty(name);
@@ -143,13 +161,16 @@ public class ApplicationProperties {
     }
 
     private void initDbProperties() {
-        Properties tempProp = new Properties();
-        tempProp.putAll(propertyRepository.findAll().stream()
-                .collect(Collectors.toMap(AppProperty::getName, AppProperty::getValue)));
-        if (!tempProp.isEmpty()) {
-            dbProperties = tempProp;
+        try {
+            Properties tempProp = new Properties();
+            tempProp.putAll(propertyRepository.findAll().stream()
+                    .collect(Collectors.toMap(AppProperty::getName, AppProperty::getValue)));
+            if (!tempProp.isEmpty()) {
+                dbPropertiesRef.set(tempProp);
+            }
+            log.info("Initializing application properties from database finished");
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
-        log.info("Initializing application properties from database finished");
     }
-
 }
