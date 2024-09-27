@@ -7,10 +7,7 @@ import org.apache.http.HttpStatus;
 import org.jsoup.Jsoup;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import ru.alamics.sso.e2e.common.Tests;
-import ru.alamics.sso.e2e.common.TestsClients;
-import ru.alamics.sso.e2e.common.TestsUsers;
-import ru.alamics.sso.e2e.common.TestsUtils;
+import ru.alamics.sso.e2e.common.*;
 
 import java.net.URI;
 import java.net.URLDecoder;
@@ -20,6 +17,7 @@ import java.util.Arrays;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@TestsEnabled
 @Slf4j
 public class PasswordTests extends Tests {
     @AfterEach

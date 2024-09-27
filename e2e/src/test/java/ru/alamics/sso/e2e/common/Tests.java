@@ -8,7 +8,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.ClassRule;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -30,11 +29,10 @@ import java.util.Objects;
 
 import static org.testcontainers.utility.MountableFile.forHostPath;
 
-@EnabledIfEnvironmentVariable(named = Tests.ENABLE_VARIABLE, matches = "true")
 @ExtendWith(Tests.WaitOnFailExtension.class)
 @Slf4j
 public abstract class Tests {
-    static final String ENABLE_VARIABLE = "ERTH_SSO_E2E_ENABLED";
+    static final String CONDITION_VARIABLE = "ERTH_SSO_E2E_ENABLED";
 
     static final Path BASEDIR = Paths.get("..").toAbsolutePath().normalize();
 
@@ -132,7 +130,7 @@ public abstract class Tests {
                     );
 
     static {
-        if (Boolean.TRUE.toString().equals(System.getenv(ENABLE_VARIABLE))) {
+        if (isEnabled()) {
             try {
                 initialize();
                 log.info("Tests initialized");
@@ -140,6 +138,10 @@ public abstract class Tests {
                 throw new ExceptionInInitializerError(e);
             }
         }
+    }
+
+    static boolean isEnabled() {
+        return Boolean.TRUE.toString().equals(System.getenv(CONDITION_VARIABLE));
     }
 
     static void initialize() {
@@ -250,7 +252,7 @@ public abstract class Tests {
 
         @Override
         public void afterAll(ExtensionContext context) throws Exception {
-            if(failed) {
+            if(isEnabled() && failed) {
                 log.error("Waiting...");
                 Thread.sleep(Duration.ofMinutes(15).toMillis());
             }

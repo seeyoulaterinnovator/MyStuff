@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import ru.alamics.sso.e2e.common.Tests;
 import ru.alamics.sso.e2e.common.TestsClients;
+import ru.alamics.sso.e2e.common.TestsEnabled;
 import ru.alamics.sso.e2e.common.TestsUtils;
 
 import static io.restassured.RestAssured.given;
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 // TODO
 @Disabled
+@TestsEnabled
 @Slf4j
 public class RegistrationTests extends Tests {
     @Test
