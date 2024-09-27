@@ -451,7 +451,7 @@ export function KeycloakDataTable<T>({
   onlyTable = false,
   withoutRefreshButton = false,
   onPaginationChange,
-  isLoading = false,
+  isLoading,
   sortingOptions,
   onSort,
   ...props
@@ -637,7 +637,9 @@ export function KeycloakDataTable<T>({
   }, [sortingOptions]);
 
   useEffect(() => {
-    setLoading(isLoading);
+    if (isLoading != null) {
+      setLoading(isLoading);
+    }
   }, [isLoading]);
 
   const convertAction = () =>
