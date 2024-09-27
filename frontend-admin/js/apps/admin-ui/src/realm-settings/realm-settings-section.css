@@ -7,6 +7,7 @@
 .pf-v5-c-card.pf-m-flat.kc-sso-session-template,
 .pf-v5-c-card.pf-m-flat.kc-client-session-template,
 .pf-v5-c-card.pf-m-flat.kc-offline-session-template,
+.pf-v5-c-card.pf-m-flat.kc-other-settings,
 .pf-v5-c-card.pf-m-flat.kc-login-settings-template {
   border: none;
   margin-top: 0px;
@@ -27,6 +28,7 @@ article.pf-v5-c-card.pf-m-flat.kc-email-connection
 .kc-login-screen > div.pf-v5-c-card__header.kc-form-panel__header,
 .kc-email-settings > div.pf-v5-c-card__header.kc-form-panel__header,
 .kc-email-template > div.pf-v5-c-card__header.kc-form-panel__header,
+.kc-other-settings > div.pf-v5-c-card__header.kc-form-panel__header,
 .kc-user-info-settings > div.pf-v5-c-card__header.kc-form-panel__header {
   padding-bottom: 0px;
   padding-left: 0px;
@@ -36,6 +38,7 @@ article.pf-v5-c-card.pf-m-flat.kc-email-connection
 .kc-email-settings > div.pf-v5-c-card__body.kc-form-panel__body,
 .kc-email-template > div.pf-v5-c-card__body.kc-form-panel__body,
 .kc-login-screen > div.pf-v5-c-card__body.kc-form-panel__body,
+.kc-other-settings > div.pf-v5-c-card__body.kc-form-panel__body,
 .kc-user-info-settings > div.pf-v5-c-card__body.kc-form-panel__body {
   padding-left: 0px;
   padding-bottom: var(--pf-v5-global--spacer--2xl);
@@ -91,7 +94,9 @@ div#offline-session-max-label > .pf-v5-c-form__group-label {
   padding-bottom: var(--pf-v5-global--spacer--lg);
 }
 
-.kc-message-bundles > .pf-v5-c-card__body.kc-form-panel__body > div.tableBorder {
+.kc-message-bundles
+  > .pf-v5-c-card__body.kc-form-panel__body
+  > div.tableBorder {
   border-style: solid;
   border-width: 1px;
   border-color: var(--pf-v5-global--BorderColor--100);
