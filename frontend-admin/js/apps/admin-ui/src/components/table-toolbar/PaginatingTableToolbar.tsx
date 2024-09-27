@@ -13,6 +13,7 @@ type KeycloakPaginationProps = {
   count: number;
   first: number;
   max: number;
+  isDisabled?: boolean;
   onNextClick: (page: number) => void;
   onPreviousClick: (page: number) => void;
   onPerPageSelect: (max: number, first: number) => void;
@@ -34,6 +35,7 @@ const KeycloakPagination = ({
   count,
   first,
   max,
+  isDisabled,
   onNextClick,
   onPreviousClick,
   onPerPageSelect,
@@ -47,6 +49,7 @@ const KeycloakPagination = ({
         paginationAriaLabel: `${t("pagination")} ${variant} `,
       }}
       isCompact
+      isDisabled={isDisabled}
       toggleTemplate={({
         firstIndex,
         lastIndex,
