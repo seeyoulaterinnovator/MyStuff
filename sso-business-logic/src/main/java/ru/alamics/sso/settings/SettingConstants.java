@@ -144,6 +144,7 @@ public enum SettingConstants {
 
     HOME_PAGE("homePageSystem"),
     TIMER_INTERVAL_DURATION_PROPERTY("timerIntervalDurationProperty"),
+    TIMER_LOCK_DURATION_PROPERTY("timerLockDurationProperty"),
     DEFAULT_REALM_CLIENT_ID("defaultRealmClient"),
 
     TIME_TOKEN_VERIFY_EMAIL("life.token.loginverify.email"),

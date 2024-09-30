@@ -87,6 +87,7 @@ public class UserSchedule implements ScheduledTask {
 
     public void changeScheduleTimer() {
         long intervalDuration = DEFAULT_INTERVAL_DURATION;
+        long lockDuration = 0;
         try {
             intervalDuration = settingsService.getSettingsLongValue(
                     SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY,
@@ -99,17 +100,30 @@ public class UserSchedule implements ScheduledTask {
                 throw e;
             }
         }
+        try {
+            lockDuration = settingsService.getSettingsLongValue(
+                    SettingConstants.TIMER_LOCK_DURATION_PROPERTY,
+                    GeneralRealm.MASTER
+            );
+        } catch (Exception e) {
+            log.debug(e.getMessage(), e);
+        }
         if (intervalDuration <= 0) {
             intervalDuration = DEFAULT_INTERVAL_DURATION;
         }
+        if(lockDuration <= 0) {
+            lockDuration = intervalDuration * 5;
+        }
         intervalDuration *= 1000;
+        lockDuration *= 1000;
 
         timerProvider.cancelTask(TIMER_NAME);
         timerProvider.schedule(
-                new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), this, intervalDuration),
+                new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), this, lockDuration),
                 intervalDuration
         );
-        log.info("Timer:{} is created, interval duration value = {} ms, initial duration value = {} ms ", TIMER_NAME, intervalDuration, intervalDuration);
+        log.info("Timer: {} is created, interval duration value = {} ms, lock duration value = {} ms ",
+                TIMER_NAME, intervalDuration, lockDuration);
     }
 
     @Override

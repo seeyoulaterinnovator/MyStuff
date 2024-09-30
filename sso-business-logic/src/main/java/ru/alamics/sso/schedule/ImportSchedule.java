@@ -29,6 +29,7 @@ public class ImportSchedule implements ScheduledTask {
     private static final String TIMER_NAME = "Import Schedule Timer";
     private static final long DEFAULT_INTERVAL_DURATION = 60000;
     private final static String TIMER_INTERVAL_DURATION_PROPERTY = "application.schedule.import.milliseconds";
+    private final static String TIMER_LOCK_DURATION_PROPERTY = "application.lock.import.milliseconds";
 
     private static final long MAX_TIMEOUT_MILLI = (4 * 60 + 45) * 1000L;
 
@@ -65,6 +66,7 @@ public class ImportSchedule implements ScheduledTask {
 
     public void changeScheduleTimer() {
         long intervalDuration = DEFAULT_INTERVAL_DURATION;
+        long lockDuration = 0;
         try {
             intervalDuration = properties.getPropertyLong(TIMER_INTERVAL_DURATION_PROPERTY, DEFAULT_INTERVAL_DURATION);
         } catch (Exception e) {
@@ -74,16 +76,25 @@ public class ImportSchedule implements ScheduledTask {
                 throw e;
             }
         }
+        try {
+            lockDuration = properties.getPropertyLong(TIMER_LOCK_DURATION_PROPERTY, 0);
+        } catch (Exception e) {
+            log.debug(e.getMessage(), e);
+        }
         if (intervalDuration <= 0) {
             intervalDuration = DEFAULT_INTERVAL_DURATION;
+        }
+        if(lockDuration <= 0) {
+            lockDuration = intervalDuration * 100;
         }
 
         timerProvider.cancelTask(TIMER_NAME);
         timerProvider.schedule(
                 new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), this, intervalDuration),
-                intervalDuration
+                lockDuration
         );
-        log.info("Timer:{} is created, interval duration set to value={} milliseconds ", TIMER_NAME, intervalDuration);
+        log.info("Timer: {} is created, interval duration value = {} ms, lock duration value = {} ms ",
+                TIMER_NAME, intervalDuration, lockDuration);
     }
 
     @Override
