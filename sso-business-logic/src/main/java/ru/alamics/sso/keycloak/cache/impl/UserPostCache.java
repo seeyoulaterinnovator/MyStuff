@@ -1,7 +1,6 @@
 package ru.alamics.sso.keycloak.cache.impl;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.ws.rs.core.Context;
 import lombok.Locked;
 import lombok.extern.slf4j.Slf4j;
@@ -14,43 +13,42 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@ApplicationScoped
+@RequestScoped
 @Slf4j
 public class UserPostCache {
     @Context
     KeycloakSession session;
 
-    private Cache<String, Set<UserPostResponse>> cache;
-
-    @PostConstruct
-    void init() {
-        cache = session.getProvider(InfinispanConnectionProvider.class).getCache("user_post_cache");
-    }
-
     @Locked.Write
     public void put(String userId, List<UserPostResponse> userPosts) {
-        Set<UserPostResponse> posts = cache.get(userId);
+        Set<UserPostResponse> posts = getCache().get(userId);
         if (posts == null) {
             posts = new HashSet<>();
         }
         posts.addAll(userPosts);
-        cache.put(userId, posts);
+        getCache().put(userId, posts);
     }
 
     @Locked.Read
     public Set<UserPostResponse> get(String userId) {
-        return cache.get(userId);
+        return getCache().get(userId);
     }
 
+    @Locked.Write
     public void clear() {
-        cache.clear();
+        getCache().clear();
     }
 
+    @Locked.Write
     public void clearById(String userId) {
-        Set<UserPostResponse> posts = cache.get(userId);
+        Set<UserPostResponse> posts = getCache().get(userId);
         if (posts == null) {
             return;
         }
         posts.clear();
+    }
+
+    public Cache<String, Set<UserPostResponse>> getCache() {
+        return session.getProvider(InfinispanConnectionProvider.class).getCache("user_post_cache");
     }
 }

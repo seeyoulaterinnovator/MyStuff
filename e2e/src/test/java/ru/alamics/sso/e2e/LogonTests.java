@@ -6,10 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.jsoup.Jsoup;
 import org.junit.jupiter.api.Test;
-import ru.alamics.sso.e2e.common.*;
+import ru.alamics.sso.e2e.common.Tests;
+import ru.alamics.sso.e2e.common.TestsClients;
+import ru.alamics.sso.e2e.common.TestsEnabled;
+import ru.alamics.sso.e2e.common.TestsUsers;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static ru.alamics.sso.e2e.common.TestsUtils.getQueryParameter;
 
 @TestsEnabled
 @Slf4j
@@ -58,7 +62,7 @@ public class LogonTests extends Tests {
 
         assertNotNull(logonRedirectUrl);
 
-        var code = TestsUtils.getQueryParameter(logonRedirectUrl, "code");
+        var code = getQueryParameter(logonRedirectUrl, "code");
 
         assertNotNull(code);
 

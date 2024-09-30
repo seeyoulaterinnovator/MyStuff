@@ -1,7 +1,6 @@
 package ru.alamics.sso.keycloak.facade;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Named;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Context;
@@ -19,17 +18,16 @@ import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.util.validator.NotValidException;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@ApplicationScoped
+@RequestScoped
 @Named("UserPostFacade")
 @Slf4j
 public class UserPostFacade {
     private static final String CUSTOMER_CACHE_LIFESPAN_IN_DB_PROPERTY = "user.post.cache.db.lifespan.days";
     private static final int CUSTOMER_CACHE_LIFESPAN_IN_DB = 1;
-    protected Cache<String, String> customerCache;
     @Getter
     protected UserPostService userPostService;
     protected ApplicationProperties properties;
@@ -49,11 +47,6 @@ public class UserPostFacade {
         customerCacheLifespanInDb = properties.getPropertyInt(CUSTOMER_CACHE_LIFESPAN_IN_DB_PROPERTY, CUSTOMER_CACHE_LIFESPAN_IN_DB, "UserPostFacade: default value used: '{}' = '{}'");
     }
 
-    @PostConstruct
-    void init() {
-        customerCache = session.getProvider(InfinispanConnectionProvider.class).getCache("customer_cache");
-    }
-
     public List<UserPostResponse> findByUserId(String userId) throws NotFoundException {
         List<UserPostResponse> userPosts = userPostService.getUserPost(userId);
         addCustomersToRequest(userPosts);
@@ -62,17 +55,21 @@ public class UserPostFacade {
 
     public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException, NotValidException {
         UserPostResponse post = userPostService.save(userPostRequest);
-        addCustomersToRequest(Arrays.asList(post));
+        addCustomersToRequest(Collections.singletonList(post));
         return post;
+    }
+
+    protected Cache<String, String> getCustomerCache() {
+        return session.getProvider(InfinispanConnectionProvider.class).getCache("customer_cache");
     }
 
     private void addCustomersToRequest(List<UserPostResponse> userPosts) {
         List<String> updatingTomsId = userPosts.stream()
-                .filter(post -> !customerCache.containsKey(post.getTomsId()))
+                .filter(post -> !getCustomerCache().containsKey(post.getTomsId()))
                 .filter(post -> !post.getUpdateTime().isBefore(LocalDateTime.now().minusHours(customerCacheLifespanInDb)) ||
                         post.getOrganization() == null)
                 .map(post -> {
-                    customerCache.put(post.getTomsId(), post.getOrganization() == null ? " " : post.getOrganization());
+                    getCustomerCache().put(post.getTomsId(), post.getOrganization() == null ? " " : post.getOrganization());
                     return post.getTomsId();
                 })
                 .distinct()

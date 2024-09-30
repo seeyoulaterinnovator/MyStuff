@@ -10,10 +10,11 @@ import org.junit.jupiter.api.Test;
 import ru.alamics.sso.e2e.common.Tests;
 import ru.alamics.sso.e2e.common.TestsClients;
 import ru.alamics.sso.e2e.common.TestsEnabled;
-import ru.alamics.sso.e2e.common.TestsUtils;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static ru.alamics.sso.e2e.common.TestsUtils.randomEmail;
+import static ru.alamics.sso.e2e.common.TestsUtils.randomPhone;
 
 // TODO
 @Disabled
@@ -23,8 +24,8 @@ public class RegistrationTests extends Tests {
     @Test
     void register() {
         var client = TestsClients.APP;
-        var email = TestsUtils.randomEmail();
-        var phone = TestsUtils.randomPhone();
+        var email = randomEmail();
+        var phone = randomPhone();
 
         var logonPage = given()
                 .queryParam("response_type", "code")

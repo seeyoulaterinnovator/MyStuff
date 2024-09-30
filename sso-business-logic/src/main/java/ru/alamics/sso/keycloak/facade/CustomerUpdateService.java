@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.*;
 
+// TODO check cluster task requirement
 @ApplicationScoped
 @Slf4j
 public class CustomerUpdateService {

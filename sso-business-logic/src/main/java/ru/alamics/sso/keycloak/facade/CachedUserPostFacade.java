@@ -1,6 +1,7 @@
 package ru.alamics.sso.keycloak.facade;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Named;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-@ApplicationScoped
+@RequestScoped
 @Slf4j
 @Named("CachedUserPostFacade")
 public class CachedUserPostFacade extends UserPostFacade {
@@ -103,9 +104,12 @@ public class CachedUserPostFacade extends UserPostFacade {
             return new LinkedList<>();
         }
 
-        cachedPosts.stream()
-                .filter(post -> customerCache.get(post.getTomsId()) != null && !customerCache.get(post.getTomsId()).isEmpty())
-                .forEach(post -> post.setOrganization(customerCache.get(post.getTomsId())));
+        for(var post : cachedPosts) {
+            var customer = getCustomerCache().get(post.getTomsId());
+            if(customer != null && !customer.isEmpty()) {
+                post.setOrganization(customer);
+            }
+        }
 
         return new LinkedList<>(cachedPosts);
     }

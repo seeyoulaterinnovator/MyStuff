@@ -1,7 +1,7 @@
 package ru.alamics.sso.emailer;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Context;
 import lombok.AllArgsConstructor;
@@ -37,7 +37,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import static ru.alamics.sso.settings.SettingConstants.*;
 
-@ApplicationScoped
+@RequestScoped
 @Slf4j
 public class EmailSender {
     private static final String SEND_INTERVAL_PROPERTY = "emailSender.interval.milliseconds";
@@ -74,7 +74,7 @@ public class EmailSender {
         }
     }
 
-    public int getEmailQueueSize() {
+    private int getEmailQueueSize() {
         return emailQueue.size();
     }
 
@@ -113,7 +113,7 @@ public class EmailSender {
         adminEventRepository.save(adminEvent);
     }
 
-    protected EmailTemplate processTemplate(String subjectKey, List<Object> subjectAttributes, String template, Map<String, Object> attributes,
+    private EmailTemplate processTemplate(String subjectKey, List<Object> subjectAttributes, String template, Map<String, Object> attributes,
                                             Theme theme, Locale locale, String realmName) throws EmailException {
         try {
             String textBody;
@@ -172,7 +172,7 @@ public class EmailSender {
     @Data
     @AllArgsConstructor
     @Getter
-    protected static class EmailTemplate {
+    private static class EmailTemplate {
         private String subject;
         private String textBody;
         private String htmlBody;

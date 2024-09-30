@@ -5,30 +5,35 @@ import jakarta.ws.rs.core.MediaType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.jsoup.Jsoup;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import ru.alamics.sso.e2e.common.*;
+import ru.alamics.sso.e2e.common.Tests;
+import ru.alamics.sso.e2e.common.TestsClients;
+import ru.alamics.sso.e2e.common.TestsEnabled;
+import ru.alamics.sso.e2e.common.TestsUsers;
 
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Arrays;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static ru.alamics.sso.e2e.common.TestsUtils.*;
+import static org.awaitility.Awaitility.*;
+import static org.hamcrest.Matchers.*;
 
 @TestsEnabled
 @Slf4j
 public class PasswordTests extends Tests {
-    @AfterEach
-    void tearDown() {
-        jdbi().useHandle(handle -> handle.execute("delete from USER_REQUIRED_ACTION"));
-    }
-
     @Test
+    @Order(1)
     void updatePassword() {
         var client = TestsClients.APP;
-        var user = TestsUsers.TESTER;
+        var user = TestsUsers.PASSWORD_TESTER;
+        var newPassword = user.getPassword() + "!";
 
         jdbi().useHandle(handle -> handle.execute(
                 "insert into USER_REQUIRED_ACTION (USER_ID, REQUIRED_ACTION) values (?, 'UPDATE_PASSWORD')",
@@ -86,7 +91,7 @@ public class PasswordTests extends Tests {
 
         var logonPage2 = given()
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .formParam("password-new", user.getPassword())
+                .formParam("password-new", newPassword)
                 .cookies(logonPage.cookies())
                 .redirects().follow(true)
                 .post(updateUrl)
@@ -161,7 +166,7 @@ public class PasswordTests extends Tests {
                 //.header("Referer", logonPageUrl)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .formParam("username", user.getUsername())
-                .formParam("password", user.getPassword())
+                .formParam("password", newPassword)
                 .formParam("loginPasswordButton", "")
                 .cookies(logonPage3.cookies())
                 .redirects().follow(false)
@@ -174,7 +179,7 @@ public class PasswordTests extends Tests {
                 .extract()
                 .header(HttpHeaders.LOCATION);
 
-        var code2 = TestsUtils.getQueryParameter(logonRedirectUrl, "code");
+        var code2 = getQueryParameter(logonRedirectUrl, "code");
         assertNotNull(code2);
 
         var accessToken2 = given()
@@ -197,5 +202,55 @@ public class PasswordTests extends Tests {
                 .jsonPath().getString("access_token");
 
         assertNotNull(accessToken2);
+    }
+
+    @Test
+    @Order(2)
+    void blockPasswordByJob() {
+        var user = TestsUsers.PASSWORD_TESTER;
+        var userId = getUserId(user);
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON)
+                .auth().oauth2(getAdminAccessToken())
+                .baseUri(KEYCLOAK.getAuthServerUrl())
+                .body(Map.of(
+                        "id", "9e4f8fb6-5425-11ec-bf63-0242ac130002",
+                        "extId", "timerIntervalDurationProperty",
+                        "name", "Timer schedule",
+                        "realmId", "master",
+                        "value", "1",
+                        "unit", "SECONDS",
+                        "type", "REALM"
+                ))
+                .put("/realms/master/settings/9e4f8fb6-5425-11ec-bf63-0242ac130002")
+                .then()
+                .assertThat()
+                .log()
+                .all()
+                .statusCode(HttpStatus.SC_OK);
+
+        jdbi().useHandle(handle -> handle.execute(
+                "update CREDENTIAL " +
+                        "set CREATED_DATE = CREATED_DATE - 1000 * 60 * 60 * 24 * 365 * 2 " +
+                        "where USER_ID = ?",
+                userId
+        ));
+
+        log.info("User {} credential updated", userId);
+
+        await().atMost(Duration.ofSeconds(30))
+                .pollDelay(Duration.ofSeconds(5))
+                .until(() -> jdbi().withHandle(handle ->
+                        handle.createQuery("select ENABLED from USER_ENTITY where ID = ?")
+                                .bind(0, userId)
+                                .mapTo(Boolean.class)
+                                .findFirst()
+                                .orElseThrow())
+                );
+
+        await().atMost(Duration.ofSeconds(30))
+                .pollDelay(Duration.ofSeconds(5))
+                .until(() -> getLastMessageSubject(user), is("Истек срок жизни пароля"));
     }
 }

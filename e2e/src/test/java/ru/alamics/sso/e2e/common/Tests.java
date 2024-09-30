@@ -6,9 +6,9 @@ import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.jdbi.v3.core.Jdbi;
 import org.junit.ClassRule;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.TestWatcher;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.*;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.containers.MockServerContainer;
@@ -26,6 +26,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.testcontainers.utility.MountableFile.forHostPath;
 
+import static ru.alamics.sso.e2e.common.TestsUtils.*;
+
 @ExtendWith(Tests.TestWatcherExtension.class)
 @Slf4j
 public abstract class Tests {
@@ -37,13 +39,15 @@ public abstract class Tests {
 
     static final boolean IS_LOW_MEMORY = "true".equals(System.getenv().get("ERTH_SSO_E2E_LOW_MEMORY"));
 
+    static final String NAME_PREFIX = "erth-sso-e2e";
+
     static final String MARIA_DB_HOST = "mariadb";
+
+    static final String SMTP_HOST = "smtp4dev";
 
     static final String KEYCLOAK_HOST = "keycloak";
 
     static final String MOCKSERVER_HOST = "mockserver";
-
-    static final AtomicBoolean IS_FAILED = new AtomicBoolean(false);
 
     @ClassRule
     public static final Network NETWORK = Network.newNetwork();
@@ -53,8 +57,29 @@ public abstract class Tests {
             .withNetwork(NETWORK)
             .withNetworkAliases(MARIA_DB_HOST);
 
+    @SuppressWarnings("resource")
+    public static final GenericContainer<?> SMTP = new GenericContainer<>(DockerImageName.parse("rnwood/smtp4dev:v3"))
+            .withNetworkAliases(SMTP_HOST)
+            .withNetwork(NETWORK)
+            .withExposedPorts(25, 80)
+            .waitingFor(Wait.forListeningPort());
+
+    public static final MockServerContainer MOCK_SERVER =
+            new MockServerContainer(DockerImageName.parse("mockserver/mockserver:5.15.0"))
+                    .withNetwork(NETWORK)
+                    .withNetworkAliases(MOCKSERVER_HOST)
+                    .waitingFor(Wait.forLogMessage(".*started on port.*", 1))
+                    .withEnv("MOCKSERVER_INITIALIZATION_JSON_PATH", "/initialization.json")
+                    .withEnv("MOCKSERVER_WATCH_INITIALIZATION_JSON", "true")
+                    .withCopyFileToContainer(
+                            forHostPath(BASEDIR.resolve("volumes/mockserver/initialization.json")),
+                            "/initialization.json"
+                    );
+
     public static final KeycloakContainer KEYCLOAK = new KeycloakContainer("quay.io/keycloak/keycloak:25.0.2")
             .dependsOn(MARIA_DB)
+            .dependsOn(SMTP)
+            .dependsOn(MOCK_SERVER)
             .withNetwork(NETWORK)
             .withNetworkAliases(KEYCLOAK_HOST)
             .withStartupTimeout(Duration.ofMinutes(5))
@@ -113,23 +138,6 @@ public abstract class Tests {
                             "/config/e2e.json"
                     );
 
-    @SuppressWarnings("resource")
-    static final GenericContainer<?> SMTP = new GenericContainer<>(DockerImageName.parse("rnwood/smtp4dev:v3"))
-            .withNetwork(NETWORK)
-            .withExposedPorts(25);
-
-    static final MockServerContainer MOCK_SERVER =
-            new MockServerContainer(DockerImageName.parse("mockserver/mockserver:5.15.0"))
-                    .withNetwork(NETWORK)
-                    .withNetworkAliases(MOCKSERVER_HOST)
-                    .waitingFor(Wait.forLogMessage(".*started on port.*", 1))
-                    .withEnv("MOCKSERVER_INITIALIZATION_JSON_PATH", "/initialization.json")
-                    .withEnv("MOCKSERVER_WATCH_INITIALIZATION_JSON", "true")
-                    .withCopyFileToContainer(
-                            forHostPath(BASEDIR.resolve("volumes/mockserver/initialization.json")),
-                            "/initialization.json"
-                    );
-
     static {
         if (IS_ENABLED) {
             try {
@@ -142,22 +150,19 @@ public abstract class Tests {
     }
 
     static void initialize() {
-        List<GenericContainer<?>> containers = List.of(
-                MARIA_DB, KEYCLOAK, KEYCLOAK_CONFIG_CLI, SMTP, MOCK_SERVER
+        var containers = List.of(
+                MARIA_DB, SMTP, MOCK_SERVER, KEYCLOAK, KEYCLOAK_CONFIG_CLI
         );
+
+        var namePrefix = NAME_PREFIX + "-" + System.currentTimeMillis() + "-";
+        containers.forEach(container -> container.withCreateContainerCmdModifier(cmd  -> {
+            cmd.withName(namePrefix + container.getDockerImageName()
+                    .replaceAll("[^/]+/", "")
+                    .replaceAll(":.*$", ""));
+        }));
         containers.forEach(GenericContainer::start);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if(IS_FAILED.get()) {
-                log.error("Waiting...");
-                try {
-                    Thread.sleep(Duration.ofMinutes(15).toMillis());
-                } catch (Exception e) {
-                    // skip
-                }
-            }
-            containers.forEach(GenericContainer::stop);
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(() ->  containers.forEach(GenericContainer::stop)));
 
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
 
@@ -201,32 +206,29 @@ public abstract class Tests {
         return Jdbi.create(() -> MARIA_DB.createConnection(""));
     }
 
-    public static String getUserId(TestsUsers user) {
-        return jdbi().withHandle(handle -> handle.createQuery(
-                        "select id from USER_ENTITY where USERNAME = ? and REALM_ID = ?"
-                )
-                .bind(0, user.getUsername())
-                .bind(1, user.getRealm().getId())
-                .mapTo(String.class)
-                .findFirst()
-                .orElseThrow());
+    @BeforeAll
+    static void tearDown() {
+        TestsUtils.clearMailbox();
     }
 
-    public static String getClientId(TestsClients client) {
-        return jdbi().withHandle(handle -> handle.createQuery(
-                        "select id from CLIENT where CLIENT_ID = ? and REALM_ID = ?"
-                )
-                .bind(0, client.getClientId())
-                .bind(1, client.getRealm().getId())
-                .mapTo(String.class)
-                .findFirst()
-                .orElseThrow());
-    }
+    static class TestWatcherExtension implements TestWatcher, AfterAllCallback {
+        final AtomicBoolean failed = new AtomicBoolean(false);
 
-    static class TestWatcherExtension implements TestWatcher {
         @Override
         public void testFailed(ExtensionContext context, Throwable cause) {
-            IS_FAILED.set(true);
+            failed.set(true);
+        }
+
+        @Override
+        public void afterAll(ExtensionContext context) {
+            if(failed.get()) {
+                log.error("Waiting...");
+                try {
+                    Thread.sleep(Duration.ofMinutes(15).toMillis());
+                } catch (Exception e) {
+                    // skip
+                }
+            }
         }
     }
 }

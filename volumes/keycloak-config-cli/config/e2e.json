@@ -27,6 +27,23 @@
         "phone": ["79602408221"],
         "phone_validated_on": ["2024-08-22T00:00:00"]
       }
+    },
+    {
+      "username": "passwordtester@nomail.tld",
+      "email": "passwordtester@nomail.tld",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "PasswordTester",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "qwerty"
+        }
+      ],
+      "attributes": {
+        "phone": ["79602408222"],
+        "phone_validated_on": ["2024-08-22T00:00:00"]
+      }
     }
   ],
   "clients": [
@@ -214,5 +231,6 @@
         }
       ]
     }
-  ]
+  ],
+  "passwordPolicy": "forceExpiredPasswordChange(365)"
 }

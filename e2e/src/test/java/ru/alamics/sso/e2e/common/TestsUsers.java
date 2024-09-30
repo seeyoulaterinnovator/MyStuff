@@ -6,7 +6,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum TestsUsers {
-    TESTER(TestsRealms.E2E, "tester@nomail.tld", "qwerty", 10002408221L);
+    TESTER(TestsRealms.E2E, "tester@nomail.tld", "qwerty", 10002408221L),
+    PASSWORD_TESTER(TestsRealms.E2E, "passwordtester@nomail.tld", "qwerty", 10002408222L);
 
     final TestsRealms realm;
 

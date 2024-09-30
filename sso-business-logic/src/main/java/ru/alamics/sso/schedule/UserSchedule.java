@@ -1,10 +1,10 @@
 package ru.alamics.sso.schedule;
 
 import io.quarkus.runtime.StartupEvent;
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.enterprise.event.Observes;
-import jakarta.inject.*;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.common.util.Time;
@@ -74,13 +74,6 @@ public class UserSchedule implements ScheduledTask {
     @Context
     KeycloakSession session;
 
-    TimerProvider timerProvider;
-
-    @PostConstruct
-    void init() {
-        timerProvider = session.getProvider(TimerProvider.class);
-    }
-
     void onStart(@Observes StartupEvent ev) {
         changeScheduleTimer();
     }
@@ -117,6 +110,7 @@ public class UserSchedule implements ScheduledTask {
         intervalDuration *= 1000;
         lockDuration *= 1000;
 
+        var timerProvider = session.getProvider(TimerProvider.class);
         timerProvider.cancelTask(TIMER_NAME);
         timerProvider.schedule(
                 new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), this, lockDuration),
@@ -132,6 +126,7 @@ public class UserSchedule implements ScheduledTask {
     }
 
     @Override
+    @ActivateRequestContext
     public void run(KeycloakSession session) {
         findExpiredPassword();
 
