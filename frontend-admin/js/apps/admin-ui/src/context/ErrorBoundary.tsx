@@ -81,8 +81,6 @@ export const ErrorBoundaryFallback: FunctionComponent<
 > = ({ children, fallback: FallbackComponent, domain }) => {
   const { error, domain: errorDomain } = useErrorBoundary();
 
-  console.log(errorDomain, domain);
-
   const isErrorBelongsDomain =
     errorDomain === domain ||
     ((!errorDomain || errorDomain === "page") && !domain);
