@@ -3,12 +3,9 @@ package ru.alamics.sso.e2e.common;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import io.restassured.RestAssured;
 import jakarta.ws.rs.core.UriBuilder;
-import lombok.Cleanup;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.jdbi.v3.core.Jdbi;
 import org.junit.ClassRule;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestWatcher;
@@ -21,20 +18,22 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Connection;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.testcontainers.utility.MountableFile.forHostPath;
 
-@ExtendWith(Tests.WaitOnFailExtension.class)
+@ExtendWith(Tests.TestWatcherExtension.class)
 @Slf4j
 public abstract class Tests {
     static final String CONDITION_VARIABLE = "ERTH_SSO_E2E_ENABLED";
 
     static final Path BASEDIR = Paths.get("..").toAbsolutePath().normalize();
+
+    static final boolean IS_ENABLED = Boolean.TRUE.toString().equals(System.getenv(CONDITION_VARIABLE));
 
     static final boolean IS_LOW_MEMORY = "true".equals(System.getenv().get("ERTH_SSO_E2E_LOW_MEMORY"));
 
@@ -43,6 +42,8 @@ public abstract class Tests {
     static final String KEYCLOAK_HOST = "keycloak";
 
     static final String MOCKSERVER_HOST = "mockserver";
+
+    static final AtomicBoolean IS_FAILED = new AtomicBoolean(false);
 
     @ClassRule
     public static final Network NETWORK = Network.newNetwork();
@@ -130,7 +131,7 @@ public abstract class Tests {
                     );
 
     static {
-        if (isEnabled()) {
+        if (IS_ENABLED) {
             try {
                 initialize();
                 log.info("Tests initialized");
@@ -140,127 +141,92 @@ public abstract class Tests {
         }
     }
 
-    static boolean isEnabled() {
-        return Boolean.TRUE.toString().equals(System.getenv(CONDITION_VARIABLE));
-    }
-
     static void initialize() {
         List<GenericContainer<?>> containers = List.of(
                 MARIA_DB, KEYCLOAK, KEYCLOAK_CONFIG_CLI, SMTP, MOCK_SERVER
         );
         containers.forEach(GenericContainer::start);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> containers.forEach(GenericContainer::stop)));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if(IS_FAILED.get()) {
+                log.error("Waiting...");
+                try {
+                    Thread.sleep(Duration.ofMinutes(15).toMillis());
+                } catch (Exception e) {
+                    // skip
+                }
+            }
+            containers.forEach(GenericContainer::stop);
+        }));
 
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
 
         String mockServerUrl = "http://" + MOCKSERVER_HOST + ":" + MOCK_SERVER.getExposedPorts().get(0);
 
-        executeSQL(connection -> {
-            for (Map.Entry<String, String> entry : Map.of(
+        jdbi().useHandle(handle -> {
+            for (var entry : Map.of(
                     "cities.url", mockServerUrl + "/cities/domains"
             ).entrySet()) {
-                var statement = connection.prepareStatement("update APP_PROPERTIES set VALUE = ? where NAME = ?");
-                statement.setString(1, entry.getValue());
-                statement.setString(2, entry.getKey());
-                statement.execute();
+                handle.execute(
+                        "update APP_PROPERTIES set VALUE = ? where NAME = ?",
+                        entry.getValue(), entry.getKey()
+                );
             }
-
-            for (Map.Entry<String, String> entry : Map.of(
+            for (var entry : Map.of(
                     "urlDaDataRequestLocationIp", mockServerUrl + "/dadata/suggestions/api/4_1/rs/iplocate/address"
             ).entrySet()) {
-                var statement = connection.prepareStatement("update SETTINGS set VALUE = ? where EXT_ID = ?");
-                statement.setString(1, entry.getValue());
-                statement.setString(2, entry.getKey());
-                statement.execute();
+                handle.execute("update SETTINGS set VALUE = ? where EXT_ID = ?", entry.getValue(), entry.getKey());
             }
-
-
             for (var user : TestsUsers.values()) {
-                var userId = getUserId(user);
-                var statement = connection.prepareStatement(
-                        "insert into CUSTOMER(id, name, update_time) values(?, 'tester', now())"
+                handle.execute(
+                        "insert into CUSTOMER(id, name, update_time) values(?, 'tester', now())",
+                        user.getTomsId()
                 );
-                statement.setLong(1, user.getTomsId());
-                statement.execute();
-                statement = connection.prepareStatement(
+                handle.execute(
                         "insert into USER_POST(id, user_id, toms_id, dmp_id, role_id) " +
-                                "values (uuid(), ?, ?, uuid(), 1)"
+                                "values (uuid(), ?, ?, uuid(), 1)",
+                        getUserId(user), user.getTomsId()
                 );
-                statement.setString(1, userId);
-                statement.setLong(2, user.getTomsId());
-                statement.execute();
             }
-
             for (var client : TestsClients.values()) {
-                var clientId = getClientId(client);
-                var statement = connection.prepareStatement(
-                        "INSERT INTO MAIN_REDIRECT_URIS (CLIENT_ID, URI) VALUES (?, 'http://localhost')"
+                handle.execute(
+                        "insert into MAIN_REDIRECT_URIS (CLIENT_ID, URI) values (?, 'http://localhost')",
+                        getClientId(client)
                 );
-                statement.setString(1, clientId);
-                statement.execute();
             }
         });
     }
 
-    @SneakyThrows
-    public static <T> T executeSQL(SQLFunction<T> function) {
-        @Cleanup var connection = MARIA_DB.createConnection("");
-        return function.apply(connection);
-    }
-
-    @SneakyThrows
-    public static void executeSQL(SQLConsumer consumer) {
-        @Cleanup var connection = MARIA_DB.createConnection("");
-        consumer.consume(connection);
+    protected static Jdbi jdbi() {
+        return Jdbi.create(() -> MARIA_DB.createConnection(""));
     }
 
     public static String getUserId(TestsUsers user) {
-        return executeSQL(connection -> {
-            var statement = connection.prepareStatement("select id from USER_ENTITY where USERNAME = ? and REALM_ID = ?");
-            statement.setString(1, user.getUsername());
-            statement.setString(2, user.getRealm().getId());
-            var rs = statement.executeQuery();
-            Assertions.assertTrue(rs.next());
-            return rs.getString(1);
-        });
+        return jdbi().withHandle(handle -> handle.createQuery(
+                        "select id from USER_ENTITY where USERNAME = ? and REALM_ID = ?"
+                )
+                .bind(0, user.getUsername())
+                .bind(1, user.getRealm().getId())
+                .mapTo(String.class)
+                .findFirst()
+                .orElseThrow());
     }
 
     public static String getClientId(TestsClients client) {
-        return executeSQL(connection -> {
-            var statement = connection.prepareStatement("select id from CLIENT where CLIENT_ID = ? and REALM_ID = ?");
-            statement.setString(1, client.getClientId());
-            statement.setString(2, client.getRealm().getId());
-            var rs = statement.executeQuery();
-            Assertions.assertTrue(rs.next());
-            return rs.getString(1);
-        });
+        return jdbi().withHandle(handle -> handle.createQuery(
+                        "select id from CLIENT where CLIENT_ID = ? and REALM_ID = ?"
+                )
+                .bind(0, client.getClientId())
+                .bind(1, client.getRealm().getId())
+                .mapTo(String.class)
+                .findFirst()
+                .orElseThrow());
     }
 
-    @FunctionalInterface
-    public interface SQLFunction<T> {
-        T apply(Connection statement) throws Exception;
-    }
-
-    @FunctionalInterface
-    public interface SQLConsumer {
-        void consume(Connection statement) throws Exception;
-    }
-
-    static class WaitOnFailExtension implements TestWatcher, AfterAllCallback {
-        boolean failed;
-
-        @Override
-        public void afterAll(ExtensionContext context) throws Exception {
-            if(isEnabled() && failed) {
-                log.error("Waiting...");
-                Thread.sleep(Duration.ofMinutes(15).toMillis());
-            }
-        }
-
+    static class TestWatcherExtension implements TestWatcher {
         @Override
         public void testFailed(ExtensionContext context, Throwable cause) {
-            failed = true;
+            IS_FAILED.set(true);
         }
     }
 }

@@ -22,9 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class PasswordTests extends Tests {
     @AfterEach
     void tearDown() {
-        executeSQL(connection -> {
-            connection.createStatement().execute("delete from USER_REQUIRED_ACTION");
-        });
+        jdbi().useHandle(handle -> handle.execute("delete from USER_REQUIRED_ACTION"));
     }
 
     @Test
@@ -32,15 +30,10 @@ public class PasswordTests extends Tests {
         var client = TestsClients.APP;
         var user = TestsUsers.TESTER;
 
-        String userId = getUserId(user);
-
-        executeSQL(connection -> {
-            var statement = connection.prepareStatement(
-                    "insert into USER_REQUIRED_ACTION (USER_ID, REQUIRED_ACTION) values (?, 'UPDATE_PASSWORD')"
-            );
-            statement.setString(1, userId);
-            statement.execute();
-        });
+        jdbi().useHandle(handle -> handle.execute(
+                "insert into USER_REQUIRED_ACTION (USER_ID, REQUIRED_ACTION) values (?, 'UPDATE_PASSWORD')",
+                getUserId(user)
+        ));
 
         var logonPage = given()
                 .queryParam("response_type", "code")
