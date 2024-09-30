@@ -52,12 +52,17 @@ export const useUserDataTable = ({
   const { adminClient } = useAdminClient();
   const { addAlert, addError } = useAlerts();
   const { t } = useTranslation();
-  const { realms, setSearchRealm } = useRealms();
+  const { realms, setSearchRealm, accessibleRealms } = useRealms();
   const { realm: realmName } = useRealm();
   const [params] = useSearchParams();
   const paramSearchRealm = params.get(QueryParam.SEARCH_REALM);
+  const rawFilterSearchRealm = paramSearchRealm || realmName;
   const [customFilters, setCustomFilters] = useState<CustomUserQuery>({
-    searchRealm: paramSearchRealm || realmName,
+    searchRealm: accessibleRealms.some(
+      (item) => item.name === rawFilterSearchRealm,
+    )
+      ? rawFilterSearchRealm
+      : accessibleRealms[0]?.name,
   });
 
   const { isCustomTheme } = useCustomConfig();
