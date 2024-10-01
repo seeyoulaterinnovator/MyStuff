@@ -255,7 +255,7 @@ public class PasswordTests extends Tests {
 
         await().atMost(Duration.ofSeconds(30))
                 .pollInterval(Duration.ofSeconds(5))
-                .until(() -> getLastMessageSubject(user), is("Ваш логин для входа в Личный кабинет"));
+                .until(() -> getLastMessageSubject(user), is("Ваш пароль для входа в Личный кабинет сброшен"));
 
         assertTrue(getRequiredActions(user).contains("UPDATE_PASSWORD"));
     }

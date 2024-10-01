@@ -195,6 +195,14 @@ public abstract class Tests {
                 handle.execute("update SETTINGS set VALUE = ? where EXT_ID = ?", value, key);
             });
 
+            handle.execute(
+                    "insert into SETTINGS " +
+                            "select uuid() as ID, EXT_ID, VALUE, `DESC`, ? as REALM_ID, NAME, UNIT, TYPE " +
+                            "from SETTINGS s " +
+                            "where REALM_ID = 'user'",
+                    TestsRealms.E2E.getId()
+            );
+
             for (var user : TestsUsers.values()) {
                 handle.execute(
                         "insert into CUSTOMER(id, name, update_time) values(?, 'tester', now())",

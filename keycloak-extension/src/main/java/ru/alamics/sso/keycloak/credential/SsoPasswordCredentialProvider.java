@@ -11,6 +11,7 @@ import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.models.*;
 import org.keycloak.models.credential.PasswordCredentialModel;
 import org.keycloak.protocol.oidc.OIDCConfigAttributes;
+import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.Urls;
 import org.keycloak.services.managers.AuthenticationSessionManager;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
@@ -72,6 +73,7 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
 
         AuthenticationSessionModel authenticationSession = authenticationSessionManager.createAuthenticationSession(realm, false)
                 .createAuthenticationSession(clientModel);
+        authenticationSession.setProtocol(OIDCLoginProtocol.LOGIN_PROTOCOL);
 
         String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
         ResetCredentialsActionToken token = new ResetCredentialsActionToken(
@@ -86,7 +88,7 @@ public class SsoPasswordCredentialProvider extends PasswordCredentialProvider {
                 token.serialize(session, realm, session.getContext().getUri()),
                 clientModel.getClientId(),
                 authenticationSession.getTabId(),
-                AuthenticationProcessor.getClientData(session, session.getContext().getAuthenticationSession())
+                AuthenticationProcessor.getClientData(session, authenticationSession)
         );
 
         int timeTokenResetPass = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm.getName());

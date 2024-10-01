@@ -44,3 +44,9 @@ set VALUE = '/tbapi/api/v1/customerManagement/customerAccounts/names'
 where NAME = 'tbapi.customer.find.path';
 
 update REALM set ADMIN_THEME = 'keycloak.v2';
+
+insert into SETTINGS
+select uuid() as ID, EXT_ID, VALUE, `DESC`, 'e2e' as REALM_ID, NAME, UNIT, TYPE
+from SETTINGS s
+where REALM_ID = 'user';
+

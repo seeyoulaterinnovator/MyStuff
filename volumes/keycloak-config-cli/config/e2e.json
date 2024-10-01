@@ -232,5 +232,9 @@
       ]
     }
   ],
-  "passwordPolicy": "forceExpiredPasswordChange(365)"
+  "passwordPolicy": "forceExpiredPasswordChange(365)",
+  "eventsEnabled": true,
+  "eventsListeners": [
+    "ExtendedListener"
+  ]
 }
