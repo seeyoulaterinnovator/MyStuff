@@ -8,7 +8,12 @@ import org.jdbi.v3.core.Jdbi;
 import org.junit.ClassRule;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.*;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.AfterAllCallback;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.TestWatcher;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.containers.MockServerContainer;
@@ -19,16 +24,16 @@ import org.testcontainers.utility.DockerImageName;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.testcontainers.utility.MountableFile.forHostPath;
-
 import static ru.alamics.sso.e2e.common.TestsUtils.*;
 
 @ExtendWith(Tests.TestWatcherExtension.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Slf4j
 public abstract class Tests {
     static final String CONDITION_VARIABLE = "ERTH_SSO_E2E_ENABLED";
@@ -150,9 +155,7 @@ public abstract class Tests {
     }
 
     static void initialize() {
-        var containers = List.of(
-                MARIA_DB, SMTP, MOCK_SERVER, KEYCLOAK, KEYCLOAK_CONFIG_CLI
-        );
+        var containers = List.of(MARIA_DB, SMTP, MOCK_SERVER, KEYCLOAK, KEYCLOAK_CONFIG_CLI);
 
         var namePrefix = NAME_PREFIX + "-" + System.currentTimeMillis() + "-";
         containers.forEach(container -> container.withCreateContainerCmdModifier(cmd  -> {
@@ -166,22 +169,32 @@ public abstract class Tests {
 
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
 
-        String mockServerUrl = "http://" + MOCKSERVER_HOST + ":" + MOCK_SERVER.getExposedPorts().get(0);
+        int mockServerPort = MOCK_SERVER.getExposedPorts().get(0);
+        String mockServerUrl = "http://" + MOCKSERVER_HOST + ":" + mockServerPort;
 
         jdbi().useHandle(handle -> {
-            for (var entry : Map.of(
-                    "cities.url", mockServerUrl + "/cities/domains"
-            ).entrySet()) {
-                handle.execute(
-                        "update APP_PROPERTIES set VALUE = ? where NAME = ?",
-                        entry.getValue(), entry.getKey()
-                );
-            }
-            for (var entry : Map.of(
-                    "urlDaDataRequestLocationIp", mockServerUrl + "/dadata/suggestions/api/4_1/rs/iplocate/address"
-            ).entrySet()) {
-                handle.execute("update SETTINGS set VALUE = ? where EXT_ID = ?", entry.getValue(), entry.getKey());
-            }
+            (new HashMap<String, String>() {{
+                put("cities.url", mockServerUrl + "/cities/domains");
+                put("tbapi.registration.ip", MOCKSERVER_HOST);
+                put("tbapi.registration.host", MOCKSERVER_HOST);
+                put("tbapi.registration.port", String.valueOf(mockServerPort));
+                put("tbapi.registration.secure", "false");
+                put("tbapi.registration.find.path", "/tbapi/api/v1/customerManagement/customerAccount");
+                put("tbapi.customer.ip", MOCKSERVER_HOST);
+                put("tbapi.customer.host", MOCKSERVER_HOST);
+                put("tbapi.customer.port", String.valueOf(mockServerPort));
+                put("tbapi.customer.secure", "false");
+                put("tbapi.customer.find.path", "/tbapi/api/v1/customerManagement/customerAccounts/names");
+            }}).forEach((key, value) -> {
+                handle.execute("update APP_PROPERTIES set VALUE = ? where NAME = ?", value, key);
+            });
+
+            (new HashMap<String, String>() {{
+                put("urlDaDataRequestLocationIp", mockServerUrl + "/dadata/suggestions/api/4_1/rs/iplocate/address");
+            }}).forEach((key, value) -> {
+                handle.execute("update SETTINGS set VALUE = ? where EXT_ID = ?", value, key);
+            });
+
             for (var user : TestsUsers.values()) {
                 handle.execute(
                         "insert into CUSTOMER(id, name, update_time) values(?, 'tester', now())",
@@ -193,6 +206,7 @@ public abstract class Tests {
                         getUserId(user), user.getTomsId()
                 );
             }
+
             for (var client : TestsClients.values()) {
                 handle.execute(
                         "insert into MAIN_REDIRECT_URIS (CLIENT_ID, URI) values (?, 'http://localhost')",
@@ -206,9 +220,9 @@ public abstract class Tests {
         return Jdbi.create(() -> MARIA_DB.createConnection(""));
     }
 
-    @BeforeAll
-    static void tearDown() {
-        TestsUtils.clearMailbox();
+    @BeforeEach
+    void tearDownMailBox() {
+        clearMailbox();
     }
 
     static class TestWatcherExtension implements TestWatcher, AfterAllCallback {

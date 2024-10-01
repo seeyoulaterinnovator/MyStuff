@@ -11,12 +11,12 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.restassured.RestAssured.given;
-import static ru.alamics.sso.e2e.common.Tests.KEYCLOAK;
 import static org.hamcrest.Matchers.*;
-import static ru.alamics.sso.e2e.common.Tests.SMTP;
+import static ru.alamics.sso.e2e.common.Tests.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TestsUtils {
@@ -46,7 +46,7 @@ public final class TestsUtils {
     }
 
     public static String getUserId(TestsUsers user) {
-        return Tests.jdbi().withHandle(handle -> handle.createQuery(
+        return jdbi().withHandle(handle -> handle.createQuery(
                         "select id from USER_ENTITY where USERNAME = ? and REALM_ID = ?"
                 )
                 .bind(0, user.getUsername())
@@ -56,8 +56,18 @@ public final class TestsUtils {
                 .orElseThrow());
     }
 
+    public static List<String> getRequiredActions(TestsUsers user) {
+        return jdbi().withHandle(handle -> handle.createQuery(
+                        "select REQUIRED_ACTION from USER_REQUIRED_ACTION where USER_ID = ?"
+                )
+                .bind(0, getUserId(user))
+                .mapTo(String.class)
+                .stream()
+                .toList());
+    }
+
     public static String getClientId(TestsClients client) {
-        return Tests.jdbi().withHandle(handle -> handle.createQuery(
+        return jdbi().withHandle(handle -> handle.createQuery(
                         "select id from CLIENT where CLIENT_ID = ? and REALM_ID = ?"
                 )
                 .bind(0, client.getClientId())
@@ -116,7 +126,6 @@ public final class TestsUtils {
                 .all()
                 .statusCode(HttpStatus.SC_OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body("rowCount", greaterThan(0))
                 .extract()
                 .body()
                 .jsonPath().get("results[0].subject");

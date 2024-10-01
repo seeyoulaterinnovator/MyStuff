@@ -5,6 +5,7 @@ import jakarta.ws.rs.core.MediaType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.jsoup.Jsoup;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import ru.alamics.sso.e2e.common.Tests;
@@ -17,6 +18,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
@@ -28,16 +30,24 @@ import static org.hamcrest.Matchers.*;
 @TestsEnabled
 @Slf4j
 public class PasswordTests extends Tests {
+    final TestsUsers user = TestsUsers.PASSWORD_TESTER;
+
+    final String userId = getUserId(user);
+
+    @BeforeEach
+    void tearDown() {
+        jdbi().useHandle(handle -> handle.execute("delete from USER_REQUIRED_ACTION where USER_ID = ?", userId));
+    }
+
     @Test
     @Order(1)
     void updatePassword() {
         var client = TestsClients.APP;
-        var user = TestsUsers.PASSWORD_TESTER;
         var newPassword = user.getPassword() + "!";
 
         jdbi().useHandle(handle -> handle.execute(
                 "insert into USER_REQUIRED_ACTION (USER_ID, REQUIRED_ACTION) values (?, 'UPDATE_PASSWORD')",
-                getUserId(user)
+                userId
         ));
 
         var logonPage = given()
@@ -206,10 +216,53 @@ public class PasswordTests extends Tests {
 
     @Test
     @Order(2)
-    void blockPasswordByJob() {
+    void sendLoginAndResetPassword() {
         var user = TestsUsers.PASSWORD_TESTER;
-        var userId = getUserId(user);
 
+        given()
+                .contentType(MediaType.APPLICATION_JSON)
+                .auth().oauth2(getAdminAccessToken())
+                .baseUri(KEYCLOAK.getAuthServerUrl())
+                .body(List.of(userId))
+                .pathParam("realm", user.getRealm().getId())
+                .post("/realms/{realm}/users-toms/send/login")
+                .then()
+                .assertThat()
+                .log()
+                .all()
+                .statusCode(HttpStatus.SC_NO_CONTENT);
+
+        await().atMost(Duration.ofSeconds(30))
+                .pollInterval(Duration.ofSeconds(5))
+                .until(() -> getLastMessageSubject(user), is("Ваш логин для входа в Личный кабинет"));
+
+        assertFalse(getRequiredActions(user).contains("UPDATE_PASSWORD"));
+
+        clearMailbox();
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON)
+                .auth().oauth2(getAdminAccessToken())
+                .baseUri(KEYCLOAK.getAuthServerUrl())
+                .body(List.of(userId))
+                .pathParam("realm", user.getRealm().getId())
+                .post("/realms/{realm}/users-toms/credential/reset-with-send-login")
+                .then()
+                .assertThat()
+                .log()
+                .all()
+                .statusCode(HttpStatus.SC_NO_CONTENT);
+
+        await().atMost(Duration.ofSeconds(30))
+                .pollInterval(Duration.ofSeconds(5))
+                .until(() -> getLastMessageSubject(user), is("Ваш логин для входа в Личный кабинет"));
+
+        assertTrue(getRequiredActions(user).contains("UPDATE_PASSWORD"));
+    }
+
+    @Test
+    @Order(3)
+    void blockPasswordByJob() {
         given()
                 .contentType(MediaType.APPLICATION_JSON)
                 .auth().oauth2(getAdminAccessToken())
@@ -219,7 +272,7 @@ public class PasswordTests extends Tests {
                         "extId", "timerIntervalDurationProperty",
                         "name", "Timer schedule",
                         "realmId", "master",
-                        "value", "1",
+                        "value", "5",
                         "unit", "SECONDS",
                         "type", "REALM"
                 ))
@@ -230,17 +283,12 @@ public class PasswordTests extends Tests {
                 .all()
                 .statusCode(HttpStatus.SC_OK);
 
-        jdbi().useHandle(handle -> handle.execute(
-                "update CREDENTIAL " +
-                        "set CREATED_DATE = CREATED_DATE - 1000 * 60 * 60 * 24 * 365 * 2 " +
-                        "where USER_ID = ?",
-                userId
-        ));
+        jdbi().useHandle(handle -> handle.execute("update CREDENTIAL set CREATED_DATE = 0 where USER_ID = ?", userId));
 
-        log.info("User {} credential updated", userId);
+        log.info("User {} credential updated", user.getUsername());
 
         await().atMost(Duration.ofSeconds(30))
-                .pollDelay(Duration.ofSeconds(5))
+                .pollInterval(Duration.ofSeconds(5))
                 .until(() -> jdbi().withHandle(handle ->
                         handle.createQuery("select ENABLED from USER_ENTITY where ID = ?")
                                 .bind(0, userId)
@@ -250,7 +298,7 @@ public class PasswordTests extends Tests {
                 );
 
         await().atMost(Duration.ofSeconds(30))
-                .pollDelay(Duration.ofSeconds(5))
+                .pollInterval(Duration.ofSeconds(5))
                 .until(() -> getLastMessageSubject(user), is("Истек срок жизни пароля"));
     }
 }
