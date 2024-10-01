@@ -34,9 +34,6 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
     private EventBuilder event;
 
     @Context
-    private ClientConnection clientConnection;
-
-    @Context
     private HttpRequest request;
 
     public RestRequiredActionsAuthenticator(KeycloakSession session) {
@@ -45,7 +42,7 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
     }
 
     public void init() {
-        event = new EventBuilder(realm, session, clientConnection);
+        event = new EventBuilder(realm, session, session.getContext().getConnection());
     }
 
     @Override
@@ -64,7 +61,7 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
             AuthenticationSessionModel authSession = context.getAuthenticationSession();
             authSession.setClientNote(OIDCLoginProtocol.RESPONSE_TYPE_PARAM, OIDCResponseType.NONE);
             authSession.setRedirectUri(""); //костыль, redirect url в REST не используем, при null падает NPE
-            Response response = AuthenticationManager.nextActionAfterAuthentication(session, authSession, clientConnection, request, session.getContext().getUri(), event);
+            Response response = AuthenticationManager.nextActionAfterAuthentication(session, authSession, context.getConnection(), request, session.getContext().getUri(), event);
             entity = response.getEntity();
             if (!(entity instanceof AccessTokenResponse)) {
                 if (!(entity instanceof Map)) {
