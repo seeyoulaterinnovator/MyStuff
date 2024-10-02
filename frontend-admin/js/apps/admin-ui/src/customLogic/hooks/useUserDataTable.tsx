@@ -13,9 +13,9 @@ import { useRealm } from "../../context/realm-context/RealmContext";
 import { useRealms } from "../../context/RealmsContext";
 import { toUser } from "../../user/routes/User";
 import {
-  KeycloakDataTable,
   type DetailField,
   type Field,
+  KeycloakDataTable,
 } from "../../components/table-toolbar/KeycloakDataTable";
 import { emptyFormatter } from "../../util";
 import { useTranslation } from "react-i18next";
@@ -26,6 +26,7 @@ import type { CustomUsersAction } from "../types/users";
 import { QueryParam } from "../../customLogic/constants/queryParams";
 import { useCustomConfig } from "../context/CustomConfigContext";
 import type { SortingOptions } from "../../customLogic/types/sorting";
+import { useWhoAmI } from "../../context/whoami/WhoAmI";
 
 const getBlockedUsers = (
   users?: Array<UserRepresentation | UserInfoRepresentation>,
@@ -65,6 +66,7 @@ export const useUserDataTable = ({
       : accessibleRealms[0]?.name,
   });
 
+  const { isMeInMaster } = useWhoAmI();
   const { isCustomTheme } = useCustomConfig();
 
   //should *only* list users when no user federation is configured
@@ -98,7 +100,9 @@ export const useUserDataTable = ({
                 navigate(
                   toUser({
                     id: row.id,
-                    realm: realmName,
+                    realm: isMeInMaster
+                      ? customFilters.searchRealm || realmName
+                      : realmName,
                     tab: "settings",
                   }),
                 );

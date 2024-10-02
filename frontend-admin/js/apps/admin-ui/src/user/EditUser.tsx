@@ -61,7 +61,6 @@ import { UserCustomer } from "./UserCustomer";
 import { UserAttribute } from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
 import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
 import { useWhoAmI } from "../context/whoami/WhoAmI";
-import { toAddUser } from "./routes/AddUser";
 
 export default function EditUser() {
   const { adminClient } = useAdminClient();
@@ -133,17 +132,26 @@ export default function EditUser() {
     !(withManageUsersAccess && (isMeInMaster || withEditDetailsAccess));
 
   useEffect(() => {
-    if (isCustomTheme && isMeInMaster && realmName != searchRealmName) {
+    if (
+      isCustomTheme &&
+      id &&
+      realmName &&
+      searchRealmName &&
+      isMeInMaster &&
+      realmName != searchRealmName
+    ) {
       navigate(
-        toAddUser({
+        toUser({
+          id,
           realm: searchRealmName || realmName,
+          tab: "settings",
         }),
         {
           replace: true,
         },
       );
     }
-  }, [realmName, searchRealmName]);
+  }, [realmName, searchRealmName, user]);
 
   useFetch(
     async () =>
