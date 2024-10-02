@@ -50,6 +50,7 @@ export type BruteForced = {
 export type UserFormProps = {
   form: UseFormReturn<UserFormFields>;
   realm: RealmRepresentation;
+  searchRealm: RealmRepresentation;
   user?: UserRepresentation;
   bruteForce?: BruteForced;
   userProfileMetadata?: UserProfileMetadata;
@@ -60,6 +61,7 @@ export type UserFormProps = {
 export const UserForm = ({
   form,
   realm,
+  searchRealm,
   user,
   bruteForce: { isBruteForceProtected, isLocked } = {
     isBruteForceProtected: false,
@@ -71,7 +73,7 @@ export const UserForm = ({
 }: UserFormProps) => {
   const { adminClient } = useAdminClient();
   const { isCustomTheme } = useCustomConfig();
-  const { isMeInMaster } = useWhoAmI();
+  const { isMeInMaster, isMeInManager } = useWhoAmI();
   const { getAccesses } = useAccess();
   const {
     withManageUsersAccess,
@@ -203,6 +205,7 @@ export const UserForm = ({
           help="requiredUserActionsHelp"
           isDisabled={isCustomTheme && !user?.id}
           isReadOnly={!isRequiredActionsEnabled}
+          searchRealm={searchRealm.id}
         />
         {(user?.federationLink || user?.origin) && canViewFederationLink && (
           <FormGroup
@@ -228,25 +231,28 @@ export const UserForm = ({
               form={form}
               userProfileMetadata={userProfileMetadata}
               hideReadOnly={!user}
-              supportedLocales={realm.supportedLocales || []}
+              supportedLocales={searchRealm.supportedLocales || []}
               currentLocale={currentLocale}
               t={
                 ((key: unknown, params) =>
                   t(key as string, params as any)) as TFunction
               }
               isReadOnly={isReadOnly}
+              registrationEmailAsUsername={
+                searchRealm.registrationEmailAsUsername
+              }
             />
           </>
         ) : (
           <>
-            {!realm.registrationEmailAsUsername && (
+            {!searchRealm.registrationEmailAsUsername && (
               <TextControl
                 name="username"
                 label={t("username")}
                 readOnly={
                   !!user?.id &&
-                  !realm.editUsernameAllowed &&
-                  realm.editUsernameAllowed !== undefined
+                  !searchRealm.editUsernameAllowed &&
+                  searchRealm.editUsernameAllowed !== undefined
                 }
                 rules={{
                   required: t("required"),
@@ -303,7 +309,7 @@ export const UserForm = ({
             />
           </FormGroup>
         )}
-        {!user?.id && (
+        {!user?.id && !isMeInManager && (
           <FormGroup
             label={t("groups")}
             fieldId="kc-groups"
@@ -355,7 +361,7 @@ export const UserForm = ({
             isDisabled={
               !user?.id &&
               !watchUsernameInput &&
-              realm.registrationEmailAsUsername === false
+              searchRealm.registrationEmailAsUsername === false
             }
             allowNonDirty
             allowInvalid

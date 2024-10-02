@@ -43,6 +43,7 @@ import { UserDataTableToolbarItems } from "./UserDataTableToolbarItems";
 import { useUserDataTable } from "../../customLogic/hooks/useUserDataTable";
 import type { UserInfoRepresentation } from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
 import { useAccess } from "../../context/access/Access";
+import { useWhoAmI } from "../../context/whoami/WhoAmI";
 
 export type UserAttribute = {
   name: string;
@@ -138,6 +139,8 @@ export function UserDataTable() {
     "manage-realm",
     "manage-users",
   ]);
+
+  const { isMeInManager } = useWhoAmI();
 
   const [searchType, setSearchType] = useState<SearchType>(
     isCustomTheme ? "custom" : "default",
@@ -236,7 +239,16 @@ export function UserDataTable() {
     },
   });
 
-  const goToCreate = () => navigate(toAddUser({ realm: realmName }));
+  const goToCreate = () => {
+    navigate(
+      toAddUser({
+        realm:
+          isCustomTheme && !isMeInManager
+            ? customFilters.searchRealm || realmName
+            : realmName,
+      }),
+    );
+  };
 
   if (!userStorage || !realm) {
     return <KeycloakSpinner />;

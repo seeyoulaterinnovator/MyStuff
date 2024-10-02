@@ -30,5 +30,14 @@ where REALM_ID = 'manager'
                'edit-credentials',
                'button-add-customer',
                'button-delete-customer',
-               'required-actions'
+               'required-actions',
+               'button-add-user',
+               'button-block-users',
+               'button-download-template-csv',
+               'button-download-template-xlsx',
+               'button-export-csv',
+               'button-export-xlsx',
+               'button-import-file-csv',
+               'button-reset-password',
+               'button-unlock-users'
     );

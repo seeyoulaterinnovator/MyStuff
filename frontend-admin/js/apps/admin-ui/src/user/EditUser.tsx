@@ -73,7 +73,8 @@ export default function EditUser() {
   const {
     realm: realmName,
     realmRepresentation: realm,
-    searchRealm,
+    searchRealm: searchRealmName,
+    searchRealmRepresentation: searchRealm,
   } = useRealm();
   // Validation of form fields is performed on server, thus we need to clear all errors before submit
   const clearAllErrorsBeforeSubmit = async (values: UserFormFields) => ({
@@ -191,7 +192,7 @@ export default function EditUser() {
 
         const phoneCheck = await adminClient.customUsers.findUserByAttribute({
           realm: realmName,
-          realmId: searchRealm,
+          realmId: searchRealmName,
           phone,
           excludedUserId: id,
         });
@@ -283,13 +284,13 @@ export default function EditUser() {
         let data;
         if (isCustomTheme) {
           data = await adminClient.customUsers.impersonation(
-            { id: user!.id!, realm: searchRealm },
-            { user: user!.id!, realm: searchRealm },
+            { id: user!.id!, realm: searchRealmName },
+            { user: user!.id!, realm: searchRealmName },
           );
         } else {
           data = await adminClient.users.impersonation(
-            { id: user!.id!, realm: searchRealm },
-            { user: user!.id!, realm: searchRealm },
+            { id: user!.id!, realm: searchRealmName },
+            { user: user!.id!, realm: searchRealmName },
           );
         }
 
@@ -379,6 +380,7 @@ export default function EditUser() {
                   <UserForm
                     form={form}
                     realm={realm!}
+                    searchRealm={searchRealm || realm!}
                     user={user}
                     bruteForce={bruteForced}
                     userProfileMetadata={userProfileMetadata}

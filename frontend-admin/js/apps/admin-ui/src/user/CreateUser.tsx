@@ -17,10 +17,11 @@ import { ViewHeader } from "../components/view-header/ViewHeader";
 import { useRealm } from "../context/realm-context/RealmContext";
 import { useFetch } from "../utils/useFetch";
 import { UserForm } from "./UserForm";
-import { UserFormFields, toUserRepresentation } from "./form-state";
+import { toUserRepresentation, UserFormFields } from "./form-state";
 import { toUser } from "./routes/User";
 
 import "./user-section.css";
+import RealmRepresentation from "@keycloak/keycloak-admin-client/lib/defs/realmRepresentation";
 
 export default function CreateUser() {
   const { adminClient } = useAdminClient();
@@ -29,13 +30,29 @@ export default function CreateUser() {
   const { addAlert, addError } = useAlerts();
   const navigate = useNavigate();
   const { realm: realmName, realmRepresentation: realm } = useRealm();
+  const searchRealmName = "user"; // FIXME
   const form = useForm<UserFormFields>({ mode: "onChange" });
   const [addedGroups, setAddedGroups] = useState<GroupRepresentation[]>([]);
   const [userProfileMetadata, setUserProfileMetadata] =
     useState<UserProfileMetadata>();
+  const [searchRealm, setSearchRealm] = useState<RealmRepresentation>();
 
   useFetch(
-    () => adminClient.users.getProfileMetadata({ realm: realmName }),
+    () =>
+      adminClient.realms.findOne({
+        realm: realmName,
+        searchRealm: searchRealmName,
+      }),
+    setSearchRealm,
+    [searchRealmName],
+  );
+
+  useFetch(
+    () =>
+      adminClient.users.getProfileMetadata({
+        realm: realmName,
+        searchRealm: searchRealmName,
+      }),
     (userProfileMetadata) => {
       if (!userProfileMetadata) {
         throw new Error(t("notFound"));
@@ -44,7 +61,7 @@ export default function CreateUser() {
       form.setValue("attributes.locale", realm?.defaultLocale || "");
       setUserProfileMetadata(userProfileMetadata);
     },
-    [],
+    [searchRealmName],
   );
 
   const save = async (data: UserFormFields) => {
@@ -53,6 +70,7 @@ export default function CreateUser() {
         ...toUserRepresentation(data),
         groups: addedGroups.map((group) => group.path!),
         enabled: true,
+        searchRealm: searchRealmName,
       });
 
       addAlert(t("userCreated"), AlertVariant.success);
@@ -69,7 +87,7 @@ export default function CreateUser() {
     }
   };
 
-  if (!realm || !userProfileMetadata) {
+  if (!realm || !searchRealm || !userProfileMetadata) {
     return <KeycloakSpinner />;
   }
 
@@ -83,6 +101,7 @@ export default function CreateUser() {
         <UserForm
           form={form}
           realm={realm}
+          searchRealm={searchRealm}
           userProfileMetadata={userProfileMetadata}
           onGroupsUpdate={setAddedGroups}
           save={save}

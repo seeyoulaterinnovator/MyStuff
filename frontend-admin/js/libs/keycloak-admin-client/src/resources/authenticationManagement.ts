@@ -24,11 +24,12 @@ export class AuthenticationManagement extends Resource<{ realm?: string }> {
 
   // Get required actions. Returns a list of required actions.
   public getRequiredActions = this.makeRequest<
-    void,
+    { searchRealm?: string },
     RequiredActionProviderRepresentation[]
   >({
     method: "GET",
     path: "/required-actions",
+    queryParamKeys: ["searchRealm"],
   });
 
   // Get required action for alias

@@ -15,6 +15,7 @@ type ResetCredentialDialogProps = {
   isEmailVerified: boolean;
   hasPhone: boolean;
   onClose: () => void;
+  searchRealm?: string;
 };
 
 type CredentialResetForm = {
@@ -32,6 +33,7 @@ export const ResetCredentialDialog = ({
   isEmailVerified,
   hasPhone,
   onClose,
+  searchRealm,
 }: ResetCredentialDialogProps) => {
   const { adminClient } = useAdminClient();
 
@@ -113,6 +115,7 @@ export const ResetCredentialDialog = ({
             name="actions"
             label="resetAction"
             help="resetActions"
+            searchRealm={searchRealm}
           />
           <LifespanField />
         </FormProvider>

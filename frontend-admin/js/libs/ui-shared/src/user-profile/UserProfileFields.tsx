@@ -90,6 +90,7 @@ export type UserProfileFieldsProps = {
     attribute: UserProfileAttributeMetadata,
   ) => JSX.Element | undefined;
   isReadOnly?: boolean;
+  registrationEmailAsUsername?: boolean;
 };
 
 type GroupWithAttributes = {
@@ -106,6 +107,7 @@ export const UserProfileFields = ({
   hideReadOnly = false,
   renderer,
   isReadOnly = false,
+  registrationEmailAsUsername = false,
 }: UserProfileFieldsProps) => {
   // Group attributes by group, for easier rendering.
   const groupsWithAttributes = useMemo(() => {
@@ -168,7 +170,10 @@ export const UserProfileFields = ({
                   disabled={
                     attribute.name === "lastName" && !attribute.required
                   }
-                  hidden={attribute.name === "username"}
+                  hidden={
+                    attribute.name === "username" &&
+                    !!registrationEmailAsUsername
+                  }
                 />
               ))}
             </div>
