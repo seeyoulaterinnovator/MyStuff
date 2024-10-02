@@ -195,7 +195,7 @@ public class UserRepository {
                 getIdList(includeOnlyIDs) +
                 "GROUP by UE.ID, UE.USERNAME, UE.FIRST_NAME, UE.LAST_NAME, UE.EMAIL, UA.VALUE, UE.ENABLED, UP.id, UP.TOMS_ID, C.NAME,\n" +
                 "         UP.DMP_ID, UP.ROLE_ID, UPR.NAME, ESR.ID, ESR.NAME, ES.ID, ES.NAME, ES.LABEL" +
-                getSort(sortField, sortAsc) +
+                getNativeSort(sortField, sortAsc) +
                 getLimit(pageNum, pageSize);
 
         Query query = em.createNativeQuery(
@@ -324,7 +324,7 @@ public class UserRepository {
                         "    from USER_POST UP \n" +
                         "    where UP.USER_ID = UE.ID and UP.TOMS_ID = :searchToms) \n" +
                         "  ) \n" +
-                        getSort(sortField, sortAsc)
+                        getNativeSort(sortField, sortAsc)
                 , USER_SUMMARY_MAPPER_NAME)
                 .setParameter("search", fullTextSearch)
                 .setParameter("searchUser", searchUser)
@@ -365,7 +365,7 @@ public class UserRepository {
                         "where UE.REALM_ID = :realm \n" +
                         "  and UA.NAME = 'phone' \n" +
                         "  and MATCH(UA.VALUE) AGAINST(:searchPhone IN BOOLEAN MODE) \n" +
-                        getSort(sortField, sortAsc)
+                        getNativeSort(sortField, sortAsc)
                 , USER_SUMMARY_MAPPER_NAME)
                 .setParameter("searchPhone", searchPhone)
                 .setParameter("realm", realm);
@@ -393,10 +393,23 @@ public class UserRepository {
                         search.substring(lastIndexSymbol));
     }
 
-    private String getSort(String sortField, boolean sortAsc) {
+    private String getNativeSort(String sortField, boolean sortAsc) {
         String sort = "";
         if (SORT_FIELD_NAME.equalsIgnoreCase(sortField)) {
             sort += " ORDER BY first_name ";
+        } else if (SORT_FIELD_EMAIL.equalsIgnoreCase(sortField)) {
+            sort += " ORDER BY email ";
+        }
+        if (!sort.isEmpty() && !sortAsc) {
+            sort += " DESC";
+        }
+        return sort;
+    }
+
+    private String getSort(String sortField, boolean sortAsc) {
+        String sort = "";
+        if (SORT_FIELD_NAME.equalsIgnoreCase(sortField)) {
+            sort += " ORDER BY firstName ";
         } else if (SORT_FIELD_EMAIL.equalsIgnoreCase(sortField)) {
             sort += " ORDER BY email ";
         }

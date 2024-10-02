@@ -22,10 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 import static ru.alamics.sso.e2e.common.TestsUtils.*;
-import static org.awaitility.Awaitility.*;
-import static org.hamcrest.Matchers.*;
 
 @TestsEnabled
 @Slf4j
@@ -234,7 +233,9 @@ public class PasswordTests extends Tests {
 
         await().atMost(Duration.ofSeconds(30))
                 .pollInterval(Duration.ofSeconds(5))
-                .until(() -> getLastMessageSubject(user), is("Ваш логин для входа в Личный кабинет"));
+                .until(() -> getMessageCount(user) > 0);
+
+        assertEquals("Ваш логин для входа в Личный кабинет", getLastMessageSubject(user));
 
         assertFalse(getRequiredActions(user).contains("UPDATE_PASSWORD"));
 
@@ -255,7 +256,9 @@ public class PasswordTests extends Tests {
 
         await().atMost(Duration.ofSeconds(30))
                 .pollInterval(Duration.ofSeconds(5))
-                .until(() -> getLastMessageSubject(user), is("Ваш пароль для входа в Личный кабинет сброшен"));
+                .until(() -> getMessageCount(user) > 0);
+
+        assertEquals("Ваш пароль для входа в Личный кабинет сброшен", getLastMessageSubject(user));
 
         assertTrue(getRequiredActions(user).contains("UPDATE_PASSWORD"));
     }
@@ -299,6 +302,8 @@ public class PasswordTests extends Tests {
 
         await().atMost(Duration.ofSeconds(30))
                 .pollInterval(Duration.ofSeconds(5))
-                .until(() -> getLastMessageSubject(user), is("Истек срок жизни пароля"));
+                .until(() -> getMessageCount(user) > 0);
+
+        assertEquals("Истек срок жизни пароля", getLastMessageSubject(user));
     }
 }

@@ -109,6 +109,26 @@ public final class TestsUtils {
                 .statusCode(HttpStatus.SC_OK);
     }
 
+    public static int getMessageCount(TestsUsers user) {
+        return given()
+                .contentType(MediaType.APPLICATION_JSON)
+                .auth().oauth2(getAdminAccessToken())
+                .baseUri("http://localhost:" + SMTP.getMappedPort(80))
+                .queryParam("searchTerms", user.getUsername())
+                .queryParam("page", 1)
+                .queryParam("pageSize", 1)
+                .get("/api/Messages")
+                .then()
+                .assertThat()
+                .log()
+                .all()
+                .statusCode(HttpStatus.SC_OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .extract()
+                .body()
+                .jsonPath().getInt("rowCount");
+    }
+
     public static String getLastMessageSubject(TestsUsers user) {
         return given()
                 .contentType(MediaType.APPLICATION_JSON)
