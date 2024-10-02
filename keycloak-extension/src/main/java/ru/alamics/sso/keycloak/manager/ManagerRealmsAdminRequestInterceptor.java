@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.manager;
 
+import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.PreMatching;
@@ -25,6 +26,13 @@ public class ManagerRealmsAdminRequestInterceptor implements ContainerRequestFil
             Rule.builder()
                     .pathPattern(Pattern.compile("/admin/realms/" + GeneralRealm.MANAGER + "/sessions(|/.*)"))
                     .pathPattern(Pattern.compile("/admin/realms/" + GeneralRealm.MANAGER + "/identity-provider/instances/.*"))
+                    .method(HttpMethod.GET)
+                    .disableStrictAuth(true)
+                    .replaceContextRealm(true)
+                    .build(),
+            Rule.builder()
+                    .pathPattern(Pattern.compile("/admin/realms/" + GeneralRealm.MANAGER + "/sessions/[a-f0-9\\-]+"))
+                    .method(HttpMethod.DELETE)
                     .disableStrictAuth(true)
                     .replaceContextRealm(true)
                     .build()
@@ -36,8 +44,8 @@ public class ManagerRealmsAdminRequestInterceptor implements ContainerRequestFil
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         for(Rule rule : RULES) {
-            if(rule.pathPatterns.stream()
-                    .anyMatch(pattern -> pattern.matcher(requestContext.getUriInfo().getPath()).matches())) {
+            if(rule.pathPatterns.stream().anyMatch(p -> p.matcher(requestContext.getUriInfo().getPath()).matches())
+                    && (rule.methods.isEmpty() || rule.methods.contains(requestContext.getMethod()))) {
                 filter(requestContext, rule);
                 return;
             }
@@ -75,6 +83,9 @@ public class ManagerRealmsAdminRequestInterceptor implements ContainerRequestFil
     private static class Rule {
         @Singular
         List<Pattern> pathPatterns;
+
+        @Singular
+        final List<String> methods;
 
         final boolean disableStrictAuth;
 

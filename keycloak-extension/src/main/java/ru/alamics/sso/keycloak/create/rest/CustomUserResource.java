@@ -41,6 +41,7 @@ import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluato
 import org.keycloak.utils.ProfileHelper;
 import ru.alamics.sso.jpa.model.CustomUserAdapter;
 import ru.alamics.sso.keycloak.GeneralRealm;
+import ru.alamics.sso.keycloak.exception.UserNotFoundException;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.FoundException;
@@ -444,7 +445,7 @@ public class CustomUserResource {
     @Path("role-mappings/{id}")
     public RoleMapperResource getRoleMappings(@PathParam("id") String id) {
         UserModel user = session.getProvider(UserProvider.class).getUserById(realm, id);
-        if (user == null) throw new NotFoundException("User not found");
+        if (user == null) throw new UserNotFoundException();
 
         AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
                 .realm(realm)
@@ -614,7 +615,7 @@ public class CustomUserResource {
 
         UserModel user = session.getProvider(UserProvider.class).getUserById(session.getContext().getRealm(), userId);
 
-        if (user == null) throw new NotFoundException("User not found");
+        if (user == null) throw new UserNotFoundException();
 
         if(!(user instanceof CustomUserAdapter customUser)) throw new InternalServerErrorException();
 

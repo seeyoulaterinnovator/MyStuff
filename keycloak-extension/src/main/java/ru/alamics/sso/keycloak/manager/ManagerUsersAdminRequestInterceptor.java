@@ -13,7 +13,6 @@ import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.UserProvider;
-import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.jpa.model.CustomUserAdapter;
 import ru.alamics.sso.keycloak.GeneralRealm;
 
@@ -69,7 +68,7 @@ public class ManagerUsersAdminRequestInterceptor implements ContainerRequestFilt
 
         String userRealm = ((CustomUserAdapter) user).getRealm().getName();
 
-        if (userRealm.equals(Config.getAdminRealm()) || userRealm.equals(GeneralRealm.MANAGER)) return;
+        if (userRealm.equals(Config.getAdminRealm())) return;
 
         if(rule.disableStrictAuth) {
             requestContext.setProperty(ManagerRequestProperties.DISABLE_STRICT_ADMIN_AUTH, true);

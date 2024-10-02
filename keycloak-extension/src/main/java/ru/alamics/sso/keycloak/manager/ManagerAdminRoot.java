@@ -8,6 +8,9 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.resources.admin.AdminRoot;
 import org.keycloak.services.resources.admin.RealmsAdminResource;
 
+/**
+ * Контроллер с переопределенной ослабленной авторизацией, как в Keycloak 6
+ */
 @Provider
 @Path("/admin-manager")
 public class ManagerAdminRoot extends AdminRoot {
