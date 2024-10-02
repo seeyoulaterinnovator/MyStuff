@@ -26,7 +26,7 @@ export class IdentityProviders extends Resource<{ realm?: string }> {
   >({
     method: "GET",
     path: "/instances",
-    queryParamKeys: ["searchRealm"]
+    queryParamKeys: ["searchRealm"],
   });
 
   public create = this.makeRequest<

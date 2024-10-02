@@ -245,18 +245,18 @@ export function UserDataTable() {
       navigate({
         ...toAddUser({
           realm: isMeInManager
-              ? realmName
-              : customFilters.searchRealm || realmName
+            ? realmName
+            : customFilters.searchRealm || realmName,
         }),
         search: isMeInManager
-            ? `?${QueryParam.SEARCH_REALM}=${customFilters.searchRealm}`
-            : ""
+          ? `?${QueryParam.SEARCH_REALM}=${customFilters.searchRealm}`
+          : "",
       });
     } else {
       navigate(
-          toAddUser({
-            realm: realmName,
-          }),
+        toAddUser({
+          realm: realmName,
+        }),
       );
     }
   };

@@ -6,10 +6,10 @@ import {
 } from "@keycloak/keycloak-ui-shared";
 import { AlertVariant, PageSection } from "@patternfly/react-core";
 import { TFunction } from "i18next";
-import {useMemo, useState} from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import {useNavigate, useSearchParams} from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAdminClient } from "../admin-client";
 import { useAlerts } from "../components/alert/Alerts";
 import { KeycloakSpinner } from "../components/keycloak-spinner/KeycloakSpinner";
@@ -22,8 +22,8 @@ import { toUser } from "./routes/User";
 
 import "./user-section.css";
 import RealmRepresentation from "@keycloak/keycloak-admin-client/lib/defs/realmRepresentation";
-import {QueryParam} from "../customLogic/constants/queryParams";
-import {useCustomConfig} from "../customLogic/context/CustomConfigContext";
+import { QueryParam } from "../customLogic/constants/queryParams";
+import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
 
 export default function CreateUser() {
   const { adminClient } = useAdminClient();
@@ -40,24 +40,24 @@ export default function CreateUser() {
 
   const [searchParams] = useSearchParams();
   const searchRealmName = useMemo(() => {
-      return searchParams.get(QueryParam.SEARCH_REALM) || realmName;
+    return searchParams.get(QueryParam.SEARCH_REALM) || realmName;
   }, [searchParams, realmName]);
-    const { isCustomTheme } = useCustomConfig();
+  const { isCustomTheme } = useCustomConfig();
 
-    useFetch(
-        () => {
-            if(isCustomTheme) {
-                return adminClient.realms.findOne({
-                    realm: realmName,
-                    searchRealm: searchRealmName,
-                });
-            } else {
-                return Promise.resolve(realm);
-            }
-        },
-        setSearchRealm,
-        [searchRealmName, realm],
-    );
+  useFetch(
+    () => {
+      if (isCustomTheme) {
+        return adminClient.realms.findOne({
+          realm: realmName,
+          searchRealm: searchRealmName,
+        });
+      } else {
+        return Promise.resolve(realm);
+      }
+    },
+    setSearchRealm,
+    [searchRealmName, realm],
+  );
 
   useFetch(
     () =>
