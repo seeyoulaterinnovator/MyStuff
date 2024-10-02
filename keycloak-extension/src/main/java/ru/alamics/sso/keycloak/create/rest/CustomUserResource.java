@@ -618,7 +618,8 @@ public class CustomUserResource {
 
         if(!(user instanceof CustomUserAdapter customUser)) throw new InternalServerErrorException();
 
-        if(customUser.getRealm().getName().equals(Config.getAdminRealm())) {
+        if(!auth.adminAuth().getRealm().getName().equals(Config.getAdminRealm())
+                && customUser.getRealm().getName().equals(Config.getAdminRealm())) {
             throw new ForbiddenException();
         }
         return customUser;

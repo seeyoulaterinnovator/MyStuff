@@ -13,6 +13,7 @@ import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.UserProvider;
+import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.jpa.model.CustomUserAdapter;
 import ru.alamics.sso.keycloak.GeneralRealm;
 
@@ -61,6 +62,10 @@ public class ManagerUsersAdminRequestInterceptor implements ContainerRequestFilt
     }
 
     void filter(ContainerRequestContext requestContext, Rule rule) {
+        AuthenticationSessionModel auth = session.getContext().getAuthenticationSession();
+
+        if(auth == null || auth.getRealm() == null) return;
+
         UserModel user = session.getProvider(UserProvider.class)
                 .getUserById(session.getContext().getRealm(), rule.userId.apply(requestContext.getUriInfo()));
 
