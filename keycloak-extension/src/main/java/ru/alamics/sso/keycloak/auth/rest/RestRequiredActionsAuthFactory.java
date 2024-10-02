@@ -31,9 +31,7 @@ public class RestRequiredActionsAuthFactory extends AbstractAuthenticatorFactory
 
     @Override
     public Authenticator create(KeycloakSession session) {
-        RestRequiredActionsAuthenticator restRequiredActionsAuthenticator = new RestRequiredActionsAuthenticator(session);
-        restRequiredActionsAuthenticator.init();
-        return restRequiredActionsAuthenticator;
+        return new RestRequiredActionsAuthenticator(session);
     }
 
     @Override

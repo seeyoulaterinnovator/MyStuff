@@ -1,15 +1,12 @@
 package ru.alamics.sso.keycloak.auth.rest;
 
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.AuthenticationProcessor;
-import org.keycloak.common.ClientConnection;
 import org.keycloak.events.EventBuilder;
-import org.keycloak.http.HttpRequest;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -31,18 +28,12 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
 
     private final KeycloakSession session;
     private final RealmModel realm;
-    private EventBuilder event;
-
-    @Context
-    private HttpRequest request;
+    private final EventBuilder event;
 
     public RestRequiredActionsAuthenticator(KeycloakSession session) {
         this.session = session;
         this.realm = session.getContext().getRealm();
-    }
-
-    public void init() {
-        event = new EventBuilder(realm, session, session.getContext().getConnection());
+        this.event = new EventBuilder(realm, session, session.getContext().getConnection());
     }
 
     @Override
@@ -61,7 +52,14 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
             AuthenticationSessionModel authSession = context.getAuthenticationSession();
             authSession.setClientNote(OIDCLoginProtocol.RESPONSE_TYPE_PARAM, OIDCResponseType.NONE);
             authSession.setRedirectUri(""); //костыль, redirect url в REST не используем, при null падает NPE
-            Response response = AuthenticationManager.nextActionAfterAuthentication(session, authSession, context.getConnection(), request, session.getContext().getUri(), event);
+            Response response = AuthenticationManager.nextActionAfterAuthentication(
+                    session,
+                    authSession,
+                    context.getConnection(),
+                    context.getHttpRequest(),
+                    session.getContext().getUri(),
+                    event
+            );
             entity = response.getEntity();
             if (!(entity instanceof AccessTokenResponse)) {
                 if (!(entity instanceof Map)) {
@@ -81,7 +79,9 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            context.getUser().addRequiredAction(UserModel.RequiredAction.valueOf(requiredAction));
+            if(requiredAction != null) {
+                context.getUser().addRequiredAction(UserModel.RequiredAction.valueOf(requiredAction));
+            }
             throw e;
         }
         if(requiredAction != null) {
