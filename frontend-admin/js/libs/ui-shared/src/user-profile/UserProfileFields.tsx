@@ -165,7 +165,9 @@ export const UserProfileFields = ({
                   currentLocale={currentLocale}
                   renderer={renderer}
                   attribute={attribute}
-                  disabled={attribute.name === "lastName"}
+                  disabled={
+                    attribute.name === "lastName" && !attribute.required
+                  }
                   hidden={attribute.name === "username"}
                 />
               ))}
