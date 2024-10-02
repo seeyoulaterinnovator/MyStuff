@@ -52,7 +52,7 @@ export const RequiredActionMultiSelect = <
   if (isDisabled) {
     return (
       <TextControl
-        name={`${name}`}
+        name={name}
         label={t(label)}
         placeholder={t("requiredActionPlaceholder")}
         readOnly
@@ -79,6 +79,7 @@ export const RequiredActionMultiSelect = <
         key: alias!,
         value: name || alias!,
       }))}
+      displayOnlyValidValues
       isDisabled={isReadOnly}
     />
   );
