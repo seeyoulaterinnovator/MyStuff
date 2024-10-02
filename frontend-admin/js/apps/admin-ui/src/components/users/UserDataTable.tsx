@@ -43,6 +43,8 @@ import { UserDataTableToolbarItems } from "./UserDataTableToolbarItems";
 import { useUserDataTable } from "../../customLogic/hooks/useUserDataTable";
 import type { UserInfoRepresentation } from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
 import { useAccess } from "../../context/access/Access";
+import { useWhoAmI } from "../../context/whoami/WhoAmI";
+import { QueryParam } from "../../customLogic/constants/queryParams";
 
 export type UserAttribute = {
   name: string;
@@ -138,6 +140,8 @@ export function UserDataTable() {
     "manage-realm",
     "manage-users",
   ]);
+
+  const { isMeInManager } = useWhoAmI();
 
   const [searchType, setSearchType] = useState<SearchType>(
     isCustomTheme ? "custom" : "default",
@@ -236,7 +240,26 @@ export function UserDataTable() {
     },
   });
 
-  const goToCreate = () => navigate(toAddUser({ realm: realmName }));
+  const goToCreate = () => {
+    if (isCustomTheme) {
+      navigate({
+        ...toAddUser({
+          realm: isMeInManager
+            ? realmName
+            : customFilters.searchRealm || realmName,
+        }),
+        search: isMeInManager
+          ? `?${QueryParam.SEARCH_REALM}=${customFilters.searchRealm}`
+          : "",
+      });
+    } else {
+      navigate(
+        toAddUser({
+          realm: realmName,
+        }),
+      );
+    }
+  };
 
   if (!userStorage || !realm) {
     return <KeycloakSpinner />;

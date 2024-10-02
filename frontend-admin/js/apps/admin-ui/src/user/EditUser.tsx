@@ -18,7 +18,7 @@ import {
 } from "@patternfly/react-core";
 import { InfoCircleIcon } from "@patternfly/react-icons";
 import { TFunction } from "i18next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -46,13 +46,13 @@ import { UserIdentityProviderLinks } from "./UserIdentityProviderLinks";
 import { UserRoleMapping } from "./UserRoleMapping";
 import { UserSessions } from "./UserSessions";
 import {
-  UIUserRepresentation,
-  UserFormFields,
   filterManagedAttributes,
   toUserFormFields,
   toUserRepresentation,
+  UIUserRepresentation,
+  UserFormFields,
 } from "./form-state";
-import { UserParams, UserTab, toUser } from "./routes/User";
+import { toUser, UserParams, UserTab } from "./routes/User";
 import { toUsers } from "./routes/Users";
 import { isLightweightUser } from "./utils";
 
@@ -61,6 +61,7 @@ import { UserCustomer } from "./UserCustomer";
 import { UserAttribute } from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
 import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
 import { useWhoAmI } from "../context/whoami/WhoAmI";
+import { toAddUser } from "./routes/AddUser";
 
 export default function EditUser() {
   const { adminClient } = useAdminClient();
@@ -73,7 +74,8 @@ export default function EditUser() {
   const {
     realm: realmName,
     realmRepresentation: realm,
-    searchRealm,
+    searchRealm: searchRealmName,
+    searchRealmRepresentation: searchRealm,
   } = useRealm();
   // Validation of form fields is performed on server, thus we need to clear all errors before submit
   const clearAllErrorsBeforeSubmit = async (values: UserFormFields) => ({
@@ -130,6 +132,19 @@ export default function EditUser() {
     isCustomTheme &&
     !(withManageUsersAccess && (isMeInMaster || withEditDetailsAccess));
 
+  useEffect(() => {
+    if (isCustomTheme && isMeInMaster && realmName != searchRealmName) {
+      navigate(
+        toAddUser({
+          realm: searchRealmName || realmName,
+        }),
+        {
+          replace: true,
+        },
+      );
+    }
+  }, [realmName, searchRealmName]);
+
   useFetch(
     async () =>
       Promise.all([
@@ -139,10 +154,13 @@ export default function EditUser() {
         }) as UIUserRepresentation | undefined,
         adminClient.attackDetection.findOne({ id: id! }),
         adminClient.users.getUnmanagedAttributes({ id: id! }),
-        adminClient.users.getProfile({ realm: realmName }),
+        adminClient.users.getProfile({
+          realm: realmName,
+          searchRealm: searchRealmName,
+        }),
       ]),
     ([userData, attackDetection, unmanagedAttributes, upConfig]) => {
-      if (!userData || !realm || !attackDetection) {
+      if (!userData || !realm || !searchRealm || !attackDetection) {
         throw new Error(t("notFound"));
       }
 
@@ -191,7 +209,7 @@ export default function EditUser() {
 
         const phoneCheck = await adminClient.customUsers.findUserByAttribute({
           realm: realmName,
-          realmId: searchRealm,
+          realmId: searchRealmName,
           phone,
           excludedUserId: id,
         });
@@ -283,13 +301,13 @@ export default function EditUser() {
         let data;
         if (isCustomTheme) {
           data = await adminClient.customUsers.impersonation(
-            { id: user!.id!, realm: searchRealm },
-            { user: user!.id!, realm: searchRealm },
+            { id: user!.id!, realm: searchRealmName },
+            { user: user!.id!, realm: searchRealmName },
           );
         } else {
           data = await adminClient.users.impersonation(
-            { id: user!.id!, realm: searchRealm },
-            { user: user!.id!, realm: searchRealm },
+            { id: user!.id!, realm: searchRealmName },
+            { user: user!.id!, realm: searchRealmName },
           );
         }
 
@@ -379,6 +397,7 @@ export default function EditUser() {
                   <UserForm
                     form={form}
                     realm={realm!}
+                    searchRealm={searchRealm || realm!}
                     user={user}
                     bruteForce={bruteForced}
                     userProfileMetadata={userProfileMetadata}

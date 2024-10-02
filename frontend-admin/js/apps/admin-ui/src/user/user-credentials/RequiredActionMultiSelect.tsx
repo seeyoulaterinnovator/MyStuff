@@ -19,6 +19,7 @@ export type RequiredActionMultiSelectProps<
   help: string;
   isDisabled?: boolean;
   isReadOnly?: boolean;
+  searchRealm?: string;
 };
 
 export const RequiredActionMultiSelect = <
@@ -30,6 +31,7 @@ export const RequiredActionMultiSelect = <
   help,
   isDisabled,
   isReadOnly,
+  searchRealm,
 }: RequiredActionMultiSelectProps<T, P>) => {
   const { adminClient } = useAdminClient();
 
@@ -39,14 +41,15 @@ export const RequiredActionMultiSelect = <
   >([]);
 
   useFetch(
-    () => adminClient.authenticationManagement.getRequiredActions(),
+    () =>
+      adminClient.authenticationManagement.getRequiredActions({ searchRealm }),
     (actions) => {
       const enabledUserActions = actions.filter((action) => {
         return action.enabled;
       });
       setRequiredActions(enabledUserActions);
     },
-    [],
+    [searchRealm],
   );
 
   if (isDisabled) {

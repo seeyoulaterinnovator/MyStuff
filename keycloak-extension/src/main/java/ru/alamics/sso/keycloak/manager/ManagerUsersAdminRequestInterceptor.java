@@ -78,6 +78,8 @@ public class ManagerUsersAdminRequestInterceptor implements ContainerRequestFilt
             requestContext.setProperty(ManagerRequestProperties.ADMIN_CONTEXT_REALM, userRealm);
         }
 
+        requestContext.setProperty(ManagerRequestProperties.ADMIN_EVENT_REALM, userRealm);
+
         requestContext.setRequestUri(
                 requestContext.getUriInfo()
                         .getRequestUriBuilder()

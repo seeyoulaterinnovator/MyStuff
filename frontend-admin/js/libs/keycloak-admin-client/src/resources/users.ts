@@ -42,9 +42,13 @@ export class Users extends Resource<{ realm?: string }> {
     method: "GET",
   });
 
-  public create = this.makeRequest<UserRepresentation, { id: string }>({
+  public create = this.makeRequest<
+    UserRepresentation & { searchRealm?: string },
+    { id: string }
+  >({
     method: "POST",
     returnResourceIdInLocationHeader: { field: "id" },
+    queryParamKeys: ["searchRealm"],
   });
 
   /**
@@ -82,9 +86,13 @@ export class Users extends Resource<{ realm?: string }> {
     path: "/count",
   });
 
-  public getProfile = this.makeRequest<{}, UserProfileConfig>({
+  public getProfile = this.makeRequest<
+    { searchRealm?: string },
+    UserProfileConfig
+  >({
     method: "GET",
     path: "/profile",
+    queryParamKeys: ["searchRealm"],
   });
 
   public updateProfile = this.makeRequest<UserProfileConfig, UserProfileConfig>(
@@ -94,9 +102,13 @@ export class Users extends Resource<{ realm?: string }> {
     },
   );
 
-  public getProfileMetadata = this.makeRequest<{}, UserProfileMetadata>({
+  public getProfileMetadata = this.makeRequest<
+    { searchRealm?: string },
+    UserProfileMetadata
+  >({
     method: "GET",
     path: "/profile/metadata",
+    queryParamKeys: ["searchRealm"],
   });
 
   /**

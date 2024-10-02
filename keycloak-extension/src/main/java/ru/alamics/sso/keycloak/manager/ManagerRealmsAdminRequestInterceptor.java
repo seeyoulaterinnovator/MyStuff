@@ -10,7 +10,6 @@ import lombok.Builder;
 import lombok.Singular;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmProvider;
 import ru.alamics.sso.keycloak.GeneralRealm;
 
 import java.io.IOException;
@@ -25,7 +24,10 @@ public class ManagerRealmsAdminRequestInterceptor implements ContainerRequestFil
     private static final List<Rule> RULES = List.of(
             Rule.builder()
                     .pathPattern(Pattern.compile("/admin/realms/" + GeneralRealm.MANAGER + "/sessions(|/.*)"))
-                    .pathPattern(Pattern.compile("/admin/realms/" + GeneralRealm.MANAGER + "/identity-provider/instances/.*"))
+                    .pathPattern(Pattern.compile("/admin/realms/" + GeneralRealm.MANAGER + "/identity-provider/instances(|/.*)"))
+                    .pathPattern(Pattern.compile("/admin/realms/" + GeneralRealm.MANAGER + "/users/profile/metadata"))
+                    .pathPattern(Pattern.compile("/admin/realms/" + GeneralRealm.MANAGER))
+                    .pathPattern(Pattern.compile("/admin/realms/" + GeneralRealm.MANAGER + "/authentication/required-actions"))
                     .method(HttpMethod.GET)
                     .disableStrictAuth(true)
                     .replaceContextRealm(true)
@@ -33,6 +35,12 @@ public class ManagerRealmsAdminRequestInterceptor implements ContainerRequestFil
             Rule.builder()
                     .pathPattern(Pattern.compile("/admin/realms/" + GeneralRealm.MANAGER + "/sessions/[a-f0-9\\-]+"))
                     .method(HttpMethod.DELETE)
+                    .disableStrictAuth(true)
+                    .replaceContextRealm(true)
+                    .build(),
+            Rule.builder()
+                    .pathPattern(Pattern.compile("/admin/realms/" + GeneralRealm.MANAGER + "/users"))
+                    .method(HttpMethod.POST)
                     .disableStrictAuth(true)
                     .replaceContextRealm(true)
                     .build()
@@ -59,8 +67,6 @@ public class ManagerRealmsAdminRequestInterceptor implements ContainerRequestFil
 
         if (searchRealm.equals(Config.getAdminRealm()) || searchRealm.equals(GeneralRealm.MANAGER)) return;
 
-        if(session.getProvider(RealmProvider.class).getRealmByName(searchRealm) == null) return;
-
         if(rule.disableStrictAuth) {
             requestContext.setProperty(ManagerRequestProperties.DISABLE_STRICT_ADMIN_AUTH, true);
         }
@@ -68,6 +74,8 @@ public class ManagerRealmsAdminRequestInterceptor implements ContainerRequestFil
         if(rule.replaceContextRealm) {
             requestContext.setProperty(ManagerRequestProperties.ADMIN_CONTEXT_REALM, searchRealm);
         }
+
+        requestContext.setProperty(ManagerRequestProperties.ADMIN_EVENT_REALM, searchRealm);
 
         requestContext.setRequestUri(
                 requestContext.getUriInfo()

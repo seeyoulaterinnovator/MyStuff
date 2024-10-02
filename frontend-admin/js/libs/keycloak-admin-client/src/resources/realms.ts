@@ -38,12 +38,13 @@ export class Realms extends Resource {
   });
 
   public findOne = this.makeRequest<
-    { realm: string },
+    { realm: string; searchRealm?: string },
     RealmRepresentation | undefined
   >({
     method: "GET",
     path: "/{realm}",
     urlParamKeys: ["realm"],
+    queryParamKeys: ["searchRealm"],
     catchNotFound: true,
   });
 

@@ -20,6 +20,7 @@ import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.sessions.RootAuthenticationSessionModel;
 import ru.alamics.sso.keycloak.auth.link.token.AuthLinkActionToken;
+import ru.alamics.sso.keycloak.exception.RealmNotFoundException;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 
 @Slf4j
@@ -40,7 +41,7 @@ public class AuthLinkResource {
         RealmManager realmManager = new RealmManager(session);
         RealmModel realm = realmManager.getRealmByName("user");
         if (realm == null)
-            throw new NotFoundException("Realm not found.");
+            throw new RealmNotFoundException();
 
         ClientModel clientModel = session.getProvider(ClientProvider.class).getClientByClientId(realm, clientId);
         if (clientModel == null)
