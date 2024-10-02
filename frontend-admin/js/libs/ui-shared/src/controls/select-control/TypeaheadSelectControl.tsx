@@ -48,6 +48,7 @@ export const TypeaheadSelectControl = <
   onFilter,
   variant,
   isDisabled,
+  displayOnlyValidValues,
   ...rest
 }: SelectControlProps<T, P>) => {
   const {
@@ -214,25 +215,34 @@ export const TypeaheadSelectControl = <
                       Array.isArray(field.value) && (
                         <ChipGroup aria-label="Current selections">
                           {field.value.map(
-                            (selection: string, index: number) => (
-                              <Chip
-                                key={index}
-                                onClick={(ev) => {
-                                  ev.stopPropagation();
-                                  field.onChange(
-                                    field.value.filter(
-                                      (item: string) => item !== key(selection),
-                                    ),
-                                  );
-                                }}
-                                isReadOnly={isDisabled}
-                              >
-                                {isSelectBasedOptions(options)
-                                  ? options.find((o) => selection === o.key)
-                                      ?.value
-                                  : getValue(selection)}
-                              </Chip>
-                            ),
+                            (selection: string, index: number) => {
+                              const chipChild = isSelectBasedOptions(options)
+                                ? options.find((o) => selection === o.key)
+                                    ?.value
+                                : getValue(selection);
+
+                              if (displayOnlyValidValues && chipChild == null) {
+                                return null;
+                              }
+
+                              return (
+                                <Chip
+                                  key={index}
+                                  onClick={(ev) => {
+                                    ev.stopPropagation();
+                                    field.onChange(
+                                      field.value.filter(
+                                        (item: string) =>
+                                          item !== key(selection),
+                                      ),
+                                    );
+                                  }}
+                                  isReadOnly={isDisabled}
+                                >
+                                  {chipChild}
+                                </Chip>
+                              );
+                            },
                           )}
                         </ChipGroup>
                       )}

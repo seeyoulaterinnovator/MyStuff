@@ -50,6 +50,7 @@ export type SelectControlProps<
     placeholderText?: string;
     chipGroupProps?: ChipGroupProps;
     withoutLabel?: boolean;
+    displayOnlyValidValues?: boolean;
   };
 
 export const isSelectBasedOptions = (

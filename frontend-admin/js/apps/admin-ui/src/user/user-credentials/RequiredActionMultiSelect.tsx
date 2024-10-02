@@ -82,6 +82,7 @@ export const RequiredActionMultiSelect = <
         key: alias!,
         value: name || alias!,
       }))}
+      displayOnlyValidValues
       isDisabled={isReadOnly}
     />
   );
