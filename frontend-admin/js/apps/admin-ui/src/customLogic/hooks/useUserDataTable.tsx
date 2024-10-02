@@ -266,8 +266,6 @@ export const useUserDataTable = ({
   }, [selectedRows]);
 
   const handleCustomAction = async (action: CustomUsersAction) => {
-    const { type } = action;
-
     switch (action.type) {
       case CustomUserToolbarAction.SEND_LOGIN: {
         try {
@@ -383,12 +381,14 @@ export const useUserDataTable = ({
 
       case CustomUserToolbarAction.EXPORT_CSV:
       case CustomUserToolbarAction.EXPORT_EXCEL: {
+        const isExcel = action.type === CustomUserToolbarAction.EXPORT_EXCEL;
+        const downloadedExtension = isExcel ? "xlsx" : "csv";
+
         try {
           const downloadedFile = await adminClient.customUsers.downloadUsers(
             { realm: realmName },
             {
-              type:
-                type === CustomUserToolbarAction.EXPORT_CSV ? "csv" : "xlsx",
+              type: downloadedExtension,
               userIds: selectedIds,
               userParameters: [
                 "USER_ID",
@@ -403,9 +403,12 @@ export const useUserDataTable = ({
               ],
             },
           );
+
           saveAs(
-            new Blob([downloadedFile], { type: "application/octet-stream" }),
-            `user_info.${CustomUserToolbarAction.EXPORT_CSV ? "csv" : "xlsx"}`,
+            new Blob([downloadedFile], {
+              type: "application/octet-stream",
+            }),
+            `user_info.${downloadedExtension}`,
           );
         } catch (error) {
           addError(t("usersExportedError"), error);
