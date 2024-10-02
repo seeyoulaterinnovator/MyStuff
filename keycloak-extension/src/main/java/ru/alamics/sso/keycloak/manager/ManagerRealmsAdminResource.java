@@ -37,7 +37,7 @@ public class ManagerRealmsAdminResource extends RealmsAdminResource {
 
     @Path("{realm}")
     public RealmAdminResource getRealmAdmin(@PathParam("realm") @Parameter(description = "realm name (not id!)") final String name) {
-        RealmModel realm = session.realms().getRealmByName(name);
+        RealmModel realm = session.getProvider(RealmProvider.class).getRealmByName(name);
         if (realm == null) throw new RealmNotFoundException();
 
         if (!auth.getRealm().getName().equals(Config.getAdminRealm())
@@ -48,16 +48,32 @@ public class ManagerRealmsAdminResource extends RealmsAdminResource {
 
         AdminPermissionEvaluator realmAuth = AdminPermissions.evaluator(session, realm, auth);
 
-        String newRealmName = (String) requestContext.getProperty(ManagerRequestProperties.ADMIN_CONTEXT_REALM);
-        if(newRealmName != null) {
-            realm = session.getProvider(RealmProvider.class).getRealmByName(newRealmName);
-            if (realm == null) throw new RealmNotFoundException();
+        String contextRealmName = (String) requestContext.getProperty(ManagerRequestProperties.ADMIN_CONTEXT_REALM);
+        if(contextRealmName != null) {
+            RealmModel contextRealm = getRealmByNameWithTransaction(contextRealmName);
+            if (contextRealm == null) throw new RealmNotFoundException();
+            session.getContext().setRealm(contextRealm);
         }
 
-        session.getContext().setRealm(realm);
-
-        AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth, session, clientConnection);
+        RealmModel eventRealm = null;
+        String eventRealmName = (String) requestContext.getProperty(ManagerRequestProperties.ADMIN_EVENT_REALM);
+        if(eventRealmName != null) {
+            eventRealm = getRealmByNameWithTransaction(eventRealmName);
+        }
+        AdminEventBuilder adminEvent = new AdminEventBuilder(
+                eventRealm != null ? eventRealm : realm,
+                auth,
+                session,
+                clientConnection
+        );
 
         return new ManagerRealmAdminResource(session, realmAuth, adminEvent);
+    }
+
+    RealmModel getRealmByNameWithTransaction(String realmName) {
+        // java.lang.IllegalStateException: Cannot access delegate without a transaction
+        // auto closed, see org.keycloak.services.DefaultKeycloakSession.close
+        if(!session.getTransactionManager().isActive()) session.getTransactionManager().begin();
+        return session.getProvider(RealmProvider.class).getRealmByName(realmName);
     }
 }

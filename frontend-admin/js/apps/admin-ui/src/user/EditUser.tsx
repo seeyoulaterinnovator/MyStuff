@@ -18,7 +18,7 @@ import {
 } from "@patternfly/react-core";
 import { InfoCircleIcon } from "@patternfly/react-icons";
 import { TFunction } from "i18next";
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -61,6 +61,8 @@ import { UserCustomer } from "./UserCustomer";
 import { UserAttribute } from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
 import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
 import { useWhoAmI } from "../context/whoami/WhoAmI";
+import {toAddUser} from "./routes/AddUser";
+import {QueryParam} from "../customLogic/constants/queryParams";
 
 export default function EditUser() {
   const { adminClient } = useAdminClient();
@@ -131,6 +133,19 @@ export default function EditUser() {
     isCustomTheme &&
     !(withManageUsersAccess && (isMeInMaster || withEditDetailsAccess));
 
+  useEffect(() => {
+    if (isCustomTheme && isMeInMaster && realmName != searchRealmName) {
+      navigate(
+        toAddUser({
+          realm: searchRealmName || realmName,
+        }),
+        {
+          replace: true,
+        },
+      );
+    }
+  }, [realmName, searchRealmName]);
+
   useFetch(
     async () =>
       Promise.all([
@@ -140,10 +155,10 @@ export default function EditUser() {
         }) as UIUserRepresentation | undefined,
         adminClient.attackDetection.findOne({ id: id! }),
         adminClient.users.getUnmanagedAttributes({ id: id! }),
-        adminClient.users.getProfile({ realm: realmName }),
+        adminClient.users.getProfile({ realm: realmName, searchRealm: searchRealmName }),
       ]),
     ([userData, attackDetection, unmanagedAttributes, upConfig]) => {
-      if (!userData || !realm || !attackDetection) {
+      if (!userData || !realm || !searchRealm || !attackDetection) {
         throw new Error(t("notFound"));
       }
 

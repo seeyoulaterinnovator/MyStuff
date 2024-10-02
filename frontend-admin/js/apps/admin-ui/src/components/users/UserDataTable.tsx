@@ -44,6 +44,7 @@ import { useUserDataTable } from "../../customLogic/hooks/useUserDataTable";
 import type { UserInfoRepresentation } from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
 import { useAccess } from "../../context/access/Access";
 import { useWhoAmI } from "../../context/whoami/WhoAmI";
+import { QueryParam } from "../../customLogic/constants/queryParams";
 
 export type UserAttribute = {
   name: string;
@@ -240,14 +241,24 @@ export function UserDataTable() {
   });
 
   const goToCreate = () => {
-    navigate(
-      toAddUser({
-        realm:
-          isCustomTheme && !isMeInManager
-            ? customFilters.searchRealm || realmName
-            : realmName,
-      }),
-    );
+    if (isCustomTheme) {
+      navigate({
+        ...toAddUser({
+          realm: isMeInManager
+              ? realmName
+              : customFilters.searchRealm || realmName
+        }),
+        search: isMeInManager
+            ? `?${QueryParam.SEARCH_REALM}=${customFilters.searchRealm}`
+            : ""
+      });
+    } else {
+      navigate(
+          toAddUser({
+            realm: realmName,
+          }),
+      );
+    }
   };
 
   if (!userStorage || !realm) {

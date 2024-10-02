@@ -205,7 +205,7 @@ export const UserForm = ({
           help="requiredUserActionsHelp"
           isDisabled={isCustomTheme && !user?.id}
           isReadOnly={!isRequiredActionsEnabled}
-          searchRealm={searchRealm.id}
+          searchRealm={searchRealm.realm}
         />
         {(user?.federationLink || user?.origin) && canViewFederationLink && (
           <FormGroup

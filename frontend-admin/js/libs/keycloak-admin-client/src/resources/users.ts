@@ -86,9 +86,10 @@ export class Users extends Resource<{ realm?: string }> {
     path: "/count",
   });
 
-  public getProfile = this.makeRequest<{}, UserProfileConfig>({
+  public getProfile = this.makeRequest<{searchRealm?: string}, UserProfileConfig>({
     method: "GET",
     path: "/profile",
+    queryParamKeys: ["searchRealm"]
   });
 
   public updateProfile = this.makeRequest<UserProfileConfig, UserProfileConfig>(

@@ -3,14 +3,11 @@ package ru.alamics.sso.keycloak.manager;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.UserProvider;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.keycloak.services.resources.KeycloakOpenAPI;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.UserResource;
 import org.keycloak.services.resources.admin.UsersResource;
@@ -27,11 +24,9 @@ public class ManagerUsersResource extends UsersResource {
         this.auth = auth;
     }
 
+    @Override
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Tag(name = KeycloakOpenAPI.Admin.Tags.USERS)
-    @Operation( summary = "Create a new user Username must be unique.")
-    @Override
     public Response createUser(UserRepresentation rep) {
         String authRealm = auth.adminAuth().getRealm().getName();
         String contextRealm = session.getContext().getRealm().getName();
@@ -43,6 +38,7 @@ public class ManagerUsersResource extends UsersResource {
         return super.createUser(rep);
     }
 
+    @Override
     @Path("{user-id}")
     public UserResource user(final @PathParam("user-id") String id) {
         String authRealm = auth.adminAuth().getRealm().getName();

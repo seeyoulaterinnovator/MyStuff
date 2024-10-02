@@ -42,7 +42,7 @@ export const RequiredActionMultiSelect = <
 
   useFetch(
     () =>
-      adminClient.authenticationManagement.getRequiredActions({ searchRealm }), // TODO
+      adminClient.authenticationManagement.getRequiredActions({ searchRealm }),
     (actions) => {
       const enabledUserActions = actions.filter((action) => {
         return action.enabled;

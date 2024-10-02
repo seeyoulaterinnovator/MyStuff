@@ -78,7 +78,9 @@ export const UserIdentityProviderLinks = ({
     })) as WithProviderId[];
 
     if (canQueryIDPDetails) {
-      const allProviders = await adminClient.identityProviders.find();
+      const allProviders = await adminClient.identityProviders.find({
+        searchRealm
+      });
       for (const element of allFedIds) {
         element.providerId = allProviders.find(
           (item) => item.alias === element.identityProvider,

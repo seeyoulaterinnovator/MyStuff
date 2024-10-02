@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.manager;
 
+import jakarta.inject.Inject;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Context;

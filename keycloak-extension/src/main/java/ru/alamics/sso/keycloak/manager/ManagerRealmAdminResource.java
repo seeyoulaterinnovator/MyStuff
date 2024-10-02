@@ -17,6 +17,6 @@ public class ManagerRealmAdminResource extends RealmAdminResource {
 
     @Path("users")
     public UsersResource users() {
-        return new UsersResource(session, auth, adminEvent);
+        return new ManagerUsersResource(session, auth, adminEvent);
     }
 }

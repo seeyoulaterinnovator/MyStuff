@@ -21,11 +21,12 @@ export class IdentityProviders extends Resource<{ realm?: string }> {
    */
 
   public find = this.makeRequest<
-    IdentityProvidersQuery,
+    IdentityProvidersQuery & { searchRealm?: string },
     IdentityProviderRepresentation[]
   >({
     method: "GET",
     path: "/instances",
+    queryParamKeys: ["searchRealm"]
   });
 
   public create = this.makeRequest<

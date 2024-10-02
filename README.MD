@@ -30,6 +30,11 @@ https://gitlab.ertelecom.ru/b2bweb/sso
 * Администратор - admin / admin
 * Менеджер - manager@nomail.ru / manager
 
+### Адреса
+
+* Консоль администратора - [/admin/master/console](http://localhost:8080/auth/admin/master/console/)
+* Консоль менеджера - [/admin/manager/console](http://localhost:8080/auth/admin/manager/console/)
+
 ## Разработка только backend
 
 ### Run config-и:
