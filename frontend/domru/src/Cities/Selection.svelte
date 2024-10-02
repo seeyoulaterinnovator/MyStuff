@@ -1,24 +1,18 @@
 <script>
-  import { beforeUpdate, afterUpdate } from 'svelte';
+  import { afterUpdate } from 'svelte';
   import { onMount } from 'svelte';
-  import Cookie from 'js-cookie';
-
-  import axios from 'axios';
 
   import {
-    status,
-    city,
-    showModal,
     editingStarted,
     allCities,
     quarter,
   } from './stores.js';
-  import { STATUS } from './constants.js';
 
   import './selection';
 
   import * as citiesJson  from '../mock/cities.json'
   import {selectCity} from "./selection";
+  import { fetchCities } from '../api/cities/index.js';
 
   let groupedCities = [];
 
@@ -65,23 +59,12 @@
   }
 
   onMount(() => {
-    const url = '/auth/realms/user/cities';
-
-    axios
-      .get(url)
-      .then(response => {
-        const respCities  = response.data.results.cities || []; //citiesJson.results.cities || [];
-        const replacedCities = respCities.map(city => city.name === 'Холдинг' ? {
-            ...city,
-            name: 'Федеральный Клиент',
-        } : city);
-        allCities.set(replacedCities);
-
-        groupedCities = groupByFirstCharacter($allCities);
-        editingStarted.set(false);
-
-      })
-      .catch(error => console.error('Error:', error));
+    fetchCities().then((response) => {
+      const fetchedCities = response.data.results?.cities;
+      allCities.set(fetchedCities || []);
+      groupedCities = groupByFirstCharacter($allCities);
+      editingStarted.set(false);
+    });
   });
 
   afterUpdate(() => {

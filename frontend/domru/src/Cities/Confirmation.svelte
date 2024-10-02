@@ -1,29 +1,36 @@
 <script>
   import Cookie from 'js-cookie';
   import {allCities, city, showModal, status} from './stores.js';
-  import {STATUS} from './constants.js';
-  import {onMount} from 'svelte';
-  import axios from 'axios';
+  import {STATUS, DEFAULT_CITY} from './constants.js';
+  import {fetchCities} from '../api/cities';
+  import {onMount, onDestroy} from 'svelte';
+
+  let unsubscribeCity = null;
+
+  const setDefaultCity = () => {
+    Cookie.set('CITY', DEFAULT_CITY.name, {sameSite: 'None', secure: document.location.protocol === 'https:'});
+    city.set(DEFAULT_CITY.name);
+  }
 
   onMount(() => {
-    const url = '/auth/realms/user/cities';
+    fetchCities().then((response) => {
+      const fetchedCities = response.data.results?.cities;
+      allCities.set(fetchedCities || []);
 
-    axios
-      .get(url)
-      .then(response => {
-        const respCities = response.data.results.cities || []; //citiesJson.results.cities || [];
-        const replacedCities = respCities.map(city => city.name === 'Холдинг' ? {
-          ...city,
-          name: 'Федеральный Клиент',
-        } : city);
-        allCities.set(replacedCities);
-      })
-      .catch(error => console.error('Error:', error));
+      unsubscribeCity = city.subscribe(value => {
+        if (!$allCities.length) {
+          setDefaultCity();
+        }
+      });
+    }).catch(error => {
+      setDefaultCity();
+    });
   });
 
+  onDestroy(unsubscribeCity);
+
   function handleConfirm() {
-    console.log($allCities)
-    const cityDomain = $allCities.find(obj => obj.name === $city).city;
+    const cityDomain = $allCities.find(obj => obj.name === $city)?.city || DEFAULT_CITY.city;   
     Cookie.set('city-domain', cityDomain, {sameSite: 'None', secure: document.location.protocol === 'https:'});
     Cookie.set('VISITED', '1', {sameSite: 'None', secure: document.location.protocol === 'https:'});
     Cookie.set('changeCity', '1', {sameSite: 'None', secure: document.location.protocol === 'https:'});

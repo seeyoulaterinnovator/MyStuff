@@ -1,7 +1,8 @@
-import {writable} from 'svelte/store';
+import { writable } from 'svelte/store';
 import Cookie from 'js-cookie';
 
-import {STATUS} from './constants.js';
+import { STATUS } from './constants.js';
+import { fetchCurrentCity } from '../api/cities';
 
 export const city = writable(
   (document.getElementById('cities-button') && document.getElementById('cities-button').dataset.city) || Cookie.get('CITY') || ''
@@ -17,15 +18,20 @@ export const domain = writable(
 
 const isFirstVisit = Cookie.get('VISITED') !== '1';
 
-isFirstVisit && fetch('/auth/realms/user/cities/current')
-  .then(response => response.json())
-  .then(json => {
-    json.results?.title == null ? city.set("Москва") : city.set(json.results.title);
-  })
-  .catch(error => {
-    console.log(error);
-    city.set('Москва');
-  });
+isFirstVisit &&
+  fetchCurrentCity()
+    .then(response => {
+      const responseResults = response.data.results;
+      const { title: currentCityTitle } = responseResults || {};
+
+      currentCityTitle == null
+        ? city.set(DEFAULT_CITY.name)
+        : city.set(currentCityTitle);
+    })
+    .catch(error => {
+      console.log(error);
+      city.set(DEFAULT_CITY.name);
+    });
 
 export const status = writable(
   isFirstVisit ? STATUS.INITIAL : STATUS.SELECTING,
