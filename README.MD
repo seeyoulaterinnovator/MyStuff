@@ -23,6 +23,13 @@ https://gitlab.ertelecom.ru/b2bweb/sso
 4. Запустить [docker-compose-local.yaml](./docker-compose-local.yml) в одном из режимов в зависимости 
    от необходимых доработок через соответствующий Intellij Idea run config.
 
+### Учетные данные для входа
+
+> См. дополнительные скрипты для патча БД [\d\d-\w+.sql](./volumes/mariadb/docker-entrypoint-initdb.d/)
+
+* Администратор - admin / admin
+* Менеджер - manager@nomail.ru / manager
+
 ## Разработка только backend
 
 ### Run config-и:
@@ -65,19 +72,19 @@ https://gitlab.ertelecom.ru/b2bweb/sso
 к нему применяется через config CLI утилиту заранее подготовленный тестовый realm в виде минимизированного абстрактного
 import файла [e2e.json](./volumes/keycloak-config-cli/config/e2e.json).
 
-# Заливка на стенд
+## Заливка на стенд
 
 ```text
 TODO
 ```
 
-# Заливка на прод
+## Заливка на прод
 
 ```text
 TODO
 ```
 
-# Ключевые таблицы БД
+## Ключевые таблицы БД
 
 * *ADMIN_EVENT_ENTITY* - поможет отследить что делал менеджер в админке
 * *APP_PROPERTIES* - настройки проекта, разные подключения
@@ -90,7 +97,7 @@ TODO
 * *USER_POST* - таблица customer-ов пользователей
 * *USER_ATTRIBUTE* - атрибуты пользователей
 
-# Сервисные письма на email
+## Сервисные письма на email
 
 Изменения производятся в [themes/domru/email/html](keycloak-extension/src/main/resources/themes/domru/email/html).
 
