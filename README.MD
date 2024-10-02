@@ -12,6 +12,8 @@ https://gitlab.ertelecom.ru/b2bweb/sso
 
 ## Разработка
 
+> Подразумевается состояние БД до миграции, т.е. на момент версии Keycloak 6.0.1
+
 1. Пометить папку [docker-entrypoint-initdb.d](./volumes/mariadb/docker-entrypoint-initdb.d), как excluded
 2. Скопировать скрипт стендовой БД dump-а в файл.
    [docker-entrypoint-initdb.d/01-dump.sql](./volumes/mariadb/docker-entrypoint-initdb.d/01-dump.sql)

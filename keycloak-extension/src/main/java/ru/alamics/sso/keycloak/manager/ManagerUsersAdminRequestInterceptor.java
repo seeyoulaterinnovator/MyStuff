@@ -62,10 +62,6 @@ public class ManagerUsersAdminRequestInterceptor implements ContainerRequestFilt
     }
 
     void filter(ContainerRequestContext requestContext, Rule rule) {
-        AuthenticationSessionModel auth = session.getContext().getAuthenticationSession();
-
-        if(auth == null || auth.getRealm() == null) return;
-
         UserModel user = session.getProvider(UserProvider.class)
                 .getUserById(session.getContext().getRealm(), rule.userId.apply(requestContext.getUriInfo()));
 
