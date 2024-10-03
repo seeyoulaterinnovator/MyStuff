@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import Cookie from 'js-cookie';
 
-import { STATUS } from './constants.js';
+import { STATUS, DEFAULT_CITY } from './constants.js';
 import { fetchCurrentCity } from '../api/cities';
 
 export const city = writable(
