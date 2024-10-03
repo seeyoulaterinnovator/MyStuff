@@ -316,7 +316,7 @@ export const useUserDataTable = ({
         try {
           const downloadedFile =
             await adminClient.customUsers.downloadCSVTemplate({
-              realm: realmName,
+              realm: customFilters.searchRealm,
             });
 
           saveAs(
@@ -334,7 +334,7 @@ export const useUserDataTable = ({
         try {
           const downloadedFile =
             await adminClient.customUsers.downloadExcelTemplate({
-              realm: realmName,
+              realm: customFilters.searchRealm,
             });
 
           saveAs(
@@ -357,7 +357,7 @@ export const useUserDataTable = ({
             formData.append("file", payload);
 
             await adminClient.customUsers.importFile(payload.name)(
-              { realm: realmName },
+              { realm: customFilters.searchRealm },
               formData,
             );
 
@@ -390,7 +390,7 @@ export const useUserDataTable = ({
 
         try {
           const downloadedFile = await adminClient.customUsers.downloadUsers(
-            { realm: realmName },
+            { realm: customFilters.searchRealm },
             {
               type: downloadedExtension,
               userIds: selectedIds,

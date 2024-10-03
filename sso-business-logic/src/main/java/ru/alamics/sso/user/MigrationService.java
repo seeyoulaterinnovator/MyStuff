@@ -1,5 +1,6 @@
 package ru.alamics.sso.user;
 
+import io.quarkus.narayana.jta.QuarkusTransaction;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
@@ -28,6 +29,7 @@ import ru.alamics.sso.util.validator.StringValidator;
 import ru.alamics.sso.util.validator.ValidatorBuilder;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
@@ -62,9 +64,9 @@ public class MigrationService {
 
         List<UserEntity> entities = new ArrayList<>();
 
-        int createdUsers = reportModel.getCountCreatedUsers();
-        int countClones = reportModel.getCountClones();
-        int processedUsers = 0;
+        AtomicInteger createdUsers = new AtomicInteger(reportModel.getCountCreatedUsers());
+        AtomicInteger countClones = new AtomicInteger(reportModel.getCountClones());
+        AtomicInteger processedUsers = new AtomicInteger();
 
         try {
             for (ImportUsersDataModel data : dataList) {
@@ -74,69 +76,72 @@ public class MigrationService {
                 if (data.getStatus() == ImportUsersDataStatus.DONE)
                     continue;
 
-                UserEntity user = null;
-                boolean modified = false;
-                try {
-                    data.setEmail(UserServiceUtil.doCleanMail(data.getEmail()));
-                    data.setPhone(UserServiceUtil.doCleanPhone(data.getPhone()));
+                QuarkusTransaction.requiringNew().run(() -> {
+                    UserEntity user = null;
+                    boolean modified = false;
 
-                    data.setErrors(null);
+                    try {
+                        data.setEmail(UserServiceUtil.doCleanMail(data.getEmail()));
+                        data.setPhone(UserServiceUtil.doCleanPhone(data.getPhone()));
 
-                    user = checkImportUser(reportModel.getRealmId(), data.getEmail(), data.getPhone());
-                    if (user == null) {
-                        user = createUser(reportModel.getRealmId(), data);
-                        createdUsers++;
-                        data.setCreated(true);
-                        modified = true;
-                    } else {
-                        user.setFirstName(data.getFirstName());
+                        data.setErrors(null);
+
+                        user = checkImportUser(reportModel.getRealmId(), data.getEmail(), data.getPhone());
+                        if (user == null) {
+                            user = createUser(reportModel.getRealmId(), data);
+                            createdUsers.incrementAndGet();
+                            data.setCreated(true);
+                            modified = true;
+                        } else {
+                            user.setFirstName(data.getFirstName());
+                        }
+                        data.setUserId(user.getId());
+                        checkToms(data);
+
+                        modified = addUserPost(user, data);
+
+                        entities.add(user);
+
+                    } catch (AllNotValidException av) {
+
+                        data.setErrors(av.getMessageList().toString());
+                        log.error("Importing user data is failed. {}", av.getMessageList().toString());
+
+                    } catch (NotFoundException | NotValidException e) {
+                        data.setErrors(e.getMessage());
+                        log.error("Importing user data is failed. {}", e.getMessage());
+                    } catch (FoundException e) {
+                        List<Object> errors = new LinkedList<>();
+                        e.getResult().forEach((k, v) -> {
+                            errors.add(v);
+                        });
+                        String errorsStr = errors.toString().substring(1, errors.toString().length() - 1);
+                        data.setErrors(errorsStr);
+                        log.error("Importing user data is failed. {}", errorsStr);
+                    } finally {
+
+                        if (user != null && modified) {
+                            addMigrationAttribute(reportModel.getId(), user, migrationStarts);
+                        } else if (!modified) {
+                            countClones.incrementAndGet();
+                        }
+
+                        data.setStatus(ImportUsersDataStatus.DONE);
+
+                        importReportService.updateImportUsersData(data);
+                        processedUsers.incrementAndGet();
+                        if (processedUsers.get() % 50 == 0) {
+                            reportModel.setCountClones(countClones.get());
+                            reportModel.setCountCreatedUsers(createdUsers.get());
+                            importReportService.updateReport(reportModel);
+                            log.info("ProcessedUsers " + processedUsers);
+                        }
                     }
-                    data.setUserId(user.getId());
-                    checkToms(data);
-
-                    modified = addUserPost(user, data);
-
-                    entities.add(user);
-
-                } catch (AllNotValidException av) {
-
-                    data.setErrors(av.getMessageList().toString());
-                    log.error("Importing user data is failed. {}", av.getMessageList().toString());
-
-                } catch (NotFoundException | NotValidException e) {
-                    data.setErrors(e.getMessage());
-                    log.error("Importing user data is failed. {}", e.getMessage());
-                } catch (FoundException e) {
-                    List<Object> errors = new LinkedList<>();
-                    e.getResult().forEach((k, v) -> {
-                        errors.add(v);
-                    });
-                    String errorsStr = errors.toString().substring(1, errors.toString().length() - 1);
-                    data.setErrors(errorsStr);
-                    log.error("Importing user data is failed. {}", errorsStr);
-                } finally {
-
-                    if (user != null && modified) {
-                        addMigrationAttribute(reportModel.getId(), user, migrationStarts);
-                    } else if (!modified) {
-                        countClones++;
-                    }
-
-                    data.setStatus(ImportUsersDataStatus.DONE);
-
-                    importReportService.updateImportUsersData(data);
-                    processedUsers++;
-                    if (processedUsers % 50 == 0) {
-                        reportModel.setCountClones(countClones);
-                        reportModel.setCountCreatedUsers(createdUsers);
-                        importReportService.updateReport(reportModel);
-                        log.info("ProcessedUsers " + processedUsers);
-                    }
-                }
+                });
             }
 
-            reportModel.setCountClones(countClones);
-            reportModel.setCountCreatedUsers(createdUsers);
+            reportModel.setCountClones(countClones.get());
+            reportModel.setCountCreatedUsers(createdUsers.get());
             reportModel.setStatus(ImportUsersReportStatus.DONE);
 
             // закомментировано, потому что для пакетной загрузки это может быть не окончательный статус
@@ -151,8 +156,8 @@ public class MigrationService {
 
             log.info("Interrupted by timeout, processed " + processedUsers);
 
-            reportModel.setCountClones(countClones);
-            reportModel.setCountCreatedUsers(createdUsers);
+            reportModel.setCountClones(countClones.get());
+            reportModel.setCountCreatedUsers(createdUsers.get());
             reportModel.setStatus(ImportUsersReportStatus.AWAITING);
             // закомментировано, потому что для пакетной загрузки это может быть не окончательный статус
             //importReportService.updateReport(reportModel);

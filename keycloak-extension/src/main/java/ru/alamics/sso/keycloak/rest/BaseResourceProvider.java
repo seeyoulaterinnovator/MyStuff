@@ -85,7 +85,7 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
             throw new ForbiddenException();
         }
 
-        if(restoreRealm && !realmFromToken.getName().equals(realmManager.getKeycloakAdminstrationRealm().getName())) {
+        if(restoreRealm) {
             // see org.keycloak.services.resources.RealmsResource#init in version 6.0.1
             // https://github.com/keycloak/keycloak/blob/6.0.1/services/src/main/java/org/keycloak/services/resources/RealmsResource.java#L202
             KeycloakUriInfo uri = context.getUri();
