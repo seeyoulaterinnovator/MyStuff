@@ -7,7 +7,6 @@ import {
   ButtonVariant,
   SearchInput,
   ToolbarItem,
-  InputGroupItem,
   Dropdown,
   MenuToggle,
   DropdownList,
@@ -132,8 +131,16 @@ export function UserDataTableToolbarItems({
   const searchItem = () => {
     return (
       <ToolbarItem>
-        <ToolbarGroup className="pf-m-wrap" variant="filter-group">
-          <InputGroupItem>
+        <ToolbarGroup
+          className="pf-m-wrap"
+          variant="filter-group"
+          {...(isCustomTheme && searchType === "custom"
+            ? {
+                spaceItems: { default: "spaceItemsSm" },
+              }
+            : {})}
+        >
+          <ToolbarItem>
             <SearchDropdown
               searchType={searchType}
               onSelect={(searchType) => {
@@ -141,7 +148,7 @@ export function UserDataTableToolbarItems({
                 setSearchType(searchType);
               }}
             />
-          </InputGroupItem>
+          </ToolbarItem>
           {searchType === "default" && defaultSearchInput()}
           {searchType === "attribute" && attributeSearchInput()}
           {searchType === "custom" && customSearchInput()}
