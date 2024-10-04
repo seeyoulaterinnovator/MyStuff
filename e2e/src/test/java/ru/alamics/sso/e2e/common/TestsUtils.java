@@ -56,6 +56,20 @@ public final class TestsUtils {
                 .orElseThrow());
     }
 
+    public static void clearRequiredActions(TestsUsers user) {
+        jdbi().useHandle(handle -> handle.execute(
+                "delete from USER_REQUIRED_ACTION where USER_ID = ?",
+                getUserId(user)
+        ));
+    }
+
+    public static void addRequiredAction(TestsUsers user, String action) {
+        jdbi().useHandle(handle -> handle.execute(
+                "insert into USER_REQUIRED_ACTION (USER_ID, REQUIRED_ACTION) values (?, ?)",
+                getUserId(user), action
+        ));
+    }
+
     public static List<String> getRequiredActions(TestsUsers user) {
         return jdbi().withHandle(handle -> handle.createQuery(
                         "select REQUIRED_ACTION from USER_REQUIRED_ACTION where USER_ID = ?"

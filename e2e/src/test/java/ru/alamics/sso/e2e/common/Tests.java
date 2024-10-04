@@ -110,6 +110,7 @@ public abstract class Tests {
             .withEnv("LIQUIBASE_COMMAND_CHANGE_EXEC_LISTENER_CLASS",
                     "ru.alamics.sso.keycloak.migration.CustomChangeExecListener")
             .withEnv("KC_SPI_USER_PROVIDER", "customjpa")
+            .withEnv("KC_SPI_AUTHENTICATION_SESSIONS_PROVIDER", "custom")
             .withEnv("KC_CACHE_CONFIG_FILE", "cache-ispn-custom.xml")
             .withEnv("ERTH_SSO_E2E_ENABLED", "true")
             .withCopyFileToContainer(

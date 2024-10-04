@@ -44,6 +44,23 @@
         "phone": ["79602408222"],
         "phone_validated_on": ["2024-08-22T00:00:00"]
       }
+    },
+    {
+      "username": "mobiletester@nomail.tld",
+      "email": "mobiletester@nomail.tld",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "MobileTester",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "qwerty"
+        }
+      ],
+      "attributes": {
+        "phone": ["79602408223"],
+        "phone_validated_on": ["2024-08-22T00:00:00"]
+      }
     }
   ],
   "clients": [
@@ -59,6 +76,24 @@
       "webOrigins": [
         "*"
       ]
+    },
+    {
+      "id": "mobileApp",
+      "name": "mobileApp",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "secret",
+      "redirectUris": [
+        "*"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "directAccessGrantsEnabled": true,
+      "authenticationFlowBindingOverrides": {
+        "direct_grant": "Rest AUTH",
+        "reset_credential": "Reset Cred of MP"
+      }
     }
   ],
   "components": {
@@ -226,6 +261,86 @@
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
           "priority": 20,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        }
+      ]
+    },
+    {
+      "alias": "Rest AUTH",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "rest-phone-username-validator",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 0,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "rest-sms-or-phone-pass-validator",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 1,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "rest-sms-or-phone-call-auth",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 2,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "rest-actions",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 3,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        }
+      ]
+    },
+    {
+      "alias": "Reset Cred of MP",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "reset-cred-choose-user-rest",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 0,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "two-step-verification",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 1,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "reset-password",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 2,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "rest-actions",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 3,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         }
