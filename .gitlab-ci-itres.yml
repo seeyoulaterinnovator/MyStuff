@@ -156,6 +156,7 @@ domru:devel:
   environment:
     name: devel
     url: https://er-sso.dev.it-resource.team
+    BASIC_AUTH_USERS: tester:$2y$05$UtcScUwbnflomoB1hhSJ0OpFvOLR6A8QH5ImGo7.QYoBws3qwUo5K # tester / z3kco5xpZQzenqUEz2Ob
   script:
     - envsubst < .gitlab-ci/docker-compose-template.yml > docker-compose.yml
     - docker login $REGISTRY -u $GROUP_DEPLOYER -p $GROUP_DEPLOYER_PASS
