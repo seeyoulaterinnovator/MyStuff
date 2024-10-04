@@ -51,7 +51,11 @@ export function UserDataTableCustomSearchForm({
   return (
     <Form onSubmit={handleSubmit(searchUserWithCustomFilters)}>
       {isCustomTheme && !withHideUserSearchAccess && (
-        <ToolbarGroup className="pf-m-wrap" variant="filter-group">
+        <ToolbarGroup
+          className="pf-m-wrap"
+          variant="filter-group"
+          spaceItems={{ default: "spaceItemsSm" }}
+        >
           <ToolbarItem>
             <TextInput
               id="value"
