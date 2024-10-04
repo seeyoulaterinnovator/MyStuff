@@ -13,9 +13,6 @@ services:
       ServerOptions__Hostname: smtp4dev-er-sso.dev.it-resource.team
     deploy:
       replicas: 1
-      placement:
-        constraints:
-          - "node.hostname==swarm2.dev.it-resource.team"
       labels:
         - "traefik.frontend.rule=Host:smtp4dev-er-sso.dev.it-resource.team;PathPrefix:/"
         - "traefik.frontend.passHostHeader=true"
