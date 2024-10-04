@@ -1,0 +1,317 @@
+{
+  "id": "e2e-manager",
+  "realm": "e2e-manager",
+  "enabled": true,
+  "displayName": "e2e-manager",
+  "resetPasswordAllowed": true,
+  "smtpServer": {
+    "host": "smtp4dev",
+    "from": "noreply@domru.ru"
+  },
+  "roles": {
+    "client": {
+      "realm-management": [
+        {
+          "id": "d3995cd4-88cd-4b23-8e17-d6d5e394a6b7",
+          "name": "button-import-file-csv",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "f209481c-1a90-4f77-9184-40b026dc341a",
+          "name": "button-block-users",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "a815bba0-f8b9-4c85-9472-3e335dc3a53f",
+          "name": "button-export-csv",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "2dc13e4e-e443-43ca-89ec-c149a5db0967",
+          "name": "edit-groups",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "dae57082-a4d6-401b-b253-6542bda36d97",
+          "name": "edit-sessions",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "abc678bb-20f7-4414-819c-bb2b4f8aa1c1",
+          "name": "manage-users",
+          "description": "${role_manage-users}",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "13470d34-6bb0-4797-b12c-5aca8e80a84b",
+          "name": "hide-manage-buttons",
+          "description": "Скрывает кнопки во вкладке Users",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "3b88f22d-2660-4eee-b5fb-236ae390d3fe",
+          "name": "button-download-template-xlsx",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "28998b8b-2186-4134-9a7a-d34cb158abbd",
+          "name": "view-users",
+          "description": "${role_view-users}",
+          "composite": true,
+          "composites": {
+            "client": {
+              "realm-management": [
+                "query-users",
+                "query-groups"
+              ]
+            }
+          },
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "8d59885e-5d52-442b-83fe-e0c3f0ab648e",
+          "name": "button-add-user",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "c1c092da-8a34-4d6f-b467-9d058addf7cb",
+          "name": "edit-role-mappings",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "8620a1a0-7490-4723-858e-a6a9fca7bf04",
+          "name": "view-identity-providers",
+          "description": "${role_view-identity-providers}",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "a98d7cb3-f31b-416b-a3b6-7ef95d5c092f",
+          "name": "edit-customer",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "c1c4d1d8-c87b-472a-8fa7-9c40934a7436",
+          "name": "edit-federated-identity",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "b07dc9fd-d6b4-46ed-be42-e486d3b71591",
+          "name": "edit-details",
+          "description": "Edit User Details",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "662aaa14-a6b4-494c-9382-436714093a2c",
+          "name": "hide-select-all",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "5e454bdb-f7c2-4373-ab82-ba14700a155b",
+          "name": "edit-credentials",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "76469f30-a127-49c6-bd46-fe90824f0ff6",
+          "name": "hide-user-search",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "3710a87d-a4d5-4663-a75c-aea5112897f1",
+          "name": "button-download-template-csv",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "49e7ced1-c3e3-4c47-9c7f-7ef680da8f37",
+          "name": "edit-attributes",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "f278dc37-7fe7-4973-9ffd-4669a7788a3b",
+          "name": "button-unlock-users",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "87653a7e-a52f-4460-9682-3b7815bb84b1",
+          "name": "view-authorization",
+          "description": "${role_view-authorization}",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "519f97a5-70fd-4cf3-bf49-d1debd96be5d",
+          "name": "view-user-realm",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "f8306d8a-39df-4bbf-8190-3ae787487d84",
+          "name": "button-export-xlsx",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "66f677b7-d122-4306-947a-c4555dc20c8e",
+          "name": "impersonation",
+          "description": "${role_impersonation}",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "c2933d5c-77d9-4c8c-91e0-fc4f8b6fb313",
+          "name": "button-add-customer",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "89c6b26e-f95f-4ed0-bf07-fb5bd12eedf0",
+          "name": "button-reset-password",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "da9900ad-525c-455e-a88b-70ad31e8965d",
+          "name": "button-delete-customer",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "c64f986d-d2f5-4ee2-941e-d5243f8106ac",
+          "name": "edit-consents",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        },
+        {
+          "id": "ab23d849-aa07-4e9c-8c61-447e16626544",
+          "name": "required-actions",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7d1e198d-9ad0-44bf-974c-a7624ef2adc3",
+          "attributes": {}
+        }
+      ]
+    }
+  },
+  "users": [
+    {
+      "username": "manager@nomail.ru",
+      "firstName": "manager",
+      "lastName": "manager",
+      "email": "manager@nomail.ru",
+      "emailVerified": true,
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "manager"
+        }
+      ],
+      "clientRoles": {
+        "realm-management": [
+          "button-import-file-csv",
+          "button-export-csv",
+          "button-block-users",
+          "edit-groups",
+          "edit-sessions",
+          "manage-users",
+          "view-users",
+          "button-download-template-xlsx",
+          "button-add-user",
+          "edit-role-mappings",
+          "view-identity-providers",
+          "edit-customer",
+          "edit-federated-identity",
+          "edit-details",
+          "edit-credentials",
+          "button-download-template-csv",
+          "edit-attributes",
+          "button-unlock-users",
+          "impersonation",
+          "button-export-xlsx",
+          "button-add-customer",
+          "button-reset-password",
+          "edit-consents",
+          "button-delete-customer",
+          "required-actions"
+        ]
+      }
+    }
+  ]
+}

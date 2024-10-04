@@ -5,6 +5,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.reactive.NoCache;
+import org.keycloak.Config;
 import org.keycloak.models.*;
 import org.keycloak.models.cache.UserCache;
 import org.keycloak.models.jpa.entities.UserEntity;
@@ -15,11 +16,9 @@ import ru.alamics.sso.jpa.model.CustomUserAdapter;
 import ru.alamics.sso.keycloak.GeneralRealm;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
-import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.service.RequiredActionService;
 import ru.alamics.sso.user.web.RealmNameDto;
-import ru.alamics.sso.user.web.UserSearch;
 import ru.alamics.sso.util.Util;
 
 import java.net.HttpURLConnection;
@@ -163,16 +162,17 @@ public class SearchResource {
         final String currentRealm = session.getContext().getRealm().getName();
         if (userDontHaveViewRoles) {
             return realm -> {
-                switch (currentRealm) {
-                    case GeneralRealm.MASTER:
-                        return true;
-                    case GeneralRealm.MANAGER:
-                        return GeneralRealm.REALMS.stream().noneMatch(realm.getName()::equalsIgnoreCase);
+                if(Config.getAdminRealm().equals(currentRealm)) {
+                    return true;
+                } else if(GeneralRealm.MANAGER_REALMS.contains(currentRealm)) {
+                    return !Config.getAdminRealm().equalsIgnoreCase(realm.getName())
+                            && !GeneralRealm.MANAGER_REALMS.contains(realm.getName());
+                } else {
+                    return false;
                 }
-                return false;
             };
         } else {
-            if (GeneralRealm.MASTER.equalsIgnoreCase(currentRealm)) {
+            if (Config.getAdminRealm().equalsIgnoreCase(currentRealm)) {
                 return realm -> true;
             } else {
                 return realm -> roles.stream()

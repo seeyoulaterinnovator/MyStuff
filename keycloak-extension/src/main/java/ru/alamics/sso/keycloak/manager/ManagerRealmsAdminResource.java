@@ -41,7 +41,7 @@ public class ManagerRealmsAdminResource extends RealmsAdminResource {
         if (realm == null) throw new RealmNotFoundException();
 
         if (!auth.getRealm().getName().equals(Config.getAdminRealm())
-                && !auth.getRealm().getName().equals(GeneralRealm.MANAGER)
+                && !GeneralRealm.MANAGER_REALMS.contains(auth.getRealm().getName())
                 && !auth.getRealm().equals(realm)) {
             throw new ForbiddenException();
         }

@@ -24,12 +24,14 @@ import java.util.regex.Pattern;
 @Provider
 @PreMatching
 public class ManagerUsersAdminRequestInterceptor implements ContainerRequestFilter {
-    private static final String USER_ID_REGEX = "[a-f0-9\\-]+";
+    private static final String REALM_REGEX = "(" + String.join("|", GeneralRealm.MANAGER_REALMS) + ")";
+
+    private static final String USER_ID_REGEX = "([a-f0-9\\-]+)";
 
     private static final List<Rule> RULES = List.of(
             Rule.builder()
                     .pathPattern(Pattern.compile(
-                            "/admin/realms/" + GeneralRealm.MANAGER + "/users/" + USER_ID_REGEX
+                            "/admin/realms/" + REALM_REGEX + "/users/" + USER_ID_REGEX
                                     + "(|/role-mappings/realm/composite)"
                     ))
                     .disableStrictAuth(true)
@@ -37,7 +39,7 @@ public class ManagerUsersAdminRequestInterceptor implements ContainerRequestFilt
                     .build(),
             Rule.builder()
                     .pathPattern(Pattern.compile(
-                            "/admin/realms/" + GeneralRealm.MANAGER + "/users/" + USER_ID_REGEX
+                            "/admin/realms/" + REALM_REGEX + "/users/" + USER_ID_REGEX
                                     + "(/federated-identity|/groups|/consents|/sessions|/logout)(|/.*)"
                     ))
                     .disableStrictAuth(true)

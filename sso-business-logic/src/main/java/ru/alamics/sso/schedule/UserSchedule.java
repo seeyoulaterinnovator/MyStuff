@@ -7,6 +7,7 @@ import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Context;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.Config;
 import org.keycloak.common.util.Time;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.jpa.AdminEventEntity;
@@ -30,7 +31,6 @@ import ru.alamics.sso.jpa.entity.AutoLockNotification;
 import ru.alamics.sso.jpa.entity.common.BlockType;
 import ru.alamics.sso.jpa.entity.common.NotificationType;
 import ru.alamics.sso.jpa.repository.*;
-import ru.alamics.sso.keycloak.GeneralRealm;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsDto;
@@ -84,7 +84,7 @@ public class UserSchedule implements ScheduledTask {
         try {
             intervalDuration = settingsService.getSettingsLongValue(
                     SettingConstants.TIMER_INTERVAL_DURATION_PROPERTY,
-                    GeneralRealm.MASTER
+                    Config.getAdminRealm()
             );
         } catch (Exception e) {
             if(E2EUtil.isE2E()) {
@@ -96,7 +96,7 @@ public class UserSchedule implements ScheduledTask {
         try {
             lockDuration = settingsService.getSettingsLongValue(
                     SettingConstants.TIMER_LOCK_DURATION_PROPERTY,
-                    GeneralRealm.MASTER
+                    Config.getAdminRealm()
             );
         } catch (Exception e) {
             log.debug(e.getMessage(), e);

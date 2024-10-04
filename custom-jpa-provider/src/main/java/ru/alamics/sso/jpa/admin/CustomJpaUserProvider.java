@@ -43,10 +43,11 @@ public class CustomJpaUserProvider extends JpaUserProvider {
                         "or attr.value like :search ) " +
                         "order by u.username",
                 UserEntity.class);
-        if (realm.getId().equals("manager"))
+        if (realm.getId().equals("manager") || realm.getId().equals("e2e-manager")) {
             query.setParameter("realmId", "user");
-        else
+        } else {
             query.setParameter("realmId", realm.getId());
+        }
         query.setParameter("search", "%" + search.toLowerCase() + "%");
         if (firstResult != -1) {
             query.setFirstResult(firstResult);

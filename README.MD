@@ -23,17 +23,13 @@ https://gitlab.ertelecom.ru/b2bweb/sso
 4. Запустить [docker-compose-local.yaml](./docker-compose-local.yml) в одном из режимов в зависимости 
    от необходимых доработок через соответствующий Intellij Idea run config.
 
-### Учетные данные для входа
-
-> См. дополнительные скрипты для патча БД [\d\d-\w+.sql](./volumes/mariadb/docker-entrypoint-initdb.d/)
-
-* Администратор - admin / admin
-* Менеджер - manager@nomail.ru / manager
-
 ### Адреса
 
-* Консоль администратора - [/admin/master/console](http://localhost:8080/auth/admin/master/console/)
-* Консоль менеджера - [/admin/manager/console](http://localhost:8080/auth/admin/manager/console/)
+> Учетные данные для входа cм. в дополнительных скриптах для патча БД 
+> [\d\d-\w+.sql](./volumes/mariadb/docker-entrypoint-initdb.d/)
+
+* Консоль администратора (admin / admin) - [/admin/master/console](http://localhost:8080/auth/admin/master/console/)
+* Консоль менеджера (manager@nomail.ru / manager) - [/admin/manager/console](http://localhost:8080/auth/admin/manager/console/)
 
 ## Разработка только backend
 
@@ -58,7 +54,6 @@ https://gitlab.ertelecom.ru/b2bweb/sso
 
 Интерфейс доступен с основного веб сервера Keycloak, т.к. производится обратное проксирование на dev сервер.
 
-
 ### Пользовательский интерфейс
 
 Модуль [domru](./frontend/domru).
@@ -76,6 +71,11 @@ https://gitlab.ertelecom.ru/b2bweb/sso
 Основная идея: Keycloak вместе со всем окружением развертывается через test containers, 
 к нему применяется через config CLI утилиту заранее подготовленный тестовый realm в виде минимизированного абстрактного
 import файла [e2e.json](./volumes/keycloak-config-cli/config/e2e.json).
+
+Для дополнения тестовых realm можно сделать полный экспорт:
+```shell
+export JAVA_OPTS="" && /opt/keycloak/bin/kc.sh export --file /tmp/realm-export.json --realm user
+```
 
 ## Заливка на стенд
 

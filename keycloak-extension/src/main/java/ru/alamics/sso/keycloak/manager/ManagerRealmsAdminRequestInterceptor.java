@@ -19,27 +19,29 @@ import java.util.regex.Pattern;
 @Provider
 @PreMatching
 public class ManagerRealmsAdminRequestInterceptor implements ContainerRequestFilter {
+    private static final String REALM_REGEX = "(" + String.join("|", GeneralRealm.MANAGER_REALMS) + ")";
+
     private static final String SEARCH_REALM_PARAM = "searchRealm";
 
     private static final List<Rule> RULES = List.of(
             Rule.builder()
-                    .pathPattern(Pattern.compile("/admin/realms/" + GeneralRealm.MANAGER + "/sessions(|/.*)"))
-                    .pathPattern(Pattern.compile("/admin/realms/" + GeneralRealm.MANAGER + "/identity-provider/instances(|/.*)"))
-                    .pathPattern(Pattern.compile("/admin/realms/" + GeneralRealm.MANAGER + "/users/profile/metadata"))
-                    .pathPattern(Pattern.compile("/admin/realms/" + GeneralRealm.MANAGER))
-                    .pathPattern(Pattern.compile("/admin/realms/" + GeneralRealm.MANAGER + "/authentication/required-actions"))
+                    .pathPattern(Pattern.compile("/admin/realms/" + REALM_REGEX + "/sessions(|/.*)"))
+                    .pathPattern(Pattern.compile("/admin/realms/" + REALM_REGEX + "/identity-provider/instances(|/.*)"))
+                    .pathPattern(Pattern.compile("/admin/realms/" + REALM_REGEX + "/users/profile/metadata"))
+                    .pathPattern(Pattern.compile("/admin/realms/" + REALM_REGEX))
+                    .pathPattern(Pattern.compile("/admin/realms/" + REALM_REGEX + "/authentication/required-actions"))
                     .method(HttpMethod.GET)
                     .disableStrictAuth(true)
                     .replaceContextRealm(true)
                     .build(),
             Rule.builder()
-                    .pathPattern(Pattern.compile("/admin/realms/" + GeneralRealm.MANAGER + "/sessions/[a-f0-9\\-]+"))
+                    .pathPattern(Pattern.compile("/admin/realms/" + REALM_REGEX + "/sessions/[a-f0-9\\-]+"))
                     .method(HttpMethod.DELETE)
                     .disableStrictAuth(true)
                     .replaceContextRealm(true)
                     .build(),
             Rule.builder()
-                    .pathPattern(Pattern.compile("/admin/realms/" + GeneralRealm.MANAGER + "/users"))
+                    .pathPattern(Pattern.compile("/admin/realms/" + REALM_REGEX + "/users"))
                     .method(HttpMethod.POST)
                     .disableStrictAuth(true)
                     .replaceContextRealm(true)
@@ -65,7 +67,7 @@ public class ManagerRealmsAdminRequestInterceptor implements ContainerRequestFil
 
         if(searchRealm == null || searchRealm.isBlank()) return;
 
-        if (searchRealm.equals(Config.getAdminRealm()) || searchRealm.equals(GeneralRealm.MANAGER)) return;
+        if (searchRealm.equals(Config.getAdminRealm()) || GeneralRealm.MANAGER_REALMS.contains(searchRealm)) return;
 
         if(rule.disableStrictAuth) {
             requestContext.setProperty(ManagerRequestProperties.DISABLE_STRICT_ADMIN_AUTH, true);

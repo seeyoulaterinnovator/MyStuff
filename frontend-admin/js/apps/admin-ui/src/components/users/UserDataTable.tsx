@@ -153,14 +153,17 @@ export function UserDataTable() {
         type: "org.keycloak.storage.UserStorageProvider",
       };
 
-      try {
-        return await Promise.all([
-          adminClient.components.find(testParams),
-          adminClient.users.getProfile(),
-        ]);
-      } catch {
-        return [[], {}] as [ComponentRepresentation[], UserProfileConfig];
+      if (!isMeInManager) {
+        try {
+          return await Promise.all([
+            adminClient.components.find(testParams),
+            adminClient.users.getProfile(),
+          ]);
+        } catch {
+          // skip
+        }
       }
+      return [[], {}] as [ComponentRepresentation[], UserProfileConfig];
     },
     ([storageProviders, profile]) => {
       setUserStorage(

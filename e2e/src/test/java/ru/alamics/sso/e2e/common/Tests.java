@@ -6,7 +6,6 @@ import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.jdbi.v3.core.Jdbi;
 import org.junit.ClassRule;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -142,6 +141,10 @@ public abstract class Tests {
                     .withCopyFileToContainer(
                             forHostPath(BASEDIR.resolve("volumes/keycloak-config-cli/config/e2e.json")),
                             "/config/e2e.json"
+                    )
+                    .withCopyFileToContainer(
+                            forHostPath(BASEDIR.resolve("volumes/keycloak-config-cli/config/e2e-manager.json")),
+                            "/config/e2e-manager.json"
                     );
 
     static {
@@ -205,15 +208,17 @@ public abstract class Tests {
             );
 
             for (var user : TestsUsers.values()) {
-                handle.execute(
-                        "insert into CUSTOMER(id, name, update_time) values(?, 'tester', now())",
-                        user.getTomsId()
-                );
-                handle.execute(
-                        "insert into USER_POST(id, user_id, toms_id, dmp_id, role_id) " +
-                                "values (uuid(), ?, ?, uuid(), 1)",
-                        getUserId(user), user.getTomsId()
-                );
+                if(user.getTomsId() != null) {
+                    handle.execute(
+                            "insert into CUSTOMER(id, name, update_time) values(?, 'tester', now())",
+                            user.getTomsId()
+                    );
+                    handle.execute(
+                            "insert into USER_POST(id, user_id, toms_id, dmp_id, role_id) " +
+                                    "values (uuid(), ?, ?, uuid(), 1)",
+                            getUserId(user), user.getTomsId()
+                    );
+                }
             }
 
             for (var client : TestsClients.values()) {

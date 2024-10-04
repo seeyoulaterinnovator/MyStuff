@@ -1,10 +1,11 @@
 package ru.alamics.sso.keycloak;
 
-import java.util.Arrays;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
-public class GeneralRealm {
-    public static final String MASTER = "master";
-    public static final String MANAGER = "manager";
-    public static final List<String> REALMS = Arrays.asList(MASTER, MANAGER);
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class GeneralRealm {
+    public static final List<String> MANAGER_REALMS = List.of("manager", "e2e-manager");
 }

@@ -91,15 +91,16 @@ public final class TestsUtils {
                 .orElseThrow());
     }
 
-    public static String getAdminAccessToken() {
+    public static String getAdminCliAccessToken(TestsUsers user) {
         return given()
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .formParam("client_id", "admin-cli")
                 .formParam("grant_type", "password")
-                .formParam("username", "admin")
-                .formParam("password", "admin")
+                .formParam("username", user.getUsername())
+                .formParam("password", user.getPassword())
+                .pathParam("realm", user.getRealm().getId())
                 .baseUri(KEYCLOAK.getAuthServerUrl())
-                .post("/realms/master/protocol/openid-connect/token")
+                .post("/realms/{realm}/protocol/openid-connect/token")
                 .then()
                 .assertThat()
                 .log()
@@ -112,10 +113,14 @@ public final class TestsUtils {
                 .jsonPath().getString("access_token");
     }
 
+    public static String getAdminCliAccessToken() {
+        return getAdminCliAccessToken(TestsUsers.ADMIN);
+    }
+
     public static void clearMailbox() {
         given()
                 .contentType(MediaType.APPLICATION_JSON)
-                .auth().oauth2(getAdminAccessToken())
+                .auth().oauth2(getAdminCliAccessToken())
                 .baseUri("http://localhost:" + SMTP.getMappedPort(80))
                 .delete("/api/Messages/*")
                 .then()
@@ -126,7 +131,7 @@ public final class TestsUtils {
     public static int getMessageCount(TestsUsers user) {
         return given()
                 .contentType(MediaType.APPLICATION_JSON)
-                .auth().oauth2(getAdminAccessToken())
+                .auth().oauth2(getAdminCliAccessToken())
                 .baseUri("http://localhost:" + SMTP.getMappedPort(80))
                 .queryParam("searchTerms", user.getUsername())
                 .queryParam("page", 1)
@@ -146,7 +151,7 @@ public final class TestsUtils {
     public static String getLastMessageSubject(TestsUsers user) {
         return given()
                 .contentType(MediaType.APPLICATION_JSON)
-                .auth().oauth2(getAdminAccessToken())
+                .auth().oauth2(getAdminCliAccessToken())
                 .baseUri("http://localhost:" + SMTP.getMappedPort(80))
                 .queryParam("searchTerms", user.getUsername())
                 .queryParam("sortColumn", "receivedDate")

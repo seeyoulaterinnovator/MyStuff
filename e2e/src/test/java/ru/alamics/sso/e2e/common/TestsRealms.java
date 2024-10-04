@@ -6,7 +6,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum TestsRealms {
-    E2E("e2e");
+    MASTER("master"),
+    E2E("e2e"),
+    E2E_MANAGER("e2e-manager");
 
     final String id;
 }

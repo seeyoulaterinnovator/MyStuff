@@ -1,7 +1,6 @@
 package ru.alamics.sso.keycloak.create.rest;
 
 import jakarta.activation.UnsupportedDataTypeException;
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -18,7 +17,6 @@ import org.keycloak.admin.ui.rest.EffectiveRoleMappingResource;
 import org.keycloak.admin.ui.rest.model.ClientRole;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.common.Profile;
-import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.events.Details;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.events.EventType;
@@ -26,8 +24,6 @@ import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.*;
 import org.keycloak.models.cache.UserCache;
-import org.keycloak.models.jpa.UserAdapter;
-import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
@@ -609,7 +605,7 @@ public class CustomUserResource {
 
     private CustomUserAdapter checkUser(String userId) {
         if(!auth.adminAuth().getRealm().getName().equals(Config.getAdminRealm())
-                && !auth.adminAuth().getRealm().getName().equals(GeneralRealm.MANAGER)) {
+                && !GeneralRealm.MANAGER_REALMS.contains(auth.adminAuth().getRealm().getName())) {
             throw new ForbiddenException();
         }
 

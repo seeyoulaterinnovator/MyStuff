@@ -39,7 +39,7 @@ public class CustomAuthenticationSessionProvider implements AuthenticationSessio
     }
 
     /**
-     * Восстановлено поведение Keycloak6 для мобильного приложения, когда не удаления сессии аутентификации
+     * Восстановлено поведение Keycloak6 для мобильного приложения, когда нет удаления сессии аутентификации
      * после неудачной попытки получить токен через direct grant flow и наличия обязательного действия обновления пароля
      * @see ru.alamics.sso.keycloak.auth.rest.RestRequiredActionsAuthenticator#authenticate
      * @see org.keycloak.protocol.oidc.grants.ResourceOwnerPasswordCredentialsGrantType#process

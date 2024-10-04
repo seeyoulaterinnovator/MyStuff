@@ -30,8 +30,8 @@ public class ManagerUsersResource extends UsersResource {
     public Response createUser(UserRepresentation rep) {
         String authRealm = auth.adminAuth().getRealm().getName();
         String contextRealm = session.getContext().getRealm().getName();
-        if (authRealm.equals(GeneralRealm.MANAGER) && (
-                contextRealm.equals(GeneralRealm.MANAGER) || contextRealm.equals(Config.getAdminRealm())
+        if (GeneralRealm.MANAGER_REALMS.contains(authRealm) && (
+               contextRealm.equals(Config.getAdminRealm()) || GeneralRealm.MANAGER_REALMS.contains(contextRealm)
         )) {
             throw new ForbiddenException();
         }
@@ -52,8 +52,8 @@ public class ManagerUsersResource extends UsersResource {
 
         String userRealm = customUser.getRealm().getName();
 
-        if(authRealm.equals(GeneralRealm.MANAGER) && (
-                userRealm.equals(Config.getAdminRealm()) || userRealm.equals(GeneralRealm.MANAGER)
+        if(GeneralRealm.MANAGER_REALMS.contains(authRealm) && (
+                userRealm.equals(Config.getAdminRealm()) || GeneralRealm.MANAGER_REALMS.contains(userRealm)
         )) {
             throw new ForbiddenException();
         }

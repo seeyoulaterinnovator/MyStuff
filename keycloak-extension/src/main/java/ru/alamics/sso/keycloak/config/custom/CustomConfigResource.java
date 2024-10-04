@@ -42,7 +42,7 @@ public class CustomConfigResource {
     public Response getAdminPublicConfig() {
         return JsonResponse.success()
                 .addResult("adminTheme", session.getContext().getRealm().getAdminTheme())
-                .addResult("manageRealmName", GeneralRealm.MANAGER)
+                .addResult("manageRealmName", GeneralRealm.MANAGER_REALMS.get(0))
                 .build();
     }
 }

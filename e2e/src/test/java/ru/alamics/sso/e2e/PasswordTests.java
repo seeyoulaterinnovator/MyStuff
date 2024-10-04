@@ -13,11 +13,7 @@ import ru.alamics.sso.e2e.common.TestsClients;
 import ru.alamics.sso.e2e.common.TestsEnabled;
 import ru.alamics.sso.e2e.common.TestsUsers;
 
-import java.net.URI;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -213,7 +209,7 @@ public class PasswordTests extends Tests {
 
         given()
                 .contentType(MediaType.APPLICATION_JSON)
-                .auth().oauth2(getAdminAccessToken())
+                .auth().oauth2(getAdminCliAccessToken())
                 .baseUri(KEYCLOAK.getAuthServerUrl())
                 .body(List.of(userId))
                 .pathParam("realm", user.getRealm().getId())
@@ -236,7 +232,7 @@ public class PasswordTests extends Tests {
 
         given()
                 .contentType(MediaType.APPLICATION_JSON)
-                .auth().oauth2(getAdminAccessToken())
+                .auth().oauth2(getAdminCliAccessToken())
                 .baseUri(KEYCLOAK.getAuthServerUrl())
                 .body(List.of(userId))
                 .pathParam("realm", user.getRealm().getId())
@@ -261,7 +257,7 @@ public class PasswordTests extends Tests {
     void blockPasswordByJob() {
         given()
                 .contentType(MediaType.APPLICATION_JSON)
-                .auth().oauth2(getAdminAccessToken())
+                .auth().oauth2(getAdminCliAccessToken())
                 .baseUri(KEYCLOAK.getAuthServerUrl())
                 .body(Map.of(
                         "id", "9e4f8fb6-5425-11ec-bf63-0242ac130002",
