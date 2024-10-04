@@ -153,7 +153,7 @@ domru:devel:
   stage: deploy
   variables:
     DOCKER_HOST: ssh://swarm2.dev.it-resource.team
-    BASIC_AUTH_USERS: "tester:$2y$05$UtcScUwbnflomoB1hhSJ0OpFvOLR6A8QH5ImGo7.QYoBws3qwUo5K" # tester / z3kco5xpZQzenqUEz2Ob
+    DOLLAR: "$"
   environment:
     name: devel
     url: https://er-sso.dev.it-resource.team
