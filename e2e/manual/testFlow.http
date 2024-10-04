@@ -1,0 +1,33 @@
+### Auth token set
+POST http://localhost:8080/auth/realms/master/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id = {{client_id}} &
+grant_type = password &
+username = {{username}} &
+password = {{password}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.global.set("access_token", response.body.access_token);
+%}
+
+
+### Test flow
+GET http://localhost:8080/auth/admin/realms/user/authentication/flows/browser%20correct_Test_TWO_STEP/executions
+# browser correct_Test_TWO_STEP  = 53163e7a-f2ed-442b-a65b-d96abe4ac872
+# 052fc35a-87b3-4570-b8c7-a2ab0ffd2833 = browser correct_Test_TWO_STEP browser correct forms = +
+# 83fafdcd-fd80-446a-a0bd-7b3613a0b93f = browser correct forms = x
+# cd2158c8-58d9-4d96-b475-94f7e2076163 = browser with phone login = x
+# Cannot find authentication provider implementation with provider ID 'auth-mail-phone-password-form' = AUTHENTICATION_EXECUTION
+Authorization: Bearer {{access_token}}
+
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
