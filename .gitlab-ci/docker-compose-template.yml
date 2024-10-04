@@ -10,7 +10,7 @@ services:
     deploy:
       replicas: 1
       labels:
-        - "traefik.smtp4dev.rule=Host:smtp4dev.er-sso.dev.it-resource.team;PathPrefix:/"
+        - "traefik.smtp4dev.rule=Host:smtp4dev-er-sso.dev.it-resource.team;PathPrefix:/"
         - "traefik.smtp4dev.passHostHeader=true"
         - "traefik.port=80"
         - "traefik.docker.network=traefik"
