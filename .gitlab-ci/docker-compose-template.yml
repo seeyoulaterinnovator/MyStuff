@@ -7,8 +7,6 @@ networks:
 services:
   smtp4dev:
     image: rnwood/smtp4dev:v3
-    environment:
-      ServerOptions__Hostname: smtp4dev1-er-sso.dev.it-resource.team
     deploy:
       replicas: 1
       labels:
