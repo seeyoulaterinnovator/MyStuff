@@ -16,7 +16,7 @@ services:
         - "traefik.smtp4dev.passHostHeader=true"
         - "traefik.port=80"
         - "traefik.docker.network=traefik"
-        - "traefik.smtp4dev.auth.basic.users=tester:${DOLLAR}2y${DOLLAR}05${DOLLAR}UtcScUwbnflomoB1hhSJ0OpFvOLR6A8QH5ImGo7.QYoBws3qwUo5K" # tester / z3kco5xpZQzenqUEz2Ob
+        - "traefik.frontend.auth.basic.users=tester:${DOLLAR}${DOLLAR}2y${DOLLAR}${DOLLAR}05${DOLLAR}${DOLLAR}UtcScUwbnflomoB1hhSJ0OpFvOLR6A8QH5ImGo7.QYoBws3qwUo5K" # tester / z3kco5xpZQzenqUEz2Ob
       resources:
         limits:
           memory: 128m
