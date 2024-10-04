@@ -6,7 +6,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum TestsClients {
-    APP(TestsRealms.E2E, "app", "secret", "http://localhost");
+    APP(TestsRealms.E2E, "app", "secret", "http://localhost"),
+    MOBILE_APP(TestsRealms.E2E, "mobileApp", "secret", "http://localhost");
 
     final TestsRealms realm;
 

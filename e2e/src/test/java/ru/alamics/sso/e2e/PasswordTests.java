@@ -35,7 +35,7 @@ public class PasswordTests extends Tests {
 
     @BeforeEach
     void tearDown() {
-        jdbi().useHandle(handle -> handle.execute("delete from USER_REQUIRED_ACTION where USER_ID = ?", userId));
+        clearRequiredActions(user);
     }
 
     @Test
@@ -44,10 +44,7 @@ public class PasswordTests extends Tests {
         var client = TestsClients.APP;
         var newPassword = user.getPassword() + "!";
 
-        jdbi().useHandle(handle -> handle.execute(
-                "insert into USER_REQUIRED_ACTION (USER_ID, REQUIRED_ACTION) values (?, 'UPDATE_PASSWORD')",
-                userId
-        ));
+        addRequiredAction(user, "UPDATE_PASSWORD");
 
         var logonPage = given()
                 .queryParam("response_type", "code")
@@ -112,11 +109,7 @@ public class PasswordTests extends Tests {
                 .extract()
                 .header(HttpHeaders.LOCATION);
 
-        var code = Arrays.stream(URI.create(logonPage2).getRawQuery().split("&"))
-                .filter(p -> p.split("=")[0].equals("code")).map(p -> p.split("=")[1])
-                .map(v -> URLDecoder.decode(v, StandardCharsets.UTF_8))
-                .findFirst().orElse(null);
-
+        var code = getQueryParameter(logonPage2, "code");
         assertNotNull(code);
 
         var accessToken = given()

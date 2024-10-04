@@ -23,6 +23,8 @@ import ru.alamics.sso.util.Util;
 
 import java.util.Map;
 
+import static ru.alamics.sso.registration.model.UserConstants.AUTH_NOTE_DIRECT_GRANT_SESSION_CLEAR_DISABLED;
+
 @Slf4j
 public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
 
@@ -45,11 +47,11 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
         String requiredAction = context.getAuthenticationSession().getAuthNote(
                 UserConstants.AUTH_NOTE_REST_SMS_OR_PHONE_CALL_END_REQUIRED_ACTION
         );
-        context.getAuthenticationSession()
-                .removeAuthNote(UserConstants.AUTH_NOTE_REST_SMS_OR_PHONE_CALL_END_REQUIRED_ACTION);
+        AuthenticationSessionModel authSession = context.getAuthenticationSession();
+        UserModel user = context.getUser();
+        authSession.removeAuthNote(UserConstants.AUTH_NOTE_REST_SMS_OR_PHONE_CALL_END_REQUIRED_ACTION);
         Object entity;
         try {
-            AuthenticationSessionModel authSession = context.getAuthenticationSession();
             authSession.setClientNote(OIDCLoginProtocol.RESPONSE_TYPE_PARAM, OIDCResponseType.NONE);
             authSession.setRedirectUri(""); //костыль, redirect url в REST не используем, при null падает NPE
             Response response = AuthenticationManager.nextActionAfterAuthentication(
@@ -80,12 +82,12 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             if(requiredAction != null) {
-                context.getUser().addRequiredAction(UserModel.RequiredAction.valueOf(requiredAction));
+                user.addRequiredAction(UserModel.RequiredAction.valueOf(requiredAction));
             }
             throw e;
         }
         if(requiredAction != null) {
-            context.getUser().addRequiredAction(UserModel.RequiredAction.valueOf(requiredAction));
+            user.addRequiredAction(UserModel.RequiredAction.valueOf(requiredAction));
             context.failure(
                     AuthenticationFlowError.CREDENTIAL_SETUP_REQUIRED,
                     Response.status(Response.Status.OK)
@@ -100,9 +102,11 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
                     MediaType.APPLICATION_JSON_TYPE
             ).build());
         }
+        if(user.getRequiredActionsStream().anyMatch(UserModel.RequiredAction.UPDATE_PASSWORD.name()::equals)) {
+            authSession.setAuthNote(AUTH_NOTE_DIRECT_GRANT_SESSION_CLEAR_DISABLED, Boolean.TRUE.toString());
+        }
     }
 
     @Override
-    public void action(AuthenticationFlowContext context) {
-    }
+    public void action(AuthenticationFlowContext context) { }
 }
