@@ -5,6 +5,21 @@ networks:
     external: true
 
 services:
+  smtp4dev:
+    image: rnwood/smtp4dev:v3
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.frontend.rule=Host:smtp4dev.er-sso.dev.it-resource.team;PathPrefix:/"
+        - "traefik.http.middlewares.keycloak.forwardauth.trustForwardHeader=true"
+        - "traefik.frontend.passHostHeader=true"
+        - "traefik.port=80"
+        - "traefik.docker.network=traefik"
+        - "traefik.frontend.auth.basic.users=tester:$2y$05$BJ5fBIUM8c.m8OMVUlCZgOtyZn5sUtcZXnj883yZbdm24TngFHSe2" # tester / te$TeR
+      resources:
+        limits:
+          memory: 128m
+
   keycloak:
     image: $REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_PIPELINE_ID
     networks:
