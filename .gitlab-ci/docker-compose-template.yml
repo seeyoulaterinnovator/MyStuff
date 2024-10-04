@@ -7,6 +7,8 @@ networks:
 services:
   smtp4dev:
     image: rnwood/smtp4dev:v3
+    networks:
+      - traefik
     environment:
       ServerOptions__Hostname: smtp4dev-er-sso.dev.it-resource.team
     deploy:
