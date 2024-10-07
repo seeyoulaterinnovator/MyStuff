@@ -27,8 +27,6 @@ public class CitiesTests extends Tests {
                 .pathParam("realm", TestsRealms.E2E.getId())
                 .get("/realms/{realm}/cities/current")
                 .then()
-                .log()
-                .body()
                 .body("results.title", notNullValue());
     }
 }

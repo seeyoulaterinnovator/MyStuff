@@ -607,4 +607,11 @@
   "httpResponse" : {
     "body": {}
   }
+}, {
+    "httpRequest": {
+      "path": "/sms-sender/sendsms"
+    },
+    "httpResponse" : {
+      "body": {}
+    }
 }]

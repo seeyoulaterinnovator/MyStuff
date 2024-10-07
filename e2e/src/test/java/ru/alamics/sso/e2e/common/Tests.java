@@ -2,7 +2,10 @@ package ru.alamics.sso.e2e.common;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import io.restassured.RestAssured;
+import io.restassured.filter.log.RequestLoggingFilter;
+import io.restassured.filter.log.ResponseLoggingFilter;
 import jakarta.ws.rs.core.UriBuilder;
+import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.jdbi.v3.core.Jdbi;
 import org.junit.ClassRule;
@@ -13,6 +16,7 @@ import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestWatcher;
+import org.mockserver.client.MockServerClient;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.containers.MockServerContainer;
@@ -27,6 +31,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static org.testcontainers.utility.MountableFile.forHostPath;
 import static ru.alamics.sso.e2e.common.TestsUtils.*;
@@ -171,7 +177,7 @@ public abstract class Tests {
 
         Runtime.getRuntime().addShutdownHook(new Thread(() ->  containers.forEach(GenericContainer::stop)));
 
-        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
 
         int mockServerPort = MOCK_SERVER.getExposedPorts().get(0);
         String mockServerUrl = "http://" + MOCKSERVER_HOST + ":" + mockServerPort;
@@ -195,6 +201,7 @@ public abstract class Tests {
 
             (new HashMap<String, String>() {{
                 put("urlDaDataRequestLocationIp", mockServerUrl + "/dadata/suggestions/api/4_1/rs/iplocate/address");
+                put("smsSender.uri", mockServerUrl + "/sms-sender/sendsms");
             }}).forEach((key, value) -> {
                 handle.execute("update SETTINGS set VALUE = ? where EXT_ID = ?", value, key);
             });
@@ -230,8 +237,18 @@ public abstract class Tests {
         });
     }
 
-    protected static Jdbi jdbi() {
+    public static Jdbi jdbi() {
         return Jdbi.create(() -> MARIA_DB.createConnection(""));
+    }
+
+    public static void useHandle(Consumer<MockServerClient> callback) {
+        @Cleanup var client = new MockServerClient("localhost", MOCK_SERVER.getFirstMappedPort());
+        callback.accept(client);
+    }
+
+    public static <T> T withHandle(Function<MockServerClient, T> callback) {
+        @Cleanup var client = new MockServerClient("localhost", MOCK_SERVER.getFirstMappedPort());
+        return callback.apply(client);
     }
 
     @BeforeEach

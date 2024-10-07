@@ -6,7 +6,8 @@
   "resetPasswordAllowed": true,
   "smtpServer": {
     "host": "smtp4dev",
-    "from": "noreply@domru.ru"
+    "from": "noreply@domru.ru",
+    "messenger": "SMS"
   },
   "loginTheme": "domru",
   "emailTheme": "domru",
@@ -75,7 +76,11 @@
       ],
       "webOrigins": [
         "*"
-      ]
+      ],
+      "attributes": {
+        "activateNewAuth": "true",
+        "loginViaEmailOrUsernameAndPassword": "true"
+      }
     },
     {
       "id": "mobileApp",

@@ -13,6 +13,10 @@ update SETTINGS
 set VALUE = 'http://mockserver:1080/dadata/suggestions/api/4_1/rs/iplocate/address'
 where EXT_ID = 'urlDaDataRequestLocationIp';
 
+update SETTINGS
+set VALUE = 'http://mockserver:1080/sms-sender/sendsms'
+where EXT_ID = 'smsSender.uri';
+
 update CLIENT
 set SECRET = 'secret'
 where CLIENT_ID in ('b2b') and REALM_ID = 'user';

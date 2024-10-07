@@ -184,8 +184,10 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
                         case CODE_TO_SMS: {
                             String code = SmsCodeGenerator.getCode(activationCodeType.getLengthCode());
                             authSession.setAuthNote(CODE_HASH_KEY, HashGenerator.getSecretHash(code));
-
-                            String[] messengerList = context.getRealm().getSmtpConfig().get(MESSENGER).split(",");
+                            String messengerConfig = context.getRealm().getSmtpConfig().get(MESSENGER);
+                            String[] messengerList = messengerConfig != null && !messengerConfig.isBlank() ?
+                                    messengerConfig.split(",") :
+                                    new String[0];
                             messageSendService.sendMessageToMessengers(user.getPhone(), code, context.getRealm().getId(), messengerList, host);
                             break;
                         }

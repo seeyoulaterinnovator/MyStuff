@@ -12,4 +12,5 @@ dependencies {
     testImplementation "org.jdbi:jdbi3-core:3.1.0"
     testImplementation "com.fasterxml.jackson.core:jackson-databind:2.8.6"
     testImplementation "org.awaitility:awaitility:4.2.2"
+    testImplementation "org.mock-server:mockserver-client-java:5.15.0"
 }

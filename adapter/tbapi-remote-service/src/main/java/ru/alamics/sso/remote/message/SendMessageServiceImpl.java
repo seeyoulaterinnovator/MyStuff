@@ -20,6 +20,7 @@ import ru.alamics.sso.registration.phone.model.MessageRequest;
 import ru.alamics.sso.registration.phone.model.MessengerType;
 import ru.alamics.sso.registration.phone.port.SendMessageService;
 import ru.alamics.sso.settings.SettingsService;
+import ru.alamics.sso.util.E2EUtil;
 import ru.alamics.sso.util.StandResolver;
 import ru.alamics.sso.util.Util;
 
@@ -88,7 +89,7 @@ public class SendMessageServiceImpl implements SendMessageService {
     public String sendMessageByRequest(MessageRequest messageRequest) throws SendMessageException {
 
         // локально и на дэве фиксированный код и не отправляю смс
-        if (!StandResolver.isBattle()) {
+        if (!StandResolver.isBattle() && !E2EUtil.isE2E()) {
             log.info("Stand {}, do not sending sms", StandResolver.ENV);
             return "0: Accepted for delivery";
         }
@@ -118,7 +119,7 @@ public class SendMessageServiceImpl implements SendMessageService {
         }
     }
 
-    private MsgConfig createMsgConfig(String realmId, String type) {
+    protected MsgConfig createMsgConfig(String realmId, String type) {
 
         return MsgConfig.builder()
                 .url(URI.create(settingsService.getSettingsStringValue(type + SEND_URI.getKey(), realmId)))

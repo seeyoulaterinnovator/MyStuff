@@ -4,6 +4,7 @@ import jakarta.ws.rs.core.MediaType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.http.HttpStatus;
+import org.mockserver.model.HttpRequest;
 
 import java.net.URI;
 import java.net.URLDecoder;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.notNullValue;
 import static ru.alamics.sso.e2e.common.Tests.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -47,13 +48,28 @@ public final class TestsUtils {
 
     public static String getUserId(TestsUsers user) {
         return jdbi().withHandle(handle -> handle.createQuery(
-                        "select id from USER_ENTITY where USERNAME = ? and REALM_ID = ?"
+                        "select ID from USER_ENTITY where USERNAME = ? and REALM_ID = ?"
                 )
                 .bind(0, user.getUsername())
                 .bind(1, user.getRealm().getId())
                 .mapTo(String.class)
                 .findFirst()
                 .orElseThrow());
+    }
+
+    public static String getUserAttribute(TestsUsers user, String attribute) {
+        return jdbi().withHandle(handle -> handle.createQuery(
+                        "select VALUE from USER_ATTRIBUTE where USER_ID = ? and NAME = ?"
+                )
+                .bind(0, getUserId(user))
+                .bind(1, attribute)
+                .mapTo(String.class)
+                .findFirst()
+                .orElseThrow());
+    }
+
+    public static String getUserPhone(TestsUsers user) {
+        return getUserAttribute(user, "phone");
     }
 
     public static void clearRequiredActions(TestsUsers user) {
@@ -103,8 +119,6 @@ public final class TestsUtils {
                 .post("/realms/{realm}/protocol/openid-connect/token")
                 .then()
                 .assertThat()
-                .log()
-                .all()
                 .statusCode(HttpStatus.SC_OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body("access_token", notNullValue())
@@ -139,8 +153,6 @@ public final class TestsUtils {
                 .get("/api/Messages")
                 .then()
                 .assertThat()
-                .log()
-                .all()
                 .statusCode(HttpStatus.SC_OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .extract()
@@ -161,12 +173,26 @@ public final class TestsUtils {
                 .get("/api/Messages")
                 .then()
                 .assertThat()
-                .log()
-                .all()
                 .statusCode(HttpStatus.SC_OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .extract()
                 .body()
                 .jsonPath().get("results[0].subject");
+    }
+
+    public static String getLastSmsCode(String phone) {
+        return withHandle(client -> {
+            var requests = client.retrieveRecordedRequests(
+                    HttpRequest.request()
+                            .withQueryStringParameter("to", phone)
+                            .withPath("/sms-sender/sendsms")
+            );
+            if(requests.length > 0) {
+                var request = requests[requests.length - 1];
+                var text = request.getFirstQueryStringParameter("text");
+                if(!text.isEmpty()) return text;
+            }
+            return null;
+        });
     }
 }

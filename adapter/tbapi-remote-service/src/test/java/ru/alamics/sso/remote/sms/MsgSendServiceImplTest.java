@@ -40,24 +40,28 @@ class MsgSendServiceImplTest {
         server = new WireMockServer(wireMockConfig().dynamicPort());
         server.start();
 
-        MsgConfig.builder()
-                .url(UriBuilder.newInstance()
-                        .scheme("http")
-                        .host("127.0.0.1")
-                        .port(server.port())
-                        .path(PATH)
-                        .build())
-                .msgCenterName(SMSC_NAME)
-                .username(USERNAME)
-                .password(PASSWORD)
-                .senderName(SENDER_NAME)
-                .timeout(5)
-                .priority(MsgConfig.Priority.HIGH)
-                .reportsMask(MsgConfig.ReportsConfig.DELIVERED_TO_PHONE)
-                .encoding(MsgConfig.Encoding.UCS2)
-                .charset(StandardCharsets.UTF_8)
-                .build();
-        service = new SendMessageServiceImpl();
+        service = new SendMessageServiceImpl() {
+            @Override
+            protected MsgConfig createMsgConfig(String realmId, String type) {
+                return MsgConfig.builder()
+                        .url(UriBuilder.newInstance()
+                                .scheme("http")
+                                .host("127.0.0.1")
+                                .port(server.port())
+                                .path(PATH)
+                                .build())
+                        .msgCenterName(SMSC_NAME)
+                        .username(USERNAME)
+                        .password(PASSWORD)
+                        .senderName(SENDER_NAME)
+                        .timeout(5)
+                        .priority(MsgConfig.Priority.HIGH)
+                        .reportsMask(MsgConfig.ReportsConfig.DELIVERED_TO_PHONE)
+                        .encoding(MsgConfig.Encoding.UCS2)
+                        .charset(StandardCharsets.UTF_8)
+                        .build();
+            }
+        };
     }
 
     @AfterEach

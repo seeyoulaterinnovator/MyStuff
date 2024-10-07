@@ -69,8 +69,6 @@ public class PasswordTests extends Tests {
                 .post(logonUrl)
                 .then()
                 .assertThat()
-                .log()
-                .all()
                 .statusCode(HttpStatus.SC_MOVED_TEMPORARILY)
                 .extract()
                 .header(HttpHeaders.LOCATION);
@@ -84,8 +82,6 @@ public class PasswordTests extends Tests {
                 .get(resetUrl)
                 .then()
                 .assertThat()
-                .log()
-                .all()
                 .statusCode(HttpStatus.SC_OK)
                 .extract();
 
@@ -99,8 +95,6 @@ public class PasswordTests extends Tests {
                 .post(updateUrl)
                 .then()
                 .assertThat()
-                .log()
-                .all()
                 .statusCode(HttpStatus.SC_MOVED_TEMPORARILY)
                 .extract()
                 .header(HttpHeaders.LOCATION);
@@ -119,8 +113,6 @@ public class PasswordTests extends Tests {
                 .post("/realms/{realm}/protocol/openid-connect/token")
                 .then()
                 .assertThat()
-                .log()
-                .all()
                 .statusCode(HttpStatus.SC_OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .extract()
@@ -137,8 +129,6 @@ public class PasswordTests extends Tests {
                 .post("/realms/{realm}/protocol/openid-connect/logout")
                 .then()
                 .assertThat()
-                .log()
-                .all()
                 .statusCode(HttpStatus.SC_OK)
                 .extract();
 
@@ -151,8 +141,6 @@ public class PasswordTests extends Tests {
                 .get("/realms/{realm}/protocol/openid-connect/auth")
                 .then()
                 .assertThat()
-                .log()
-                .all()
                 .statusCode(HttpStatus.SC_OK)
                 .extract();
 
@@ -171,8 +159,6 @@ public class PasswordTests extends Tests {
                 .post(logonUrl2)
                 .then()
                 .assertThat()
-                .log()
-                .all()
                 .statusCode(HttpStatus.SC_MOVED_TEMPORARILY)
                 .extract()
                 .header(HttpHeaders.LOCATION);
@@ -191,8 +177,6 @@ public class PasswordTests extends Tests {
                 .post("/realms/{realm}/protocol/openid-connect/token")
                 .then()
                 .assertThat()
-                .log()
-                .all()
                 .statusCode(HttpStatus.SC_OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .extract()
@@ -216,8 +200,6 @@ public class PasswordTests extends Tests {
                 .post("/realms/{realm}/users-toms/send/login")
                 .then()
                 .assertThat()
-                .log()
-                .all()
                 .statusCode(HttpStatus.SC_NO_CONTENT);
 
         await().atMost(Duration.ofSeconds(30))
@@ -239,8 +221,6 @@ public class PasswordTests extends Tests {
                 .post("/realms/{realm}/users-toms/credential/reset-with-send-login")
                 .then()
                 .assertThat()
-                .log()
-                .all()
                 .statusCode(HttpStatus.SC_NO_CONTENT);
 
         await().atMost(Duration.ofSeconds(30))
@@ -271,8 +251,6 @@ public class PasswordTests extends Tests {
                 .put("/realms/master/settings/9e4f8fb6-5425-11ec-bf63-0242ac130002")
                 .then()
                 .assertThat()
-                .log()
-                .all()
                 .statusCode(HttpStatus.SC_OK);
 
         jdbi().useHandle(handle -> handle.execute("update CREDENTIAL set CREATED_DATE = 0 where USER_ID = ?", userId));

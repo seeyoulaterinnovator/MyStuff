@@ -53,8 +53,6 @@ public class RegistrationTests extends Tests {
                 .post(formUrl)
                 .then()
                 .assertThat()
-                .log()
-                .all()
                 .statusCode(HttpStatus.SC_MOVED_TEMPORARILY)
                 .extract()
                 .header(HttpHeaders.LOCATION);
