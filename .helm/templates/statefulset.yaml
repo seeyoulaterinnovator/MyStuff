@@ -39,8 +39,8 @@ spec:
       containers:
         - name: keycloak
           args:
-            - -b
-            - 0.0.0.0
+            - start
+            - --proxy=edge
             {{- if and .Values.externalInfinispan.server .Values.externalInfinispan.port }}
             - -c=standalone-ha-infspn-ext.xml
             {{- else }}
