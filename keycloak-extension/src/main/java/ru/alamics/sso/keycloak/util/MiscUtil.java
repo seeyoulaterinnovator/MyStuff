@@ -3,6 +3,7 @@ package ru.alamics.sso.keycloak.util;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
 
@@ -75,8 +76,15 @@ public final class MiscUtil {
             return form3;
         }
     }
+
     public static String pluralize(int n, List<String> forms) {
         if(forms.size() != 3) throw new IllegalArgumentException();
         return pluralize(n, forms.get(0), forms.get(1), forms.get(2));
+    }
+
+    public static String addBom(byte[] data) {
+        String text = new String(data, StandardCharsets.UTF_8);
+        text = "\ufeff" + text;
+        return text;
     }
 }

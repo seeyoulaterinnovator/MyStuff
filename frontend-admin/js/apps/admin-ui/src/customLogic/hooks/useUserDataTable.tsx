@@ -27,6 +27,7 @@ import { QueryParam } from "../../customLogic/constants/queryParams";
 import { useCustomConfig } from "../context/CustomConfigContext";
 import type { SortingOptions } from "../../customLogic/types/sorting";
 import { useWhoAmI } from "../../context/whoami/WhoAmI";
+import { addBomAndConvertToBlob } from "../helpers/transforms";
 
 const getBlockedUsers = (
   users?: Array<UserRepresentation | UserInfoRepresentation>,
@@ -319,10 +320,7 @@ export const useUserDataTable = ({
               realm: customFilters.searchRealm,
             });
 
-          saveAs(
-            new Blob([downloadedFile], { type: "application/octet-stream" }),
-            `user_template.csv`,
-          );
+          saveAs(addBomAndConvertToBlob(downloadedFile), `user_template.csv`);
         } catch (error) {
           addError(t("userCSVTemplateDownloadError"), error);
         }
@@ -337,10 +335,7 @@ export const useUserDataTable = ({
               realm: customFilters.searchRealm,
             });
 
-          saveAs(
-            new Blob([downloadedFile], { type: "application/octet-stream" }),
-            `user_template.xlsx`,
-          );
+          saveAs(new Blob([downloadedFile]), `user_template.xlsx`);
         } catch (error) {
           addError(t("userExcelTemplateDownloadError"), error);
         }
@@ -409,9 +404,9 @@ export const useUserDataTable = ({
           );
 
           saveAs(
-            new Blob([downloadedFile], {
-              type: "application/octet-stream",
-            }),
+            isExcel
+              ? new Blob([downloadedFile])
+              : addBomAndConvertToBlob(downloadedFile),
             `user_info.${downloadedExtension}`,
           );
         } catch (error) {

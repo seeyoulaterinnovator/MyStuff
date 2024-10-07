@@ -51,3 +51,9 @@ export const convertCase = <
 export const capitalizeText = <T extends string>(text: T): Capitalize<T> => {
   return `${text.charAt(0).toUpperCase()}${text.slice(1)}` as Capitalize<T>;
 };
+
+export const addBomAndConvertToBlob: (text: ArrayBuffer) => Blob = (text) => {
+  return new Blob([new Uint8Array([0xef, 0xbb, 0xbf]), text], {
+    type: "text/plain;charset=utf-8",
+  });
+};

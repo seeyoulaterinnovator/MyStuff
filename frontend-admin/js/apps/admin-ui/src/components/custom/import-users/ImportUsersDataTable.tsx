@@ -1,22 +1,18 @@
 import {
-  UserReportStatus,
   type ImportUsersReportRepresentation,
+  UserReportStatus,
 } from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
-import { NetworkError } from "@keycloak/keycloak-admin-client/lib";
 import { KeycloakDataTable } from "../../table-toolbar/KeycloakDataTable";
 import { useTranslation } from "react-i18next";
 import { useAdminClient } from "../../../admin-client";
 import { useAlerts } from "../../alert/Alerts";
-import { useRealm } from "../../../context/realm-context/RealmContext";
-import { ImportUsersDataTableToolbarItems } from "./ImportUsersDataTableToolbarItems";
-import type { CustomImportUsersAction } from "../../../customLogic/types/users";
-import { CustomImportUsersToolbarAction } from "../../../customLogic/constants/user";
-import { AlertVariant, Toolbar, ToolbarContent } from "@patternfly/react-core";
+import { AlertVariant } from "@patternfly/react-core";
 import { useCallback, useEffect, useState } from "react";
 import { cellWidth, type IRowData } from "@patternfly/react-table";
 import { saveAs } from "file-saver";
 import { ListEmptyState } from "../../list-empty-state/ListEmptyState";
 import { isEqual } from "lodash-es";
+import { addBomAndConvertToBlob } from "../../../customLogic/helpers/transforms";
 
 let importUsersInterval: NodeJS.Timeout | null = null;
 
@@ -167,9 +163,7 @@ export const ImportUsersDataTable = () => {
                   });
 
                 saveAs(
-                  new Blob([downloadedFile], {
-                    type: "application/octet-stream",
-                  }),
+                  addBomAndConvertToBlob(downloadedFile),
                   `import_users_report.csv`,
                 );
               } catch (error) {

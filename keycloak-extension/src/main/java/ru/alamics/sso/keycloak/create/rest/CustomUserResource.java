@@ -6,6 +6,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.reactive.NoCache;
@@ -40,6 +41,7 @@ import ru.alamics.sso.keycloak.GeneralRealm;
 import ru.alamics.sso.keycloak.exception.UserNotFoundException;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.keycloak.util.MiscUtil;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
@@ -238,13 +240,15 @@ public class CustomUserResource {
                         .message("Users not found")
                         .build();
             }
-            Response.ResponseBuilder response = Response.ok(bytes);
-            response.header("Content-Disposition", "attachment; filename=\"users_info." + downloadUserRequest.getType() + "\"");
+            Response.ResponseBuilder response;
             if (downloadUserRequest.getType().equals("xlsx")) {
+                response = Response.ok(bytes);
                 response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
             } else {
+                response = Response.ok(MiscUtil.addBom(bytes));
                 response.header("Content-Type", MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8");
             }
+            response.header("Content-Disposition", "attachment; filename=\"users_info." + downloadUserRequest.getType() + "\"");
             log.info("Download users success! filename = users_info." + downloadUserRequest.getType());
             return response.build();
         } catch (UnsupportedDataTypeException e) {
@@ -316,16 +320,17 @@ public class CustomUserResource {
         log.info("Download import users template");
         try {
             if (type.equalsIgnoreCase("xlsx")) {
-                byte[] bytes = IOUtils.toByteArray(CustomUserResource.class.getResourceAsStream("/template/template.xlsx"));
+                @Cleanup var stream = CustomUserResource.class.getResourceAsStream("/template/template.xlsx");
+                byte[] bytes = IOUtils.toByteArray(stream);
                 Response.ResponseBuilder response = Response.ok(bytes);
                 response.header("Content-Disposition", "attachment; filename=\"template.xlsx" + "\"");
                 response.header("filename", "template.xlsx");
                 response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
                 return response.build();
             }
-
-            byte[] bytes = IOUtils.toByteArray(CustomUserResource.class.getResourceAsStream("/template/template.csv"));
-            Response.ResponseBuilder response = Response.ok(bytes);
+            @Cleanup var stream = CustomUserResource.class.getResourceAsStream("/template/template.csv");
+            byte[] bytes = IOUtils.toByteArray(stream);
+            Response.ResponseBuilder response = Response.ok(MiscUtil.addBom(bytes));
             response.header("Content-Disposition", "attachment; filename=\"template.csv" + "\"");
             response.header("filename", "template.csv");
             response.header("Content-Type", MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8");
@@ -346,12 +351,15 @@ public class CustomUserResource {
         try {
             log.info("Start download users");
             FileModel file = userService.downloadUsersByImportReportId(importId);
-            Response.ResponseBuilder response = Response.ok(file.save());
+            byte[] bytes = file.save();
+            Response.ResponseBuilder response;
             if (file instanceof XlsxImpl) {
+                response = Response.ok(bytes);
                 response.header("Content-Disposition", "attachment; filename=\"import_users_report.xlsx" + "\"");
                 response.header("filename", "import_users_report.xlsx");
                 response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
             } else {
+                response = Response.ok(MiscUtil.addBom(bytes));
                 response.header("Content-Disposition", "attachment; filename=\"import_users_report.csv" + "\"");
                 response.header("filename", "import_users_report.csv");
                 response.header("Content-Type", MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8");
