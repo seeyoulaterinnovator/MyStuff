@@ -8,6 +8,7 @@ import { useAccess } from "../../context/access/Access";
 import { FormFields } from "../ClientDetails";
 import type { ClientSettingsProps } from "../ClientSettings";
 import { LoginSettings } from "./LoginSettings";
+import { convertAttributeNameToForm } from "../../util";
 
 export const AccessSettings = ({
   client,
@@ -29,13 +30,22 @@ export const AccessSettings = ({
       role="manage-clients"
     >
       {!client.bearerOnly && <LoginSettings protocol={protocol} />}
+
       {protocol !== "saml" && (
-        <TextControl
-          type="url"
-          name="adminUrl"
-          label={t("adminURL")}
-          labelIcon={t("adminURLHelp")}
-        />
+        <>
+          <TextControl
+            type="url"
+            name={convertAttributeNameToForm<FormFields>("mainRedirectUri")}
+            label={t("mainRedirectUri")}
+            labelIcon={t("mainRedirectUriHelp")}
+          />
+          <TextControl
+            type="url"
+            name="adminUrl"
+            label={t("adminURL")}
+            labelIcon={t("adminURLHelp")}
+          />
+        </>
       )}
       {client.bearerOnly && (
         <FixedButtonsGroup

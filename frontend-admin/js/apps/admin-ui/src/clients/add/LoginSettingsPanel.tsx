@@ -55,6 +55,36 @@ export const LoginSettingsPanel = ({ access }: { access?: boolean }) => {
         labelIcon={t("consentScreenTextHelp")}
         isDisabled={!(consentRequired && displayOnConsentScreen === "true")}
       />
+      {/* TODO alternative */}
+      <DefaultSwitchControl
+        name={convertAttributeNameToForm<FormFields>(
+          "attributes.activateNewAuth",
+        )}
+        label={t("attributes.activateNewAuth")}
+        stringify
+      />
+      <DefaultSwitchControl
+        name={convertAttributeNameToForm<FormFields>("attributes.loginViaSms")}
+        label={t("attributes.loginViaSms")}
+        labelIcon={t("attributes.loginViaSmsHelp")}
+        stringify
+      />
+      <DefaultSwitchControl
+        name={convertAttributeNameToForm<FormFields>(
+          "attributes.loginViaEmailOrUsernameAndPassword",
+        )}
+        label={t("attributes.loginViaEmailOrUsernameAndPassword")}
+        labelIcon={t("attributes.loginViaEmailOrUsernameAndPasswordHelp")}
+        stringify
+      />
+      <DefaultSwitchControl
+        name={convertAttributeNameToForm<FormFields>(
+          "attributes.loginViaPhoneCall",
+        )}
+        label={t("attributes.loginViaPhoneCall")}
+        labelIcon={t("attributes.loginViaPhoneCallHelp")}
+        stringify
+      />
     </FormAccess>
   );
 };
