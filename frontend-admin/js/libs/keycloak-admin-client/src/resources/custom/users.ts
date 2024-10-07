@@ -117,6 +117,9 @@ export class CustomUsers extends Resource<{ realm?: string }> {
   >({
     method: "POST",
     path: "/users-toms/downloadUsers",
+    headers: {
+      accept: "application/octet-stream",
+    },
   });
 
   public getImportsReport = this.makeRequest<

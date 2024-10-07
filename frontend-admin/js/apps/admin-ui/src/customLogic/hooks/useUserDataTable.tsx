@@ -335,7 +335,12 @@ export const useUserDataTable = ({
               realm: customFilters.searchRealm,
             });
 
-          saveAs(new Blob([downloadedFile]), `user_template.xlsx`);
+          saveAs(
+            new Blob([downloadedFile], {
+              type: "application/octet-stream",
+            }),
+            `user_template.xlsx`,
+          );
         } catch (error) {
           addError(t("userExcelTemplateDownloadError"), error);
         }
@@ -405,7 +410,9 @@ export const useUserDataTable = ({
 
           saveAs(
             isExcel
-              ? new Blob([downloadedFile])
+              ? new Blob([downloadedFile], {
+                  type: "application/octet-stream",
+                })
               : addBomAndConvertToBlob(downloadedFile),
             `user_info.${downloadedExtension}`,
           );
