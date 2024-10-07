@@ -38,7 +38,7 @@ resources:
     cpu: "0.5"
     memory: 512Mi
   limits:
-    cpu: "1"
+    cpu: "2.5"
     memory: 1Gi
 
 podAnnotations:
