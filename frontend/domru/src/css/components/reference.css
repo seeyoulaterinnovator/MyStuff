@@ -1,25 +1,21 @@
 .reference {
   transition: 0.2s ease-in-out;
-  color: #2B539B;
+
   &-generate-password {
     display: inline-block;
     font-size: 16px;
+    
     @media screen and (min-width: 1280px) {
       font-size: 18px;
     }
   }
+
   &_hoverable {
     opacity: 1;
   }
 }
 
 .generate-btn {
-  padding-bottom: 15px;
-  &:hover {
-    .reference {
-      border-bottom-color: transparent;
-    }
-  }
 }
 
 .agreement {
@@ -27,30 +23,15 @@
 }
 
 .generated-password {
-  margin-left: 20px;
 }
 
-@media screen and (max-width: 1279px){
-  .generate-btn {
-    padding-bottom: 9px
-  }
 
-  .generated-password {
-    margin-top: -4px;
-    margin-left: 24px;
-  }
-}
 
 .show-small-tell {
   display: none;
 }
 
 @media screen and (max-width: 767px) {
-  .generate-btn {
-    padding-bottom: 13px;
-    margin: 0 auto;
-    width: 20%;
-  }
 
   .show-small-tell {
     display: block;
@@ -60,9 +41,4 @@
     display: none;
   }
 
-  .generated-password {
-    margin: 0 0 30px;
-    margin-left: 20px;
-    margin-top: -5px;
-  }
 }

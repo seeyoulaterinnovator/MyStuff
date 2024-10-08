@@ -15,7 +15,7 @@
     import PhoneButton from './PhoneButton.svelte';
 
     import './selection';
-    import {selectCity, setAllSelected, setSelectedCity} from "./selection";
+    import {selectCity, setAllSelected} from "./selection";
     import CloseButton from "../Common/Buttons/CloseButton.svelte";
     import SearchIcon from "../Common/Icons/SearchIcon.svelte";
 
@@ -42,15 +42,16 @@
     }
     console.log($status);
 </script>
+
 {#if $showModal}
     <div
-            class="flex flex-col fixed transparent-bg w-screen bg-white inset-0 py-4 md:py-6 xl:py-8 {$status === STATUS.INITIAL && 'opacity-90'} scrollable-container overflow-x-hidden overflow-y-auto"
+            class="flex flex-col fixed transparent-bg w-screen bg-white inset-0 scrollable-container overflow-x-hidden overflow-y-auto main-wrapper"
             id="location-selection-window" style={$status === STATUS.SELECTING ? "background-color: white" : ''}>
-        <header id="cities-header" class="flex items-center pb-4 px-4 sm:px-6 lg:px-8 xl:px-6">
+        <header id="cities-header" class="flex items-center custom-mb-lg">
             <div id="cities-header-div" class="w-full">
               {#if $status === STATUS.SELECTING}
                 <div class="w-full">
-                  <div class="flex justify-between items-center custom-mb-md">
+                  <div class="flex justify-between items-center custom-mb-lg">
                     <label for="search-city" class="choose-city-text">Выбрать город</label>
                     <CloseButton on:click={handleClose} class="custom-icon"/>
                   </div>

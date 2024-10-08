@@ -1,5 +1,13 @@
+button {
+  &.highlighted-text, .highlighted-text {
+    &:hover:not([disabled]) {
+        @apply .text-accentBlue-1200-hover;
+    }
+  }
+}
+
 .btn {
-  @apply .block .uppercase .tracking-wider .p-4 .rounded-lg .shadow;
+  @apply .block .uppercase .tracking-wider .p-4 .rounded-lg .shadow-base;
 
   border-radius: 12px;
   height: 48px;
@@ -19,13 +27,18 @@
     @apply .opacity-40 .cursor-not-allowed;
     &:hover {
        transform: none;
-       @apply .shadow;
+       @apply .shadow-base;
     }
   }
 
   &:hover {
-    transform: translate(1px, -1px);
-    @apply .shadow-md;
+    @apply .shadow-base-md;
+  }
+
+  &.highlighted-text, .highlighted-text {
+    &:hover:not([disabled]) {
+        @apply .text-accentBlue-1200-hover;
+    }
   }
 
   &:focus {
@@ -33,21 +46,18 @@
   }
 
   &:active {
-    transform: translate(0, 0);
     @apply .shadow-inner;
   }
 }
 
-.text-accentBlue-900 {
-  @apply .text-accentBlue-900;
-}
 
 .btn-main {
-  @apply .bg-extra .text-white;
+  @apply .bg-extra .text-white .shadow-main;
 
-  &:hover,
-  &:active {
+  &:hover:not([disabled]),
+  &:active:not([disabled]) {
     @apply .bg-extra-700-hover;
+    @apply .shadow-main-md;
   }
 }
 
@@ -121,14 +131,12 @@ a.btn {
 
 
 @media screen and (max-width: 767px) {
-  .btn {
-    font-size: 13px;
-  }
 
   .btn.w-1\/2 {
     width: 100%;
   }
 }
+
 @media only screen and (min-width: 1280px) {
   .btn-switcher{
     display: flex;

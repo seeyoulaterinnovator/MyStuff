@@ -1,4 +1,10 @@
-<a href="tel:88003339000" class="hidden sm:block opacity-50">
+<a href="tel:88003339000" class="
+  hidden 
+  sm:block 
+  opacity-50 
+  highlighted-hover-text 
+  highlighted-nested-hover-svg
+  phone-call-center">
   <div class="flex h-6 items-center">
     <svg
       class="h-8 w-auto mr-1"

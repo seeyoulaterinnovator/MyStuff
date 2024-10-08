@@ -19,17 +19,17 @@
                 </div>
                 <#list posts as post>
                     <#assign firstRow = post?index == 0>
-                    <div class="${firstRow?then('selected', '')} trow titems">
+                    <div class="${firstRow?then('selected', '')} trow titems highlighted-hover-text">
                         <div id="tomsId-${post?index}" style="display:none">${post.tomsId!}</div>
                         <div id="postId-${post?index}" style="display:none">${post.id!}</div>
-                        <div id="tomsName-${post?index}" class="org-cell">
+                        <div id="tomsName-${post?index}" class="org-cell highlighted-text trigger-hover-text">
                             <#if (post.organization?hasContent && post.organization?length > 1)>
                                 ${post.organization}
                             <#else>
                                 ${post.tomsId}
                             </#if>
                         </div>
-                        <div id="roleName-${post?index}" class="role-cell">
+                        <div id="roleName-${post?index}" class="role-cell trigger-hover-text">
                             <#if (post.userRole.description?hasContent && post.userRole.description?length > 1)>
                                 ${post.userRole.description}
                             <#else>
