@@ -1,187 +1,80 @@
 package ru.alamics.sso.keycloak.client;
 
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Produces;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.reactive.NoCache;
-import org.keycloak.authorization.admin.AuthorizationService;
-import org.keycloak.events.admin.OperationType;
-import org.keycloak.events.admin.ResourceType;
-import org.keycloak.models.*;
-import org.keycloak.models.utils.ModelToRepresentation;
-import org.keycloak.models.utils.RepresentationToModel;
+import org.keycloak.models.ClientModel;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.ModelDuplicateException;
+import org.keycloak.models.RealmModel;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.services.ErrorResponse;
-import org.keycloak.services.ErrorResponseException;
-import org.keycloak.services.managers.ClientManager;
-import org.keycloak.services.managers.RealmManager;
-import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
-import org.keycloak.services.resources.admin.AdminRoot;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
-import org.keycloak.services.validation.ClientValidator;
-import org.keycloak.services.validation.PairwiseClientValidator;
-import org.keycloak.services.validation.Validation;
-import org.keycloak.services.validation.ValidationMessages;
 import ru.alamics.sso.client.ClientService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 
-import java.util.Properties;
-
-import static java.lang.Boolean.TRUE;
-
 @Slf4j
-public class ClientResource {
-    private RealmModel realm;
-    private AdminPermissionEvaluator auth;
-    private AdminEventBuilder adminEvent;
-    private KeycloakSession session;
-    private ClientModel client;
-    private ClientService service;
+public class ClientResource extends org.keycloak.services.resources.admin.ClientResource {
+    private final ClientService service;
 
-    public ClientResource(KeycloakSession session, AdminPermissionEvaluator auth, AdminAuth adminAuth, ClientModel client) {
-        this.auth = auth;
-        this.session = session;
-        this.client = client;
-        this.realm = session.getContext().getRealm();
-        this.adminEvent = new AdminEventBuilder(realm, adminAuth, session, session.getContext().getConnection())
-                .realm(realm).resource(ResourceType.CLIENT);
+    private final ObjectMapper objectMapper;
 
+    public ClientResource(
+            RealmModel realm,
+            AdminPermissionEvaluator auth,
+            ClientModel clientModel,
+            KeycloakSession session,
+            AdminEventBuilder adminEvent
+    ) {
+        super(realm, auth, clientModel, session, adminEvent);
         this.service = Lookup.lookup(ClientService.class);
+        this.objectMapper = Lookup.lookup(ObjectMapper.class);
+    }
+
+    @Override
+    public ClientRepresentation getClient() {
+        throw new NotFoundException();
+    }
+
+    @Override
+    public Response update(ClientRepresentation rep) {
+        throw new NotFoundException();
     }
 
     @GET
+    @Path("/ext")
     @NoCache
     @Produces(MediaType.APPLICATION_JSON)
-    public CustomClientRepresentation getClient() {
-        auth.clients().requireView(client);
-
-        CustomClientRepresentation representation = new CustomClientRepresentation(ModelToRepresentation.toRepresentation(client, session));
-
-        representation.setAccess(auth.clients().getAccess(client));
-
-        representation.setMainRedirectUri(service.getMainRedirectUri(client.getId()));
-
-        return representation;
+    public ObjectNode getCustomClient() {
+        var client = super.getClient();
+        ObjectNode customClient = objectMapper.valueToTree(client);
+        customClient.set("mainRedirectUri", new TextNode(service.getMainRedirectUri(client.getId())));
+        return customClient;
     }
 
     @PUT
+    @Path("/ext")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response update(final CustomClientRepresentation rep) {
-        auth.clients().requireConfigure(client);
-
-        ValidationMessages validationMessages = new ValidationMessages();
-        if (!ClientValidator.validate(rep, validationMessages) || !PairwiseClientValidator.validate(session, rep, validationMessages)) {
-            Properties messages = AdminRoot.getMessages(session, realm, auth.adminAuth().getToken().getLocale());
-            throw new ErrorResponseException(
-                    validationMessages.getStringMessages(),
-                    validationMessages.getStringMessages(messages),
-                    Response.Status.BAD_REQUEST
-            );
-        }
-
+    public Response updateCustom(final CustomClientRepresentation rep) {
         try {
-            updateClientFromRep(rep, client, session);
             service.saveMainRedirectUri(client.getId(), rep.getMainRedirectUri());
-            adminEvent.operation(OperationType.UPDATE).resourcePath(session.getContext().getUri()).representation(rep).success();
-            updateAuthorizationSettings(rep);
-            return Response.noContent().build();
+            return super.update(rep);
         } catch (ModelDuplicateException e) {
             return ErrorResponse.exists("Client " + rep.getClientId() + " already exists").getResponse();
         }
     }
 
-
-    private void updateClientFromRep(ClientRepresentation rep, ClientModel client, KeycloakSession session) throws ModelDuplicateException {
-        UserModel serviceAccount = this.session.users().getServiceAccount(client);
-        if (TRUE.equals(rep.isServiceAccountsEnabled())) {
-            if (serviceAccount == null) {
-                new ClientManager(new RealmManager(session)).enableServiceAccount(client);
-            }
-        } else {
-            if (serviceAccount != null) {
-                new UserManager(session).removeUser(realm, serviceAccount);
-            }
-        }
-
-        if (!rep.getClientId().equals(client.getClientId())) {
-            new ClientManager(new RealmManager(session)).clientIdChanged(client, rep);
-        }
-
-        if (rep.isFullScopeAllowed() != null && rep.isFullScopeAllowed() != client.isFullScopeAllowed()) {
-            auth.clients().requireManage(client);
-        }
-
-        RepresentationToModel.updateClient(rep, client, session);
-    }
-
-    private void updateAuthorizationSettings(ClientRepresentation rep) {
-        if (TRUE.equals(rep.getAuthorizationServicesEnabled())) {
-            authorization().enable(false);
-        } else {
-            authorization().disable();
-        }
-    }
-
-    private AuthorizationService authorization() {
-        return new AuthorizationService(this.session, this.client, this.auth, adminEvent);
-    }
-
     @Data
     @EqualsAndHashCode(callSuper = true)
-    @NoArgsConstructor
-    private static class CustomClientRepresentation extends ClientRepresentation {
+    public static class CustomClientRepresentation extends ClientRepresentation {
         private String mainRedirectUri;
-
-        public CustomClientRepresentation(ClientRepresentation representation) {
-            setId(representation.getId());
-            setOrigin(representation.getOrigin());
-            setClientId(representation.getClientId());
-            setName(representation.getName());
-            setDescription(representation.getDescription());
-            setEnabled(representation.isEnabled());
-            setAdminUrl(representation.getAdminUrl());
-            setPublicClient(representation.isPublicClient());
-            setFrontchannelLogout(representation.isFrontchannelLogout());
-            setProtocol(representation.getProtocol());
-            setAttributes(representation.getAttributes());
-            setAuthenticationFlowBindingOverrides(representation.getAuthenticationFlowBindingOverrides());
-            setFullScopeAllowed(representation.isFullScopeAllowed());
-            setBearerOnly(representation.isBearerOnly());
-            setConsentRequired(representation.isConsentRequired());
-            setStandardFlowEnabled(representation.isStandardFlowEnabled());
-            setImplicitFlowEnabled(representation.isImplicitFlowEnabled());
-            setDirectAccessGrantsEnabled(representation.isDirectAccessGrantsEnabled());
-            setServiceAccountsEnabled(representation.isServiceAccountsEnabled());
-            setSurrogateAuthRequired(representation.isSurrogateAuthRequired());
-            setRootUrl(representation.getRootUrl());
-            setBaseUrl(representation.getBaseUrl());
-            setNotBefore(representation.getNotBefore());
-            setNodeReRegistrationTimeout(representation.getNodeReRegistrationTimeout());
-            setClientAuthenticatorType(representation.getClientAuthenticatorType());
-
-            setDefaultClientScopes(representation.getDefaultClientScopes());
-            setOptionalClientScopes(representation.getOptionalClientScopes());
-
-            setRedirectUris(representation.getRedirectUris());
-
-            setWebOrigins(representation.getWebOrigins());
-
-            setDefaultRoles(representation.getDefaultRoles());
-
-            setRegisteredNodes(representation.getRegisteredNodes());
-
-            setProtocolMappers(representation.getProtocolMappers());
-            setAuthorizationServicesEnabled(representation.getAuthorizationServicesEnabled());
-        }
     }
-
-
 }

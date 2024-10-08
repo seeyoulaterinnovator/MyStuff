@@ -69,6 +69,8 @@ services:
       KC_SPI_AUTHENTICATION_SESSIONS_PROVIDER: custom
       LIQUIBASE_COMMAND_CHANGE_EXEC_LISTENER_CLASS: ru.alamics.sso.keycloak.migration.CustomChangeExecListener
       APP_PROPS_UPDATE_DELAY_SECS: 60
+      # TZ: Asia/Yekaterinburg
+      TZ: Europe/Moscow
     volumes:
       - ./volumes/keycloak/opt/keycloak/bin/kc-custom.sh:/opt/keycloak/bin/kc-custom.sh:ro
       - ./volumes/keycloak/opt/keycloak/conf/cache-ispn-custom.xml:/opt/keycloak/conf/cache-ispn-custom.xml:ro
