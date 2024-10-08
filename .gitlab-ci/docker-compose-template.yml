@@ -19,7 +19,7 @@ services:
         - "traefik.http.routers.smtp4dev.rule=Host(`smtp4dev-er-sso.dev.it-resource.team`) && PathPrefix(`/`)"
         - "traefik.http.routers.smtp4dev.service=smtp4dev"
         - "traefik.http.services.smtp4dev.loadbalancer.server.port=80"
-        - "traefik.docker.network=traefik2"
+        - "traefik.docker.network=traefik3"
       resources:
         limits:
           memory: 128m
