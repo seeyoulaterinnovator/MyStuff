@@ -56,8 +56,8 @@ externalInfinispan:
 
 resources:
   limits:
-    cpu: '2'
-    memory: 1.5Gi
+    cpu: '4'
+    memory: 3Gi
   requests:
     cpu: 500m
     memory: 500Mi

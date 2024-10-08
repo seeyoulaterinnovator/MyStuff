@@ -98,7 +98,7 @@ spec:
           {{- end }}
           readinessProbe:
             httpGet:
-              path: /
+              path: /auth
               port: 8080
             initialDelaySeconds: 20
             periodSeconds: 15
