@@ -3,15 +3,11 @@ package ru.alamics.sso.keycloak.client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.reactive.NoCache;
 import org.keycloak.models.ClientModel;
@@ -43,22 +39,34 @@ public class ClientResource extends org.keycloak.services.resources.admin.Client
         this.objectMapper = Lookup.lookup(ObjectMapper.class);
     }
 
+    @Override
+    public ClientRepresentation getClient() {
+        throw new NotFoundException();
+    }
+
+    @Override
+    public Response update(ClientRepresentation rep) {
+        throw new NotFoundException();
+    }
+
     @GET
+    @Path("/ext")
     @NoCache
     @Produces(MediaType.APPLICATION_JSON)
     public ObjectNode getCustomClient() {
-        var client = this.getClient();
+        var client = super.getClient();
         ObjectNode customClient = objectMapper.valueToTree(client);
         customClient.set("mainRedirectUri", new TextNode(service.getMainRedirectUri(client.getId())));
         return customClient;
     }
 
     @PUT
+    @Path("/ext")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateCustom(final CustomClientRepresentation rep) {
         try {
             service.saveMainRedirectUri(client.getId(), rep.getMainRedirectUri());
-            return this.update(rep);
+            return super.update(rep);
         } catch (ModelDuplicateException e) {
             return ErrorResponse.exists("Client " + rep.getClientId() + " already exists").getResponse();
         }
@@ -66,7 +74,6 @@ public class ClientResource extends org.keycloak.services.resources.admin.Client
 
     @Data
     @EqualsAndHashCode(callSuper = true)
-    @NoArgsConstructor
     public static class CustomClientRepresentation extends ClientRepresentation {
         private String mainRedirectUri;
     }

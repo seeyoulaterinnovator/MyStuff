@@ -8,7 +8,7 @@ export class CustomClients extends Resource<{ realm?: string }> {
     CustomClientRepresentation | undefined
   >({
     method: "GET",
-    path: "/{id}",
+    path: "/{id}/ext",
     urlParamKeys: ["id"],
     catchNotFound: true,
   });
@@ -19,7 +19,7 @@ export class CustomClients extends Resource<{ realm?: string }> {
     void
   >({
     method: "PUT",
-    path: "/{id}",
+    path: "/{id}/ext",
     urlParamKeys: ["id"],
   });
 
