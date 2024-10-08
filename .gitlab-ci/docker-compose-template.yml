@@ -64,13 +64,12 @@ services:
     deploy:
       replicas: 1
       labels:
-        - "traefik.frontend.rule=Host:er-sso.dev.it-resource.team;PathPrefix:/"
-#        - "traefik.second.frontend.rule=Host:er-sso-mgmt.dev.it-resource.team;PathPrefix:/"
-        - "traefik.http.middlewares.keycloak.forwardauth.trustForwardHeader=true"
-        - "traefik.frontend.passHostHeader=true"
-        - "traefik.port=8080"
-        # - "traefik.first.port=8080"
-        # - "traefik.second.port=9000"
+        - "traefik.http.routers.http8k.rule=Host(`Host:er-sso.dev.it-resource.team`) && PathPrefix(`/`)"
+        - "traefik.http.routers.http8k.service=http8k-service"
+        - "traefik.http.services.http8k-service.loadbalancer.server.port=8080"
+        - "traefik.http.routers.http9k.rule=Host(`Host:er-sso-mgmt.dev.it-resource.team`) && PathPrefix(`/`)"
+        - "traefik.http.routers.http9k.service=http9k-service"
+        - "traefik.http.services.http9k-service.loadbalancer.server.port=9000"
         - "traefik.docker.network=traefik"
       resources:
         limits:
