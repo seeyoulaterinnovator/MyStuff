@@ -306,7 +306,7 @@ export default function ClientDetails() {
   };
 
   useFetch(
-    () => adminClient.clients.findOne({ id: clientId }),
+    () => adminClient.customClients.findOne({ id: clientId }),
     (fetchedClient) => {
       if (!fetchedClient) {
         throw new Error(t("notFound"));
@@ -359,7 +359,7 @@ export default function ClientDetails() {
 
       newClient.clientId = newClient.clientId?.trim();
 
-      await adminClient.clients.update({ id: clientId }, newClient);
+      await adminClient.customClients.update({ id: clientId }, newClient);
       setupForm(newClient);
       setClient(newClient);
       addAlert(t(messageKey), AlertVariant.success);
