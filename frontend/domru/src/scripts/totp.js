@@ -19,8 +19,10 @@ export default (function() {
   // После него появится кнопка "Отправить еще раз"
   const timer = new Timer(expirationSeconds.value || 30);
   timer.timeElement = document.getElementById('timer-time');
+
   if (expirationSeconds.value == 0) {
     switchTimer();
+    timer.stopTimer();
   } else {
     timer.callback = switchTimer;
   }
@@ -58,8 +60,6 @@ export default (function() {
 
       jumpToNextInput(input);
       cutRedundant(input);
-      clearEmptyInputsHighlights();
-      highlightCurrentInput(input, index);
       checkInputs();
     });
 
@@ -107,42 +107,6 @@ export default (function() {
 
       if (currentInput) currentInput.focus();
     }
-  }
-
-  function highlightCurrentInput(currentInput, index) {
-    if (isInputsFilled(currentInput)) {
-      return highlightInputsWithGreen();
-    }
-
-    if (currentInput) {
-      const borderText = '1px solid ';
-      const codeLength = codeNumbers.value;
-
-      if (index === 0 || (index === 3 && codeLength == 6)) {
-        currentInput.style.border = borderText + "#0CB779";
-      }
-      else if (index === 1 || (index === 4 && codeLength == 6)) {
-        currentInput.style.border = borderText + "#FF372B";
-      }
-      else if (index === 2) {
-        currentInput.style.border = borderText + "#0FC8F9";
-      }
-      else if (index === 3 && codeLength == 4 || index === 5 && codeLength == 6) {
-        highlightInputsWithGreen();
-      }
-    }
-  }
-
-  function highlightInputsWithGreen() {
-    inputs.forEach(input => input.style.border = '1px solid #0CB779');
-  }
-
-  function clearEmptyInputsHighlights() {
-    inputs.forEach(input => {
-      if (!input.value) {
-        input.style.border = "1px solid #E2E8F0";
-      }
-    })
   }
 
   function isInputsFilled(exceptInput) {

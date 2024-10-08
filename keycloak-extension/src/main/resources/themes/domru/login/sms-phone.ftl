@@ -7,11 +7,11 @@
 
     <#elseif section = "form">
         <#if phoneCallButton!false>
-            <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4 info-text info-text-code">
+            <h3 class="verification__sub custom-mb-md">
                 Введите последние 4 цифры входящего номера
             </h3>
         <#else>
-            <h3 class="verification__sub pb-2 sm:pb-3 md:pb-4 info-text info-text-code">
+            <h3 class="verification__sub custom-mb-md">
                 Введите код из СМС
             </h3>
         </#if>
@@ -25,9 +25,9 @@
 
             </div>
 
-            <div class="w-full center-items">
+            <div class="w-full center-items sms-inputs">
                 <#list 1..lengthCode as x>
-                    <input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="-" maxlength="1" id="smscode-${x}" style="font-size: 22px;"
+                    <input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="-" maxlength="1" id="smscode-${x}"
                            name="smscode-${x} " autocomplete="one-time-code"
                            <#if isMoreThanFiveAttempts?? && isMoreThanFiveAttempts>
                                disabled
@@ -35,7 +35,7 @@
                                disabled
                            </#if>
                            class="text-center align-middle w-14 h-14 border rounded-lg focus:border-extra outline-none squares
-                            sms-input" x == 1 && autofocus/>
+                            field__input sms-input" x == 1 && autofocus/>
                 </#list>
             </div>
 
@@ -49,20 +49,21 @@
                             <button class="font-light verification__resend w-full" name="resend" type="submit">${sendAgain}</button>
                         </span>
                 <#else>
-                <div class="flex justify-between enter-login-link-timer enter-login-link-resend page-buttons" flex-wrap-justify-content="center">
-                    <a id="topSecretButton" class="resend" href="#"
+                <div class="flex justify-between enter-login-link-timer enter-login-link-resend page-buttons w-full">
+                    <a id="topSecretButton" class="resend highlighted-hover-text" href="#"
                        onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
                     </a>
-                    <div id="timer"  style="margin-left: auto;">
-                            <span class="timer-new">
-                                Код действует:
-                            </span>
+                    <div id="timer" class="ml-auto timer">
+                        <span class="timer-new">
+                            Код действует: 
+                        </span>
+                        <span> </span>
                         <span id="timer-time" class="timer-new-countdown"></span>
                     </div>
                     <#if enableRepeatCall?? && enableRepeatCall!>
                         <p class="hidden font-light text-black verification__text" id="resend">
                                 <span>
-                                    <button class="resend font-light" name="resend"
+                                    <button class="resend font-light highlighted-hover-text" name="resend"
                                             type="submit">${sendAgain}</button>
                                 </span>
                         </p>

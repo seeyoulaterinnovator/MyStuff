@@ -1,5 +1,6 @@
 <#import "templates/email-sent.ftl" as emailSent>
 <#import "templates/header.ftl" as header>
+<#import "./templates/svg.ftl" as svg>
 
 <#macro registrationLayout
         displayInfo=false
@@ -44,7 +45,7 @@
         </#if>
 
     </head>
-    <body class="min-h-full flex flex-col p-4 sm:px-6 md:py-6 lg:px-8 xl:py-8 xl:px-6 custom">
+    <body class="min-h-full flex flex-col custom main-wrapper">
     <#if displayMessage && message?has_content && message.summary == 'Регистрация временно недоступна, попробуйте повторить попытку позже'>
         <#if iframe ?? && iframe == false>
             <@header.defaultTemplate withCity=displayCity></@header.defaultTemplate>
@@ -173,16 +174,18 @@
         </main>
 
         <#if iframe?? && iframe == false>
-            <footer id="page-footer" class="w-full footer">
-                <a href="${(phoneConstLink)!"tel:88005500479"}" class= "show-small-tell">
-                    <div class="flex h-6 items-center">
-                        <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M5.03341 4.12902C5.2853 3.87713 5.6937 3.87713 5.9456 4.12902L7.99182 6.17524C8.38346 6.56688 8.38346 7.20186 7.99182 7.5935C7.48302 8.1023 7.28745 8.84622 7.47635 9.53884C7.89974 11.0913 9.11969 12.3112 10.6721 12.7346C11.3648 12.9235 12.1087 12.728 12.6175 12.2192C13.0091 11.8275 13.6441 11.8275 14.0357 12.2192L15.3419 13.5253C15.6933 13.8768 15.6933 14.4466 15.3419 14.798C14.4689 15.6711 13.4536 16.2352 12.4491 16.4008C11.4571 16.5642 10.4516 16.3447 9.54609 15.6075C8.8175 15.0142 7.95941 14.2451 6.96264 13.2483C5.83397 12.1197 4.95756 11.1292 4.27924 10.2838C2.78739 8.42446 3.23894 5.92349 5.03341 4.12902Z" stroke="#222222"/>
-                        </svg>
-                        <span class="phone-number">${(phoneConst)!"8 800 550 0479"}</span>
-                    </div>
-                </a>
-                <span class="text-main-500 copyright">${(footer)!"© АО «ЭР-Телеком Холдинг» 2011—"}${.now?string('yyyy')}</span>
+            <footer id="page-footer" class="w-full flex flex-col footer">
+              <a href="${(phoneConstLink)!"tel:88005500479"}" class="show-small-tell highlighted-hover-text highlighted-nested-hover-svg phone-call-center">
+                <div class="flex h-6 items-center">
+                  <@svg.phoneIcon/>
+                  <span class="phone-number">
+                    ${(phoneConst)!"8 800 550 0479"}
+                  </span>
+                </div>
+              </a>
+              <span class="text-main-500 copyright mt-2">
+                ${(footer)!"© АО «ЭР-Телеком Холдинг» 2011—"}${.now?string('yyyy')}
+              </span>
             </footer>
         </#if>
 

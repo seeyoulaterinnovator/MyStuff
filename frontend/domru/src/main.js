@@ -18,6 +18,9 @@ import './css/typography.css';
 import './css/animation.css';
 import './css/custom.css';
 import './css/sth-went-wrong.css';
+import './css/svg.css';
+import './css/wrapper.css';
+import './css/scroll.css';
 
 import './css/components/button.css';
 import './css/components/field.css';

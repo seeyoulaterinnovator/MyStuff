@@ -75,20 +75,20 @@
   });
 </script>
 
-<ul class="flex flex-wrap flex-row cities-container w-full px-4">
+<ul class="flex flex-wrap flex-row cities-container w-full">
     {#each groupedCities as groupPart}
       <ul class="flex flex-col cities-column">
       {#each groupPart as group}
 
-        <ul class="flex mb-4 capital flex-col px-0 md:px-2 capital">
-          <h2 class="city-group-letter capitalize custom-mb-sm sm:px-2">
+        <ul class="flex capital flex-col px-0 capital custom-mb-lg">
+          <h2 class="city-group-letter capitalize custom-mb-sm">
             {group.firstCharacter}
           </h2>
 
            <ul class="flex flex-col">
            {#each group.cities as city}
-              <li class="mb-2 sm:px-2 city">
-                <button class="city text-left" on:click={() => handleClick(city)}>{city.name}</button>
+              <li class="city">
+                <button class="text-left" on:click={() => handleClick(city)}>{city.name}</button>
               </li>
             {:else}
               <div />

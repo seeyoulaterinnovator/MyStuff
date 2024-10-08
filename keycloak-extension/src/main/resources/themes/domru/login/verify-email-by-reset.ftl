@@ -20,7 +20,7 @@
                 </div>
                 <div class="flex-basis-auto w-full ml-0 text-sm sm:ml-6">
                     <#--  <button id="cancel" class="btn w-full" type="button">${msg("doCancel")}</button>  -->
-                    <a id="cancel" href="${url.loginUrl}" class="btn btn-cancel text-accentBlue-900 w-full domru-cancel">${msg(doCancel)}</a>
+                    <a id="cancel" href="${url.loginUrl}" class="btn btn-cancel highlighted-text w-full domru-cancel">${msg(doCancel)}</a>
                 </div>
             </div>
         </form>

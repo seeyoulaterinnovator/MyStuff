@@ -1,0 +1,51 @@
+.default-svg {
+  fill: var(--main-900);
+
+  > path {
+    fill: var(--main-900);
+  }
+}
+
+.highlighted-svg {
+  fill: var(--accent-blue-1200);
+
+  > path {
+    fill: var(--accent-blue-1200);
+  }
+}
+
+.highlighted-hover-svg {
+  &:hover,
+  &:active {
+    fill: var(--accent-blue-1200-hover);
+
+    > path {
+      fill: var(--accent-blue-1200-hover);
+    }
+  }
+}
+
+.nested-svg {
+  svg {
+    @apply .default-svg;
+  }
+}
+
+.highlighted-nested-svg {
+  svg {
+    @apply .highlighted-svg;
+  }
+}
+
+.highlighted-nested-hover-svg {
+  &:hover,
+  &:active {
+    svg {
+      fill: var(--accent-blue-1200-hover);
+
+      > path {
+        fill: var(--accent-blue-1200-hover);
+      }
+    }
+  }
+}

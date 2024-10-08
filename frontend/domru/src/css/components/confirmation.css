@@ -1,110 +1,42 @@
-.confirm__title {
-  font-size: 16px;
-  line-height: 20px;
-  color: #222222;
-  font-weight: 400;
-  padding: 25px;
-}
-
-.select-city-confirmation{
-  background: #FFFFFF;
+.select-city-confirmation {
+  background: #ffffff;
   position: fixed;
   right: 27px;
   top: 80px;
-  height: 120px;
   border-radius: 20px;
-  width: 418px;
+  padding: 24px;
 }
 
-/*.select-city-confirmation {
-  grid-gap: 24px;
-  gap: 24px;
-  position: absolute;
-  width: 418px;
-  height: 139px;
-  left: 862px;
-  top: 61px;
-  background: #fff;
-  border-radius: 24px;
-}*/
+.select-city-confirmation {
+  > div {
+    > :not(:first-child) {
+      margin-top: 24px;
+    }
+  }
+}
+
+.confirm__title {
+  color: var(--main-800);
+  max-width: 400px;
+}
 
 .confirm__btns {
-
-  padding-left: 25px;
-  padding-bottom: 32px;
-  padding-right: 110px;
-}
-
-.confirm__btn {
-
-  box-sizing: border-box;
-}
-
-.confirm__btn:first-child {
-  margin-right: 46px;
-}
-
-@media screen and (max-width: 1279px){
-  .confirm__btns {
-    flex-direction: row;
-    align-items: center;
-  }
-
-  .confirm__btn:first-child {
-    margin-right: 24px;
-    margin-bottom: 0;
-    max-width: 70px;
-  }
-
-  .confirm__title {
-    max-width: 400px;
-    margin: 0 auto;
+  > :not(:first-child) {
+    margin-left: 24px;
   }
 }
 
-@media screen and (max-width: 767px){
-  .confirm__btns {
-    flex-direction: row;
-  }
-
-  .confirm__btn:first-child {
-    margin-right: 16px;
-    margin-bottom: 0;
-    max-width: 70px;
-  }
-  .confirm__title {
-    font-size: 14px;
-    line-height: 32px;
-    opacity: 0.8;
-    max-width: 300px;
-  }
-
-}
-
-@media screen and (max-width: 767px){
-  .confirm__btns {
-    margin-right: 16px;
-  }
-
-  .select-city-confirmation{
-    right: 10px;
-    top: 75px;
-    max-width: 288px;
-  }
-
-  .confirm__btns {
-    padding-left: 18px;
-    padding-bottom: 32px;
-    padding-right: 100px;
-  }
-
-  .confirm__title {
+@media screen and (max-width: 767px) {
+  .select-city-confirmation {
     padding: 18px;
   }
 
-  .confirm__btn:first-child {
-    margin-right: 10px;
-    margin-bottom: 0;
-    max-width: 70px;
+  .select-city-confirmation > div > :not(:first-child) {
+    margin-top: 18px;
+  }
+
+  .confirm__btns > .btn-main {
+    width: auto;
+    height: auto;
   }
 }
