@@ -33,7 +33,9 @@ const getBlockedUsers = (
   users?: Array<UserRepresentation | UserInfoRepresentation>,
 ) => {
   const blockedUsers = users?.filter((item) => !item.enabled);
-  const blockedUsernames = users?.map((item) => item.username).join(", ");
+  const blockedUsernames = blockedUsers
+    ?.map((item) => item.username)
+    .join(", ");
 
   return { blockedUsers, blockedUsernames };
 };
@@ -251,7 +253,12 @@ export const useUserDataTable = ({
 
     if (blockedUsers?.length) {
       addError(
-        t("blockedUserSelected", { username: blockedUsernames }),
+        t(
+          blockedUsers.length > 1
+            ? "blockedUsersSelected"
+            : "blockedUserSelected",
+          { username: blockedUsernames },
+        ),
         "error",
       );
       return true;
