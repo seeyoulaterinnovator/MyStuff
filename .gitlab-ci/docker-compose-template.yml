@@ -15,7 +15,7 @@ services:
       replicas: 1
       labels:
         - "traefik.enable=true"
-        - "traefik.http.middlewares.smtp4dev.auth.basic.users=tester:${DOLLAR}${DOLLAR}2y${DOLLAR}${DOLLAR}05${DOLLAR}${DOLLAR}UtcScUwbnflomoB1hhSJ0OpFvOLR6A8QH5ImGo7.QYoBws3qwUo5K" # tester / z3kco5xpZQzenqUEz2Ob
+        - "traefik.http.middlewares.smtp4dev.basicauth.users=tester:${DOLLAR}${DOLLAR}2y${DOLLAR}${DOLLAR}05${DOLLAR}${DOLLAR}UtcScUwbnflomoB1hhSJ0OpFvOLR6A8QH5ImGo7.QYoBws3qwUo5K" # tester / z3kco5xpZQzenqUEz2Ob
         - "traefik.http.routers.smtp4dev.entrypoints=web"
         - "traefik.http.routers.smtp4dev.rule=Host(`smtp4dev-er-sso.dev.it-resource.team`) && PathPrefix(`/`)"
         - "traefik.http.routers.smtp4dev.service=smtp4dev"
