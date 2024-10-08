@@ -66,7 +66,7 @@
   ],
   "clients": [
     {
-      "id": "app",
+      "clientId": "app",
       "name": "app",
       "enabled": true,
       "clientAuthenticatorType": "client-secret",
@@ -83,7 +83,7 @@
       }
     },
     {
-      "id": "mobileApp",
+      "clientId": "mobileApp",
       "name": "mobileApp",
       "enabled": true,
       "clientAuthenticatorType": "client-secret",
@@ -113,34 +113,53 @@
       }
     ]
   },
+  "browserFlow": "Copy of Browser two steep new",
+  "registrationFlow": "Registration with Phone",
+  "resetCredentialsFlow": "Correct reset credential",
+  "passwordPolicy": "forceExpiredPasswordChange(365)",
+  "eventsEnabled": true,
+  "registrationAllowed": true,
+  "eventsListeners": [
+    "ExtendedListener"
+  ],
   "requiredActions": [
     {
       "alias": "phone_verificator_sms",
       "name": "Phone Verification (sms)",
       "providerId": "phone_verificator_sms",
-      "priority": 25
-    },
-    {
-      "alias": "incoming_call_phone_verificator",
-      "name": "Phone Verification (incoming call)",
-      "providerId": "incoming_call_phone_verificator",
       "enabled": true,
-      "priority": 30
-    },
-    {
-      "alias": "login_stats_recordings",
-      "name": "Record Login Statistics Action",
-      "providerId": "login_stats_recordings",
-      "enabled": true,
-      "priority": 54
+      "defaultAction": true
     },
     {
       "alias": "email_sender",
       "name": "New Email Sender",
       "providerId": "email_sender",
       "enabled": true,
-      "defaultAction": true,
-      "priority": 55
+      "defaultAction": true
+    },
+    {
+      "alias": "incoming_call_phone_verificator",
+      "name": "Phone Verification (incoming call)",
+      "providerId": "incoming_call_phone_verificator",
+      "enabled": true
+    },
+    {
+      "alias": "VERIFY_EMAIL",
+      "name": "Verify Email",
+      "providerId": "VERIFY_EMAIL",
+      "enabled": true
+    },
+    {
+      "alias": "login_stats_recordings",
+      "name": "Record Login Statistics Action",
+      "providerId": "login_stats_recordings",
+      "enabled": true
+    },
+    {
+      "alias": "UPDATE_PROFILE",
+      "name": "Update Profile",
+      "providerId": "UPDATE_PROFILE",
+      "enabled": true
     },
     {
       "alias": "VERIFY_PROFILE",
@@ -149,8 +168,6 @@
       "enabled": false
     }
   ],
-  "browserFlow": "Copy of Browser two steep new",
-  "resetCredentialsFlow": "Correct reset credential",
   "authenticationFlows": [
     {
       "alias": "Copy of Browser two steep new",
@@ -161,14 +178,12 @@
         {
           "authenticatorFlow": true,
           "requirement": "REQUIRED",
-          "priority": 10,
           "autheticatorFlow": true,
           "flowAlias": "Copy of Browser two steep new - Alternatives - 0"
         },
         {
           "authenticator": "new-attributes-form",
-          "requirement": "REQUIRED",
-          "priority": 32
+          "requirement": "REQUIRED"
         }
       ]
     },
@@ -179,18 +194,15 @@
       "authenticationExecutions": [
         {
           "authenticator": "auth-cookie",
-          "requirement": "ALTERNATIVE",
-          "priority": 10
+          "requirement": "ALTERNATIVE"
         },
         {
           "authenticator": "identity-provider-redirector",
-          "requirement": "ALTERNATIVE",
-          "priority": 20
+          "requirement": "ALTERNATIVE"
         },
         {
           "authenticatorFlow": true,
           "requirement": "ALTERNATIVE",
-          "priority": 30,
           "autheticatorFlow": true,
           "flowAlias": "Copy of Browser two steep new Browser two steep new forms"
         }
@@ -217,7 +229,6 @@
           "authenticator": "reset-credentials-choose-user",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
-          "priority": 10,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         },
@@ -225,7 +236,6 @@
           "authenticator": "reset-credential-email-or-phone",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
-          "priority": 30,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         },
@@ -233,14 +243,12 @@
           "authenticator": "reset-password",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
-          "priority": 40,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         },
         {
           "authenticatorFlow": true,
           "requirement": "CONDITIONAL",
-          "priority": 41,
           "autheticatorFlow": true,
           "flowAlias": "Correct reset credential - reset-otp - Conditional"
         }
@@ -257,7 +265,6 @@
           "authenticator": "conditional-user-configured",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
-          "priority": 10,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         },
@@ -265,7 +272,6 @@
           "authenticator": "reset-otp",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
-          "priority": 20,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         }
@@ -281,7 +287,6 @@
           "authenticator": "rest-phone-username-validator",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
-          "priority": 0,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         },
@@ -289,7 +294,6 @@
           "authenticator": "rest-sms-or-phone-pass-validator",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
-          "priority": 1,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         },
@@ -297,7 +301,6 @@
           "authenticator": "rest-sms-or-phone-call-auth",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
-          "priority": 2,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         },
@@ -305,7 +308,6 @@
           "authenticator": "rest-actions",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
-          "priority": 3,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         }
@@ -321,7 +323,6 @@
           "authenticator": "reset-cred-choose-user-rest",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
-          "priority": 0,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         },
@@ -329,7 +330,6 @@
           "authenticator": "two-step-verification",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
-          "priority": 1,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         },
@@ -337,7 +337,6 @@
           "authenticator": "reset-password",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
-          "priority": 2,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         },
@@ -345,16 +344,71 @@
           "authenticator": "rest-actions",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
-          "priority": 3,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        }
+      ]
+    },
+    {
+      "alias": "Registration with Phone",
+      "description": "registration flow",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "registration-page-form",
+          "authenticatorFlow": true,
+          "requirement": "REQUIRED",
+          "autheticatorFlow": true,
+          "flowAlias": "Registration with Phone registration form",
+          "userSetupAllowed": false
+        }
+      ]
+    },
+    {
+      "alias": "Registration with Phone registration form",
+      "description": "registration form",
+      "providerId": "form-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "registration-user-creation",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "phone_checker",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "registration-user-extension",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "user_post_creator",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "letter_sender",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
           "autheticatorFlow": false,
           "userSetupAllowed": false
         }
       ]
     }
-  ],
-  "passwordPolicy": "forceExpiredPasswordChange(365)",
-  "eventsEnabled": true,
-  "eventsListeners": [
-    "ExtendedListener"
   ]
 }
