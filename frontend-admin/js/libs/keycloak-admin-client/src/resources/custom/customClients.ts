@@ -1,12 +1,11 @@
 import Resource from "../resource.js";
 import type { KeycloakAdminClient } from "../../client.js";
-import type ClientRepresentation from "../../defs/clientRepresentation.js";
+import { CustomClientRepresentation } from "../../defs/custom/customClientRepresentation.js";
 
-// TODO mainRedirectUri
 export class CustomClients extends Resource<{ realm?: string }> {
   public findOne = this.makeRequest<
     { id: string },
-    ClientRepresentation | undefined
+    CustomClientRepresentation | undefined
   >({
     method: "GET",
     path: "/{id}",
@@ -16,7 +15,7 @@ export class CustomClients extends Resource<{ realm?: string }> {
 
   public update = this.makeUpdateRequest<
     { id: string },
-    ClientRepresentation,
+    CustomClientRepresentation,
     void
   >({
     method: "PUT",
