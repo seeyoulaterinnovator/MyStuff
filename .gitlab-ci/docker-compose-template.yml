@@ -17,6 +17,7 @@ services:
         - "traefik.enable=true"
         - "traefik.http.middlewares.smtp4dev.basicauth.users=tester:${DOLLAR}${DOLLAR}2y${DOLLAR}${DOLLAR}05${DOLLAR}${DOLLAR}UtcScUwbnflomoB1hhSJ0OpFvOLR6A8QH5ImGo7.QYoBws3qwUo5K" # tester / z3kco5xpZQzenqUEz2Ob
         - "traefik.http.routers.smtp4dev.rule=Host(`smtp4dev-er-sso.dev.it-resource.team`) && PathPrefix(`/`)"
+        - "traefik.http.routers.smtp4dev.middlewares=smtp4dev"
         - "traefik.http.routers.smtp4dev.service=smtp4dev"
         - "traefik.http.services.smtp4dev.loadbalancer.server.port=80"
         - "traefik.docker.network=traefik3"
