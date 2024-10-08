@@ -41,6 +41,7 @@ spec:
           args:
             - start
             - --proxy=edge
+            - --verbose
             # {{- if and .Values.externalInfinispan.server .Values.externalInfinispan.port }}
             # - -kc=standalone-ha-infspn-ext.xml
             # {{- else }}
