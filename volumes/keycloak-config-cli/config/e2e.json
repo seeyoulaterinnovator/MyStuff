@@ -166,6 +166,13 @@
       "name": "Verify Profile",
       "providerId": "VERIFY_PROFILE",
       "enabled": false
+    },
+    {
+      "alias": "empty_req",
+      "name": "Empty Req",
+      "providerId": "empty_req",
+      "enabled": true,
+      "defaultAction": true
     }
   ],
   "authenticationFlows": [

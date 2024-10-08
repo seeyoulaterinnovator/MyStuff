@@ -181,7 +181,7 @@ public final class TestsUtils {
     }
 
     public static String getLastSmsCode(String phone) {
-        return withHandle(client -> {
+        return withMockServer(client -> {
             var requests = client.retrieveRecordedRequests(
                     HttpRequest.request()
                             .withQueryStringParameter("to", phone)
