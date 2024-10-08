@@ -1,14 +1,14 @@
 version: '3.8'
 
 networks:
-  traefik:
+  traefik2:
     external: true
 
 services:
   smtp4dev:
     image: rnwood/smtp4dev:v3
     networks:
-      - traefik
+      - traefik2
     environment:
       ServerOptions__Hostname: smtp4dev-er-sso.dev.it-resource.team
     deploy:
@@ -27,7 +27,7 @@ services:
   keycloak:
     image: $REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_PIPELINE_ID
     networks:
-      - traefik
+      - traefik2
     extra_hosts:
       - "mariadb:192.168.57.79"
     command: [ "start", "--proxy=edge" ]
