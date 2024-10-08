@@ -3,9 +3,9 @@ import type { CustomUserQuery } from "@keycloak/keycloak-admin-client/lib/resour
 import type UserRepresentation from "@keycloak/keycloak-admin-client/lib/defs/userRepresentation";
 import type { UserInfoRepresentation } from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
 import { NetworkError } from "@keycloak/keycloak-admin-client/lib";
-import { AlertVariant, Button, Checkbox } from "@patternfly/react-core";
+import { AlertVariant, Checkbox, Text } from "@patternfly/react-core";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { CustomUserToolbarAction } from "../constants/user";
 import { useAdminClient } from "../../admin-client";
 import { useAlerts } from "../../components/alert/Alerts";
@@ -52,7 +52,6 @@ export const useUserDataTable = ({
   refresh,
   userStorage,
 }: UseUserDataTableProps) => {
-  const navigate = useNavigate();
   const { adminClient } = useAdminClient();
   const { addAlert, addError } = useAlerts();
   const { t } = useTranslation();
@@ -90,29 +89,35 @@ export const useUserDataTable = ({
           },
         },
         cellRenderer: (row) => {
+          const href = toUser({
+            id: row.id,
+            realm: isMeInMaster
+              ? customFilters.searchRealm || realmName
+              : realmName,
+            tab: "settings",
+          }).pathname;
+
+          if (!href) {
+            return (
+              <Text
+                style={{
+                  textWrap: "wrap",
+                }}
+              >
+                {row.id}
+              </Text>
+            );
+          }
+
           return (
-            <Button
-              variant="link"
+            <Link
+              to={href}
               style={{
-                width: "200px",
-                maxWidth: "200px",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-              onClick={() => {
-                navigate(
-                  toUser({
-                    id: row.id,
-                    realm: isMeInMaster
-                      ? customFilters.searchRealm || realmName
-                      : realmName,
-                    tab: "settings",
-                  }),
-                );
+                textWrap: "wrap",
               }}
             >
               {row.id}
-            </Button>
+            </Link>
           );
         },
       },
