@@ -40,7 +40,7 @@ class RiasUserExistsCheckImplTest {
 
         ApplicationProperties props = new ApplicationPropertiesMock(properties);
 
-        service = new RiasUserExistsCheckImpl(props, SSLContext.getDefault());
+        service = new RiasUserExistsCheckImpl(props, SSLContext.getDefault(), (s, ss) -> true);
     }
 
     @Test

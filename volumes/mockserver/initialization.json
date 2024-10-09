@@ -1,5 +1,12 @@
 [{
   "httpRequest": {
+    "path": "/ok"
+  },
+  "httpResponse": {
+    "body": "ok"
+  }
+},{
+  "httpRequest": {
     "path": "/cities/domains"
   },
   "httpResponse": {

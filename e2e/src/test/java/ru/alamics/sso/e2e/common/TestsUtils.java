@@ -2,16 +2,26 @@ package ru.alamics.sso.e2e.common;
 
 import jakarta.ws.rs.core.MediaType;
 import lombok.AccessLevel;
+import lombok.Cleanup;
 import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import org.apache.http.HttpStatus;
 import org.mockserver.model.HttpRequest;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,6 +40,24 @@ public final class TestsUtils {
                 .filter(p -> p.split("=")[0].equals(parameter)).map(p -> p.split("=")[1])
                 .map(v -> URLDecoder.decode(v, StandardCharsets.UTF_8))
                 .findFirst().orElse(null);
+    }
+
+    @SneakyThrows
+    public static Certificate getCertificate(String host, int port) {
+        var context = SSLContext.getInstance("TLS");
+        context.init(null, new TrustManager[] { new X509TrustManager() {
+            @Override public void checkClientTrusted(X509Certificate[] chain, String type) { }
+            @Override public void checkServerTrusted(X509Certificate[] chain, String type) { }
+            @Override public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+        }}, null);
+        @Cleanup var socket = (SSLSocket) context.getSocketFactory().createSocket(host, port);
+        socket.startHandshake();
+        return socket.getSession().getPeerCertificates()[0];
+    }
+
+    @SneakyThrows
+    public static String getThumbprint(Certificate certificate) {
+        return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-1").digest(certificate.getEncoded()));
     }
 
     public static String randomEmail() {

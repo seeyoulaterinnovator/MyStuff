@@ -43,6 +43,7 @@ import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 import ru.alamics.sso.util.Util;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import java.io.InputStream;
 import java.util.*;
@@ -70,11 +71,13 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
 
     public CustomIdpReviewProfileAuthenticator(
             SSLContext tbapiRegistrationSslContext,
-            SSLContext tbapiCustomerSslContext
+            SSLContext tbapiCustomerSslContext,
+            HostnameVerifier hostnameVerifier
     ) {
         tbapiService = new TbapiService(new TbapiServiceRestImpl(
                 tbapiRegistrationSslContext,
-                tbapiCustomerSslContext
+                tbapiCustomerSslContext,
+                hostnameVerifier
         ));
         userExtension = new UserExtension();
         properties = Lookup.lookup(ApplicationProperties.class);

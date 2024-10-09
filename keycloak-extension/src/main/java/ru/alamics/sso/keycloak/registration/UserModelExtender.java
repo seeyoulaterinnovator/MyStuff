@@ -25,6 +25,7 @@ import ru.alamics.sso.registration.tbapi.model.TbapiConnect;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -180,7 +181,8 @@ public class UserModelExtender extends AbstractFormActionFactory implements Form
         log.info("Creating UserModelExtender");
         tbapiService = new TbapiService(new TbapiServiceRestImpl(
                 Lookup.lookup(SSLContext.class, "tbapiRegistration"),
-                Lookup.lookup(SSLContext.class, "tbapiCustomer")
+                Lookup.lookup(SSLContext.class, "tbapiCustomer"),
+                Lookup.lookup(HostnameVerifier.class)
         ));
         return this;
     }

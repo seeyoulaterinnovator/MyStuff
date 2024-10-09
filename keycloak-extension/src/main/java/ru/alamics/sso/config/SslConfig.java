@@ -8,11 +8,11 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.property.ApplicationProperties;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
-import java.security.*;
+import javax.net.ssl.*;
+import java.security.KeyStore;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
@@ -29,40 +29,70 @@ public class SslConfig {
     ApplicationProperties applicationProperties;
 
     @Produces
+    public HostnameVerifier getHostnameVerifier() {
+        var hostnameVerifier = HttpsURLConnection.getDefaultHostnameVerifier();
+        return (hostname, session) -> {
+            try {
+                String thumbprint = getThumbprint(session.getPeerCertificates()[0]);
+                if(Arrays.stream(SslContextKind.values()).anyMatch(kind -> getThumbprints(kind).contains(thumbprint))) {
+                    return true;
+                }
+            } catch (Exception e) {
+                log.debug(e.getMessage(), e);
+            }
+            return hostnameVerifier.verify(hostname, session);
+        };
+    }
+
+    @Produces
     @Named("rias")
     public SSLContext getRiasContext() throws Exception {
-        return getContext("rias.ssl.relaxed", "rias.ssl.thumbprints");
+        return getContext(SslContextKind.RIAS);
     }
 
     @Produces
     @Named("riasLogin")
     public SSLContext getRiasLoginContext() throws Exception {
-        return getContext("riasLogin.ssl.relaxed", "riasLogin.ssl.thumbprints");
+        return getContext(SslContextKind.RIAS_LOGIN);
     }
 
     @Produces
     @Named("tbapiRegistration")
     public SSLContext getTbapiRegistrationContext() throws Exception {
-        return getContext("tbapi.registration.ssl.relaxed", "tbapi.registration.ssl.thumbprints");
+        return getContext(SslContextKind.TBAPI_REGISTRATION);
     }
 
     @Produces
     @Named("tbapiCustomer")
     public SSLContext getTbapiCustomerContext() throws Exception {
-        return getContext("tbapi.customer.ssl.relaxed", "tbapi.customer.ssl.thumbprints");
+        return getContext(SslContextKind.TBAPI_CUSTOMER);
     }
 
-    SSLContext getContext(String relaxedProperty, String thumbprintsProperty) throws Exception {
+    @Produces
+    @Named("cities")
+    public SSLContext getCitiesContext() throws Exception {
+        return getContext(SslContextKind.CITIES);
+    }
+
+    @Produces
+    @Named("dadata")
+    public SSLContext getDaDataContext() throws Exception {
+        return getContext(SslContextKind.DA_DATA);
+    }
+
+    @Produces
+    @Named("smsSender")
+    public SSLContext getSmsSenderContext() throws Exception {
+        return getContext(SslContextKind.SMS_SENDER);
+    }
+
+    SSLContext getContext(SslContextKind kind) throws Exception {
         var context = SSLContext.getInstance("SSL");
-        context.init(
-                null,
-                new TrustManager[] { getTrustManager(relaxedProperty, thumbprintsProperty) },
-                new SecureRandom()
-        );
+        context.init(null, new TrustManager[] { getTrustManager(kind) }, new SecureRandom());
         return context;
     }
 
-    TrustManager getTrustManager(String relaxedProperty, String thumbprintsProperty) throws Exception {
+    TrustManager getTrustManager(SslContextKind kind) throws Exception {
         var trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         trustManagerFactory.init((KeyStore) null);
 
@@ -84,8 +114,8 @@ public class SslConfig {
 
             @Override
             public void checkServerTrusted(X509Certificate[] chain, String type) throws CertificateException {
-                if(!Boolean.TRUE.toString().equals(applicationProperties.getProperty(relaxedProperty))) {
-                    if(!checkTrusted(chain, getThumbprints(thumbprintsProperty))) {
+                if(!Boolean.TRUE.toString().equals(applicationProperties.getProperty(kind.getRelaxedProperty()))) {
+                    if(!checkTrusted(chain, getThumbprints(kind))) {
                         for (X509TrustManager trustManager : trustManagers) {
                             trustManager.checkServerTrusted(chain, type);
                         }
@@ -95,8 +125,8 @@ public class SslConfig {
         };
     }
 
-    List<String> getThumbprints(String thumbprintsProperty) {
-        var value = applicationProperties.getProperty(thumbprintsProperty);
+    List<String> getThumbprints(SslContextKind kind) {
+        var value = applicationProperties.getProperty(kind.getThumbprintsProperty());
         if(value == null || value.isBlank()) {
             return List.of();
         } else {
@@ -104,7 +134,7 @@ public class SslConfig {
         }
     }
 
-    boolean checkTrusted(X509Certificate[] chain, List<String> trustedThumbprints) throws CertificateException{
+    boolean checkTrusted(X509Certificate[] chain, List<String> trustedThumbprints) throws CertificateException {
         if(chain == null || chain.length == 0) throw new CertificateException();
 
         try {

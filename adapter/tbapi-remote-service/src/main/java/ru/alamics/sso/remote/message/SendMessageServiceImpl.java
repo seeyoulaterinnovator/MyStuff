@@ -1,6 +1,5 @@
 package ru.alamics.sso.remote.message;
 
-import jakarta.annotation.Resource;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -24,6 +23,8 @@ import ru.alamics.sso.util.E2EUtil;
 import ru.alamics.sso.util.StandResolver;
 import ru.alamics.sso.util.Util;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -35,24 +36,23 @@ import static ru.alamics.sso.settings.SettingConstants.*;
 @Named("MessageSender")
 @Slf4j
 public class SendMessageServiceImpl implements SendMessageService {
-    private static final HttpClient client;
-    static {
-        try {
-            client = HttpClients.custom()
-                    .setDefaultRequestConfig(RequestConfig.custom()
-                            .setConnectTimeout(3_000)
-                            .setSocketTimeout(10_000)
-                            .build())
-                    .build();
-        } catch (Exception e) {
-            throw new ExceptionInInitializerError(e);
-        }
-    }
+    private final HttpClient client;
 
     @Inject
     SettingsService settingsService;
 
-    public SendMessageServiceImpl() {
+    public SendMessageServiceImpl(
+            @Named("smsSender") SSLContext sslContext,
+            HostnameVerifier hostnameVerifier
+    ) {
+        client = HttpClients.custom()
+                .setSSLContext(sslContext)
+                .setSSLHostnameVerifier(hostnameVerifier)
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setConnectTimeout(3_000)
+                        .setSocketTimeout(10_000)
+                        .build())
+                .build();
     }
 
     public String sendMessageByRequestAndLogInfo(MessageRequest messageRequest) throws SendMessageException {

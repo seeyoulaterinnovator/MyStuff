@@ -12,10 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.TrustAllStrategy;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContextBuilder;
 import org.jboss.resteasy.reactive.NoCache;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
@@ -29,6 +26,8 @@ import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.StandResolver;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,31 +37,22 @@ import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
 public class CitiesResource {
-    private static final HttpClient client;
-    static {
-        try {
-            client = HttpClients.custom()
-                    .setSSLContext(new SSLContextBuilder()
-                            .loadTrustMaterial(null, TrustAllStrategy.INSTANCE)
-                            .build())
-                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
-                    .setDefaultRequestConfig(RequestConfig.custom()
-                            .setConnectTimeout(3_000)
-                            .setSocketTimeout(10_000)
-                            .build())
-                    .build();
-        } catch (Exception e) {
-            throw new ExceptionInInitializerError(e);
-        }
-    }
+    private static final int CONNECT_TIMEOUT = 3_000;
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final String CITIES_URL = "cities.url";
+    private static final int SOCKET_TIMEOUT = 10_000;
+
     private static final long CACHE_TIME = 60 * 60 * 1000; // 1h
-    private static final ReentrantLock LOCK = new ReentrantLock();
-    private static final AtomicLong UPDATED = new AtomicLong(0);
+
+    private static final String CITIES_URL = "cities.url";
 
     private static final String LANGUAGE_RU = "ru";
+
+    private static final ReentrantLock LOCK = new ReentrantLock();
+
+    private static final AtomicLong UPDATED = new AtomicLong(0);
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
     private static final AtomicReference<List<CityMigration>> CITY_LIST_REF = new AtomicReference<>(new ArrayList<>());
 
     public static CityMigration getCityMigrationByCity(String city) {
@@ -91,7 +81,36 @@ public class CitiesResource {
         return null;
     }
 
-    public static void updateIfNeed() {
+    private final KeycloakSession session;
+
+    private final SettingsService settingsService;
+
+    private final HttpClient citiesClient;
+
+    private final HttpClient dadataClient;
+
+    public CitiesResource(KeycloakSession session) {
+        this.session = session;
+        settingsService = Lookup.lookup(SettingsService.class);
+        citiesClient = HttpClients.custom()
+                .setSSLContext(Lookup.lookup(SSLContext.class, "cities"))
+                .setSSLHostnameVerifier(Lookup.lookup(HostnameVerifier.class))
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setConnectTimeout(CONNECT_TIMEOUT)
+                        .setSocketTimeout(SOCKET_TIMEOUT)
+                        .build())
+                .build();
+        dadataClient = HttpClients.custom()
+                .setSSLContext(Lookup.lookup(SSLContext.class, "dadata"))
+                .setSSLHostnameVerifier(Lookup.lookup(HostnameVerifier.class))
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setConnectTimeout(CONNECT_TIMEOUT)
+                        .setSocketTimeout(SOCKET_TIMEOUT)
+                        .build())
+                .build();
+    }
+
+    public void updateIfNeed() {
         if (CITY_LIST_REF.get().isEmpty() || System.currentTimeMillis() > UPDATED.get() + CACHE_TIME) {
             LOCK.lock();
             try {
@@ -99,7 +118,7 @@ public class CitiesResource {
                     try {
                         HttpGet request = new HttpGet(Lookup.lookup(ApplicationProperties.class).getProperty(CITIES_URL));
                         request.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
-                        try (InputStream stream = client.execute(request).getEntity().getContent()) {
+                        try (InputStream stream = citiesClient.execute(request).getEntity().getContent()) {
                             CITY_LIST_REF.set(List.of(MAPPER.readValue(stream, CityMigration[].class)));
                         }
                         UPDATED.set(System.currentTimeMillis());
@@ -111,14 +130,6 @@ public class CitiesResource {
                 LOCK.unlock();
             }
         }
-    }
-
-    private final KeycloakSession session;
-    private final SettingsService settingsService;
-
-    public CitiesResource(KeycloakSession session) {
-        this.session = session;
-        settingsService = Lookup.lookup(SettingsService.class);
     }
 
     @GET
@@ -145,7 +156,7 @@ public class CitiesResource {
             getCities();
         }
 
-        log.info(String.format("Sending request with address %s to dadata", ipAddress));
+        log.debug(String.format("Sending request with address %s to dadata", ipAddress));
 
         HttpGet request = new HttpGet(UriBuilder.fromUri(url)
                 .queryParam("ip", ipAddress)
@@ -155,7 +166,7 @@ public class CitiesResource {
         request.setHeader(HttpHeaders.AUTHORIZATION, "TOKEN " + token);
 
         CityDadataModel cityDadataModel;
-        try(InputStream stream = client.execute(request).getEntity().getContent()) {
+        try(InputStream stream = dadataClient.execute(request).getEntity().getContent()) {
             cityDadataModel = MAPPER.readValue(stream, CityDadataModel.class);
         }
 
@@ -177,7 +188,7 @@ public class CitiesResource {
 
             title = city == null ? null : city.getName();
         }
-        log.info("getCityTitle ended");
+        log.debug("getCityTitle ended");
 
         return JsonResponse.success()
                 .addResult("title", title)

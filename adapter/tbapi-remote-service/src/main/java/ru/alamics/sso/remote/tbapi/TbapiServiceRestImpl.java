@@ -23,6 +23,7 @@ import ru.alamics.sso.registration.tbapi.model.TbapiRequest;
 import ru.alamics.sso.registration.tbapi.model.TbapiResponse;
 import ru.alamics.sso.registration.tbapi.port.TbapiRemoteService;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import java.io.InputStream;
 import java.net.URI;
@@ -45,10 +46,12 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
 
     public TbapiServiceRestImpl(
             @Named("tbapiRegistration") SSLContext tbapiRegistrationSslContext,
-            @Named("tbapiCustomer") SSLContext tbapiCustomerSslContext
+            @Named("tbapiCustomer") SSLContext tbapiCustomerSslContext,
+            HostnameVerifier hostnameVerifier
     ) {
         tbapiRegistrationClient = HttpClients.custom()
                 .setSSLContext(tbapiRegistrationSslContext)
+                .setSSLHostnameVerifier(hostnameVerifier)
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setConnectTimeout(CONNECT_TIMEOUT)
                         .setSocketTimeout(SOCKET_TIMEOUT)
@@ -56,6 +59,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
                 .build();
         tbapiCustomerClient = HttpClients.custom()
                 .setSSLContext(tbapiCustomerSslContext)
+                .setSSLHostnameVerifier(hostnameVerifier)
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setConnectTimeout(CONNECT_TIMEOUT)
                         .setSocketTimeout(SOCKET_TIMEOUT)

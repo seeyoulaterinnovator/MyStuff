@@ -12,6 +12,7 @@ import ru.alamics.sso.registration.phone.model.MessageRequest;
 import ru.alamics.sso.registration.phone.model.MessengerType;
 import ru.alamics.sso.remote.message.SendMessageServiceImpl;
 
+import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,11 +37,11 @@ class MsgSendServiceImplTest {
     private static SendMessageServiceImpl service;
 
     @BeforeAll
-    static void initWireMock() {
+    static void initWireMock() throws Exception {
         server = new WireMockServer(wireMockConfig().dynamicPort());
         server.start();
 
-        service = new SendMessageServiceImpl() {
+        service = new SendMessageServiceImpl(SSLContext.getDefault(), (s, ss) -> true) {
             @Override
             protected MsgConfig createMsgConfig(String realmId, String type) {
                 return MsgConfig.builder()

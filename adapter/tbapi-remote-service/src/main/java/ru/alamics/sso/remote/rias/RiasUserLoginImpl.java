@@ -15,6 +15,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
@@ -22,6 +23,7 @@ import ru.alamics.sso.registration.rias.model.RiasLogin;
 import ru.alamics.sso.registration.rias.port.RiasLoginService;
 import ru.alamics.sso.util.Util;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import java.io.InputStream;
 import java.net.URI;
@@ -51,6 +53,7 @@ public class RiasUserLoginImpl implements RiasLoginService {
     public RiasUserLoginImpl(@Named("riasLogin") SSLContext sslContext) {
         client = HttpClients.custom()
                 .setSSLContext(sslContext)
+                .setSSLHostnameVerifier(Lookup.lookup(HostnameVerifier.class))
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setConnectTimeout(3_000)
                         .setSocketTimeout(10_000)

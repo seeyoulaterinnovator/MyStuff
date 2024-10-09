@@ -7,6 +7,7 @@ import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,7 +49,8 @@ public class CustomIdpReviewProfileAuthenticatorFactory extends IdpReviewProfile
     public Authenticator create(KeycloakSession session) {
         return new CustomIdpReviewProfileAuthenticator(
                 Lookup.lookup(SSLContext.class, "tbapiRegistration"),
-                Lookup.lookup(SSLContext.class, "tbapiCustomer")
+                Lookup.lookup(SSLContext.class, "tbapiCustomer"),
+                Lookup.lookup(HostnameVerifier.class)
         );
     }
 

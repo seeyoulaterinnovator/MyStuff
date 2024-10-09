@@ -45,7 +45,7 @@ public abstract class Tests {
 
     static final Path BASEDIR = Paths.get("..").toAbsolutePath().normalize();
 
-    static final boolean IS_ENABLED = Boolean.TRUE.toString().equals(System.getenv(CONDITION_VARIABLE));
+    static final boolean IS_ENABLED = "true".equals(System.getenv(CONDITION_VARIABLE));
 
     static final boolean IS_LOW_MEMORY = "true".equals(System.getenv().get("ERTH_SSO_E2E_LOW_MEMORY"));
 
@@ -78,9 +78,10 @@ public abstract class Tests {
             new MockServerContainer(DockerImageName.parse("mockserver/mockserver:5.15.0"))
                     .withNetwork(NETWORK)
                     .withNetworkAliases(MOCKSERVER_HOST)
-                    .waitingFor(Wait.forLogMessage(".*started on port.*", 1))
+                    .waitingFor(Wait.forHttp("/ok"))
                     .withEnv("MOCKSERVER_INITIALIZATION_JSON_PATH", "/initialization.json")
                     .withEnv("MOCKSERVER_WATCH_INITIALIZATION_JSON", "true")
+                    .withEnv("MOCKSERVER_PREVENT_CERTIFICATE_DYNAMIC_UPDATE", "true")
                     .withCopyFileToContainer(
                             forHostPath(BASEDIR.resolve("volumes/mockserver/initialization.json")),
                             "/initialization.json"
@@ -180,23 +181,31 @@ public abstract class Tests {
         RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
 
         int mockServerPort = MOCK_SERVER.getExposedPorts().get(0);
-        String mockServerUrl = "http://" + MOCKSERVER_HOST + ":" + mockServerPort;
+        String mockServerUrl = "https://" + MOCKSERVER_HOST + ":" + mockServerPort;
+
+        var mockServerThumbprint = getThumbprint(getCertificate("localhost", MOCK_SERVER.getFirstMappedPort()));
 
         jdbi().useHandle(handle -> {
             (new HashMap<String, String>() {{
                 put("cities.url", mockServerUrl + "/cities/domains");
+                put("cities.ssl.thumbprints", mockServerThumbprint);
                 put("tbapi.registration.ip", MOCKSERVER_HOST);
                 put("tbapi.registration.host", MOCKSERVER_HOST);
                 put("tbapi.registration.port", String.valueOf(mockServerPort));
-                put("tbapi.registration.secure", "false");
+                put("tbapi.registration.secure", "true");
                 put("tbapi.registration.find.path", "/tbapi/api/v1/customerManagement/customerAccount");
+                put("tbapi.registration.ssl.thumbprints", mockServerThumbprint);
                 put("tbapi.customer.ip", MOCKSERVER_HOST);
                 put("tbapi.customer.host", MOCKSERVER_HOST);
                 put("tbapi.customer.port", String.valueOf(mockServerPort));
-                put("tbapi.customer.secure", "false");
+                put("tbapi.customer.secure", "true");
                 put("tbapi.customer.find.path", "/tbapi/api/v1/customerManagement/customerAccounts/names");
+                put("tbapi.customer.ssl.thumbprints", mockServerThumbprint);
+                put("dadata.ssl.thumbprints", mockServerThumbprint);
+                put("smsSender.ssl.thumbprints", mockServerThumbprint);
             }}).forEach((key, value) -> {
                 handle.execute("update APP_PROPERTIES set VALUE = ? where NAME = ?", value, key);
+                handle.execute("insert ignore into APP_PROPERTIES(NAME, VALUE) values (?, ?)", key, value);
             });
 
             (new HashMap<String, String>() {{

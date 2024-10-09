@@ -1,15 +1,11 @@
 package ru.alamics.sso.remote.rias;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriBuilder;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -25,6 +21,7 @@ import ru.alamics.sso.remote.rias.model.RiasCheckStatus;
 import ru.alamics.sso.remote.rias.model.RiasData;
 import ru.alamics.sso.util.Util;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import java.io.InputStream;
 import java.net.URI;
@@ -49,11 +46,13 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
 
     public RiasUserExistsCheckImpl(
             ApplicationProperties properties,
-            @Named("rias") SSLContext sslContext
+            @Named("rias") SSLContext sslContext,
+            HostnameVerifier hostnameVerifier
     ) {
         this.properties = properties;
         client = HttpClients.custom()
                 .setSSLContext(sslContext)
+                .setSSLHostnameVerifier(hostnameVerifier)
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setConnectTimeout(3_000)
                         .setSocketTimeout(10_000)
