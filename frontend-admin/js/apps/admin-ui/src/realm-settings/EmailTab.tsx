@@ -27,6 +27,7 @@ import { toUser } from "../user/routes/User";
 import { emailRegexPattern } from "../util";
 import { useCurrentUser } from "../utils/useCurrentUser";
 import useToggle from "../utils/useToggle";
+import { MessengersSelect } from "./MessengersSelect";
 
 import "./realm-settings-section.css";
 
@@ -147,6 +148,7 @@ export const RealmSettingsEmailTab = ({
               labelIcon={t("envelopeFromHelp")}
               placeholder={t("senderEnvelopePlaceholder")}
             />
+            <MessengersSelect />
           </FormAccess>
         </FormPanel>
         <FormPanel
