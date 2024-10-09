@@ -5,7 +5,9 @@ import org.keycloak.authentication.authenticators.broker.IdpReviewProfileAuthent
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 
+import javax.net.ssl.SSLContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -44,7 +46,10 @@ public class CustomIdpReviewProfileAuthenticatorFactory extends IdpReviewProfile
 
     @Override
     public Authenticator create(KeycloakSession session) {
-        return new CustomIdpReviewProfileAuthenticator();
+        return new CustomIdpReviewProfileAuthenticator(
+                Lookup.lookup(SSLContext.class, "tbapiRegistration"),
+                Lookup.lookup(SSLContext.class, "tbapiCustomer")
+        );
     }
 
     @Override

@@ -22,6 +22,7 @@ import ru.alamics.sso.registration.rias.model.RiasLogin;
 import ru.alamics.sso.registration.rias.port.RiasLoginService;
 import ru.alamics.sso.util.Util;
 
+import javax.net.ssl.SSLContext;
 import java.io.InputStream;
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -31,21 +32,6 @@ import java.time.format.DateTimeFormatter;
 @Named("RiasLoginService")
 @Slf4j
 public class RiasUserLoginImpl implements RiasLoginService {
-
-    private static final HttpClient client;
-    static {
-        try {
-            client = HttpClients.custom()
-                    .setDefaultRequestConfig(RequestConfig.custom()
-                            .setConnectTimeout(3_000)
-                            .setSocketTimeout(10_000)
-                            .build())
-                    .build();
-        } catch (Exception e) {
-            throw new ExceptionInInitializerError(e);
-        }
-    }
-
     private static final XmlMapper mapper = new XmlMapper();
 
     private static final String AUTH_SCHEME = "riasLogin.scheme";
@@ -57,10 +43,19 @@ public class RiasUserLoginImpl implements RiasLoginService {
     private static final String CLIENT_SALT = "riasLogin.client.salt";
     private static final String GRANT_TYPE = "riasLogin.grantType";
 
+    private final HttpClient client;
+
     @Inject
     ApplicationProperties properties;
 
-    public RiasUserLoginImpl() {
+    public RiasUserLoginImpl(@Named("riasLogin") SSLContext sslContext) {
+        client = HttpClients.custom()
+                .setSSLContext(sslContext)
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setConnectTimeout(3_000)
+                        .setSocketTimeout(10_000)
+                        .build())
+                .build();
     }
 
     public RiasLogin loginUser(String domain, String username, String password) throws RiasCheckException {

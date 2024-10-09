@@ -2,6 +2,7 @@ package ru.alamics.sso.property;
 
 import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;
+import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -62,6 +63,7 @@ public class ApplicationProperties {
         }
     }
 
+    @Nullable
     @Locked.Read
     public String getProperty(final String name) {
         String result = System.getenv(name);

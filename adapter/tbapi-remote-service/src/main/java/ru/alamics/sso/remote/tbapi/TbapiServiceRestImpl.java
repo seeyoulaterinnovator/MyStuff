@@ -17,11 +17,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
+import ru.alamics.sso.registration.tbapi.model.TbapiConnect;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.tbapi.model.TbapiRequest;
 import ru.alamics.sso.registration.tbapi.model.TbapiResponse;
 import ru.alamics.sso.registration.tbapi.port.TbapiRemoteService;
 
+import javax.net.ssl.SSLContext;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
@@ -31,21 +33,35 @@ import java.util.Map;
 @Named("TbapiRemoteService")
 @Slf4j
 public class TbapiServiceRestImpl implements TbapiRemoteService {
-    private static final HttpClient client;
-    static {
-        try {
-            client = HttpClients.custom()
-                    .setDefaultRequestConfig(RequestConfig.custom()
-                            .setConnectTimeout(3_000)
-                            .setSocketTimeout(10_000)
-                            .build())
-                    .build();
-        } catch (Exception e) {
-            throw new ExceptionInInitializerError(e);
-        }
-    }
+    private static final int CONNECT_TIMEOUT = 3_000;
 
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final int SOCKET_TIMEOUT = 10_000;
+
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    private final HttpClient tbapiRegistrationClient;
+
+    private final HttpClient tbapiCustomerClient;
+
+    public TbapiServiceRestImpl(
+            @Named("tbapiRegistration") SSLContext tbapiRegistrationSslContext,
+            @Named("tbapiCustomer") SSLContext tbapiCustomerSslContext
+    ) {
+        tbapiRegistrationClient = HttpClients.custom()
+                .setSSLContext(tbapiRegistrationSslContext)
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setConnectTimeout(CONNECT_TIMEOUT)
+                        .setSocketTimeout(SOCKET_TIMEOUT)
+                        .build())
+                .build();
+        tbapiCustomerClient = HttpClients.custom()
+                .setSSLContext(tbapiCustomerSslContext)
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setConnectTimeout(CONNECT_TIMEOUT)
+                        .setSocketTimeout(SOCKET_TIMEOUT)
+                        .build())
+                .build();
+    }
 
     @Override
     public TbapiResponse createCustomer(TbapiRequest request, TbapiConnectConfig connectConfig) throws TbapiRegisterException {
@@ -56,6 +72,14 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
         }
 
         return createCustomerBattle(request, connectConfig);
+    }
+
+    private HttpClient getClient(TbapiConnectConfig connectConfig) {
+        if(connectConfig.getConnect() == TbapiConnect.CUTOMER_NAMES) {
+            return tbapiCustomerClient;
+        } else {
+            return tbapiRegistrationClient;
+        }
     }
 
     private TbapiResponse createCustomerBattle(TbapiRequest request, TbapiConnectConfig connectConfig) throws TbapiRegisterException {
@@ -82,7 +106,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
                             connectConfig.getAppname(), connectConfig.getUsername(), connectConfig.getPassword())
             );
             httpRequest.setEntity(new StringEntity(mapper.writeValueAsString(request)));
-            HttpResponse httpResponse = client.execute(httpRequest);
+            HttpResponse httpResponse = getClient(connectConfig).execute(httpRequest);
             if(httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 Header contentType = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
                 if(contentType != null && MediaType.TEXT_HTML.equals(contentType.getValue())) {
@@ -133,7 +157,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
                                 connectConfig.getAppname(), connectConfig.getUsername(), connectConfig.getPassword())
                 );
                 httpRequest.setEntity(new StringEntity(mapper.writeValueAsString(request)));
-                HttpResponse httpResponse = client.execute(httpRequest);
+                HttpResponse httpResponse = getClient(connectConfig).execute(httpRequest);
                 if(httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     Header contentType = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
                     if(contentType != null && MediaType.TEXT_HTML.equals(contentType.getValue())) {

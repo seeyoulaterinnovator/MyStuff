@@ -8,6 +8,7 @@ import ru.alamics.sso.property.ApplicationProperties;
 @Slf4j
 @Data
 public class TbapiConnectConfig {
+    private TbapiConnect connect;
     private String host;
     private String ip;
     private int port;
@@ -21,6 +22,7 @@ public class TbapiConnectConfig {
     }
 
     public TbapiConnectConfig(TbapiConnect connect) {
+        this.connect = connect;
         try {
             ApplicationProperties properties = Lookup.lookup(ApplicationProperties.class);
             host = properties.getProperty(connect.getHost());
