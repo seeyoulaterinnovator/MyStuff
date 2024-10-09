@@ -9,11 +9,11 @@
             <@blocks.password firstFieldName="password-new" />
 
             <div class="flex page-buttons">
-                <div class="mb-2 sm:mb-0">
+                <div>
                     <button id="submit" class="btn btn-main w-full pass-fields pass-fields--change-pass" type="submit">${msg(resetPassword)}</button>
                 </div>
-                <div class="ml-0 text-sm sm:ml-6">
-                    <a id="cancel" href="${url.loginUrl}" class="btn w-full text-accentBlue-900 domru-cancel">${msg(doCancel)}</a>
+                <div class="ml-0 text-sm">
+                    <a id="cancel" href="${url.loginUrl}" class="btn w-full highlighted-text domru-cancel">${msg(doCancel)}</a>
                 </div>
             </div>
         </form>

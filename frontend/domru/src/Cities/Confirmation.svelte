@@ -27,7 +27,9 @@
     });
   });
 
-  onDestroy(unsubscribeCity);
+  onDestroy(() => {
+    unsubscribeCity?.()
+  });
 
   function handleConfirm() {
     const cityDomain = $allCities.find(obj => obj.name === $city)?.city || DEFAULT_CITY.city;   
@@ -49,7 +51,7 @@
 <div>
   <p class="confirm__title">Вы находитесь в г. {$city}?</p>
   <div class="flex confirm__btns">
-    <button class="btn btn-main mr-8 confirm__btn" on:click={handleConfirm}>Да</button>
-    <button class="btn disabled confirm__btn" on:click={handleReject}><p style="color: #16629A;">Выбрать другой</p></button>
+    <button class="btn btn-main confirm__btn" on:click={handleConfirm}>Да</button>
+    <button class="btn highlighted-text disabled confirm__btn" on:click={handleReject}><p>Выбрать другой</p></button>
   </div>
 </div>

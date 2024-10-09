@@ -16,17 +16,31 @@ preStopDelay:
   delaySeconds: 15
 
 extraEnvs:
+  KC_DB: "mariadb"
+  KC_DB_URL_HOST: "{{ env "DB_HOST" }}"
+  KC_DB_URL_PORT: "{{ env "DB_PORT" }}"
+  KC_DB_URL_DATABASE: "{{ env "DB_DATABASE" }}"
+  KC_HTTP_ENABLED: "true"
+  KC_HTTP_RELATIVE_PATH: "/auth"
+  KC_HOSTNAME: "{{ env "FQDN" }}"
+  KC_HOSTNAME_STRICT: "false"
+  KC_HOSTNAME_STRICT_HTTPS: "false"
+  KC_METRICS_ENABLED: "true"
+  KC_HOSTNAME_DEBUG: "true"
+  KC_CACHE: "ispn"
+  KC_CACHE_CONFIG_FILE: "cache-ispn-custom.xml"
   DB_DATABASE: "{{ env "DB_DATABASE" }}"
   KEYCLOAK_HOSTNAME: "{{ env "FQDN" }}"
   DB_HOST: "{{ env "DB_HOST" }}"
   DB_PORT: "{{ env "DB_PORT" }}"
   SITE: "{{ env "CI_ENVIRONMENT_SLUG" }}"
   TZ: "Asia/Yekaterinburg"
-  JAVA_OPTS: "-server -Xms64m -Xmx512m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Djava.net.preferIPv4Stack=true -Djboss.modules.system.pkgs=org.jboss.byteman -Djboss.site.name={{ env "CI_ENVIRONMENT_SLUG" }} -Djava.awt.headless=true"
 
 extraSensitiveEnvs:
   DB_USER: "{{ env "DB_USER" }}"
   DB_PASSWORD: "{{ env "DB_PASSWORD" }}"
+  KC_DB_USERNAME: "{{ env "DB_USER" }}"
+  KC_DB_PASSWORD: "{{ env "DB_PASSWORD" }}"
 
 service:
   type: NodePort
@@ -42,8 +56,8 @@ externalInfinispan:
 
 resources:
   limits:
-    cpu: '2'
-    memory: 1.5Gi
+    cpu: '4'
+    memory: 3Gi
   requests:
     cpu: 500m
     memory: 500Mi

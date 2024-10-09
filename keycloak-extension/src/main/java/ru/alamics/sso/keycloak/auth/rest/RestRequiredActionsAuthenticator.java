@@ -21,12 +21,17 @@ import ru.alamics.sso.keycloak.auth.AbstractAuthenticator;
 import ru.alamics.sso.registration.model.UserConstants;
 import ru.alamics.sso.util.Util;
 
+import java.util.List;
 import java.util.Map;
 
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_NOTE_DIRECT_GRANT_SESSION_CLEAR_DISABLED;
 
 @Slf4j
 public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
+    private static final List<String> DIRECT_GRANT_ALLOWED_REQUIRED_ACTIONS = List.of(
+            UserModel.RequiredAction.UPDATE_PASSWORD.name(),
+            UserModel.RequiredAction.UPDATE_PROFILE.name()
+    );
 
     private final KeycloakSession session;
     private final RealmModel realm;
@@ -102,7 +107,7 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
                     MediaType.APPLICATION_JSON_TYPE
             ).build());
         }
-        if(user.getRequiredActionsStream().anyMatch(UserModel.RequiredAction.UPDATE_PASSWORD.name()::equals)) {
+        if(user.getRequiredActionsStream().anyMatch(DIRECT_GRANT_ALLOWED_REQUIRED_ACTIONS::contains)) {
             authSession.setAuthNote(AUTH_NOTE_DIRECT_GRANT_SESSION_CLEAR_DISABLED, Boolean.TRUE.toString());
         }
     }

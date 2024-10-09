@@ -11,7 +11,7 @@
                     <button id="submit" class="btn btn-main w-full" type="submit">${enter}</button>
                     <input name="btoken" value="${redirectHeader}" type="hidden"/>
                 </div>
-                <div class="ml-0 text-sm sm:ml-6">
+                <div class="ml-0 text-sm">
                     <a id="cancel" href="https://b2b.dom.ru" class="btn w-full" target="_top">${backToMainPage}</a>
                 </div>
             </div>

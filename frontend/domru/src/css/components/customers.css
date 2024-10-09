@@ -3,7 +3,6 @@
   flex-direction: column;
   justify-content: center;
   height: 100%;
-  gap: 16px
 }
 
 .table {
@@ -33,48 +32,21 @@
 
 .titems {
   cursor: pointer;
-  .role-cell, .org-cell {
-    color: #16629A;
-  }
-  &:hover {
-    .role-cell, .org-cell {
-      color: #0090D8;
-    }
-  }
   .org-cell {
     flex-grow: 2;
-    font-size: 18px;
-    line-height: 24px;
     word-break: break-word;
   }
   .role-cell {
     flex-grow: 1;
-    font-size: 15px;
-    line-height: 19px;
-    letter-spacing: 0.03em;
     text-align: right;
-    color: #899DA8;
+    color: var(--main-900);
   }
 }
 
 @media (max-width: 1279px) {
-  .table-wrapper {
-    gap: 14px;
-  }
   .theader > div {
     font-size: 12px;
     line-height: 15px;
-  }
-  .titems {
-    .org-cell {
-      font-size: 17px;
-      line-height: 23px;
-    }
-    .role-cell {
-      font-size: 14px;
-      line-height: 18px;
-      letter-spacing: 0.03em;
-    }
   }
 }
 
@@ -96,17 +68,6 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
-  }
-  .titems {
-    .org-cell {
-      font-size: 16px;
-      line-height: 21px;
-    }
-    .role-cell {
-      font-size: 13px;
-      line-height: 17px;
-      letter-spacing: 0.03em;
-    }
   }
 }
 

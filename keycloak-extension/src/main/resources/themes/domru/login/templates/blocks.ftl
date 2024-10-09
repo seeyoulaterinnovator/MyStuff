@@ -3,36 +3,41 @@
 
 <#macro password firstFieldName="password">
     <div id="password-block">
-        <p class="text-black-80">Пароль должен состоять из комбинации букв, цифр и быть не менее 8 и не более 16
-            символов</p>
-        <div class="flex text-black-50 py-6">
-            <div id="letters-password" class="flex flex-1 flex-col mr-6">
-                <span class="text-symbols">A-z</span>
-                <span class="text-sm sm:block">Латинские символы с верхним и нижним регистром</span>
-            </div>
-            <div id="numbers-password" class="flex flex-1 flex-col mr-4">
-                <span class="text-symbols">0–9</span>
-                <span class="text-sm sm:block">Цифра или несколько цифр</span>
-            </div>
+        <div class="password-instruction"> 
+          <p class="text-black">Пароль должен состоять из комбинации букв, цифр и быть не менее 8 и не более 16
+              символов</p>
+          <div class="flex custom-mt-sm">
+              <div id="letters-password" class="flex flex-1 flex-col mr-6">
+                  <span class="text-symbols">A-z</span>
+                  <span class="sm:block">Латинские символы с верхним и нижним регистром</span>
+              </div>
+              <div id="numbers-password" class="flex flex-1 flex-col mr-4">
+                  <span class="text-symbols">0–9</span>
+                  <span class="sm:block">Цифра или несколько цифр</span>
+              </div>
+          </div>
         </div>
-        <p class="text-black-80 mb-8 mt-8">Не забудьте записать пароль <span id="generated-password"
-                                                                             class="text-base"></span></p>
-        <div class="flex">
-            <div class="pass-fields">
-                <@components.field class="mb-3 sm:mb-4" fieldName="${firstFieldName}" label="${msg('password')}" placeholder="${msg(passwordPlaceholder)}" type="password" required=true value="" />
-            </div>
-            <div class="mx-auto generated-password btn-group flex">
-                <button id="refresh-password-button" class="w-12 h-12 focus:outline-none flex-child allowDoubleClick"
-                        type="button">
-                    <@svg.reloadButton color="accentBlue-1100"></@svg.reloadButton>
-                </button>
-                <button id="generate-password-button" type="button"
-                        class="generate-btn focus:outline-none pass--hidden-small flex-child allowDoubleClick">
-                    <span class="reference reference-generate-password border-accentBlue text-accentBlue-1100">ГЕНЕРИРОВАТЬ</span>
-                </button>
-            </div>
+        
+        <div class="password-wrapper custom-mt-xl">
+          <p class="text-main-800">Не забудьте записать пароль <span id="generated-password"                                                                     class="text-base"></span></p>
+          <div class="flex custom-mt-lg">
+              <div class="pass-fields">
+                  <@components.field fieldName="${firstFieldName}" label="${msg('password')}" placeholder="${msg(passwordPlaceholder)}" type="password" required=true value="" />
+              </div>
+              <div class="ml-auto generated-password btn-group flex custom-ml-md">
+                  <button id="refresh-password-button" class="focus:outline-none flex-child allowDoubleClick highlighted-nested-svg highlighted-nested-hover-svg"
+                          type="button">
+                      <@svg.reloadIcon/>
+                  </button>
+                  <button id="generate-password-button" type="button"
+                          class="generate-btn focus:outline-none pass--hidden-small flex-child allowDoubleClick ml-2">
+                      <span class="reference reference-generate-password uppercase highlighted-text">Генерировать</span>
+                  </button>
+              </div>
 
+          </div>
         </div>
+      
     </div>
 </#macro>
 
@@ -46,7 +51,7 @@
         </h1>
 
         <#if secondaryTitle != "">
-            <h2 class="page-title text-secondary-title">
+            <h2 class="page-title text-secondary-title highlighted-hover-text">
                 <a href="${secondaryHref}">
                     <b class="titleAllPage">
                         ${secondaryTitle}

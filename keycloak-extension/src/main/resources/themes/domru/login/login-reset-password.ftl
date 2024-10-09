@@ -22,13 +22,13 @@
             </div>
 
             <div class="flex page-buttons">
-                <div class="mb-2 sm:mb-0">
+                <div>
                     <#--  <button id="submit" class="btn btn-main w-full" type="submit">${msg("doSubmit")}</button>  -->
                     <button id="submit" class="btn btn-main w-full" type="submit">${msg(restoreButtonLabel!next)}</button>
                 </div>
-                <div class="ml-0 text-sm sm:ml-6">
+                <div class="ml-0 text-sm">
                     <#--  <button id="cancel" class="btn w-full" type="button">${msg("doCancel")}</button>  -->
-                    <a id="cancel" href="${url.loginUrl}" class="btn btn-cancel text-accentBlue-900 w-full domru-cancel">${msg(doCancel)}</a>
+                    <a id="cancel" href="${url.loginUrl}" class="btn btn-cancel highlighted-text w-full domru-cancel highlighted-text">${msg(doCancel)}</a>
                 </div>
             </div>
         </form>

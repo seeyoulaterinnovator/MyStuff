@@ -57,8 +57,7 @@ h3 {
     font-size: 24px;
   }
 }
-
-h4, .phone-number {
+h4 {
   font-size: 16px;
   margin-left: 7px;
 
@@ -71,36 +70,161 @@ h4, .phone-number {
   }
 }
 
-.text-symbols {
-  font-size: 16px;
-  line-height: 24px;
+.highlighted-text {
+  @apply .text-accentBlue-1200;
+}
 
-  @media (min-width: 768px) {
-    font-size: 19px;
-    line-height: 26px;
-  }
+.trigger-hover-text {
+}
 
-  @media (min-width: 1280px) {
-    font-size: 20px;
-    line-height: 28px;
+.highlighted-hover-text {
+  &:hover {
+    @apply .text-accentBlue-1200-hover;
+
+    .trigger-hover-text {
+      @apply .text-accentBlue-1200-hover;
+    }
   }
 }
 
-.btn {
-  font-size: 0.95rem;
+.underline-hovering-text {
+  &:hover {
+    @apply .underline;
+  }
 }
 
+/* TODO: Попытаться поместить кастомные классы, связанные с текстом 
+* в @layer или plugins tailwind 
+*/
+.text-custom-main {
+  @apply .text-custom/base;
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    @apply .text-custom/md;
+  }
+
+  @media only screen and (max-width: 767px) {
+    @apply .text-custom/sm;
+  }
+}
+
+.text-custom-sm {
+  @apply .text-custom/sm;
+  @apply tracking-wider;
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    @apply .text-custom/2sm;
+  }
+
+  @media only screen and (max-width: 767px) {
+    @apply .text-custom/3sm;
+  }
+}
+
+.text-custom-4sm {
+  @apply .text-custom/4sm;
+  @apply tracking-wider;
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    @apply .text-custom/5sm;
+  }
+
+  @media only screen and (max-width: 767px) {
+    @apply .text-custom/6sm;
+  }
+}
+
+.text-custom-2sm {
+  @apply .text-custom/2sm;
+  @apply tracking-wider/sm;
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    @apply .text-custom/3sm;
+  }
+
+  @media only screen and (max-width: 767px) {
+    @apply .text-custom/4sm;
+  }
+}
+
+.text-custom-3lg {
+  @apply .text-custom/3lg;
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    @apply .text-custom/2lg;
+  }
+
+  @media only screen and (max-width: 767px) {
+    @apply .text-custom/lg;
+  }
+}
+
+.text-custom-6lg {
+  @apply .text-custom/6lg;
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    @apply .text-custom/5lg;
+  }
+
+  @media only screen and (max-width: 767px) {
+    @apply .text-custom/4lg;
+  }
+}
+
+body.custom #content p,
+.confirm__title,
+.field__input,
+.field__input::placeholder,
+.code,
+.forgot,
+.phone-number,
+.verification__sub,
+.resend,
+.verification__text,
+.enter-login-link,
+#numbers-password > .text-symbols,
+#letters-password > .text-symbols,
+.titems .org-cell,
+.city {
+  @apply .text-custom-main;
+}
+
+.btn,
+.btn:not(.message__btn) .btn-main {
+  @apply .text-custom-sm;
+}
+
+.timer,
+.titems .role-cell {
+  @apply .text-custom-2sm;
+}
+
+.field__error-message,
+.field__label,
+.personal-data-process-accept,
 figcaption,
 caption,
 summary,
-.caption {
-  font-size: 12px;
+.caption,
+.copyright,
+#show-cities > span,
+#letters-password,
+#numbers-password,
+.theader .org-cell,
+.theader .role-cell {
+  @apply .text-custom-4sm;
+}
 
-  @media (min-width: 768px) {
-    font-size: 14px;
-  }
+.sms-input,
+.city-group-letter {
+  @apply .text-custom-3lg;
+  @apply font-bold;
+}
 
-  @media (min-width: 1280px) {
-    font-size: 15px;
-  }
+.page-title-wrapper .page-title,
+.page-title,
+.titleAllPage,
+.choose-city-text {
+  @apply .text-custom-6lg;
+  @apply font-black;
 }

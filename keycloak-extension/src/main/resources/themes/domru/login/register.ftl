@@ -58,10 +58,10 @@
                     <button id="submit" class="btn btn-main reg-fields" type="submit">${msg(doRegister)}</button>
                 </div>
                 <span class="personal-data-process-accept flex flex-col justify-center items-left flex-basis-auto text-xs">
-                    <span class="opacity-50">
+                    <span class="text-main-1000">
                         Нажимая кнопку, вы соглашаетесь <br>
                     </span>
-                    <a class="reference reference_hoverable allowDoubleClick item_hover" style="font-weight: 350;"
+                    <a class="reference reference_hoverable allowDoubleClick item_hover highlighted-text underline-hovering-text" style="font-weight: 350;"
                        href="https://moscow.b2b.dom.ru/agreement" target="_blink">
                         с правилами обработки персональных данных</a>
                 </span>

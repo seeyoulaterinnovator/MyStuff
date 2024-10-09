@@ -1,24 +1,26 @@
 version: '3.8'
 
 networks:
-  traefik:
+  traefik3:
     external: true
 
 services:
   smtp4dev:
     image: rnwood/smtp4dev:v3
     networks:
-      - traefik
+      - traefik3
     environment:
       ServerOptions__Hostname: smtp4dev-er-sso.dev.it-resource.team
     deploy:
       replicas: 1
       labels:
-        - "traefik.frontend.rule=Host:smtp4dev-er-sso.dev.it-resource.team;PathPrefix:/"
-        - "traefik.frontend.passHostHeader=true"
-        - "traefik.port=80"
-        - "traefik.docker.network=traefik"
-        - "traefik.frontend.auth.basic.users=tester:${DOLLAR}${DOLLAR}2y${DOLLAR}${DOLLAR}05${DOLLAR}${DOLLAR}UtcScUwbnflomoB1hhSJ0OpFvOLR6A8QH5ImGo7.QYoBws3qwUo5K" # tester / z3kco5xpZQzenqUEz2Ob
+        - "traefik.enable=true"
+        - "traefik.http.middlewares.smtp4dev.basicauth.users=tester:${DOLLAR}${DOLLAR}2y${DOLLAR}${DOLLAR}05${DOLLAR}${DOLLAR}UtcScUwbnflomoB1hhSJ0OpFvOLR6A8QH5ImGo7.QYoBws3qwUo5K" # tester / z3kco5xpZQzenqUEz2Ob
+        - "traefik.http.routers.smtp4dev.rule=Host(`smtp4dev-er-sso.dev.it-resource.team`) && PathPrefix(`/`)"
+        - "traefik.http.routers.smtp4dev.middlewares=smtp4dev"
+        - "traefik.http.routers.smtp4dev.service=smtp4dev"
+        - "traefik.http.services.smtp4dev.loadbalancer.server.port=80"
+        - "traefik.docker.network=traefik3"
       resources:
         limits:
           memory: 128m
@@ -26,7 +28,7 @@ services:
   keycloak:
     image: $REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_PIPELINE_ID
     networks:
-      - traefik
+      - traefik3
     extra_hosts:
       - "mariadb:192.168.57.79"
     command: [ "start", "--proxy=edge" ]
@@ -64,14 +66,14 @@ services:
     deploy:
       replicas: 1
       labels:
-        - "traefik.frontend.rule=Host:er-sso.dev.it-resource.team;PathPrefix:/"
-#        - "traefik.second.frontend.rule=Host:er-sso-mgmt.dev.it-resource.team;PathPrefix:/"
-        - "traefik.http.middlewares.keycloak.forwardauth.trustForwardHeader=true"
-        - "traefik.frontend.passHostHeader=true"
-        - "traefik.port=8080"
-        # - "traefik.first.port=8080"
-        # - "traefik.second.port=9000"
-        - "traefik.docker.network=traefik"
+        - "traefik.enable=true"
+        - "traefik.http.routers.http8k.rule=Host(`er-sso.dev.it-resource.team`) && PathPrefix(`/`)"
+        - "traefik.http.routers.http8k.service=http8k-service"
+        - "traefik.http.services.http8k-service.loadbalancer.server.port=8080"
+        - "traefik.http.routers.http9k.rule=Host(`er-sso-mgmt.dev.it-resource.team`) && PathPrefix(`/`)"
+        - "traefik.http.routers.http9k.service=http9k-service"
+        - "traefik.http.services.http9k-service.loadbalancer.server.port=9000"
+        - "traefik.docker.network=traefik3"
       resources:
         limits:
           memory: 1536m

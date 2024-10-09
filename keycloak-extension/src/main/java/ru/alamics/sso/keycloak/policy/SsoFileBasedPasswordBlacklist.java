@@ -43,7 +43,7 @@ public class SsoFileBasedPasswordBlacklist implements BlacklistPasswordPolicyPro
             try(Stream<String> stream = Files.lines(path)) {
                 blacklist = stream.collect(Collectors.toSet());
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                log.error(e.getMessage(), e);
             }
         }
     }

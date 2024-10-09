@@ -40,8 +40,7 @@
   }
 
   &__close-dialog-button {
-    width: 28px;
-    height: 28px;
+    padding: 5px;
 
     display: flex;
     justify-content: center;
@@ -85,9 +84,6 @@
   }
 
   .btn:not(&__btn) {
-    font-size: 16px;
-    line-height: 21px;
-    letter-spacing: 0.05em;
     padding-left: 16px;
     padding-right: 16px;
   }

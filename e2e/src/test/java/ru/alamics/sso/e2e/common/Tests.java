@@ -241,12 +241,12 @@ public abstract class Tests {
         return Jdbi.create(() -> MARIA_DB.createConnection(""));
     }
 
-    public static void useHandle(Consumer<MockServerClient> callback) {
+    public static void useMockServer(Consumer<MockServerClient> callback) {
         @Cleanup var client = new MockServerClient("localhost", MOCK_SERVER.getFirstMappedPort());
         callback.accept(client);
     }
 
-    public static <T> T withHandle(Function<MockServerClient, T> callback) {
+    public static <T> T withMockServer(Function<MockServerClient, T> callback) {
         @Cleanup var client = new MockServerClient("localhost", MOCK_SERVER.getFirstMappedPort());
         return callback.apply(client);
     }

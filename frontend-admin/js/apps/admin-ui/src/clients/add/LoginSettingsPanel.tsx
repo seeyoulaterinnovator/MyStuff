@@ -6,10 +6,11 @@ import { FormAccess } from "../../components/form/FormAccess";
 import { useServerInfo } from "../../context/server-info/ServerInfoProvider";
 import { convertAttributeNameToForm } from "../../util";
 import { FormFields } from "../ClientDetails";
+import { useEffect } from "react";
 
 export const LoginSettingsPanel = ({ access }: { access?: boolean }) => {
   const { t } = useTranslation();
-  const { watch } = useFormContext<FormFields>();
+  const { watch, setValue } = useFormContext<FormFields>();
 
   const loginThemes = useServerInfo().themes!["login"];
   const consentRequired = watch("consentRequired");
@@ -18,6 +19,41 @@ export const LoginSettingsPanel = ({ access }: { access?: boolean }) => {
       "attributes.display.on.consent.screen",
     ),
   );
+
+  const loginViaEmailOrUsernameAndPassword: string = watch(
+    convertAttributeNameToForm<FormFields>(
+      "attributes.loginViaEmailOrUsernameAndPassword",
+    ),
+  );
+
+  const loginViaSms: string = watch(
+    convertAttributeNameToForm<FormFields>("attributes.loginViaSms"),
+  );
+
+  const loginViaPhoneCall: string = watch(
+    convertAttributeNameToForm<FormFields>("attributes.loginViaPhoneCall"),
+  );
+
+  useEffect(() => {
+    if (loginViaEmailOrUsernameAndPassword === "true") {
+      setValue("attributes.loginViaSms", "false");
+      setValue("attributes.loginViaPhoneCall", "false");
+    }
+  }, [loginViaEmailOrUsernameAndPassword]);
+
+  useEffect(() => {
+    if (loginViaSms === "true") {
+      setValue("attributes.loginViaEmailOrUsernameAndPassword", "false");
+      setValue("attributes.loginViaPhoneCall", "false");
+    }
+  }, [loginViaSms]);
+
+  useEffect(() => {
+    if (loginViaPhoneCall === "true") {
+      setValue("attributes.loginViaEmailOrUsernameAndPassword", "false");
+      setValue("attributes.loginViaSms", "false");
+    }
+  }, [loginViaPhoneCall]);
 
   return (
     <FormAccess isHorizontal fineGrainedAccess={access} role="manage-clients">
@@ -54,6 +90,35 @@ export const LoginSettingsPanel = ({ access }: { access?: boolean }) => {
         label={t("consentScreenText")}
         labelIcon={t("consentScreenTextHelp")}
         isDisabled={!(consentRequired && displayOnConsentScreen === "true")}
+      />
+      <DefaultSwitchControl
+        name={convertAttributeNameToForm<FormFields>(
+          "attributes.activateNewAuth",
+        )}
+        label={t("attributes.activateNewAuth")}
+        stringify
+      />
+      <DefaultSwitchControl
+        name={convertAttributeNameToForm<FormFields>("attributes.loginViaSms")}
+        label={t("attributes.loginViaSms")}
+        labelIcon={t("attributes.loginViaSmsHelp")}
+        stringify
+      />
+      <DefaultSwitchControl
+        name={convertAttributeNameToForm<FormFields>(
+          "attributes.loginViaEmailOrUsernameAndPassword",
+        )}
+        label={t("attributes.loginViaEmailOrUsernameAndPassword")}
+        labelIcon={t("attributes.loginViaEmailOrUsernameAndPasswordHelp")}
+        stringify
+      />
+      <DefaultSwitchControl
+        name={convertAttributeNameToForm<FormFields>(
+          "attributes.loginViaPhoneCall",
+        )}
+        label={t("attributes.loginViaPhoneCall")}
+        labelIcon={t("attributes.loginViaPhoneCallHelp")}
+        stringify
       />
     </FormAccess>
   );
