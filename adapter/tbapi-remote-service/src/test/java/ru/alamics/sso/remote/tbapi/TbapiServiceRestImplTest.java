@@ -5,9 +5,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
+import ru.alamics.sso.registration.tbapi.model.TbapiConnect;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.tbapi.model.TbapiRequest;
 import ru.alamics.sso.registration.tbapi.model.TbapiResponse;
+
+import javax.net.ssl.SSLContext;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -21,11 +24,11 @@ class TbapiServiceRestImplTest {
     private static WireMockServer server;
 
     @BeforeAll
-    static void initWireMock() {
+    static void initWireMock() throws Exception {
         server = new WireMockServer(wireMockConfig().dynamicPort());
         server.start();
 
-        service = new TbapiServiceRestImpl();
+        service = new TbapiServiceRestImpl(SSLContext.getDefault(), SSLContext.getDefault());
     }
 
     @AfterEach
@@ -73,7 +76,7 @@ class TbapiServiceRestImplTest {
         );
 
         TbapiConnectConfig conectConfig = new TbapiConnectConfig();
-
+        conectConfig.setConnect(TbapiConnect.REGISTRATION);
         conectConfig.setHost("localhost");
         conectConfig.setIp("localhost");
         conectConfig.setPort(server.port());

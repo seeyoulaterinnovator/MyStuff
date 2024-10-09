@@ -25,6 +25,7 @@ import ru.alamics.sso.remote.rias.model.RiasCheckStatus;
 import ru.alamics.sso.remote.rias.model.RiasData;
 import ru.alamics.sso.util.Util;
 
+import javax.net.ssl.SSLContext;
 import java.io.InputStream;
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -32,41 +33,32 @@ import java.time.format.DateTimeFormatter;
 
 @ApplicationScoped
 @Named("RiasApiService")
-@NoArgsConstructor
 @Slf4j
 public class RiasUserExistsCheckImpl implements RiasApiService {
     private static final String RIAS_API_URI = "riasApi.uri";
     private static final String CLIENT_NAME = "riasApi.client.name";
     private static final String CLIENT_SALT = "riasApi.client.salt";
 
-    private static final HttpClient client;
-    static {
-        try {
-            client = HttpClients.custom()
-                    .setDefaultRequestConfig(RequestConfig.custom()
-                            .setConnectTimeout(3_000)
-                            .setSocketTimeout(10_000)
-                            .build())
-                    .build();
-        } catch (Exception e) {
-            throw new ExceptionInInitializerError(e);
-        }
-    }
+    private final XmlMapper mapper = new XmlMapper();
 
-    private static final XmlMapper mapper = new XmlMapper();
+    private final ApplicationProperties properties;
 
-    @Inject
-    ApplicationProperties properties;
+    private final HttpClient client;
 
-    private URI uri;
+    private final URI uri;
 
-    public RiasUserExistsCheckImpl(ApplicationProperties properties, URI uri) {
+    public RiasUserExistsCheckImpl(
+            ApplicationProperties properties,
+            @Named("rias") SSLContext sslContext
+    ) {
         this.properties = properties;
-        this.uri = uri;
-    }
-
-    @PostConstruct
-    private void init() {
+        client = HttpClients.custom()
+                .setSSLContext(sslContext)
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setConnectTimeout(3_000)
+                        .setSocketTimeout(10_000)
+                        .build())
+                .build();
         uri = URI.create(properties.getProperty(RIAS_API_URI));
     }
 

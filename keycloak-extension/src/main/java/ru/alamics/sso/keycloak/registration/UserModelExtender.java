@@ -15,6 +15,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.provider.ProviderConfigProperty;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.keycloak.registration.rias.RiasCheckProvider;
 import ru.alamics.sso.registration.UserExtension;
@@ -24,6 +25,7 @@ import ru.alamics.sso.registration.tbapi.model.TbapiConnect;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,13 +49,12 @@ public class UserModelExtender extends AbstractFormActionFactory implements Form
             AuthenticationExecutionModel.Requirement.REQUIRED,
             AuthenticationExecutionModel.Requirement.DISABLED
     };
-    private final TbapiService tbapiService;
+    private TbapiService tbapiService;
     private final UserExtension userExtension;
     // jackson serialize
     ObjectMapper jacksonMapper = new ObjectMapper();
 
     public UserModelExtender() {
-        tbapiService = new TbapiService(new TbapiServiceRestImpl());
         userExtension = new UserExtension();
     }
 
@@ -177,6 +178,10 @@ public class UserModelExtender extends AbstractFormActionFactory implements Form
     @Override
     public FormAction create(KeycloakSession session) {
         log.info("Creating UserModelExtender");
+        tbapiService = new TbapiService(new TbapiServiceRestImpl(
+                Lookup.lookup(SSLContext.class, "tbapiRegistration"),
+                Lookup.lookup(SSLContext.class, "tbapiCustomer")
+        ));
         return this;
     }
 

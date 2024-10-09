@@ -28,10 +28,10 @@ import org.keycloak.models.utils.FormMessage;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.messages.Messages;
+import org.keycloak.services.resources.AttributeFormDataProcessor;
 import org.keycloak.services.validation.Validation;
 import org.keycloak.util.JsonSerialization;
 import ru.alamics.sso.keycloak.lookup.Lookup;
-import org.keycloak.services.resources.AttributeFormDataProcessor;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.UserExtension;
 import ru.alamics.sso.registration.model.FormConstants;
@@ -43,6 +43,7 @@ import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 import ru.alamics.sso.util.Util;
 
+import javax.net.ssl.SSLContext;
 import java.io.InputStream;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -67,8 +68,14 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
 
     private ApplicationProperties properties;
 
-    public CustomIdpReviewProfileAuthenticator() {
-        tbapiService = new TbapiService(new TbapiServiceRestImpl());
+    public CustomIdpReviewProfileAuthenticator(
+            SSLContext tbapiRegistrationSslContext,
+            SSLContext tbapiCustomerSslContext
+    ) {
+        tbapiService = new TbapiService(new TbapiServiceRestImpl(
+                tbapiRegistrationSslContext,
+                tbapiCustomerSslContext
+        ));
         userExtension = new UserExtension();
         properties = Lookup.lookup(ApplicationProperties.class);
     }
