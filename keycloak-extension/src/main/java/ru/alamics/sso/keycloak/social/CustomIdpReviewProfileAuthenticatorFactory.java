@@ -50,7 +50,8 @@ public class CustomIdpReviewProfileAuthenticatorFactory extends IdpReviewProfile
         return new CustomIdpReviewProfileAuthenticator(
                 Lookup.lookup(SSLContext.class, "tbapiRegistration"),
                 Lookup.lookup(SSLContext.class, "tbapiCustomer"),
-                Lookup.lookup(HostnameVerifier.class)
+                Lookup.lookup(HostnameVerifier.class, "tbapiRegistration"),
+                Lookup.lookup(HostnameVerifier.class, "tbapiCustomer")
         );
     }
 

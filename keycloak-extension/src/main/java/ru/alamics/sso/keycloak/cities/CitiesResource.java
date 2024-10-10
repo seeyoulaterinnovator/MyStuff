@@ -93,16 +93,16 @@ public class CitiesResource {
         this.session = session;
         settingsService = Lookup.lookup(SettingsService.class);
         citiesClient = HttpClients.custom()
-                .setSSLContext(Lookup.lookup(SSLContext.class, "cities"))
-                .setSSLHostnameVerifier(Lookup.lookup(HostnameVerifier.class))
+                .setSSLContext(Lookup.lookup(SSLContext.class, "citiesSSLContext"))
+                .setSSLHostnameVerifier(Lookup.lookup(HostnameVerifier.class, "citiesHostnameVerifier"))
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setConnectTimeout(CONNECT_TIMEOUT)
                         .setSocketTimeout(SOCKET_TIMEOUT)
                         .build())
                 .build();
         dadataClient = HttpClients.custom()
-                .setSSLContext(Lookup.lookup(SSLContext.class, "dadata"))
-                .setSSLHostnameVerifier(Lookup.lookup(HostnameVerifier.class))
+                .setSSLContext(Lookup.lookup(SSLContext.class, "dadataSSLContext"))
+                .setSSLHostnameVerifier(Lookup.lookup(HostnameVerifier.class, "dadataHostnameVerifier"))
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setConnectTimeout(CONNECT_TIMEOUT)
                         .setSocketTimeout(SOCKET_TIMEOUT)

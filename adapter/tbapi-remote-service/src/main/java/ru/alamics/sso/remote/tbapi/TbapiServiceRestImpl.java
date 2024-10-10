@@ -45,13 +45,14 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
     private final HttpClient tbapiCustomerClient;
 
     public TbapiServiceRestImpl(
-            @Named("tbapiRegistration") SSLContext tbapiRegistrationSslContext,
-            @Named("tbapiCustomer") SSLContext tbapiCustomerSslContext,
-            HostnameVerifier hostnameVerifier
+            @Named("tbapiRegistrationSSLContext") SSLContext tbapiRegistrationSslContext,
+            @Named("tbapiCustomerSSLContext") SSLContext tbapiCustomerSslContext,
+            @Named("tbapiRegistrationHostnameVerifier") HostnameVerifier tbapiRegistrationHostnameVerifier,
+            @Named("tbapiCustomerHostnameVerifier") HostnameVerifier tbapiCustomerHostnameVerifier
     ) {
         tbapiRegistrationClient = HttpClients.custom()
                 .setSSLContext(tbapiRegistrationSslContext)
-                .setSSLHostnameVerifier(hostnameVerifier)
+                .setSSLHostnameVerifier(tbapiRegistrationHostnameVerifier)
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setConnectTimeout(CONNECT_TIMEOUT)
                         .setSocketTimeout(SOCKET_TIMEOUT)
@@ -59,7 +60,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
                 .build();
         tbapiCustomerClient = HttpClients.custom()
                 .setSSLContext(tbapiCustomerSslContext)
-                .setSSLHostnameVerifier(hostnameVerifier)
+                .setSSLHostnameVerifier(tbapiCustomerHostnameVerifier)
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setConnectTimeout(CONNECT_TIMEOUT)
                         .setSocketTimeout(SOCKET_TIMEOUT)

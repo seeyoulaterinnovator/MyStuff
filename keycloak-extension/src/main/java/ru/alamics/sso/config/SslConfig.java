@@ -29,12 +29,107 @@ public class SslConfig {
     ApplicationProperties applicationProperties;
 
     @Produces
-    public HostnameVerifier getHostnameVerifier() {
+    @Named("riasApiSSLContext")
+    public SSLContext getRiasApiContext() throws Exception {
+        return getContext(SslContextKind.RIAS);
+    }
+
+    @Produces
+    @Named("riasLoginSSLContext")
+    public SSLContext getRiasLoginContext() throws Exception {
+        return getContext(SslContextKind.RIAS_LOGIN);
+    }
+
+    @Produces
+    @Named("tbapiRegistrationSSLContext")
+    public SSLContext getTbapiRegistrationContext() throws Exception {
+        return getContext(SslContextKind.TBAPI_REGISTRATION);
+    }
+
+    @Produces
+    @Named("tbapiCustomerSSLContext")
+    public SSLContext getTbapiCustomerContext() throws Exception {
+        return getContext(SslContextKind.TBAPI_CUSTOMER);
+    }
+
+    @Produces
+    @Named("citiesSSLContext")
+    public SSLContext getCitiesContext() throws Exception {
+        return getContext(SslContextKind.CITIES);
+    }
+
+    @Produces
+    @Named("dadataSSLContext")
+    public SSLContext getDaDataContext() throws Exception {
+        return getContext(SslContextKind.DA_DATA);
+    }
+
+    @Produces
+    @Named("smsSenderSSLContext")
+    public SSLContext getSmsSenderContext() throws Exception {
+        return getContext(SslContextKind.SMS_SENDER);
+    }
+
+    @Produces
+    @Named("riasApiHostnameVerifier")
+    public HostnameVerifier getRiasApiHostnameVerifier() {
+        return getHostnameVerifier(SslContextKind.RIAS);
+    }
+
+    @Produces
+    @Named("riasLoginHostnameVerifier")
+    public HostnameVerifier getRiasLoginHostnameVerifier() {
+        return getHostnameVerifier(SslContextKind.RIAS_LOGIN);
+    }
+
+    @Produces
+    @Named("tbapiRegistrationHostnameVerifier")
+    public HostnameVerifier getTbapiRegistrationHostnameVerifier() {
+        return getHostnameVerifier(SslContextKind.TBAPI_REGISTRATION);
+    }
+
+    @Produces
+    @Named("tbapiCustomerHostnameVerifier")
+    public HostnameVerifier getTbapiCustomerHostnameVerifier() {
+        return getHostnameVerifier(SslContextKind.TBAPI_CUSTOMER);
+    }
+
+    @Produces
+    @Named("citiesHostnameVerifier")
+    public HostnameVerifier getCitiesHostnameVerifier() {
+        return getHostnameVerifier(SslContextKind.CITIES);
+    }
+
+    @Produces
+    @Named("dadataHostnameVerifier")
+    public HostnameVerifier getDaDataHostnameVerifier() {
+        return getHostnameVerifier(SslContextKind.DA_DATA);
+    }
+
+    @Produces
+    @Named("smsSenderHostnameVerifier")
+    public HostnameVerifier getSmsSenderHostnameVerifier() {
+        return getHostnameVerifier(SslContextKind.SMS_SENDER);
+    }
+
+    SSLContext getContext(SslContextKind kind) throws Exception {
+        var context = SSLContext.getInstance("SSL");
+        context.init(null, new TrustManager[] { getTrustManager(kind) }, new SecureRandom());
+        return context;
+    }
+
+    HostnameVerifier getHostnameVerifier(SslContextKind kind) {
         var hostnameVerifier = HttpsURLConnection.getDefaultHostnameVerifier();
         return (hostname, session) -> {
+            if(Boolean.TRUE.toString().equals(applicationProperties.getProperty(kind.getRelaxedProperty()))) {
+                return true;
+            }
             try {
-                String thumbprint = getThumbprint(session.getPeerCertificates()[0]);
-                if(Arrays.stream(SslContextKind.values()).anyMatch(kind -> getThumbprints(kind).contains(thumbprint))) {
+                var certificates = session.getPeerCertificates();
+                if(checkTrusted(
+                        Arrays.copyOf(certificates, certificates.length, X509Certificate[].class),
+                        getThumbprints(kind)
+                )) {
                     return true;
                 }
             } catch (Exception e) {
@@ -42,54 +137,6 @@ public class SslConfig {
             }
             return hostnameVerifier.verify(hostname, session);
         };
-    }
-
-    @Produces
-    @Named("rias")
-    public SSLContext getRiasContext() throws Exception {
-        return getContext(SslContextKind.RIAS);
-    }
-
-    @Produces
-    @Named("riasLogin")
-    public SSLContext getRiasLoginContext() throws Exception {
-        return getContext(SslContextKind.RIAS_LOGIN);
-    }
-
-    @Produces
-    @Named("tbapiRegistration")
-    public SSLContext getTbapiRegistrationContext() throws Exception {
-        return getContext(SslContextKind.TBAPI_REGISTRATION);
-    }
-
-    @Produces
-    @Named("tbapiCustomer")
-    public SSLContext getTbapiCustomerContext() throws Exception {
-        return getContext(SslContextKind.TBAPI_CUSTOMER);
-    }
-
-    @Produces
-    @Named("cities")
-    public SSLContext getCitiesContext() throws Exception {
-        return getContext(SslContextKind.CITIES);
-    }
-
-    @Produces
-    @Named("dadata")
-    public SSLContext getDaDataContext() throws Exception {
-        return getContext(SslContextKind.DA_DATA);
-    }
-
-    @Produces
-    @Named("smsSender")
-    public SSLContext getSmsSenderContext() throws Exception {
-        return getContext(SslContextKind.SMS_SENDER);
-    }
-
-    SSLContext getContext(SslContextKind kind) throws Exception {
-        var context = SSLContext.getInstance("SSL");
-        context.init(null, new TrustManager[] { getTrustManager(kind) }, new SecureRandom());
-        return context;
     }
 
     TrustManager getTrustManager(SslContextKind kind) throws Exception {

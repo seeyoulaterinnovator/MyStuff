@@ -1,7 +1,6 @@
 package ru.alamics.sso.remote.rias;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import jakarta.annotation.Resource;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -15,7 +14,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
-import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
@@ -50,10 +48,13 @@ public class RiasUserLoginImpl implements RiasLoginService {
     @Inject
     ApplicationProperties properties;
 
-    public RiasUserLoginImpl(@Named("riasLogin") SSLContext sslContext) {
+    public RiasUserLoginImpl(
+            @Named("riasLoginSSLContext") SSLContext sslContext,
+            @Named("riasLoginHostnameVerifier") HostnameVerifier hostnameVerifier
+    ) {
         client = HttpClients.custom()
                 .setSSLContext(sslContext)
-                .setSSLHostnameVerifier(Lookup.lookup(HostnameVerifier.class))
+                .setSSLHostnameVerifier(hostnameVerifier)
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setConnectTimeout(3_000)
                         .setSocketTimeout(10_000)

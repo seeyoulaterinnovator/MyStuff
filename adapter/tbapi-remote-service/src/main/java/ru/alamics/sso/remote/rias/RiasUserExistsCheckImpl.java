@@ -46,8 +46,8 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
 
     public RiasUserExistsCheckImpl(
             ApplicationProperties properties,
-            @Named("rias") SSLContext sslContext,
-            HostnameVerifier hostnameVerifier
+            @Named("riasApiSSLContext") SSLContext sslContext,
+            @Named("riasApiHostnameVerifier") HostnameVerifier hostnameVerifier
     ) {
         this.properties = properties;
         client = HttpClients.custom()

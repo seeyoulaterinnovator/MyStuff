@@ -42,8 +42,8 @@ public class SendMessageServiceImpl implements SendMessageService {
     SettingsService settingsService;
 
     public SendMessageServiceImpl(
-            @Named("smsSender") SSLContext sslContext,
-            HostnameVerifier hostnameVerifier
+            @Named("smsSenderSSLContext") SSLContext sslContext,
+            @Named("smsSenderHostnameVerifier") HostnameVerifier hostnameVerifier
     ) {
         client = HttpClients.custom()
                 .setSSLContext(sslContext)

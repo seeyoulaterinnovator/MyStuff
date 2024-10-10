@@ -27,7 +27,12 @@ class TbapiServiceRestImplTest {
         server = new WireMockServer(wireMockConfig().dynamicPort());
         server.start();
 
-        service = new TbapiServiceRestImpl(SSLContext.getDefault(), SSLContext.getDefault(), (s, ss) -> true);
+        service = new TbapiServiceRestImpl(
+                SSLContext.getDefault(),
+                SSLContext.getDefault(),
+                (s, ss) -> true,
+                (s, ss) -> true
+        );
     }
 
     @AfterEach

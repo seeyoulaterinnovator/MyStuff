@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum SslContextKind {
-    RIAS("rias.ssl.relaxed", "rias.ssl.thumbprints"),
+    RIAS("riasApi.ssl.relaxed", "riasApi.ssl.thumbprints"),
     RIAS_LOGIN("riasLogin.ssl.relaxed", "riasLogin.ssl.thumbprints"),
     TBAPI_REGISTRATION("tbapi.registration.ssl.relaxed", "tbapi.registration.ssl.thumbprints"),
     TBAPI_CUSTOMER("tbapi.customer.ssl.relaxed", "tbapi.customer.ssl.thumbprints"),

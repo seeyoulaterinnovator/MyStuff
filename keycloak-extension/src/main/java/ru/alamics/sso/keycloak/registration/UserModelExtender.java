@@ -180,9 +180,10 @@ public class UserModelExtender extends AbstractFormActionFactory implements Form
     public FormAction create(KeycloakSession session) {
         log.info("Creating UserModelExtender");
         tbapiService = new TbapiService(new TbapiServiceRestImpl(
-                Lookup.lookup(SSLContext.class, "tbapiRegistration"),
-                Lookup.lookup(SSLContext.class, "tbapiCustomer"),
-                Lookup.lookup(HostnameVerifier.class)
+                Lookup.lookup(SSLContext.class, "tbapiRegistrationSSLContext"),
+                Lookup.lookup(SSLContext.class, "tbapiCustomerSSLContext"),
+                Lookup.lookup(HostnameVerifier.class, "tbapiRegistrationHostnameVerifier"),
+                Lookup.lookup(HostnameVerifier.class, "tbapiCustomerHostnameVerifier")
         ));
         return this;
     }

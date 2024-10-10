@@ -72,12 +72,14 @@ public class CustomIdpReviewProfileAuthenticator extends IdpReviewProfileAuthent
     public CustomIdpReviewProfileAuthenticator(
             SSLContext tbapiRegistrationSslContext,
             SSLContext tbapiCustomerSslContext,
-            HostnameVerifier hostnameVerifier
+            HostnameVerifier tbapiRegistrationHostnameVerifier,
+            HostnameVerifier tbapiCustomerHostnameVerifier
     ) {
         tbapiService = new TbapiService(new TbapiServiceRestImpl(
                 tbapiRegistrationSslContext,
                 tbapiCustomerSslContext,
-                hostnameVerifier
+                tbapiRegistrationHostnameVerifier,
+                tbapiCustomerHostnameVerifier
         ));
         userExtension = new UserExtension();
         properties = Lookup.lookup(ApplicationProperties.class);
