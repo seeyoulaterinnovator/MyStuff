@@ -121,7 +121,6 @@ export function UserDataTable() {
     userColumns,
     customFilters,
     isCustomTheme,
-    userDetailColumns,
     sortingOptions,
     handleCustomAction,
     searchUserWithCustomFilters,
@@ -425,7 +424,6 @@ export function UserDataTable() {
           }
           toolbarItem={toolbar()}
           subToolbar={subtoolbar()}
-          isExpandable
           isStriped
           actionResolver={(rowData: IRowData) => {
             const user: UserInfoRepresentation = rowData.data;
@@ -466,7 +464,14 @@ export function UserDataTable() {
             return actionResolvers;
           }}
           columns={userColumns}
-          detailColumns={userDetailColumns}
+          automaticallyMergedColumns={[
+            "id",
+            "email",
+            "firstName",
+            "phone",
+            0,
+            9,
+          ]}
         />
       </>
     );

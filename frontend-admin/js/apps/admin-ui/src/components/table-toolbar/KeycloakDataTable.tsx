@@ -5,6 +5,7 @@ import {
   Toolbar,
   ToolbarContent,
   ToolbarItem,
+  Tooltip,
 } from "@patternfly/react-core";
 import type { SVGIconProps } from "@patternfly/react-icons/dist/js/createIcon";
 import {
@@ -47,6 +48,11 @@ import { ListEmptyState } from "../list-empty-state/ListEmptyState";
 import { PaginatingTableToolbar } from "./PaginatingTableToolbar";
 import { SyncAltIcon, ArrowDownIcon } from "@patternfly/react-icons";
 import type { SortingOptions } from "../../customLogic/types/sorting";
+import { mergeCellsAutomatically } from "../../customLogic/helpers/tables";
+import { getAttributeName } from "../../customLogic/helpers/attributes";
+import { DataAttribute } from "../../customLogic/constants/attributes";
+import { AutomaticallyMergedColumn } from "../../customLogic/types/table";
+import useResizeObserver from "../../customLogic/hooks/useResizeObserver";
 
 type TitleCell = { title: JSX.Element };
 type Cell<T> = keyof T | JSX.Element | TitleCell;
@@ -80,25 +86,66 @@ type DataTableProps<T> = {
   isRadio?: boolean;
   sortingOptions?: SortingOptions;
   onSort?: (sortingOptions: SortingOptions) => void;
-};
-
-type CellRendererProps = {
-  row: IRow;
+  automaticallyMergedColumns?: AutomaticallyMergedColumn<T>[];
+  onChangeNumberOfRowMerges?: (value: number) => void;
 };
 
 export const isSubRow = <T,>(data?: Row<T> | SubRow<T>): data is SubRow<T> => {
   return !!data && "parent" in data;
 };
 
-const CellRenderer = ({ row }: CellRendererProps) => {
-  const isRow = (c: ReactNode | IRowCell): c is IRowCell =>
-    !!c && (c as IRowCell).title !== undefined;
-  return row.cells!.map((c, i) => {
-    return (
-      <Td key={`cell-${i}`} {...(isRow(c) ? c.props : null)}>
-        {(isRow(c) ? c.title : c) as ReactNode}
+const isRow = (c: ReactNode | IRowCell): c is IRowCell =>
+  !!c && (c as IRowCell).title !== undefined;
+
+interface CellRenderProps<T> {
+  cell: ReactNode | IRowCell;
+  column?: Field<T>;
+}
+
+const CellRender = <T,>({ cell, column }: CellRenderProps<T>) => {
+  const tdContent = (isRow(cell) ? cell.title : cell) as ReactNode;
+  const [isClamped, setIsClamped] = useState(false);
+
+  const { targetRef: contentRef } = useResizeObserver<HTMLSpanElement>(
+    ({ target }) => {
+      let hasClampedText = false;
+
+      if (target) {
+        hasClampedText = target.scrollWidth > target.clientWidth;
+      }
+
+      setIsClamped(hasClampedText);
+    },
+  );
+
+  return (
+    <>
+      <Td
+        ref={contentRef}
+        {...(isRow(cell) ? cell.props : null)}
+        {...{
+          [getAttributeName(DataAttribute.TableColumnName)]: column?.name || "",
+        }}
+      >
+        {tdContent}
       </Td>
-    );
+      <Tooltip
+        content={tdContent}
+        trigger={isClamped ? "mouseenter focus" : ""}
+        triggerRef={contentRef}
+      />
+    </>
+  );
+};
+
+type CellsRendererProps<T> = {
+  row: IRow;
+  columns?: Field<T>[];
+};
+
+const CellsRenderer = <T,>({ row, columns }: CellsRendererProps<T>) => {
+  return row.cells!.map((c, i) => {
+    return <CellRender key={`cell-${i}`} cell={c} column={columns?.[i]} />;
   });
 };
 
@@ -115,6 +162,8 @@ function DataTable<T>({
   isRadio,
   onSort,
   sortingOptions,
+  automaticallyMergedColumns,
+  onChangeNumberOfRowMerges,
   ...props
 }: DataTableProps<T>) {
   const { t } = useTranslation();
@@ -123,6 +172,8 @@ function DataTable<T>({
   const [expandedRows, setExpandedRows] = useState<boolean[]>([]);
   const [currentSortingOptions, setCurrentSortingOptions] =
     useState(sortingOptions);
+
+  const tableRef = useRef<HTMLTableElement | null>(null);
 
   const updateState = (rowIndex: number, isSelected: boolean) => {
     const items = [
@@ -170,9 +221,26 @@ function DataTable<T>({
     });
   };
 
+  useEffect(() => {
+    const { current: tableElement } = tableRef;
+
+    if (!automaticallyMergedColumns?.length || !tableElement) {
+      return;
+    }
+
+    const { numberOfRowMerges } = mergeCellsAutomatically(
+      tableElement,
+      automaticallyMergedColumns,
+    );
+    onChangeNumberOfRowMerges?.(numberOfRowMerges);
+  }, [rows, columns, automaticallyMergedColumns]);
+
   return (
     <Table
       {...props}
+      ref={(tableElement) => {
+        tableRef.current = tableElement;
+      }}
       variant={isNotCompact ? undefined : TableVariant.compact}
       aria-label={t(ariaLabelKey)}
     >
@@ -248,7 +316,7 @@ function DataTable<T>({
                   }}
                 />
               )}
-              <CellRenderer row={row} />
+              <CellsRenderer row={row} columns={columns} />
               {(actions || actionResolver) && (
                 <Td isActionCell>
                   <ActionsColumn
@@ -304,7 +372,7 @@ function DataTable<T>({
                       }}
                     />
                   )}
-                  <CellRenderer row={row} />
+                  <CellsRenderer row={row} />
                   {(actions || actionResolver) && (
                     <Td isActionCell>
                       <ActionsColumn
@@ -325,7 +393,7 @@ function DataTable<T>({
                     }
                   >
                     <ExpandableRowContent>
-                      <CellRenderer row={row} />
+                      <CellsRenderer row={row} />
                     </ExpandableRowContent>
                   </Td>
                 </Tr>
@@ -402,6 +470,7 @@ export type DataListProps<T> = Omit<
   isLoading?: boolean;
   sortingOptions?: SortingOptions;
   onSort?: (sortingOptions: SortingOptions) => void;
+  automaticallyMergedColumns?: AutomaticallyMergedColumn<T>[];
 };
 
 /**
@@ -702,12 +771,16 @@ export function KeycloakDataTable<T>({
     onSort?.(newSortOptions);
   };
 
+  const [numberOfRowMerges, setNumberOfRowMerges] = useState(0);
+
   const data = filteredData || rows;
   const noData = !data || data.length === 0;
   const searching = search !== "" || isSearching;
   // if we use detail columns there are twice the number of rows
-  const maxRows = detailColumns ? max * 2 : max;
-  const rowLength = detailColumns ? (data?.length || 0) / 2 : data?.length || 0;
+  const maxRows = detailColumns ? max * 2 : max + numberOfRowMerges;
+  const rowLength = detailColumns
+    ? (data?.length || 0) / 2
+    : (data?.length || 0) + numberOfRowMerges;
 
   const renderTable = () => {
     return (
@@ -736,6 +809,7 @@ export function KeycloakDataTable<T>({
               ariaLabelKey={ariaLabelKey}
               sortingOptions={currentSortingOptions}
               onSort={handleSort}
+              onChangeNumberOfRowMerges={setNumberOfRowMerges}
             />
           </>
         )}
