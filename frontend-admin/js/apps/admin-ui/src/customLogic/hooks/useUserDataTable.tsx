@@ -1,10 +1,19 @@
 import type ComponentRepresentation from "@keycloak/keycloak-admin-client/lib/defs/componentRepresentation";
 import type { CustomUserQuery } from "@keycloak/keycloak-admin-client/lib/resources/custom/users";
 import type UserRepresentation from "@keycloak/keycloak-admin-client/lib/defs/userRepresentation";
-import type { UserInfoRepresentation } from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
+import type {
+  UserInfoRepresentation,
+  UserPostRepresentation,
+} from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
 import { NetworkError } from "@keycloak/keycloak-admin-client/lib";
-import { AlertVariant, Checkbox, Text } from "@patternfly/react-core";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { AlertVariant, Text, Tooltip } from "@patternfly/react-core";
+import {
+  CSSProperties,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { CustomUserToolbarAction } from "../constants/user";
 import { useAdminClient } from "../../admin-client";
@@ -12,22 +21,18 @@ import { useAlerts } from "../../components/alert/Alerts";
 import { useRealm } from "../../context/realm-context/RealmContext";
 import { useRealms } from "../../context/RealmsContext";
 import { toUser } from "../../user/routes/User";
-import {
-  type DetailField,
-  type Field,
-  KeycloakDataTable,
-} from "../../components/table-toolbar/KeycloakDataTable";
-import { emptyFormatter } from "../../util";
+import { type Field } from "../../components/table-toolbar/KeycloakDataTable";
 import { useTranslation } from "react-i18next";
 import { saveAs } from "file-saver";
 import { useConfirmDialog } from "../../components/confirm-dialog/ConfirmDialog";
 import { isExistGuard } from "../helpers/guards";
 import type { CustomUsersAction } from "../types/users";
-import { QueryParam } from "../../customLogic/constants/queryParams";
+import { QueryParam } from "../constants/queryParams";
 import { useCustomConfig } from "../context/CustomConfigContext";
-import type { SortingOptions } from "../../customLogic/types/sorting";
+import type { SortingOptions } from "../types/sorting";
 import { useWhoAmI } from "../../context/whoami/WhoAmI";
 import { addBomAndConvertToBlob } from "../helpers/transforms";
+import { ExclamationCircleIcon } from "@patternfly/react-icons";
 
 const getBlockedUsers = (
   users?: Array<UserRepresentation | UserInfoRepresentation>,
@@ -39,6 +44,19 @@ const getBlockedUsers = (
 
   return { blockedUsers, blockedUsernames };
 };
+
+const ellipsisCellStyle: CSSProperties = {
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  maxWidth: 0,
+  whiteSpace: "nowrap",
+};
+
+interface UserInfoWithFlatUserPosts
+  extends UserInfoRepresentation,
+    Partial<Omit<UserPostRepresentation, "id">> {
+  userPostId?: UserPostRepresentation["id"];
+}
 
 export interface UseUserDataTableProps {
   selectedRows: Array<UserRepresentation | UserInfoRepresentation>;
@@ -78,15 +96,13 @@ export const useUserDataTable = ({
     return selectedRows.map((item) => item.id).filter(isExistGuard);
   }, [selectedRows]);
 
-  const userColumns = useMemo(() => {
+  const userColumns = useMemo<Field<UserInfoWithFlatUserPosts>[]>(() => {
     return [
       {
         name: "id",
         displayKey: "id",
         cellProps: {
-          style: {
-            display: "block",
-          },
+          style: ellipsisCellStyle,
         },
         cellRenderer: (row) => {
           const href = toUser({
@@ -98,26 +114,18 @@ export const useUserDataTable = ({
           }).pathname;
 
           if (!href) {
-            return (
-              <Text
-                style={{
-                  textWrap: "wrap",
-                }}
-              >
-                {row.id}
-              </Text>
-            );
+            return <Text>{row.id}</Text>;
           }
 
           return (
-            <Link
-              to={href}
-              style={{
-                textWrap: "wrap",
-              }}
-            >
-              {row.id}
-            </Link>
+            <>
+              {!row.enabled && (
+                <Tooltip content={t("notEnabled")}>
+                  <ExclamationCircleIcon className="keycloak__user-section__email-verified" />
+                </Tooltip>
+              )}{" "}
+              <Link to={href}>{row.id}</Link>
+            </>
           );
         },
       },
@@ -125,77 +133,76 @@ export const useUserDataTable = ({
         name: "email",
         displayKey: "email",
         isSortable: true,
+        cellProps: {
+          style: ellipsisCellStyle,
+        },
+        cellRenderer: (row) => {
+          return (
+            <>
+              {!row.emailVerified && (
+                <Tooltip content={t("notVerified")}>
+                  <ExclamationCircleIcon className="keycloak__user-section__email-verified" />
+                </Tooltip>
+              )}{" "}
+              {row.email}
+            </>
+          );
+        },
       },
       {
         name: "firstName",
         displayKey: "firstName",
-        cellFormatters: [emptyFormatter()],
+        // cellFormatters: [emptyFormatter()],
         isSortable: true,
-      },
-      {
-        name: "enabled",
-        displayKey: "enabled",
-        cellRenderer: (row) => {
-          return <Checkbox id="dd" checked={row.enabled} isDisabled />;
+        cellProps: {
+          style: ellipsisCellStyle,
         },
       },
       {
         name: "phone",
         displayKey: "phone",
-        cellFormatters: [emptyFormatter()],
-      },
-    ] satisfies Field<UserInfoRepresentation>[];
-  }, []);
-
-  const userDetailColumns = useMemo(() => {
-    return [
-      {
-        name: "userPosts",
-        enabled: (rowUser) => !!rowUser.userPosts?.length,
         cellProps: {
-          style: {
-            display: "block",
-          },
+          style: ellipsisCellStyle,
         },
-        cellRenderer: (row) => (
-          <KeycloakDataTable
-            loader={row.userPosts}
-            ariaLabelKey="userPosts"
-            isStriped
-            onlyTable
-            columns={[
-              {
-                name: "organization",
-                displayKey: "organization",
-              },
-              {
-                name: "tomsId",
-                displayKey: "tomsId",
-              },
-              {
-                name: "userRole",
-                displayKey: "roles",
-                cellRenderer: (row) => row.userRole.name,
-              },
-              {
-                name: "systemRoles",
-                displayKey: "systems",
-                cellRenderer: (row) => {
-                  return (
-                    <p style={{ whiteSpace: "pre-wrap" }}>
-                      {(row.systemRoles || [])
-                        .map((systemRole) => systemRole.externalSystem.name)
-                        .join("\n")}
-                    </p>
-                  );
-                },
-              },
-            ]}
-          />
-        ),
+        // cellFormatters: [emptyFormatter()],
       },
-    ] satisfies Array<DetailField<UserInfoRepresentation>>;
-  }, []);
+
+      {
+        name: "organization",
+        displayKey: "organization",
+        cellProps: {
+          style: ellipsisCellStyle,
+        },
+      },
+      {
+        name: "tomsId",
+        displayKey: "tomsId",
+        cellProps: {
+          style: ellipsisCellStyle,
+        },
+      },
+      {
+        name: "userRole",
+        displayKey: "roles",
+        cellProps: {
+          style: ellipsisCellStyle,
+        },
+        cellRenderer: (row) => row.userRole?.name || "",
+      },
+      {
+        name: "systemRoles",
+        displayKey: "systems",
+        cellProps: {
+          style: ellipsisCellStyle,
+        },
+        cellRenderer: (row) => {
+          return (row.systemRoles || [])
+            .map((systemRole) => systemRole.externalSystem.name)
+            .join(", ");
+        },
+      },
+    ];
+  }, [customFilters.searchRealm, isMeInMaster, realmName]);
 
   const getUsers = useCallback(
     async (query: CustomUserQuery) => {
@@ -521,12 +528,26 @@ export const useUserDataTable = ({
     try {
       setSortingOptions(newSortingOptions);
 
-      return await getUsers({
+      const users = await getUsers({
         first,
         max,
         sortAsc: newSortingOptions?.order === "asc",
         sortField: newSortingOptions?.orderBy,
       });
+      const usersNew: UserInfoWithFlatUserPosts[] = [];
+
+      users.forEach((user) => {
+        if (!user.userPosts?.length) {
+          usersNew.push(user);
+        }
+
+        user.userPosts?.forEach((userPost) => {
+          const { id, ...userPostRest } = userPost;
+          usersNew.push({ ...userPostRest, ...user, userPostId: id });
+        });
+      });
+
+      return usersNew;
     } catch (error) {
       if (userStorage?.length) {
         addError("noUsersFoundErrorStorage", error);
@@ -543,7 +564,6 @@ export const useUserDataTable = ({
     isCustomTheme,
     realms,
     userColumns,
-    userDetailColumns,
     customLoader,
     getUsers,
     handleCustomAction,
