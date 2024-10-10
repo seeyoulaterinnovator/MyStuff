@@ -100,10 +100,14 @@ public class SendMessageServiceImpl implements SendMessageService {
 
         log.info(String.format("Api %s, Sending %s code to number: %s", uri.getHost(), messageRequest.getMessengerName().toString(), messageRequest.getUserPhone()));
 
-        HttpGet request = new HttpGet(UriBuilder.fromUri(uri)
-                .queryParam("to", Util.getCleanUserPhone(messageRequest.getUserPhone()))
-                .queryParam("text", Util.rfc3986Encoder(messageRequest.getText()))
-                .build());
+        var uriBuilder = UriBuilder.fromUri(uri);
+        msgConfig.getConfigForQuery().forEach(uriBuilder::queryParam);
+
+        HttpGet request = new HttpGet(
+                uriBuilder.queryParam("to", Util.getCleanUserPhone(messageRequest.getUserPhone()))
+                        .queryParam("text", Util.rfc3986Encoder(messageRequest.getText()))
+                        .build()
+        );
         request.setHeader(HttpHeaders.ACCEPT, MediaType.WILDCARD);
         try {
             HttpResponse response = client.execute(request);
