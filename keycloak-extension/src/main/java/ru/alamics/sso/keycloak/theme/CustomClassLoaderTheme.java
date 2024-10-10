@@ -138,7 +138,11 @@ public class CustomClassLoaderTheme implements Theme  {
             return null;
         }
 
-        Map<Locale, Properties> localeMessages = Collections.singletonMap(locale, getMessages(locale));
+        Properties localeProperties = getMessages(locale);
+        if(localeProperties == null) {
+            localeProperties = new Properties();
+        }
+        Map<Locale, Properties> localeMessages = Collections.singletonMap(locale, localeProperties);
         return LocaleUtil.enhancePropertiesWithRealmLocalizationTexts(realm, locale, localeMessages);
     }
 
