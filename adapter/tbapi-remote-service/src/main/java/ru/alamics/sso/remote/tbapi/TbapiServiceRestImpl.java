@@ -112,7 +112,8 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
             );
             httpRequest.setEntity(new StringEntity(mapper.writeValueAsString(request)));
             HttpResponse httpResponse = getClient(connectConfig).execute(httpRequest);
-            if(httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            int status = httpResponse.getStatusLine().getStatusCode();
+            if(status == HttpStatus.SC_OK || status == HttpStatus.SC_CREATED) {
                 Header contentType = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
                 if(contentType != null && MediaType.TEXT_HTML.equals(contentType.getValue())) {
                     try(InputStream stream = httpResponse.getEntity().getContent()) {
