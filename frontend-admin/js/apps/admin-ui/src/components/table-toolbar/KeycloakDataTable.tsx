@@ -103,8 +103,13 @@ interface CellRenderProps<T> {
 }
 
 const CellRender = <T,>({ cell, column }: CellRenderProps<T>) => {
+  const { t } = useTranslation();
+
   const tdContent = (isRow(cell) ? cell.title : cell) as ReactNode;
   const [isClamped, setIsClamped] = useState(false);
+
+  const columnTitle = column?.displayKey || column?.name;
+  const columnLabel = columnTitle ? t(columnTitle) : undefined;
 
   const { targetRef: contentRef } = useResizeObserver<HTMLSpanElement>(
     ({ target }) => {
@@ -126,6 +131,7 @@ const CellRender = <T,>({ cell, column }: CellRenderProps<T>) => {
         {...{
           [getAttributeName(DataAttribute.TableColumnName)]: column?.name || "",
         }}
+        dataLabel={columnLabel}
       >
         {tdContent}
       </Td>
@@ -372,7 +378,7 @@ function DataTable<T>({
                       }}
                     />
                   )}
-                  <CellsRenderer row={row} />
+                  <CellsRenderer row={row} columns={columns} />
                   {(actions || actionResolver) && (
                     <Td isActionCell>
                       <ActionsColumn
@@ -393,7 +399,7 @@ function DataTable<T>({
                     }
                   >
                     <ExpandableRowContent>
-                      <CellsRenderer row={row} />
+                      <CellsRenderer row={row} columns={columns} />
                     </ExpandableRowContent>
                   </Td>
                 </Tr>

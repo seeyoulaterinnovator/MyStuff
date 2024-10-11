@@ -83,7 +83,7 @@ export function UserDataTableCustomSearchForm({
           <ToolbarItem>
             <TextInput
               id="phone"
-              style={{ maxWidth: "150px" }}
+              style={{ maxWidth: "135px" }}
               placeholder={t("searchByPhone")}
               {...register("searchPhone")}
             />
