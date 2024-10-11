@@ -24,7 +24,7 @@
 >
   <LocationIcon />
   <span
-    class="border-dashed border-main-600 h-6 leading-normal"
+    class="border-dashed border-main-600 leading-normal"
     style="margin-left: 7px;"
   >
     {$city}

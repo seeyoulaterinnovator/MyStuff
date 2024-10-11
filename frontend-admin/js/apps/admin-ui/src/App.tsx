@@ -29,6 +29,7 @@ import { SubGroups } from "./groups/SubGroupsContext";
 import { AuthWall } from "./root/AuthWall";
 import { CustomConfigContextProvider } from "./customLogic/context/CustomConfigContext";
 import { CustomAuthWall } from "./root/CustomAuthWall";
+import { useClipboard } from "./customLogic/hooks/useClipboard";
 
 const AppContexts = ({ children }: PropsWithChildren) => (
   <ErrorBoundaryProvider>
@@ -60,6 +61,7 @@ const AppContexts = ({ children }: PropsWithChildren) => (
 );
 
 export const App = () => {
+  useClipboard();
   const { keycloak, environment } = useEnvironment<Environment>();
   const [adminClient, setAdminClient] = useState<KeycloakAdminClient>();
 

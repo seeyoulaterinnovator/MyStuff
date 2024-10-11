@@ -61,7 +61,7 @@
             <@header.defaultTemplate withCity=displayCity></@header.defaultTemplate>
         </#if>
 
-        <main id="content" class="flex-1 py-8 md:py-12 mx-auto md:mx-auto w-full max-w-440px xl:max-w-470px" style="overflow: initial;">
+        <main id="content" class="flex-1 py-8 md:py-12 mx-auto md:mx-auto w-full" style="overflow: initial;">
 
 
             <#if displayMessage && message?has_content && message.summary == msg('emailSentMessage')>
@@ -184,7 +184,7 @@
                 </div>
               </a>
               <span class="text-main-500 copyright mt-2">
-                ${(footer)!"© АО «ЭР-Телеком Холдинг» 2011—"}${.now?string('yyyy')}
+                ${(footer)!"© АО «ЭР-Телеком Холдинг» 2011–"}${.now?string('yyyy')}
               </span>
             </footer>
         </#if>

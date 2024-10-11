@@ -55,17 +55,18 @@
                     <label for="search-city" class="choose-city-text">Выбрать город</label>
                     <CloseButton on:click={handleClose} class="custom-icon"/>
                   </div>
-                  <div class="field field__container search-city-form">
-                    <form on:submit|preventDefault={handleSelectCity} class="flex items-center search-city-input field__input">
+                  <div class="field field__container ">
+                    <form on:submit|preventDefault={handleSelectCity} class="flex items-center">
                       <input
+                        class="field__input"
                         name="Поиск города"
                         id="search-city"
                         placeholder="Название города"
                         bind:value={search}
-                        on:input={handleInputChange} />
-                      <SearchIcon/>
+                        on:input={handleInputChange} autofocus autocomplete="off"/>
+                      <label class="field__label" for="search-city">Название города</label>
+                      <SearchIcon class="field__open highlighted-hover-svg"/>
                     </form>
-                    <label class="field__label" for="search-city">Название города</label>
                   </div>
                 </div>
               {/if}
@@ -81,7 +82,7 @@
               <Confirmation />
           </div>
       {:else if $status === STATUS.SELECTING}
-          <div class="flex flex-1 justify-center content-box h-full mt-4 xl:mt-17 scrollable-container overflow-x-hidden overflow-y-auto custom-scroll">
+          <div class="flex flex-1 justify-center content-box h-full scrollable-container overflow-x-hidden overflow-y-auto scrollable-container">
               <Selection {search} />
           </div>
       {/if}
