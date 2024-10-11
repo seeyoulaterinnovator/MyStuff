@@ -9,6 +9,6 @@
   }
 </script>
 
-<button class="message__close-dialog-button" on:click={handleClick}>
-  <CloseIcon/>
+<button class="message__close-dialog-button highlighted-nested-hover-svg" on:click={handleClick}>
+  <CloseIcon />
 </button>

@@ -109,18 +109,36 @@ module.exports = {
           },
         ],
         'custom/4lg': [
+          '23px',
+          {
+            lineHeight: '27px',
+          },
+        ],
+        'custom/5lg': [
+          '23px',
+          {
+            lineHeight: '27px',
+          },
+        ],
+        'custom/6lg': [
+          '27px',
+          {
+            lineHeight: '33px',
+          },
+        ],
+        'custom/7lg': [
           '1.9375rem',
           {
             lineHeight: '2.125rem',
           },
         ],
-        'custom/5lg': [
+        'custom/8lg': [
           '2.1875rem',
           {
             lineHeight: '2.5rem',
           },
         ],
-        'custom/6lg': [
+        'custom/9lg': [
           '2.875rem',
           {
             lineHeight: '3.25rem',
@@ -162,6 +180,7 @@ module.exports = {
         '1/4': '25%',
         '1/2': '50%',
         '3/4': '75%',
+        '200px': '200px',
         '440px': '440px',
         '470px': '470px',
         '568px': '568px',
@@ -208,6 +227,7 @@ module.exports = {
           '1000': '#7F7F7F',
           '1100': '#A8A8A8',
           '1200': '#CFDBE0',
+          '1300': '#EFEFEF',
           default: '#777777',
         },
         extra: {

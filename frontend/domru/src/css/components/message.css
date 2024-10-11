@@ -16,16 +16,8 @@
   }
 
   p {
-    font-style: normal;
-    font-weight: 400;
-    font-size: 17px;
-    line-height: 23px;
     mix-blend-mode: normal;
 
-    @media (min-width: 1280px) {
-      font-size: 18px;
-      line-height: 24px;
-    }
   }
 
   &__fade {
@@ -51,22 +43,9 @@
   }
 
   &__title {
-    font-style: normal;
-    font-weight: 700;
-    font-size: 24px;
-    line-height: 33px;
     mix-blend-mode: normal;
     margin-bottom: 16px;
 
-    @media (min-width: 768px) {
-      font-size: 23px;
-      line-height: 30px;
-    }
-
-    @media (min-width: 1280px) {
-      font-size: 26px;
-      line-height: 33px;
-    }
   }
 
   &__btn {
