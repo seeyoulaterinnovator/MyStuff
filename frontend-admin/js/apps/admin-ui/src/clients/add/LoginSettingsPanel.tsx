@@ -20,6 +20,10 @@ export const LoginSettingsPanel = ({ access }: { access?: boolean }) => {
     ),
   );
 
+  const activateNewAuth: string = watch(
+    convertAttributeNameToForm<FormFields>("attributes.activateNewAuth"),
+  );
+
   const loginViaEmailOrUsernameAndPassword: string = watch(
     convertAttributeNameToForm<FormFields>(
       "attributes.loginViaEmailOrUsernameAndPassword",
@@ -54,6 +58,14 @@ export const LoginSettingsPanel = ({ access }: { access?: boolean }) => {
       setValue("attributes.loginViaSms", "false");
     }
   }, [loginViaPhoneCall]);
+
+  useEffect(() => {
+    if (activateNewAuth !== "true") {
+      setValue("attributes.loginViaEmailOrUsernameAndPassword", "false");
+      setValue("attributes.loginViaSms", "false");
+      setValue("attributes.loginViaPhoneCall", "false");
+    }
+  }, [activateNewAuth]);
 
   return (
     <FormAccess isHorizontal fineGrainedAccess={access} role="manage-clients">
@@ -98,28 +110,34 @@ export const LoginSettingsPanel = ({ access }: { access?: boolean }) => {
         label={t("attributes.activateNewAuth")}
         stringify
       />
-      <DefaultSwitchControl
-        name={convertAttributeNameToForm<FormFields>("attributes.loginViaSms")}
-        label={t("attributes.loginViaSms")}
-        labelIcon={t("attributes.loginViaSmsHelp")}
-        stringify
-      />
-      <DefaultSwitchControl
-        name={convertAttributeNameToForm<FormFields>(
-          "attributes.loginViaEmailOrUsernameAndPassword",
-        )}
-        label={t("attributes.loginViaEmailOrUsernameAndPassword")}
-        labelIcon={t("attributes.loginViaEmailOrUsernameAndPasswordHelp")}
-        stringify
-      />
-      <DefaultSwitchControl
-        name={convertAttributeNameToForm<FormFields>(
-          "attributes.loginViaPhoneCall",
-        )}
-        label={t("attributes.loginViaPhoneCall")}
-        labelIcon={t("attributes.loginViaPhoneCallHelp")}
-        stringify
-      />
+      {activateNewAuth === "true" && (
+        <>
+          <DefaultSwitchControl
+            name={convertAttributeNameToForm<FormFields>(
+              "attributes.loginViaSms",
+            )}
+            label={t("attributes.loginViaSms")}
+            labelIcon={t("attributes.loginViaSmsHelp")}
+            stringify
+          />
+          <DefaultSwitchControl
+            name={convertAttributeNameToForm<FormFields>(
+              "attributes.loginViaEmailOrUsernameAndPassword",
+            )}
+            label={t("attributes.loginViaEmailOrUsernameAndPassword")}
+            labelIcon={t("attributes.loginViaEmailOrUsernameAndPasswordHelp")}
+            stringify
+          />
+          <DefaultSwitchControl
+            name={convertAttributeNameToForm<FormFields>(
+              "attributes.loginViaPhoneCall",
+            )}
+            label={t("attributes.loginViaPhoneCall")}
+            labelIcon={t("attributes.loginViaPhoneCallHelp")}
+            stringify
+          />
+        </>
+      )}
     </FormAccess>
   );
 };
