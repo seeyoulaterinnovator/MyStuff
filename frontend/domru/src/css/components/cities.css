@@ -75,18 +75,6 @@
   }
 }
 
-.search-city-form {
-  .field__label {
-    color: var(--accent-blue-1200-hover);
-    display: none;
-  }
-
-  &:has(input:focus) {
-    .field__label {
-      display: block;
-    }
-  }
-}
 
 .search-city-input {
   height: 48px;

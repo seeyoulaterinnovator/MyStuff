@@ -12,6 +12,12 @@
   display: flex;
   flex-flow: column;
   position: relative;
+
+  &:has(.field__input:focus:not(:placeholder-shown)) {
+    .field__label {
+      @apply .text-accentBlue-1200-hover;
+    }
+  }
 }
 
 .field__open {
@@ -36,6 +42,11 @@
   width: 100%;
   color: #222222;
   padding: 9.5px 14px;
+
+  &::placeholder {
+    color: var(--main-900);
+  }
+
 
   &:-webkit-autofill,
   &:-webkit-autofill:focus {
