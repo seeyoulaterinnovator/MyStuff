@@ -475,7 +475,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         if(value == null) {
             log.warn("null value for key = {}", key);
         } else {
-            putAttribute(key, value);
+            attributes.put(key, value);
         }
     }
 
