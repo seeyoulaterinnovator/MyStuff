@@ -113,7 +113,8 @@ public class SendMessageServiceImpl implements SendMessageService {
         request.setHeader(HttpHeaders.ACCEPT, MediaType.WILDCARD);
         try {
             HttpResponse response = client.execute(request);
-            if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            var status = response.getStatusLine().getStatusCode();
+            if(status == HttpStatus.SC_OK || status == HttpStatus.SC_ACCEPTED) {
                 try(InputStream stream = response.getEntity().getContent()) {
                     return new String(stream.readAllBytes());
                 }
