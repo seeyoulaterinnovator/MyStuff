@@ -171,7 +171,7 @@
       {#if $isLimitExceeded}
 
       {:else}
-        <div class="flex flex-col md:flex-row justify-start items-start gap-4 custom-mt-md">
+        <div class="flex flex-col md:flex-row justify-start items-start gap-4 mt-6">
           {#if $isRegistration}
             <a href="{$loginUrl}" class="btn btn-main w-full md:w-auto reg-button" on:click={handleHide}>
               Войти

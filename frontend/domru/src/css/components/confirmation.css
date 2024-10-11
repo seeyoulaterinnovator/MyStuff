@@ -1,10 +1,21 @@
 .select-city-confirmation {
   background: #ffffff;
   position: fixed;
-  right: 27px;
-  top: 80px;
+  right: 80px;
+  top: 61px;
   border-radius: 20px;
   padding: 24px;
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    top: 53px;
+    right: 36px;
+  }
+
+  @media only screen and (max-width: 767px) {
+    top: 41px;
+    right: 16px;
+    margin-left: 16px;
+  }
 }
 
 .select-city-confirmation {
@@ -37,6 +48,6 @@
 
   .confirm__btns > .btn-main {
     width: auto;
-    height: auto;
+    /* height: auto; */
   }
 }

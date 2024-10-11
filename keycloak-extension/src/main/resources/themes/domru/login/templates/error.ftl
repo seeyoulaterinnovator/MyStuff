@@ -76,12 +76,12 @@
             <img class="mb-8" src="${img}"/>
         </#if>
         <div>
-            <div class="page-title-wrapper">
+            <div class="page-title-wrapper custom-mb-sm">
                 <h1 class="page-title">
                     <b class="titleAllPage">${heading}</b>
                 </h1>
             </div>
-            <p class="text-sm">
+            <p>
                 <#nested>
             </p>
             <div class="page-buttons">

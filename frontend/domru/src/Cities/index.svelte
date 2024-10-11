@@ -81,7 +81,7 @@
               <Confirmation />
           </div>
       {:else if $status === STATUS.SELECTING}
-          <div class="flex flex-1 justify-center content-box h-full mt-4 xl:mt-17 scrollable-container overflow-x-hidden overflow-y-auto custom-scroll">
+          <div class="flex flex-1 justify-center content-box h-full scrollable-container overflow-x-hidden overflow-y-auto scrollable-container">
               <Selection {search} />
           </div>
       {/if}

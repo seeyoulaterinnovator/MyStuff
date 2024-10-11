@@ -171,7 +171,20 @@ h4 {
   }
 }
 
+.text-custom-9lg {
+  @apply .text-custom/9lg;
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    @apply .text-custom/8lg;
+  }
+
+  @media only screen and (max-width: 767px) {
+    @apply .text-custom/7lg;
+  }
+}
+
 body.custom #content p,
+.message p,
 .confirm__title,
 .field__input,
 .field__input::placeholder,
@@ -221,10 +234,16 @@ summary,
   @apply font-bold;
 }
 
+
+.message__title {
+  @apply .text-custom-6lg;
+  @apply font-bold;
+}
+
 .page-title-wrapper .page-title,
 .page-title,
 .titleAllPage,
 .choose-city-text {
-  @apply .text-custom-6lg;
+  @apply .text-custom-9lg;
   @apply font-black;
 }

@@ -2,11 +2,11 @@
 
 <#macro defaultTemplate withCity=true>
   <header id="page-header" class="flex items-center">
-    <div class="w-full flex justify-between">
-      <a href="${(homePage)!"https://newlkb2b.dom.ru"}">
-        <div class="h-5 w-200px bg-contain bg-no-repeat logo logo--domru"></div>
+    <div class="w-full flex justify-between items-center">
+      <a class="w-full max-w-200px" href="${(homePage)!"https://newlkb2b.dom.ru"}">
+        <div class="h-5 bg-contain bg-no-repeat logo logo--domru"></div>
       </a>
-      <div class="flex items-center xl:items-start">
+      <div class="flex items-center">
         <div id="cities-button" data-city=""></div>
         <a href="${(phoneConstLink)!"tel:88005500479"}"
           class="highlighted-hover-text highlighted-nested-hover-svg custom-ml-md ${withCity ? string("phone--hidden-small phone-call-center", "phone--hidden-small phone-call-center")}">
