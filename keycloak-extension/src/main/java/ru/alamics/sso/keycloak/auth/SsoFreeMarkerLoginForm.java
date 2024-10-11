@@ -69,17 +69,17 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
     public SsoFreeMarkerLoginForm(KeycloakSession session) {
         super(session);
-        attributes.put("redirectUrl", getRedirectUrl());
-        attributes.put("hideRegistration", isHideRegistration());
-        attributes.put("iframe", Util.isFrame(session));
+        putAttribute("redirectUrl", getRedirectUrl());
+        putAttribute("hideRegistration", isHideRegistration());
+        putAttribute("iframe", Util.isFrame(session));
 
         settingsService = Lookup.lookup(SettingsService.class);
         clientService = Lookup.lookup(ClientService.class);
 
-        attributes.put("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, realm.getName()));
-        attributes.put("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, realm.getName()));
-        attributes.put("footer", settingsService.getSettingsStringValue(FOOTER, realm.getName()));
-        attributes.put("homePage", settingsService.getSettingsStringValue(HOME_PAGE, realm.getName()));
+        putAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, realm.getName()));
+        putAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, realm.getName()));
+        putAttribute("footer", settingsService.getSettingsStringValue(FOOTER, realm.getName()));
+        putAttribute("homePage", settingsService.getSettingsStringValue(HOME_PAGE, realm.getName()));
     }
 
     @Override
@@ -99,11 +99,11 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         URI baseUriWithCodeAndClientId = baseUriBuilder.build();
 
         if (client != null) {
-            attributes.put("client", new ClientBean(session, client));
+            putAttribute("client", new ClientBean(session, client));
         }
 
         if (realm != null) {
-            attributes.put("realm", new RealmBean(realm));
+            putAttribute("realm", new RealmBean(realm));
 
             if (settingsService == null) {
                 settingsService = Lookup.lookup(SettingsService.class);
@@ -120,70 +120,70 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                         }
                 ).collect(Collectors.toList());
             }
-            attributes.put("social", new IdentityProviderBean(realm, session, identityProviders, baseUriWithCodeAndClientId));
-            attributes.put("auth", new AuthenticationContextBean(context, page));
+            putAttribute("social", new IdentityProviderBean(realm, session, identityProviders, baseUriWithCodeAndClientId));
+            putAttribute("auth", new AuthenticationContextBean(context, page));
 
             //register page
-            attributes.put("placeholderUsername", settingsService.getSettingsStringValue(PLACEHOLDER_USERNAME, realm.getName()));
-            attributes.put("placeholderEmail", settingsService.getSettingsStringValue(PLACEHOLDER_EMAIL, realm.getName()));
-            attributes.put("fullPlaceholderEmail", notEmptySettingsValue(
+            putAttribute("placeholderUsername", settingsService.getSettingsStringValue(PLACEHOLDER_USERNAME, realm.getName()));
+            putAttribute("placeholderEmail", settingsService.getSettingsStringValue(PLACEHOLDER_EMAIL, realm.getName()));
+            putAttribute("fullPlaceholderEmail", notEmptySettingsValue(
                     settingsService.getSettingsStringValue(FULL_PLACEHOLDER_EMAIL, realm.getName()),
                     settingsService.getSettingsStringValue(PLACEHOLDER_EMAIL, realm.getName())
             ));
-            attributes.put("placeholderPhone", settingsService.getSettingsStringValue(PLACEHOLDER_PHONE, realm.getName()));
+            putAttribute("placeholderPhone", settingsService.getSettingsStringValue(PLACEHOLDER_PHONE, realm.getName()));
             //login page
-            attributes.put("loginTitleText", settingsService.getSettingsStringValue(LOGIN_TITLE_TEXT, realm.getName()));
-            attributes.put("yourlogin", settingsService.getSettingsStringValue(YOUR_LOGIN, realm.getName()));
-            attributes.put("passwordPlaceholder", settingsService.getSettingsStringValue(PASS_PLACEHOLDER, realm.getName()));
-            attributes.put("enter", settingsService.getSettingsStringValue(ENTER, realm.getName()));
-            attributes.put("doForgotPassword", settingsService.getSettingsStringValue(DO_FORGOT_PASS, realm.getName()));
+            putAttribute("loginTitleText", settingsService.getSettingsStringValue(LOGIN_TITLE_TEXT, realm.getName()));
+            putAttribute("yourlogin", settingsService.getSettingsStringValue(YOUR_LOGIN, realm.getName()));
+            putAttribute("passwordPlaceholder", settingsService.getSettingsStringValue(PASS_PLACEHOLDER, realm.getName()));
+            putAttribute("enter", settingsService.getSettingsStringValue(ENTER, realm.getName()));
+            putAttribute("doForgotPassword", settingsService.getSettingsStringValue(DO_FORGOT_PASS, realm.getName()));
             //Общие поля register и login
-            attributes.put("loginWith", settingsService.getSettingsStringValue(LOGIN_WITH, realm.getName()));
-            attributes.put("doLogIn", settingsService.getSettingsStringValue(DO_LOGIN, realm.getName()));
-            attributes.put("registerTitle", settingsService.getSettingsStringValue(REGISTER_TITLE, realm.getName()));
+            putAttribute("loginWith", settingsService.getSettingsStringValue(LOGIN_WITH, realm.getName()));
+            putAttribute("doLogIn", settingsService.getSettingsStringValue(DO_LOGIN, realm.getName()));
+            putAttribute("registerTitle", settingsService.getSettingsStringValue(REGISTER_TITLE, realm.getName()));
             //Login idp link confirm
-            attributes.put("confirmLinkIdpReviewProfile", settingsService.getSettingsStringValue(CONFIRM_LINK_IDP_REVIEW_PROFILE, realm.getName()));
-            attributes.put("confirmLinkIdpContinue", settingsService.getSettingsStringValue(CONFIRM_LINK_IDP_CONTINUE, realm.getName()));
+            putAttribute("confirmLinkIdpReviewProfile", settingsService.getSettingsStringValue(CONFIRM_LINK_IDP_REVIEW_PROFILE, realm.getName()));
+            putAttribute("confirmLinkIdpContinue", settingsService.getSettingsStringValue(CONFIRM_LINK_IDP_CONTINUE, realm.getName()));
             //Login idp link email
             //login page expired
-            attributes.put("pageExpiredMsg1", settingsService.getSettingsStringValue(PAGE_EXPIRE_MSG_1, realm.getName()));
-            attributes.put("pageExpiredMsg2", settingsService.getSettingsStringValue(PAGE_EXPIRE_MSG_2, realm.getName()));
-            attributes.put("doClickHere", settingsService.getSettingsStringValue(DO_CLICK_HERE, realm.getName()));
+            putAttribute("pageExpiredMsg1", settingsService.getSettingsStringValue(PAGE_EXPIRE_MSG_1, realm.getName()));
+            putAttribute("pageExpiredMsg2", settingsService.getSettingsStringValue(PAGE_EXPIRE_MSG_2, realm.getName()));
+            putAttribute("doClickHere", settingsService.getSettingsStringValue(DO_CLICK_HERE, realm.getName()));
             //login reset password
-            attributes.put("username", settingsService.getSettingsStringValue(USERNAME, realm.getName()));
-            attributes.put("usernameOrEmail", settingsService.getSettingsStringValue(USERNAME_OR_EMAIL, realm.getName()));
-            attributes.put("phoneOrEmail", settingsService.getSettingsStringValue(PHONE_OR_EMAIL, realm.getName()));
-            attributes.put("next", settingsService.getSettingsStringValue(NEXT, realm.getName()));
-            attributes.put("emailInstruction", settingsService.getSettingsStringValue(EMAIL_INSTRUCTION, realm.getName()));
+            putAttribute("username", settingsService.getSettingsStringValue(USERNAME, realm.getName()));
+            putAttribute("usernameOrEmail", settingsService.getSettingsStringValue(USERNAME_OR_EMAIL, realm.getName()));
+            putAttribute("phoneOrEmail", settingsService.getSettingsStringValue(PHONE_OR_EMAIL, realm.getName()));
+            putAttribute("next", settingsService.getSettingsStringValue(NEXT, realm.getName()));
+            putAttribute("emailInstruction", settingsService.getSettingsStringValue(EMAIL_INSTRUCTION, realm.getName()));
             //Общие поля login и reset password
-            attributes.put("usernameOrEmailPlaceholder", settingsService.getSettingsStringValue(USERNAME_OR_EMAIL_PLACEHOLDER, realm.getName()));
+            putAttribute("usernameOrEmailPlaceholder", settingsService.getSettingsStringValue(USERNAME_OR_EMAIL_PLACEHOLDER, realm.getName()));
             //Общие поля reset password и update password
-            attributes.put("emailForgotContentTitle", settingsService.getSettingsStringValue(EMAIL_FORGOT_CONTENT_TITLE, realm.getName()));
+            putAttribute("emailForgotContentTitle", settingsService.getSettingsStringValue(EMAIL_FORGOT_CONTENT_TITLE, realm.getName()));
             //Общие поля reset password и update password и Update profile
-            attributes.put("doCancel", settingsService.getSettingsStringValue(DO_CANCEL, realm.getName()));
+            putAttribute("doCancel", settingsService.getSettingsStringValue(DO_CANCEL, realm.getName()));
             //Update password
-            attributes.put("resetPassword", settingsService.getSettingsStringValue(RESET_PASSWORD, realm.getName()));
+            putAttribute("resetPassword", settingsService.getSettingsStringValue(RESET_PASSWORD, realm.getName()));
             //Update profile
-            attributes.put("loginProfileTitle", settingsService.getSettingsStringValue(LOGIN_PROFILE_TITLE, realm.getName()));
-            attributes.put("doSubmit", settingsService.getSettingsStringValue(DO_SUBMIT, realm.getName()));
-            attributes.put("doAccept", settingsService.getSettingsStringValue(DO_ACCEPT, realm.getName()));
+            putAttribute("loginProfileTitle", settingsService.getSettingsStringValue(LOGIN_PROFILE_TITLE, realm.getName()));
+            putAttribute("doSubmit", settingsService.getSettingsStringValue(DO_SUBMIT, realm.getName()));
+            putAttribute("doAccept", settingsService.getSettingsStringValue(DO_ACCEPT, realm.getName()));
             //Общие поля Update profile и register
-            attributes.put("doRegister", settingsService.getSettingsStringValue(DO_REGISTER, realm.getName()));
+            putAttribute("doRegister", settingsService.getSettingsStringValue(DO_REGISTER, realm.getName()));
             //Info page
-            attributes.put("proceedWithAction", settingsService.getSettingsStringValue(PROCEED_WITH_ACTION, realm.getName()));
-            attributes.put("backToApplication", settingsService.getSettingsStringValue(BACK_TO_APP, realm.getName()));
+            putAttribute("proceedWithAction", settingsService.getSettingsStringValue(PROCEED_WITH_ACTION, realm.getName()));
+            putAttribute("backToApplication", settingsService.getSettingsStringValue(BACK_TO_APP, realm.getName()));
 
-            attributes.put("password", settingsService.getSettingsStringValue(PASS, realm.getName()));
-            attributes.put("requiredFields", settingsService.getSettingsStringValue(REQUIRED_FIELDS, realm.getName()));
+            putAttribute("password", settingsService.getSettingsStringValue(PASS, realm.getName()));
+            putAttribute("requiredFields", settingsService.getSettingsStringValue(REQUIRED_FIELDS, realm.getName()));
 
-            attributes.put("url", new SsoUrlBean(realm, theme, baseUri, this.actionUri, Util.isFrame(session)));
-            attributes.put("requiredActionUrl", new RequiredActionUrlFormatterMethod(realm, baseUri));
-            attributes.put("activateNewAuth", isNewAuthActivated(client));
-            attributes.put("loginViaSms", isLoginViaSms());
-            attributes.put("loginViaEmailOrUsernameAndPassword", isLoginViaEmailOrUsernameAndPassword());
-            attributes.put("loginViaPhoneCall", isLoginViaPhoneCall());
-            attributes.put("hideChat", isChatHidden());
-            attributes.put(
+            putAttribute("url", new SsoUrlBean(realm, theme, baseUri, this.actionUri, Util.isFrame(session)));
+            putAttribute("requiredActionUrl", new RequiredActionUrlFormatterMethod(realm, baseUri));
+            putAttribute("activateNewAuth", isNewAuthActivated(client));
+            putAttribute("loginViaSms", isLoginViaSms());
+            putAttribute("loginViaEmailOrUsernameAndPassword", isLoginViaEmailOrUsernameAndPassword());
+            putAttribute("loginViaPhoneCall", isLoginViaPhoneCall());
+            putAttribute("hideChat", isChatHidden());
+            putAttribute(
                     "isRegistrationRedirect",
                     hasClientIdInSettings(REGISTRATION_FIRST_TAB_CLIENT_IDS)
                             && page == LoginFormsPages.LOGIN
@@ -193,22 +193,22 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                             && !isHideRegistration()
 
             );
-            attributes.put("isRegistrationFullTexts", hasClientIdInSettings(REGISTRATION_FIRST_TAB_CLIENT_IDS));
-            attributes.put("isLoginFullTexts", hasClientIdInSettings(LOGIN_FULL_TEXTS_CLIENT_IDS));
+            putAttribute("isRegistrationFullTexts", hasClientIdInSettings(REGISTRATION_FIRST_TAB_CLIENT_IDS));
+            putAttribute("isLoginFullTexts", hasClientIdInSettings(LOGIN_FULL_TEXTS_CLIENT_IDS));
             if(hasClientIdInSettings(LOGIN_FAIL_TO_REGISTRATION_CLIENT_IDS)
                     && messages != null && !messages.isEmpty()
                     && messages.stream().allMatch(m -> Messages.INVALID_USER.equals(m.getMessage()))
                     && page == LoginFormsPages.LOGIN && formData != null && !formData.isEmpty()
             ) {
-                attributes.put("loginFailToRegistrationMessage", notEmptySettingsValue(
+                putAttribute("loginFailToRegistrationMessage", notEmptySettingsValue(
                         settingsService.getSettingsStringValue(LOGIN_FAIL_TO_REGISTRATION_MESSAGE, realm.getName()),
                         ""));
             }
             if(hasClientIdInSettings(LOGIN_FAIL_TO_REGISTRATION_CLIENT_IDS) && page == LoginFormsPages.REGISTER) {
-                attributes.put("lastLoginUsername", getAndRemoveLastLoginUsername());
-                attributes.put("lastLoginPhone", getAndRemoveLastLoginPhone());
+                putAttribute("lastLoginUsername", getAndRemoveLastLoginUsername());
+                putAttribute("lastLoginPhone", getAndRemoveLastLoginPhone());
             }
-            attributes.put("restoreButtonLabel", settingsService.getSettingsStringValue(RESTORE_BUTTON_LABEL, realm.getName()));
+            putAttribute("restoreButtonLabel", settingsService.getSettingsStringValue(RESTORE_BUTTON_LABEL, realm.getName()));
 
             if (realm.isInternationalizationEnabled()) {
                 UriBuilder b;
@@ -240,17 +240,17 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                     b.queryParam(Constants.KEY, authenticationSession.getAuthNote(Constants.KEY));
                 }
 
-                attributes.put("locale", new LocaleBean(realm, locale, b, messagesBundle));
+                putAttribute("locale", new LocaleBean(realm, locale, b, messagesBundle));
             }
         }
         if (realm != null && user != null && session != null) {
-            attributes.put("authenticatorConfigured", new AuthenticatorConfiguredMethod(realm, user, session));
-            attributes.put("actionIsNull", user.getRequiredActionsStream().findAny().isEmpty());
-            attributes.put("actionIsEmpty", user.getRequiredActionsStream().count() == 1);
+            putAttribute("authenticatorConfigured", new AuthenticatorConfiguredMethod(realm, user, session));
+            putAttribute("actionIsNull", user.getRequiredActionsStream().findAny().isEmpty());
+            putAttribute("actionIsEmpty", user.getRequiredActionsStream().count() == 1);
 
             log.info(String.format("actionIsEmpty is %s", user.getRequiredActionsStream().count() == 1));
 
-            attributes.put("clientIsB2B", CLIENT_B2B.equals(client.getClientId()));
+            putAttribute("clientIsB2B", CLIENT_B2B.equals(client.getClientId()));
         }
     }
 
@@ -419,20 +419,20 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         if (authType != null) {
             // TODO: может вообще от этого избавиться?
             // TODO: это для информации какая двухфакторная аутентификация будет
-//            this.attributes.put("twoStepAuthType", authType.getDescription());
-            this.attributes.put("twoStepAuthType", "");
+//            this.putAttribute("twoStepAuthType", authType.getDescription());
+            this.putAttribute("twoStepAuthType", "");
         } else {
-            this.attributes.put("twoStepAuthType", "");
+            this.putAttribute("twoStepAuthType", "");
         }
         if (formData != null) {
 
             String phone = Util.getCleanUserPhone(formData.getFirst(FormConstants.FIELD_PHONE));
 
-            this.attributes.put(FormConstants.FIELD_ORG_NAME, formData.getFirst(FormConstants.FIELD_ORG_NAME));
-            this.attributes.put(FormConstants.FIELD_EMAIL, formData.getFirst(FormConstants.FIELD_EMAIL));
-            this.attributes.put(FormConstants.FIELD_FIRST_NAME, formData.getFirst(FormConstants.FIELD_FIRST_NAME));
-            this.attributes.put(FormConstants.FIELD_USERNAME, formData.getFirst(FormConstants.FIELD_USERNAME));
-            this.attributes.put(FormConstants.FIELD_PHONE, phone);
+            this.putAttribute(FormConstants.FIELD_ORG_NAME, formData.getFirst(FormConstants.FIELD_ORG_NAME));
+            this.putAttribute(FormConstants.FIELD_EMAIL, formData.getFirst(FormConstants.FIELD_EMAIL));
+            this.putAttribute(FormConstants.FIELD_FIRST_NAME, formData.getFirst(FormConstants.FIELD_FIRST_NAME));
+            this.putAttribute(FormConstants.FIELD_USERNAME, formData.getFirst(FormConstants.FIELD_USERNAME));
+            this.putAttribute(FormConstants.FIELD_PHONE, phone);
         }
         log.info("create form attr = {}", attributes);
         return super.createRegistration();
@@ -447,7 +447,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
         UserModel existingUser = AbstractIdpAuthenticator.getExistingUser(session, session.getContext().getRealm(), brokerContext.getAuthenticationSession());
         if (existingUser != null) {
-            attributes.put(FormConstants.EXISTING_USER_EMAIL, existingUser.getEmail());
+            putAttribute(FormConstants.EXISTING_USER_EMAIL, existingUser.getEmail());
         }
         return createResponse(LoginFormsPages.LOGIN_IDP_LINK_EMAIL);
     }
@@ -469,6 +469,14 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             }
         }
         return super.createLoginUsernamePassword();
+    }
+    
+    private void putAttribute(String key, Object value) {
+        if(value == null) {
+            log.warn("null value for key = {}", key);
+        } else {
+            putAttribute(key, value);
+        }
     }
 
     private String getAndRemoveLastLoginPhone() {
