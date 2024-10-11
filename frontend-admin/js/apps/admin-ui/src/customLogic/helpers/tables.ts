@@ -59,7 +59,6 @@ export const mergeCellsAutomatically = <Data>(
         if (!currentCell) {
           return;
         }
-        console.log(currentCell?.innerText, prevCell?.innerText);
 
         if (prevCell != null && currentCell.innerText === prevCell.innerText) {
           if (isMainGroup) {

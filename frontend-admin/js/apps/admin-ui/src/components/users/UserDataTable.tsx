@@ -464,14 +464,7 @@ export function UserDataTable() {
             return actionResolvers;
           }}
           columns={userColumns}
-          automaticallyMergedColumns={[
-            "id",
-            "email",
-            "firstName",
-            "phone",
-            0,
-            9,
-          ]}
+          automaticallyMergedColumns={["id", "email", "phone", 0, 8]}
         />
       </>
     );

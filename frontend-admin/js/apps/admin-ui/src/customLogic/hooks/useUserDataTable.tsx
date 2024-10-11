@@ -49,6 +49,7 @@ const ellipsisCellStyle: CSSProperties = {
   overflow: "hidden",
   textOverflow: "ellipsis",
   maxWidth: 0,
+  minWidth: "100%",
   whiteSpace: "nowrap",
 };
 
@@ -118,14 +119,14 @@ export const useUserDataTable = ({
           }
 
           return (
-            <>
+            <span>
               {!row.enabled && (
                 <Tooltip content={t("notEnabled")}>
                   <ExclamationCircleIcon className="keycloak__user-section__email-verified" />
                 </Tooltip>
               )}{" "}
               <Link to={href}>{row.id}</Link>
-            </>
+            </span>
           );
         },
       },
@@ -134,37 +135,35 @@ export const useUserDataTable = ({
         displayKey: "email",
         isSortable: true,
         cellProps: {
-          style: ellipsisCellStyle,
+          style: { ...ellipsisCellStyle, width: "20%" },
         },
         cellRenderer: (row) => {
           return (
-            <>
+            <span>
               {!row.emailVerified && (
                 <Tooltip content={t("notVerified")}>
                   <ExclamationCircleIcon className="keycloak__user-section__email-verified" />
                 </Tooltip>
               )}{" "}
               {row.email}
-            </>
+            </span>
           );
         },
       },
-      {
-        name: "firstName",
-        displayKey: "firstName",
-        // cellFormatters: [emptyFormatter()],
-        isSortable: true,
-        cellProps: {
-          style: ellipsisCellStyle,
-        },
-      },
+      // {
+      //   name: "firstName",
+      //   displayKey: "firstName",
+      //   isSortable: true,
+      //   cellProps: {
+      //     style: ellipsisCellStyle,
+      //   },
+      // },
       {
         name: "phone",
         displayKey: "phone",
         cellProps: {
-          style: ellipsisCellStyle,
+          style: { ...ellipsisCellStyle, width: "15%" },
         },
-        // cellFormatters: [emptyFormatter()],
       },
 
       {
@@ -178,14 +177,14 @@ export const useUserDataTable = ({
         name: "tomsId",
         displayKey: "tomsId",
         cellProps: {
-          style: ellipsisCellStyle,
+          style: { ...ellipsisCellStyle, width: "20%" },
         },
       },
       {
         name: "userRole",
         displayKey: "roles",
         cellProps: {
-          style: ellipsisCellStyle,
+          style: { ...ellipsisCellStyle, width: "5%" },
         },
         cellRenderer: (row) => row.userRole?.name || "",
       },
