@@ -39,26 +39,24 @@ export const RevocationModal = ({
 
     if (successCount === 0 && failedCount === 0) {
       addAlert(t("noAdminUrlSet"), AlertVariant.warning);
-    } else if (failedCount > 0) {
-      addAlert(
-        t("" + prefixKey + "Success", {
-          successNodes: result.successRequests,
-        }),
-        AlertVariant.success,
-      );
-      addAlert(
-        t("" + prefixKey + "Fail", {
-          failedNodes: result.failedRequests,
-        }),
-        AlertVariant.danger,
-      );
     } else {
-      addAlert(
-        t("" + prefixKey + "Success", {
-          successNodes: result.successRequests,
-        }),
-        AlertVariant.success,
-      );
+      if (successCount > 0) {
+        addAlert(
+          t("" + prefixKey + "Success", {
+            successNodes: result.successRequests,
+          }),
+          AlertVariant.success,
+        );
+      }
+
+      if (failedCount > 0) {
+        addAlert(
+          t("" + prefixKey + "Fail", {
+            failedNodes: result.failedRequests,
+          }),
+          AlertVariant.danger,
+        );
+      }
     }
   };
 
