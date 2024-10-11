@@ -28,7 +28,9 @@ import javax.net.ssl.SSLContext;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 
 import static ru.alamics.sso.settings.SettingConstants.*;
 
@@ -101,7 +103,7 @@ public class SendMessageServiceImpl implements SendMessageService {
         log.info(String.format("Api %s, Sending %s code to number: %s", uri.getHost(), messageRequest.getMessengerName().toString(), messageRequest.getUserPhone()));
 
         var uriBuilder = UriBuilder.fromUri(uri);
-        msgConfig.getConfigForQuery().forEach(uriBuilder::queryParam);
+        msgConfig.getConfigForQuery().forEach((name, objects) -> uriBuilder.queryParam(name, objects.toArray()));
 
         HttpGet request = new HttpGet(
                 uriBuilder.queryParam("to", Util.getCleanUserPhone(messageRequest.getUserPhone()))
