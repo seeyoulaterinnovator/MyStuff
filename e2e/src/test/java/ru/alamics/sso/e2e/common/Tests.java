@@ -4,11 +4,11 @@ import dasniko.testcontainers.keycloak.KeycloakContainer;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
+import io.restassured.specification.RequestSpecification;
 import jakarta.ws.rs.core.UriBuilder;
-import lombok.Cleanup;
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.jdbi.v3.core.Jdbi;
-import org.junit.ClassRule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -17,6 +17,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestWatcher;
 import org.mockserver.client.MockServerClient;
+import org.mockserver.mock.Expectation;
+import org.mockserver.model.ClearType;
+import org.mockserver.model.ExpectationId;
+import org.mockserver.model.HttpRequest;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.containers.MockServerContainer;
@@ -24,16 +28,17 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
+import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
+import static io.restassured.RestAssured.given;
 import static org.testcontainers.utility.MountableFile.forHostPath;
 import static ru.alamics.sso.e2e.common.TestsUtils.*;
 
@@ -59,26 +64,25 @@ public abstract class Tests {
 
     static final String MOCKSERVER_HOST = "mockserver";
 
-    @ClassRule
-    public static final Network NETWORK = Network.newNetwork();
+    private static final Network NETWORK = Network.newNetwork();
 
     @SuppressWarnings("resource")
-    public static final MariaDBContainer<?> MARIA_DB = new MariaDBContainer<>(DockerImageName.parse("mariadb:10.11"))
+    private static final MariaDBContainer<?> MARIA_DB = new MariaDBContainer<>(DockerImageName.parse("mariadb:10.11"))
             .withNetwork(NETWORK)
             .withNetworkAliases(MARIA_DB_HOST);
 
     @SuppressWarnings("resource")
-    public static final GenericContainer<?> SMTP = new GenericContainer<>(DockerImageName.parse("rnwood/smtp4dev:v3"))
+    private static final GenericContainer<?> SMTP = new GenericContainer<>(DockerImageName.parse("rnwood/smtp4dev:v3"))
             .withNetworkAliases(SMTP_HOST)
             .withNetwork(NETWORK)
             .withExposedPorts(25, 80)
             .waitingFor(Wait.forListeningPort());
 
-    public static final MockServerContainer MOCK_SERVER =
+    private static final MockServerContainer MOCK_SERVER =
             new MockServerContainer(DockerImageName.parse("mockserver/mockserver:5.15.0"))
                     .withNetwork(NETWORK)
                     .withNetworkAliases(MOCKSERVER_HOST)
-                    .waitingFor(Wait.forHttp("/ok"))
+                    .waitingFor(Wait.forHttp("/ok").forStatusCode(200))
                     .withEnv("MOCKSERVER_INITIALIZATION_JSON_PATH", "/initialization.json")
                     .withEnv("MOCKSERVER_WATCH_INITIALIZATION_JSON", "true")
                     .withEnv("MOCKSERVER_PREVENT_CERTIFICATE_DYNAMIC_UPDATE", "true")
@@ -87,7 +91,7 @@ public abstract class Tests {
                             "/initialization.json"
                     );
 
-    public static final KeycloakContainer KEYCLOAK = new KeycloakContainer("quay.io/keycloak/keycloak:25.0.2")
+    static final KeycloakContainer KEYCLOAK = new KeycloakContainer("quay.io/keycloak/keycloak:25.0.2")
             .dependsOn(MARIA_DB)
             .dependsOn(SMTP)
             .dependsOn(MOCK_SERVER)
@@ -129,7 +133,7 @@ public abstract class Tests {
             );
 
     @SuppressWarnings("resource")
-    public static final GenericContainer<?> KEYCLOAK_CONFIG_CLI =
+    static final GenericContainer<?> KEYCLOAK_CONFIG_CLI =
             new GenericContainer<>(DockerImageName.parse("adorsys/keycloak-config-cli:latest-25.0.1"))
                     .dependsOn(KEYCLOAK)
                     .withNetwork(NETWORK)
@@ -154,7 +158,11 @@ public abstract class Tests {
                             "/config/e2e-manager.json"
                     );
 
+    private static MockServerClient MOCK_SERVER_CLIENT;
+
     static {
+        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+
         if (IS_ENABLED) {
             try {
                 initialize();
@@ -176,9 +184,10 @@ public abstract class Tests {
         }));
         containers.forEach(GenericContainer::start);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() ->  containers.forEach(GenericContainer::stop)));
-
-        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            containers.forEach(GenericContainer::stop);
+            NETWORK.close();
+        }));
 
         int mockServerPort = MOCK_SERVER.getExposedPorts().get(0);
         String mockServerUrl = "https://" + MOCKSERVER_HOST + ":" + mockServerPort;
@@ -247,22 +256,52 @@ public abstract class Tests {
     }
 
     public static Jdbi jdbi() {
-        return Jdbi.create(() -> MARIA_DB.createConnection(""));
+        return IS_ENABLED ?
+                Jdbi.create(() -> MARIA_DB.createConnection("")) :
+                Jdbi.create("jdbc:mariadb://localhost:3306/sso", "sso", "sso");
     }
 
-    public static void useMockServer(Consumer<MockServerClient> callback) {
-        @Cleanup var client = new MockServerClient("localhost", MOCK_SERVER.getFirstMappedPort());
-        callback.accept(client);
+    @Synchronized
+    public static MockServerClient getMockServerClient() {
+        if(MOCK_SERVER_CLIENT == null) {
+            MOCK_SERVER_CLIENT = new MockServerClient("localhost", IS_ENABLED ? MOCK_SERVER.getFirstMappedPort() : 1080);
+        }
+        return MOCK_SERVER_CLIENT;
     }
 
-    public static <T> T withMockServer(Function<MockServerClient, T> callback) {
-        @Cleanup var client = new MockServerClient("localhost", MOCK_SERVER.getFirstMappedPort());
-        return callback.apply(client);
+    public static RequestSpecification getSmtp4DevApi() {
+        return given().baseUri("http://localhost:" + (IS_ENABLED ?  SMTP.getMappedPort(80) : 8025) + "/api");
+    }
+
+    public static int getKeycloakPort() {
+        return IS_ENABLED ?  KEYCLOAK.getHttpPort() : 8080;
+    }
+
+    public static String getKeycloakPath() {
+        return IS_ENABLED ? KEYCLOAK.getContextPath() : "/auth";
+    }
+
+    public static String getKeycloakUrl() {
+        return "http://localhost:" + getKeycloakPort() + getKeycloakPath();
+    }
+
+    public static String resolveKeycloakPath(String path) {
+        return getKeycloakUrl().replaceFirst(getKeycloakPath(), "") + path;
+    }
+
+    public static String resolveKeycloakPort(String url) {
+        return UriBuilder.fromUri(URI.create(url)).port(getKeycloakPort()).build().toString();
     }
 
     @BeforeEach
-    void tearDownMailBox() {
+    void tearDown() {
         clearMailbox();
+
+        var mockServerClient = getMockServerClient();
+        Arrays.stream(mockServerClient.retrieveActiveExpectations(HttpRequest.request()))
+                .map(Expectation::getId)
+                .distinct()
+                .forEach(id -> mockServerClient.clear(ExpectationId.expectationId(id), ClearType.LOG));
     }
 
     static class TestWatcherExtension implements TestWatcher, AfterAllCallback {

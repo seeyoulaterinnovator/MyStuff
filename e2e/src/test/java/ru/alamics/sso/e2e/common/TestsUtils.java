@@ -1,11 +1,14 @@
 package ru.alamics.sso.e2e.common;
 
+import io.restassured.response.ExtractableResponse;
 import jakarta.ws.rs.core.MediaType;
 import lombok.AccessLevel;
 import lombok.Cleanup;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.http.HttpStatus;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.mockserver.model.HttpRequest;
 
 import javax.net.ssl.SSLContext;
@@ -19,6 +22,7 @@ import java.security.MessageDigest;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HexFormat;
@@ -70,30 +74,38 @@ public final class TestsUtils {
     public static String randomPhone() {
         return String.format(
                 "8%s%02d",
-                LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")), PHONE_COUNTER.getAndIncrement() % 100
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddhh")), PHONE_COUNTER.getAndIncrement() % 100
         );
     }
 
-    public static String getUserId(TestsUsers user) {
+    public static String getUserId(String username, TestsRealms realm) {
         return jdbi().withHandle(handle -> handle.createQuery(
                         "select ID from USER_ENTITY where USERNAME = ? and REALM_ID = ?"
                 )
-                .bind(0, user.getUsername())
-                .bind(1, user.getRealm().getId())
+                .bind(0, username)
+                .bind(1, realm.getId())
+                .mapTo(String.class)
+                .findFirst()
+                .orElseThrow());
+    }
+
+    public static String getUserId(TestsUsers user) {
+        return getUserId(user.getUsername(), user.getRealm());
+    }
+
+    public static String getUserAttribute(String username, TestsRealms realm, String attribute) {
+        return jdbi().withHandle(handle -> handle.createQuery(
+                        "select VALUE from USER_ATTRIBUTE where USER_ID = ? and NAME = ?"
+                )
+                .bind(0, getUserId(username, realm))
+                .bind(1, attribute)
                 .mapTo(String.class)
                 .findFirst()
                 .orElseThrow());
     }
 
     public static String getUserAttribute(TestsUsers user, String attribute) {
-        return jdbi().withHandle(handle -> handle.createQuery(
-                        "select VALUE from USER_ATTRIBUTE where USER_ID = ? and NAME = ?"
-                )
-                .bind(0, getUserId(user))
-                .bind(1, attribute)
-                .mapTo(String.class)
-                .findFirst()
-                .orElseThrow());
+        return getUserAttribute(user.getUsername(), user.getRealm(), attribute);
     }
 
     public static String getUserPhone(TestsUsers user) {
@@ -114,14 +126,18 @@ public final class TestsUtils {
         ));
     }
 
-    public static List<String> getRequiredActions(TestsUsers user) {
+    public static List<String> getRequiredActions(String username, TestsRealms realm) {
         return jdbi().withHandle(handle -> handle.createQuery(
                         "select REQUIRED_ACTION from USER_REQUIRED_ACTION where USER_ID = ?"
                 )
-                .bind(0, getUserId(user))
+                .bind(0, getUserId(username, realm))
                 .mapTo(String.class)
                 .stream()
                 .toList());
+    }
+
+    public static List<String> getRequiredActions(TestsUsers user) {
+        return getRequiredActions(user.getUsername(), user.getRealm());
     }
 
     public static String getClientId(TestsClients client) {
@@ -160,25 +176,19 @@ public final class TestsUtils {
     }
 
     public static void clearMailbox() {
-        given()
-                .contentType(MediaType.APPLICATION_JSON)
-                .auth().oauth2(getAdminCliAccessToken())
-                .baseUri("http://localhost:" + SMTP.getMappedPort(80))
-                .delete("/api/Messages/*")
+        getSmtp4DevApi()
+                .delete("/Messages/*")
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.SC_OK);
     }
 
-    public static int getMessageCount(TestsUsers user) {
-        return given()
-                .contentType(MediaType.APPLICATION_JSON)
-                .auth().oauth2(getAdminCliAccessToken())
-                .baseUri("http://localhost:" + SMTP.getMappedPort(80))
-                .queryParam("searchTerms", user.getUsername())
+    public static int getMessageCount(String email) {
+        return getSmtp4DevApi()
+                .queryParam("searchTerms", email)
                 .queryParam("page", 1)
                 .queryParam("pageSize", 1)
-                .get("/api/Messages")
+                .get("/Messages")
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.SC_OK)
@@ -188,39 +198,64 @@ public final class TestsUtils {
                 .jsonPath().getInt("rowCount");
     }
 
+    public static int getMessageCount(TestsUsers user) {
+        return getMessageCount(user.getUsername());
+    }
+
+    public static String getLastMessageSubject(String email) {
+        return getLastMessage(email).body().jsonPath().get("results[0].subject");
+    }
+
     public static String getLastMessageSubject(TestsUsers user) {
-        return given()
-                .contentType(MediaType.APPLICATION_JSON)
-                .auth().oauth2(getAdminCliAccessToken())
-                .baseUri("http://localhost:" + SMTP.getMappedPort(80))
-                .queryParam("searchTerms", user.getUsername())
+        return getLastMessageSubject(user.getUsername());
+    }
+
+    public static Document getLastMessageHtml(String email) {
+        var messageId = getLastMessage(email).body().jsonPath().get("results[0].id");
+
+        var html = getSmtp4DevApi()
+                .pathParam("messageId", messageId)
+                .get("/Messages/{messageId}/html")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .extract()
+                .body().asString();
+
+        return Jsoup.parse(html);
+    }
+
+    public static Document getLastMessageHtml(TestsUsers user) {
+        return getLastMessageHtml(user.getUsername());
+    }
+
+    public static String getLastSmsCode(String phone) {
+        var mockServerClient = getMockServerClient();
+        var requests = mockServerClient.retrieveRecordedRequests(
+                HttpRequest.request()
+                        .withQueryStringParameter("to", phone)
+                        .withPath("/sms-sender/sendsms")
+        );
+        if(requests.length > 0) {
+            var request = requests[requests.length - 1];
+            var text = request.getFirstQueryStringParameter("text");
+            if(!text.isEmpty()) return text;
+        }
+        return null;
+    }
+
+    private static ExtractableResponse<?> getLastMessage(String email) {
+        return getSmtp4DevApi()
+                .queryParam("searchTerms", email)
                 .queryParam("sortColumn", "receivedDate")
                 .queryParam("sortIsDescending", true)
                 .queryParam("page", 1)
                 .queryParam("pageSize", 1)
-                .get("/api/Messages")
+                .get("/Messages")
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.SC_OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .extract()
-                .body()
-                .jsonPath().get("results[0].subject");
-    }
-
-    public static String getLastSmsCode(String phone) {
-        return withMockServer(client -> {
-            var requests = client.retrieveRecordedRequests(
-                    HttpRequest.request()
-                            .withQueryStringParameter("to", phone)
-                            .withPath("/sms-sender/sendsms")
-            );
-            if(requests.length > 0) {
-                var request = requests[requests.length - 1];
-                var text = request.getFirstQueryStringParameter("text");
-                if(!text.isEmpty()) return text;
-            }
-            return null;
-        });
+                .extract();
     }
 }

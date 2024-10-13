@@ -13,7 +13,7 @@ public class CitiesTests extends Tests {
     @Test
     void getCities() {
         given()
-                .baseUri(KEYCLOAK.getAuthServerUrl())
+                .baseUri(getKeycloakUrl())
                 .pathParam("realm", TestsRealms.E2E.getId())
                 .get("/realms/{realm}/cities")
                 .then()
@@ -23,7 +23,7 @@ public class CitiesTests extends Tests {
     @Test
     void getCurrentCity() {
         given()
-                .baseUri(KEYCLOAK.getAuthServerUrl())
+                .baseUri(getKeycloakUrl())
                 .pathParam("realm", TestsRealms.E2E.getId())
                 .get("/realms/{realm}/cities/current")
                 .then()

@@ -3,7 +3,10 @@ package ru.alamics.sso.e2e;
 import jakarta.ws.rs.core.MediaType;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
-import ru.alamics.sso.e2e.common.*;
+import ru.alamics.sso.e2e.common.Tests;
+import ru.alamics.sso.e2e.common.TestsEnabled;
+import ru.alamics.sso.e2e.common.TestsRealms;
+import ru.alamics.sso.e2e.common.TestsUsers;
 
 import java.util.List;
 
@@ -45,7 +48,7 @@ public class AdminTests extends Tests {
         given()
                 .contentType(MediaType.APPLICATION_JSON)
                 .auth().oauth2(getAdminCliAccessToken(user))
-                .baseUri(KEYCLOAK.getAuthServerUrl())
+                .baseUri(getKeycloakUrl())
                 .queryParam("searchRealm", TestsRealms.E2E.getId())
                 .queryParam("first", 0)
                 .queryParam("max", 10)
@@ -65,7 +68,7 @@ public class AdminTests extends Tests {
         return given()
                 .contentType(MediaType.APPLICATION_JSON)
                 .auth().oauth2(getAdminCliAccessToken(user))
-                .baseUri(KEYCLOAK.getAuthServerUrl())
+                .baseUri(getKeycloakUrl())
                 .pathParam("realm", user.getRealm().getId())
                 .get("/realms/{realm}/users-info/accessible-realms")
                 .then()

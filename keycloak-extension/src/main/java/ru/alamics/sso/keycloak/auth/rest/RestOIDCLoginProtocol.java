@@ -9,16 +9,27 @@ import org.keycloak.protocol.oidc.TokenManager;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.util.TokenUtil;
+import ru.alamics.sso.client.ClientService;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.util.Util;
 
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
 @Slf4j
 public class RestOIDCLoginProtocol extends OIDCLoginProtocol {
     @Override
     public Response authenticated(AuthenticationSessionModel authSession, UserSessionModel userSession, ClientSessionContext clientSessionCtx) {
         if (Util.isPasswordGrandType(session)) {
             return createTokenResponse(authSession, userSession);
+        }
+        if(authSession.getRedirectUri() == null) {
+            String redirectUri = Lookup.lookup(ClientService.class)
+                    .getMainRedirectUri(authSession.getClient().getClientId());
+            if(redirectUri == null) {
+                redirectUri = authSession.getClient().getBaseUrl();
+            }
+            authSession.setRedirectUri(redirectUri);
         }
         return super.authenticated(authSession, userSession, clientSessionCtx);
     }

@@ -6,6 +6,8 @@
         <option name="sourceFilePath" value="docker-compose-local.yml" />
       </settings>
     </deployment>
-    <method v="2" />
+    <method v="2">
+      <option name="LaunchBrowser.Before.Run" url="http://localhost:8180/" />
+    </method>
   </configuration>
 </component>

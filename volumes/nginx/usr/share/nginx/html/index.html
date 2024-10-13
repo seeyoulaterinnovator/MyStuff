@@ -4,6 +4,14 @@
     <title>Client</title>
 </head>
 <body>
+<a href="http://localhost:8080/auth/admin/master/console/" target="_blank">Admin console</a>
+<br>
+<a href="http://localhost:8080/auth/admin/manager/console/" target="_blank">Manager console</a>
+<br>
+<a href="http://localhost:8025" target="_blank">SMTP4Dev</a>
+<br>
+<a href="http://localhost:1080/mockserver/dashboard" target="_blank">MockServer</a>
+<br>
 <div id="logon" hidden>
     <label for="realm">Realm</label>
     <select id="realm">
@@ -33,7 +41,7 @@
     if(code) {
       const realm = params.get('realm');
       const client = params.get('client');
-      const response = await fetch(`http://localhost:8180/kecyloak/auth/realms/${realm}/protocol/openid-connect/token`, {
+      const response = await fetch(`http://localhost:8180/keycloak/auth/realms/${realm}/protocol/openid-connect/token`, {
         method: 'post',
         body: new URLSearchParams({
           grant_type: 'authorization_code',
@@ -52,12 +60,18 @@
         const realm = document.getElementById('realm').value;
         const client = document.getElementById('client').value;
         const iframe = document.getElementById('iframe').checked ? { iframe: 1 } : {};
-        document.location = `http://localhost:8080/auth/realms/${realm}/protocol/openid-connect/auth?` + new URLSearchParams({
-          response_type: 'code',
-          client_id: client,
-          redirect_uri: `http://localhost:8180/?realm=${realm}&client=${client}`,
-          ...iframe
-        });
+        const element = document.createElement('a');
+        element.setAttribute('href', `http://localhost:8080/auth/realms/${realm}/protocol/openid-connect/auth?` + new URLSearchParams({
+            response_type: 'code',
+            client_id: client,
+            redirect_uri: `http://localhost:8180/?realm=${realm}&client=${client}`,
+            ...iframe
+        }));
+        element.setAttribute('target', '_blank');
+        element.setAttribute('hidden', 'hidden');
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
       };
       document.getElementById('logon').removeAttribute('hidden');
     }

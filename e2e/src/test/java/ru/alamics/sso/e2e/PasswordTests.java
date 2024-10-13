@@ -46,7 +46,7 @@ public class PasswordTests extends Tests {
                 .queryParam("response_type", "code")
                 .queryParam("redirect_uri", client.getRedirectUri())
                 .queryParam("client_id", client.getClientId())
-                .baseUri(KEYCLOAK.getAuthServerUrl())
+                .baseUri(getKeycloakUrl())
                 .pathParam("realm", client.getRealm().getId())
                 .get("/realms/{realm}/protocol/openid-connect/auth")
                 .then()
@@ -57,6 +57,7 @@ public class PasswordTests extends Tests {
         var logonUrl = Jsoup.parse(logonPage.body().asString()).body().select("#loginForm").attr("action");
 
         assertNotNull(logonUrl);
+        assertNotEquals("", logonUrl);
         log.info("Logon URL: {}", logonUrl);
 
         var resetUrl = given()
@@ -87,6 +88,10 @@ public class PasswordTests extends Tests {
 
         var updateUrl = Jsoup.parse(updatePage.body().asString()).body().select("#loginUpdatePasswordForm").attr("action");
 
+        assertNotNull(updateUrl);
+        assertNotEquals("", updateUrl);
+        log.info("update URL: {}", updateUrl);
+
         var logonPage2 = given()
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .formParam("password-new", newPassword)
@@ -108,7 +113,7 @@ public class PasswordTests extends Tests {
                 .formParam("redirect_uri", client.getRedirectUri())
                 .formParam("code", code)
                 .auth().preemptive().basic(client.getClientId(), client.getClientSecret())
-                .baseUri(KEYCLOAK.getAuthServerUrl())
+                .baseUri(getKeycloakUrl())
                 .pathParam("realm", client.getRealm().getId())
                 .post("/realms/{realm}/protocol/openid-connect/token")
                 .then()
@@ -124,7 +129,7 @@ public class PasswordTests extends Tests {
        given()
                 .cookies(logonPage.cookies())
                 .redirects().follow(false)
-                .baseUri(KEYCLOAK.getAuthServerUrl())
+                .baseUri(getKeycloakUrl())
                 .pathParam("realm", client.getRealm().getId())
                 .post("/realms/{realm}/protocol/openid-connect/logout")
                 .then()
@@ -136,7 +141,7 @@ public class PasswordTests extends Tests {
                 .queryParam("response_type", "code")
                 .queryParam("redirect_uri", client.getRedirectUri())
                 .queryParam("client_id", client.getClientId())
-                .baseUri(KEYCLOAK.getAuthServerUrl())
+                .baseUri(getKeycloakUrl())
                 .pathParam("realm", client.getRealm().getId())
                 .get("/realms/{realm}/protocol/openid-connect/auth")
                 .then()
@@ -147,6 +152,7 @@ public class PasswordTests extends Tests {
        var logonUrl2 = Jsoup.parse(logonPage3.body().asString()).body().select("#loginForm").attr("action");
 
        assertNotNull(logonUrl2);
+       assertNotEquals("", logonPage2);
 
         var logonRedirectUrl = given()
                 //.header("Referer", logonPageUrl)
@@ -172,7 +178,7 @@ public class PasswordTests extends Tests {
                 .formParam("redirect_uri", client.getRedirectUri())
                 .formParam("code", code2)
                 .auth().preemptive().basic(client.getClientId(), client.getClientSecret())
-                .baseUri(KEYCLOAK.getAuthServerUrl())
+                .baseUri(getKeycloakUrl())
                 .pathParam("realm", client.getRealm().getId())
                 .post("/realms/{realm}/protocol/openid-connect/token")
                 .then()
@@ -194,7 +200,7 @@ public class PasswordTests extends Tests {
         given()
                 .contentType(MediaType.APPLICATION_JSON)
                 .auth().oauth2(getAdminCliAccessToken())
-                .baseUri(KEYCLOAK.getAuthServerUrl())
+                .baseUri(getKeycloakUrl())
                 .body(List.of(userId))
                 .pathParam("realm", user.getRealm().getId())
                 .post("/realms/{realm}/users-toms/send/login")
@@ -215,7 +221,7 @@ public class PasswordTests extends Tests {
         given()
                 .contentType(MediaType.APPLICATION_JSON)
                 .auth().oauth2(getAdminCliAccessToken())
-                .baseUri(KEYCLOAK.getAuthServerUrl())
+                .baseUri(getKeycloakUrl())
                 .body(List.of(userId))
                 .pathParam("realm", user.getRealm().getId())
                 .post("/realms/{realm}/users-toms/credential/reset-with-send-login")
@@ -238,7 +244,7 @@ public class PasswordTests extends Tests {
         given()
                 .contentType(MediaType.APPLICATION_JSON)
                 .auth().oauth2(getAdminCliAccessToken())
-                .baseUri(KEYCLOAK.getAuthServerUrl())
+                .baseUri(getKeycloakUrl())
                 .body(Map.of(
                         "id", "9e4f8fb6-5425-11ec-bf63-0242ac130002",
                         "extId", "timerIntervalDurationProperty",

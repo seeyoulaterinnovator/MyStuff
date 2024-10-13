@@ -5,6 +5,10 @@ update APP_PROPERTIES
 set value = 'http://mockserver:1080/cities/domains'
 where name = 'cities.url';
 
+update APP_PROPERTIES
+set value = 'http://mockserver:1080/sms-sender/sendsms'
+where name = 'smsSender.uri';
+
 update REALM_SMTP_CONFIG
 set VALUE = 'smtp4dev'
 where NAME = 'host';

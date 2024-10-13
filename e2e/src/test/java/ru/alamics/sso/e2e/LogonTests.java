@@ -3,7 +3,6 @@ package ru.alamics.sso.e2e;
 import io.restassured.response.ExtractableResponse;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.jsoup.Jsoup;
@@ -13,9 +12,8 @@ import ru.alamics.sso.e2e.common.TestsClients;
 import ru.alamics.sso.e2e.common.TestsEnabled;
 import ru.alamics.sso.e2e.common.TestsUsers;
 
-import java.net.URI;
-
 import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static ru.alamics.sso.e2e.common.TestsUtils.*;
 
@@ -73,8 +71,7 @@ public class LogonTests extends Tests {
 
         var smsLogonPage1 = given()
                 .cookies(logonPage.cookies())
-                .baseUri(KEYCLOAK.getAuthServerUrl().replaceFirst(KEYCLOAK.getContextPath(), ""))
-                .get(smsLogonPagePath1)
+                .get(resolveKeycloakPath(smsLogonPagePath1))
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.SC_OK)
@@ -83,9 +80,7 @@ public class LogonTests extends Tests {
         var smsLogonFormUrl1 = Jsoup.parse(smsLogonPage1.body().asString()).select("#loginForm").attr("action");
 
         assertNotNull(smsLogonFormUrl1);
-
-        var smsLogonFormUri1 = URI.create(smsLogonFormUrl1);
-        smsLogonFormUri1 = UriBuilder.fromUri(smsLogonFormUri1).port(KEYCLOAK.getFirstMappedPort()).build();
+        assertNotEquals("", smsLogonFormUrl1);
 
         var smsLogonPage2 = given()
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -93,7 +88,7 @@ public class LogonTests extends Tests {
                 .formParam("smsButton", "")
                 .cookies(logonPage.cookies())
                 .redirects().follow(false)
-                .post(smsLogonFormUri1)
+                .post(resolveKeycloakPort(smsLogonFormUrl1))
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.SC_OK)
@@ -102,20 +97,18 @@ public class LogonTests extends Tests {
         var smsLogonFormUrl2 = Jsoup.parse(smsLogonPage2.body().asString()).select("#totpe").attr("action");
 
         assertNotNull(smsLogonFormUrl2);
+        assertNotEquals("", smsLogonFormUrl2);
 
         String smsCode = getLastSmsCode(getUserPhone(user));
 
         assertNotNull(smsCode);
-
-        var smsLogonFormUri2 = URI.create(smsLogonFormUrl2);
-        smsLogonFormUri2 = UriBuilder.fromUri(smsLogonFormUri2).port(KEYCLOAK.getFirstMappedPort()).build();
 
         var logonRedirectUrl = given()
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .formParam("smscode", smsCode)
                 .cookies(logonPage.cookies())
                 .redirects().follow(false)
-                .post(smsLogonFormUri2)
+                .post(resolveKeycloakPort(smsLogonFormUrl2))
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.SC_MOVED_TEMPORARILY)
@@ -136,7 +129,7 @@ public class LogonTests extends Tests {
                 .queryParam("response_type", "code")
                 .queryParam("redirect_uri", client.getRedirectUri())
                 .queryParam("client_id", client.getClientId())
-                .baseUri(KEYCLOAK.getAuthServerUrl())
+                .baseUri(getKeycloakUrl())
                 .pathParam("realm", client.getRealm().getId())
                 .get("/realms/{realm}/protocol/openid-connect/auth")
                 .then()
@@ -152,7 +145,7 @@ public class LogonTests extends Tests {
                 .formParam("redirect_uri", client.getRedirectUri())
                 .formParam("code", code)
                 .auth().preemptive().basic(client.getClientId(), client.getClientSecret())
-                .baseUri(KEYCLOAK.getAuthServerUrl())
+                .baseUri(getKeycloakUrl())
                 .pathParam("realm", client.getRealm().getId())
                 .post("/realms/{realm}/protocol/openid-connect/token")
                 .then()
