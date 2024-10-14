@@ -18,6 +18,7 @@ import org.keycloak.admin.ui.rest.EffectiveRoleMappingResource;
 import org.keycloak.admin.ui.rest.model.ClientRole;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.common.Profile;
+import org.keycloak.credential.CredentialModel;
 import org.keycloak.events.Details;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.events.EventType;
@@ -509,6 +510,38 @@ public class CustomUserResource {
     @POST
     public Response sendLoginAndResetPassword(List<String> ids) {
         sendLogin(ids, UserEntityRepresentation.SEND_LOGIN_AND_RESET_PASSWORD);
+        return JsonResponse.success()
+                .httpStatus(Response.Status.NO_CONTENT)
+                .build();
+    }
+
+    @Path("users/{userId}/credentials/{credentialId}")
+    @DELETE
+    @NoCache
+    public Response removeCredential(final @PathParam("userId") String userId, final @PathParam("credentialId") String credentialId) {
+        KeycloakContext context = session.getContext();
+        AdminEventBuilder eventBuilder = new AdminEventBuilder(context.getRealm(), auth.adminAuth(), session, context.getConnection());
+        eventBuilder.resource(ResourceType.USER);
+        UserProvider userProvider = session.users();
+        UserModel user = userProvider.getUserById(realm, userId);
+
+        CredentialModel credential = user.credentialManager().getStoredCredentialById(credentialId);
+        if (credential == null) {
+            // we do this to make sure somebody can't phish ids
+            if (auth.users().canQuery()) throw new NotFoundException("Credential not found");
+            else throw new ForbiddenException();
+        }
+        user.credentialManager().removeStoredCredentialById(credentialId);
+//        adminEvent.operation(OperationType.ACTION).resourcePath(session.getContext().getUri()).success();
+
+        UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
+        rep.getRequiredActions().add(UserEntityRepresentation.SEND_LOGIN_AND_RESET_PASSWORD);
+        eventBuilder.operation(OperationType.ACTION)
+                .resourcePath(session.getContext().getUri())
+                .representation(rep)
+                .realm(realm)
+                .success();
+
         return JsonResponse.success()
                 .httpStatus(Response.Status.NO_CONTENT)
                 .build();
