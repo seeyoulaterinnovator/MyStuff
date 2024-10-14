@@ -134,7 +134,7 @@ export function UserDataTableToolbarItems({
   const searchItem = () => {
     return (
       <ToolbarGroup
-        className={`"pf-m-wrap" ${isCustomTheme && searchType === "custom" ? "pf-v5-u-w-100" : ""}`}
+        className={`"pf-m-wrap" ${isCustomTheme && searchType === "custom" ? "pf-v5-u-w-100 pf-v5-u-flex-wrap" : ""}`}
         variant="filter-group"
         {...(isCustomTheme && searchType === "custom"
           ? {
