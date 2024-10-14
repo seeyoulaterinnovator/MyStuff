@@ -120,6 +120,9 @@ export const RealmSimpleSelector = ({
       className="keycloak__realm_selector__dropdown"
       isOpen={open}
       onOpenChange={setOpen}
+      popperProps={{
+        position: "right",
+      }}
       toggle={(ref) => (
         <MenuToggle
           ref={ref}
