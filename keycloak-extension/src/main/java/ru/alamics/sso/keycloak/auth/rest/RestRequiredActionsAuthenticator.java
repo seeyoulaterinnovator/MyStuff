@@ -18,6 +18,7 @@ import org.keycloak.services.managers.ClientSessionCode;
 import org.keycloak.services.resources.LoginActionsService;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.keycloak.auth.AbstractAuthenticator;
+import ru.alamics.sso.keycloak.auth.form.new_auth.newAuthReqActions.EmailReqAction;
 import ru.alamics.sso.registration.model.UserConstants;
 import ru.alamics.sso.util.Util;
 
@@ -30,7 +31,9 @@ import static ru.alamics.sso.registration.model.UserConstants.AUTH_NOTE_DIRECT_G
 public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
     private static final List<String> DIRECT_GRANT_ALLOWED_REQUIRED_ACTIONS = List.of(
             UserModel.RequiredAction.UPDATE_PASSWORD.name(),
-            UserModel.RequiredAction.UPDATE_PROFILE.name()
+            UserModel.RequiredAction.UPDATE_PROFILE.name(),
+            UserModel.RequiredAction.VERIFY_EMAIL.name(),
+            EmailReqAction.PROVIDER_ID
     );
 
     private final KeycloakSession session;
