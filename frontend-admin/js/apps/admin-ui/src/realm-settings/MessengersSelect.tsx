@@ -50,7 +50,7 @@ export const MessengersSelect = () => {
       <Controller
         name="smtpServer.messenger"
         control={control}
-        defaultValue={[]}
+        defaultValue={""}
         render={({ field }) => {
           const splittedFieldValue = (field.value as string)
             ?.split(",")
