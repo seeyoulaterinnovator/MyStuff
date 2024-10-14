@@ -49,48 +49,46 @@ export function UserDataTableCustomSearchForm({
   }, [customFilters]);
 
   return (
-    <Form onSubmit={handleSubmit(searchUserWithCustomFilters)}>
+    <Form
+      className="pf-v5-u-flex-grow-1"
+      onSubmit={handleSubmit(searchUserWithCustomFilters)}
+    >
       {isCustomTheme && !withHideUserSearchAccess && (
         <ToolbarGroup
-          className="pf-m-wrap"
+          className="pf-m-wrap pf-m-space-items"
           variant="filter-group"
           spaceItems={{ default: "spaceItemsSm" }}
         >
-          <ToolbarItem>
+          <ToolbarItem className="pf-v5-u-flex-grow-1">
             <TextInput
               id="value"
-              style={{ maxWidth: "150px" }}
               placeholder={t("search")}
               {...register("search")}
             />
           </ToolbarItem>
-          <ToolbarItem>
+          <ToolbarItem className="pf-v5-u-flex-grow-1">
             <TextInput
               id="userId"
-              style={{ maxWidth: "150px" }}
               placeholder={t("searchByUserId")}
               {...register("searchUser")}
             />
           </ToolbarItem>
-          <ToolbarItem>
+          <ToolbarItem className="pf-v5-u-flex-grow-1">
             <TextInput
               id="tomsId"
-              style={{ maxWidth: "150px" }}
               placeholder={t("searchByTomsId")}
               {...register("searchToms")}
             />
           </ToolbarItem>
-          <ToolbarItem>
+          <ToolbarItem className="pf-v5-u-flex-grow-1">
             <TextInput
               id="phone"
-              style={{ maxWidth: "135px" }}
               placeholder={t("searchByPhone")}
               {...register("searchPhone")}
             />
           </ToolbarItem>
           <ToolbarItem>
             <Button
-              style={{ maxWidth: "150px" }}
               data-testid="search-user-attribute-btn"
               variant="primary"
               type="submit"
