@@ -1,7 +1,12 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth.new_auth_post;
 
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
+import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.forms.login.LoginFormsProvider;
@@ -20,10 +25,6 @@ import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
-import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.core.MultivaluedMap;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -76,8 +77,12 @@ public class NewAttributesForm implements Authenticator {
                 attributes = Collections.emptyList();
             }
             if (attributes.size() <= 1) {
-                roleService.setUserPost(context, attributes);
-                context.success();
+                if(roleService.setUserPost(context, attributes)) {
+                    context.success();
+                } else {
+                    log.debug("User {} post set failed", context.getUser().getId());
+                    context.failure(AuthenticationFlowError.INVALID_USER);
+                }
             } else {
                 context.challenge(createForm(context, attributes));
             }
