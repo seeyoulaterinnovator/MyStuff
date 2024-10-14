@@ -34,15 +34,34 @@ import { useWhoAmI } from "../../context/whoami/WhoAmI";
 import { addBomAndConvertToBlob } from "../helpers/transforms";
 import { ExclamationCircleIcon } from "@patternfly/react-icons";
 
-const getBlockedUsers = (
+const getInvalidUsers = (
   users?: Array<UserRepresentation | UserInfoRepresentation>,
 ) => {
-  const blockedUsers = users?.filter((item) => !item.enabled);
-  const blockedUsernames = blockedUsers
-    ?.map((item) => item.username)
-    .join(", ");
+  const blockedUsers: (UserRepresentation | UserInfoRepresentation)[] = [];
+  const blockedUsernames: string[] = [];
+  const unverifiedUsers: (UserRepresentation | UserInfoRepresentation)[] = [];
+  const unverifiedUsernames: string[] = [];
 
-  return { blockedUsers, blockedUsernames };
+  users?.forEach((userItem) => {
+    const { enabled, emailVerified, username } = userItem;
+
+    if (!enabled) {
+      blockedUsers.push(userItem);
+      if (username) blockedUsernames.push(username);
+    }
+
+    if (!emailVerified) {
+      unverifiedUsers.push(userItem);
+      if (username) unverifiedUsernames.push(username);
+    }
+  });
+
+  return {
+    blockedUsers,
+    blockedUsernames: blockedUsernames.join(", "),
+    unverifiedUsers,
+    unverifiedUsernames: unverifiedUsernames.join(", "),
+  };
 };
 
 const ellipsisCellStyle: CSSProperties = {
@@ -259,8 +278,13 @@ export const useUserDataTable = ({
     };
   }, []);
 
-  const checkIsSelectedUsersBlocked = useCallback(() => {
-    const { blockedUsers, blockedUsernames } = getBlockedUsers(selectedRows);
+  const checkUsersForActivity = useCallback(() => {
+    const {
+      blockedUsers,
+      blockedUsernames,
+      unverifiedUsernames,
+      unverifiedUsers,
+    } = getInvalidUsers(selectedRows);
 
     if (blockedUsers?.length) {
       addError(
@@ -272,6 +296,21 @@ export const useUserDataTable = ({
         ),
         "error",
       );
+    }
+
+    if (unverifiedUsers?.length) {
+      addError(
+        t(
+          unverifiedUsers.length > 1
+            ? "unverifiedUsersSelected"
+            : "unverifiedUserSelected",
+          { username: unverifiedUsernames },
+        ),
+        "error",
+      );
+    }
+
+    if (blockedUsers?.length || unverifiedUsers?.length) {
       return true;
     }
 
@@ -292,7 +331,7 @@ export const useUserDataTable = ({
     switch (action.type) {
       case CustomUserToolbarAction.SEND_LOGIN: {
         try {
-          if (checkIsUsersNotSelected() || checkIsSelectedUsersBlocked()) {
+          if (checkIsUsersNotSelected() || checkUsersForActivity()) {
             return;
           }
 
@@ -311,7 +350,7 @@ export const useUserDataTable = ({
 
       case CustomUserToolbarAction.SEND_LOGIN_AND_RESET_PASSWORD: {
         try {
-          if (checkIsUsersNotSelected() || checkIsSelectedUsersBlocked()) {
+          if (checkIsUsersNotSelected() || checkUsersForActivity()) {
             return;
           }
 
