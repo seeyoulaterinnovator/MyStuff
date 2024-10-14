@@ -12,6 +12,8 @@ import {
   DropdownList,
   DropdownItem,
   ToolbarGroup,
+  DropdownGroup,
+  Divider,
 } from "@patternfly/react-core";
 import { ArrowRightIcon, EllipsisVIcon } from "@patternfly/react-icons";
 import { ReactNode, useState } from "react";
@@ -78,6 +80,7 @@ export function UserDataTableToolbarItems({
 }: UserDataTableToolbarItemsProps) {
   const { t } = useTranslation();
   const [kebabOpen, setKebabOpen] = useState(false);
+  const [isActionsOpen, setIsActionsOpen] = useState(false);
 
   const { hasAccess, getAccesses } = useAccess();
   const { whoAmI } = useWhoAmI();
@@ -130,30 +133,28 @@ export function UserDataTableToolbarItems({
 
   const searchItem = () => {
     return (
-      <ToolbarItem>
-        <ToolbarGroup
-          className="pf-m-wrap"
-          variant="filter-group"
-          {...(isCustomTheme && searchType === "custom"
-            ? {
-                spaceItems: { default: "spaceItemsSm" },
-              }
-            : {})}
-        >
-          <ToolbarItem>
-            <SearchDropdown
-              searchType={searchType}
-              onSelect={(searchType) => {
-                clearAllFilters();
-                setSearchType(searchType);
-              }}
-            />
-          </ToolbarItem>
-          {searchType === "default" && defaultSearchInput()}
-          {searchType === "attribute" && attributeSearchInput()}
-          {searchType === "custom" && customSearchInput()}
-        </ToolbarGroup>
-      </ToolbarItem>
+      <ToolbarGroup
+        className="pf-m-wrap pf-v5-u-w-100"
+        variant="filter-group"
+        {...(isCustomTheme && searchType === "custom"
+          ? {
+              spaceItems: { default: "spaceItemsSm" },
+            }
+          : {})}
+      >
+        <ToolbarItem>
+          <SearchDropdown
+            searchType={searchType}
+            onSelect={(searchType) => {
+              clearAllFilters();
+              setSearchType(searchType);
+            }}
+          />
+        </ToolbarItem>
+        {searchType === "default" && defaultSearchInput()}
+        {searchType === "attribute" && attributeSearchInput()}
+        {searchType === "custom" && customSearchInput()}
+      </ToolbarGroup>
     );
   };
 
@@ -238,7 +239,7 @@ export function UserDataTableToolbarItems({
       !isCustomTheme) && (
       <ToolbarItem>
         <Button
-          variant={ButtonVariant.link}
+          variant={!isCustomTheme ? ButtonVariant.link : undefined}
           onClick={toggleDeleteDialog}
           data-testid="delete-user-btn"
           isDisabled={hasSelectedRows}
@@ -303,44 +304,11 @@ export function UserDataTableToolbarItems({
   );
 
   const actionItems = (
-    <>
-      {isCustomTheme &&
-        withViewUsersAccess &&
-        !(isMasterSearchRealm || isManagerSearchRealm) && (
-          <ToolbarGroup
-            align={{
-              md: "alignLeft",
-              "2xl": "alignRight",
-            }}
-            className="pf-m-wrap"
-          >
-            <ToolbarItem>
-              <Button
-                onClick={() =>
-                  onCustomAction?.({ type: CustomUserToolbarAction.SEND_LOGIN })
-                }
-              >
-                {t("sendLogin")}
-              </Button>
-            </ToolbarItem>
-            <ToolbarItem>
-              <Button
-                onClick={() =>
-                  onCustomAction?.({
-                    type: CustomUserToolbarAction.SEND_LOGIN_AND_RESET_PASSWORD,
-                  })
-                }
-              >
-                {t("sendLoginAndResetPassword")}
-              </Button>
-            </ToolbarItem>
-          </ToolbarGroup>
-        )}
-      <ToolbarGroup
-        align={{ md: "alignLeft", "2xl": "alignRight" }}
-        className="pf-m-wrap"
-      >
-        {/* {isCustomTheme &&
+    <ToolbarGroup
+      align={{ md: "alignLeft", "2xl": "alignRight" }}
+      className="pf-m-wrap"
+    >
+      {/* {isCustomTheme &&
           withCustomViewRealmAccess &&
           (withButtonDownloadTemplateCsvAccess || isMasterAuthRealm) && (
             <ToolbarItem>
@@ -355,7 +323,7 @@ export function UserDataTableToolbarItems({
               </Button>
             </ToolbarItem>
           )} */}
-        {/* {isCustomTheme &&
+      {/* {isCustomTheme &&
           withCustomViewRealmAccess &&
           (withButtonDownloadTemplateXlsxAccess || isMasterAuthRealm) && (
             <ToolbarItem>
@@ -370,110 +338,158 @@ export function UserDataTableToolbarItems({
               </Button>
             </ToolbarItem>
           )} */}
-        {isCustomTheme &&
-          withShowManageButtonAndManageUsersAccess &&
-          withCustomViewRealmAccess &&
-          (withButtonImportFileCsvAccess || isMasterAuthRealm) && (
-            <ToolbarItem>
-              <UploadButton
-                extensions={".csv,.xls,.xlsx,.ctl"}
-                onUpload={(event) =>
-                  onCustomAction?.({
-                    type: CustomUserToolbarAction.IMPORT_FILE,
-                    payload: event.target.files?.[0],
-                  })
-                }
-              >
-                {t("importFile")}
-              </UploadButton>
-            </ToolbarItem>
-          )}
-        {isCustomTheme &&
-          withShowManageButtonAndManageUsersAccess &&
-          (withButtonExportCsvAccess || isMasterAuthRealm) && (
-            <ToolbarItem>
-              <Button
-                onClick={() =>
-                  onCustomAction?.({ type: CustomUserToolbarAction.EXPORT_CSV })
-                }
-              >
-                {t("exportCSV")}
-              </Button>
-            </ToolbarItem>
-          )}
-        {isCustomTheme &&
-          withShowManageButtonAndManageUsersAccess &&
-          (withButtonExportXlsxAccess || isMasterAuthRealm) && (
-            <ToolbarItem>
-              <Button
-                onClick={() =>
-                  onCustomAction?.({
-                    type: CustomUserToolbarAction.EXPORT_EXCEL,
-                  })
-                }
-              >
-                {t("exportExcel")}
-              </Button>
-            </ToolbarItem>
-          )}
-        {isCustomTheme &&
-          withShowManageButtonAndManageUsersAccess &&
-          (withButtonResetPasswordAccess || isMasterAuthRealm) && (
-            <ToolbarItem>
-              <Button
-                onClick={() =>
-                  onCustomAction?.({
-                    type: CustomUserToolbarAction.RESET_PASSWORD,
-                  })
-                }
-              >
-                {t("resetPassword")}
-              </Button>
-            </ToolbarItem>
-          )}
-        {isCustomTheme &&
-          withShowManageButtonAndManageUsersAccess &&
-          (withButtonBlockUsersAccess || isMasterAuthRealm) && (
-            <ToolbarItem>
-              <Button
-                onClick={() =>
-                  onCustomAction?.({
-                    type: CustomUserToolbarAction.BLOCK_USERS,
-                  })
-                }
-              >
-                {t("blockUsers")}
-              </Button>
-            </ToolbarItem>
-          )}
-        {isCustomTheme &&
-          withShowManageButtonAndManageUsersAccess &&
-          (withButtonUnlockUsersAccess || isMasterAuthRealm) && (
-            <ToolbarItem>
-              <Button
-                onClick={() =>
-                  onCustomAction?.({
-                    type: CustomUserToolbarAction.UNLOCK_USERS,
-                  })
-                }
-              >
-                {t("unlockUsers")}
-              </Button>
-            </ToolbarItem>
-          )}
-        {((isCustomTheme &&
-          withShowManageButtonAndManageUsersAccess &&
-          (withButtonAddUserAccess || isMasterAuthRealm)) ||
-          !isCustomTheme) && (
+      {isCustomTheme &&
+        withShowManageButtonAndManageUsersAccess &&
+        withCustomViewRealmAccess &&
+        (withButtonImportFileCsvAccess || isMasterAuthRealm) && (
           <ToolbarItem>
-            <Button data-testid="add-user" onClick={goToCreate}>
-              {t("addUser")}
-            </Button>
+            <UploadButton
+              extensions={".csv,.xls,.xlsx,.ctl"}
+              onUpload={(event) =>
+                onCustomAction?.({
+                  type: CustomUserToolbarAction.IMPORT_FILE,
+                  payload: event.target.files?.[0],
+                })
+              }
+            >
+              {t("importFile")}
+            </UploadButton>
           </ToolbarItem>
         )}
-        {bruteForceProtectionToolbarItem}
-      </ToolbarGroup>
-    </>
+      {((isCustomTheme &&
+        withShowManageButtonAndManageUsersAccess &&
+        (withButtonAddUserAccess || isMasterAuthRealm)) ||
+        !isCustomTheme) && (
+        <ToolbarItem>
+          <Button data-testid="add-user" onClick={goToCreate}>
+            {t("addUser")}
+          </Button>
+        </ToolbarItem>
+      )}
+      {bruteForceProtectionToolbarItem}
+      <ToolbarItem>
+        <Dropdown
+          popperProps={{
+            position: "right",
+          }}
+          toggle={(ref) => (
+            <MenuToggle
+              ref={ref}
+              onClick={() =>
+                setIsActionsOpen((prevIsActionsOpen) => !prevIsActionsOpen)
+              }
+              data-testid="action-dropdown"
+            >
+              {t("action")}
+            </MenuToggle>
+          )}
+          isOpen={isActionsOpen}
+          onOpenChange={setIsActionsOpen}
+        >
+          <DropdownGroup>
+            {isCustomTheme &&
+              withViewUsersAccess &&
+              !(isMasterSearchRealm || isManagerSearchRealm) && (
+                <DropdownList>
+                  <DropdownItem
+                    onClick={() =>
+                      onCustomAction?.({
+                        type: CustomUserToolbarAction.SEND_LOGIN,
+                      })
+                    }
+                  >
+                    {t("sendLogin")}
+                  </DropdownItem>
+                  <DropdownItem
+                    onClick={() =>
+                      onCustomAction?.({
+                        type: CustomUserToolbarAction.SEND_LOGIN_AND_RESET_PASSWORD,
+                      })
+                    }
+                  >
+                    {t("sendLoginAndResetPassword")}
+                  </DropdownItem>
+                </DropdownList>
+              )}
+          </DropdownGroup>
+          <Divider component="li" />
+          <DropdownGroup>
+            <DropdownList>
+              {isCustomTheme &&
+                withShowManageButtonAndManageUsersAccess &&
+                (withButtonBlockUsersAccess || isMasterAuthRealm) && (
+                  <DropdownItem
+                    onClick={() =>
+                      onCustomAction?.({
+                        type: CustomUserToolbarAction.BLOCK_USERS,
+                      })
+                    }
+                  >
+                    {t("blockUsers")}
+                  </DropdownItem>
+                )}
+              {isCustomTheme &&
+                withShowManageButtonAndManageUsersAccess &&
+                (withButtonUnlockUsersAccess || isMasterAuthRealm) && (
+                  <DropdownItem
+                    onClick={() =>
+                      onCustomAction?.({
+                        type: CustomUserToolbarAction.UNLOCK_USERS,
+                      })
+                    }
+                  >
+                    {t("unlockUsers")}
+                  </DropdownItem>
+                )}
+              {isCustomTheme &&
+                withShowManageButtonAndManageUsersAccess &&
+                (withButtonResetPasswordAccess || isMasterAuthRealm) && (
+                  <DropdownItem
+                    onClick={() =>
+                      onCustomAction?.({
+                        type: CustomUserToolbarAction.RESET_PASSWORD,
+                      })
+                    }
+                  >
+                    {t("resetPassword")}
+                  </DropdownItem>
+                )}
+            </DropdownList>
+          </DropdownGroup>
+          <Divider component="li" />
+          <DropdownGroup>
+            <DropdownList>
+              {isCustomTheme &&
+                withShowManageButtonAndManageUsersAccess &&
+                (withButtonExportCsvAccess || isMasterAuthRealm) && (
+                  <DropdownItem
+                    onClick={() =>
+                      onCustomAction?.({
+                        type: CustomUserToolbarAction.EXPORT_CSV,
+                      })
+                    }
+                  >
+                    {t("exportCSV")}
+                  </DropdownItem>
+                )}
+              {isCustomTheme &&
+                withShowManageButtonAndManageUsersAccess &&
+                (withButtonExportXlsxAccess || isMasterAuthRealm) && (
+                  <DropdownItem
+                    onClick={() =>
+                      onCustomAction?.({
+                        type: CustomUserToolbarAction.EXPORT_EXCEL,
+                      })
+                    }
+                  >
+                    {t("exportExcel")}
+                  </DropdownItem>
+                )}
+            </DropdownList>
+          </DropdownGroup>
+        </Dropdown>
+      </ToolbarItem>
+    </ToolbarGroup>
   );
 
   return (
