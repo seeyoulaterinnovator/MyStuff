@@ -93,10 +93,12 @@ type PermissionEdit = [
 export const USERNAME_EMAIL = ["username", "email"];
 
 const CreateAttributeFormContent = ({
+  translationsData,
   onHandlingTranslationsData,
   onHandlingGeneratedDisplayName,
   save,
 }: {
+  translationsData?: Translations;
   save: (profileConfig: UserProfileConfig) => void;
   onHandlingTranslationsData: (translationsData: Translations) => void;
   onHandlingGeneratedDisplayName: (generatedDisplayName: string) => void;
@@ -123,6 +125,7 @@ const CreateAttributeFormContent = ({
             title: t("generalSettings"),
             panel: (
               <AttributeGeneralSettings
+                translationsData={translationsData}
                 onHandlingTranslationData={handleTranslationsData}
                 onHandlingGeneratedDisplayName={handleGeneratedDisplayName}
               />
@@ -413,6 +416,7 @@ export default function NewAttributeSettings() {
       <PageSection variant="light">
         <CreateAttributeFormContent
           save={() => form.handleSubmit(save)()}
+          translationsData={translationsData}
           onHandlingTranslationsData={setTranslationsData}
           onHandlingGeneratedDisplayName={setGeneratedDisplayName}
         />

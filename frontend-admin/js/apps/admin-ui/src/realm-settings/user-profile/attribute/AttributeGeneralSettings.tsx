@@ -63,11 +63,13 @@ type Translations = {
 };
 
 export type AttributeGeneralSettingsProps = {
+  translationsData?: Translations;
   onHandlingTranslationData: (data: Translations) => void;
   onHandlingGeneratedDisplayName: (displayName: string) => void;
 };
 
 export const AttributeGeneralSettings = ({
+  translationsData: currentTranslationsData,
   onHandlingTranslationData,
   onHandlingGeneratedDisplayName,
 }: AttributeGeneralSettingsProps) => {
@@ -86,11 +88,19 @@ export const AttributeGeneralSettings = ({
   const [newAttributeName, setNewAttributeName] = useState("");
   const [generatedDisplayName, setGeneratedDisplayName] = useState("");
   const [type, setType] = useState<TranslationsType>();
-  const [translationsData, setTranslationsData] = useState<Translations>({
-    key: "",
-    translations: [],
-  });
+  const [translationsData, setTranslationsData] = useState<Translations>(
+    currentTranslationsData || {
+      key: "",
+      translations: [],
+    },
+  );
   const displayNameRegex = /\$\{([^}]+)\}/;
+
+  useEffect(() => {
+    if (currentTranslationsData) {
+      setTranslationsData(currentTranslationsData);
+    }
+  }, [currentTranslationsData]);
 
   const handleAttributeNameChange = (
     _event: React.FormEvent<HTMLInputElement>,
