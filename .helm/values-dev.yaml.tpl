@@ -35,6 +35,7 @@ extraEnvs:
   DB_PORT: "{{ env "DB_PORT" }}"
   SITE: "{{ env "CI_ENVIRONMENT_SLUG" }}"
   TZ: "Asia/Yekaterinburg"
+  APP_FORWARDED_PROTO_HEADER: "https"
 
 extraSensitiveEnvs:
   DB_USER: "{{ env "DB_USER" }}"

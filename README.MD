@@ -80,6 +80,20 @@ export JAVA_OPTS="" && /opt/keycloak/bin/kc.sh export --file /tmp/realm-export.j
 Для отладки теста можно запускать его поверх контейнеров запущенных через *docker-compose-full*
 для этого можно временно убрать аннотацию *@TestsEnabled* и запустить тест индивидуально.
 
+## Настройки
+
+### Переменные окружения
+
+См. https://www.keycloak.org/server/all-config
+
+Дополнительные переменные окружения:
+
+* *APP_PROPS_UPDATE_DELAY_SECS* - количество секунда между обновлениями кэша настроек таблицы *APP_PROPERTIES*.
+* *SITE* - профиль (тип стенда), 
+  см. перечисление [EStand](./sso-business-logic/src/main/java/ru/alamics/sso/util/EStand.java)
+* *APP_FORWARDED_PROTO_HEADER* - значение для подстановки в заголовок *X-Forwarded-Proto* для запросов в случае 
+ его отсутствия (при отсутствии возможности проставить на балансировщике)
+
 ## Заливка на стенд
 
 ```text
