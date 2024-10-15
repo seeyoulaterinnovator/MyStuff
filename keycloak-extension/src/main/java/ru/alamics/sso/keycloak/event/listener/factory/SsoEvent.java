@@ -14,6 +14,7 @@ import org.keycloak.services.managers.AuthenticationSessionManager;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.theme.Theme;
+import org.keycloak.theme.ThemeProvider;
 import ru.alamics.sso.emailer.EmailModel;
 import ru.alamics.sso.emailer.EmailSender;
 import ru.alamics.sso.keycloak.auth.form.new_auth.SsoUtil;
@@ -84,8 +85,11 @@ public abstract class SsoEvent {
 
                 String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenCreateUser);
                 attributes.put("expTimePass", expirationStrRusPass);
-                emailSender.send(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
-                        session.theme().getTheme(Theme.Type.EMAIL), session.getContext().resolveLocale(user)));
+                emailSender.send(new EmailModel(
+                        user, realm, subject, template, Collections.emptyList(), attributes,
+                        session.theme().getTheme(realm.getEmailTheme(), Theme.Type.EMAIL),
+                        session.getContext().resolveLocale(user)
+                ));
 
 
             } else {
@@ -114,8 +118,11 @@ public abstract class SsoEvent {
                 attributes.put("expTimePass", expirationStrRusPass);
 
 
-                emailSender.send(new EmailModel(user, realm, subject, template, Collections.emptyList(), attributes,
-                        session.theme().getTheme(Theme.Type.EMAIL), session.getContext().resolveLocale(user)));
+                emailSender.send(new EmailModel(
+                        user, realm, subject, template, Collections.emptyList(), attributes,
+                        session.theme().getTheme(realm.getEmailTheme(), Theme.Type.EMAIL),
+                        session.getContext().resolveLocale(user)
+                ));
 
             }
 

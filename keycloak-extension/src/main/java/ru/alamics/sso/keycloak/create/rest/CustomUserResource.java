@@ -625,6 +625,7 @@ public class CustomUserResource {
             for (String id : ids) {
                 UserModel user = userProvider.getUserById(realm, id);
                 if (user != null) {
+                    RealmModel realm = getUserRealmModel(id);
                     UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
                     rep.getRequiredActions().add(requiredAction);
                     eventBuilder.operation(OperationType.ACTION)
@@ -661,5 +662,13 @@ public class CustomUserResource {
             throw new ForbiddenException();
         }
         return customUser;
+    }
+
+    private RealmModel getUserRealmModel(String userId) {
+        UserModel user = session.getProvider(UserProvider.class).getUserById(session.getContext().getRealm(), userId);
+
+        if(user instanceof CustomUserAdapter) return ((CustomUserAdapter)user).getRealm();
+
+        return realm;
     }
 }
