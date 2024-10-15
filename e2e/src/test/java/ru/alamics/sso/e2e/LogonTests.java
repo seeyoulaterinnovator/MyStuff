@@ -1,5 +1,6 @@
 package ru.alamics.sso.e2e;
 
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.ExtractableResponse;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
@@ -23,6 +24,10 @@ public class LogonTests extends Tests {
     final TestsClients client = TestsClients.APP;
 
     final TestsUsers user = TestsUsers.TESTER;
+
+    String accessToken;
+
+    String idToken;
 
     @Test
     void logonByPassword() {
@@ -55,7 +60,9 @@ public class LogonTests extends Tests {
 
         assertNotNull(code);
 
-        getAccessTokenByCode(code);
+        getTokensByCode(code);
+
+        logout();
     }
 
     @Test
@@ -121,7 +128,9 @@ public class LogonTests extends Tests {
 
         assertNotNull(code);
 
-        getAccessTokenByCode(code);
+        getTokensByCode(code);
+
+        legacyInvalidLogout();
     }
 
     ExtractableResponse<?> getLogonPage() {
@@ -129,6 +138,7 @@ public class LogonTests extends Tests {
                 .queryParam("response_type", "code")
                 .queryParam("redirect_uri", client.getRedirectUri())
                 .queryParam("client_id", client.getClientId())
+                .queryParam("scope", "openid")
                 .baseUri(getKeycloakUrl())
                 .pathParam("realm", client.getRealm().getId())
                 .get("/realms/{realm}/protocol/openid-connect/auth")
@@ -138,8 +148,8 @@ public class LogonTests extends Tests {
                 .extract();
     }
 
-    void getAccessTokenByCode(String code) {
-        var accessToken = given()
+    void getTokensByCode(String code) {
+        JsonPath jsonPath = given()
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .formParam("grant_type", "authorization_code")
                 .formParam("redirect_uri", client.getRedirectUri())
@@ -154,8 +164,39 @@ public class LogonTests extends Tests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .extract()
                 .body()
-                .jsonPath().getString("access_token");
+                .jsonPath();
+
+        accessToken = jsonPath.getString("access_token");
+
+        idToken = jsonPath.getString("id_token");
 
         assertNotNull(accessToken);
+        assertNotNull(idToken);
+    }
+
+    void logout() {
+        given()
+                .queryParam("id_token_hint", idToken)
+                .queryParam("post_logout_redirect_uri", client.getRedirectUri())
+                .baseUri(getKeycloakUrl())
+                .pathParam("realm", client.getRealm().getId())
+                .redirects().follow(false)
+                .get("/realms/{realm}/protocol/openid-connect/logout")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_MOVED_TEMPORARILY);
+    }
+
+    void legacyInvalidLogout() {
+        given()
+                .queryParam("id_token_hint", accessToken)
+                .queryParam("post_logout_redirect_uri", client.getRedirectUri())
+                .baseUri(getKeycloakUrl())
+                .pathParam("realm", client.getRealm().getId())
+                .redirects().follow(false)
+                .get("/realms/{realm}/protocol/openid-connect/logout")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_MOVED_TEMPORARILY);
     }
 }
