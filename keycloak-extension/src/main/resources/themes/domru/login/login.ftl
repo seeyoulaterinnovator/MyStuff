@@ -32,14 +32,6 @@
             <@blocks.contentHeader mainTitle="${doLogIn}" secondaryTitle="" secondaryHref="" withBorder=true />
         </#if>
     <#elseif section = "form">
-        <#if !isBattle!true>
-        <!--
-        activateNewAuth = ${activateNewAuth!''}
-        loginViaEmailOrUsernameAndPassword = ${loginViaEmailOrUsernameAndPassword!''}
-        isSwitcherOn = ${isSwitcherOn!''}
-        realm.password = ${realm.password!''}
-        -->
-        </#if>
         <#if !activateNewAuth || loginViaEmailOrUsernameAndPassword!true>
             <#if !activateNewAuth || !isSwitcherOn!true>
                 <#if realm.password>
