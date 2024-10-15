@@ -7,7 +7,7 @@
     if(window.parent === window) {
       const initialize = () => {
         customConfig.subscribe(config => {
-          if (!window.B2B_CHAT_WIDGET_PARAMS && config.isLoaded) {
+          if (!window.B2B_CHAT_WIDGET_PARAMS && config.isLoaded && config.b2bChatWidgetUrl) {
             window.B2B_CHAT_WIDGET_PARAMS = {
               server: config.b2bChatWidgetServer,
               userData: {
