@@ -3,6 +3,8 @@ import type {
   UserProfileMetadata,
 } from "@keycloak/keycloak-admin-client/lib/defs/userProfileMetadata";
 import {
+  isFieldError,
+  FieldError,
   isUserProfileError,
   setUserProfileServerError,
 } from "@keycloak/keycloak-ui-shared";
@@ -273,7 +275,28 @@ export default function EditUser() {
             param,
           ) => t(key as string, param as any)) as TFunction);
         }
-        addError("userNotSaved", "");
+
+        const getErrorText = (responseError: FieldError) => {
+          const { errorMessage, field: errorField } = responseError;
+
+          return t(errorMessage, { 0: t(errorField) });
+        };
+
+        let resultErrorText = "";
+
+        if (isFieldError(error.responseData)) {
+          resultErrorText = getErrorText(error.responseData);
+        } else {
+          const { errors: responseErrors } = error.responseData;
+
+          const formattedErrorTexts = responseErrors
+            ?.map((responseError) => `\n\r- ${getErrorText(responseError)}`)
+            .join("");
+
+          resultErrorText = formattedErrorTexts || "";
+        }
+
+        addError("userNotSaved", resultErrorText);
       } else {
         addError("userCreateError", error);
       }

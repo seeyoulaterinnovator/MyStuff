@@ -51,6 +51,9 @@ export {
   isUserProfileError,
   label,
   setUserProfileServerError,
+  isFieldError,
+  type FieldError,
+  type ErrorArray,
 } from "./user-profile/utils";
 export type { UserFormFields } from "./user-profile/utils";
 export { createNamedContext } from "./utils/createNamedContext";
