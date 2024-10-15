@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.interceptor;
+package ru.alamics.sso.keycloak.oidc;
 
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.container.ContainerRequestContext;

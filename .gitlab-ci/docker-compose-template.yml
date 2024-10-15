@@ -53,8 +53,7 @@ services:
 #      - JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:8787,server=y,suspend=n"
       - KC_CACHE=ispn
       - KC_CACHE_CONFIG_FILE=cache-ispn-custom.xml
-      # - KC_HOSTNAME_ADMIN_URL=https://er-sso.dev.it-resource.team # see SSOERTH-163, https://github.com/keycloak/keycloak/issues/16005
-      - APP_FORWARDED_PROTO_HEADER=https
+      - KC_HOSTNAME_ADMIN_URL=https://er-sso.dev.it-resource.team # see SSOERTH-163, https://github.com/keycloak/keycloak/issues/16005
 #    healthcheck:
 #      test: [
 #        "CMD-SHELL",
