@@ -35,7 +35,7 @@ extraEnvs:
   DB_PORT: "{{ env "DB_PORT" }}"
   SITE: "{{ env "CI_ENVIRONMENT_SLUG" }}"
   TZ: "Asia/Yekaterinburg"
-  KC_HOSTNAME_ADMIN_URL: "https://sso-balancer4.testing.srv.loc" # see https://github.com/keycloak/keycloak/issues/16005
+  KC_HOSTNAME_ADMIN_URL: "{{ env "CI_ENVIRONMENT_URL" }}" # see https://github.com/keycloak/keycloak/issues/16005
 
 extraSensitiveEnvs:
   DB_USER: "{{ env "DB_USER" }}"
