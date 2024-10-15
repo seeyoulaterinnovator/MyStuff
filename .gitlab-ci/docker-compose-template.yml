@@ -53,12 +53,13 @@ services:
 #      - JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:8787,server=y,suspend=n"
       - KC_CACHE=ispn
       - KC_CACHE_CONFIG_FILE=cache-ispn-custom.xml
+      - KC_HOSTNAME_ADMIN_URL=https://er-sso.dev.it-resource.team # see SSOERTH-163, https://github.com/keycloak/keycloak/issues/16005
 #    healthcheck:
 #      test: [
 #        "CMD-SHELL",
 #        'exec 3<>/dev/tcp/localhost/9000;
-#           echo -e "GET /health/ready HTTP/1.1\nhost: localhost:9000\n" >&3; 
-#           timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; 
+#           echo -e "GET /health/ready HTTP/1.1\nhost: localhost:9000\n" >&3;
+#           timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP;
 #           ERROR=$?; exec 3<&-; exec 3>&-; exit $ERROR'
 #      ]
 #      interval: 5s
