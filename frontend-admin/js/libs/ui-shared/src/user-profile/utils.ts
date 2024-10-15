@@ -12,13 +12,13 @@ export type UserFormFields = Omit<
   attributes?: KeyValueType[] | Record<string, string | string[]>;
 };
 
-type FieldError = {
+export type FieldError = {
   field: string;
   errorMessage: string;
   params?: string[];
 };
 
-type ErrorArray = { errors?: FieldError[] };
+export type ErrorArray = { errors?: FieldError[] };
 
 export type UserProfileError = {
   responseData: ErrorArray | FieldError;
@@ -141,7 +141,7 @@ export function isUserProfileError(error: unknown): error is UserProfileError {
   return responseData.errors.every(isFieldError);
 }
 
-function isFieldError(error: unknown): error is FieldError {
+export function isFieldError(error: unknown): error is FieldError {
   // Check if the error is an object.
   if (typeof error !== "object" || error === null) {
     return false;
