@@ -30,3 +30,16 @@ input[type="checkbox"] {
   color: var(--pf-v5-global--primary-color--100);
   width: fit-content;
 }
+
+/*
+* FIX of Popper (\node_modules\@patternfly\react-core\src\helpers\Popper\Popper.tsx)
+* positioning strategy.
+*
+* Popper component does not contain props for changing the strategy, so this approach was chosen.
+* usePopper used in Popper by default uses the absolute positioning strategy,
+* which is why the Popper's initial position is not formed correctly if the
+* parent component has relative positioning. As a result, the page jerks during rendering/
+*/
+.pf-v5-c-menu {
+  position: fixed !important;
+}
