@@ -32,9 +32,13 @@
             <@blocks.contentHeader mainTitle="${doLogIn}" secondaryTitle="" secondaryHref="" withBorder=true />
         </#if>
     <#elseif section = "form">
+        <!-- form -->
         <#if !activateNewAuth || loginViaEmailOrUsernameAndPassword!true>
+            <!-- loginViaEmailOrUsernameAndPassword -->
             <#if !activateNewAuth || !isSwitcherOn!true>
+                <!-- !isSwitcherOn -->
                 <#if realm.password>
+                    <!-- realm.password -->
                     <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
                     onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
                     <div class="field field__container field--required md:w-full">

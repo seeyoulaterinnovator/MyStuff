@@ -42,6 +42,7 @@ import ru.alamics.sso.registration.phone.port.SendMessageService;
 import ru.alamics.sso.registration.service.AuthorisedUsersService;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.settings.SettingsService;
+import ru.alamics.sso.util.TraceUtil;
 import ru.alamics.sso.util.Util;
 
 import java.time.Duration;
@@ -667,6 +668,10 @@ public abstract class NewAbstractAuthMailPhoneForm extends AbstractUsernameFormA
         boolean isLoginPassword = Boolean.parseBoolean(context.getAuthenticationSession().getClient().getAttribute("loginViaEmailOrUsernameAndPassword"));
         boolean isSms = Boolean.parseBoolean(context.getAuthenticationSession().getClient().getAttribute("loginViaSms"));
         boolean isPhoneCall = Boolean.parseBoolean(context.getAuthenticationSession().getClient().getAttribute("loginViaPhoneCall"));
+
+        if(TraceUtil.isTraceEnabled()) {
+            log.debug("Switcher status context: {}, {}, {}, {}, {}", isOff, isOn, isLoginPassword, isSms, isPhoneCall);
+        }
 
         if (authenticationSession.getAuthNote("backToLoginPassword") != null) {
             if (isLoginPassword) {

@@ -33,6 +33,7 @@ import ru.alamics.sso.keycloak.util.MiscUtil;
 import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
+import ru.alamics.sso.util.TraceUtil;
 import ru.alamics.sso.util.Util;
 
 import java.net.URI;
@@ -251,6 +252,9 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             log.info(String.format("actionIsEmpty is %s", user.getRequiredActionsStream().count() == 1));
 
             putAttribute("clientIsB2B", CLIENT_B2B.equals(client.getClientId()));
+        }
+        if(TraceUtil.isTraceEnabled()) {
+            log.debug("Attributes: {}", attributes);
         }
     }
 
