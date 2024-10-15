@@ -33,6 +33,7 @@ import ru.alamics.sso.keycloak.util.MiscUtil;
 import ru.alamics.sso.registration.model.FormConstants;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
+import ru.alamics.sso.util.StandResolver;
 import ru.alamics.sso.util.Util;
 
 import java.net.URI;
@@ -209,6 +210,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
                 putAttribute("lastLoginPhone", getAndRemoveLastLoginPhone());
             }
             putAttribute("restoreButtonLabel", settingsService.getSettingsStringValue(RESTORE_BUTTON_LABEL, realm.getName()));
+            putAttribute("isBattle", StandResolver.isBattle());
 
             if (realm.isInternationalizationEnabled()) {
                 UriBuilder b;
