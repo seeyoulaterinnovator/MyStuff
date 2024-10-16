@@ -175,8 +175,14 @@ export default function NewAttributeSettings() {
   });
   const [generatedDisplayName, setGeneratedDisplayName] = useState<string>("");
 
+  const currentDisplayName = form.watch("displayName");
+
   useFetch(
     async () => {
+      if (!currentDisplayName || !combinedLocales.length) {
+        return;
+      }
+
       const translationsToSave: any[] = [];
       await Promise.all(
         combinedLocales.map(async (selectedLocale) => {
@@ -187,10 +193,9 @@ export default function NewAttributeSettings() {
                 selectedLocale,
               });
 
-            const formData = form.getValues();
-            const formattedKey = formData.displayName?.substring(
+            const formattedKey = currentDisplayName?.substring(
               2,
-              formData.displayName.length - 1,
+              currentDisplayName.length - 1,
             );
             const filteredTranslations: Array<{
               locale: string;
@@ -229,6 +234,8 @@ export default function NewAttributeSettings() {
       return translationsToSave;
     },
     (translationsToSaveData) => {
+      if (!translationsToSaveData) return;
+
       setTranslationsData(() => ({
         key: translationsToSaveData[0].key,
         translations: translationsToSaveData.flatMap(
@@ -236,7 +243,7 @@ export default function NewAttributeSettings() {
         ),
       }));
     },
-    [combinedLocales],
+    [combinedLocales, currentDisplayName],
   );
 
   useFetch(
