@@ -36,6 +36,7 @@ import { UserPostRoleRepresentation } from "@keycloak/keycloak-admin-client/lib/
 
 import "./user-customer.css";
 import { UserPostActions } from "./user-customer/UserPostActions";
+import { DmpIdTextInput } from "./user-customer/DmpIdTextInput";
 
 type Post =
   | (UserPostRepresentation & {
@@ -221,6 +222,7 @@ export const UserCustomer = () => {
                 newTomsIdRef.current = value;
               }}
               placeholder={t("tomsId")}
+              type="number"
             />
           ),
       },
@@ -241,12 +243,10 @@ export const UserCustomer = () => {
               ""
             )
           ) : (
-            <TextInput
-              aria-label={t("dmpId")}
-              onChange={(_event, value) => {
+            <DmpIdTextInput
+              onChange={(value) => {
                 newDmpIdRef.current = value;
               }}
-              placeholder={t("dmpId")}
             />
           ),
       },
