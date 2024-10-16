@@ -86,6 +86,7 @@ export const ErrorBoundaryFallback: FunctionComponent<
     ((!errorDomain || errorDomain === "page") && !domain);
 
   if (error && isErrorBelongsDomain) {
+    console.error(error);
     return <FallbackComponent error={error} />;
   }
 

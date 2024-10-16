@@ -48,7 +48,7 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
   const realmParam = routeMatch?.params.realm;
   const realm = useMemo(
     () => decodeURIComponent(realmParam ?? environment.realm),
-    [realmParam],
+    [realmParam, environment.realm],
   );
 
   // Configure admin client to use selected realm when it changes.
@@ -111,10 +111,11 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
     <RealmContext.Provider
       value={{
         realm,
-        searchRealm: searchRealm || realm,
+        searchRealm:
+          searchRealm && searchRealmRepresentation ? searchRealm : realm,
         realmRepresentation,
         searchRealmRepresentation:
-          searchRealm && searchRealm !== realm
+          searchRealm && searchRealmRepresentation
             ? searchRealmRepresentation
             : realmRepresentation,
         searchRealmUserId:
