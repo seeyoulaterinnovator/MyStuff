@@ -1,0 +1,5 @@
+.custom-search-form {
+    > :not(:last-child) {
+        margin-inline-end: var(--pf-v5-global--spacer--sm);
+    }
+}

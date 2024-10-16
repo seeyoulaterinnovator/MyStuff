@@ -43,3 +43,7 @@ input[type="checkbox"] {
 .pf-v5-c-menu {
   position: fixed !important;
 }
+
+.pf-v5-u-display-contents {
+  display: contents;
+}
