@@ -7,6 +7,8 @@ import { RealmSimpleSelector } from "../custom/realm-simple-selector/RealmSimple
 import { useAccess } from "../../context/access/Access";
 import { useCustomConfig } from "../../customLogic/context/CustomConfigContext";
 
+import "./user-data-table-custom-search-form.css";
+
 const defaultCustomSearchForm: CustomUserQuery = {};
 
 type UserDataTableCustomSearchFormProps = {
@@ -47,7 +49,10 @@ export function UserDataTableCustomSearchForm({
   }
 
   return (
-    <>
+    <form
+      onSubmit={handleSubmit(searchUserWithCustomFilters)}
+      className="custom-search-form pf-v5-u-display-contents"
+    >
       <ToolbarItem
         className="pf-v5-u-flex-grow-1"
         style={{ minWidth: "140px" }}
@@ -93,7 +98,6 @@ export function UserDataTableCustomSearchForm({
           data-testid="search-user-attribute-btn"
           variant="primary"
           type="submit"
-          onClick={() => handleSubmit(searchUserWithCustomFilters)()}
         >
           {t("search")}
         </Button>
@@ -119,6 +123,6 @@ export function UserDataTableCustomSearchForm({
           }}
         />
       </ToolbarItem>
-    </>
+    </form>
   );
 }
