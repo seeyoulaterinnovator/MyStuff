@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.email;
 
+import freemarker.template.TemplateNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.common.util.ObjectUtil;
@@ -129,13 +130,20 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider {
             try {
                 textBody = freeMarker.processTemplate(attributes, textTemplate, theme);
             } catch (final FreeMarkerException e) {
+                if(!(e.getCause() instanceof TemplateNotFoundException)) {
+                    log.warn(e.getMessage(), e);
+                }
                 textBody = null;
+
             }
             String htmlTemplate = String.format("html/%s", template);
             String htmlBody;
             try {
                 htmlBody = freeMarker.processTemplate(attributes, htmlTemplate, theme);
             } catch (final FreeMarkerException e) {
+                if(!(e.getCause() instanceof TemplateNotFoundException)) {
+                    log.warn(e.getMessage(), e);
+                }
                 htmlBody = null;
             }
             if (htmlBody != null) {
@@ -145,10 +153,12 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider {
                     log.warn(e.getMessage(), e);
                 }
             }
-
+            if(textBody == null && htmlBody == null) {
+                throw new EmailException("Empty email message body");
+            }
             return new EmailTemplate(subject, textBody, htmlBody);
         } catch (Exception e) {
-            throw new EmailException("Failed to template email", e);
+            throw new EmailException("Failed to template email: " + e.getMessage(), e);
         }
     }
 
@@ -165,4 +175,8 @@ public class SsoEmailTemplateProvider extends FreeMarkerEmailTemplateProvider {
         }
     }
 
+    @Override
+    protected Theme getTheme() throws IOException {
+        return session.theme().getTheme(realm.getEmailTheme(), Theme.Type.EMAIL);
+    }
 }
