@@ -4,7 +4,22 @@
   import Cookie from "js-cookie";
 
   onMount(() => {
-    if(window.parent === window) {
+    let isFrame = false;
+
+    try {
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      const iframeUrlParam = urlParams.get('iframe');
+
+      isFrame = window !== top
+      || document !== top.document
+      || self.location !== top.location
+      || iframeUrlParam === '1';
+    } catch (e) {
+      isFrame = false;
+    }
+
+    if(!isFrame) {
       const initialize = () => {
         customConfig.subscribe(config => {
           if (!window.B2B_CHAT_WIDGET_PARAMS && config.isLoaded && config.b2bChatWidgetUrl) {
@@ -20,11 +35,11 @@
           }
         });
       };
-      if(document.readyState === 'complete') {
+      if (document.readyState === 'complete') {
         initialize();
       } else {
         document.addEventListener('readystatechange', () => {
-          if(document.readyState === 'complete') {
+          if (document.readyState === 'complete') {
             initialize();
           }
         });
