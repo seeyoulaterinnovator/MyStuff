@@ -26,6 +26,7 @@ import static ru.alamics.sso.e2e.common.TestsUtils.*;
 @Slf4j
 public class PasswordTests extends Tests {
     final TestsUsers user = TestsUsers.PASSWORD_TESTER;
+//    final TestsUsers user2 = TestsUsers.TESTER;
 
     final String userId = getUserId(user);
 
@@ -279,4 +280,71 @@ public class PasswordTests extends Tests {
 
         assertEquals("Истек срок жизни пароля", getLastMessageSubject(user));
     }
+
+    @Test
+    @Order(4)
+    void deletePassword() {
+        var user = TestsUsers.PASSWORD_TESTER;
+
+        var userId = given()
+                .contentType(MediaType.APPLICATION_JSON)
+                .auth().oauth2(getAdminCliAccessToken())
+                .baseUri(getKeycloakUrl())
+                .pathParams(Map.of(
+                        "realm", user.getRealm().getId(),
+                        "realm2", user.getRealm().getId(),
+                        "email", user.getUsername()
+                ))
+                .get("/realms/{realm}/users-info/search?searchRealm={realm2}&first=0&max=11&searchEmail={email}")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .extract()
+                .body()
+                .jsonPath().getString("results['users-info'][0].id");
+
+        var userCredentialId = given()
+                .contentType(MediaType.APPLICATION_JSON)
+                .auth().oauth2(getAdminCliAccessToken())
+                .baseUri(getKeycloakUrl())
+                .pathParams(Map.of(
+                        "realm", user.getRealm().getId(),
+                        "userId", userId
+                ))
+                .get("/admin/realms/{realm}/users/{userId}/credentials/")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .extract()
+                .body()
+                .jsonPath().getString("[0].id");
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON)
+                .auth().oauth2(getAdminCliAccessToken())
+                .baseUri(getKeycloakUrl())
+                .pathParams(Map.of(
+                        "realm", user.getRealm().getId(),
+                        "userId", userId,
+                        "userCredentialId", userCredentialId
+                ))
+                .delete("/realms/{realm}/users-toms/users/{userId}/credentials/{userCredentialId}")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_NO_CONTENT);
+
+        await().atMost(Duration.ofSeconds(30))
+                .pollInterval(Duration.ofSeconds(5))
+                .until(() -> getMessageCount(user) > 0);
+
+//        assertEquals("Ваш логин для входа в Личный кабинет", getLastMessageSubject(user));
+        assertEquals("Ваш пароль для входа в Личный кабинет сброшен", getLastMessageSubject(user));
+
+        assertTrue(getRequiredActions(user).contains("UPDATE_PASSWORD"));
+
+        clearMailbox();
+    }
+
 }
