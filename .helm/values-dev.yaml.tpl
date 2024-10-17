@@ -23,8 +23,8 @@ extraEnvs:
   KC_HTTP_ENABLED: "true"
   KC_HTTP_RELATIVE_PATH: "/auth"
   KC_HOSTNAME: "{{ env "FQDN" }}"
-  KC_HOSTNAME_STRICT: "false"
-  KC_HOSTNAME_STRICT_HTTPS: "false"
+  KC_HOSTNAME_STRICT: "true"
+  KC_HOSTNAME_STRICT_HTTPS: "true"
   KC_METRICS_ENABLED: "true"
   KC_HOSTNAME_DEBUG: "true"
   KC_CACHE: "ispn"
@@ -36,7 +36,9 @@ extraEnvs:
   SITE: "{{ env "CI_ENVIRONMENT_SLUG" }}"
   TZ: "Asia/Yekaterinburg"
   KC_HOSTNAME_ADMIN_URL: "{{ env "CI_ENVIRONMENT_URL" }}" # see https://github.com/keycloak/keycloak/issues/16005
-  KC_LOG_CONSOLE_OUTPUT: "json"
+  KC_HOSTNAME_ACCOUNT_URL: "{{ env "CI_ENVIRONMENT_URL" }}"
+  KC_HOSTNAME_URL: "{{ env "CI_ENVIRONMENT_URL" }}"
+  # KC_LOG_CONSOLE_OUTPUT: "json"
 
 extraSensitiveEnvs:
   DB_USER: "{{ env "DB_USER" }}"
