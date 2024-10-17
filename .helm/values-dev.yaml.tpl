@@ -38,7 +38,7 @@ extraEnvs:
   KC_HOSTNAME_ADMIN_URL: "{{ env "CI_ENVIRONMENT_URL" }}" # see https://github.com/keycloak/keycloak/issues/16005
   KC_HOSTNAME_ACCOUNT_URL: "{{ env "CI_ENVIRONMENT_URL" }}"
   KC_HOSTNAME_URL: "{{ env "CI_ENVIRONMENT_URL" }}"
-  KC_LOG_CONSOLE_OUTPUT: "json"
+  # KC_LOG_CONSOLE_OUTPUT: "json"
 
 extraSensitiveEnvs:
   DB_USER: "{{ env "DB_USER" }}"
