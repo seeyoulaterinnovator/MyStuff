@@ -34,7 +34,7 @@
 
 .field__input {
   @apply .border .border-accentBlue-700-20 .rounded-lg .pt-2 .pb-3 .px-3 .text-black .outline-none;
-  
+
   border-radius: 10px;
   -webkit-box-shadow: inset 0 0 0 50px #fff;
   height: 48px;
@@ -557,11 +557,9 @@
 }
 
 #numbers-password {
-  color: var(--accent-green-1000);
 }
 
 #letters-password {
-  color: var(--accent-red-100);
 }
 
 .sms-inputs {
