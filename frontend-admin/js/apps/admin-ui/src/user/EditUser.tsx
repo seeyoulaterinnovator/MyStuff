@@ -126,7 +126,13 @@ export default function EditUser() {
     withEditCredentialsAccess,
     withCreateRealmAccess,
     withManageRealmAccess,
-  } = getAccesses(["manage-users", "edit-details", "edit-credentials"]);
+  } = getAccesses([
+    "manage-users",
+    "edit-details",
+    "edit-credentials",
+    "create-realm",
+    "manage-realm",
+  ]);
   const isCredentialsTabEnabled =
     isCustomTheme &&
     withManageUsersAccess &&
