@@ -40,6 +40,7 @@ import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
 type UserCredentialsProps = {
   user: UserRepresentation;
   setUser: (user: UserRepresentation) => void;
+  refreshUserProfile?: () => void;
 };
 
 type ExpandableCredentialRepresentation = {
@@ -98,7 +99,11 @@ const UserCredentialsRow = ({
   </CredentialRow>
 );
 
-export const UserCredentials = ({ user, setUser }: UserCredentialsProps) => {
+export const UserCredentials = ({
+  user,
+  setUser,
+  refreshUserProfile,
+}: UserCredentialsProps) => {
   const { adminClient } = useAdminClient();
   const { t } = useTranslation();
   const { addAlert, addError } = useAlerts();
@@ -192,6 +197,8 @@ export const UserCredentials = ({ user, setUser }: UserCredentialsProps) => {
             id: user.id!,
             credentialId: selectedCredential.id!,
           });
+
+          refreshUserProfile?.();
         }
 
         addAlert(t("deleteCredentialsSuccess"), AlertVariant.success);

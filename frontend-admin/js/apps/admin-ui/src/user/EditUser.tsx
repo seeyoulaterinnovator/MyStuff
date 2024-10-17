@@ -452,7 +452,11 @@ export default function EditUser() {
                   title={<TabTitleText>{t("credentials")}</TabTitleText>}
                   {...credentialsTab}
                 >
-                  <UserCredentials user={user} setUser={setUser} />
+                  <UserCredentials
+                    user={user}
+                    setUser={setUser}
+                    refreshUserProfile={refresh}
+                  />
                 </Tab>
               )}
               <Tab
