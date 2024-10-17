@@ -334,6 +334,15 @@ export class CustomUsers extends Resource<{ realm?: string }> {
     catchNotFound: true,
   });
 
+  public deleteCredential = this.makeRequest<
+    { id: string; credentialId: string },
+    void
+  >({
+    method: "DELETE",
+    path: "/users-toms/users/{id}/credentials/{credentialId}",
+    urlParamKeys: ["id", "credentialId"],
+  });
+
   constructor(client: KeycloakAdminClient) {
     super(client, {
       path: "/realms/{realm}",

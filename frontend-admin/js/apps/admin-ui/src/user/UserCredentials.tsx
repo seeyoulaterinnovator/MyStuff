@@ -182,10 +182,18 @@ export const UserCredentials = ({ user, setUser }: UserCredentialsProps) => {
     continueButtonVariant: ButtonVariant.danger,
     onConfirm: async () => {
       try {
-        await adminClient.users.deleteCredential({
-          id: user.id!,
-          credentialId: selectedCredential.id!,
-        });
+        if (!isCustomTheme) {
+          await adminClient.users.deleteCredential({
+            id: user.id!,
+            credentialId: selectedCredential.id!,
+          });
+        } else {
+          await adminClient.customUsers.deleteCredential({
+            id: user.id!,
+            credentialId: selectedCredential.id!,
+          });
+        }
+
         addAlert(t("deleteCredentialsSuccess"), AlertVariant.success);
         setKey((key) => key + 1);
       } catch (error) {
