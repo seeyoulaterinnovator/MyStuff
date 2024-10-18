@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 /**
  * Доработка для клиентов по типу ЛК, которые нарушают спецификацию OIDC
- * и передают дубли from url encoded параметров
+ * и передают дубли form url encoded параметров
  * @see TokenEndpoint#checkParameterDuplicated()
  */
 @Provider

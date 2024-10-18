@@ -20,7 +20,7 @@ public final class HttpUtil {
     }
 
     @SneakyThrows(IOException.class)
-    public static byte[] writeFormUrlEncoded(MediaType mediaType, Form form) throws IOException {
+    public static byte[] writeFormUrlEncoded(MediaType mediaType, Form form) {
         var baos = new ByteArrayOutputStream();
         new FormUrlEncodedProviderExt()
                 .writeTo(form, null, null, null, mediaType, null, baos);
