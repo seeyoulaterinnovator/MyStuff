@@ -106,6 +106,8 @@ export const useUserDataTable = ({
       : accessibleRealms[0]?.name,
   });
 
+  const { searchRealm: filterSearchRealm } = customFilters;
+
   const { isMeInMaster } = useWhoAmI();
   const { isCustomTheme } = useCustomConfig();
 
@@ -270,8 +272,9 @@ export const useUserDataTable = ({
   }, []);
 
   useEffect(() => {
-    setSearchRealm(customFilters.searchRealm);
-  }, [customFilters]);
+    setSearchRealm(filterSearchRealm);
+  }, [filterSearchRealm]);
+
   useEffect(() => {
     return () => {
       setSearchRealm("");
@@ -336,7 +339,7 @@ export const useUserDataTable = ({
           }
 
           await adminClient.customUsers.sendLogin(
-            { realm: realmName },
+            { realm: filterSearchRealm },
             selectedIds,
           );
 
@@ -355,7 +358,7 @@ export const useUserDataTable = ({
           }
 
           await adminClient.customUsers.sendLoginAndResetPassword(
-            { realm: realmName },
+            { realm: filterSearchRealm },
             selectedIds,
           );
 
@@ -374,7 +377,7 @@ export const useUserDataTable = ({
         try {
           const downloadedFile =
             await adminClient.customUsers.downloadCSVTemplate({
-              realm: customFilters.searchRealm,
+              realm: filterSearchRealm,
             });
 
           saveAs(addBomAndConvertToBlob(downloadedFile), `user_template.csv`);
@@ -389,7 +392,7 @@ export const useUserDataTable = ({
         try {
           const downloadedFile =
             await adminClient.customUsers.downloadExcelTemplate({
-              realm: customFilters.searchRealm,
+              realm: filterSearchRealm,
             });
 
           saveAs(
@@ -414,7 +417,7 @@ export const useUserDataTable = ({
             formData.append("file", payload);
 
             await adminClient.customUsers.importFile(payload.name)(
-              { realm: customFilters.searchRealm },
+              { realm: filterSearchRealm },
               formData,
             );
 
@@ -447,7 +450,7 @@ export const useUserDataTable = ({
 
         try {
           const downloadedFile = await adminClient.customUsers.downloadUsers(
-            { realm: customFilters.searchRealm },
+            { realm: filterSearchRealm },
             {
               type: downloadedExtension,
               userIds: selectedIds,
@@ -487,7 +490,7 @@ export const useUserDataTable = ({
           }
 
           await adminClient.customUsers.resetPassword(
-            { realm: realmName },
+            { realm: filterSearchRealm },
             selectedIds,
           );
           addAlert(t("userPasswordResetSuccess"), AlertVariant.success);
@@ -505,7 +508,7 @@ export const useUserDataTable = ({
           }
 
           await adminClient.customUsers.block(
-            { realm: realmName },
+            { realm: filterSearchRealm },
             selectedIds,
           );
           addAlert(t("userBlockedSuccess"), AlertVariant.success);
@@ -524,7 +527,7 @@ export const useUserDataTable = ({
           }
 
           await adminClient.customUsers.unlock(
-            { realm: realmName },
+            { realm: filterSearchRealm },
             selectedIds,
           );
           addAlert(t("userUnlockedSuccess"), AlertVariant.success);
