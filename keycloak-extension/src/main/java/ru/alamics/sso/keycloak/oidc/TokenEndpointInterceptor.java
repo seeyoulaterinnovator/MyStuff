@@ -80,7 +80,12 @@ public class TokenEndpointInterceptor {
                                                 .stream()
                                                 .collect(Collectors.toMap(
                                                         Map.Entry::getKey,
-                                                        entry -> entry.getValue().get(0)
+                                                        entry -> lenientParams.contains(entry.getKey()) ?
+                                                                lenientParams.stream()
+                                                                        .filter(value -> !value.isBlank())
+                                                                        .findFirst()
+                                                                        .orElse(entry.getValue().get(0))
+                                                                : entry.getValue().get(0)
                                                 ))
                                 );
                                 content = HttpUtil.writeFormUrlEncoded(requestContext.getMediaType(), new Form(map));
