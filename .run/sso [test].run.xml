@@ -4,6 +4,7 @@
       <option name="env">
         <map>
           <entry key="ERTH_SSO_E2E_ENABLED" value="true" />
+          <entry key="ERTH_SSO_E2E_WAIT_ENABLED" value="true" />
         </map>
       </option>
       <option name="executionName" />
@@ -24,6 +25,7 @@
     <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
     <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
     <DebugAllEnabled>false</DebugAllEnabled>
+    <RunAsTest>false</RunAsTest>
     <method v="2" />
   </configuration>
 </component>

@@ -52,6 +52,8 @@ public abstract class Tests {
 
     static final boolean IS_ENABLED = "true".equals(System.getenv(CONDITION_VARIABLE));
 
+    static final boolean IS_WAIT_ENABLED = "true".equals(System.getenv("ERTH_SSO_E2E_WAIT_ENABLED"));
+
     static final boolean IS_LOW_MEMORY = "true".equals(System.getenv().get("ERTH_SSO_E2E_LOW_MEMORY"));
 
     static final String NAME_PREFIX = "erth-sso-e2e";
@@ -316,7 +318,7 @@ public abstract class Tests {
 
         @Override
         public void afterAll(ExtensionContext context) {
-            if(IS_ENABLED && failed.get()) {
+            if(IS_ENABLED && IS_WAIT_ENABLED && failed.get()) {
                 log.error("Waiting...");
                 try {
                     Thread.sleep(Duration.ofMinutes(15).toMillis());
