@@ -14,6 +14,7 @@ import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.reactive.server.ServerRequestFilter;
 import org.keycloak.Config;
+import org.keycloak.OAuth2Constants;
 import ru.alamics.sso.keycloak.GeneralRealm;
 import ru.alamics.sso.keycloak.util.HttpUtil;
 import ru.alamics.sso.property.ApplicationProperties;
@@ -78,11 +79,19 @@ public class TokenEndpointInterceptor {
                                 map = new MultivaluedHashMap<>(
                                         map.entrySet()
                                                 .stream()
-                                                .filter(entry -> !(lenientParams.contains(entry.getKey())
-                                                        && entry.getValue().get(0).isEmpty()))
                                                 .collect(Collectors.toMap(
                                                         Map.Entry::getKey,
-                                                        entry -> entry.getValue().get(0)
+                                                        entry -> {
+                                                            if(lenientParams.contains(entry.getKey())) {
+                                                                if(entry.getKey().equals(OAuth2Constants.SCOPE)) {
+                                                                    return entry.getValue()
+                                                                            .stream()
+                                                                            .filter(s -> !s.isBlank())
+                                                                            .collect(Collectors.joining(""));
+                                                                }
+                                                            }
+                                                            return entry.getValue().get(0);
+                                                        }
                                                 ))
                                 );
                                 content = HttpUtil.writeFormUrlEncoded(requestContext.getMediaType(), new Form(map));
