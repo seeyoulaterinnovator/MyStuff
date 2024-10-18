@@ -244,6 +244,13 @@ public final class TestsUtils {
         return null;
     }
 
+    public static void setAppProperty(String name, String value) {
+        jdbi().useHandle(handle -> {
+            handle.execute("delete from APP_PROPERTIES where name = ?", name);
+            handle.execute("insert into APP_PROPERTIES (NAME, VALUE) values (?, ?)", name, value);
+        });
+    }
+
     private static ExtractableResponse<?> getLastMessage(String email) {
         return getSmtp4DevApi()
                 .queryParam("searchTerms", email)

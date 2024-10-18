@@ -77,8 +77,8 @@ import файла [e2e.json](./volumes/keycloak-config-cli/config/e2e.json).
 export JAVA_OPTS="" && /opt/keycloak/bin/kc.sh export --file /tmp/realm-export.json --realm user
 ```
 
-Для отладки теста можно запускать его поверх контейнеров запущенных через *docker-compose-full*
-для этого можно временно убрать аннотацию *@TestsEnabled* и запустить тест индивидуально.
+Для отладки теста можно запускать его поверх контейнеров запущенных через *docker-compose-full-e2e* 
+(отключен кэш настроек) для этого можно временно убрать аннотацию *@TestsEnabled* и запустить тест индивидуально.
 
 ## Заливка на стенд
 

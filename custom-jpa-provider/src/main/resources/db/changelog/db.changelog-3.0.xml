@@ -59,4 +59,15 @@
             VALUES ('b3a0dc99-8772-4c65-89fc-d21757f7c808', 'timerLockDurationProperty', '25', null, 'master', 'Timer lock timeout', 'MINUTES', 'REALM');
         </sql>
     </changeSet>
+    <changeSet id="5" author="korotaev.miu">
+        <preConditions>
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM APP_PROPERTIES WHERE NAME = 'oidc.token.allowedDuplicateParameters';
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE)
+            VALUES ('oidc.token.allowedDuplicateParameters', 'scope');
+        </sql>
+    </changeSet>
 </databaseChangeLog>
