@@ -12,7 +12,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 @TestsEnabled
-//  see ru.alamics.sso.keycloak.oidc.TokenEndpointInterceptor
+// see ru.alamics.sso.keycloak.oidc.TokenEndpointInterceptor
 public class ClientTests extends Tests {
     TestsClients client = TestsClients.APP;
 
@@ -77,6 +77,7 @@ public class ClientTests extends Tests {
                 .formParam("grant_type", "client_credentials")
                 .formParam("client_id", client.getClientId())
                 .formParam("client_secret", client.getClientSecret())
+                .formParam("scope", "")
                 .formParam("scope", "openid")
                 .formParam("scope", "profile")
                 .pathParam("realm", client.getRealm().getId())
