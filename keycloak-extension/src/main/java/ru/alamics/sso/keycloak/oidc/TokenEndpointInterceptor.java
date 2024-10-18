@@ -37,7 +37,7 @@ public class TokenEndpointInterceptor {
                 requestContext.getUriInfo().getPath().matches("/realms/[^/]+/protocol/openid-connect/token")
                         && HttpMethod.POST.equals(requestContext.getMethod())
                         && requestContext.getMediaType() != null
-                        && MediaType.APPLICATION_FORM_URLENCODED.equals(requestContext.getMediaType().getType())
+                        && requestContext.getMediaType().isCompatible(MediaType.valueOf(MediaType.APPLICATION_FORM_URLENCODED))
         )) return result;
 
         String realmName = requestContext.getUriInfo().getPathSegments().get(1).toString();
