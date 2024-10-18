@@ -56,17 +56,27 @@ public class TokenEndpointInterceptor {
 
             try {
                 var map = HttpUtil.parseFormUrlEncoded(requestContext.getMediaType(), content).asMap();
-                if(map.values().stream().anyMatch(values -> values.size() > 1)
-                        && map.values().stream().allMatch(values -> values.stream().distinct().count() == 1)) {
-                    map = new MultivaluedHashMap<>(
-                            map.entrySet()
-                                    .stream()
-                                    .collect(Collectors.toMap(
-                                            Map.Entry::getKey,
-                                            entry -> entry.getValue().get(0)
-                                    ))
-                    );
-                    content = HttpUtil.writeFormUrlEncoded(requestContext.getMediaType(), new Form(map));
+                if(map.values().stream().anyMatch(values -> values.size() > 1)) {
+                    if(map.values().stream().allMatch(values -> values.stream().distinct().count() == 1)) {
+                        map = new MultivaluedHashMap<>(
+                                map.entrySet()
+                                        .stream()
+                                        .collect(Collectors.toMap(
+                                                Map.Entry::getKey,
+                                                entry -> entry.getValue().get(0)
+                                        ))
+                        );
+                        content = HttpUtil.writeFormUrlEncoded(requestContext.getMediaType(), new Form(map));
+                    } else {
+                        log.debug(
+                                "Token request has parameters collision for: {}",
+                                map.entrySet()
+                                        .stream()
+                                        .filter(entry -> entry.getValue().stream().distinct().count() > 1)
+                                        .map(Map.Entry::getKey)
+                                        .collect(Collectors.joining(", "))
+                        );
+                    }
                 }
             } catch (Exception e) {
                 log.debug(e.getMessage(), e);

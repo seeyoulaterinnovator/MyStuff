@@ -43,7 +43,7 @@ services:
     image: quay.io/keycloak/keycloak:25.0.2
     ports:
       - "8080:8080"
-      - "9000:9000"
+      #- "9000:9000"
       - "8787:8787"
     entrypoint: /bin/sh -c "/opt/keycloak/bin/kc-custom.sh"
     environment:
@@ -77,6 +77,8 @@ services:
       APP_PROPS_UPDATE_DELAY_SECS: 60
       # TZ: Asia/Yekaterinburg
       TZ: Europe/Moscow
+      QUARKUS_HTTP_ACCESS_LOG_ENABLED: true
+      QUARKUS_HTTP_ACCESS_LOG_PATTERN: "long"
     volumes:
       - ./volumes/keycloak/opt/keycloak/bin/kc-custom.sh:/opt/keycloak/bin/kc-custom.sh:ro
       - ./volumes/keycloak/opt/keycloak/conf/cache-ispn-custom.xml:/opt/keycloak/conf/cache-ispn-custom.xml:ro
