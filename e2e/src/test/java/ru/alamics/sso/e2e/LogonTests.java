@@ -187,6 +187,9 @@ public class LogonTests extends Tests {
                 .statusCode(HttpStatus.SC_MOVED_TEMPORARILY);
     }
 
+    /**
+     * see ru.alamics.sso.keycloak.oidc.LogoutEndpointInterceptor
+     */
     void legacyInvalidLogout() {
         given()
                 .queryParam("id_token_hint", accessToken)

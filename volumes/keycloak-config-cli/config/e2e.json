@@ -72,6 +72,7 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "secret",
       "baseUrl": "/realms/e2e/account/",
+      "serviceAccountsEnabled": true,
       "redirectUris": [
         "*"
       ],

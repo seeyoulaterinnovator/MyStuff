@@ -316,7 +316,7 @@ public abstract class Tests {
 
         @Override
         public void afterAll(ExtensionContext context) {
-            if(failed.get()) {
+            if(IS_ENABLED && failed.get()) {
                 log.error("Waiting...");
                 try {
                     Thread.sleep(Duration.ofMinutes(15).toMillis());
