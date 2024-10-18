@@ -81,7 +81,8 @@ public class TokenEndpointInterceptor {
                                                 .collect(Collectors.toMap(
                                                         Map.Entry::getKey,
                                                         entry -> lenientParams.contains(entry.getKey()) ?
-                                                                lenientParams.stream()
+                                                                entry.getValue()
+                                                                        .stream()
                                                                         .filter(value -> !value.isBlank())
                                                                         .findFirst()
                                                                         .orElse(entry.getValue().get(0))
