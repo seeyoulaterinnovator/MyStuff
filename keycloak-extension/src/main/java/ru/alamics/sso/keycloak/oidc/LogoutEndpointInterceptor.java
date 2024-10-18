@@ -38,6 +38,7 @@ public class LogoutEndpointInterceptor implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         if(!(requestContext.getUriInfo().getPath().matches("/realms/[^/]+/protocol/openid-connect/logout")
+                && requestContext.getUriInfo().getPathSegments().size() > 1
                 && HttpMethod.GET.equals(requestContext.getMethod()))) return;
 
         String realmName = requestContext.getUriInfo().getPathSegments().get(1).toString();

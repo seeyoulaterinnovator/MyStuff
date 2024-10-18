@@ -34,6 +34,7 @@ public class TokenEndpointInterceptor {
     public Uni<Void> filter(ContainerRequestContext requestContext) {
         var result = Uni.createFrom().voidItem();
         if(!(requestContext.getUriInfo().getPath().matches("/realms/[^/]+/protocol/openid-connect/token")
+                && requestContext.getUriInfo().getPathSegments().size() > 1
                 && HttpMethod.POST.equals(requestContext.getMethod()))
                 && requestContext.getMediaType() != null
                 && MediaType.APPLICATION_FORM_URLENCODED.equals(requestContext.getMediaType().getType())) return result;
