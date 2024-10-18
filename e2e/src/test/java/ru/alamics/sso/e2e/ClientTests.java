@@ -12,11 +12,12 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 @TestsEnabled
+//  see ru.alamics.sso.keycloak.oidc.TokenEndpointInterceptor
 public class ClientTests extends Tests {
     TestsClients client = TestsClients.APP;
 
     @Test
-    void logon() {
+    void logonSuccess() {
         given()
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .formParam("grant_type", "client_credentials")
@@ -32,11 +33,8 @@ public class ClientTests extends Tests {
                 .body("access_token", notNullValue());
     }
 
-    /**
-     * see ru.alamics.sso.keycloak.oidc.TokenEndpointInterceptor
-     */
     @Test
-    void legacyInvalidLogon() {
+    void legacyInvalidLogonSuccess() {
         given()
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .formParam("grant_type", "client_credentials")
@@ -54,7 +52,7 @@ public class ClientTests extends Tests {
     }
 
     @Test
-    void legacyInvalidLogonFail() {
+    void legacyInvalidLogonFailByCollision() {
         given()
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .formParam("grant_type", "client_credentials")
@@ -70,5 +68,24 @@ public class ClientTests extends Tests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body("error", is("invalid_request"))
                 .body("error_description", is("duplicated parameter"));
+    }
+
+    @Test
+    void legacyInvalidLogonSuccessByCollisionException() {
+        given()
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .formParam("grant_type", "client_credentials")
+                .formParam("client_id", client.getClientId())
+                .formParam("client_secret", client.getClientSecret())
+                .formParam("scope", "openid")
+                .formParam("scope", "profile")
+                .pathParam("realm", client.getRealm().getId())
+                .baseUri(getKeycloakUrl())
+                .post("/realms/{realm}/protocol/openid-connect/token")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body("access_token", notNullValue());
     }
 }

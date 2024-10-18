@@ -37,7 +37,7 @@ public class ApplicationProperties {
 
     void onStart(@Observes StartupEvent ev) {
         executor = Executors.newSingleThreadScheduledExecutor();
-        int defaultDelay = 60 * 10;
+        int defaultDelay = 10 * 60;
         int delay = defaultDelay;
         try {
             delay = Integer.parseInt(System.getenv("APP_PROPS_UPDATE_DELAY_SECS"));
@@ -47,7 +47,7 @@ public class ApplicationProperties {
         if(delay < 0) {
             delay = defaultDelay;
         }
-        executor.scheduleWithFixedDelay(this::initDbProperties, delay, delay, TimeUnit.SECONDS);
+        executor.scheduleWithFixedDelay(this::initDbProperties, Math.min(30, delay), delay, TimeUnit.SECONDS);
     }
 
     void onShutdown(@Observes ShutdownEvent ev) {
@@ -85,6 +85,12 @@ public class ApplicationProperties {
             result = this.fileProperties.getProperty(name);
         }
         return result;
+    }
+
+    @Locked.Read
+    public String getProperty(final String name, String defValue) {
+        String value =  getProperty(name);
+        return value == null ? defValue : value;
     }
 
     @Locked.Read
