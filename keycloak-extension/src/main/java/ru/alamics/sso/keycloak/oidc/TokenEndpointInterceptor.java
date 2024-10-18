@@ -87,7 +87,7 @@ public class TokenEndpointInterceptor {
                                                                     return entry.getValue()
                                                                             .stream()
                                                                             .filter(s -> !s.isBlank())
-                                                                            .collect(Collectors.joining(""));
+                                                                            .collect(Collectors.joining(" "));
                                                                 }
                                                             }
                                                             return entry.getValue().get(0);
