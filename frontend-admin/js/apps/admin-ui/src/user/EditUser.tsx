@@ -124,7 +124,15 @@ export default function EditUser() {
     withManageUsersAccess,
     withEditDetailsAccess,
     withEditCredentialsAccess,
-  } = getAccesses(["manage-users", "edit-details", "edit-credentials"]);
+    withCreateRealmAccess,
+    withManageRealmAccess,
+  } = getAccesses([
+    "manage-users",
+    "edit-details",
+    "edit-credentials",
+    "create-realm",
+    "manage-realm",
+  ]);
   const isCredentialsTabEnabled =
     isCustomTheme &&
     withManageUsersAccess &&
@@ -132,6 +140,11 @@ export default function EditUser() {
   const isReadOnly =
     isCustomTheme &&
     !(withManageUsersAccess && (isMeInMaster || withEditDetailsAccess));
+  const canDelete =
+    isCustomTheme &&
+    withCreateRealmAccess &&
+    withManageRealmAccess &&
+    withManageUsersAccess;
 
   useEffect(() => {
     if (
@@ -393,7 +406,7 @@ export default function EditUser() {
           </DropdownItem>,
           <DropdownItem
             key="delete"
-            isDisabled={!user.access?.manage || isReadOnly}
+            isDisabled={!user.access?.manage || !canDelete}
             onClick={() => toggleDeleteDialog()}
           >
             {t("delete")}
