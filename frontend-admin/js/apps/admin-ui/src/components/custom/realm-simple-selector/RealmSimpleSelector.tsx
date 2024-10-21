@@ -14,10 +14,11 @@ import {
   StackItem,
 } from "@patternfly/react-core";
 import { CheckIcon } from "@patternfly/react-icons";
-import { useEffect, useMemo, useState } from "react";
+import { MutableRefObject, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useRealms } from "../../../context/RealmsContext";
 import { useRecentRealms } from "../../../context/RecentRealms";
+import { useOutsideChecker } from "../../../customLogic/hooks/useOutsideChecker";
 
 import "./realm-simple-selector.css";
 
@@ -64,6 +65,9 @@ export const RealmSimpleSelector = ({
   onChange,
 }: RealmSimpleSelectorProps) => {
   const { realms, accessibleRealms } = useRealms();
+  const { isMayBeOutside, targetAnchorRef, checkedTargetRef } =
+    useOutsideChecker();
+
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const { t } = useTranslation();
@@ -120,12 +124,16 @@ export const RealmSimpleSelector = ({
       className="keycloak__realm_selector__dropdown"
       isOpen={open}
       onOpenChange={setOpen}
+      innerRef={checkedTargetRef}
       popperProps={{
-        position: "right",
+        position: isMayBeOutside.right ? "right" : "left",
       }}
       toggle={(ref) => (
         <MenuToggle
-          ref={ref}
+          ref={(menuRef) => {
+            (ref as MutableRefObject<HTMLElement | null>).current = menuRef;
+            targetAnchorRef.current = menuRef;
+          }}
           data-testid="realmSelector"
           onClick={() => {
             setOpen(!open);
