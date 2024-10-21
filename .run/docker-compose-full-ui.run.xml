@@ -9,6 +9,10 @@
               <option name="name" value="KC_ADMIN_VITE_ENABLED" />
               <option name="value" value="true" />
             </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="ERTH_SSO_E2E_ENABLED" />
+              <option name="value" value="false" />
+            </DockerEnvVarImpl>
           </list>
         </option>
         <option name="sourceFilePath" value="docker-compose-local.yml" />
