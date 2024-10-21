@@ -70,4 +70,57 @@
             VALUES ('oidc.token.allowedDuplicateParameters', 'scope');
         </sql>
     </changeSet>
+    <changeSet id="6" author="korotaev.miu">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mariadb"/>
+        </preConditions>
+        <comment>Clients > account-console > Web origins + /realms/realm/account/*</comment>
+        <sql>
+            insert into WEB_ORIGINS(CLIENT_ID, VALUE)
+            select c.ID, concat('/realms/', c.REALM_ID, '/account/*') from CLIENT c
+            where c.CLIENT_ID = 'account-console'
+              and REALM_ID not in ('master', 'manager')
+              and not exists (select * from WEB_ORIGINS wo where wo.CLIENT_ID = c.ID);
+        </sql>
+    </changeSet>
+    <changeSet id="7" author="korotaev.miu">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mariadb"/>
+        </preConditions>
+        <comment>Clients > account-console > Client Scopes > account-console-dedicated + Add mappers: client roles</comment>
+        <sql>
+            insert into PROTOCOL_MAPPER(ID, NAME, PROTOCOL, PROTOCOL_MAPPER_NAME, CLIENT_ID)
+            select
+                concat('2b88e952-ab68-4a86-9c33-', cast(lpad(row_number() over (order by c.ID), 12, '0') as CHAR)),
+                'client roles',
+                'openid-connect',
+                'oidc-usermodel-client-role-mapper',
+                c.ID
+            from CLIENT c
+            where c.CLIENT_ID = 'account-console'
+              and REALM_ID not in ('master', 'manager')
+              and not exists (
+                select * from PROTOCOL_MAPPER pm
+                where pm.CLIENT_ID = c.ID
+                  and pm.NAME = 'client roles'
+            );
+            insert into PROTOCOL_MAPPER_CONFIG(PROTOCOL_MAPPER_ID, NAME, VALUE)
+            select pm.ID as PROTOCOL_MAPPER_ID, q.NAME, q.VALUE
+            from (
+                     select 'access.token.claim' as NAME, 'true' as VALUE
+                     union all
+                     select 'claim.name', 'resource_access.\$\{client_id}.roles'
+                     union all
+                     select 'introspection.token.claim', 'true'
+                     union all
+                     select 'jsonType.label', 'String'
+                     union all
+                     select 'multivalued', 'true'
+                     union all
+                     select 'user.attribute', 'foo'
+                 ) q,
+                 PROTOCOL_MAPPER pm
+            where pm.ID like '2b88e952-ab68-4a86-9c33-%';
+        </sql>
+    </changeSet>
 </databaseChangeLog>
