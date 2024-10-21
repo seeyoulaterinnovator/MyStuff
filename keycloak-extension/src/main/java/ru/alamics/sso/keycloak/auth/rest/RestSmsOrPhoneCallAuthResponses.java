@@ -5,9 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.keycloak.OAuthErrorException;
 
 import javax.ws.rs.core.Response;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 @RequiredArgsConstructor
 @Getter
@@ -115,13 +112,5 @@ public enum RestSmsOrPhoneCallAuthResponses {
 
     boolean isError() {
         return errorCode != 0;
-    }
-
-    public static void main(String[] args) throws Exception {
-        StringBuilder builder = new StringBuilder();
-        for(RestSmsOrPhoneCallAuthResponses response : RestSmsOrPhoneCallAuthResponses.values()) {
-            builder.append(String.format("union all select '%s', '%s'%n", response.getMessageSetting(), response.getDefaultMessage()));
-        }
-        Files.write(Paths.get("temp.txt"), builder.toString().getBytes(StandardCharsets.UTF_8));
     }
 }
