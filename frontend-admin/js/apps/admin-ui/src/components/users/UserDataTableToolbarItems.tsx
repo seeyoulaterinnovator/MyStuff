@@ -131,6 +131,26 @@ export function UserDataTableToolbarItems({
   const withShowManageButtonAndManageUsersAccess =
     !withHideManageButtonsAccess && withManageUsersAccess;
 
+  const getFullActionCondition = (condition?: boolean) => {
+    return (
+      isCustomTheme &&
+      withShowManageButtonAndManageUsersAccess &&
+      (condition || isMasterAuthRealm)
+    );
+  };
+
+  const canSendLoginAndResetPassword =
+    isCustomTheme &&
+    withViewUsersAccess &&
+    !(isMasterSearchRealm || isManagerSearchRealm);
+  const canBlockUser = getFullActionCondition(withButtonBlockUsersAccess);
+  const canUnlockUser = getFullActionCondition(withButtonUnlockUsersAccess);
+  const canResetPassword = getFullActionCondition(
+    withButtonResetPasswordAccess,
+  );
+  const canExportCsv = getFullActionCondition(withButtonExportCsvAccess);
+  const canExportExcel = getFullActionCondition(withButtonExportXlsxAccess);
+
   const searchItem = () => {
     return (
       <ToolbarGroup
@@ -386,10 +406,9 @@ export function UserDataTableToolbarItems({
           isOpen={isActionsOpen}
           onOpenChange={setIsActionsOpen}
         >
-          <DropdownGroup>
-            {isCustomTheme &&
-              withViewUsersAccess &&
-              !(isMasterSearchRealm || isManagerSearchRealm) && (
+          {canSendLoginAndResetPassword && (
+            <>
+              <DropdownGroup>
                 <DropdownList>
                   <DropdownItem
                     onClick={() =>
@@ -410,58 +429,56 @@ export function UserDataTableToolbarItems({
                     {t("sendLoginAndResetPassword")}
                   </DropdownItem>
                 </DropdownList>
-              )}
-          </DropdownGroup>
-          <Divider component="li" />
-          <DropdownGroup>
-            <DropdownList>
-              {isCustomTheme &&
-                withShowManageButtonAndManageUsersAccess &&
-                (withButtonBlockUsersAccess || isMasterAuthRealm) && (
-                  <DropdownItem
-                    onClick={() =>
-                      onCustomAction?.({
-                        type: CustomUserToolbarAction.BLOCK_USERS,
-                      })
-                    }
-                  >
-                    {t("blockUsers")}
-                  </DropdownItem>
-                )}
-              {isCustomTheme &&
-                withShowManageButtonAndManageUsersAccess &&
-                (withButtonUnlockUsersAccess || isMasterAuthRealm) && (
-                  <DropdownItem
-                    onClick={() =>
-                      onCustomAction?.({
-                        type: CustomUserToolbarAction.UNLOCK_USERS,
-                      })
-                    }
-                  >
-                    {t("unlockUsers")}
-                  </DropdownItem>
-                )}
-              {isCustomTheme &&
-                withShowManageButtonAndManageUsersAccess &&
-                (withButtonResetPasswordAccess || isMasterAuthRealm) && (
-                  <DropdownItem
-                    onClick={() =>
-                      onCustomAction?.({
-                        type: CustomUserToolbarAction.RESET_PASSWORD,
-                      })
-                    }
-                  >
-                    {t("resetPassword")}
-                  </DropdownItem>
-                )}
-            </DropdownList>
-          </DropdownGroup>
-          <Divider component="li" />
-          <DropdownGroup>
-            <DropdownList>
-              {isCustomTheme &&
-                withShowManageButtonAndManageUsersAccess &&
-                (withButtonExportCsvAccess || isMasterAuthRealm) && (
+              </DropdownGroup>
+              <Divider component="li" />
+            </>
+          )}
+          {(canBlockUser || canUnlockUser || canResetPassword) && (
+            <>
+              <DropdownGroup>
+                <DropdownList>
+                  {canBlockUser && (
+                    <DropdownItem
+                      onClick={() =>
+                        onCustomAction?.({
+                          type: CustomUserToolbarAction.BLOCK_USERS,
+                        })
+                      }
+                    >
+                      {t("blockUsers")}
+                    </DropdownItem>
+                  )}
+                  {canUnlockUser && (
+                    <DropdownItem
+                      onClick={() =>
+                        onCustomAction?.({
+                          type: CustomUserToolbarAction.UNLOCK_USERS,
+                        })
+                      }
+                    >
+                      {t("unlockUsers")}
+                    </DropdownItem>
+                  )}
+                  {canResetPassword && (
+                    <DropdownItem
+                      onClick={() =>
+                        onCustomAction?.({
+                          type: CustomUserToolbarAction.RESET_PASSWORD,
+                        })
+                      }
+                    >
+                      {t("resetPassword")}
+                    </DropdownItem>
+                  )}
+                </DropdownList>
+              </DropdownGroup>
+              <Divider component="li" />
+            </>
+          )}
+          {(canExportCsv || canExportExcel) && (
+            <DropdownGroup>
+              <DropdownList>
+                {canExportCsv && (
                   <DropdownItem
                     onClick={() =>
                       onCustomAction?.({
@@ -472,9 +489,7 @@ export function UserDataTableToolbarItems({
                     {t("exportCSV")}
                   </DropdownItem>
                 )}
-              {isCustomTheme &&
-                withShowManageButtonAndManageUsersAccess &&
-                (withButtonExportXlsxAccess || isMasterAuthRealm) && (
+                {canExportExcel && (
                   <DropdownItem
                     onClick={() =>
                       onCustomAction?.({
@@ -485,8 +500,9 @@ export function UserDataTableToolbarItems({
                     {t("exportExcel")}
                   </DropdownItem>
                 )}
-            </DropdownList>
-          </DropdownGroup>
+              </DropdownList>
+            </DropdownGroup>
+          )}
         </Dropdown>
       </ToolbarItem>
     </ToolbarGroup>
