@@ -103,7 +103,7 @@
                 where pm.CLIENT_ID = c.ID
                   and pm.NAME = 'client roles'
             );
-            insert into PROTOCOL_MAPPER_CONFIG(PROTOCOL_MAPPER_ID, NAME, VALUE)
+            insert ignore into PROTOCOL_MAPPER_CONFIG(PROTOCOL_MAPPER_ID, NAME, VALUE)
             select pm.ID as PROTOCOL_MAPPER_ID, q.NAME, q.VALUE
             from (
                      select 'access.token.claim' as NAME, 'true' as VALUE
