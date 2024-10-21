@@ -4,7 +4,7 @@ import {
 } from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
 import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
-import { SelectControl } from "@keycloak/keycloak-ui-shared";
+import { KeycloakSelect } from "@keycloak/keycloak-ui-shared";
 import { useAdminClient } from "../../admin-client";
 import { useRealm } from "../../context/realm-context/RealmContext";
 import {
@@ -14,6 +14,7 @@ import {
   ChipGroup,
   Flex,
   FlexItem,
+  SelectOption,
 } from "@patternfly/react-core";
 import { PlusCircleIcon } from "@patternfly/react-icons";
 import "../user-customer.css";
@@ -52,6 +53,7 @@ export const UserPostSystemRoleMultiSelect = (
   );
   const [isAdding, setIsAdding] = useState(false);
   const [isChanging, setIsChanging] = useState(false);
+  const [isSystemOpen, setIsSystemOpen] = useState(false);
 
   const allowableSystems = useMemo(() => {
     return allSystemRoles
@@ -130,15 +132,27 @@ export const UserPostSystemRoleMultiSelect = (
           className="kc-user-customer-account-cell"
         >
           <FlexItem>
-            <SelectControl
-              key={allowableSystems[0]}
-              name={`user.post.${postId}.system.${allowableSystems.join("-")}`}
-              controller={{
-                defaultValue: allowableSystems[0],
+            <KeycloakSelect
+              toggleId="system"
+              onToggle={setIsSystemOpen}
+              onSelect={(value) => {
+                setSystem(value.toString() as ExternalSystemName);
+                setIsSystemOpen(false);
               }}
-              withoutLabel={true}
-              options={allowableSystems}
-            />
+              selections={system || undefined}
+              aria-label={t("system")}
+              isOpen={isSystemOpen}
+            >
+              {allowableSystems.map((allowableSystem) => (
+                <SelectOption
+                  selected={allowableSystem === system}
+                  key={allowableSystem}
+                  value={allowableSystem}
+                >
+                  {allowableSystem}
+                </SelectOption>
+              ))}
+            </KeycloakSelect>
           </FlexItem>
           <FlexItem>
             <Button
