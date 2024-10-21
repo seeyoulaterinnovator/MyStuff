@@ -490,7 +490,7 @@ export const useUserDataTable = ({
           }
 
           await adminClient.customUsers.resetPassword(
-            { realm: filterSearchRealm },
+            { realm: realmName },
             selectedIds,
           );
           addAlert(t("userPasswordResetSuccess"), AlertVariant.success);
@@ -508,7 +508,7 @@ export const useUserDataTable = ({
           }
 
           await adminClient.customUsers.block(
-            { realm: filterSearchRealm },
+            { realm: realmName },
             selectedIds,
           );
           addAlert(t("userBlockedSuccess"), AlertVariant.success);
@@ -527,7 +527,7 @@ export const useUserDataTable = ({
           }
 
           await adminClient.customUsers.unlock(
-            { realm: filterSearchRealm },
+            { realm: realmName },
             selectedIds,
           );
           addAlert(t("userUnlockedSuccess"), AlertVariant.success);
