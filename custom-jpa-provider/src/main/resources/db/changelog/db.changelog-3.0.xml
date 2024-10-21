@@ -89,7 +89,7 @@
         </preConditions>
         <comment>Clients > account-console > Client Scopes > account-console-dedicated + Add mappers: client roles</comment>
         <sql>
-            insert into PROTOCOL_MAPPER(ID, NAME, PROTOCOL, PROTOCOL_MAPPER_NAME, CLIENT_ID)
+            insert ignore into PROTOCOL_MAPPER(ID, NAME, PROTOCOL, PROTOCOL_MAPPER_NAME, CLIENT_ID)
             select
                 concat('2b88e952-ab68-4a86-9c34-', cast(lpad(row_number() over (order by c.ID), 12, '0') as CHAR)),
                 'client roles',
