@@ -91,14 +91,13 @@
         <sql>
             insert into PROTOCOL_MAPPER(ID, NAME, PROTOCOL, PROTOCOL_MAPPER_NAME, CLIENT_ID)
             select
-                concat('2b88e952-ab68-4a86-9c33-', cast(lpad(row_number() over (order by c.ID), 12, '0') as CHAR)),
+                concat('2b88e952-ab68-4a86-9c34-', cast(lpad(row_number() over (order by c.ID), 12, '0') as CHAR)),
                 'client roles',
                 'openid-connect',
                 'oidc-usermodel-client-role-mapper',
                 c.ID
             from CLIENT c
             where c.CLIENT_ID = 'account-console'
-              and REALM_ID not in ('master', 'manager')
               and not exists (
                 select * from PROTOCOL_MAPPER pm
                 where pm.CLIENT_ID = c.ID
@@ -120,7 +119,7 @@
                      select 'user.attribute', 'foo'
                  ) q,
                  PROTOCOL_MAPPER pm
-            where pm.ID like '2b88e952-ab68-4a86-9c33-%';
+            where pm.ID like '2b88e952-ab68-4a86-9c34-%';
         </sql>
     </changeSet>
 </databaseChangeLog>
