@@ -55,4 +55,37 @@
                     'Подпись кнопки предложения восстановления пароля', null, 'FRONT');
         </sql>
     </changeSet>
+    <changeSet id="6" author="korotaev-my">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mysql"/>
+        </preConditions>
+        <sql>
+            insert into SETTINGS (ID, EXT_ID, REALM_ID, NAME, VALUE, TYPE, `DESC`, UNIT)
+            select
+                concat('a1eef36c-3ee6-4893-9c8a-', cast(lpad(row_number() over (order by r.ID, q.EXT_ID), 12, '0') as CHAR)) as ID,
+                q.EXT_ID,
+                r.ID as REALM_ID,
+                concat('Настройка сообщения ', q.EXT_ID, ' для аутентификатора "REST SMS or phone call authentication"') as NAME,
+                q.VALUE,
+                'FRONT' as TYPE,
+                '' as `DESC`,
+                null as UNIT
+            from REALM r, (
+                select 'restSmsOrPhoneCallAuthCodeSentMessage' as EXT_ID, 'Код отправлен' as VALUE
+                union all select 'restSmsOrPhoneCallAuthInvalidCodeTypeMessage', 'Не указан вариант отправки кода'
+                union all select 'restSmsOrPhoneCallAuthNoPhoneMessage', 'У пользователя нет телефона'
+                union all select 'restSmsOrPhoneCallAuthPhoneNotVerifiedMessage', 'Телефон еще не верифицирован'
+                union all select 'restSmsOrPhoneCallAuthManyRequestsMessage', 'Слишком много запросов отправки кода. Повторите позже'
+                union all select 'restSmsOrPhoneCallAuthSendFailedMessage', 'Ошибка отправки кода'
+                union all select 'restSmsOrPhoneCallAuthNoCodeIdMessage', 'Не передан ID кода'
+                union all select 'restSmsOrPhoneCallAuthNoActiveCodeMessage', 'Не активного кода с переданным идентификатором'
+                union all select 'restSmsOrPhoneCallAuthCodeExpiredMessage', 'Код устарел'
+                union all select 'restSmsOrPhoneCallAuthWrongCodeMessage', 'Неверный код. Осталось {{attemptLeftLong}} ввода кода'
+                union all select 'restSmsOrPhoneCallAuthCodeAttemptExhaustedMessage', 'Неверный код. Исчерпаны попытки ввода кода. Осталось {{resendLeftLong}} повторной отправки кода'
+                union all select 'restSmsOrPhoneCallAuthNoCodeMessage', 'Код не запрошен'
+                union all select 'restSmsOrPhoneCallAuthBlockedMessage', 'Временная блокировка на {{blockSecondsLong}}'
+            ) q
+            where r.ID not in ('master', 'manager')
+        </sql>
+    </changeSet>
 </databaseChangeLog>
