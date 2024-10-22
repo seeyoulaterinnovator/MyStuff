@@ -1,10 +1,9 @@
 package ru.alamics.sso.keycloak.auth.rest;
 
+import jakarta.ws.rs.core.Response;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.OAuthErrorException;
-
-import javax.ws.rs.core.Response;
 
 @RequiredArgsConstructor
 @Getter
@@ -98,16 +97,12 @@ public enum RestSmsOrPhoneCallAuthResponses {
     final Response.Status status;
 
     String getErrorAlias() {
-        switch (status) {
-            case OK:
-                return "";
-            case INTERNAL_SERVER_ERROR:
-                return OAuthErrorException.SERVER_ERROR;
-            case FORBIDDEN:
-                return OAuthErrorException.ACCESS_DENIED;
-            default:
-                return OAuthErrorException.INVALID_REQUEST;
-        }
+        return switch (status) {
+            case OK -> "";
+            case INTERNAL_SERVER_ERROR -> OAuthErrorException.SERVER_ERROR;
+            case FORBIDDEN -> OAuthErrorException.ACCESS_DENIED;
+            default -> OAuthErrorException.INVALID_REQUEST;
+        };
     }
 
     boolean isError() {
