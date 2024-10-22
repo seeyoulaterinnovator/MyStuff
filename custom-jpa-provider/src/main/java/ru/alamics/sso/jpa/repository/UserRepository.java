@@ -244,7 +244,8 @@ public class UserRepository {
             int max
     ) {
         if (CollectionUtils.isNotEmpty(search)) {
-            search = "%" + search.replace("-", "\\-") + "%";
+//            search = "%" + search.replace("-", "\\-") + "%";
+            search = "%" + search + "%";
         }
 
         if (CollectionUtils.isNotEmpty(searchEmail)) {
