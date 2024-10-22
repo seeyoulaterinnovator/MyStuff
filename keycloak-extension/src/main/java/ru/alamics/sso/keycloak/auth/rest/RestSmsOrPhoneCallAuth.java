@@ -7,9 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.OAuth2Constants;
-import org.keycloak.OAuthErrorException;
 import org.keycloak.authentication.AuthenticationFlowContext;
-import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.models.UserModel;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.sessions.AuthenticationSessionModel;
@@ -31,6 +29,7 @@ import ru.alamics.sso.registration.phone.exception.WrongSmsCode;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 import ru.alamics.sso.registration.phone.port.SendMessageService;
 import ru.alamics.sso.registration.service.AuthorisedUsersService;
+import ru.alamics.sso.settings.SettingsService;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -61,8 +60,6 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
 
     private static final String SMS_CODE_ID_PARAM = "smsCodeId";
 
-    private static final String MESSAGE_FIELD = "message";
-
     private static final List<String> ATTEMPT_WORD_FORMS = Arrays.asList("попытка", "попытки", "попыток");
 
     private static final List<String> SECOND_WORD_FORMS = Arrays.asList("секунда", "секунды", "секунд");
@@ -81,6 +78,8 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
 
     private final AuthorisedUsersService authorisedUsersService;
 
+    private final SettingsService settingsService;
+
     public RestSmsOrPhoneCallAuth() {
         this.blackListService = Lookup.lookup(BlackListService.class);
         this.attemptFailsService = Lookup.lookup(AttemptFailsService.class);
@@ -89,6 +88,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
         this.wroteCodeAttemptsService = Lookup.lookup(WroteCodeAttemptsService.class);
         this.userPhoneVerifier = Lookup.lookup(UserPhoneVerifier.class);
         this.authorisedUsersService = Lookup.lookup(AuthorisedUsersService.class);
+        this.settingsService = Lookup.lookup(SettingsService.class);
     }
 
     @Override
@@ -146,13 +146,13 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
             if(isPassword) {
                 context.success();
             } else {
-                failure(context, "Не указан вариант отправки кода");
+                challenge(context, RestSmsOrPhoneCallAuthResponses.INVALID_CODE_TYPE);
             }
             return;
         }
 
         if(user.getPhone() == null) {
-            failure(context, "У пользователя нет телефона");
+            challenge(context, RestSmsOrPhoneCallAuthResponses.NO_PHONE);
             return;
         }
 
@@ -162,7 +162,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                         userModel.getRequiredActionsStream()
                                 .anyMatch(AuthOrRegType.PHONE_CALL.getReqActProviderName()::equals)
         )) {
-            failure(context, "Телефон еще не верифицирован");
+            challenge(context, RestSmsOrPhoneCallAuthResponses.PHONE_NOT_VERIFIED);
             return;
         }
 
@@ -183,7 +183,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
 
         if(userCodeValue == null || userCodeValue.isEmpty()) {
             if(codeSentAt != null && codeSentAt.isAfter(Instant.now().minus(newSendDelay)) && attributeCode == null) {
-                failure(context, "Слишком много запросов отправки кода. Повторите позже");
+                challenge(context, RestSmsOrPhoneCallAuthResponses.MANY_REQUESTS);
                 return;
             }
             if(attributeCode == null || codeSentAt == null
@@ -221,7 +221,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                     }
                 } catch (Exception e) {
                     log.info(e.getMessage(), e);
-                    failure(context, "Ошибка отправки кода");
+                    challenge(context, RestSmsOrPhoneCallAuthResponses.SEND_FAILED);
                     return;
                 }
                 codeSentAt = Instant.now();
@@ -237,27 +237,42 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                         String.valueOf(codeSentAt.toEpochMilli()));
                 log.info("Code sent");
             }
-            Map<String, Object> result = new HashMap<>();
-            result.put(MESSAGE_FIELD, "Код отправлен");
-            result.put("expirationSeconds", mapToSeconds(Duration.between(
+            int expirationSeconds = mapToSeconds(Duration.between(
                     Instant.now(),
                     codeSentAt.plus(Duration.ofSeconds(codeType.getExpiredSecondsToResend()))
-            )));
-            result.put(SMS_CODE_ID_PARAM, attributeCode.getId());
-            context.challenge(Response.ok().entity(result).type(MediaType.APPLICATION_JSON_TYPE).build());
+            ));
+            String smsCodeId = attributeCode.getId();
+            challenge(
+                    context,
+                    RestSmsOrPhoneCallAuthResponses.CODE_SENT,
+                    new HashMap<String, String>() {{
+                        put("expirationSeconds", String.valueOf(expirationSeconds));
+                        put("expirationSecondsLong", expirationSeconds + " "
+                                + MiscUtil.pluralize(expirationSeconds, SECOND_WORD_FORMS));
+                        put("attemptLeft", String.valueOf(countByOnCode));
+                        put("attemptLeftLong", countByOnCode + " "
+                                + MiscUtil.pluralize(countByOnCode, ATTEMPT_WORD_FORMS));
+
+                    }},
+                    new HashMap<String, Object>() {{
+                        put(SMS_CODE_ID_PARAM, smsCodeId);
+                        put("expirationSeconds", expirationSeconds);
+                        put("attempt_left", countByOnCode);
+                    }}
+            );
             return;
         }
 
         if(attributeCode == null || codeSentAt == null) {
-            failure(context, "Код не запрошен");
+            challenge(context, RestSmsOrPhoneCallAuthResponses.NO_CODE);
             return;
         }
         if(userCodeId == null || userCodeId.isEmpty()) {
-            failure(context, "Не передан ID кода");
+            challenge(context, RestSmsOrPhoneCallAuthResponses.NO_CODE_ID);
             return;
         }
         if(!userCodeId.equals(attributeCode.getId())) {
-            failure(context, "Не активного кода с переданным идентификатором");
+            challenge(context, RestSmsOrPhoneCallAuthResponses.NO_ACTIVE_CODE);
             return;
         }
         session.setAuthNote(EXPIRATION_TIME, codeSentAt.atZone(ZoneOffset.systemDefault()).toLocalDateTime()
@@ -299,11 +314,18 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                     context.getRealm().getName(), authType.name(), attributeCode.getHashKey());
             int lastCodeAttempts = countByOnCode - codeAttempts;
             if(lastCodeAttempts > 0) {
-                failure(context, String.format(
-                        "Неверный код. Осталось %d %s ввода кода",
-                        lastCodeAttempts,
-                        MiscUtil.pluralize(lastCodeAttempts, ATTEMPT_WORD_FORMS)
-                ));
+                challenge(
+                        context,
+                        RestSmsOrPhoneCallAuthResponses.WRONG_CODE,
+                        new HashMap<String, String>() {{
+                            put("attemptLeft", String.valueOf(lastCodeAttempts));
+                            put("attemptLeftLong", lastCodeAttempts + " "
+                                    + MiscUtil.pluralize(lastCodeAttempts, ATTEMPT_WORD_FORMS));
+                        }},
+                        new HashMap<String, Object>() {{
+                            put("attempt_left", lastCodeAttempts);
+                        }}
+                );
             } else {
                 attemptFailsService.saveAttempt(new AttemptFailsDto(user.getPhone(), attributeCode.getHashKey(),
                         context.getRealm().getName(), codeType.name(), LocalDateTime.now(),
@@ -315,11 +337,18 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                 );
                 int lastResendAttempts = maxResendRecallTries - resendAttempts + 1;
                 if(lastResendAttempts > 0) {
-                    failure(context, String.format(
-                            "Неверный код. Исчерпаны попытки ввода кода. Осталось %d %s повторной отправки кода",
-                            lastResendAttempts,
-                            MiscUtil.pluralize(lastResendAttempts, ATTEMPT_WORD_FORMS)
-                    ));
+                    challenge(
+                            context,
+                            RestSmsOrPhoneCallAuthResponses.CODE_ATTEMPT_EXHAUSTED,
+                            new HashMap<String, String>() {{
+                                put("resendLeft", String.valueOf(lastResendAttempts));
+                                put("resendLeftLong", lastResendAttempts + " "
+                                        + MiscUtil.pluralize(lastResendAttempts, ATTEMPT_WORD_FORMS));
+                            }},
+                            new HashMap<String, Object>() {{
+                                put("resend_left", lastCodeAttempts);
+                            }}
+                    );
                 } else {
                     failureWithBlocking(
                             context,
@@ -332,7 +361,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
             }
         } catch (TimeExpiredException e) {
             log.warn("Expired time of code");
-            failure(context, "Код устарел");
+            challenge(context, RestSmsOrPhoneCallAuthResponses.CODE_EXPIRED);
         }
     }
 
@@ -345,31 +374,60 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
         context.getUser().removeAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_ID_AND_HASH_KEY);
         context.getUser().removeAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_SENT_AT);
         int blockSeconds = mapToSeconds(Duration.between(Instant.now(), blockTimeout.unblockedAt));
+        challenge(
+                context,
+                RestSmsOrPhoneCallAuthResponses.BLOCKED,
+                new HashMap<String, String>() {{
+                    put("blockSeconds", String.valueOf(blockSeconds));
+                    put("blockSecondsLong", blockSeconds + " " +  MiscUtil.pluralize(blockSeconds, SECOND_WORD_FORMS));
+                }},
+                new HashMap<String, Object>() {{
+                    put("blockSeconds", blockSeconds);
+                }}
+        );
+    }
+
+    private void challenge(
+            AuthenticationFlowContext context,
+            RestSmsOrPhoneCallAuthResponses response,
+            Map<String, String> placeholders,
+            Map<String, Object> fields
+    ) {
+        String message = settingsService.getSettingsStringValue(
+                response.getMessageSetting(),
+                context.getRealm().getId()
+        );
+        if(message == null || message.trim().isEmpty() || MiscUtil.isEmptySettingsValue(message)) {
+            message = response.getDefaultMessage();
+        }
+        for(String placeholder : placeholders.keySet()) {
+            message = message.replace(String.format("{{%s}}", placeholder), placeholders.get(placeholder));
+        }
         Map<String, Object> result = new HashMap<>();
-        result.put(MESSAGE_FIELD, String.format(
-                "Временная блокировка на %d %s",
-                blockSeconds,
-                MiscUtil.pluralize(blockSeconds, SECOND_WORD_FORMS)
-        ));
-        result.put("blockSeconds", mapToSeconds(Duration.between(Instant.now(), blockTimeout.unblockedAt)));
-        context.challenge(Response.status(Response.Status.TOO_MANY_REQUESTS)
+        if(response.isError()) {
+            result.put(OAuth2Constants.ERROR, response.getErrorAlias());
+            result.put(OAuth2Constants.ERROR_DESCRIPTION, message);
+            result.put("error_code", response.getErrorCode());
+        } else {
+            result.put("message", message);
+        }
+        result.putAll(fields);
+        context.challenge(Response.status(response.status)
                 .entity(result)
                 .type(MediaType.APPLICATION_JSON_TYPE)
                 .build());
     }
 
-    private void failure(AuthenticationFlowContext context, String error) {
-        Map<String, Object> result = new HashMap<>();
-        result.put(OAuth2Constants.ERROR, OAuthErrorException.INVALID_REQUEST);
-        result.put(OAuth2Constants.ERROR_DESCRIPTION, error);
-        context.failure(
-                AuthenticationFlowError.INTERNAL_ERROR,
-                Response.status(Response.Status.FORBIDDEN)
-                        .entity(result)
-                        .type(MediaType.APPLICATION_JSON_TYPE)
-                        .build()
+    private void challenge(
+            AuthenticationFlowContext context,
+            RestSmsOrPhoneCallAuthResponses error,
+            Map<String, String> placeholders
+    ) {
+        challenge(context, error, placeholders, Collections.emptyMap());
+    }
 
-        );
+    private void challenge(AuthenticationFlowContext context, RestSmsOrPhoneCallAuthResponses error) {
+        challenge(context, error, Collections.emptyMap());
     }
 
     private BlockTimeout mapToBlockTimeout(BlackListDto blackList, Duration blockCacheExpire) {
