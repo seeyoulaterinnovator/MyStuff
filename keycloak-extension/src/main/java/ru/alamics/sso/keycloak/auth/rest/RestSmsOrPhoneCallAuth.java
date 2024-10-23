@@ -177,6 +177,19 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
             userModel.removeAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_BLOCKED_AT);
         }
 
+        int resendAttempts = attemptFailsService.getActualAttemptFailsCount(
+                user.getPhone(), context.getRealm().getName(), codeType.name(), user.getId()
+        );
+        int lastResendAttempts = maxResendRecallTries - resendAttempts + 1;
+        Map<String, String> placeholders = new HashMap<String, String>() {{
+            put("resendLeft", String.valueOf(lastResendAttempts));
+            put("resendLeftLong", lastResendAttempts + " "
+                    + MiscUtil.pluralize(lastResendAttempts, ATTEMPT_WORD_FORMS));
+        }};
+        Map<String, Object> fields = new HashMap<String, Object>() {{
+            put("resend_left", lastResendAttempts);
+        }};
+
         if(userCodeValue == null || userCodeValue.isEmpty()) {
             if(codeSentAt != null && codeSentAt.isAfter(Instant.now().minus(newSendDelay)) && attributeCode == null) {
                 challenge(context, RestSmsOrPhoneCallAuthResponses.MANY_REQUESTS);
@@ -186,10 +199,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                     || codeSentAt.isBefore(Instant.now().minus(Duration.ofSeconds(codeType.getExpiredSecondsToResend())))
             ) {
                 if(attributeCode != null) {
-                    int resendAttempts = attemptFailsService.getActualAttemptFailsCount(
-                            user.getPhone(), context.getRealm().getName(), codeType.name(), user.getId()
-                    );
-                    if(maxResendRecallTries - resendAttempts <= 0) {
+                    if(lastResendAttempts <= 1) {
                         failureWithBlocking(
                                 context,
                                 mapToBlockTimeout(
@@ -242,6 +252,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                     context,
                     RestSmsOrPhoneCallAuthResponses.CODE_SENT,
                     new HashMap<String, String>() {{
+                        putAll(placeholders);
                         put("expirationSeconds", String.valueOf(expirationSeconds));
                         put("expirationSecondsLong", expirationSeconds + " "
                                 + MiscUtil.pluralize(expirationSeconds, SECOND_WORD_FORMS));
@@ -251,6 +262,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
 
                     }},
                     new HashMap<String, Object>() {{
+                        putAll(fields);
                         put(SMS_CODE_ID_PARAM, smsCodeId);
                         put("expirationSeconds", expirationSeconds);
                         put("attempt_left", countByOnCode);
@@ -312,11 +324,13 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                         context,
                         RestSmsOrPhoneCallAuthResponses.WRONG_CODE,
                         new HashMap<String, String>() {{
+                            putAll(placeholders);
                             put("attemptLeft", String.valueOf(lastCodeAttempts));
                             put("attemptLeftLong", lastCodeAttempts + " "
                                     + MiscUtil.pluralize(lastCodeAttempts, ATTEMPT_WORD_FORMS));
                         }},
                         new HashMap<String, Object>() {{
+                            putAll(fields);
                             put("attempt_left", lastCodeAttempts);
                         }}
                 );
@@ -326,22 +340,12 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                         context.getUser().getId()));
                 userModel.removeAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_ID_AND_HASH_KEY);
                 userModel.removeAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_SENT_AT);
-                int resendAttempts = attemptFailsService.getActualAttemptFailsCount(
-                        user.getPhone(), context.getRealm().getName(), codeType.name(), user.getId()
-                );
-                int lastResendAttempts = maxResendRecallTries - resendAttempts + 1;
                 if(lastResendAttempts > 0) {
                     challenge(
                             context,
                             RestSmsOrPhoneCallAuthResponses.CODE_ATTEMPT_EXHAUSTED,
-                            new HashMap<String, String>() {{
-                                put("resendLeft", String.valueOf(lastResendAttempts));
-                                put("resendLeftLong", lastResendAttempts + " "
-                                        + MiscUtil.pluralize(lastResendAttempts, ATTEMPT_WORD_FORMS));
-                            }},
-                            new HashMap<String, Object>() {{
-                                put("resend_left", lastCodeAttempts);
-                            }}
+                            placeholders,
+                            fields
                     );
                 } else {
                     failureWithBlocking(
