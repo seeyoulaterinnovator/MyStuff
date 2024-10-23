@@ -39,28 +39,63 @@ const getInvalidUsers = (
 ) => {
   const blockedUsers: (UserRepresentation | UserInfoRepresentation)[] = [];
   const blockedUsernames: string[] = [];
+  const unlockedUserIds: string[] = [];
   const unverifiedUsers: (UserRepresentation | UserInfoRepresentation)[] = [];
   const unverifiedUsernames: string[] = [];
+  const verifiedUserIds: string[] = [];
+  const unlockedAndVerifiedUserIds: string[] = [];
+
+  const processUser = (
+    condition: boolean | undefined,
+    checkedUser: UserRepresentation | UserInfoRepresentation,
+    users: (UserRepresentation | UserInfoRepresentation)[],
+    usernames: string[],
+    validIds: string[],
+  ) => {
+    const { username, id } = checkedUser;
+
+    if (condition) {
+      users.push(checkedUser);
+      if (username) usernames.push(username);
+    } else if (id) {
+      validIds.push(id);
+    }
+  };
 
   users?.forEach((userItem) => {
-    const { enabled, emailVerified, username } = userItem;
+    processUser(
+      !userItem.enabled,
+      userItem,
+      blockedUsers,
+      blockedUsernames,
+      unlockedUserIds,
+    );
 
-    if (!enabled) {
-      blockedUsers.push(userItem);
-      if (username) blockedUsernames.push(username);
-    }
+    processUser(
+      !userItem.emailVerified,
+      userItem,
+      unverifiedUsers,
+      unverifiedUsernames,
+      verifiedUserIds,
+    );
 
-    if (!emailVerified) {
-      unverifiedUsers.push(userItem);
-      if (username) unverifiedUsernames.push(username);
-    }
+    processUser(
+      !userItem.emailVerified && !userItem.enabled,
+      userItem,
+      [],
+      [],
+      unlockedAndVerifiedUserIds,
+    );
   });
 
   return {
     blockedUsers,
     blockedUsernames: blockedUsernames.join(", "),
+    unlockedUserIds,
     unverifiedUsers,
     unverifiedUsernames: unverifiedUsernames.join(", "),
+    verifiedUserIds,
+    unlockedAndVerifiedUserIds,
   };
 };
 
@@ -281,44 +316,58 @@ export const useUserDataTable = ({
     };
   }, []);
 
-  const checkUsersForActivity = useCallback(() => {
-    const {
-      blockedUsers,
-      blockedUsernames,
-      unverifiedUsernames,
-      unverifiedUsers,
-    } = getInvalidUsers(selectedRows);
+  const checkUsersForActivity = useCallback(
+    (kindOfChecking?: { blocked?: boolean; unverified?: boolean }) => {
+      const { blocked, unverified } = kindOfChecking || {};
 
-    if (blockedUsers?.length) {
-      addError(
-        t(
-          blockedUsers.length > 1
-            ? "blockedUsersSelected"
-            : "blockedUserSelected",
-          { username: blockedUsernames },
-        ),
-        "error",
-      );
-    }
+      const {
+        blockedUsers,
+        blockedUsernames,
+        unlockedUserIds,
+        unverifiedUsernames,
+        unverifiedUsers,
+        verifiedUserIds,
+        unlockedAndVerifiedUserIds,
+      } = getInvalidUsers(selectedRows);
 
-    if (unverifiedUsers?.length) {
-      addError(
-        t(
-          unverifiedUsers.length > 1
-            ? "unverifiedUsersSelected"
-            : "unverifiedUserSelected",
-          { username: unverifiedUsernames },
-        ),
-        "error",
-      );
-    }
+      const isBlockedExist = Boolean(blocked && blockedUsers?.length);
+      const isUnverifiedExist = Boolean(unverified && unverifiedUsers?.length);
 
-    if (blockedUsers?.length || unverifiedUsers?.length) {
-      return true;
-    }
+      if (isBlockedExist) {
+        addError(
+          t(
+            blockedUsers.length > 1
+              ? "blockedUsersSelected"
+              : "blockedUserSelected",
+            { username: blockedUsernames },
+          ),
+          "error",
+        );
+      }
 
-    return false;
-  }, [selectedRows]);
+      if (isUnverifiedExist) {
+        addError(
+          t(
+            unverifiedUsers.length > 1
+              ? "unverifiedUsersSelected"
+              : "unverifiedUserSelected",
+            { username: unverifiedUsernames },
+          ),
+          "error",
+        );
+      }
+
+      return {
+        isBlockedExist,
+        isUnverifiedExist,
+        isBlockedOrUnverifiedExist: isBlockedExist || isUnverifiedExist,
+        unlockedUserIds,
+        verifiedUserIds,
+        unlockedAndVerifiedUserIds,
+      };
+    },
+    [selectedRows],
+  );
 
   const checkIsUsersNotSelected = useCallback(() => {
     if (!selectedRows.length) {
@@ -334,7 +383,11 @@ export const useUserDataTable = ({
     switch (action.type) {
       case CustomUserToolbarAction.SEND_LOGIN: {
         try {
-          if (checkIsUsersNotSelected() || checkUsersForActivity()) {
+          if (
+            checkIsUsersNotSelected() ||
+            checkUsersForActivity({ blocked: true, unverified: true })
+              .isBlockedOrUnverifiedExist
+          ) {
             return;
           }
 
@@ -353,7 +406,11 @@ export const useUserDataTable = ({
 
       case CustomUserToolbarAction.SEND_LOGIN_AND_RESET_PASSWORD: {
         try {
-          if (checkIsUsersNotSelected() || checkUsersForActivity()) {
+          if (
+            checkIsUsersNotSelected() ||
+            checkUsersForActivity({ blocked: true, unverified: true })
+              .isBlockedOrUnverifiedExist
+          ) {
             return;
           }
 
@@ -507,9 +564,17 @@ export const useUserDataTable = ({
             return;
           }
 
+          const { verifiedUserIds } = checkUsersForActivity({
+            unverified: true,
+          });
+
+          if (!verifiedUserIds.length) {
+            return;
+          }
+
           await adminClient.customUsers.block(
             { realm: realmName },
-            selectedIds,
+            verifiedUserIds,
           );
           addAlert(t("userBlockedSuccess"), AlertVariant.success);
           refresh();
@@ -526,9 +591,17 @@ export const useUserDataTable = ({
             return;
           }
 
+          const { verifiedUserIds } = checkUsersForActivity({
+            unverified: true,
+          });
+
+          if (!verifiedUserIds.length) {
+            return;
+          }
+
           await adminClient.customUsers.unlock(
             { realm: realmName },
-            selectedIds,
+            verifiedUserIds,
           );
           addAlert(t("userUnlockedSuccess"), AlertVariant.success);
           refresh();
