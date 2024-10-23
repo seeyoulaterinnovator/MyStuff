@@ -1,7 +1,12 @@
 .cities-container {
+  @apply gap-8;
+
   max-height: 100%;
   height: auto;
-  gap: 2rem;
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    @apply gap-y-6;
+  }
 
   @media only screen and (max-width: 767px) {
     gap: unset;
@@ -9,14 +14,18 @@
 }
 
 .cities-column {
+  @apply gap-8;
+
   flex: 1;
 
   @media only screen and (min-width: 768px) and (max-width: 1279px) {
     min-width: 30%;
+    @apply gap-6;
   }
 
   @media only screen and (max-width: 767px) {
     min-width: 100%;
+    @apply gap-6;
   }
 
   @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {

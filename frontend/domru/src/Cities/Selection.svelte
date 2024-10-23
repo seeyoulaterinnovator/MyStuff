@@ -80,7 +80,7 @@
       <ul class="flex flex-col cities-column">
       {#each groupPart as group}
 
-        <ul class="flex capital flex-col px-0 capital custom-mb-lg">
+        <ul class="flex capital flex-col px-0 capital">
           <h2 class="city-group-letter capitalize custom-mb-sm">
             {group.firstCharacter}
           </h2>
@@ -100,6 +100,6 @@
       {/each}
       </ul>
     {:else}
-      <p class="m-auto">Ничего не найдено. Пожалуйста, проверьте правильность написания города</p>
+      <p>Ничего не найдено. Пожалуйста, проверьте правильность написания города</p>
     {/each}
 </ul>

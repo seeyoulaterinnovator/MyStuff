@@ -7,13 +7,13 @@
 
     <#elseif section = "form">
         <#if phoneCallButton!false>
-            <h3 class="verification__sub custom-mb-md">
+            <p class="verification__sub custom-mb-md">
                 Введите последние 4 цифры входящего номера
-            </h3>
+            </p>
         <#else>
-            <h3 class="verification__sub custom-mb-md">
+            <p class="verification__sub custom-mb-md">
                 Введите код из СМС
-            </h3>
+            </p>
         </#if>
         <form id="totpe" action="${url.loginAction}" method="POST"></form>
 

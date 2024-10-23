@@ -51,11 +51,11 @@
             <div id="cities-header-div" class="w-full">
               {#if $status === STATUS.SELECTING}
                 <div class="w-full">
-                  <div class="flex justify-between items-center custom-mb-lg">
-                    <label for="search-city" class="choose-city-text">Выбрать город</label>
+                  <div class="flex justify-between items-center custom-mb-lg gap-3">
+                    <h1 for="search-city" class="choose-city-text">Выбрать город</h1>
                     <CloseButton on:click={handleClose} class="custom-icon"/>
                   </div>
-                  <div class="field field__container ">
+                  <div class="field field__container max-w-696px">
                     <form on:submit|preventDefault={handleSelectCity} class="flex items-center">
                       <input
                         class="field__input"

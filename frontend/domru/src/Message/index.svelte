@@ -152,7 +152,7 @@
     <div class="message {$isRegistration ? 'new-message' : 'message'}"
          on:click={handleClick}>
       <div class="message__title flex flex-row justify-between items-center gap-4 custom-mb-sm">
-        <span>
+        <h3>
           {#if $isBadEmail || $isBadPhone}
             Учетная запись существует
           {:else if $isLimitExceeded}
@@ -160,7 +160,7 @@
           {:else}
             Ошибка
           {/if}
-        </span>
+        </h3>
         {#if $isSecondSwitcher && $isPhoneError}
           <CloseButton on:click={clickSecondSwitcher}/>
         {:else}
@@ -211,20 +211,20 @@
     </div>
   </div>
 {:else if $showInfo}
-  <div class="message__fade flex justify-center items-center" on:click={closeAndSubmit}>
-    <div class="message" style="{$isEmailVer ? 'width: 390px' : 'width: 288px'}" on:click={closeAndSubmit}>
+  <div class="message__fade flex justify-center items-center" on:click={handleHide2}>
+    <div class="message" on:click={handleHide2}>
       <div class="message__title flex flex-row justify-between items-center gap-4 custom-mb-sm">
-        <span>
+        <h3>
           {#if $isEmailVer}
             Подтверждение
           {:else}
             Подтверждение данных
           {/if}
-        </span>
+        </h3>
         {#if $isEmailVer}
-          <CloseButton on:click={closeAndSubmit}/>
+          <CloseButton on:click={handleHide2}/>
         {:else}
-          <CloseButton click={closeAndSubmit}/>
+          <CloseButton click={handleHide2}/>
         {/if}
       </div>
       <p>{$text}</p>
