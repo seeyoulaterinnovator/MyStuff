@@ -7,6 +7,7 @@ import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.jpa.entities.RealmEntity;
 import org.keycloak.models.jpa.entities.UserAttributeEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
@@ -14,6 +15,7 @@ import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.jpa.model.UserSummaryView;
 import ru.alamics.sso.jpa.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,6 +30,9 @@ public class UserRepository {
 
     @Inject
     EntityManager em;
+
+    @Inject
+    RealmRepository realmRepository;
 
     public UserEntity findUser(final String userId) {
         return em.find(UserEntity.class, userId);
@@ -255,6 +260,12 @@ public class UserRepository {
         if (CollectionUtils.isNotEmpty(searchPhone)) {
             searchPhone = searchPhone + "%";
         }
+
+        if(realmRepository.findRealmById(realm) == null) {
+            realm = realmRepository.findRealmEntityByName(realm).map(RealmEntity::getId).orElse(null);
+        }
+
+        if(realm == null) return Collections.emptyList();
 
         Query query = em.createQuery(
                 "select distinct new ru.alamics.sso.jpa.model.UserSummaryView(UE.id, " +
