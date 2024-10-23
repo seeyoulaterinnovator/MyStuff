@@ -8,13 +8,13 @@
 
     <#elseif section = "form">
 
-        <form id="kc-update-profile-form" class="${properties.kcFormClass!}" action="${url.loginAction}" method="post">
+        <form id="kc-update-profile-form" class="${properties.kcFormClass!} custom-mt-lg" action="${url.loginAction}" method="post">
     <#-- В нашем случае firstName – это полное имя -->
-        <@components.field class="mb-4 md:w-full" fieldName="firstName"value="${(user.firstName!'')}" label="Как к Вам обращаться?" placeholder="Как к Вам обращаться?" required=true />
+        <@components.field fieldName="firstName"value="${(user.firstName!'')}" label="Как к Вам обращаться?" placeholder="Как к Вам обращаться?" required=true />
 
-        <@components.field class="mb-4 md:w-full" fieldName="email" value="${(user.email!'')}" label="Эл. почта" placeholder="Введите эл. почту" required=true type="text" />
+        <@components.field class="custom-mt-lg" fieldName="email" value="${(user.email!'')}" label="Электронная почта" placeholder="Введите эл. почту" required=true type="text" />
 
-        <@components.field class="mb-4 md:w-full" fieldName="phone" label="Ваш телефон" placeholder="Введите номер телефона" required=true />
+        <@components.field class="custom-mt-lg" fieldName="phone" label="Ваш телефон" placeholder="Введите номер телефона" required=true />
 
 
             <#if recaptchaRequired??>
@@ -41,10 +41,7 @@
                         <div class="flex flex-basis-auto items-center">
                             <button class="btn btn-main w-full" type="submit" id="update-profile-submit" />${msg(doAccept)}</button>
                         </div>
-                        <span class="flex-basis-auto ml-2 mb-6 mt-4 text-xs personal-data-process-accept">
-                            <span class="opacity-50">Нажимая кнопку, вы соглашаетесь <br></span>
-                            <a class="reference reference_hoverable allowDoubleClick" href="https://dom.ru/policy.pdf" target="_blink">с правилами обработки перс. данных</a>
-                        </span>
+                        <@blocks.personalDataProcessAccept />
                     </#if>
                 </div>
             </div>

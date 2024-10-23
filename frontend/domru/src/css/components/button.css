@@ -4,6 +4,10 @@ button {
         @apply .text-accentBlue-1200-hover;
     }
   }
+
+  &:focus {
+    @apply .outline-none;
+  }
 }
 
 .btn {
@@ -12,26 +16,30 @@ button {
   border-radius: 12px;
   height: 48px;
   padding: 0;
+  padding-inline: 19px;
   transition: 0.2s ease-in-out;
   font-family: 'CoFo Sans',sans-serif;
 
   @media only screen and (min-width: 768px) and (max-width: 1279px) {
     height: 44px;
+    padding-inline: 17px;
   }
 
   @media only screen and (max-width: 767px) {
     height: 40px;
+    padding-inline: 14px;
   }
 
   &:disabled {
     @apply .opacity-40 .cursor-not-allowed;
+
     &:hover {
        transform: none;
        @apply .shadow-base;
     }
   }
 
-  &:hover {
+  &:not([disabled]):not(:active):hover {
     @apply .shadow-base-md;
   }
 
@@ -43,19 +51,15 @@ button {
 
   &:focus {
     @apply .outline-none;
+    outline: none;
   }
 
-  &:active {
-    @apply .shadow-inner;
-  }
 }
-
 
 .btn-main {
   @apply .bg-extra .text-white .shadow-main;
 
-  &:hover:not([disabled]),
-  &:active:not([disabled]) {
+  &:hover:not([disabled]):not(:active) {
     @apply .bg-extra-700-hover;
     @apply .shadow-main-md;
   }

@@ -123,7 +123,7 @@
   .forgot-pass {
     justify-content: center; /* center text horizontally */
     text-align: center;
-  / gap: 18 px;
+    gap: 18px;
     width: 288px;
     height: 21px;
   }

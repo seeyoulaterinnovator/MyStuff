@@ -1,4 +1,3 @@
-
 const convertColorToVar = ({ addBase, theme }) => {
   function extractColorVars (colorObj, colorGroup = '') {
     return Object.entries(colorObj).reduce((vars, [key, value]) => {
@@ -109,21 +108,21 @@ module.exports = {
           },
         ],
         'custom/4lg': [
-          '23px',
+          '1.4375rem',
           {
-            lineHeight: '27px',
+            lineHeight: '1.6875rem',
           },
         ],
         'custom/5lg': [
-          '23px',
+          '1.4375rem',
           {
-            lineHeight: '27px',
+            lineHeight: '1.6875rem',
           },
         ],
         'custom/6lg': [
-          '27px',
+          '1.6875rem',
           {
-            lineHeight: '33px',
+            lineHeight: '2.0625rem',
           },
         ],
         'custom/7lg': [
@@ -183,7 +182,7 @@ module.exports = {
         '200px': '200px',
         '440px': '440px',
         '470px': '470px',
-        '568px': '568px',
+        '696px': '696px',
       },
       minHeight: {
         '1/4': '25%',
