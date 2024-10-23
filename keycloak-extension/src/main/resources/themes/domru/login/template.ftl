@@ -92,75 +92,75 @@
 
                 <div class="">
                     <#if displayMessage && message?has_content>
-                        <div class="alert pb-4">
+                        <div class="alert">
                             <#if message.type = 'info'>
                             <#if message.summary?contains('Ваш E-mail успешно подтверждён!')>
-                                <span class="text-black email-ver hidden">
+                                <p class="text-black email-ver hidden">
                                         ${kcSanitize(message.summary)?no_esc}
-                                </span>
+                                </p>
                             <#else>
-                                <span class="text-black hidden">
+                                <p class="text-black hidden">
                                     ${kcSanitize(message.summary)?no_esc}
-                                </span>
+                                </p>
                             </#if>
                             </#if>
                             <#if message.type = 'warning' && displayWarningMessage>
-                                <span class="text-black">
+                                <p class="text-black">
                                     ${kcSanitize(message.summary)?no_esc}
-                                </span>
+                                </p>
                             </#if>
                             <#if message.type = 'success' && message.summary != msg('emailSentMessage')>
-                                <span class="text-accentGreen">
+                                <p class="text-accentGreen">
                                     ${kcSanitize(message.summary)?no_esc}
-                                </span>
+                                </p>
                             </#if>
                             <#if message.type = 'error'>
                                 <#if loginFailToRegistrationMessage?has_content>
-                                    <span class="text-accentRed login-fail-to-registration hidden">
+                                    <p class="text-accentRed login-fail-to-registration hidden">
                                         ${kcSanitize(loginFailToRegistrationMessage)?no_esc}
-                                    </span>
+                                    </p>
                                 <#elseif message.summary?contains('Номер мобильного телефона уже используется в другой учетной записи.')>
                                     <#if message.summary?contains(msg('emailExistsMessage'))>
-                                        <span class="text-accentRed bad_phone bad_email hidden">
+                                        <p class="text-accentRed bad_phone bad_email hidden">
                                             ${kcSanitize(message.summary)?no_esc}
-                                        </span>
+                                        </p>
                                     <#else>
-                                        <span class="text-accentRed bad_phone hidden">
+                                        <p class="text-accentRed bad_phone hidden">
                                             ${kcSanitize(message.summary)?no_esc}
-                                        </span>
+                                        </p>
                                     </#if>
                                 <#elseif message.summary?contains('Превышен лимит СМС. Запросить новое СМС можно через 5 минут')>
-                                    <span class="text-accentRed hidden limit-exceeded">
+                                    <p class="text-accentRed hidden limit-exceeded">
                                         ${kcSanitize(message.summary)?no_esc}
-                                    </span>
+                                    </p>
                                 <#elseif message.summary?contains('Превышен лимит повторных звонков. Запросить новый звонок можно через 12 часов')>
-                                    <span class="text-accentRed hidden limit-exceeded">
+                                    <p class="text-accentRed hidden limit-exceeded">
                                         ${kcSanitize(message.summary)?no_esc}
-                                    </span>
+                                    </p>
                                 <#elseif message.summary?contains('Код был введён более 5 раз. Запросите новое СМС')>
-                                    <span class="text-accentRed hidden limit-exceeded">
+                                    <p class="text-accentRed hidden limit-exceeded">
                                         ${kcSanitize(message.summary)?no_esc}
-                                    </span>
+                                    </p>
                                 <#elseif message.summary?contains('Код был введён более 5 раз. Запросите новый звонок')>
-                                    <span class="text-accentRed hidden limit-exceeded">
+                                    <p class="text-accentRed hidden limit-exceeded">
                                         ${kcSanitize(message.summary)?no_esc}
-                                    </span>
+                                    </p>
                                 <#elseif message.summary == msg('emailExistsMessage')>
-                                    <span class="text-accentRed bad_email hidden">
+                                    <p class="text-accentRed bad_email hidden">
                                         ${kcSanitize(message.summary)?no_esc}
-                                    </span>
+                                    </p>
                                 <#elseif message.summary?contains('Код введен неверно. Проверьте правильность введенных данных')>
-                                    <span class="text-accentRed hidden">
+                                    <p class="text-accentRed hidden">
                                         ${kcSanitize(message.summary)?no_esc}
-                                    </span>
+                                    </p>
                                 <#elseif message.summary == msg('Авторизация с использованием временного кода в данный момент не доступна. Для авторизации воспользуйтесь логином и паролем')>
-                                    <span class="text-accentRed phone_error hidden">
+                                    <p class="text-accentRed phone_error hidden">
                                         ${kcSanitize(message.summary)?no_esc}
-                                    </span>
+                                    </p>
                                 <#else>
-                                    <span class="text-accentRed hidden">
+                                    <p class="text-accentRed hidden">
                                         ${kcSanitize(message.summary)?no_esc}
-                                    </span>
+                                    </p>
                                 </#if>
                             </#if>
                         </div>

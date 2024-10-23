@@ -137,14 +137,6 @@
 
 .pass-fields--change-pass {
   min-width: unset;
-
-  @media (max-width: 1279px) {
-    min-width:210px;
-  }
-
-  @media (max-width: 767px) {
-    width:100%;
-  }
 }
 
 .generated-password-text {

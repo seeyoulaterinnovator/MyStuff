@@ -2,9 +2,9 @@
 
 <#macro defaultTemplate withCity=true>
   <header id="page-header" class="flex items-center">
-    <div class="w-full flex justify-between items-center">
+    <div class="w-full flex justify-between items-start md:items-center lg:items-start">
       <a class="w-full max-w-200px" href="${(homePage)!"https://newlkb2b.dom.ru"}">
-        <div class="h-5 bg-contain bg-no-repeat logo logo--domru"></div>
+        <div class=" h-5 md:h-6 lg:h-6 bg-contain bg-no-repeat logo logo--domru"></div>
       </a>
       <div class="flex items-center">
         <div id="cities-button" data-city=""></div>

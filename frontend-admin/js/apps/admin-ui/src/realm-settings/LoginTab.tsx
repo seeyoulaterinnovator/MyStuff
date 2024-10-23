@@ -8,6 +8,7 @@ import { FormAccess } from "../components/form/FormAccess";
 import { useRealm } from "../context/realm-context/RealmContext";
 import { useForm, FieldPath } from "react-hook-form";
 import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
+import { cloneDeep, merge } from "lodash-es";
 
 type RealmSettingsLoginTabProps = {
   realm: RealmRepresentation;
@@ -47,11 +48,12 @@ export const RealmSettingsLoginTab = ({
     }
 
     try {
+      const realm = await adminClient.realms.findOne({ realm: realmName });
       await adminClient.realms.update(
         {
           realm: realmName,
         },
-        getValues(),
+        merge(cloneDeep(realm), getValues()),
       );
       addAlert(t("enableSwitchSuccess", { switch: t(name) }));
       refresh();

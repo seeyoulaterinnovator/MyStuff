@@ -3,23 +3,6 @@
 <#import "templates/components.ftl" as components>
 <#import "templates/blocks.ftl" as blocks>
 
-<#macro personalDataProcessAccept>
-    <span class="personal-data-process-accept flex flex-col justify-center items-left flex-basis-auto text-xs">
-    <span class="text-main-1000">
-        Нажимая кнопку, вы соглашаетесь <br>
-    </span>
-    <a class="reference reference_hoverable allowDoubleClick item_hover highlighted-text underline-hovering-text"
-       style="font-weight: 350;"
-       href="https://moscow.b2b.dom.ru/agreement" target="_blink">
-       <#if isLoginFullTexts!false>
-           с Условиями обработки персональных данных
-       <#else>
-           с Условиями обработки данных
-       </#if>
-    </a>
-    </span>
-</#macro>
-
 <@layout.registrationLayout
         displayInfo=social.displayInfo
         displayWide=(realm.password && social.providers??)
@@ -72,7 +55,7 @@
                                 <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
                                         type="submit">${enter}</button>
                             </div>
-                            <@personalDataProcessAccept/>
+                            <@blocks.personalDataProcessAccept/>
                         </div>
 
                         <div class="flex code-forgot" flex-wrap-justify-content="center">
@@ -136,7 +119,7 @@
                                    type="text" autofocus autocomplete="off"/>
 
                         </#if>
-                        <label class="field__label" for="username">Номер телефона</label>
+                        <#--  <label class="field__label" for="username">Номер телефона</label>  -->
                         <span class="span-line">${error!}</span>
                     </div>
                 </#if>
@@ -146,7 +129,7 @@
                             <button id="submit-phone" name="smsButton" class="btn btn-main btn-enter btn-new-enter"
                                     type="submit">${enter}</button>
                         </div>
-                        <@personalDataProcessAccept/>
+                        <@blocks.personalDataProcessAccept />
                     </div>
                 </div>
 
@@ -200,7 +183,7 @@
                             <button id="submit-phone" name="smsButton" class="btn btn-main btn-enter btn-new-enter"
                                     type="submit">${enter}</button>
                         </div>
-                        <@personalDataProcessAccept/>
+                        <@blocks.personalDataProcessAccept />
                     </div>
                 </div>
 
@@ -256,7 +239,7 @@
                                 <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
                                         type="submit">${enter}</button>
                             </div>
-                            <@personalDataProcessAccept/>
+                            <@blocks.personalDataProcessAccept />
                         </div>
 
                         <div class="flex code-forgot" flex-wrap-justify-content="center">

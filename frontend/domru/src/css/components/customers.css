@@ -32,14 +32,34 @@
 
 .titems {
   cursor: pointer;
+
   .org-cell {
     flex-grow: 2;
     word-break: break-word;
   }
+
   .role-cell {
+    margin-left: 8px;
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis;
+    max-width: 179px;
     flex-grow: 1;
     text-align: right;
     color: var(--main-900);
+
+    @media only screen and (min-width: 768px) and (max-width: 1279px) {
+      max-width: 178px;
+    }
+
+    @media only screen and (max-width: 767px) {
+      text-align: left;
+      white-space: unset; 
+      overflow: auto; 
+      text-overflow: unset;
+      max-width: unset;
+      margin-left: 0;
+    }
   }
 }
 

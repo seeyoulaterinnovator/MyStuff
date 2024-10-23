@@ -5,7 +5,7 @@
   <#elseif section = "body">
     <div>
       <span style="font-size: 18px;   line-height: 24px;">
-        Ваша учетная запись для входа в <a style="display: inline-block !important" href="https://newlkb2b.dom.ru">Личный кабинет</a> «Дом.ру Бизнес» <span style="color: #15A250"> разблокирована.</span>
+        Ваша учетная запись для входа в <a style="display: inline-block !important" href="https://newlkb2b.dom.ru">Личный кабинет</a> «Дом.ру Бизнес» <span style="color: #37a254"> разблокирована.</span>
 	  </span>
 
       <div class="content__secondary content__secondary-mt">Ваш логин:</div>
