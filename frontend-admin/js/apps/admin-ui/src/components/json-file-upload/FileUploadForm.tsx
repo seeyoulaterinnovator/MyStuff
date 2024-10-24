@@ -64,6 +64,7 @@ export const FileUploadForm = ({
 
   const handleTextOrDataChange = (value: string) => {
     setFileUpload({ ...fileUpload, value });
+    rest.onTextChange?.(value);
     onChange(value);
   };
 
