@@ -79,6 +79,7 @@ services:
       TZ: Europe/Moscow
       QUARKUS_HTTP_ACCESS_LOG_ENABLED: true
       QUARKUS_HTTP_ACCESS_LOG_PATTERN: "long"
+      DEV_HTTP_LOG_ALLOWED: true
     volumes:
       - ./volumes/keycloak/opt/keycloak/bin/kc-custom.sh:/opt/keycloak/bin/kc-custom.sh:ro
       - ./volumes/keycloak/opt/keycloak/conf/cache-ispn-custom.xml:/opt/keycloak/conf/cache-ispn-custom.xml:ro

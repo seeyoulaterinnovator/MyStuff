@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.oidc;
+package ru.alamics.sso.keycloak.interceptor;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;

@@ -122,4 +122,41 @@
             where pm.ID like '2b88e952-ab68-4a86-9c34-%';
         </sql>
     </changeSet>
+    <changeSet id="8" author="korotaev.miu" dbms="mariadb">
+        <sql>
+            alter table CHECK_TABLE modify column name varchar(255) not null;
+        </sql>
+    </changeSet>
+    <changeSet id="9" author="korotaev.miu" dbms="mariadb">
+        <sql>
+            create table DEV_HTTP_LOG(
+                                         ID varchar(36) not null,
+                                         PINNED boolean not null default false,
+                                         NODE varchar(255) not null,
+                                         REQUESTED_AT timestamp not null,
+                                         URL varchar(4096) character set utf8mb4 collate utf8mb4_unicode_ci not null,
+                                         METHOD varchar(7) not null,
+                                         REQUEST_HEADERS json not null,
+                                         REQUEST_BODY_TEXT text character set utf8mb4 collate utf8mb4_unicode_ci,
+                                         REQUEST_BODY_BINARY blob,
+                                         RESPONDED_AT timestamp,
+                                         STATUS smallint,
+                                         RESPONSE_HEADERS json,
+                                         RESPONSE_BODY_TEXT text character set utf8mb4 collate utf8mb4_unicode_ci,
+                                         RESPONSE_BODY_BINARY blob,
+                                         primary key (ID)
+            );
+            create index IDX_DEV_HTTP_LOG_REQUESTED_AT on DEV_HTTP_LOG (REQUESTED_AT);
+
+
+        </sql>
+    </changeSet>
+    <changeSet id="10" author="korotaev.miu" dbms="mariadb">
+        <sql>
+            insert ignore into APP_PROPERTIES (NAME, VALUE)
+            values ('dev.httpLogEnabled', 'false'),
+                   ('dev.httpLogPaths', '^/auth/realms/[^/]+/protocol/openid-connect/.*$'),
+                   ('dev.httpLogMaxCountPerNode', '10000');
+        </sql>
+    </changeSet>
 </databaseChangeLog>

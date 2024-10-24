@@ -39,6 +39,7 @@ extraEnvs:
   KC_HOSTNAME_ACCOUNT_URL: "{{ env "CI_ENVIRONMENT_URL" }}"
   KC_HOSTNAME_URL: "{{ env "CI_ENVIRONMENT_URL" }}"
   # KC_LOG_CONSOLE_OUTPUT: "json"
+  DEV_HTTP_LOG_ALLOWED: "true"
 
 extraSensitiveEnvs:
   DB_USER: "{{ env "DB_USER" }}"
