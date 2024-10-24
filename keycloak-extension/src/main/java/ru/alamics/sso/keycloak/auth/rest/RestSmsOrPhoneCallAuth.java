@@ -93,6 +93,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
+        ActivationCodeType.init(context.getRealm().getName());
         AuthenticationSessionModel session = context.getAuthenticationSession();
         UserModel userModel = context.getUser();
         User user = UserModelUserMapper.mapToUser(context.getUser());
@@ -184,15 +185,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
         int resendAttempts = attemptFailsService.getActualAttemptFailsCount(
                 user.getPhone(), context.getRealm().getName(), codeType.name(), user.getId()
         );
-        int lastResendAttempts = maxResendRecallTries - resendAttempts + 1;
-        Map<String, String> placeholders = new HashMap<String, String>() {{
-            put("resendLeft", String.valueOf(lastResendAttempts));
-            put("resendLeftLong", lastResendAttempts + " "
-                    + MiscUtil.pluralize(lastResendAttempts, ATTEMPT_WORD_FORMS));
-        }};
-        Map<String, Object> fields = new HashMap<String, Object>() {{
-            put("resend_left", lastResendAttempts);
-        }};
+        int lastResendAttempts = maxResendRecallTries - resendAttempts;
 
         if(userCodeValue == null || userCodeValue.isEmpty()) {
             if(codeSentAt != null && codeSentAt.isAfter(Instant.now().minus(newSendDelay)) && attributeCode == null) {
@@ -203,7 +196,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                     || codeSentAt.isBefore(Instant.now().minus(Duration.ofSeconds(codeType.getExpiredSecondsToResend())))
             ) {
                 if(attributeCode != null) {
-                    if(lastResendAttempts <= 1) {
+                    if(lastResendAttempts <= 0) {
                         failureWithBlocking(
                                 context,
                                 mapToBlockTimeout(
@@ -217,6 +210,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                     attemptFailsService.saveAttempt(new AttemptFailsDto(user.getPhone(), attributeCode.getHashKey(),
                             context.getRealm().getName(), codeType.name(), LocalDateTime.now(),
                             context.getUser().getId()));
+                    lastResendAttempts--;
                 }
                 String code;
                 try {
@@ -245,7 +239,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                         attributeCode.toString());
                 userModel.setSingleAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_SENT_AT,
                         String.valueOf(codeSentAt.toEpochMilli()));
-                log.info("Code sent");
+                log.info("Code sent {}", codeId);
             }
             int expirationSeconds = mapToSeconds(Duration.between(
                     Instant.now(),
@@ -255,8 +249,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
             challenge(
                     context,
                     RestSmsOrPhoneCallAuthResponses.CODE_SENT,
-                    new HashMap<String, String>() {{
-                        putAll(placeholders);
+                    new HashMap<String, String>(getPlaceholders(lastResendAttempts)) {{
                         put("expirationSeconds", String.valueOf(expirationSeconds));
                         put("expirationSecondsLong", expirationSeconds + " "
                                 + MiscUtil.pluralize(expirationSeconds, SECOND_WORD_FORMS));
@@ -265,8 +258,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                                 + MiscUtil.pluralize(countByOnCode, ATTEMPT_WORD_FORMS));
 
                     }},
-                    new HashMap<String, Object>() {{
-                        putAll(fields);
+                    new HashMap<String, Object>(getFields(lastResendAttempts)) {{
                         put(SMS_CODE_ID_PARAM, smsCodeId);
                         put("expirationSeconds", expirationSeconds);
                         put("attempt_left", countByOnCode);
@@ -329,14 +321,12 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                 challenge(
                         context,
                         RestSmsOrPhoneCallAuthResponses.WRONG_CODE,
-                        new HashMap<String, String>() {{
-                            putAll(placeholders);
+                        new HashMap<String, String>(getPlaceholders(lastResendAttempts)) {{
                             put("attemptLeft", String.valueOf(lastCodeAttempts));
                             put("attemptLeftLong", lastCodeAttempts + " "
                                     + MiscUtil.pluralize(lastCodeAttempts, ATTEMPT_WORD_FORMS));
                         }},
-                        new HashMap<String, Object>() {{
-                            putAll(fields);
+                        new HashMap<String, Object>(getFields(lastResendAttempts)) {{
                             put("attempt_left", lastCodeAttempts);
                         }}
                 );
@@ -350,8 +340,8 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                     challenge(
                             context,
                             RestSmsOrPhoneCallAuthResponses.CODE_ATTEMPT_EXHAUSTED,
-                            placeholders,
-                            fields
+                            getPlaceholders(lastResendAttempts),
+                            getFields(lastResendAttempts)
                     );
                 } else {
                     failureWithBlocking(
@@ -445,6 +435,21 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
 
     private int mapToSeconds(Duration duration) {
         return Math.max(0, (int) Math.ceil(duration.toMillis() / 1000.0));
+    }
+
+
+    private Map<String, String> getPlaceholders(int lastResendAttempts) {
+        return new HashMap<String, String>() {{
+            put("resendLeft", String.valueOf(lastResendAttempts));
+            put("resendLeftLong", lastResendAttempts + " "
+                    + MiscUtil.pluralize(lastResendAttempts, ATTEMPT_WORD_FORMS));
+        }};
+    }
+
+    private Map<String, Object> getFields(int lastResendAttempts) {
+        return new HashMap<String, Object>() {{
+            put("resend_left", lastResendAttempts);
+        }};
     }
 
     @Data
