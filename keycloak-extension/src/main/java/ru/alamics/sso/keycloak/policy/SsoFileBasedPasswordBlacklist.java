@@ -29,7 +29,7 @@ public class SsoFileBasedPasswordBlacklist implements BlacklistPasswordPolicyPro
         }
 
         if (!Files.exists(this.path)) {
-            throw new IllegalArgumentException("Password blacklist " + name + " not found!");
+            log.error("Password blacklist {} not found!", name);
         }
     }
 
