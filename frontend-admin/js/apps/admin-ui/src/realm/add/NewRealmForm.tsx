@@ -1,5 +1,10 @@
 import type RealmRepresentation from "@keycloak/keycloak-admin-client/lib/defs/realmRepresentation";
-import { ActionGroup, Button, PageSection } from "@patternfly/react-core";
+import {
+  ActionGroup,
+  AlertVariant,
+  Button,
+  PageSection,
+} from "@patternfly/react-core";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -14,7 +19,7 @@ import { ViewHeader } from "../../components/view-header/ViewHeader";
 import { useRealms } from "../../context/RealmsContext";
 import { useWhoAmI } from "../../context/whoami/WhoAmI";
 import { toDashboard } from "../../dashboard/routes/Dashboard";
-import { convertFormValuesToObject, convertToFormValues } from "../../util";
+import { convertFormValuesToObject } from "../../util";
 
 export default function NewRealmForm() {
   const { adminClient } = useAdminClient();
@@ -25,24 +30,33 @@ export default function NewRealmForm() {
   const { refresh: refreshRealms } = useRealms();
   const { addAlert, addError } = useAlerts();
   const [realm, setRealm] = useState<RealmRepresentation>();
+  const [rawTextResourceFile, setRawTextResourceFile] = useState("");
 
   const form = useForm<RealmRepresentation>({
     mode: "onChange",
   });
 
-  const { handleSubmit, setValue, formState } = form;
+  const { handleSubmit, formState } = form;
 
-  const handleFileChange = (obj?: object) => {
+  const handleFileChange = (obj?: object, rawText?: string) => {
     const defaultRealm = { id: "", realm: "", enabled: true };
-    convertToFormValues(obj || defaultRealm, setValue);
-    setRealm(obj || defaultRealm);
+    const cleanedRawText = rawText?.replace(/^{|}$/g, "").trim() || "";
+
+    setRawTextResourceFile(cleanedRawText);
+    setRealm(convertFormValuesToObject(obj || defaultRealm));
   };
 
   const save = async (fields: RealmRepresentation) => {
     try {
+      if (realm && !Object.keys(realm).length && rawTextResourceFile.length) {
+        addAlert(t("invalidResourceFile"), AlertVariant.danger);
+        return;
+      }
+
       await adminClient.realms.create({
         ...realm,
         ...convertFormValuesToObject(fields),
+        id: fields.realm,
       });
       addAlert(t("saveRealmSuccess"));
 
