@@ -120,35 +120,35 @@ container-image:
   tags:
     - sso-build-shell
 
-domru:stage:
-  extends: .domru:stage:template
-  environment:
-    name: stage
-    url: https://sso-balancer.testing.srv.loc
-  variables:
-    NAMESPACE: 'sso'
-    NODE_PORT: '30081'
-    REPLICA_COUNT: '1'
+#domru:stage:
+#  extends: .domru:stage:template
+#  environment:
+#    name: stage
+#    url: https://sso-balancer.testing.srv.loc
+#  variables:
+#    NAMESPACE: 'sso'
+#    NODE_PORT: '30081'
+#    REPLICA_COUNT: '1'
 
-domru:stage2:
-  extends: .domru:stage:template
-  environment:
-    name: stage2
-    url: https://sso-balancer2.testing.srv.loc
-  variables:
-    NAMESPACE: 'sso'
-    NODE_PORT: '30082'
-    REPLICA_COUNT: '1'
+#domru:stage2:
+#  extends: .domru:stage:template
+#  environment:
+#    name: stage2
+#    url: https://sso-balancer2.testing.srv.loc
+#  variables:
+#    NAMESPACE: 'sso'
+#    NODE_PORT: '30082'
+#    REPLICA_COUNT: '1'
 
-domru:stage3:
-  extends: .domru:stage:template
-  environment:
-    name: stage3
-    url: https://sso-balancer3.testing.srv.loc
-  variables:
-    NAMESPACE: 'sso'
-    NODE_PORT: '30083'
-    REPLICA_COUNT: '1'
+#domru:stage3:
+#  extends: .domru:stage:template
+#  environment:
+#    name: stage3
+#    url: https://sso-balancer3.testing.srv.loc
+#  variables:
+#    NAMESPACE: 'sso'
+#    NODE_PORT: '30083'
+#    REPLICA_COUNT: '1'
 
 domru:stage4:
   extends: .domru:stage:template
@@ -160,32 +160,32 @@ domru:stage4:
     NODE_PORT: '30084'
     REPLICA_COUNT: '1'
 
-domru:stage5:
-  extends: .domru:stage:template
-  environment:
-    name: stage5
-    url: https://sso-balancer5.testing.srv.loc
-  variables:
-    NAMESPACE: 'sso'
-    NODE_PORT: '30085'
-    REPLICA_COUNT: '3'
+#domru:stage5:
+#  extends: .domru:stage:template
+#  environment:
+#    name: stage5
+#    url: https://sso-balancer5.testing.srv.loc
+#  variables:
+#    NAMESPACE: 'sso'
+#    NODE_PORT: '30085'
+#    REPLICA_COUNT: '3'
 
-infinispan:stage5:
-  stage: deploy
-  image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
-  when: manual
-  variables:
-    NAMESPACE: 'sso'
-    INFINISPAN_REPLICA_COUNT: '3'
-  script:
-    - export DTD=$(date | sha256sum)
-    - consul-template -once -template "./configs/infinispan/.helm/values-dev.yaml.tpl:values.yaml"
-    - ln -s ${INFINISPAN_MGMT_USERS} ./configs/infinispan/.helm/configs/mgmt-users.properties
-    - ln -s ${INFINISPAN_MGMT_GROUPS} ./configs/infinispan/.helm/configs/mgmt-groups.properties
-    - helm upgrade -i infinispan --values values.yaml ./configs/infinispan/.helm -n ${NAMESPACE} --atomic --timeout 5m
-    - helm history -n ${NAMESPACE} infinispan --max 5
-  tags:
-    - sso-build-k8s
+#infinispan:stage5:
+#  stage: deploy
+#  image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
+#  when: manual
+#  variables:
+#    NAMESPACE: 'sso'
+#    INFINISPAN_REPLICA_COUNT: '3'
+#  script:
+#    - export DTD=$(date | sha256sum)
+#    - consul-template -once -template "./configs/infinispan/.helm/values-dev.yaml.tpl:values.yaml"
+#    - ln -s ${INFINISPAN_MGMT_USERS} ./configs/infinispan/.helm/configs/mgmt-users.properties
+#    - ln -s ${INFINISPAN_MGMT_GROUPS} ./configs/infinispan/.helm/configs/mgmt-groups.properties
+#    - helm upgrade -i infinispan --values values.yaml ./configs/infinispan/.helm -n ${NAMESPACE} --atomic --timeout 5m
+#    - helm history -n ${NAMESPACE} infinispan --max 5
+#  tags:
+#    - sso-build-k8s
 
 domru:perm:primary:
   stage: deploy
