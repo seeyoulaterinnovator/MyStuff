@@ -54,6 +54,7 @@ services:
       - KC_CACHE=ispn
       - KC_CACHE_CONFIG_FILE=cache-ispn-custom.xml
       - KC_HOSTNAME_ADMIN_URL=https://er-sso.dev.it-resource.team # see SSOERTH-163, https://github.com/keycloak/keycloak/issues/16005
+      - DEV_HTTP_LOG_ALLOWED=true
 #    healthcheck:
 #      test: [
 #        "CMD-SHELL",
