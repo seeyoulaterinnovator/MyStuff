@@ -40,6 +40,7 @@ extraEnvs:
   KC_HOSTNAME_URL: "{{ env "CI_ENVIRONMENT_URL" }}"
   # KC_LOG_CONSOLE_OUTPUT: "json"
   DEV_HTTP_LOG_ALLOWED: "true"
+  APP_PROPS_UPDATE_DELAY_SECS: "60"
 
 extraSensitiveEnvs:
   DB_USER: "{{ env "DB_USER" }}"
