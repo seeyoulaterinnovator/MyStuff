@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.policy;
 
+import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +21,15 @@ public class SsoFileBasedPasswordBlacklist implements BlacklistPasswordPolicyPro
 
     private Set<String> blacklist;
 
-    public SsoFileBasedPasswordBlacklist(Path blacklistBasePath, String name) {
+    public SsoFileBasedPasswordBlacklist(@Nullable Path blacklistBasePath, String name) {
         this.name = name;
+
+        if(blacklistBasePath == null) {
+            log.error("Password blacklist path empty");
+            path = null;
+            return;
+        }
+
         this.path = blacklistBasePath.resolve(name);
 
         if (name.contains("/")) {
@@ -29,7 +37,7 @@ public class SsoFileBasedPasswordBlacklist implements BlacklistPasswordPolicyPro
         }
 
         if (!Files.exists(this.path)) {
-            throw new IllegalArgumentException("Password blacklist " + name + " not found!");
+            log.error("Password blacklist {} not found!", name);
         }
     }
 
@@ -39,7 +47,7 @@ public class SsoFileBasedPasswordBlacklist implements BlacklistPasswordPolicyPro
 
     @Synchronized
     public void lazyInit() {
-        if (blacklist == null) {
+        if (blacklist == null && path != null) {
             try(Stream<String> stream = Files.lines(path)) {
                 blacklist = stream.collect(Collectors.toSet());
             } catch (Exception e) {

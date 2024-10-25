@@ -6,15 +6,15 @@ export type JsonFileUploadProps = Omit<
   FileUploadFormProps,
   "onChange" | "language" | "extension"
 > & {
-  onChange: (obj: object) => void;
+  onChange: (obj: object, rawText: string) => void;
 };
 
 export const JsonFileUpload = ({ onChange, ...props }: JsonFileUploadProps) => {
   const handleChange = (value: string) => {
     try {
-      onChange(JSON.parse(value));
+      onChange(JSON.parse(value), value);
     } catch (error) {
-      onChange({});
+      onChange({}, value);
       console.warn("Invalid json, ignoring value using {}");
     }
   };

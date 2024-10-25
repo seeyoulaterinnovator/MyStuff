@@ -45,13 +45,18 @@ public class SsoBlacklistPasswordPolicyProviderFactory implements PasswordPolicy
             return ensureExists(Paths.get(pathFromSpiConfig));
         }
 
-        String pathFromJbossDataPath = System.getProperty(JBOSS_SERVER_DATA_DIR) + "/" + PASSWORD_BLACKLISTS_FOLDER;
-        if (!Files.exists(Paths.get(pathFromJbossDataPath))) {
-            if (!Paths.get(pathFromJbossDataPath).toFile().mkdirs()) {
-                log.error("Could not create folder for password blacklists: {}", pathFromJbossDataPath);
+        String pathServerDataDirProperty = System.getProperty(JBOSS_SERVER_DATA_DIR);
+        if(pathServerDataDirProperty != null) {
+            Path pathFromJbossDataPath = Paths.get(pathServerDataDirProperty).resolve(PASSWORD_BLACKLISTS_FOLDER);
+            if (!Files.exists(pathFromJbossDataPath)) {
+                if (!pathFromJbossDataPath.toFile().mkdirs()) {
+                    log.error("Could not create folder for password blacklists: {}", pathFromJbossDataPath);
+                    return null;
+                }
             }
+            return ensureExists(pathFromJbossDataPath);
         }
-        return ensureExists(Paths.get(pathFromJbossDataPath));
+        return null;
     }
 
     private static Path ensureExists(Path path) {
@@ -62,7 +67,9 @@ public class SsoBlacklistPasswordPolicyProviderFactory implements PasswordPolicy
             return path;
         }
 
-        throw new IllegalStateException("Password blacklists location does not exist: " + path);
+        log.error("Password blacklists location does not exist: {}", path);
+
+        return null;
     }
 
     @Override
