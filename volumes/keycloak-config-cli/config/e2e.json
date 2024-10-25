@@ -119,7 +119,7 @@
   "browserFlow": "Copy of Browser two steep new",
   "registrationFlow": "Registration with Phone",
   "resetCredentialsFlow": "Correct reset credential",
-  "passwordPolicy": "forceExpiredPasswordChange(365)",
+  "passwordPolicy": "forceExpiredPasswordChange(365) and ssoPasswordBlacklist(black_list_password.txt)",
   "eventsEnabled": true,
   "registrationAllowed": true,
   "eventsListeners": [
