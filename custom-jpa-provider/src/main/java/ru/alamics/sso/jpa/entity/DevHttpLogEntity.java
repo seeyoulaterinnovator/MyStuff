@@ -17,7 +17,7 @@ import java.util.UUID;
 public class DevHttpLogEntity {
     @Id
     @Column(name = "ID", nullable = false)
-    UUID id;
+    String id;
 
     @Column(name = "PINNED", nullable = false)
     boolean pinned;

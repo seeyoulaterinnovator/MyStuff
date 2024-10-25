@@ -13,6 +13,7 @@ import ru.alamics.sso.jpa.entity.DevHttpLogEntity;
 import java.net.URL;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -20,11 +21,13 @@ import java.util.stream.Collectors;
 public class DevHttpLogRepository {
     final ObjectMapper objectMapper = new ObjectMapper();
 
+    final ReentrantLock lock = new ReentrantLock();
+
     @Inject
     EntityManager em;
 
-    public UUID addRequest(String node, URL url, String method, Map<String, List<String>> headers) {
-        var id = UUID.randomUUID();
+    public String addRequest(String node, URL url, String method, Map<String, List<String>> headers) {
+        var id = UUID.randomUUID().toString();
         em.persist(
                 DevHttpLogEntity.builder()
                         .id(id)
@@ -38,17 +41,17 @@ public class DevHttpLogRepository {
         return id;
     }
 
-    public void addRequestBody(UUID id, String body) {
+    public void addRequestBody(String id, String body) {
         var log = em.find(DevHttpLogEntity.class, id);
         if (log != null) log.setRequestBodyText(body);
     }
 
-    public void addRequestBody(UUID id, byte[] body) {
+    public void addRequestBody(String id, byte[] body) {
         var log = em.find(DevHttpLogEntity.class, id);
         if (log != null) log.setRequestBodyBinary(body);
     }
 
-    public void addResponse(UUID id, int status, Map<String, List<String>> headers) {
+    public void addResponse(String id, int status, Map<String, List<String>> headers) {
         var log = em.find(DevHttpLogEntity.class, id);
         if (log != null) {
             log.setRespondedAt(Instant.now());
@@ -57,31 +60,36 @@ public class DevHttpLogRepository {
         }
     }
 
-    public void addResponseBody(UUID id, String body) {
+    public void addResponseBody(String id, String body) {
         var log = em.find(DevHttpLogEntity.class, id);
         if (log != null) log.setResponseBodyText(body);
     }
 
-    public void addResponseBody(UUID id, byte[] body) {
+    public void addResponseBody(String id, byte[] body) {
         var log = em.find(DevHttpLogEntity.class, id);
         if (log != null) log.setResponseBodyBinary(body);
     }
 
     public void rollup(String node, long maxCount) {
-        long count = Long.parseLong(
-                em.createQuery("select count(e) from DevHttpLogEntity e where e.node = :node and not e.pinned")
+        if(!lock.tryLock()) return;
+        try {
+            long count = Long.parseLong(
+                    em.createQuery("select count(e) from DevHttpLogEntity e where e.node = :node and not e.pinned")
+                            .setParameter("node", node)
+                            .getSingleResult()
+                            .toString()
+            );
+            if(count > 2L * maxCount) {
+                em.createNativeQuery("delete from DEV_HTTP_LOG " +
+                                "where NODE = :node and not PINNED " +
+                                "order by REQUESTED_AT asc " +
+                                "limit :limit")
                         .setParameter("node", node)
-                        .getSingleResult()
-                        .toString()
-        );
-        if(count > 2L * maxCount) {
-            em.createNativeQuery("delete from DEV_HTTP_LOG" +
-                            " where NODE = :node and not PINNED " +
-                            "order by REQUESTED_AT asc " +
-                            "limit :limit")
-                    .setParameter("node", node)
-                    .setParameter("limit", maxCount)
-                    .executeUpdate();
+                        .setParameter("limit", maxCount)
+                        .executeUpdate();
+            }
+        } finally {
+            lock.unlock();
         }
     }
 

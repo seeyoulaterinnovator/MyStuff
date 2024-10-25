@@ -134,6 +134,12 @@ public class ApplicationProperties {
     }
 
     @Locked.Read
+    public long getPositivePropertyLong(final String name, long defValue) {
+        long value = getPropertyLong(name, defValue, null);
+        return value > 0 ? value : defValue;
+    }
+
+    @Locked.Read
     public long getPropertyLong(final String name, long defValue, String logDefault) {
         try {
             return Long.parseLong(getProperty(name));
