@@ -159,4 +159,13 @@
                    ('dev.httpLogMaxCountPerNode', '10000');
         </sql>
     </changeSet>
+    <changeSet id="11" author="korotaev.miu" dbms="mariadb">
+        <sql>
+            update CLIENT
+            set ALWAYS_DISPLAY_IN_CONSOLE = 1
+            where CLIENT_ID not like '%-realm'
+              and CLIENT_ID not in ('account', 'account-console', 'realm-management', 'security-admin-console',
+                                    'admin-cli', 'broker');
+        </sql>
+    </changeSet>
 </databaseChangeLog>
