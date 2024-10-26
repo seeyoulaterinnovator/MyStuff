@@ -19,6 +19,8 @@ import org.keycloak.services.resources.LoginActionsService;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.keycloak.auth.AbstractAuthenticator;
 import ru.alamics.sso.keycloak.auth.form.new_auth.newAuthReqActions.EmailReqAction;
+import ru.alamics.sso.keycloak.auth.requiredactions.PhoneVerificationByIncomingCallFactory;
+import ru.alamics.sso.keycloak.auth.requiredactions.PhoneVerificationBySmsFactory;
 import ru.alamics.sso.registration.model.UserConstants;
 import ru.alamics.sso.util.Util;
 
@@ -33,7 +35,9 @@ public class RestRequiredActionsAuthenticator extends AbstractAuthenticator {
             UserModel.RequiredAction.UPDATE_PASSWORD.name(),
             UserModel.RequiredAction.UPDATE_PROFILE.name(),
             UserModel.RequiredAction.VERIFY_EMAIL.name(),
-            EmailReqAction.PROVIDER_ID
+            EmailReqAction.PROVIDER_ID,
+            PhoneVerificationBySmsFactory.PROVIDER_ID,
+            PhoneVerificationByIncomingCallFactory.PROVIDER_ID
     );
 
     private final KeycloakSession session;
