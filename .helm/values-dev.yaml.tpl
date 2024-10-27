@@ -38,8 +38,13 @@ extraEnvs:
   KC_HOSTNAME_ADMIN_URL: "{{ env "CI_ENVIRONMENT_URL" }}" # see https://github.com/keycloak/keycloak/issues/16005
   KC_HOSTNAME_ACCOUNT_URL: "{{ env "CI_ENVIRONMENT_URL" }}"
   KC_HOSTNAME_URL: "{{ env "CI_ENVIRONMENT_URL" }}"
-  # KC_LOG_CONSOLE_OUTPUT: "json"
+  APP_PROPS_UPDATE_DELAY_SECS: "60"
+  # KC_LOG_CONSOLE_OUTPUT: "json" # need configure in OpenSearch
+  LOG_LEVEL: INFO
+  QUARKUS_HTTP_ACCESS_LOG_ENABLED: false
+  QUARKUS_HTTP_ACCESS_LOG_PATTERN: "long"
   DEV_HTTP_LOG_ALLOWED: "true"
+  QUARKUS_LOG_CATEGORY__ORG_APACHE_HTTP__LEVEL: "DEBUG"
 
 extraSensitiveEnvs:
   DB_USER: "{{ env "DB_USER" }}"
