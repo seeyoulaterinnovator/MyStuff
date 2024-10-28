@@ -36,8 +36,9 @@ input[type="checkbox"] {
 * https://jira.it-resource.team/browse/SSOERTH-116
 * https://jira.it-resource.team/browse/SSOERTH-205
 */
+.pf-v5-c-masthead,
 .pf-v5-c-page__main > section {
-  contain: layout paint;
+  overflow-x: clip;
 }
 
 .pf-v5-u-display-contents {
