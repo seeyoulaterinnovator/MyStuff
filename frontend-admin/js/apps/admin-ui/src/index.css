@@ -32,16 +32,13 @@ input[type="checkbox"] {
 }
 
 /*
-* FIX of Popper (\node_modules\@patternfly\react-core\src\helpers\Popper\Popper.tsx)
-* positioning strategy.
-*
-* Popper component does not contain props for changing the strategy, so this approach was chosen.
-* usePopper used in Popper by default uses the absolute positioning strategy,
-* which is why the Popper's initial position is not formed correctly if the
-* parent component has relative positioning. As a result, the page jerks during rendering.
+* Fix problems:
+* https://jira.it-resource.team/browse/SSOERTH-116
+* https://jira.it-resource.team/browse/SSOERTH-205
 */
-.pf-v5-c-menu {
-  position: fixed !important;
+.pf-v5-c-masthead,
+.pf-v5-c-page__main > section {
+  overflow-x: clip;
 }
 
 .pf-v5-u-display-contents {
