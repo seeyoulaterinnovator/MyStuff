@@ -43,7 +43,7 @@ public class CustomerUpdateService {
         tbapiRequestInterval = properties.getPropertyLong(TBAPI_REQUEST_INTERVAL_PROPERTY, TBAPI_REQUEST_INTERVAL_DEFAULT, "CustomerUpdateService: default value used: '%s' = '%s'");
         log.info("tbapiRequestInterval set to value={}", tbapiRequestInterval);
 
-        tasksPool.offer(executorService.scheduleAtFixedRate(new UpdateTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
+        tasksPool.offer(executorService.scheduleWithFixedDelay(new UpdateTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
     }
 
     @Lock(LockType.READ)
@@ -54,8 +54,12 @@ public class CustomerUpdateService {
     private class UpdateTask implements Runnable {
         @Override
         public void run() {
-            updateCustomers();
-            checkLoad();
+            try {
+                updateCustomers();
+                checkLoad();
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 

@@ -106,8 +106,13 @@ public class CustomerRequestService {
 
         int currentElement = 0;
         while (!tomsIdQueue.isEmpty() && currentElement <= countElements) {
-            result.add(tomsIdQueue.poll());
-            currentElement++;
+            String tomsId = tomsIdQueue.poll();
+            if (tomsId != null) {
+                result.add(tomsId);
+                currentElement++;
+            } else {
+                break;
+            }
         }
         return result;
     }
