@@ -55,7 +55,7 @@ Keycloak обеспечивает поддержку тем для веб-стр
 
 В рамках данного проекта конфигурируются следующие типы тем: *Admin*, *Login*, *Email*.
 
-- Конфигурирование тем *Login* и *Email* основывается на редактировании [FreeMarker](https://freemarker.apache.org/) шаблонов, определенных в [keycloak-extension\src\main\resources\themes](./keycloak-extension/src/main/resources/themes)
+- Конфигурирование тем *Login* и *Email* основывается на редактировании [FreeMarker](https://freemarker.apache.org/) шаблонов, определенных в [themes](./keycloak-extension/src/main/resources/themes)
 - Конфигурирование темы *Admin* основывается на разработке [React приложения](./frontend-admin/js/apps/admin-ui). Подробнее с кастомизацией тем, основанных на React, можно ознакомиться в [документации](https://www.keycloak.org/docs/latest/server_development/#_theme_react). 
 ⚠️ _На момент разработки собственной темы административной консоли пакета *@keycloak/keycloak-admin-ui* не существовало, хотя он и был описан в документации. В связи с этим было найдено [альтернативное решение](https://github.com/keycloak/keycloak/discussions/32645#discussioncomment-10566232)._
 
@@ -83,7 +83,15 @@ Keycloak обеспечивает поддержку тем для веб-стр
 
 ### Email - Почтовые сообщения
 
-Конфигурирование почтовых сообщений производится в [keycloak-extension\src\main\resources\themes\{yourTheme}\email](keycloak-extension\src\main\resources\themes\domru\email) и сводится к корректировке стилей и FreeMarker шаблонов. При разработке стоит учитывать [особенности верстки](https://habr.com/ru/articles/252279/) для почтовых клиентов. Для проверки поддержки той или иной функции почтовым клиентом рекомендуется использовать сервис [Can I email](https://www.caniemail.com/features/).
+Конфигурирование почтовых сообщений производится в [themes/{yourTheme}/email](keycloak-extension\src\main\resources\themes\domru\email) и сводится к корректировке стилей и FreeMarker шаблонов. При разработке стоит учитывать [особенности верстки](https://habr.com/ru/articles/252279/) для почтовых клиентов. Для проверки поддержки той или иной функции почтовым клиентом рекомендуется использовать сервис [Can I email](https://www.caniemail.com/features/).
+
+Для перехвата почтовых сообщений при локальной разработке используется *smtp4dev* сервер.
+
+#### Стенды 
+
+- **dev**: [https://smtp4dev-er-sso.dev.it-resource.team/](https://smtp4dev-er-sso.dev.it-resource.team/)
+
+- **local**: [http://localhost:8025](http://localhost:8025/)
 
 ## E2E
 
@@ -126,7 +134,7 @@ TODO
 * *USER_POST* - таблица customer-ов пользователей
 * *USER_ATTRIBUTE* - атрибуты пользователей
 
-## Сервисные письма на email
+<!-- ## Сервисные письма на email
 
 Изменения производятся в [themes/domru/email/html](keycloak-extension/src/main/resources/themes/domru/email/html).
-
+ -->
