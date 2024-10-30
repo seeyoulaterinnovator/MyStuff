@@ -57,8 +57,12 @@ public class CustomerUpdateService {
     private class UpdateTask implements Runnable {
         @Override
         public void run() {
-            updateCustomers();
-            checkLoad();
+            try {
+                updateCustomers();
+                checkLoad();
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
