@@ -83,15 +83,7 @@ Keycloak обеспечивает поддержку тем для веб-стр
 
 ### Email - Почтовые сообщения
 
-Конфигурирование почтовых сообщений производится в [themes/{yourTheme}/email](keycloak-extension\src\main\resources\themes\domru\email) и сводится к корректировке стилей и FreeMarker шаблонов. При разработке стоит учитывать [особенности верстки](https://habr.com/ru/articles/252279/) для почтовых клиентов. Для проверки поддержки той или иной функции почтовым клиентом рекомендуется использовать сервис [Can I email](https://www.caniemail.com/features/).
-
-Для перехвата почтовых сообщений при локальной разработке используется *smtp4dev* сервер.
-
-#### Стенды 
-
-- **dev**: [https://smtp4dev-er-sso.dev.it-resource.team/](https://smtp4dev-er-sso.dev.it-resource.team/)
-
-- **local**: [http://localhost:8025](http://localhost:8025/)
+См. [Сервисные-письма-на-email](##Сервисные-письма-на-email)
 
 ## E2E
 
@@ -134,7 +126,14 @@ TODO
 * *USER_POST* - таблица customer-ов пользователей
 * *USER_ATTRIBUTE* - атрибуты пользователей
 
-<!-- ## Сервисные письма на email
+## Сервисные письма на email
 
-Изменения производятся в [themes/domru/email/html](keycloak-extension/src/main/resources/themes/domru/email/html).
- -->
+Конфигурирование почтовых сообщений производится в [themes/{yourTheme}/email](keycloak-extension\src\main\resources\themes\domru\email) и сводится к корректировке стилей и FreeMarker шаблонов. При разработке стоит учитывать [особенности верстки](https://habr.com/ru/articles/252279/) для почтовых клиентов. Для проверки поддержки той или иной функции почтовым клиентом рекомендуется использовать сервис [Can I email](https://www.caniemail.com/features/).
+
+Для перехвата почтовых сообщений при локальной разработке используется *smtp4dev* сервер.
+
+### Стенды 
+
+- **dev**: [https://smtp4dev-er-sso.dev.it-resource.team/](https://smtp4dev-er-sso.dev.it-resource.team/)
+
+- **local**: [http://localhost:8025](http://localhost:8025/)
