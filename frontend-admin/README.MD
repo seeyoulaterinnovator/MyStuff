@@ -47,10 +47,11 @@
 ## Локальный запуск проекта
 
 1. Запустить сервер в соответствии с [инструкцией Разработка](../README.MD/#Разработка)
-2. Проинициализировать husky: `pnpm prepare`;
-3. Установить зависимости: `npm i`
-4. Запустить проект из каталога `/js/apps/admin-ui`: `pnpm dev`
-5. Открыть [localhost:8080/auth/admin/master/console](http://localhost:8080/auth/admin/master/console)
+2. Запустить run config: `docker-compose-full-ui` или `docker-compose-ui`.
+3. Проинициализировать husky: `pnpm prepare`;
+4. Установить зависимости: `npm i`
+5. Запустить проект из каталога `/js/apps/admin-ui`: `pnpm dev`
+6. Открыть [localhost:8080/auth/admin/master/console](http://localhost:8080/auth/admin/master/console)
 
 ## Интернационализация
 

@@ -35,10 +35,11 @@
 
 Представленная инструкция характерна для любой темы из каталога [frontend](../frontend/).
 1. Запустить сервер в соответствии с [инструкцией Разработка](../README.MD/#Разработка)
-2. Закомментировать содержимое [.npmrc](./domru/.npmrc) ⚠️не забыть раскомментировать при коммите
-3. Установить зависимости: `npm i`
-4. Запустить проект: `npm run dev`
-5. Открыть [localhost:8080/auth/admin/master/console](http://localhost:8080/auth/realms/user/protocol/openid-connect/auth?city=yar&response_type=code&redirect_uri=https%3A%2F%2Fperm.b2b.dom.ru&client_id=b2b&scope=openid)
+2. Запустить run config: `docker-compose-full-ui` или `docker-compose-ui`.
+3. Закомментировать содержимое [.npmrc](./domru/.npmrc) ⚠️не забыть раскомментировать при коммите
+4. Установить зависимости: `npm i`
+5. Запустить проект: `npm run dev`
+6. Открыть [localhost:8080/auth/admin/master/console](http://localhost:8080/auth/realms/user/protocol/openid-connect/auth?city=yar&response_type=code&redirect_uri=https%3A%2F%2Fperm.b2b.dom.ru&client_id=b2b&scope=openid)
 
 ## Интернационализация
 
