@@ -80,7 +80,7 @@ public class CustomerUpdateService {
     private void checkLoad() {
         //Добавление дополнительного потока
         if (customerRequestService.getLoadCoeff() > tasksPool.size() && tasksPool.size() < MAX_SIZE_POOL) {
-            tasksPool.offer(executorService.scheduleAtFixedRate(new UpdateTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
+            tasksPool.offer(executorService.scheduleWithFixedDelay(new UpdateTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
             log.info("Increased count tasks for update customers. Count tasks={}", tasksPool.size());
             return;
         }

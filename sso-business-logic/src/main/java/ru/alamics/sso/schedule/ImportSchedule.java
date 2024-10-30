@@ -60,7 +60,7 @@ public class ImportSchedule {
         //timerService.createIntervalTimer(DEFAULT_INTERVAL_DURATION, intervalDuration, timerConfig);
         //log.info("Timer:{} is created, interval duration set to value={} milliseconds ", TIMER_NAME, intervalDuration);
 
-        this.scheduler.scheduleAtFixedRate(this::schedule,
+        this.scheduler.scheduleWithFixedDelay(this::schedule,
                 DEFAULT_INTERVAL_DURATION, intervalDuration,
                 TimeUnit.MILLISECONDS);
     }
@@ -70,15 +70,19 @@ public class ImportSchedule {
         //if (timer != null && !TIMER_NAME.equals(timer.getInfo().toString())) {
         //    return;
         //}
+        try {
 
-        long scheduleStart = System.currentTimeMillis();
+            long scheduleStart = System.currentTimeMillis();
 
-        List<ImportUsersReportModel> reportList = importReportService.getReportListByStatus(ImportUsersReportStatus.AWAITING);
+            List<ImportUsersReportModel> reportList = importReportService.getReportListByStatus(ImportUsersReportStatus.AWAITING);
 
-        for (ImportUsersReportModel reportModel : reportList) {
-            importReportService.setReportStatus(reportModel, ImportUsersReportStatus.IN_PROGRESS);
-            importService.createImportUsers(reportModel, null, scheduleStart, null, null);
-            importReportService.updateReport(reportModel);
+            for (ImportUsersReportModel reportModel : reportList) {
+                importReportService.setReportStatus(reportModel, ImportUsersReportStatus.IN_PROGRESS);
+                importService.createImportUsers(reportModel, null, scheduleStart, null, null);
+                importReportService.updateReport(reportModel);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
     }
 }
