@@ -101,8 +101,6 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
     @Override
     public Map<String, Object> getCustomerName(List<String> id, TbapiConnectConfig connectConfig) {
         log.info("customer names request : customerIds={}", id);
-        Map<String, Object> responseMap = new HashMap<>();
-
         Response response = null;
 
         try {
@@ -133,24 +131,26 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
 
             if (response.getMediaType().toString().equalsIgnoreCase("text/html")) {
                 log.error("response " + response.readEntity(String.class));
-
+                throw new Exception("error tbapi invalid response");
             } else {
 
-                responseMap = response.readEntity(new GenericType<>(mapExample.getClass()));
+                Map<String, Object> responseMap = response.readEntity(new GenericType<>(mapExample.getClass()));
                 if (responseMap.get("businessErrorCode") != null) {
                     throw new Exception("error tbapi code: " + responseMap.get("businessErrorCode").toString());
                 }
-            }
 
-            log.info("customer names response : {}", responseMap);
+                log.info("customer names response : {}", responseMap);
+
+                return responseMap;
+            }
 
         } catch (Exception e) {
             log.error("tbapi error post request: ", e);
+            throw new RuntimeException(e);
         } finally {
 
             if (response != null)
                 response.close();
         }
-        return responseMap;
     }
 }
