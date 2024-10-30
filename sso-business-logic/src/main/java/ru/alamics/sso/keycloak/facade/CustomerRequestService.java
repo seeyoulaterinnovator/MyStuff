@@ -2,6 +2,7 @@ package ru.alamics.sso.keycloak.facade;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.Locked;
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.customer.CustomerDto;
 import ru.alamics.sso.customer.CustomerService;
@@ -47,7 +48,7 @@ public class CustomerRequestService {
         dontRequest = Boolean.parseBoolean(properties.getProperty(TBAPI_CUSTOMER_DONT_REQUEST));
     }
 
-    @Locked.Write
+    @Synchronized
     public Map<String, String> updateCustomerNames() {
         List<String> currentTomsIds = extractListFromQueue(tbapiRequestMaxSize);
         if (currentTomsIds.isEmpty()) {
@@ -84,7 +85,6 @@ public class CustomerRequestService {
 
     @Locked.Write
     public void addTomsIdsInQueue(List<String> updatingTomsId) {
-
         for (String tomsId : updatingTomsId) {
             tomsIdQueue.offer(tomsId);
         }
@@ -95,7 +95,8 @@ public class CustomerRequestService {
         return tomsIdQueue.size() / tbapiRequestMaxSize / loadCoeff;
     }
 
-    private List<String> extractListFromQueue(int countElements) {
+    @Locked.Write
+    public List<String> extractListFromQueue(int countElements) {
         List<String> result = new LinkedList<>();
         if (tomsIdQueue.isEmpty()) {
             return Collections.emptyList();
