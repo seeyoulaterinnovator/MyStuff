@@ -51,7 +51,7 @@ public class CustomerUpdateService {
     }
 
     void onStart(@Observes StartupEvent ev) {
-        tasksPool.offer(executorService.scheduleAtFixedRate(new UpdateTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
+        tasksPool.offer(executorService.scheduleWithFixedDelay(new UpdateTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
     }
 
     private class UpdateTask implements Runnable {
