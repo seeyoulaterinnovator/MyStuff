@@ -44,25 +44,46 @@ https://gitlab.ertelecom.ru/b2bweb/sso
 
 ## Разработка frontend
 
-### Административный интерфейс
+Keycloak обеспечивает поддержку тем для веб-страниц и электронных писем. Это позволяет настраивать внешний вид страниц, доступных конечному пользователю, чтобы их можно было интегрировать с вашими приложениями.
 
-Модуль [admin-ui](./frontend-admin/js/apps/admin-ui).
+Тема может предоставлять один или несколько типов для настройки различных аспектов Keycloak. Доступные типы:
+- Account - Account Console
+- Admin - Admin Console
+- Email - Emails
+- Login - Login forms
+- Welcome - Welcome page
 
-Запуск Vite dev сервера через run config "keycloak.v2 admin dev".
+В рамках данного проекта конфигурируются следующие типы тем: *Admin*, *Login*, *Email*.
+
+- Конфигурирование тем *Login* и *Email* основывается на редактировании [FreeMarker](https://freemarker.apache.org/) шаблонов, определенных в [themes](./keycloak-extension/src/main/resources/themes)
+- Конфигурирование темы *Admin* основывается на разработке [React приложения](./frontend-admin/js/apps/admin-ui). Подробнее с кастомизацией тем, основанных на React, можно ознакомиться в [документации](https://www.keycloak.org/docs/latest/server_development/#_theme_react). 
+⚠️ _На момент разработки собственной темы административной консоли пакета *@keycloak/keycloak-admin-ui* не существовало, хотя он и был описан в документации. В связи с этим было найдено [альтернативное решение](https://github.com/keycloak/keycloak/discussions/32645#discussioncomment-10566232)._
+
+Подробнее с кастомизацией тем можно ознакомиться в [документации](https://www.keycloak.org/docs/latest/server_development/#_themes).
+
+### Admin Console - Административный интерфейс
+
+[Документация Frontend Admin](./frontend-admin/README.MD)
+
+<!-- Запуск Vite dev сервера через run config "keycloak.v2 admin dev".
 
 Запуск docker-compose через run config-и *docker-compose-full-ui* или *docker-compose-ui*.
 
-Интерфейс доступен с основного веб сервера Keycloak, т.к. производится обратное проксирование на dev сервер.
+Интерфейс доступен с основного веб сервера Keycloak, т.к. производится обратное проксирование на dev сервер. -->
 
-### Пользовательский интерфейс
+### Login Form - Пользовательский интерфейс
 
-Модуль [domru](./frontend/domru).
+[Документация Frontend Client](./frontend/README.MD)
 
-Запуск автопересборки через run config "domru autobuild".
+<!-- Запуск автопересборки через run config "domru autobuild".
 
 Запуск docker-compose в любом варианте.
 
-Интерфейс доступен с основного веб сервера Keycloak, т.к. dev сервера нет.
+Интерфейс доступен с основного веб сервера Keycloak, т.к. dev сервера нет. -->
+
+### Email - Почтовые сообщения
+
+См. [Сервисные письма на email](#Сервисные-письма-на-email)
 
 ## E2E
 
@@ -107,5 +128,12 @@ TODO
 
 ## Сервисные письма на email
 
-Изменения производятся в [themes/domru/email/html](keycloak-extension/src/main/resources/themes/domru/email/html).
+Конфигурирование почтовых сообщений производится в [themes/{yourTheme}/email](keycloak-extension\src\main\resources\themes\domru\email) и сводится к корректировке стилей и FreeMarker шаблонов. При разработке стоит учитывать [особенности верстки](https://habr.com/ru/articles/252279/) для почтовых клиентов. Для проверки поддержки той или иной функции почтовым клиентом рекомендуется использовать сервис [Can I email](https://www.caniemail.com/features/).
 
+Для перехвата почтовых сообщений при локальной разработке используется *smtp4dev* сервер.
+
+### Стенды 
+
+- **dev**: [https://smtp4dev-er-sso.dev.it-resource.team/](https://smtp4dev-er-sso.dev.it-resource.team/)
+
+- **local**: [http://localhost:8025](http://localhost:8025/)

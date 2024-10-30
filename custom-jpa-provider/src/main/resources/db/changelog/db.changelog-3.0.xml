@@ -159,4 +159,33 @@
                    ('dev.httpLogMaxCountPerNode', '10000');
         </sql>
     </changeSet>
+    <changeSet id="11" author="korotaev.miu" dbms="mariadb">
+        <sql>
+            update CLIENT
+            set ALWAYS_DISPLAY_IN_CONSOLE = 1
+            where CLIENT_ID not like '%-realm'
+              and CLIENT_ID not in ('account', 'account-console', 'realm-management', 'security-admin-console',
+                                    'admin-cli', 'broker');
+        </sql>
+    </changeSet>
+    <changeSet id="12" author="korotaev.miu" dbms="mariadb">
+        <sql>
+            insert into SETTINGS(ID, REALM_ID, EXT_ID, VALUE, `DESC`, NAME, UNIT, `TYPE`)
+            select
+                concat(substring(uuid(), 1, 24), cast(lpad(row_number() over (order by EXT_ID), 12, '0') as CHAR)) as ID,
+                'ER-TELECOM' as REALM_ID,
+                EXT_ID, VALUE, `DESC`, NAME, UNIT, `TYPE`
+            from SETTINGS s
+            where REALM_ID = 'user' and EXT_ID in ('emailEnabledAccountBodyHtml', 'emailDisabledAccountBodyHtml')
+              and not exists(select * from SETTINGS where EXT_ID = s.EXT_ID and REALM_ID = 'ER-TELECOM');
+            insert into SETTINGS(ID, REALM_ID, EXT_ID, VALUE, `DESC`, NAME, UNIT, `TYPE`)
+            select
+                concat(substring(uuid(), 1, 24), cast(lpad(row_number() over (order by EXT_ID), 12, '0') as CHAR)) as ID,
+                'S-TELECOM' as REALM_ID,
+                EXT_ID, VALUE, `DESC`, NAME, UNIT, `TYPE`
+            from SETTINGS s
+            where REALM_ID = 'user' and EXT_ID in ('emailEnabledAccountBodyHtml', 'emailDisabledAccountBodyHtml')
+              and not exists(select * from SETTINGS where EXT_ID = s.EXT_ID and REALM_ID = 'S-TELECOM');
+        </sql>
+    </changeSet>
 </databaseChangeLog>

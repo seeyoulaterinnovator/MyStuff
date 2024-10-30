@@ -1,5 +1,6 @@
 package ru.alamics.sso.remote.rias;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -32,8 +33,6 @@ import java.time.format.DateTimeFormatter;
 @Named("RiasLoginService")
 @Slf4j
 public class RiasUserLoginImpl implements RiasLoginService {
-    private static final XmlMapper mapper = new XmlMapper();
-
     private static final String AUTH_SCHEME = "riasLogin.scheme";
     private static final String AUTH_DEF_CITY = "riasLogin.defCity";
     private static final String AUTH_DOMAIN = "riasLogin.domain";
@@ -42,6 +41,9 @@ public class RiasUserLoginImpl implements RiasLoginService {
     private static final String CLIENT_NAME = "riasLogin.client.name";
     private static final String CLIENT_SALT = "riasLogin.client.salt";
     private static final String GRANT_TYPE = "riasLogin.grantType";
+
+    private final ObjectMapper jsonMapper = new ObjectMapper();
+    private final XmlMapper xmlMapper = new XmlMapper();
 
     private final HttpClient client;
 
@@ -97,8 +99,19 @@ public class RiasUserLoginImpl implements RiasLoginService {
 
             HttpResponse response = client.execute(request);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                byte[] content;
                 try(InputStream stream = response.getEntity().getContent()) {
-                    result = mapper.readValue(stream, RiasLogin.class);
+                    content = stream.readAllBytes();
+                }
+                try {
+                    result = xmlMapper.readValue(content, RiasLogin.class);
+                } catch (Exception e1) {
+                    try {
+                        result = jsonMapper.readValue(content, RiasLogin.class);
+                    } catch (Exception e2) {
+                        e2.addSuppressed(e1);
+                        throw new RiasCheckException(e2);
+                    }
                 }
             } else {
                 throw new RiasCheckException(response.getStatusLine().getReasonPhrase());
