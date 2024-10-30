@@ -82,7 +82,7 @@ public class CustomerRequestService {
 
     }
 
-    @Locked.Read
+    @Locked.Write
     public void addTomsIdsInQueue(List<String> updatingTomsId) {
 
         for (String tomsId : updatingTomsId) {
