@@ -129,7 +129,7 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
 
             log.info("response media type {}, status {}", response.getMediaType(), response.getStatus());
 
-            if (response.getMediaType().toString().equalsIgnoreCase("text/html")) {
+            if (response.getStatus() != 200 || response.getMediaType().toString().equalsIgnoreCase("text/html")) {
                 log.error("response " + response.readEntity(String.class));
                 throw new Exception("error tbapi invalid response");
             } else {
