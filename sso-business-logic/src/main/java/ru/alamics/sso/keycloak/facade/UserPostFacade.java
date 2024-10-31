@@ -2,6 +2,7 @@ package ru.alamics.sso.keycloak.facade;
 
 import lombok.extern.slf4j.Slf4j;
 import org.infinispan.Cache;
+import org.infinispan.container.entries.CacheEntry;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.FoundUserPostException;
@@ -13,7 +14,10 @@ import ru.alamics.sso.util.validator.NotValidException;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ws.rs.NotFoundException;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,7 +62,16 @@ public class UserPostFacade {
 
     private void addCustomersToRequest(List<UserPostResponse> userPosts) {
         List<String> updatingTomsId = userPosts.stream()
-                .filter(post -> !customerCache.containsKey(post.getTomsId()))
+                .filter(post -> {
+                    CacheEntry<?,?> entry = customerCache.getAdvancedCache().getCacheEntry(post.getTomsId());
+                    if(entry == null) return true;
+                    Instant cachedAt = Instant.ofEpochMilli(entry.getCreated());
+                    return post.getUpdateTime()
+                            .plus(Duration.ofHours(customerCacheLifespanInDb))
+                            .atZone(ZoneOffset.systemDefault())
+                            .toInstant()
+                            .isBefore(cachedAt);
+                })
                 .filter(post -> post.getUpdateTime().isBefore(LocalDateTime.now().minusHours(customerCacheLifespanInDb)) ||
                         post.getOrganization() == null)
                 .map(post -> {
