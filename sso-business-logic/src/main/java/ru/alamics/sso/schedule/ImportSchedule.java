@@ -106,7 +106,7 @@ public class ImportSchedule implements ScheduledTask {
     public void run(KeycloakSession session) {
         long scheduleStart = System.currentTimeMillis();
 
-        List<ImportUsersReportModel> reportList = importReportService.getReportListByStatus(ImportUsersReportStatus.AWAITING);
+            List<ImportUsersReportModel> reportList = importReportService.getReportListByStatus(ImportUsersReportStatus.AWAITING);
 
         for (ImportUsersReportModel reportModel : reportList) {
             reportModel.setStatus(ImportUsersReportStatus.IN_PROGRESS);
