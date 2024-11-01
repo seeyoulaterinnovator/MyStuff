@@ -176,7 +176,8 @@
                 'ER-TELECOM' as REALM_ID,
                 EXT_ID, VALUE, `DESC`, NAME, UNIT, `TYPE`
             from SETTINGS s
-            where REALM_ID = 'user' and EXT_ID in ('emailEnabledAccountBodyHtml', 'emailDisabledAccountBodyHtml')
+            where REALM_ID = 'user'
+              and `TYPE` in ('MESSAGE', 'FRONT')
               and not exists(select * from SETTINGS where EXT_ID = s.EXT_ID and REALM_ID = 'ER-TELECOM');
             insert into SETTINGS(ID, REALM_ID, EXT_ID, VALUE, `DESC`, NAME, UNIT, `TYPE`)
             select
@@ -184,7 +185,8 @@
                 'S-TELECOM' as REALM_ID,
                 EXT_ID, VALUE, `DESC`, NAME, UNIT, `TYPE`
             from SETTINGS s
-            where REALM_ID = 'user' and EXT_ID in ('emailEnabledAccountBodyHtml', 'emailDisabledAccountBodyHtml')
+            where REALM_ID = 'user'
+              and `TYPE` in ('MESSAGE', 'FRONT')
               and not exists(select * from SETTINGS where EXT_ID = s.EXT_ID and REALM_ID = 'S-TELECOM');
         </sql>
     </changeSet>
