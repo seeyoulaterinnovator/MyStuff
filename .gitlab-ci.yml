@@ -158,7 +158,7 @@ domru:stage4:
   variables:
     NAMESPACE: 'sso'
     NODE_PORT: '30084'
-    REPLICA_COUNT: '1'
+    REPLICA_COUNT: '3'
 
 #domru:stage5:
 #  extends: .domru:stage:template
