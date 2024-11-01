@@ -6,13 +6,16 @@
     </#if>
 </#function>
 
-<#macro dump_keys object prefix="">
-    <#if object??>
+<#macro dump_keys object prefix="" level=0>
+    <#if object?? && level < 5>
         <#if object?is_hash_ex>
-            <#list object?keys as key>
-                ${prefix}.${key}
-                <@dump_keys object=.data_model[key]!"" prefix=prefix+key/>
-            </#list>
+            <#attempt>
+                <#list object?keys as key>
+                    ${prefix}.${key}
+                    <@dump_keys object=object[key]!"" prefix=prefix+key level=level+1/>
+                </#list>
+                <#recover>
+            </#attempt>
         </#if>
     </#if>
 </#macro>
