@@ -17,6 +17,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.phone.exception.PhoneCallException;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
@@ -106,13 +107,17 @@ public class PhoneCallerRemoteServiceImpl implements PhoneCallerRemoteService {
         request.setHeader(HttpHeaders.ACCEPT, MediaType.WILDCARD);
         try {
             HttpResponse response = client.execute(request);
-            if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                try(InputStream stream = response.getEntity().getContent()) {
-                    String code = new String(stream.readAllBytes());
-                    code = code.replaceAll("\\n", "");
-                    log.info(String.format("Api %s, code %s", uri.getHost(), code));
-                    return code;
+            try {
+                if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                    try (InputStream stream = response.getEntity().getContent()) {
+                        String code = new String(stream.readAllBytes());
+                        code = code.replaceAll("\\n", "");
+                        log.info(String.format("Api %s, code %s", uri.getHost(), code));
+                        return code;
+                    }
                 }
+            } finally {
+                EntityUtils.consume(response.getEntity());
             }
             throw new PhoneCallException(response.getStatusLine().getReasonPhrase());
         } catch (Exception e) {
