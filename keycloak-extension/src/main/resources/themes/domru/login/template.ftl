@@ -253,6 +253,8 @@
     <!--<script src="${url.resourcesPath}/build/iframeResizer.contentWindow.min.js" async></script> -->
     </body>
     </html>
+    <#--
     <#include "util.ftl"/>
     <@dump_data_model_keys/>
+    -->
 </#macro>
