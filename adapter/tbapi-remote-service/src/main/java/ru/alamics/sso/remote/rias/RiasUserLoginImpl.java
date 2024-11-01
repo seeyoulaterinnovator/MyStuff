@@ -59,6 +59,7 @@ public class RiasUserLoginImpl implements RiasLoginService {
                 .setSSLHostnameVerifier(hostnameVerifier)
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setConnectTimeout(3_000)
+                        .setConnectionRequestTimeout(3_000)
                         .setSocketTimeout(10_000)
                         .build())
                 .build();

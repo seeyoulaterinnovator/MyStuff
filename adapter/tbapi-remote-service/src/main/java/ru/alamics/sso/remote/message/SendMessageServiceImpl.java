@@ -28,9 +28,7 @@ import javax.net.ssl.SSLContext;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.UUID;
-import java.util.function.BiConsumer;
 
 import static ru.alamics.sso.settings.SettingConstants.*;
 
@@ -49,9 +47,9 @@ public class SendMessageServiceImpl implements SendMessageService {
     ) {
         client = HttpClients.custom()
                 .setSSLContext(sslContext)
-                .setSSLHostnameVerifier(hostnameVerifier)
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setConnectTimeout(3_000)
+                        .setConnectionRequestTimeout(3_000)
                         .setSocketTimeout(10_000)
                         .build())
                 .build();

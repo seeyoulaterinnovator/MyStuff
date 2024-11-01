@@ -1,10 +1,7 @@
 package ru.alamics.sso.remote.call;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.Resource;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.BadRequestException;
@@ -42,6 +39,7 @@ public class PhoneCallerRemoteServiceImpl implements PhoneCallerRemoteService {
             client = HttpClients.custom()
                     .setDefaultRequestConfig(RequestConfig.custom()
                             .setConnectTimeout(3_000)
+                            .setConnectionRequestTimeout(3_000)
                             .setSocketTimeout(10_000)
                             .build())
                     .build();
