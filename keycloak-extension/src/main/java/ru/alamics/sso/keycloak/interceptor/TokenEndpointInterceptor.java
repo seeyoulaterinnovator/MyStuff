@@ -40,6 +40,7 @@ public class TokenEndpointInterceptor {
     @ServerRequestFilter(preMatching = true)
     public Uni<Void> filter(ContainerRequestContext requestContext) {
         var result = Uni.createFrom().voidItem();
+
         if(!(
                 requestContext.getUriInfo().getPath().matches("/realms/[^/]+/protocol/openid-connect/token")
                         && HttpMethod.POST.equals(requestContext.getMethod())

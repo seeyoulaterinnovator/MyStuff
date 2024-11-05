@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.interceptor;
 
+import io.quarkus.narayana.jta.QuarkusTransaction;
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
@@ -50,51 +51,53 @@ public class LogoutEndpointInterceptor implements ContainerRequestFilter {
 
         if(idToken == null) return;
 
-        var clientId = requestContext.getUriInfo().getQueryParameters().getFirst(CLIENT_ID_PARAM);
+        QuarkusTransaction.requiringNew().run(() -> {
+            var clientId = requestContext.getUriInfo().getQueryParameters().getFirst(CLIENT_ID_PARAM);
+            var oldRealm = session.getContext().getRealm();
+            try {
 
-        var oldRealm = session.getContext().getRealm();
-        try {
-            TokenVerifier<AccessToken> verifier = TokenVerifier.create(idToken, AccessToken.class)
-                    .withDefaultChecks()
-                    .realmUrl(Urls.realmIssuer(session.getContext().getUri().getBaseUri(), realmName));
+                TokenVerifier<AccessToken> verifier = TokenVerifier.create(idToken, AccessToken.class)
+                        .withDefaultChecks()
+                        .realmUrl(Urls.realmIssuer(session.getContext().getUri().getBaseUri(), realmName));
 
-            RealmModel realm = session.getProvider(RealmProvider.class).getRealmByName(realmName);
+                RealmModel realm = session.getProvider(RealmProvider.class).getRealmByName(realmName);
 
-            if(realm == null) return;
+                if (realm == null) return;
 
-            session.getContext().setRealm(realm);
+                session.getContext().setRealm(realm);
 
-            var verifierContext = session.getProvider(
-                            SignatureProvider.class,
-                            verifier.getHeader().getAlgorithm().name()
-                    )
-                    .verifier(verifier.getHeader().getKeyId());
+                var verifierContext = session.getProvider(
+                                SignatureProvider.class,
+                                verifier.getHeader().getAlgorithm().name()
+                        )
+                        .verifier(verifier.getHeader().getKeyId());
 
-            verifier.verifierContext(verifierContext);
+                verifier.verifierContext(verifierContext);
 
-            AccessToken token = verifier.verify().getToken();
+                AccessToken token = verifier.verify().getToken();
 
-            if(token == null) return;
+                if (token == null) return;
 
-            ClientModel client = realm.getClientByClientId(token.getIssuedFor());
+                ClientModel client = realm.getClientByClientId(token.getIssuedFor());
 
-            if(client == null) return;
+                if (client == null) return;
 
-            if(clientId == null) clientId = client.getClientId();
+                if (clientId == null || clientId.equals(client.getClientId())) clientId = client.getClientId();
 
-        } catch (Exception e) {
-            log.debug(e.getMessage(), e);
-            return;
-        } finally {
-            session.getContext().setRealm(oldRealm);
-        }
+            } catch (Exception e) {
+                log.debug(e.getMessage(), e);
+                return;
+            } finally {
+                session.getContext().setRealm(oldRealm);
+            }
 
-        requestContext.setRequestUri(
-                requestContext.getUriInfo()
-                        .getRequestUriBuilder()
-                        .replaceQueryParam(ID_TOKEN_HINT_PARAM)
-                        .replaceQueryParam(CLIENT_ID_PARAM, clientId)
-                        .build()
-        );
+            requestContext.setRequestUri(
+                    requestContext.getUriInfo()
+                            .getRequestUriBuilder()
+                            .replaceQueryParam(ID_TOKEN_HINT_PARAM)
+                            .replaceQueryParam(CLIENT_ID_PARAM, clientId)
+                            .build()
+            );
+        });
     }
 }

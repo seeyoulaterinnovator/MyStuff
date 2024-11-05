@@ -96,7 +96,7 @@ public class DevHttpLogInterceptor implements ContainerResponseFilter, WriterInt
                                 logId,
                                 new String(content, getMediaTypeCharset(context.getMediaType()))
                         );
-                    } else {
+                    } else if(content.length > 0) {
                         devHttpLogRepository.addRequestBody(logId, content);
                     }
                     context.setEntityStream(new ByteArrayInputStream(content));

@@ -4,12 +4,10 @@ import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.PreMatching;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.ext.Provider;
 import lombok.Builder;
 import lombok.Singular;
 import org.keycloak.Config;
-import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.GeneralRealm;
 import ru.alamics.sso.keycloak.manager.ManagerRequestProperties;
 
@@ -48,9 +46,6 @@ public class ManagerRealmsAdminRequestInterceptor implements ContainerRequestFil
                     .replaceContextRealm(true)
                     .build()
     );
-
-    @Context
-    KeycloakSession session;
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
