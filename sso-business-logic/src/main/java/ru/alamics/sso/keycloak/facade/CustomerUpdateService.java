@@ -51,14 +51,18 @@ public class CustomerUpdateService {
     }
 
     void onStart(@Observes StartupEvent ev) {
-        tasksPool.offer(executorService.scheduleAtFixedRate(new UpdateTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
+        tasksPool.offer(executorService.scheduleWithFixedDelay(new UpdateTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
     }
 
     private class UpdateTask implements Runnable {
         @Override
         public void run() {
-            updateCustomers();
-            checkLoad();
+            try {
+                updateCustomers();
+                checkLoad();
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -79,7 +83,7 @@ public class CustomerUpdateService {
     private void checkLoad() {
         //Добавление дополнительного потока
         if (customerRequestService.getLoadCoeff() > tasksPool.size() && tasksPool.size() < MAX_SIZE_POOL) {
-            tasksPool.offer(executorService.scheduleAtFixedRate(new UpdateTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
+            tasksPool.offer(executorService.scheduleWithFixedDelay(new UpdateTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
             log.info("Increased count tasks for update customers. Count tasks={}", tasksPool.size());
             return;
         }

@@ -7,6 +7,7 @@ import jakarta.ws.rs.core.Context;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.infinispan.Cache;
+import org.infinispan.container.entries.CacheEntry;
 import org.keycloak.connections.infinispan.InfinispanConnectionProvider;
 import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.lookup.Lookup;
@@ -17,7 +18,10 @@ import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.util.validator.NotValidException;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -65,8 +69,17 @@ public class UserPostFacade {
 
     private void addCustomersToRequest(List<UserPostResponse> userPosts) {
         List<String> updatingTomsId = userPosts.stream()
-                .filter(post -> !getCustomerCache().containsKey(post.getTomsId()))
-                .filter(post -> !post.getUpdateTime().isBefore(LocalDateTime.now().minusHours(customerCacheLifespanInDb)) ||
+                .filter(post -> {
+                    CacheEntry<?,?> entry = getCustomerCache().getAdvancedCache().getCacheEntry(post.getTomsId());
+                    if(entry == null) return true;
+                    Instant cachedAt = Instant.ofEpochMilli(entry.getCreated());
+                    return post.getUpdateTime()
+                            .plus(Duration.ofHours(customerCacheLifespanInDb))
+                            .atZone(ZoneOffset.systemDefault())
+                            .toInstant()
+                            .isBefore(cachedAt);
+                })
+                .filter(post -> post.getUpdateTime().isBefore(LocalDateTime.now().minusHours(customerCacheLifespanInDb)) ||
                         post.getOrganization() == null)
                 .map(post -> {
                     getCustomerCache().put(post.getTomsId(), post.getOrganization() == null ? " " : post.getOrganization());
