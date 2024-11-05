@@ -15,6 +15,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
@@ -59,6 +60,7 @@ public class RiasUserLoginImpl implements RiasLoginService {
                 .setSSLHostnameVerifier(hostnameVerifier)
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setConnectTimeout(3_000)
+                        .setConnectionRequestTimeout(3_000)
                         .setSocketTimeout(10_000)
                         .build())
                 .build();
@@ -98,23 +100,27 @@ public class RiasUserLoginImpl implements RiasLoginService {
             request.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML);
 
             HttpResponse response = client.execute(request);
-            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                byte[] content;
-                try(InputStream stream = response.getEntity().getContent()) {
-                    content = stream.readAllBytes();
-                }
-                try {
-                    result = xmlMapper.readValue(content, RiasLogin.class);
-                } catch (Exception e1) {
-                    try {
-                        result = jsonMapper.readValue(content, RiasLogin.class);
-                    } catch (Exception e2) {
-                        e2.addSuppressed(e1);
-                        throw new RiasCheckException(e2);
+            try {
+                if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                    byte[] content;
+                    try (InputStream stream = response.getEntity().getContent()) {
+                        content = stream.readAllBytes();
                     }
+                    try {
+                        result = xmlMapper.readValue(content, RiasLogin.class);
+                    } catch (Exception e1) {
+                        try {
+                            result = jsonMapper.readValue(content, RiasLogin.class);
+                        } catch (Exception e2) {
+                            e2.addSuppressed(e1);
+                            throw new RiasCheckException(e2);
+                        }
+                    }
+                } else {
+                    throw new RiasCheckException(response.getStatusLine().getReasonPhrase());
                 }
-            } else {
-                throw new RiasCheckException(response.getStatusLine().getReasonPhrase());
+            } finally {
+                EntityUtils.consume(response.getEntity());
             }
         } catch (Exception e) {
                 throw new RiasCheckException(e);

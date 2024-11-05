@@ -32,8 +32,7 @@ public class ManagerUsersAdminRequestInterceptor implements ContainerRequestFilt
     private static final List<Rule> RULES = List.of(
             Rule.builder()
                     .pathPattern(Pattern.compile(
-                            "/admin/realms/" + REALM_REGEX + "/users/" + USER_ID_REGEX
-                                    + "(|/role-mappings/realm/composite)"
+                            "/admin/realms/" + REALM_REGEX + "/users/" + USER_ID_REGEX + "/role-mappings/realm/composite"
                     ))
                     .disableStrictAuth(true)
                     .userId(uri -> uri.getPathSegments().get(4).getPath())
@@ -41,7 +40,7 @@ public class ManagerUsersAdminRequestInterceptor implements ContainerRequestFilt
             Rule.builder()
                     .pathPattern(Pattern.compile(
                             "/admin/realms/" + REALM_REGEX + "/users/" + USER_ID_REGEX
-                                    + "(/federated-identity|/groups|/consents|/sessions|/logout)(|/.*)"
+                                    + "(|/federated-identity|/groups|/consents|/sessions|/logout)(|/.*)"
                     ))
                     .disableStrictAuth(true)
                     .replaceContextRealm(true)

@@ -16,6 +16,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnect;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
@@ -112,21 +113,25 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
             );
             httpRequest.setEntity(new StringEntity(mapper.writeValueAsString(request)));
             HttpResponse httpResponse = getClient(connectConfig).execute(httpRequest);
-            int status = httpResponse.getStatusLine().getStatusCode();
-            if(status == HttpStatus.SC_OK || status == HttpStatus.SC_CREATED) {
-                Header contentType = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
-                if(contentType != null && MediaType.TEXT_HTML.equals(contentType.getValue())) {
-                    try(InputStream stream = httpResponse.getEntity().getContent()) {
-                        log.error("response " + new String(stream.readAllBytes()));
+            try {
+                int status = httpResponse.getStatusLine().getStatusCode();
+                if (status == HttpStatus.SC_OK || status == HttpStatus.SC_CREATED) {
+                    Header contentType = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
+                    if (contentType != null && MediaType.TEXT_HTML.equals(contentType.getValue())) {
+                        try (InputStream stream = httpResponse.getEntity().getContent()) {
+                            log.error("response " + new String(stream.readAllBytes()));
+                        }
+                        throw new TbapiRegisterException();
+                    } else {
+                        try (InputStream stream = httpResponse.getEntity().getContent()) {
+                            return mapper.readValue(stream, TbapiResponse.class);
+                        }
                     }
-                    throw new TbapiRegisterException();
                 } else {
-                    try(InputStream stream = httpResponse.getEntity().getContent()) {
-                        return mapper.readValue(stream, TbapiResponse.class);
-                    }
+                    throw new TbapiRegisterException(httpResponse.getStatusLine().getReasonPhrase());
                 }
-            } else {
-                throw new TbapiRegisterException(httpResponse.getStatusLine().getReasonPhrase());
+            } finally {
+                EntityUtils.consume(httpResponse.getEntity());
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -151,30 +156,30 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
             log.info("TBAPI request to {}", uri.toString());
 
             Map<String, Object> request = Map.of("id", id);
-
+            HttpPost httpRequest = new HttpPost(uri);
+            httpRequest.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+            httpRequest.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
+            httpRequest.setHeader(HttpHeaders.HOST, connectConfig.getHost());
+            httpRequest.setHeader(
+                    HttpHeaders.AUTHORIZATION,
+                    String.format("Trusted application=\"%s\", username=\"%s\", password=\"%s\"",
+                            connectConfig.getAppname(), connectConfig.getUsername(), connectConfig.getPassword())
+            );
+            httpRequest.setEntity(new StringEntity(mapper.writeValueAsString(request)));
+            HttpResponse httpResponse = getClient(connectConfig).execute(httpRequest);
             try {
-                HttpPost httpRequest = new HttpPost(uri);
-                httpRequest.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-                httpRequest.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
-                httpRequest.setHeader(HttpHeaders.HOST, connectConfig.getHost());
-                httpRequest.setHeader(
-                        HttpHeaders.AUTHORIZATION,
-                        String.format("Trusted application=\"%s\", username=\"%s\", password=\"%s\"",
-                                connectConfig.getAppname(), connectConfig.getUsername(), connectConfig.getPassword())
-                );
-                httpRequest.setEntity(new StringEntity(mapper.writeValueAsString(request)));
-                HttpResponse httpResponse = getClient(connectConfig).execute(httpRequest);
-                if(httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     Header contentType = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
-                    if(contentType != null && MediaType.TEXT_HTML.equals(contentType.getValue())) {
-                        try(InputStream stream = httpResponse.getEntity().getContent()) {
+                    if (contentType != null && MediaType.TEXT_HTML.equals(contentType.getValue())) {
+                        try (InputStream stream = httpResponse.getEntity().getContent()) {
                             log.error("response " + new String(stream.readAllBytes()));
                         }
                         throw new TbapiRegisterException();
                     } else {
                         Map<String, Object> response;
-                        try(InputStream stream = httpResponse.getEntity().getContent()) {
-                            response = mapper.readValue(stream, new TypeReference<>() {});
+                        try (InputStream stream = httpResponse.getEntity().getContent()) {
+                            response = mapper.readValue(stream, new TypeReference<>() {
+                            });
                         }
                         if (response.get("businessErrorCode") != null) {
                             throw new Exception("error tbapi code: " + response.get("businessErrorCode").toString());
@@ -187,8 +192,9 @@ public class TbapiServiceRestImpl implements TbapiRemoteService {
                 }
             } catch (Exception e) {
                 throw new TbapiRegisterException(e);
+            } finally {
+                EntityUtils.consume(httpResponse.getEntity());
             }
-
         } catch (Exception e) {
             log.error("tbapi error post request: ", e);
             throw new TbapiRegisterException(e);

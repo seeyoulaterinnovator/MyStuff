@@ -13,6 +13,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
@@ -55,6 +56,7 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
                 .setSSLHostnameVerifier(hostnameVerifier)
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setConnectTimeout(3_000)
+                        .setConnectionRequestTimeout(3_000)
                         .setSocketTimeout(10_000)
                         .build())
                 .build();
@@ -84,13 +86,17 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
         RiasData response;
         try {
             HttpResponse httpResponse = client.execute(request);
-            if(httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                try(InputStream stream = httpResponse.getEntity().getContent()) {
-                    response = mapper.readValue(stream, RiasData.class);
-                    log.info("response result {}, status {}, message {}", response.getResult(), response.getStatus(), response.getMessages());
+            try {
+                if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                    try (InputStream stream = httpResponse.getEntity().getContent()) {
+                        response = mapper.readValue(stream, RiasData.class);
+                        log.info("response result {}, status {}, message {}", response.getResult(), response.getStatus(), response.getMessages());
+                    }
+                } else {
+                    throw new RiasCheckException(httpResponse.getStatusLine().getReasonPhrase());
                 }
-            } else {
-                throw new RiasCheckException(httpResponse.getStatusLine().getReasonPhrase());
+            } finally {
+                EntityUtils.consume(httpResponse.getEntity());
             }
         } catch (Exception e) {
             throw new RiasCheckException(e);

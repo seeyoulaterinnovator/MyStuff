@@ -13,6 +13,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import ru.alamics.sso.registration.phone.MsgConfig;
 import ru.alamics.sso.registration.phone.exception.SendMessageException;
 import ru.alamics.sso.registration.phone.model.MessageRequest;
@@ -28,9 +29,7 @@ import javax.net.ssl.SSLContext;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.UUID;
-import java.util.function.BiConsumer;
 
 import static ru.alamics.sso.settings.SettingConstants.*;
 
@@ -52,6 +51,7 @@ public class SendMessageServiceImpl implements SendMessageService {
                 .setSSLHostnameVerifier(hostnameVerifier)
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setConnectTimeout(3_000)
+                        .setConnectionRequestTimeout(3_000)
                         .setSocketTimeout(10_000)
                         .build())
                 .build();
@@ -113,11 +113,15 @@ public class SendMessageServiceImpl implements SendMessageService {
         request.setHeader(HttpHeaders.ACCEPT, MediaType.WILDCARD);
         try {
             HttpResponse response = client.execute(request);
-            var status = response.getStatusLine().getStatusCode();
-            if(status == HttpStatus.SC_OK || status == HttpStatus.SC_ACCEPTED) {
-                try(InputStream stream = response.getEntity().getContent()) {
-                    return new String(stream.readAllBytes());
+            try {
+                var status = response.getStatusLine().getStatusCode();
+                if (status == HttpStatus.SC_OK || status == HttpStatus.SC_ACCEPTED) {
+                    try (InputStream stream = response.getEntity().getContent()) {
+                        return new String(stream.readAllBytes());
+                    }
                 }
+            } finally {
+                EntityUtils.consume(response.getEntity());
             }
             throw new SendMessageException(response.getStatusLine().getReasonPhrase());
         } catch (Exception e) {
