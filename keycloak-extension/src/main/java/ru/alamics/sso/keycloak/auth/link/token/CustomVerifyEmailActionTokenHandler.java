@@ -20,8 +20,10 @@ import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
 
 import java.util.Objects;
+
 @Slf4j
 public class CustomVerifyEmailActionTokenHandler extends AbstractActionTokenHander<VerifyEmailActionToken> {
+    private static final String PHONE_VERIFICATION_DISABLED = "phoneVerificationDisabled";
 
     public CustomVerifyEmailActionTokenHandler() {
         super(
@@ -66,7 +68,9 @@ public class CustomVerifyEmailActionTokenHandler extends AbstractActionTokenHand
         // verify user email as we know it is valid as this entry point would never have gotten here.
            user.setEmailVerified(true);
         user.removeRequiredAction(UserModel.RequiredAction.VERIFY_EMAIL);
-        user.addRequiredAction("phone_verificator_sms");
+        if(!"true".equals(tokenContext.getRealm().getAttribute(PHONE_VERIFICATION_DISABLED))) {
+            user.addRequiredAction("phone_verificator_sms");
+        }
         user.addRequiredAction(UserModel.RequiredAction.UPDATE_PASSWORD.name());
         authSession.removeRequiredAction(UserModel.RequiredAction.VERIFY_EMAIL);
 

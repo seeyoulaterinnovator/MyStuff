@@ -6,7 +6,7 @@ import { useAdminClient } from "../admin-client";
 import { useAlerts } from "../components/alert/Alerts";
 import { FormAccess } from "../components/form/FormAccess";
 import { useRealm } from "../context/realm-context/RealmContext";
-import { useForm, FieldPath } from "react-hook-form";
+import { FieldPath, useForm } from "react-hook-form";
 import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
 import { cloneDeep, merge } from "lodash-es";
 
@@ -322,6 +322,40 @@ export const RealmSettingsLoginTab = ({
               aria-label={t("verifyEmail")}
             />
           </FormGroup>
+          {isCustomTheme && (
+            <FormGroup
+              label={t("attributes.phoneVerificationDisabled")}
+              fieldId="kc-attributes-phone-verification-disabled"
+              labelIcon={
+                <HelpItem
+                  helpText={t("attributes.phoneVerificationDisabledHelp")}
+                  fieldLabelId="attributes.phoneVerificationDisabled"
+                />
+              }
+              hasNoPaddingTop
+            >
+              <Switch
+                id="kc-attributes-phone-verification-disabled-switch"
+                data-testid="attributes-phone-verification-disabled-switch"
+                value={
+                  realm.attributes?.phoneVerificationDisabled === "true"
+                    ? "on"
+                    : "off"
+                }
+                label={t("on")}
+                labelOff={t("off")}
+                isChecked={
+                  realm.attributes?.phoneVerificationDisabled === "true"
+                }
+                onChange={(_event, value) => {
+                  updateSwitchValue({
+                    "attributes.phoneVerificationDisabled": value,
+                  });
+                }}
+                aria-label={t("attributes.phoneVerificationDisabled")}
+              />
+            </FormGroup>
+          )}
         </FormAccess>
       </FormPanel>
       <FormPanel
