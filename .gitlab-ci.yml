@@ -165,7 +165,6 @@ domru:stage4:
     NAMESPACE: 'sso'
     NODE_PORT: '30084'
     REPLICA_COUNT: '3'
-    NEW_DB_DATABASE: sso5_1
 
 #domru:stage5:
 #  extends: .domru:stage:template
