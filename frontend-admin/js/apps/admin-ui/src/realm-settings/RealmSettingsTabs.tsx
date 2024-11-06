@@ -55,6 +55,7 @@ import { ClientPoliciesTab, toClientPolicies } from "./routes/ClientPolicies";
 import { RealmSettingsTab, toRealmSettings } from "./routes/RealmSettings";
 import { SecurityDefenses } from "./security-defences/SecurityDefenses";
 import { UserProfileTab } from "./user-profile/UserProfileTab";
+import { RealmSettingsCacheTab } from "./CacheTab";
 
 export interface UIRealmRepresentation extends RealmRepresentation {
   upConfig?: UserProfileConfig;
@@ -284,6 +285,7 @@ export const RealmSettingsTabs = () => {
   const loginTab = useTab("login");
   const emailTab = useTab("email");
   const themesTab = useTab("themes");
+  const cacheTab = useTab("cache");
   const keysTab = useTab("keys");
   const eventsTab = useTab("events");
   const localizationTab = useTab("localization");
@@ -358,6 +360,13 @@ export const RealmSettingsTabs = () => {
             {...themesTab}
           >
             <RealmSettingsThemesTab realm={realm!} save={save} />
+          </Tab>
+          <Tab
+            title={<TabTitleText>{t("cache")}</TabTitleText>}
+            data-testid="rs-cache-tab"
+            {...cacheTab}
+          >
+            <RealmSettingsCacheTab realm={realm!} />
           </Tab>
           <Tab
             title={<TabTitleText>{t("keys")}</TabTitleText>}
