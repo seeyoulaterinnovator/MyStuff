@@ -8,9 +8,11 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.DevHttpLogEntity;
 
 import java.net.URL;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 
 @ApplicationScoped
 @Transactional(Transactional.TxType.REQUIRES_NEW)
+@Slf4j
 public class DevHttpLogRepository {
     final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -80,6 +83,7 @@ public class DevHttpLogRepository {
                             .toString()
             );
             if(count > 2L * maxCount) {
+                var started = Instant.now();
                 em.createNativeQuery("delete from DEV_HTTP_LOG " +
                                 "where NODE = :node and not PINNED " +
                                 "order by REQUESTED_AT asc " +
@@ -87,6 +91,7 @@ public class DevHttpLogRepository {
                         .setParameter("node", node)
                         .setParameter("limit", maxCount)
                         .executeUpdate();
+                log.debug("Dev HTTP Log rollup for {}", Duration.between(started, Instant.now()));
             }
         } finally {
             lock.unlock();
