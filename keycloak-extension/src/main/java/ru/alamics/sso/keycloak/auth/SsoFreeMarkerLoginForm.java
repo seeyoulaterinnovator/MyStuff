@@ -17,6 +17,7 @@ import org.keycloak.forms.login.freemarker.LoginFormsUtil;
 import org.keycloak.forms.login.freemarker.Templates;
 import org.keycloak.forms.login.freemarker.model.*;
 import org.keycloak.models.*;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.services.ErrorPage;
 import org.keycloak.services.Urls;
 import org.keycloak.services.messages.Messages;
@@ -31,6 +32,7 @@ import ru.alamics.sso.keycloak.auth.model.SsoUrlBean;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.util.MiscUtil;
 import ru.alamics.sso.registration.model.FormConstants;
+import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.TraceUtil;
@@ -68,6 +70,8 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
     private SettingsService settingsService = null;
 
+    private UserFindService userFindService = null;
+
     public SsoFreeMarkerLoginForm(KeycloakSession session) {
         super(session);
         putAttribute("redirectUrl", getRedirectUrl());
@@ -76,6 +80,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
 
         settingsService = Lookup.lookup(SettingsService.class);
         clientService = Lookup.lookup(ClientService.class);
+        userFindService = Lookup.lookup(UserFindService.class);
 
         putAttribute("phoneConst", settingsService.getSettingsStringValue(PHONE_CONST, realm.getName()));
         putAttribute("phoneConstLink", settingsService.getSettingsStringValue(PHONE_CONST_LINK, realm.getName()));
@@ -255,6 +260,9 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         }
         if(TraceUtil.isTraceEnabled()) {
             log.debug("Attributes: {}", attributes);
+        }
+        if(context.getHttpRequest().getDecodedFormParameters().getFirst("username") != null){
+            putAttribute("userEmail", getEmailBy());
         }
     }
 
@@ -499,5 +507,14 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
             return username;
         }
         return null;
+    }
+
+    private String getEmailBy() {
+        String username = context.getHttpRequest().getDecodedFormParameters().getFirst("username");
+        if (username.startsWith("+7")) {
+            UserEntity userFind = userFindService.getUserByPhone(context.getRealm(), username);
+            return userFind.getEmail();
+        }
+        return username;
     }
 }

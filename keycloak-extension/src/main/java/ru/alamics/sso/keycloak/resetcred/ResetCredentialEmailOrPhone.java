@@ -3,7 +3,6 @@ package ru.alamics.sso.keycloak.resetcred;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAuthenticator;
-import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -83,7 +82,6 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
                 if(userFind.isEmailVerified()) {
                     username = userFind.getUsername();
                     authenticationSession.setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, userFind.getEmail());
-                    context.getHttpRequest().getDecodedFormParameters().replace("username", Collections.singletonList(userFind.getEmail()));
                 } else {
                     context.setUser(user);
                     context.challenge(context.form().createForm("verify-email-by-reset.ftl"));

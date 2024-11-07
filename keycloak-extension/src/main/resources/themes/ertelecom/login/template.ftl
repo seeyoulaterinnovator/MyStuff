@@ -46,16 +46,16 @@
 
         <main id="content" class="flex-1 py-8 md:py-12 mx-auto md:mx-auto w-full max-w-440px xl:max-w-470px">
             <#if displayMessage && message?has_content && message.summary == msg('emailSentMessage')>
-                <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}" success=true; section>
+                <@emailSent.defaultTemplate email="${userEmail}" backHref="${url.loginUrl}" success=true; section>
                     <#if section = "header">
                         Восстановление пароля
                     <#elseif section = "description">
-                        <span>На почту: ${login.username!}</span><br>
+                        <span>На почту: ${userEmail}</span><br>
                         Отправлены инструкции по восстановлению пароля
                     </#if>
                 </@emailSent.defaultTemplate>
             <#elseif displayMessage && message?has_content && message.summary == msg('emailSendErrorMessage')>
-                <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}" success = false; section>
+                <@emailSent.defaultTemplate email="${userEmail}" backHref="${url.loginUrl}" success = false; section>
                     <#if section = "header">
                         Восстановление пароля
                     <#elseif section = "description">
