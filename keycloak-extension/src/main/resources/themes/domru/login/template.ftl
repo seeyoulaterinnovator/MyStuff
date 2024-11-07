@@ -65,17 +65,17 @@
 
 
             <#if displayMessage && message?has_content && message.summary == msg('emailSentMessage')>
-                <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}" success=true; section>
+                <@emailSent.defaultTemplate email="${userEmail}" backHref="${url.loginUrl}" success=true; section>
                     <#if section = "header">
                         Восстановление пароля
                     <#elseif section = "description">
-                        <span>На e-mail: ${login.username!"указанную при регистрации"}</span><br>
+                        <span>На e-mail: ${userEmail!"указанную при регистрации"}</span><br>
                         Отправлены инструкции по восстановлению пароля
                     </#if>
                 </@emailSent.defaultTemplate>
 
             <#elseif displayMessage && message?has_content && message.summary == msg('emailSendErrorMessage')>
-                <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}" success = false; section>
+                <@emailSent.defaultTemplate email="${userEmail}" backHref="${url.loginUrl}" success = false; section>
                     <#if section = "header">
                         Восстановление пароля
                     <#elseif section = "description">
