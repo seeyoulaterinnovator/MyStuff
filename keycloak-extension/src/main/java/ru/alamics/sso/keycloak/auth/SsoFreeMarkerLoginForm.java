@@ -261,7 +261,7 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         if(TraceUtil.isTraceEnabled()) {
             log.debug("Attributes: {}", attributes);
         }
-        if(context.getHttpRequest().getDecodedFormParameters().getFirst("username") != null){
+        if(context != null && context.getHttpRequest().getDecodedFormParameters().getFirst("username") != null){
             putAttribute("userEmail", getEmailBy());
         }
     }
