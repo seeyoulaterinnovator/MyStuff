@@ -110,9 +110,7 @@ export function UserDataTable() {
   const [activeFilters, setActiveFilters] = useState<UserAttribute[]>([]);
   const [profile, setProfile] = useState<UserProfileConfig>({});
   const [query, setQuery] = useState("");
-  const [selectedRows, setSelectedRows] = useState<
-    Array<UserRepresentation | UserInfoRepresentation>
-  >([]);
+  const [selectedRows, setSelectedRows] = useState<UserRepresentation[]>([]);
 
   const [key, setKey] = useState(0);
   const refresh = () => setKey(key + 1);
@@ -120,13 +118,17 @@ export function UserDataTable() {
   const {
     userColumns,
     customFilters,
+    customSelectedRows,
     isCustomTheme,
     sortingOptions,
+    pagination,
     handleCustomAction,
     searchUserWithCustomFilters,
     UploadUserInfo,
     customLoader,
-  } = useUserDataTable({ selectedRows, refresh, userStorage });
+    setCustomSelectedRows,
+    ConfirmAction,
+  } = useUserDataTable({ refresh, userStorage });
   const { getAccesses } = useAccess();
   const {
     withHideSelectAllAccess,
@@ -145,6 +147,9 @@ export function UserDataTable() {
   const [searchType, setSearchType] = useState<SearchType>(
     isCustomTheme ? "custom" : "default",
   );
+
+  const resultSelectedRows =
+    searchType === "custom" ? customSelectedRows : selectedRows;
 
   useFetch(
     async () => {
@@ -221,12 +226,12 @@ export function UserDataTable() {
 
   const [toggleDeleteDialog, DeleteConfirm] = useConfirmDialog({
     titleKey: "deleteConfirmUsers",
-    messageKey: t("deleteConfirmDialog", { count: selectedRows.length }),
+    messageKey: t("deleteConfirmDialog", { count: resultSelectedRows.length }),
     continueButtonLabel: "delete",
     continueButtonVariant: ButtonVariant.danger,
     onConfirm: async () => {
       try {
-        for (const user of selectedRows) {
+        for (const user of resultSelectedRows) {
           if (searchType === "custom") {
             await adminClient.customUsers.delete?.({ id: user.id! });
           } else {
@@ -234,6 +239,7 @@ export function UserDataTable() {
           }
         }
         setSelectedRows([]);
+        setCustomSelectedRows([]);
         clearAllFilters();
         addAlert(t("userDeletedSuccess"), AlertVariant.success);
       } catch (error) {
@@ -335,7 +341,7 @@ export function UserDataTable() {
         searchDropdownOpen={searchDropdownOpen}
         setSearchDropdownOpen={setSearchDropdownOpen}
         realm={realm}
-        hasSelectedRows={selectedRows.length === 0}
+        hasSelectedRows={resultSelectedRows.length === 0}
         toggleDeleteDialog={toggleDeleteDialog}
         toggleUnlockUsersDialog={toggleUnlockUsersDialog}
         goToCreate={goToCreate}
@@ -381,6 +387,7 @@ export function UserDataTable() {
   if (searchType === "custom") {
     return (
       <>
+        <ConfirmAction />
         <DeleteConfirm />
         <UnlockUsersConfirm />
         <UploadUserInfo />
@@ -398,9 +405,9 @@ export function UserDataTable() {
           canSelectAll={
             (isCustomTheme && !withHideSelectAllAccess) || !isCustomTheme
           }
-          onSelect={(rows: UserInfoRepresentation[]) =>
-            setSelectedRows([...rows])
-          }
+          selectedRows={customSelectedRows}
+          totalRows={pagination?.totalElements}
+          onSelect={setCustomSelectedRows}
           emptyState={
             !listUsers ? (
               <>
@@ -433,7 +440,7 @@ export function UserDataTable() {
                 title: t("edit"),
                 onClick: () => {
                   if (user.id) {
-                    setSelectedRows([user]);
+                    setCustomSelectedRows([user]);
                     navigate(
                       toUser({
                         id: user.id,
@@ -455,7 +462,7 @@ export function UserDataTable() {
               actionResolvers.push({
                 title: t("delete"),
                 onClick: () => {
-                  setSelectedRows([user]);
+                  setCustomSelectedRows([user]);
                   toggleDeleteDialog();
                 },
               });
