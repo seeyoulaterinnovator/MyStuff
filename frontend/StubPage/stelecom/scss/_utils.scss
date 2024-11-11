@@ -1,0 +1,59 @@
+.desktop {
+  &_hidden {
+    @include desktop {
+      display: none !important;
+    }
+  }
+}
+
+.tablet {
+  &_hidden {
+    @include tablet {
+      display: none !important;
+    }
+  }
+}
+
+.mobile {
+   &_hidden {
+    @include mobile {
+      display: none !important;
+    }
+  }
+}
+
+.trigger-hover-text {
+}
+
+.highlighted-hover-text:hover,
+.highlighted-hover-text:hover .trigger-hover-text {
+  color: var(--color-accent-blue-1200-hover);
+}
+
+.scrollable-container {
+  scrollbar-color: transparent;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    width: 4px !important;
+    border-radius: 2px;
+
+    @include hover {
+      background-color: var(--color-main-1300);
+    }
+  }
+
+  &::-webkit-scrollbar-thumb {
+    width: 4px !important;
+    border-radius: 2px;
+    background-color: var(--color-main-1200);
+
+    @include hover {
+      background-color: var(--color-accent-blue-1200-hover);
+    }
+
+    &:active {
+      background-color: var(--color-main-1200);
+    }
+  }
+}
