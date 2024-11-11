@@ -40,7 +40,7 @@ extraEnvs:
   KEYCLOAK_HOSTNAME: "{{ env "FQDN" }}"
   DB_HOST: "{{ env "DB_HOST" }}"
   DB_PORT: "{{ env "DB_PORT" }}"
-  SITE: "{{ env "CI_ENVIRONMENT_SLUG" }}"
+  SITE: "prod"
   TZ: "Asia/Yekaterinburg"
   APP_PROPS_UPDATE_DELAY_SECS: "60"
   QUARKUS_HTTP_ACCESS_LOG_ENABLED: "false"
