@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.event.listener.factory.impl;
 
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.events.admin.AdminEvent;
@@ -18,7 +19,6 @@ import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.stats.LoginHistory;
 import ru.alamics.sso.util.Util;
 
-import jakarta.persistence.EntityManager;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,10 +98,10 @@ public class SsoUserUpdateEvent extends SsoEvent {
             String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
             attributes.put("expTimePass", expirationStrRusPass);
             if (userNow.isEnabled()) {
-                long blockValue = settingsService.getSettingsLongValue(SettingConstants.BLOCK_NOTIFICATION_OF_UNLOCKING, realm.getName());
-                if (blockValue > 0) {
+//                long blockValue = settingsService.getSettingsLongValue(SettingConstants.BLOCK_NOTIFICATION_OF_UNLOCKING, realm.getName());
+//                if (blockValue > 0) {
                     this.sendEmail(user, realm, settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_ENABLE, realm.getName()), BODY_TEMPLATE_ENABLE, attributes);
-                }
+//                }
                 this.recordLoginUser(userId);//При разблокировании юзера, логиним его
                 return;
             }
