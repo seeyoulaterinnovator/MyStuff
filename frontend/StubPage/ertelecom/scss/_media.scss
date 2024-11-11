@@ -1,0 +1,31 @@
+@mixin desktop {
+  @media only screen and (min-width: $desktop) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media only screen and (min-width: $tablet) and (max-width: $desktop-below) {
+    @content;
+  }
+}
+
+@mixin mobile {
+  @media only screen and (max-width: $tablet-below) {
+    @content;
+  }
+}
+
+@mixin hover {
+  @media (hover: hover) {
+    &:hover {
+      @content;
+    }
+  }
+
+  @media (hover: none) {
+    &:active {
+      @content;
+    }
+  }
+}
