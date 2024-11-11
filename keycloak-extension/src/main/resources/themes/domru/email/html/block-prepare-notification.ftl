@@ -1,29 +1,11 @@
 <#import "template.ftl" as template>
+<#import "blocks.ftl" as blocks>
 
 <@template.layout ; section>
     <#if section = "style">
     <#elseif section = "body">
         ${blockPrepareNotificationSchedulerHtml?no_esc}
-        <#if phone??>
-            <p class="small_text login_data">Ваш логин:<br><span class="text_bolid">${userName}</span><br><span
-                        class="small_text">или</span><br><span class="text_bolid">${phone}</span></p>
-
-        <#else>
-            <p class="small_text login_data">Ваш логин:<br><span class="text_bolid">${userName}</span></p>
-        </#if>
-        <p>Мы не храним ваши пароли.</p>
-        <p style="font-size: 18px">Если вы забыли свой пароль или у вас не получается войти в Личный кабинет - воспользуйтесь формой
-            восстановления пароля по ссылке <a class="no_block" href="https://newlkb2b.dom.ru">«Забыли пароль?»</a></p>
-        <div class="instruction">
-            <div class="instruction_text">
-                <div class="red-item">&nbsp;</div>
-                Для восстановления данных укажите ваш логин.
-            </div>
-            <div class="instruction_text">
-                <div class="red-item">&nbsp;</div>
-                На ваш адрес электронной почты будет отправлена ссылка для восстановления пароля. Срок действия ссылки ${expTimePass?no_esc}.
-            </div>
-        </div>
-
+        <@blocks.yourLogin login="${userName!}" phone="${phone!}"/>
+        <@blocks.recoveryPasswordInstruction/>
     </#if>
 </@template.layout>
