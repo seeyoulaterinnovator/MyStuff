@@ -41,7 +41,7 @@
                                             <tr>
                                                 <td class="contact__number">
                                                     <a href="${phoneConstLink}" class="contacts">
-                                                        8 800 250 0333
+                                                        8 800 2500 333
                                                     </a>
                                                 </td>
                                             </tr>
@@ -57,48 +57,54 @@
 
                             <div class="mail-container__content content">
                                 <div class="content">
-                                    <h2 style="margin-top: 30px; font-size: 32px" class="content__heading">Уважаемый клиент!</h2>
+                                    <h2 style="margin-top: 40px; margin-bottom: 16px; font-size: 32px" class="content__heading">Уважаемый клиент!</h2>
                                     <#nested "body">
                                 </div>
                             </div>
 
                             <div>
                                 <p class="mail-text-title" style="font-weight: 700; font-size: 24px;">Всегда на связи!</p>
-                                <table height="172" class="messengers" cellpadding="0" cellspacing="0" width="100%">
+                                <table height="172" class="messengers" cellpadding="0" cellspacing="0">
                                     <tr>
-                                        <td style="width: 25%">
-                                            <img style="width: 120px; height: 120px"
+                                        <td style="width: 120px">
+                                            <img style="width: 108px; height: 108px"
                                                  src="${telegramQr}">
                                         </td>
-                                        <td style="width: 25%">
-                                            <img style="width: 120px; height: 120px"
+                                        <td style="min-width: 24px"></td>
+                                        <#--  <td style="width: 120px">
+                                            <img style="width: 108px; height: 108px"
                                                  src="${whatsAppQr}">
                                         </td>
-                                        <td style="width: 25%">
-                                            <img style="width: 120px; height: 120px"
+                                        <td style="min-width: 8px"></td>  -->
+                                        <td style="width: 120px">
+                                            <img style="width: 108px; height: 108px"
                                                  src="${b2bDomruRuQr}">
                                         </td>
-                                        <td style="width: 25%">
-                                            <img style="width: 120px; height: 120px"
+                                        <td style="min-width: 24px"></td>
+                                        <td style="width: 120px">
+                                            <img style="width: 108px; height: 108px"
                                                  src="${mobileAppQr}">
                                         </td>
                                     </tr>
                                     <tr class="messengers-links">
-                                        <td style="width: 25%">
+                                        <td>
                                             <a href="https://t.me/DomruBusinessBot">Telegram</a>
                                         </td>
-                                        <td style="width: 25%">
+                                        <td></td>
+                                        <#--  <td>
                                             <a href="https://wa.me/73422195440">WhatsApp</a>
                                         </td>
-                                        <td style="width: 25%">
+                                        <td></td>  -->
+                                        <td>
                                             <a href="https://b2b.domru.ru/?openchat">b2b.domru.ru</a>
                                         </td>
-                                        <td style="width: 25%">
-                                            <a href="https://app.b2b.dom.ru/mobile-a">Мобильное приложение</a>
+                                        <td></td>
+                                        <td>
+                                            <a href="https://app.b2b.dom.ru/kBMf">Мобильное приложение</a>
                                         </td>
                                     </tr>
                                 </table>
-                                <p class="mail-text-title mail-text--bold" style="font-weight:bold;margin:40px 0 16px 0">${gratitudeUp}</p>
+                                <p class="mail-text-title-secondary mail-text--bold" style="font-weight:bold;margin:40px 0 16px 0">${gratitudeUp}</p>
                                 <p class="mail-text--translucent mail-text--light-gray" style="font-size:12px;line-height:16px;margin:8px 0 0 0">${gratitudeDown?no_esc}</p>
                                 <p class="mail-text--translucent mail-text--light-gray" style="font-size:12px;line-height:16px;margin:8px 0 0 0">${footerInMassage}${.now?string.yyyy}</p>
                             </div>

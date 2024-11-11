@@ -1,12 +1,12 @@
 <#import "template.ftl" as template>
+<#import "blocks.ftl" as blocks>
 
 <@template.layout ; section>
-    <#if section = "style">
-    <#elseif section = "body">
-        <div>
-            <span style="font-size: 18px;   line-height: 24px;">
-                ${kcSanitize(msg("emailCredentialDisableBodyHtml", authHref))?no_esc}
-	        </span>
-        </div>
-    </#if>
+  <#if section="style">
+    <#elseif section="body">
+        ${kcSanitize(msg("emailResetPasswordBodyHtml", authHref, expTimePass))?no_esc}
+        <@blocks.yourLogin login="${email!}" phone="${phone!}" />
+        ${kcSanitize(msg("login"))?no_esc}
+        <@blocks.recoveryPasswordInstruction />
+  </#if>
 </@template.layout>
