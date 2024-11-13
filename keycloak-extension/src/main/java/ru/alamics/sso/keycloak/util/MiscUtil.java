@@ -87,4 +87,13 @@ public final class MiscUtil {
         text = "\ufeff" + text;
         return text;
     }
+
+    public static String notEmpty(String... texts) {
+        for(String text : texts) {
+            if(text != null && !text.isBlank()) {
+                return text;
+            }
+        }
+        return "";
+    }
 }
