@@ -1,20 +1,18 @@
 package ru.alamics.sso.keycloak.interceptor;
 
-import io.quarkus.narayana.jta.QuarkusTransaction;
+import io.vertx.ext.auth.impl.jose.JWT;
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.PreMatching;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.ext.Provider;
+import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.Config;
 import org.keycloak.TokenVerifier;
 import org.keycloak.crypto.SignatureProvider;
-import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.RealmProvider;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.services.Urls;
 import ru.alamics.sso.keycloak.GeneralRealm;
@@ -24,6 +22,7 @@ import java.io.IOException;
 /**
  * Доработка для клиентов по типу ЛК, которые нарушают спецификацию OIDC
  * и передают в параметре id_token_hint access токен вместо ID токена
+ * @see org.keycloak.protocol.oidc.endpoints.LogoutEndpoint
  */
 @Provider
 @PreMatching
@@ -36,7 +35,6 @@ public class LogoutEndpointInterceptor implements ContainerRequestFilter {
     @Context
     KeycloakSession session;
 
-    @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         if(!(
                 requestContext.getUriInfo().getPath().matches("/realms/[^/]+/protocol/openid-connect/logout")
@@ -51,53 +49,66 @@ public class LogoutEndpointInterceptor implements ContainerRequestFilter {
 
         if(idToken == null) return;
 
-        QuarkusTransaction.requiringNew().run(() -> {
-            var clientId = requestContext.getUriInfo().getQueryParameters().getFirst(CLIENT_ID_PARAM);
-            var oldRealm = session.getContext().getRealm();
-            try {
+        try {
+            if("ID".equals(JWT.parse(idToken).getJsonObject("payload").getString("typ"))) return;
+        } catch (Exception e) {
+            log.trace(e.getMessage(), e);
+        }
 
-                TokenVerifier<AccessToken> verifier = TokenVerifier.create(idToken, AccessToken.class)
-                        .withDefaultChecks()
-                        .realmUrl(Urls.realmIssuer(session.getContext().getUri().getBaseUri(), realmName));
+        var clientId = requestContext.getUriInfo().getQueryParameters().getFirst(CLIENT_ID_PARAM);
 
-                RealmModel realm = session.getProvider(RealmProvider.class).getRealmByName(realmName);
+        var tokenClientId = verifyAccessTokenAndGetClientId(idToken, realmName);
 
-                if (realm == null) return;
+        if(tokenClientId == null) return;
 
-                session.getContext().setRealm(realm);
+        if(clientId != null && !clientId.equals(tokenClientId)) return;
 
-                var verifierContext = session.getProvider(
-                                SignatureProvider.class,
-                                verifier.getHeader().getAlgorithm().name()
-                        )
-                        .verifier(verifier.getHeader().getKeyId());
+        requestContext.setRequestUri(
+                requestContext.getUriInfo()
+                        .getRequestUriBuilder()
+                        .replaceQueryParam(ID_TOKEN_HINT_PARAM)
+                        .replaceQueryParam(CLIENT_ID_PARAM, tokenClientId)
+                        .build()
+        );
+    }
 
-                verifier.verifierContext(verifierContext);
+    String verifyAccessTokenAndGetClientId(String accessToken, String realmName) {
+        @Cleanup var session = this.session.getKeycloakSessionFactory().create();
 
-                AccessToken token = verifier.verify().getToken();
+        try {
+            var realm = session.realms().getRealmByName(realmName);
 
-                if (token == null) return;
+            if (realm == null) return null;
 
-                ClientModel client = realm.getClientByClientId(token.getIssuedFor());
+            session.getContext().setRealm(realm);
 
-                if (client == null) return;
+            @SuppressWarnings("deprecation")
+            var verifier = TokenVerifier.create(accessToken, AccessToken.class)
+                    .withDefaultChecks()
+                    .realmUrl(Urls.realmIssuer(session.getContext().getUri().getBaseUri(), realmName));
 
-                if (clientId == null || clientId.equals(client.getClientId())) clientId = client.getClientId();
+            session.getContext().setRealm(realm);
 
-            } catch (Exception e) {
-                log.debug(e.getMessage(), e);
-                return;
-            } finally {
-                session.getContext().setRealm(oldRealm);
-            }
+            var verifierContext = session.getProvider(
+                            SignatureProvider.class,
+                            verifier.getHeader().getAlgorithm().name()
+                    )
+                    .verifier(verifier.getHeader().getKeyId());
 
-            requestContext.setRequestUri(
-                    requestContext.getUriInfo()
-                            .getRequestUriBuilder()
-                            .replaceQueryParam(ID_TOKEN_HINT_PARAM)
-                            .replaceQueryParam(CLIENT_ID_PARAM, clientId)
-                            .build()
-            );
-        });
+            verifier.verifierContext(verifierContext);
+
+            var token = verifier.verify().getToken();
+
+            if (token == null) return null;
+
+            var client = realm.getClientByClientId(token.getIssuedFor());
+
+            if (client == null) return null;
+
+            return client.getClientId();
+        } catch (Exception e) {
+            log.trace(e.getMessage(), e);
+            return null;
+        }
     }
 }

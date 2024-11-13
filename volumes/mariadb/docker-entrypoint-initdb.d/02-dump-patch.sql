@@ -23,17 +23,17 @@ where EXT_ID = 'smsSender.uri';
 
 update CLIENT
 set SECRET = 'secret'
-where CLIENT_ID in ('b2b') and REALM_ID = 'user';
+where CLIENT_ID in ('b2b', 'dmp-kc-sit') and REALM_ID = 'user';
 
 delete from REDIRECT_URIS
 where CLIENT_ID in (select ID
                     from CLIENT
-                    where CLIENT_ID in ('b2b') and REALM_ID = 'user');
+                    where CLIENT_ID in ('b2b', 'dmp-kc-sit') and REALM_ID = 'user');
 
 INSERT INTO REDIRECT_URIS(CLIENT_ID, VALUE)
 select ID, '*'
 from CLIENT
-where CLIENT_ID in ('b2b') and REALM_ID = 'user';
+where CLIENT_ID in ('b2b', 'dmp-kc-sit') and REALM_ID = 'user';
 
 update APP_PROPERTIES
 set VALUE = 'mockserver'
