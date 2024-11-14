@@ -39,6 +39,27 @@ stages:
   tags:
     - sso-build-k8s
 
+.domru:prod:template:
+  stage: deploy
+  image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
+  when: manual
+  script:
+    - export FQDN=`echo "${CI_ENVIRONMENT_URL}" | sed 's/^http\(\|s\):\/\///g'`
+    - consul-template -once -template ".helm/values-prod.yaml.tpl:values.yaml"
+    - |-
+      if [[ -z "$NEW_DB_DATABASE" ]]; then
+          export NEW_DB_DATABASE=$DB_DATABASE
+      fi
+    - echo "DB_DATABASE = ${DB_DATABASE}"
+    - echo "NEW_DB_DATABASE = ${NEW_DB_DATABASE}"
+    - cat values.yaml
+    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml --set extraEnvs.DB_DATABASE=${NEW_DB_DATABASE} ./.helm -n ${NAMESPACE} --atomic --timeout 5m
+    - helm history -n ${NAMESPACE} ${CI_ENVIRONMENT_SLUG} --max 5
+  variables:
+    NAMESPACE: 'sso'
+    NODE_PORT: '30080'
+    REPLICA_COUNT: '3'
+
 .frontend:theme:build:
   stage: build
   image: harbor.ertelecom.ru/b2bweb/openjdk:21-node20
@@ -52,7 +73,9 @@ stages:
     expire_in: 1 day
   only:
     - itres-new
+    - cicd
   allow_failure: false
+  when: manual
   tags:
     - sso-build-docker
 
@@ -87,7 +110,9 @@ frontend:admin:build:
     expire_in: 1 day
   only:
     - itres-new
+    - cicd
   allow_failure: false
+  when: manual
   tags:
     - sso-build-docker
 
@@ -105,11 +130,13 @@ back:build:
   allow_failure: false
   only:
     - itres-new
+    - cicd
   needs:
     - "frontend:domru:build"
     - "frontend:ertelecom:build"
     - "frontend:stelecom:build"
     - "frontend:admin:build"
+  when: manual
   tags:
     - sso-build-docker
 
@@ -192,6 +219,23 @@ domru:stage4:
 #    - helm history -n ${NAMESPACE} infinispan --max 5
 #  tags:
 #    - sso-build-k8s
+
+domru:perm-k8s:
+  extends: .domru:prod:template
+  tags:
+    - sso-k8s-perm
+  environment:
+    name: production-k8s-perm
+    url: https://new.auth.dom.ru
+
+domru:voronezh-k8s:
+  extends: .domru:prod:template
+  tags:
+    - sso-k8s-voronezh
+  environment:
+    name: production-k8s-voronezh
+    url: https://new.auth.dom.ru
+
 
 domru:perm:primary:
   stage: deploy
