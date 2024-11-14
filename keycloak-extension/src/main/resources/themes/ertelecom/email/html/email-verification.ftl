@@ -1,4 +1,17 @@
 <#import "template.ftl" as template>
+<#import "./helpers/blocks.ftl" as blocks>
+
+<#-- ЛК - Регистрация -->
+<@template.layout ; section>
+  <#if section="style">
+    <title>${kcSanitize(msg(emailVerificationSubject!""))}</title>
+  <#elseif section="body">
+    <@blocks.parameterizedMsg message=emailVerificationBodyHtml/>
+  </#if>
+</@template.layout>
+
+<#--  TODO: Old logic  -->
+<#--  <#import "template.ftl" as template>
 
 <@template.layout ; section>
     <#if section = "style">
@@ -11,4 +24,4 @@
             </#if>
         ${kcSanitize(msg("emailVerificationBodyHtml",link, linkExpiration, email, linkExpirationFormatter(linkExpiration), expTime))?no_esc}
     </#if>
-</@template.layout>
+</@template.layout>  -->

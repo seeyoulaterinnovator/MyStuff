@@ -1,12 +1,11 @@
 <#import "template.ftl" as template>
-<#import "blocks.ftl" as blocks>
+<#import "./helpers/blocks.ftl" as blocks>
 
+<#--  Admin console - Users – Select user – Send login and reset password -->
 <@template.layout ; section>
   <#if section="style">
-    <#elseif section="body">
-        ${kcSanitize(msg("emailResetPasswordBodyHtml", authHref, expTimePass))?no_esc}
-        <@blocks.yourLogin login="${email!}" phone="${phone!}" />
-        ${kcSanitize(msg("login"))?no_esc}
-        <@blocks.recoveryPasswordInstruction />
+    <title>${kcSanitize(msg(emailResetPasswordSubject!""))}</title>
+  <#elseif section="body">
+    <@blocks.parameterizedMsg message=emailResetPasswordBodyHtml/>
   </#if>
 </@template.layout>

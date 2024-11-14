@@ -1,4 +1,17 @@
 <#import "template.ftl" as template>
+<#import "./helpers/blocks.ftl" as blocks>
+
+<#-- ??? way for getting -->
+<@template.layout ; section>
+  <#if section = "style">
+    <title>Уведомление о блокировке</title>
+  <#elseif section = "body">
+    <@blocks.parameterizedMsg message=blockNotificationSchedulerHtml/>
+  </#if>
+</@template.layout>
+
+<#--  TODO: Old logic  -->
+<#--  <#import "template.ftl" as template>
 
 <@template.layout ; section>
     <#if section="style">
@@ -26,4 +39,5 @@
                 Срок действия ссылки 5 минут</li>
         </ul>
     </#if>
-</@template.layout>
+</@template.layout>  -->
+

@@ -11,6 +11,19 @@
 </#outputformat>
 
 <#import "template.ftl" as template>
+<#import "./helpers/blocks.ftl" as blocks>
+
+<#-- Admin console - Users - Visit user's card - Credentials - Credential Reset -->
+<@template.layout ; section>
+  <#if section="style">
+    <title>${kcSanitize(msg(executeActionsSubject!""))}</title>
+  <#elseif section="body">
+    <@blocks.parameterizedMsg message=executeActionsBodyHtml/>
+  </#if>
+</@template.layout>
+
+<#--  TODO: Old logic  -->
+<#--  <#import "template.ftl" as template>
 
 <@template.layout ; section>
   <#if section = "style">
@@ -25,4 +38,4 @@
  
     ${kcSanitize(msg("executeActionsBodyHtml",link, linkExpiration, email, requiredActionsText, linkExpirationFormatter(linkExpiration), time))?no_esc}
   </#if>
-</@template.layout>
+</@template.layout>  -->
