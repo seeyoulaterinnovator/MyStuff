@@ -58,7 +58,7 @@ stages:
   variables:
     NAMESPACE: 'sso'
     NODE_PORT: '30080'
-    REPLICA_COUNT: '3'
+    REPLICA_COUNT: '5'
 
 .frontend:theme:build:
   stage: build
