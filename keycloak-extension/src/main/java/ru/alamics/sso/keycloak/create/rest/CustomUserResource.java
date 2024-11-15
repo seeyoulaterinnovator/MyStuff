@@ -535,7 +535,7 @@ public class CustomUserResource {
 //        adminEvent.operation(OperationType.ACTION).resourcePath(session.getContext().getUri()).success();
 
         UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
-        rep.getRequiredActions().add(UserEntityRepresentation.SEND_LOGIN_AND_RESET_PASSWORD);
+        rep.getRequiredActions().add(UserEntityRepresentation.DELETE_PASSWORD);
         eventBuilder.operation(OperationType.ACTION)
                 .resourcePath(session.getContext().getUri())
                 .representation(rep)
