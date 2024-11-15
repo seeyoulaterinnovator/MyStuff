@@ -53,7 +53,7 @@ stages:
     - echo "DB_DATABASE = ${DB_DATABASE}"
     - echo "NEW_DB_DATABASE = ${NEW_DB_DATABASE}"
     - cat values.yaml
-    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml --set extraEnvs.DB_DATABASE=${NEW_DB_DATABASE} ./.helm -n ${NAMESPACE} --atomic --timeout 5m
+    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml --set extraEnvs.DB_DATABASE=${NEW_DB_DATABASE} ./.helm -n ${NAMESPACE} --atomic --timeout 10m
     - helm history -n ${NAMESPACE} ${CI_ENVIRONMENT_SLUG} --max 5
   variables:
     NAMESPACE: 'sso'
