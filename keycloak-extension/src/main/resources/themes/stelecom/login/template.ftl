@@ -9,7 +9,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="robots" content="noindex, nofollow">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <link rel="shortcut icon" href="${url.resourcesPath}/build/images/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="${url.resourcesPath}/build/images/favicon.svg" type="image/x-icon">
 
         <#if properties.meta?has_content>
             <#list properties.meta?split(' ') as meta>

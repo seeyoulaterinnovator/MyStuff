@@ -1,0 +1,164 @@
+.login-password-forgot {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px;
+  gap: 24px;
+  width: 568px;
+  height: 96px;
+  flex: none;
+  order: 2;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1279px) {
+  .login-password-forgot {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 18px;
+    width: 480px;
+    height: 85px;
+    flex: none;
+    order: 2;
+    align-self: stretch;
+    flex-grow: 0;
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .login-password-forgot {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 18px;
+    width: 288px;
+    height: 137px;
+    flex: none;
+    order: 2;
+    align-self: stretch;
+    flex-grow: 0;
+  }
+}
+
+
+.login-pass {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  gap: 24px;
+  width: 568px;
+  height: 48px;
+  flex: none;
+  order: 0;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+
+@media only screen and (min-width: 768px) and (max-width: 1279px) {
+  .login-pass {
+    color: #16629A;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px;
+    gap: 18px;
+    width: 480px;
+    height: 44px;
+    flex: none;
+    order: 0;
+    align-self: stretch;
+    flex-grow: 0;
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .login-pass {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 18px;
+    width: 288px;
+    height: 98px;
+    flex: none;
+    order: 0;
+    align-self: stretch;
+    flex-grow: 0;
+  }
+}
+
+.forgot-pass {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  gap: 24px;
+  width: 568px;
+  height: 24px;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 1;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+
+@media only screen and (min-width: 768px) and (max-width: 1279px) {
+  .forgot-pass {
+    gap: 18px;
+    width: 480px;
+    height: 23px;
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .forgot-pass {
+    justify-content: center; /* center text horizontally */
+    text-align: center;
+    gap: 18px;
+    width: 288px;
+    height: 21px;
+  }
+}
+
+.my-span {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  color: #16629A;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  flex-grow: 1;
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1279px) {
+  .my-span {
+    width: 480px;
+    height: 23px;
+    font-size: 17px;
+    line-height: 23px;
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .my-span {
+    width: 288px;
+    height: 21px;
+    font-size: 16px;
+    line-height: 21px;
+    text-align: center;
+    justify-content: center; /* center text horizontally */
+  }
+}

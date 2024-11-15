@@ -1,0 +1,44 @@
+.reference {
+  transition: 0.2s ease-in-out;
+
+  &-generate-password {
+    display: inline-block;
+    font-size: 16px;
+    
+    @media screen and (min-width: 1280px) {
+      font-size: 18px;
+    }
+  }
+
+  &_hoverable {
+    opacity: 1;
+  }
+}
+
+.generate-btn {
+}
+
+.agreement {
+  padding-bottom: 15px;
+}
+
+.generated-password {
+}
+
+
+
+.show-small-tell {
+  display: none;
+}
+
+@media screen and (max-width: 767px) {
+
+  .show-small-tell {
+    display: block;
+  }
+
+  .pass--hidden-small {
+    display: none;
+  }
+
+}

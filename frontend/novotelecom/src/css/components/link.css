@@ -1,0 +1,30 @@
+a {
+  &.highlighted-text,
+  .highlighted-text {
+    &:hover {
+      @apply .text-accentBlue-1200-hover;
+    }
+  }
+}
+
+.link {
+  @apply .block .no-underline .text-sm;
+
+  &.highlighted-text {
+    &:hover {
+      @apply .text-accentBlue-1200-hover;
+    }
+  }
+}
+
+.underline-link {
+}
+
+.link-main {
+  @apply .text-main-600;
+}
+
+.link-main:hover,
+.link-main:focus {
+  @apply .text-main-800;
+}

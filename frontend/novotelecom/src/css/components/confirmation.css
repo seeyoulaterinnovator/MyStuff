@@ -1,0 +1,53 @@
+.select-city-confirmation {
+  background: #ffffff;
+  position: fixed;
+  right: 80px;
+  top: 61px;
+  border-radius: 20px;
+  padding: 24px;
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    top: 53px;
+    right: 36px;
+  }
+
+  @media only screen and (max-width: 767px) {
+    top: 41px;
+    right: 16px;
+    margin-left: 16px;
+  }
+}
+
+.select-city-confirmation {
+  > div {
+    > :not(:first-child) {
+      margin-top: 24px;
+    }
+  }
+}
+
+.confirm__title {
+  color: var(--main-800);
+  max-width: 400px;
+}
+
+.confirm__btns {
+  > :not(:first-child) {
+    margin-left: 24px;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .select-city-confirmation {
+    padding: 18px;
+  }
+
+  .select-city-confirmation > div > :not(:first-child) {
+    margin-top: 18px;
+  }
+
+  .confirm__btns > .btn-main {
+    width: auto;
+    /* height: auto; */
+  }
+}

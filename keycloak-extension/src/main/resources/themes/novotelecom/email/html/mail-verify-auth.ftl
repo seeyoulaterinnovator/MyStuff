@@ -1,0 +1,11 @@
+<#import "template.ftl" as template>
+<#import "./helpers/blocks.ftl" as blocks>
+
+<#--  Приходит из мобильного приложения  -->
+<@template.layout ; section>
+  <#if section="style">
+    <title>${kcSanitize(msg(emailVerificationAuthSubject!""))}</title>
+  <#elseif section="body">
+    <@blocks.parameterizedMsg message=emailVerificationAuthBodyHtml />
+  </#if>
+</@template.layout>

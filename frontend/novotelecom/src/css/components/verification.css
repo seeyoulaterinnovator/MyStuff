@@ -1,0 +1,100 @@
+.verification {
+  &__title {
+    font-size: 36px;
+    line-height: 42px;
+    font-weight: 700;
+
+    @media (max-width: 1279px) {
+      font-size: 32px;
+      line-height: 38px;
+    }
+
+    @media (max-width: 767px) {
+      font-size: 27px;
+      line-height: 32px;
+    }
+  }
+
+  &__sub {
+  }
+
+  &__btn__send {
+    color: #007BFB;
+    margin-left: 30px;
+    min-width: 253px;
+    padding: 0;
+
+    @media (max-width: 767px) {
+      margin-top: 18px;
+      margin-left: 0;
+      min-width: 100%;
+    }
+  }
+
+  &__btn__accept {
+    min-width: 196px;
+  }
+
+  &__btn {
+    min-height: 48px;
+
+    @media (max-width: 767px) {
+      min-height: 44px;
+      width: 100%;
+    }
+  }
+
+  &__code {
+    margin-right: 32px;
+    font-size: 21.5px;
+
+    @media (max-width: 767px) {
+      margin-right: 14px;
+      font-size: 18.5px;
+    }
+  }
+
+  &__err {
+    font-size: 12.5px;
+
+    @media (max-width: 767px) {
+      font-size: 10.5px;
+    }
+  }
+
+  &__text {
+    font-size: 18px;
+    @media (max-width: 767px) {
+      font-size: 15.5px;
+    }
+  }
+
+  &__resend {
+    color: #16629A !important;
+  }
+
+  &__error__text{
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 16px;
+    letter-spacing: 0.05em;
+    @media (max-width: 767px) {
+      letter-spacing: 0.05em;
+      font-size: 11px;
+      line-height: 14px;
+    }
+  }
+
+  &__timer__text {
+    font-size: 14px;
+    line-height: 24px;
+    margin-top: 2rem;
+    letter-spacing: 0.03em;
+  }
+
+  &__timer__text__little {
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 24px;
+  }
+}
