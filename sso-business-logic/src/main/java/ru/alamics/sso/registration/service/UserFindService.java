@@ -108,8 +108,8 @@ public class UserFindService {
     }
 
 
-    public long getTotalUsersByParameters(String realm, String search, String searchUser, String searchToms) {
-        return userRepository.getTotalUsersByParameters(realm, search, searchUser, searchToms);
+    public long getTotalUsersByParameters(String realm, String search, String searchUser, String searchEmail, String searchToms, String searchPhone) {
+        return userRepository.getTotalUsersByParameters(realm, search, searchUser, searchEmail, searchToms, searchPhone);
     }
 
     public UserEntity getUserEntity(String userId) {

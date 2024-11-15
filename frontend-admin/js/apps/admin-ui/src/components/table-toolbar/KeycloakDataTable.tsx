@@ -786,7 +786,7 @@ export function KeycloakDataTable<T>({
   const maxRows = detailColumns ? max * 2 : max + numberOfRowMerges;
   const rowLength = detailColumns
     ? (data?.length || 0) / 2
-    : (data?.length || 0) + numberOfRowMerges;
+    : (data?.length || 0) - numberOfRowMerges;
 
   const renderTable = () => {
     return (
