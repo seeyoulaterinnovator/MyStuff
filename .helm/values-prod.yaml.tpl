@@ -76,9 +76,10 @@ resources:
 
 podAntiAffinity:
   requiredDuringSchedulingIgnoredDuringExecution:
-    - labelSelector:
-        matchExpressions:
-          - key: app.kubernetes.io/instance
-            operator: In
-            values:
-              - "{{ env "CI_ENVIRONMENT_SLUG" }}"
+  - labelSelector:
+      matchExpressions:
+      - key: app.kubernetes.io/instance
+        operator: In
+        values:
+        - "{{ env "CI_ENVIRONMENT_SLUG" }}"
+    topologyKey: kubernetes.io/hostname
