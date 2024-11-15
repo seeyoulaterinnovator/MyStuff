@@ -11,14 +11,13 @@
 </#outputformat>
 
 <#import "template.ftl" as template>
+<#import "./helpers/blocks.ftl" as blocks>
 
+<#-- Admin console - Users - Visit user's card - Credentials - Credential Reset -->
 <@template.layout ; section>
   <#if section="style">
-    <#elseif section="body">
-      <#assign email=realmName>
-        <#if user?? && user.getEmail??>
-          <#assign email=user.getEmail()>
-        </#if>
-        ${kcSanitize(msg("executeActionsBodyHtml",link, linkExpiration, email, requiredActionsText, linkExpirationFormatter(linkExpiration), time))?no_esc}
+    <title>${kcSanitize(msg(executeActionsSubject!""))}</title>
+  <#elseif section="body">
+    <@blocks.parameterizedMsg message=executeActionsBodyHtml/>
   </#if>
 </@template.layout>

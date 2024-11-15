@@ -1,5 +1,7 @@
 <#import "template.ftl" as template>
 
+<#-- ??? Admin console - Users - Visit user's card - Identity provider links -->
+<#--  not used  -->
 <@template.layout ; section>
     <#if section = "style">
         <#include 'styles/content-style--default.html' >

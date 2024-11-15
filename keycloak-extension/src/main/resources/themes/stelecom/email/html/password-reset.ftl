@@ -1,4 +1,17 @@
 <#import "template.ftl" as template>
+<#import "./helpers/blocks.ftl" as blocks>
+
+<#-- ЛК - Забыли пароль? -->
+<@template.layout ; section>
+  <#if section="style">
+    <title>${kcSanitize(msg(emailExpiresPasswordDataSubject!""))}</title>
+  <#elseif section="body">
+    <@blocks.parameterizedMsg message=passwordResetBodyHtml />
+  </#if>
+</@template.layout>
+
+<#--  TODO: Old logic  -->
+<#--  <#import "template.ftl" as template>
 
 <@template.layout ; section>
   <#if section = "style">
@@ -13,4 +26,4 @@
 
     ${kcSanitize(msg("passwordResetBodyHtml",link, expTime, email, linkExpirationFormatter(linkExpiration)))?no_esc}
   </#if>
-</@template.layout>
+</@template.layout>  -->

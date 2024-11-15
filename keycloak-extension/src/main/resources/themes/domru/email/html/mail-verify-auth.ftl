@@ -1,8 +1,11 @@
 <#import "template.ftl" as template>
+<#import "./helpers/blocks.ftl" as blocks>
 
+<#--  Приходит из мобильного приложения  -->
 <@template.layout ; section>
-  <#if section = "style">
-  <#elseif section = "body">
-    <p>Код для подтверждения данных вашей учетной записи Личного кабинета «Дом.ру Бизнес»:</p><p style="font-weight: bold" class = "text_bolid margin_block">${code}</p>
+  <#if section="style">
+    <title>${kcSanitize(msg(emailVerificationAuthSubject!""))}</title>
+  <#elseif section="body">
+    <@blocks.parameterizedMsg message=emailVerificationAuthBodyHtml />
   </#if>
 </@template.layout>
