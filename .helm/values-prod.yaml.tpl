@@ -85,6 +85,7 @@ podAntiAffinity:
         values:
         - "{{ env "CI_ENVIRONMENT_SLUG" }}"
     topologyKey: kubernetes.io/hostname
+
 hostAliases:
   - ip: "10.121.10.225"
     hostnames:
