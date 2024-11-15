@@ -74,3 +74,7 @@ resources:
     cpu: 500m
     memory: 500Mi
 
+hostAliases:
+  - ip: "10.121.10.225"
+    hostnames:
+      - "tb.uat03.bss.loc"
