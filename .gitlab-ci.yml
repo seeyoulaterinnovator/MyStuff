@@ -65,7 +65,12 @@ stages:
   image: harbor.ertelecom.ru/b2bweb/openjdk:21-node20
   script:
     - cd frontend/$BUILD_THEME
-    - npm i && npm run build
+    - npm ci --cache ~/.npm --prefer-offline && npm run build
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - ~/.npm
+
   artifacts:
     paths:
       - keycloak-extension/src/main/resources/themes/$BUILD_THEME/login/resources/build/
@@ -122,6 +127,10 @@ back:build:
   <<: *build-template
   script:
     - ./gradlew --stacktrace --console=plain build
+  cache:
+    key: "CI_COMMIT_REF_SLUG"
+    paths:
+      - .gradle/
   artifacts:
     paths:
       - build/keycloak-extension/libs/keycloak-extension-1.0.1-all.jar
