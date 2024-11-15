@@ -177,8 +177,6 @@ h4 {
     @apply .text-custom/lg;
   }
 }
-
-
 .text-custom-9lg {
   @apply .text-custom/9lg;
 
@@ -217,8 +215,7 @@ body.custom #content p,
   @apply .text-custom-sm;
 }
 
-.timer,
-.titems .role-cell {
+.timer, .role-cell {
   @apply .text-custom-2sm;
 }
 
@@ -234,7 +231,7 @@ summary,
 #letters-password,
 #numbers-password,
 .theader .org-cell,
-.theader .role-cell {
+.theader {
   @apply .text-custom-4sm;
 }
 
@@ -243,8 +240,6 @@ summary,
   @apply .text-custom-3lg;
   @apply font-bold;
 }
-
-
 
 .page-title-wrapper .page-title,
 .page-title,

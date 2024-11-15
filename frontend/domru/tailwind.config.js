@@ -261,6 +261,7 @@ module.exports = {
           '1100': '#2B539B',
           '1200': '#16629A',
           '1200-hover': '#0090D8',
+          '1300': '#EFF8FC',
           default: '#6688c9',
         },
         accentGreen: {

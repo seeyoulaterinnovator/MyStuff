@@ -1,0 +1,112 @@
+.table-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
+.table {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 8px
+}
+
+.trow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+}
+
+.theader > div {
+  font-size: 13px;
+  line-height: 16px;
+  letter-spacing: 0.05em;
+  color: #899DA8;
+}
+
+.theader-mobile {
+  display: none !important;
+}
+
+.titems {
+  cursor: pointer;
+
+  .org-cell {
+    flex-grow: 2;
+    word-break: break-word;
+  }
+
+  .role-cell {
+    margin-left: 8px;
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis;
+    max-width: 179px;
+    flex-grow: 1;
+    text-align: right;
+    color: var(--main-900);
+
+    @media only screen and (min-width: 768px) and (max-width: 1279px) {
+      max-width: 178px;
+    }
+
+    @media only screen and (max-width: 767px) {
+      text-align: left;
+      white-space: unset; 
+      overflow: auto; 
+      text-overflow: unset;
+      max-width: unset;
+      margin-left: 0;
+    }
+  }
+}
+
+@media (max-width: 1279px) {
+  .theader > div {
+    font-size: 12px;
+    line-height: 15px;
+  }
+}
+
+@media (max-width: 767px) {
+  .theader {
+    display: none;
+  }
+  .theader-mobile {
+    display: flex !important;
+  }
+  .theader > div {
+    font-size: 11px;
+    line-height: 14px;
+  }
+  .table {
+    gap: 16px;
+  }
+  .trow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+  .table-wrapper {
+    display: table-cell;
+    vertical-align: middle;
+  }
+  .table {
+    display: inline-block;
+    max-width: 440px;
+  }
+  .trow {
+    vertical-align: middle;
+  }
+  .trow div {
+    display: table-cell;
+    vertical-align: middle;
+  }
+}
+
+

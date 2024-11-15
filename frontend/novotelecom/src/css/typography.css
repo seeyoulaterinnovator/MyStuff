@@ -1,0 +1,253 @@
+html {
+  @apply font-body;
+}
+
+body {
+  font-size: 14px;
+
+  line-height: 1.36;
+
+  @media (min-width: 768px) {
+    font-size: 15px;
+    line-height: 1.29;
+  }
+
+  @media (min-width: 1280px) {
+    font-size: 17px;
+  }
+}
+
+h1 {
+  font-family: "Affect", sans-serif;
+  font-size: 31px;
+  line-height: 34px;
+  font-weight: 700;
+
+  b {
+    font-size: 1.03em;
+  }
+
+  @media (min-width: 768px) {
+    font-size: 35px;
+    line-height: 40px;
+  }
+
+  @media (min-width: 1280px) {
+    font-size: 46px;
+    line-height: 52px;
+  }
+}
+
+h2 {
+  font-family: "Affect", sans-serif;
+  font-size: 27px;
+  line-height: 29px;
+  font-weight: 700;
+
+  @media (min-width: 768px) {
+    font-size: 30px;
+    line-height: 36px;
+  }
+
+  @media (min-width: 1280px) {
+    font-size: 36px;
+    line-height: 42px;
+  }
+}
+
+h3 {
+  font-family: "Affect", sans-serif;
+  font-size: 23px;
+  line-height: 27px;
+  font-weight: 700;
+
+  @media (min-width: 768px) {
+    font-size: 24px;
+    line-height: 30px;
+  }
+
+  @media (min-width: 1280px) {
+    font-size: 27px;
+    line-height: 33px;
+  }
+}
+
+h4 {
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+
+  @media (min-width: 768px) {
+    font-size: 19px;
+    line-height: 26px;
+  }
+
+  @media (min-width: 1280px) {
+    font-size: 21px;
+    line-height: 28px;
+  }
+}
+
+.highlighted-text {
+  @apply .text-accentBlue-1200;
+}
+
+.trigger-hover-text {
+}
+
+.highlighted-hover-text {
+  &:hover {
+    @apply .text-accentBlue-1200-hover;
+
+    .trigger-hover-text {
+      @apply .text-accentBlue-1200-hover;
+    }
+  }
+}
+
+.underline-hovering-text {
+  &:hover {
+    @apply .underline;
+  }
+}
+
+/* TODO: Попытаться поместить кастомные классы, связанные с текстом 
+* в @layer или plugins tailwind 
+*/
+.text-custom-main {
+  @apply .text-custom/base;
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    @apply .text-custom/md;
+  }
+
+  @media only screen and (max-width: 767px) {
+    @apply .text-custom/sm;
+  }
+}
+
+.text-custom-lg {
+  @apply .text-custom/lg;
+  @apply tracking-wider;
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    @apply .text-custom/md2;
+  }
+
+  @media only screen and (max-width: 767px) {
+    @apply .text-custom/sm2;
+  }
+}
+
+.text-custom-4sm {
+  @apply .text-custom/4sm;
+  @apply tracking-wider;
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    @apply .text-custom/5sm;
+  }
+
+  @media only screen and (max-width: 767px) {
+    @apply .text-custom/6sm;
+  }
+}
+
+.text-custom-2sm {
+  @apply .text-custom/2sm;
+  @apply tracking-wider/sm;
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    @apply .text-custom/3sm;
+  }
+
+  @media only screen and (max-width: 767px) {
+    @apply .text-custom/4sm2;
+  }
+}
+
+.text-custom-3lg {
+  @apply .text-custom/3lg;
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    @apply .text-custom/2lg;
+  }
+
+  @media only screen and (max-width: 767px) {
+    @apply .text-custom/lg;
+  }
+}
+.text-custom-9lg {
+  @apply .text-custom/9lg;
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    @apply .text-custom/8lg;
+  }
+
+  @media only screen and (max-width: 767px) {
+    @apply .text-custom/7lg;
+  }
+}
+
+body p,
+body.custom #content p,
+.message p,
+.confirm__title,
+.field__input,
+.field__input::placeholder,
+.code,
+.forgot,
+.phone-number,
+.verification__sub,
+.resend,
+.verification__text,
+.enter-login-link,
+#numbers-password > .text-symbols,
+#letters-password > .text-symbols,
+.titems .org-cell,
+.city {
+  @apply .text-custom-main;
+}
+
+.btn,
+.btn p,
+.btn:not(.message__btn) .btn-main {
+  @apply .text-custom-lg;
+  @apply tracking-wider;
+}
+
+.timer, .role-cell {
+  @apply .text-custom-2sm;
+  @apply tracking-wider/sm;
+}
+
+.field__error-message,
+.field__label,
+.personal-data-process-accept,
+figcaption,
+caption,
+summary,
+.caption,
+.copyright,
+#show-cities > span,
+#letters-password,
+#numbers-password,
+.theader .org-cell,
+.theader {
+  @apply .text-custom-4sm;
+  @apply tracking-wider;
+}
+
+.sms-input,
+.city-group-letter {
+  @apply .text-custom-3lg;
+  @apply font-bold;
+}
+
+.page-title-wrapper .page-title,
+.page-title,
+.titleAllPage,
+.choose-city-text {
+  @apply .text-custom-9lg;
+  @apply font-bold;
+}

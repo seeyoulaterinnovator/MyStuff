@@ -1,0 +1,105 @@
+<script>
+  import { afterUpdate } from 'svelte';
+  import { onMount } from 'svelte';
+
+  import {
+    editingStarted,
+    allCities,
+    quarter,
+  } from './stores.js';
+
+  import './selection';
+
+  import * as citiesJson  from '../mock/cities.json'
+  import {selectCity} from "./selection";
+  import { fetchCities } from '../api/cities/index.js';
+
+  let groupedCities = [];
+
+  export let search;
+
+  function handleClick(currentCity) {
+      selectCity($allCities.find(obj => obj.name === currentCity.name));
+  }
+
+  function groupByFirstCharacter(arr) {
+    if (!arr || !arr.length) return [];
+    arr = arr.sort((a, b) => a.name.localeCompare(b.name));
+    let quarterStore = 0;
+    const unsubscribe = quarter.subscribe(value => {
+      quarterStore = value;
+    });
+    if (quarterStore  < 1) quarter.set(Math.floor(arr.length / 4));
+    let partCounter = 0;
+    let currentQuarter = quarterStore;
+
+    const groupedCitiesObject = arr.reduce((acc, value, index) => {
+      let firstCharacter = value.name[0];
+
+      if (!acc[partCounter]) acc.push([]);
+      if (!acc[partCounter][firstCharacter]) {
+
+        if ( index >= currentQuarter && partCounter < 3) {
+          partCounter++;
+          currentQuarter = currentQuarter + quarterStore;
+        }
+        if (!acc[partCounter]) acc.push([]);
+        acc[partCounter][firstCharacter] = {
+            firstCharacter,
+            cities: [{ name: value.name, domain: !value.bss && value.city }]
+        };
+      } else {
+        acc[partCounter][firstCharacter].cities.push({ name: value.name, domain: !value.bss && value.city });
+      }
+
+      return acc;
+    }, []);
+
+    return groupedCitiesObject.map(part => Object.values(part));
+  }
+
+  onMount(() => {
+    fetchCities().then((response) => {
+      const fetchedCities = response.data.results?.cities;
+      allCities.set(fetchedCities || []);
+      groupedCities = groupByFirstCharacter($allCities);
+      editingStarted.set(false);
+    });
+  });
+
+  afterUpdate(() => {
+    const displayingCities = $editingStarted
+      ? $allCities.filter(cityObject => cityObject.name.toLowerCase().startsWith(search.toLowerCase()))
+      : $allCities;
+    groupedCities = groupByFirstCharacter(displayingCities);
+  });
+</script>
+
+<ul class="flex flex-wrap flex-row cities-container w-full">
+    {#each groupedCities as groupPart}
+      <ul class="flex flex-col cities-column">
+      {#each groupPart as group}
+
+        <ul class="flex capital flex-col px-0 capital">
+          <h2 class="city-group-letter capitalize custom-mb-sm">
+            {group.firstCharacter}
+          </h2>
+
+           <ul class="flex flex-col">
+           {#each group.cities as city}
+              <li class="city">
+                <button class="text-left" on:click={() => handleClick(city)}>{city.name}</button>
+              </li>
+            {:else}
+              <div />
+            {/each}
+            </ul>
+
+        </ul>
+
+      {/each}
+      </ul>
+    {:else}
+      <p>Ничего не найдено. Пожалуйста, проверьте правильность написания города</p>
+    {/each}
+</ul>

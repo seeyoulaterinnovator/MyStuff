@@ -1,0 +1,310 @@
+button {
+  &.highlighted-text, .highlighted-text {
+    &:hover:not([disabled]) {
+        @apply .text-accentBlue-1200-hover;
+    }
+  }
+
+  &:focus {
+    @apply .outline-none;
+    outline: none;
+  }
+}
+
+.btn {
+  @apply .block .uppercase .tracking-wider .p-4 .rounded-lg .main-gradient;
+  
+  font-family: "Affect", sans-serif;
+  border-radius: 12px;
+  height: 48px;
+  padding: 0;
+  padding-inline: 19px;
+  border: 2px solid var(--accent-red-100);   
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    height: 44px;
+    padding-inline: 17px;
+    border-radius: 11px;
+  }
+
+  @media only screen and (max-width: 767px) {
+    height: 40px;
+    padding-inline: 14px;
+    border-radius: 10px;
+  }
+
+  &:disabled {
+    @apply .opacity-40 .cursor-not-allowed;
+
+    &:hover {
+       transform: none;
+    }
+  }
+
+  &:not([disabled]):not(:active):hover {
+    @apply .text-white;
+    @apply .set-gradient-props_red-gradient;
+  }
+
+  &.highlighted-text, .highlighted-text {
+    &:hover:not([disabled]) {
+        @apply .text-white;
+    }
+  }
+
+  &:focus {
+    @apply .outline-none;
+    outline: none;
+  }
+
+}
+
+.btn-main {
+  @apply  .text-white .set-gradient-props_red-gradient .main-gradient;;
+
+  border: none;
+
+  &:hover:not([disabled]):not(:active) {
+    @apply .bg-extra-700-hover;
+    @apply .shadow-red-hover;
+  }
+}
+
+.btn-main:active:not(:disabled){
+  background-color: #C51F1F;
+}
+
+.btn-disabled {
+  display: none!important;
+}
+
+/* TODO FIX THE SHIT WITH ABOVE SHIT*/
+.btn-display-none {
+  display: none;
+}
+
+.btn-sell {
+  @apply .bg-accentBlue .text-white;
+
+  &:hover,
+  &:active {
+    @apply .bg-accentBlue-700-hover;
+  }
+}
+
+.btn__choose {
+  width: 203px;
+  box-sizing: border-box;
+
+  @media screen and (max-width: 1279px) {
+    width: 88px;
+  }
+
+  @media screen and (max-width: 767px) {
+    display: none;
+  }
+}
+
+.phone-icon {
+  width: 29px;
+  height: 29px;
+
+  @media screen and (max-width: 767px) {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.city-icon {
+  width: 23px;
+  height: 23px;
+}
+
+a.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-enter {
+  padding: 13.5px 19px 13.5px 19px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  @media screen and (max-width: 767px){
+    min-width: 82px;
+  }
+}
+
+
+@media screen and (max-width: 767px) {
+
+  .btn.w-1\/2 {
+    width: 100%;
+  }
+}
+
+@media only screen and (min-width: 1280px) {
+  .btn-switcher{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 13px 19px;
+    gap: 10px;
+
+    width: 285px;
+    height: 48px;
+
+    /* [Light]/Основные/Белый */
+
+    background: #FFFFFF;
+    /* Button/White_Normal */
+
+    box-shadow: 0px 2px 8px rgba(117, 142, 161, 0.25), 0px 0px 2px rgba(117, 142, 161, 0.22);
+    border-radius: 12px;
+
+    /* Inside auto layout */
+
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+  }
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1279px) {
+  .btn-switcher {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 17px;
+    gap: 10px;
+    width: 266px;
+    height: 44px;
+    background: #FFFFFF; /* [Light]/Основные/Белый */
+    /* Button/White_Normal */
+    box-shadow: 0px 2px 8px rgba(117, 142, 161, 0.25), 0px 0px 2px rgba(117, 142, 161, 0.22);
+    border-radius: 11px;
+    /* Inside auto layout */
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .btn-switcher {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 11px 15px;
+    gap: 10px;
+    width: 100%;
+    height: 40px;
+    background: #FFFFFF; /* [Light]/Основные/Белый */
+    /* Button/White_Normal */
+    box-shadow: 0px 2px 8px rgba(117, 142, 161, 0.25), 0px 0px 2px rgba(117, 142, 161, 0.22);
+    border-radius: 10px;
+    /* Inside auto layout */
+    flex: none;
+    order: 1;
+    align-self: stretch;
+    flex-grow: 0;
+
+  }
+}
+@media only screen and (max-width: 767px) {
+  .btn-main {
+    width: 100%;
+    height: 40px;
+  }
+}
+
+@media only screen and (min-width: 1280px) {
+  .btn-back {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 13px 19px;
+    gap: 10px;
+    width: 292px;
+    height: 48px;
+
+    /* [Light]/Основные/Белый */
+
+    background: #FFFFFF;
+    /* Button/White_Normal */
+
+    box-shadow: 0px 2px 8px rgba(117, 142, 161, 0.25), 0px 0px 2px rgba(117, 142, 161, 0.22);
+    border-radius: 12px;
+
+    /* Inside auto layout */
+
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+  }
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1279px) {
+  .btn-back {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 17px;
+    gap: 10px;
+    width: 272px;
+    height: 44px;
+    background: #FFFFFF; /* [Light]/Основные/Белый */
+    /* Button/White_Normal */
+    box-shadow: 0px 2px 8px rgba(117, 142, 161, 0.25), 0px 0px 2px rgba(117, 142, 161, 0.22);
+    border-radius: 11px;
+    /* Inside auto layout */
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .btn-back {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 11px 15px;
+    gap: 10px;
+    width: 100%;
+    height: 40px;
+    background: #FFFFFF; /* [Light]/Основные/Белый */
+    /* Button/White_Normal */
+    box-shadow: 0px 2px 8px rgba(117, 142, 161, 0.25), 0px 0px 2px rgba(117, 142, 161, 0.22);
+    border-radius: 10px;
+    /* Inside auto layout */
+    flex: none;
+    order: 1;
+    align-self: stretch;
+    flex-grow: 0;
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .reg-button {
+    width: 252px;
+    height: 40px;
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .domru-cancel {
+    height: 40px;
+  }
+}
+
+

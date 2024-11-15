@@ -1,0 +1,11 @@
+@property --first-color-button {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: var(--white-default);
+}
+
+@property --second-color-button {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: var(--white-default);
+}
