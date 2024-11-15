@@ -7,4 +7,5 @@ export enum HtmlAttributePrefix {
 export enum DataAttribute {
   TableRowGroupId = "table-row-group-id",
   TableColumnName = "table-column-name",
+  CellWasMergedByRow = "row-was-merged-by-row",
 }

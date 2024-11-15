@@ -44,10 +44,10 @@ export const mergeCellsAutomatically = <Data>(
     // * Массив индексов строк для каждой группы текущей колонки
     const rowIndexesCurrentGroups: number[][] = [];
     let columnGroupIndexes: number[] = [0];
+    const isMainGroup = targetColumnIndex === 0;
 
     // * Перебор групп предыдущей группировки
     rowIndexesParentGroups.forEach((rowIndexesParentGroup) => {
-      const isMainGroup = targetColumnIndex === 0;
       let prevCell: HTMLTableCellElement | null = null;
       let currentGroupNumber = -1;
 
@@ -60,15 +60,18 @@ export const mergeCellsAutomatically = <Data>(
           return;
         }
 
-        if (prevCell != null && currentCell.innerText === prevCell.innerText) {
-          if (isMainGroup) {
-            numberOfRowMerges += 1;
-          }
-
+        if (
+          prevCell != null &&
+          currentCell.innerText.trim() === prevCell.innerText.trim()
+        ) {
           if (currentCell.style.display !== "none") {
             prevCell.rowSpan = prevCell.rowSpan + 1;
             columnGroupIndexes.push(rowIndex);
             currentCell.style.display = "none";
+            currentCell.setAttribute(
+              getAttributeName(DataAttribute.CellWasMergedByRow),
+              "",
+            );
           }
         } else {
           if (rowIndex !== 0) {
@@ -90,6 +93,14 @@ export const mergeCellsAutomatically = <Data>(
 
         if (isMainGroup) {
           rowGroupNumber[rowIndex] = currentGroupNumber;
+
+          const cellWasMergedByRow = currentCell.getAttribute(
+            getAttributeName(DataAttribute.CellWasMergedByRow),
+          );
+
+          if (cellWasMergedByRow !== null) {
+            numberOfRowMerges += 1;
+          }
         }
 
         // * Для каждой строки устанавливаем номер главной группы, в которой находится строка
