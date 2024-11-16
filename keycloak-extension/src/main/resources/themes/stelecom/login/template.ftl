@@ -150,7 +150,7 @@
         </#list>
     </#if>
 
-    <#if hideChat>
+    <#if hideChat?? && hideChat == true>
         <div id="hiddenChat" class="hidden">
         </div>
     </#if>

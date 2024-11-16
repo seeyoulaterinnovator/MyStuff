@@ -214,23 +214,41 @@ public class UserRepository {
         return query.getResultList();
     }
 
-    public long getTotalUsersByParameters(String realm, String search, String searchUser, String searchToms) {
+    public long getTotalUsersByParameters(String realm, String search, String searchUser, String searchEmail, String searchToms, String searchPhone) {
+        if (CollectionUtils.isNotEmpty(search)) {
+            search = "%" + search + "%";
+        }
+
+        if (CollectionUtils.isNotEmpty(searchEmail)) {
+            search = searchEmail;
+        }
+
+        if (CollectionUtils.isNotEmpty(searchPhone)) {
+            searchPhone = searchPhone + "%";
+        }
+
+        if(realmRepository.findRealmById(realm) == null) {
+            realm = realmRepository.findRealmEntityByName(realm).map(RealmEntity::getId).orElse(null);
+        }
+
+        if(realm == null) return 0;
+
         Query query = em.createQuery(
-                "select count(UE)  " +
+                "select count(distinct UE.id) " +
                         "from UserEntity UE\n" +
                         "         left join UserAttributeEntity UA on UE = UA.user AND UA.name = 'phone'\n" +
                         "         left join UserPostEntity UP on UE = UP.user \n" +
                         "WHERE UE.realmId = :realm\n" +
-                        "and (:search is null or :search = '' or (UE.email LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                                         UE.firstName LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                                         UE.lastName LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                                         UE.username LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                                         UA.value LIKE CONCAT('%', :search, '%')))\n" +
+                        "and (:search is null or :search = '' or (UE.email LIKE :search OR\n" +
+                        "                                         UE.firstName LIKE :search OR\n" +
+                        "                                         UE.username LIKE :search ))\n" +
                         "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser)\n" +
-                        "and (:searchToms is null or :searchToms = '' or UP.customer.id = :searchToms)\n")
+                        "and (:searchToms is null or :searchToms = '' or UP.customer.id = :searchToms)\n" +
+                        "and (:searchPhone is null or :searchPhone = '' or UA.value LIKE :searchPhone)\n")
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
+                .setParameter("searchPhone", searchPhone)
                 .setParameter("realm", realm);
 
         return Long.parseLong(query.getSingleResult().toString());
