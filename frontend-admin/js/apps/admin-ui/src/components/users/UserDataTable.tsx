@@ -431,6 +431,9 @@ export function UserDataTable() {
           }
           toolbarItem={toolbar()}
           subToolbar={subtoolbar()}
+          onRefresh={() => {
+            setCustomSelectedRows([]);
+          }}
           isStriped
           actionResolver={(rowData: IRowData) => {
             const user: UserInfoRepresentation = rowData.data;
