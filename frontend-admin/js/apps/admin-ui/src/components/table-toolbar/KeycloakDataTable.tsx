@@ -564,6 +564,7 @@ export type DataListProps<T> = Omit<
   automaticallyMergedColumns?: AutomaticallyMergedColumn<T>[];
   totalRows?: number;
   selectedRows?: T[];
+  onRefresh?: () => void;
 };
 
 /**
@@ -619,6 +620,7 @@ export function KeycloakDataTable<T>({
   selectedRows,
   automaticallyMergedColumns,
   totalRows,
+  onRefresh,
   ...props
 }: DataListProps<T>) {
   const { t } = useTranslation();
@@ -643,7 +645,10 @@ export function KeycloakDataTable<T>({
 
   const [key, setKey] = useState(0);
   const prevKey = useRef<number>();
-  const refresh = () => setKey(key + 1);
+  const refresh = () => {
+    setKey(key + 1);
+    onRefresh?.();
+  };
   const id = useId();
 
   const renderCell = (
@@ -830,7 +835,7 @@ export function KeycloakDataTable<T>({
     const data = filteredData || rows;
     if (rowIndex === -1) {
       setRows(
-        data!.map((row) => {
+        data?.map((row) => {
           (row as Row<T>).selected = isSelected;
           return row;
         }),
@@ -839,7 +844,7 @@ export function KeycloakDataTable<T>({
       setSelected([]);
       onSelect!([]);
       setRows(
-        data!.map((row) => {
+        data?.map((row) => {
           (row as Row<T>).selected = isSelected;
           return row;
         }),
@@ -847,13 +852,13 @@ export function KeycloakDataTable<T>({
 
       return;
     } else {
-      (data![rowIndex] as Row<T>).selected = isSelected;
+      (data?.[rowIndex] as Row<T>).selected = isSelected;
 
       setRows([...rows!]);
     }
 
     const mainMergedColumnKey = automaticallyMergedColumns?.[0];
-    let uniqueData = data!;
+    let uniqueData = data;
 
     if (mainMergedColumnKey) {
       const mainMergeColumn =
@@ -863,8 +868,8 @@ export function KeycloakDataTable<T>({
       const mainMergedProp = mainMergeColumn?.name;
 
       if (mainMergedProp) {
-        uniqueData = uniqueData.filter((row, currentRow) => {
-          const equivalentRowIndex = data!.findIndex(
+        uniqueData = uniqueData?.filter((row, currentRow) => {
+          const equivalentRowIndex = data?.findIndex(
             (checkedSelectedRow) =>
               isKeyObjectGuard(checkedSelectedRow.data, mainMergedProp) &&
               isKeyObjectGuard(row.data, mainMergedProp) &&
@@ -877,7 +882,7 @@ export function KeycloakDataTable<T>({
       }
     }
 
-    uniqueData = uniqueData.slice(0, max);
+    uniqueData = uniqueData?.slice(0, max);
 
     // Keeps selected items when paginating
     const difference = differenceBy(
@@ -910,6 +915,10 @@ export function KeycloakDataTable<T>({
 
   useEffect(() => {
     setSelected(selectedRows || []);
+
+    if (!selectedRows?.length) {
+      _onSelect(false, -2);
+    }
   }, [selectedRows, rows]);
 
   const data = filteredData || rows;
