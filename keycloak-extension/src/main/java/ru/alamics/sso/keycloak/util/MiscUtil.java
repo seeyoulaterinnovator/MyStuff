@@ -88,9 +88,13 @@ public final class MiscUtil {
         return text;
     }
 
+    public static boolean hasText(String token) {
+        return token != null && !token.isBlank();
+    }
+
     public static String notEmpty(String... texts) {
         for(String text : texts) {
-            if(text != null && !text.isBlank()) {
+            if(hasText(text)) {
                 return text;
             }
         }

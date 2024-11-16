@@ -13,8 +13,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static jakarta.ws.rs.core.MediaType.*;
@@ -60,6 +63,22 @@ public final class HttpUtil {
             }
         }
         return StandardCharsets.ISO_8859_1;
+    }
+
+    public static boolean isSameDomain(String url1, String url2, int level) {
+        return getDomainList(url1, level).equals(getDomainList(url2, level));
+    }
+
+    public static List<String> getDomainList(String url) {
+        var list = Arrays.asList(URI.create(url).getHost().split("\\."));
+        Collections.reverse(list);
+        return list;
+    }
+
+    public static List<String> getDomainList(String url, int level) {
+        var list = getDomainList(url);
+        list = list.subList(0, Math.min(list.size(), level));
+        return list;
     }
 
     private static class FormUrlEncodedProviderExt extends FormUrlEncodedProvider {

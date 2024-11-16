@@ -68,6 +68,7 @@ services:
       KC_CACHE: ispn
       KC_CACHE_CONFIG_FILE: cache-ispn-custom.xml
       KC_ADMIN_VITE_ENABLED: ${KC_ADMIN_VITE_ENABLED}
+      KC_PROXY_HEADERS: xforwarded
       ERTH_SSO_E2E_ENABLED: ${ERTH_SSO_E2E_ENABLED}
       SITE: STAGE5
       KC_SPI_USER_PROVIDER: customjpa
@@ -114,11 +115,20 @@ services:
     restart: no
 
   nginx:
-    image: nginx:1.15.3
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    build:
+      # language=Dockerfile
+      dockerfile_inline: |
+        FROM alpine/openssl:3.3.2 as openssl
+        RUN openssl req -newkey rsa:2048 -days 3650 -nodes -sha256 -x509 \
+            -keyout /tmp/key.pem -out /tmp/cert.pem  \
+            -subj "/C=RU/ST=PRM/L=Perm/O=My Inc/OU=Test/CN=www.erth.test/emailAddress=noreply@www.erth.test"
+        FROM nginx:1.15.3
+        COPY --from=openssl /tmp/key.pem /tmp/cert.pem /etc/nginx/ssl/default/
     ports:
-      - "8180:80"
+      - "8180:8180"
+      - "443:443"
     volumes:
       - ./volumes/nginx/etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./volumes/nginx/usr/share/nginx/html:/usr/share/nginx/html:ro

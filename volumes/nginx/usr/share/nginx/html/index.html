@@ -41,20 +41,24 @@
     <button id="logout">Logout</button>
     <br>
     <button id="invalidLogout">Invalid logout</button>
+    <br>
+    <button id="asyncInvalidLogout">Async invalid logout</button>
 </div>
 <script>
   (async function (){
+    const clientBaseUrl = 'http://localhost:8180';
+    const kcBaseUrl = 'https://localhost:443/auth';
     const params = new URLSearchParams(location.search);
     const code = params.get('code');
     if(code) {
       const realm = params.get('realm');
       const client = params.get('client');
-      const response = await fetch(`http://localhost:8180/keycloak/auth/realms/${realm}/protocol/openid-connect/token`, {
+      const response = await fetch(`${clientBaseUrl}/keycloak/auth/realms/${realm}/protocol/openid-connect/token`, {
         method: 'post',
         body: new URLSearchParams({
           grant_type: 'authorization_code',
           client_id: client,
-          redirect_uri: `http://localhost:8180/?realm=${realm}&client=${client}`,
+          redirect_uri: `${clientBaseUrl}/?realm=${realm}&client=${client}`,
           code
         }),
       });
@@ -62,22 +66,28 @@
       console.log(JSON.stringify(result));
       document.getElementById('account').setAttribute('href', `http://localhost:8080/auth/realms/${realm}/account`);
       document.getElementById('redirect').removeAttribute('hidden');
-      document.getElementById('logout').addEventListener('click', () => {
-        location.href =  `http://localhost:8080/auth/realms/${realm}/protocol/openid-connect/logout?id_token_hint=${result.id_token}`;
-      });
-      document.getElementById('invalidLogout').addEventListener('click', () => {
-        location.href =  `http://localhost:8080/auth/realms/${realm}/protocol/openid-connect/logout?id_token_hint=${result.access_token}`;
-      });
+      document.getElementById('logout').onclick = () => {
+        location.href =  `${kcBaseUrl}/realms/${realm}/protocol/openid-connect/logout?id_token_hint=${result.id_token}`;
+      };
+      document.getElementById('invalidLogout').onclick = () => {
+        location.href =  `${kcBaseUrl}/realms/${realm}/protocol/openid-connect/logout?id_token_hint=${result.access_token}`;
+      };
+      document.getElementById('asyncInvalidLogout').onclick = async () => {
+          await fetch(`${kcBaseUrl}/realms/${realm}/protocol/openid-connect/logout?id_token_hint=${result.access_token}`, {
+              mode: 'cors'
+          });
+          location.href = '/';
+      };
     } else {
       document.getElementById('go').onclick = () => {
         const realm = document.getElementById('realm').value;
         const client = document.getElementById('client').value;
         const iframe = document.getElementById('iframe').checked ? { iframe: 1 } : {};
         const element = document.createElement('a');
-        element.setAttribute('href', `http://localhost:8080/auth/realms/${realm}/protocol/openid-connect/auth?` + new URLSearchParams({
+        element.setAttribute('href', `${kcBaseUrl}/realms/${realm}/protocol/openid-connect/auth?` + new URLSearchParams({
             response_type: 'code',
             client_id: client,
-            redirect_uri: `http://localhost:8180/?realm=${realm}&client=${client}`,
+            redirect_uri: `${clientBaseUrl}/?realm=${realm}&client=${client}`,
             scope: 'openid',
             ...iframe
         }));
