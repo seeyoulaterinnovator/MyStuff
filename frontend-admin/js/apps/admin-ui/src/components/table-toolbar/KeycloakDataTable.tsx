@@ -309,7 +309,7 @@ function DataTable<T>({
                               ? currentCountSelectedRows !== rows.length
                               : isSelected;
 
-                          onSelect!(isSelectedResult, rowIndex);
+                          onSelect?.(isSelectedResult, rowIndex);
                           updateState(-1, isSelectedResult);
                         },
                         isSelected:
@@ -341,7 +341,7 @@ function DataTable<T>({
                       </Text>
                       <Button
                         onClick={() => {
-                          onSelect!(false, -2);
+                          onSelect?.(false, -2);
                           updateState(-2, false);
                         }}
                       >
@@ -842,7 +842,7 @@ export function KeycloakDataTable<T>({
       );
     } else if (rowIndex === -2) {
       setSelected([]);
-      onSelect!([]);
+      onSelect?.([]);
       setRows(
         data?.map((row) => {
           (row as Row<T>).selected = isSelected;
@@ -900,7 +900,7 @@ export function KeycloakDataTable<T>({
     ];
 
     setSelected(selectedRows);
-    onSelect!(selectedRows);
+    onSelect?.(selectedRows);
   };
 
   const onCollapse = (isOpen: boolean, rowIndex: number) => {
@@ -916,9 +916,9 @@ export function KeycloakDataTable<T>({
   useEffect(() => {
     setSelected(selectedRows || []);
 
-    if (!selectedRows?.length) {
-      _onSelect(false, -2);
-    }
+    // if (!selectedRows?.length) {
+    //   _onSelect(false, -2);
+    // }
   }, [selectedRows, rows]);
 
   const data = filteredData || rows;
