@@ -88,5 +88,4 @@ podAntiAffinity:
 
 hostAliases:
   - ip: "10.121.10.225"
-    hostnames:
-      - "tb.uat03.bss.loc"
+    hostnames: ["tb.uat03.bss.loc"]

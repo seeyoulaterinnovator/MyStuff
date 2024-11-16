@@ -126,5 +126,5 @@ spec:
     {{- end }}
     {{- if .Values.hostAliases }}
       hostAliases:
-        {{ toYaml .Values.hostAliases | indent 8 }}
+      {{- toYaml .Values.hostAliases | nindent 8 }}
     {{- end }}
