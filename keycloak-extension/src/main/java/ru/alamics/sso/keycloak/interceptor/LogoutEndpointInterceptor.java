@@ -77,10 +77,10 @@ public class LogoutEndpointInterceptor implements ContainerResponseFilter {
     }
 
     void filter(ContainerRequestContext requestContext) throws Exception {
-        if (!(
-                requestContext.getUriInfo().getPath().matches("/realms/[^/]+/protocol/openid-connect/logout")
-                        && HttpMethod.GET.equals(requestContext.getMethod())
-        )) return;
+        if(!requestContext.getUriInfo().getPath().matches("/realms/[^/]+/protocol/openid-connect/logout")) return;
+
+        if (!(HttpMethod.GET.equals(requestContext.getMethod())
+                || HttpMethod.OPTIONS.equals(requestContext.getMethod()))) return;
 
         String realmName = requestContext.getUriInfo().getPathSegments().get(1).toString();
 
@@ -103,7 +103,7 @@ public class LogoutEndpointInterceptor implements ContainerResponseFilter {
             var referer = requestContext.getHeaderString("Referer");
             var secFetchSite = requestContext.getHeaderString("Sec-Fetch-Site");
             var secFetchMode = requestContext.getHeaderString("Sec-Fetch-Mode");
-            if ("cross-site".equals(secFetchSite) && "cors".equals(secFetchMode) && hasText(referer)) {
+            if (("cross-site".equals(secFetchSite) || "same-site".equals(secFetchSite)) && "cors".equals(secFetchMode) && hasText(referer)) {
                 if (HttpUtil.isSameDomain(
                         requestContext.getUriInfo().getBaseUri().toString(),
                         referer,
@@ -131,15 +131,21 @@ public class LogoutEndpointInterceptor implements ContainerResponseFilter {
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         var corsOrigin = (String) requestContext.getProperty(CORS_ORIGIN_PROPERTY);
-        if (corsOrigin != null && responseContext.getStatus() == HttpStatus.SC_MOVED_TEMPORARILY) {
-            responseContext.getHeaders().clear();
-            responseContext.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
-            responseContext.getHeaders().add("Access-Control-Allow-Origin", corsOrigin);
-            responseContext.getHeaders().add("Access-Control-Allow-Methods", "GET");
-            responseContext.setStatus(HttpStatus.SC_NO_CONTENT);
-            responseContext.setEntity("");
-            AuthenticationManager.expireIdentityCookie(keycloak);
-            AuthenticationManager.expireAuthSessionCookie(keycloak);
+        if (corsOrigin != null) {
+            if(HttpMethod.OPTIONS.equals(requestContext.getMethod())
+                    || HttpMethod.GET.equals(requestContext.getMethod())
+                    && responseContext.getStatus() == HttpStatus.SC_MOVED_TEMPORARILY) {
+                responseContext.getHeaders().clear();
+                responseContext.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
+                responseContext.getHeaders().add("Access-Control-Allow-Origin", corsOrigin);
+                responseContext.getHeaders().add("Access-Control-Allow-Methods", "GET");
+                if(HttpMethod.GET.equals(requestContext.getMethod())) {
+                    responseContext.setStatus(HttpStatus.SC_NO_CONTENT);
+                    responseContext.setEntity("");
+                    AuthenticationManager.expireIdentityCookie(keycloak);
+                    AuthenticationManager.expireAuthSessionCookie(keycloak);
+                }
+            }
         }
     }
 
