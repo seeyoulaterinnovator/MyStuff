@@ -20,6 +20,7 @@ import org.apache.http.HttpStatus;
 import org.jboss.resteasy.reactive.server.ServerRequestFilter;
 import org.keycloak.Config;
 import org.keycloak.TokenVerifier;
+import org.keycloak.cookie.CookieType;
 import org.keycloak.crypto.SignatureProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserProvider;
@@ -121,13 +122,19 @@ public class LogoutEndpointInterceptor implements ContainerResponseFilter {
             requestContext.setProperty(CORS_ORIGIN_PROPERTY, origin);
         }
 
-        requestContext.setRequestUri(
-                requestContext.getUriInfo()
-                        .getRequestUriBuilder()
-                        .replaceQueryParam(ID_TOKEN_HINT_PARAM, idToken.token)
-                        .replaceQueryParam(POST_LOGOUT_REDIRECT_URI_PARAM, redirectUri)
-                        .build()
-        );
+        var requestUri = requestContext.getUriInfo()
+                .getRequestUriBuilder()
+                .replaceQueryParam(ID_TOKEN_HINT_PARAM)
+                .replaceQueryParam(POST_LOGOUT_REDIRECT_URI_PARAM);
+
+        if(!requestContext.getCookies().containsKey(CookieType.AUTH_SESSION_ID.getName())) {
+            requestUri.replaceQueryParam(ID_TOKEN_HINT_PARAM, idToken.token);
+        }
+        if(hasText(redirectUri)) {
+            requestUri.replaceQueryParam(POST_LOGOUT_REDIRECT_URI_PARAM, redirectUri);
+        }
+
+        requestContext.setRequestUri(requestUri.build());
     }
 
     @Override
