@@ -96,7 +96,9 @@ public class LogoutEndpointInterceptor implements ContainerResponseFilter {
 
         if (idToken == null) return;
 
-        if (!hasText(redirectUri)) redirectUri = getClientRedirectUri(realmName, idToken.clientId);
+        var defaultRedirectUri = getClientRedirectUri(realmName, idToken.clientId);
+
+        if (!hasText(redirectUri)) redirectUri = defaultRedirectUri;
 
         String origin = null;
         try {
@@ -105,7 +107,7 @@ public class LogoutEndpointInterceptor implements ContainerResponseFilter {
             var secFetchMode = requestContext.getHeaderString("Sec-Fetch-Mode");
             if (("cross-site".equals(secFetchSite) || "same-site".equals(secFetchSite)) && "cors".equals(secFetchMode) && hasText(referer)) {
                 if (HttpUtil.isSameDomain(
-                        requestContext.getUriInfo().getBaseUri().toString(),
+                        defaultRedirectUri,
                         referer,
                         properties.getPropertyInt("logout.sameDomainLevel", 2)
                 )) {
