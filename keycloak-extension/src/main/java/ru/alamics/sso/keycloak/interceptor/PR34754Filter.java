@@ -19,7 +19,7 @@ import ru.alamics.sso.keycloak.util.MiscUtil;
 import java.io.IOException;
 
 /**
- * {@link <a href="https://github.com/keycloak/keycloak/pull/34754/files">Fix NullPointerException if no session attached when authenticating with identity cookie</a>}
+ * <a href="https://github.com/keycloak/keycloak/pull/34754/files">Fix NullPointerException if no session attached when authenticating with identity cookie</a>
  */
 @Provider
 @Slf4j
