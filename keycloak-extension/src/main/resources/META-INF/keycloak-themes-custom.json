@@ -11,5 +11,8 @@
   }, {
     "name" : "keycloak.v2",
     "types": [ "admin" ]
+  }, {
+    "name" : "novotelecom",
+    "types": [ "login", "email" ]
   }]
 }

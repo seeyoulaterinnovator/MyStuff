@@ -54,7 +54,6 @@ import { getAttributeName } from "../../customLogic/helpers/attributes";
 import { DataAttribute } from "../../customLogic/constants/attributes";
 import { AutomaticallyMergedColumn } from "../../customLogic/types/table";
 import useResizeObserver from "../../customLogic/hooks/useResizeObserver";
-import { isKeyObjectGuard } from "../../customLogic/helpers/guards";
 
 type TitleCell = { title: JSX.Element };
 type Cell<T> = keyof T | JSX.Element | TitleCell;
@@ -229,14 +228,14 @@ function DataTable<T>({
       const selectAllCheckbox = document.getElementsByName("check-all").item(0);
       if (selectAllCheckbox) {
         const checkbox = selectAllCheckbox as HTMLInputElement;
-        const selected = selectedRows.filter((r) => r === true);
+        const onlySelected = selectedRows.filter((r) => r === true);
         const isIndeterminateCheckboxForAllRows =
           totalRows != null &&
           countSelectedRows != null &&
           countSelectedRows < totalRows &&
           countSelectedRows > 0;
         const isIndeterminateCheckboxForPageRows =
-          selected.length < rows.length && selected.length > 0;
+          onlySelected.length < rows.length && onlySelected.length > 0;
         checkbox.indeterminate =
           isIndeterminateCheckboxForAllRows ||
           isIndeterminateCheckboxForPageRows;
@@ -685,7 +684,12 @@ export function KeycloakDataTable<T>({
     });
   };
 
-  const convertToColumns = (data: T[]): (Row<T> | SubRow<T>)[] => {
+  const convertToColumns = (
+    data: T[],
+    options?: { rowsAreNotSelected: boolean },
+  ): (Row<T> | SubRow<T>)[] => {
+    const { rowsAreNotSelected } = options || {};
+
     const isDetailColumnsEnabled = (value: T) =>
       detailColumns?.[0]?.enabled?.(value);
     return data
@@ -696,7 +700,9 @@ export function KeycloakDataTable<T>({
             data: value,
             disableSelection: disabledRow,
             disableActions: disabledRow,
-            selected: !!selected.find((v) => get(v, "id") === get(value, "id")),
+            selected: rowsAreNotSelected
+              ? false
+              : !!selected.find((v) => get(v, "id") === get(value, "id")),
             isOpen: isDetailColumnsEnabled(value) ? false : undefined,
             cells: renderCell(columns, value),
           },
@@ -749,6 +755,8 @@ export function KeycloakDataTable<T>({
     [search, first, max],
   );
 
+  const data = filteredData || rows;
+
   const unPaginatedRows = useMemo(() => {
     return unPaginatedData ? convertToColumns(unPaginatedData) : [];
   }, [unPaginatedData]);
@@ -784,7 +792,9 @@ export function KeycloakDataTable<T>({
         }
       }
 
-      const result = convertToColumns(data);
+      const result = convertToColumns(data, {
+        rowsAreNotSelected: true,
+      });
       setRows(result);
       setLoading(false);
     },
@@ -832,7 +842,6 @@ export function KeycloakDataTable<T>({
     });
 
   const _onSelect = (isSelected: boolean, rowIndex: number) => {
-    const data = filteredData || rows;
     if (rowIndex === -1) {
       setRows(
         data?.map((row) => {
@@ -871,10 +880,8 @@ export function KeycloakDataTable<T>({
         uniqueData = uniqueData?.filter((row, currentRow) => {
           const equivalentRowIndex = data?.findIndex(
             (checkedSelectedRow) =>
-              isKeyObjectGuard(checkedSelectedRow.data, mainMergedProp) &&
-              isKeyObjectGuard(row.data, mainMergedProp) &&
-              checkedSelectedRow.data[mainMergedProp] ===
-                row.data[mainMergedProp],
+              get(checkedSelectedRow.data, mainMergedProp) ===
+              get(row.data, mainMergedProp),
           );
 
           return currentRow === equivalentRowIndex;
@@ -892,15 +899,15 @@ export function KeycloakDataTable<T>({
     );
 
     // Selected rows are any rows previously selected from a different page, plus current page selections
-    const selectedRows = [
+    const newSelectedRows = [
       ...difference,
       ...uniqueData!
         .filter((row) => (row as Row<T>).selected)
         .map((row) => row.data),
     ];
 
-    setSelected(selectedRows);
-    onSelect?.(selectedRows);
+    setSelected(newSelectedRows);
+    onSelect?.(newSelectedRows);
   };
 
   const onCollapse = (isOpen: boolean, rowIndex: number) => {
@@ -915,13 +922,19 @@ export function KeycloakDataTable<T>({
 
   useEffect(() => {
     setSelected(selectedRows || []);
+  }, [selectedRows]);
 
-    // if (!selectedRows?.length) {
-    //   _onSelect(false, -2);
-    // }
-  }, [selectedRows, rows]);
+  useEffect(() => {
+    if (loading === false) {
+      // It is used to update the nested property rows
+      setRows((prevRows) => {
+        if (prevRows) return convertToColumns(prevRows?.map((tt) => tt.data));
 
-  const data = filteredData || rows;
+        return prevRows;
+      });
+    }
+  }, [loading]);
+
   const noData = !data || data.length === 0;
   const searching = search !== "" || isSearching;
   // if we use detail columns there are twice the number of rows
