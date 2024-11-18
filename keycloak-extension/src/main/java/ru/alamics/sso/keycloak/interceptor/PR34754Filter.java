@@ -12,9 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.jboss.resteasy.reactive.server.spi.ResteasyReactiveContainerRequestContext;
+import org.keycloak.cookie.CookieProvider;
+import org.keycloak.cookie.CookieType;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.managers.AuthenticationManager;
-import ru.alamics.sso.keycloak.util.MiscUtil;
 
 import java.io.IOException;
 
@@ -46,8 +47,9 @@ public class PR34754Filter implements ContainerResponseFilter {
                         ) {
                             log.warn("PR34754 error: {}", request.getUriInfo().getRequestUri());
                             if(!request.getUriInfo().getQueryParameters().containsKey("redirect")) {
-                                AuthenticationManager.expireIdentityCookie(keycloak);
-                                AuthenticationManager.expireAuthSessionCookie(keycloak);
+                                var cookieProvider = keycloak.getProvider(CookieProvider.class);
+                                cookieProvider.set(CookieType.IDENTITY, "", 0);
+                                cookieProvider.set(CookieType.SESSION, "", 0);
                                 response.setStatus(HttpStatus.SC_MOVED_TEMPORARILY);
                                 response.getHeaders().clear();
                                 response.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
