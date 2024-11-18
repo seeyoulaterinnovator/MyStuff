@@ -20,6 +20,7 @@ import org.apache.http.HttpStatus;
 import org.jboss.resteasy.reactive.server.ServerRequestFilter;
 import org.keycloak.Config;
 import org.keycloak.TokenVerifier;
+import org.keycloak.cookie.CookieProvider;
 import org.keycloak.cookie.CookieType;
 import org.keycloak.crypto.SignatureProvider;
 import org.keycloak.models.KeycloakSession;
@@ -147,13 +148,17 @@ public class LogoutEndpointInterceptor implements ContainerResponseFilter {
                     && responseContext.getStatus() == HttpStatus.SC_MOVED_TEMPORARILY) {
                 responseContext.getHeaders().clear();
                 responseContext.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
+                responseContext.getHeaders().add("Content-Type", "text/html");
+                responseContext.getHeaders().add("Pragma", "no-cache");
+                responseContext.getHeaders().add("Cache-Control", "no-cache, no-store");
                 responseContext.getHeaders().add("Access-Control-Allow-Origin", corsOrigin);
                 responseContext.getHeaders().add("Access-Control-Allow-Methods", "GET");
                 if(HttpMethod.GET.equals(requestContext.getMethod())) {
                     responseContext.setStatus(HttpStatus.SC_NO_CONTENT);
                     responseContext.setEntity("");
-                    AuthenticationManager.expireIdentityCookie(keycloak);
-                    AuthenticationManager.expireAuthSessionCookie(keycloak);
+                    var cookieProvider = keycloak.getProvider(CookieProvider.class);
+                    cookieProvider.set(CookieType.IDENTITY, "", 0);
+                    cookieProvider.set(CookieType.SESSION, "", 0);
                 }
             }
         }
