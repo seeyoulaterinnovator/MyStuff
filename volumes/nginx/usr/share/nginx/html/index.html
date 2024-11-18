@@ -73,7 +73,9 @@
         location.href =  `${kcBaseUrl}/realms/${realm}/protocol/openid-connect/logout?id_token_hint=${result.access_token}`;
       };
       document.getElementById('asyncInvalidLogout').onclick = async () => {
-          await fetch(`${kcBaseUrl}/realms/${realm}/protocol/openid-connect/logout?id_token_hint=${result.access_token}`, {
+          await fetch(`${kcBaseUrl}/realms/${realm}/protocol/openid-connect/logout?id_token_hint=${result.access_token}&` + new URLSearchParams({
+              post_logout_redirect_uri: ''
+          }) , {
               mode: 'cors'
           });
           location.href = '/';

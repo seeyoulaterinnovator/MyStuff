@@ -23,6 +23,7 @@ import org.keycloak.TokenVerifier;
 import org.keycloak.cookie.CookieType;
 import org.keycloak.crypto.SignatureProvider;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmProvider;
 import org.keycloak.models.UserProvider;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.services.Urls;
@@ -72,7 +73,7 @@ public class LogoutEndpointInterceptor implements ContainerResponseFilter {
             try {
                 filter(requestContext);
             } catch (Exception e) {
-                log.debug(e.getMessage(), e);
+                log.warn(e.getMessage(), e);
             }
         }).runSubscriptionOn(Infrastructure.getDefaultWorkerPool());
     }
@@ -160,57 +161,71 @@ public class LogoutEndpointInterceptor implements ContainerResponseFilter {
 
     IdToken verifyAccessTokenAndGetIdToken(String accessToken, String realmName, String clientId) throws Exception {
         @Cleanup var keycloak = this.keycloak.getKeycloakSessionFactory().create();
+        var tm = keycloak.getTransactionManager();
+        tm.begin();
+        try {
+            var realm = keycloak.getProvider(RealmProvider.class).getRealmByName(realmName);
+            if (realm == null) return null;
 
-        var realm = keycloak.realms().getRealmByName(realmName);
-        if (realm == null) return null;
+            keycloak.getContext().setRealm(realm);
 
-        keycloak.getContext().setRealm(realm);
+            @SuppressWarnings("deprecation")
+            var verifier = TokenVerifier.create(accessToken, AccessToken.class)
+                    .withDefaultChecks()
+                    .realmUrl(Urls.realmIssuer(keycloak.getContext().getUri().getBaseUri(), realmName));
+            var verifierContext = keycloak.getProvider(
+                            SignatureProvider.class,
+                            verifier.getHeader().getAlgorithm().name()
+                    )
+                    .verifier(verifier.getHeader().getKeyId());
+            verifier.verifierContext(verifierContext);
 
-        @SuppressWarnings("deprecation")
-        var verifier = TokenVerifier.create(accessToken, AccessToken.class)
-                .withDefaultChecks()
-                .realmUrl(Urls.realmIssuer(keycloak.getContext().getUri().getBaseUri(), realmName));
-        var verifierContext = keycloak.getProvider(
-                        SignatureProvider.class,
-                        verifier.getHeader().getAlgorithm().name()
-                )
-                .verifier(verifier.getHeader().getKeyId());
-        verifier.verifierContext(verifierContext);
+            var token = verifier.verify().getToken();
+            if (token == null) return null;
 
-        var token = verifier.verify().getToken();
-        if (token == null) return null;
+            var client = realm.getClientByClientId(token.getIssuedFor());
+            if (client == null || clientId != null && !clientId.equals(client.getClientId())) return null;
 
-        var client = realm.getClientByClientId(token.getIssuedFor());
-        if (client == null || clientId != null && !clientId.equals(client.getClientId())) return null;
+            var users = keycloak.getProvider(UserProvider.class);
+            var user = users.getUserById(realm, token.getSubject());
+            if (user == null) {
+                var post = userPostRepository.getUserPost(token.getSubject());
+                if (post != null) user = users.getUserById(realm, post.getUser().getId());
+            }
+            if (user == null && token.getEmail() != null) {
+                user = users.getUserByEmail(realm, token.getEmail());
+            }
+            if (user == null) return null;
 
-        var users = keycloak.getProvider(UserProvider.class);
-        var user = users.getUserById(realm, token.getSubject());
-        if (user == null) {
-            var post = userPostRepository.getUserPost(token.getSubject());
-            if (post != null) user = users.getUserById(realm, post.getUser().getId());
+            var session = keycloak.sessions().getUserSession(realm, token.getSessionId());
+            if (session == null) return null;
+
+            var idToken = AuthenticationManager.createIdentityToken(keycloak, realm, user, session, token.getIssuer());
+            idToken.type(TOKEN_TYPE_ID);
+            idToken.issuedFor(client.getClientId());
+            return IdToken.builder()
+                    .clientId(client.getClientId())
+                    .token(keycloak.tokens().encode(idToken))
+                    .build();
+        } finally {
+            tm.commit();
         }
-        if (user == null) return null;
-
-        var session = keycloak.sessions().getUserSession(realm, token.getSessionId());
-        if (session == null) return null;
-
-        var idToken = AuthenticationManager.createIdentityToken(keycloak, realm, user, session, token.getIssuer());
-        idToken.type(TOKEN_TYPE_ID);
-        idToken.issuedFor(client.getClientId());
-        return IdToken.builder()
-                .clientId(client.getClientId())
-                .token(keycloak.tokens().encode(idToken))
-                .build();
     }
 
     String getClientRedirectUri(String realmName, String clientId) {
         @Cleanup var keycloak = this.keycloak.getKeycloakSessionFactory().create();
-        var client = keycloak.realms().getRealm(realmName).getClientByClientId(clientId);
-        return MiscUtil.notEmpty(
-                clientService.getMainRedirectUri(client.getId()),
-                client.getBaseUrl(),
-                client.getRootUrl()
-        );
+        var tm = keycloak.getTransactionManager();
+        tm.begin();
+        try {
+            var client = keycloak.realms().getRealm(realmName).getClientByClientId(clientId);
+            return MiscUtil.notEmpty(
+                    clientService.getMainRedirectUri(client.getId()),
+                    client.getBaseUrl(),
+                    client.getRootUrl()
+            );
+        } finally {
+            tm.commit();
+        }
     }
 
     @Builder
