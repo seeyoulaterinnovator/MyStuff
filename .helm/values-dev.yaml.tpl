@@ -35,6 +35,7 @@ extraEnvs:
   KC_HOSTNAME_URL: "{{ env "CI_ENVIRONMENT_URL" }}"
   # KC_LOG_CONSOLE_OUTPUT: "json" # need configure in OpenSearch
   KC_LOG_LEVEL: "INFO"
+  KC_HEALTH_ENABLED: "true"
   KC_METRICS_ENABLED: "true"
   DB_DATABASE: "{{ env "DB_DATABASE" }}"
   KEYCLOAK_HOSTNAME: "{{ env "FQDN" }}"
