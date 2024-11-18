@@ -146,18 +146,20 @@ public class LogoutEndpointInterceptor implements ContainerResponseFilter {
             if(HttpMethod.OPTIONS.equals(requestContext.getMethod())
                     || HttpMethod.GET.equals(requestContext.getMethod())
                     && responseContext.getStatus() == HttpStatus.SC_MOVED_TEMPORARILY) {
-                responseContext.getHeaders().clear();
-                responseContext.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
-                responseContext.getHeaders().add("Pragma", "no-cache");
-                responseContext.getHeaders().add("Cache-Control", "no-cache, no-store");
-                responseContext.getHeaders().add("Access-Control-Allow-Origin", corsOrigin);
-                responseContext.getHeaders().add("Access-Control-Allow-Methods", "GET");
                 if(HttpMethod.GET.equals(requestContext.getMethod())) {
+                    responseContext.getHeaders().clear();
+                    responseContext.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
+                    responseContext.getHeaders().add("Pragma", "no-cache");
+                    responseContext.getHeaders().add("Cache-Control", "no-cache, no-store");
                     responseContext.setStatus(HttpStatus.SC_NO_CONTENT);
                     responseContext.setEntity("");
                     var cookieProvider = keycloak.getProvider(CookieProvider.class);
                     cookieProvider.set(CookieType.IDENTITY, "", 0);
                     cookieProvider.set(CookieType.SESSION, "", 0);
+                }
+                if("true".equals(properties.getProperty("logout.corsHeadersEnabled", "false"))) {
+                    responseContext.getHeaders().add("Access-Control-Allow-Origin", corsOrigin);
+                    responseContext.getHeaders().add("Access-Control-Allow-Methods", "GET");
                 }
             }
         }
