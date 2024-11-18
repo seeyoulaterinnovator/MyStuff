@@ -78,6 +78,7 @@ stages:
     expire_in: 1 day
   only:
     - itres-new
+    - itres-new-prod
     - cicd
   allow_failure: false
   when: manual
@@ -115,6 +116,7 @@ frontend:admin:build:
     expire_in: 1 day
   only:
     - itres-new
+    - itres-new-prod
     - cicd
   allow_failure: false
   when: manual
@@ -139,6 +141,7 @@ back:build:
   allow_failure: false
   only:
     - itres-new
+    - itres-new-prod
     - cicd
   needs:
     - "frontend:domru:build"
