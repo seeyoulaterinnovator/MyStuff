@@ -148,7 +148,6 @@ public class LogoutEndpointInterceptor implements ContainerResponseFilter {
                     && responseContext.getStatus() == HttpStatus.SC_MOVED_TEMPORARILY) {
                 responseContext.getHeaders().clear();
                 responseContext.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
-                responseContext.getHeaders().add("Content-Type", "text/html");
                 responseContext.getHeaders().add("Pragma", "no-cache");
                 responseContext.getHeaders().add("Cache-Control", "no-cache, no-store");
                 responseContext.getHeaders().add("Access-Control-Allow-Origin", corsOrigin);
