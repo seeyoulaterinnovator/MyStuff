@@ -235,7 +235,7 @@ domru:perm-k8s:
     - sso-k8s-perm
   environment:
     name: production-k8s-perm
-    url: https://new.auth.dom.ru
+    url: https://auth.dom.ru
 
 domru:voronezh-k8s:
   extends: .domru:prod:template
@@ -243,7 +243,7 @@ domru:voronezh-k8s:
     - sso-k8s-voronezh
   environment:
     name: production-k8s-voronezh
-    url: https://new.auth.dom.ru
+    url: https://auth.dom.ru
 
 
 domru:perm:primary:

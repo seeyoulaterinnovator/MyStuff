@@ -30,8 +30,8 @@ extraEnvs:
   KC_HOSTNAME_ADMIN_URL: "{{ env "CI_ENVIRONMENT_URL" }}" # see https://github.com/keycloak/keycloak/issues/16005
   KC_HOSTNAME_ACCOUNT_URL: "{{ env "CI_ENVIRONMENT_URL" }}"
   KC_HOSTNAME_DEBUG: "true"
-  KC_HOSTNAME_STRICT: "true"
-  KC_HOSTNAME_STRICT_HTTPS: "true"
+  KC_HOSTNAME_STRICT: "false"
+  KC_HOSTNAME_STRICT_HTTPS: "false"
   KC_HOSTNAME_URL: "{{ env "CI_ENVIRONMENT_URL" }}"
   # KC_LOG_CONSOLE_OUTPUT: "json" # need configure in OpenSearch
   KC_LOG_LEVEL: "INFO"
