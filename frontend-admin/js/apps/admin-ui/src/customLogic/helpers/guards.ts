@@ -11,10 +11,3 @@ export const isEnumValueGuard =
 export const isReadonlyArray = <T>(arr: unknown): arr is readonly T[] => {
   return Array.isArray(arr);
 };
-
-export const isKeyObjectGuard = <T>(
-  target: T,
-  key: PropertyKey,
-): key is keyof T => {
-  return target && typeof target === "object" && key in target;
-};
