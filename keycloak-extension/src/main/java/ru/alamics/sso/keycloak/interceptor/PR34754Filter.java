@@ -45,14 +45,18 @@ public class PR34754Filter implements ContainerResponseFilter {
                                 " is null").equals(exception.getMessage())
                         ) {
                             log.warn("PR34754 error: {}", request.getUriInfo().getRequestUri());
-                            AuthenticationManager.expireIdentityCookie(keycloak);
-                            AuthenticationManager.expireAuthSessionCookie(keycloak);
-                            String redirectUri = request.getUriInfo().getQueryParameters().getFirst("redirect_uri");
-                            if(MiscUtil.hasText(redirectUri)) {
+                            if(!request.getUriInfo().getQueryParameters().containsKey("redirect")) {
+                                AuthenticationManager.expireIdentityCookie(keycloak);
+                                AuthenticationManager.expireAuthSessionCookie(keycloak);
                                 response.setStatus(HttpStatus.SC_MOVED_TEMPORARILY);
                                 response.getHeaders().clear();
                                 response.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
-                                response.getHeaders().add(HttpHeaders.LOCATION, redirectUri);
+                                response.getHeaders().add(HttpHeaders.LOCATION,
+                                        request.getUriInfo()
+                                                .getRequestUriBuilder()
+                                                .queryParam("redirect", "true")
+                                                .build()
+                                );
                                 response.setEntity("");
                             }
                         }
