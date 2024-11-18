@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.mapper;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.ProtocolMapperModel;
 import org.keycloak.models.UserModel;
@@ -18,14 +19,13 @@ import java.util.List;
 
 @Slf4j
 public class PersonalAccountMapper extends AbstractOIDCProtocolMapper implements OIDCAccessTokenMapper, OIDCIDTokenMapper, UserInfoTokenMapper {
-
-    private static final String POST_PERSONAL_ACCOUNT = "post.personal.account";
-
     private static final String PROVIDER_ID = "personal-account-mapper";
     private static final String DISPLAY_NAME = "Personal Account";
     private static final String HELP_TEXT = "Map a personal account list of user post to a token claim.";
 
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<ProviderConfigProperty>();
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     static {
         ProviderConfigProperty multiValued = new ProviderConfigProperty();
@@ -43,7 +43,6 @@ public class PersonalAccountMapper extends AbstractOIDCProtocolMapper implements
         OIDCAttributeMapperHelper.addIncludeInTokensConfig(configProperties, PersonalAccountMapper.class);
     }
 
-    private UserPostService userPostService;
     private PersonalAccountService paService;
 
     public static void addJsonTypeConfig(List<ProviderConfigProperty> configProperties) {
@@ -98,6 +97,7 @@ public class PersonalAccountMapper extends AbstractOIDCProtocolMapper implements
         if (accountModel == null) return;
 
         Object propertyValue = getModelValue(accountModel);
+        propertyValue = objectMapper.valueToTree(propertyValue);
         OIDCAttributeMapperHelper.mapClaim(token, mappingModel, propertyValue);
     }
 
