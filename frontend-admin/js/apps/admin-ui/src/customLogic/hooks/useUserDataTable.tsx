@@ -41,7 +41,8 @@ import type { SortingOptions } from "../types/sorting";
 import { useWhoAmI } from "../../context/whoami/WhoAmI";
 import { addBomAndConvertToBlob } from "../helpers/transforms";
 import { ExclamationCircleIcon } from "@patternfly/react-icons";
-import type PageInfoRepresentation from "js/libs/keycloak-admin-client/lib/defs/custom/pageInfoRepresentation";
+import type PageInfoRepresentation from "@keycloak/keycloak-admin-client/lib/defs/custom/pageInfoRepresentation";
+import { URLQueryParams } from "../helpers/queryParams";
 
 const getInvalidUsers = (
   users?: Array<UserRepresentation | UserInfoRepresentation>,
@@ -144,7 +145,23 @@ export const useUserDataTable = ({
   const [customSelectedRows, setCustomSelectedRows] = useState<
     UserInfoRepresentation[]
   >([]);
-  const paramSearchRealm = params.get(QueryParam.SEARCH_REALM);
+  const {
+    paramSearch,
+    paramSearchPhone,
+    paramSearchRealm,
+    paramSearchToms,
+    paramSearchUser,
+  } = URLQueryParams.get(
+    [
+      QueryParam.SEARCH,
+      QueryParam.SEARCH_USER,
+      QueryParam.SEARCH_TOMS,
+      QueryParam.SEARCH_PHONE,
+      QueryParam.SEARCH_REALM,
+    ],
+    params,
+  );
+
   const rawFilterSearchRealm = paramSearchRealm || realmName;
   const [customFilters, setCustomFilters] = useState<CustomUserQuery>({
     searchRealm: accessibleRealms.some(
@@ -152,6 +169,10 @@ export const useUserDataTable = ({
     )
       ? rawFilterSearchRealm
       : accessibleRealms[0]?.name,
+    search: paramSearch,
+    searchUser: paramSearchUser,
+    searchPhone: paramSearchPhone,
+    searchToms: paramSearchToms,
   });
 
   const { searchRealm: filterSearchRealm } = customFilters;
@@ -293,17 +314,13 @@ export const useUserDataTable = ({
     refresh();
     setCustomSelectedRows([]);
 
-    const url = new URL(window.location.href);
-
-    if (newCustomFilters.searchRealm) {
-      url.searchParams.set(
-        QueryParam.SEARCH_REALM,
-        newCustomFilters.searchRealm,
-      );
-      history.pushState({}, "", url);
-    } else {
-      url.searchParams.delete(QueryParam.SEARCH_REALM);
-    }
+    URLQueryParams.update([
+      [QueryParam.SEARCH, newCustomFilters.search],
+      [QueryParam.SEARCH_PHONE, newCustomFilters.searchPhone],
+      [QueryParam.SEARCH_REALM, newCustomFilters.searchRealm],
+      [QueryParam.SEARCH_TOMS, newCustomFilters.searchToms],
+      [QueryParam.SEARCH_USER, newCustomFilters.searchUser],
+    ]);
   };
 
   useEffect(() => {

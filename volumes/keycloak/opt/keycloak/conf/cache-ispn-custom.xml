@@ -46,6 +46,7 @@
         </local-cache>
         <replicated-cache name="work">
             <expiration lifespan="-1"/>
+            <transaction mode="NON_XA"/>
         </replicated-cache>
         <local-cache name="keys" simple-cache="true">
             <encoding>
