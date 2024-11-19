@@ -73,6 +73,11 @@ frontend:stelecom:build:
   variables:
     BUILD_THEME: stelecom
 
+frontend:novotelecom:build:
+  extends: .frontend:theme:build
+  variables:
+    BUILD_THEME: novotelecom
+
 frontend:admin:build:
   stage: build
   script:
@@ -116,6 +121,7 @@ back:build:
     - "frontend:ertelecom:build"
     - "frontend:stelecom:build"
     - "frontend:admin:build"
+    - "frontend:novotelecom:build"
 
 container-image:source:
   stage: docker
@@ -244,7 +250,7 @@ domru:perm:primary:
     name: production-perm-primary
     url: https://auth.dom.ru/auth
   script:
-    - for i in domru stelecom ertelecom; do cp -r build/deploy/themes/${i} /usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app02:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app03:/usr/local/keycloak/themes; done
+    - for i in domru stelecom ertelecom novotelecom; do cp -r build/deploy/themes/${i} /usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app02:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app03:/usr/local/keycloak/themes; done
     - mkdir -p /usr/local/keycloak/domain/data/password-blacklists
     - cp build/deploy/standalone/data/password-blacklists/black_list_password.txt /usr/local/keycloak/domain/servers/server-one/data/password-blacklists
     - ssh sso-app02 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
@@ -272,7 +278,7 @@ domru:perm:secondary:
     name: production-perm-secondary
     url: https://auth.dom.ru/auth
   script:
-    - for i in domru stelecom ertelecom; do scp -r build/deploy/themes/${i} sso-app04:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app05:/usr/local/keycloak/themes; done
+    - for i in domru stelecom ertelecom novotelecom; do scp -r build/deploy/themes/${i} sso-app04:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app05:/usr/local/keycloak/themes; done
     - ssh sso-app04 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
     - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app04:/usr/local/keycloak/domain/servers/server-four/data/password-blacklists
     - ssh sso-app05 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
@@ -296,7 +302,7 @@ domru:voronezh:primary:
     name: production-voronezh-primary
     url: https://auth.dom.ru/auth
   script:
-    - for i in domru stelecom ertelecom; do cp -r build/deploy/themes/${i} /usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app02:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app03:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app04:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app05:/usr/local/keycloak/themes; done
+    - for i in domru stelecom ertelecom novotelecom; do cp -r build/deploy/themes/${i} /usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app02:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app03:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app04:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app05:/usr/local/keycloak/themes; done
     - mkdir -p /usr/local/keycloak/domain/data/password-blacklists
     - cp build/deploy/standalone/data/password-blacklists/black_list_password.txt /usr/local/keycloak/domain/servers/server-one/data/password-blacklists
     - ssh sso-app02 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
@@ -324,7 +330,7 @@ domru:voronezh:secondary:
     name: production-voronezh-secondary
     url: https://auth.dom.ru/auth
   script:
-    - for i in domru stelecom ertelecom; do scp -r build/deploy/themes/${i} sso-app04:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app05:/usr/local/keycloak/themes; done
+    - for i in domru stelecom ertelecom novotelecom; do scp -r build/deploy/themes/${i} sso-app04:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app05:/usr/local/keycloak/themes; done
     - ssh sso-app04 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
     - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app04:/usr/local/keycloak/domain/servers/server-four/data/password-blacklists
     - ssh sso-app05 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
