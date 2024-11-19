@@ -4,6 +4,8 @@
     <title>Client</title>
 </head>
 <body>
+<a href="/">Home</a>
+<br>
 <a href="http://localhost:8080/auth/admin/master/console/" target="_blank">Admin console</a>
 <br>
 <a href="http://localhost:8080/auth/admin/manager/console/" target="_blank">Manager console</a>
@@ -17,6 +19,8 @@
     <select id="realm">
         <option value="user">user</option>
         <option value="e2e">e2e</option>
+        <option value="S-TELECOM">S-TELECOM</option>
+        <option value="novotelecom">novotelecom</option>
     </select>
     <br>
     <label for="client">Client</label>
@@ -24,6 +28,8 @@
         <option value="b2b">b2b</option>
         <option value="dmp-kc-sit">dmp-kc-sit</option>
         <option value="app">app</option>
+        <option value="lkb2b">lkb2b</option>
+        <option value="TOMS">TOMS</option>
     </select>
     <br>
     <label for="iframe">Iframe</label>
@@ -33,38 +39,60 @@
 </div>
 <div id="redirect" hidden>
     <a id="account" href="">Account</a>
+    <br>
+    <button id="logout">Logout</button>
+    <br>
+    <button id="invalidLogout">Invalid logout</button>
+    <br>
+    <button id="asyncInvalidLogout">Async invalid logout</button>
 </div>
 <script>
   (async function (){
+    const clientBaseUrl = 'http://localhost:8180';
+    const kcBaseUrl = 'https://localhost:443/auth';
     const params = new URLSearchParams(location.search);
     const code = params.get('code');
     if(code) {
       const realm = params.get('realm');
       const client = params.get('client');
-      const response = await fetch(`http://localhost:8180/keycloak/auth/realms/${realm}/protocol/openid-connect/token`, {
+      const response = await fetch(`${clientBaseUrl}/keycloak/auth/realms/${realm}/protocol/openid-connect/token`, {
         method: 'post',
         body: new URLSearchParams({
           grant_type: 'authorization_code',
           client_id: client,
-          redirect_uri: `http://localhost:8180/?realm=${realm}&client=${client}`,
+          redirect_uri: `${clientBaseUrl}/?realm=${realm}&client=${client}`,
           code
         }),
       });
       const result = await response.json();
       console.log(JSON.stringify(result));
       document.getElementById('account').setAttribute('href', `http://localhost:8080/auth/realms/${realm}/account`);
-      // TODO
       document.getElementById('redirect').removeAttribute('hidden');
+      document.getElementById('logout').onclick = () => {
+        location.href =  `${kcBaseUrl}/realms/${realm}/protocol/openid-connect/logout?id_token_hint=${result.id_token}`;
+      };
+      document.getElementById('invalidLogout').onclick = () => {
+        location.href =  `${kcBaseUrl}/realms/${realm}/protocol/openid-connect/logout?id_token_hint=${result.access_token}`;
+      };
+      document.getElementById('asyncInvalidLogout').onclick = async () => {
+          await fetch(`${kcBaseUrl}/realms/${realm}/protocol/openid-connect/logout?id_token_hint=${result.access_token}&` + new URLSearchParams({
+              post_logout_redirect_uri: ''
+          }) , {
+              mode: 'cors'
+          });
+          location.href = '/';
+      };
     } else {
       document.getElementById('go').onclick = () => {
         const realm = document.getElementById('realm').value;
         const client = document.getElementById('client').value;
         const iframe = document.getElementById('iframe').checked ? { iframe: 1 } : {};
         const element = document.createElement('a');
-        element.setAttribute('href', `http://localhost:8080/auth/realms/${realm}/protocol/openid-connect/auth?` + new URLSearchParams({
+        element.setAttribute('href', `${kcBaseUrl}/realms/${realm}/protocol/openid-connect/auth?` + new URLSearchParams({
             response_type: 'code',
             client_id: client,
-            redirect_uri: `http://localhost:8180/?realm=${realm}&client=${client}`,
+            redirect_uri: `${clientBaseUrl}/?realm=${realm}&client=${client}`,
+            scope: 'openid',
             ...iframe
         }));
         element.setAttribute('target', '_blank');

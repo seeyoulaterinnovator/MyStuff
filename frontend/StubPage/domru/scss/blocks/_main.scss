@@ -1,0 +1,59 @@
+.main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1 1 auto;
+
+  @include mobile {
+    align-items: flex-start;
+  }
+
+  &__container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    margin-block: 40px;
+  }
+
+  &__body {
+    display: flex;
+    gap: 64px;
+    max-width: 568px;
+
+    @include tablet {
+      gap: 56px;
+    }
+
+    @include mobile {
+      flex-direction: column;
+      gap: 32px;
+    }
+  }
+
+  &__image {
+    max-width: 160px;
+    height: fit-content;
+
+    @include tablet {
+      max-width: 150px;
+    }
+
+    @include mobile {
+      max-width: 120px;
+    }
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__title {
+  }
+
+  &__text {
+  }
+}

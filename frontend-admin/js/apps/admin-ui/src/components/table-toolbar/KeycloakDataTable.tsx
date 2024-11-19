@@ -2,6 +2,7 @@ import {
   Button,
   ButtonVariant,
   Divider,
+  Text,
   Toolbar,
   ToolbarContent,
   ToolbarItem,
@@ -88,6 +89,8 @@ type DataTableProps<T> = {
   onSort?: (sortingOptions: SortingOptions) => void;
   automaticallyMergedColumns?: AutomaticallyMergedColumn<T>[];
   onChangeNumberOfRowMerges?: (value: number) => void;
+  totalRows?: number;
+  selected?: T[];
 };
 
 export const isSubRow = <T,>(data?: Row<T> | SubRow<T>): data is SubRow<T> => {
@@ -170,6 +173,8 @@ function DataTable<T>({
   sortingOptions,
   automaticallyMergedColumns,
   onChangeNumberOfRowMerges,
+  totalRows,
+  selected,
   ...props
 }: DataTableProps<T>) {
   const { t } = useTranslation();
@@ -178,16 +183,41 @@ function DataTable<T>({
   const [expandedRows, setExpandedRows] = useState<boolean[]>([]);
   const [currentSortingOptions, setCurrentSortingOptions] =
     useState(sortingOptions);
+  const [isDeterminateSelectAll, setIsDeterminateSelectAll] = useState(false);
+  const [isMouseEnterSelectAll, setIsMountEnterSelectAll] = useState(false);
 
   const tableRef = useRef<HTMLTableElement | null>(null);
+  const selectAllRef = useRef<HTMLTableCellElement | null>(null);
+
+  const countSelectedRows = selected?.length;
+
+  const currentCountSelectedRows = useMemo(() => {
+    return selectedRows.filter((row) => row).length;
+  }, [selectedRows]);
 
   const updateState = (rowIndex: number, isSelected: boolean) => {
     const items = [
-      ...(rowIndex === -1 ? Array(rows.length).fill(isSelected) : selectedRows),
+      ...(rowIndex === -1 || rowIndex === -2
+        ? Array(rows.length).fill(isSelected)
+        : selectedRows),
     ];
     items[rowIndex] = isSelected;
     setSelectedRows(items);
   };
+
+  useEffect(() => {
+    setSelectedRows(() => {
+      const newSelectedRows: boolean[] = [];
+
+      rows.forEach((row, index) => {
+        if (!isSubRow(row)) {
+          newSelectedRows[index] = row.selected;
+        }
+      });
+
+      return newSelectedRows;
+    });
+  }, [rows]);
 
   useEffect(() => {
     setCurrentSortingOptions(sortingOptions);
@@ -198,9 +228,19 @@ function DataTable<T>({
       const selectAllCheckbox = document.getElementsByName("check-all").item(0);
       if (selectAllCheckbox) {
         const checkbox = selectAllCheckbox as HTMLInputElement;
-        const selected = selectedRows.filter((r) => r === true);
+        const onlySelected = selectedRows.filter((r) => r === true);
+        const isIndeterminateCheckboxForAllRows =
+          totalRows != null &&
+          countSelectedRows != null &&
+          countSelectedRows < totalRows &&
+          countSelectedRows > 0;
+        const isIndeterminateCheckboxForPageRows =
+          onlySelected.length < rows.length && onlySelected.length > 0;
         checkbox.indeterminate =
-          selected.length < rows.length && selected.length > 0;
+          isIndeterminateCheckboxForAllRows ||
+          isIndeterminateCheckboxForPageRows;
+
+        setIsDeterminateSelectAll(checkbox.indeterminate);
       }
     }
   }, [selectedRows]);
@@ -254,21 +294,65 @@ function DataTable<T>({
         <Tr>
           {onCollapse && <Th />}
           {canSelectAll ? (
-            <Th
-              select={
-                !isRadio
-                  ? {
-                      onSelect: (_, isSelected, rowIndex) => {
-                        onSelect!(isSelected, rowIndex);
-                        updateState(-1, isSelected);
-                      },
-                      isSelected:
-                        selectedRows.filter((r) => r === true).length ===
-                        rows.length,
-                    }
-                  : undefined
-              }
-            />
+            <>
+              <Th
+                ref={selectAllRef}
+                select={
+                  !isRadio
+                    ? {
+                        onSelect: (_, isSelected, rowIndex) => {
+                          const isSelectedResult =
+                            isDeterminateSelectAll &&
+                            totalRows != null &&
+                            countSelectedRows != null
+                              ? currentCountSelectedRows !== rows.length
+                              : isSelected;
+
+                          onSelect?.(isSelectedResult, rowIndex);
+                          updateState(-1, isSelectedResult);
+                        },
+                        isSelected:
+                          countSelectedRows != null && totalRows != null
+                            ? countSelectedRows === totalRows
+                            : currentCountSelectedRows === rows.length,
+                      }
+                    : undefined
+                }
+                onMouseEnter={() => setIsMountEnterSelectAll(true)}
+                onMouseLeave={() => setIsMountEnterSelectAll(false)}
+              />
+              {selected && selected.length > 0 && (
+                <Tooltip
+                  triggerRef={selectAllRef}
+                  trigger="mouseenter focus manual"
+                  isContentLeftAligned
+                  isVisible={isMouseEnterSelectAll}
+                  content={
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "12px",
+                      }}
+                    >
+                      <Text>
+                        {t("selectedRows")}: {selected?.length}
+                      </Text>
+                      <Button
+                        onClick={() => {
+                          onSelect?.(false, -2);
+                          updateState(-2, false);
+                        }}
+                      >
+                        {t("resetAll")}
+                      </Button>
+                    </div>
+                  }
+                  onMouseEnter={() => setIsMountEnterSelectAll(true)}
+                  onMouseLeave={() => setIsMountEnterSelectAll(false)}
+                />
+              )}
+            </>
           ) : (
             onSelect && (
               <Th>
@@ -477,6 +561,9 @@ export type DataListProps<T> = Omit<
   sortingOptions?: SortingOptions;
   onSort?: (sortingOptions: SortingOptions) => void;
   automaticallyMergedColumns?: AutomaticallyMergedColumn<T>[];
+  totalRows?: number;
+  selectedRows?: T[];
+  onRefresh?: () => void;
 };
 
 /**
@@ -529,15 +616,20 @@ export function KeycloakDataTable<T>({
   isLoading,
   sortingOptions,
   onSort,
+  selectedRows,
+  automaticallyMergedColumns,
+  totalRows,
+  onRefresh,
   ...props
 }: DataListProps<T>) {
   const { t } = useTranslation();
-  const [selected, setSelected] = useState<T[]>([]);
+  const [selected, setSelected] = useState<T[]>(selectedRows || []);
   const [rows, setRows] = useState<(Row<T> | SubRow<T>)[]>();
   const [unPaginatedData, setUnPaginatedData] = useState<T[]>();
   const [loading, setLoading] = useState(false);
   const [currentSortingOptions, setCurrentSortingOptions] =
     useState(sortingOptions);
+  const [numberOfRowMerges, setNumberOfRowMerges] = useState(0);
 
   const [defaultPageSize, setDefaultPageSize] = useStoredState(
     localStorage,
@@ -552,7 +644,10 @@ export function KeycloakDataTable<T>({
 
   const [key, setKey] = useState(0);
   const prevKey = useRef<number>();
-  const refresh = () => setKey(key + 1);
+  const refresh = () => {
+    setKey(key + 1);
+    onRefresh?.();
+  };
   const id = useId();
 
   const renderCell = (
@@ -589,7 +684,12 @@ export function KeycloakDataTable<T>({
     });
   };
 
-  const convertToColumns = (data: T[]): (Row<T> | SubRow<T>)[] => {
+  const convertToColumns = (
+    data: T[],
+    options?: { rowsAreNotSelected: boolean },
+  ): (Row<T> | SubRow<T>)[] => {
+    const { rowsAreNotSelected } = options || {};
+
     const isDetailColumnsEnabled = (value: T) =>
       detailColumns?.[0]?.enabled?.(value);
     return data
@@ -600,7 +700,9 @@ export function KeycloakDataTable<T>({
             data: value,
             disableSelection: disabledRow,
             disableActions: disabledRow,
-            selected: !!selected.find((v) => get(v, "id") === get(value, "id")),
+            selected: rowsAreNotSelected
+              ? false
+              : !!selected.find((v) => get(v, "id") === get(value, "id")),
             isOpen: isDetailColumnsEnabled(value) ? false : undefined,
             cells: renderCell(columns, value),
           },
@@ -653,6 +755,8 @@ export function KeycloakDataTable<T>({
     [search, first, max],
   );
 
+  const data = filteredData || rows;
+
   const unPaginatedRows = useMemo(() => {
     return unPaginatedData ? convertToColumns(unPaginatedData) : [];
   }, [unPaginatedData]);
@@ -688,7 +792,9 @@ export function KeycloakDataTable<T>({
         }
       }
 
-      const result = convertToColumns(data);
+      const result = convertToColumns(data, {
+        rowsAreNotSelected: true,
+      });
       setRows(result);
       setLoading(false);
     },
@@ -736,35 +842,72 @@ export function KeycloakDataTable<T>({
     });
 
   const _onSelect = (isSelected: boolean, rowIndex: number) => {
-    const data = filteredData || rows;
     if (rowIndex === -1) {
       setRows(
-        data!.map((row) => {
+        data?.map((row) => {
           (row as Row<T>).selected = isSelected;
           return row;
         }),
       );
+    } else if (rowIndex === -2) {
+      setSelected([]);
+      onSelect?.([]);
+      setRows(
+        data?.map((row) => {
+          (row as Row<T>).selected = isSelected;
+          return row;
+        }),
+      );
+
+      return;
     } else {
-      (data![rowIndex] as Row<T>).selected = isSelected;
+      (data?.[rowIndex] as Row<T>).selected = isSelected;
 
       setRows([...rows!]);
     }
 
+    const mainMergedColumnKey = automaticallyMergedColumns?.[0];
+    let uniqueData = data;
+
+    if (mainMergedColumnKey) {
+      const mainMergeColumn =
+        typeof mainMergedColumnKey === "number"
+          ? columns[mainMergedColumnKey]
+          : columns.find((item) => item.name === mainMergedColumnKey);
+      const mainMergedProp = mainMergeColumn?.name;
+
+      if (mainMergedProp) {
+        uniqueData = uniqueData?.filter((row, currentRow) => {
+          const equivalentRowIndex = data?.findIndex(
+            (checkedSelectedRow) =>
+              get(checkedSelectedRow.data, mainMergedProp) ===
+              get(row.data, mainMergedProp),
+          );
+
+          return currentRow === equivalentRowIndex;
+        });
+      }
+    }
+
+    uniqueData = uniqueData?.slice(0, max);
+
     // Keeps selected items when paginating
     const difference = differenceBy(
       selected,
-      data!.map((row) => row.data),
+      uniqueData!.map((row) => row.data),
       "id",
     );
 
     // Selected rows are any rows previously selected from a different page, plus current page selections
-    const selectedRows = [
+    const newSelectedRows = [
       ...difference,
-      ...data!.filter((row) => (row as Row<T>).selected).map((row) => row.data),
+      ...uniqueData!
+        .filter((row) => (row as Row<T>).selected)
+        .map((row) => row.data),
     ];
 
-    setSelected(selectedRows);
-    onSelect!(selectedRows);
+    setSelected(newSelectedRows);
+    onSelect?.(newSelectedRows);
   };
 
   const onCollapse = (isOpen: boolean, rowIndex: number) => {
@@ -777,16 +920,28 @@ export function KeycloakDataTable<T>({
     onSort?.(newSortOptions);
   };
 
-  const [numberOfRowMerges, setNumberOfRowMerges] = useState(0);
+  useEffect(() => {
+    setSelected(selectedRows || []);
+  }, [selectedRows]);
 
-  const data = filteredData || rows;
+  useEffect(() => {
+    if (loading === false) {
+      // It is used to update the nested property rows
+      setRows((prevRows) => {
+        if (prevRows) return convertToColumns(prevRows?.map((tt) => tt.data));
+
+        return prevRows;
+      });
+    }
+  }, [loading]);
+
   const noData = !data || data.length === 0;
   const searching = search !== "" || isSearching;
   // if we use detail columns there are twice the number of rows
   const maxRows = detailColumns ? max * 2 : max + numberOfRowMerges;
   const rowLength = detailColumns
     ? (data?.length || 0) / 2
-    : (data?.length || 0) + numberOfRowMerges;
+    : (data?.length || 0) - numberOfRowMerges;
 
   const renderTable = () => {
     return (
@@ -816,6 +971,9 @@ export function KeycloakDataTable<T>({
               sortingOptions={currentSortingOptions}
               onSort={handleSort}
               onChangeNumberOfRowMerges={setNumberOfRowMerges}
+              automaticallyMergedColumns={automaticallyMergedColumns}
+              totalRows={totalRows}
+              selected={selected}
             />
           </>
         )}

@@ -29,7 +29,7 @@
         </#if>
     </head>
     <body class="min-h-full flex flex-col p-4 sm:px-6 md:py-6 lg:px-8 xl:py-8 xl:px-6">
-    <#if displayMessage && message?has_content && message.summary == 'Регистрация временно недоступна, попробуйте повторить попытку позже'>
+    <#if displayMessage?has_content && displayMessage && message?has_content && message.summary == 'Регистрация временно недоступна, попробуйте повторить попытку позже'>
         <#if iframe == false>
             <@header.defaultTemplate withCity=displayCity></@header.defaultTemplate>
         </#if>
@@ -46,11 +46,11 @@
 
         <main id="content" class="flex-1 py-8 md:py-12 mx-auto md:mx-auto w-full max-w-440px xl:max-w-470px">
             <#if displayMessage && message?has_content && message.summary == msg('emailSentMessage')>
-                <@emailSent.defaultTemplate email="${userEmail}" backHref="${url.loginUrl}" success=true; section>
+                <@emailSent.defaultTemplate email="${userEmail!}" backHref="${url.loginUrl}" success=true; section>
                     <#if section = "header">
                         Восстановление пароля
                     <#elseif section = "description">
-                        <span>На почту: ${userEmail}</span><br>
+                        <span>На почту: ${userEmail!}</span><br>
                         Отправлены инструкции по восстановлению пароля
                     </#if>
                 </@emailSent.defaultTemplate>

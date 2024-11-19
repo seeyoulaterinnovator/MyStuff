@@ -1,0 +1,25 @@
+
+html,
+body {
+  height: 100%;
+  font-family: var(--font-family-base);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--color-main-800);
+}
+
+.wrapper {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 40px;
+  overflow-y: auto;
+
+  @include tablet {
+    padding: 24px;
+  }
+
+  @include mobile {
+    padding: 16px;
+  }
+}

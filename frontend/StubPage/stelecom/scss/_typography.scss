@@ -1,0 +1,54 @@
+h1 {
+  font-size: 2.75rem;
+  line-height: 3.25rem;
+  font-weight: 800;
+
+  @include tablet {
+    font-size: 2.0625rem;
+    line-height: 2.5rem;
+  }
+
+  @include mobile {
+    font-size: 1.9375rem;
+    line-height: 2.1313rem;
+  }
+}
+
+body,
+p {
+  font-size: 1.0938rem;
+  line-height: 1.5rem;
+  font-weight: 300;
+
+  @include tablet {
+    font-size: 1.0313rem;
+    line-height: 1.4375rem;
+  }
+
+  @include mobile {
+    font-size: .9688rem;
+    line-height: 1.3125rem;
+  }
+}
+
+.text {
+  &__info {
+    font-size: .7813rem;
+    line-height: 1rem;
+    letter-spacing: .04em;
+    font-weight: 300;
+    color: var(--color-main-900);
+
+    @include tablet {
+      font-size: .7188rem;
+      line-height: .9375rem;
+      letter-spacing: .055em;
+    }
+
+    @include mobile {
+      font-size: .6563rem;
+      line-height: .9063rem;
+      letter-spacing: .06em;
+    }
+  }
+}

@@ -1,0 +1,23 @@
+@font-face {
+  font-family: 'CoFo Sans';
+  src: url('../assets/fonts/CoFoSans-Black.eot');
+  src: local('CoFo Sans Black'), local('CoFoSans-Black'),
+  url('../assets/fonts/CoFoSans-Black.eot?#iefix') format('embedded-opentype'),
+  url('../assets/fonts/CoFoSans-Black.woff2') format('woff2'),
+  url('../assets/fonts/CoFoSans-Black.woff') format('woff'),
+  url('../assets/fonts/CoFoSans-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'CoFo Sans';
+  src: url('../assets/fonts/CoFoSans-Regular.eot');
+  src: local('CoFo Sans'), local('CoFoSans-Regular'),
+  url('../assets/fonts/CoFoSans-Regular.eot?#iefix') format('embedded-opentype'),
+  url('../assets/fonts/CoFoSans-Regular.woff2') format('woff2'),
+  url('../assets/fonts/CoFoSans-Regular.woff') format('woff'),
+  url('../assets/fonts/CoFoSans-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}

@@ -1,0 +1,419 @@
+<#import "util.ftl" as util>
+<#import "template.ftl" as layout>
+<#import "templates/components.ftl" as components>
+<#import "templates/blocks.ftl" as blocks>
+
+<@layout.registrationLayout
+        displayInfo=social.displayInfo
+        displayWide=(realm.password && social.providers??)
+        redirectTo=util.if(isRegistrationRedirect!false, url.registrationUrl, '');
+    section>
+    <#if section = "header">
+        <#if !hideRegistration!false>
+            <@blocks.contentHeader mainTitle="${doLogIn}" secondaryTitle="${registerTitle}" secondaryHref="${url.registrationUrl}" withBorder=true />
+        <#else>
+            <@blocks.contentHeader mainTitle="${doLogIn}" secondaryTitle="" secondaryHref="" withBorder=true />
+        </#if>
+    <#elseif section = "form">
+        <!-- form -->
+        <#if !activateNewAuth || loginViaEmailOrUsernameAndPassword!true>
+            <!-- loginViaEmailOrUsernameAndPassword -->
+            <#if !activateNewAuth || !isSwitcherOn!true>
+                <!-- !isSwitcherOn -->
+                <#if realm.password>
+                    <!-- realm.password -->
+                    <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
+                    onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
+                    <div class="field field__container field--required md:w-full">
+                        <input class="hidden w-0 h-0" id="domain-login" name="city">
+                        <#if withCity?has_content && withCity == "TRUE">
+                            <input id="withCity" class="hidden w-0 h-0" name="withCity" value="TRUE">
+                        </#if>
+                        <#if showModal?has_content>
+                            <input id="showModalIframe" class="hidden w-0 h-0" name="showModal" value="${showModal}">
+                        </#if>
+                        <#if usernameEditDisabled??>
+                            <input name="username" id="username" class="field__input"
+                                   label="${usernameOrEmailPlaceholder}"
+                                   placeholder="Телефон или E-mail" value="${(login.username!)}"
+                                   type="text" disabled/>
+                        <#else>
+                            <input name="username" id="username"
+                                   class="field__input ${error?has_content?then('field__input--error','')}"
+                                   label="${usernameOrEmailPlaceholder}"
+                                   placeholder="Телефон или E-mail" value="${(login.username!)}"
+                                   type="text" autofocus autocomplete="off"/>
+                        </#if>
+                        <label class="field__label" for="username">Телефон или E-mail</label>
+                        <span class="span-line">${error!}</span>
+                    </div>
+
+                    <@components.field class="md:w-full custom-mt-lg" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />
+                    <div class="login-consent-password-forgot-code w-full">
+                        <div class="flex page-buttons w-full">
+                            <div class="flex flex-basis-auto items-center login-consent">
+                                <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
+                                        type="submit">${enter}</button>
+                            </div>
+                            <@blocks.personalDataProcessAccept/>
+                        </div>
+
+                        <div class="flex code-forgot" flex-wrap-justify-content="center">
+                            <#if activateNewAuth!false>
+                                <a class="code highlighted-text" href="#" id="topSecretButton" onclick="document.getElementById('smsLoginButton').click();">Получить временный код</a>
+                            </#if>
+                            <#if realm.resetPasswordAllowed!false>
+                                <a class="forgot reference_hoverable allowDoubleClick item_hover highlighted-text" href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
+                            </#if>
+                        </div>
+                    </div>
+                </#if>
+                </form>
+
+
+                <#if realm.password && social.providers??>
+                    <div class="flex items-center social-providers">
+                        <div class="text-no-wrap text-with-login mr-6">${loginWith}</div>
+                        <ul class="logo-social-providers">
+                            <#list social.providers as p>
+                                <li class="mr-4">
+                                    <a href="${p.loginUrl}">
+                                        <div class="logo logo--${p.providerId}"></div>
+                                    </a>
+                                </li>
+                            </#list>
+                        </ul>
+                    </div>
+                </#if>
+                <form id="on" method="POST" name="on" action="${url.loginUrl}">
+                    <button id="smsLoginButton" name="on" type="submit" class="hidden">
+                        login via sms
+                    </button>
+                </form>
+
+            <#elseif isSwitcherOn!false>
+
+                <p class="custom-mb-md">Мы отправим код в СМС</p>
+                <#if realm.password>
+                    <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
+                    onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
+
+                    <div class="field field__container field--required md:w-full">
+                        <input class="hidden w-0 h-0" id="domain-login" name="city">
+                        <#if withCity?has_content && withCity == "TRUE">
+                            <input id="withCity" class="hidden w-0 h-0" name="withCity" value="TRUE">
+                        </#if>
+                        <#if showModal?has_content>
+                            <input id="showModalIframe" class="hidden w-0 h-0" name="showModal" value="${showModal}">
+                        </#if>
+                        <#if usernameEditDisabled??>
+                            <input name="username" id="username-second" class="field__input"
+                                   label="${usernameOrEmailPlaceholder}"
+                                   placeholder="Номер телефона" value="${(login.username!)}"
+                                   type="text" disabled/>
+                        <#else>
+                            <input name="username" id="username-second"
+                                   class="field__input ${error?has_content?then('field__input--error','')}"
+                                   label="${usernameOrEmailPlaceholder}"
+                                   placeholder="Номер телефона" value="${(login.username!)}"
+                                   type="text" autofocus autocomplete="off"/>
+
+                        </#if>
+                        <#--  <label class="field__label" for="username">Номер телефона</label>  -->
+                        <span class="span-line">${error!}</span>
+                    </div>
+                </#if>
+                <div class="login-consent-enter-login-link">
+                    <div class="flex page-buttons w-full">
+                        <div class="flex flex-basis-auto items-center login-consent">
+                            <button id="submit-phone" name="smsButton" class="btn btn-main btn-enter btn-new-enter"
+                                    type="submit">${enter}</button>
+                        </div>
+                        <@blocks.personalDataProcessAccept />
+                    </div>
+                </div>
+
+                <div class="flex justify-center md:justify-between w-full">
+                    <a id="topSecretButton" class="enter-login-link highlighted-hover-text" href="#"
+                       onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
+                    </a>
+                </div>
+                </form>
+                <form id="off" method="POST" name="off" action="${url.loginUrl}">
+                    <button id="loginPasswordButton" name="off" type="submit" class="hidden">
+                    </button>
+                </form>
+            </#if>
+
+        <#elseif loginViaSms!true>
+            <#if !isSwitcherOn!true>
+                <p class="custom-mb-md">Мы отправим код в СМС</p>
+                <#if realm.password>
+                    <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
+                    onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
+                    <div class="field field__container field--required md:w-full">
+                        <input class="hidden w-0 h-0" id="domain-login" name="city">
+                        <#if withCity?has_content && withCity == "TRUE">
+                            <input id="withCity" class="hidden w-0 h-0" name="withCity" value="TRUE">
+                        </#if>
+                        <#if showModal?has_content>
+                            <input id="showModalIframe" class="hidden w-0 h-0" name="showModal" value="${showModal}">
+                        </#if>
+                        <#if usernameEditDisabled??>
+                            <input name="username" id="username-second" class="field__input"
+                                   label="${usernameOrEmailPlaceholder}"
+                                   placeholder="Номер телефона" value="${(login.username!)}"
+                                   type="text" disabled/>
+                        <#else>
+                            <input name="username" id="username-second"
+                                   class="field__input ${error?has_content?then('field__input--error','')}"
+                                   label="${usernameOrEmailPlaceholder}"
+                                   placeholder="Номер телефона" value="${(login.username!)}"
+                                   type="text" autofocus autocomplete="off"/>
+
+                        </#if>
+                        <label class="field__label" for="username">Номер телефона</label>
+                        <span class="span-line">${error!}</span>
+                    </div>
+                </#if>
+
+                <div class="login-consent-enter-login-link">
+                    <div class="flex page-buttons w-full">
+                        <div class="flex flex-basis-auto items-center login-consent">
+                            <button id="submit-phone" name="smsButton" class="btn btn-main btn-enter btn-new-enter"
+                                    type="submit">${enter}</button>
+                        </div>
+                        <@blocks.personalDataProcessAccept />
+                    </div>
+                </div>
+
+                <div class="flex justify-center md:justify-between w-full">
+                    <a id="topSecretButton" class="enter-login-link" href="#"
+                       onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
+                    </a>
+                </div>
+
+                </form>
+
+
+                <form method="POST" action="${url.loginUrl}">
+                    <button id="loginPasswordButton" name="on" type="submit" class="hidden">
+                        Войти с помощью логина
+                    </button>
+                </form>
+
+            <#elseif isSwitcherOn!false>
+                <#if realm.password>
+                    <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
+                    onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
+                    <div class="field field__container field--required md:w-full">
+                        <input class="hidden w-0 h-0" id="domain-login" name="city">
+                        <#if withCity?has_content && withCity == "TRUE">
+                            <input id="withCity" class="hidden w-0 h-0" name="withCity" value="TRUE">
+                        </#if>
+                        <#if showModal?has_content>
+                            <input id="showModalIframe" class="hidden w-0 h-0" name="showModal" value="${showModal}">
+                        </#if>
+                        <#if usernameEditDisabled??>
+                            <input name="username" id="username" class="field__input"
+                                   label="${usernameOrEmailPlaceholder}"
+                                   placeholder="Телефон или E-mail" value="${(login.username!)}"
+                                   type="text" disabled/>
+                        <#else>
+                            <input name="username" id="username"
+                                   class="field__input ${error?has_content?then('field__input--error','')}"
+                                   label="${usernameOrEmailPlaceholder}"
+                                   placeholder="Телефон или E-mail" value="${(login.username!)}"
+                                   type="text" autofocus autocomplete="off"/>
+
+                        </#if>
+                        <label class="field__label" for="username">Телефон или E-mail</label>
+                        <span class="span-line">${error!}</span>
+                    </div>
+
+<#--                new code cart >Получить временный код-->
+                 <@components.field class="md:w-full custom-mt-lg" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />
+                    <div class="login-consent-password-forgot-code w-full">
+                        <div class="flex page-buttons w-full">
+                            <div class="flex flex-basis-auto items-center login-consent">
+                                <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
+                                        type="submit">${enter}</button>
+                            </div>
+                            <@blocks.personalDataProcessAccept />
+                        </div>
+
+                        <div class="flex code-forgot" flex-wrap-justify-content="center">
+                            <#if activateNewAuth!false>
+                                <a class="code highlighted-text" href="#" id="topSecretButton" onclick="document.getElementById('smsLoginButton').click();">Получить временный код</a>
+                            </#if>
+                            <#if realm.resetPasswordAllowed!false>
+                                <a class="forgot reference_hoverable allowDoubleClick item_hover highlighted-text" href="${url.loginResetCredentialsUrl}">${doForgotPassword}</a>
+                            </#if>
+                        </div>
+                    </div>
+                </#if>
+                </form>
+
+
+                <#if realm.password && social.providers??>
+                    <div class="flex items-center social-providers">
+                        <div class="text-no-wrap text-with-login mr-6">${loginWith}</div>
+                        <ul class="logo-social-providers">
+                            <#list social.providers as p>
+                                <li class="mr-4">
+                                    <a href="${p.loginUrl}">
+                                        <div class="logo logo--${p.providerId}"></div>
+                                    </a>
+                                </li>
+                            </#list>
+                        </ul>
+                    </div>
+                </#if>
+                <form method="POST" name="smsLoginButton" action="${url.loginUrl}">
+                    <button id="smsLoginButton" name="off" type="submit" class="hidden">
+                        login via sms
+                    </button>
+                </form>
+            </#if>
+
+        <#elseif loginViaPhoneCall>
+            <#if !isSwitcherOn!true>
+                <p class="custom-mb-md info-text">На указанный номер поступит звонок. Для подтверждения <span class="breakable"> нужно ввести последние 4 цифры входящего номера</span>
+                </p>
+                <#if realm.password>
+                    <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
+                    onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
+
+                    <div class="field field__container field--required md:w-full">
+                        <input class="hidden w-0 h-0" id="domain-login" name="city">
+                        <#if withCity?has_content && withCity == "TRUE">
+                            <input id="withCity" class="hidden w-0 h-0" name="withCity" value="TRUE">
+                        </#if>
+                        <#if showModal?has_content>
+                            <input id="showModalIframe" class="hidden w-0 h-0" name="showModal" value="${showModal}">
+                        </#if>
+                        <#if usernameEditDisabled??>
+                            <input name="username" id="username-second" class="field__input"
+                                   label="${usernameOrEmailPlaceholder}"
+                                   placeholder="Номер телефона" value="${(login.username!)}"
+                                   type="text" disabled/>
+                        <#else>
+                            <input name="username" id="username-second"
+                                   class="field__input ${error?has_content?then('field__input--error','')}"
+                                   label="${usernameOrEmailPlaceholder}"
+                                   placeholder="Номер телефона" value="${(login.username!)}"
+                                   type="text" autofocus autocomplete="off"/>
+
+                        </#if>
+                        <label class="field__label" for="username">Номер телефона</label>
+                        <span class="span-line">${error!}</span>
+                    </div>
+                </#if>
+<#--                это еще не правил 292 -->
+                <div class="login-password-forgot">
+                    <div class="login-pass mt-10">
+                        <button id="submit-phone" name="phoneCallButton" class="btn btn-main btn-enter btn-new-enter"
+                                type="submit">${enter}</button>
+                        <button id="topSecretButton" type="button" class="w-full btn btn-back highlighted-text"
+                                onclick="document.getElementById('loginPasswordButton').click();">Войти с помощью логина
+                        </button>
+                    </div>
+                </div>
+                </form>
+                <form method="POST" action="${url.loginUrl}">
+                    <button id="loginPasswordButton" name="on" type="submit" class="hidden">
+                        Войти с помощью логина
+                    </button>
+                </form>
+
+            <#elseif isSwitcherOn!false>
+                <#if realm.password>
+                    <form id="loginForm" class="md:flex md:flex-wrap md:justify-between"
+                    onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
+                    <div class="field field__container field--required md:w-full">
+                        <input class="hidden w-0 h-0" id="domain-login" name="city">
+                        <#if withCity?has_content && withCity == "TRUE">
+                            <input id="withCity" class="hidden w-0 h-0" name="withCity" value="TRUE">
+                        </#if>
+                        <#if showModal?has_content>
+                            <input id="showModalIframe" class="hidden w-0 h-0" name="showModal" value="${showModal}">
+                        </#if>
+                        <#if usernameEditDisabled??>
+                            <input name="username" id="username" class="field__input"
+                                   label="${usernameOrEmailPlaceholder}"
+                                   placeholder="Телефон или E-mail" value="${(login.username!)}"
+                                   type="text" disabled/>
+                        <#else>
+                            <input name="username" id="username"
+                                   class="field__input ${error?has_content?then('field__input--error','')}"
+                                   label="${usernameOrEmailPlaceholder}"
+                                   placeholder="Телефон или E-mail" value="${(login.username!)}"
+                                   type="text" autofocus autocomplete="off"/>
+
+                        </#if>
+                        <label class="field__label" for="username">Телефон или E-mail</label>
+                        <span class="span-line">${error!}</span>
+                    </div>
+
+                    <@components.field class="md:w-full custom-mt-lg" fieldName="password" label="Пароль" placeholder="Пароль" type="password" required=true />
+
+                    <div class="login-password-forgot">
+                    <div class="login-pass mt-10">
+                        <button id="submit" name="loginPasswordButton" class="btn btn-main btn-enter"
+                                type="submit">${enter}</button>
+                        <#if activateNewAuth!false>
+                            <button id="topSecretButton" type="button" class="btn btn-switcher highlighted-text"
+                                    onclick="document.getElementById('smsLoginButton').click();">Получить временный код
+                            </button>
+                        </#if>
+                    </div>
+                    <div class="forgot-pass">
+                        <#if realm.resetPasswordAllowed>
+                            <span class="my-span">
+                            <a href="${url.loginResetCredentialsUrl} highlighted-text">${doForgotPassword}</a>
+                             </span>
+                        </#if>
+                    </div>
+                </#if>
+                </div>
+                </form>
+                <#if realm.password && social.providers??>
+                    <div class="flex items-center social-providers">
+                        <div class="text-no-wrap text-with-login mr-6">${loginWith}</div>
+                        <ul class="logo-social-providers">
+                            <#list social.providers as p>
+                                <li class="mr-4">
+                                    <a href="${p.loginUrl}">
+                                        <div class="logo logo--${p.providerId}"></div>
+                                    </a>
+                                </li>
+                            </#list>
+                        </ul>
+                    </div>
+                </#if>
+                <form method="POST" action="${url.loginUrl}">
+                    <button id="smsLoginButton" name="off" type="submit" class="hidden">
+                        login via phone call
+                    </button>
+                </form>
+            </#if>
+        </#if>
+    </#if>
+
+    <script>
+        window.addEventListener('message', function (event) {
+            if (event.origin !== document.location.origin) {
+                var loginForm = document.getElementById('loginForm');
+                var actionAttribute = loginForm.getAttribute("action");
+                if (actionAttribute.indexOf("iframe") === -1) {
+                    actionAttribute = actionAttribute + "&iframe=1";
+                }
+                loginForm.setAttribute("action", actionAttribute);
+            }
+        });
+
+        function submitForm1() {
+            document.getElementById("on").submit();
+        }
+    </script>
+</@layout.registrationLayout>

@@ -1,0 +1,49 @@
+.logo {
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: 64px;
+  background-image: url('../assets/images/logo.svg');
+
+  @include tablet {
+    height: 40px;
+  }
+
+  @include mobile {
+    height: 30px;
+  }
+
+  &__container {
+    max-width: 200px;
+    width: 100%;
+  }
+}
+
+.phone {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.error-background {
+  position: fixed;
+  z-index: -1;
+  object-fit: cover;
+  object-position: left top;
+  left: 10px;
+  right: 0;
+  left: 5px;
+  bottom: -159px;
+  height: 540px;
+
+  @include tablet {
+    left: -25px;
+    bottom: -40px;
+    height: 300px;
+  }
+
+  @include mobile {
+    left: -18px;
+    bottom: -35px;
+    height: 260px;
+  }
+}

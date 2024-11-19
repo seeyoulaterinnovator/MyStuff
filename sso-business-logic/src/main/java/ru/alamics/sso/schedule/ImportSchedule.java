@@ -16,7 +16,6 @@ import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.user.ImportReportService;
 import ru.alamics.sso.user.ImportService;
-import ru.alamics.sso.user.model.ImportUsersDataModel;
 import ru.alamics.sso.user.model.ImportUsersReportModel;
 import ru.alamics.sso.user.model.RepeatNextTimeException;
 import ru.alamics.sso.util.E2EUtil;
@@ -104,9 +103,14 @@ public class ImportSchedule implements ScheduledTask {
 
     @Override
     public void run(KeycloakSession session) {
+        if(properties.isClusterTaskDisabled()) {
+            log.debug("Run skipped");
+            return;
+        }
+
         long scheduleStart = System.currentTimeMillis();
 
-            List<ImportUsersReportModel> reportList = importReportService.getReportListByStatus(ImportUsersReportStatus.AWAITING);
+        List<ImportUsersReportModel> reportList = importReportService.getReportListByStatus(ImportUsersReportStatus.AWAITING);
 
         for (ImportUsersReportModel reportModel : reportList) {
             reportModel.setStatus(ImportUsersReportStatus.IN_PROGRESS);

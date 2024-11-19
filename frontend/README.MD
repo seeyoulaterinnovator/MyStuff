@@ -23,8 +23,9 @@
 
 ## Описание и структура проекта 
 
-Основное конфигурирование тем клиентской части основывается на редактировании [FreeMarker](https://freemarker.apache.org/) шаблонов, определенных в [keycloak-extension\src\main\resources\themes](./keycloak-extension/src/main/resources/themes)
-В каталоге [frontend](../frontend/) содержатся Svelte-проекты для каждой из тем клиентской части, которые расширяют основной функционал FreeMarker шаблонов.
+- Основное конфигурирование тем клиентской части основывается на редактировании [FreeMarker](https://freemarker.apache.org/) шаблонов, определенных в [keycloak-extension\src\main\resources\themes](./keycloak-extension/src/main/resources/themes)
+- В каталоге [frontend](../frontend/) содержатся Svelte-проекты для каждой из тем, которые расширяют основной функционал FreeMarker шаблонов.
+- В каталоге [frontend\StubPage](./StubPage) содержатся страницы-заглушки для каждой из тем, которые используются на случай технических работ.
 
 ## Требования
 
@@ -44,7 +45,7 @@
 ## Интернационализация
 
 Файлы для интернационализации находятся в [каталогах с темами](../keycloak-extension/src/main/resources/themes/).
-Например, для кастомной темы клиентской части они расположены в [domru/login/messages](../keycloak-extension/src/main/resources/themes/domru/login/messages/)
+Например, для кастомной темы _domru_ они расположены в [domru/login/messages](../keycloak-extension/src/main/resources/themes/domru/login/messages/)
 
 ## Дополнительные источники
 

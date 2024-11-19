@@ -39,12 +39,40 @@ stages:
   tags:
     - sso-build-k8s
 
+.domru:prod:template:
+  stage: deploy
+  image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
+  when: manual
+  only:
+    - itres-new-prod
+  script:
+    - export FQDN=`echo "${CI_ENVIRONMENT_URL}" | sed 's/^http\(\|s\):\/\///g'`
+    - consul-template -once -template ".helm/values-prod.yaml.tpl:values.yaml"
+    - |-
+      if [[ -z "$NEW_DB_DATABASE" ]]; then
+          export NEW_DB_DATABASE=$DB_DATABASE
+      fi
+    - echo "DB_DATABASE = ${DB_DATABASE}"
+    - echo "NEW_DB_DATABASE = ${NEW_DB_DATABASE}"
+    - cat values.yaml
+    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml --set extraEnvs.DB_DATABASE=${NEW_DB_DATABASE} ./.helm -n ${NAMESPACE} --atomic --timeout 10m
+    - helm history -n ${NAMESPACE} ${CI_ENVIRONMENT_SLUG} --max 5
+  variables:
+    NAMESPACE: 'sso'
+    NODE_PORT: '30080'
+    REPLICA_COUNT: '5'
+
 .frontend:theme:build:
   stage: build
   image: harbor.ertelecom.ru/b2bweb/openjdk:21-node20
   script:
     - cd frontend/$BUILD_THEME
-    - npm i && npm run build
+    - npm ci --cache ~/.npm --prefer-offline && npm run build
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - ~/.npm
+
   artifacts:
     paths:
       - keycloak-extension/src/main/resources/themes/$BUILD_THEME/login/resources/build/
@@ -52,7 +80,10 @@ stages:
     expire_in: 1 day
   only:
     - itres-new
+    - itres-new-prod
+    - cicd
   allow_failure: false
+  when: manual
   tags:
     - sso-build-docker
 
@@ -87,7 +118,10 @@ frontend:admin:build:
     expire_in: 1 day
   only:
     - itres-new
+    - itres-new-prod
+    - cicd
   allow_failure: false
+  when: manual
   tags:
     - sso-build-docker
 
@@ -97,6 +131,10 @@ back:build:
   <<: *build-template
   script:
     - ./gradlew --stacktrace --console=plain build
+  cache:
+    key: "CI_COMMIT_REF_SLUG"
+    paths:
+      - .gradle/
   artifacts:
     paths:
       - build/keycloak-extension/libs/keycloak-extension-1.0.1-all.jar
@@ -105,11 +143,14 @@ back:build:
   allow_failure: false
   only:
     - itres-new
+    - itres-new-prod
+    - cicd
   needs:
     - "frontend:domru:build"
     - "frontend:ertelecom:build"
     - "frontend:stelecom:build"
     - "frontend:admin:build"
+  when: manual
   tags:
     - sso-build-docker
 
@@ -192,6 +233,23 @@ domru:stage4:
 #    - helm history -n ${NAMESPACE} infinispan --max 5
 #  tags:
 #    - sso-build-k8s
+
+domru:perm-k8s:
+  extends: .domru:prod:template
+  tags:
+    - sso-k8s-perm
+  environment:
+    name: production-k8s-perm
+    url: https://auth.dom.ru
+
+domru:voronezh-k8s:
+  extends: .domru:prod:template
+  tags:
+    - sso-k8s-voronezh
+  environment:
+    name: production-k8s-voronezh
+    url: https://auth.dom.ru
+
 
 domru:perm:primary:
   stage: deploy

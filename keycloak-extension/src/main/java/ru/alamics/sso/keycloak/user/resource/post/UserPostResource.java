@@ -135,6 +135,7 @@ public class UserPostResource {
     @NoCache
     public Response getUserPost(@PathParam("id") String userId) {
         try {
+            log.info("userId = " + userId);
             return JsonResponse.success()
                     .addResult("user_post", userPostFacade.findByUserId(userId))
                     .build();

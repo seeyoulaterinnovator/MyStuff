@@ -1,0 +1,15 @@
+$desktop: 1280px;
+$desktop-below: 1279px;
+
+$tablet: 768px;
+$tablet-below: 767px;
+
+:root {
+  --color-main-800: #222;
+  --color-main-900: #899da8;
+  --color-main-1200: #cfdbe0;
+  --color-main-1300: #efefef;
+  --color-accent-blue-1200-hover: #0090d8;
+
+  --font-family-base: 'CoFo Sans', sans-serif;
+}

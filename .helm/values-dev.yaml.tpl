@@ -16,8 +16,10 @@ preStopDelay:
   delaySeconds: 15
 
 extraEnvs:
+  JAVA_OPTS_APPEND: "-Djgroups.dns.query={{ env "CI_ENVIRONMENT_SLUG" }}-sso-headless"
   KC_CACHE: "ispn"
   KC_CACHE_CONFIG_FILE: "cache-ispn-custom.xml"
+  KC_CACHE_STACK: "kubernetes"
   KC_DB: "mariadb"
   KC_DB_URL_HOST: "{{ env "DB_HOST" }}"
   KC_DB_URL_PORT: "{{ env "DB_PORT" }}"
@@ -33,6 +35,7 @@ extraEnvs:
   KC_HOSTNAME_URL: "{{ env "CI_ENVIRONMENT_URL" }}"
   # KC_LOG_CONSOLE_OUTPUT: "json" # need configure in OpenSearch
   KC_LOG_LEVEL: "INFO"
+  KC_HEALTH_ENABLED: "true"
   KC_METRICS_ENABLED: "true"
   DB_DATABASE: "{{ env "DB_DATABASE" }}"
   KEYCLOAK_HOSTNAME: "{{ env "FQDN" }}"

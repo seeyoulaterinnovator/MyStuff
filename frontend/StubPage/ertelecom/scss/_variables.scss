@@ -1,0 +1,15 @@
+$desktop: 1280px;
+$desktop-below: 1279px;
+
+$tablet: 768px;
+$tablet-below: 767px;
+
+:root {
+  --color-main-800: #000;
+  --color-main-900: rgba(0,0,0,0.6);
+  --color-main-1200: #cfdbe0;
+  --color-main-1300: #efefef;
+  --color-accent-blue-1200-hover: #4F4BFE;
+
+  --font-family-base: 'Suisse Intl', sans-serif;
+}

@@ -6,7 +6,12 @@ import type {
   UserPostRepresentation,
 } from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
 import { NetworkError } from "@keycloak/keycloak-admin-client/lib";
-import { AlertVariant, Text, Tooltip } from "@patternfly/react-core";
+import {
+  AlertVariant,
+  ButtonVariant,
+  Text,
+  Tooltip,
+} from "@patternfly/react-core";
 import {
   CSSProperties,
   useCallback,
@@ -24,7 +29,10 @@ import { toUser } from "../../user/routes/User";
 import { type Field } from "../../components/table-toolbar/KeycloakDataTable";
 import { useTranslation } from "react-i18next";
 import { saveAs } from "file-saver";
-import { useConfirmDialog } from "../../components/confirm-dialog/ConfirmDialog";
+import {
+  useConfirmDialog,
+  type ConfirmDialogProps,
+} from "../../components/confirm-dialog/ConfirmDialog";
 import { isExistGuard } from "../helpers/guards";
 import type { CustomUsersAction } from "../types/users";
 import { QueryParam } from "../constants/queryParams";
@@ -33,6 +41,8 @@ import type { SortingOptions } from "../types/sorting";
 import { useWhoAmI } from "../../context/whoami/WhoAmI";
 import { addBomAndConvertToBlob } from "../helpers/transforms";
 import { ExclamationCircleIcon } from "@patternfly/react-icons";
+import type PageInfoRepresentation from "@keycloak/keycloak-admin-client/lib/defs/custom/pageInfoRepresentation";
+import { URLQueryParams } from "../helpers/queryParams";
 
 const getInvalidUsers = (
   users?: Array<UserRepresentation | UserInfoRepresentation>,
@@ -114,14 +124,12 @@ interface UserInfoWithFlatUserPosts
 }
 
 export interface UseUserDataTableProps {
-  selectedRows: Array<UserRepresentation | UserInfoRepresentation>;
   refresh: () => void;
   userStorage?: ComponentRepresentation[];
   listUsers?: boolean;
 }
 
 export const useUserDataTable = ({
-  selectedRows,
   refresh,
   userStorage,
 }: UseUserDataTableProps) => {
@@ -131,7 +139,29 @@ export const useUserDataTable = ({
   const { realms, setSearchRealm, accessibleRealms } = useRealms();
   const { realm: realmName } = useRealm();
   const [params] = useSearchParams();
-  const paramSearchRealm = params.get(QueryParam.SEARCH_REALM);
+
+  const [sortingOptions, setSortingOptions] = useState<SortingOptions>();
+  const [pagination, setPagination] = useState<PageInfoRepresentation>();
+  const [customSelectedRows, setCustomSelectedRows] = useState<
+    UserInfoRepresentation[]
+  >([]);
+  const {
+    paramSearch,
+    paramSearchPhone,
+    paramSearchRealm,
+    paramSearchToms,
+    paramSearchUser,
+  } = URLQueryParams.get(
+    [
+      QueryParam.SEARCH,
+      QueryParam.SEARCH_USER,
+      QueryParam.SEARCH_TOMS,
+      QueryParam.SEARCH_PHONE,
+      QueryParam.SEARCH_REALM,
+    ],
+    params,
+  );
+
   const rawFilterSearchRealm = paramSearchRealm || realmName;
   const [customFilters, setCustomFilters] = useState<CustomUserQuery>({
     searchRealm: accessibleRealms.some(
@@ -139,6 +169,10 @@ export const useUserDataTable = ({
     )
       ? rawFilterSearchRealm
       : accessibleRealms[0]?.name,
+    search: paramSearch,
+    searchUser: paramSearchUser,
+    searchPhone: paramSearchPhone,
+    searchToms: paramSearchToms,
   });
 
   const { searchRealm: filterSearchRealm } = customFilters;
@@ -150,8 +184,8 @@ export const useUserDataTable = ({
   const listUsers = !(userStorage && userStorage.length > 0);
 
   const selectedIds = useMemo(() => {
-    return selectedRows.map((item) => item.id).filter(isExistGuard);
-  }, [selectedRows]);
+    return customSelectedRows.map((item) => item.id).filter(isExistGuard);
+  }, [customSelectedRows]);
 
   const userColumns = useMemo<Field<UserInfoWithFlatUserPosts>[]>(() => {
     return [
@@ -267,9 +301,10 @@ export const useUserDataTable = ({
           ...query,
         },
       });
-      const { "users-info": userInfo } = response.results;
+      const { "users-info": userInfo, "page-info": pageInfo } =
+        response.results;
 
-      return userInfo;
+      return { userInfo, pageInfo };
     },
     [adminClient, customFilters],
   );
@@ -277,18 +312,15 @@ export const useUserDataTable = ({
   const searchUserWithCustomFilters = (newCustomFilters: CustomUserQuery) => {
     setCustomFilters(newCustomFilters);
     refresh();
+    setCustomSelectedRows([]);
 
-    const url = new URL(window.location.href);
-
-    if (newCustomFilters.searchRealm) {
-      url.searchParams.set(
-        QueryParam.SEARCH_REALM,
-        newCustomFilters.searchRealm,
-      );
-      history.pushState({}, "", url);
-    } else {
-      url.searchParams.delete(QueryParam.SEARCH_REALM);
-    }
+    URLQueryParams.update([
+      [QueryParam.SEARCH, newCustomFilters.search],
+      [QueryParam.SEARCH_PHONE, newCustomFilters.searchPhone],
+      [QueryParam.SEARCH_REALM, newCustomFilters.searchRealm],
+      [QueryParam.SEARCH_TOMS, newCustomFilters.searchToms],
+      [QueryParam.SEARCH_USER, newCustomFilters.searchUser],
+    ]);
   };
 
   useEffect(() => {
@@ -328,7 +360,7 @@ export const useUserDataTable = ({
         unverifiedUsers,
         verifiedUserIds,
         unlockedAndVerifiedUserIds,
-      } = getInvalidUsers(selectedRows);
+      } = getInvalidUsers(customSelectedRows);
 
       const isBlockedExist = Boolean(blocked && blockedUsers?.length);
       const isUnverifiedExist = Boolean(unverified && unverifiedUsers?.length);
@@ -366,247 +398,317 @@ export const useUserDataTable = ({
         unlockedAndVerifiedUserIds,
       };
     },
-    [selectedRows],
+    [customSelectedRows],
   );
 
   const checkIsUsersNotSelected = useCallback(() => {
-    if (!selectedRows.length) {
+    if (!customSelectedRows.length) {
       addError(t("noUsersSelected"), "error");
 
       return true;
     }
 
     return false;
-  }, [selectedRows]);
+  }, [customSelectedRows]);
 
-  const handleCustomAction = async (action: CustomUsersAction) => {
-    switch (action.type) {
+  const [currentAction, setCurrentAction] =
+    useState<CustomUsersAction | null>();
+
+  const dialogProps = useMemo<ConfirmDialogProps>(() => {
+    const confirmDialogBaseProps = {
+      titleKey: `${currentAction?.type}ConfirmUsers`,
+      messageKey: t(`${currentAction?.type}ConfirmDialog`, {
+        count: customSelectedRows.length,
+      }),
+      continueButtonLabel: currentAction?.type,
+      continueButtonVariant: ButtonVariant.danger,
+    };
+
+    switch (currentAction?.type) {
       case CustomUserToolbarAction.SEND_LOGIN: {
-        try {
-          if (
-            checkIsUsersNotSelected() ||
-            checkUsersForActivity({ blocked: true, unverified: true })
-              .isBlockedOrUnverifiedExist
-          ) {
-            return;
-          }
+        return {
+          ...confirmDialogBaseProps,
+          onConfirm: async () => {
+            try {
+              if (
+                checkIsUsersNotSelected() ||
+                checkUsersForActivity({ blocked: true, unverified: true })
+                  .isBlockedOrUnverifiedExist
+              ) {
+                return;
+              }
 
-          await adminClient.customUsers.sendLogin(
-            { realm: filterSearchRealm },
-            selectedIds,
-          );
+              await adminClient.customUsers.sendLogin(
+                { realm: filterSearchRealm },
+                selectedIds,
+              );
 
-          addAlert(t("userLoginSentSuccess"), AlertVariant.success);
-        } catch (error) {
-          addError(t("userLoginSentError"), error);
-        }
-
-        break;
+              addAlert(t("userLoginSentSuccess"), AlertVariant.success);
+            } catch (error) {
+              addError(t("userLoginSentError"), error);
+            }
+          },
+        };
       }
 
       case CustomUserToolbarAction.SEND_LOGIN_AND_RESET_PASSWORD: {
-        try {
-          if (
-            checkIsUsersNotSelected() ||
-            checkUsersForActivity({ blocked: true, unverified: true })
-              .isBlockedOrUnverifiedExist
-          ) {
-            return;
-          }
+        return {
+          ...confirmDialogBaseProps,
+          onConfirm: async () => {
+            try {
+              if (
+                checkIsUsersNotSelected() ||
+                checkUsersForActivity({ blocked: true, unverified: true })
+                  .isBlockedOrUnverifiedExist
+              ) {
+                return;
+              }
 
-          await adminClient.customUsers.sendLoginAndResetPassword(
-            { realm: filterSearchRealm },
-            selectedIds,
-          );
+              await adminClient.customUsers.sendLoginAndResetPassword(
+                { realm: filterSearchRealm },
+                selectedIds,
+              );
 
-          addAlert(
-            t("userLoginSentAndPasswordResetSuccess"),
-            AlertVariant.success,
-          );
-        } catch (error) {
-          addError(t("userLoginSentAndPasswordResetError"), error);
-        }
-
-        break;
+              addAlert(
+                t("userLoginSentAndPasswordResetSuccess"),
+                AlertVariant.success,
+              );
+            } catch (error) {
+              addError(t("userLoginSentAndPasswordResetError"), error);
+            }
+          },
+        };
       }
 
       case CustomUserToolbarAction.DOWNLOAD_TEMPLATE_CSV: {
-        try {
-          const downloadedFile =
-            await adminClient.customUsers.downloadCSVTemplate({
-              realm: filterSearchRealm,
-            });
+        return {
+          ...confirmDialogBaseProps,
+          onConfirm: async () => {
+            try {
+              const downloadedFile =
+                await adminClient.customUsers.downloadCSVTemplate({
+                  realm: filterSearchRealm,
+                });
 
-          saveAs(addBomAndConvertToBlob(downloadedFile), `user_template.csv`);
-        } catch (error) {
-          addError(t("userCSVTemplateDownloadError"), error);
-        }
-
-        break;
+              saveAs(
+                addBomAndConvertToBlob(downloadedFile),
+                `user_template.csv`,
+              );
+            } catch (error) {
+              addError(t("userCSVTemplateDownloadError"), error);
+            }
+          },
+        };
       }
 
       case CustomUserToolbarAction.DOWNLOAD_TEMPLATE_EXCEL: {
-        try {
-          const downloadedFile =
-            await adminClient.customUsers.downloadExcelTemplate({
-              realm: filterSearchRealm,
-            });
+        return {
+          ...confirmDialogBaseProps,
+          onConfirm: async () => {
+            try {
+              const downloadedFile =
+                await adminClient.customUsers.downloadExcelTemplate({
+                  realm: filterSearchRealm,
+                });
 
-          saveAs(
-            new Blob([downloadedFile], {
-              type: "application/octet-stream",
-            }),
-            `user_template.xlsx`,
-          );
-        } catch (error) {
-          addError(t("userExcelTemplateDownloadError"), error);
-        }
-
-        break;
+              saveAs(
+                new Blob([downloadedFile], {
+                  type: "application/octet-stream",
+                }),
+                `user_template.xlsx`,
+              );
+            } catch (error) {
+              addError(t("userExcelTemplateDownloadError"), error);
+            }
+          },
+        };
       }
 
       case CustomUserToolbarAction.IMPORT_FILE: {
-        try {
-          const { payload } = action;
-          const formData = new FormData();
+        return {
+          ...confirmDialogBaseProps,
+          onConfirm: async () => {
+            try {
+              const { payload } = currentAction;
+              const formData = new FormData();
 
-          if (payload) {
-            formData.append("file", payload);
+              if (payload) {
+                formData.append("file", payload);
 
-            await adminClient.customUsers.importFile(payload.name)(
-              { realm: filterSearchRealm },
-              formData,
-            );
+                await adminClient.customUsers.importFile(payload.name)(
+                  { realm: filterSearchRealm },
+                  formData,
+                );
 
-            toggleUploadUserInfo();
-          }
-        } catch (error: unknown) {
-          if (error instanceof NetworkError) {
-            switch (error.response.status) {
-              case 400:
-                addError(error.message, error);
-                break;
+                toggleUploadUserInfo();
+              }
+            } catch (error: unknown) {
+              if (error instanceof NetworkError) {
+                switch (error.response.status) {
+                  case 400:
+                    addError(error.message, error);
+                    break;
 
-              case 502:
-                addAlert(t("tooManyUsersToImport"), AlertVariant.info);
-                break;
+                  case 502:
+                    addAlert(t("tooManyUsersToImport"), AlertVariant.info);
+                    break;
 
-              default:
-                addError(error.response.statusText, error);
+                  default:
+                    addError(error.response.statusText, error);
+                }
+              }
             }
-          }
-        }
-
-        break;
+          },
+        };
       }
 
       case CustomUserToolbarAction.EXPORT_CSV:
       case CustomUserToolbarAction.EXPORT_EXCEL: {
-        const isExcel = action.type === CustomUserToolbarAction.EXPORT_EXCEL;
-        const downloadedExtension = isExcel ? "xlsx" : "csv";
+        return {
+          ...confirmDialogBaseProps,
+          onConfirm: async () => {
+            const isExcel =
+              currentAction.type === CustomUserToolbarAction.EXPORT_EXCEL;
+            const downloadedExtension = isExcel ? "xlsx" : "csv";
 
-        try {
-          const downloadedFile = await adminClient.customUsers.downloadUsers(
-            { realm: filterSearchRealm },
-            {
-              type: downloadedExtension,
-              userIds: selectedIds,
-              userParameters: [
-                "USER_ID",
-                "FIRST_NAME",
-                "EMAIL",
-                "PHONE",
-                "TOMS_ID",
-                "DMP_ID",
-                "ROLE",
-                "SYSTEM",
-                "ENABLED",
-              ],
-            },
-          );
+            try {
+              const downloadedFile =
+                await adminClient.customUsers.downloadUsers(
+                  { realm: filterSearchRealm },
+                  {
+                    type: downloadedExtension,
+                    userIds: selectedIds,
+                    userParameters: [
+                      "USER_ID",
+                      "FIRST_NAME",
+                      "EMAIL",
+                      "PHONE",
+                      "TOMS_ID",
+                      "DMP_ID",
+                      "ROLE",
+                      "SYSTEM",
+                      "ENABLED",
+                    ],
+                  },
+                );
 
-          saveAs(
-            isExcel
-              ? new Blob([downloadedFile], {
-                  type: "application/octet-stream",
-                })
-              : addBomAndConvertToBlob(downloadedFile),
-            `user_info.${downloadedExtension}`,
-          );
-        } catch (error) {
-          addError(t("usersExportedError"), error);
-        }
-
-        break;
+              saveAs(
+                isExcel
+                  ? new Blob([downloadedFile], {
+                      type: "application/octet-stream",
+                    })
+                  : addBomAndConvertToBlob(downloadedFile),
+                `user_info.${downloadedExtension}`,
+              );
+            } catch (error) {
+              addError(t("usersExportedError"), error);
+            }
+          },
+        };
       }
 
       case CustomUserToolbarAction.RESET_PASSWORD: {
-        try {
-          if (checkIsUsersNotSelected()) {
-            return;
-          }
+        return {
+          ...confirmDialogBaseProps,
+          onConfirm: async () => {
+            try {
+              if (checkIsUsersNotSelected()) {
+                return;
+              }
 
-          await adminClient.customUsers.resetPassword(
-            { realm: realmName },
-            selectedIds,
-          );
-          addAlert(t("userPasswordResetSuccess"), AlertVariant.success);
-        } catch (error) {
-          addError(t("userPasswordResetError"), error);
-        }
-
-        break;
+              await adminClient.customUsers.resetPassword(
+                { realm: realmName },
+                selectedIds,
+              );
+              addAlert(t("userPasswordResetSuccess"), AlertVariant.success);
+            } catch (error) {
+              addError(t("userPasswordResetError"), error);
+            }
+          },
+        };
       }
 
       case CustomUserToolbarAction.BLOCK_USERS: {
-        try {
-          if (checkIsUsersNotSelected()) {
-            return;
-          }
+        return {
+          ...confirmDialogBaseProps,
+          onConfirm: async () => {
+            try {
+              if (checkIsUsersNotSelected()) {
+                return;
+              }
 
-          const { verifiedUserIds } = checkUsersForActivity({
-            unverified: true,
-          });
+              const { verifiedUserIds } = checkUsersForActivity({
+                unverified: true,
+              });
 
-          if (!verifiedUserIds.length) {
-            return;
-          }
+              if (!verifiedUserIds.length) {
+                return;
+              }
 
-          await adminClient.customUsers.block(
-            { realm: realmName },
-            verifiedUserIds,
-          );
-          addAlert(t("userBlockedSuccess"), AlertVariant.success);
-          refresh();
-        } catch (error) {
-          addError(t("userBlockedError"), error);
-        }
-
-        break;
+              await adminClient.customUsers.block(
+                { realm: realmName },
+                verifiedUserIds,
+              );
+              addAlert(t("userBlockedSuccess"), AlertVariant.success);
+              refresh();
+            } catch (error) {
+              addError(t("userBlockedError"), error);
+            }
+          },
+        };
       }
 
       case CustomUserToolbarAction.UNLOCK_USERS: {
-        try {
-          if (checkIsUsersNotSelected()) {
-            return;
-          }
+        return {
+          ...confirmDialogBaseProps,
+          onConfirm: async () => {
+            try {
+              if (checkIsUsersNotSelected()) {
+                return;
+              }
 
-          const { verifiedUserIds } = checkUsersForActivity({
-            unverified: true,
-          });
+              const { verifiedUserIds } = checkUsersForActivity({
+                unverified: true,
+              });
 
-          if (!verifiedUserIds.length) {
-            return;
-          }
+              if (!verifiedUserIds.length) {
+                return;
+              }
 
-          await adminClient.customUsers.unlock(
-            { realm: realmName },
-            verifiedUserIds,
-          );
-          addAlert(t("userUnlockedSuccess"), AlertVariant.success);
-          refresh();
-        } catch (error) {
-          addError(t("userUnlockedError"), error);
+              await adminClient.customUsers.unlock(
+                { realm: realmName },
+                verifiedUserIds,
+              );
+              addAlert(t("userUnlockedSuccess"), AlertVariant.success);
+              refresh();
+            } catch (error) {
+              addError(t("userUnlockedError"), error);
+            }
+          },
+        };
+      }
+
+      default:
+        return confirmDialogBaseProps;
+    }
+  }, [currentAction]);
+
+  const [toggleConfirmActionDialog, ConfirmAction] = useConfirmDialog({
+    ...dialogProps,
+    onCancel: () => {
+      setCurrentAction(null);
+    },
+  });
+
+  const handleCustomAction = async (action: CustomUsersAction) => {
+    switch (action.type) {
+      case CustomUserToolbarAction.SEND_LOGIN:
+      case CustomUserToolbarAction.SEND_LOGIN_AND_RESET_PASSWORD:
+      case CustomUserToolbarAction.RESET_PASSWORD:
+      case CustomUserToolbarAction.BLOCK_USERS:
+      case CustomUserToolbarAction.UNLOCK_USERS: {
+        if (checkIsUsersNotSelected()) {
+          return;
         }
 
         break;
@@ -615,19 +717,20 @@ export const useUserDataTable = ({
       default:
         break;
     }
+
+    setCurrentAction(action);
+    toggleConfirmActionDialog();
   };
 
   const [toggleUploadUserInfo, UploadUserInfo] = useConfirmDialog({
     titleKey: "information",
-    messageKey: t("importUsersMessage", { count: selectedRows.length }),
+    messageKey: t("importUsersMessage"),
     continueButtonLabel: "ok",
     noCancelButton: true,
     onConfirm: () => {
       return;
     },
   });
-
-  const [sortingOptions, setSortingOptions] = useState<SortingOptions>();
 
   const customLoader = async (
     first?: number,
@@ -642,7 +745,7 @@ export const useUserDataTable = ({
     try {
       setSortingOptions(newSortingOptions);
 
-      const users = await getUsers({
+      const { userInfo, pageInfo } = await getUsers({
         first,
         max,
         sortAsc: newSortingOptions?.order === "asc",
@@ -650,7 +753,7 @@ export const useUserDataTable = ({
       });
       const usersNew: UserInfoWithFlatUserPosts[] = [];
 
-      users.forEach((user) => {
+      userInfo.forEach((user) => {
         if (!user.userPosts?.length) {
           usersNew.push(user);
         }
@@ -660,6 +763,7 @@ export const useUserDataTable = ({
           usersNew.push({ ...userPostRest, ...user, userPostId: id });
         });
       });
+      setPagination(pageInfo);
 
       return usersNew;
     } catch (error) {
@@ -675,6 +779,7 @@ export const useUserDataTable = ({
   return {
     sortingOptions,
     customFilters,
+    customSelectedRows,
     isCustomTheme,
     realms,
     userColumns,
@@ -686,5 +791,8 @@ export const useUserDataTable = ({
     toggleUploadUserInfo,
     UploadUserInfo,
     setSortingOptions,
+    setCustomSelectedRows,
+    pagination,
+    ConfirmAction,
   };
 };

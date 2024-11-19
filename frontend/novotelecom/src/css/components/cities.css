@@ -1,0 +1,140 @@
+.cities-container {
+  @apply gap-8;
+
+  max-height: 100%;
+  height: auto;
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    @apply gap-y-6;
+  }
+
+  @media only screen and (max-width: 767px) {
+    @apply gap-y-6;
+  }
+}
+
+.cities-column {
+  @apply gap-8;
+
+  flex: 1;
+  gap: 2rem;
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    min-width: 30%;
+    @apply gap-6;
+  }
+
+  @media only screen and (max-width: 767px) {
+    min-width: 100%;
+    @apply gap-6;
+  }
+
+  @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    width: calc((100vw - 4.9rem) / 4);
+    height: 100vh;
+  }
+  @media (max-width: 1279px) and (-ms-high-contrast: none),
+    (-ms-high-contrast: active) {
+    width: calc((100vw - 5.4rem) / 4);
+  }
+  @media (max-width: 767px) and (-ms-high-contrast: none),
+    (-ms-high-contrast: active) {
+    width: 100vw;
+  }
+}
+
+.transparent-bg {
+  background: rgba(34, 34, 34, 0.7);
+}
+
+.choose-city-text {
+}
+
+#cities-button {
+  span {
+    font-family: "IBM Plex Sans", sans-serif;
+    text-align: left;
+    display: flex;
+    align-items: center;
+  }
+}
+
+.city {
+  text-align: start !important;
+
+  &:not(:last-child) {
+    margin-bottom: 0.875rem;
+
+    @media screen and (min-width: 768px) {
+      @apply .mb-2;
+    }
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .cities-column:nth-child(2) {
+    order: 3;
+  }
+
+  .cities-column:nth-child(4) {
+    order: 4;
+  }
+
+  .phone--hidden-small {
+    display: none;
+  }
+}
+
+
+.search-city-input {
+  height: 48px;
+  padding: 12px 14px 12px 16px;
+  border-radius: 12px;
+
+  input {
+    ::placeholder {
+      color: var(--main-900);
+    }
+
+    flex-grow: 1;
+    outline: none;
+  }
+
+  @media only screen and (min-width: 1280px) {
+    width: 696px;
+    min-width: 242px;
+    height: 48px;
+  }
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    min-width: 226px;
+    height: 44px;
+  }
+
+  @media only screen and (max-width: 767px) {
+    min-width: 288px;
+    height: 40px;
+  }
+}
+
+.city-group-letter {
+}
+
+.cities-column .city:hover {
+  color: var(--accent-blue-1200-hover);
+}
+
+.select-city-confirmation {
+  .btn {
+    text-wrap: nowrap;
+    @media only screen and (max-width: 767px) {
+      text-wrap: wrap;
+    }
+  }
+}
+
+#cities-modal:has(.select-city-confirmation) {
+  #cities-header {
+    display: none;
+  }
+}

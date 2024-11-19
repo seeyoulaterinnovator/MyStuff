@@ -12,6 +12,7 @@ import java.util.List;
 public class UserEntityRepresentation {
     public static String SEND_LOGIN_AND_RESET_PASSWORD = "SEND_LOGIN_AND_RESET_PASSWORD";
     public static String SEND_LOGIN = "SEND_LOGIN";
+    public static String DELETE_PASSWORD = "DELETE_PASSWORD";
 
     private String id;
     private String email;

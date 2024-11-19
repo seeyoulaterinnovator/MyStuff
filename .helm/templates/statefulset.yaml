@@ -36,6 +36,12 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+
+      affinity:
+        {{- if .Values.podAntiAffinity }}
+        podAntiAffinity:
+          {{- toYaml .Values.podAntiAffinity | nindent 10 }}
+        {{- end }}
       containers:
         - name: keycloak
           args:
@@ -120,5 +126,5 @@ spec:
     {{- end }}
     {{- if .Values.hostAliases }}
       hostAliases:
-        {{ toYaml .Values.hostAliases | indent 8 }}
+      {{- toYaml .Values.hostAliases | nindent 8 }}
     {{- end }}

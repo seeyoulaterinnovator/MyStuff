@@ -1,0 +1,25 @@
+.logo {
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: 20px;
+  background-image: url('../assets/images/logo.svg');
+
+  @include tablet {
+    background-image: url('../assets/images/logo-mid.svg');
+  }
+
+  @include mobile {
+    background-image: url('../assets/images/logo-small.svg');
+  }
+
+  &__container {
+    max-width: 200px;
+    width: 100%;
+  }
+}
+
+.phone {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

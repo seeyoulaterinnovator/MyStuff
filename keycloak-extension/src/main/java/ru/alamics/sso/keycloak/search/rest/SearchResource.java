@@ -16,9 +16,11 @@ import ru.alamics.sso.jpa.model.CustomUserAdapter;
 import ru.alamics.sso.keycloak.GeneralRealm;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.service.RequiredActionService;
 import ru.alamics.sso.user.web.RealmNameDto;
+import ru.alamics.sso.user.web.UserSearch;
 import ru.alamics.sso.util.Util;
 
 import java.net.HttpURLConnection;
@@ -86,8 +88,15 @@ public class SearchResource {
 
         clearUserCache();
 
+        List<UserSearch> users = userFindService.getUsersByParameters(searchRealm, search, searchUser, searchEmail, searchToms, searchPhone, sortField, sortAsc, first, max);
+        long total = userFindService.getTotalUsersByParameters(searchRealm, search, searchUser, searchEmail, searchToms, searchPhone);
+        
+        int pageSize = max - 1;
+        int pageNum = first / pageSize;
+
         return JsonResponse.success()
-                .addResult("users-info", userFindService.getUsersByParameters(searchRealm, search, searchUser, searchEmail, searchToms, searchPhone, sortField, sortAsc, first, max))
+                .addResult("users-info", users)
+                .addResult("page-info", DataMapper.toPageDto(users, total, pageNum, pageSize))
                 .build();
     }
 

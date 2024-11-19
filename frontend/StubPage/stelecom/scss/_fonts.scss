@@ -1,0 +1,23 @@
+@font-face {
+    font-family: 'Inter';
+    src: url('../assets/fonts/Inter-ExtraBold.eot');
+    src: local('Inter Extra Bold'), local('Inter-ExtraBold'),
+        url('../assets/fonts/Inter-ExtraBold.eot?#iefix') format('embedded-opentype'),
+        url('../assets/fonts/Inter-ExtraBold.woff2') format('woff2'),
+        url('../assets/fonts/Inter-ExtraBold.woff') format('woff'),
+        url('../assets/fonts/Inter-ExtraBold.ttf') format('truetype');
+    font-weight: 800;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Inter';
+    src: url('../assets/fonts/Inter-Light.eot');
+    src: local('Inter Light'), local('Inter-Light'),
+        url('../assets/fonts/Inter-Light.eot?#iefix') format('embedded-opentype'),
+        url('../assets/fonts/Inter-Light.woff2') format('woff2'),
+        url('../assets/fonts/Inter-Light.woff') format('woff'),
+        url('../assets/fonts/Inter-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+}
