@@ -102,6 +102,11 @@ frontend:stelecom:build:
   variables:
     BUILD_THEME: stelecom
 
+frontend:novotelecom:build:
+  extends: .frontend:theme:build
+  variables:
+    BUILD_THEME: novotelecom
+    
 frontend:admin:build:
   stage: build
   image: harbor.ertelecom.ru/b2bweb/openjdk:21-node20
