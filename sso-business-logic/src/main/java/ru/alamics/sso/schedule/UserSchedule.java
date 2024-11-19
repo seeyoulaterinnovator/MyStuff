@@ -31,6 +31,7 @@ import ru.alamics.sso.jpa.entity.AutoLockNotification;
 import ru.alamics.sso.jpa.entity.common.BlockType;
 import ru.alamics.sso.jpa.entity.common.NotificationType;
 import ru.alamics.sso.jpa.repository.*;
+import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsDto;
@@ -64,6 +65,8 @@ public class UserSchedule implements ScheduledTask {
     ClientRepository clientRepository;
     @Inject
     AdminEventRepository adminEventRepository;
+    @Inject
+    ApplicationProperties properties;
     @Inject
     SettingsService settingsService;
     @Inject
@@ -128,6 +131,11 @@ public class UserSchedule implements ScheduledTask {
     @Override
     @ActivateRequestContext
     public void run(KeycloakSession session) {
+        if(properties.isClusterTaskDisabled()) {
+            log.debug("Run skipped");
+            return;
+        }
+
         findExpiredPassword();
 
         for (RealmModel model : realmRepository.getAllRealms()) {
