@@ -151,6 +151,10 @@ public class ApplicationProperties {
         }
     }
 
+    public boolean isClusterTaskDisabled() {
+        return "true".equals(System.getenv("CLUSTER_TASK_DISABLED"));
+    }
+
     @PostConstruct
     @Locked.Write
     public void init() throws IOException {
