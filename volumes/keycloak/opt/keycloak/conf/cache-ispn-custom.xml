@@ -46,6 +46,11 @@
         </local-cache>
         <replicated-cache name="work">
             <expiration lifespan="-1"/>
+            <!--
+            См. https://github.com/keycloak/keycloak/issues/33402#issuecomment-2396393870
+            Пока отключено, т.к. будет развертывание Infinispan в external варианте
+            -->
+            <!-- <transaction mode="NON_XA"/> -->
         </replicated-cache>
         <local-cache name="keys" simple-cache="true">
             <encoding>

@@ -32,7 +32,8 @@ export const CustomConfigContextProvider = ({
   useFetch(
     async () => {
       return (
-        (await adminClient.customConfig.getCustomConfig({})).results || null
+        (await adminClient.customConfig.getCustomConfig({ realm })).results ||
+        null
       );
     },
     setConfig,
