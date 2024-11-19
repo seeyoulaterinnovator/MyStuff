@@ -29,6 +29,7 @@ public class EmailReqAction implements RequiredActionProvider {
         }
         log.info("called requiredActionChallenge");
         SsoUtil.sendEmailVer(context);
+        user.removeRequiredAction(PROVIDER_ID);
         context.challenge(createForm(context));
     }
 

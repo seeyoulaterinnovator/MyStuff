@@ -41,7 +41,7 @@ public class CustomConfigResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAdminPublicConfig() {
         return JsonResponse.success()
-                .addResult("adminTheme", session.getContext().getRealm().getAdminTheme())
+                .addResult("adminTheme", session.getContext().getRealm().getAdminTheme() == null ? "keycloak.v2" : session.getContext().getRealm().getAdminTheme())
                 .addResult("manageRealmName", GeneralRealm.MANAGER_REALMS.get(0))
                 .build();
     }
