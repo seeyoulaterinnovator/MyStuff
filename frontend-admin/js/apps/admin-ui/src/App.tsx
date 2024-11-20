@@ -30,6 +30,7 @@ import { AuthWall } from "./root/AuthWall";
 import { CustomConfigContextProvider } from "./customLogic/context/CustomConfigContext";
 import { CustomAuthWall } from "./root/CustomAuthWall";
 import { useClipboard } from "./customLogic/hooks/useClipboard";
+import { HashRestorer } from "./root/HashRestorer";
 
 const AppContexts = ({ children }: PropsWithChildren) => (
   <ErrorBoundaryProvider>
@@ -86,11 +87,13 @@ export const App = () => {
         >
           <ErrorBoundaryFallback fallback={ErrorRenderer}>
             <Suspense fallback={<KeycloakSpinner />}>
-              <AuthWall>
-                <CustomAuthWall>
-                  <Outlet />
-                </CustomAuthWall>
-              </AuthWall>
+              <HashRestorer>
+                <AuthWall>
+                  <CustomAuthWall>
+                    <Outlet />
+                  </CustomAuthWall>
+                </AuthWall>
+              </HashRestorer>
             </Suspense>
           </ErrorBoundaryFallback>
         </Page>

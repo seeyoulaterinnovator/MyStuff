@@ -8,6 +8,7 @@ import { i18n } from "./i18n/i18n";
 import { RootRoute } from "./routes";
 
 import "./index.css";
+import { HashInterceptor } from "./root/HashInterceptor";
 
 // Initialize required components before rendering app.
 await i18n.init();
@@ -18,6 +19,8 @@ const root = createRoot(container!);
 
 root.render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <HashInterceptor>
+      <RouterProvider router={router} />
+    </HashInterceptor>
   </StrictMode>,
 );
