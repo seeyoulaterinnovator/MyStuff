@@ -513,7 +513,11 @@ public class SsoFreeMarkerLoginForm extends FreeMarkerLoginFormsProvider {
         String username = context.getHttpRequest().getDecodedFormParameters().getFirst("username");
         if (username.startsWith("+7")) {
             UserEntity userFind = userFindService.getUserByPhone(context.getRealm(), username);
-            return userFind.getEmail();
+            if(userFind != null && userFind.getEmail() != null){
+                return userFind.getEmail();
+            } else {
+                return null;
+            }
         }
         return username;
     }
