@@ -457,7 +457,7 @@ export default function EventsSection() {
                 detailColumns={[
                   {
                     name: "details",
-                    enabled: (event) => event.details !== undefined,
+                    enabled: (event) => event?.details !== undefined,
                     cellRenderer: DetailCell,
                   },
                 ]}
