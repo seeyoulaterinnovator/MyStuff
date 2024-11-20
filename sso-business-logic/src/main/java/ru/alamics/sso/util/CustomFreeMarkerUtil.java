@@ -16,9 +16,11 @@ public class CustomFreeMarkerUtil {
     private final static String THEME_DOMRU = "/themes/domru/email";
     private final static String THEME_STELECOM = "/themes/stelecom/email";
     private final static String THEME_ERTELECOM = "/themes/ertelecom/email";
+    private final static String THEME_NOVOTELECOM = "/themes/novotelecom/email";
     private final static String DOMRU = "user";
     private final static String STELECOM = "S-TELECOM";
     private final static String ERTELECOM = "ER-TELECOM";
+    private final static String NOVOTELECOM = "novotelecom";
 
     private final static String[] REALM_NAMES = {"user", "S-TELECOM", "ERTELECOM"};
 
@@ -52,6 +54,9 @@ public class CustomFreeMarkerUtil {
                         break;
                     case ERTELECOM:
                         pathTheme = THEME_ERTELECOM;
+                        break;
+                    case NOVOTELECOM:
+                        pathTheme = THEME_NOVOTELECOM;
                         break;
                 }
             }
