@@ -28,7 +28,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static ru.alamics.sso.keycloak.util.HttpUtil.getMediaTypeCharset;
 
@@ -58,7 +57,8 @@ public class DevHttpLogInterceptor implements ContainerResponseFilter, WriterInt
         return Uni.createFrom().voidItem()
                 .chain(() -> {
                     if(isEnabled() &&
-                            Stream.of(properties.getProperty("dev.httpLogPaths", "").split(","))
+                            properties.getPropertyList("dev.httpLogPaths")
+                                    .stream()
                                     .map(it -> {
                                         try {
                                             return Pattern.compile(it);
