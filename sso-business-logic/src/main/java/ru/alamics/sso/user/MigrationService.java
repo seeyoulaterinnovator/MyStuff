@@ -89,7 +89,7 @@ public class MigrationService {
                         user = checkImportUser(reportModel.getRealmId(), data.getEmail(), data.getPhone());
                         if (user == null) {
                             user = createUser(reportModel.getRealmId(), data);
-                            createdUsers.incrementAndGet();
+
                             data.setCreated(true);
                             modified = true;
                         } else {
@@ -122,6 +122,7 @@ public class MigrationService {
 
                         if (user != null && modified) {
                             addMigrationAttribute(reportModel.getId(), user, migrationStarts);
+                            createdUsers.incrementAndGet();
                         } else if (!modified) {
                             countClones.incrementAndGet();
                         }
