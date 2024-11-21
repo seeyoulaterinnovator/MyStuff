@@ -5,11 +5,9 @@ VALUES ('e31137b0-39fc-4f3b-a62f-7b048eed1230', 'admin@nomail.ru', 'admin@nomail
         'master', 'admin', 1724331178659, NULL, 0);
 
 -- password=admin
-INSERT INTO CREDENTIAL
-(ID, DEVICE, HASH_ITERATIONS, SALT, TYPE, VALUE, USER_ID, CREATED_DATE, COUNTER, DIGITS, PERIOD, ALGORITHM)
-VALUES ('13ed726c-6c24-4195-8d44-9ca14ebe5caf', NULL, 27500, 0xEC21B047287CF9EE301008F2BA0EC74E, 'password',
-        'cfaVqvSYfU6oV64REuCXxbD+QcILBnD/AuKwVDeNd+O8l7smRr3HWrF2Z8Mb4bL3N9KwwXslEH+IrQvNKsSCEg==',
-        'e31137b0-39fc-4f3b-a62f-7b048eed1230', 1724331240294, 0, 0, 0, 'pbkdf2-sha256');
+INSERT INTO CREDENTIAL (ID, SALT, TYPE, USER_ID, CREATED_DATE, USER_LABEL, SECRET_DATA, CREDENTIAL_DATA, PRIORITY)
+VALUES ('af9d70c8-a75a-4cb7-865d-4b7e88219109', null, 'password', 'e31137b0-39fc-4f3b-a62f-7b048eed1230', 1732099524427, 'My password', '{"value":"OtJwiTMkaWfxJPzY4J/SH3lgyxdNsoMHIzxj4paZfAc=","salt":"aZSWPVjMi9v3ZHjhCintWg==","additionalParameters":{}}', '{"hashIterations":5,"algorithm":"argon2","additionalParameters":{"hashLength":["32"],"memory":["7168"],"type":["id"],"version":["1.3"],"parallelism":["1"]}}', 10);
+
 
 insert into USER_ROLE_MAPPING(ROLE_ID, USER_ID)
 values ((select id from KEYCLOAK_ROLE where NAME = 'admin'),
