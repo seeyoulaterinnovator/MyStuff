@@ -11,6 +11,7 @@ VALUES ('13ed726c-6c24-4195-8d44-9ca14ebe5caf', NULL, 27500, 0xEC21B047287CF9EE3
         'cfaVqvSYfU6oV64REuCXxbD+QcILBnD/AuKwVDeNd+O8l7smRr3HWrF2Z8Mb4bL3N9KwwXslEH+IrQvNKsSCEg==',
         'e31137b0-39fc-4f3b-a62f-7b048eed1230', 1724331240294, 0, 0, 0, 'pbkdf2-sha256');
 
+
 insert into USER_ROLE_MAPPING(ROLE_ID, USER_ID)
 values ((select id from KEYCLOAK_ROLE where NAME = 'admin'),
         (select id from USER_ENTITY where USERNAME = 'admin'));
