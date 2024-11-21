@@ -32,7 +32,7 @@ public class CustomHostnameProvider implements HostnameProvider {
         String hostname = delegate.getHostname(originalUriInfo, type);
         String originalHost = originalUriInfo.getBaseUri().getHost();
         if(hostname != null && !hostname.equals(originalHost)
-                && properties.getPropertyList("admin.allowedOrigins").contains(originalHost)) {
+                && properties.getPropertyList("hostname.allowedOrigins").contains(originalHost)) {
             return originalHost;
         }
         return hostname;
