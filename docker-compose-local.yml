@@ -48,8 +48,6 @@ services:
       - "8787:8787"
     entrypoint: /bin/sh -c "/opt/keycloak/bin/kc-custom.sh"
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
       KC_DB: mariadb
       KC_DB_URL_HOST: mariadb
       KC_DB_URL_PORT: 3306
@@ -62,26 +60,32 @@ services:
       KC_HTTP_RELATIVE_PATH: /auth
       KC_HOSTNAME_STRICT: false
       KC_HOSTNAME_STRICT_HTTPS: false
-      KC_METRICS_ENABLED: true
+      KEYCLOAK_HOSTNAME: "localhost"
+      KC_HOSTNAME: "localhost"
+      KC_HOSTNAME_URL: "https://localhost"
+      KC_HOSTNAME_ADMIN_URL: "https://localhost"
+      KC_HOSTNAME_ACCOUNT_URL: "https://localhost"
+      KC_PROXY_HEADERS: xforwarded
+      # KC_METRICS_ENABLED: true
       KC_HOSTNAME_DEBUG: true
-      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:8787,server=y,suspend=n"
       KC_CACHE: ispn
       KC_CACHE_CONFIG_FILE: cache-ispn-custom.xml
       KC_ADMIN_VITE_ENABLED: ${KC_ADMIN_VITE_ENABLED}
-      KC_PROXY_HEADERS: xforwarded
-      ERTH_SSO_E2E_ENABLED: ${ERTH_SSO_E2E_ENABLED}
-      SITE: STAGE5
       KC_SPI_USER_PROVIDER: customjpa
       KC_SPI_AUTHENTICATION_SESSIONS_PROVIDER: custom
       KC_SPI_PASSWORD_POLICY_BLACKLIST_PROVIDER: ssoPasswordBlacklist
-      LIQUIBASE_COMMAND_CHANGE_EXEC_LISTENER_CLASS: ru.alamics.sso.keycloak.migration.CustomChangeExecListener
       KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_LEGACY_LOGOUT_REDIRECT_URI: true
       KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_SUPPRESS_LOGOUT_CONFIRMATION_SCREEN: true
-      APP_PROPS_UPDATE_DELAY_SECS: 60
-      TZ: Asia/Yekaterinburg # Europe/Moscow
-      QUARKUS_HTTP_ACCESS_LOG_ENABLED: false
+      KC_SPI_HOSTNAME_PROVIDER: custom # custom # v2
+      LIQUIBASE_COMMAND_CHANGE_EXEC_LISTENER_CLASS: ru.alamics.sso.keycloak.migration.CustomChangeExecListener
+      QUARKUS_HTTP_ACCESS_LOG_ENABLED: true
       QUARKUS_HTTP_ACCESS_LOG_PATTERN: "long"
-      DEV_HTTP_LOG_ALLOWED: true
+      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:8787,server=y,suspend=n"
+      TZ: Asia/Yekaterinburg # Europe/Moscow
+      SITE: STAGE5
+      APP_PROPS_UPDATE_DELAY_SECS: 60
+      # DEV_HTTP_LOG_ALLOWED: true
+      ERTH_SSO_E2E_ENABLED: ${ERTH_SSO_E2E_ENABLED}
     volumes:
       - ./volumes/keycloak/opt/keycloak/bin/kc-custom.sh:/opt/keycloak/bin/kc-custom.sh:ro
       - ./volumes/keycloak/opt/keycloak/conf/cache-ispn-custom.xml:/opt/keycloak/conf/cache-ispn-custom.xml:ro

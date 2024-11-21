@@ -1,0 +1,2 @@
+org.keycloak.url.HostnameV2ProviderFactory
+ru.alamics.sso.keycloak.url.CustomHostnameProviderFactory

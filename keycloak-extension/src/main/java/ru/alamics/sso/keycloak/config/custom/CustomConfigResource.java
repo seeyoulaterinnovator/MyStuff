@@ -43,6 +43,7 @@ public class CustomConfigResource {
         return JsonResponse.success()
                 .addResult("adminTheme", session.getContext().getRealm().getAdminTheme() == null ? "keycloak.v2" : session.getContext().getRealm().getAdminTheme())
                 .addResult("manageRealmName", GeneralRealm.MANAGER_REALMS.get(0))
+                .addResult("adminAllowedOrigins", properties.getPropertyList("hostname.allowedOrigins"))
                 .build();
     }
 }

@@ -16,12 +16,14 @@ import ru.alamics.sso.util.StandResolver;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ApplicationScoped
 @Slf4j
@@ -151,6 +153,14 @@ public class ApplicationProperties {
         }
     }
 
+    @Locked.Read
+    public List<String> getPropertyList(final String name) {
+        return Stream.of(getProperty(name, "").split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
+    }
+
     public boolean isClusterTaskDisabled() {
         return "true".equals(System.getenv("CLUSTER_TASK_DISABLED"));
     }
@@ -186,7 +196,7 @@ public class ApplicationProperties {
             if (!tempProp.isEmpty()) {
                 dbPropertiesRef.set(tempProp);
             }
-            log.info("Initializing application properties from database finished");
+            log.debug("Update of application properties from database finished");
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
