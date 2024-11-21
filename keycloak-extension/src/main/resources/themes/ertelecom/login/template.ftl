@@ -190,13 +190,13 @@
         </#list>
     </#if>
 
-    <#if !hideChat>
+    <#if hideChat?? && hideChat == false>
         <div id="hiddenChat" class="hidden">
         </div>
     </#if>
 
     <script type="text/javascript">
-        let isChatHidden = document.getElementById('hiddenChat');
+        let chatElement = document.getElementById('hiddenChat');
 
 
         let isFramed = false;
