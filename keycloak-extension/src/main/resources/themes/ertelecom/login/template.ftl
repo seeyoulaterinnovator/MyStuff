@@ -55,7 +55,7 @@
                     </#if>
                 </@emailSent.defaultTemplate>
             <#elseif displayMessage && message?has_content && message.summary == msg('emailSendErrorMessage')>
-                <@emailSent.defaultTemplate email="${userEmail}" backHref="${url.loginUrl}" success = false; section>
+                <@emailSent.defaultTemplate email="${userEmail!}" backHref="${url.loginUrl}" success = false; section>
                     <#if section = "header">
                         Восстановление пароля
                     <#elseif section = "description">
