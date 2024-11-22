@@ -51,6 +51,8 @@ update APP_PROPERTIES
 set VALUE = '/tbapi/api/v1/customerManagement/customerAccounts/names'
 where NAME = 'tbapi.customer.find.path';
 
+insert ignore into APP_PROPERTIES(NAME, VALUE) values ('hostname.allowedOrigins', 'stelecom.local, ertelecom.local');
+
 update REALM set ADMIN_THEME = 'keycloak.v2';
 
 insert into SETTINGS
