@@ -19,7 +19,7 @@
         </div>
         
         <div class="password-wrapper custom-mt-xl">
-          <p class="text-main-800">Не забудьте сохранить или запомнить пароль<span id="generated-password"                                                                     class="text-base"></span></p>
+          <p class="text-main-800">Не забудьте сохранить или запомнить пароль <span id="generated-password" class="text-base"></span></p>
           <div class="flex custom-mt-lg">
               <div class="pass-fields">
                   <@components.field fieldName="${firstFieldName}" label="${msg('password')}" placeholder="${msg(passwordPlaceholder)}" type="password" required=true value="" />
