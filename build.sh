@@ -17,6 +17,10 @@ cd $baseDir/frontend/stelecom
 npm install
 npm run build
 
+cd $baseDir/frontend/novotelecom
+npm install
+npm run build
+
 cd $baseDir/frontend-admin
 pnpm install
 cd $baseDir/frontend-admin/js/apps/admin-ui

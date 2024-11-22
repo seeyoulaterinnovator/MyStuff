@@ -26,6 +26,11 @@ public class RouterConfig {
                 ApplicationStateNotification.waitForApplicationStart();
                 Object rootHandler = Reflections.readField(VertxHttpRecorder.class, "rootHandler", null);
                 Object rootDelegate = Reflections.readField(rootHandler.getClass(), "val$delegate", rootHandler);
+                try {
+                    rootDelegate = Reflections.readField(rootDelegate.getClass(), "val$old", rootDelegate);
+                } catch (Exception e) {
+                    log.trace(e.getMessage(), e);
+                }
                 Router rootRouter = (Router) Reflections.readField(rootDelegate.getClass(), "val$root", rootDelegate);
                 rootRouter.errorHandler(HttpStatus.SC_NOT_FOUND, event -> {
                     if (event.request().path().equals("/")) {

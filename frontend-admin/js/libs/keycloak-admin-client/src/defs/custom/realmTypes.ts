@@ -6,4 +6,5 @@ export enum RealmName {
   TEST = "TEST",
   ER_TELECOM = "ER-TELECOM",
   MANAGER = "manager",
+  NOVO_TELECOM = "novotelecom",
 }

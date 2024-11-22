@@ -55,7 +55,7 @@
                     </#if>
                 </@emailSent.defaultTemplate>
             <#elseif displayMessage && message?has_content && message.summary == msg('emailSendErrorMessage')>
-                <@emailSent.defaultTemplate email="${userEmail}" backHref="${url.loginUrl}" success = false; section>
+                <@emailSent.defaultTemplate email="${userEmail!}" backHref="${url.loginUrl}" success = false; section>
                     <#if section = "header">
                         Восстановление пароля
                     <#elseif section = "description">
@@ -190,13 +190,13 @@
         </#list>
     </#if>
 
-    <#if !hideChat>
+    <#if hideChat?? && hideChat == false>
         <div id="hiddenChat" class="hidden">
         </div>
     </#if>
 
     <script type="text/javascript">
-        let isChatHidden = document.getElementById('hiddenChat');
+        let chatElement = document.getElementById('hiddenChat');
 
 
         let isFramed = false;

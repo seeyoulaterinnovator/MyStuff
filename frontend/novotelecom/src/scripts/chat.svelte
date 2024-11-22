@@ -19,7 +19,7 @@
       isFrame = false;
     }
 
-    if(!isFrame) {
+    if(!isFrame && chatElement != null) {
       const initialize = () => {
         customConfig.subscribe(config => {
           if (!window.B2B_CHAT_WIDGET_PARAMS && config.isLoaded && config.b2bChatWidgetUrl) {

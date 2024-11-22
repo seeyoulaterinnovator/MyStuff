@@ -76,17 +76,22 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
 
         if (user == null && username.startsWith("+7")) {
             userFind = findUserByConvertUsernameToPhone(realm, username);
-            if (userFind != null && userFind.getAttributes().stream().noneMatch(it -> it.getName().equals(BlockType.MANAGER_BLOCK.getType()))) {
-                user = context.getSession().users().getUserById(context.getSession().realms().getRealm(userFind.getRealmId()), userFind.getId());
-                Objects.requireNonNull(user).setEnabled(true);
-                if(userFind.isEmailVerified()) {
-                    username = userFind.getUsername();
-                    authenticationSession.setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, userFind.getEmail());
-                } else {
-                    context.setUser(user);
-                    context.challenge(context.form().createForm("verify-email-by-reset.ftl"));
-                    return;
+            if (userFind != null) {
+                if (userFind.getAttributes().stream().noneMatch(it -> it.getName().equals(BlockType.MANAGER_BLOCK.getType()))) {
+                    user = context.getSession().users().getUserById(context.getSession().realms().getRealm(userFind.getRealmId()), userFind.getId());
+                    Objects.requireNonNull(user).setEnabled(true);
+                    if (userFind.isEmailVerified()) {
+                        username = userFind.getUsername();
+                        authenticationSession.setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, userFind.getEmail());
+                    } else {
+                        context.setUser(user);
+                        context.challenge(context.form().createForm("verify-email-by-reset.ftl"));
+                        return;
+                    }
                 }
+            } else {
+                context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT_ERROR));
+                return;
             }
         }
 
