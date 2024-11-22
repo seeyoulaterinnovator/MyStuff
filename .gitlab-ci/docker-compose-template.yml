@@ -69,7 +69,7 @@ services:
       replicas: 1
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.http8k.rule=Host(`er-sso.dev.it-resource.team`) && PathPrefix(`/`)"
+        - "traefik.http.routers.http8k.rule=(Host(`er-sso.dev.it-resource.team`) || Host(`er-sso-alt.dev.it-resource.team`)) && PathPrefix(`/`)"
         - "traefik.http.routers.http8k.service=http8k-service"
         - "traefik.http.services.http8k-service.loadbalancer.server.port=8080"
         - "traefik.http.routers.http9k.rule=Host(`er-sso-mgmt.dev.it-resource.team`) && PathPrefix(`/`)"
