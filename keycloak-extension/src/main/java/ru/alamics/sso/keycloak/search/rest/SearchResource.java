@@ -59,6 +59,9 @@ public class SearchResource {
                                                 @QueryParam("searchToms") String searchToms, @QueryParam("sortField") String sortField,
                                                 @QueryParam("sortAsc") boolean sortAsc, @QueryParam("searchRealm") String searchRealm,
                                                 @DefaultValue("1") @QueryParam("pageNum") int pageNum, @DefaultValue("100") @QueryParam("pageSize") int pageSize) {
+        if (pageSize > 100) {
+            throw new BadRequestException("Page size must be less than 100");
+        }
 
         clearUserCache();
         String rawPath = session.getContext().getUri().getAbsolutePath().getRawPath();

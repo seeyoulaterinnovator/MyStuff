@@ -1,0 +1,37 @@
+### Auth token set
+POST http://localhost:8080/auth/realms/master/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id = {{client_id}} &
+grant_type = password &
+username = {{username}} &
+password = {{password}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.global.set("access_token", response.body.access_token);
+%}
+
+
+### Test search
+GET http://localhost:8080/auth/realms/e2e/users-info?pageSize=101
+Authorization: Bearer {{access_token}}
+
+> {%
+    client.test("Request executed 400", function () {
+        client.assert(response.status === 400, "Response status is 400");
+    });
+%}
+
+### Test search 2
+GET http://localhost:8080/auth/realms/e2e/users-info?pageSize=99
+Authorization: Bearer {{access_token}}
+
+> {%
+    client.test("Request executed 200", function () {
+        client.assert(response.status === 200, "Response status is 200");
+    });
+%}
