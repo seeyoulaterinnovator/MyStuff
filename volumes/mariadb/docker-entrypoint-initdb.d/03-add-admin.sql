@@ -10,6 +10,7 @@ VALUES ('af9d70c8-a75a-4cb7-865d-4b7e88219109', null, 'password', 'e31137b0-39fc
 
 
 
+
 insert into USER_ROLE_MAPPING(ROLE_ID, USER_ID)
 values ((select id from KEYCLOAK_ROLE where NAME = 'admin'),
         (select id from USER_ENTITY where USERNAME = 'admin'));
