@@ -130,7 +130,7 @@ public abstract class AbstractAuthMailPhoneForm extends AbstractUsernameFormAuth
             return false;
         }
         if(user.getFirstAttribute(BlockType.MANAGER_BLOCK.getType()) == null) {
-            user.setEnabled(true);
+//            user.setEnabled(true);  зачем-то логика разблокировки при авторизации
 
             attributeService = new UserAttributeService(context.getSession(), userFindService);
             attributeService.deleteAttributes(user.getId(), Collections.singletonList(BlockType.SYSTEM_BLOCK.getType()));
