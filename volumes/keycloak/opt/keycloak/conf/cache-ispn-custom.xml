@@ -5,6 +5,7 @@
         xmlns="urn:infinispan:config:15.0">
     <!-- Keycloak project > quarkus/runtime/src/main/resources/cache-ispn.xml -->
     <cache-container name="keycloak" statistics="true">
+        <jmx enabled="true" />
         <local-cache name="realms" simple-cache="true">
             <encoding>
                 <key media-type="application/x-java-object"/>
@@ -70,6 +71,7 @@
         </distributed-cache>
     </cache-container>
     <cache-container name="custom_container">
+        <jmx enabled="true" />
         <transport lock-timeout="60000"/>
         <replicated-cache name="user_post_cache">
             <expiration max-idle="100000" lifespan="500000"/>

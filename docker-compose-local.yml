@@ -44,7 +44,7 @@ services:
     hostname: keycloak
     ports:
       - "8080:8080"
-      #- "9000:9000"
+      - "9990:9990"
       - "8787:8787"
     entrypoint: /bin/sh -c "/opt/keycloak/bin/kc-custom.sh"
     environment:
@@ -67,6 +67,7 @@ services:
       KC_HOSTNAME_ACCOUNT_URL: "https://localhost"
       KC_PROXY_HEADERS: xforwarded
       # KC_METRICS_ENABLED: true
+      KEYCLOAK_STATISTICS: true
       KC_HOSTNAME_DEBUG: true
       KC_CACHE: ispn
       KC_CACHE_CONFIG_FILE: cache-ispn-custom.xml
