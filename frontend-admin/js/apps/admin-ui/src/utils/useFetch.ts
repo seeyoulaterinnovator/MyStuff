@@ -35,13 +35,11 @@ export function useFetch<T>(
       })
       .catch((error) => {
         if (!signal.aborted) {
-          if (error instanceof NetworkError) {
-            if (error.response.status === 401) {
-              window.location.href =
-                window.location.origin + window.location.pathname;
-            }
+          if (error instanceof NetworkError && error.response.status === 401) {
+            showBoundary(error, undefined, "unauthenticated");
+          } else {
+            showBoundary(error);
           }
-          showBoundary(error);
         }
       });
 
