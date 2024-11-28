@@ -183,15 +183,16 @@ container-image:
 #    NODE_PORT: '30081'
 #    REPLICA_COUNT: '1'
 
-#domru:stage2:
-#  extends: .domru:stage:template
-#  environment:
-#    name: stage2
-#    url: https://sso-balancer2.testing.srv.loc
-#  variables:
-#    NAMESPACE: 'sso'
-#    NODE_PORT: '30082'
-#    REPLICA_COUNT: '1'
+domru:stage2:
+  extends: .domru:stage:template
+  environment:
+    name: stage2
+    url: https://sso-balancer2.testing.srv.loc
+  variables:
+    NAMESPACE: 'sso'
+    NODE_PORT: '30082'
+    REPLICA_COUNT: '1'
+    NEW_DB_DATABASE: sso2_1
 
 #domru:stage3:
 #  extends: .domru:stage:template
