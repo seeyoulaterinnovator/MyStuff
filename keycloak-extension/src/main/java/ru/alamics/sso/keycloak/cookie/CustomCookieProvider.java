@@ -54,7 +54,7 @@ public class CustomCookieProvider implements CookieProvider {
                         return "";
                     }
                 } catch (Exception e){
-                    log.error("Fail parse token", e);
+                    log.trace("Fail parse token", e);
                 }
             }
         }
