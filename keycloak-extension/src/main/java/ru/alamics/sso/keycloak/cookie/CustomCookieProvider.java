@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.cookie.CookieProvider;
 import org.keycloak.cookie.CookieType;
 import org.keycloak.models.KeycloakSession;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.property.ApplicationProperties;
 
 import java.sql.Timestamp;
@@ -18,14 +19,14 @@ public class CustomCookieProvider implements CookieProvider {
 
     final CookieProvider provider;
 
-    @Inject
-    ApplicationProperties properties;
+    private ApplicationProperties properties;
 
     private static final String TIME_UPDATE_KEYCLOAK = "updateVerKC.datetime";
 
     public CustomCookieProvider(KeycloakSession session, CookieProvider provider) {
         this.session = session;
         this.provider = provider;
+        properties = Lookup.lookup(ApplicationProperties.class);
     }
 
     @Override
@@ -45,17 +46,20 @@ public class CustomCookieProvider implements CookieProvider {
                 String token = provider.get(CookieType.IDENTITY);
                 try {
                     JsonObject payload = JWT.parse(token).getJsonObject("payload");
-                    if(payload.getString("iat") != null) {
-                        Timestamp tokenTime = Timestamp.valueOf(payload.getString("iat"));
+                    if (payload.containsKey("iat")) {
+                        long timestamp = payload.getLong("iat");
+                        Timestamp tokenTime = new Timestamp(timestamp*1000);
                         if(tokenTime.before(Timestamp.valueOf(properties.getProperty(TIME_UPDATE_KEYCLOAK)))) {
                             log.info("clean old cookie");
-                            return "";
+                            return null;
                         }
                     } else {
-                        return "";
+                        log.info("clean old cookie");
+                        return null;
                     }
                 } catch (Exception e){
                     log.trace("Fail parse token", e);
+                    return null;
                 }
             }
         }
