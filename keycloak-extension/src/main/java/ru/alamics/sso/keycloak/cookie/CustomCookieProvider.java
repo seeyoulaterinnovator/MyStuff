@@ -48,6 +48,7 @@ public class CustomCookieProvider implements CookieProvider {
                     if(payload.getString("iat") != null) {
                         Timestamp tokenTime = Timestamp.valueOf(payload.getString("iat"));
                         if(tokenTime.before(Timestamp.valueOf(properties.getProperty(TIME_UPDATE_KEYCLOAK)))) {
+                            log.info("clean old cookie");
                             return "";
                         }
                     } else {
