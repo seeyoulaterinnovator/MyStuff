@@ -2,9 +2,12 @@ package ru.alamics.sso.keycloak.cookie;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.impl.jose.JWT;
+import jakarta.inject.Inject;
 import org.keycloak.cookie.CookieProvider;
 import org.keycloak.cookie.CookieType;
 import org.keycloak.models.KeycloakSession;
+import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.property.ApplicationProperties;
 
 import java.sql.Timestamp;
 
@@ -14,7 +17,10 @@ public class CustomCookieProvider implements CookieProvider {
 
     final CookieProvider provider;
 
-    private final Timestamp TIME_UPDATE_KEYCLOAK = Timestamp.valueOf("2024-11-18 06:00:00");
+    @Inject
+    ApplicationProperties properties;
+
+    private static final String TIME_UPDATE_KEYCLOAK = "updateVerKC.datetime";
 
     public CustomCookieProvider(KeycloakSession session, CookieProvider provider) {
         this.session = session;
@@ -39,7 +45,7 @@ public class CustomCookieProvider implements CookieProvider {
                 JsonObject payload = JWT.parse(token).getJsonObject("payload");
                 if(payload.getString("iat") != null) {
                     Timestamp tokenTime = Timestamp.valueOf(payload.getString("iat"));
-                    if(tokenTime.before(TIME_UPDATE_KEYCLOAK)) {
+                    if(tokenTime.before(Timestamp.valueOf(properties.getProperty(TIME_UPDATE_KEYCLOAK)))) {
                         return "";
                     }
                 } else {
