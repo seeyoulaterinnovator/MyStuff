@@ -223,4 +223,9 @@
             ]]>
         </sql>
     </changeSet>
+    <changeSet id="14" author="ichetovkina-eiu">
+        <sql>
+            INSERT INTO APP_PROPERTIES (name, value) VALUES ('updateVerKC.datetime', '2024-11-18 06:00:00')
+        </sql>
+    </changeSet>
 </databaseChangeLog>
