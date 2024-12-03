@@ -18,6 +18,7 @@
   const newText = hasAlert ? alert.innerText : '';
   const emailElement = document.getElementsByName('email')[0];
   const phoneElement = document.getElementsByName('phone')[0];
+  const submitButton = document.getElementById("closeWindow");
 
   let email = '';
   let phone = '';
@@ -75,6 +76,19 @@
 
   function handleHide() {
     show.set(false);
+  }
+
+
+  function handleHide2() {
+    closeAndSubmit();
+  }
+
+  setTimeout(handleHide2, 2300);
+
+  function closeAndSubmit() {
+    if (submitButton) {
+      submitButton.click();
+    }
   }
 
   function handleClick(e) {
