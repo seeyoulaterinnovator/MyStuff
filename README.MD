@@ -12,7 +12,7 @@ https://gitlab.ertelecom.ru/b2bweb/sso
 
 ## Разработка
 
-> Подразумевается состояние БД до миграции, т.е. на момент версии Keycloak 6.0.1
+> Проверено на БД Keycloak-а версии 25.0.2
 
 1. Пометить папку [docker-entrypoint-initdb.d](./volumes/mariadb/docker-entrypoint-initdb.d), как excluded
 2. Скопировать скрипт стендовой БД dump-а в файл.
@@ -28,8 +28,11 @@ https://gitlab.ertelecom.ru/b2bweb/sso
 > Учетные данные для входа cм. в дополнительных скриптах для патча БД 
 > [\d\d-\w+.sql](./volumes/mariadb/docker-entrypoint-initdb.d/)
 
-* Консоль администратора (admin / admin) - [/admin/master/console](http://localhost:8080/auth/admin/master/console/)
-* Консоль менеджера (manager@nomail.ru / manager) - [/admin/manager/console](http://localhost:8080/auth/admin/manager/console/)
+* Консоль администратора (admin / admin) - [/admin/master/console](http://localhost:8080/auth/admin/master/console/).
+* Консоль менеджера (manager@nomail.ru / manager) - [/admin/manager/console](http://localhost:8080/auth/admin/manager/console/).
+* MBean кэша подключиться по протоколу JMX через JConsole к `service:jmx:rmi:///jndi/rmi://127.0.0.1:9990/jmxrmi`,
+  см. MBeans > "org.infinispan" (напр. сброс сессий операция `clear` для bean-а 
+  `org.infinispan:type=Cache,name="sessions(dist_sync)",manager="custom_container",component=Cache`)
 
 ## Разработка только backend
 

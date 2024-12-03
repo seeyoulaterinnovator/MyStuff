@@ -10,7 +10,7 @@ import { useEnvironment } from "@keycloak/keycloak-ui-shared";
 
 import { type FallbackProps } from "../../context/ErrorBoundary";
 
-export const ErrorRenderer = ({ error, withSignOut }: FallbackProps) => {
+export const ErrorRenderer = ({ error, withSignOut, cause }: FallbackProps) => {
   const { t } = useTranslation();
   const { keycloak } = useEnvironment();
 
@@ -21,6 +21,11 @@ export const ErrorRenderer = ({ error, withSignOut }: FallbackProps) => {
   const signOut = () => {
     keycloak.logout({ redirectUri: "" });
   };
+
+  if (cause === "unauthenticated") {
+    reset();
+    return;
+  }
 
   return (
     <PageSection>

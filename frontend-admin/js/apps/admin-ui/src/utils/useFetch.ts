@@ -1,5 +1,6 @@
 import { DependencyList, useEffect } from "react";
 import { useErrorBoundary } from "../context/ErrorBoundary";
+import { NetworkError } from "@keycloak/keycloak-admin-client";
 
 /**
  * Util function to only set the state when the component is still mounted.
@@ -34,7 +35,11 @@ export function useFetch<T>(
       })
       .catch((error) => {
         if (!signal.aborted) {
-          showBoundary(error);
+          if (error instanceof NetworkError && error.response.status === 401) {
+            showBoundary(error, undefined, "unauthenticated");
+          } else {
+            showBoundary(error);
+          }
         }
       });
 

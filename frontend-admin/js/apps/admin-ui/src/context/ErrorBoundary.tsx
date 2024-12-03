@@ -12,10 +12,17 @@ import {
 
 type ErrorBoundaryDomain = "page" | "context";
 
+type ErrorBoundaryCause = "unauthenticated";
+
 export interface ErrorBoundaryContextValue {
   error?: Error;
   domain?: ErrorBoundaryDomain;
-  showBoundary: (error: Error, domain?: ErrorBoundaryDomain) => void;
+  cause?: ErrorBoundaryCause;
+  showBoundary: (
+    error: Error,
+    domain?: ErrorBoundaryDomain,
+    cause?: ErrorBoundaryCause,
+  ) => void;
 }
 
 const ErrorBoundaryContext = createNamedContext<
@@ -31,6 +38,7 @@ export interface ErrorBoundaryProviderProps {
 export interface ErrorBoundaryProviderState {
   error?: Error;
   domain?: ErrorBoundaryDomain;
+  cause?: ErrorBoundaryCause;
 }
 
 export class ErrorBoundaryProvider extends Component<
@@ -46,8 +54,12 @@ export class ErrorBoundaryProvider extends Component<
     return { error };
   };
 
-  showBoundary = (error: Error, domain?: ErrorBoundaryDomain) => {
-    this.setState({ error, domain });
+  showBoundary = (
+    error: Error,
+    domain?: ErrorBoundaryDomain,
+    cause?: ErrorBoundaryCause,
+  ) => {
+    this.setState({ error, domain, cause });
   };
 
   render() {
@@ -56,6 +68,7 @@ export class ErrorBoundaryProvider extends Component<
         value={{
           error: this.state.error,
           domain: this.state.domain,
+          cause: this.state.cause,
           showBoundary: this.showBoundary,
         }}
       >
@@ -68,18 +81,20 @@ export class ErrorBoundaryProvider extends Component<
 export interface FallbackProps {
   error: Error;
   withSignOut?: boolean;
+  cause?: ErrorBoundaryCause;
 }
 
 export interface ErrorBoundaryFallbackProps {
   fallback: ComponentType<FallbackProps>;
   children: ReactNode;
   domain?: ErrorBoundaryDomain;
+  cause?: ErrorBoundaryCause;
 }
 
 export const ErrorBoundaryFallback: FunctionComponent<
   ErrorBoundaryFallbackProps
-> = ({ children, fallback: FallbackComponent, domain }) => {
-  const { error, domain: errorDomain } = useErrorBoundary();
+> = ({ children, fallback: FallbackComponent, domain, cause }) => {
+  const { error, domain: errorDomain, cause: errorCause } = useErrorBoundary();
 
   const isErrorBelongsDomain =
     errorDomain === domain ||
@@ -87,7 +102,7 @@ export const ErrorBoundaryFallback: FunctionComponent<
 
   if (error && isErrorBelongsDomain) {
     console.error(error);
-    return <FallbackComponent error={error} />;
+    return <FallbackComponent error={error} cause={cause || errorCause} />;
   }
 
   return children;
