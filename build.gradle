@@ -1,15 +1,17 @@
 version = "1.0.1"
 
+apply plugin: "idea"
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
 allprojects {
     apply plugin: "java"
     apply plugin: "idea"
-
-    idea {
-        module {
-            downloadJavadoc = true
-            downloadSources = true
-        }
-    }
 
     repositories {
         mavenCentral()
