@@ -127,6 +127,7 @@ public abstract class Tests {
             .withEnv("KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_SUPPRESS_LOGOUT_CONFIRMATION_SCREEN", "true")
             .withEnv("KC_CACHE_CONFIG_FILE", "cache-ispn-custom.xml")
             .withEnv("ERTH_SSO_E2E_ENABLED", "true")
+            .withEnv("KC_SPI_COOKIE_PROVIDER", "custom")
             .withCopyFileToContainer(
                     forHostPath(BASEDIR.resolve("volumes/keycloak/opt/keycloak/conf/cache-ispn-custom.xml")),
                     "/opt/keycloak/conf/cache-ispn-custom.xml"
