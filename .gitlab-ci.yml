@@ -156,7 +156,7 @@ container-image:
   <<: *init-variables
   when: manual
   script:
-    - docker build -t harbor.ertelecom.ru/sso-protected/sso:$CI_PIPELINE_ID -f .gitlab-ci/Dockerfile.ertelecom .
+    - docker build -t harbor.ertelecom.ru/sso-protected/sso:$CI_PIPELINE_ID .
     - docker push harbor.ertelecom.ru/sso-protected/sso:$CI_PIPELINE_ID
   allow_failure: false
   needs:
