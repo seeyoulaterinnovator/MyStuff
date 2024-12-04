@@ -116,10 +116,6 @@ frontend:admin:build:
       - keycloak-extension/src/main/resources/themes/keycloak.v2/admin/resources/
     name: "domru-sso-$CI_PIPELINE_ID"
     expire_in: 1 day
-  only:
-    - itres-new
-    - itres-new-prod
-    - cicd
   allow_failure: false
   when: manual
   tags:
