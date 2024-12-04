@@ -1,130 +1,142 @@
-# Проект
+# Р”РѕРј.СЂСѓ Р‘2Р‘ SSO
+
 https://gitlab.ertelecom.ru/b2bweb/sso
 
-# Поднятие проекта
-1) Скачиваем КС 6.0.1 по ссылке https://downloads.jboss.org/keycloak/6.0.1/keycloak-6.0.1.zip
-2) Вот этот [файл](org.zip) положить в сам КС в папку modules ![img.png](img.png) 
-   1) Скопировать также [папку](./tools/modules) в папку modules у КС
-3) Файл [standalone](standalone.xml) вот сюда ![img_1.png](img_1.png)
-4) Далее настраиваем файл конфигурацию запуска ![img_2.png](img_2.png) добавить строку KEYCLOAK_DEPLOY_DIR=C:\keycloak-6.0.1\keycloak-6.0.1.
-5) Запуск проекта после Деплоя через этот файл ![img_3.png](img_3.png)
-6) Сделать проливку данными из какого стейджа, для облегчения дампа
-   исключить можно таблицы событий (ADMIN_EVENT_ENTITY, USER_LOGIN_HISTORY, EVENT_ENTITY), 
-   но не забыть потом их создать
-7) Обновить настройки для локального развертывания:
-```mysql
-update REALM
-set ssl_required = 'NONE';
--- Если будут использоваться сохраненные run config-и для Idea
--- 1
-update APP_PROPERTIES
-set value = 'http://localhost:1080/cities/domains'
-where name = 'cities.url';
--- 2
-update REALM_SMTP_CONFIG
-set VALUE = 'localhost'
-where NAME = 'host';
--- 3
-update SETTINGS
-set VALUE = 'http://localhost:1080/dadata/suggestions/api/4_1/rs/iplocate/address'
-where EXT_ID = 'urlDaDataRequestLocationIp';
--- 4
-update CLIENT
-set SECRET = 'secret'
-where CLIENT_ID in ('b2b') and REALM_ID = 'user';
--- 5
-delete from REDIRECT_URIS
-where CLIENT_ID in (select ID
-                    from CLIENT
-                    where CLIENT_ID in ('b2b') and REALM_ID = 'user');
--- 6
-INSERT INTO REDIRECT_URIS(CLIENT_ID, VALUE)
-select ID, '*'
-from CLIENT
-where CLIENT_ID in ('b2b') and REALM_ID = 'user';
--- 7
-update APP_PROPERTIES
-set VALUE = 'localhost:1080'
-where NAME in ('tbapi.registration.ip', 'tbapi.registration.host');
-update APP_PROPERTIES
-set VALUE = '/tbapi/api/v1/customerManagement/customerAccount'
-where NAME = 'tbapi.registration.find.path';
+## РўСЂРµР±РѕРІР°РЅРёСЏ
+
+> Р’РµСЂСЃРёРё РџРћ, РЅР° РєРѕС‚РѕСЂРѕРј РІРµР»Р°СЃСЊ СЂР°Р·СЂР°Р±РѕС‚РєР°
+
+* JDK 17 Рё Gradle 8
+* Node 20 Рё NPM 9 (PNPM 9)
+* Docker 27
+
+## Р Р°Р·СЂР°Р±РѕС‚РєР°
+
+> РџСЂРѕРІРµСЂРµРЅРѕ РЅР° Р‘Р” Keycloak-Р° РІРµСЂСЃРёРё 25.0.2
+
+1. РџРѕРјРµС‚РёС‚СЊ РїР°РїРєСѓ [docker-entrypoint-initdb.d](./volumes/mariadb/docker-entrypoint-initdb.d), РєР°Рє excluded
+2. РЎРєРѕРїРёСЂРѕРІР°С‚СЊ СЃРєСЂРёРїС‚ СЃС‚РµРЅРґРѕРІРѕР№ Р‘Р” dump-Р° РІ С„Р°Р№Р».
+   [docker-entrypoint-initdb.d/01-dump.sql](./volumes/mariadb/docker-entrypoint-initdb.d/01-dump.sql)
+   (РїСЂРё СЃРѕР·РґР°РЅРёРё РЅРѕРІРѕРіРѕ dump-Р° РјРѕР¶РЅРѕ РёСЃРєР»СЋС‡РёС‚СЊ ADMIN_EVENT_ENTITY, USER_LOGIN_HISTORY, EVENT_ENTITY, 
+   РЅРѕ РЅРµ Р·Р°Р±С‹С‚СЊ РїРѕС‚РѕРј РёС… СЃРѕР·РґР°С‚СЊ).
+3. Р’С‹РїРѕР»РЅРёС‚СЊ СЃР±РѕСЂРєСѓ РїСЂРѕРµРєС‚Р° СЃРєСЂРёРїС‚РѕРј [build.sh](./build.sh) (frontend Рё backend).
+4. Р—Р°РїСѓСЃС‚РёС‚СЊ [docker-compose-local.yaml](./docker-compose-local.yml) РІ РѕРґРЅРѕРј РёР· СЂРµР¶РёРјРѕРІ РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё 
+   РѕС‚ РЅРµРѕР±С…РѕРґРёРјС‹С… РґРѕСЂР°Р±РѕС‚РѕРє С‡РµСЂРµР· СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёР№ Intellij Idea run config.
+
+### РђРґСЂРµСЃР°
+
+> РЈС‡РµС‚РЅС‹Рµ РґР°РЅРЅС‹Рµ РґР»СЏ РІС…РѕРґР° cРј. РІ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹С… СЃРєСЂРёРїС‚Р°С… РґР»СЏ РїР°С‚С‡Р° Р‘Р” 
+> [\d\d-\w+.sql](./volumes/mariadb/docker-entrypoint-initdb.d/)
+
+* РљРѕРЅСЃРѕР»СЊ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР° (admin / admin) - [/admin/master/console](http://localhost:8080/auth/admin/master/console/).
+* РљРѕРЅСЃРѕР»СЊ РјРµРЅРµРґР¶РµСЂР° (manager@nomail.ru / manager) - [/admin/manager/console](http://localhost:8080/auth/admin/manager/console/).
+* MBean РєСЌС€Р° РїРѕРґРєР»СЋС‡РёС‚СЊСЃСЏ РїРѕ РїСЂРѕС‚РѕРєРѕР»Сѓ JMX С‡РµСЂРµР· JConsole Рє `service:jmx:rmi:///jndi/rmi://127.0.0.1:9990/jmxrmi`,
+  СЃРј. MBeans > "org.infinispan" (РЅР°РїСЂ. СЃР±СЂРѕСЃ СЃРµСЃСЃРёР№ РѕРїРµСЂР°С†РёСЏ `clear` РґР»СЏ bean-Р° 
+  `org.infinispan:type=Cache,name="sessions(dist_sync)",manager="custom_container",component=Cache`)
+
+## Р Р°Р·СЂР°Р±РѕС‚РєР° С‚РѕР»СЊРєРѕ backend
+
+### Run config-Рё:
+
+* *docker-compose-full* - Р·Р°РїСѓСЃРє Р‘Р”, Keycloak Рё mock-СЃРµСЂРІРёСЃРѕРІ Рё РїСЂРѕС‡РµРіРѕ РѕРєСЂСѓР¶РµРЅРёСЏ РґР»СЏ СЂР°Р·СЂР°Р±РѕС‚РєРё.
+* *docker-compose* - Р·Р°РїСѓСЃРє С‚РѕР»СЊРєРѕ Р‘Р”, Keycloak.
+* *docker-compose-config-cli* - РїРµСЂРµР·Р°РїСѓСЃРє config CLI СѓС‚РёР»РёС‚С‹ РґР»СЏ СѓСЃРєРѕСЂРµРЅРЅРѕР№ РѕС‚Р»Р°РґРєРё С‚РµСЃС‚РѕРІРѕРіРѕ realm-Р° РґР»СЏ E2E.
+  РїРµСЂРµРґ РЅР°РїРёСЃР°РЅРёРµРј С‚РµСЃС‚Р°.
+
+РћР±РЅРѕРІР»РµРЅРёРµ РїСѓС‚РµРј РїРµСЂРµСЃР±РѕСЂРєРё С‡РµСЂРµР· Gradle Рё РїРµСЂРµР·Р°РїСѓСЃРєР° СЃРµСЂРІРёСЃР° keycloak РёР· docker-compose.
+
+## Р Р°Р·СЂР°Р±РѕС‚РєР° frontend
+
+Keycloak РѕР±РµСЃРїРµС‡РёРІР°РµС‚ РїРѕРґРґРµСЂР¶РєСѓ С‚РµРј РґР»СЏ РІРµР±-СЃС‚СЂР°РЅРёС† Рё СЌР»РµРєС‚СЂРѕРЅРЅС‹С… РїРёСЃРµРј. Р­С‚Рѕ РїРѕР·РІРѕР»СЏРµС‚ РЅР°СЃС‚СЂР°РёРІР°С‚СЊ РІРЅРµС€РЅРёР№ РІРёРґ СЃС‚СЂР°РЅРёС†, РґРѕСЃС‚СѓРїРЅС‹С… РєРѕРЅРµС‡РЅРѕРјСѓ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ, С‡С‚РѕР±С‹ РёС… РјРѕР¶РЅРѕ Р±С‹Р»Рѕ РёРЅС‚РµРіСЂРёСЂРѕРІР°С‚СЊ СЃ РІР°С€РёРјРё РїСЂРёР»РѕР¶РµРЅРёСЏРјРё.
+
+РўРµРјР° РјРѕР¶РµС‚ РїСЂРµРґРѕСЃС‚Р°РІР»СЏС‚СЊ РѕРґРёРЅ РёР»Рё РЅРµСЃРєРѕР»СЊРєРѕ С‚РёРїРѕРІ РґР»СЏ РЅР°СЃС‚СЂРѕР№РєРё СЂР°Р·Р»РёС‡РЅС‹С… Р°СЃРїРµРєС‚РѕРІ Keycloak. Р”РѕСЃС‚СѓРїРЅС‹Рµ С‚РёРїС‹:
+- Account - Account Console
+- Admin - Admin Console
+- Email - Emails
+- Login - Login forms
+- Welcome - Welcome page
+
+Р’ СЂР°РјРєР°С… РґР°РЅРЅРѕРіРѕ РїСЂРѕРµРєС‚Р° РєРѕРЅС„РёРіСѓСЂРёСЂСѓСЋС‚СЃСЏ СЃР»РµРґСѓСЋС‰РёРµ С‚РёРїС‹ С‚РµРј: *Admin*, *Login*, *Email*.
+
+- РљРѕРЅС„РёРіСѓСЂРёСЂРѕРІР°РЅРёРµ С‚РµРј *Login* Рё *Email* РѕСЃРЅРѕРІС‹РІР°РµС‚СЃСЏ РЅР° СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёРё [FreeMarker](https://freemarker.apache.org/) С€Р°Р±Р»РѕРЅРѕРІ, РѕРїСЂРµРґРµР»РµРЅРЅС‹С… РІ [themes](./keycloak-extension/src/main/resources/themes)
+- РљРѕРЅС„РёРіСѓСЂРёСЂРѕРІР°РЅРёРµ С‚РµРјС‹ *Admin* РѕСЃРЅРѕРІС‹РІР°РµС‚СЃСЏ РЅР° СЂР°Р·СЂР°Р±РѕС‚РєРµ [React РїСЂРёР»РѕР¶РµРЅРёСЏ](./frontend-admin/js/apps/admin-ui). РџРѕРґСЂРѕР±РЅРµРµ СЃ РєР°СЃС‚РѕРјРёР·Р°С†РёРµР№ С‚РµРј, РѕСЃРЅРѕРІР°РЅРЅС‹С… РЅР° React, РјРѕР¶РЅРѕ РѕР·РЅР°РєРѕРјРёС‚СЊСЃСЏ РІ [РґРѕРєСѓРјРµРЅС‚Р°С†РёРё](https://www.keycloak.org/docs/latest/server_development/#_theme_react). 
+вљ пёЏ _РќР° РјРѕРјРµРЅС‚ СЂР°Р·СЂР°Р±РѕС‚РєРё СЃРѕР±СЃС‚РІРµРЅРЅРѕР№ С‚РµРјС‹ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РёРІРЅРѕР№ РєРѕРЅСЃРѕР»Рё РїР°РєРµС‚Р° *@keycloak/keycloak-admin-ui* РЅРµ СЃСѓС‰РµСЃС‚РІРѕРІР°Р»Рѕ, С…РѕС‚СЏ РѕРЅ Рё Р±С‹Р» РѕРїРёСЃР°РЅ РІ РґРѕРєСѓРјРµРЅС‚Р°С†РёРё. Р’ СЃРІСЏР·Рё СЃ СЌС‚РёРј Р±С‹Р»Рѕ РЅР°Р№РґРµРЅРѕ [Р°Р»СЊС‚РµСЂРЅР°С‚РёРІРЅРѕРµ СЂРµС€РµРЅРёРµ](https://github.com/keycloak/keycloak/discussions/32645#discussioncomment-10566232)._
+
+РџРѕРґСЂРѕР±РЅРµРµ СЃ РєР°СЃС‚РѕРјРёР·Р°С†РёРµР№ С‚РµРј РјРѕР¶РЅРѕ РѕР·РЅР°РєРѕРјРёС‚СЊСЃСЏ РІ [РґРѕРєСѓРјРµРЅС‚Р°С†РёРё](https://www.keycloak.org/docs/latest/server_development/#_themes).
+
+### Admin Console - РђРґРјРёРЅРёСЃС‚СЂР°С‚РёРІРЅС‹Р№ РёРЅС‚РµСЂС„РµР№СЃ
+
+[Р”РѕРєСѓРјРµРЅС‚Р°С†РёСЏ Frontend Admin](./frontend-admin/README.MD)
+
+<!-- Р—Р°РїСѓСЃРє Vite dev СЃРµСЂРІРµСЂР° С‡РµСЂРµР· run config "keycloak.v2 admin dev".
+
+Р—Р°РїСѓСЃРє docker-compose С‡РµСЂРµР· run config-Рё *docker-compose-full-ui* РёР»Рё *docker-compose-ui*.
+
+РРЅС‚РµСЂС„РµР№СЃ РґРѕСЃС‚СѓРїРµРЅ СЃ РѕСЃРЅРѕРІРЅРѕРіРѕ РІРµР± СЃРµСЂРІРµСЂР° Keycloak, С‚.Рє. РїСЂРѕРёР·РІРѕРґРёС‚СЃСЏ РѕР±СЂР°С‚РЅРѕРµ РїСЂРѕРєСЃРёСЂРѕРІР°РЅРёРµ РЅР° dev СЃРµСЂРІРµСЂ. -->
+
+### Login Form - РџРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёР№ РёРЅС‚РµСЂС„РµР№СЃ
+
+[Р”РѕРєСѓРјРµРЅС‚Р°С†РёСЏ Frontend Client](./frontend/README.MD)
+
+<!-- Р—Р°РїСѓСЃРє Р°РІС‚РѕРїРµСЂРµСЃР±РѕСЂРєРё С‡РµСЂРµР· run config "domru autobuild".
+
+Р—Р°РїСѓСЃРє docker-compose РІ Р»СЋР±РѕРј РІР°СЂРёР°РЅС‚Рµ.
+
+РРЅС‚РµСЂС„РµР№СЃ РґРѕСЃС‚СѓРїРµРЅ СЃ РѕСЃРЅРѕРІРЅРѕРіРѕ РІРµР± СЃРµСЂРІРµСЂР° Keycloak, С‚.Рє. dev СЃРµСЂРІРµСЂР° РЅРµС‚. -->
+
+### Email - РџРѕС‡С‚РѕРІС‹Рµ СЃРѕРѕР±С‰РµРЅРёСЏ
+
+РЎРј. [РЎРµСЂРІРёСЃРЅС‹Рµ РїРёСЃСЊРјР° РЅР° email](#РЎРµСЂРІРёСЃРЅС‹Рµ-РїРёСЃСЊРјР°-РЅР°-email)
+
+## E2E
+
+РњРѕРґСѓР»СЊ [e2e](./e2e).
+
+РћСЃРЅРѕРІРЅР°СЏ РёРґРµСЏ: Keycloak РІРјРµСЃС‚Рµ СЃРѕ РІСЃРµРј РѕРєСЂСѓР¶РµРЅРёРµРј СЂР°Р·РІРµСЂС‚С‹РІР°РµС‚СЃСЏ С‡РµСЂРµР· test containers, 
+Рє РЅРµРјСѓ РїСЂРёРјРµРЅСЏРµС‚СЃСЏ С‡РµСЂРµР· config CLI СѓС‚РёР»РёС‚Сѓ Р·Р°СЂР°РЅРµРµ РїРѕРґРіРѕС‚РѕРІР»РµРЅРЅС‹Р№ С‚РµСЃС‚РѕРІС‹Р№ realm РІ РІРёРґРµ РјРёРЅРёРјРёР·РёСЂРѕРІР°РЅРЅРѕРіРѕ Р°Р±СЃС‚СЂР°РєС‚РЅРѕРіРѕ
+import С„Р°Р№Р»Р° [e2e.json](./volumes/keycloak-config-cli/config/e2e.json).
+
+Р”Р»СЏ РґРѕРїРѕР»РЅРµРЅРёСЏ С‚РµСЃС‚РѕРІС‹С… realm РјРѕР¶РЅРѕ СЃРґРµР»Р°С‚СЊ РїРѕР»РЅС‹Р№ СЌРєСЃРїРѕСЂС‚:
+```shell
+export JAVA_OPTS="" && /opt/keycloak/bin/kc.sh export --file /tmp/realm-export.json --realm user
 ```
 
-# Запуск проекта с Дебагом
-1) Качаем wildFly 16 
-2) Настраиваем ![img_4.png](img_4.png) ![img_5.png](img_5.png) ![img_6.png](img_6.png)
-3) Запуск самого приложение с тегом debug т.е. standalone.bat --debug
+Р”Р»СЏ РѕС‚Р»Р°РґРєРё С‚РµСЃС‚Р° РјРѕР¶РЅРѕ Р·Р°РїСѓСЃРєР°С‚СЊ РµРіРѕ РїРѕРІРµСЂС… РєРѕРЅС‚РµР№РЅРµСЂРѕРІ Р·Р°РїСѓС‰РµРЅРЅС‹С… С‡РµСЂРµР· *docker-compose-full-e2e* 
+(РѕС‚РєР»СЋС‡РµРЅ РєСЌС€ РЅР°СЃС‚СЂРѕРµРє) РґР»СЏ СЌС‚РѕРіРѕ РјРѕР¶РЅРѕ РІСЂРµРјРµРЅРЅРѕ СѓР±СЂР°С‚СЊ Р°РЅРЅРѕС‚Р°С†РёСЋ *@TestsEnabled* Рё Р·Р°РїСѓСЃС‚РёС‚СЊ С‚РµСЃС‚ РёРЅРґРёРІРёРґСѓР°Р»СЊРЅРѕ.
 
-# Запуск через run config-и для Idea
-1) Запустить docker-compose-local.yaml (версия бд как на тесте)
-2) Выполнить на Windows (пример):
-```batch
-mklink /d "C:\Program Files\Java\jdk1.8" "C:\Program Files\Java\jdk1.8.0_192"
+## Р—Р°Р»РёРІРєР° РЅР° СЃС‚РµРЅРґ
+
+```text
+TODO
 ```
-3) Распаковать keycloak в data/local/keycloak-6.0.1 и org.zip в него в modules, скопировать ту да же ./tools/modules
-4) Выполнить run config gradle "sso [build]" и "sso [deploy]"
-5) Выполнить run config batch "standalone.bat"
-6) Выполнить run config remote jvm debug "debug"
 
-# Логи стейджей
-https://kibana.dev.itrev.ru/app/logs/stream?flyoutOptions=(flyoutId:!n,flyoutVisibility:hidden,surroundingLogsId:!n)&logFilter=(language:kuery,query:ssostage2)&logPosition=(end:now,position:(tiebreaker:1409023,time:1635776220481),start:%272021-11-01T13:17:00.481Z%27,streamLive:!f)
-В поле менять на нужный ![img_7.png](img_7.png) <br>
-Существуют ssostage2, ssostage3, ssostage4, ssostage
+## Р—Р°Р»РёРІРєР° РЅР° РїСЂРѕРґ
 
-# логи прода
-Логи прода находятся в менеджерской консоли
-https://mgmt1.auth.domru.ru
-https://mgmt2.auth.domru.ru
+```text
+TODO
+```
 
-Лучше их просить через Девопса
+## РљР»СЋС‡РµРІС‹Рµ С‚Р°Р±Р»РёС†С‹ Р‘Р”
 
-# Стейджы
-1) sso-balancer.testing.srv.loc
-2) sso-balancer2.testing.srv.loc
-3) sso-balancer3.testing.srv.loc
-4) sso-balancer4.testing.srv.loc
+* *ADMIN_EVENT_ENTITY* - РїРѕРјРѕР¶РµС‚ РѕС‚СЃР»РµРґРёС‚СЊ С‡С‚Рѕ РґРµР»Р°Р» РјРµРЅРµРґР¶РµСЂ РІ Р°РґРјРёРЅРєРµ
+* *APP_PROPERTIES* - РЅР°СЃС‚СЂРѕР№РєРё РїСЂРѕРµРєС‚Р°, СЂР°Р·РЅС‹Рµ РїРѕРґРєР»СЋС‡РµРЅРёСЏ
+* *AUTO_LOCK_NOTIFICATION* - С‚Р°Р±Р»РёС†Р° РїР»Р°РЅРёСЂРѕРІС‰РёРєР° РїРѕ РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёСЏ РїРѕ РґРѕР»РіРѕР№ РЅРµ Р°РєС‚РёРІРЅРѕСЃС‚Рё
+* *CLIENT* - РІСЃРµ РєР»РёРµРЅС‚С‹ РґР»СЏ СЂР°Р·РЅС‹С… realm-РѕРІ
+* *IMPORT_USERS_DATA*
+* *IMPORT_USERS_REPORT* - С„Р°Р№Р»С‹ РѕС‚РІРµС‡Р°СЋС‰РёРµ Р·Р° РјРёРіСЂР°С†РёСЋ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
+* *REALM* - РЅР°СЃС‚СЂРѕР№РєРё realm-Р°
+* *USER_ENTITY* - РІСЃРµ РїРѕР»СЊР·РѕРІР°С‚РµР»Рё СЂР°Р·РЅС‹С… realm-РѕРІ
+* *USER_POST* - С‚Р°Р±Р»РёС†Р° customer-РѕРІ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
+* *USER_ATTRIBUTE* - Р°С‚СЂРёР±СѓС‚С‹ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
 
-# Базы
-Тут все БД стейджей
-jdbc:mariadb://10.101.6.63:3306/sso2
-sso/Okcyetlihoaphho
+## РЎРµСЂРІРёСЃРЅС‹Рµ РїРёСЃСЊРјР° РЅР° email
 
-Прод
-jdbc:mariadb://192.168.57.23:3308/sso
+РљРѕРЅС„РёРіСѓСЂРёСЂРѕРІР°РЅРёРµ РїРѕС‡С‚РѕРІС‹С… СЃРѕРѕР±С‰РµРЅРёР№ РїСЂРѕРёР·РІРѕРґРёС‚СЃСЏ РІ [themes/{yourTheme}/email](keycloak-extension\src\main\resources\themes\domru\email) Рё СЃРІРѕРґРёС‚СЃСЏ Рє РєРѕСЂСЂРµРєС‚РёСЂРѕРІРєРµ СЃС‚РёР»РµР№ Рё FreeMarker С€Р°Р±Р»РѕРЅРѕРІ. РџСЂРё СЂР°Р·СЂР°Р±РѕС‚РєРµ СЃС‚РѕРёС‚ СѓС‡РёС‚С‹РІР°С‚СЊ [РѕСЃРѕР±РµРЅРЅРѕСЃС‚Рё РІРµСЂСЃС‚РєРё](https://habr.com/ru/articles/252279/) РґР»СЏ РїРѕС‡С‚РѕРІС‹С… РєР»РёРµРЅС‚РѕРІ. Р”Р»СЏ РїСЂРѕРІРµСЂРєРё РїРѕРґРґРµСЂР¶РєРё С‚РѕР№ РёР»Рё РёРЅРѕР№ С„СѓРЅРєС†РёРё РїРѕС‡С‚РѕРІС‹Рј РєР»РёРµРЅС‚РѕРј СЂРµРєРѕРјРµРЅРґСѓРµС‚СЃСЏ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ СЃРµСЂРІРёСЃ [Can I email](https://www.caniemail.com/features/).
 
-# Заливка на прод
-Делать нужно с девопсом
-1) Смержить свои задачи в PROD ветку
-2) Сделать тег
-3) В Деплое появятся новые пункты ![img_8.png](img_8.png)
-4) Нажимаем по очереди с Воронежа
-5) В этих кабинетах смотрим что поменялся тег билда
-https://mgmt1.auth.domru.ru
-https://mgmt2.auth.domru.ru
+Р”Р»СЏ РїРµСЂРµС…РІР°С‚Р° РїРѕС‡С‚РѕРІС‹С… СЃРѕРѕР±С‰РµРЅРёР№ РїСЂРё Р»РѕРєР°Р»СЊРЅРѕР№ СЂР°Р·СЂР°Р±РѕС‚РєРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ *smtp4dev* СЃРµСЂРІРµСЂ.
 
-# Заливка на стейдж
-После создание ветки Pipeline собирается автоматически
-Ждем первых 3 пункта далее жмем container дожидаемся и заливаем куда нам нужно
+### РЎС‚РµРЅРґС‹ 
 
-# Поднятие фронта
-1) Открываем в терминале нужную тему ![img_9.png](img_9.png)
-2)  npm install      
-3) npm run-script build      
-4) После каждого изменения фронта билдим фронт деплоим проект
+- **dev**: [https://smtp4dev-er-sso.dev.it-resource.team/](https://smtp4dev-er-sso.dev.it-resource.team/)
 
-# Ключевые таблицы БД
-ADMIN_EVENT_ENTITY - поможет отследить что делал менеджер в админке
-APP_PROPERTIES - настройки проекта, разные подключения
-AUTO_LOCK_NOTIFICATION - таблица шедулера по предупреждения по долгой не активности
-CLIENT - все клиеты для разных реалмов
-IMPORT_USERS_DATA
-IMPORT_USERS_REPORT - файлы отвечающие за миграцию пользователей
-REALM - настройки реалма
-USER_ENTITY - все пользователи разных реалмов
-USER_POST - таблица кастомеров пользователей
-USER_ATTRIBUTE - атрибуты пользователей
-
-# Сервисные письма на email
-Изменения производятся в keycloak-extension/src/main/resources/themes/domru/email/html ( см примеры ) - domru
-
+- **local**: [http://localhost:8025](http://localhost:8025/)

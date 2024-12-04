@@ -9,7 +9,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="robots" content="noindex, nofollow">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <link rel="shortcut icon" href="${url.resourcesPath}/build/images/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="${url.resourcesPath}/build/images/favicon.svg" type="image/x-icon">
 
         <#if properties.meta?has_content>
             <#list properties.meta?split(' ') as meta>
@@ -24,12 +24,12 @@
 
         <#if properties.styles?has_content>
             <#list properties.styles?split(' ') as style>
-                <link href="${url.resourcesPath}/${style}?hash=" rel="stylesheet"/>
+                <link href="${url.resourcesPath}/${style}?hash=@hash@" rel="stylesheet"/>
             </#list>
         </#if>
     </head>
     <body class="min-h-full flex flex-col p-4 sm:px-6 md:py-6 lg:px-8 xl:py-8 xl:px-6">
-    <#if displayMessage && message?has_content && message.summary == 'Регистрация временно недоступна, попробуйте повторить попытку позже'>
+    <#if displayMessage?has_content && displayMessage && message?has_content && message.summary == 'Регистрация временно недоступна, попробуйте повторить попытку позже'>
         <@header.defaultTemplate withCity=displayCity></@header.defaultTemplate>
         <#include "templates/sth-went-wrong.html">
     <#else>
@@ -40,12 +40,12 @@
         <@header.defaultTemplate withCity=displayCity></@header.defaultTemplate>
 
         <main id="content" class="flex-1 py-8 md:py-12 mx-auto md:mx-auto w-full max-w-440px xl:max-w-470px">
-            <#if displayMessage && message?has_content && message.summary == msg('emailSentMessage')>
-                <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}"; section>
+            <#if displayMessage?has_content && displayMessage && message?has_content && message.summary == msg('emailSentMessage')>
+                <@emailSent.defaultTemplate email="${userEmail!}" backHref="${url.loginUrl}"; section>
                     <#if section = "header">
                         Восстановление пароля
                     <#elseif section = "description">
-                        <span>На почту: ${login.username!}</span>
+                        <span>На почту: ${userEmail!}</span>
                         Отправлены инструкции для восстановления пароля
                     </#if>
                 </@emailSent.defaultTemplate>
@@ -134,7 +134,7 @@
 
     <#if properties.scripts?has_content>
         <#list properties.scripts?split(' ') as script>
-            <script src="${url.resourcesPath}/${script}?hash=" async></script>
+            <script src="${url.resourcesPath}/${script}?hash=@hash@" async></script>
         </#list>
     </#if>
 
@@ -150,13 +150,13 @@
         </#list>
     </#if>
 
-    <#if hideChat>
+    <#if hideChat?? && hideChat == false>
         <div id="hiddenChat" class="hidden">
         </div>
     </#if>
 
     <script type="text/javascript">
-        let isChatHidden = document.getElementById('hiddenChat');
+        let chatElement = document.getElementById('hiddenChat');
 
         let isFramed = false;
         try {

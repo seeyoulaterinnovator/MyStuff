@@ -13,7 +13,7 @@ public class CityDadataModel {
 
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public class LocationModel {
+    public static class LocationModel {
 
         private String value;
 
@@ -21,7 +21,7 @@ public class CityDadataModel {
 
         @Data
         @JsonIgnoreProperties(ignoreUnknown = true)
-        public class DataModel {
+        public static class DataModel {
 
             private String city;
             @JsonProperty("region_iso_code")

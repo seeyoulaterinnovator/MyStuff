@@ -1,0 +1,29 @@
+import {writable} from 'svelte/store';
+
+export const text = writable('');
+
+export const show = writable(false);
+
+export const showInfo = writable(false);
+
+export const isBadEmail = writable(false);
+
+export const isEmailVer = writable(false);
+
+export const isSecondSwitcher = writable(false);
+
+export const isPhoneError = writable(false);
+
+export const isBadPhone = writable(false);
+
+export const isRegistration = writable(false);
+
+export const isUpdateProfile = writable(false);
+
+export const isLimitExceeded = writable(false);
+
+export const isLoginFailToRegistration = writable(false);
+
+export const loginUrl = writable(document.getElementById('message-modal').getAttribute('data-login-url'));
+
+export const registrationUrl = writable(document.getElementById('message-modal').getAttribute('data-registration-url'));

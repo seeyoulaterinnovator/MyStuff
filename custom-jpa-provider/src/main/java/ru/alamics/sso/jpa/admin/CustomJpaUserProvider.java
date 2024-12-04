@@ -1,8 +1,11 @@
 package ru.alamics.sso.jpa.admin;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.RealmProvider;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.JpaUserProvider;
 import org.keycloak.models.jpa.UserAdapter;
@@ -11,17 +14,14 @@ import org.keycloak.models.utils.KeycloakModelUtils;
 import ru.alamics.sso.jpa.entity.AutoLockNotification;
 import ru.alamics.sso.jpa.entity.UserLoginHistory;
 import ru.alamics.sso.jpa.entity.UserPostEntity;
+import ru.alamics.sso.jpa.model.CustomUserAdapter;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import java.net.URI;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Slf4j
 public class CustomJpaUserProvider extends JpaUserProvider {
-
-    private KeycloakSession session;
+    private final KeycloakSession session;
 
     public CustomJpaUserProvider(KeycloakSession session, EntityManager em) {
         super(session, em);
@@ -29,7 +29,7 @@ public class CustomJpaUserProvider extends JpaUserProvider {
     }
 
     @Override
-    public List<UserModel> searchForUser(String search, RealmModel realm, int firstResult, int maxResults) {
+    public Stream<UserModel> searchForUserStream(RealmModel realm, String search, Integer firstResult, Integer maxResults) {
         log.info("searchForUser");
 
         TypedQuery<UserEntity> query = em.createQuery(
@@ -43,10 +43,11 @@ public class CustomJpaUserProvider extends JpaUserProvider {
                         "or attr.value like :search ) " +
                         "order by u.username",
                 UserEntity.class);
-        if (realm.getId().equals("manager"))
+        if (realm.getId().equals("manager") || realm.getId().equals("e2e-manager")) {
             query.setParameter("realmId", "user");
-        else
+        } else {
             query.setParameter("realmId", realm.getId());
+        }
         query.setParameter("search", "%" + search.toLowerCase() + "%");
         if (firstResult != -1) {
             query.setFirstResult(firstResult);
@@ -54,10 +55,7 @@ public class CustomJpaUserProvider extends JpaUserProvider {
         if (maxResults != -1) {
             query.setMaxResults(maxResults);
         }
-        List<UserEntity> results = query.getResultList();
-        List<UserModel> users = new LinkedList<>();
-        for (UserEntity entity : results) users.add(new UserAdapter(session, realm, em, entity));
-        return users;
+        return query.getResultStream().map(entity -> new UserAdapter(session, realm, em, entity));
     }
 
     @Override
@@ -71,8 +69,8 @@ public class CustomJpaUserProvider extends JpaUserProvider {
 
     private void removeUser(UserEntity user) {
         String id = user.getId();
-        em.createNativeQuery(AutoLockNotification.DELETE_BY_USER_SQL).setParameter("user", user).executeUpdate();
-        em.createNativeQuery(UserLoginHistory.DELETE_BY_USER_SQL).setParameter("user", user).executeUpdate();
+        em.createNativeQuery(AutoLockNotification.DELETE_BY_USER_SQL).setParameter("user", user.getId()).executeUpdate();
+        em.createNativeQuery(UserLoginHistory.DELETE_BY_USER_SQL).setParameter("user", user.getId()).executeUpdate();
         em.createNamedQuery("deleteUserRoleMappingsByUser").setParameter("user", user).executeUpdate();
         em.createNamedQuery("deleteUserGroupMembershipsByUser").setParameter("user", user).executeUpdate();
         em.createNamedQuery("deleteFederatedIdentityByUser").setParameter("user", user).executeUpdate();
@@ -84,7 +82,7 @@ public class CustomJpaUserProvider extends JpaUserProvider {
 
         removePostSystem(user);
 
-        em.createNativeQuery(UserPostEntity.DELETE_BY_USER_SQL).setParameter("user", user).executeUpdate();
+        em.createNativeQuery(UserPostEntity.DELETE_BY_USER_SQL).setParameter("user", user.getId()).executeUpdate();
 
         em.flush();
         // not sure why i have to do a clear() here.  I was getting some messed up errors that Hibernate couldn't
@@ -129,5 +127,18 @@ public class CustomJpaUserProvider extends JpaUserProvider {
         }
 
         return addUser(realm, KeycloakModelUtils.generateId(), username.toLowerCase(), true, true);
+    }
+
+    // версия 6.0.1 без проверки realm-а (необходима для менеджеров)
+    @Override
+    public UserModel getUserById(RealmModel realm, String id) {
+        UserEntity userEntity = this.em.find(UserEntity.class, id);
+        if(userEntity == null) return null;
+        return new CustomUserAdapter(
+                this.session,
+                session.getProvider(RealmProvider.class).getRealm(userEntity.getRealmId()),
+                this.em,
+                userEntity
+        );
     }
 }

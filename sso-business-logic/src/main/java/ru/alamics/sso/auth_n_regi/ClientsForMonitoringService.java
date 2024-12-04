@@ -1,19 +1,15 @@
 package ru.alamics.sso.auth_n_regi;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import ru.alamics.sso.jpa.entity.auth_reg.ClientsForMonitoringEntity;
 import ru.alamics.sso.jpa.repository.ClientsForMonitoringRepository;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-
-@Stateless
-@LocalBean
+@ApplicationScoped
 public class ClientsForMonitoringService {
-
-    @EJB
-    private final ClientsForMonitoringRepository clientsForMonitoringRepository;
+    @Inject
+    ClientsForMonitoringRepository clientsForMonitoringRepository;
 
     public ClientsForMonitoringService() {
         this.clientsForMonitoringRepository = Lookup.lookup(ClientsForMonitoringRepository.class);

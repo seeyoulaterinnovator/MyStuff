@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.reg;
 
+import jakarta.ws.rs.core.MultivaluedMap;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.Config;
 import org.keycloak.authentication.FormAction;
@@ -16,12 +17,12 @@ import org.keycloak.models.utils.FormMessage;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.services.messages.Messages;
-import org.keycloak.services.resources.AttributeFormDataProcessor;
 import org.keycloak.services.validation.Validation;
+import org.keycloak.services.resources.AttributeFormDataProcessor;
 
-import javax.ws.rs.core.MultivaluedMap;
 import java.util.ArrayList;
 import java.util.List;
+
 @Slf4j
 public class RestRegistrationUserCreation implements FormAction, FormActionFactory {
 
@@ -57,7 +58,7 @@ public class RestRegistrationUserCreation implements FormAction, FormActionFacto
                 context.validationError(formData, errors);
                 return;
             }
-            if (email != null && !context.getRealm().isDuplicateEmailsAllowed() && context.getSession().users().getUserByEmail(email, context.getRealm()) != null) {
+            if (email != null && !context.getRealm().isDuplicateEmailsAllowed() && context.getSession().users().getUserByEmail(context.getRealm(), email) != null) {
                 context.error(Errors.EMAIL_IN_USE);
                 formData.remove(Validation.FIELD_EMAIL);
                 errors.add(new FormMessage(RegistrationPage.FIELD_EMAIL, Messages.EMAIL_EXISTS));
@@ -73,7 +74,7 @@ public class RestRegistrationUserCreation implements FormAction, FormActionFacto
                 return;
             }
 
-            if (context.getSession().users().getUserByUsername(username, context.getRealm()) != null) {
+            if (context.getSession().users().getUserByUsername(context.getRealm(), username) != null) {
                 context.error(Errors.USERNAME_IN_USE);
                 errors.add(new FormMessage(usernameField, Messages.USERNAME_EXISTS));
                 formData.remove(Validation.FIELD_USERNAME);

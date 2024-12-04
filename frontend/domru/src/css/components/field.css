@@ -12,6 +12,12 @@
   display: flex;
   flex-flow: column;
   position: relative;
+
+  &:has(.field__input:focus:not(:placeholder-shown)) {
+    .field__label {
+      @apply .text-accentBlue-1200-hover;
+    }
+  }
 }
 
 .field__open {
@@ -23,51 +29,51 @@
 }
 
 .eye {
-  opacity: 0.2;
-  margin-bottom: 1px;
 }
 
-.field__open:hover .eye {
-  opacity: 0.5;
-}
 
 .field__input {
   @apply .border .border-accentBlue-700-20 .rounded-lg .pt-2 .pb-3 .px-3 .text-black .outline-none;
-  border-radius: 10px;
+
+  border-radius: 12px;
   -webkit-box-shadow: inset 0 0 0 50px #fff;
-  height: 40px;
+  height: 48px;
   transition: border-color 0.1s ease-in;
   width: 100%;
   color: #222222;
+  padding: 9.5px 14px;
+
+  &::placeholder {
+    color: var(--main-900);
+  }
+
+
   &:-webkit-autofill,
   &:-webkit-autofill:focus {
     transition: color 0s 222222s !important;
   }
 
-@media (min-width: 1280px) {
-  height:48px;
-}
+  &:hover {
+    @apply .border-accentBlue-1200-hover;
+  }
 
-&
-:hover {
-  @apply .border-accentBlue-1000;
-}
+  &:focus {
+    @apply .border-accentBlue-1200-hover;
+  }
 
-&
-:focus {
-  @apply .border-accentBlue-1000;
-}
+  &:placeholder {
+    color: var(--main-900);
+  }
 
-&
-::placeholder {
-  font-size: 16px;
-  color: black;
-  opacity: 0.5;
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    height: 44px;
+    border-radius: 11px;
+  }
 
-@media (min-width: 1280px) {
-  font-size:17px;
-}
-}
+  @media only screen and (max-width: 767px) {
+    height: 40px;
+    border-radius: 10px;
+  }
 }
 
 .field__input:placeholder-shown + .field__label {
@@ -81,13 +87,11 @@
 }
 
 .field__label {
-  @apply .text-main;
+  @apply .text-main-900;
 
-  font-weight: 350;
   position: absolute;
   top: -6.2px;
   left: 12px;
-  color: #899DA8;
   background-color: white;
   padding-right: 2px;
   padding-left: 2px;
@@ -95,79 +99,46 @@
   align-items: center;
   transition: color .3s ease-in-out;
   margin-bottom: 3px;
-  font-size: 10px;
-  line-height: 13px;
-  letter-spacing: 0.05em;
-
-@media (min-width: 768px) {
-  font-size:13px;
-}
 }
 
 .field--error {
   .field__input {
-    border-color: #FF312C;
+    border-color: var(--accent-red-100);
   }
 }
 
 .field__error-message {
-  color: #FF312C;
+  color: var(--accent-red-100);
   height: 0;
-  font-size: 13px;
-  line-height: 13px;
 }
 
 .pass-fields {
-  min-width: 270px;
-  max-width: 270px;
-
-  @media (max-width: 1279px) {
-    min-width:235px;
-    max-width:245px;
-  }
-
-  @media (max-width: 767px) {
-    min-width: auto;
-    max-width: none;
-    flex-grow: 1;
-  }
+  width: 100%;
 }
 
-@media only screen and (min-width: 1280px) {
-  .reg-fields {
+.reg-fields {
+
+  @media only screen and (min-width: 1280px) {
     min-width: 242px;
     height: 48px;
     font-size: 16px;
   }
-}
 
   @media only screen and (min-width: 768px) and (max-width: 1279px) {
-    .reg-fields {
-      min-width: 226px;
-      height: 44px;
-      font-size: 15px;
-    }
+    min-width: 226px;
+    height: 44px;
+    font-size: 15px;
   }
 
   @media only screen and (max-width: 767px) {
-    .reg-fields {
-      min-width: 288px;
-      height: 40px;
-      font-size: 14px;
-    }
+    min-width: 288px;
+    height: 40px;
+    font-size: 14px;
   }
-
+}
 
 .pass-fields--change-pass {
   min-width: unset;
-
-  @media (max-width: 1279px) {
-    min-width:210px;
-  }
-
-  @media (max-width: 767px) {
-    width:100%;
-  }
 }
 
 .generated-password-text {
@@ -191,7 +162,6 @@
     height: 40px;
   }
 }
-
 
 .passw_ok {
   position: absolute;
@@ -253,6 +223,10 @@
   align-items: center;
   gap: 18px;
   align-self: stretch;
+
+  @media only screen and (max-width: 767px) {
+    flex-direction: column;
+  }
 }
 
 /*my*/
@@ -275,35 +249,17 @@
 
 /*my*/
 .code {
-  color: var(--light, #16629A);
-  /* Tablet/Ссылка_17-23_Tablet */
-  font-family: CoFo Sans, sans-serif;
-  font-size: 17px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 23px; /* 135.294% */
+  color: var(--accent-blue-1200, #16629A);
 }
 
 /*my*/
 .forgot {
-  color: var(--light, #16629A);
-  /* Tablet/Ссылка_17-23_Tablet */
-  font-family: CoFo Sans;
-  font-size: 17px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 23px; /* 135.294% */
+  color: var(--accent-blue-1200, #16629A);
 }
 
 /*my*/
 .enter-login-link {
-  color: var(--light, #16629A);
-  /* Tablet/Ссылка_17-23_Tablet */
-  font-family: CoFo Sans, sans-serif;
-  font-size: 17px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 23px; /* 135.294% */
+  color: var(--accent-blue-1200, #16629A);
   margin-top: 18px;
 }
 
@@ -324,39 +280,26 @@
 }
 
 .timer-new {
-  color: #899DA8;
+  color: var(--main-900);
   text-align: right;
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 18px;
-  letter-spacing: 0.03em;
 }
 
 .timer-new-countdown {
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 18px;
-  letter-spacing: 0.03em;
+  color: var(--main-800);
 }
 
 /*my*/
 .resend {
-  color: var(--light, #16629A);
+  color: var(--accent-blue-1200);
   text-align: center;
-  font-size: 17px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 23px; /* 135.294% */
 }
 
 .field__input {
-  border-color: #CFDBE0;
+  border-color: var(--main-1200);
 }
 
 .field__input.field__input--error {
-  border-color: #FF312C;
+  border-color: var(--accent-red-100);
 }
 
 .login-password-forgot {
@@ -519,14 +462,18 @@
   color: #FF312C;
 }
 
+.timer {
+  @media only screen and (max-width: 767px) {
+    align-items: center;
+  }
+}
+
 .back-timer {
   display: flex;
   flex-direction: row;
   align-items: center;
   padding: 0px;
   gap: 24px;
-  width: 568px;
-  height: 48px;
   flex: none;
   order: 2;
   align-self: stretch;
@@ -536,8 +483,6 @@
 @media only screen and (min-width: 768px) and (max-width: 1279px) {
   .back-timer {
     gap: 18px;
-    width: 480px;
-    height: 44px;
   }
 }
 
@@ -547,8 +492,6 @@
     align-items: start;
     justify-content: center;
     gap: 10px;
-    width: 100%;
-    height: auto;
   }
 
   #timer {
@@ -597,7 +540,6 @@
 @media (max-width: 767px){
   .enter-reg-mobile{
     display: flex;
-    justify-content: space-between;
   }
 }
 
@@ -608,3 +550,31 @@
   }
 }
 
+#numbers-password {
+}
+
+#letters-password {
+}
+
+.sms-inputs {
+  @media only screen and (max-width: 767px) {
+    margin: auto;
+    max-width: 288px;
+    justify-content: space-between;
+  }
+}
+
+.sms-input {
+  width: 60px;
+  height: 60px;
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    width: 58px;
+    height: 58px;
+  }
+
+  @media only screen and (max-width: 767px) {
+    width: 56px;
+    height: 56px;
+  }
+}

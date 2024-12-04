@@ -1,6 +1,13 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.persistence.Tuple;
+import jakarta.transaction.Transactional;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.jpa.entities.RealmEntity;
 import org.keycloak.models.jpa.entities.UserAttributeEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
@@ -8,20 +15,12 @@ import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.jpa.model.UserSummaryView;
 import ru.alamics.sso.jpa.util.CollectionUtils;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.persistence.Tuple;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@LocalBean
-@Stateless
+@ApplicationScoped
 public class UserRepository {
 
     private final static String USER_SUMMARY_MAPPER_NAME = "UserSummaryMapper";
@@ -29,16 +28,17 @@ public class UserRepository {
     private final static String SORT_FIELD_NAME = "firstName";
     private final static String SORT_FIELD_EMAIL = "email";
 
-    @PersistenceContext
-    private EntityManager em;
+    @Inject
+    EntityManager em;
+
+    @Inject
+    RealmRepository realmRepository;
 
     public UserEntity findUser(final String userId) {
-        UserEntity ret = em.find(UserEntity.class, userId);
-
-        return ret;
+        return em.find(UserEntity.class, userId);
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Transactional
     public List<UserEntity> save(List<UserEntity> entities) {
         entities.forEach(entity -> {
             if (entity.getId() == null) {
@@ -53,7 +53,7 @@ public class UserRepository {
         return entities;
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Transactional
     public UserEntity save(UserEntity user) {
         if (user.getId() == null) {
             user.setId(KeycloakModelUtils.generateId());
@@ -66,7 +66,7 @@ public class UserRepository {
         return user;
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Transactional
     public UserAttributeEntity saveAttributes(UserAttributeEntity attr) {
         if (attr.getId() == null) {
             attr.setId(KeycloakModelUtils.generateId());
@@ -118,22 +118,6 @@ public class UserRepository {
         if (users != null && !users.isEmpty())
             return users.get(0);
 
-        return null;
-    }
-
-    public UserEntity getFirstUserByPhone(String phone) {
-        List<UserEntity> users = em.createQuery(
-                "select u from UserEntity u " +
-                        "join u.attributes attr \n" +
-                        "  where attr.name = :name " +
-                        "       and attr.value = :phoneNmbr", UserEntity.class)
-                .setParameter("name", "phone")
-                .setParameter("phoneNmbr", phone)
-                .setMaxResults(1)
-                .getResultList();
-        if (users != null && users.size() > 0) {
-            return users.get(0);
-        }
         return null;
     }
 
@@ -216,7 +200,7 @@ public class UserRepository {
                 getIdList(includeOnlyIDs) +
                 "GROUP by UE.ID, UE.USERNAME, UE.FIRST_NAME, UE.LAST_NAME, UE.EMAIL, UA.VALUE, UE.ENABLED, UP.id, UP.TOMS_ID, C.NAME,\n" +
                 "         UP.DMP_ID, UP.ROLE_ID, UPR.NAME, ESR.ID, ESR.NAME, ES.ID, ES.NAME, ES.LABEL" +
-                getSort(sortField, sortAsc) +
+                getNativeSort(sortField, sortAsc) +
                 getLimit(pageNum, pageSize);
 
         Query query = em.createNativeQuery(
@@ -230,23 +214,41 @@ public class UserRepository {
         return query.getResultList();
     }
 
-    public long getTotalUsersByParameters(String realm, String search, String searchUser, String searchToms) {
+    public long getTotalUsersByParameters(String realm, String search, String searchUser, String searchEmail, String searchToms, String searchPhone) {
+        if (CollectionUtils.isNotEmpty(search)) {
+            search = "%" + search + "%";
+        }
+
+        if (CollectionUtils.isNotEmpty(searchEmail)) {
+            search = searchEmail;
+        }
+
+        if (CollectionUtils.isNotEmpty(searchPhone)) {
+            searchPhone = searchPhone + "%";
+        }
+
+        if(realmRepository.findRealmById(realm) == null) {
+            realm = realmRepository.findRealmEntityByName(realm).map(RealmEntity::getId).orElse(null);
+        }
+
+        if(realm == null) return 0;
+
         Query query = em.createQuery(
-                "select count(UE)  " +
+                "select count(distinct UE.id) " +
                         "from UserEntity UE\n" +
                         "         left join UserAttributeEntity UA on UE = UA.user AND UA.name = 'phone'\n" +
                         "         left join UserPostEntity UP on UE = UP.user \n" +
                         "WHERE UE.realmId = :realm\n" +
-                        "and (:search is null or :search = '' or (UE.email LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                                         UE.firstName LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                                         UE.lastName LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                                         UE.username LIKE CONCAT('%', :search, '%') OR\n" +
-                        "                                         UA.value LIKE CONCAT('%', :search, '%')))\n" +
+                        "and (:search is null or :search = '' or (UE.email LIKE :search OR\n" +
+                        "                                         UE.firstName LIKE :search OR\n" +
+                        "                                         UE.username LIKE :search ))\n" +
                         "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser)\n" +
-                        "and (:searchToms is null or :searchToms = '' or UP.customer.id = :searchToms)\n")
+                        "and (:searchToms is null or :searchToms = '' or UP.customer.id = :searchToms)\n" +
+                        "and (:searchPhone is null or :searchPhone = '' or UA.value LIKE :searchPhone)\n")
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
+                .setParameter("searchPhone", searchPhone)
                 .setParameter("realm", realm);
 
         return Long.parseLong(query.getSingleResult().toString());
@@ -261,11 +263,12 @@ public class UserRepository {
             String searchToms,
             String sortField,
             boolean sortAsc,
-            int pageNum,
-            int pageSize
+            int first,
+            int max
     ) {
         if (CollectionUtils.isNotEmpty(search)) {
-            search = "%" + search.replace("-", "\\-") + "%";
+//            search = "%" + search.replace("-", "\\-") + "%";
+            search = "%" + search + "%";
         }
 
         if (CollectionUtils.isNotEmpty(searchEmail)) {
@@ -275,6 +278,12 @@ public class UserRepository {
         if (CollectionUtils.isNotEmpty(searchPhone)) {
             searchPhone = searchPhone + "%";
         }
+
+        if(realmRepository.findRealmById(realm) == null) {
+            realm = realmRepository.findRealmEntityByName(realm).map(RealmEntity::getId).orElse(null);
+        }
+
+        if(realm == null) return Collections.emptyList();
 
         Query query = em.createQuery(
                 "select distinct new ru.alamics.sso.jpa.model.UserSummaryView(UE.id, " +
@@ -303,11 +312,8 @@ public class UserRepository {
                 .setParameter("searchPhone", searchPhone)
                 .setParameter("realm", realm);
 
-        pageNum = Math.max(1, pageNum);
-        pageSize = Math.max(1, pageSize);
-
-        query.setFirstResult((pageNum - 1) * pageSize);
-        query.setMaxResults(pageSize);
+        query.setFirstResult(first);
+        query.setMaxResults(max);
 
         return query.getResultList();
     }
@@ -348,7 +354,7 @@ public class UserRepository {
                         "    from USER_POST UP \n" +
                         "    where UP.USER_ID = UE.ID and UP.TOMS_ID = :searchToms) \n" +
                         "  ) \n" +
-                        getSort(sortField, sortAsc)
+                        getNativeSort(sortField, sortAsc)
                 , USER_SUMMARY_MAPPER_NAME)
                 .setParameter("search", fullTextSearch)
                 .setParameter("searchUser", searchUser)
@@ -389,7 +395,7 @@ public class UserRepository {
                         "where UE.REALM_ID = :realm \n" +
                         "  and UA.NAME = 'phone' \n" +
                         "  and MATCH(UA.VALUE) AGAINST(:searchPhone IN BOOLEAN MODE) \n" +
-                        getSort(sortField, sortAsc)
+                        getNativeSort(sortField, sortAsc)
                 , USER_SUMMARY_MAPPER_NAME)
                 .setParameter("searchPhone", searchPhone)
                 .setParameter("realm", realm);
@@ -417,10 +423,23 @@ public class UserRepository {
                         search.substring(lastIndexSymbol));
     }
 
-    private String getSort(String sortField, boolean sortAsc) {
+    private String getNativeSort(String sortField, boolean sortAsc) {
         String sort = "";
         if (SORT_FIELD_NAME.equalsIgnoreCase(sortField)) {
             sort += " ORDER BY first_name ";
+        } else if (SORT_FIELD_EMAIL.equalsIgnoreCase(sortField)) {
+            sort += " ORDER BY email ";
+        }
+        if (!sort.isEmpty() && !sortAsc) {
+            sort += " DESC";
+        }
+        return sort;
+    }
+
+    private String getSort(String sortField, boolean sortAsc) {
+        String sort = "";
+        if (SORT_FIELD_NAME.equalsIgnoreCase(sortField)) {
+            sort += " ORDER BY firstName ";
         } else if (SORT_FIELD_EMAIL.equalsIgnoreCase(sortField)) {
             sort += " ORDER BY email ";
         }

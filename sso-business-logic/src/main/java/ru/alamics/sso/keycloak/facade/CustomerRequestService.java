@@ -1,5 +1,7 @@
 package ru.alamics.sso.keycloak.facade;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.Locked;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.customer.CustomerDto;
 import ru.alamics.sso.customer.CustomerService;
@@ -10,15 +12,12 @@ import ru.alamics.sso.registration.tbapi.model.TbapiConnect;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.tbapi.port.TbapiRemoteService;
 
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Singleton;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.ReentrantLock;
 
+@ApplicationScoped
 @Slf4j
-@Singleton
-@Lock(LockType.READ)
 public class CustomerRequestService {
     private static final String TBAPI_REQUEST_MAX_SIZE_PROPERTY = "tbapi.customer.request.max.size";
     private static final int TBAPI_REQUEST_MAX_SIZE = 10;
@@ -26,9 +25,11 @@ public class CustomerRequestService {
     private static final int LOAD_COEFF_DEFAULT = 100;
     private static final String TBAPI_CUSTOMER_DONT_REQUEST = "tbapi.customer.dont.request";
 
+    private final ReentrantLock lock = new ReentrantLock();
+
     private int tbapiRequestMaxSize;
     private int loadCoeff;
-    private boolean dontRequest = false;
+    private boolean dontRequest;
 
     private TbapiService tbapiService;
     private CustomerService customerService;
@@ -48,62 +49,55 @@ public class CustomerRequestService {
         dontRequest = Boolean.parseBoolean(properties.getProperty(TBAPI_CUSTOMER_DONT_REQUEST));
     }
 
-    @Lock(LockType.WRITE)
     public Map<String, String> updateCustomerNames() {
-        List<String> currentTomsIds = extractListFromQueue(tbapiRequestMaxSize);
-        if (currentTomsIds.isEmpty()) {
-            return new HashMap<>();
-        }
+        lock.lock();
         try {
-            Map<String, Object> customerMap = requestCustomerNames(currentTomsIds);
-            Map<String, String> customers = new HashMap<>();
-            for (String tomsId : currentTomsIds) {
-                CustomerDto customer = CustomerDto.builder()
-                        .tomsId(tomsId)
-                        .name(customerMap.get(tomsId) == null ? " " : customerMap.get(tomsId).toString())
-                        .build();
-                customerService.save(customer);
-                customers.put(customer.getTomsId(), customer.getName());
+            List<String> currentTomsIds = extractListFromQueue(tbapiRequestMaxSize);
+            if (currentTomsIds.isEmpty()) {
+                return new HashMap<>();
             }
-            return customers;
+            if(dontRequest) {
+                log.info("FAKE customer names request due to properties: customerIds={}", currentTomsIds);
+                return new HashMap<>();
+            }
+            try {
+                Map<String, Object> customerMap = tbapiService.customerNames(new TbapiConnectConfig(TbapiConnect.CUTOMER_NAMES), currentTomsIds);;
+                Map<String, String> customers = new HashMap<>();
+                for (String tomsId : currentTomsIds) {
+                    CustomerDto customer = CustomerDto.builder()
+                            .tomsId(tomsId)
+                            .name(customerMap.get(tomsId) == null ? " " : customerMap.get(tomsId).toString())
+                            .build();
+                    customerService.save(customer);
+                    customers.put(customer.getTomsId(), customer.getName());
+                }
+                return customers;
+            } catch (Exception e) {
+                log.error("Fail getting customer names by tomsIds={}", currentTomsIds, e);
+                throw e;
+            }
         } catch (Exception e) {
-            log.error("Fail getting customer names by tomsIds={}", currentTomsIds.toString(), e);
+            log.error("Fail updating customer names", e);
             return new HashMap<>();
+        } finally {
+            lock.lock();
         }
     }
 
-    @Lock(LockType.WRITE)
-    private Map<String, Object> requestCustomerNames(List<String> currentTomsIds) {
-
-        if (dontRequest) {
-            log.info("FAKE customer names request due to properties: customerIds={}", currentTomsIds);
-            return new HashMap<>();
-        }
-
-        return tbapiService.customerNames(new TbapiConnectConfig(TbapiConnect.CUTOMER_NAMES), currentTomsIds);
-
-    }
-
+    @Locked.Write
     public void addTomsIdsInQueue(List<String> updatingTomsId) {
-
         for (String tomsId : updatingTomsId) {
             tomsIdQueue.offer(tomsId);
         }
     }
 
+    @Locked.Read
     public int getLoadCoeff() {
         return tomsIdQueue.size() / tbapiRequestMaxSize / loadCoeff;
     }
 
-    public int getTomsIdQueueSize() {
-        return tomsIdQueue.size();
-    }
-
-    public int getTbapiRequestMaxSize() {
-        return tbapiRequestMaxSize;
-    }
-
-    private List<String> extractListFromQueue(int countElements) {
+    @Locked.Write
+    public List<String> extractListFromQueue(int countElements) {
         List<String> result = new LinkedList<>();
         if (tomsIdQueue.isEmpty()) {
             return Collections.emptyList();
@@ -111,10 +105,14 @@ public class CustomerRequestService {
 
         int currentElement = 0;
         while (!tomsIdQueue.isEmpty() && currentElement <= countElements) {
-            result.add(tomsIdQueue.poll());
-            currentElement++;
+            String tomsId = tomsIdQueue.poll();
+            if (tomsId != null) {
+                result.add(tomsId);
+                currentElement++;
+            } else {
+                break;
+            }
         }
         return result;
     }
-
 }

@@ -64,7 +64,7 @@ public class VkIdentityProvider extends AbstractOAuth2IdentityProvider<OAuth2Ide
 
         String id = getJsonProperty(profile, "id");
 
-        BrokeredIdentityContext user = new BrokeredIdentityContext(id);
+        BrokeredIdentityContext user = new BrokeredIdentityContext(id, getConfig());
 
         String username = getJsonProperty(profile, "domain");
         String firstName = getJsonProperty(profile, "first_name");
@@ -83,7 +83,6 @@ public class VkIdentityProvider extends AbstractOAuth2IdentityProvider<OAuth2Ide
         user.setEmail(email);
         user.setUsername(username);
         user.setName(firstName + lastName);
-        user.setIdpConfig(getConfig());
         user.setIdp(this);
         user.getContextData().put("firstName", firstName + " " + lastName);
 
@@ -99,6 +98,6 @@ public class VkIdentityProvider extends AbstractOAuth2IdentityProvider<OAuth2Ide
 
     @Override
     public Object callback(RealmModel realm, AuthenticationCallback callback, EventBuilder event) {
-        return new AbstractOAuth2IdentityProvider.Endpoint(callback, realm, event);
+        return new AbstractOAuth2IdentityProvider.Endpoint(callback, realm, event, this);
     }
 }

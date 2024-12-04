@@ -1,14 +1,16 @@
 package ru.alamics.sso.user;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.*;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.authentication.authenticators.x509.UserIdentityToModelMapper;
 import org.keycloak.common.util.Time;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
 import org.keycloak.events.jpa.AdminEventEntity;
 import org.keycloak.models.*;
 import org.keycloak.models.jpa.entities.*;
-import org.keycloak.services.DefaultKeycloakTransactionManager;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.storage.ReadOnlyException;
@@ -30,8 +32,6 @@ import ru.alamics.sso.util.validator.EmailValidator;
 import ru.alamics.sso.util.validator.NotValidException;
 import ru.alamics.sso.util.validator.PhoneValidator;
 
-import javax.ejb.*;
-import javax.ws.rs.NotFoundException;
 import java.util.*;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
@@ -41,27 +41,23 @@ import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
  * <p>
  * same as UserExtService
  */
+@ApplicationScoped
 @Slf4j
-@Stateless
-@LocalBean
 public class ImportService {
-
-    @EJB
-    private ImportUsersReportRepository importUsersReportRepository;
-    @EJB
-    private UserRepository userRepository;
-    @EJB
-    private RealmRepository realmRepository;
-    @EJB
-    private RoleRepository roleRepository;
-    @EJB
-    private AdminEventRepository adminEventRepository;
-    @EJB
-    private UserPostService userPostService;
-    @EJB
-    private MigrationService migrationService;
-    @EJB
-    private ImportReportService importReportService;
+    @Inject
+    UserRepository userRepository;
+    @Inject
+    RealmRepository realmRepository;
+    @Inject
+    RoleRepository roleRepository;
+    @Inject
+    AdminEventRepository adminEventRepository;
+    @Inject
+    UserPostService userPostService;
+    @Inject
+    MigrationService migrationService;
+    @Inject
+    ImportReportService importReportService;
 
     public void doGeneratePasswords(List<ImportUsersDataModel> dataList, AdminAuth auth, KeycloakSession session) {
 
@@ -87,7 +83,7 @@ public class ImportService {
 
                 String errors = "";
                 //здесь происходит ужас
-                UserModel user = session.users().getUserById(data.getUserId(), realm);
+                UserModel user = session.users().getUserById(realm, data.getUserId());
 
                 try {
                     if (user == null) {
@@ -96,7 +92,7 @@ public class ImportService {
                     } else {
 
                         UserCredentialModel cred = UserCredentialModel.password(data.getCleanPassword(), false);
-                        session.userCredentialManager().updateCredential(realm, user, cred);
+                        user.credentialManager().updateCredential(cred);
                     }
 
                 } catch (IllegalStateException ise) {
@@ -138,7 +134,6 @@ public class ImportService {
     }
 
     //@Asynchronous
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public List<UserEntity> createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart,
                                               AdminAuth auth, KeycloakSession session) {
 
@@ -295,22 +290,13 @@ public class ImportService {
         user = userRepository.save(user);
 
         RealmEntity realm = realmRepository.findRealmEntityById(realmId);
-        if (realm.getDefaultRoles() != null && !realm.getDefaultRoles().isEmpty()) {
-            UserEntity finalUser = user;
-            realm.getDefaultRoles().forEach(o -> {
-                UserRoleMappingEntity roleMapping = new UserRoleMappingEntity();
-                roleMapping.setRoleId(o.getId());
-                roleMapping.setUser(finalUser);
-                roleRepository.save(roleMapping);
-            });
 
-            ClientEntity client = roleRepository.findClientByName("account", realmId);
-            client.getDefaultRoles().forEach(o -> {
-                UserRoleMappingEntity roleMapping = new UserRoleMappingEntity();
-                roleMapping.setRoleId(o.getId());
-                roleMapping.setUser(finalUser);
-                roleRepository.save(roleMapping);
-            });
+        if (realm.getDefaultRoleId() != null) {
+            roleRepository.findById(realm.getDefaultRoleId());
+            UserRoleMappingEntity roleMapping = new UserRoleMappingEntity();
+            roleMapping.setRoleId(realm.getDefaultRoleId());
+            roleMapping.setUser(user);
+            roleRepository.save(roleMapping);
         }
 
         UserAttributeEntity attributeEntity = new UserAttributeEntity();

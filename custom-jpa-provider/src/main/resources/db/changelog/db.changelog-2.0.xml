@@ -57,7 +57,7 @@
     </changeSet>
     <changeSet id="6" author="korotaev-my">
         <preConditions onFail="MARK_RAN">
-            <dbms type="mysql"/>
+            <dbms type="mariadb"/>
         </preConditions>
         <sql>
             insert into SETTINGS (ID, EXT_ID, REALM_ID, NAME, VALUE, TYPE, `DESC`, UNIT)

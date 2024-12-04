@@ -1,52 +1,37 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import org.keycloak.models.jpa.entities.ClientEntity;
 import ru.alamics.sso.jpa.entity.MainRedirectUri;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import java.util.List;
-
-
-@Stateless
-@LocalBean
+@ApplicationScoped
 public class ClientRepository {
+    @Inject
+    EntityManager em;
 
-    @PersistenceContext
-    private EntityManager em;
-
-    public ClientEntity findClientById(final String clientId, final String realmId) {
-        ClientEntity client = null;
-        try {
-            client = em.createQuery(
-                    "select cl " +
-                            "from ClientEntity cl " +
-                            "where cl.clientId = :client_id and cl.realm.name = :realmId ", ClientEntity.class)
-                    .setParameter("client_id", clientId)
-                    .setParameter("realmId", realmId)
-                    .getSingleResult();
-        } finally {
-            return client;
-        }
-    }
-
-    public List<MainRedirectUri> findMainRedirectUrisByClientId(final String clientId) {
-        List<MainRedirectUri> uris = em.createQuery(
-                "select ru " +
-                        "from MainRedirectUri ru " +
-                        "where ru.clientId = :clientId ", MainRedirectUri.class)
+    public ClientEntity findClientByIdAndRealmName(final String clientId, final String realmName) {
+        return em.createQuery(
+                        "select cl " +
+                                "from ClientEntity cl " +
+                                "where cl.clientId = :clientId " +
+                                    "and cl.realmId = (select r.id from RealmEntity r where r.name = :realmName)",
+                        ClientEntity.class
+                )
                 .setParameter("clientId", clientId)
-                .getResultList();
-
-        return uris;
+                .setParameter("realmName", realmName)
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
     }
 
     public MainRedirectUri findMainRedirectUriByClientId(final String clientId) {
         return em.find(MainRedirectUri.class, clientId);
     }
 
+    @Transactional
     public void saveMainRedirectUri(MainRedirectUri uri) {
         MainRedirectUri mainRedirectUri = findMainRedirectUriByClientId(uri.getClientId());
 

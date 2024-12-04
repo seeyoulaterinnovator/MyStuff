@@ -1,46 +1,60 @@
 package ru.alamics.sso.remote.message;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.internal.ClientInvocationBuilder;
-import org.jboss.resteasy.plugins.providers.StringTextStar;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import ru.alamics.sso.registration.phone.MsgConfig;
 import ru.alamics.sso.registration.phone.exception.SendMessageException;
 import ru.alamics.sso.registration.phone.model.MessageRequest;
 import ru.alamics.sso.registration.phone.model.MessengerType;
 import ru.alamics.sso.registration.phone.port.SendMessageService;
 import ru.alamics.sso.settings.SettingsService;
+import ru.alamics.sso.util.E2EUtil;
 import ru.alamics.sso.util.StandResolver;
 import ru.alamics.sso.util.Util;
 
-import javax.annotation.Resource;
-import javax.ejb.Stateless;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-import java.io.UnsupportedEncodingException;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import java.io.InputStream;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static ru.alamics.sso.settings.SettingConstants.*;
 
-
+@ApplicationScoped
+@Named("MessageSender")
 @Slf4j
-@Stateless(name = "MessageSender")
 public class SendMessageServiceImpl implements SendMessageService {
+    private final HttpClient client;
 
-    private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
-            .connectTimeout(3, TimeUnit.SECONDS)
-            .readTimeout(10, TimeUnit.SECONDS);
-    private static final ResteasyClient client = clientBuilder.build();
+    @Inject
+    SettingsService settingsService;
 
-    @Resource(lookup = "java:global/domru-sso/SettingsService")
-    private SettingsService settingsService;
-
-    public SendMessageServiceImpl() {
+    public SendMessageServiceImpl(
+            @Named("smsSenderSSLContext") SSLContext sslContext,
+            @Named("smsSenderHostnameVerifier") HostnameVerifier hostnameVerifier
+    ) {
+        client = HttpClients.custom()
+                .setSSLContext(sslContext)
+                .setSSLHostnameVerifier(hostnameVerifier)
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setConnectTimeout(3_000)
+                        .setConnectionRequestTimeout(3_000)
+                        .setSocketTimeout(10_000)
+                        .build())
+                .build();
     }
 
     public String sendMessageByRequestAndLogInfo(MessageRequest messageRequest) throws SendMessageException {
@@ -77,7 +91,7 @@ public class SendMessageServiceImpl implements SendMessageService {
     public String sendMessageByRequest(MessageRequest messageRequest) throws SendMessageException {
 
         // локально и на дэве фиксированный код и не отправляю смс
-        if (!StandResolver.isBattle()) {
+        if (!StandResolver.isBattle() && !E2EUtil.isE2E()) {
             log.info("Stand {}, do not sending sms", StandResolver.ENV);
             return "0: Accepted for delivery";
         }
@@ -88,21 +102,35 @@ public class SendMessageServiceImpl implements SendMessageService {
 
         log.info(String.format("Api %s, Sending %s code to number: %s", uri.getHost(), messageRequest.getMessengerName().toString(), messageRequest.getUserPhone()));
 
-        ClientInvocationBuilder builder = (ClientInvocationBuilder) client.register(StringTextStar.class)
-                .target(uri)
-                .queryParams(msgConfig.getConfigForQuery())
-                .queryParam("to", Util.getCleanUserPhone(messageRequest.getUserPhone()))
-                .queryParam("text", Util.rfc3986Encoder(messageRequest.getText()))
-                .request();
+        var uriBuilder = UriBuilder.fromUri(uri);
+        msgConfig.getConfigForQuery().forEach((name, objects) -> uriBuilder.queryParam(name, objects.toArray()));
+
+        HttpGet request = new HttpGet(
+                uriBuilder.queryParam("to", Util.getCleanUserPhone(messageRequest.getUserPhone()))
+                        .queryParam("text", Util.rfc3986Encoder(messageRequest.getText()))
+                        .build()
+        );
+        request.setHeader(HttpHeaders.ACCEPT, MediaType.WILDCARD);
         try {
-            return builder.get(String.class);
-        } catch (ProcessingException | WebApplicationException wae) {
-            log.error(wae.getMessage(), wae);
-            throw new SendMessageException(wae);
+            HttpResponse response = client.execute(request);
+            try {
+                var status = response.getStatusLine().getStatusCode();
+                if (status == HttpStatus.SC_OK || status == HttpStatus.SC_ACCEPTED) {
+                    try (InputStream stream = response.getEntity().getContent()) {
+                        return new String(stream.readAllBytes());
+                    }
+                }
+            } finally {
+                EntityUtils.consume(response.getEntity());
+            }
+            throw new SendMessageException(response.getStatusLine().getReasonPhrase());
+        } catch (Exception e) {
+            log.warn(e.getMessage(), e);
+            throw new SendMessageException(e.getMessage(), e);
         }
     }
 
-    private MsgConfig createMsgConfig(String realmId, String type) {
+    protected MsgConfig createMsgConfig(String realmId, String type) {
 
         return MsgConfig.builder()
                 .url(URI.create(settingsService.getSettingsStringValue(type + SEND_URI.getKey(), realmId)))

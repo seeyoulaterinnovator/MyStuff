@@ -1,33 +1,32 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.RealmAdapter;
 import org.keycloak.models.jpa.entities.RealmEntity;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-
-@Stateless
-@LocalBean
+@ApplicationScoped
 public class RealmRepository {
-
-    @PersistenceContext
-    private EntityManager em;
+    @Inject
+    EntityManager em;
 
     public RealmModel findRealmById(final String id) {
         RealmEntity realm = em.createQuery("select r from RealmEntity r " +
                 "left join fetch r.smtpConfig " +
                 "where r.id = :id ", RealmEntity.class)
                 .setParameter("id", id)
-                .getSingleResult();
+                .getResultList()
+                .stream()
+                .findFirst()
+                .orElse(null);
         if (realm == null) return null;
-        RealmAdapter adapter = new RealmAdapter(null, em, realm);
-        return adapter;
+        return new RealmAdapter(null, em, realm);
     }
 
     public List<RealmModel> getAllRealms() {
@@ -40,5 +39,14 @@ public class RealmRepository {
 
     public RealmEntity findRealmEntityById(final String id) {
         return em.find(RealmEntity.class, id);
+    }
+
+    public Optional<RealmEntity> findRealmEntityByName(final String name) {
+        return em.createQuery("select r from RealmEntity r " +
+                        "where r.name = :name ", RealmEntity.class)
+                .setParameter("name", name)
+                .getResultList()
+                .stream()
+                .findFirst();
     }
 }

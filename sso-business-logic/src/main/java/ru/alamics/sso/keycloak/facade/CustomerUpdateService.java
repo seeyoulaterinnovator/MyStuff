@@ -1,61 +1,68 @@
 package ru.alamics.sso.keycloak.facade;
 
+import io.quarkus.runtime.StartupEvent;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.ws.rs.core.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.infinispan.Cache;
+import org.keycloak.connections.infinispan.InfinispanConnectionProvider;
+import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.property.ApplicationProperties;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.*;
 
+// TODO check cluster task requirement
+@ApplicationScoped
 @Slf4j
-@Startup
-@Singleton
 public class CustomerUpdateService {
     private static final int MAX_SIZE_POOL = 1;
     private static final String TBAPI_REQUEST_INTERVAL_PROPERTY = "tbapi.customer.request.interval.milliseconds";
-    private long TBAPI_REQUEST_INTERVAL_DEFAULT = 10000;
+    private static final long TBAPI_REQUEST_INTERVAL_DEFAULT = 10000;
+
+    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MAX_SIZE_POOL);
+
+    private final ConcurrentLinkedQueue<ScheduledFuture> tasksPool = new ConcurrentLinkedQueue<>();
 
     private CustomerRequestService customerRequestService;
-    @Resource(lookup = "infinispan/custom_container/customer_cache")
+
+    @Context
+    KeycloakSession session;
+
     private Cache<String, String> customerCache;
 
     private long tbapiRequestInterval;
-
-    private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MAX_SIZE_POOL);
-    private ConcurrentLinkedQueue<ScheduledFuture> tasksPool = new ConcurrentLinkedQueue<>();
 
     public CustomerUpdateService() {
         customerRequestService = Lookup.lookup(CustomerRequestService.class);
     }
 
     @PostConstruct
-    private void init() {
-
+    void init() {
         ApplicationProperties properties = Lookup.lookup(ApplicationProperties.class);
         tbapiRequestInterval = properties.getPropertyLong(TBAPI_REQUEST_INTERVAL_PROPERTY, TBAPI_REQUEST_INTERVAL_DEFAULT, "CustomerUpdateService: default value used: '%s' = '%s'");
         log.info("tbapiRequestInterval set to value={}", tbapiRequestInterval);
 
-        tasksPool.offer(executorService.scheduleAtFixedRate(new UpdateTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
+        customerCache = session.getProvider(InfinispanConnectionProvider.class).getCache("customer_cache");
     }
 
-    @Lock(LockType.READ)
-    public int getTasksPoolSize() {
-        return tasksPool.size();
+    void onStart(@Observes StartupEvent ev) {
+        tasksPool.offer(executorService.scheduleWithFixedDelay(new UpdateTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
     }
 
     private class UpdateTask implements Runnable {
         @Override
         public void run() {
-            updateCustomers();
-            checkLoad();
+            try {
+                updateCustomers();
+                checkLoad();
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -76,7 +83,7 @@ public class CustomerUpdateService {
     private void checkLoad() {
         //Добавление дополнительного потока
         if (customerRequestService.getLoadCoeff() > tasksPool.size() && tasksPool.size() < MAX_SIZE_POOL) {
-            tasksPool.offer(executorService.scheduleAtFixedRate(new UpdateTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
+            tasksPool.offer(executorService.scheduleWithFixedDelay(new UpdateTask(), tbapiRequestInterval, tbapiRequestInterval, TimeUnit.MILLISECONDS));
             log.info("Increased count tasks for update customers. Count tasks={}", tasksPool.size());
             return;
         }

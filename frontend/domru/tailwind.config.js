@@ -1,3 +1,20 @@
+const convertColorToVar = ({ addBase, theme }) => {
+  function extractColorVars (colorObj, colorGroup = '') {
+    return Object.entries(colorObj).reduce((vars, [key, value]) => {
+      const varKey = key === 'DEFAULT' ? `${colorGroup}` : `${colorGroup}-${key}`
+      if (typeof value === 'string') {
+        return { ...vars, [`-${varKey}`]: value }
+      } else {
+        return { ...vars, ...extractColorVars(value, varKey) }
+      }
+    }, {});
+  }
+
+  addBase({
+    ':root': extractColorVars(theme('colors')),
+  });
+}
+
 module.exports = {
   theme: {
     screens: {
@@ -11,10 +28,121 @@ module.exports = {
     fontFamily: {
       body: ['Fact', 'Arial', 'sans-serif'],
     },
+    letterSpacing: {
+      tighter: '-.05em',
+      tight: '-.025em',
+      normal: '0',
+      wide: '.025em',
+      'wider/sm': '.03em',
+      wider: '.05em',
+      widest: '.1em',
+    },
     extend: {
       fontSize: {
         '4/3em': '1.33em',
         '5/3em': '1.66em',
+        'custom/6sm': [
+          '.6875rem',
+          {
+            lineHeight: '.875rem',
+          },
+        ],
+        'custom/5sm': [
+          '.75rem',
+          {
+            lineHeight: '.9375rem',
+          },
+        ],
+        'custom/4sm': [
+          '.8125rem',
+          {
+            lineHeight: '1rem',
+          },
+        ],
+        'custom/3sm': [
+          '.875rem',
+          {
+            lineHeight: '1.0625rem',
+          },
+        ],
+        'custom/2sm': [
+          '.9375rem',
+          {
+            lineHeight: '1.1875rem',
+          },
+        ],
+        'custom/sm': [
+          '1rem',
+          {
+            lineHeight: '1.3125rem',
+          },
+        ],
+        'custom/md': [
+          '1.0625rem',
+          {
+            lineHeight: '1.4375rem',
+          },
+        ],
+        'custom/base': [
+          '1.125rem',
+          {
+            lineHeight: '1.5rem',
+          },
+        ],
+        'custom/lg': [
+          '1.1875rem',
+          {
+            lineHeight: '1.5rem',
+          },
+        ],
+        'custom/2lg': [
+          '1.25rem',
+          {
+            lineHeight: '1.625rem',
+          },
+        ],
+        'custom/3lg': [
+          '1.375rem',
+          {
+            lineHeight: '1.75rem',
+          },
+        ],
+        'custom/4lg': [
+          '1.4375rem',
+          {
+            lineHeight: '1.6875rem',
+          },
+        ],
+        'custom/5lg': [
+          '1.4375rem',
+          {
+            lineHeight: '1.6875rem',
+          },
+        ],
+        'custom/6lg': [
+          '1.6875rem',
+          {
+            lineHeight: '2.0625rem',
+          },
+        ],
+        'custom/7lg': [
+          '1.9375rem',
+          {
+            lineHeight: '2.125rem',
+          },
+        ],
+        'custom/8lg': [
+          '2.1875rem',
+          {
+            lineHeight: '2.5rem',
+          },
+        ],
+        'custom/9lg': [
+          '2.875rem',
+          {
+            lineHeight: '3.25rem',
+          },
+        ],
       },
       flex: {
         'basis-1/2': '0 1 50%',
@@ -51,9 +179,10 @@ module.exports = {
         '1/4': '25%',
         '1/2': '50%',
         '3/4': '75%',
+        '200px': '200px',
         '440px': '440px',
         '470px': '470px',
-        '568px': '568px'
+        '696px': '696px',
       },
       minHeight: {
         '1/4': '25%',
@@ -93,6 +222,11 @@ module.exports = {
           '600': '#a7a7a7',
           '700': '#777777',
           '800': '#222222',
+          '900': '#899DA8',
+          '1000': '#7F7F7F',
+          '1100': '#A8A8A8',
+          '1200': '#CFDBE0',
+          '1300': '#EFEFEF',
           default: '#777777',
         },
         extra: {
@@ -100,7 +234,7 @@ module.exports = {
           '300': '#ff4e53',
           '500': '#f5272d',
           '700': '#C51F1F',
-          '700-hover': '#C51F1F',
+          '700-hover': '#FF312C',
           '900': '#b3002b',
           default: '#C51F1F',
         },
@@ -125,6 +259,9 @@ module.exports = {
           '900': '#1d45a1',
           '1000': '#0357F1',
           '1100': '#2B539B',
+          '1200': '#16629A',
+          '1200-hover': '#0090D8',
+          '1300': '#EFF8FC',
           default: '#6688c9',
         },
         accentGreen: {
@@ -137,8 +274,18 @@ module.exports = {
           default: '#69be28',
         },
       },
+      boxShadow: {
+        base:
+          '0px 2px 8px 0px rgba(117, 142, 161, 0.25), 0px 0px 2px 0px rgba(117, 142, 161, 0.22)',
+        'base-md':
+          '0px 4px 8px 0px rgba(117, 142, 161, 0.12), 0px 12px 36px 0px rgba(117, 142, 161, 0.22)',
+        main:
+          '0px 2px 2px 0px rgba(117, 142, 161, 0.20), 0px 2px 12px 0px rgba(117, 142, 161, 0.25)',
+        'main-md':
+          '0px 4px 8px 0px rgba(117, 142, 161, 0.22), 0px 16px 40px 0px rgba(117, 142, 161, 0.26)',
+      },
     },
   },
   variants: {},
-  plugins: [],
+  plugins: [convertColorToVar],
 };

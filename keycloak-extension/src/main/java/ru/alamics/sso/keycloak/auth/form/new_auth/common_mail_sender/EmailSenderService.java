@@ -1,13 +1,16 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth.common_mail_sender;
 
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriBuilderException;
+import jakarta.ws.rs.core.UriInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.authentication.AuthenticationProcessor;
 import org.keycloak.authentication.actiontoken.verifyemail.VerifyEmailActionToken;
 import org.keycloak.common.util.Time;
 import org.keycloak.email.EmailException;
 import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.events.Errors;
 import org.keycloak.events.EventBuilder;
-import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -20,9 +23,6 @@ import ru.alamics.sso.schedule.Translator;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriBuilderException;
-import javax.ws.rs.core.UriInfo;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -40,8 +40,13 @@ public class EmailSenderService {
 
             String authSessionEncodedId = SsoUtil.generatePattern();
             VerifyEmailActionToken token = new VerifyEmailActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, user.getEmail(), authSession.getClient().getClientId());
-            UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
-                    authSession.getClient().getClientId(), authSession.getTabId());
+            UriBuilder builder = Urls.actionTokenBuilder(
+                    uriInfo.getBaseUri(),
+                    token.serialize(session, realm, uriInfo),
+                    authSession.getClient().getClientId(),
+                    authSession.getTabId(),
+                    AuthenticationProcessor.getClientData(session, authSession)
+            );
             String link = builder.build(realm.getName()).toString();
             long expirationInMinutes = TimeUnit.SECONDS.toMinutes(timeTokenVerifyEmail);
 

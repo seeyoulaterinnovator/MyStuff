@@ -1,5 +1,7 @@
 package ru.alamics.sso.registration.service;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.UserEntity;
@@ -7,8 +9,6 @@ import ru.alamics.sso.jpa.entity.UserPostRoleEntity;
 import ru.alamics.sso.jpa.model.UserSummaryView;
 import ru.alamics.sso.jpa.repository.UserPostRepository;
 import ru.alamics.sso.jpa.repository.UserRepository;
-import ru.alamics.sso.keycloak.lookup.Lookup;
-import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.user.mapper.UserMapper;
@@ -16,27 +16,19 @@ import ru.alamics.sso.user.web.UserSearch;
 import ru.alamics.sso.user.web.UserSearchDto;
 import ru.alamics.sso.util.Util;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Stateless
+@ApplicationScoped
 @Slf4j
 public class UserFindService {
-    @EJB
-    private UserRepository userRepository;
-    @EJB
-    private UserPostRepository userPostRepository;
+    @Inject
+    UserRepository userRepository;
 
-    private ApplicationProperties properties;
-
-    public UserFindService() {
-
-        properties = Lookup.lookup(ApplicationProperties.class);
-    }
+    @Inject
+    UserPostRepository userPostRepository;
 
     public UserEntity getUserByPhone(RealmModel realm, String phone) {
         phone = Util.getCleanUserPhone(phone);
@@ -85,10 +77,10 @@ public class UserFindService {
             String searchPhone,
             String sortField,
             boolean sortAsc,
-            Integer pageNum,
-            Integer pageSize
+            Integer first,
+            Integer max
     ) {
-        List<UserSummaryView> users = userRepository.findUsersByParameters(realm, search, searchUser, searchEmail, searchPhone, searchToms, sortField, sortAsc, pageNum, pageSize);
+        List<UserSummaryView> users = userRepository.findUsersByParameters(realm, search, searchUser, searchEmail, searchPhone, searchToms, sortField, sortAsc, first, max);
 
         if (users.isEmpty()) {
             return Collections.emptyList();
@@ -116,8 +108,8 @@ public class UserFindService {
     }
 
 
-    public long getTotalUsersByParameters(String realm, String search, String searchUser, String searchToms) {
-        return userRepository.getTotalUsersByParameters(realm, search, searchUser, searchToms);
+    public long getTotalUsersByParameters(String realm, String search, String searchUser, String searchEmail, String searchToms, String searchPhone) {
+        return userRepository.getTotalUsersByParameters(realm, search, searchUser, searchEmail, searchToms, searchPhone);
     }
 
     public UserEntity getUserEntity(String userId) {

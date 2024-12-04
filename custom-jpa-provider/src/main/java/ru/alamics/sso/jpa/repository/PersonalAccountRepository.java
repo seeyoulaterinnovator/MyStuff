@@ -1,26 +1,22 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.PersonalAccountEntity;
 import ru.alamics.sso.jpa.entity.PersonalAccountPostEntity;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Stateless
-@LocalBean
+@ApplicationScoped
+@Transactional
 @Slf4j
-@TransactionAttribute(TransactionAttributeType.REQUIRED)
 public class PersonalAccountRepository {
-
-    @PersistenceContext
-    private EntityManager em;
+    @Inject
+    EntityManager em;
 
     public PersonalAccountPostEntity getAccount(final String postId) {
 
@@ -49,7 +45,10 @@ public class PersonalAccountRepository {
         em.flush();
     }
 
-    public void addAccountList(final String postId, List<String> paList) {
+    public Set<PersonalAccountEntity> addAccountList(final String postId, List<String> paList) {
+        if(paList == null) {
+            return Collections.emptySet();
+        }
 
         PersonalAccountPostEntity pe = em.find(PersonalAccountPostEntity.class, postId);
 
@@ -61,9 +60,6 @@ public class PersonalAccountRepository {
             pe = em.find(PersonalAccountPostEntity.class, postId);
         }
 
-
-        if (paList == null)
-            paList = new LinkedList<>();
         Set<PersonalAccountEntity> paEnList = new HashSet<>();
         for (String pa : paList) {
             String[] accountsNumber = pa.split(",");
@@ -89,6 +85,8 @@ public class PersonalAccountRepository {
         em.persist(pe); // ?
 
         em.flush();
+
+        return pe.getAccounts().stream().filter(pa -> paList.contains(pa.getValue())).collect(Collectors.toSet());
     }
 
     public void subAccountUuidList(final String postId, List<String> paUuidList) {

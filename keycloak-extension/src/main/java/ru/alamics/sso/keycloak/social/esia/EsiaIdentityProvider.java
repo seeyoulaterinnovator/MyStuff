@@ -1,6 +1,13 @@
 package ru.alamics.sso.keycloak.social.esia;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.broker.oidc.AbstractOAuth2IdentityProvider;
@@ -23,17 +30,8 @@ import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.util.Signer;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,8 +46,6 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
     private static final String TIMESTAMP = "timestamp";
     private static final String ACCESS_TYPE = "access_type";
     private static final DateTimeFormatter timestampFormat = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss Z");
-
-    private static final Map<String, String> uuidToState = new ConcurrentHashMap<>();
 
     EsiaIdentityProvider(KeycloakSession session, EsiaIdentityProviderConfig config) {
         super(session, config);
@@ -112,7 +108,7 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
             }
         }
 
-        uuidToState.put(uuid.toString(), request.getState().getEncoded());
+        // uuidToState.put(uuid.toString(), request.getState().getEncoded());
         /*
             AuthenticationSessionModel asm = session.getContext().getAuthenticationSession();
             asm.setAuthNote(uuid.toString(), request.getState().getEncoded());
@@ -128,12 +124,12 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
 
     @Override
     public Object callback(RealmModel realm, AuthenticationCallback callback, EventBuilder event) {
-        return new Endpoint(callback, realm, event);
+        return new Endpoint(callback, realm, event, this);
     }
 
     private BrokeredIdentityContext extractIdentityFromProfile(JsonNode profile, String userId) {
         log.info("profile={}", profile);
-        BrokeredIdentityContext user = new BrokeredIdentityContext(userId);
+        BrokeredIdentityContext user = new BrokeredIdentityContext(userId, getConfig());
 
 //        String email = getJsonProperty(profile, "email");
 //
@@ -153,8 +149,6 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
         user.setLastName("-");
         user.setUsername(username);
         user.getContextData().put("firstName", username);
-
-        user.setIdpConfig(getConfig());
         user.setIdp(this);
 
         AbstractJsonUserAttributeMapper.storeUserProfileForMapper(user, profile, getConfig().getAlias());
@@ -190,10 +184,11 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
         }
     }
 
-    protected class Endpoint {
+    protected static class Endpoint {
         protected AuthenticationCallback callback;
         protected RealmModel realm;
         protected EventBuilder event;
+        protected EsiaIdentityProvider provider;
 
         @Context
         protected ClientConnection clientConnection;
@@ -201,10 +196,11 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
         @Context
         protected HttpHeaders headers;
 
-        public Endpoint(AuthenticationCallback callback, RealmModel realm, EventBuilder event) {
+        public Endpoint(AuthenticationCallback callback, RealmModel realm, EventBuilder event, EsiaIdentityProvider provider) {
             this.callback = callback;
             this.realm = realm;
             this.event = event;
+            this.provider = provider;
         }
 
         @GET
@@ -216,11 +212,11 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
             if (error != null) {
                 //logger.error("Failed " + getConfig().getAlias() + " broker login: " + error);
                 if (error.equals(ACCESS_DENIED)) {
-                    logger.error(ACCESS_DENIED + " for broker login " + getConfig().getProviderId());
-                    return callback.cancelled(state);
+                    logger.error(ACCESS_DENIED + " for broker login " + provider.getConfig().getProviderId());
+                    return callback.cancelled(provider.getConfig());
                 } else {
-                    logger.error(error + " for broker login " + getConfig().getProviderId());
-                    return callback.error(state, Messages.IDENTITY_PROVIDER_UNEXPECTED_ERROR);
+                    logger.error(error + " for broker login " + provider.getConfig().getProviderId());
+                    return callback.error(Messages.IDENTITY_PROVIDER_UNEXPECTED_ERROR);
                 }
             }
 
@@ -232,17 +228,16 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
                     log.info("response marker = {}", response);
 
 
-                    BrokeredIdentityContext federatedIdentity = getFederatedIdentity(response);
+                    BrokeredIdentityContext federatedIdentity = provider.getFederatedIdentity(response);
 
-                    if (getConfig().isStoreToken()) {
+                    if (provider.getConfig().isStoreToken()) {
                         // make sure that token wasn't already set by getFederatedIdentity();
                         // want to be able to allow provider to set the token itself.
                         if (federatedIdentity.getToken() == null) federatedIdentity.setToken(response);
                     }
 
-                    federatedIdentity.setIdpConfig(getConfig());
-                    federatedIdentity.setIdp(EsiaIdentityProvider.this);
-                    federatedIdentity.setCode(uuidToState.remove(state));
+                    federatedIdentity.setIdp(provider);
+                    // federatedIdentity.setCode(uuidToState.remove(state));
 
                     /*
                         AuthenticationSessionModel asm = session.getContext().getAuthenticationSession();
@@ -259,19 +254,19 @@ public class EsiaIdentityProvider extends AbstractOAuth2IdentityProvider<EsiaIde
             }
             event.event(EventType.LOGIN);
             event.error(Errors.IDENTITY_PROVIDER_LOGIN_FAILURE);
-            return ErrorPage.error(session, null, Response.Status.BAD_GATEWAY, Messages.IDENTITY_PROVIDER_UNEXPECTED_ERROR);
+            return ErrorPage.error(provider.session, null, Response.Status.BAD_GATEWAY, Messages.IDENTITY_PROVIDER_UNEXPECTED_ERROR);
         }
 
         private SimpleHttp generateTokenRequest(String authorizationCode, String state) {
             final String dateTime = timestampFormat.format(ZonedDateTime.now());
             final UUID uuid = UUID.randomUUID();
 
-            return SimpleHttp.doPost(getConfig().getTokenUrl(), session)
-                    .param(OAUTH2_PARAMETER_CLIENT_ID, getConfig().getClientId())
+            return SimpleHttp.doPost(provider.getConfig().getTokenUrl(), provider.session)
+                    .param(OAUTH2_PARAMETER_CLIENT_ID, provider.getConfig().getClientId())
                     .param(OAUTH2_PARAMETER_CLIENT_SECRET,
-                            Signer.signString(getDefaultScopes() + dateTime + getConfig().getClientId() + uuid))
-                    .param(OAUTH2_PARAMETER_REDIRECT_URI, session.getContext().getUri().getAbsolutePath().toString())
-                    .param(OAUTH2_PARAMETER_SCOPE, getDefaultScopes())
+                            Signer.signString(provider.getDefaultScopes() + dateTime + provider.getConfig().getClientId() + uuid))
+                    .param(OAUTH2_PARAMETER_REDIRECT_URI, provider.session.getContext().getUri().getAbsolutePath().toString())
+                    .param(OAUTH2_PARAMETER_SCOPE, provider.getDefaultScopes())
                     .param(OAUTH2_PARAMETER_STATE, uuid.toString())
                     .param(TIMESTAMP, dateTime)
                     .param(OAUTH2_PARAMETER_CODE, authorizationCode)

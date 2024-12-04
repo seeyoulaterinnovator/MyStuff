@@ -39,156 +39,128 @@ stages:
   tags:
     - sso-build-k8s
 
-back:compile:
-  stage: compile
-  <<: *build-template
-  except:
-    - master
-  script:
-    - if [ -f ./gradlew ]; then chmod 775 ./gradlew; fi
-    - ./gradlew :classes --stacktrace -Dorg.gradle.java.home=/usr/java/jdk1.8.0
-  cache: {}
-
-back:test:adapter:tbapi-remote-service:
-  stage: test
-  <<: *build-template
-  when: on_success
-  except:
-    - master
-  script:
-    - ./gradlew :tbapi-remote-service:check -Dorg.gradle.java.home=/usr/java/jdk1.8.0
-  cache:
-    key: "$CI_COMMIT_SHA"
-    paths:
-      - .gradle/
-      - build/
-    policy: pull
-  artifacts:
-    when: always
-    paths:
-      - build/test-results/tbapi-remote-service/reports
-    name: "tbapi-remote-service-test-reports-$CI_PIPELINE_ID"
-    reports:
-      junit: build/test-results/tbapi-remote-service/TEST-*.xml
-
-back:test:sso-business-logic:
-  stage: test
-  <<: *build-template
-  when: on_success
-  except:
-    - master
-  script:
-    - ./gradlew :sso-business-logic:check -Dorg.gradle.java.home=/usr/java/jdk1.8.0
-  cache:
-    key: "$CI_COMMIT_SHA"
-    paths:
-      - .gradle/
-    policy: pull
-  artifacts:
-    when: always
-    paths:
-      - build/test-results/sso-business-logic/reports
-    name: "sso-business-logic-test-reports-$CI_PIPELINE_ID"
-    reports:
-      junit: build/test-results/sso-business-logic/TEST-*.xml
-
-back:test:keycloak-extension:
-  stage: test
-  <<: *build-template
-  when: on_success
-  except:
-    - master
-  script:
-    - ./gradlew :keycloak-extension:check -Dorg.gradle.java.home=/usr/java/jdk1.8.0
-  cache:
-    key: "$CI_COMMIT_SHA"
-    paths:
-      - .gradle/
-    policy: pull
-  artifacts:
-    when: always
-    paths:
-      - build/test-results/keycloak-extension/reports
-    name: "keycloak-extension-test-reports-$CI_PIPELINE_ID"
-    reports:
-      junit: build/test-results/keycloak-extension/TEST-*.xml
-
-back:war:
-  stage: build
-  <<: *build-template
-  when: on_success
-  except:
-    - master
-  variables:
-    NODE_BUILD_PATH: build
-  script:
-    - currentdir=`pwd`
-    # domru theme
-    - cd frontend/domru
-    - cp /opt/npmrc .npmrc
-    - npm clean-install --cache ~/.npm --prefer-offline
-    - npm run build
-    - mkdir -p ../../keycloak-extension/src/main/resources/themes/domru/login/resources
-    - cp -r -f build ../../keycloak-extension/src/main/resources/themes/domru/login/resources
-    - cd $currentdir
-    # stelecom theme
-    - cd frontend/stelecom
-    - cp /opt/npmrc .npmrc
-    - npm clean-install --cache ~/.npm --prefer-offline
-    - npm run build
-    - mkdir -p ../../keycloak-extension/src/main/resources/themes/stelecom/login/resources
-    - cp -r -f build ../../keycloak-extension/src/main/resources/themes/stelecom/login/resources
-    - cd $currentdir
-    # ertelecom theme
-    - cd frontend/ertelecom
-    - cp /opt/npmrc .npmrc
-    - npm clean-install --cache ~/.npm --prefer-offline
-    - npm run build
-    - mkdir -p ../../keycloak-extension/src/main/resources/themes/ertelecom/login/resources
-    - cp -r -f build ../../keycloak-extension/src/main/resources/themes/ertelecom/login/resources
-    - cd $currentdir
-    # deploy
-    - mkdir -p .ci_status
-    - ./gradlew :deploy -Dorg.gradle.java.home=/usr/java/jdk1.8.0
-    - touch .ci_status/war_built
-  cache:
-    key: "$CI_COMMIT_SHA"
-    paths:
-      - .gradle/
-  artifacts:
-    paths:
-      - .ci_status/
-      - build/deploy/standalone/deployments/domru-sso.war
-      - build/deploy/standalone/deployments/custom-jpa.jar
-      - build/deploy/modules/system/layers/base/ru/alamics/sso/jpa/main/module.xml
-      - build/deploy/themes/
-      - build/deploy/standalone/data/password-blacklists/
-    name: "domru-sso-compile-$CI_PIPELINE_ID"
-    expire_in: 1 week
-
-container-image:source:
-  stage: docker
-  <<: *init-variables
+.domru:prod:template:
+  stage: deploy
+  image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
   when: manual
+  only:
+    - PROD
   script:
-    - docker build -t harbor.ertelecom.ru/sso-protected/keycloak:6.0.1 -f Dockerfile.intermediate .
-    - docker push harbor.ertelecom.ru/sso-protected/keycloak:6.0.1
+    - export FQDN=`echo "${CI_ENVIRONMENT_URL}" | sed 's/^http\(\|s\):\/\///g'`
+    - consul-template -once -template ".helm/values-prod.yaml.tpl:values.yaml"
+    - |-
+      if [[ -z "$NEW_DB_DATABASE" ]]; then
+          export NEW_DB_DATABASE=$DB_DATABASE
+      fi
+    - echo "DB_DATABASE = ${DB_DATABASE}"
+    - echo "NEW_DB_DATABASE = ${NEW_DB_DATABASE}"
+    - cat values.yaml
+    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml --set extraEnvs.DB_DATABASE=${NEW_DB_DATABASE} ./.helm -n ${NAMESPACE} --atomic --timeout 10m
+    - helm history -n ${NAMESPACE} ${CI_ENVIRONMENT_SLUG} --max 5
+  variables:
+    NAMESPACE: 'sso'
+    NODE_PORT: '30080'
+    REPLICA_COUNT: '5'
+
+.frontend:theme:build:
+  stage: build
+  image: harbor.ertelecom.ru/b2bweb/openjdk:21-node20
+  script:
+    - cd frontend/$BUILD_THEME
+    - npm ci --cache ~/.npm --prefer-offline && npm run build
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - ~/.npm
   artifacts:
     paths:
-      - .ci_status/
+      - keycloak-extension/src/main/resources/themes/$BUILD_THEME/login/resources/build/
+    name: "domru-sso-$CI_PIPELINE_ID"
+    expire_in: 1 day
+  allow_failure: false
+  when: manual
   tags:
-    - sso-build-shell
+    - sso-build-docker
+
+frontend:domru:build:
+  extends: .frontend:theme:build
+  variables:
+    BUILD_THEME: domru
+
+frontend:ertelecom:build:
+  extends: .frontend:theme:build
+  variables:
+    BUILD_THEME: ertelecom
+
+frontend:stelecom:build:
+  extends: .frontend:theme:build
+  variables:
+    BUILD_THEME: stelecom
+
+frontend:novotelecom:build:
+  extends: .frontend:theme:build
+  variables:
+    BUILD_THEME: novotelecom
+    
+frontend:admin:build:
+  stage: build
+  image: harbor.ertelecom.ru/b2bweb/openjdk:21-node20
+  script:
+    - npm i -g pnpm
+    - cd frontend-admin
+    - pnpm install
+    - cd ../frontend-admin/js/apps/admin-ui
+    - pnpm run build
+  artifacts:
+    paths:
+      - keycloak-extension/src/main/resources/themes/keycloak.v2/admin/resources/
+    name: "domru-sso-$CI_PIPELINE_ID"
+    expire_in: 1 day
+  only:
+    - itres-new
+    - itres-new-prod
+    - cicd
+  allow_failure: false
+  when: manual
+  tags:
+    - sso-build-docker
+
+back:build:
+  stage: build
+  image: harbor.ertelecom.ru/b2bweb/openjdk:21-node20
+  <<: *build-template
+  script:
+    - ./gradlew --stacktrace --console=plain build
+  cache:
+    key: "CI_COMMIT_REF_SLUG"
+    paths:
+      - .gradle/
+  artifacts:
+    paths:
+      - build/keycloak-extension/libs/keycloak-extension-1.0.1-all.jar
+    name: "domru-sso-$CI_PIPELINE_ID"
+    expire_in: 1 day
+  allow_failure: false
+  needs:
+    - "frontend:domru:build"
+    - "frontend:ertelecom:build"
+    - "frontend:stelecom:build"
+    - "frontend:admin:build"
+    - "frontend:novotelecom:build"
+  when: manual
+  tags:
+    - sso-build-docker
 
 container-image:
   stage: docker
   <<: *init-variables
   when: manual
   script:
-    - docker build -t harbor.ertelecom.ru/sso-protected/sso:$CI_PIPELINE_ID -f Dockerfile .
+    - docker build -t harbor.ertelecom.ru/sso-protected/sso:$CI_PIPELINE_ID .
     - docker push harbor.ertelecom.ru/sso-protected/sso:$CI_PIPELINE_ID
-  artifacts:
-    paths:
-      - .ci_status/
+  allow_failure: false
+  needs:
+    - "back:build"
   tags:
     - sso-build-shell
 
@@ -211,7 +183,6 @@ domru:stage2:
     NAMESPACE: 'sso'
     NODE_PORT: '30082'
     REPLICA_COUNT: '1'
-    NEW_DB_DATABASE: sso2_1
 
 domru:stage3:
   extends: .domru:stage:template
@@ -242,7 +213,8 @@ domru:stage5:
     NAMESPACE: 'sso'
     NODE_PORT: '30085'
     REPLICA_COUNT: '3'
-    NEW_DB_DATABASE: sso5_1
+  only:
+    - itres # т.к. пока еше не обновлен
 
 infinispan:stage5:
   stage: deploy
@@ -260,6 +232,25 @@ infinispan:stage5:
     - helm history -n ${NAMESPACE} infinispan --max 5
   tags:
     - sso-build-k8s
+  only:
+    - itres # т.к. пока еше не обновлен
+
+domru:perm-k8s:
+  extends: .domru:prod:template
+  tags:
+    - sso-k8s-perm
+  environment:
+    name: production-k8s-perm
+    url: https://auth.dom.ru
+
+domru:voronezh-k8s:
+  extends: .domru:prod:template
+  tags:
+    - sso-k8s-voronezh
+  environment:
+    name: production-k8s-voronezh
+    url: https://auth.dom.ru
+
 
 domru:perm:primary:
   stage: deploy
@@ -271,7 +262,7 @@ domru:perm:primary:
     name: production-perm-primary
     url: https://auth.dom.ru/auth
   script:
-    - for i in domru stelecom ertelecom; do cp -r build/deploy/themes/${i} /usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app02:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app03:/usr/local/keycloak/themes; done
+    - for i in domru stelecom ertelecom novotelecom; do cp -r build/deploy/themes/${i} /usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app02:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app03:/usr/local/keycloak/themes; done
     - mkdir -p /usr/local/keycloak/domain/data/password-blacklists
     - cp build/deploy/standalone/data/password-blacklists/black_list_password.txt /usr/local/keycloak/domain/servers/server-one/data/password-blacklists
     - ssh sso-app02 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
@@ -299,7 +290,7 @@ domru:perm:secondary:
     name: production-perm-secondary
     url: https://auth.dom.ru/auth
   script:
-    - for i in domru stelecom ertelecom; do scp -r build/deploy/themes/${i} sso-app04:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app05:/usr/local/keycloak/themes; done
+    - for i in domru stelecom ertelecom novotelecom; do scp -r build/deploy/themes/${i} sso-app04:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app05:/usr/local/keycloak/themes; done
     - ssh sso-app04 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
     - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app04:/usr/local/keycloak/domain/servers/server-four/data/password-blacklists
     - ssh sso-app05 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
@@ -323,7 +314,7 @@ domru:voronezh:primary:
     name: production-voronezh-primary
     url: https://auth.dom.ru/auth
   script:
-    - for i in domru stelecom ertelecom; do cp -r build/deploy/themes/${i} /usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app02:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app03:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app04:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app05:/usr/local/keycloak/themes; done
+    - for i in domru stelecom ertelecom novotelecom; do cp -r build/deploy/themes/${i} /usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app02:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app03:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app04:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app05:/usr/local/keycloak/themes; done
     - mkdir -p /usr/local/keycloak/domain/data/password-blacklists
     - cp build/deploy/standalone/data/password-blacklists/black_list_password.txt /usr/local/keycloak/domain/servers/server-one/data/password-blacklists
     - ssh sso-app02 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
@@ -351,7 +342,7 @@ domru:voronezh:secondary:
     name: production-voronezh-secondary
     url: https://auth.dom.ru/auth
   script:
-    - for i in domru stelecom ertelecom; do scp -r build/deploy/themes/${i} sso-app04:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app05:/usr/local/keycloak/themes; done
+    - for i in domru stelecom ertelecom novotelecom; do scp -r build/deploy/themes/${i} sso-app04:/usr/local/keycloak/themes; scp -r build/deploy/themes/${i} sso-app05:/usr/local/keycloak/themes; done
     - ssh sso-app04 mkdir -p /usr/local/keycloak/domain/data/password-blacklists
     - scp build/deploy/standalone/data/password-blacklists/black_list_password.txt sso-app04:/usr/local/keycloak/domain/servers/server-four/data/password-blacklists
     - ssh sso-app05 mkdir -p /usr/local/keycloak/domain/data/password-blacklists

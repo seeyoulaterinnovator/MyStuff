@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public enum AuthType {
+    DEFAULT(new String[] {}, "По умолчанию (без подтверждения)"),
     EMAIL(
             new String[]{UserModel.RequiredAction.VERIFY_EMAIL.toString()},
             "На указанный адрес эл. почты будет выслана ссылка для подтверждения"

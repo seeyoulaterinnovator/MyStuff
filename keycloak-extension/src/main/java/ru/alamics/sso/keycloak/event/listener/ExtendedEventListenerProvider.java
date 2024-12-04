@@ -41,13 +41,13 @@ public class ExtendedEventListenerProvider implements EventListenerProvider {
         String clientId = event.getClientId();
 
         if (userId == null || realmId == null || clientId == null) {
-            log.error("userId == " + userId + ", " + "realmId == " + realmId + "clientId == " + clientId);
+            log.debug("userId == {}, realmId == {}, clientId == {}: {}", userId, realmId, clientId, event.getType());
             return;
         }
 
         RealmProvider model = session.realms();
         RealmModel realm = model.getRealm(event.getRealmId());
-        UserModel userModel = session.users().getUserById(userId, realm);
+        UserModel userModel = session.users().getUserById(realm, userId);
 
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");

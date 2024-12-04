@@ -1,13 +1,13 @@
 package ru.alamics.sso.keycloak.settings;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.keycloak.models.KeycloakSession;
+import ru.alamics.sso.jpa.entity.common.SettingType;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.settings.SettingsDto;
 import ru.alamics.sso.settings.SettingsService;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -30,10 +30,19 @@ public class SettingsResource {
                 .build();
     }
 
+    @Path("/search")
+    @GET
+    public Response searchSettings(@QueryParam("type") @DefaultValue("REALM") final SettingType type) {
+        String realmId = session.getContext().getRealm().getId();
+        return JsonResponse.success()
+                .addResult("settings", service.getRealmSettings(realmId, type))
+                .build();
+    }
+
+
     @Path("/{settingId}")
     @DELETE
     public Response deleteSetting(@PathParam("settingId") final String settingId) {
-        String realmId = session.getContext().getRealm().getId();
         service.deleteSetting(settingId);
         return JsonResponse.success()
                 .httpStatus(Response.Status.NO_CONTENT)

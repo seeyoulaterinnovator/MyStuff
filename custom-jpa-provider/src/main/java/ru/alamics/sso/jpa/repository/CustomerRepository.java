@@ -1,20 +1,19 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import ru.alamics.sso.jpa.entity.Customer;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
-@LocalBean
-@Stateless
+@ApplicationScoped
 public class CustomerRepository {
+    @Inject
+    EntityManager em;
 
-    @PersistenceContext
-    private EntityManager em;
-
+    @Transactional
     public Customer save(Customer customer) {
         Customer customerInDb = findByTomsId(customer.getId());
         if (customerInDb == null) {

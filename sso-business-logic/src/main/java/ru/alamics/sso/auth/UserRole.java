@@ -1,5 +1,10 @@
 package ru.alamics.sso.auth;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.core.MultivaluedMap;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.RequiredActionContext;
@@ -14,11 +19,6 @@ import ru.alamics.sso.jpa.repository.UserPostRepository;
 import ru.alamics.sso.jpa.repository.UserRepository;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.core.MultivaluedMap;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -27,17 +27,18 @@ import java.util.stream.Collectors;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_TOMS_NAME;
 
-@Stateless(name = "UserRole")
+@ApplicationScoped
+@Named("UserRole")
 @Slf4j
-@LocalBean
 public class UserRole {
+    @Inject
+    RoleRepository roleRepository;
 
-    @EJB
-    private RoleRepository roleRepository;
-    @EJB
-    private UserRepository userRepository;
-    @EJB
-    private UserPostRepository postRepository;
+    @Inject
+    UserRepository userRepository;
+
+    @Inject
+    UserPostRepository postRepository;
 
     public void setUserPost(AuthenticationFlowContext context) {
         final String DEBUG_STR = "setUserPost";
@@ -66,20 +67,24 @@ public class UserRole {
         user.setAttribute(ATTR_TOMS_NAME, Collections.singletonList(tomsId));
     }
 
-    public void setUserPost(AuthenticationFlowContext context, List<UserPostResponse> attributes) {
+    public boolean setUserPost(AuthenticationFlowContext context, List<UserPostResponse> attributes) {
+
         final String DEBUG_STR = "setUserPost";
         log.info("{}: user={}", DEBUG_STR, context.getUser().getId());
 
-        final String tomsId = attributes.get(0).getTomsId();
-        final String selectedPostId = attributes.get(0).getId();
+        if(!attributes.isEmpty()) {
+            final String tomsId = attributes.get(0).getTomsId();
+            final String selectedPostId = attributes.get(0).getId();
 
-        UserModel user = context.getUser();
+            UserModel user = context.getUser();
 
-        selectPostByUser(user, selectedPostId);
-        user.setAttribute(ATTR_TOMS_NAME, Collections.singletonList(tomsId));
+            selectPostByUser(user, selectedPostId);
+            user.setAttribute(ATTR_TOMS_NAME, Collections.singletonList(tomsId));
+            return true;
+        }
+
+        return false;
     }
-
-
 
     private List<UserPostEntity> deselectAllPostsByUser(UserEntity user) {
         List<UserPostEntity> userPosts = postRepository.getAllUserPostByUserId(user.getId());
@@ -156,7 +161,7 @@ public class UserRole {
         RoleEntity clientRole = createRoleEntity(realmId, roleName);
 
         clientRole.setClientRole(true);
-        clientRole.setClient(client);
+        clientRole.setClientId(client.getClientId());
         clientRole.setClientRealmConstraint(client.getClientId());
         return roleRepository.save(clientRole);
     }
@@ -176,7 +181,7 @@ public class UserRole {
 
         RealmEntity realmEntity = new RealmEntity();
         realmEntity.setId(realmId);
-        roleEntity.setRealm(realmEntity);
+        roleEntity.setRealmId(realmEntity.getId());
 
         roleEntity.setRealmId(realmId);
 

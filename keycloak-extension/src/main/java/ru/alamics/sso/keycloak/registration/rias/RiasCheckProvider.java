@@ -18,7 +18,7 @@ import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.rias.RiasService;
 import ru.alamics.sso.util.Util;
 
-import javax.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,0 +1,89 @@
+import type RequiredActionProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/requiredActionProviderRepresentation";
+import { useState } from "react";
+import { FieldPathByValue, FieldValues } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import {
+  SelectControl,
+  SelectVariant,
+  TextControl,
+} from "@keycloak/keycloak-ui-shared";
+import { useAdminClient } from "../../admin-client";
+import { useFetch } from "../../utils/useFetch";
+
+export type RequiredActionMultiSelectProps<
+  T extends FieldValues,
+  P extends FieldPathByValue<T, string[] | undefined>,
+> = {
+  name: P;
+  label: string;
+  help: string;
+  isDisabled?: boolean;
+  isReadOnly?: boolean;
+  searchRealm?: string;
+};
+
+export const RequiredActionMultiSelect = <
+  T extends FieldValues,
+  P extends FieldPathByValue<T, string[] | undefined>,
+>({
+  name,
+  label,
+  help,
+  isDisabled,
+  isReadOnly,
+  searchRealm,
+}: RequiredActionMultiSelectProps<T, P>) => {
+  const { adminClient } = useAdminClient();
+
+  const { t } = useTranslation();
+  const [requiredActions, setRequiredActions] = useState<
+    RequiredActionProviderRepresentation[]
+  >([]);
+
+  useFetch(
+    () =>
+      adminClient.authenticationManagement.getRequiredActions({ searchRealm }),
+    (actions) => {
+      const enabledUserActions = actions.filter((action) => {
+        return action.enabled;
+      });
+      setRequiredActions(enabledUserActions);
+    },
+    [searchRealm],
+  );
+
+  if (isDisabled) {
+    return (
+      <TextControl
+        name={name}
+        label={t(label)}
+        placeholder={t("requiredActionPlaceholder")}
+        readOnly
+        isDisabled
+      />
+    );
+  }
+
+  return (
+    <SelectControl
+      name={name}
+      label={t(label)}
+      labelIcon={t(help)}
+      controller={{ defaultValue: [] }}
+      isScrollable
+      maxMenuHeight="375px"
+      variant={SelectVariant.typeaheadMulti}
+      chipGroupProps={{
+        numChips: 3,
+      }}
+      placeholderText={t("requiredActionPlaceholder")}
+      menuAppendTo="parent"
+      options={requiredActions.map(({ alias, name }) => ({
+        key: alias!,
+        value: name || alias!,
+      }))}
+      displayOnlyValidValues
+      isDisabled={isReadOnly}
+    />
+  );
+};

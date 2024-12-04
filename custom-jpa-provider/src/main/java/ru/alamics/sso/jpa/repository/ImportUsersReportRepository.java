@@ -1,27 +1,23 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
 import ru.alamics.sso.jpa.entity.common.ImportUsersDataStatus;
 import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
-@LocalBean
-@Stateless
-@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+@ApplicationScoped
+@Transactional
 @Slf4j
 public class ImportUsersReportRepository {
-
-    @PersistenceContext
-    private EntityManager em;
+    @Inject
+    EntityManager em;
 
     public ImportUsersReportEntity findImportUsersReportByImportId(final String importId) {
         return em.find(ImportUsersReportEntity.class, importId);
@@ -40,30 +36,34 @@ public class ImportUsersReportRepository {
         return em.find(ImportUsersDataEntity.class, id);
     }
 
-    public List<ImportUsersReportEntity> findImportUsersReports(String realmId) {
+    public List<ImportUsersReportEntity> findImportUsersReports(String realmId, int first, int max) {
         return em.createQuery(
                 "select ire " +
                         "from ImportUsersReportEntity ire where ire.realmId = :realmId " +
                         "order by ire.importDate desc ", ImportUsersReportEntity.class)
                 .setParameter("realmId", realmId)
+                .setFirstResult(first)
+                .setMaxResults(max)
                 .getResultList();
     }
 
-    public List<ImportUsersReportEntity> findAllImportUsersReports() {
-        return em.createQuery(
-                "select ire " +
-                        "from ImportUsersReportEntity ire ", ImportUsersReportEntity.class)
-                .getResultList();
+    public int findReportsInWork (String realmId, ImportUsersReportStatus status) {
+        return em.createQuery("select ire " +
+                                "from ImportUsersReportEntity ire where ire.realmId = :realmId " +
+                                "and ire.status not in(:status) ", ImportUsersReportEntity.class)
+                .setParameter("realmId", realmId)
+                .setParameter("status", status)
+                .getResultList().size();
     }
 
     public void saveImportUsersReport(ImportUsersReportEntity importUsersReportEntity) {
-        log.info("import report with id = {} saved, status = {}", importUsersReportEntity.getId(), importUsersReportEntity.getStatus());
+        log.debug("import report with id = {} saved, status = {}", importUsersReportEntity.getId(), importUsersReportEntity.getStatus());
         em.persist(importUsersReportEntity);
         em.flush();
     }
 
     public void saveImportUsersData(ImportUsersDataEntity entity) {
-        log.info("importUserData with id = {} saved", entity.getId());
+        log.debug("importUserData with id = {} saved", entity.getId());
         em.persist(entity);
         em.flush();
     }
@@ -96,7 +96,7 @@ public class ImportUsersReportRepository {
     }
 
     public void updateReport(String id, ImportUsersReportStatus status, int clones, int created) {
-        log.info("report with id = {} was updated", id);
+        log.debug("report with id = {} was updated", id);
         em.createQuery("update ImportUsersReportEntity rep " +
                 "set rep.status = :status, rep.countClones = :clones, rep.countCreatedUsers = :created where rep.id = :id")
                 .setParameter("id", id)

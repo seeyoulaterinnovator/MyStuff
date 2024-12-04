@@ -2,7 +2,7 @@ package ru.alamics.sso.remote.sms;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.matching.StringValuePattern;
-import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
+import jakarta.ws.rs.core.UriBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -12,6 +12,7 @@ import ru.alamics.sso.registration.phone.model.MessageRequest;
 import ru.alamics.sso.registration.phone.model.MessengerType;
 import ru.alamics.sso.remote.message.SendMessageServiceImpl;
 
+import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,28 +37,32 @@ class MsgSendServiceImplTest {
     private static SendMessageServiceImpl service;
 
     @BeforeAll
-    static void initWireMock() {
+    static void initWireMock() throws Exception {
         server = new WireMockServer(wireMockConfig().dynamicPort());
         server.start();
 
-        MsgConfig.builder()
-                .url(new ResteasyUriBuilder()
-                        .scheme("http")
-                        .host("127.0.0.1")
-                        .port(server.port())
-                        .path(PATH)
-                        .build())
-                .msgCenterName(SMSC_NAME)
-                .username(USERNAME)
-                .password(PASSWORD)
-                .senderName(SENDER_NAME)
-                .timeout(5)
-                .priority(MsgConfig.Priority.HIGH)
-                .reportsMask(MsgConfig.ReportsConfig.DELIVERED_TO_PHONE)
-                .encoding(MsgConfig.Encoding.UCS2)
-                .charset(StandardCharsets.UTF_8)
-                .build();
-        service = new SendMessageServiceImpl();
+        service = new SendMessageServiceImpl(SSLContext.getDefault(), (s, ss) -> true) {
+            @Override
+            protected MsgConfig createMsgConfig(String realmId, String type) {
+                return MsgConfig.builder()
+                        .url(UriBuilder.newInstance()
+                                .scheme("http")
+                                .host("127.0.0.1")
+                                .port(server.port())
+                                .path(PATH)
+                                .build())
+                        .msgCenterName(SMSC_NAME)
+                        .username(USERNAME)
+                        .password(PASSWORD)
+                        .senderName(SENDER_NAME)
+                        .timeout(5)
+                        .priority(MsgConfig.Priority.HIGH)
+                        .reportsMask(MsgConfig.ReportsConfig.DELIVERED_TO_PHONE)
+                        .encoding(MsgConfig.Encoding.UCS2)
+                        .charset(StandardCharsets.UTF_8)
+                        .build();
+            }
+        };
     }
 
     @AfterEach

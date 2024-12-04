@@ -1,0 +1,9 @@
+ru.alamics.sso.keycloak.registration.UserModelExtender
+ru.alamics.sso.keycloak.registration.rias.RiasCheckFactory
+ru.alamics.sso.keycloak.registration.phone.PhoneCheckerFactory
+ru.alamics.sso.keycloak.registration.userpost.UserPostCreatorFactory
+ru.alamics.sso.keycloak.registration.sendEmail.LetterSenderFactory
+ru.alamics.sso.keycloak.registration.validate.RegistrationCustomProfile
+ru.alamics.sso.keycloak.registration.validate.RegistrationCustomPassword
+ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.reg.RestRegistrationUserCreation
+ru.alamics.sso.keycloak.registration.RegistrationUserCreationExtension

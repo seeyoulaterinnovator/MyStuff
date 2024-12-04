@@ -1,6 +1,6 @@
 package ru.alamics.sso.keycloak.response;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 public interface ResponseBuilder {
 

@@ -1,26 +1,25 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.jpa.entity.UserLoginHistory;
-import ru.alamics.sso.jpa.entity.antifraud.AttemptFailsEntity;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+@ApplicationScoped
 @Slf4j
-@Stateless
 public class UserHistoryLoginRepository {
+    @Inject
+    EntityManager em;
 
-    @PersistenceContext
-    private EntityManager em;
-
+    @Transactional
     public void findInactiveUsers(final long absenceTime, final String realmId) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime absenceDate = now.minusSeconds(absenceTime);
@@ -61,6 +60,7 @@ public class UserHistoryLoginRepository {
         }
     }
 
+    @Transactional
     public void findUsersToBlock(final long absenceTimeBlock, final String realmId) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime absence = now.minusSeconds(absenceTimeBlock);
@@ -88,6 +88,7 @@ public class UserHistoryLoginRepository {
         }
     }
 
+    @Transactional
     public UserLoginHistory save(UserLoginHistory history) {
         final String id = UUID.randomUUID().toString();
         history.setId(id);
@@ -96,6 +97,7 @@ public class UserHistoryLoginRepository {
         return history;
     }
 
+    @Transactional
     public void saveSuccessAuth(UserLoginHistory history) {
         final String id = UUID.randomUUID().toString();
         history.setId(id);

@@ -1,34 +1,46 @@
 package ru.alamics.sso.status;
 
+import io.quarkus.runtime.StartupEvent;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.repository.StatusRepository;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
-@Singleton
-@Startup
+@ApplicationScoped
 @Slf4j
-@Lock(LockType.READ)
 public class StatusService {
+    @Inject
+    StatusRepository statusRepository;
 
-    private final String NODE_NAME = System.getProperty("jboss.node.name");
-
-    @EJB
-    private StatusRepository statusRepository;
-
-    @PostConstruct
-    @Lock(LockType.WRITE)
-    public void init() {
-
-        tryInsertNodeName();
-    }
-
-    private void tryInsertNodeName() {
-        statusRepository.tryInsertNodeName(NODE_NAME);
+    void onStart(@Observes StartupEvent ev) {
+        statusRepository.tryInsertNodeName(getNodeName());
     }
 
     public boolean checkStatusDb() {
-        return statusRepository.checkStatusDb(NODE_NAME);
+        return statusRepository.checkStatusDb(getNodeName());
+    }
+
+    // TODO k8s
+    public String getNodeName() {
+        String name = System.getProperty("jboss.node.name");
+        if(name == null) {
+            // i.e. k8s metadata.name
+            name = System.getenv("POD_NAME");
+        }
+        if(name == null) {
+            try {
+                name = InetAddress.getLocalHost().getHostName();
+            } catch (UnknownHostException e) {
+                log.warn(e.getMessage(), e);
+            }
+        }
+        if(name == null) {
+            name = "";
+        }
+        return name;
     }
 }

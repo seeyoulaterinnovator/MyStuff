@@ -1,5 +1,7 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth.new_auth_rias;
 
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -22,9 +24,6 @@ import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
-
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 
 import static ru.alamics.sso.settings.SettingConstants.*;
 
@@ -75,7 +74,7 @@ public class NewAuthMailPhoneWithRiasForm extends NewAbstractAuthMailPhoneForm {
                 if (Util.isEmpty(withCity) || !withCity.equals("TRUE")) {
                     context.form().setAttribute(FormConstants.WITH_CITY, "TRUE");
                     context.form().setAttribute("showModal", "TRUE");
-                    context.challenge(context.form().createLogin());
+                    context.challenge(context.form().createLoginUsernamePassword());
                     return true;
                 } else if (!checkAuthRias(context, CHOOSE_REDIRECT_TO_LK_FORM)) {
                     context.getEvent().error(Errors.USER_NOT_FOUND);

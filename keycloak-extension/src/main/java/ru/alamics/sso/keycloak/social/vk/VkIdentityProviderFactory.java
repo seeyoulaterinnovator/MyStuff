@@ -22,6 +22,11 @@ public class VkIdentityProviderFactory extends AbstractIdentityProviderFactory<V
     }
 
     @Override
+    public IdentityProviderModel createConfig() {
+        return new IdentityProviderModel(); // TODO
+    }
+
+    @Override
     public String getId() {
         return PROVIDER_ID;
     }

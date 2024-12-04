@@ -1,9 +1,19 @@
 package ru.alamics.sso.remote.rias;
 
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
@@ -12,48 +22,44 @@ import ru.alamics.sso.remote.rias.model.RiasCheckStatus;
 import ru.alamics.sso.remote.rias.model.RiasData;
 import ru.alamics.sso.util.Util;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.ejb.Stateless;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import java.io.InputStream;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.TimeUnit;
 
+@ApplicationScoped
+@Named("RiasApiService")
 @Slf4j
-@Stateless(name = "RiasApiService")
-@NoArgsConstructor
 public class RiasUserExistsCheckImpl implements RiasApiService {
     private static final String RIAS_API_URI = "riasApi.uri";
     private static final String CLIENT_NAME = "riasApi.client.name";
     private static final String CLIENT_SALT = "riasApi.client.salt";
 
-    private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
-            .connectTimeout(3, TimeUnit.SECONDS)
-            .readTimeout(10, TimeUnit.SECONDS);
+    private final XmlMapper mapper = new XmlMapper();
 
-    private static final ResteasyClient client = clientBuilder.build();
+    private final ApplicationProperties properties;
 
-    @Resource(lookup = "java:global/domru-sso/ApplicationProperties")
-    private ApplicationProperties properties;
+    private final HttpClient client;
 
-    private URI uri;
+    private final URI uri;
 
-    public RiasUserExistsCheckImpl(URI uri) {
-        this.uri = uri;
-    }
-
-    public RiasUserExistsCheckImpl(ApplicationProperties properties, URI uri) {
-
+    public RiasUserExistsCheckImpl(
+            ApplicationProperties properties,
+            @Named("riasApiSSLContext") SSLContext sslContext,
+            @Named("riasApiHostnameVerifier") HostnameVerifier hostnameVerifier
+    ) {
         this.properties = properties;
-        this.uri = uri;
-    }
-
-    @PostConstruct
-    private void init() {
+        client = HttpClients.custom()
+                .setSSLContext(sslContext)
+                .setSSLHostnameVerifier(hostnameVerifier)
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setConnectTimeout(3_000)
+                        .setConnectionRequestTimeout(3_000)
+                        .setSocketTimeout(10_000)
+                        .build())
+                .build();
         uri = URI.create(properties.getProperty(RIAS_API_URI));
     }
 
@@ -70,20 +76,30 @@ public class RiasUserExistsCheckImpl implements RiasApiService {
         String namesV = Util.encodeUTF8("data_for_check$c,timestamp,client,client_secret");
         String valuesV = Util.encodeUTF8(param + "," + timestamp + "," + properties.getProperty(CLIENT_NAME) + "," + secretHash);
 
+        HttpGet request = new HttpGet(UriBuilder.fromUri(uri)
+                .queryParam("params", paramsV)
+                .queryParam("param_names_arr$c", namesV)
+                .queryParam("param_values_arr$c", valuesV)
+                .build());
+        request.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML);
+
         RiasData response;
-
         try {
-            response = client.target(uri)
-                    .queryParam("params", paramsV)
-                    .queryParam("param_names_arr$c", namesV)
-                    .queryParam("param_values_arr$c", valuesV)
-                    .request(MediaType.APPLICATION_XML)
-                    .get(RiasData.class);
-
-            log.info("response result {}, status {}, message {}", response.getResult(), response.getStatus(), response.getMessages());
-
-        } catch (ProcessingException | WebApplicationException wae) {
-            throw new RiasCheckException(wae);
+            HttpResponse httpResponse = client.execute(request);
+            try {
+                if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                    try (InputStream stream = httpResponse.getEntity().getContent()) {
+                        response = mapper.readValue(stream, RiasData.class);
+                        log.info("response result {}, status {}, message {}", response.getResult(), response.getStatus(), response.getMessages());
+                    }
+                } else {
+                    throw new RiasCheckException(httpResponse.getStatusLine().getReasonPhrase());
+                }
+            } finally {
+                EntityUtils.consume(httpResponse.getEntity());
+            }
+        } catch (Exception e) {
+            throw new RiasCheckException(e);
         }
 
         if (response.getStatus() == RiasCheckStatus.DATA_NOT_FOUND)

@@ -1,27 +1,28 @@
 package ru.alamics.sso.keycloak.search.rest;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.annotations.cache.NoCache;
-import org.jboss.resteasy.annotations.jaxrs.QueryParam;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.RoleModel;
+import org.jboss.resteasy.reactive.NoCache;
+import org.keycloak.Config;
+import org.keycloak.models.*;
+import org.keycloak.models.cache.UserCache;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.representations.idm.RequiredActionProviderRepresentation;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.validation.Validation;
+import ru.alamics.sso.jpa.model.CustomUserAdapter;
 import ru.alamics.sso.keycloak.GeneralRealm;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.service.RequiredActionService;
+import ru.alamics.sso.user.web.RealmNameDto;
 import ru.alamics.sso.user.web.UserSearch;
 import ru.alamics.sso.util.Util;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,8 +59,11 @@ public class SearchResource {
                                                 @QueryParam("searchToms") String searchToms, @QueryParam("sortField") String sortField,
                                                 @QueryParam("sortAsc") boolean sortAsc, @QueryParam("searchRealm") String searchRealm,
                                                 @DefaultValue("1") @QueryParam("pageNum") int pageNum, @DefaultValue("100") @QueryParam("pageSize") int pageSize) {
+        if (pageSize > 100) {
+            throw new BadRequestException("Page size must be less than 100");
+        }
 
-        session.userCache().clear();
+        clearUserCache();
         String rawPath = session.getContext().getUri().getAbsolutePath().getRawPath();
 
         searchRealm = Util.getRealm(searchRealm, rawPath);
@@ -80,34 +84,23 @@ public class SearchResource {
                                  @QueryParam("searchToms") String searchToms, @QueryParam("searchPhone") String searchPhone,
                                  @QueryParam("sortField") String sortField, @QueryParam("sortAsc") boolean sortAsc,
                                  @QueryParam("searchRealm") String searchRealm,
-                                 @QueryParam("pageNum") int pageNum, @QueryParam("pageSize") int pageSize) {
+                                 @QueryParam("first") int first, @QueryParam("max") int max) {
         String rawPath = session.getContext().getUri().getAbsolutePath().getRawPath();
 
         searchRealm = Util.getRealm(searchRealm, rawPath);
 
-        session.userCache().clear();
+        clearUserCache();
 
-        log.info("getUsersInfo 1");
+        List<UserSearch> users = userFindService.getUsersByParameters(searchRealm, search, searchUser, searchEmail, searchToms, searchPhone, sortField, sortAsc, first, max);
+        long total = userFindService.getTotalUsersByParameters(searchRealm, search, searchUser, searchEmail, searchToms, searchPhone);
+        
+        int pageSize = max - 1;
+        int pageNum = first / pageSize;
 
-        List<UserSearch> users = userFindService.getUsersByParameters(searchRealm, search, searchUser, searchEmail, searchToms, searchPhone, sortField, sortAsc, pageNum, pageSize);
-
-        log.info("getUsersInfo 2");
-
-        long total = 200; // userFindService.getTotalUsersByParameters(searchRealm, search, searchUser, searchToms);
-
-        log.info("getUsersInfo 3");
-
-        Response respB = JsonResponse.success()
+        return JsonResponse.success()
                 .addResult("users-info", users)
-                .addResult("page-info",
-                        DataMapper.toPageDto(users,
-                                total,
-                                pageNum, pageSize))
+                .addResult("page-info", DataMapper.toPageDto(users, total, pageNum, pageSize))
                 .build();
-
-        log.info("getUsersInfo 4");
-
-        return respB;
     }
 
     @GET
@@ -137,8 +130,8 @@ public class SearchResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
     public List<String> getAccessibleRealms() {
-        final List<RealmModel> realms = session.realms().getRealms();
-        final Set<RoleModel> userRoles = adminAuth.getUser().getRoleMappings();
+        final List<RealmModel> realms = session.realms().getRealmsStream().toList();
+        final Set<RoleModel> userRoles = adminAuth.getUser().getRoleMappingsStream().collect(Collectors.toSet());
         List<String> userViewRoles = new ArrayList<>();
         for (RealmModel realm : realms) {
             for (RoleModel role : userRoles) {
@@ -162,25 +155,48 @@ public class SearchResource {
         return requiredActionService.getRequiredActions(realmId);
     }
 
+    @GET
+    @Path("/realm-name-by-user-id")
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public RealmNameDto getRealmNameByUserId(@QueryParam("userId") String userId) {
+        UserModel user = session.getProvider(UserProvider.class).getUserById(session.getContext().getRealm(), userId);
+        if(user == null) {
+            throw new NotFoundException();
+        }
+        if(user instanceof CustomUserAdapter) {
+            return new RealmNameDto(((CustomUserAdapter) user).getRealm().getName());
+        }
+        throw new InternalServerErrorException();
+    }
+
     private Predicate<RealmModel> getPredicateByViewRoles(Set<RoleModel> roles, boolean userDontHaveViewRoles) {
         final String currentRealm = session.getContext().getRealm().getName();
         if (userDontHaveViewRoles) {
             return realm -> {
-                switch (currentRealm) {
-                    case GeneralRealm.MASTER:
-                        return true;
-                    case GeneralRealm.MANAGER:
-                        return GeneralRealm.REALMS.stream().noneMatch(realm.getName()::equalsIgnoreCase);
+                if(Config.getAdminRealm().equals(currentRealm)) {
+                    return true;
+                } else if(GeneralRealm.MANAGER_REALMS.contains(currentRealm)) {
+                    return !Config.getAdminRealm().equalsIgnoreCase(realm.getName())
+                            && !GeneralRealm.MANAGER_REALMS.contains(realm.getName());
+                } else {
+                    return false;
                 }
-                return false;
             };
         } else {
-            if (GeneralRealm.MASTER.equalsIgnoreCase(currentRealm)) {
+            if (Config.getAdminRealm().equalsIgnoreCase(currentRealm)) {
                 return realm -> true;
             } else {
                 return realm -> roles.stream()
                         .anyMatch(role -> formatViewRole(realm).equalsIgnoreCase(role.getName()));
             }
+        }
+    }
+
+    private void clearUserCache() {
+        UserCache cache = session.getProvider(UserCache.class);
+        if (cache != null) {
+            cache.clear();
         }
     }
 }

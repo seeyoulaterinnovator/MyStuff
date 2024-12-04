@@ -1,5 +1,7 @@
 <#import "template.ftl" as template>
 
+<#-- ??? ЛК - Забыли пароль? - Установить новый пароль  -->
+<#--  not used  -->
 <@template.layout ; section>
     <#if section = "style">
         <#include 'styles/content-style--default.html' >

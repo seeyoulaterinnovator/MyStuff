@@ -1,0 +1,1054 @@
+import {
+  Button,
+  ButtonVariant,
+  Divider,
+  Text,
+  Toolbar,
+  ToolbarContent,
+  ToolbarItem,
+  Tooltip,
+} from "@patternfly/react-core";
+import type { SVGIconProps } from "@patternfly/react-icons/dist/js/createIcon";
+import {
+  ActionsColumn,
+  ExpandableRowContent,
+  IAction,
+  IActions,
+  IActionsResolver,
+  IFormatter,
+  IRow,
+  IRowCell,
+  ITransform,
+  Table,
+  TableProps,
+  TableVariant,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+  type TdProps,
+} from "@patternfly/react-table";
+import { cloneDeep, differenceBy, get } from "lodash-es";
+import {
+  ComponentClass,
+  ReactNode,
+  isValidElement,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useTranslation } from "react-i18next";
+
+import { useStoredState } from "@keycloak/keycloak-ui-shared";
+import { useFetch } from "../../utils/useFetch";
+import { KeycloakSpinner } from "../keycloak-spinner/KeycloakSpinner";
+import { ListEmptyState } from "../list-empty-state/ListEmptyState";
+import { PaginatingTableToolbar } from "./PaginatingTableToolbar";
+import { SyncAltIcon, ArrowDownIcon } from "@patternfly/react-icons";
+import type { SortingOptions } from "../../customLogic/types/sorting";
+import { mergeCellsAutomatically } from "../../customLogic/helpers/tables";
+import { getAttributeName } from "../../customLogic/helpers/attributes";
+import { DataAttribute } from "../../customLogic/constants/attributes";
+import { AutomaticallyMergedColumn } from "../../customLogic/types/table";
+import useResizeObserver from "../../customLogic/hooks/useResizeObserver";
+
+type TitleCell = { title: JSX.Element };
+type Cell<T> = keyof T | JSX.Element | TitleCell;
+
+type BaseRow<T> = {
+  data: T;
+  cells: Cell<T>[];
+};
+
+type Row<T> = BaseRow<T> & {
+  selected: boolean;
+  isOpen?: boolean;
+  disableSelection: boolean;
+  disableActions: boolean;
+};
+
+type SubRow<T> = BaseRow<T> & {
+  parent: number;
+};
+
+type DataTableProps<T> = {
+  ariaLabelKey: string;
+  columns: Field<T>[];
+  rows: (Row<T> | SubRow<T>)[];
+  actions?: IActions;
+  actionResolver?: IActionsResolver;
+  onSelect?: (isSelected: boolean, rowIndex: number) => void;
+  onCollapse?: (isOpen: boolean, rowIndex: number) => void;
+  canSelectAll: boolean;
+  isNotCompact?: boolean;
+  isRadio?: boolean;
+  sortingOptions?: SortingOptions;
+  onSort?: (sortingOptions: SortingOptions) => void;
+  automaticallyMergedColumns?: AutomaticallyMergedColumn<T>[];
+  onChangeNumberOfRowMerges?: (value: number) => void;
+  totalRows?: number;
+  selected?: T[];
+};
+
+export const isSubRow = <T,>(data?: Row<T> | SubRow<T>): data is SubRow<T> => {
+  return !!data && "parent" in data;
+};
+
+const isRow = (c: ReactNode | IRowCell): c is IRowCell =>
+  !!c && (c as IRowCell).title !== undefined;
+
+interface CellRenderProps<T> {
+  cell: ReactNode | IRowCell;
+  column?: Field<T>;
+}
+
+const CellRender = <T,>({ cell, column }: CellRenderProps<T>) => {
+  const { t } = useTranslation();
+
+  const tdContent = (isRow(cell) ? cell.title : cell) as ReactNode;
+  const [isClamped, setIsClamped] = useState(false);
+
+  const columnTitle = column?.displayKey || column?.name;
+  const columnLabel = columnTitle ? t(columnTitle) : undefined;
+
+  const { targetRef: contentRef } = useResizeObserver<HTMLSpanElement>(
+    ({ target }) => {
+      let hasClampedText = false;
+
+      if (target) {
+        hasClampedText = target.scrollWidth > target.clientWidth;
+      }
+
+      setIsClamped(hasClampedText);
+    },
+  );
+
+  return (
+    <>
+      <Td
+        ref={contentRef}
+        {...(isRow(cell) ? cell.props : null)}
+        {...{
+          [getAttributeName(DataAttribute.TableColumnName)]: column?.name || "",
+        }}
+        dataLabel={columnLabel}
+      >
+        {tdContent}
+      </Td>
+      <Tooltip
+        content={tdContent}
+        trigger={isClamped ? "mouseenter focus" : ""}
+        triggerRef={contentRef}
+      />
+    </>
+  );
+};
+
+type CellsRendererProps<T> = {
+  row: IRow;
+  columns?: Field<T>[];
+};
+
+const CellsRenderer = <T,>({ row, columns }: CellsRendererProps<T>) => {
+  return row.cells!.map((c, i) => {
+    return <CellRender key={`cell-${i}`} cell={c} column={columns?.[i]} />;
+  });
+};
+
+function DataTable<T>({
+  columns,
+  rows,
+  actions,
+  actionResolver,
+  ariaLabelKey,
+  onSelect,
+  onCollapse,
+  canSelectAll,
+  isNotCompact,
+  isRadio,
+  onSort,
+  sortingOptions,
+  automaticallyMergedColumns,
+  onChangeNumberOfRowMerges,
+  totalRows,
+  selected,
+  ...props
+}: DataTableProps<T>) {
+  const { t } = useTranslation();
+
+  const [selectedRows, setSelectedRows] = useState<boolean[]>([]);
+  const [expandedRows, setExpandedRows] = useState<boolean[]>([]);
+  const [currentSortingOptions, setCurrentSortingOptions] =
+    useState(sortingOptions);
+  const [isDeterminateSelectAll, setIsDeterminateSelectAll] = useState(false);
+  const [isMouseEnterSelectAll, setIsMountEnterSelectAll] = useState(false);
+
+  const tableRef = useRef<HTMLTableElement | null>(null);
+  const selectAllRef = useRef<HTMLTableCellElement | null>(null);
+
+  const countSelectedRows = selected?.length;
+
+  const currentCountSelectedRows = useMemo(() => {
+    return selectedRows.filter((row) => row).length;
+  }, [selectedRows]);
+
+  const updateState = (rowIndex: number, isSelected: boolean) => {
+    const items = [
+      ...(rowIndex === -1 || rowIndex === -2
+        ? Array(rows.length).fill(isSelected)
+        : selectedRows),
+    ];
+    items[rowIndex] = isSelected;
+    setSelectedRows(items);
+  };
+
+  useEffect(() => {
+    setSelectedRows(() => {
+      const newSelectedRows: boolean[] = [];
+
+      rows.forEach((row, index) => {
+        if (!isSubRow(row)) {
+          newSelectedRows[index] = row.selected;
+        }
+      });
+
+      return newSelectedRows;
+    });
+  }, [rows]);
+
+  useEffect(() => {
+    setCurrentSortingOptions(sortingOptions);
+  }, [sortingOptions]);
+
+  useEffect(() => {
+    if (canSelectAll) {
+      const selectAllCheckbox = document.getElementsByName("check-all").item(0);
+      if (selectAllCheckbox) {
+        const checkbox = selectAllCheckbox as HTMLInputElement;
+        const onlySelected = selectedRows.filter((r) => r === true);
+        const isIndeterminateCheckboxForAllRows =
+          totalRows != null &&
+          countSelectedRows != null &&
+          countSelectedRows < totalRows &&
+          countSelectedRows > 0;
+        const isIndeterminateCheckboxForPageRows =
+          onlySelected.length < rows.length && onlySelected.length > 0;
+        checkbox.indeterminate =
+          isIndeterminateCheckboxForAllRows ||
+          isIndeterminateCheckboxForPageRows;
+
+        setIsDeterminateSelectAll(checkbox.indeterminate);
+      }
+    }
+  }, [selectedRows]);
+
+  const handleSort = (column: Field<T>) => {
+    if (!column.isSortable) {
+      return;
+    }
+
+    setCurrentSortingOptions((prev) => {
+      const newSortOptions: SortingOptions = {
+        orderBy: column.name,
+        order:
+          prev?.orderBy === column.name
+            ? prev.order === "asc"
+              ? "desc"
+              : "asc"
+            : "asc",
+      };
+
+      onSort?.(newSortOptions);
+
+      return newSortOptions;
+    });
+  };
+
+  useEffect(() => {
+    const { current: tableElement } = tableRef;
+
+    if (!automaticallyMergedColumns?.length || !tableElement) {
+      return;
+    }
+
+    const { numberOfRowMerges } = mergeCellsAutomatically(
+      tableElement,
+      automaticallyMergedColumns,
+    );
+    onChangeNumberOfRowMerges?.(numberOfRowMerges);
+  }, [rows, columns, automaticallyMergedColumns]);
+
+  return (
+    <Table
+      {...props}
+      ref={(tableElement) => {
+        tableRef.current = tableElement;
+      }}
+      variant={isNotCompact ? undefined : TableVariant.compact}
+      aria-label={t(ariaLabelKey)}
+    >
+      <Thead>
+        <Tr>
+          {onCollapse && <Th />}
+          {canSelectAll ? (
+            <>
+              <Th
+                ref={selectAllRef}
+                select={
+                  !isRadio
+                    ? {
+                        onSelect: (_, isSelected, rowIndex) => {
+                          const isSelectedResult =
+                            isDeterminateSelectAll &&
+                            totalRows != null &&
+                            countSelectedRows != null
+                              ? currentCountSelectedRows !== rows.length
+                              : isSelected;
+
+                          onSelect?.(isSelectedResult, rowIndex);
+                          updateState(-1, isSelectedResult);
+                        },
+                        isSelected:
+                          countSelectedRows != null && totalRows != null
+                            ? countSelectedRows === totalRows
+                            : currentCountSelectedRows === rows.length,
+                      }
+                    : undefined
+                }
+                onMouseEnter={() => setIsMountEnterSelectAll(true)}
+                onMouseLeave={() => setIsMountEnterSelectAll(false)}
+              />
+              {selected && selected.length > 0 && (
+                <Tooltip
+                  triggerRef={selectAllRef}
+                  trigger="mouseenter focus manual"
+                  isContentLeftAligned
+                  isVisible={isMouseEnterSelectAll}
+                  content={
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "12px",
+                      }}
+                    >
+                      <Text>
+                        {t("selectedRows")}: {selected?.length}
+                      </Text>
+                      <Button
+                        onClick={() => {
+                          onSelect?.(false, -2);
+                          updateState(-2, false);
+                        }}
+                      >
+                        {t("resetAll")}
+                      </Button>
+                    </div>
+                  }
+                  onMouseEnter={() => setIsMountEnterSelectAll(true)}
+                  onMouseLeave={() => setIsMountEnterSelectAll(false)}
+                />
+              )}
+            </>
+          ) : (
+            onSelect && (
+              <Th>
+                <div />
+              </Th>
+            )
+          )}
+          {columns.map((column) => {
+            const isSoringApplied =
+              column.isSortable &&
+              currentSortingOptions?.orderBy === column.name;
+            const arrowAngel = currentSortingOptions?.order === "asc" ? 0 : 180;
+
+            return (
+              <Th
+                key={column.displayKey}
+                aria-label={t(ariaLabelKey)}
+                className={column.transforms?.[0]().className}
+                style={{
+                  cursor: column.isSortable ? "pointer" : "unset",
+                }}
+                onClick={() => handleSort(column)}
+              >
+                {t(column.displayKey || column.name)}{" "}
+                {isSoringApplied && (
+                  <ArrowDownIcon
+                    style={{
+                      transform: `rotate(${arrowAngel}deg)`,
+                    }}
+                  />
+                )}
+              </Th>
+            );
+          })}
+        </Tr>
+      </Thead>
+      {!onCollapse ? (
+        <Tbody>
+          {(rows as IRow[]).map((row, index) => (
+            <Tr key={index} isExpanded={expandedRows[index]}>
+              {onSelect && (
+                <Td
+                  select={{
+                    rowIndex: index,
+                    onSelect: (_, isSelected, rowIndex) => {
+                      onSelect!(isSelected, rowIndex);
+                      updateState(rowIndex, isSelected);
+                    },
+                    isSelected: selectedRows[index],
+                    variant: isRadio ? "radio" : "checkbox",
+                  }}
+                />
+              )}
+              <CellsRenderer row={row} columns={columns} />
+              {(actions || actionResolver) && (
+                <Td isActionCell>
+                  <ActionsColumn
+                    items={actions || actionResolver?.(row, {})!}
+                    extraData={{ rowIndex: index }}
+                  />
+                </Td>
+              )}
+            </Tr>
+          ))}
+        </Tbody>
+      ) : (
+        (rows as IRow[]).map((row, index) => {
+          const nextRow = rows[index + 1];
+          const hasExpandableContent =
+            isSubRow<T>(nextRow) &&
+            nextRow.parent !== null &&
+            !!nextRow.cells.length;
+
+          return (
+            <Tbody key={index}>
+              {index % 2 === 0 ? (
+                <Tr>
+                  {hasExpandableContent ? (
+                    <Td
+                      expand={{
+                        isExpanded: !!expandedRows[index],
+                        rowIndex: index,
+                        expandId: `${index}`,
+                        onToggle: (_, rowIndex, isOpen) => {
+                          onCollapse(isOpen, rowIndex);
+                          const expand = [...expandedRows];
+                          expand[index] = isOpen;
+                          setExpandedRows(expand);
+                        },
+                      }}
+                    />
+                  ) : (
+                    <Td>
+                      <div />
+                    </Td>
+                  )}
+                  {onSelect && (
+                    <Td
+                      select={{
+                        rowIndex: index,
+                        onSelect: (_, isSelected, rowIndex) => {
+                          onSelect!(isSelected, rowIndex);
+                          updateState(rowIndex, isSelected);
+                        },
+                        isSelected: selectedRows[index],
+                        variant: isRadio ? "radio" : "checkbox",
+                      }}
+                    />
+                  )}
+                  <CellsRenderer row={row} columns={columns} />
+                  {(actions || actionResolver) && (
+                    <Td isActionCell>
+                      <ActionsColumn
+                        items={actions || actionResolver?.(row, {})!}
+                        extraData={{ rowIndex: index }}
+                      />
+                    </Td>
+                  )}
+                </Tr>
+              ) : (
+                <Tr isExpanded={!!expandedRows[index - 1]}>
+                  <Td />
+                  <Td
+                    colSpan={
+                      columns.length +
+                      (onSelect ? 1 : 0) +
+                      (actionResolver || actions ? 1 : 0)
+                    }
+                  >
+                    <ExpandableRowContent>
+                      <CellsRenderer row={row} columns={columns} />
+                    </ExpandableRowContent>
+                  </Td>
+                </Tr>
+              )}
+            </Tbody>
+          );
+        })
+      )}
+    </Table>
+  );
+}
+
+export type Field<T> = {
+  name: string;
+  displayKey?: string;
+  cellFormatters?: IFormatter[];
+  transforms?: ITransform[];
+  cellProps?: TdProps | ((value: T, col: DetailField<T> | Field<T>) => TdProps);
+  isSortable?: boolean;
+  cellRenderer?: (row: T) => JSX.Element | string;
+};
+
+export type DetailField<T> = {
+  name: string;
+  cellProps?: TdProps | ((value: T, col: DetailField<T> | Field<T>) => TdProps);
+  enabled?: (row: T) => boolean;
+  cellRenderer?: (row: T) => JSX.Element | string;
+};
+
+export type Action<T> = IAction & {
+  onRowClick?: (row: T) => Promise<boolean | void> | void;
+};
+
+export type LoaderFunction<T> = (
+  first?: number,
+  max?: number,
+  search?: string,
+  sortingOptions?: SortingOptions,
+) => Promise<T[]>;
+
+export type NestedFiltersFunction = (
+  first?: number,
+  max?: number,
+  search?: string,
+) => void;
+
+export type DataListProps<T> = Omit<
+  TableProps,
+  "rows" | "cells" | "onSelect"
+> & {
+  loader: T[] | LoaderFunction<T>;
+  onSelect?: (value: T[]) => void;
+  canSelectAll?: boolean;
+  detailColumns?: DetailField<T>[];
+  isRowDisabled?: (value: T) => boolean;
+  isPaginated?: boolean;
+  ariaLabelKey: string;
+  searchPlaceholderKey?: string;
+  columns: Field<T>[];
+  actions?: Action<T>[];
+  actionResolver?: IActionsResolver;
+  searchTypeComponent?: ReactNode;
+  toolbarItem?: ReactNode;
+  onlyTableToolbarItem?: ReactNode;
+  subToolbar?: ReactNode;
+  emptyState?: ReactNode;
+  icon?: ComponentClass<SVGIconProps>;
+  isNotCompact?: boolean;
+  isRadio?: boolean;
+  isSearching?: boolean;
+  onlyTable?: boolean;
+  withoutRefreshButton?: boolean;
+  onPaginationChange?: NestedFiltersFunction;
+  isLoading?: boolean;
+  sortingOptions?: SortingOptions;
+  onSort?: (sortingOptions: SortingOptions) => void;
+  automaticallyMergedColumns?: AutomaticallyMergedColumn<T>[];
+  totalRows?: number;
+  selectedRows?: T[];
+  onRefresh?: () => void;
+};
+
+/**
+ * A generic component that can be used to show the initial list most sections have. Takes care of the loading of the date and filtering.
+ * All you have to define is how the columns are displayed.
+ * @example
+ *   <KeycloakDataTable columns={[
+ *     {
+ *        name: "clientId", //name of the field from the array of object the loader returns to display in this column
+ *        displayKey: "clientId", //i18n key to use to lookup the name of the column header
+ *        cellRenderer: ClientDetailLink, //optionally you can use a component to render the column when you don't want just the content of the field, the whole row / entire object is passed in.
+ *     }
+ *   ]}
+ * @param {DataListProps} props - The properties.
+ * @param {string} props.ariaLabelKey - The aria label key i18n key to lookup the label
+ * @param {string} props.searchPlaceholderKey - The i18n key to lookup the placeholder for the search box
+ * @param {boolean} props.isPaginated - if true the the loader will be called with first, max and search and a pager will be added in the header
+ * @param {(first?: number, max?: number, search?: string) => Promise<T[]>} props.loader - loader function that will fetch the data to display first, max and search are only applicable when isPaginated = true
+ * @param {Field<T>} props.columns - definition of the columns
+ * @param {Field<T>} props.detailColumns - definition of the columns expandable columns
+ * @param {Action[]} props.actions - the actions that appear on the row
+ * @param {IActionsResolver} props.actionResolver Resolver for the given action
+ * @param {ReactNode} props.toolbarItem - Toolbar items that appear on the top of the table {@link toolbarItem}
+ * @param {ReactNode} props.emptyState - ReactNode show when the list is empty could be any component but best to use {@link ListEmptyState}
+ */
+export function KeycloakDataTable<T>({
+  ariaLabelKey,
+  searchPlaceholderKey,
+  isPaginated = false,
+  onSelect,
+  canSelectAll = false,
+  isNotCompact,
+  isRadio,
+  detailColumns,
+  isRowDisabled,
+  loader,
+  columns,
+  actions,
+  actionResolver,
+  searchTypeComponent,
+  toolbarItem,
+  onlyTableToolbarItem,
+  subToolbar,
+  emptyState,
+  icon,
+  isSearching = false,
+  onlyTable = false,
+  withoutRefreshButton = false,
+  onPaginationChange,
+  isLoading,
+  sortingOptions,
+  onSort,
+  selectedRows,
+  automaticallyMergedColumns,
+  totalRows,
+  onRefresh,
+  ...props
+}: DataListProps<T>) {
+  const { t } = useTranslation();
+  const [selected, setSelected] = useState<T[]>(selectedRows || []);
+  const [rows, setRows] = useState<(Row<T> | SubRow<T>)[]>();
+  const [unPaginatedData, setUnPaginatedData] = useState<T[]>();
+  const [loading, setLoading] = useState(false);
+  const [currentSortingOptions, setCurrentSortingOptions] =
+    useState(sortingOptions);
+  const [numberOfRowMerges, setNumberOfRowMerges] = useState(0);
+
+  const [defaultPageSize, setDefaultPageSize] = useStoredState(
+    localStorage,
+    "pageSize",
+    10,
+  );
+
+  const [max, setMax] = useState(defaultPageSize);
+  const [first, setFirst] = useState(0);
+  const [search, setSearch] = useState<string>("");
+  const prevSearch = useRef<string>();
+
+  const [key, setKey] = useState(0);
+  const prevKey = useRef<number>();
+  const refresh = () => {
+    setKey(key + 1);
+    onRefresh?.();
+  };
+  const id = useId();
+
+  const renderCell = (
+    columns: (Field<T> | DetailField<T>)[],
+    value: T,
+  ): Array<Cell<T>> => {
+    return columns.map((col) => {
+      const cellProps =
+        typeof col.cellProps === "function"
+          ? col.cellProps(value, col)
+          : col.cellProps;
+
+      if ("cellFormatters" in col) {
+        const v = get(value, col.name);
+
+        return {
+          title: col.cellFormatters?.reduce((s, f) => f(s), v),
+          props: cellProps,
+        };
+      }
+      if (col.cellRenderer) {
+        const Component = col.cellRenderer;
+
+        return {
+          //@ts-ignore
+          title: <Component {...value} />,
+          props: cellProps,
+        };
+      }
+      return {
+        title: <>{get(value, col.name)}</>,
+        props: cellProps,
+      };
+    });
+  };
+
+  const convertToColumns = (
+    data: T[],
+    options?: { rowsAreNotSelected: boolean },
+  ): (Row<T> | SubRow<T>)[] => {
+    const { rowsAreNotSelected } = options || {};
+
+    const isDetailColumnsEnabled = (value: T) =>
+      detailColumns?.[0]?.enabled?.(value);
+    return data
+      .map((value, index) => {
+        const disabledRow = isRowDisabled ? isRowDisabled(value) : false;
+        const row: (Row<T> | SubRow<T>)[] = [
+          {
+            data: value,
+            disableSelection: disabledRow,
+            disableActions: disabledRow,
+            selected: rowsAreNotSelected
+              ? false
+              : !!selected.find((v) => get(v, "id") === get(value, "id")),
+            isOpen: isDetailColumnsEnabled(value) ? false : undefined,
+            cells: renderCell(columns, value),
+          },
+        ];
+        if (detailColumns) {
+          row.push({
+            parent: index * 2,
+            cells: isDetailColumnsEnabled(value)
+              ? renderCell(detailColumns!, value)
+              : [],
+          } as SubRow<T>);
+        }
+        return row;
+      })
+      .flat();
+  };
+
+  const getNodeText = (node: Cell<T>): string => {
+    if (["string", "number"].includes(typeof node)) {
+      return node!.toString();
+    }
+    if (node instanceof Array) {
+      return node.map(getNodeText).join("");
+    }
+    if (typeof node === "object") {
+      return getNodeText(
+        isValidElement((node as TitleCell).title)
+          ? (node as TitleCell).title.props
+          : Object.values(node),
+      );
+    }
+    return "";
+  };
+
+  const filteredData = useMemo<(Row<T> | SubRow<T>)[] | undefined>(
+    () =>
+      search === "" || isPaginated
+        ? undefined
+        : convertToColumns(unPaginatedData || [])
+            .filter((row) =>
+              row.cells.some(
+                (cell) =>
+                  cell &&
+                  getNodeText(cell)
+                    .toLowerCase()
+                    .includes(search.toLowerCase()),
+              ),
+            )
+            .slice(first, first + max + 1),
+    [search, first, max],
+  );
+
+  const data = filteredData || rows;
+
+  const unPaginatedRows = useMemo(() => {
+    return unPaginatedData ? convertToColumns(unPaginatedData) : [];
+  }, [unPaginatedData]);
+
+  useFetch(
+    async () => {
+      setLoading(true);
+      const newSearch = prevSearch.current === "" && search !== "";
+
+      if (newSearch) {
+        setFirst(0);
+      }
+      prevSearch.current = search;
+      return typeof loader === "function"
+        ? key === prevKey.current && unPaginatedData
+          ? unPaginatedData
+          : await loader(
+              newSearch ? 0 : first,
+              max + 1,
+              search,
+              currentSortingOptions,
+            )
+        : loader;
+    },
+    (data) => {
+      prevKey.current = key;
+      if (!isPaginated) {
+        setUnPaginatedData(data);
+        if (data.length > first) {
+          data = data.slice(first, first + max + 1);
+        } else {
+          setFirst(0);
+        }
+      }
+
+      const result = convertToColumns(data, {
+        rowsAreNotSelected: true,
+      });
+      setRows(result);
+      setLoading(false);
+    },
+    [
+      key,
+      first,
+      max,
+      search,
+      currentSortingOptions?.order,
+      currentSortingOptions?.orderBy,
+      typeof loader !== "function" ? loader : undefined,
+    ],
+  );
+
+  useEffect(() => {
+    onPaginationChange?.(first, (max || 0) + 1, search);
+  }, [onPaginationChange, first, max, search]);
+
+  useEffect(() => {
+    setCurrentSortingOptions(sortingOptions);
+  }, [sortingOptions]);
+
+  useEffect(() => {
+    if (isLoading != null) {
+      setLoading(isLoading);
+    }
+  }, [isLoading]);
+
+  const convertAction = () =>
+    actions &&
+    cloneDeep(actions).map((action: Action<T>, index: number) => {
+      delete action.onRowClick;
+      action.onClick = async (_, rowIndex) => {
+        const result = await actions[index].onRowClick!(
+          (filteredData || rows)![rowIndex].data,
+        );
+        if (result) {
+          if (!isPaginated) {
+            setSearch("");
+          }
+          refresh();
+        }
+      };
+      return action;
+    });
+
+  const _onSelect = (isSelected: boolean, rowIndex: number) => {
+    if (rowIndex === -1) {
+      setRows(
+        data?.map((row) => {
+          (row as Row<T>).selected = isSelected;
+          return row;
+        }),
+      );
+    } else if (rowIndex === -2) {
+      setSelected([]);
+      onSelect?.([]);
+      setRows(
+        data?.map((row) => {
+          (row as Row<T>).selected = isSelected;
+          return row;
+        }),
+      );
+
+      return;
+    } else {
+      (data?.[rowIndex] as Row<T>).selected = isSelected;
+
+      setRows([...rows!]);
+    }
+
+    const mainMergedColumnKey = automaticallyMergedColumns?.[0];
+    let uniqueData = data;
+
+    if (mainMergedColumnKey) {
+      const mainMergeColumn =
+        typeof mainMergedColumnKey === "number"
+          ? columns[mainMergedColumnKey]
+          : columns.find((item) => item.name === mainMergedColumnKey);
+      const mainMergedProp = mainMergeColumn?.name;
+
+      if (mainMergedProp) {
+        uniqueData = uniqueData?.filter((row, currentRow) => {
+          const equivalentRowIndex = data?.findIndex(
+            (checkedSelectedRow) =>
+              get(checkedSelectedRow.data, mainMergedProp) ===
+              get(row.data, mainMergedProp),
+          );
+
+          return currentRow === equivalentRowIndex;
+        });
+      }
+    }
+
+    uniqueData = uniqueData?.slice(0, max);
+
+    // Keeps selected items when paginating
+    const difference = differenceBy(
+      selected,
+      uniqueData!.map((row) => row.data),
+      "id",
+    );
+
+    // Selected rows are any rows previously selected from a different page, plus current page selections
+    const newSelectedRows = [
+      ...difference,
+      ...uniqueData!
+        .filter((row) => (row as Row<T>).selected)
+        .map((row) => row.data),
+    ];
+
+    setSelected(newSelectedRows);
+    onSelect?.(newSelectedRows);
+  };
+
+  const onCollapse = (isOpen: boolean, rowIndex: number) => {
+    (data![rowIndex] as Row<T>).isOpen = isOpen;
+    setRows([...data!]);
+  };
+
+  const handleSort = (newSortOptions: SortingOptions) => {
+    setCurrentSortingOptions(newSortOptions);
+    onSort?.(newSortOptions);
+  };
+
+  useEffect(() => {
+    setSelected(selectedRows || []);
+  }, [selectedRows]);
+
+  useEffect(() => {
+    if (loading === false) {
+      // It is used to update the nested property rows
+      setRows((prevRows) => {
+        if (prevRows) return convertToColumns(prevRows?.map((tt) => tt.data));
+
+        return prevRows;
+      });
+    }
+  }, [loading]);
+
+  const noData = !data || data.length === 0;
+  const searching = search !== "" || isSearching;
+  // if we use detail columns there are twice the number of rows
+  const maxRows = detailColumns ? max * 2 : max + numberOfRowMerges;
+  const rowLength = detailColumns
+    ? (data?.length || 0) / 2
+    : (data?.length || 0) - numberOfRowMerges;
+
+  const renderTable = () => {
+    return (
+      <>
+        {!loading && !noData && (
+          <>
+            {onlyTableToolbarItem && (
+              <>
+                <Toolbar>
+                  <ToolbarContent>{onlyTableToolbarItem}</ToolbarContent>
+                </Toolbar>
+                <Divider />
+              </>
+            )}
+            <DataTable
+              {...props}
+              canSelectAll={canSelectAll}
+              onSelect={onSelect ? _onSelect : undefined}
+              onCollapse={detailColumns ? onCollapse : undefined}
+              actions={convertAction()}
+              actionResolver={actionResolver}
+              rows={onlyTable ? unPaginatedRows : data.slice(0, maxRows)}
+              columns={columns}
+              isNotCompact={isNotCompact}
+              isRadio={isRadio}
+              ariaLabelKey={ariaLabelKey}
+              sortingOptions={currentSortingOptions}
+              onSort={handleSort}
+              onChangeNumberOfRowMerges={setNumberOfRowMerges}
+              automaticallyMergedColumns={automaticallyMergedColumns}
+              totalRows={totalRows}
+              selected={selected}
+            />
+          </>
+        )}
+        {!loading && noData && searching && (
+          <ListEmptyState
+            hasIcon={true}
+            icon={icon}
+            isSearchVariant={true}
+            message={t("noSearchResults")}
+            instructions={t("noSearchResultsInstructions")}
+            secondaryActions={
+              !isSearching
+                ? [
+                    {
+                      text: t("clearAllFilters"),
+                      onClick: () => setSearch(""),
+                      type: ButtonVariant.link,
+                    },
+                  ]
+                : []
+            }
+          />
+        )}
+        {loading && <KeycloakSpinner />}
+      </>
+    );
+  };
+
+  if (onlyTable) {
+    return renderTable();
+  }
+
+  return (
+    <>
+      {(loading || !noData || searching) && (
+        <PaginatingTableToolbar
+          id={id}
+          count={rowLength}
+          first={first}
+          max={max}
+          isDisabled={loading}
+          onNextClick={setFirst}
+          onPreviousClick={setFirst}
+          onPerPageSelect={(first, max) => {
+            setFirst(first);
+            setMax(max);
+            setDefaultPageSize(max);
+          }}
+          inputGroupName={
+            searchPlaceholderKey ? `${ariaLabelKey}input` : undefined
+          }
+          inputGroupOnEnter={setSearch}
+          inputGroupPlaceholder={t(searchPlaceholderKey || "")}
+          searchTypeComponent={searchTypeComponent}
+          toolbarItem={
+            <>
+              {toolbarItem}
+              {!withoutRefreshButton && (
+                <>
+                  <ToolbarItem variant="separator" />{" "}
+                  <ToolbarItem>
+                    <Button variant="link" onClick={refresh}>
+                      <SyncAltIcon /> {t("refresh")}
+                    </Button>
+                  </ToolbarItem>
+                </>
+              )}
+            </>
+          }
+          subToolbar={subToolbar}
+        >
+          {renderTable()}
+        </PaginatingTableToolbar>
+      )}
+      {!loading && noData && !searching && emptyState}
+    </>
+  );
+}

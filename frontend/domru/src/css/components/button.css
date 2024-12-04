@@ -1,53 +1,69 @@
-.btn {
-  @apply .block .uppercase .tracking-wider .p-4 .rounded-lg .shadow;
-
-  border-radius: 12px;
-  height: 48px;
-  padding: 0;
-  transition: 0.2s ease-in-out;
-  font-family: 'CoFo Sans',sans-serif;
-
-  @media only screen and (min-width: 768px) and (max-width: 1279px) {
-    height: 44px;
-  }
-
-  @media only screen (max-width: 767px) {
-    height: 40px;
-  }
-
-  &:disabled {
-    @apply .opacity-40 .cursor-not-allowed;
-    &:hover {
-       transform: none;
-       @apply .shadow;
+button {
+  &.highlighted-text, .highlighted-text {
+    &:hover:not([disabled]) {
+        @apply .text-accentBlue-1200-hover;
     }
-  }
-
-  &:hover {
-    transform: translate(1px, -1px);
-    @apply .shadow-md;
   }
 
   &:focus {
     @apply .outline-none;
   }
-
-  &:active {
-    transform: translate(0, 0);
-    @apply .shadow-inner;
-  }
 }
 
-.text-accentBlue-900 {
-  @apply .text-accentBlue-900;
+.btn {
+  @apply .block .uppercase .tracking-wider .p-4 .rounded-lg .shadow-base;
+
+  border-radius: 12px;
+  height: 48px;
+  padding: 0;
+  padding-inline: 19px;
+  transition: 0.2s ease-in-out;
+  font-family: 'CoFo Sans',sans-serif;
+
+  @media only screen and (min-width: 768px) and (max-width: 1279px) {
+    height: 44px;
+    padding-inline: 17px;
+    border-radius: 11px;
+  }
+
+  @media only screen and (max-width: 767px) {
+    height: 40px;
+    padding-inline: 14px;
+    border-radius: 10px;
+  }
+
+  &:disabled {
+    @apply .opacity-40 .cursor-not-allowed;
+
+    &:hover {
+       transform: none;
+       @apply .shadow-base;
+    }
+  }
+
+  &:not([disabled]):not(:active):hover {
+    @apply .shadow-base-md;
+  }
+
+  &.highlighted-text, .highlighted-text {
+    &:hover:not([disabled]) {
+        @apply .text-accentBlue-1200-hover;
+    }
+  }
+
+  &:focus {
+    @apply .outline-none;
+    outline: none;
+  }
+
 }
 
 .btn-main {
-  @apply .bg-extra .text-white;
+  @apply .bg-extra .text-white .shadow-main;
 
-  &:hover,
-  &:active {
+  &:hover:not([disabled]):not(:active) {
     @apply .bg-extra-700-hover;
+    @apply .shadow-main-md;
   }
 }
 
@@ -121,14 +137,12 @@ a.btn {
 
 
 @media screen and (max-width: 767px) {
-  .btn {
-    font-size: 13px;
-  }
 
   .btn.w-1\/2 {
     width: 100%;
   }
 }
+
 @media only screen and (min-width: 1280px) {
   .btn-switcher{
     display: flex;

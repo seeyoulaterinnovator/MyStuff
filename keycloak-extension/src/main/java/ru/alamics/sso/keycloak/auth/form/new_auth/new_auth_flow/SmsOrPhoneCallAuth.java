@@ -1,10 +1,10 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth.new_auth_flow;
 
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.forms.login.LoginFormsProvider;
+import org.keycloak.http.HttpRequest;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -22,8 +22,8 @@ import ru.alamics.sso.registration.service.AuthorisedUsersService;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
@@ -139,7 +139,7 @@ public class SmsOrPhoneCallAuth implements Authenticator {
             return Response.ok().entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
         }
         if (mp != null) {
-            HttpRequest contextObject = context.getSession().getContext().getContextObject(HttpRequest.class);
+            HttpRequest contextObject = context.getSession().getContext().getHttpRequest();
             MultivaluedMap<String, String> parameters = contextObject.getDecodedFormParameters();
             parameters.add(GRANT_TYPE, "password");
         }

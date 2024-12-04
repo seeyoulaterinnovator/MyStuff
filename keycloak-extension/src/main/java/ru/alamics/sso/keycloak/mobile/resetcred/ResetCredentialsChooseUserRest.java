@@ -1,14 +1,16 @@
 package ru.alamics.sso.keycloak.mobile.resetcred;
 
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
-import org.keycloak.authentication.actiontoken.DefaultActionTokenKey;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
 import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAuthenticator;
 import org.keycloak.events.Errors;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.forms.login.LoginFormsProvider;
+import org.keycloak.models.DefaultActionTokenKey;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -21,8 +23,6 @@ import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.user.UserServiceUtil;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.Objects;
 
@@ -54,7 +54,7 @@ public class ResetCredentialsChooseUserRest extends AbstractAuthenticator {
 
         String actionTokenUserId = context.getAuthenticationSession().getAuthNote(DefaultActionTokenKey.ACTION_TOKEN_USER_ID);
         if (actionTokenUserId != null) {
-            UserModel existingUser = context.getSession().users().getUserById(actionTokenUserId, context.getRealm());
+            UserModel existingUser = context.getSession().users().getUserById(context.getRealm(), actionTokenUserId);
 
             // Action token logics handles checks for user ID validity and user being enabled
 
@@ -90,15 +90,15 @@ public class ResetCredentialsChooseUserRest extends AbstractAuthenticator {
         username = username.trim();
 
         RealmModel realm = context.getRealm();
-        UserModel user = context.getSession().users().getUserByUsername(username, realm);
+        UserModel user = context.getSession().users().getUserByUsername(realm, username);
         if (user == null && realm.isLoginWithEmailAllowed() && username.contains("@")) {
-            user = context.getSession().users().getUserByEmail(username, realm);
+            user = context.getSession().users().getUserByEmail(realm, username);
         }
 
         if (user == null && username.startsWith("+7")) {
             userFind = findUserByConvertUsernameToPhone(realm, username);
             if (userFind != null && userFind.getAttributes().stream().noneMatch(it -> it.getName().equals(BlockType.MANAGER_BLOCK.getType()))) {
-                user = context.getSession().users().getUserById(userFind.getId(), context.getSession().realms().getRealm(userFind.getRealmId()));
+                user = context.getSession().users().getUserById(context.getSession().realms().getRealm(userFind.getRealmId()), userFind.getId());
                 username = userFind.getUsername();
                 authenticationSession.setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, userFind.getEmail());
                 context.getHttpRequest().getDecodedFormParameters().replace("username", Collections.singletonList(userFind.getEmail()));
@@ -116,7 +116,7 @@ public class ResetCredentialsChooseUserRest extends AbstractAuthenticator {
         if (userFind != null && Objects.requireNonNull(userFind).getAttributes()
                 .stream().anyMatch(it -> it.getName().equals(BlockType.MANAGER_BLOCK.getType()))
                 || user != null
-                && !user.getAttribute(BlockType.MANAGER_BLOCK.getType()).isEmpty()) {
+                && user.getFirstAttribute(BlockType.MANAGER_BLOCK.getType()) != null) {
             Response challenge = JsonResponse.fail().message("Пользователь заблокирован").build();
             context.failureChallenge(AuthenticationFlowError.USER_DISABLED, challenge);
             return;

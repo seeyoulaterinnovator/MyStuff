@@ -1,5 +1,9 @@
 package ru.alamics.sso.emailer;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Context;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -10,10 +14,11 @@ import org.keycloak.email.EmailException;
 import org.keycloak.email.EmailSenderProvider;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.jpa.AdminEventEntity;
+import org.keycloak.models.KeycloakSession;
 import org.keycloak.theme.FreeMarkerException;
-import org.keycloak.theme.FreeMarkerUtil;
 import org.keycloak.theme.Theme;
 import org.keycloak.theme.beans.MessageFormatterMethod;
+import org.keycloak.theme.freemarker.FreeMarkerProvider;
 import org.keycloak.util.JsonSerialization;
 import ru.alamics.sso.jpa.repository.AdminEventRepository;
 import ru.alamics.sso.keycloak.lookup.Lookup;
@@ -22,10 +27,6 @@ import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.CustomFreeMarkerUtil;
 import ru.alamics.sso.util.HtmlUtil;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.*;
@@ -36,9 +37,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import static ru.alamics.sso.settings.SettingConstants.*;
 
-@Stateless
+@RequestScoped
 @Slf4j
-@LocalBean
 public class EmailSender {
     private static final String SEND_INTERVAL_PROPERTY = "emailSender.interval.milliseconds";
     private static final String DO_NOT_SEND_PROPERTY = "emailSender.dont.send";
@@ -46,15 +46,19 @@ public class EmailSender {
     private long sendInterval = 1000;
     private boolean dontSend = false;
 
-    private FreeMarkerUtil freeMarkerUtil;
+    private FreeMarkerProvider freeMarkerUtil;
     private BlockingQueue<EmailModel> emailQueue;
     private EmailSenderProvider emailSenderProvider;
     private ExecutorService executorService;
     private SettingsService settingsService;
-    @EJB
-    private AdminEventRepository adminEventRepository;
-    @EJB
-    private ApplicationProperties properties;
+
+    @Inject
+    AdminEventRepository adminEventRepository;
+    @Inject
+    ApplicationProperties properties;
+
+    @Context
+    KeycloakSession session;
 
     public void send(EmailModel emailModel) {
         String email = emailModel.getUser().getEmail();
@@ -70,19 +74,15 @@ public class EmailSender {
         }
     }
 
-    public int getEmailQueueSize() {
+    private int getEmailQueueSize() {
         return emailQueue.size();
-    }
-
-    public long getSendInterval() {
-        return sendInterval;
     }
 
     @PostConstruct
     public void init() {
         this.emailSenderProvider = new DefaultEmailSenderProvider(null);
         this.emailQueue = new LinkedBlockingQueue<>();
-        this.freeMarkerUtil = new FreeMarkerUtil();
+        this.freeMarkerUtil = session.getProvider(FreeMarkerProvider.class);
         this.executorService = Executors.newSingleThreadExecutor();
         executorService.submit(new SendTask());
 
@@ -113,7 +113,7 @@ public class EmailSender {
         adminEventRepository.save(adminEvent);
     }
 
-    protected EmailTemplate processTemplate(String subjectKey, List<Object> subjectAttributes, String template, Map<String, Object> attributes,
+    private EmailTemplate processTemplate(String subjectKey, List<Object> subjectAttributes, String template, Map<String, Object> attributes,
                                             Theme theme, Locale locale, String realmName) throws EmailException {
         try {
             String textBody;
@@ -172,7 +172,7 @@ public class EmailSender {
     @Data
     @AllArgsConstructor
     @Getter
-    protected static class EmailTemplate {
+    private static class EmailTemplate {
         private String subject;
         private String textBody;
         private String htmlBody;

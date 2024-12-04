@@ -3,9 +3,22 @@
     <deployment type="docker-compose.yml">
       <settings>
         <option name="envFilePath" value="" />
+        <option name="envVars">
+          <list>
+            <DockerEnvVarImpl>
+              <option name="name" value="KC_ADMIN_VITE_ENABLED" />
+              <option name="value" value="false" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="ERTH_SSO_E2E_ENABLED" />
+              <option name="value" value="false" />
+            </DockerEnvVarImpl>
+          </list>
+        </option>
         <option name="services">
           <list>
-            <option value="db" />
+            <option value="mariadb" />
+            <option value="keycloak" />
           </list>
         </option>
         <option name="sourceFilePath" value="docker-compose-local.yml" />

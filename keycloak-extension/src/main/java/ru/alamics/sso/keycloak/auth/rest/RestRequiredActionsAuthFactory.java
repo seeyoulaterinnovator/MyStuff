@@ -1,6 +1,5 @@
 package ru.alamics.sso.keycloak.auth.rest;
 
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
@@ -13,7 +12,7 @@ public class RestRequiredActionsAuthFactory extends AbstractAuthenticatorFactory
     private static final String PROVIDER_ID = "rest-actions";
     public static final String DISPLAY_TYPE = "REST Actions";
     private static final String HELP_TEXT = "";
-    private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {REQUIRED, OPTIONAL, DISABLED};
+    private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {REQUIRED, CONDITIONAL, DISABLED};
 
     @Override
     public String getDisplayType() {
@@ -32,10 +31,7 @@ public class RestRequiredActionsAuthFactory extends AbstractAuthenticatorFactory
 
     @Override
     public Authenticator create(KeycloakSession session) {
-        RestRequiredActionsAuthenticator restRequiredActionsAuthenticator = new RestRequiredActionsAuthenticator(session);
-        ResteasyProviderFactory.getInstance().injectProperties(restRequiredActionsAuthenticator);
-        restRequiredActionsAuthenticator.init();
-        return restRequiredActionsAuthenticator;
+        return new RestRequiredActionsAuthenticator(session);
     }
 
     @Override

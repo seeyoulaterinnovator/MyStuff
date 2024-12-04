@@ -1,5 +1,7 @@
 package ru.alamics.sso.keycloak.auth.rest;
 
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,8 +31,6 @@ import ru.alamics.sso.registration.phone.port.SendMessageService;
 import ru.alamics.sso.registration.service.AuthorisedUsersService;
 import ru.alamics.sso.settings.SettingsService;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -121,6 +121,8 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                 config.get(RestSmsOrPhoneCallAuthFactory.PHONE_VERIFICATION_REQUIRED.getName())
         );
 
+        ActivationCodeType.init(context.getRealm().getName());
+
         // Parameters
         String host = context.getHttpRequest().getUri().getBaseUri().getHost();
         MultivaluedMap<String, String> params = context.getHttpRequest().getDecodedFormParameters();
@@ -156,8 +158,10 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
         }
 
         if(phoneVerificationRequired && (
-                userModel.getRequiredActions().contains(AuthOrRegType.SMS_CODE.getReqActProviderName())
-                        || userModel.getRequiredActions().contains(AuthOrRegType.PHONE_CALL.getReqActProviderName())
+                userModel.getRequiredActionsStream()
+                        .anyMatch(AuthOrRegType.SMS_CODE.getReqActProviderName()::equals) ||
+                        userModel.getRequiredActionsStream()
+                                .anyMatch(AuthOrRegType.PHONE_CALL.getReqActProviderName()::equals)
         )) {
             challenge(context, RestSmsOrPhoneCallAuthResponses.PHONE_NOT_VERIFIED);
             return;
@@ -286,8 +290,10 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
             );
             userModel.removeAttribute(UserConstants.ATTR_REST_SMS_OR_PHONE_CALL_CODE_ID_AND_HASH_KEY);
             if(!phoneVerificationRequired && (
-                    userModel.getRequiredActions().contains(AuthOrRegType.SMS_CODE.getReqActProviderName())
-                            || userModel.getRequiredActions().contains(AuthOrRegType.PHONE_CALL.getReqActProviderName())
+                    userModel.getRequiredActionsStream()
+                            .anyMatch(AuthOrRegType.SMS_CODE.getReqActProviderName()::equals)
+                            || userModel.getRequiredActionsStream()
+                            .anyMatch(AuthOrRegType.PHONE_CALL.getReqActProviderName()::equals)
             )) {
                 userModel.removeRequiredAction(AuthOrRegType.SMS_CODE.getReqActProviderName());
                 userModel.removeRequiredAction(AuthOrRegType.PHONE_CALL.getReqActProviderName());
@@ -296,7 +302,7 @@ public class RestSmsOrPhoneCallAuth extends AbstractAuthenticator {
                         Collections.singletonList(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME))
                 );
             }
-            if(userModel.getRequiredActions().contains(UserModel.RequiredAction.UPDATE_PASSWORD.name())) {
+            if(userModel.getRequiredActionsStream().anyMatch(UserModel.RequiredAction.UPDATE_PASSWORD.name()::equals)) {
                 session.setAuthNote(
                         UserConstants.AUTH_NOTE_REST_SMS_OR_PHONE_CALL_END_REQUIRED_ACTION,
                         UserModel.RequiredAction.UPDATE_PASSWORD.name()

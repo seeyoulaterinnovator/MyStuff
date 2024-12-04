@@ -1,11 +1,17 @@
 package ru.alamics.sso.keycloak.auth.link.rest;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.annotations.cache.NoCache;
+import org.jboss.resteasy.reactive.NoCache;
 import org.keycloak.authentication.AuthenticationProcessor;
 import org.keycloak.authentication.actiontoken.resetcred.ResetCredentialsActionToken;
 import org.keycloak.common.util.Time;
 import org.keycloak.models.ClientModel;
+import org.keycloak.models.ClientProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.services.Urls;
@@ -14,13 +20,8 @@ import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.sessions.RootAuthenticationSessionModel;
 import ru.alamics.sso.keycloak.auth.link.token.AuthLinkActionToken;
+import ru.alamics.sso.keycloak.exception.RealmNotFoundException;
 import ru.alamics.sso.keycloak.response.JsonResponse;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
 
 @Slf4j
 public class AuthLinkResource {
@@ -40,9 +41,9 @@ public class AuthLinkResource {
         RealmManager realmManager = new RealmManager(session);
         RealmModel realm = realmManager.getRealmByName("user");
         if (realm == null)
-            throw new NotFoundException("Realm not found.");
+            throw new RealmNotFoundException();
 
-        ClientModel clientModel = session.clientStorageManager().getClientByClientId(clientId, realm);
+        ClientModel clientModel = session.getProvider(ClientProvider.class).getClientByClientId(realm, clientId);
         if (clientModel == null)
             throw new NotFoundException("Client not found.");
 
@@ -66,7 +67,7 @@ public class AuthLinkResource {
         UriInfo uriInfo = session.getContext().getUri();
 
         UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo),
-                clientModel.getClientId(), authenticationSession.getTabId());
+                clientModel.getClientId(), authenticationSession.getTabId(), null);
 
         String link = builder.build(realm.getName()).toString();
 

@@ -1,37 +1,52 @@
 package ru.alamics.sso.keycloak.create.rest;
 
+import jakarta.activation.UnsupportedDataTypeException;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.jboss.resteasy.annotations.cache.NoCache;
-import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.jboss.resteasy.reactive.NoCache;
+import org.jboss.resteasy.reactive.server.multipart.FormValue;
+import org.jboss.resteasy.reactive.server.multipart.MultipartFormDataInput;
+import org.keycloak.Config;
+import org.keycloak.admin.ui.rest.AvailableRoleMappingResource;
+import org.keycloak.admin.ui.rest.EffectiveRoleMappingResource;
+import org.keycloak.admin.ui.rest.model.ClientRole;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.common.Profile;
-import org.keycloak.connections.jpa.JpaConnectionProvider;
+import org.keycloak.credential.CredentialModel;
 import org.keycloak.events.Details;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.events.EventType;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.*;
-import org.keycloak.models.jpa.UserAdapter;
-import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.models.cache.UserCache;
 import org.keycloak.models.utils.ModelToRepresentation;
+import org.keycloak.representations.idm.GroupRepresentation;
+import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.services.ErrorResponse;
+import org.keycloak.services.Urls;
 import org.keycloak.services.managers.AuthenticationManager;
-import org.keycloak.services.resources.account.AccountFormService;
-import org.keycloak.services.resources.admin.AdminEventBuilder;
-import org.keycloak.services.resources.admin.ClientsResource;
-import org.keycloak.services.resources.admin.RoleMapperResource;
-import org.keycloak.services.resources.admin.UsersResource;
+import org.keycloak.services.resources.account.AccountRestService;
+import org.keycloak.services.resources.admin.*;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.utils.ProfileHelper;
+import ru.alamics.sso.jpa.model.CustomUserAdapter;
+import ru.alamics.sso.keycloak.GeneralRealm;
+import ru.alamics.sso.keycloak.exception.UserNotFoundException;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
+import ru.alamics.sso.keycloak.util.MiscUtil;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
+import ru.alamics.sso.service.ValidateService;
 import ru.alamics.sso.user.FileServiceException;
 import ru.alamics.sso.user.ImportReportService;
 import ru.alamics.sso.user.UserService;
@@ -44,23 +59,14 @@ import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.util.Util;
 import ru.alamics.sso.util.validator.NotValidException;
 
-import javax.activation.UnsupportedDataTypeException;
-import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.keycloak.models.ImpersonationSessionNote.IMPERSONATOR_ID;
 import static org.keycloak.models.ImpersonationSessionNote.IMPERSONATOR_USERNAME;
@@ -70,6 +76,7 @@ public class CustomUserResource {
     private final UserService userService;
     private final AdminPermissionEvaluator auth;
     private final ImportReportService importReportService;
+    private final ValidateService validateService;
     private final RealmModel realm;
     protected KeycloakSession session;
 
@@ -79,7 +86,7 @@ public class CustomUserResource {
         auth.users().requireManage();
         this.userService = new UserServiceImpl(session, auth.adminAuth());
         this.importReportService = Lookup.lookup(ImportReportService.class);
-
+        this.validateService = Lookup.lookup(ValidateService.class);
         this.realm = session.getContext().getRealm();
     }
 
@@ -89,16 +96,16 @@ public class CustomUserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUser(final UserRequest request, final HttpHeaders headers) {
         if (Util.isEmpty(request.getPhone())) {
-            return ErrorResponse.error("Поле Phone должно быть заполнено", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле Phone должно быть заполнено", Response.Status.BAD_REQUEST).getResponse();
         }
         if (!validatePhone(request.getPhone())) {
-            return ErrorResponse.error("Поле Phone невалидно", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле Phone невалидно", Response.Status.BAD_REQUEST).getResponse();
         }
         if (Util.isEmpty(request.getEmail())) {
-            return ErrorResponse.error("Поле Email должно быть заполнено", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле Email должно быть заполнено", Response.Status.BAD_REQUEST).getResponse();
         }
         if (!validateEmail(request.getEmail())) {
-            return ErrorResponse.error("Поле Email невалидно", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле Email невалидно", Response.Status.BAD_REQUEST).getResponse();
         }
         return getUserResponse(request, false);
     }
@@ -109,22 +116,22 @@ public class CustomUserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUserBss(final UserRequest request, final HttpHeaders headers) {
         if (Util.isEmpty(request.getPhone())) {
-            return ErrorResponse.error("Поле Phone должно быть заполнено", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле Phone должно быть заполнено", Response.Status.BAD_REQUEST).getResponse();
         }
         if (!validatePhone(request.getPhone())) {
-            return ErrorResponse.error("Поле Phone невалидно", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле Phone невалидно", Response.Status.BAD_REQUEST).getResponse();
         }
         if (Util.isEmpty(request.getTomsId())) {
-            return ErrorResponse.error("Поле TomsId должно быть заполнено", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле TomsId должно быть заполнено", Response.Status.BAD_REQUEST).getResponse();
         }
         if (Util.isEmpty(request.getName())) {
-            return ErrorResponse.error("Поле name должно быть заполнено", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле name должно быть заполнено", Response.Status.BAD_REQUEST).getResponse();
         }
         if (Util.isEmpty(request.getEmail())) {
-            return ErrorResponse.error("Поле Email должно быть заполнено", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле Email должно быть заполнено", Response.Status.BAD_REQUEST).getResponse();
         }
         if (!validateEmail(request.getEmail())) {
-            return ErrorResponse.error("Поле Email невалидно", Response.Status.BAD_REQUEST);
+            return ErrorResponse.error("Поле Email невалидно", Response.Status.BAD_REQUEST).getResponse();
         }
 
         return getUserResponse(request, true);
@@ -183,22 +190,28 @@ public class CustomUserResource {
                 .addResult("user-parameters", UserParameter.values())
                 .build();
     }
+
     @POST
     @Path("/uploadUsers")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @NoCache
     @Transactional(Transactional.TxType.NEVER)
-    public Response uploadUsers(@MultipartForm FileDto file, @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content) {
-
-        if (file == null ||
-                content == null || content.isEmpty()) {
-            return JsonResponse.error(Response.Status.BAD_REQUEST).build();
-        }
-        try (InputStream bas = new ByteArrayInputStream(file.getFileData())) {
-            return JsonResponse.success()
-                    .addResult("import-report",
-                            userService.importUsers(bas, content))
-                    .build();
+    public Response uploadUsers(MultipartFormDataInput input) {
+        try {
+            FormValue formValue = input.getValues().get("file").stream().findFirst().orElse(null);
+            if(formValue != null) {
+                return JsonResponse.success()
+                        .addResult(
+                                "import-report",
+                                userService.importUsers(
+                                        formValue.getFileItem().getInputStream(),
+                                        formValue.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION)
+                                )
+                        )
+                        .build();
+            } else {
+                return JsonResponse.error(Response.Status.BAD_REQUEST).build();
+            }
         } catch (UnsupportedDataTypeException | FileServiceException e) {
             log.error("Could not upload users", e);
             return JsonResponse.fail()
@@ -216,7 +229,8 @@ public class CustomUserResource {
     @Path("/downloadUsers")
     @Consumes(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response downloadUsers(@NotNull @Valid DownloadUserRequest downloadUserRequest) {
+    public Response downloadUsers(DownloadUserRequest downloadUserRequest) {
+        validateService.validate(downloadUserRequest);
         try {
             log.info("Start download users");
             byte[] bytes = userService.exportUsers(downloadUserRequest);
@@ -227,14 +241,16 @@ public class CustomUserResource {
                         .message("Users not found")
                         .build();
             }
-            Response.ResponseBuilder response = Response.ok(bytes);
-            response.header("Content-Disposition", "attachment; filename=\"users_info." + downloadUserRequest.getType() + "\"");
+            Response.ResponseBuilder response;
             if (downloadUserRequest.getType().equals("xlsx")) {
+                response = Response.ok(bytes);
                 response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
             } else {
+                response = Response.ok(MiscUtil.addBom(bytes));
                 response.header("Content-Type", MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8");
             }
-            log.info("Download users success!", "filename = users_info." + downloadUserRequest.getType());
+            response.header("Content-Disposition", "attachment; filename=\"users_info." + downloadUserRequest.getType() + "\"");
+            log.info("Download users success! filename = users_info." + downloadUserRequest.getType());
             return response.build();
         } catch (UnsupportedDataTypeException e) {
             log.error("Could not download users", e);
@@ -254,23 +270,36 @@ public class CustomUserResource {
     @Path("/importUsersReports")
     @NoCache
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getImportUsersReports() {
+//    first - позиция начала передаваемых в ответе записей из результатов поиска
+//    max - максимальное количество записей в ответе
+    public Response getImportUsersReports(@QueryParam("first") int first, @QueryParam("max") int max) {
+        String realmId = session.getContext().getRealm().getName();
         return JsonResponse.success()
-                .addResult("importUsersReports", importReportService.findImportUsersReportsByRealmId(session.getContext().getRealm().getName()))
+                .addResult("importUsersReports", importReportService.findImportUsersReportsByRealmId(realmId, first, max))
+                .addResult("nextUpdate", importReportService.getTimeNextUpdate(realmId))
                 .build();
     }
+
     @POST
     @Path("/uploadImportUsersFile")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @NoCache
-    public Response uploadImportUsersFile(@MultipartForm FileDto file, @HeaderParam(HttpHeaders.CONTENT_DISPOSITION) String content) {
-        if (file == null || content == null || content.isEmpty()) {
-            return JsonResponse.error(Response.Status.BAD_REQUEST).build();
-        }
-        try (InputStream bas = new ByteArrayInputStream(file.getFileData())) {
-            userService.uploadImportUsersFile(bas, content);
-            return JsonResponse.success()
-                    .build();
+    public Response uploadImportUsersFile(MultipartFormDataInput input) {
+        try {
+            FormValue formValue = input.getValues().get("file").stream().findFirst().orElse(null);
+            if(formValue != null) {
+                userService.uploadImportUsersFile(
+                        formValue.getFileItem().getInputStream(),
+                        formValue.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION)
+                );
+                String realmId = session.getContext().getRealm().getName();
+                return JsonResponse.success()
+                        .addResult("importUsersReports", importReportService.findImportUsersReportsByRealmId(realmId, 0, 11))
+                        .addResult("nextUpdate", importReportService.getTimeNextUpdate(realmId))
+                        .build();
+            } else {
+                return JsonResponse.error(Response.Status.BAD_REQUEST).build();
+            }
         } catch (UnsupportedDataTypeException | FileServiceException e) {
             log.error("Could not upload users", e);
             return JsonResponse.fail()
@@ -292,16 +321,17 @@ public class CustomUserResource {
         log.info("Download import users template");
         try {
             if (type.equalsIgnoreCase("xlsx")) {
-                byte[] bytes = IOUtils.toByteArray(CustomUserResource.class.getResourceAsStream("/template/template.xlsx"));
+                @Cleanup var stream = CustomUserResource.class.getResourceAsStream("/template/template.xlsx");
+                byte[] bytes = IOUtils.toByteArray(stream);
                 Response.ResponseBuilder response = Response.ok(bytes);
                 response.header("Content-Disposition", "attachment; filename=\"template.xlsx" + "\"");
                 response.header("filename", "template.xlsx");
                 response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
                 return response.build();
             }
-
-            byte[] bytes = IOUtils.toByteArray(CustomUserResource.class.getResourceAsStream("/template/template.csv"));
-            Response.ResponseBuilder response = Response.ok(bytes);
+            @Cleanup var stream = CustomUserResource.class.getResourceAsStream("/template/template.csv");
+            byte[] bytes = IOUtils.toByteArray(stream);
+            Response.ResponseBuilder response = Response.ok(MiscUtil.addBom(bytes));
             response.header("Content-Disposition", "attachment; filename=\"template.csv" + "\"");
             response.header("filename", "template.csv");
             response.header("Content-Type", MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8");
@@ -322,12 +352,15 @@ public class CustomUserResource {
         try {
             log.info("Start download users");
             FileModel file = userService.downloadUsersByImportReportId(importId);
-            Response.ResponseBuilder response = Response.ok(file.save());
+            byte[] bytes = file.save();
+            Response.ResponseBuilder response;
             if (file instanceof XlsxImpl) {
+                response = Response.ok(bytes);
                 response.header("Content-Disposition", "attachment; filename=\"import_users_report.xlsx" + "\"");
                 response.header("filename", "import_users_report.xlsx");
                 response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
             } else {
+                response = Response.ok(MiscUtil.addBom(bytes));
                 response.header("Content-Disposition", "attachment; filename=\"import_users_report.csv" + "\"");
                 response.header("filename", "import_users_report.csv");
                 response.header("Content-Type", MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8");
@@ -364,10 +397,18 @@ public class CustomUserResource {
     @NoCache
     @Produces(MediaType.APPLICATION_JSON)
     public Map<String, Object> impersonate(@PathParam("id") String id) {
-        session.userCache().clear();
+        clearUserCache(session);
         ProfileHelper.requireFeature(Profile.Feature.IMPERSONATION);
 
-        UserModel user = session.users().getUserById(id, realm);
+        CustomUserAdapter user;
+        UserModel userModel = session.getProvider(UserProvider.class).getUserById(realm, id);
+        if(userModel instanceof CustomUserAdapter) {
+            user = (CustomUserAdapter) userModel;
+        } else {
+            throw new InternalServerErrorException();
+        }
+        RealmModel realm = user.getRealm();
+
         auth.users().requireImpersonate(user);
         // if same realm logout before impersonation
         RealmModel authenticatedRealm = auth.adminAuth().getRealm();
@@ -376,11 +417,11 @@ public class CustomUserResource {
         if (authenticatedRealm.getId().equals(realm.getId())) {
             sameRealm = true;
             UserSessionModel userSession = session.sessions().getUserSession(realm, auth.adminAuth().getToken().getSessionState());
-            AuthenticationManager.expireIdentityCookie(realm, session.getContext().getUri(), clientConnection);
-            AuthenticationManager.expireRememberMeCookie(realm, session.getContext().getUri(), clientConnection);
-            AuthenticationManager.backchannelLogout(session, realm, userSession, session.getContext().getUri(), clientConnection, session.getContext().getRequestHeaders(), true);
+            AuthenticationManager.expireIdentityCookie(session);
+            AuthenticationManager.expireRememberMeCookie(session);
+            AuthenticationManager.backchannelLogout(session, auth.adminAuth().getRealm(), userSession, session.getContext().getUri(), clientConnection, session.getContext().getRequestHeaders(), true);
         }
-        EventBuilder event = new EventBuilder(realm, session, clientConnection);
+        EventBuilder event = new EventBuilder(auth.adminAuth().getRealm(), session, clientConnection);
 
         UserSessionModel userSession = session.sessions().createUserSession(realm, user, user.getUsername(), clientConnection.getRemoteAddr(), "impersonate", false, null, null);
 
@@ -391,7 +432,9 @@ public class CustomUserResource {
         userSession.setNote(IMPERSONATOR_USERNAME.toString(), impersonator);
 
         AuthenticationManager.createLoginCookie(session, realm, userSession.getUser(), userSession, session.getContext().getUri(), clientConnection);
-        URI redirect = AccountFormService.accountServiceApplicationPage(session.getContext().getUri()).build(realm.getName());
+        URI redirect = Urls.accountBase(session.getContext().getUri().getBaseUri())
+                .path(AccountRestService.class, "applications")
+                .build(realm.getName());
         Map<String, Object> result = new HashMap<>();
         result.put("sameRealm", sameRealm);
         result.put("redirect", redirect.toString());
@@ -406,10 +449,8 @@ public class CustomUserResource {
 
     @Path("role-mappings/{id}")
     public RoleMapperResource getRoleMappings(@PathParam("id") String id) {
-        EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
-        UserEntity userEntity = em.find(UserEntity.class, id);
-        if (userEntity == null) throw new NotFoundException("User not found");
-        UserModel user = new UserAdapter(session, realm, em, userEntity);
+        UserModel user = session.getProvider(UserProvider.class).getUserById(realm, id);
+        if (user == null) throw new UserNotFoundException();
 
         AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
                 .realm(realm)
@@ -417,9 +458,30 @@ public class CustomUserResource {
 
         AdminPermissionEvaluator.RequirePermissionCheck manageCheck = () -> auth.users().requireMapRoles(user);
         AdminPermissionEvaluator.RequirePermissionCheck viewCheck = () -> auth.users().requireView(user);
-        RoleMapperResource resource = new RoleMapperResource(realm, auth, user, adminEvent, manageCheck, viewCheck);
-        ResteasyProviderFactory.getInstance().injectProperties(resource);
+        RoleMapperResource resource = new RoleMapperResource(session, auth, user, adminEvent, manageCheck, viewCheck);
         return resource;
+    }
+
+    @Path("ui-ext/effective-roles/users/{id}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public List<ClientRole> listCompositeUsersRoleMappings(@PathParam("id") String id) {
+        checkUser(id);
+        return new EffectiveRoleMappingResource(session, realm, auth).listCompositeUsersRoleMappings(id);
+    }
+
+    @Path("ui-ext/available-roles/users/{id}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public List<ClientRole> getEffectiveRoleMappings(
+            @PathParam("id") String id, @QueryParam("first") @DefaultValue("0") int first,
+            @QueryParam("max") @DefaultValue("10") int max, @QueryParam("search") @DefaultValue("") String search
+    ) {
+        checkUser(id);
+        return new AvailableRoleMappingResource(session, realm, auth)
+                .listAvailableUserRoleMappings(id, first, max, search);
     }
 
     @Path("clients")
@@ -427,23 +489,20 @@ public class CustomUserResource {
         AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
                 .realm(realm)
                 .resource(ResourceType.REALM);
-        ClientsResource clientsResource = new ClientsResource(realm, auth, adminEvent);
-        ResteasyProviderFactory.getInstance().injectProperties(clientsResource);
+        ClientsResource clientsResource = new ClientsResource(session, auth, adminEvent);
         return clientsResource;
     }
 
 
     @Path("users")
     public UsersResource users() {
-        session.userCache().clear();
+        clearUserCache(session);
 
         AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
                 .realm(realm)
                 .resource(ResourceType.REALM);
-        UsersResource users = new UsersResource(realm, auth, adminEvent);
-        ResteasyProviderFactory.getInstance().injectProperties(users);
 
-        return users;
+        return new UsersResource(session, auth, adminEvent);
     }
 
 
@@ -451,6 +510,38 @@ public class CustomUserResource {
     @POST
     public Response sendLoginAndResetPassword(List<String> ids) {
         sendLogin(ids, UserEntityRepresentation.SEND_LOGIN_AND_RESET_PASSWORD);
+        return JsonResponse.success()
+                .httpStatus(Response.Status.NO_CONTENT)
+                .build();
+    }
+
+    @Path("users/{userId}/credentials/{credentialId}")
+    @DELETE
+    @NoCache
+    public Response removeCredential(final @PathParam("userId") String userId, final @PathParam("credentialId") String credentialId) {
+        KeycloakContext context = session.getContext();
+        AdminEventBuilder eventBuilder = new AdminEventBuilder(context.getRealm(), auth.adminAuth(), session, context.getConnection());
+        eventBuilder.resource(ResourceType.USER);
+        UserProvider userProvider = session.users();
+        UserModel user = userProvider.getUserById(realm, userId);
+
+        CredentialModel credential = user.credentialManager().getStoredCredentialById(credentialId);
+        if (credential == null) {
+            // we do this to make sure somebody can't phish ids
+            if (auth.users().canQuery()) throw new NotFoundException("Credential not found");
+            else throw new ForbiddenException();
+        }
+        user.credentialManager().removeStoredCredentialById(credentialId);
+//        adminEvent.operation(OperationType.ACTION).resourcePath(session.getContext().getUri()).success();
+
+        UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
+        rep.getRequiredActions().add(UserEntityRepresentation.DELETE_PASSWORD);
+        eventBuilder.operation(OperationType.ACTION)
+                .resourcePath(session.getContext().getUri())
+                .representation(rep)
+                .realm(realm)
+                .success();
+
         return JsonResponse.success()
                 .httpStatus(Response.Status.NO_CONTENT)
                 .build();
@@ -465,6 +556,66 @@ public class CustomUserResource {
                 .build();
     }
 
+    /**
+     * see {@link RealmAdminResource#getRealm()}
+     */
+    @Path("realm/{id}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public RealmRepresentation getUserRealm(@PathParam("id") String id) {
+        checkUser(id);
+        RealmRepresentation rep = new RealmRepresentation();
+        rep.setRealm(realm.getName());
+        rep.setDefaultLocale(realm.getDefaultLocale());
+        rep.setDisplayName(realm.getDisplayName());
+        rep.setDisplayNameHtml(realm.getDisplayNameHtml());
+        rep.setSupportedLocales(realm.getSupportedLocalesStream().collect(Collectors.toSet()));
+        rep.setRegistrationEmailAsUsername(realm.isRegistrationEmailAsUsername());
+        RealmRepresentation r = ModelToRepresentation.toRepresentation(session, realm, false);
+        rep.setIdentityProviders(r.getIdentityProviders());
+        rep.setIdentityProviderMappers(r.getIdentityProviderMappers());
+        return rep;
+    }
+
+    @Path("realm/{id}/groups")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Stream<GroupRepresentation> getUserRealmGroups(
+            @PathParam("id") String id,
+            @QueryParam("search") String search,
+            @QueryParam("q") String searchQuery,
+            @QueryParam("exact") @DefaultValue("false") Boolean exact,
+            @QueryParam("first") Integer firstResult,
+            @QueryParam("max") Integer maxResults,
+            @QueryParam("briefRepresentation") @DefaultValue("true") boolean briefRepresentation,
+            @QueryParam("populateHierarchy") @DefaultValue("true") boolean populateHierarchy
+    ) {
+        CustomUserAdapter user = checkUser(id);
+
+        AdminEventBuilder adminEvent = new AdminEventBuilder(user.getRealm(), auth.adminAuth(), session, session.getContext().getConnection())
+                .realm(user.getRealm())
+                .resource(ResourceType.REALM);
+
+        return new GroupsResource(user.getRealm(), session, auth, adminEvent)
+                .getGroups(search, searchQuery, exact, firstResult, maxResults, briefRepresentation, populateHierarchy);
+    }
+
+    @Path("realm/{id}/groups/{groupId}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public GroupResource getUserRealmGroupById(@PathParam("id") String id, @PathParam("id") String groupId) {
+        CustomUserAdapter user = checkUser(id);
+
+        AdminEventBuilder adminEvent = new AdminEventBuilder(user.getRealm(), auth.adminAuth(), session, session.getContext().getConnection())
+                .realm(user.getRealm())
+                .resource(ResourceType.REALM);
+
+        return new GroupsResource(user.getRealm(), session, auth, adminEvent).getGroupById(groupId);
+    }
+
     private void sendLogin(List<String> ids, final String requiredAction) {
         KeycloakContext context = session.getContext();
         AdminEventBuilder eventBuilder = new AdminEventBuilder(context.getRealm(), auth.adminAuth(), session, context.getConnection());
@@ -472,8 +623,9 @@ public class CustomUserResource {
         UserProvider userProvider = session.users();
         if (ids != null) {
             for (String id : ids) {
-                UserModel user = userProvider.getUserById(id, realm);
+                UserModel user = userProvider.getUserById(realm, id);
                 if (user != null) {
+                    RealmModel realm = getUserRealmModel(id);
                     UserRepresentation rep = ModelToRepresentation.toRepresentation(session, realm, user);
                     rep.getRequiredActions().add(requiredAction);
                     eventBuilder.operation(OperationType.ACTION)
@@ -486,4 +638,37 @@ public class CustomUserResource {
         }
     }
 
+    private void clearUserCache(KeycloakSession session) {
+        UserCache cache = session.getProvider(UserCache.class);
+        if (cache != null) {
+            cache.clear();
+        }
+    }
+
+    private CustomUserAdapter checkUser(String userId) {
+        if(!auth.adminAuth().getRealm().getName().equals(Config.getAdminRealm())
+                && !GeneralRealm.MANAGER_REALMS.contains(auth.adminAuth().getRealm().getName())) {
+            throw new ForbiddenException();
+        }
+
+        UserModel user = session.getProvider(UserProvider.class).getUserById(session.getContext().getRealm(), userId);
+
+        if (user == null) throw new UserNotFoundException();
+
+        if(!(user instanceof CustomUserAdapter customUser)) throw new InternalServerErrorException();
+
+        if(!auth.adminAuth().getRealm().getName().equals(Config.getAdminRealm())
+                && customUser.getRealm().getName().equals(Config.getAdminRealm())) {
+            throw new ForbiddenException();
+        }
+        return customUser;
+    }
+
+    private RealmModel getUserRealmModel(String userId) {
+        UserModel user = session.getProvider(UserProvider.class).getUserById(session.getContext().getRealm(), userId);
+
+        if(user instanceof CustomUserAdapter) return ((CustomUserAdapter)user).getRealm();
+
+        return realm;
+    }
 }

@@ -1,0 +1,1 @@
+UPDATE AUTHENTICATION_EXECUTION SET AUTHENTICATOR = 'auth-mail-phone-pass-form' WHERE ID = '6aaaf3f4-3bde-4263-9598-4f0a907fdeb0';

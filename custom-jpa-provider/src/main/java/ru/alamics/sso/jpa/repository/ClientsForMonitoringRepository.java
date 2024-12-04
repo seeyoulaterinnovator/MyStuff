@@ -1,18 +1,17 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import ru.alamics.sso.jpa.entity.auth_reg.ClientsForMonitoringEntity;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
-@LocalBean
-@Stateless
+@ApplicationScoped
 public class ClientsForMonitoringRepository {
-    @PersistenceContext
-    private EntityManager em;
+    @Inject
+    EntityManager em;
 
     public ClientsForMonitoringEntity findAndReturnClientForMonitoring(String clientName, String realm) {
         List<ClientsForMonitoringEntity> resultList = em.createQuery("select cfme from ClientsForMonitoringEntity cfme where cfme.clientName = :clientName and cfme.realm = :realm", ClientsForMonitoringEntity.class)

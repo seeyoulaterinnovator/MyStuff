@@ -8,11 +8,12 @@
 *.iws
 *.iml
 *.ipr
-/out/
+*/out/
 
 # Frontend
 node_modules/
 .vscode
 .cache
 /keycloak-extension/src/main/resources/themes/*/login/resources/build/
+/keycloak-extension/src/main/resources/themes/keycloak.v2/admin/resources
 /frontend/*/build/

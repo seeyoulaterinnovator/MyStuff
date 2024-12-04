@@ -1,30 +1,29 @@
 package ru.alamics.sso.jpa.repository;
 
-import org.hibernate.jpa.QueryHints;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
+import org.hibernate.jpa.AvailableHints;
 import ru.alamics.sso.jpa.entity.Settings;
+import ru.alamics.sso.jpa.entity.common.SettingType;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.UUID;
 
-@Stateless
-@LocalBean
+@ApplicationScoped
 public class SettingsRepository {
+    @Inject
+    EntityManager em;
 
-    @PersistenceContext
-    private EntityManager em;
-
-
+    @Transactional(Transactional.TxType.REQUIRED)
     public Settings getSettings(final String keyName, final String realmId) {
         Settings ret = null;
         if (keyName != null) {
             List<Settings> values = em.createQuery("select s from Settings s where s.extId = :extId and s.realmId =:realmId", Settings.class)
                     .setParameter("extId", keyName)
                     .setParameter("realmId", realmId)
-                    .setHint(QueryHints.HINT_READONLY, true)
+                    .setHint(AvailableHints.HINT_READ_ONLY, true)
                     .getResultList();
             if (!values.isEmpty()) {
                 ret = values.get(0);
@@ -41,13 +40,22 @@ public class SettingsRepository {
                 .getResultList();
     }
 
+    public List<Settings> findRealmSettings(String realmId, SettingType type) {
+        return em.createQuery("select s from Settings s " +
+                        "where s.realmId = :realmId and s.type = :type", Settings.class)
+                .setParameter("realmId", realmId)
+                .setParameter("type", type)
+                .getResultList();
+    }
+
+    @Transactional
     public void deleteSetting(final String settingId) {
         em.createQuery("delete from Settings s where s.id =: settingId")
                 .setParameter("settingId", settingId)
                 .executeUpdate();
     }
 
-
+    @Transactional
     public Settings save(Settings settings) {
         if(settings != null) {
             if(settings.getId() == null) {

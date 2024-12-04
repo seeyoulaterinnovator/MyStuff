@@ -1,0 +1,29 @@
+.scrollable-container {
+  scrollbar-color: transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scrollable-container::-webkit-scrollbar {
+  width: 4px !important;
+  scrollbar-color: transparent;
+  border-radius: 2px;
+
+  &:hover, &:active {
+    @apply .bg-main-1300;
+  }
+}
+
+.scrollable-container::-webkit-scrollbar-thumb {
+  width: 4px !important;
+  border-radius: 2px;
+
+  @apply .bg-main-1200;
+
+  &:hover {
+    @apply .bg-accentBlue-1200-hover;
+  }
+
+  &:active {
+    @apply .bg-main-1200;
+  }
+}

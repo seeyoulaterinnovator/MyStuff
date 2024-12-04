@@ -15,9 +15,9 @@ public class CustomUserCacheSession extends UserCacheSession implements UserCach
     }
 
     @Override
-    public UserModel getUserById(String id, RealmModel realm) {
+    public UserModel getUserById(RealmModel realm, String id) {
         if (isRegisteredForInvalidation(realm, id)) {
-            return getDelegate().getUserById(id, realm);
+            return getDelegate().getUserById(realm, id);
         }
         if (managedUsers.containsKey(id)) {
             return managedUsers.get(id);
@@ -27,7 +27,7 @@ public class CustomUserCacheSession extends UserCacheSession implements UserCach
         UserModel adapter = null;
         if (cached == null) {
             Long loaded = cache.getCurrentRevision(id);
-            UserModel delegate = getDelegate().getUserById(id, realm);
+            UserModel delegate = getDelegate().getUserById(realm, id);
             if (delegate == null) {
                 return null;
             }
@@ -35,9 +35,9 @@ public class CustomUserCacheSession extends UserCacheSession implements UserCach
         } else {
             adapter = validateCache(realm, cached);
             if (adapter == null) {
-                session.userCache().clear();
+                clearUserCache();
                 Long loaded = cache.getCurrentRevision(id);
-                UserModel delegate = getDelegate().getUserById(id, realm);
+                UserModel delegate = getDelegate().getUserById(realm, id);
                 if (delegate == null) {
                     return null;
                 }
@@ -50,5 +50,12 @@ public class CustomUserCacheSession extends UserCacheSession implements UserCach
 
     private boolean isRegisteredForInvalidation(RealmModel realm, String userId) {
         return realmInvalidations.contains(realm.getId()) || invalidations.contains(userId);
+    }
+
+    private void clearUserCache() {
+        UserCache cache = session.getProvider(UserCache.class);
+        if (cache != null) {
+            cache.clear();
+        }
     }
 }

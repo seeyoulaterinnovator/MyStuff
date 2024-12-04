@@ -46,4 +46,7 @@ public class UserConstants {
 
     public static final String AUTH_NOTE_REST_SMS_OR_PHONE_CALL_END_REQUIRED_ACTION =
             "auth_note_rest_sms_or_phone_call_end_required_action";
+
+    public static final String AUTH_NOTE_DIRECT_GRANT_SESSION_CLEAR_DISABLED =
+            "auth_note_direct_grant_session_clear_disabled";
 }

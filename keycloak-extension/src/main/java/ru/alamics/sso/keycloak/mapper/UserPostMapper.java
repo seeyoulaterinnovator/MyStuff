@@ -71,16 +71,6 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
 
     private UserPostService userPostService;
 
-    public static ProtocolMapperModel createClaimMapper(String name,
-                                                        String userAttribute,
-                                                        String tokenClaimName, String claimType,
-                                                        boolean accessToken, boolean idToken) {
-        return OIDCAttributeMapperHelper.createClaimMapper(name, userAttribute,
-                tokenClaimName, claimType,
-                accessToken, idToken,
-                PROVIDER_ID);
-    }
-
     public static Object getUserModelValue(UserPostResponse userPost, String propertyName) {
         switch (UserPostPropertyType.valueOf(propertyName)) {
             case POST_ID:

@@ -9,7 +9,7 @@ import ru.alamics.sso.keycloak.auth.AbstractAuthenticatorFactory;
 import ru.alamics.sso.keycloak.auth.model.AuthType;
 import ru.alamics.sso.registration.model.UserConstants;
 
-import javax.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 import java.util.*;
 import java.util.stream.Collectors;
 

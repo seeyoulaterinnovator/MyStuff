@@ -1,23 +1,19 @@
 package ru.alamics.sso.jpa.repository;
 
-import lombok.extern.slf4j.Slf4j;
-import ru.alamics.sso.jpa.entity.antifraud.AttemptFailsEntity;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import ru.alamics.sso.jpa.entity.antifraud.WroteCodeAttemptsEntity;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
-@Stateless
-@LocalBean
-@Slf4j
+@ApplicationScoped
 public class WroteCodeAttemptsRepository {
+    @Inject
+    EntityManager em;
 
-    @PersistenceContext
-    private EntityManager em;
-
+    @Transactional
     public void save(WroteCodeAttemptsEntity entity) {
         em.persist(entity);
         em.flush();

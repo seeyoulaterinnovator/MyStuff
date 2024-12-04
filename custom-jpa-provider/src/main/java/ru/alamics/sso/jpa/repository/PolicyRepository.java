@@ -1,25 +1,19 @@
 package ru.alamics.sso.jpa.repository;
 
-import lombok.extern.slf4j.Slf4j;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import org.keycloak.models.jpa.entities.RealmEntity;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
-@Stateless
-@LocalBean
-@Slf4j
+@ApplicationScoped
 public class PolicyRepository {
-
-    @PersistenceContext
-    private EntityManager em;
+    @Inject
+    EntityManager em;
 
     public List<RealmEntity> findRealmWithPolicy(final String policy) {
-        final String DEBUG_STR = "findRealmWithPolicy";
-
         return em.createQuery(
                         "select re from RealmEntity re " +
                                 "where re.passwordPolicy LIKE CONCAT('%', :policy, '%') ", RealmEntity.class)
@@ -27,6 +21,7 @@ public class PolicyRepository {
                 .getResultList();
     }
 
+    @Transactional
     public void findExpiredPasswords(final String realm, final long millis) {
         em.createNativeQuery("insert into AUTO_LOCK_NOTIFICATION(id, user_id, sended_at, type, status)\n" +
                         "SELECT uuid(), cred.USER_ID, null, 'PASSWORD_EXPIRED', 'PREPARE'\n" +

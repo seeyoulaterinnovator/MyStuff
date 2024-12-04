@@ -1,7 +1,10 @@
 package ru.alamics.sso.keycloak.facade;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Named;
+import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import ru.alamics.sso.keycloak.cache.CustomCache;
 import ru.alamics.sso.keycloak.cache.impl.UserPostCache;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.FoundUserPostException;
@@ -11,17 +14,15 @@ import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.util.validator.NotValidException;
 
-import javax.ejb.Stateless;
-import javax.ws.rs.NotFoundException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+@RequestScoped
 @Slf4j
-@Stateless
+@Named("CachedUserPostFacade")
 public class CachedUserPostFacade extends UserPostFacade {
-
     private final UserPostCache cache;
 
     public CachedUserPostFacade() {
@@ -103,9 +104,12 @@ public class CachedUserPostFacade extends UserPostFacade {
             return new LinkedList<>();
         }
 
-        cachedPosts.stream()
-                .filter(post -> customerCache.get(post.getTomsId()) != null && !customerCache.get(post.getTomsId()).isEmpty())
-                .forEach(post -> post.setOrganization(customerCache.get(post.getTomsId())));
+        for(var post : cachedPosts) {
+            var customer = getCustomerCache().get(post.getTomsId());
+            if(customer != null && !customer.isEmpty()) {
+                post.setOrganization(customer);
+            }
+        }
 
         return new LinkedList<>(cachedPosts);
     }

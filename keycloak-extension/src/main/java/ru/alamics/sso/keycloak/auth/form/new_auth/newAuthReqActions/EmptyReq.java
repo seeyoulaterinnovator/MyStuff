@@ -9,7 +9,7 @@ import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.jpa.entity.auth_reg.AuthOrRegType;
 import ru.alamics.sso.registration.service.RegisteredUsersService;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import java.util.Arrays;
 import java.util.List;
@@ -70,8 +70,10 @@ public class EmptyReq implements RequiredActionProvider {
     public void addRegisteredUser(RequiredActionContext context) {
         AuthenticationSessionModel authenticationSessionModel = context.getAuthenticationSession();
 
-        List<RequiredActionProviderModel> requiredActionProviderModels = context.getRealm().getRequiredActionProviders()
-                .stream().filter(RequiredActionProviderModel::isDefaultAction).collect(Collectors.toList());
+        List<RequiredActionProviderModel> requiredActionProviderModels = context.getRealm()
+                .getRequiredActionProvidersStream()
+                .filter(RequiredActionProviderModel::isDefaultAction)
+                .toList();
 
         AuthOrRegType[] authOrRegTypes = AuthOrRegType.values();
 

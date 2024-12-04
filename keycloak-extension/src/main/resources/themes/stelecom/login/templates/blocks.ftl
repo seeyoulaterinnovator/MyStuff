@@ -14,7 +14,7 @@
         <span class="text-sm sm:block">Цифра или несколько цифр</span>
       </div>
     </div>
-    <p class="text-black-80 mb-8 mt-8">Не забудьте записать пароль <span id="generated-password" class="text-base"></span></p>
+    <p class="text-black-80 mb-8 mt-8">Не забудьте сохранить или запомнить пароль <span id="generated-password" class="text-base"></span></p>
     <div class="flex sm:flex-row">
       <div class="pass-fields">
         <@components.field class="mb-3 sm:mb-4" fieldName="${firstFieldName}" label="${msg('passwordPlaceholder')}" placeholder="${msg('passwordPlaceholder')}" type="password" required=true value="" />

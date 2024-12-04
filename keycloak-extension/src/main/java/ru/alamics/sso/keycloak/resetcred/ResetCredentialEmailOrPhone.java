@@ -3,7 +3,6 @@ package ru.alamics.sso.keycloak.resetcred;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAuthenticator;
-import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -26,7 +25,7 @@ import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.user.UserAttributeService;
 import ru.alamics.sso.user.UserServiceUtil;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.Objects;
 
@@ -72,23 +71,27 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
         RealmModel realm = context.getRealm();
 
         if (user == null && realm.isLoginWithEmailAllowed() && username.contains("@")) {
-            user = context.getSession().users().getUserByEmail(username, realm);
+            user = context.getSession().users().getUserByEmail(realm, username);
         }
 
         if (user == null && username.startsWith("+7")) {
             userFind = findUserByConvertUsernameToPhone(realm, username);
-            if (userFind != null && userFind.getAttributes().stream().noneMatch(it -> it.getName().equals(BlockType.MANAGER_BLOCK.getType()))) {
-                user = context.getSession().users().getUserById(userFind.getId(), context.getSession().realms().getRealm(userFind.getRealmId()));
-                Objects.requireNonNull(user).setEnabled(true);
-                if(userFind.isEmailVerified()) {
-                    username = userFind.getUsername();
-                    authenticationSession.setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, userFind.getEmail());
-                    context.getHttpRequest().getDecodedFormParameters().replace("username", Collections.singletonList(userFind.getEmail()));
-                } else {
-                    context.setUser(user);
-                    context.challenge(context.form().createForm("verify-email-by-reset.ftl"));
-                    return;
+            if (userFind != null) {
+                if (userFind.getAttributes().stream().noneMatch(it -> it.getName().equals(BlockType.MANAGER_BLOCK.getType()))) {
+                    user = context.getSession().users().getUserById(context.getSession().realms().getRealm(userFind.getRealmId()), userFind.getId());
+                    Objects.requireNonNull(user).setEnabled(true);
+                    if (userFind.isEmailVerified()) {
+                        username = userFind.getUsername();
+                        authenticationSession.setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, userFind.getEmail());
+                    } else {
+                        context.setUser(user);
+                        context.challenge(context.form().createForm("verify-email-by-reset.ftl"));
+                        return;
+                    }
                 }
+            } else {
+                context.forkWithSuccessMessage(new FormMessage(Messages.EMAIL_SENT_ERROR));
+                return;
             }
         }
 
@@ -104,7 +107,7 @@ public class ResetCredentialEmailOrPhone extends AbstractAuthenticator {
         if (userFind != null && Objects.requireNonNull(userFind).getAttributes()
                 .stream().anyMatch(it -> it.getName().equals(BlockType.MANAGER_BLOCK.getType()))
                 || user != null
-                && !user.getAttribute(BlockType.MANAGER_BLOCK.getType()).isEmpty()) {
+                && user.getFirstAttribute(BlockType.MANAGER_BLOCK.getType()) != null) {
 
             context.forkWithErrorMessage(new FormMessage(Messages.ACCOUNT_DISABLED));
         } else {

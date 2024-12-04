@@ -1,27 +1,30 @@
 package ru.alamics.sso.jpa.repository;
 
-import lombok.extern.slf4j.Slf4j;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import ru.alamics.sso.jpa.entity.AppProperty;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
+import java.util.Optional;
 
-@Stateless
-@LocalBean
-@Slf4j
+@ApplicationScoped
 public class AppPropertyRepository {
+    @Inject
+    EntityManager em;
 
-    @PersistenceContext
-    private EntityManager em;
-
+    @Transactional
     public List<AppProperty> findAll() {
         return em.createQuery("select ap from AppProperty ap ", AppProperty.class).getResultList();
     }
 
-    public AppProperty findByName(String name) {
-        return em.find(AppProperty.class, name);
+    @Transactional
+    public Optional<AppProperty> findByName(String name) {
+        return em.createQuery("select ap from AppProperty ap where ap.name = :name", AppProperty.class)
+                .setParameter("name", name)
+                .getResultList()
+                .stream()
+                .findFirst();
     }
 }

@@ -1,41 +1,56 @@
 package ru.alamics.sso.remote.call;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.internal.ClientInvocationBuilder;
-import org.jboss.resteasy.plugins.providers.StringTextStar;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.phone.exception.PhoneCallException;
 import ru.alamics.sso.registration.phone.port.PhoneCallerRemoteService;
 import ru.alamics.sso.util.Util;
 
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.ejb.Stateless;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
+import java.io.InputStream;
 import java.net.URI;
-import java.util.concurrent.TimeUnit;
 
+@ApplicationScoped
+@Named("PhoneCallerService")
 @Slf4j
-@Stateless(name = "PhoneCallerService")
 public class PhoneCallerRemoteServiceImpl implements PhoneCallerRemoteService {
 
     private static final String URI_PERM = "phoneCaller.uri.perm";
     private static final String URI_VORONEZH = "phoneCaller.uri.voronezh";
 
-    private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
-            .connectTimeout(3, TimeUnit.SECONDS)
-            .readTimeout(10, TimeUnit.SECONDS);
+    private static final HttpClient client;
+    static {
+        try {
+            client = HttpClients.custom()
+                    .setDefaultRequestConfig(RequestConfig.custom()
+                            .setConnectTimeout(3_000)
+                            .setConnectionRequestTimeout(3_000)
+                            .setSocketTimeout(10_000)
+                            .build())
+                    .build();
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 
-    private static final ResteasyClient client = clientBuilder.build();
-
-    @Resource(lookup = "java:global/domru-sso/ApplicationProperties")
-    private ApplicationProperties properties;
+    @Inject
+    ApplicationProperties properties;
 
     private URI uriPerm;
     private URI uriVoronezh;
@@ -82,22 +97,33 @@ public class PhoneCallerRemoteServiceImpl implements PhoneCallerRemoteService {
         return response;
     }
 
-    private String getCode(URI uri, String phone, int count) {
-
+    private String getCode(URI uri, String phone, int count) throws PhoneCallException {
         log.info(String.format("Api %s, call to number: %s, count: %d", uri.getHost(), phone, count));
 
-        ClientInvocationBuilder builder = (ClientInvocationBuilder) client.register(StringTextStar.class)
-                .target(uri)
+        HttpGet request = new HttpGet(UriBuilder.fromUri(uri)
                 .queryParam("num", phone)
                 .queryParam("retry", count)
-                .request();
-
-        String code = builder.get(String.class);
-        code = code != null ? code.replaceAll("\\n", "") : "";
-
-        log.info(String.format("Api %s, code %s", uri.getHost(), code));
-
-        return code;
+                .build());
+        request.setHeader(HttpHeaders.ACCEPT, MediaType.WILDCARD);
+        try {
+            HttpResponse response = client.execute(request);
+            try {
+                if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                    try (InputStream stream = response.getEntity().getContent()) {
+                        String code = new String(stream.readAllBytes());
+                        code = code.replaceAll("\\n", "");
+                        log.info(String.format("Api %s, code %s", uri.getHost(), code));
+                        return code;
+                    }
+                }
+            } finally {
+                EntityUtils.consume(response.getEntity());
+            }
+            throw new PhoneCallException(response.getStatusLine().getReasonPhrase());
+        } catch (Exception e) {
+            log.warn(e.getMessage(), e);
+            throw new PhoneCallException(e.getMessage(), e);
+        }
     }
 
     private boolean isNull(String field) {

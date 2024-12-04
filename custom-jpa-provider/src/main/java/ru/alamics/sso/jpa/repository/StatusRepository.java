@@ -1,34 +1,31 @@
 package ru.alamics.sso.jpa.repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.OptimisticLockException;
+import jakarta.transaction.Transactional;
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import ru.alamics.sso.jpa.entity.status.CheckTableEntity;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.OptimisticLockException;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 
-@Stateless
-@LocalBean
+@ApplicationScoped
 @Slf4j
 public class StatusRepository {
+    @Inject
+    EntityManager em;
 
-    @PersistenceContext
-    private EntityManager em;
-
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void tryInsertNodeName(String nodeName) {
 
         try {
             log.info("Checking nodeName " + nodeName);
             try {
-                Object name = em
+                em
                         .createNativeQuery("SELECT name FROM CHECK_TABLE WHERE name = :nodeName ")
                         .setParameter("nodeName", nodeName)
                         .getSingleResult();
@@ -47,15 +44,15 @@ public class StatusRepository {
         }
     }
 
-    @Transactional
-    @Lock(LockType.WRITE)
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Synchronized
     public boolean checkStatusDb(String nodeName) {
         try {
             CheckTableEntity ent = em.find(CheckTableEntity.class, nodeName);
 
             ent.setUpdateTime(LocalDateTime.now());
 
-            em.unwrap(Session.class).update(ent);
+            em.unwrap(Session.class).merge(ent);
 
         } catch (OptimisticLockException oe) {
             log.info("OptimisticLockException " + oe.getMessage());

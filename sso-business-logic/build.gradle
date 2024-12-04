@@ -1,28 +1,35 @@
 dependencies {
+    compileOnly "org.keycloak:keycloak-quarkus-server-app:$keycloakVersion"
+
+    implementation(platform("io.quarkus:quarkus-bom:$quarkusVersion"))
+    implementation "org.hibernate.validator:hibernate-validator"
+    implementation ("org.glassfish.expressly:expressly") {
+        exclude group: 'jakarta.el', module: 'jakarta.el-api'
+    }
+
+    implementation ("org.apache.poi:poi:5.2.5") {
+        exclude group: 'commons-codec', module: 'commons-codec'
+        exclude group: 'commons-io', module: 'commons-io'
+        exclude group: 'org.apache.commons', module: 'commons-collections4'
+    }
+    implementation ("org.apache.poi:poi-ooxml:5.2.5") {
+        exclude group: 'commons-codec', module: 'commons-codec'
+        exclude group: 'commons-io', module: 'commons-io'
+        exclude group: 'org.apache.commons', module: 'commons-collections4'
+        exclude group: 'org.apache.commons', module: 'commons-lang3'
+    }
+    implementation ("com.opencsv:opencsv:5.9") {
+        exclude group: 'org.apache.commons', module: 'commons-collections4'
+        exclude group: 'org.apache.commons', module: 'commons-lang3'
+    }
+    implementation "org.jsoup:jsoup:1.18.1"
+    implementation ("com.helger:ph-css:7.0.2") {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+    }
 
     implementation (
-            project(':custom-jpa-provider'),
+            project(":custom-jpa-provider"),
     )
-    implementation 'org.jboss.resteasy:resteasy-jackson2-provider:3.6.3.Final'
-    implementation 'org.slf4j:slf4j-api:1.7.22'
-//    implementation group: 'javax.ejb', name: 'ejb-api', version: '3.0'
-//    implementation group: 'org.jboss.spec.javax.ejb', name: 'jboss-ejb-api_3.2_spec', version: '1.0.2.Final'
-    implementation group: 'javax', name: 'javaee-api', version: '8.0.1'
-    implementation "org.keycloak:keycloak-model-jpa:$keycloakVersion"
-    implementation group: 'org.freemarker', name: 'freemarker', version: '2.3.26-incubating'
 
-    // https://mvnrepository.com/artifact/org.apache.poi/poi
-    implementation group: 'org.apache.poi', name: 'poi', version: '4.1.0'
-    // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
-    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.0'
-    // https://mvnrepository.com/artifact/com.opencsv/opencsv
-    implementation group: 'com.opencsv', name: 'opencsv', version: '4.0'
-
-    implementation "org.keycloak:keycloak-model-infinispan:$keycloakVersion"
-
-    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.8'
-
-    implementation 'org.jsoup:jsoup:1.18.1'
-
-    implementation group: 'com.helger', name: 'ph-css', version: '6.5.0'
+    testImplementation "org.keycloak:keycloak-quarkus-server-app:$keycloakVersion"
 }

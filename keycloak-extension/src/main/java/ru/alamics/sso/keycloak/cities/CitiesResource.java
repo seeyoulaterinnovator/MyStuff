@@ -1,13 +1,21 @@
 package ru.alamics.sso.keycloak.cities;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.annotations.cache.NoCache;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.plugins.providers.StringTextStar;
-import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClients;
+import org.jboss.resteasy.reactive.NoCache;
+import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
-import ru.alamics.sso.keycloak.GeneralRealm;
 import ru.alamics.sso.keycloak.cities.model.CityDadataModel;
 import ru.alamics.sso.keycloak.cities.model.CityMigration;
 import ru.alamics.sso.keycloak.cities.model.RegionCities;
@@ -18,60 +26,41 @@ import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.StandResolver;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
 public class CitiesResource {
+    private static final int CONNECT_TIMEOUT = 3_000;
 
-    private static final ResteasyClient client = new ResteasyClientBuilder()
-            .connectTimeout(3, TimeUnit.SECONDS)
-            .readTimeout(10, TimeUnit.SECONDS)
-            .disableTrustManager()
-            .build();
-    private static final String CITIES_URL = "cities.url";
+    private static final int SOCKET_TIMEOUT = 10_000;
+
     private static final long CACHE_TIME = 60 * 60 * 1000; // 1h
-    private static final ReentrantLock lock = new ReentrantLock();
-    private static final AtomicLong updated = new AtomicLong(0);
+
+    private static final String CITIES_URL = "cities.url";
 
     private static final String LANGUAGE_RU = "ru";
 
-    private static String url;
-    private static List<CityMigration> cityList = new ArrayList<>();
-    private final SettingsService settingsService;
-    protected KeycloakSession session;
+    private static final ReentrantLock LOCK = new ReentrantLock();
 
-    public CitiesResource(KeycloakSession session) {
-        this.session = session;
-        ApplicationProperties properties = Lookup.lookup(ApplicationProperties.class);
+    private static final AtomicLong UPDATED = new AtomicLong(0);
 
-        this.settingsService = Lookup.lookup(SettingsService.class);
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
-        if (url == null && properties != null) {
-            url = properties.getProperty(CITIES_URL);
-        }
-    }
-
-    public static List<CityMigration> getCityList() {
-        return cityList;
-    }
+    private static final AtomicReference<List<CityMigration>> CITY_LIST_REF = new AtomicReference<>(new ArrayList<>());
 
     public static CityMigration getCityMigrationByCity(String city) {
 
         if (city == null)
             return null;
 
-        for (CityMigration cm : cityList) {
+        for (CityMigration cm : CITY_LIST_REF.get()) {
             if (city.equalsIgnoreCase(cm.getCity()))
                 return cm;
         }
@@ -84,7 +73,7 @@ public class CitiesResource {
         if (city == null)
             return null;
 
-        for (CityMigration cm : cityList) {
+        for (CityMigration cm : CITY_LIST_REF.get()) {
             if (city.equalsIgnoreCase(cm.getName()))
                 return cm;
         }
@@ -92,17 +81,55 @@ public class CitiesResource {
         return null;
     }
 
-    public static CityMigration getCityMigrationByDomain(String domain) {
+    private final KeycloakSession session;
 
-        if (domain == null)
-            return null;
+    private final SettingsService settingsService;
 
-        for (CityMigration cm : cityList) {
-            if (domain.equalsIgnoreCase(cm.getDomain()))
-                return cm;
+    private final HttpClient citiesClient;
+
+    private final HttpClient dadataClient;
+
+    public CitiesResource(KeycloakSession session) {
+        this.session = session;
+        settingsService = Lookup.lookup(SettingsService.class);
+        citiesClient = HttpClients.custom()
+                .setSSLContext(Lookup.lookup(SSLContext.class, "citiesSSLContext"))
+                .setSSLHostnameVerifier(Lookup.lookup(HostnameVerifier.class, "citiesHostnameVerifier"))
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setConnectTimeout(CONNECT_TIMEOUT)
+                        .setSocketTimeout(SOCKET_TIMEOUT)
+                        .build())
+                .build();
+        dadataClient = HttpClients.custom()
+                .setSSLContext(Lookup.lookup(SSLContext.class, "dadataSSLContext"))
+                .setSSLHostnameVerifier(Lookup.lookup(HostnameVerifier.class, "dadataHostnameVerifier"))
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setConnectTimeout(CONNECT_TIMEOUT)
+                        .setSocketTimeout(SOCKET_TIMEOUT)
+                        .build())
+                .build();
+    }
+
+    public void updateIfNeed() {
+        if (CITY_LIST_REF.get().isEmpty() || System.currentTimeMillis() > UPDATED.get() + CACHE_TIME) {
+            LOCK.lock();
+            try {
+                if (CITY_LIST_REF.get().isEmpty() || System.currentTimeMillis() > UPDATED.get() + CACHE_TIME) {
+                    try {
+                        HttpGet request = new HttpGet(Lookup.lookup(ApplicationProperties.class).getProperty(CITIES_URL));
+                        request.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
+                        try (InputStream stream = citiesClient.execute(request).getEntity().getContent()) {
+                            CITY_LIST_REF.set(List.of(MAPPER.readValue(stream, CityMigration[].class)));
+                        }
+                        UPDATED.set(System.currentTimeMillis());
+                    } catch (Exception e) {
+                        log.warn(e.getMessage(), e);
+                    }
+                }
+            } finally {
+                LOCK.unlock();
+            }
         }
-
-        return null;
     }
 
     @GET
@@ -110,59 +137,38 @@ public class CitiesResource {
     @NoCache
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     public Response getCities() {
-
-        long now = System.currentTimeMillis();
-
-        if (cityList.isEmpty() || now > updated.get() + CACHE_TIME) {
-            lock.lock();
-            try {
-                if (cityList.isEmpty() || now > updated.get() + CACHE_TIME) {
-                    try (Response response = client.target(url)
-                            .register(ResteasyJackson2Provider.class)
-                            .register(StringTextStar.class)
-                            .request()
-                            .accept(MediaType.APPLICATION_JSON)
-                            .get()) {
-                        log.info("response media type {}, status {}", response.getMediaType(), response.getStatus());
-                        if (response.getMediaType().toString().equalsIgnoreCase("text/html")) {
-                            log.error("response " + response.readEntity(String.class));
-                        } else {
-                            cityList = response.readEntity(new GenericType<List<CityMigration>>() {
-                            });
-                        }
-                    }
-                    updated.set(now);
-                }
-            } finally {
-                lock.unlock();
-            }
-        }
+        updateIfNeed();
         return JsonResponse.success()
-                .addResult("cities", cityList)
+                .addResult("cities", CITY_LIST_REF.get())
                 .build();
     }
 
     @GET
     @Path("/current")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-    public Response getCityTitle() {
+    public Response getCityTitle() throws Exception {
+        updateIfNeed();
         String ipAddress = session.getContext().getConnection().getRemoteAddr();
-        String url = settingsService.getSettingsStringValue(SettingConstants.URL_DADATA_REQUEST_LOCATION_IP, GeneralRealm.MASTER);
-        String token = settingsService.getSettingsStringValue(SettingConstants.TOKEN_DADATA, GeneralRealm.MASTER);
+        String url = settingsService.getSettingsStringValue(SettingConstants.URL_DADATA_REQUEST_LOCATION_IP, Config.getAdminRealm());
+        String token = settingsService.getSettingsStringValue(SettingConstants.TOKEN_DADATA, Config.getAdminRealm());
 
         if (StandResolver.isBattle()) {
             getCities();
         }
 
-        log.info(String.format("Sending request with address %s to dadata", ipAddress));
+        log.debug(String.format("Sending request with address %s to dadata", ipAddress));
 
-        CityDadataModel cityDadataModel = client.target(url)
+        HttpGet request = new HttpGet(UriBuilder.fromUri(url)
                 .queryParam("ip", ipAddress)
                 .queryParam("language", LANGUAGE_RU)
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, "TOKEN " + token)
-                .get(CityDadataModel.class);
+                .build());
+        request.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
+        request.setHeader(HttpHeaders.AUTHORIZATION, "TOKEN " + token);
+
+        CityDadataModel cityDadataModel;
+        try(InputStream stream = dadataClient.execute(request).getEntity().getContent()) {
+            cityDadataModel = MAPPER.readValue(stream, CityDadataModel.class);
+        }
 
         String title = null;
         if (cityDadataModel != null) {
@@ -182,7 +188,7 @@ public class CitiesResource {
 
             title = city == null ? null : city.getName();
         }
-        log.info("getCityTitle ended");
+        log.debug("getCityTitle ended");
 
         return JsonResponse.success()
                 .addResult("title", title)

@@ -1,38 +1,39 @@
 package ru.alamics.sso.remote.rias;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
-import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import ru.alamics.sso.property.ApplicationProperties;
-import ru.alamics.sso.property.PropertyException;
 import ru.alamics.sso.registration.phone.HashGenerator;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.model.RiasLogin;
 import ru.alamics.sso.registration.rias.port.RiasLoginService;
 import ru.alamics.sso.util.Util;
 
-import javax.annotation.Resource;
-import javax.ejb.Stateless;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import java.io.InputStream;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.TimeUnit;
 
+@ApplicationScoped
+@Named("RiasLoginService")
 @Slf4j
-@Stateless(name = "RiasLoginService")
 public class RiasUserLoginImpl implements RiasLoginService {
-
-    private static final ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder()
-            .connectTimeout(3, TimeUnit.SECONDS)
-            .readTimeout(10, TimeUnit.SECONDS);
-
-    private static final ResteasyClient client = clientBuilder.build();
     private static final String AUTH_SCHEME = "riasLogin.scheme";
     private static final String AUTH_DEF_CITY = "riasLogin.defCity";
     private static final String AUTH_DOMAIN = "riasLogin.domain";
@@ -41,10 +42,28 @@ public class RiasUserLoginImpl implements RiasLoginService {
     private static final String CLIENT_NAME = "riasLogin.client.name";
     private static final String CLIENT_SALT = "riasLogin.client.salt";
     private static final String GRANT_TYPE = "riasLogin.grantType";
-    @Resource(lookup = "java:global/domru-sso/ApplicationProperties")
-    private ApplicationProperties properties;
 
-    public RiasUserLoginImpl() {
+    private final ObjectMapper jsonMapper = new ObjectMapper();
+    private final XmlMapper xmlMapper = new XmlMapper();
+
+    private final HttpClient client;
+
+    @Inject
+    ApplicationProperties properties;
+
+    public RiasUserLoginImpl(
+            @Named("riasLoginSSLContext") SSLContext sslContext,
+            @Named("riasLoginHostnameVerifier") HostnameVerifier hostnameVerifier
+    ) {
+        client = HttpClients.custom()
+                .setSSLContext(sslContext)
+                .setSSLHostnameVerifier(hostnameVerifier)
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setConnectTimeout(3_000)
+                        .setConnectionRequestTimeout(3_000)
+                        .setSocketTimeout(10_000)
+                        .build())
+                .build();
     }
 
     public RiasLogin loginUser(String domain, String username, String password) throws RiasCheckException {
@@ -56,8 +75,7 @@ public class RiasUserLoginImpl implements RiasLoginService {
 
         String usernameV = Util.encodeUTF8(username);
 
-        Response response = null;
-        RiasLogin result = null;
+        RiasLogin result;
 
         // {"refresh_token":"0000022d-703b1793-cea5-8e2a-e053-4794c26df2c1", "access_token":"m6qj36yhmrmm3xu6p067fu9h0aw8h2"}
         // {"error":"INVALID_CLIENT", "error_description":"Не найден договор"}
@@ -65,31 +83,47 @@ public class RiasUserLoginImpl implements RiasLoginService {
         // {"error":"UNAUTHORIZED_CLIENT", "error_description":"Данный тип авторизации не поддерживается для заданного клиента."}
 
         try {
-
-            URI uri = new ResteasyUriBuilder()
+            URI uri = UriBuilder.newInstance()
                     .scheme(properties.getProperty(AUTH_SCHEME))
                     .host(String.format("%s.%s", domain == null ? properties.getProperty(AUTH_DEF_CITY) : domain, properties.getProperty(AUTH_DOMAIN)))
                     .port(properties.getPropertyInt(AUTH_PORT))
                     .path(properties.getProperty(AUTH_PATH))
                     .build();
 
-            ResteasyWebTarget wt = client.target(uri)
+            HttpGet request = new HttpGet(UriBuilder.fromUri(uri)
                     .queryParam("client_id", properties.getProperty(CLIENT_NAME))
                     .queryParam("grant_type", properties.getProperty(GRANT_TYPE))
                     .queryParam("username", usernameV)
                     .queryParam("timestamp$c", timestamp)
-                    .queryParam("client_secret", secretHash);
+                    .queryParam("client_secret", secretHash)
+                    .build());
+            request.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML);
 
-            response = wt.request(MediaType.APPLICATION_XML)
-                    .get();
-
-            result = response.readEntity(RiasLogin.class);
-
-        } catch (PropertyException | ProcessingException | WebApplicationException wae) {
-            throw new RiasCheckException(wae);
-        } finally {
-            if (response != null)
-                response.close();
+            HttpResponse response = client.execute(request);
+            try {
+                if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                    byte[] content;
+                    try (InputStream stream = response.getEntity().getContent()) {
+                        content = stream.readAllBytes();
+                    }
+                    try {
+                        result = xmlMapper.readValue(content, RiasLogin.class);
+                    } catch (Exception e1) {
+                        try {
+                            result = jsonMapper.readValue(content, RiasLogin.class);
+                        } catch (Exception e2) {
+                            e2.addSuppressed(e1);
+                            throw new RiasCheckException(e2);
+                        }
+                    }
+                } else {
+                    throw new RiasCheckException(response.getStatusLine().getReasonPhrase());
+                }
+            } finally {
+                EntityUtils.consume(response.getEntity());
+            }
+        } catch (Exception e) {
+                throw new RiasCheckException(e);
         }
 
         log.info("login response: " + result);

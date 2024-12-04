@@ -24,7 +24,7 @@ public class CustomRestResourceProviderFactory implements BaseResourceProviderFa
 
     @Override
     public RealmResourceProvider create(KeycloakSession session) {
-        this.auth = this.initAuth(session);
+        this.auth = this.initAuth(session, true);
         this.session = session;
         return this;
     }

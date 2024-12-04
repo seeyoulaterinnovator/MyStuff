@@ -1,5 +1,8 @@
 package ru.alamics.sso.keycloak.rest;
 
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.core.MultivaluedMap;
 import org.keycloak.jose.jws.JWSInput;
 import org.keycloak.jose.jws.JWSInputException;
 import org.keycloak.models.*;
@@ -12,9 +15,6 @@ import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.services.resources.admin.permissions.AdminPermissions;
 
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.core.MultivaluedMap;
 import java.util.Optional;
 
 public interface BaseResourceProvider<T> extends RealmResourceProvider {
@@ -28,7 +28,7 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
 
     default AdminPermissionEvaluator initAuthByWorkingRealm(KeycloakSession session) {
         KeycloakContext context = session.getContext();
-        InitSession initSession = initAdminAuth(session);
+        InitSession initSession = initAdminAuth(session, true);
 
         RealmManager realmManager = new RealmManager(session);
         KeycloakUriInfo uri = context.getUri();
@@ -42,12 +42,12 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
         return AdminPermissions.evaluator(session, realmFromRequest, initSession.getAdminAuth());
     }
 
-    default AdminPermissionEvaluator initAuth(KeycloakSession session) {
-        InitSession initSession = initAdminAuth(session);
+    default AdminPermissionEvaluator initAuth(KeycloakSession session, boolean restoreRealm) {
+        InitSession initSession = initAdminAuth(session, restoreRealm);
         return AdminPermissions.evaluator(session, initSession.getRealmFromToken(), initSession.getAdminAuth());
     }
 
-    default InitSession initAdminAuth(KeycloakSession session) {
+    default InitSession initAdminAuth(KeycloakSession session, boolean restoreRealm) {
         KeycloakContext context = session.getContext();
         AppAuthManager appAuthManager = new AppAuthManager();
         String tokenString = Optional.ofNullable(appAuthManager.extractAuthorizationHeaderToken(context.getRequestHeaders())).orElseThrow(() -> new NotAuthorizedException("Bearer"));
@@ -68,8 +68,12 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
 
         session.getContext().setRealm(realmFromToken);
 
-        AuthenticationManager.AuthResult authResult = Optional.ofNullable(appAuthManager.authenticateBearerToken(session, realmFromToken))
-                .orElseThrow(() -> new NotAuthorizedException("Bearer"));
+        AppAuthManager.BearerTokenAuthenticator authenticator = new AppAuthManager.BearerTokenAuthenticator(session);
+
+        AuthenticationManager.AuthResult authResult = authenticator.authenticate();
+        if(authResult == null) {
+            throw new NotAuthorizedException("Bearer");
+        }
 
         ClientModel client = Optional.ofNullable(realmFromToken.getClientByClientId(token.getIssuedFor()))
                 .orElseThrow(() -> new NotAuthorizedException("Could not find client for authorization"));
@@ -79,6 +83,17 @@ public interface BaseResourceProvider<T> extends RealmResourceProvider {
         if (!auth.getRealm().equals(realmManager.getKeycloakAdminstrationRealm())
                 && !auth.getRealm().equals(realmFromToken)) {
             throw new ForbiddenException();
+        }
+
+        if(restoreRealm) {
+            // see org.keycloak.services.resources.RealmsResource#init in version 6.0.1
+            // https://github.com/keycloak/keycloak/blob/6.0.1/services/src/main/java/org/keycloak/services/resources/RealmsResource.java#L202
+            KeycloakUriInfo uri = context.getUri();
+            MultivaluedMap<String, String> pathParameters = uri.getPathParameters();
+            String realmFromRequestName = pathParameters.getFirst("realm");
+            RealmModel realmFromRequest = Optional.ofNullable(realmManager.getRealmByName(realmFromRequestName))
+                    .orElseThrow(() -> new NotAuthorizedException("Unknown realm in path param"));
+            session.getContext().setRealm(realmFromRequest);
         }
 
         return new InitSession(session, realmFromToken, auth);

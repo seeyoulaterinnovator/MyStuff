@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.registration.rias.port.RiasApiService;
+import ru.alamics.sso.registration.rias.port.RiasLoginService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.when;
 class RiasServiceTest {
 
     private static RiasApiService riasApiService ;
+    private static RiasLoginService riasLoginService ;
     private static RiasService service;
 
     private static final String PHONE = "89999999999";
@@ -22,7 +24,8 @@ class RiasServiceTest {
     @BeforeAll
     static void init() {
         riasApiService = mock(RiasApiService.class);
-        service = new RiasService(riasApiService);
+        riasLoginService = mock(RiasLoginService.class);
+        service = new RiasService(riasApiService, riasLoginService);
     }
 
     @Test

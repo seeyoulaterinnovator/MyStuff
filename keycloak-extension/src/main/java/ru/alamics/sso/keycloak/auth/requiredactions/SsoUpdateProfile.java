@@ -1,5 +1,7 @@
 package ru.alamics.sso.keycloak.auth.requiredactions;
 
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.requiredactions.UpdateProfile;
@@ -11,14 +13,12 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.services.messages.Messages;
-import org.keycloak.services.resources.AttributeFormDataProcessor;
 import ru.alamics.sso.keycloak.lookup.Lookup;
+import org.keycloak.services.resources.AttributeFormDataProcessor;
 import ru.alamics.sso.registration.model.MessageConstants;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.util.Util;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.List;
 
@@ -57,13 +57,8 @@ public class SsoUpdateProfile extends UpdateProfile {
         String oldFirstName = user.getFirstName();
         String oldEmail = user.getEmail();
 
-        List<String> phones = user.getAttribute(ATTR_PHONE_NAME);
-        String oldPhone = null;
-        if (!phones.isEmpty()) {
-            oldPhone = phones.get(0);
-        } else {
-            user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(phone));
-        }
+        String oldPhone = user.getFirstAttribute(ATTR_PHONE_NAME);
+        user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(phone));
 
         boolean emailChanged = !(Util.isEmpty(oldEmail) || oldEmail.equals(email));
         boolean phoneChanged = !(Util.isEmpty(oldPhone) || oldPhone.equals(phone));
@@ -94,7 +89,7 @@ public class SsoUpdateProfile extends UpdateProfile {
         }
 
         if (emailChanged) {
-            UserModel userByEmail = session.users().getUserByEmail(email, realm);
+            UserModel userByEmail = session.users().getUserByEmail(realm, email);
             // check for duplicated email
             if (userByEmail != null && !userByEmail.getId().equals(user.getId())) {
                 Response challenge = context.form()
@@ -110,7 +105,7 @@ public class SsoUpdateProfile extends UpdateProfile {
             user.setEmailVerified(false);
         }
 
-        AttributeFormDataProcessor.process(formData, realm, user);
+        AttributeFormDataProcessor.process(formData, context.getRealm(), user);
 
         if (emailChanged) {
             event.clone().event(EventType.UPDATE_EMAIL).detail(Details.PREVIOUS_EMAIL, oldEmail).detail(Details.UPDATED_EMAIL, email).success();

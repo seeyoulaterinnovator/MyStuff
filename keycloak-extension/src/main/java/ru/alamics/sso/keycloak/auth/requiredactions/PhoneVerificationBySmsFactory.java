@@ -2,7 +2,6 @@ package ru.alamics.sso.keycloak.auth.requiredactions;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.OAuth2Constants;
-import org.keycloak.authentication.DisplayTypeRequiredActionFactory;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.models.KeycloakSession;
@@ -11,7 +10,7 @@ import ru.alamics.sso.registration.phone.ActivationCodeType;
 import ru.alamics.sso.registration.phone.UserPhoneVerifier;
 
 @Slf4j
-public class PhoneVerificationBySmsFactory extends AbstractRequiredActionFactory implements DisplayTypeRequiredActionFactory {
+public class PhoneVerificationBySmsFactory extends AbstractRequiredActionFactory {
 
     public static final String PROVIDER_ID = "phone_verificator_sms";
     private static final String DISPLAY_TEXT = "Phone Verification (sms)";
@@ -22,13 +21,6 @@ public class PhoneVerificationBySmsFactory extends AbstractRequiredActionFactory
     @Override
     public RequiredActionProvider create(KeycloakSession session) {
         return createProvider(session);
-    }
-
-    @Override
-    public RequiredActionProvider createDisplay(KeycloakSession session, String displayType) {
-        if (displayType == null) return createProvider(session);
-        if (!OAuth2Constants.DISPLAY_CONSOLE.equalsIgnoreCase(displayType)) return null;
-        return null;
     }
 
     private RequiredActionProvider createProvider(KeycloakSession session) {

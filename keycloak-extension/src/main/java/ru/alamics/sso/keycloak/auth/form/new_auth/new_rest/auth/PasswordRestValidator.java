@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth;
 
+import jakarta.ws.rs.core.Response;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.authenticators.directgrant.ValidatePassword;
@@ -11,7 +12,6 @@ import ru.alamics.sso.keycloak.facade.CachedUserPostFacade;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 
-import javax.ws.rs.core.Response;
 import java.util.List;
 
 import static ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth.RestAuthHelper.*;
@@ -45,7 +45,7 @@ public class PasswordRestValidator extends ValidatePassword {
             context.success();
             return;
         }
-        boolean valid = context.getSession().userCredentialManager().isValid(context.getRealm(), context.getUser(), UserCredentialModel.password(password));
+        boolean valid = user.credentialManager().isValid(UserCredentialModel.password(password));
         if (!valid) {
             context.getEvent().user(context.getUser());
             context.getEvent().error(Errors.INVALID_USER_CREDENTIALS);

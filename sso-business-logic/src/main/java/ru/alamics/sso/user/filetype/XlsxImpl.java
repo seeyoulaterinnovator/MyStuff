@@ -46,6 +46,7 @@ public class XlsxImpl implements FileModel {
     public void addRow(List<String> cells) {
         Sheet sheet = workbook.getSheetAt(0);
         int rowNum = sheet.getLastRowNum();
+        if(rowNum == -1) rowNum = 0;
         if (sheet.getRow(rowNum) != null) {
             rowNum++;
         }

@@ -1,11 +1,12 @@
 package ru.alamics.sso.registration.phone;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.sessions.AuthenticationSessionModel;
-import ru.alamics.sso.jpa.entity.UserLoginHistory;
 import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.phone.exception.*;
@@ -16,16 +17,11 @@ import ru.alamics.sso.registration.phone.port.SendMessageService;
 import ru.alamics.sso.registration.service.AuthorisedUsersService;
 import ru.alamics.sso.stats.LoginHistory;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
 
-
+@ApplicationScoped
 @Slf4j
-@Stateless
 public class UserPhoneVerifier {
 
     public static final String PHONE_KEY_HASH = "phone_key_hash";
@@ -33,12 +29,14 @@ public class UserPhoneVerifier {
     public static final String COUNT_REPEAT = "count_repeat";
     public static final String MESSENGER = "messenger";
 
-    @EJB
-    private SendMessageService messageSendService;
-    @EJB
-    private PhoneCallerRemoteService phoneCallerService;
-    @EJB
-    private LoginHistory loginHistory;
+    @Inject
+    SendMessageService messageSendService;
+
+    @Inject
+    PhoneCallerRemoteService phoneCallerService;
+
+    @Inject
+    LoginHistory loginHistory;
 
     public UserPhoneVerifier() {
         System.out.println("Got SendMessageService");

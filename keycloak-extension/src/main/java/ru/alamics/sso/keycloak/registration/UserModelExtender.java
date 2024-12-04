@@ -1,6 +1,7 @@
 package ru.alamics.sso.keycloak.registration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.ws.rs.core.MultivaluedMap;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormContext;
@@ -14,6 +15,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.provider.ProviderConfigProperty;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
 import ru.alamics.sso.keycloak.registration.rias.RiasCheckProvider;
 import ru.alamics.sso.registration.UserExtension;
@@ -23,14 +25,16 @@ import ru.alamics.sso.registration.tbapi.model.TbapiConnect;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.remote.tbapi.TbapiServiceRestImpl;
 
-import javax.ws.rs.core.MultivaluedMap;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static ru.alamics.sso.registration.model.FormConstants.*;
+import static ru.alamics.sso.registration.model.FormConstants.FIELD_EMAIL;
+import static ru.alamics.sso.registration.model.FormConstants.FIELD_PHONE;
 
 public class UserModelExtender extends AbstractFormActionFactory implements FormAction {
 
@@ -46,13 +50,12 @@ public class UserModelExtender extends AbstractFormActionFactory implements Form
             AuthenticationExecutionModel.Requirement.REQUIRED,
             AuthenticationExecutionModel.Requirement.DISABLED
     };
-    private final TbapiService tbapiService;
+    private TbapiService tbapiService;
     private final UserExtension userExtension;
     // jackson serialize
     ObjectMapper jacksonMapper = new ObjectMapper();
 
     public UserModelExtender() {
-        tbapiService = new TbapiService(new TbapiServiceRestImpl());
         userExtension = new UserExtension();
     }
 
@@ -176,6 +179,12 @@ public class UserModelExtender extends AbstractFormActionFactory implements Form
     @Override
     public FormAction create(KeycloakSession session) {
         log.info("Creating UserModelExtender");
+        tbapiService = new TbapiService(new TbapiServiceRestImpl(
+                Lookup.lookup(SSLContext.class, "tbapiRegistrationSSLContext"),
+                Lookup.lookup(SSLContext.class, "tbapiCustomerSSLContext"),
+                Lookup.lookup(HostnameVerifier.class, "tbapiRegistrationHostnameVerifier"),
+                Lookup.lookup(HostnameVerifier.class, "tbapiCustomerHostnameVerifier")
+        ));
         return this;
     }
 

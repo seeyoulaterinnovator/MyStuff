@@ -1,13 +1,14 @@
 package ru.alamics.sso.remote.rias;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
+import jakarta.ws.rs.core.UriBuilder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.rias.exception.RiasCheckException;
 import ru.alamics.sso.remote.ApplicationPropertiesMock;
 
+import javax.net.ssl.SSLContext;
 import java.net.URI;
 import java.util.Properties;
 
@@ -23,20 +24,23 @@ class RiasUserExistsCheckImplTest {
     private static RiasUserExistsCheckImpl service;
 
     @BeforeAll
-    static void initWireMock() {
+    static void initWireMock() throws Exception {
         server = new WireMockServer(wireMockConfig().dynamicPort());
         server.start();
 
-        URI uri = new ResteasyUriBuilder()
+        URI uri = UriBuilder.newInstance()
                 .scheme("http")
                 .host("localhost")
                 .port(server.port())
                 .path(PATH)
                 .build();
 
-        ApplicationProperties props = new ApplicationPropertiesMock(new Properties());
+        Properties properties = new Properties();
+        properties.put("riasApi.uri", uri.toString());
 
-        service = new RiasUserExistsCheckImpl(props, uri);
+        ApplicationProperties props = new ApplicationPropertiesMock(properties);
+
+        service = new RiasUserExistsCheckImpl(props, SSLContext.getDefault(), (s, ss) -> true);
     }
 
     @Test

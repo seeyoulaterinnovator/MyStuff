@@ -1,9 +1,10 @@
 package ru.alamics.sso.keycloak.resetcred.impl;
 
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
-import org.keycloak.authentication.actiontoken.DefaultActionTokenKey;
 import org.keycloak.authentication.actiontoken.resetcred.ResetCredentialsActionToken;
 import org.keycloak.common.util.Time;
 import org.keycloak.email.EmailException;
@@ -12,10 +13,7 @@ import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.events.EventType;
-import org.keycloak.models.ClientModel;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.messages.Messages;
@@ -31,9 +29,6 @@ import ru.alamics.sso.schedule.Translator;
 import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-import java.text.DecimalFormat;
 import java.util.Objects;
 
 @Slf4j
@@ -85,7 +80,8 @@ public class ResetCredentialEmail extends ResetCredential {
             authenticationSession.setRedirectUri(getRedirectUrl(authenticationSession.getClient()));
         }
         String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authenticationSession).getEncodedId();
-        ResetCredentialsActionToken token = new ResetCredentialsActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, authenticationSession.getClient().getClientId());
+        ResetCredentialsActionToken token = new ResetCredentialsActionToken(user.getId(), user.getEmail(),
+                absoluteExpirationInSecs, authSessionEncodedId, authenticationSession.getClient().getClientId());
 
         token.setOtherClaims("reduri", getRedirectUrl(authenticationSession.getClient()));
 

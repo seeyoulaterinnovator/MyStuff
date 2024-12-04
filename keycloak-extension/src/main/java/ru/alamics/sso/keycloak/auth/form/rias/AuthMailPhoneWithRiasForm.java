@@ -23,8 +23,8 @@ import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 
 import static ru.alamics.sso.settings.SettingConstants.*;
 
@@ -70,7 +70,7 @@ public class AuthMailPhoneWithRiasForm extends AbstractAuthMailPhoneForm {
                 if (Util.isEmpty(withCity) || !withCity.equals("TRUE")) {
                     context.form().setAttribute(FormConstants.WITH_CITY, "TRUE");
                     context.form().setAttribute("showModal", "TRUE");
-                    context.challenge(context.form().createLogin());
+                    context.challenge(context.form().createLoginUsernamePassword());
                 } else if (!checkAuthRias(context, CHOOSE_REDIRECT_TO_LK_FORM)) {
                     context.getEvent().error(Errors.USER_NOT_FOUND);
                     context.form().setAttribute("showModal", "FALSE");

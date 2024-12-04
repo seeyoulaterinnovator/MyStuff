@@ -1,23 +1,20 @@
 package ru.alamics.sso.service;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.jpa.entities.RequiredActionProviderEntity;
 import org.keycloak.representations.idm.RequiredActionProviderRepresentation;
 import ru.alamics.sso.jpa.repository.RealmRepository;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Stateless
-@LocalBean
+@ApplicationScoped
 @Slf4j
 public class RequiredActionService {
-
-    @EJB
-    private RealmRepository realmRepository;
+    @Inject
+    RealmRepository realmRepository;
 
     private static RequiredActionProviderRepresentation entityToRepresentation(RequiredActionProviderEntity entity) {
         RequiredActionProviderRepresentation rep = new RequiredActionProviderRepresentation();

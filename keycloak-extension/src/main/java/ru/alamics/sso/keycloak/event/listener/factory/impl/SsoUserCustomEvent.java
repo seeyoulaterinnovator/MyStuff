@@ -26,6 +26,7 @@ public class SsoUserCustomEvent extends SsoEvent {
 
     private static final String BODY_TEMPLATE_LOGIN_SEND = "mail-login-send.ftl";
     private static final String BODY_TEMPLATE_PASSWORD_RESET_WITH_LOGIN = "mail-password-reset-with-login.ftl";
+    private static final String BODY_TEMPLATE_DELETE_PASSWORD = "credential-disable-password.ftl";
 
     private AdminEvent event;
 
@@ -48,7 +49,7 @@ public class SsoUserCustomEvent extends SsoEvent {
             UserEntityRepresentation userRepresentation = this.getUserEntityRepresentation(representation);
             RealmModel realm = session.realms().getRealm(event.getRealmId());
             String userId = userRepresentation.getId();
-            UserModel user = session.users().getUserById(userId, realm);
+            UserModel user = session.users().getUserById(realm, userId);
 
             if (user != null && user.getEmail() != null) {
                 Map<String, Object> attributes = new HashMap<>();
@@ -58,10 +59,11 @@ public class SsoUserCustomEvent extends SsoEvent {
                 attributes.put("emailLoginHtml", settingsService.getSettingsStringValue(EMAIL_LOGIN_ACCOUNT, realm.getName()));
                 attributes.put("emailPasswordFooterHtml", settingsService.getSettingsStringValue(EMAIL_PASSWORD_FOOTER_ACCOUNT, realm.getName()));
                 attributes.put("emailResetPasswordBodyHtml", settingsService.getSettingsStringValue(EMAIL_RESET_PASSWORD_ACCOUNT, realm.getName()));
+                attributes.put("emailCredentialDisableBodyHtml", settingsService.getSettingsStringValue(EMAIL_CREDENTIAL_DISABLE_ACCOUNT, realm.getName()));
                 int timeTokenResetPass = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm.getName());
                 String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
                 attributes.put("expTimePass", expirationStrRusPass);
-                List<String> phones = user.getAttribute("phone");
+                List<String> phones = user.getAttributeStream("phone").toList();
                 if (!phones.isEmpty() && phones.get(0).length() == 11) {
                     attributes.put("phone", Util.getFormatNumber(phones.get(0)));
                 }
@@ -77,6 +79,15 @@ public class SsoUserCustomEvent extends SsoEvent {
                             timeTokenResetPassAndLogin,
                             settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_RESET_PASSWORD, realm.getName()), BODY_TEMPLATE_PASSWORD_RESET_WITH_LOGIN, attributes);
                     //this.sendEmail(user, realm, "emailResetPasswordSubject", "mail-password-reset-with-login.ftl", attributes);
+                } else if (userRepresentation.getRequiredActions().contains(UserEntityRepresentation.DELETE_PASSWORD)) {
+                    int timeTokenResetPassAndLogin = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD_AND_LOGIN, realm.getName());
+                    String expirationStrRusPassAndLogin = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPassAndLogin);
+                    attributes.put("expTimePassAndLogin", expirationStrRusPassAndLogin);
+
+                    SsoPasswordCredentialProvider a = new SsoPasswordCredentialProvider(session);
+                    a.disableCredentialType(realm, user, CredentialModel.PASSWORD,
+                            timeTokenResetPassAndLogin,
+                            settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_CREDENTIAL_DISABLE, realm.getName()), BODY_TEMPLATE_DELETE_PASSWORD, attributes);
                 }
             } else {
                 log.error(String.format("User '%s' not found or do not have email", userId));

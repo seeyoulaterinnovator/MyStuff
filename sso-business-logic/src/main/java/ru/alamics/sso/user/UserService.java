@@ -1,5 +1,6 @@
 package ru.alamics.sso.user;
 
+import jakarta.ws.rs.NotFoundException;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
@@ -9,7 +10,6 @@ import ru.alamics.sso.user.model.ImportResponse;
 import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.util.validator.NotValidException;
 
-import javax.ws.rs.NotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 

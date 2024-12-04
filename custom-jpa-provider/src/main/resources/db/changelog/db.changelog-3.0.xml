@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet id="1" author="korotaev.miu">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mariadb"/>
+        </preConditions>
+        <comment>Make first name profile attribute as required</comment>
+        <sql>
+            update
+                COMPONENT_CONFIG as q1,
+                (
+                    select
+                        cf.id,
+                        @path_to_name := json_unquote(json_search(value, 'one', 'firstName', null, '$.attributes[*].name')) as path_to_name,
+                        @path := concat(trim (trailing '.name' from @path_to_name), '.required.roles') as path,
+                        @new_value := json_set(value, @path, json_array('admin', 'user')) as new_value
+                    from COMPONENT_CONFIG cf
+                    join COMPONENT c on c.ID = cf.COMPONENT_ID
+                    join REALM r on r.ID = c.REALM_ID
+                    where cf.NAME = 'kc.user.profile.config' and r.NAME in ('user', 'ER-TELECOM', 'S-TELECOM')
+                ) as q2
+            set q1.value = q2.new_value
+            where q1.id = q2.id;
+        </sql>
+    </changeSet>
+    <changeSet id="2" author="korotaev.miu">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mariadb"/>
+        </preConditions>
+        <comment>Make last name profile attribute as optional</comment>
+        <sql>
+            update
+                COMPONENT_CONFIG as q1,
+                (
+                    select
+                        cf.id,
+                        @path_to_name := json_unquote(json_search(value, 'one', 'lastName', null, '$.attributes[*].name')) as path_to_name,
+                        @path := concat(trim(trailing '.name' from @path_to_name), '.required') as path,
+                        @new_value := json_remove(value, @path) as new_value
+                    from COMPONENT_CONFIG cf
+                    join COMPONENT c on c.ID = cf.COMPONENT_ID
+                    join REALM r on r.ID = c.REALM_ID
+                    where cf.NAME = 'kc.user.profile.config' and r.NAME in ('user', 'ER-TELECOM', 'S-TELECOM')
+                ) as q2
+            set q1.value = q2.new_value
+            where q1.id = q2.id;
+        </sql>
+    </changeSet>
+    <changeSet id="3" author="korotaev.miu">
+        <sql>
+            update REALM set ADMIN_THEME = 'keycloak.v2';
+        </sql>
+    </changeSet>
+    <changeSet id="4" author="korotaev.miu">
+        <sql>
+            INSERT INTO SETTINGS (ID, EXT_ID, VALUE, `DESC`, REALM_ID, NAME, UNIT, TYPE)
+            VALUES ('b3a0dc99-8772-4c65-89fc-d21757f7c808', 'timerLockDurationProperty', '25', null, 'master', 'Timer lock timeout', 'MINUTES', 'REALM');
+        </sql>
+    </changeSet>
+    <changeSet id="5" author="korotaev.miu">
+        <preConditions>
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM APP_PROPERTIES WHERE NAME = 'oidc.token.allowedDuplicateParameters';
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT INTO APP_PROPERTIES (NAME, VALUE)
+            VALUES ('oidc.token.allowedDuplicateParameters', 'scope');
+        </sql>
+    </changeSet>
+    <changeSet id="6" author="korotaev.miu">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mariadb"/>
+        </preConditions>
+        <comment>Clients > account-console > Web origins + /realms/realm/account/*</comment>
+        <sql>
+            insert into WEB_ORIGINS(CLIENT_ID, VALUE)
+            select c.ID, concat('/realms/', c.REALM_ID, '/account/*') from CLIENT c
+            where c.CLIENT_ID = 'account-console'
+              and REALM_ID not in ('master', 'manager')
+              and not exists (select * from WEB_ORIGINS wo where wo.CLIENT_ID = c.ID);
+        </sql>
+    </changeSet>
+    <changeSet id="7" author="korotaev.miu">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mariadb"/>
+        </preConditions>
+        <comment>Clients > account-console > Client Scopes > account-console-dedicated + Add mappers: client roles</comment>
+        <sql>
+            insert ignore into PROTOCOL_MAPPER(ID, NAME, PROTOCOL, PROTOCOL_MAPPER_NAME, CLIENT_ID)
+            select
+                concat('2b88e952-ab68-4a86-9c34-', cast(lpad(row_number() over (order by c.ID), 12, '0') as CHAR)),
+                'client roles',
+                'openid-connect',
+                'oidc-usermodel-client-role-mapper',
+                c.ID
+            from CLIENT c
+            where c.CLIENT_ID = 'account-console'
+              and not exists (
+                select * from PROTOCOL_MAPPER pm
+                where pm.CLIENT_ID = c.ID
+                  and pm.NAME = 'client roles'
+            );
+            insert ignore into PROTOCOL_MAPPER_CONFIG(PROTOCOL_MAPPER_ID, NAME, VALUE)
+            select pm.ID as PROTOCOL_MAPPER_ID, q.NAME, q.VALUE
+            from (
+                     select 'access.token.claim' as NAME, 'true' as VALUE
+                     union all
+                     select 'claim.name', 'resource_access.\$\{client_id}.roles'
+                     union all
+                     select 'introspection.token.claim', 'true'
+                     union all
+                     select 'jsonType.label', 'String'
+                     union all
+                     select 'multivalued', 'true'
+                     union all
+                     select 'user.attribute', 'foo'
+                 ) q,
+                 PROTOCOL_MAPPER pm
+            where pm.ID like '2b88e952-ab68-4a86-9c34-%';
+        </sql>
+    </changeSet>
+    <changeSet id="8" author="korotaev.miu" dbms="mariadb">
+        <sql>
+            alter table CHECK_TABLE modify column name varchar(255) not null;
+        </sql>
+    </changeSet>
+    <changeSet id="9" author="korotaev.miu" dbms="mariadb">
+        <sql>
+            create table DEV_HTTP_LOG(
+                                         ID varchar(36) not null,
+                                         PINNED boolean not null default false,
+                                         NODE varchar(255) not null,
+                                         REQUESTED_AT timestamp not null,
+                                         URL varchar(4096) character set utf8mb4 collate utf8mb4_unicode_ci not null,
+                                         METHOD varchar(7) not null,
+                                         REQUEST_HEADERS json not null,
+                                         REQUEST_BODY_TEXT longtext character set utf8mb4 collate utf8mb4_unicode_ci,
+                                         REQUEST_BODY_BINARY blob,
+                                         RESPONDED_AT timestamp,
+                                         STATUS smallint,
+                                         RESPONSE_HEADERS json,
+                                         RESPONSE_BODY_TEXT longtext character set utf8mb4 collate utf8mb4_unicode_ci,
+                                         RESPONSE_BODY_BINARY blob,
+                                         primary key (ID)
+            );
+            create index IDX_DEV_HTTP_LOG_REQUESTED_AT on DEV_HTTP_LOG (REQUESTED_AT);
+
+
+        </sql>
+    </changeSet>
+    <changeSet id="10" author="korotaev.miu" dbms="mariadb">
+        <sql>
+            insert ignore into APP_PROPERTIES (NAME, VALUE)
+            values ('dev.httpLogEnabled', 'false'),
+                   ('dev.httpLogPaths', '^/realms/[^/]+/protocol/openid-connect/.*$'),
+                   ('dev.httpLogMaxCountPerNode', '10000');
+        </sql>
+    </changeSet>
+    <changeSet id="11" author="korotaev.miu" dbms="mariadb">
+        <sql>
+            update CLIENT
+            set ALWAYS_DISPLAY_IN_CONSOLE = 1
+            where CLIENT_ID not like '%-realm'
+              and CLIENT_ID not in ('account', 'account-console', 'realm-management', 'security-admin-console',
+                                    'admin-cli', 'broker');
+        </sql>
+    </changeSet>
+    <changeSet id="12" author="korotaev.miu" dbms="mariadb">
+        <sql>
+            insert into SETTINGS(ID, REALM_ID, EXT_ID, VALUE, `DESC`, NAME, UNIT, `TYPE`)
+            select
+                concat(substring(uuid(), 1, 24), cast(lpad(row_number() over (order by EXT_ID), 12, '0') as CHAR)) as ID,
+                'ER-TELECOM' as REALM_ID,
+                EXT_ID, VALUE, `DESC`, NAME, UNIT, `TYPE`
+            from SETTINGS s
+            where REALM_ID = 'user'
+              and `TYPE` in ('MESSAGE', 'FRONT')
+              and not exists(select * from SETTINGS where EXT_ID = s.EXT_ID and REALM_ID = 'ER-TELECOM');
+            insert into SETTINGS(ID, REALM_ID, EXT_ID, VALUE, `DESC`, NAME, UNIT, `TYPE`)
+            select
+                concat(substring(uuid(), 1, 24), cast(lpad(row_number() over (order by EXT_ID), 12, '0') as CHAR)) as ID,
+                'S-TELECOM' as REALM_ID,
+                EXT_ID, VALUE, `DESC`, NAME, UNIT, `TYPE`
+            from SETTINGS s
+            where REALM_ID = 'user'
+              and `TYPE` in ('MESSAGE', 'FRONT')
+              and not exists(select * from SETTINGS where EXT_ID = s.EXT_ID and REALM_ID = 'S-TELECOM');
+        </sql>
+    </changeSet>
+    <changeSet id="13" author="barsukov-as">
+        <sql>
+            <![CDATA[
+                UPDATE SETTINGS SET VALUE = '8 800 2500 333' WHERE EXT_ID = 'phoneInMessage' and REALM_ID = 'user';
+                UPDATE SETTINGS SET VALUE = '8 800 550 0479' WHERE EXT_ID = 'phoneInMessage' and REALM_ID = 'ER-TELECOM';
+                UPDATE SETTINGS SET VALUE = '8 (495) 145 9 555' WHERE EXT_ID = 'phoneInMessage' and REALM_ID = 'S-TELECOM';
+
+                UPDATE SETTINGS SET VALUE = '© АО «ЭР-Телеком Холдинг» 2011–' WHERE EXT_ID = 'footerInMassage' and REALM_ID = 'user';
+                UPDATE SETTINGS SET VALUE = '© АО «ЭР-Телеком Холдинг» 2011–' WHERE EXT_ID = 'footerInMassage' and REALM_ID = 'ER-TELECOM';
+                UPDATE SETTINGS SET VALUE = '© OOO «Телеком Центр»' WHERE EXT_ID = 'footerInMassage' and REALM_ID = 'S-TELECOM';
+
+                UPDATE SETTINGS SET VALUE = 'С уважением, {23}!' WHERE EXT_ID = 'GratitudeUp';
+                UPDATE SETTINGS SET VALUE = 'Данное письмо отправлено с адреса, предназначенного            только для рассылок. Пожалуйста, не отвечайте на это письмо. В случае возникновения            вопросов Вы можете обратиться к персональному менеджеру, контактные данные есть в            «личном кабинете» или по телефону <br> {21} (звонок бесплатный).' WHERE EXT_ID = 'GratitudeDown';
+                UPDATE SETTINGS SET VALUE = '<p> Мы не храним ваши пароли.<br /> Если вы забыли свой пароль или у вас не получается войти в Личный кабинет — воспользуйтесь формой восстановления пароля по ссылке <a class="no_block" href="{0}">«Забыли пароль?»</a>. </p> <div class="instruction"> <p class="instruction_text"> <span class="mark">&nbsp;</span> Для восстановления данных укажите ваш логин. </p> <p class="instruction_text"> <span class="mark">&nbsp;</span> На ваш адрес электронной почты будет отправлена ссылка для восстановления пароля.<br /> <span style="margin-left: 19px">Срок действия ссылки {7}.</span> </p> </div>' WHERE EXT_ID = 'emailPasswordFooterHtml';
+                UPDATE SETTINGS SET VALUE = '<p class="small_text login_data"> Ваш логин:<br /> <span class="text_bolid">{32}</span> </p>' WHERE EXT_ID = 'emailLoginHtml';
+                UPDATE SETTINGS SET VALUE = '<p class="small_text login_data"> Ваш логин:<br /> <span class="text_bolid">{22}</span><br /> <span class="small_text">или</span><br /> <span class="text_bolid">{2}</span> </p>' WHERE EXT_ID = 'emailLoginAndPhoneHtml';
+
+                UPDATE SETTINGS SET VALUE = '<p> Ваша учетная запись для входа в Личный кабинет «{23}» <font color="{28}">заблокирована</font>. Доступ к услугам при этом не блокируется.<br> Вы не использовали свою учетную запись в течении длительного времени. Чтобы восстановить доступ к учетной записи, обратитесь к своему персональному менеджеру или оставьте заявку в чате <a class="no_block" href="{0}">на сайте</a> или по телефону <a class="no_block" href="tel:{24}">{21}</a>. </p> {19} {20}' WHERE EXT_ID = 'blockNotificationSchedulerHtml';
+                UPDATE SETTINGS SET VALUE = '<p> Ваша учетная запись для входа в <a href="{0}">Личный кабинет</a> «{23}» <span style="color: {29}"> разблокирована.</span> </p> {19} <p class = "block_login"> <a class="no_block" href="{0}"> Перейти в Личный кабинет</a> </p>' WHERE EXT_ID = 'emailEnabledAccountBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p> Подтвердите вашу учетную запись для входа в Личный кабинет «{23}». Срок действия ссылки {6}. </p> <p class="block_link"> <a href="{12}">Подтвердить учетную запись</a> </p>' WHERE EXT_ID = 'emailVerificationLoginBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p> Код для подтверждения данных вашей учетной записи Личного кабинета «{23}»: </p> <p style="font-weight: bold" class="text_bolid margin_block"> {4} </p>' WHERE EXT_ID = 'emailVerificationAuthBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p> Создана учетная запись <a class="no_block" href="mailto:{3}">{3}</a>. Если ее создали вы, пройдите по ссылке ниже для подтверждения вашего e-mail. </p> <p style="margin-top: 16px; margin-bottom: 16px;" class="block_link"><a href="{12}">Подтвердить e-mail</a></p> <p style="font-size: 12px; line-height: 16px;" class="small_text"> Эта ссылка устареет через {6}.<br> Если вы не создавали учетную запись, просто проигнорируйте это письмо. </p>' WHERE EXT_ID = 'emailVerificationBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p> Для безопасности ваших персональных данных пароль от входа в личный кабинет «{23}» был сброшен. Чтобы восстановить учетную запись, перейдите по ссылке ниже и смените пароль. </p> <p style="margin-top: 16px" class="block_link"> <a href="{11}">Восстановить пароль</a> </p>' WHERE EXT_ID = 'emailCredentialDisableBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p> Ваша учетная запись для входа в Личный кабинет «{23}» <font color="{28}">заблокирована</font>. Доступ к услугам при этом не блокируется.<br> Чтобы восстановить доступ к учетной записи, обратитесь к своему персональному менеджеру или оставьте заявку в чате <a class="no_block" href="{0}">на сайте</a> или по телефону <a class="no_block" href="tel:{24}">{21}</a>. </p> {19} {20}' WHERE EXT_ID = 'emailDisabledAccountBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p> Для вас создана учетная запись для входа в <a href="{0}">Личный кабинет</a> </p> <p class="small_text block_timer">Срок действия ссылки {7}.</p> {19} <p style="margin-top: 16px"> Благодарим вас за выбор услуг «{23}» для вашей компании! </p>' WHERE EXT_ID = 'emailAccountCreateBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p> Для авторизации в <a class="no_block" href="{0}">Личном кабинете</a> необходимо указать логин и пароль, установленный вами при регистрации в Личном кабинете. </p> {19} {20} <p class = "block_login"> <a class="no_block" href="{0}"> Перейти в Личный кабинет</a> </p>' WHERE EXT_ID = 'emailSendLoginBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p> Для вас создана учетная запись для входа в <a href="{0}">Личный кабинет</a> </p> <p class="small_text block_timer">Срок действия ссылки {7}.</p> {19} <p style="margin-top: 16px"> Пройдите по ссылке и <a href="{13}">установите пароль</a> </p>' WHERE EXT_ID = 'emailAccountDataBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p> Пароль вашей учетной записи был сброшен.<br /> Установите новый пароль по <a class="no_block" href="{11}">ссылке</a>, чтобы завершить процесс и восстановить доступ к личному кабинету. </p> <p class="small_text block_timer">Срок действия ссылки {7}.</p> {19} <p class = "block_login"> <a class="no_block" href="{0}">Перейти в Личный кабинет</a> </p> {20}' WHERE EXT_ID = 'emailResetPasswordBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p> Был создан запрос на изменение пароля от вашей учетной записи <a href="mailto:{3}">{3} </a>. Если это были вы, пройдите по ссылке: <br /> </p> <a href="{12}" style="margin-top: 16px">Изменить пароль</a> <p class="content__secondary content__secondary-mt"> Эта ссылка устареет через {6} <br /> Если вы не хотите сбрасывать пароль, просто проигнорируйте это письмо. </p>' WHERE EXT_ID = 'passwordResetBodyHtml';
+                UPDATE SETTINGS SET VALUE = '<p> Просим вас обновить данные учетной записи <a class="no_block" href="mailto:{3}">{3}</a>. Для этого перейдите по ссылке ниже. </p> <p style="margin-top: 16px; margin-bottom: 16px" class="block_link"> <a href="{12}">Обновить данные</a> </p> <p style="font-size: 12px; line-height: 16px" class="small_text"> Эта ссылка устареет через {5}. </p>' WHERE EXT_ID = 'executeActionsBodyHtml';
+            ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="14" author="ichetovkina-eiu">
+        <sql>
+            INSERT INTO APP_PROPERTIES (name, value) VALUES ('updateVerKC.datetime', '2024-11-18 06:00:00')
+        </sql>
+    </changeSet>
+</databaseChangeLog>

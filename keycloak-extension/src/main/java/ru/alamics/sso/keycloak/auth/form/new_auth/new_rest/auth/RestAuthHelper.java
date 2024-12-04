@@ -1,12 +1,12 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth;
 
+import jakarta.ws.rs.core.MultivaluedMap;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.models.UserModel;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.keycloak.auth.form.new_auth.rest_enums.RestAuthSessionErrorNotes;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 
-import javax.ws.rs.core.MultivaluedMap;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;

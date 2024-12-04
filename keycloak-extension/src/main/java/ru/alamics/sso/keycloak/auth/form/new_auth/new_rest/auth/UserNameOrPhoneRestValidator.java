@@ -20,8 +20,8 @@ import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.util.Util;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import java.util.Objects;
 
 import static ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.auth.RestAuthHelper.isRestAuthRequestValid;
@@ -83,7 +83,7 @@ public class UserNameOrPhoneRestValidator extends ValidateUsername {
             return;
         }
 
-        if (!user.getAttribute(BlockType.MANAGER_BLOCK.getType()).isEmpty()) {
+        if (user.getFirstAttribute(BlockType.MANAGER_BLOCK.getType()) != null) {
             context.getEvent().user(user);
             context.getEvent().error(Errors.USER_DISABLED);
             Response challengeResponse = errorResponse(Response.Status.BAD_REQUEST.getStatusCode(), "invalid_grant", "Account disabled");

@@ -115,7 +115,9 @@
   }
 
   function closeAndSubmit() {
-    submitButton.click();
+    if(submitButton) {
+      submitButton.click();
+    }
   }
 
   function handleClick(e) {

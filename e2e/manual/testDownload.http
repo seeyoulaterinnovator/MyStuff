@@ -1,0 +1,62 @@
+### Auth token set
+POST http://localhost:8080/auth/realms/master/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id = {{client_id}} &
+grant_type = password &
+username = {{username}} &
+password = {{password}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.global.set("access_token", response.body.access_token);
+%}
+
+### Find test user
+GET http://localhost:8080/auth/realms/e2e/users-info/search?searchRealm=e2e&first=0&max=11
+Authorization: Bearer {{access_token}}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.global.set("testerId", response.body.results['users-info'][0].id);
+%}
+
+### Test download
+POST http://localhost:8080/auth/realms/{{realm}}/users-toms/downloadUsers
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "type": "xlsx",
+  "userIds": ["{{testerId}}"],
+  "userParameters": ["USER_ID","FIRST_NAME","EMAIL","PHONE","TOMS_ID","DMP_ID","ROLE","SYSTEM","ENABLED"]
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+### Test download 2
+POST http://localhost:8080/auth/realms/user/users-toms/downloadUsers
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "type": "xlsx",
+  "userIds": ["c18f0a95-9ad6-418e-9548-8f9d96b80a76", "8a433d72-d777-4db8-a1db-2c418bab68ba", "b0c9fc8e-c42f-418b-9f34-4e0f6141f697"],
+  "userParameters": ["USER_ID","FIRST_NAME","EMAIL","PHONE","TOMS_ID","DMP_ID","ROLE","SYSTEM","ENABLED"]
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}

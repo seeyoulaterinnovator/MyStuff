@@ -1,30 +1,51 @@
 package ru.alamics.sso.keycloak.registration.validate;
 
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.Config;
+import org.keycloak.authentication.FormAction;
+import org.keycloak.authentication.FormActionFactory;
+import org.keycloak.authentication.FormContext;
 import org.keycloak.authentication.ValidationContext;
 import org.keycloak.authentication.forms.RegistrationPage;
-import org.keycloak.authentication.forms.RegistrationProfile;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
+import org.keycloak.forms.login.LoginFormsProvider;
+import org.keycloak.models.*;
 import org.keycloak.models.utils.FormMessage;
+import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
 
-import javax.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 import java.util.ArrayList;
 import java.util.List;
 
 import static ru.alamics.sso.registration.model.FormConstants.FIELD_FIRST_NAME;
 import static ru.alamics.sso.registration.model.FormConstants.FIELD_PHONE;
+
 @Slf4j
-public class RegistrationCustomProfile extends RegistrationProfile {
+public class RegistrationCustomProfile implements FormAction, FormActionFactory {
+    private static final String PROVIDER_ID = "registration-profile-action";
 
     private static final String DISPLAY_NAME = "Profile Custom Validation";
 
     @Override
-    public String getDisplayType() {
-        return DISPLAY_NAME;
-    }
+    public String getDisplayType() { return DISPLAY_NAME; }
+
+    @Override
+    public String getReferenceCategory() { return null; }
+
+    @Override
+    public boolean isConfigurable() { return false; }
+
+    @Override
+    public AuthenticationExecutionModel.Requirement[] getRequirementChoices() { return REQUIREMENT_CHOICES; }
+
+    @Override
+    public boolean isUserSetupAllowed() { return false; }
+
+    @Override
+    public void buildPage(FormContext context, LoginFormsProvider form) {}
 
     @Override
     public void validate(ValidationContext context) {
@@ -66,7 +87,7 @@ public class RegistrationCustomProfile extends RegistrationProfile {
             emailValid = false;
         }
 
-        if (emailValid && !context.getRealm().isDuplicateEmailsAllowed() && context.getSession().users().getUserByEmail(email, context.getRealm()) != null) {
+        if (emailValid && !context.getRealm().isDuplicateEmailsAllowed() && context.getSession().users().getUserByEmail(context.getRealm(), email) != null) {
             eventError = Errors.EMAIL_IN_USE;
             formData.remove(Validation.FIELD_EMAIL);
             context.getEvent().detail(Details.EMAIL, email);
@@ -77,10 +98,51 @@ public class RegistrationCustomProfile extends RegistrationProfile {
         if (errors.size() > 0) {
             context.error(eventError);
             context.validationError(formData, errors);
-            return;
-
         } else {
             context.success();
         }
+    }
+
+    @Override
+    public void success(FormContext context) {
+        UserModel user = context.getUser();
+        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
+        user.setFirstName(formData.getFirst(RegistrationPage.FIELD_FIRST_NAME));
+        user.setLastName(formData.getFirst(RegistrationPage.FIELD_LAST_NAME));
+        user.setEmail(formData.getFirst(RegistrationPage.FIELD_EMAIL));
+    }
+
+    @Override
+    public boolean requiresUser() { return false; }
+
+    @Override
+    public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user) { return true; }
+
+    @Override
+    public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user) {}
+
+    @Override
+    public String getHelpText() {
+        return "Validates email, first name, and last name attributes and stores them in user data.";
+    }
+
+    @Override
+    public List<ProviderConfigProperty> getConfigProperties() { return List.of(); }
+
+    @Override
+    public FormAction create(KeycloakSession session) { return this; }
+
+    @Override
+    public void init(Config.Scope config) {}
+
+    @Override
+    public void postInit(KeycloakSessionFactory factory) {}
+
+    @Override
+    public void close() {}
+
+    @Override
+    public String getId() {
+        return PROVIDER_ID;
     }
 }

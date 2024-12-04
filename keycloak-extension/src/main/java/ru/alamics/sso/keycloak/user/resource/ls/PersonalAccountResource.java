@@ -1,13 +1,13 @@
 package ru.alamics.sso.keycloak.user.resource.ls;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.annotations.cache.NoCache;
+import org.jboss.resteasy.reactive.NoCache;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.user.PersonalAccountService;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.List;
 
 @Slf4j
@@ -68,6 +68,22 @@ public class PersonalAccountResource {
             service.addAccountList(postId, paList);
             return JsonResponse.success()
                     .addResult("result", 1)
+                    .build();
+
+        } catch (/*NotFoundException*/ Exception e) {
+            log.error("", e);
+            return JsonResponse.fail()
+                    .message(e.getMessage())
+                    .build();
+        }
+    }
+
+    @PATCH
+    @Path("/{postId}/addV2")
+    public Response addV2(@PathParam("postId") String postId, List<String> paList) {
+        try {
+            return JsonResponse.success()
+                    .addResult("accounts", service.addAccountList(postId, paList))
                     .build();
 
         } catch (/*NotFoundException*/ Exception e) {

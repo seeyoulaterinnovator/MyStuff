@@ -1,5 +1,8 @@
 package ru.alamics.sso.antifraud;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.jpa.entity.UserLoginHistory;
 import ru.alamics.sso.jpa.entity.antifraud.AttemptFailsEntity;
@@ -9,20 +12,18 @@ import ru.alamics.sso.jpa.repository.UserHistoryLoginRepository;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.util.AttemptFailsMapper;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
 import java.util.List;
 
-@Stateless
-@LocalBean
+@ApplicationScoped
 public class AttemptFailsService {
-    @EJB
-    private final AttemptFailsRepository repository;
-    @EJB
-    private final BlackListRepository blackListRepository;
-    @EJB
-    private final UserHistoryLoginRepository userHistoryLoginRepository;
+    @Inject
+    AttemptFailsRepository repository;
+
+    @Inject
+    BlackListRepository blackListRepository;
+
+    @Inject
+    UserHistoryLoginRepository userHistoryLoginRepository;
 
     public AttemptFailsService() {
         this.repository = Lookup.lookup(AttemptFailsRepository.class);

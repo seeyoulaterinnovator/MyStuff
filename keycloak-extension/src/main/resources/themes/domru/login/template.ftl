@@ -1,5 +1,6 @@
 <#import "templates/email-sent.ftl" as emailSent>
 <#import "templates/header.ftl" as header>
+<#import "./templates/svg.ftl" as svg>
 
 <#macro registrationLayout
         displayInfo=false
@@ -10,6 +11,7 @@
         displayCity=true
         redirectTo=""
         redirectToOnModalClose=""
+        bodyClass=""
 >
     <!DOCTYPE html>
     <html xmlns="http://www.w3.org/1999/xhtml" lang="ru" class="h-full scrollable-container">
@@ -33,7 +35,7 @@
 
         <#if properties.styles?has_content>
             <#list properties.styles?split(' ') as style>
-                <link href="${url.resourcesPath}/${style}?hash=" rel="stylesheet"/>
+                <link href="${url.resourcesPath}/${style}?hash=@hash@" rel="stylesheet"/>
             </#list>
         </#if>
         <#if redirectTo?has_content>
@@ -43,9 +45,9 @@
         </#if>
 
     </head>
-    <body class="min-h-full flex flex-col p-4 sm:px-6 md:py-6 lg:px-8 xl:py-8 xl:px-6 custom">
-    <#if displayMessage && message?has_content && message.summary == 'Регистрация временно недоступна, попробуйте повторить попытку позже'>
-        <#if iframe == false>
+    <body class="min-h-full flex flex-col custom main-wrapper">
+    <#if displayMessage?has_content && displayMessage && message?has_content && message.summary == 'Регистрация временно недоступна, попробуйте повторить попытку позже'>
+        <#if iframe ?? && iframe == false>
             <@header.defaultTemplate withCity=displayCity></@header.defaultTemplate>
         </#if>
         <#include "templates/sth-went-wrong.html">
@@ -55,25 +57,25 @@
 <#--            <#include "templates/google-tag-manager-body.html">-->
 <#--        </#if>-->
 
-        <#if iframe == false>
+        <#if iframe ?? && iframe == false>
             <@header.defaultTemplate withCity=displayCity></@header.defaultTemplate>
         </#if>
 
-        <main id="content" class="flex-1 py-8 md:py-12 mx-auto md:mx-auto w-full max-w-440px xl:max-w-470px" style="overflow: initial;">
+        <main id="content" class="flex-1 py-8 md:py-12 mx-auto md:mx-auto w-full" style="overflow: initial;">
 
 
-            <#if displayMessage && message?has_content && message.summary == msg('emailSentMessage')>
-                <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}" success=true; section>
+            <#if displayMessage?has_content && displayMessage && message?has_content && message.summary == msg('emailSentMessage')>
+                <@emailSent.defaultTemplate email="${userEmail!}" backHref="${url.loginUrl}" success=true; section>
                     <#if section = "header">
                         Восстановление пароля
                     <#elseif section = "description">
-                        <span>На e-mail: ${login.username!"указанную при регистрации"}</span><br>
+                        <span>На e-mail: ${userEmail!"указанную при регистрации"}</span><br>
                         Отправлены инструкции по восстановлению пароля
                     </#if>
                 </@emailSent.defaultTemplate>
 
-            <#elseif displayMessage && message?has_content && message.summary == msg('emailSendErrorMessage')>
-                <@emailSent.defaultTemplate email="${login.username!}" backHref="${url.loginUrl}" success = false; section>
+            <#elseif displayMessage?has_content && displayMessage && message?has_content && message.summary == msg('emailSendErrorMessage')>
+                <@emailSent.defaultTemplate email="${userEmail!}" backHref="${url.loginUrl}" success = false; section>
                     <#if section = "header">
                         Восстановление пароля
                     <#elseif section = "description">
@@ -90,75 +92,75 @@
 
                 <div class="">
                     <#if displayMessage && message?has_content>
-                        <div class="alert pb-4">
+                        <div class="alert">
                             <#if message.type = 'info'>
                             <#if message.summary?contains('Ваш E-mail успешно подтверждён!')>
-                                <span class="text-black email-ver hidden">
+                                <p class="text-black email-ver hidden">
                                         ${kcSanitize(message.summary)?no_esc}
-                                </span>
+                                </p>
                             <#else>
-                                <span class="text-black hidden">
+                                <p class="text-black hidden">
                                     ${kcSanitize(message.summary)?no_esc}
-                                </span>
+                                </p>
                             </#if>
                             </#if>
                             <#if message.type = 'warning' && displayWarningMessage>
-                                <span class="text-black">
+                                <p class="text-black">
                                     ${kcSanitize(message.summary)?no_esc}
-                                </span>
+                                </p>
                             </#if>
                             <#if message.type = 'success' && message.summary != msg('emailSentMessage')>
-                                <span class="text-accentGreen">
+                                <p class="text-accentGreen">
                                     ${kcSanitize(message.summary)?no_esc}
-                                </span>
+                                </p>
                             </#if>
                             <#if message.type = 'error'>
                                 <#if loginFailToRegistrationMessage?has_content>
-                                    <span class="text-accentRed login-fail-to-registration hidden">
+                                    <p class="text-accentRed login-fail-to-registration hidden">
                                         ${kcSanitize(loginFailToRegistrationMessage)?no_esc}
-                                    </span>
+                                    </p>
                                 <#elseif message.summary?contains('Номер мобильного телефона уже используется в другой учетной записи.')>
                                     <#if message.summary?contains(msg('emailExistsMessage'))>
-                                        <span class="text-accentRed bad_phone bad_email hidden">
+                                        <p class="text-accentRed bad_phone bad_email hidden">
                                             ${kcSanitize(message.summary)?no_esc}
-                                        </span>
+                                        </p>
                                     <#else>
-                                        <span class="text-accentRed bad_phone hidden">
+                                        <p class="text-accentRed bad_phone hidden">
                                             ${kcSanitize(message.summary)?no_esc}
-                                        </span>
+                                        </p>
                                     </#if>
                                 <#elseif message.summary?contains('Превышен лимит СМС. Запросить новое СМС можно через 5 минут')>
-                                    <span class="text-accentRed hidden limit-exceeded">
+                                    <p class="text-accentRed hidden limit-exceeded">
                                         ${kcSanitize(message.summary)?no_esc}
-                                    </span>
+                                    </p>
                                 <#elseif message.summary?contains('Превышен лимит повторных звонков. Запросить новый звонок можно через 12 часов')>
-                                    <span class="text-accentRed hidden limit-exceeded">
+                                    <p class="text-accentRed hidden limit-exceeded">
                                         ${kcSanitize(message.summary)?no_esc}
-                                    </span>
+                                    </p>
                                 <#elseif message.summary?contains('Код был введён более 5 раз. Запросите новое СМС')>
-                                    <span class="text-accentRed hidden limit-exceeded">
+                                    <p class="text-accentRed hidden limit-exceeded">
                                         ${kcSanitize(message.summary)?no_esc}
-                                    </span>
+                                    </p>
                                 <#elseif message.summary?contains('Код был введён более 5 раз. Запросите новый звонок')>
-                                    <span class="text-accentRed hidden limit-exceeded">
+                                    <p class="text-accentRed hidden limit-exceeded">
                                         ${kcSanitize(message.summary)?no_esc}
-                                    </span>
+                                    </p>
                                 <#elseif message.summary == msg('emailExistsMessage')>
-                                    <span class="text-accentRed bad_email hidden">
+                                    <p class="text-accentRed bad_email hidden">
                                         ${kcSanitize(message.summary)?no_esc}
-                                    </span>
+                                    </p>
                                 <#elseif message.summary?contains('Код введен неверно. Проверьте правильность введенных данных')>
-                                    <span class="text-accentRed hidden">
+                                    <p class="text-accentRed hidden">
                                         ${kcSanitize(message.summary)?no_esc}
-                                    </span>
+                                    </p>
                                 <#elseif message.summary == msg('Авторизация с использованием временного кода в данный момент не доступна. Для авторизации воспользуйтесь логином и паролем')>
-                                    <span class="text-accentRed phone_error hidden">
+                                    <p class="text-accentRed phone_error hidden">
                                         ${kcSanitize(message.summary)?no_esc}
-                                    </span>
+                                    </p>
                                 <#else>
-                                    <span class="text-accentRed hidden">
+                                    <p class="text-accentRed hidden">
                                         ${kcSanitize(message.summary)?no_esc}
-                                    </span>
+                                    </p>
                                 </#if>
                             </#if>
                         </div>
@@ -171,17 +173,19 @@
             </#if>
         </main>
 
-        <#if iframe == false>
-            <footer id="page-footer" class="w-full footer">
-                <a href="${(phoneConstLink)!"tel:88005500479"}" class= "show-small-tell">
-                    <div class="flex h-6 items-center">
-                        <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M5.03341 4.12902C5.2853 3.87713 5.6937 3.87713 5.9456 4.12902L7.99182 6.17524C8.38346 6.56688 8.38346 7.20186 7.99182 7.5935C7.48302 8.1023 7.28745 8.84622 7.47635 9.53884C7.89974 11.0913 9.11969 12.3112 10.6721 12.7346C11.3648 12.9235 12.1087 12.728 12.6175 12.2192C13.0091 11.8275 13.6441 11.8275 14.0357 12.2192L15.3419 13.5253C15.6933 13.8768 15.6933 14.4466 15.3419 14.798C14.4689 15.6711 13.4536 16.2352 12.4491 16.4008C11.4571 16.5642 10.4516 16.3447 9.54609 15.6075C8.8175 15.0142 7.95941 14.2451 6.96264 13.2483C5.83397 12.1197 4.95756 11.1292 4.27924 10.2838C2.78739 8.42446 3.23894 5.92349 5.03341 4.12902Z" stroke="#222222"/>
-                        </svg>
-                        <span class="phone-number">${(phoneConst)!"8 800 550 0479"}</span>
-                    </div>
-                </a>
-                <span class="text-main-500 copyright">${(footer)!"© АО «ЭР-Телеком Холдинг» 2011—"}${.now?string('yyyy')}</span>
+        <#if iframe?? && iframe == false>
+            <footer id="page-footer" class="w-full flex flex-col footer">
+              <a href="${(phoneConstLink)!"tel:88005500479"}" class="show-small-tell highlighted-hover-text highlighted-nested-hover-svg phone-call-center">
+                <div class="flex h-6 items-center">
+                  <@svg.phoneIcon/>
+                  <span class="phone-number">
+                    ${(phoneConst)!"8 800 550 0479"}
+                  </span>
+                </div>
+              </a>
+              <span class="text-main-500 copyright mt-2">
+                ${(footer)!"© АО «ЭР-Телеком Холдинг» 2011–"}${.now?string('yyyy')}
+              </span>
             </footer>
         </#if>
 
@@ -191,7 +195,7 @@
 
     <#if properties.scripts?has_content>
         <#list properties.scripts?split(' ') as script>
-            <script src="${url.resourcesPath}/${script}?hash=" async></script>
+            <script src="${url.resourcesPath}/${script}?hash=@hash@" async></script>
         </#list>
     </#if>
 
@@ -207,13 +211,13 @@
         </#list>
     </#if>
 
-    <#if hideChat>
+    <#if hideChat?? && hideChat == false>
         <div id="hiddenChat" class="hidden">
         </div>
     </#if>
 
     <script type="text/javascript">
-        let isChatHidden = document.getElementById('hiddenChat');
+        let chatElement = document.getElementById('hiddenChat');
 
         let isFramed = false;
         try {
@@ -249,4 +253,8 @@
     <!--<script src="${url.resourcesPath}/build/iframeResizer.contentWindow.min.js" async></script> -->
     </body>
     </html>
+    <#--
+    <#include "util.ftl"/>
+    <@dump_data_model_keys/>
+    -->
 </#macro>

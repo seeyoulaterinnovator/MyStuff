@@ -1,13 +1,13 @@
 package ru.alamics.sso.keycloak.policy.rest;
 
-import org.jboss.resteasy.annotations.cache.NoCache;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.core.Response;
+import org.jboss.resteasy.reactive.NoCache;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.PasswordPolicy;
 import org.keycloak.models.RealmModel;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;

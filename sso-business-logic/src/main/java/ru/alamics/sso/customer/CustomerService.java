@@ -1,20 +1,19 @@
 package ru.alamics.sso.customer;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.Customer;
 import ru.alamics.sso.jpa.repository.CustomerRepository;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@ApplicationScoped
 @Slf4j
-@Stateless
 public class CustomerService {
-
-    @EJB
-    private CustomerRepository customerRepository;
+    @Inject
+    CustomerRepository customerRepository;
 
     public CustomerDto save(CustomerDto customer) {
         return toCustomerDto(customerRepository.save(toCustomer(customer)));

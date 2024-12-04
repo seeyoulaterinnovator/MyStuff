@@ -1,5 +1,8 @@
 package ru.alamics.sso.user;
 
+import io.quarkus.narayana.jta.QuarkusTransaction;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.KeycloakSession;
@@ -22,9 +25,6 @@ import ru.alamics.sso.user.model.*;
 import ru.alamics.sso.util.Util;
 import ru.alamics.sso.util.validator.NotValidException;
 
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.ws.rs.NotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService {
             if (id == null || id.isEmpty() || !importData.isCreated()) {
                 continue;
             }
-            UserModel user = session.users().getUserById(id, realm);
+            UserModel user = session.users().getUserById(realm, id);
             if (user == null || user.isEnabled()) {
                 continue;
             }
@@ -99,7 +99,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @TransactionAttribute(TransactionAttributeType.NEVER)
+    @Transactional(Transactional.TxType.NEVER)
     public ImportResponse importUsers(InputStream inputStream, String content) throws IOException, FileServiceException {
         log.info("Start upload users");
 
@@ -109,7 +109,7 @@ public class UserServiceImpl implements UserService {
             try {
                 doImport(file, content);
             } catch (Exception e) {
-                log.info("import exception = {}", e.getMessage());
+                log.info("import exception = {}", e.getMessage(), e);
             }
         }, 2);
 
@@ -143,7 +143,9 @@ public class UserServiceImpl implements UserService {
 
             if (entities!=null && !entities.isEmpty()){
                 for (UserEntity user: entities) {
-                    registeredUsersService.saveSuccessfulReg(user.getId(), user.getRealmId(), "migration", 5);
+                    QuarkusTransaction.requiringNew().run(() -> {
+                        registeredUsersService.saveSuccessfulReg(user.getId(), user.getRealmId(), "migration", 5);
+                    });
                 }
             }
 

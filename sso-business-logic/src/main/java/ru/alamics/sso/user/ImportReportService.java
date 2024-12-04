@@ -1,5 +1,8 @@
 package ru.alamics.sso.user;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.ImportUsersDataEntity;
 import ru.alamics.sso.jpa.entity.ImportUsersReportEntity;
@@ -12,19 +15,18 @@ import ru.alamics.sso.user.model.ImportUsersDataModel;
 import ru.alamics.sso.user.model.ImportUsersReportModel;
 import ru.alamics.sso.user.web.ImportUsersReportDto;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@ApplicationScoped
 @Slf4j
-@Stateless
-@LocalBean
 public class ImportReportService {
 
-    @EJB
-    private ImportUsersReportRepository importUsersReportRepository;
+    private static final int SHORT_TIME_NEXT_UPDATE = 5; //сек
+    private static final int LONG_TIME_NEXT_UPDATE = 30; //сек
+
+    @Inject
+    ImportUsersReportRepository importUsersReportRepository;
 
     public void setReportStatus(ImportUsersReportModel report, ImportUsersReportStatus status) {
 
@@ -53,6 +55,7 @@ public class ImportReportService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void updateReport(ImportUsersReportModel report) {
 
         importUsersReportRepository.updateReport(report.getId(), report.getStatus(), report.getCountClones(), report.getCountCreatedUsers());
@@ -115,8 +118,8 @@ public class ImportReportService {
         }
     }
 
-    public List<ImportUsersReportDto> findImportUsersReportsByRealmId(String realmId) {
-        return UserMapper.toImportUsersReportDtos(importUsersReportRepository.findImportUsersReports(realmId));
+    public List<ImportUsersReportDto> findImportUsersReportsByRealmId(String realmId, int first, int max) {
+        return UserMapper.toImportUsersReportDtos(importUsersReportRepository.findImportUsersReports(realmId, first, max));
     }
 
     public ImportUsersReportEntity findImportUsersReportByImportId(String importId) {
@@ -125,5 +128,12 @@ public class ImportReportService {
 
     public List<ImportUsersDataEntity> findImportUsersDataByImportId(String importId) {
         return importUsersReportRepository.findImportUsersDataByImportId(importId);
+    }
+
+    public int getTimeNextUpdate(String realmId) {
+        if(importUsersReportRepository.findReportsInWork(realmId, ImportUsersReportStatus.DONE) > 0){
+            return SHORT_TIME_NEXT_UPDATE;
+        }
+        return LONG_TIME_NEXT_UPDATE;
     }
 }

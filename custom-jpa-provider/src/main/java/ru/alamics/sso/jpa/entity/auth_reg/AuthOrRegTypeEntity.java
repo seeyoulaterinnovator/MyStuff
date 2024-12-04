@@ -3,7 +3,7 @@ package ru.alamics.sso.jpa.entity.auth_reg;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "AUTH_OR_REG_TYPE")

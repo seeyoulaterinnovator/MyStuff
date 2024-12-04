@@ -1,5 +1,8 @@
 package ru.alamics.sso.registration.service;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.auth_n_regi.ClientsForMonitoringService;
@@ -8,35 +11,25 @@ import ru.alamics.sso.jpa.entity.auth_reg.ClientsForMonitoringEntity;
 import ru.alamics.sso.jpa.entity.auth_reg.RegisteredUsersEntity;
 import ru.alamics.sso.jpa.repository.RegisteredUsersRepository;
 import ru.alamics.sso.jpa.repository.UserRepository;
-import ru.alamics.sso.keycloak.lookup.Lookup;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Stateless(name = "RegisteredUsersService")
-@LocalBean
+@ApplicationScoped
+@Named("RegisteredUsersService")
 @Slf4j
 public class RegisteredUsersService {
+    @Inject
+    RegisteredUsersRepository registeredUsersRepository;
 
-    @EJB
-    private final RegisteredUsersRepository registeredUsersRepository;
-    @EJB
-    private final UserRepository userRepository;
+    @Inject
+    UserRepository userRepository;
 
-    private final AuthOrRegTypeService authOrRegTypeService;
+    @Inject
+    AuthOrRegTypeService authOrRegTypeService;
 
-    private final ClientsForMonitoringService clientsForMonitoringService;
-
-    public RegisteredUsersService() {
-        this.registeredUsersRepository = Lookup.lookup(RegisteredUsersRepository.class);
-        this.userRepository = Lookup.lookup(UserRepository.class);
-        this.authOrRegTypeService = Lookup.lookup(AuthOrRegTypeService.class);
-        this.clientsForMonitoringService = Lookup.lookup(ClientsForMonitoringService.class);
-
-    }
+    @Inject
+    ClientsForMonitoringService clientsForMonitoringService;
 
     public void saveSuccessfulReg(String user, String realm, String client, int typeId) {
         log.info(" Client is : " + client);

@@ -1,46 +1,48 @@
 package ru.alamics.sso.schedule;
 
 
+import io.quarkus.runtime.StartupEvent;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Context;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
+import org.keycloak.timer.ScheduledTask;
+import org.keycloak.timer.TimerProvider;
 import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.user.ImportReportService;
 import ru.alamics.sso.user.ImportService;
 import ru.alamics.sso.user.model.ImportUsersReportModel;
 import ru.alamics.sso.user.model.RepeatNextTimeException;
+import ru.alamics.sso.util.E2EUtil;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.ejb.DependsOn;
-import javax.ejb.EJB;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
+@ApplicationScoped
 @Slf4j
-@Startup
-@Singleton
-@DependsOn("ApplicationProperties")
-public class ImportSchedule {
+public class ImportSchedule implements ScheduledTask {
     private static final String TIMER_NAME = "Import Schedule Timer";
     private static final long DEFAULT_INTERVAL_DURATION = 60000;
     private final static String TIMER_INTERVAL_DURATION_PROPERTY = "application.schedule.import.milliseconds";
+    private final static String TIMER_LOCK_DURATION_PROPERTY = "application.lock.import.milliseconds";
 
     private static final long MAX_TIMEOUT_MILLI = (4 * 60 + 45) * 1000L;
 
-    @EJB
-    private ImportReportService importReportService;
-    @EJB
-    private ApplicationProperties properties;
-    @EJB
-    private ImportService importService;
-    //@Resource
-    //private TimerService timerService;
+    @Inject
+    ImportReportService importReportService;
+    @Inject
+    ApplicationProperties properties;
+    @Inject
+    ImportService importService;
 
-    @Resource
-    private ManagedScheduledExecutorService scheduler;
+    @Context
+    KeycloakSession session;
+
+    TimerProvider timerProvider;
 
     public static void checkTimeout(Long scheduleStart) throws RepeatNextTimeException {
 
@@ -54,30 +56,66 @@ public class ImportSchedule {
 
     @PostConstruct
     private void init() {
-        //final TimerConfig timerConfig = new TimerConfig(TIMER_NAME, false);
-
-        final long intervalDuration = properties.getPropertyLong(TIMER_INTERVAL_DURATION_PROPERTY, DEFAULT_INTERVAL_DURATION);
-        //timerService.createIntervalTimer(DEFAULT_INTERVAL_DURATION, intervalDuration, timerConfig);
-        //log.info("Timer:{} is created, interval duration set to value={} milliseconds ", TIMER_NAME, intervalDuration);
-
-        this.scheduler.scheduleAtFixedRate(this::schedule,
-                DEFAULT_INTERVAL_DURATION, intervalDuration,
-                TimeUnit.MILLISECONDS);
+        timerProvider = session.getProvider(TimerProvider.class);
     }
 
-    //@Timeout
-    public void schedule(/*Timer timer*/) {
-        //if (timer != null && !TIMER_NAME.equals(timer.getInfo().toString())) {
-        //    return;
-        //}
+    void onStart(@Observes StartupEvent ev) {
+        changeScheduleTimer();
+    }
+
+    public void changeScheduleTimer() {
+        long intervalDuration = DEFAULT_INTERVAL_DURATION;
+        long lockDuration = 0;
+        try {
+            intervalDuration = properties.getPropertyLong(TIMER_INTERVAL_DURATION_PROPERTY, DEFAULT_INTERVAL_DURATION);
+        } catch (Exception e) {
+            if(E2EUtil.isE2E()) {
+                log.error(e.getMessage());
+            } else {
+                throw e;
+            }
+        }
+        try {
+            lockDuration = properties.getPropertyLong(TIMER_LOCK_DURATION_PROPERTY, 0);
+        } catch (Exception e) {
+            log.debug(e.getMessage(), e);
+        }
+        if (intervalDuration <= 0) {
+            intervalDuration = DEFAULT_INTERVAL_DURATION;
+        }
+        if(lockDuration <= 0) {
+            lockDuration = intervalDuration * 100;
+        }
+
+        timerProvider.cancelTask(TIMER_NAME);
+        timerProvider.schedule(
+                new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), this, intervalDuration),
+                lockDuration
+        );
+        log.info("Timer: {} is created, interval duration value = {} ms, lock duration value = {} ms ",
+                TIMER_NAME, intervalDuration, lockDuration);
+    }
+
+    @Override
+    public String getTaskName() {
+        return TIMER_NAME;
+    }
+
+    @Override
+    public void run(KeycloakSession session) {
+        if(properties.isClusterTaskDisabled()) {
+            log.debug("Run skipped");
+            return;
+        }
 
         long scheduleStart = System.currentTimeMillis();
 
         List<ImportUsersReportModel> reportList = importReportService.getReportListByStatus(ImportUsersReportStatus.AWAITING);
 
         for (ImportUsersReportModel reportModel : reportList) {
-            importReportService.setReportStatus(reportModel, ImportUsersReportStatus.IN_PROGRESS);
-            importService.createImportUsers(reportModel, null, scheduleStart, null, null);
+            reportModel.setStatus(ImportUsersReportStatus.IN_PROGRESS);
+            importReportService.updateReport(reportModel);
+            importService.createImportUsers(reportModel, importReportService.getDataListAwaiting(reportModel.getId()), scheduleStart, null, null);
             importReportService.updateReport(reportModel);
         }
     }

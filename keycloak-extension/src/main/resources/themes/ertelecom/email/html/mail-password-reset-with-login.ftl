@@ -1,4 +1,17 @@
 <#import "template.ftl" as template>
+<#import "./helpers/blocks.ftl" as blocks>
+
+<#--  Admin console - Users – Select user – Send login and reset password -->
+<@template.layout ; section>
+  <#if section="style">
+    <title>${kcSanitize(msg(emailResetPasswordSubject!""))}</title>
+  <#elseif section="body">
+    <@blocks.parameterizedMsg message=emailResetPasswordBodyHtml/>
+  </#if>
+</@template.layout>
+
+<#--  TODO: Old logic  -->
+<#--  <#import "template.ftl" as template>
 
 <@template.layout ; section>
     <#if section = "style">
@@ -13,6 +26,8 @@
         </#if>
         ${kcSanitize(msg("emailPasswordFooterHtml"))?no_esc}
     </#if>
+</@template.layout>  -->
+
 <#--    <#if section = "style">-->
 <#--        <#include 'styles/custom-content-style.html' >-->
 <#--    <#elseif section = "body">-->
@@ -62,4 +77,3 @@
 <#--            </div>-->
 <#--        </div>-->
 <#--    </#if>-->
-</@template.layout>

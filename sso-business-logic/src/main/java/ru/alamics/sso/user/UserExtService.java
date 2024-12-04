@@ -1,5 +1,6 @@
 package ru.alamics.sso.user;
 
+import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.events.admin.OperationType;
@@ -25,7 +26,6 @@ import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.util.Util;
 import ru.alamics.sso.util.validator.NotValidException;
 
-import javax.ws.rs.NotFoundException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -59,7 +59,7 @@ public class UserExtService {
         this.realm = session.getContext().getRealm();
 
         this.userFindService = Lookup.lookup(UserFindService.class);
-        this.userPostFacade = Lookup.lookup(UserPostFacade.class);
+        this.userPostFacade = Lookup.lookup(UserPostFacade.class, "UserPostFacade");
         this.registeredUsersService = Lookup.lookup(RegisteredUsersService.class);
     }
 
@@ -84,7 +84,7 @@ public class UserExtService {
         if (!bss) {
             if (reqActions != null) {
                 Set<String> allActions = new HashSet<>();
-                for (ProviderFactory factory : session.getKeycloakSessionFactory().getProviderFactories(RequiredActionProvider.class)) {
+                for (ProviderFactory factory : session.getKeycloakSessionFactory().getProviderFactoriesStream(RequiredActionProvider.class).toList()) {
                     allActions.add(factory.getId());
                 }
                 for (String action : allActions) {
@@ -176,7 +176,7 @@ public class UserExtService {
         UserModel user = null;
         if (bss && !userNotFound) {
 
-            user = session.users().getUserById(userIdByPhone, realm);
+            user = session.users().getUserById(realm, userIdByPhone);
 
         } else {
             user = createUser(bss, request);
@@ -209,14 +209,14 @@ public class UserExtService {
     private void checkOnExistUserByEmailAndUsername(UserRequest request, RealmModel realm) throws FoundException {
         // Double-check duplicated username and email here due to federation
         if (request.getEmail() != null && !realm.isDuplicateEmailsAllowed()) {
-            UserModel userModel = session.users().getUserByEmail(request.getEmail(), realm);
+            UserModel userModel = session.users().getUserByEmail(realm, request.getEmail());
             if (userModel != null) {
                 log.error("User exists with same email {}", request.getEmail());
                 throw new FoundException("Уже существует УЗ с таким email").addResult("userId", userModel.getId());
             }
         }
 
-        UserModel userModel = session.users().getUserByUsername(request.getEmail(), realm);
+        UserModel userModel = session.users().getUserByUsername(realm, request.getEmail());
         if (userModel != null) {
             log.error("User exists with same username {}", request.getEmail());
             throw new FoundException("Уже существует УЗ с таким username").addResult("userId", userModel.getId());

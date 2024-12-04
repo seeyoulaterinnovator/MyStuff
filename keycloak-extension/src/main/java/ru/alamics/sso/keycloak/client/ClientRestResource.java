@@ -1,13 +1,15 @@
 package ru.alamics.sso.keycloak.client;
 
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.services.ForbiddenException;
+import org.keycloak.models.RealmModel;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
-
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 
 public class ClientRestResource {
 
@@ -21,7 +23,10 @@ public class ClientRestResource {
 
     @Path("{id}")
     public ClientResource getSearchResource(final @PathParam("id") String id) {
-        return new ClientResource(session, auth, auth.adminAuth(), findClientById(id));
+        RealmModel realm = session.getContext().getRealm();
+        AdminEventBuilder adminEvent = new AdminEventBuilder(realm, auth.adminAuth(), session, session.getContext().getConnection())
+                .realm(realm).resource(ResourceType.REALM);
+        return new ClientResource(realm, auth, findClientById(id), session, adminEvent);
     }
 
     private ClientModel findClientById(String id) {

@@ -7,6 +7,7 @@ import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.auth.AbstractAuthenticatorFactory;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.phone.UserPhoneVerifier;
+
 @Slf4j
 public class SmsOrPhoneCallAuthFactory extends AbstractAuthenticatorFactory {
     private static final String PROVIDER_ID = "sms-or-phone";

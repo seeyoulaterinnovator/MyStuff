@@ -5,7 +5,7 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.jpa.entity.common.NotificationType;
 import ru.alamics.sso.jpa.entity.common.NotificationStatus;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 

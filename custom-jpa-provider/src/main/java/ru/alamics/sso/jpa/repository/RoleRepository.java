@@ -1,30 +1,30 @@
 package ru.alamics.sso.jpa.repository;
 
-import lombok.extern.slf4j.Slf4j;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import org.keycloak.models.jpa.entities.ClientEntity;
 import org.keycloak.models.jpa.entities.RoleEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.jpa.entities.UserRoleMappingEntity;
 import ru.alamics.sso.jpa.util.CollectionUtils;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Slf4j
-@Stateless
-@LocalBean
+@ApplicationScoped
 public class RoleRepository {
+    @Inject
+    EntityManager em;
 
-    @PersistenceContext
-    private EntityManager em;
+    public RoleEntity findById(String id) {
+        return em.find(RoleEntity.class, id);
+    }
 
     public RoleEntity findRoleEntityByName(final String roleName, final String realmId) {
 
-        List<RoleEntity> resultList = em.createQuery("select re from RoleEntity re where re.name =:roleName and re.realm.id =:realmId", RoleEntity.class)
+        List<RoleEntity> resultList = em.createQuery("select re from RoleEntity re where re.name =:roleName and re.realmId =:realmId", RoleEntity.class)
                 .setParameter("roleName", roleName)
                 .setParameter("realmId", realmId)
                 .getResultList();
@@ -33,6 +33,7 @@ public class RoleRepository {
 
     }
 
+    @Transactional
     public RoleEntity save(final RoleEntity entity) {
         entity.setId(UUID.randomUUID().toString());
         em.persist(entity);
@@ -40,6 +41,7 @@ public class RoleRepository {
         return entity;
     }
 
+    @Transactional
     public UserRoleMappingEntity save(final UserRoleMappingEntity entity) {
         boolean notExist = em.createQuery("select (count(ur) <= 0) as t from UserRoleMappingEntity ur where ur.roleId =:roleId and ur.user.id=:userId", Boolean.class)
                 .setParameter("userId", entity.getUser().getId())
@@ -63,6 +65,7 @@ public class RoleRepository {
                 .getResultList();
     }
 
+    @Transactional
     public void unbindRolesToUserByNames(final UserEntity user, final Set<String> roleNames) {
 
         List<String> roleIds = findRolesByNames(new ArrayList<>(roleNames), user.getRealmId()).stream()
@@ -79,10 +82,10 @@ public class RoleRepository {
 
     public RoleEntity findClientRoleEntity(final String roleName, final String realmId, final ClientEntity clientEntity) {
 
-        List<RoleEntity> resultList = em.createQuery("select re from RoleEntity re where re.name =:roleName and re.realmId =:realmId and re.client =:client", RoleEntity.class)
+        List<RoleEntity> resultList = em.createQuery("select re from RoleEntity re where re.name =:roleName and re.realmId =:realmId and re.clientId =:clientId", RoleEntity.class)
                 .setParameter("roleName", roleName)
                 .setParameter("realmId", realmId)
-                .setParameter("client", clientEntity)
+                .setParameter("clientId", clientEntity.getId())
                 .getResultList();
 
         return CollectionUtils.nullOrGet(resultList, 0);
@@ -91,7 +94,7 @@ public class RoleRepository {
 
     public ClientEntity findClientByName(final String name, final String realmId) {
 
-        List<ClientEntity> resultList = em.createQuery("select c from ClientEntity c where c.clientId =:name and c.realm.id =:realmId", ClientEntity.class)
+        List<ClientEntity> resultList = em.createQuery("select c from ClientEntity c where c.clientId =:name and c.realmId =:realmId", ClientEntity.class)
                 .setParameter("name", name)
                 .setParameter("realmId", realmId)
                 .getResultList();

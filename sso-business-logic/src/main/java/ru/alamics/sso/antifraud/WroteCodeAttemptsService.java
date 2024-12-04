@@ -1,27 +1,24 @@
 package ru.alamics.sso.antifraud;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.jpa.entity.antifraud.WroteCodeAttemptsEntity;
-import ru.alamics.sso.jpa.repository.AttemptFailsRepository;
 import ru.alamics.sso.jpa.repository.UserRepository;
 import ru.alamics.sso.jpa.repository.WroteCodeAttemptsRepository;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.model.User;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Stateless
-@LocalBean
+@ApplicationScoped
 public class WroteCodeAttemptsService {
+    @Inject
+    WroteCodeAttemptsRepository wroteCodeAttemptsRepository;
 
-    @EJB
-    private final WroteCodeAttemptsRepository wroteCodeAttemptsRepository;
-    @EJB
-    private final UserRepository userRepository;
+    @Inject
+    UserRepository userRepository;
 
     public WroteCodeAttemptsService() {
         this.wroteCodeAttemptsRepository = Lookup.lookup(WroteCodeAttemptsRepository.class);

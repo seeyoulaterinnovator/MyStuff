@@ -23,6 +23,11 @@ public class EsiaIdentityProviderFactory extends AbstractIdentityProviderFactory
     }
 
     @Override
+    public IdentityProviderModel createConfig() {
+        return new IdentityProviderModel(); // TODO
+    }
+
+    @Override
     public String getId() {
         return PROVIDER_ID;
     }

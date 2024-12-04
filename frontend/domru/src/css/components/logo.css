@@ -1,7 +1,6 @@
 .logo {
   &--domru {
     background-image: url('./images/domru-logo.svg');
-    width: 200px;
   }
 
   @media screen and (max-width: 1279px){

@@ -7,7 +7,7 @@
   let chatWrapper;
   let isOpen = false;
   let showChat = isFramed === undefined || isFramed === false;
-  let test = isChatHidden;
+  let test = chatElement;
 
   console.log("isFramed s " + isFramed);
 

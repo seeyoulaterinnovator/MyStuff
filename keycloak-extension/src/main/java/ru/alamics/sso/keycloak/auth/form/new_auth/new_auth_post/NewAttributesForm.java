@@ -1,7 +1,12 @@
 package ru.alamics.sso.keycloak.auth.form.new_auth.new_auth_post;
 
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.AuthenticationFlowContext;
+import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.forms.login.LoginFormsProvider;
@@ -9,6 +14,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.UserSessionModel;
+import org.keycloak.models.cache.UserCache;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.auth.UserRole;
@@ -19,10 +25,6 @@ import ru.alamics.sso.settings.SettingConstants;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -75,8 +77,12 @@ public class NewAttributesForm implements Authenticator {
                 attributes = Collections.emptyList();
             }
             if (attributes.size() <= 1) {
-                roleService.setUserPost(context, attributes);
-                context.success();
+                if(roleService.setUserPost(context, attributes)) {
+                    context.success();
+                } else {
+                    log.debug("User {} post set failed", context.getUser().getId());
+                    context.failure(AuthenticationFlowError.INVALID_USER);
+                }
             } else {
                 context.challenge(createForm(context, attributes));
             }
@@ -99,7 +105,7 @@ public class NewAttributesForm implements Authenticator {
         form.setAttribute("phoneConst", settingsService.getSettingsStringValue(SettingConstants.PHONE_CONST, context.getRealm().getId()));
         form.setAttribute("phoneConstLink", settingsService.getSettingsStringValue(SettingConstants.PHONE_CONST_LINK, context.getRealm().getId()));
         form.setAttribute("homePage", settingsService.getSettingsStringValue(SettingConstants.HOME_PAGE, context.getRealm().getId()));
-        form.setAttribute("actionIsEmpty", context.getUser().getRequiredActions() == null);
+        form.setAttribute("actionIsEmpty", context.getUser().getRequiredActionsStream().findAny().isEmpty());
         form.setAttribute("clientIsB2B", CLIENT_B2B.equals(context.getAuthenticationSession().getClient().getClientId()));
         return form.createForm(FORM);
     }
@@ -110,7 +116,7 @@ public class NewAttributesForm implements Authenticator {
         roleService.setUserPost(context);
         KeycloakSession session = context.getSession();
         RealmModel realm = context.getAuthenticationSession().getRealm();
-        session.userCache().clear();
+        clearUserCache(session);
         UserSessionModel userSession = session.sessions().getUserSession(realm, context.getAuthenticationSession().getParentSession().getId());
         ClientConnection clientConnection = session.getContext().getConnection();
         AuthenticationManager.backchannelLogout(session, realm, userSession, session.getContext().getUri(), clientConnection, session.getContext().getRequestHeaders(), true);
@@ -165,5 +171,12 @@ public class NewAttributesForm implements Authenticator {
             }
         }
         return queryParameters;
+    }
+
+    private void clearUserCache(KeycloakSession session) {
+        UserCache cache = session.getProvider(UserCache.class);
+        if (cache != null) {
+            cache.clear();
+        }
     }
 }
