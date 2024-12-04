@@ -34,6 +34,9 @@ export const ServerInfoProvider = ({ children }: PropsWithChildren) => {
       } catch (error: any) {
         if (error instanceof NetworkError) {
           switch (error.response.status) {
+            case 401:
+              // skip: иначе мелькает error boundary при logout
+              break;
             case 403:
               showBoundary(
                 new Error(`${t("forbidden")}. ${t("noAccessResource")}.`),

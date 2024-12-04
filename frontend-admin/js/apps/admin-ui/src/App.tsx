@@ -18,48 +18,86 @@ import {
   ErrorBoundaryFallback,
   ErrorBoundaryProvider,
 } from "./context/ErrorBoundary";
-import { RealmsProvider } from "./context/RealmsContext";
-import { RecentRealmsProvider } from "./context/RecentRealms";
-import { AccessContextProvider } from "./context/access/Access";
-import { RealmContextProvider } from "./context/realm-context/RealmContext";
-import { ServerInfoProvider } from "./context/server-info/ServerInfoProvider";
-import { WhoAmIContextProvider } from "./context/whoami/WhoAmI";
+import { RealmsProvider, useRealms } from "./context/RealmsContext";
+import { RecentRealmsProvider, useRecentRealms } from "./context/RecentRealms";
+import { AccessContextProvider, useAccess } from "./context/access/Access";
+import {
+  RealmContextProvider,
+  useRealm,
+} from "./context/realm-context/RealmContext";
+import {
+  ServerInfoProvider,
+  useServerInfo,
+} from "./context/server-info/ServerInfoProvider";
+import { useWhoAmI, WhoAmIContextProvider } from "./context/whoami/WhoAmI";
 import type { Environment } from "./environment";
 import { SubGroups } from "./groups/SubGroupsContext";
 import { AuthWall } from "./root/AuthWall";
-import { CustomConfigContextProvider } from "./customLogic/context/CustomConfigContext";
+import {
+  CustomConfigContextProvider,
+  useCustomConfig,
+} from "./customLogic/context/CustomConfigContext";
 import { CustomAuthWall } from "./root/CustomAuthWall";
 import { useClipboard } from "./customLogic/hooks/useClipboard";
 import { HashRestorer } from "./root/HashRestorer";
 
-const AppContexts = ({ children }: PropsWithChildren) => (
-  <ErrorBoundaryProvider>
-    <ErrorBoundaryFallback
-      domain="context"
-      fallback={(fallbackProps) => (
-        <ErrorRenderer {...fallbackProps} withSignOut />
-      )}
-    >
-      <ServerInfoProvider>
-        <RealmContextProvider>
-          <WhoAmIContextProvider>
-            <RealmsProvider>
-              <RecentRealmsProvider>
-                <AccessContextProvider>
-                  <AlertProvider>
-                    <CustomConfigContextProvider>
-                      <SubGroups>{children}</SubGroups>
-                    </CustomConfigContextProvider>
-                  </AlertProvider>
-                </AccessContextProvider>
-              </RecentRealmsProvider>
-            </RealmsProvider>
-          </WhoAmIContextProvider>
-        </RealmContextProvider>
-      </ServerInfoProvider>
-    </ErrorBoundaryFallback>
-  </ErrorBoundaryProvider>
-);
+const AppContextsReadyWall = ({ children }: PropsWithChildren) => {
+  const serverInfo = useServerInfo();
+  const { realmRepresentation, searchRealmRepresentation } = useRealm();
+  const { whoAmI } = useWhoAmI();
+  const { realms } = useRealms();
+  const recentRealms = useRecentRealms();
+  const access = useAccess();
+  const config = useCustomConfig();
+
+  if (
+    !(
+      serverInfo &&
+      realmRepresentation &&
+      searchRealmRepresentation &&
+      whoAmI &&
+      realms &&
+      recentRealms &&
+      access &&
+      config
+    )
+  ) {
+    return <KeycloakSpinner />;
+  }
+
+  return children;
+};
+
+const AppContexts = ({ children }: PropsWithChildren) => {
+  return (
+    <ErrorBoundaryProvider>
+      <ErrorBoundaryFallback
+        domain="context"
+        fallback={(fallbackProps) => (
+          <ErrorRenderer {...fallbackProps} withSignOut />
+        )}
+      >
+        <ServerInfoProvider>
+          <RealmContextProvider>
+            <WhoAmIContextProvider>
+              <RealmsProvider>
+                <RecentRealmsProvider>
+                  <AccessContextProvider>
+                    <AlertProvider>
+                      <CustomConfigContextProvider>
+                        <SubGroups>{children}</SubGroups>
+                      </CustomConfigContextProvider>
+                    </AlertProvider>
+                  </AccessContextProvider>
+                </RecentRealmsProvider>
+              </RealmsProvider>
+            </WhoAmIContextProvider>
+          </RealmContextProvider>
+        </ServerInfoProvider>
+      </ErrorBoundaryFallback>
+    </ErrorBoundaryProvider>
+  );
+};
 
 export const App = () => {
   useClipboard();
@@ -90,7 +128,9 @@ export const App = () => {
               <HashRestorer>
                 <AuthWall>
                   <CustomAuthWall>
-                    <Outlet />
+                    <AppContextsReadyWall>
+                      <Outlet />
+                    </AppContextsReadyWall>
                   </CustomAuthWall>
                 </AuthWall>
               </HashRestorer>
