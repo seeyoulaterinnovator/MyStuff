@@ -44,7 +44,7 @@ stages:
   image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
   when: manual
   only:
-    - PROD
+    - tags
   script:
     - export FQDN=`echo "${CI_ENVIRONMENT_URL}" | sed 's/^http\(\|s\):\/\///g'`
     - consul-template -once -template ".helm/values-prod.yaml.tpl:values.yaml"
