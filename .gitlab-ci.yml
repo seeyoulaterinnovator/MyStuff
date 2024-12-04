@@ -193,8 +193,6 @@ domru:stage3:
     NAMESPACE: 'sso'
     NODE_PORT: '30083'
     REPLICA_COUNT: '1'
-  only: 
-    - itres # т.к. пока еше не обновлен
 
 domru:stage4:
   extends: .domru:stage:template
