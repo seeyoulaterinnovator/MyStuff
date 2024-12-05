@@ -10,12 +10,6 @@ stages:
   - docker
   - deploy
 
-.build: &build-template
-  before_script:
-  - if [ -f ./gradlew ]; then
-  - chmod 775 ./gradlew
-  - fi
-
 .init_vars: &init-variables
   before_script:
   - cp ${ERTK_PEM} configs/ertk.pem
@@ -124,9 +118,8 @@ frontend:admin:build:
 back:build:
   stage: build
   image: harbor.ertelecom.ru/b2bweb/openjdk:21-node20
-  <<: *build-template
   script:
-    - ./gradlew --stacktrace --console=plain build
+    - gradle --stacktrace --console=plain build
   cache:
     key: "CI_COMMIT_REF_SLUG"
     paths:
