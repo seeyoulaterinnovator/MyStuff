@@ -1,0 +1,50 @@
+apiVersion: infinispan.org/v1
+kind: Infinispan
+metadata:
+  name: infinispan 
+  namespace: infinispan
+  annotations:
+    infinispan.org/monitoring: 'true' 
+spec:
+  replicas: 5
+  version: 15.0.10
+  container:
+    cpu: "2000m:500m"
+    memory: "4Gi:1Gi"
+    extraJvmOpts: "-Xms1024m -Xmx4096m -XX:NativeMemoryTracking=summary"
+  jmx:
+    enabled: true
+  security:
+    endpointSecretName: connect-secret
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app: infinispan-pod
+            clusterName: infinispan
+            infinispan_cr: infinispan
+        topologyKey: "topology.kubernetes.io/hostname"
+  logging:
+    categories:
+      org.jgroups.protocols.TCP: error
+      org.jgroups.protocols.relay.RELAY2: error
+  service:
+    type: DataGrid
+    container:
+      storage: 1Gi
+      ephemeralStorage: true      
+    sites:
+      local:
+        name: perm
+        discovery:
+          launchGossipRouter: true
+          memory: "2Gi:1Gi"
+          cpu: "2000m:500m"
+        expose:
+          type: NodePort
+          nodePort: 32600
+        maxRelayNodes: 5
+      locations:
+        - name: voronezh
+          url: infinispan+xsite://sso-k8s-app01.cc-voronezh.ertelecom.ru:32600

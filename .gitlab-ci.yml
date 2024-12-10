@@ -56,6 +56,18 @@ stages:
     NODE_PORT: '30080'
     REPLICA_COUNT: '5'
 
+.infinispan:prod:template:
+  stage: deploy
+  image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
+  when: manual
+  only:
+    - tags
+  script:
+    # Apply Infinispan installation manifest
+    - kubectl apply -f ./configs/infinispan-k8s-prod/infinispan-${DC}.yaml
+    # Apply Infinispan caches manifest
+    - kubectl apply -f ./configs/infinispan-k8s-prod/caches-${DC}.yaml
+
 .frontend:theme:build:
   stage: build
   image: harbor.ertelecom.ru/b2bweb/openjdk:21-node20
@@ -240,6 +252,19 @@ domru:voronezh-k8s:
     name: production-k8s-voronezh
     url: https://auth.dom.ru
 
+infinispan:perm-k8s:
+  extends: .infinispan:prod:template
+  variables:
+    DC: "perm"
+  tags:
+    - sso-k8s-perm
+
+infinispan:voronezh-k8s:
+  extends: .infinispan:prod:template
+  variables:
+    DC: "voronezh"
+  tags:
+    - sso-k8s-voronezh
 
 domru:perm:primary:
   stage: deploy
