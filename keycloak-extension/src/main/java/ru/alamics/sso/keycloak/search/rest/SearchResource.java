@@ -90,9 +90,10 @@ public class SearchResource {
         searchRealm = Util.getRealm(searchRealm, rawPath);
 
         clearUserCache();
+        List<UserSearch> users = new ArrayList<>();
+        long total = 0;
 
-        List<UserSearch> users = userFindService.getUsersByParameters(searchRealm, search, searchUser, searchEmail, searchToms, searchPhone, sortField, sortAsc, first, max);
-        long total = userFindService.getTotalUsersByParameters(searchRealm, search, searchUser, searchEmail, searchToms, searchPhone);
+        userFindService.getUsersForPage(searchRealm, search, searchUser, searchEmail, searchToms, searchPhone, sortField, sortAsc, first, max, users, total);
         
         int pageSize = max - 1;
         int pageNum = first / pageSize;
