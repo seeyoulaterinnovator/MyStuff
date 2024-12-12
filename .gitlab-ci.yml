@@ -60,13 +60,11 @@ stages:
   stage: deploy
   image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
   when: manual
-  only:
-    - tags
   script:
     # Apply Infinispan installation manifest
-    - kubectl apply -f ./configs/infinispan-k8s-prod/infinispan-${DC}.yaml
+    - kubectl apply -f ./configs/infinispan15/infinispan-${DC}.yaml
     # Apply Infinispan caches manifest
-    - kubectl apply -f ./configs/infinispan-k8s-prod/caches-${DC}.yaml
+    - kubectl apply -f ./configs/infinispan15/caches-${DC}.yaml
 
 .frontend:theme:build:
   stage: build
@@ -252,10 +250,21 @@ domru:voronezh-k8s:
     name: production-k8s-voronezh
     url: https://auth.dom.ru
 
+infinispan:stage-k8s:
+  extends: .infinispan:prod:template
+  variables:
+    DC: "stage"
+  except:
+    - tags
+  tags:
+    - sso-build-k8s
+
 infinispan:perm-k8s:
   extends: .infinispan:prod:template
   variables:
     DC: "perm"
+  only:
+    - tags
   tags:
     - sso-k8s-perm
 
@@ -263,6 +272,8 @@ infinispan:voronezh-k8s:
   extends: .infinispan:prod:template
   variables:
     DC: "voronezh"
+  only:
+    - tags
   tags:
     - sso-k8s-voronezh
 
