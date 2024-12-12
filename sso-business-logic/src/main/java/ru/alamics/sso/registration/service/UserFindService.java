@@ -4,11 +4,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.jpa.entities.RealmEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.jpa.entity.UserPostRoleEntity;
 import ru.alamics.sso.jpa.model.UserSummaryView;
+import ru.alamics.sso.jpa.repository.RealmRepository;
 import ru.alamics.sso.jpa.repository.UserPostRepository;
 import ru.alamics.sso.jpa.repository.UserRepository;
+import ru.alamics.sso.jpa.util.CollectionUtils;
 import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.user.mapper.UserMapper;
@@ -26,6 +29,9 @@ import java.util.stream.Collectors;
 public class UserFindService {
     @Inject
     UserRepository userRepository;
+
+    @Inject
+    RealmRepository realmRepository;
 
     @Inject
     UserPostRepository userPostRepository;
@@ -68,7 +74,7 @@ public class UserFindService {
         return UserMapper.toUserDtoList(userRepository.getTupleUsersByParametersWithoutGrouping(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize, includeOnlyIDs));
     }
 
-    public List<UserSearch> getUsersByParameters(
+    public void getUsersForPage (
             String realm,
             String search,
             String searchUser,
@@ -78,38 +84,51 @@ public class UserFindService {
             String sortField,
             boolean sortAsc,
             Integer first,
-            Integer max
+            Integer max,
+            List<UserSearch> users,
+            long total
     ) {
-        List<UserSummaryView> users = userRepository.findUsersByParameters(realm, search, searchUser, searchEmail, searchPhone, searchToms, sortField, sortAsc, first, max);
-
-        if (users.isEmpty()) {
-            return Collections.emptyList();
+        if(realmRepository.findRealmById(realm) == null) {
+            realm = realmRepository.findRealmEntityByName(realm).map(RealmEntity::getId).orElse(null);
         }
 
-        log.info("getUsersByParameters 1");
+        if(realm == null) {
+            users = Collections.emptyList();
+        } else {
+            List<UserSummaryView> usersData;
+            if(CollectionUtils.isEmpty(search) && CollectionUtils.isEmpty(searchUser) && CollectionUtils.isEmpty(searchEmail)
+                    && CollectionUtils.isEmpty(searchToms) && CollectionUtils.isEmpty(searchPhone)) {
+                total = userRepository.getTotalUsersByRealm(realm);
+                usersData = userRepository.findUsersByRealm(realm, sortField, sortAsc, first, max);
+            } else {
+                total = userRepository.getTotalUsersByParameters(realm, search, searchUser, searchEmail, searchToms, searchPhone);
+                usersData = userRepository.findUsersByParameters(realm, search, searchUser, searchEmail, searchPhone, searchToms, sortField, sortAsc, first, max);
+            }
 
-        Map<String, List<UserPostResponse>> userPosts = userPostRepository
-                .findUserPostsByUserIds(
-                        users.stream()
-                                .map(UserSummaryView::getId)
-                                .collect(Collectors.toList()))
-                .stream()
-                .map(DataMapper::toUserPostResponse)
-                .collect(Collectors.groupingBy(UserPostResponse::getUserId));
+            if (users.isEmpty()) {
+                users = Collections.emptyList();
+            } else {
+                log.info("getUsersByParameters 1");
 
-        log.info("getUsersByParameters 2");
+                Map<String, List<UserPostResponse>> userPosts = userPostRepository
+                        .findUserPostsByUserIds(
+                                usersData.stream()
+                                        .map(UserSummaryView::getId)
+                                        .collect(Collectors.toList()))
+                        .stream()
+                        .map(DataMapper::toUserPostResponse)
+                        .collect(Collectors.groupingBy(UserPostResponse::getUserId));
 
-        List<UserSearch> userSearches = UserMapper.toUserSearchList(users);
-        userSearches.forEach(user -> user.setUserPosts(userPosts.get(user.getId())));
+                log.info("getUsersByParameters 2");
 
-        log.info("getUsersByParameters 3");
+                List<UserSearch> userSearches = UserMapper.toUserSearchList(usersData);
+                userSearches.forEach(user -> user.setUserPosts(userPosts.get(user.getId())));
 
-        return userSearches;
-    }
+                log.info("getUsersByParameters 3");
 
-
-    public long getTotalUsersByParameters(String realm, String search, String searchUser, String searchEmail, String searchToms, String searchPhone) {
-        return userRepository.getTotalUsersByParameters(realm, search, searchUser, searchEmail, searchToms, searchPhone);
+                users = userSearches;
+            }
+        }
     }
 
     public UserEntity getUserEntity(String userId) {
