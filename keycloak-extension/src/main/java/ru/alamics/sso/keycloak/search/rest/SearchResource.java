@@ -21,6 +21,7 @@ import ru.alamics.sso.registration.service.UserFindService;
 import ru.alamics.sso.service.RequiredActionService;
 import ru.alamics.sso.user.web.RealmNameDto;
 import ru.alamics.sso.user.web.UserSearch;
+import ru.alamics.sso.user.web.UserSearchForPage;
 import ru.alamics.sso.util.Util;
 
 import java.net.HttpURLConnection;
@@ -90,17 +91,15 @@ public class SearchResource {
         searchRealm = Util.getRealm(searchRealm, rawPath);
 
         clearUserCache();
-        List<UserSearch> users = new ArrayList<>();
-        long total = 0;
 
-        userFindService.getUsersForPage(searchRealm, search, searchUser, searchEmail, searchToms, searchPhone, sortField, sortAsc, first, max, users, total);
-        
+        UserSearchForPage users = userFindService.getUsersForPage(searchRealm, search, searchUser, searchEmail, searchToms, searchPhone, sortField, sortAsc, first, max);
+
         int pageSize = max - 1;
         int pageNum = first / pageSize;
 
         return JsonResponse.success()
-                .addResult("users-info", users)
-                .addResult("page-info", DataMapper.toPageDto(users, total, pageNum, pageSize))
+                .addResult("users-info", users.getUsers())
+                .addResult("page-info", DataMapper.toPageDto(users.getUsers(), users.getTotal(), pageNum, pageSize))
                 .build();
     }
 

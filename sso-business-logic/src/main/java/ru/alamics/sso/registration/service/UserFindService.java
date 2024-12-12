@@ -17,6 +17,7 @@ import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.user.mapper.UserMapper;
 import ru.alamics.sso.user.web.UserSearch;
 import ru.alamics.sso.user.web.UserSearchDto;
+import ru.alamics.sso.user.web.UserSearchForPage;
 import ru.alamics.sso.util.Util;
 
 import java.util.Collections;
@@ -74,7 +75,7 @@ public class UserFindService {
         return UserMapper.toUserDtoList(userRepository.getTupleUsersByParametersWithoutGrouping(realm, search, searchUser, searchToms, sortField, sortAsc, pageNum, pageSize, includeOnlyIDs));
     }
 
-    public void getUsersForPage (
+    public UserSearchForPage getUsersForPage (
             String realm,
             String search,
             String searchUser,
@@ -84,29 +85,28 @@ public class UserFindService {
             String sortField,
             boolean sortAsc,
             Integer first,
-            Integer max,
-            List<UserSearch> users,
-            long total
+            Integer max
     ) {
         if(realmRepository.findRealmById(realm) == null) {
             realm = realmRepository.findRealmEntityByName(realm).map(RealmEntity::getId).orElse(null);
         }
 
         if(realm == null) {
-            users = Collections.emptyList();
+            return new UserSearchForPage(Collections.emptyList(), 0);
         } else {
+            UserSearchForPage userSearchForPage = new UserSearchForPage();
             List<UserSummaryView> usersData;
             if(CollectionUtils.isEmpty(search) && CollectionUtils.isEmpty(searchUser) && CollectionUtils.isEmpty(searchEmail)
                     && CollectionUtils.isEmpty(searchToms) && CollectionUtils.isEmpty(searchPhone)) {
-                total = userRepository.getTotalUsersByRealm(realm);
+                userSearchForPage.setTotal(userRepository.getTotalUsersByRealm(realm));
                 usersData = userRepository.findUsersByRealm(realm, sortField, sortAsc, first, max);
             } else {
-                total = userRepository.getTotalUsersByParameters(realm, search, searchUser, searchEmail, searchToms, searchPhone);
+                userSearchForPage.setTotal(userRepository.getTotalUsersByParameters(realm, search, searchUser, searchEmail, searchToms, searchPhone));
                 usersData = userRepository.findUsersByParameters(realm, search, searchUser, searchEmail, searchPhone, searchToms, sortField, sortAsc, first, max);
             }
 
-            if (users.isEmpty()) {
-                users = Collections.emptyList();
+            if (usersData.isEmpty()) {
+                return new UserSearchForPage(Collections.emptyList(), 0);
             } else {
                 log.info("getUsersByParameters 1");
 
@@ -126,7 +126,8 @@ public class UserFindService {
 
                 log.info("getUsersByParameters 3");
 
-                users = userSearches;
+                userSearchForPage.setUsers(userSearches);
+                return userSearchForPage;
             }
         }
     }
