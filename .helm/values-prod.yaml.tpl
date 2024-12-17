@@ -18,7 +18,7 @@ preStopDelay:
 extraEnvs:
   JAVA_OPTS_APPEND: "-Djgroups.dns.query={{ env "CI_ENVIRONMENT_SLUG" }}-sso-headless"
   KC_CACHE: "ispn"
-  KC_CACHE_CONFIG_FILE: "cache-ispn-custom.xml"
+  KC_CACHE_CONFIG_FILE: "{{ envOrDefault  "KC_CACHE_CONFIG_FILE" "cache-ispn.embedded.xml" }}"
   KC_CACHE_STACK: "kubernetes"
   KC_DB: "mariadb"
   KC_DB_URL_HOST: "{{ env "DB_HOST" }}"
