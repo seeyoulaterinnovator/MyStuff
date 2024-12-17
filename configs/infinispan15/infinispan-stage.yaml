@@ -12,9 +12,6 @@ spec:
     cpu: "2000m:500m"
     memory: "4Gi:1Gi"
     extraJvmOpts: "-Xms1024m -Xmx4096m -XX:NativeMemoryTracking=summary"
-  expose:
-    type: NodePort
-    nodePort: 31222
   jmx:
     enabled: true
   security:
