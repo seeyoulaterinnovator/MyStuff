@@ -11,6 +11,7 @@ spec:
     replicatedCache: 
       mode: "SYNC"
       remoteTimeout: "61000"
+      statistics: "true"
       encoding:
         media-type: "application/x-jboss-marshalling"
       locking: 
@@ -37,6 +38,7 @@ spec:
     replicatedCache: 
       mode: "SYNC"
       remoteTimeout: "61000"
+      statistics: "true"
       encoding:
         media-type: "application/x-jboss-marshalling"
       locking: 
