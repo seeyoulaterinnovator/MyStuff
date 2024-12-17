@@ -10,12 +10,6 @@ stages:
   - docker
   - deploy
 
-.build: &build-template
-  before_script:
-  - if [ -f ./gradlew ]; then
-  - chmod 775 ./gradlew
-  - fi
-
 .init_vars: &init-variables
   before_script:
   - cp ${ERTK_PEM} configs/ertk.pem
@@ -44,7 +38,7 @@ stages:
   image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
   when: manual
   only:
-    - PROD
+    - tags
   script:
     - export FQDN=`echo "${CI_ENVIRONMENT_URL}" | sed 's/^http\(\|s\):\/\///g'`
     - consul-template -once -template ".helm/values-prod.yaml.tpl:values.yaml"
@@ -61,6 +55,18 @@ stages:
     NAMESPACE: 'sso'
     NODE_PORT: '30080'
     REPLICA_COUNT: '5'
+
+.infinispan:prod:template:
+  stage: deploy
+  image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
+  when: manual
+  only:
+    - tags
+  script:
+    # Apply Infinispan installation manifest
+    - kubectl apply -f ./configs/infinispan-k8s-prod/infinispan-${DC}.yaml
+    # Apply Infinispan caches manifest
+    - kubectl apply -f ./configs/infinispan-k8s-prod/caches-${DC}.yaml
 
 .frontend:theme:build:
   stage: build
@@ -116,10 +122,6 @@ frontend:admin:build:
       - keycloak-extension/src/main/resources/themes/keycloak.v2/admin/resources/
     name: "domru-sso-$CI_PIPELINE_ID"
     expire_in: 1 day
-  only:
-    - itres-new
-    - itres-new-prod
-    - cicd
   allow_failure: false
   when: manual
   tags:
@@ -128,9 +130,8 @@ frontend:admin:build:
 back:build:
   stage: build
   image: harbor.ertelecom.ru/b2bweb/openjdk:21-node20
-  <<: *build-template
   script:
-    - ./gradlew --stacktrace --console=plain build
+    - gradle --stacktrace --console=plain build
   cache:
     key: "CI_COMMIT_REF_SLUG"
     paths:
@@ -251,6 +252,19 @@ domru:voronezh-k8s:
     name: production-k8s-voronezh
     url: https://auth.dom.ru
 
+infinispan:perm-k8s:
+  extends: .infinispan:prod:template
+  variables:
+    DC: "perm"
+  tags:
+    - sso-k8s-perm
+
+infinispan:voronezh-k8s:
+  extends: .infinispan:prod:template
+  variables:
+    DC: "voronezh"
+  tags:
+    - sso-k8s-voronezh
 
 domru:perm:primary:
   stage: deploy
