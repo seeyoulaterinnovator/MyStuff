@@ -55,6 +55,7 @@ stages:
     NAMESPACE: 'sso'
     NODE_PORT: '30080'
     REPLICA_COUNT: '5'
+    KC_CACHE_CONFIG_FILE: 'cache-ispn.remote.xml'
 
 .infinispan:prod:template:
   stage: deploy

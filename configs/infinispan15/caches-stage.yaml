@@ -111,7 +111,7 @@ spec:
     distributedCache:
       mode: "SYNC"
       owners: "2"
-      statistics: "false"
+      statistics: "true"
       remoteTimeout: "61000"
       encoding:
         media-type: "application/x-jboss-marshalling"
