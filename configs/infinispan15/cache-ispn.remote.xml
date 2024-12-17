@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<infinispan
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:infinispan:config:15.0 http://www.infinispan.org/schemas/infinispan-config-15.0.xsd
+        urn:infinispan:config:store:remote:15.0 https://infinispan.org/schemas/infinispan-server-15.0.xsd"
+        xmlns="urn:infinispan:config:15.0">
+    <cache-container name="keycloak">
+        <transport lock-timeout="60000" site="sso"/>
+        <serialization marshaller="org.infinispan.jboss.marshalling.commons.GenericJBossMarshaller"/>
+        <replicated-cache name="realms">
+            <encoding>
+                <key media-type="application/x-java-object"/>
+                <value media-type="application/x-java-object"/>
+            </encoding>
+            <remote-store xmlns="urn:infinispan:config:store:remote:15.0" cache="realms" shared="true" raw-values="true"
+                          segmented="false"
+                          marshaller="org.infinispan.jboss.marshalling.commons.GenericJBossMarshaller">
+                <remote-server host="${env.KC_CACHE_REMOTE_HOST}" port="${env.KC_CACHE_REMOTE_PORT}"/>
+                <security>
+                    <authentication>
+                        <digest username="${env.KC_CACHE_REMOTE_USERNAME}"
+                                password="${env.KC_CACHE_REMOTE_PASSWORD}" realm="default"/>
+                    </authentication>
+                </security>
+            </remote-store>
+        </replicated-cache>
+        <replicated-cache name="users">
+            <encoding>
+                <key media-type="application/x-java-object"/>
+                <value media-type="application/x-java-object"/>
+            </encoding>
+            <remote-store xmlns="urn:infinispan:config:store:remote:15.0" cache="users" shared="true" raw-values="true"
+                          segmented="false"
+                          marshaller="org.infinispan.jboss.marshalling.commons.GenericJBossMarshaller">
+                <remote-server host="${env.KC_CACHE_REMOTE_HOST}" port="${env.KC_CACHE_REMOTE_PORT}"/>
+                <security>
+                    <authentication>
+                        <digest username="${env.KC_CACHE_REMOTE_USERNAME}"
+                                password="${env.KC_CACHE_REMOTE_PASSWORD}" realm="default"/>
+                    </authentication>
+                </security>
+            </remote-store>
+        </replicated-cache>
+        <distributed-cache name="sessions">
+            <encoding>
+                <key media-type="application/x-java-object"/>
+                <value media-type="application/x-java-object"/>
+            </encoding>
+        </distributed-cache>
+        <distributed-cache name="authenticationSessions">
+            <encoding>
+                <key media-type="application/x-java-object"/>
+                <value media-type="application/x-java-object"/>
+            </encoding>
+        </distributed-cache>
+        <distributed-cache name="offlineSessions">
+            <encoding>
+                <key media-type="application/x-java-object"/>
+                <value media-type="application/x-java-object"/>
+            </encoding>
+        </distributed-cache>
+        <distributed-cache name="clientSessions">
+            <encoding>
+                <key media-type="application/x-java-object"/>
+                <value media-type="application/x-java-object"/>
+            </encoding>
+        </distributed-cache>
+        <distributed-cache name="offlineClientSessions">
+            <encoding>
+                <key media-type="application/x-java-object"/>
+                <value media-type="application/x-java-object"/>
+            </encoding>
+        </distributed-cache>
+        <distributed-cache name="loginFailures">
+            <encoding>
+                <key media-type="application/x-java-object"/>
+                <value media-type="application/x-java-object"/>
+            </encoding>
+        </distributed-cache>
+        <replicated-cache name="authorization">
+            <encoding>
+                <key media-type="application/x-java-object"/>
+                <value media-type="application/x-java-object"/>
+            </encoding>
+            <remote-store xmlns="urn:infinispan:config:store:remote:15.0" cache="authorization" shared="true"
+                          raw-values="true" segmented="false"
+                          marshaller="org.infinispan.jboss.marshalling.commons.GenericJBossMarshaller">
+                <remote-server host="${env.KC_CACHE_REMOTE_HOST}" port="${env.KC_CACHE_REMOTE_PORT}"/>
+                <security>
+                    <authentication>
+                        <digest username="${env.KC_CACHE_REMOTE_USERNAME}"
+                                password="${env.KC_CACHE_REMOTE_PASSWORD}" realm="default"/>
+                    </authentication>
+                </security>
+            </remote-store>
+        </replicated-cache>
+        <replicated-cache name="work">
+            <encoding>
+                <key media-type="application/x-java-object"/>
+                <value media-type="application/x-java-object"/>
+            </encoding>
+        </replicated-cache>
+        <replicated-cache name="keys">
+            <encoding>
+                <key media-type="application/x-java-object"/>
+                <value media-type="application/x-java-object"/>
+            </encoding>
+            <remote-store xmlns="urn:infinispan:config:store:remote:15.0" cache="keys" shared="true" raw-values="true"
+                          segmented="false"
+                          marshaller="org.infinispan.jboss.marshalling.commons.GenericJBossMarshaller">
+                <remote-server host="${env.KC_CACHE_REMOTE_HOST}" port="${env.KC_CACHE_REMOTE_PORT}"/>
+                <security>
+                    <authentication>
+                        <digest username="${env.KC_CACHE_REMOTE_USERNAME}"
+                                password="${env.KC_CACHE_REMOTE_PASSWORD}" realm="default"/>
+                    </authentication>
+                </security>
+            </remote-store>
+        </replicated-cache>
+        <distributed-cache name="actionTokens">
+            <encoding>
+                <key media-type="application/x-java-object"/>
+                <value media-type="application/x-java-object"/>
+            </encoding>
+        </distributed-cache>
+    </cache-container>
+
+    <cache-container name="custom">
+        <transport lock-timeout="60000" site="sso"/>
+        <serialization marshaller="org.infinispan.jboss.marshalling.commons.GenericJBossMarshaller"/>
+        <replicated-cache name="user_post_cache">
+            <encoding>
+                <key media-type="application/x-java-object"/>
+                <value media-type="application/x-java-object"/>
+            </encoding>
+            <remote-store xmlns="urn:infinispan:config:store:remote:15.0" cache="user_post_cache" shared="true"
+                          raw-values="true" segmented="false"
+                          marshaller="org.infinispan.jboss.marshalling.commons.GenericJBossMarshaller">
+                <remote-server host="${env.KC_CACHE_REMOTE_HOST}" port="${env.KC_CACHE_REMOTE_PORT}"/>
+                <security>
+                    <authentication>
+                        <digest username="${env.KC_CACHE_REMOTE_USERNAME}"
+                                password="${env.KC_CACHE_REMOTE_PASSWORD}" realm="default"/>
+                    </authentication>
+                </security>
+            </remote-store>
+            <expiration max-idle="100000" lifespan="500000"/>
+            <state-transfer chunk-size="2048" timeout="120000"/>
+        </replicated-cache>
+        <replicated-cache name="customer_cache">
+            <encoding>
+                <key media-type="application/x-java-object"/>
+                <value media-type="application/x-java-object"/>
+            </encoding>
+            <remote-store xmlns="urn:infinispan:config:store:remote:15.0" cache="customer_cache" shared="true"
+                          raw-values="true" segmented="false"
+                          marshaller="org.infinispan.jboss.marshalling.commons.GenericJBossMarshaller">
+                <remote-server host="${env.KC_CACHE_REMOTE_HOST}" port="${env.KC_CACHE_REMOTE_PORT}"/>
+                <security>
+                    <authentication>
+                        <digest username="${env.KC_CACHE_REMOTE_USERNAME}"
+                                password="${env.KC_CACHE_REMOTE_PASSWORD}" realm="default"/>
+                    </authentication>
+                </security>
+            </remote-store>
+            <expiration max-idle="100000" lifespan="500000"/>
+            <state-transfer chunk-size="2048" timeout="120000"/>
+        </replicated-cache>
+    </cache-container>
+</infinispan>
