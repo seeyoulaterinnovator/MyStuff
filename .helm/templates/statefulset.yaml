@@ -63,14 +63,12 @@ spec:
           env:
             - name: PROXY_ADDRESS_FORWARDING
               value: "true"
-            {{- if ne .Values.extraEnvs.KC_CACHE "local" }}
             - name: JGROUPS_DISCOVERY_PROTOCOL
               value: "dns.DNS_PING"
             - name: JGROUPS_DISCOVERY_PROPERTIES
               value: "dns_query={{ include "sso.fullname" . }}-headless"
             - name: JGROUPS_DISCOVERY_QUERY
               value: "{{ include "sso.fullname" . }}-headless"
-            {{- end }}
             {{- if and .Values.externalInfinispan.server .Values.externalInfinispan.port }}
             - name: INFINISPAN_HOST
               value: "{{ .Values.externalInfinispan.server }}"

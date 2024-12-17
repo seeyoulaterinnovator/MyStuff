@@ -22,7 +22,7 @@ stages:
   script:
     - export FQDN=`echo "${CI_ENVIRONMENT_URL}" | sed 's/^http\(\|s\):\/\///g'`
     - |-
-      if [[ $KC_CACHE == "local" ]]; then
+      if [[ $KC_CACHE_STACK == "kubernetes" ]]; then
           export INFINISPAN_HOST=""
       fi
     - consul-template -once -template ".helm/values-dev.yaml.tpl:values.yaml"
@@ -181,7 +181,7 @@ domru:stage2:
     NAMESPACE: 'sso'
     NODE_PORT: '30082'
     REPLICA_COUNT: '1'
-    KC_CACHE: 'local'
+    KC_CACHE_STACK: 'kubernetes'
 
 domru:stage3:
   extends: .domru:stage:template
