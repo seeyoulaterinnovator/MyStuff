@@ -203,7 +203,7 @@ domru:stage4:
     NAMESPACE: 'sso'
     NODE_PORT: '30084'
     REPLICA_COUNT: '3'
-    KC_CACHE_CONFIG_FILE: 'cache-ispn.embedded.xml'
+    KC_CACHE_CONFIG_FILE: 'cache-ispn.remote.xml'
 
 domru:stage5:
   extends: .domru:stage:template
