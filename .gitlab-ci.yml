@@ -184,7 +184,7 @@ domru:stage2:
     NODE_PORT: '30082'
     REPLICA_COUNT: '1'
     KC_CACHE: 'local'
-    KC_CACHE_REMOTE_HOST: ''
+    INFINISPAN_HOST: ''
 
 domru:stage3:
   extends: .domru:stage:template
