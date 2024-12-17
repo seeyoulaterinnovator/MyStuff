@@ -19,7 +19,7 @@ extraEnvs:
   # JAVA_OPTS_APPEND: "-Djgroups.dns.query={{ env "CI_ENVIRONMENT_SLUG" }}-sso-headless"
   KC_CACHE: "{{ envOrDefault  "KC_CACHE" "ispn" }}"
   KC_CACHE_CONFIG_FILE: "{{ envOrDefault  "KC_CACHE_CONFIG_FILE" "cache-ispn.embedded.xml" }}"
-  KC_CACHE_STACK: "kubernetes"
+  KC_CACHE_STACK: "tcp"
   KC_CACHE_REMOTE_HOST: "{{ env "INFINISPAN_HOST" }}"
   KC_CACHE_REMOTE_PORT: "{{ envOrDefault  "INFINISPAN_PORT" "11222" }}"
   KC_CACHE_REMOTE_TLS_ENABLED: "false"
