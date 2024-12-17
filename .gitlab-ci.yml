@@ -21,14 +21,12 @@ stages:
   when: manual
   script:
     - export FQDN=`echo "${CI_ENVIRONMENT_URL}" | sed 's/^http\(\|s\):\/\///g'`
-    - consul-template -once -template ".helm/values-dev.yaml.tpl:values.yaml"
     - |-
-      if [[ -z "$NEW_DB_DATABASE" ]]; then
-          export NEW_DB_DATABASE=$DB_DATABASE
+      if [[ $KC_CACHE == "local" ]]; then
+          export INFINISPAN_HOST=""
       fi
-    - echo "DB_DATABASE = ${DB_DATABASE}"
-    - echo "NEW_DB_DATABASE = ${NEW_DB_DATABASE}"
-    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml --set extraEnvs.DB_DATABASE=${NEW_DB_DATABASE} ./.helm -n ${NAMESPACE} --atomic --timeout 5m
+    - consul-template -once -template ".helm/values-dev.yaml.tpl:values.yaml"
+    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml ./.helm -n ${NAMESPACE} --atomic --timeout 5m
     - helm history -n ${NAMESPACE} ${CI_ENVIRONMENT_SLUG} --max 5
   tags:
     - sso-build-k8s
@@ -184,7 +182,6 @@ domru:stage2:
     NODE_PORT: '30082'
     REPLICA_COUNT: '1'
     KC_CACHE: 'local'
-    INFINISPAN_HOST: ''
 
 domru:stage3:
   extends: .domru:stage:template
