@@ -12,7 +12,7 @@ spec:
       mode: "SYNC"
       remoteTimeout: "61000"
       encoding:
-        media-type: "application/x-protostream"
+        media-type: "application/x-jboss-marshalling"
       locking: 
         acquireTimeout: "60000"
       transaction: 
@@ -38,7 +38,7 @@ spec:
       mode: "SYNC"
       remoteTimeout: "61000"
       encoding:
-        media-type: "application/x-protostream"
+        media-type: "application/x-jboss-marshalling"
       locking: 
         acquireTimeout: "60000"
       transaction: 
@@ -64,7 +64,7 @@ spec:
       mode: "SYNC"
       remoteTimeout: "61000"
       encoding:
-        media-type: "application/x-protostream"
+        media-type: "application/x-jboss-marshalling"
       locking: 
         acquireTimeout: "60000"
       transaction: 
@@ -89,7 +89,7 @@ spec:
       statistics: "true"
       remoteTimeout: "61000"
       encoding:
-        media-type: "application/x-protostream"
+        media-type: "application/x-jboss-marshalling"
       locking:
         acquireTimeout: "60000"
       transaction:
@@ -114,7 +114,7 @@ spec:
       statistics: "false"
       remoteTimeout: "61000"
       encoding:
-        media-type: "application/x-protostream"
+        media-type: "application/x-jboss-marshalling"
       locking:
         acquireTimeout: "60000"
       expiration:
@@ -141,7 +141,7 @@ spec:
       statistics: "true"
       remoteTimeout: "61000"
       encoding:
-        media-type: "application/x-protostream"
+        media-type: "application/x-jboss-marshalling"
       locking:
         acquireTimeout: "60000"
       transaction:
@@ -166,7 +166,7 @@ spec:
       statistics: "true"
       remoteTimeout: "61000"
       encoding:
-        media-type: "application/x-protostream"
+        media-type: "application/x-jboss-marshalling"
       locking:
         acquireTimeout: "60000"
       transaction:
@@ -191,7 +191,7 @@ spec:
       statistics: "true"
       remoteTimeout: "61000"
       encoding:
-        media-type: "application/x-protostream"
+        media-type: "application/x-jboss-marshalling"
       locking:
         acquireTimeout: "60000"
       transaction:
@@ -216,7 +216,7 @@ spec:
       statistics: "true"
       remoteTimeout: "61000"
       encoding:
-        media-type: "application/x-protostream"
+        media-type: "application/x-jboss-marshalling"
       locking:
         acquireTimeout: "60000"
       transaction:
@@ -241,7 +241,7 @@ spec:
       statistics: "true"
       remoteTimeout: "61000"
       encoding:
-        media-type: "application/x-protostream"
+        media-type: "application/x-jboss-marshalling"
       locking:
         acquireTimeout: "60000"
       transaction:

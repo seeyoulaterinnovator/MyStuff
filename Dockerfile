@@ -1,6 +1,7 @@
 FROM harbor.ertelecom.ru/sso-protected/keycloak:25.0.2
 
 COPY --chown=keycloak ./configs/infinispan15/cache-ispn.embedded.xml /opt/keycloak/conf/
+COPY --chown=keycloak ./configs/infinispan15/cache-ispn.remote.xml /opt/keycloak/conf/
 COPY --chown=keycloak ./build/keycloak-extension/libs/keycloak-extension-1.0.1-all.jar /opt/keycloak/providers/
 
 ENV LIQUIBASE_COMMAND_CHANGE_EXEC_LISTENER_CLASS=ru.alamics.sso.keycloak.migration.CustomChangeExecListener
