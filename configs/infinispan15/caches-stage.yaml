@@ -1,0 +1,252 @@
+---
+apiVersion: infinispan.org/v2alpha1
+kind: Cache
+metadata:
+  name: customercache
+  namespace: infinispan
+spec:
+  clusterName: infinispan
+  name: customer_cache
+  template: |-
+    replicatedCache: 
+      mode: "SYNC"
+      remoteTimeout: "61000"
+      encoding:
+        media-type: "application/x-protostream"
+      locking: 
+        acquireTimeout: "60000"
+      transaction: 
+        mode: "NON_XA"
+        locking: "PESSIMISTIC"
+      expiration: 
+        lifespan: "500000"
+        maxIdle: "100000"
+      stateTransfer: 
+        timeout: "120000"
+        chunkSize: "2048"
+---
+apiVersion: infinispan.org/v2alpha1
+kind: Cache
+metadata:
+  name: userpostcache
+  namespace: infinispan
+spec:
+  clusterName: infinispan
+  name: user_post_cache
+  template: |-
+    replicatedCache: 
+      mode: "SYNC"
+      remoteTimeout: "61000"
+      encoding:
+        media-type: "application/x-protostream"
+      locking: 
+        acquireTimeout: "60000"
+      transaction: 
+        mode: "NON_XA"
+        locking: "PESSIMISTIC"
+      expiration: 
+        lifespan: "500000"
+        maxIdle: "100000"
+      stateTransfer: 
+        timeout: "120000"
+        chunkSize: "2048"
+---
+apiVersion: infinispan.org/v2alpha1
+kind: Cache
+metadata:
+  name: work
+  namespace: infinispan
+spec:
+  clusterName: infinispan
+  name: work
+  template: |-
+    replicatedCache: 
+      mode: "SYNC"
+      remoteTimeout: "61000"
+      encoding:
+        media-type: "application/x-protostream"
+      locking: 
+        acquireTimeout: "60000"
+      transaction: 
+        mode: "NON_XA"
+        locking: "PESSIMISTIC"
+      stateTransfer: 
+        timeout: "120000"
+        chunkSize: "2048"
+---
+apiVersion: infinispan.org/v2alpha1
+kind: Cache
+metadata:
+  name: authenticationsessions
+  namespace: infinispan
+spec:
+  clusterName: infinispan
+  name: authenticationSessions
+  template: |-
+    distributedCache:
+      mode: "SYNC"
+      owners: "2"
+      statistics: "true"
+      remoteTimeout: "61000"
+      encoding:
+        media-type: "application/x-protostream"
+      locking:
+        acquireTimeout: "60000"
+      transaction:
+        mode: "NON_XA" 
+        locking: "PESSIMISTIC" 
+      stateTransfer:
+        timeout: "120000"
+        chunkSize: "2048"
+---
+apiVersion: infinispan.org/v2alpha1
+kind: Cache
+metadata:
+  name: sessions
+  namespace: infinispan
+spec:
+  clusterName: infinispan
+  name: sessions
+  template: |-
+    distributedCache:
+      mode: "SYNC"
+      owners: "2"
+      statistics: "false"
+      remoteTimeout: "61000"
+      encoding:
+        media-type: "application/x-protostream"
+      locking:
+        acquireTimeout: "60000"
+      expiration:
+        lifespan: "-1"
+      transaction:
+        mode: "NON_XA" 
+        locking: "PESSIMISTIC" 
+      stateTransfer:
+        timeout: "120000"
+        chunkSize: "2048"
+---
+apiVersion: infinispan.org/v2alpha1
+kind: Cache
+metadata:
+  name: clientsessions
+  namespace: infinispan
+spec:
+  clusterName: infinispan
+  name: clientSessions
+  template: |-
+    distributedCache:
+      mode: "SYNC"
+      owners: "2"
+      statistics: "true"
+      remoteTimeout: "61000"
+      encoding:
+        media-type: "application/x-protostream"
+      locking:
+        acquireTimeout: "60000"
+      transaction:
+        mode: "NON_XA" 
+        locking: "PESSIMISTIC" 
+      stateTransfer:
+        timeout: "120000"
+        chunkSize: "2048"
+---
+apiVersion: infinispan.org/v2alpha1
+kind: Cache
+metadata:
+  name: offlinesessions
+  namespace: infinispan
+spec:
+  clusterName: infinispan
+  name: offlineSessions
+  template: |-
+    distributedCache:
+      mode: "SYNC"
+      owners: "2"
+      statistics: "true"
+      remoteTimeout: "61000"
+      encoding:
+        media-type: "application/x-protostream"
+      locking:
+        acquireTimeout: "60000"
+      transaction:
+        mode: "NON_XA" 
+        locking: "PESSIMISTIC" 
+      stateTransfer:
+        timeout: "120000"
+        chunkSize: "2048"
+---
+apiVersion: infinispan.org/v2alpha1
+kind: Cache
+metadata:
+  name: offlineclientsessions
+  namespace: infinispan
+spec:
+  clusterName: infinispan
+  name: offlineClientSessions
+  template: |-
+    distributedCache:
+      mode: "SYNC"
+      owners: "2"
+      statistics: "true"
+      remoteTimeout: "61000"
+      encoding:
+        media-type: "application/x-protostream"
+      locking:
+        acquireTimeout: "60000"
+      transaction:
+        mode: "NON_XA" 
+        locking: "PESSIMISTIC" 
+      stateTransfer:
+        timeout: "120000"
+        chunkSize: "2048"
+---
+apiVersion: infinispan.org/v2alpha1
+kind: Cache
+metadata:
+  name: loginfailures
+  namespace: infinispan
+spec:
+  clusterName: infinispan
+  name: loginFailures
+  template: |-
+    distributedCache:
+      mode: "SYNC"
+      owners: "2"
+      statistics: "true"
+      remoteTimeout: "61000"
+      encoding:
+        media-type: "application/x-protostream"
+      locking:
+        acquireTimeout: "60000"
+      transaction:
+        mode: "NON_XA" 
+        locking: "PESSIMISTIC" 
+      stateTransfer:
+        timeout: "120000"
+        chunkSize: "2048"
+---
+apiVersion: infinispan.org/v2alpha1
+kind: Cache
+metadata:
+  name: actiontokens
+  namespace: infinispan
+spec:
+  clusterName: infinispan
+  name: actionTokens
+  template: |-
+    distributedCache:
+      mode: "SYNC"
+      owners: "2"
+      statistics: "true"
+      remoteTimeout: "61000"
+      encoding:
+        media-type: "application/x-protostream"
+      locking:
+        acquireTimeout: "60000"
+      transaction:
+        mode: "NON_XA" 
+        locking: "PESSIMISTIC" 
+      stateTransfer:
+        timeout: "120000"
+        chunkSize: "2048"
