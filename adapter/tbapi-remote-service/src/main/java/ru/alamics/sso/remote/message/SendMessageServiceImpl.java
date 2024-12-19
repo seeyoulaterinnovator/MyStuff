@@ -95,7 +95,7 @@ public class SendMessageServiceImpl implements SendMessageService {
     public String sendMessageByRequest(MessageRequest messageRequest) throws SendMessageException {
 
         // локально и на дэве фиксированный код и не отправляю смс
-        if (!StandResolver.isBattle() && !E2EUtil.isE2E() && !isSmsSenderMocked()) {
+        if (!StandResolver.isBattle() && !E2EUtil.isE2E() || isSmsSenderMocked()) {
             log.info("Stand {}, do not sending sms", StandResolver.ENV);
             return "0: Accepted for delivery";
         }
