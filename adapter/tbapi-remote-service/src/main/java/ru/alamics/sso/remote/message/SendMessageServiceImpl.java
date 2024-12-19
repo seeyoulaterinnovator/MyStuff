@@ -14,6 +14,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.phone.MsgConfig;
 import ru.alamics.sso.registration.phone.exception.SendMessageException;
 import ru.alamics.sso.registration.phone.model.MessageRequest;
@@ -41,6 +42,9 @@ public class SendMessageServiceImpl implements SendMessageService {
 
     @Inject
     SettingsService settingsService;
+
+    @Inject
+    ApplicationProperties properties;
 
     public SendMessageServiceImpl(
             @Named("smsSenderSSLContext") SSLContext sslContext,
@@ -91,7 +95,7 @@ public class SendMessageServiceImpl implements SendMessageService {
     public String sendMessageByRequest(MessageRequest messageRequest) throws SendMessageException {
 
         // локально и на дэве фиксированный код и не отправляю смс
-        if (!StandResolver.isBattle() && !E2EUtil.isE2E()) {
+        if (!StandResolver.isBattle() && !E2EUtil.isE2E() && !isSmsSenderMocked()) {
             log.info("Stand {}, do not sending sms", StandResolver.ENV);
             return "0: Accepted for delivery";
         }
@@ -144,6 +148,11 @@ public class SendMessageServiceImpl implements SendMessageService {
                 .encoding(MsgConfig.Encoding.UCS2)
                 .charset(StandardCharsets.UTF_8)
                 .build();
+    }
+
+
+    private boolean isSmsSenderMocked() {
+        return "true".equals(properties.getProperty("smsSender.mocked"));
     }
 
 }
