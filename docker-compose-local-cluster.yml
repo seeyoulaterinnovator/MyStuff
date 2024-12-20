@@ -56,11 +56,15 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 396M
 
   infinispan2:
     <<: *infinispan1
     hostname: infinispan2
+
+#  infinispan3:
+#    <<: *infinispan1
+#    hostname: infinispan3
 
   keycloak1: &keycloak1
     depends_on:
@@ -70,6 +74,8 @@ services:
         condition: service_healthy
       infinispan2:
         condition: service_healthy
+#      infinispan3:
+#        condition: service_healthy
     image: quay.io/keycloak/keycloak:25.0.2
     hostname: keycloak1
     command: [ "start" ]
@@ -119,7 +125,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1024M
+          memory: 768M
 
   keycloak2:
     <<: *keycloak1
@@ -127,6 +133,10 @@ services:
     environment:
       <<: *keycloak1-env
       TZ: Europe/Moscow
+
+#  keycloak3:
+#    <<: *keycloak1
+#    hostname: keycloak3
 
   keycloak-config-cli:
     depends_on:
@@ -153,10 +163,14 @@ services:
         condition: service_healthy
       infinispan2:
         condition: service_healthy
+#      infinispan3:
+#        condition: service_healthy
       keycloak1:
         condition: service_started
       keycloak2:
         condition: service_started
+#      keycloak3:
+#        condition: service_started
     image: haproxy:2.9.9-alpine
     ports:
       - 8080:8080
@@ -168,3 +182,18 @@ services:
       resources:
         limits:
           memory: 128M
+
+  nginx:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    image: nginx:1.15.3
+    ports:
+      - "8180:8180"
+      - "80:80"
+    volumes:
+      - ./volumes/nginx/etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./volumes/nginx/usr/share/nginx/html:/usr/share/nginx/html:ro
+    deploy:
+      resources:
+        limits:
+          memory: 32m

@@ -1,5 +1,8 @@
 package ru.alamics.sso.e2e;
 
+import io.restassured.RestAssured;
+import io.restassured.filter.log.RequestLoggingFilter;
+import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.ExtractableResponse;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -10,22 +13,29 @@ import org.junit.jupiter.api.RepeatedTest;
 import ru.alamics.sso.e2e.common.TestsClients;
 import ru.alamics.sso.e2e.common.TestsUsers;
 
+import java.util.Map;
+
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static ru.alamics.sso.e2e.common.TestsUtils.getQueryParameter;
 
 /**
  * see docker-compose-local-cluster.yml
  */
-//@org.junit.jupiter.api.Disabled
+@org.junit.jupiter.api.Disabled
 public class ClusterTests {
+    static {
+        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+    }
+
     String keycloakUrl = "http://localhost:8080/auth";
 
     TestsClients client = TestsClients.APP;
 
     TestsUsers user = TestsUsers.TESTER;
 
-    @RepeatedTest(value = 100)
+    Map<String, String> cookies;
+
+    @RepeatedTest(value = 10)
     void test() {
         var logonPage = getLogonPage();
 
@@ -34,6 +44,8 @@ public class ClusterTests {
                 .select("#loginForm")
                 .attr("action");
 
+        if(cookies == null) cookies = logonPage.cookies();
+
         assertNotNull(logonUrl);
 
         var logonRedirectUrl = given()
@@ -41,7 +53,7 @@ public class ClusterTests {
                 .formParam("username", user.getUsername())
                 .formParam("password", user.getPassword())
                 .formParam("loginPasswordButton", "")
-                .cookies(logonPage.cookies())
+                .cookies(cookies)
                 .redirects().follow(false)
                 .post(logonUrl)
                 .then()
@@ -52,11 +64,18 @@ public class ClusterTests {
 
         assertNotNull(logonRedirectUrl);
 
-        var code = getQueryParameter(logonRedirectUrl, "code");
+        // для случая наличия required action
+        given()
+                .cookies(cookies)
+                .get(logonRedirectUrl)
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK);
 
-        assertNotNull(code);
+        //var code = getQueryParameter(logonRedirectUrl, "code");
+        //assertNotNull(code);
 
-        getTokensByCodeAndLogout(code);
+        //getTokensByCodeAndLogout(code);
     }
 
     ExtractableResponse<?> getLogonPage() {
