@@ -100,14 +100,13 @@
         const realm = document.getElementById('realm').value;
         const client = document.getElementById('client').value;
         const iframe = document.getElementById('iframe').checked ? { iframe: 1 } : {};
-        const https = document.getElementById('iframe').checked;
+        const https = document.getElementById('https').checked;
         const element = document.createElement('a');
         element.setAttribute('href', `${getKcBaseUrl()}/realms/${realm}/protocol/openid-connect/auth?` + new URLSearchParams({
           response_type: 'code',
           client_id: client,
           redirect_uri: `${clientBaseUrl}/?realm=${realm}&client=${client}&state=${new Date().getTime()}&https=${https}`,
           scope: 'openid',
-          https: document.getElementById('iframe').checked,
           ...iframe,
         }));
         element.setAttribute('target', '_blank');
