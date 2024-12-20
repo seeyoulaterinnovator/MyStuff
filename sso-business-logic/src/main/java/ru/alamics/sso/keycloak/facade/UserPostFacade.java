@@ -71,18 +71,9 @@ public class UserPostFacade {
         log.info("addCustomersToRequest start");
         List<String> updatingTomsId = userPosts.stream()
                 .filter(post -> {
-                    log.info("addCustomersToRequest post.getTomsId() = {}", post.getTomsId());
                     CacheEntry<?,?> entry = getCustomerCache().getAdvancedCache().getCacheEntry(post.getTomsId());
                     if(entry == null) return true;
-                    log.info("addCustomersToRequest entry.getCreated() = {}", entry.getCreated());
-                    log.info("addCustomersToRequest post.getUpdateTime()1 = {}", post.getUpdateTime());
-                    log.info("addCustomersToRequest post.getUpdateTime()2 = {}", post.getUpdateTime().plus(Duration.ofHours(customerCacheLifespanInDb)));
-                    log.info("addCustomersToRequest post.getUpdateTime()3 = {}", post.getUpdateTime().plus(Duration.ofHours(customerCacheLifespanInDb))
-                            .atZone(ZoneOffset.systemDefault()));
-                    log.info("addCustomersToRequest post.getUpdateTime()4 = {}", post.getUpdateTime().plus(Duration.ofHours(customerCacheLifespanInDb))
-                            .atZone(ZoneOffset.systemDefault()).toInstant());
                     Instant cachedAt = Instant.ofEpochMilli(entry.getCreated());
-                    log.info("addCustomersToRequest cachedAt = {}", cachedAt);
                     return post.getUpdateTime()
                             .plus(Duration.ofHours(customerCacheLifespanInDb))
                             .atZone(ZoneOffset.systemDefault())
