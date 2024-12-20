@@ -5,7 +5,7 @@
         urn:infinispan:config:store:remote:15.0 https://infinispan.org/schemas/infinispan-server-15.0.xsd"
         xmlns="urn:infinispan:config:15.0">
     <cache-container name="keycloak">
-        <transport lock-timeout="60000" site="${env.KC_CACHE_REMOTE_SITE:sso}"/>
+        <transport lock-timeout="60000" site="sso"/>
         <serialization marshaller="org.infinispan.jboss.marshalling.commons.GenericJBossMarshaller"/>
         <local-cache name="realms" simple-cache="true">
             <encoding>
@@ -96,7 +96,7 @@
     </cache-container>
 
     <cache-container name="custom">
-        <transport lock-timeout="60000" site="${env.KC_CACHE_REMOTE_SITE:sso}"/>
+        <transport lock-timeout="60000" site="sso"/>
         <serialization marshaller="org.infinispan.jboss.marshalling.commons.GenericJBossMarshaller"/>
         <replicated-cache name="user_post_cache">
             <encoding>
