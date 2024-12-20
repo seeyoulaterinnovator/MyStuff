@@ -45,7 +45,7 @@ stages:
     REPLICA_COUNT: '5'
 
 .infinispan:prod:template:
-  stage: deploy
+  stage: build
   image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
   when: manual
   script:
