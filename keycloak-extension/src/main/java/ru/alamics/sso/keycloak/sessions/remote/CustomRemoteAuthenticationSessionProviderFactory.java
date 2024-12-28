@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.sessions;
+package ru.alamics.sso.keycloak.sessions.remote;
 
 import lombok.extern.slf4j.Slf4j;
 import org.infinispan.client.hotrod.RemoteCache;
@@ -11,17 +11,17 @@ import org.keycloak.sessions.AuthenticationSessionProvider;
 import org.keycloak.sessions.AuthenticationSessionProviderFactory;
 
 @Slf4j
-public class CustomAuthenticationSessionProviderFactory
+public class CustomRemoteAuthenticationSessionProviderFactory
         implements AuthenticationSessionProviderFactory<AuthenticationSessionProvider> {
     private static final int PROVIDER_PRIORITY = 2;
 
-    private static final String PROVIDER_ID = "custom";
+    private static final String PROVIDER_ID = "custom-remote";
 
     private static final String AUTH_SESSIONS_LIMIT = "authSessionsLimit";
 
     private static final int DEFAULT_AUTH_SESSIONS_LIMIT = 300;
 
-    private volatile CustomInfinispanKeyGenerator keyGenerator;
+    private volatile CustomRemoteKeyGenerator keyGenerator;
 
     private volatile RemoteCache<String, RootAuthenticationSessionEntity> authSessionsCache;
 
@@ -30,7 +30,7 @@ public class CustomAuthenticationSessionProviderFactory
     @Override
     public AuthenticationSessionProvider create(KeycloakSession session) {
         lazyInit(session);
-        return new CustomAuthenticationSessionProvider(
+        return new CustomRemoteAuthenticationSessionProvider(
                 session,
                 keyGenerator,
                 authSessionsCache,
@@ -66,7 +66,7 @@ public class CustomAuthenticationSessionProviderFactory
                 if (authSessionsCache == null) {
                     InfinispanConnectionProvider connections = session.getProvider(InfinispanConnectionProvider.class);
                     authSessionsCache = connections.getRemoteCache(InfinispanConnectionProvider.AUTHENTICATION_SESSIONS_CACHE_NAME);
-                    keyGenerator = new CustomInfinispanKeyGenerator();
+                    keyGenerator = new CustomRemoteKeyGenerator();
                 }
             }
         }

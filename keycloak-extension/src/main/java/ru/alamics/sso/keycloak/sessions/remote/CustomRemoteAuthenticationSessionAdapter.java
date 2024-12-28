@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.sessions;
+package ru.alamics.sso.keycloak.sessions.remote;
 
 import org.keycloak.common.Profile;
 import org.keycloak.models.ClientModel;
@@ -22,13 +22,13 @@ import static org.keycloak.models.light.LightweightUserAdapter.isLightweightUser
 /**
  * @see org.keycloak.models.sessions.infinispan.AuthenticationSessionAdapter
  */
-public class CustomAuthenticationSessionAdapter implements AuthenticationSessionModel {
+public class CustomRemoteAuthenticationSessionAdapter implements AuthenticationSessionModel {
     private final KeycloakSession session;
     private final CustomRootAuthenticationSessionAdapter parent;
     private final String tabId;
     private final AuthenticationSessionEntity entity;
 
-    public CustomAuthenticationSessionAdapter(
+    public CustomRemoteAuthenticationSessionAdapter(
             KeycloakSession session,
             CustomRootAuthenticationSessionAdapter parent,
             String tabId,

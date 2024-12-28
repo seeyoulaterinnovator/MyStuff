@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.sessions;
+package ru.alamics.sso.keycloak.sessions.remote;
 
 import lombok.extern.slf4j.Slf4j;
 import org.infinispan.client.hotrod.RemoteCache;
@@ -25,7 +25,7 @@ public class CustomRootAuthenticationSessionAdapter implements RootAuthenticatio
 
     private final KeycloakSession session;
 
-    private final CustomAuthenticationSessionProvider provider;
+    private final CustomRemoteAuthenticationSessionProvider provider;
 
     private final RemoteCache<String, RootAuthenticationSessionEntity> cache;
 
@@ -37,7 +37,7 @@ public class CustomRootAuthenticationSessionAdapter implements RootAuthenticatio
 
     public CustomRootAuthenticationSessionAdapter(
             KeycloakSession session,
-            CustomAuthenticationSessionProvider provider,
+            CustomRemoteAuthenticationSessionProvider provider,
             RemoteCache<String, RootAuthenticationSessionEntity> cache,
             RealmModel realm,
             RootAuthenticationSessionEntity entity,
@@ -82,7 +82,7 @@ public class CustomRootAuthenticationSessionAdapter implements RootAuthenticatio
         Map<String, AuthenticationSessionModel> result = new HashMap<>();
         for (Map.Entry<String, AuthenticationSessionEntity> entry : entity.getAuthenticationSessions().entrySet()) {
             String tabId = entry.getKey();
-            result.put(tabId , new CustomAuthenticationSessionAdapter(session, this, tabId, entry.getValue()));
+            result.put(tabId , new CustomRemoteAuthenticationSessionAdapter(session, this, tabId, entry.getValue()));
         }
         return result;
     }
@@ -130,7 +130,7 @@ public class CustomRootAuthenticationSessionAdapter implements RootAuthenticatio
 
         update();
 
-        CustomAuthenticationSessionAdapter authSession = new CustomAuthenticationSessionAdapter(
+        CustomRemoteAuthenticationSessionAdapter authSession = new CustomRemoteAuthenticationSessionAdapter(
                 session, this, tabId, authSessionEntity
         );
         session.getContext().setAuthenticationSession(authSession);

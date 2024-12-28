@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.sessions;
+package ru.alamics.sso.keycloak.sessions.remote;
 
 import lombok.extern.slf4j.Slf4j;
 import org.infinispan.client.hotrod.RemoteCache;
@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  * @see InfinispanKeycloakTransaction
  */
 @Slf4j
-public class CustomInfinispanKeycloakTransaction implements KeycloakTransaction {
+public class CustomRemoteKeycloakTransaction implements KeycloakTransaction {
     private static final InfinispanKeycloakTransaction.CacheTask TOMBSTONE = new InfinispanKeycloakTransaction.CacheTask() {
         @Override
         public void execute() {}

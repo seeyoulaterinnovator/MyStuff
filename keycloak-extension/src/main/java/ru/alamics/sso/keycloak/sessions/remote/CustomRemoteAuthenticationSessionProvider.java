@@ -1,4 +1,4 @@
-package ru.alamics.sso.keycloak.sessions;
+package ru.alamics.sso.keycloak.sessions.remote;
 
 import org.infinispan.client.hotrod.RemoteCache;
 import org.keycloak.common.util.Base64Url;
@@ -22,16 +22,16 @@ import static ru.alamics.sso.registration.model.UserConstants.AUTH_NOTE_DIRECT_G
 /**
  * @see InfinispanAuthenticationSessionProvider
  */
-public class CustomAuthenticationSessionProvider implements AuthenticationSessionProvider {
-    protected final CustomInfinispanKeycloakTransaction tx;
+public class CustomRemoteAuthenticationSessionProvider implements AuthenticationSessionProvider {
+    protected final CustomRemoteKeycloakTransaction tx;
     private final KeycloakSession session;
     private final RemoteCache<String, RootAuthenticationSessionEntity> cache;
-    private final CustomInfinispanKeyGenerator keyGenerator;
+    private final CustomRemoteKeyGenerator keyGenerator;
     private final int authSessionsLimit;
 
-    public CustomAuthenticationSessionProvider(
+    public CustomRemoteAuthenticationSessionProvider(
             KeycloakSession session,
-            CustomInfinispanKeyGenerator keyGenerator,
+            CustomRemoteKeyGenerator keyGenerator,
             RemoteCache<String, RootAuthenticationSessionEntity> cache,
             int authSessionsLimit
     ) {
@@ -39,7 +39,7 @@ public class CustomAuthenticationSessionProvider implements AuthenticationSessio
         this.cache = cache;
         this.keyGenerator = keyGenerator;
         this.authSessionsLimit = authSessionsLimit;
-        this.tx = new CustomInfinispanKeycloakTransaction();
+        this.tx = new CustomRemoteKeycloakTransaction();
         session.getTransactionManager().enlistAfterCompletion(tx);
     }
 

@@ -123,7 +123,7 @@ public abstract class Tests {
             .withEnv("LIQUIBASE_COMMAND_CHANGE_EXEC_LISTENER_CLASS",
                     "ru.alamics.sso.keycloak.migration.CustomChangeExecListener")
             .withEnv("KC_SPI_USER_PROVIDER", "customjpa")
-            .withEnv("KC_SPI_AUTHENTICATION_SESSIONS_PROVIDER", "custom")
+            .withEnv("KC_SPI_AUTHENTICATION_SESSIONS_PROVIDER", "custom-embedded")
             .withEnv("KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_LEGACY_LOGOUT_REDIRECT_URI", "true")
             .withEnv("KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_SUPPRESS_LOGOUT_CONFIRMATION_SCREEN", "true")
             .withEnv("KC_SPI_COOKIE_PROVIDER", "custom")
