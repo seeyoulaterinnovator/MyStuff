@@ -1,4 +1,6 @@
-FROM harbor.ertelecom.ru/sso-protected/keycloak:25.0.2
+# quay.io/keycloak/
+ARG REGISTRYPATH="harbor.ertelecom.ru/sso-protected/"
+FROM ${REGISTRYPATH}keycloak:25.0.2
 
 COPY --chown=keycloak ./configs/infinispan15/cache-ispn.embedded.xml /opt/keycloak/conf/
 COPY --chown=keycloak ./configs/infinispan15/cache-ispn.remote.xml /opt/keycloak/conf/

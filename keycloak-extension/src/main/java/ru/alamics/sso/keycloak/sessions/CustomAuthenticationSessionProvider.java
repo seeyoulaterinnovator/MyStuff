@@ -1,41 +1,71 @@
 package ru.alamics.sso.keycloak.sessions;
 
-import org.keycloak.authentication.AuthenticationFlowContext;
+import org.infinispan.client.hotrod.RemoteCache;
+import org.keycloak.common.util.Base64Url;
+import org.keycloak.common.util.SecretGenerator;
+import org.keycloak.common.util.Time;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
-import org.keycloak.protocol.oidc.grants.OAuth2GrantType;
+import org.keycloak.models.sessions.infinispan.InfinispanAuthenticationSessionProvider;
+import org.keycloak.models.sessions.infinispan.entities.RootAuthenticationSessionEntity;
+import org.keycloak.models.utils.SessionExpiration;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionProvider;
 import org.keycloak.sessions.RootAuthenticationSessionModel;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_NOTE_DIRECT_GRANT_SESSION_CLEAR_DISABLED;
 
+/**
+ * @see InfinispanAuthenticationSessionProvider
+ */
 public class CustomAuthenticationSessionProvider implements AuthenticationSessionProvider {
-    final KeycloakSession session;
+    protected final CustomInfinispanKeycloakTransaction tx;
+    private final KeycloakSession session;
+    private final RemoteCache<String, RootAuthenticationSessionEntity> cache;
+    private final CustomInfinispanKeyGenerator keyGenerator;
+    private final int authSessionsLimit;
 
-    final AuthenticationSessionProvider provider;
-
-    public CustomAuthenticationSessionProvider(KeycloakSession session, AuthenticationSessionProvider provider) {
+    public CustomAuthenticationSessionProvider(
+            KeycloakSession session,
+            CustomInfinispanKeyGenerator keyGenerator,
+            RemoteCache<String, RootAuthenticationSessionEntity> cache,
+            int authSessionsLimit
+    ) {
         this.session = session;
-        this.provider = provider;
+        this.cache = cache;
+        this.keyGenerator = keyGenerator;
+        this.authSessionsLimit = authSessionsLimit;
+        this.tx = new CustomInfinispanKeycloakTransaction();
+        session.getTransactionManager().enlistAfterCompletion(tx);
     }
+
 
     @Override
     public RootAuthenticationSessionModel createRootAuthenticationSession(RealmModel realm) {
-        return provider.createRootAuthenticationSession(realm);
+        String id = keyGenerator.generateKeyString(session, cache);
+        return createRootAuthenticationSession(realm, id);
     }
 
     @Override
     public RootAuthenticationSessionModel createRootAuthenticationSession(RealmModel realm, String id) {
-        return provider.createRootAuthenticationSession(realm, id);
+        RootAuthenticationSessionEntity entity = new RootAuthenticationSessionEntity(id);
+        entity.setRealmId(realm.getId());
+        entity.setTimestamp(Time.currentTime());
+        int expirationSeconds = SessionExpiration.getAuthSessionLifespan(realm);
+        tx.put(cache, id, entity, expirationSeconds, TimeUnit.SECONDS);
+        return wrap(realm, entity);
     }
 
     @Override
-    public RootAuthenticationSessionModel getRootAuthenticationSession(RealmModel realm, String authenticationSessionId) {
-        return provider.getRootAuthenticationSession(realm, authenticationSessionId);
+    public RootAuthenticationSessionModel getRootAuthenticationSession(
+            RealmModel realm, String authenticationSessionId
+    ) {
+        RootAuthenticationSessionEntity entity = tx.get(cache, authenticationSessionId);
+        return wrap(realm, entity);
     }
 
     /**
@@ -49,42 +79,41 @@ public class CustomAuthenticationSessionProvider implements AuthenticationSessio
         var authSession = session.getContext().getAuthenticationSession();
         if(authSession == null ||
                 !Boolean.TRUE.toString().equals(authSession.getAuthNote(AUTH_NOTE_DIRECT_GRANT_SESSION_CLEAR_DISABLED))) {
-            provider.removeRootAuthenticationSession(realm, authenticationSession);
+            tx.remove(cache, authenticationSession.getId());
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public void removeAllExpired() {
-        provider.removeAllExpired();
-    }
+    public void removeAllExpired() {}
 
-    @SuppressWarnings("deprecation")
     @Override
-    public void removeExpired(RealmModel realm) {
-        provider.removeExpired(realm);
-    }
+    public void removeExpired(RealmModel realm) {}
 
     @Override
     public void onRealmRemoved(RealmModel realm) {
-        provider.onRealmRemoved(realm);
+        // TODO
     }
 
     @Override
     public void onClientRemoved(RealmModel realm, ClientModel client) {
-        provider.onClientRemoved(realm, client);
+        // TODO
     }
 
     @Override
     public void updateNonlocalSessionAuthNotes(
-            AuthenticationSessionCompoundId compoundId,
-            Map<String, String> authNotesFragment
-    ) {
-        provider.updateNonlocalSessionAuthNotes(compoundId, authNotesFragment);
-    }
+            AuthenticationSessionCompoundId compoundId, Map<String, String> authNotesFragment
+    ) {}
 
     @Override
-    public void close() {
-        provider.close();
+    public void close() {}
+
+    protected String generateTabId() {
+        return Base64Url.encode(SecretGenerator.getInstance().randomBytes(8));
+    }
+
+    private CustomRootAuthenticationSessionAdapter wrap(RealmModel realm, RootAuthenticationSessionEntity entity) {
+        if(entity == null) return null;
+
+        return new CustomRootAuthenticationSessionAdapter(session, this, cache, realm, entity, authSessionsLimit);
     }
 }

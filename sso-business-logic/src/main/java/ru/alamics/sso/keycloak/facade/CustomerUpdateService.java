@@ -33,8 +33,6 @@ public class CustomerUpdateService {
     @Context
     KeycloakSession session;
 
-    private Cache<String, String> customerCache;
-
     private long tbapiRequestInterval;
 
     public CustomerUpdateService() {
@@ -46,8 +44,6 @@ public class CustomerUpdateService {
         ApplicationProperties properties = Lookup.lookup(ApplicationProperties.class);
         tbapiRequestInterval = properties.getPropertyLong(TBAPI_REQUEST_INTERVAL_PROPERTY, TBAPI_REQUEST_INTERVAL_DEFAULT, "CustomerUpdateService: default value used: '%s' = '%s'");
         log.info("tbapiRequestInterval set to value={}", tbapiRequestInterval);
-
-        customerCache = session.getProvider(InfinispanConnectionProvider.class).getCache("customer_cache");
     }
 
     void onStart(@Observes StartupEvent ev) {
@@ -76,7 +72,7 @@ public class CustomerUpdateService {
         //Замена во всем кэше имен организаций (ключ кэша - tomsId)
         customers.entrySet().stream()
                 .filter(customer -> customer.getValue() != null && !customer.getValue().isEmpty())
-                .forEach(customer -> customerCache.put(customer.getKey(), customer.getValue()));
+                .forEach(customer -> session.getProvider(InfinispanConnectionProvider.class).getCache("customer_cache").put(customer.getKey(), customer.getValue()));
         log.info("customers update is finished");
     }
 
