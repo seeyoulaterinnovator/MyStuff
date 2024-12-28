@@ -17,3 +17,6 @@ node_modules/
 /keycloak-extension/src/main/resources/themes/*/login/resources/build/
 /keycloak-extension/src/main/resources/themes/keycloak.v2/admin/resources
 /frontend/*/build/
+docker-compose-local-temp.yml
+values.yaml
+volumes/nginx/etc/nginx/nginx-temp.conf

@@ -15,6 +15,7 @@ import org.keycloak.quarkus.runtime.configuration.Configuration;
 @ApplicationScoped
 @Slf4j
 public class RouterConfig {
+    @Deprecated(forRemoval = true)
     public void configureIndexRedirect(@Observes Router relativeRouter) {
         ConfigValue port = Configuration.getConfig().getConfigValue("kc.http-port");
         ConfigValue path = Configuration.getConfig().getConfigValue("kc.http-relative-path");

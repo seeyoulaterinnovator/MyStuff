@@ -7,6 +7,7 @@ metadata:
 spec:
   clusterName: infinispan
   name: customer_cache
+  #language=yaml
   template: |-
     replicatedCache: 
       mode: "SYNC"
@@ -42,6 +43,7 @@ metadata:
 spec:
   clusterName: infinispan
   name: user_post_cache
+  #language=yaml
   template: |-
     replicatedCache: 
       mode: "SYNC"
@@ -77,9 +79,11 @@ metadata:
 spec:
   clusterName: infinispan
   name: work
+  #language=yaml
   template: |-
     replicatedCache: 
       mode: "SYNC"
+      statistics: "true"
       remoteTimeout: "61000"
       encoding:
         media-type: "application/x-jboss-marshalling"
@@ -108,6 +112,7 @@ metadata:
 spec:
   clusterName: infinispan
   name: authenticationSessions
+  #language=yaml
   template: |-
     distributedCache:
       mode: "SYNC"
@@ -141,6 +146,7 @@ metadata:
 spec:
   clusterName: infinispan
   name: sessions
+  #language=yaml
   template: |-
     distributedCache:
       mode: "SYNC"
@@ -176,6 +182,7 @@ metadata:
 spec:
   clusterName: infinispan
   name: clientSessions
+  #language=yaml
   template: |-
     distributedCache:
       mode: "SYNC"
@@ -209,6 +216,7 @@ metadata:
 spec:
   clusterName: infinispan
   name: offlineSessions
+  #language=yaml
   template: |-
     distributedCache:
       mode: "SYNC"
@@ -242,6 +250,7 @@ metadata:
 spec:
   clusterName: infinispan
   name: offlineClientSessions
+  #language=yaml
   template: |-
     distributedCache:
       mode: "SYNC"
@@ -275,6 +284,7 @@ metadata:
 spec:
   clusterName: infinispan
   name: loginFailures
+  #language=yaml
   template: |-
     distributedCache:
       mode: "SYNC"
@@ -308,6 +318,7 @@ metadata:
 spec:
   clusterName: infinispan
   name: actionTokens
+  #language=yaml
   template: |-
     distributedCache:
       mode: "SYNC"
