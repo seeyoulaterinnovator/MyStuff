@@ -22,6 +22,7 @@ extraEnvs:
   KC_CACHE_REMOTE_HOST: "{{ env "INFINISPAN_HOST" }}"
   KC_CACHE_REMOTE_PORT: "{{ envOrDefault  "INFINISPAN_PORT" "11222" }}"
   KC_CACHE_REMOTE_TLS_ENABLED: "false"
+  KC_SPI_AUTHENTICATION_SESSIONS_PROVIDER: "custom-remote"
   KC_DB: "mariadb"
   KC_DB_URL_HOST: "{{ env "DB_HOST" }}"
   KC_DB_URL_PORT: "{{ env "DB_PORT" }}"
