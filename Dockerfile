@@ -1,11 +1,14 @@
-FROM harbor.ertelecom.ru/sso-protected/keycloak:25.0.2
+# quay.io/keycloak/
+ARG REGISTRYPATH="harbor.ertelecom.ru/sso-protected/"
+FROM ${REGISTRYPATH}keycloak:25.0.2
 
 COPY --chown=keycloak ./configs/infinispan15/cache-ispn.embedded.xml /opt/keycloak/conf/
+COPY --chown=keycloak ./configs/infinispan15/cache-ispn.remote.xml /opt/keycloak/conf/
 COPY --chown=keycloak ./build/keycloak-extension/libs/keycloak-extension-1.0.1-all.jar /opt/keycloak/providers/
 
 ENV LIQUIBASE_COMMAND_CHANGE_EXEC_LISTENER_CLASS=ru.alamics.sso.keycloak.migration.CustomChangeExecListener
 ENV KC_SPI_USER_PROVIDER=customjpa
-ENV KC_SPI_AUTHENTICATION_SESSIONS_PROVIDER=custom
+ENV KC_SPI_AUTHENTICATION_SESSIONS_PROVIDER=custom-embedded
 ENV KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_LEGACY_LOGOUT_REDIRECT_URI=true
 ENV KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_SUPPRESS_LOGOUT_CONFIRMATION_SCREEN=true
 ENV KC_SPI_HOSTNAME_PROVIDER=custom

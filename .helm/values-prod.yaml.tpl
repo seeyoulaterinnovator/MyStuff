@@ -16,10 +16,13 @@ preStopDelay:
   delaySeconds: 15
 
 extraEnvs:
-  JAVA_OPTS_APPEND: "-Djgroups.dns.query={{ env "CI_ENVIRONMENT_SLUG" }}-sso-headless"
   KC_CACHE: "ispn"
-  KC_CACHE_CONFIG_FILE: "{{ envOrDefault  "KC_CACHE_CONFIG_FILE" "cache-ispn.embedded.xml" }}"
-  KC_CACHE_STACK: "kubernetes"
+  KC_CACHE_CONFIG_FILE: "cache-ispn.remote.xml"
+  KC_CACHE_STACK: "tcp"
+  KC_CACHE_REMOTE_HOST: "{{ env "INFINISPAN_HOST" }}"
+  KC_CACHE_REMOTE_PORT: "{{ envOrDefault  "INFINISPAN_PORT" "11222" }}"
+  KC_CACHE_REMOTE_TLS_ENABLED: "false"
+  KC_SPI_AUTHENTICATION_SESSIONS_PROVIDER: "custom-remote"
   KC_DB: "mariadb"
   KC_DB_URL_HOST: "{{ env "DB_HOST" }}"
   KC_DB_URL_PORT: "{{ env "DB_PORT" }}"
@@ -56,6 +59,8 @@ extraSensitiveEnvs:
   DB_PASSWORD: "{{ env "DB_PASSWORD" }}"
   KC_DB_USERNAME: "{{ env "DB_USER" }}"
   KC_DB_PASSWORD: "{{ env "DB_PASSWORD" }}"
+  KC_CACHE_REMOTE_USERNAME: "{{ env "INFINISPAN_USER" }}"
+  KC_CACHE_REMOTE_PASSWORD: "{{ env "INFINISPAN_PASSWORD" }}"
 
 service:
   type: NodePort

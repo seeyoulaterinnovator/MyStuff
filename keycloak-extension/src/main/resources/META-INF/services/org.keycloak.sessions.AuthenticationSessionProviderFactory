@@ -1,1 +1,2 @@
-ru.alamics.sso.keycloak.sessions.CustomAuthenticationSessionProviderFactory
+ru.alamics.sso.keycloak.sessions.embedded.CustomEmbeddedAuthenticationSessionProviderFactory
+ru.alamics.sso.keycloak.sessions.remote.CustomRemoteAuthenticationSessionProviderFactory

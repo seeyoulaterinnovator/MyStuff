@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<infinispan
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:infinispan:config:15.0 http://www.infinispan.org/schemas/infinispan-config-15.0.xsd
+        urn:infinispan:config:store:remote:15.0 https://infinispan.org/schemas/infinispan-server-15.0.xsd"
+        xmlns="urn:infinispan:config:15.0">
+    <cache-container name="keycloak">
+        <transport lock-timeout="60000" site="${env.KC_CACHE_REMOTE_SITE:sso}"/>
+        <serialization marshaller="org.infinispan.jboss.marshalling.commons.GenericJBossMarshaller"/>
+        <local-cache name="realms" simple-cache="true">
+            <encoding media-type="application/x-java-object"/>
+            <memory max-count="10000"/>
+        </local-cache>
+        <local-cache name="users" simple-cache="true">
+            <encoding media-type="application/x-java-object"/>
+            <memory max-count="10000"/>
+        </local-cache>
+        <local-cache name="keys" simple-cache="true">
+            <encoding media-type="application/x-java-object"/>
+            <expiration max-idle="3600000"/>
+            <memory max-count="1000"/>
+        </local-cache>
+        <local-cache name="authorization" simple-cache="true">
+            <encoding media-type="application/x-java-object"/>
+            <memory max-count="10000"/>
+        </local-cache>
+        <distributed-cache-configuration name="default-distributed-cache-configuration" remote-timeout="61000">
+            <encoding media-type="application/x-java-object"/>
+            <transaction mode="NON_XA" locking="PESSIMISTIC"/>
+            <locking acquire-timeout="60000"/>
+            <state-transfer timeout="120000" chunk-size="2048"/>
+            <memory max-count="10000"/>
+        </distributed-cache-configuration>
+        <distributed-cache name="sessions" configuration="default-distributed-cache-configuration"/>
+        <distributed-cache name="offlineSessions" configuration="default-distributed-cache-configuration"/>
+        <distributed-cache name="clientSessions" configuration="default-distributed-cache-configuration"/>
+        <distributed-cache name="offlineClientSessions" configuration="default-distributed-cache-configuration"/>
+        <distributed-cache name="loginFailures" configuration="default-distributed-cache-configuration"/>
+        <distributed-cache name="actionTokens" configuration="default-distributed-cache-configuration"/>
+        <replicated-cache-configuration name="default-replicated-cache-configuration" remote-timeout="61000">
+            <encoding media-type="application/x-java-object"/>
+            <transaction mode="NON_XA" locking="PESSIMISTIC"/>
+            <locking acquire-timeout="60000"/>
+            <state-transfer timeout="120000" chunk-size="2048"/>
+            <memory max-count="10000"/>
+        </replicated-cache-configuration>
+        <replicated-cache name="work" configuration="default-replicated-cache-configuration"/>
+        <distributed-cache name="authenticationSessions" configuration="default-replicated-cache-configuration"/>
+    </cache-container>
+
+    <cache-container name="custom">
+        <transport lock-timeout="60000" site="${env.KC_CACHE_REMOTE_SITE:sso}" stack="custom"/>
+        <serialization marshaller="org.infinispan.jboss.marshalling.commons.GenericJBossMarshaller"/>
+        <replicated-cache name="user_post_cache">
+            <encoding media-type="application/x-java-object"/>
+            <transaction mode="NON_XA" locking="PESSIMISTIC"/>
+            <state-transfer chunk-size="2048" timeout="120000"/>
+            <memory max-count="10000"/>
+            <persistence>
+                <remote-store xmlns="urn:infinispan:config:store:remote:15.0" cache="customer_cache" shared="true"
+                              raw-values="true" segmented="false"
+                              marshaller="org.infinispan.jboss.marshalling.commons.GenericJBossMarshaller">
+                    <remote-server host="${env.KC_CACHE_REMOTE_HOST}" port="${env.KC_CACHE_REMOTE_PORT}"/>
+                    <security>
+                        <authentication>
+                            <digest username="${env.KC_CACHE_REMOTE_USERNAME}"
+                                    password="${env.KC_CACHE_REMOTE_PASSWORD}" realm="default"/>
+                        </authentication>
+                    </security>
+                </remote-store>
+            </persistence>
+        </replicated-cache>
+        <replicated-cache name="customer_cache">
+            <encoding media-type="application/x-java-object"/>
+            <transaction mode="NON_XA" locking="PESSIMISTIC"/>
+            <state-transfer chunk-size="2048" timeout="120000"/>
+            <memory max-count="10000"/>
+            <persistence>
+                <remote-store xmlns="urn:infinispan:config:store:remote:15.0" cache="customer_cache" shared="true"
+                              raw-values="true" segmented="false"
+                              marshaller="org.infinispan.jboss.marshalling.commons.GenericJBossMarshaller">
+                    <remote-server host="${env.KC_CACHE_REMOTE_HOST}" port="${env.KC_CACHE_REMOTE_PORT}"/>
+                    <security>
+                        <authentication>
+                            <digest username="${env.KC_CACHE_REMOTE_USERNAME}"
+                                    password="${env.KC_CACHE_REMOTE_PASSWORD}" realm="default"/>
+                        </authentication>
+                    </security>
+                </remote-store>
+            </persistence>
+        </replicated-cache>
+    </cache-container>
+</infinispan>
