@@ -119,18 +119,19 @@ public abstract class Tests {
             .withEnv("KC_LOG_LEVEL", "INFO")
             .withEnv("KC_LOG_CONSOLE_COLOR", "true")
             .withEnv("KC_CACHE", "ispn")
+            .withEnv("KC_CACHE_CONFIG_FILE", "cache-ispn.embedded.xml")
             .withEnv("LIQUIBASE_COMMAND_CHANGE_EXEC_LISTENER_CLASS",
                     "ru.alamics.sso.keycloak.migration.CustomChangeExecListener")
             .withEnv("KC_SPI_USER_PROVIDER", "customjpa")
-            .withEnv("KC_SPI_AUTHENTICATION_SESSIONS_PROVIDER", "custom")
+            .withEnv("KC_SPI_AUTHENTICATION_SESSIONS_PROVIDER", "custom-embedded")
             .withEnv("KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_LEGACY_LOGOUT_REDIRECT_URI", "true")
             .withEnv("KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_SUPPRESS_LOGOUT_CONFIRMATION_SCREEN", "true")
-            .withEnv("KC_CACHE_CONFIG_FILE", "cache-ispn-custom.xml")
-            .withEnv("ERTH_SSO_E2E_ENABLED", "true")
             .withEnv("KC_SPI_COOKIE_PROVIDER", "custom")
+            .withEnv("KC_SPI_HOSTNAME_PROVIDER", "custom")
+            .withEnv("ERTH_SSO_E2E_ENABLED", "true")
             .withCopyFileToContainer(
-                    forHostPath(BASEDIR.resolve("volumes/keycloak/opt/keycloak/conf/cache-ispn-custom.xml")),
-                    "/opt/keycloak/conf/cache-ispn-custom.xml"
+                    forHostPath(BASEDIR.resolve("configs/infinispan15/cache-ispn.embedded.xml")),
+                    "/opt/keycloak/conf/cache-ispn.embedded.xml"
             )
             .withCopyFileToContainer(
                     forHostPath(BASEDIR.resolve("build/keycloak-extension/libs/keycloak-extension-1.0.1-all.jar")),

@@ -1,4 +1,4 @@
-name: "sso-new"
+name: "sso-new-cluster"
 services:
 
   mariadb:
@@ -15,85 +15,103 @@ services:
       test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
     volumes:
       - ./volumes/mariadb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/:ro
+    deploy:
+      resources:
+        limits:
+          memory: 512M
 
   mockserver:
     image: mockserver/mockserver:5.15.0
-    ports:
-      - "1080:1080"
     environment:
       MOCKSERVER_INITIALIZATION_JSON_PATH: /initialization.json
       MOCKSERVER_WATCH_INITIALIZATION_JSON: true
     volumes:
       - ./volumes/mockserver/initialization.json:/initialization.json:ro
+    deploy:
+      resources:
+        limits:
+          memory: 256m
 
   smtp4dev:
     image: rnwood/smtp4dev:v3
-    ports:
-      - "25:25"
-      - "8025:80"
     deploy:
       resources:
         limits:
           memory: 128m
 
-  keycloak:
+  infinispan1: &infinispan1
+    image: infinispan/server:15.0.10.Final
+    hostname: infinispan1
+    environment:
+      USER: keycloak
+      PASS: keycloak
+      TZ: Etc/UTC
+    command: [ "-c", "/user-config/cache-ispn.xml" ]
+    healthcheck:
+      test: curl -s http://localhost:11222/rest/v2/container/health/status | grep -q 'HEALTHY' || exit 1
+      interval: 5s
+      retries: 12
+    volumes:
+      - ./volumes/infinispan/user-config:/user-config/:ro
+    deploy:
+      resources:
+        limits:
+          memory: 396M
+
+  infinispan2:
+    <<: *infinispan1
+    hostname: infinispan2
+
+#  infinispan3:
+#    <<: *infinispan1
+#    hostname: infinispan3
+
+  keycloak1: &keycloak1
     depends_on:
       mariadb:
         condition: service_healthy
+      infinispan1:
+        condition: service_healthy
+      infinispan2:
+        condition: service_healthy
+#      infinispan3:
+#        condition: service_healthy
     image: quay.io/keycloak/keycloak:25.0.2
-    hostname: keycloak
-    ports:
-      - "8080:8080"
-      - "9990:9990"
-      - "8787:8787"
-    entrypoint: /bin/sh -c "/opt/keycloak/bin/kc-custom.sh"
-    environment:
+    hostname: keycloak1
+    command: [ "start" ]
+    environment: &keycloak1-env
       KC_DB: mariadb
       KC_DB_URL_HOST: mariadb
       KC_DB_URL_PORT: 3306
       KC_DB_URL_DATABASE: sso
       KC_DB_USERNAME: sso
       KC_DB_PASSWORD: sso
-      KC_LOG_LEVEL: INFO
       KC_LOG_CONSOLE_COLOR: true
       KC_HTTP_ENABLED: true
       KC_HTTP_RELATIVE_PATH: /auth
       KC_HOSTNAME_STRICT: false
       KC_HOSTNAME_STRICT_HTTPS: false
-      KEYCLOAK_HOSTNAME: "localhost"
-      KC_HOSTNAME: "localhost"
-      KC_HOSTNAME_URL: "https://localhost"
-      KC_HOSTNAME_ADMIN_URL: "https://localhost"
-      KC_HOSTNAME_ACCOUNT_URL: "https://localhost"
-      KC_PROXY_HEADERS: xforwarded
-      # KC_METRICS_ENABLED: true
-      KEYCLOAK_STATISTICS: true
-      KC_HOSTNAME_DEBUG: true
       KC_CACHE: ispn
-      KC_CACHE_CONFIG_FILE: cache-ispn.embedded.xml
-      KC_ADMIN_VITE_ENABLED: ${KC_ADMIN_VITE_ENABLED}
+      KC_CACHE_REMOTE_HOST: haproxy
+      KC_CACHE_REMOTE_PORT: 11222
+      KC_CACHE_REMOTE_TLS_ENABLED: false
+      KC_CACHE_REMOTE_USERNAME: keycloak
+      KC_CACHE_REMOTE_PASSWORD: keycloak
+      KC_CACHE_CONFIG_FILE: cache-ispn.remote.xml
+      KC_CACHE_STACK: tcp
       KC_SPI_USER_PROVIDER: customjpa
-      KC_SPI_AUTHENTICATION_SESSIONS_PROVIDER: custom-embedded
+      KC_SPI_AUTHENTICATION_SESSIONS_PROVIDER: custom-remote
       KC_SPI_PASSWORD_POLICY_BLACKLIST_PROVIDER: ssoPasswordBlacklist
       KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_LEGACY_LOGOUT_REDIRECT_URI: true
       KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_SUPPRESS_LOGOUT_CONFIRMATION_SCREEN: true
-      KC_SPI_HOSTNAME_PROVIDER: custom # custom # v2
+      KC_SPI_HOSTNAME_PROVIDER: custom
       KC_SPI_COOKIE_PROVIDER: custom
       LIQUIBASE_COMMAND_CHANGE_EXEC_LISTENER_CLASS: ru.alamics.sso.keycloak.migration.CustomChangeExecListener
-      QUARKUS_HTTP_ACCESS_LOG_ENABLED: false
-      QUARKUS_HTTP_ACCESS_LOG_PATTERN: "long"
-      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:8787,server=y,suspend=n"
-      TZ: Asia/Yekaterinburg # Europe/Moscow
+      TZ: Asia/Yekaterinburg
       SITE: STAGE5
-      APP_PROPS_UPDATE_DELAY_SECS: 60
-      # DEV_HTTP_LOG_ALLOWED: true
-      ERTH_SSO_E2E_ENABLED: ${ERTH_SSO_E2E_ENABLED}
     volumes:
-      - ./volumes/keycloak/opt/keycloak/bin/kc-custom.sh:/opt/keycloak/bin/kc-custom.sh:ro
-      - ./configs/infinispan15/cache-ispn.embedded.xml:/opt/keycloak/conf/cache-ispn.embedded.xml:ro
+      - ./configs/infinispan15/cache-ispn.remote.xml:/opt/keycloak/conf/cache-ispn.remote.xml:ro
       - ./build/keycloak-extension/libs/keycloak-extension-1.0.1-all.jar:/opt/keycloak/providers/keycloak-extension.jar:ro
-      - ./keycloak-extension/src/main/resources/themes/keycloak.v2/admin:/opt/keycloak/themes-custom/keycloak.v2/admin:ro
-      - ./keycloak-extension/src/main/resources/themes/domru/login:/opt/keycloak/themes-custom/domru/login:ro
     healthcheck:
       test: [
         "CMD-SHELL",
@@ -104,14 +122,29 @@ services:
       ]
       interval: 5s
       retries: 36
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+
+  keycloak2:
+    <<: *keycloak1
+    hostname: keycloak2
+    environment:
+      <<: *keycloak1-env
+      TZ: Europe/Moscow
+
+#  keycloak3:
+#    <<: *keycloak1
+#    hostname: keycloak3
 
   keycloak-config-cli:
     depends_on:
-      keycloak:
+      keycloak1:
         condition: service_healthy
     image: adorsys/keycloak-config-cli:latest-25.0.1
     environment:
-      KEYCLOAK_URL: http://keycloak:8080/auth
+      KEYCLOAK_URL: http://keycloak1:8080/auth
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: admin
       KEYCLOAK_AVAILABILITYCHECK_ENABLED: true
@@ -119,25 +152,46 @@ services:
     volumes:
       - ./volumes/keycloak-config-cli/config/:/config/:ro
     restart: no
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  haproxy:
+    depends_on:
+      infinispan1:
+        condition: service_healthy
+      infinispan2:
+        condition: service_healthy
+#      infinispan3:
+#        condition: service_healthy
+      keycloak1:
+        condition: service_started
+      keycloak2:
+        condition: service_started
+#      keycloak3:
+#        condition: service_started
+    image: haproxy:2.9.9-alpine
+    ports:
+      - 8080:8080
+      - 11222:11222
+    command: [ "haproxy", "-f", "/usr/local/etc/haproxy/haproxy.cfg" ]
+    volumes:
+      - ./volumes/haproxy/usr/local/etc/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    deploy:
+      resources:
+        limits:
+          memory: 128M
 
   nginx:
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    build:
-      # language=Dockerfile
-      dockerfile_inline: |
-        FROM alpine/openssl:3.3.2 as openssl
-        RUN openssl req -newkey rsa:2048 -days 3650 -nodes -sha256 -x509 \
-            -keyout /tmp/key.pem -out /tmp/cert.pem  \
-            -subj "/C=RU/ST=PRM/L=Perm/O=My Inc/OU=Test/CN=www.erth.test/emailAddress=noreply@www.erth.test"
-        FROM nginx:1.15.3
-        COPY --from=openssl /tmp/key.pem /tmp/cert.pem /etc/nginx/ssl/default/
+    image: nginx:1.15.3
     ports:
       - "8180:8180"
-      - "443:443"
+      - "80:80"
     volumes:
       - ./volumes/nginx/etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./volumes/nginx/etc/nginx/conf.d/default-ssl.conf:/etc/nginx/conf.d/default-ssl.conf:ro
       - ./volumes/nginx/usr/share/nginx/html:/usr/share/nginx/html:ro
     deploy:
       resources:

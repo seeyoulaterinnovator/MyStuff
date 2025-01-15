@@ -1,10 +1,8 @@
-package ru.alamics.sso.keycloak.sessions;
+package ru.alamics.sso.keycloak.sessions.embedded;
 
-import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
-import org.keycloak.protocol.oidc.grants.OAuth2GrantType;
 import org.keycloak.sessions.AuthenticationSessionCompoundId;
 import org.keycloak.sessions.AuthenticationSessionProvider;
 import org.keycloak.sessions.RootAuthenticationSessionModel;
@@ -13,12 +11,12 @@ import java.util.Map;
 
 import static ru.alamics.sso.registration.model.UserConstants.AUTH_NOTE_DIRECT_GRANT_SESSION_CLEAR_DISABLED;
 
-public class CustomAuthenticationSessionProvider implements AuthenticationSessionProvider {
+public class CustomEmbeddedAuthenticationSessionProvider implements AuthenticationSessionProvider {
     final KeycloakSession session;
 
     final AuthenticationSessionProvider provider;
 
-    public CustomAuthenticationSessionProvider(KeycloakSession session, AuthenticationSessionProvider provider) {
+    public CustomEmbeddedAuthenticationSessionProvider(KeycloakSession session, AuthenticationSessionProvider provider) {
         this.session = session;
         this.provider = provider;
     }

@@ -22,13 +22,7 @@ stages:
   script:
     - export FQDN=`echo "${CI_ENVIRONMENT_URL}" | sed 's/^http\(\|s\):\/\///g'`
     - consul-template -once -template ".helm/values-dev.yaml.tpl:values.yaml"
-    - |-
-      if [[ -z "$NEW_DB_DATABASE" ]]; then
-          export NEW_DB_DATABASE=$DB_DATABASE
-      fi
-    - echo "DB_DATABASE = ${DB_DATABASE}"
-    - echo "NEW_DB_DATABASE = ${NEW_DB_DATABASE}"
-    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml --set extraEnvs.DB_DATABASE=${NEW_DB_DATABASE} ./.helm -n ${NAMESPACE} --atomic --timeout 5m
+    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml ./.helm -n ${NAMESPACE} --atomic --timeout 5m
     - helm history -n ${NAMESPACE} ${CI_ENVIRONMENT_SLUG} --max 5
   tags:
     - sso-build-k8s
@@ -42,14 +36,8 @@ stages:
   script:
     - export FQDN=`echo "${CI_ENVIRONMENT_URL}" | sed 's/^http\(\|s\):\/\///g'`
     - consul-template -once -template ".helm/values-prod.yaml.tpl:values.yaml"
-    - |-
-      if [[ -z "$NEW_DB_DATABASE" ]]; then
-          export NEW_DB_DATABASE=$DB_DATABASE
-      fi
-    - echo "DB_DATABASE = ${DB_DATABASE}"
-    - echo "NEW_DB_DATABASE = ${NEW_DB_DATABASE}"
     - cat values.yaml
-    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml --set extraEnvs.DB_DATABASE=${NEW_DB_DATABASE} ./.helm -n ${NAMESPACE} --atomic --timeout 10m
+    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml ./.helm -n ${NAMESPACE} --atomic --timeout 10m
     - helm history -n ${NAMESPACE} ${CI_ENVIRONMENT_SLUG} --max 5
   variables:
     NAMESPACE: 'sso'
@@ -182,6 +170,7 @@ domru:stage2:
     NAMESPACE: 'sso'
     NODE_PORT: '30082'
     REPLICA_COUNT: '1'
+    KC_CACHE_STACK: 'kubernetes'
 
 domru:stage3:
   extends: .domru:stage:template
@@ -202,6 +191,7 @@ domru:stage4:
     NAMESPACE: 'sso'
     NODE_PORT: '30084'
     REPLICA_COUNT: '3'
+    KC_CACHE_CONFIG_FILE: 'cache-ispn.remote.xml'
 
 domru:stage5:
   extends: .domru:stage:template
