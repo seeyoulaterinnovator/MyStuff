@@ -124,6 +124,7 @@ services:
       LIQUIBASE_COMMAND_CHANGE_EXEC_LISTENER_CLASS: ru.alamics.sso.keycloak.migration.CustomChangeExecListener
       TZ: Asia/Yekaterinburg
       SITE: STAGE5
+      JAVA_OPTS_APPEND: "-Djgroups.dns.query=keycloak1"
     volumes:
       - ./configs/infinispan15/cache-ispn.remote.xml:/opt/keycloak/conf/cache-ispn.remote.xml:ro
       - ./build/keycloak-extension/libs/keycloak-extension-1.0.1-all.jar:/opt/keycloak/providers/keycloak-extension.jar:ro
@@ -149,6 +150,7 @@ services:
       <<: *keycloak1-env
       KC_CACHE_REMOTE_HOST: infinispan-b-1
       TZ: Europe/Moscow
+      JAVA_OPTS_APPEND: "-Djgroups.dns.query=keycloak2"
 
   keycloak-config-cli:
     depends_on:
@@ -169,32 +171,14 @@ services:
         limits:
           memory: 512M
 
-  haproxy:
-    depends_on:
-      keycloak1:
-        condition: service_healthy
-      keycloak2:
-        condition: service_healthy
-    image: haproxy:2.9.9-alpine
-    ports:
-      - 8080:8080
-    command: [ "haproxy", "-f", "/usr/local/etc/haproxy/haproxy.cfg" ]
-    volumes:
-      - ./volumes/haproxy/usr/local/etc/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-
   nginx:
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     image: nginx:1.15.3
     ports:
       - "8180:8180"
+      - "8080:80"
       - "80:80"
     volumes:
-      - ./volumes/nginx/etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./volumes/nginx/etc/nginx/conf.d/default-cluster.conf:/etc/nginx/conf.d/default.conf:ro
       - ./volumes/nginx/usr/share/nginx/html:/usr/share/nginx/html:ro
     deploy:
       resources:
