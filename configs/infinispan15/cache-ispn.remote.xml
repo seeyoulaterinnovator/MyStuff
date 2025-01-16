@@ -49,7 +49,7 @@
     </cache-container>
 
     <cache-container name="custom">
-        <transport lock-timeout="60000" site="${env.KC_CACHE_REMOTE_SITE:sso}" stack="custom"/>
+        <transport lock-timeout="60000" site="${env.KC_CACHE_REMOTE_SITE:sso}"/>
         <serialization marshaller="org.infinispan.jboss.marshalling.commons.GenericJBossMarshaller"/>
         <replicated-cache name="user_post_cache">
             <encoding media-type="application/x-java-object"/>
