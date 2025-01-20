@@ -45,11 +45,11 @@
             <memory max-count="10000"/>
         </replicated-cache-configuration>
         <replicated-cache name="work" configuration="default-replicated-cache-configuration"/>
-        <distributed-cache name="authenticationSessions" configuration="default-replicated-cache-configuration"/>
+        <distributed-cache name="authenticationSessions" configuration="default-distributed-cache-configuration"/>
     </cache-container>
 
-    <cache-container name="custom">
-        <transport lock-timeout="60000" site="${env.KC_CACHE_REMOTE_SITE:sso}" stack="custom"/>
+    <cache-container name="custom_container">
+        <transport lock-timeout="60000" site="${env.KC_CACHE_REMOTE_SITE:sso}"/>
         <serialization marshaller="org.infinispan.jboss.marshalling.commons.GenericJBossMarshaller"/>
         <replicated-cache name="user_post_cache">
             <encoding media-type="application/x-java-object"/>
@@ -57,7 +57,7 @@
             <state-transfer chunk-size="2048" timeout="120000"/>
             <memory max-count="10000"/>
             <persistence>
-                <remote-store xmlns="urn:infinispan:config:store:remote:15.0" cache="customer_cache" shared="true"
+                <remote-store xmlns="urn:infinispan:config:store:remote:15.0" cache="user_post_cache" shared="true"
                               raw-values="true" segmented="false"
                               marshaller="org.infinispan.jboss.marshalling.commons.GenericJBossMarshaller">
                     <remote-server host="${env.KC_CACHE_REMOTE_HOST}" port="${env.KC_CACHE_REMOTE_PORT}"/>
