@@ -39,43 +39,58 @@ services:
         limits:
           memory: 128m
 
-  infinispan1: &infinispan1
+  infinispan-a-1: &infinispan-a-1
     image: infinispan/server:15.0.10.Final
-    hostname: infinispan1
-    environment:
+    environment: &infinispan-a-1-env
       USER: keycloak
       PASS: keycloak
       TZ: Etc/UTC
-    command: [ "-c", "/user-config/cache-ispn.xml" ]
+      SITE: A
+      BACKUP_SITE: B
+      MCAST_PORT: 46656
+    entrypoint: "/entrypoint.sh"
+    ports: [ "11221:11222" ]
     healthcheck:
       test: curl -s http://localhost:11222/rest/v2/container/health/status | grep -q 'HEALTHY' || exit 1
       interval: 5s
       retries: 12
     volumes:
+      - ./volumes/infinispan/entrypoint.sh:/entrypoint.sh:ro
       - ./volumes/infinispan/user-config:/user-config/:ro
     deploy:
       resources:
         limits:
           memory: 396M
 
-  infinispan2:
-    <<: *infinispan1
-    hostname: infinispan2
+  infinispan-a-2:
+    <<: *infinispan-a-1
+    ports: [ "11222:11222" ]
 
-#  infinispan3:
-#    <<: *infinispan1
-#    hostname: infinispan3
+  infinispan-b-1: &infinispan-b-1
+    <<: *infinispan-a-1
+    environment:
+      <<: *infinispan-a-1-env
+      SITE: B
+      BACKUP_SITE: A
+      MCAST_PORT: 46666
+    ports: [ "21221:11222" ]
+
+  infinispan-b-2:
+    <<: *infinispan-b-1
+    ports: [ "21222:11222" ]
 
   keycloak1: &keycloak1
     depends_on:
       mariadb:
         condition: service_healthy
-      infinispan1:
+      infinispan-a-1:
         condition: service_healthy
-      infinispan2:
+      infinispan-a-2:
         condition: service_healthy
-#      infinispan3:
-#        condition: service_healthy
+      infinispan-b-1:
+        condition: service_healthy
+      infinispan-b-2:
+        condition: service_healthy
     image: quay.io/keycloak/keycloak:25.0.2
     hostname: keycloak1
     command: [ "start" ]
@@ -92,7 +107,7 @@ services:
       KC_HOSTNAME_STRICT: false
       KC_HOSTNAME_STRICT_HTTPS: false
       KC_CACHE: ispn
-      KC_CACHE_REMOTE_HOST: haproxy
+      KC_CACHE_REMOTE_HOST: infinispan-a-1
       KC_CACHE_REMOTE_PORT: 11222
       KC_CACHE_REMOTE_TLS_ENABLED: false
       KC_CACHE_REMOTE_USERNAME: keycloak
@@ -109,6 +124,7 @@ services:
       LIQUIBASE_COMMAND_CHANGE_EXEC_LISTENER_CLASS: ru.alamics.sso.keycloak.migration.CustomChangeExecListener
       TZ: Asia/Yekaterinburg
       SITE: STAGE5
+      JAVA_OPTS_APPEND: "-Djgroups.dns.query=keycloak1"
     volumes:
       - ./configs/infinispan15/cache-ispn.remote.xml:/opt/keycloak/conf/cache-ispn.remote.xml:ro
       - ./build/keycloak-extension/libs/keycloak-extension-1.0.1-all.jar:/opt/keycloak/providers/keycloak-extension.jar:ro
@@ -132,11 +148,9 @@ services:
     hostname: keycloak2
     environment:
       <<: *keycloak1-env
+      KC_CACHE_REMOTE_HOST: infinispan-b-1
       TZ: Europe/Moscow
-
-#  keycloak3:
-#    <<: *keycloak1
-#    hostname: keycloak3
+      JAVA_OPTS_APPEND: "-Djgroups.dns.query=keycloak2"
 
   keycloak-config-cli:
     depends_on:
@@ -157,41 +171,14 @@ services:
         limits:
           memory: 512M
 
-  haproxy:
-    depends_on:
-      infinispan1:
-        condition: service_healthy
-      infinispan2:
-        condition: service_healthy
-#      infinispan3:
-#        condition: service_healthy
-      keycloak1:
-        condition: service_started
-      keycloak2:
-        condition: service_started
-#      keycloak3:
-#        condition: service_started
-    image: haproxy:2.9.9-alpine
-    ports:
-      - 8080:8080
-      - 11222:11222
-    command: [ "haproxy", "-f", "/usr/local/etc/haproxy/haproxy.cfg" ]
-    volumes:
-      - ./volumes/haproxy/usr/local/etc/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-
   nginx:
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     image: nginx:1.15.3
     ports:
       - "8180:8180"
+      - "8080:80"
       - "80:80"
     volumes:
-      - ./volumes/nginx/etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./volumes/nginx/etc/nginx/conf.d/default-cluster.conf:/etc/nginx/conf.d/default.conf:ro
       - ./volumes/nginx/usr/share/nginx/html:/usr/share/nginx/html:ro
     deploy:
       resources:

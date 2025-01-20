@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<infinispan
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:infinispan:config:15.0 https://infinispan.org/schemas/infinispan-config-15.0.xsd
+                            urn:infinispan:server:15.0 https://infinispan.org/schemas/infinispan-server-15.0.xsd
+                            urn:org:jgroups http://www.jgroups.org/schema/jgroups-5.3.xsd"
+        xmlns="urn:infinispan:config:15.0"
+        xmlns:ispn="urn:infinispan:config:15.0"
+        xmlns:server="urn:infinispan:server:15.0">
+
+    <!-- /opt/infinispan/server/conf/infinispan-xsite.xml-->
+    <jgroups>
+        <stack name="bridge" extends="tcp">
+            <MPING mcast_port="${jgroups.bridge.mcast_port:47655}"
+                   ispn:stack.combine="COMBINE"
+                   xmlns="urn:org:jgroups"
+            />
+        </stack>
+        <stack name="local" extends="udp">
+            <relay.RELAY2 site="${infinispan.site.name:site1}"
+                          max_site_masters="${infinispan.site.max_relay_nodes:1}"
+                          xmlns="urn:org:jgroups"/>
+            <remote-sites default-stack="bridge">
+                <remote-site name="${infinispan.site.name:site1}"/>
+            </remote-sites>
+        </stack>
+    </jgroups>
+    <cache-container name="default" statistics="true">
+        <transport cluster="${infinispan.cluster.name:cluster}" stack="${infinispan.cluster.stack:local}" node-name="${infinispan.node.name:}"/>
+        <security>
+            <authorization/>
+        </security>
+    </cache-container>
+    <server xmlns="urn:infinispan:server:15.0">
+        <interfaces>
+            <interface name="public">
+                <inet-address value="${infinispan.bind.address:127.0.0.1}"/>
+            </interface>
+        </interfaces>
+        <socket-bindings default-interface="public" port-offset="${infinispan.socket.binding.port-offset:0}">
+            <socket-binding name="default" port="${infinispan.bind.port:11222}"/>
+        </socket-bindings>
+        <security>
+            <security-realms>
+                <security-realm name="default">
+                    <properties-realm/>
+                </security-realm>
+            </security-realms>
+        </security>
+        <endpoints socket-binding="default" security-realm="default" />
+    </server>
+
+    <cache-container name="keycloak" statistics="true">
+        <distributed-cache-configuration name="default-distributed-cache-configuration" owners="2" statistics="true" remote-timeout="61000">
+            <encoding media-type="application/x-jboss-marshalling"/>
+            <transaction mode="NON_XA" locking="PESSIMISTIC"/>
+            <state-transfer timeout="120000" chunk-size="2048"/>
+            <locking acquire-timeout="60000"/>
+            <backups>
+                <backup site="${infinispan.backup.site.name}" strategy="SYNC" timeout="60500" failure-policy="FAIL">
+                    <state-transfer chunk-size="2048"/>
+                </backup>
+            </backups>
+        </distributed-cache-configuration>
+        <distributed-cache name="sessions" configuration="default-distributed-cache-configuration"/>
+        <distributed-cache name="authenticationSessions" configuration="default-distributed-cache-configuration"/>
+        <distributed-cache name="offlineSessions" configuration="default-distributed-cache-configuration"/>
+        <distributed-cache name="clientSessions" configuration="default-distributed-cache-configuration"/>
+        <distributed-cache name="offlineClientSessions" configuration="default-distributed-cache-configuration"/>
+        <distributed-cache name="loginFailures" configuration="default-distributed-cache-configuration"/>
+        <distributed-cache name="actionTokens" configuration="default-distributed-cache-configuration"/>
+        <replicated-cache name="work" remote-timeout="61000">
+            <encoding media-type="application/x-jboss-marshalling"/>
+            <expiration lifespan="-1"/>
+            <transaction mode="NON_XA" locking="PESSIMISTIC"/>
+            <state-transfer timeout="120000" chunk-size="2048"/>
+            <locking acquire-timeout="60000"/>
+            <backups>
+                <backup site="${infinispan.backup.site.name}" strategy="SYNC" timeout="60500" failure-policy="FAIL">
+                    <state-transfer chunk-size="2048"/>
+                </backup>
+            </backups>
+        </replicated-cache>
+    </cache-container>
+
+    <cache-container name="custom">
+        <replicated-cache name="user_post_cache" remote-timeout="61000">
+            <encoding media-type="application/x-jboss-marshalling"/>
+            <transaction mode="NON_XA" locking="PESSIMISTIC"/>
+            <expiration max-idle="100000" lifespan="500000"/>
+            <state-transfer chunk-size="2048" timeout="120000"/>
+            <persistence passivation="true"/>
+            <backups>
+                <backup site="${infinispan.backup.site.name}" strategy="SYNC" timeout="60500" failure-policy="FAIL">
+                    <state-transfer chunk-size="2048"/>
+                </backup>
+            </backups>
+        </replicated-cache>
+        <replicated-cache name="customer_cache" remote-timeout="61000">
+            <encoding media-type="application/x-jboss-marshalling"/>
+            <transaction mode="NON_XA" locking="PESSIMISTIC"/>
+            <expiration max-idle="100000" lifespan="500000"/>
+            <state-transfer chunk-size="2048" timeout="120000"/>
+            <persistence passivation="true"/>
+            <backups>
+                <backup site="${infinispan.backup.site.name}" strategy="SYNC" timeout="60500" failure-policy="FAIL">
+                    <state-transfer chunk-size="2048"/>
+                </backup>
+            </backups>
+        </replicated-cache>
+    </cache-container>
+</infinispan>
