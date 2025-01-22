@@ -37,17 +37,17 @@ spec:
     container:
       storage: 1Gi
       ephemeralStorage: true      
-#    sites:
-#      local:
-#        name: voronezh
-#        discovery:
-#          launchGossipRouter: true
-#          memory: "2Gi:1Gi"
-#          cpu: "2000m:500m"
-#        expose:
-#          type: NodePort
-#          nodePort: 32600
-#        maxRelayNodes: 5
-#      locations:
-#        - name: perm
-#          url: infinispan+xsite://sso-k8s-app01.cc-perm.ertelecom.ru:32600
+    sites:
+      local:
+        name: voronezh
+        discovery:
+          launchGossipRouter: true
+          memory: "2Gi:1Gi"
+          cpu: "2000m:500m"
+        expose:
+          type: NodePort
+          nodePort: 32600
+        maxRelayNodes: 5
+      locations:
+        - name: perm
+          url: infinispan+xsite://sso-k8s-app01.cc-perm.ertelecom.ru:32600
