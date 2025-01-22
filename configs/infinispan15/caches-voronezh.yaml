@@ -26,14 +26,14 @@ spec:
       stateTransfer: 
         timeout: "120000"
         chunkSize: "2048"
-      backups: 
-        perm: 
-          backup:
-            strategy: "SYNC" 
-            timeout: "60500" 
-            failurePolicy: "FAIL" 
-            stateTransfer:
-              chunkSize: "2048"
+#      backups:
+#        perm:
+#          backup:
+#            strategy: "SYNC"
+#            timeout: "60500"
+#            failurePolicy: "FAIL"
+#            stateTransfer:
+#              chunkSize: "2048"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -62,14 +62,14 @@ spec:
       stateTransfer: 
         timeout: "120000"
         chunkSize: "2048"
-      backups: 
-        perm: 
-          backup:
-            strategy: "SYNC" 
-            timeout: "60500" 
-            failurePolicy: "FAIL" 
-            stateTransfer:
-              chunkSize: "2048"
+#      backups:
+#        perm:
+#          backup:
+#            strategy: "SYNC"
+#            timeout: "60500"
+#            failurePolicy: "FAIL"
+#            stateTransfer:
+#              chunkSize: "2048"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -95,14 +95,14 @@ spec:
       stateTransfer: 
         timeout: "120000"
         chunkSize: "2048"
-      backups: 
-        perm: 
-          backup:
-            strategy: "SYNC" 
-            timeout: "60500" 
-            failurePolicy: "FAIL" 
-            stateTransfer:
-              chunkSize: "2048"
+#      backups:
+#        perm:
+#          backup:
+#            strategy: "SYNC"
+#            timeout: "60500"
+#            failurePolicy: "FAIL"
+#            stateTransfer:
+#              chunkSize: "2048"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -129,14 +129,14 @@ spec:
       stateTransfer:
         timeout: "120000"
         chunkSize: "2048"
-      backups:
-        perm: 
-          backup:
-            strategy: "SYNC" 
-            timeout: "60500" 
-            failurePolicy: "FAIL" 
-            stateTransfer:
-              chunkSize: "2048"
+#      backups:
+#        perm:
+#          backup:
+#            strategy: "SYNC"
+#            timeout: "60500"
+#            failurePolicy: "FAIL"
+#            stateTransfer:
+#              chunkSize: "2048"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -165,14 +165,14 @@ spec:
       stateTransfer:
         timeout: "120000"
         chunkSize: "2048"
-      backups:
-        perm: 
-          backup:
-            strategy: "SYNC" 
-            timeout: "60500" 
-            failurePolicy: "FAIL" 
-            stateTransfer:
-              chunkSize: "2048"
+#      backups:
+#        perm:
+#          backup:
+#            strategy: "SYNC"
+#            timeout: "60500"
+#            failurePolicy: "FAIL"
+#            stateTransfer:
+#              chunkSize: "2048"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -199,14 +199,14 @@ spec:
       stateTransfer:
         timeout: "120000"
         chunkSize: "2048"
-      backups:
-        perm: 
-          backup:
-            strategy: "SYNC" 
-            timeout: "60500" 
-            failurePolicy: "FAIL" 
-            stateTransfer:
-              chunkSize: "2048"
+#      backups:
+#        perm:
+#          backup:
+#            strategy: "SYNC"
+#            timeout: "60500"
+#            failurePolicy: "FAIL"
+#            stateTransfer:
+#              chunkSize: "2048"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -233,14 +233,14 @@ spec:
       stateTransfer:
         timeout: "120000"
         chunkSize: "2048"
-      backups:
-        perm: 
-          backup:
-            strategy: "SYNC" 
-            timeout: "60500" 
-            failurePolicy: "FAIL" 
-            stateTransfer:
-              chunkSize: "2048"
+#      backups:
+#        perm:
+#          backup:
+#            strategy: "SYNC"
+#            timeout: "60500"
+#            failurePolicy: "FAIL"
+#            stateTransfer:
+#              chunkSize: "2048"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -267,14 +267,14 @@ spec:
       stateTransfer:
         timeout: "120000"
         chunkSize: "2048"
-      backups:
-        perm: 
-          backup:
-            strategy: "SYNC" 
-            timeout: "60500" 
-            failurePolicy: "FAIL" 
-            stateTransfer:
-              chunkSize: "2048"
+#      backups:
+#        perm:
+#          backup:
+#            strategy: "SYNC"
+#            timeout: "60500"
+#            failurePolicy: "FAIL"
+#            stateTransfer:
+#              chunkSize: "2048"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -301,14 +301,14 @@ spec:
       stateTransfer:
         timeout: "120000"
         chunkSize: "2048"
-      backups:
-        perm: 
-          backup:
-            strategy: "SYNC" 
-            timeout: "60500" 
-            failurePolicy: "FAIL" 
-            stateTransfer:
-              chunkSize: "2048"
+#      backups:
+#        perm:
+#          backup:
+#            strategy: "SYNC"
+#            timeout: "60500"
+#            failurePolicy: "FAIL"
+#            stateTransfer:
+#              chunkSize: "2048"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -335,11 +335,11 @@ spec:
       stateTransfer:
         timeout: "120000"
         chunkSize: "2048"
-      backups:
-        perm: 
-          backup:
-            strategy: "SYNC" 
-            timeout: "60500" 
-            failurePolicy: "FAIL" 
-            stateTransfer:
-              chunkSize: "2048"
+#      backups:
+#        perm:
+#          backup:
+#            strategy: "SYNC"
+#            timeout: "60500"
+#            failurePolicy: "FAIL"
+#            stateTransfer:
+#              chunkSize: "2048"
