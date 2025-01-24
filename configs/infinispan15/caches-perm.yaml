@@ -137,10 +137,6 @@ spec:
       stateTransfer:
         timeout: "120000"
         chunkSize: "16"
-      indexing:
-        enabled: true
-        indexed-entities:
-        - keycloak.RootAuthenticationSessionEntity
       backups:
         voronezh:
           backup:
@@ -323,10 +319,6 @@ spec:
       stateTransfer:
         timeout: "120000"
         chunkSize: "16"
-      indexing:
-        enabled: true
-        indexed-entities:
-        - keycloak.LoginFailureEntity
       backups:
         voronezh:
           backup:
