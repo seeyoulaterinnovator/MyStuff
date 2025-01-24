@@ -33,12 +33,14 @@ export const CustomConfigContextProvider = ({
     async () => {
       return (
         (await adminClient.customConfig.getCustomConfig({ realm })).results ||
-        null
+        {}
       );
     },
     setConfig,
     [realm],
   );
+
+  if (!config) return;
 
   return (
     <CustomConfigContext.Provider

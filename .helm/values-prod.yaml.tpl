@@ -47,10 +47,10 @@ extraEnvs:
   SITE: "prod"
   TZ: "Asia/Yekaterinburg"
   APP_PROPS_UPDATE_DELAY_SECS: "60"
-  QUARKUS_HTTP_ACCESS_LOG_ENABLED: "false"
-  QUARKUS_HTTP_ACCESS_LOG_PATTERN: "long"
+  QUARKUS_HTTP_ACCESS_LOG_ENABLED: "true" # TODO отключить
+  # QUARKUS_HTTP_ACCESS_LOG_PATTERN: "long"
   DEV_HTTP_LOG_ALLOWED: "true"
-  QUARKUS_LOG_CATEGORY__ORG_APACHE_HTTP__LEVEL: "DEBUG"
+  QUARKUS_LOG_CATEGORY__ORG_APACHE_HTTP__LEVEL: "DEBUG" # TODO отключить
   # fix "java.io.EOFException: unexpected end of stream, read 0 bytes from 4 (socket was closed by server)"
   KC_DB_URL_PROPERTIES: "?usePipeLineAuth=false&disablePipeLine=true&useBatchMultiSend=false"
 
