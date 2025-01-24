@@ -25,7 +25,7 @@ spec:
         maxIdle: "100000"
       stateTransfer: 
         timeout: "120000"
-        chunkSize: "2048"
+        chunkSize: "16"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -53,7 +53,7 @@ spec:
         maxIdle: "100000"
       stateTransfer: 
         timeout: "120000"
-        chunkSize: "2048"
+        chunkSize: "16"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -80,7 +80,7 @@ spec:
         locking: "PESSIMISTIC"
       stateTransfer: 
         timeout: "120000"
-        chunkSize: "2048"
+        chunkSize: "16"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -108,7 +108,7 @@ spec:
         locking: "PESSIMISTIC" 
       stateTransfer:
         timeout: "120000"
-        chunkSize: "2048"
+        chunkSize: "16"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -136,7 +136,7 @@ spec:
         locking: "PESSIMISTIC" 
       stateTransfer:
         timeout: "120000"
-        chunkSize: "2048"
+        chunkSize: "16"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -164,7 +164,7 @@ spec:
         locking: "PESSIMISTIC" 
       stateTransfer:
         timeout: "120000"
-        chunkSize: "2048"
+        chunkSize: "16"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -192,7 +192,7 @@ spec:
         locking: "PESSIMISTIC" 
       stateTransfer:
         timeout: "120000"
-        chunkSize: "2048"
+        chunkSize: "16"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -220,7 +220,7 @@ spec:
         locking: "PESSIMISTIC" 
       stateTransfer:
         timeout: "120000"
-        chunkSize: "2048"
+        chunkSize: "16"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -248,7 +248,7 @@ spec:
         locking: "PESSIMISTIC" 
       stateTransfer:
         timeout: "120000"
-        chunkSize: "2048"
+        chunkSize: "16"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -278,4 +278,4 @@ spec:
         locking: "PESSIMISTIC" 
       stateTransfer:
         timeout: "120000"
-        chunkSize: "2048"
+        chunkSize: "16"
