@@ -105,7 +105,11 @@ spec:
         lifespan: "-1"
       transaction:
         mode: "NON_XA" 
-        locking: "PESSIMISTIC" 
+        locking: "PESSIMISTIC"
+      indexing:
+        enabled: true
+        indexed-entities:
+        - keycloak.RootAuthenticationSessionEntity
       stateTransfer:
         timeout: "120000"
         chunkSize: "16"
@@ -245,7 +249,11 @@ spec:
         lifespan: "-1"
       transaction:
         mode: "NON_XA" 
-        locking: "PESSIMISTIC" 
+        locking: "PESSIMISTIC"
+      indexing:
+        enabled: true
+        indexed-entities:
+        - keycloak.LoginFailureEntity
       stateTransfer:
         timeout: "120000"
         chunkSize: "16"
