@@ -44,6 +44,10 @@ spec:
           launchGossipRouter: true
           memory: "2Gi:1Gi"
           cpu: "2000m:500m"
+          heartbeats:
+            enabled: true
+            interval: 2000
+            timeout: 8000
         expose:
           type: NodePort
           nodePort: 32600
