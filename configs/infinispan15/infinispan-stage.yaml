@@ -11,7 +11,7 @@ spec:
   container:
     cpu: "2000m:500m"
     memory: "4Gi:1Gi"
-    extraJvmOpts: "-XX:MaxRAMPercentage=50.0 -XX:NativeMemoryTracking=summary"
+    extraJvmOpts: "-XX:MaxRAMPercentage=60.0 -XX:NativeMemoryTracking=summary"
   jmx:
     enabled: true
   security:
