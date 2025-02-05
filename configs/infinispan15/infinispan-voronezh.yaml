@@ -10,8 +10,8 @@ spec:
   version: 15.0.10
   container:
     cpu: "2000m:500m"
-    memory: "4Gi:4Gi"
-    extraJvmOpts: "-XX:InitialRAMPercentage=60 -XX:MaxRAMPercentage=60 -XX:NativeMemoryTracking=summary"
+    memory: "4Gi:1Gi"
+    extraJvmOpts: "-Xms1024m -Xmx4096m -XX:NativeMemoryTracking=summary"
   expose:
     type: NodePort
     nodePort: 31222
@@ -42,7 +42,7 @@ spec:
         name: voronezh
         discovery:
           launchGossipRouter: true
-          memory: "1Gi:1Gi"
+          memory: "2Gi:1Gi"
           cpu: "2000m:500m"
           heartbeats:
             enabled: true
