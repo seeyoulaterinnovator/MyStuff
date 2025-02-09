@@ -3,7 +3,8 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="urn:infinispan:config:15.0 https://infinispan.org/schemas/infinispan-config-15.0.xsd
                             urn:infinispan:server:15.0 https://infinispan.org/schemas/infinispan-server-15.0.xsd
-                            urn:org:jgroups http://www.jgroups.org/schema/jgroups-5.3.xsd"
+                            urn:org:jgroups https://www.jgroups.org/schema/jgroups-5.3.xsd
+                            urn:infinispan:config:store:jdbc:15.0 https://infinispan.org/schemas/infinispan-cachestore-jdbc-config-15.0.xsd"
         xmlns="urn:infinispan:config:15.0"
         xmlns:ispn="urn:infinispan:config:15.0"
         xmlns:server="urn:infinispan:server:15.0">
@@ -62,7 +63,23 @@
                 </backup>
             </backups>
         </distributed-cache-configuration>
-        <distributed-cache name="sessions" configuration="default-distributed-cache-configuration"/>
+        <distributed-cache name="sessions" configuration="default-distributed-cache-configuration">
+            <persistence>
+                <string-keyed-jdbc-store xmlns="urn:infinispan:config:store:jdbc:15.0" dialect="MARIA_DB" shared="true">
+                    <string-keyed-table create-on-start="false" drop-on-exit="false" prefix="ispn_cache">
+                        <id-column name="id" type="VARCHAR(768)" />
+                        <data-column name="data" type="MEDIUMBLOB" />
+                        <timestamp-column name="timestamp" type="BIGINT" />
+                        <segment-column name="segment" type="INT" />
+                    </string-keyed-table>
+                    <connection-pool connection-url="jdbc:mariadb://${env.DB_HOST}:${env.DB_PORT}/${env.DB_DATABASE}"
+                                     username="${env.DB_USERNAME}"
+                                     password="${env.DB_PASSWORD}"
+                                     driver="org.mariadb.jdbc.Driver"/>
+                    <write-behind modification-queue-size="2048" fail-silently="true"/>
+                </string-keyed-jdbc-store>
+            </persistence>
+        </distributed-cache>
         <distributed-cache name="authenticationSessions" configuration="default-distributed-cache-configuration"/>
         <distributed-cache name="offlineSessions" configuration="default-distributed-cache-configuration"/>
         <distributed-cache name="clientSessions" configuration="default-distributed-cache-configuration"/>
