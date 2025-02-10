@@ -201,6 +201,7 @@ public class PhoneVerificationProvider implements RequiredActionProvider {
 
         } catch (UserPhoneEmpty userPhoneEmpty) {
             log.info("ignore... userPhoneEmpty");
+            context.ignore();
         } catch (PhoneCallException e) {
             log.info("ignore... PhoneCallException {}", e.getMessage());
             if (authSession.getAuthNote("restSecondPhase")!=null) {

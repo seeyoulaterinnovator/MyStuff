@@ -68,6 +68,7 @@ public class UserPostFacade {
     }
 
     private void addCustomersToRequest(List<UserPostResponse> userPosts) {
+        log.info("addCustomersToRequest start");
         List<String> updatingTomsId = userPosts.stream()
                 .filter(post -> {
                     CacheEntry<?,?> entry = getCustomerCache().getAdvancedCache().getCacheEntry(post.getTomsId());
