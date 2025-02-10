@@ -25,8 +25,11 @@ import java.util.Set;
 public class CachedUserPostFacade extends UserPostFacade {
     private final UserPostCache cache;
 
+    private final CustomerRequestService customerRequestService;
+
     public CachedUserPostFacade() {
         cache = Lookup.lookup(UserPostCache.class);
+        customerRequestService = Lookup.lookup(CustomerRequestService.class);
     }
 
     public List<UserPostResponse> findByUserId(String userId) throws NotFoundException {
@@ -105,7 +108,7 @@ public class CachedUserPostFacade extends UserPostFacade {
         }
 
         for(var post : cachedPosts) {
-            var customer = getCustomerCache().get(post.getTomsId());
+            var customer = customerRequestService.getCustomerName(post.getTomsId());
             if(customer != null && !customer.isEmpty()) {
                 post.setOrganization(customer);
             }
