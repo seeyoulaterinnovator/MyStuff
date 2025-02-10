@@ -10,6 +10,12 @@ import { RootRoute } from "./routes";
 import "./index.css";
 import { HashInterceptor } from "./root/HashInterceptor";
 
+import structuredClone from "@ungap/structured-clone";
+if (!("structuredClone" in globalThis)) {
+  // @ts-ignore
+  globalThis.structuredClone = structuredClone;
+}
+
 // Initialize required components before rendering app.
 await i18n.init();
 
