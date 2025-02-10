@@ -36,10 +36,10 @@ export const RealmsProvider = ({ children }: PropsWithChildren) => {
   const { keycloak } = useEnvironment();
   const { adminClient } = useAdminClient();
 
-  const [realms, setRealms] = useState<RealmNameRepresentation[]>([]);
+  const [realms, setRealms] = useState<RealmNameRepresentation[] | null>(null);
   const [accessibleRealms, setAccessibleRealms] = useState<
-    RealmNameRepresentation[]
-  >([]);
+    RealmNameRepresentation[] | null
+  >(null);
   const [refreshCount, setRefreshCount] = useState(0);
   const localeSort = useLocaleSort();
   const { t } = useTranslation();
@@ -91,9 +91,17 @@ export const RealmsProvider = ({ children }: PropsWithChildren) => {
   }, []);
 
   const value = useMemo<RealmsContextProps>(
-    () => ({ realms, refresh, accessibleRealms, searchRealm, setSearchRealm }),
+    () => ({
+      realms: realms || [],
+      refresh,
+      accessibleRealms: accessibleRealms || [],
+      searchRealm,
+      setSearchRealm,
+    }),
     [realms, refresh, accessibleRealms, searchRealm, setSearchRealm],
   );
+
+  if (!realms || !accessibleRealms) return;
 
   return (
     <RealmsContext.Provider value={value}>{children}</RealmsContext.Provider>
