@@ -15,6 +15,10 @@ public class CustomerService {
     @Inject
     CustomerRepository customerRepository;
 
+    public CustomerDto findById(String tomsId) {
+        return toCustomerDto(customerRepository.findByTomsId(tomsId));
+    }
+
     public CustomerDto save(CustomerDto customer) {
         return toCustomerDto(customerRepository.save(toCustomer(customer)));
     }
