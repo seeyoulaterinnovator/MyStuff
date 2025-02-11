@@ -6,9 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.Customer;
 import ru.alamics.sso.jpa.repository.CustomerRepository;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @ApplicationScoped
 @Slf4j
 public class CustomerService {
@@ -21,10 +18,6 @@ public class CustomerService {
 
     public CustomerDto save(CustomerDto customer) {
         return toCustomerDto(customerRepository.save(toCustomer(customer)));
-    }
-
-    public List<CustomerDto> findAll() {
-        return customerRepository.findAll().stream().map(this::toCustomerDto).collect(Collectors.toList());
     }
 
     private Customer toCustomer(CustomerDto customer) {

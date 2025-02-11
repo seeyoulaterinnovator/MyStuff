@@ -3,10 +3,7 @@ package ru.alamics.sso.keycloak.facade;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Named;
 import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.core.Context;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.FoundUserPostException;
@@ -19,14 +16,11 @@ import java.util.List;
 
 @RequestScoped
 @Named("UserPostFacade")
-@Slf4j
 public class UserPostFacade {
     @Getter
     protected UserPostService userPostService;
-    protected ApplicationProperties properties;
 
-    @Context
-    KeycloakSession session;
+    protected ApplicationProperties properties;
 
     public UserPostFacade() {
 

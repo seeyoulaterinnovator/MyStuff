@@ -1,6 +1,8 @@
 package ru.alamics.sso.registration.tbapi;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.tbapi.exception.TbapiRegisterException;
@@ -32,6 +34,8 @@ public class TbapiService {
         this.remoteService = remoteService;
     }
 
+    @Timed
+    @Counted
     public Map<String, Object> registerUser(User user, TbapiConnectConfig connectConfig) throws TbapiRegisterException {
 
         TbapiRequest request = new TbapiRequest();
@@ -85,6 +89,8 @@ public class TbapiService {
         return ret;
     }
 
+    @Timed
+    @Counted
     public Map<String, Object> customerNames(TbapiConnectConfig connectConfig, List<String> customerIds) throws TbapiRegisterException {
         return remoteService.getCustomerName(customerIds, connectConfig);
     }

@@ -612,7 +612,9 @@
     "path": "/tbapi/api/v1/customerManagement/customerAccounts/names"
   },
   "httpResponse" : {
-    "body": {}
+    "body": {
+      "1739294936": "Test 1739294936 inc."
+    }
   }
 }, {
     "httpRequest": {
