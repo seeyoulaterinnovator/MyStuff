@@ -27,18 +27,16 @@ import java.util.concurrent.locks.ReentrantLock;
 @ApplicationScoped
 @Slf4j
 public class CustomerRequestService {
-    private static final String DB_CACHE_LIFESPAN_PROPERTY = "tbapi.customer.cache.lifespan.ms";
+    private static final String CACHE_LIFESPAN_PROPERTY = "tbapi.customer.cache.lifespan.ms";
     private static final String TBAPI_REQUEST_MAX_SIZE_PROPERTY = "tbapi.customer.request.max.size";
     private static final String TBAPI_REQUEST_DISABLED_PROPERTY = "tbapi.customer.dont.request";
     private static final String TBAPI_REQUEST_LOCK_TIMEOUT_PROPERTY = "tbapi.customer.request.lock.timeout.ms";
-
 
     private final ApplicationProperties properties;
     private final TbapiService tbapiService;
     private final CustomerService customerService;
 
     private final Lock lock = new ReentrantLock();
-
     private final AtomicReference<Semaphore> semaphoreRef = new AtomicReference<>();
     private final AtomicInteger semaphoreSize = new AtomicInteger();
 
@@ -71,16 +69,26 @@ public class CustomerRequestService {
             }
         }
 
-        if(name != null && !name.isBlank()) {
-            getCache().put(
-                    tomsId,
-                    name,
-                    properties.getPropertyInt(TBAPI_REQUEST_MAX_SIZE_PROPERTY, 15 * 60 * 1000),
-                    TimeUnit.MILLISECONDS
-            );
+        if (name == null) {
+            name = "";
         }
 
-        return "";
+        getCache().put(
+                tomsId,
+                name,
+                properties.getPropertyInt(CACHE_LIFESPAN_PROPERTY, 15 * 60 * 1000),
+                TimeUnit.MILLISECONDS
+        );
+
+        return name;
+    }
+
+    public void updateCustomerName(String tomsId, String customerName) {
+        if(customerName == null || customerName.isEmpty()) {
+            getCache().remove(tomsId);
+        } else {
+            getCache().put(tomsId, customerName);
+        }
     }
 
     private String requestCustomerName(String tomsId) throws InterruptedException, TimeoutException {
