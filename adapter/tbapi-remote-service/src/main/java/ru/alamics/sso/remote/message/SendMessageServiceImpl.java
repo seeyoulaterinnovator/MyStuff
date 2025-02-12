@@ -151,7 +151,7 @@ public class SendMessageServiceImpl implements SendMessageService {
     }
 
 
-    private boolean isSmsSenderMocked() {
+    protected boolean isSmsSenderMocked() {
         return "true".equals(properties.getProperty("smsSender.mocked"));
     }
 

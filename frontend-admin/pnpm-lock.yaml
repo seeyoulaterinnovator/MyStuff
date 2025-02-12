@@ -95,6 +95,9 @@ importers:
       '@react-input/mask':
         specifier: ^1.2.11
         version: 1.2.11(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@ungap/structured-clone':
+        specifier: ^1.2.1
+        version: 1.2.1
       admin-ui:
         specifier: 'file:'
         version: file:js/apps/admin-ui(@types/react@18.3.3)
@@ -183,6 +186,9 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.0
         version: 18.3.0
+      '@types/ungap__structured-clone':
+        specifier: ^1.2.0
+        version: 1.2.0
       '@types/uuid':
         specifier: ^9.0.8
         version: 9.0.8
@@ -1349,6 +1355,9 @@ packages:
   '@types/sizzle@2.3.8':
     resolution: {integrity: sha512-0vWLNK2D5MT9dg0iOo8GlKguPAU02QjmZitPEsXRuJXU/OGIOt9vT9Fc26wtYuavLxtO45v9PGleoL9Z0k1LHg==}
 
+  '@types/ungap__structured-clone@1.2.0':
+    resolution: {integrity: sha512-ZoaihZNLeZSxESbk9PUAPZOlSpcKx81I1+4emtULDVmBLkYutTcMlCj2K9VNlf9EWODxdO6gkAqEaLorXwZQVA==}
+
   '@types/uuid@9.0.8':
     resolution: {integrity: sha512-jg+97EGIcY9AGHJJRaaPVgetKDsrTgbRjQ5Msgjh/DQKEFl0DtyRr/VCOyD1T2R1MNeWPK/u7JoGhlDZnKBAfA==}
 
@@ -1432,6 +1441,9 @@ packages:
 
   '@ungap/structured-clone@1.2.0':
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
+
+  '@ungap/structured-clone@1.2.1':
+    resolution: {integrity: sha512-fEzPV3hSkSMltkw152tJKNARhOupqbH96MZWyRjNaYZOMIzbrTeQDG+MTc6Mr2pgzFQzFxAfmhGDNP5QK++2ZA==}
 
   '@vitejs/plugin-react-swc@3.7.0':
     resolution: {integrity: sha512-yrknSb3Dci6svCd/qhHqhFPDSw0QtjumcqdKMoNNzmOl5lMXTTiqzjWtG4Qask2HdvvzaNgSunbQGet8/GrKdA==}
@@ -5577,6 +5589,8 @@ snapshots:
 
   '@types/sizzle@2.3.8': {}
 
+  '@types/ungap__structured-clone@1.2.0': {}
+
   '@types/uuid@9.0.8': {}
 
   '@types/yauzl@2.10.3':
@@ -5688,6 +5702,8 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
+  '@ungap/structured-clone@1.2.1': {}
+
   '@vitejs/plugin-react-swc@3.7.0(vite@5.2.12(@types/node@20.14.2)(lightningcss@1.25.1)(terser@5.31.0))':
     dependencies:
       '@swc/core': 1.5.7
@@ -5787,6 +5803,7 @@ snapshots:
       '@patternfly/react-styles': 5.3.1
       '@patternfly/react-table': 5.3.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-input/mask': 1.2.11(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@ungap/structured-clone': 1.2.1
       dagre: 0.8.5
       file-saver: 2.0.5
       file-selector: 0.6.0

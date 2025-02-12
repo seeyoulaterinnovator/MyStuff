@@ -6,13 +6,11 @@ import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.keycloak.models.jpa.entities.UserEntity;
-import ru.alamics.sso.jpa.entity.ExternalSystemEntity;
-import ru.alamics.sso.jpa.entity.ExternalSystemRoleEntity;
-import ru.alamics.sso.jpa.entity.UserPostEntity;
-import ru.alamics.sso.jpa.entity.UserPostRoleEntity;
+import ru.alamics.sso.jpa.entity.*;
 import ru.alamics.sso.jpa.repository.CustomerRepository;
 import ru.alamics.sso.jpa.repository.UserPostRepository;
 import ru.alamics.sso.jpa.repository.UserRepository;
+import ru.alamics.sso.keycloak.facade.CustomerRequestService;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.*;
 import ru.alamics.sso.registration.mapper.DataMapper;
@@ -37,6 +35,9 @@ public class UserPostService {
     @Inject
     CustomerRepository customerRepository;
 
+    @Inject
+    CustomerRequestService customerRequestService;
+
     public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException, NotValidException {
         UserEntity user = userRepository.findUser(userPostRequest.getUserId());
         if (user == null) {
@@ -60,6 +61,8 @@ public class UserPostService {
         userPost.setRole(role);
         userPost.setCustomer(customerRepository.save(userPost.getCustomer()));
         userPost.setSelected(CollectionUtils.isEmpty(userPosts));
+
+        customerRequestService.updateCustomerName(userPostRequest.getTomsId(), userPostRequest.getOrgName());
 
         return DataMapper.toUserPostResponse(userPostRepository.save(userPost));
     }

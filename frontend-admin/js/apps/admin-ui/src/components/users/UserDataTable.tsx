@@ -45,6 +45,7 @@ import type { UserInfoRepresentation } from "@keycloak/keycloak-admin-client/lib
 import { useAccess } from "../../context/access/Access";
 import { useWhoAmI } from "../../context/whoami/WhoAmI";
 import { QueryParam } from "../../customLogic/constants/queryParams";
+import { useRealms } from "../../context/RealmsContext";
 
 export type UserAttribute = {
   name: string;
@@ -102,7 +103,12 @@ export function UserDataTable() {
 
   const { t } = useTranslation();
   const { addAlert, addError } = useAlerts();
-  const { realm: realmName, realmRepresentation: realm } = useRealm();
+  const {
+    realm: realmName,
+    realmRepresentation: realm,
+    searchRealmRepresentation,
+  } = useRealm();
+  const { realms, accessibleRealms } = useRealms();
   const navigate = useNavigate();
   const [userStorage, setUserStorage] = useState<ComponentRepresentation[]>();
   const [searchUser, setSearchUser] = useState("");
@@ -269,7 +275,13 @@ export function UserDataTable() {
     }
   };
 
-  if (!userStorage || !realm) {
+  if (
+    !userStorage ||
+    !realm ||
+    !searchRealmRepresentation ||
+    !realms?.length ||
+    !accessibleRealms?.length
+  ) {
     return <KeycloakSpinner />;
   }
 

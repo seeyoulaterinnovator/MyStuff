@@ -1,8 +1,11 @@
 package ru.alamics.sso.keycloak.facade;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import lombok.Locked;
+import jakarta.ws.rs.core.Context;
 import lombok.extern.slf4j.Slf4j;
+import org.infinispan.Cache;
+import org.keycloak.connections.infinispan.InfinispanConnectionProvider;
+import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.customer.CustomerDto;
 import ru.alamics.sso.customer.CustomerService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
@@ -12,107 +15,119 @@ import ru.alamics.sso.registration.tbapi.model.TbapiConnect;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.tbapi.port.TbapiRemoteService;
 
-import java.util.*;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.List;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 @ApplicationScoped
 @Slf4j
 public class CustomerRequestService {
+    private static final String CACHE_LIFESPAN_PROPERTY = "tbapi.customer.cache.lifespan.ms";
     private static final String TBAPI_REQUEST_MAX_SIZE_PROPERTY = "tbapi.customer.request.max.size";
-    private static final int TBAPI_REQUEST_MAX_SIZE = 10;
-    private static final String LOAD_COEFF_PROPERTY = "tbapi.customer.request.load.coeff";
-    private static final int LOAD_COEFF_DEFAULT = 100;
-    private static final String TBAPI_CUSTOMER_DONT_REQUEST = "tbapi.customer.dont.request";
+    private static final String TBAPI_REQUEST_DISABLED_PROPERTY = "tbapi.customer.dont.request";
+    private static final String TBAPI_REQUEST_LOCK_TIMEOUT_PROPERTY = "tbapi.customer.request.lock.timeout.ms";
 
-    private final ReentrantLock lock = new ReentrantLock();
+    private final ApplicationProperties properties;
+    private final TbapiService tbapiService;
+    private final CustomerService customerService;
 
-    private int tbapiRequestMaxSize;
-    private int loadCoeff;
-    private boolean dontRequest;
+    private final Lock lock = new ReentrantLock();
+    private final AtomicReference<Semaphore> semaphoreRef = new AtomicReference<>();
+    private final AtomicInteger semaphoreSize = new AtomicInteger();
 
-    private TbapiService tbapiService;
-    private CustomerService customerService;
-    private LinkedBlockingQueue<String> tomsIdQueue = new LinkedBlockingQueue<>();
-    private ApplicationProperties properties;
+    @Context
+    KeycloakSession session;
 
     public CustomerRequestService() {
-
         TbapiRemoteService tbapiRemoteService = Lookup.lookup(TbapiRemoteService.class);
-
-        tbapiService = new TbapiService(tbapiRemoteService);
         properties = Lookup.lookup(ApplicationProperties.class);
+        tbapiService = new TbapiService(tbapiRemoteService);
         customerService = Lookup.lookup(CustomerService.class);
-        tbapiRequestMaxSize = properties.getPropertyInt(TBAPI_REQUEST_MAX_SIZE_PROPERTY, TBAPI_REQUEST_MAX_SIZE, "CustomerRequestService: default value used: '%s' = '%s'");
-        loadCoeff = properties.getPropertyInt(LOAD_COEFF_PROPERTY, LOAD_COEFF_DEFAULT, "CustomerRequestService: default value used: '%s' = '%s'");
-
-        dontRequest = Boolean.parseBoolean(properties.getProperty(TBAPI_CUSTOMER_DONT_REQUEST));
     }
 
-    public Map<String, String> updateCustomerNames() {
-        lock.lock();
+    public String getCustomerName(String tomsId) {
+        String name = getCache().get(tomsId);
+        if (name != null) return name;
+
         try {
-            List<String> currentTomsIds = extractListFromQueue(tbapiRequestMaxSize);
-            if (currentTomsIds.isEmpty()) {
-                return new HashMap<>();
-            }
-            if(dontRequest) {
-                log.info("FAKE customer names request due to properties: customerIds={}", currentTomsIds);
-                return new HashMap<>();
-            }
-            try {
-                Map<String, Object> customerMap = tbapiService.customerNames(new TbapiConnectConfig(TbapiConnect.CUTOMER_NAMES), currentTomsIds);;
-                Map<String, String> customers = new HashMap<>();
-                for (String tomsId : currentTomsIds) {
-                    CustomerDto customer = CustomerDto.builder()
-                            .tomsId(tomsId)
-                            .name(customerMap.get(tomsId) == null ? " " : customerMap.get(tomsId).toString())
-                            .build();
-                    customerService.save(customer);
-                    customers.put(customer.getTomsId(), customer.getName());
-                }
-                return customers;
-            } catch (Exception e) {
-                log.error("Fail getting customer names by tomsIds={}", currentTomsIds, e);
-                throw e;
+            name = requestCustomerName(tomsId);
+            if (!name.isBlank()) {
+                customerService.save(CustomerDto.builder()
+                        .tomsId(tomsId)
+                        .name(name)
+                        .build());
             }
         } catch (Exception e) {
-            log.error("Fail updating customer names", e);
-            return new HashMap<>();
-        } finally {
-            lock.lock();
-        }
-    }
-
-    @Locked.Write
-    public void addTomsIdsInQueue(List<String> updatingTomsId) {
-        for (String tomsId : updatingTomsId) {
-            tomsIdQueue.offer(tomsId);
-        }
-    }
-
-    @Locked.Read
-    public int getLoadCoeff() {
-        return tomsIdQueue.size() / tbapiRequestMaxSize / loadCoeff;
-    }
-
-    @Locked.Write
-    public List<String> extractListFromQueue(int countElements) {
-        List<String> result = new LinkedList<>();
-        if (tomsIdQueue.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        int currentElement = 0;
-        while (!tomsIdQueue.isEmpty() && currentElement <= countElements) {
-            String tomsId = tomsIdQueue.poll();
-            if (tomsId != null) {
-                result.add(tomsId);
-                currentElement++;
-            } else {
-                break;
+            CustomerDto customer = customerService.findById(tomsId);
+            if(customer != null) {
+                name = customer.getName();
             }
         }
-        return result;
+
+        if (name == null) {
+            name = "";
+        }
+
+        getCache().put(
+                tomsId,
+                name,
+                properties.getPropertyInt(CACHE_LIFESPAN_PROPERTY, 15 * 60 * 1000),
+                TimeUnit.MILLISECONDS
+        );
+
+        return name;
+    }
+
+    public void updateCustomerName(String tomsId, String customerName) {
+        if(customerName == null || customerName.isEmpty()) {
+            getCache().remove(tomsId);
+        } else {
+            getCache().put(tomsId, customerName);
+        }
+    }
+
+    private String requestCustomerName(String tomsId) throws InterruptedException, TimeoutException {
+        int tbapiRequestMaxSize = properties.getPropertyInt(TBAPI_REQUEST_MAX_SIZE_PROPERTY, 10);
+        int requestLockTimeoutMs = properties.getPropertyInt(TBAPI_REQUEST_LOCK_TIMEOUT_PROPERTY, 30 * 1000);
+        boolean dontRequest = Boolean.parseBoolean(properties.getProperty(TBAPI_REQUEST_DISABLED_PROPERTY));
+        Semaphore semaphore;
+        lock.lock();
+        try {
+            semaphore = semaphoreRef.get();
+            if(semaphore == null || semaphoreSize.get() != tbapiRequestMaxSize) {
+                semaphoreRef.set(semaphore = new Semaphore(tbapiRequestMaxSize));
+                semaphoreSize.set(tbapiRequestMaxSize);
+            }
+        } finally {
+            lock.unlock();
+        }
+        if(!semaphore.tryAcquire(requestLockTimeoutMs, TimeUnit.MILLISECONDS)) {
+            throw new TimeoutException("Customer name request lock timeout for tomsId=" + tomsId);
+        }
+        try {
+            if(dontRequest) {
+                log.debug("FAKE customer names request due to properties: tomsId={}", tomsId);
+                return "";
+            }
+            Object name = tbapiService.customerNames(new TbapiConnectConfig(TbapiConnect.CUTOMER_NAMES), List.of(tomsId)).get(tomsId);
+            if (name != null) {
+              return name.toString();
+            }
+        } catch (Exception e) {
+            log.error("Fail updating customer name by tomsId={}", tomsId, e);
+            return "";
+        } finally {
+            semaphore.release();
+        }
+        return "";
+    }
+
+    private Cache<String, String> getCache() {
+        return session.getProvider(InfinispanConnectionProvider.class).getCache("customer_cache");
     }
 }

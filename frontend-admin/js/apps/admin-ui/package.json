@@ -88,7 +88,8 @@
     "react-router-dom": "^6.23.1",
     "reactflow": "^11.11.3",
     "use-react-router-breadcrumbs": "^4.0.1",
-    "@react-input/mask": "^1.2.11"
+    "@react-input/mask": "^1.2.11",
+    "@ungap/structured-clone": "^1.2.1"
   },
   "devDependencies": {
     "@4tw/cypress-drag-drop": "^2.2.5",
@@ -113,6 +114,7 @@
     "uuid": "^9.0.1",
     "vite": "^5.2.12",
     "vite-plugin-checker": "^0.6.4",
-    "vitest": "^1.6.0"
+    "vitest": "^1.6.0",
+    "@types/ungap__structured-clone": "^1.2.0"
   }
 }

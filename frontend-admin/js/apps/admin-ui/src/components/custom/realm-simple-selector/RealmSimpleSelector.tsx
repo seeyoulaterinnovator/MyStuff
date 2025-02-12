@@ -77,7 +77,9 @@ export const RealmSimpleSelector = ({
   const resRealms = realmsSource === "default" ? realms : accessibleRealms;
 
   useEffect(() => {
-    setCurrentRealmName(value);
+    if (value) {
+      setCurrentRealmName(value);
+    }
   }, [value]);
 
   const selectedRealm = useMemo(() => {
@@ -117,6 +119,8 @@ export const RealmSimpleSelector = ({
               .includes(normalizedSearch),
         );
   }, [search, all]);
+
+  if (!resRealms.length) return;
 
   return (
     <Dropdown

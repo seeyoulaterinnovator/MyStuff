@@ -62,6 +62,11 @@ class MsgSendServiceImplTest {
                         .charset(StandardCharsets.UTF_8)
                         .build();
             }
+
+            @Override
+            protected boolean isSmsSenderMocked() {
+                return false;
+            }
         };
     }
 

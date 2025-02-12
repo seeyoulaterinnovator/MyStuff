@@ -40,7 +40,14 @@ services:
           memory: 128m
 
   infinispan-a-1: &infinispan-a-1
-    image: infinispan/server:15.0.10.Final
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    build:
+      # language=Dockerfile
+      dockerfile_inline: |
+        FROM infinispan/server:15.0.10.Final
+        RUN bin/cli.sh install org.mariadb.jdbc:mariadb-java-client:3.5.1
     environment: &infinispan-a-1-env
       USER: keycloak
       PASS: keycloak
@@ -48,6 +55,11 @@ services:
       SITE: A
       BACKUP_SITE: B
       MCAST_PORT: 46656
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      DB_DATABASE: sso
+      DB_USERNAME: sso
+      DB_PASSWORD: sso
     entrypoint: "/entrypoint.sh"
     ports: [ "11221:11222" ]
     healthcheck:

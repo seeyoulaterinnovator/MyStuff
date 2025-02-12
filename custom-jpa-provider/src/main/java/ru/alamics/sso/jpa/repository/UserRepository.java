@@ -7,7 +7,6 @@ import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import org.keycloak.models.RealmModel;
-import org.keycloak.models.jpa.entities.RealmEntity;
 import org.keycloak.models.jpa.entities.UserAttributeEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
@@ -15,7 +14,6 @@ import org.keycloak.services.validation.Validation;
 import ru.alamics.sso.jpa.model.UserSummaryView;
 import ru.alamics.sso.jpa.util.CollectionUtils;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,9 +28,6 @@ public class UserRepository {
 
     @Inject
     EntityManager em;
-
-    @Inject
-    RealmRepository realmRepository;
 
     public UserEntity findUser(final String userId) {
         return em.find(UserEntity.class, userId);
@@ -227,24 +222,18 @@ public class UserRepository {
             searchPhone = searchPhone + "%";
         }
 
-        if(realmRepository.findRealmById(realm) == null) {
-            realm = realmRepository.findRealmEntityByName(realm).map(RealmEntity::getId).orElse(null);
-        }
-
-        if(realm == null) return 0;
-
         Query query = em.createQuery(
-                "select count(distinct UE.id) " +
-                        "from UserEntity UE\n" +
-                        "         left join UserAttributeEntity UA on UE = UA.user AND UA.name = 'phone'\n" +
-                        "         left join UserPostEntity UP on UE = UP.user \n" +
-                        "WHERE UE.realmId = :realm\n" +
-                        "and (:search is null or :search = '' or (UE.email LIKE :search OR\n" +
-                        "                                         UE.firstName LIKE :search OR\n" +
-                        "                                         UE.username LIKE :search ))\n" +
-                        "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser)\n" +
-                        "and (:searchToms is null or :searchToms = '' or UP.customer.id = :searchToms)\n" +
-                        "and (:searchPhone is null or :searchPhone = '' or UA.value LIKE :searchPhone)\n")
+                        "select count(distinct UE.id) " +
+                                "from UserEntity UE\n" +
+                                "         left join UserAttributeEntity UA on UE = UA.user AND UA.name = 'phone'\n" +
+                                "         left join UserPostEntity UP on UE = UP.user \n" +
+                                "WHERE UE.realmId = :realm\n" +
+                                "and (:search is null or :search = '' or (UE.email LIKE :search OR\n" +
+                                "                                         UE.firstName LIKE :search OR\n" +
+                                "                                         UE.username LIKE :search ))\n" +
+                                "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser)\n" +
+                                "and (:searchToms is null or :searchToms = '' or UP.customer.id = :searchToms)\n" +
+                                "and (:searchPhone is null or :searchPhone = '' or UA.value LIKE :searchPhone)\n")
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
@@ -252,6 +241,38 @@ public class UserRepository {
                 .setParameter("realm", realm);
 
         return Long.parseLong(query.getSingleResult().toString());
+    }
+
+    public long getTotalUsersByRealm(String realm) {
+        Query query = em.createQuery("select count(distinct UE.id) from UserEntity UE WHERE UE.realmId = :realm")
+                .setParameter("realm", realm);
+
+        return Long.parseLong(query.getSingleResult().toString());
+
+    }
+
+    public List<UserSummaryView> findUsersByRealm(String realm, String sortField, boolean sortAsc, int first, int max) {
+
+        Query query = em.createQuery(
+                        "select distinct new ru.alamics.sso.jpa.model.UserSummaryView(UE.id, " +
+                                "                                                         UE.username," +
+                                "                                                         UE.firstName, " +
+                                "                                                         UE.lastName, " +
+                                "                                                         UE.email, " +
+                                "                                                         UA.value, " +
+                                "                                                         UE.enabled, " +
+                                "                                                         UE.emailVerified) " +
+                                "from UserEntity UE\n" +
+                                "         left join UserAttributeEntity UA on UE = UA.user AND UA.name = 'phone'\n" +
+                                "WHERE UE.realmId = :realm\n"+
+                                getSort(sortField, sortAsc)
+                        , UserSummaryView.class)
+                .setParameter("realm", realm);
+
+        query.setFirstResult(first);
+        query.setMaxResults(max);
+
+        return query.getResultList();
     }
 
     public List<UserSummaryView> findUsersByParameters(
@@ -267,7 +288,6 @@ public class UserRepository {
             int max
     ) {
         if (CollectionUtils.isNotEmpty(search)) {
-//            search = "%" + search.replace("-", "\\-") + "%";
             search = "%" + search + "%";
         }
 
@@ -279,33 +299,27 @@ public class UserRepository {
             searchPhone = searchPhone + "%";
         }
 
-        if(realmRepository.findRealmById(realm) == null) {
-            realm = realmRepository.findRealmEntityByName(realm).map(RealmEntity::getId).orElse(null);
-        }
-
-        if(realm == null) return Collections.emptyList();
-
         Query query = em.createQuery(
-                "select distinct new ru.alamics.sso.jpa.model.UserSummaryView(UE.id, " +
-                        "                                                         UE.username," +
-                        "                                                         UE.firstName, " +
-                        "                                                         UE.lastName, " +
-                        "                                                         UE.email, " +
-                        "                                                         UA.value, " +
-                        "                                                         UE.enabled, " +
-                        "                                                         UE.emailVerified) " +
-                        "from UserEntity UE\n" +
-                        "         left join UserAttributeEntity UA on UE = UA.user AND UA.name = 'phone'\n" +
-                        "         left join UserPostEntity UP on UE = UP.user \n" +
-                        "WHERE UE.realmId = :realm\n" +
-                        "and (:search is null or :search = '' or (UE.email LIKE :search OR\n" +
-                        "                                         UE.firstName LIKE :search OR\n" +
-                        "                                         UE.username LIKE :search ))\n" +
-                        "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser)\n" +
-                        "and (:searchToms is null or :searchToms = '' or UP.customer.id = :searchToms)\n" +
-                        "and (:searchPhone is null or :searchPhone = '' or UA.value LIKE :searchPhone)\n" +
-                        getSort(sortField, sortAsc)
-                , UserSummaryView.class)
+                        "select distinct new ru.alamics.sso.jpa.model.UserSummaryView(UE.id, " +
+                                "                                                         UE.username," +
+                                "                                                         UE.firstName, " +
+                                "                                                         UE.lastName, " +
+                                "                                                         UE.email, " +
+                                "                                                         UA.value, " +
+                                "                                                         UE.enabled, " +
+                                "                                                         UE.emailVerified) " +
+                                "from UserEntity UE\n" +
+                                "         left join UserAttributeEntity UA on UE = UA.user AND UA.name = 'phone'\n" +
+                                "         left join UserPostEntity UP on UE = UP.user \n" +
+                                "WHERE UE.realmId = :realm\n" +
+                                "and (:search is null or :search = '' or (UE.email LIKE :search OR\n" +
+                                "                                         UE.firstName LIKE :search OR\n" +
+                                "                                         UE.username LIKE :search ))\n" +
+                                "and (:searchUser is null or :searchUser = '' or UE.id = :searchUser)\n" +
+                                "and (:searchToms is null or :searchToms = '' or UP.customer.id = :searchToms)\n" +
+                                "and (:searchPhone is null or :searchPhone = '' or UA.value LIKE :searchPhone)\n" +
+                                getSort(sortField, sortAsc)
+                        , UserSummaryView.class)
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
