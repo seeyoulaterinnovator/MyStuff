@@ -10,6 +10,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import ru.alamics.sso.keycloak.facade.CachedUserPostFacade;
+import ru.alamics.sso.keycloak.facade.CustomerRequestService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
@@ -20,9 +21,11 @@ import ru.alamics.sso.util.validator.NotValidException;
 public class UserPostCreatorProvider implements FormAction {
     public static final Long ROLE_ID = 1L;     //Соотаветсвует ЛПР
     private final CachedUserPostFacade cachedUserPostFacade;
+    private final CustomerRequestService customerRequestService;
 
     public UserPostCreatorProvider() {
         this.cachedUserPostFacade = Lookup.lookup(CachedUserPostFacade.class);
+        this.customerRequestService = Lookup.lookup(CustomerRequestService.class);
     }
 
     @Override
@@ -43,6 +46,11 @@ public class UserPostCreatorProvider implements FormAction {
         if (userPostRequest != null && userPostRequest.getTomsId() != null) {
             userPostRequest.setRoleId(ROLE_ID);
             userPostRequest.setSelected(true);
+
+            if((userPostRequest.getOrgName() == null || userPostRequest.getOrgName().isEmpty())
+                    && userPostRequest.getTomsId() != null && !userPostRequest.getTomsId().isEmpty()) {
+                customerRequestService.getCustomerName(userPostRequest.getTomsId());
+            }
 
             try {
                 cachedUserPostFacade.addUserPostAndSystemRole(userPostRequest);
