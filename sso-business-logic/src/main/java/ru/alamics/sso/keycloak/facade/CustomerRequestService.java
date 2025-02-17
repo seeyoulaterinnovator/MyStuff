@@ -1,6 +1,7 @@
 package ru.alamics.sso.keycloak.facade;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.ws.rs.core.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.infinispan.Cache;
@@ -73,16 +74,20 @@ public class CustomerRequestService {
             name = "";
         }
 
-        getCache().put(
-                tomsId,
-                name,
-                properties.getPropertyInt(CACHE_LIFESPAN_PROPERTY, 15 * 60 * 1000),
-                TimeUnit.MILLISECONDS
-        );
+        // SD-3530207: в случае неудачной попытки получения названия, не кэшировать пустое значение
+        if(!name.isEmpty()) {
+            getCache().put(
+                    tomsId,
+                    name,
+                    properties.getPropertyInt(CACHE_LIFESPAN_PROPERTY, 15 * 60 * 1000),
+                    TimeUnit.MILLISECONDS
+            );
+        }
 
         return name;
     }
 
+    @ActivateRequestContext
     public void updateCustomerName(String tomsId, String customerName) {
         if(customerName == null || customerName.isEmpty()) {
             getCache().remove(tomsId);
@@ -92,9 +97,29 @@ public class CustomerRequestService {
     }
 
     private String requestCustomerName(String tomsId) throws InterruptedException, TimeoutException {
+        boolean dontRequest = Boolean.parseBoolean(properties.getProperty(TBAPI_REQUEST_DISABLED_PROPERTY));
+        if(dontRequest) {
+            log.debug("FAKE customer names request due to properties: tomsId={}", tomsId);
+            return "";
+        }
+        Semaphore semaphore = tryLock(tomsId);
+        try {
+            Object name = tbapiService.customerNames(new TbapiConnectConfig(TbapiConnect.CUTOMER_NAMES), List.of(tomsId)).get(tomsId);
+            if (name != null) {
+              return name.toString();
+            }
+        } catch (Exception e) {
+            log.error("Fail updating customer name by tomsId={}", tomsId, e);
+        } finally {
+            semaphore.release();
+        }
+        return "";
+    }
+
+    // Rate limiter для контроля нагрузки на TBAPI
+    private Semaphore tryLock(String tomsId) throws InterruptedException, TimeoutException {
         int tbapiRequestMaxSize = properties.getPropertyInt(TBAPI_REQUEST_MAX_SIZE_PROPERTY, 10);
         int requestLockTimeoutMs = properties.getPropertyInt(TBAPI_REQUEST_LOCK_TIMEOUT_PROPERTY, 30 * 1000);
-        boolean dontRequest = Boolean.parseBoolean(properties.getProperty(TBAPI_REQUEST_DISABLED_PROPERTY));
         Semaphore semaphore;
         lock.lock();
         try {
@@ -109,22 +134,7 @@ public class CustomerRequestService {
         if(!semaphore.tryAcquire(requestLockTimeoutMs, TimeUnit.MILLISECONDS)) {
             throw new TimeoutException("Customer name request lock timeout for tomsId=" + tomsId);
         }
-        try {
-            if(dontRequest) {
-                log.debug("FAKE customer names request due to properties: tomsId={}", tomsId);
-                return "";
-            }
-            Object name = tbapiService.customerNames(new TbapiConnectConfig(TbapiConnect.CUTOMER_NAMES), List.of(tomsId)).get(tomsId);
-            if (name != null) {
-              return name.toString();
-            }
-        } catch (Exception e) {
-            log.error("Fail updating customer name by tomsId={}", tomsId, e);
-            return "";
-        } finally {
-            semaphore.release();
-        }
-        return "";
+        return semaphore;
     }
 
     private Cache<String, String> getCache() {

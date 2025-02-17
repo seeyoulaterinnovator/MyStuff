@@ -53,6 +53,7 @@ extraEnvs:
   QUARKUS_LOG_CATEGORY__ORG_APACHE_HTTP__LEVEL: "DEBUG" # TODO отключить
   # fix "java.io.EOFException: unexpected end of stream, read 0 bytes from 4 (socket was closed by server)"
   KC_DB_URL_PROPERTIES: "?usePipeLineAuth=false&disablePipeLine=true&useBatchMultiSend=false"
+  DC_NAME: "{{ envOrDefault "DC_NAME" "voronezh" }}"
 
 extraSensitiveEnvs:
   DB_USER: "{{ env "DB_USER" }}"
