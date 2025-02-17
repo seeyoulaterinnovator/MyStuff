@@ -9,6 +9,7 @@ import ru.alamics.sso.user.model.ImportUsersDataModel;
 import ru.alamics.sso.user.model.ImportUsersReportModel;
 import ru.alamics.sso.user.web.UserSearch;
 
+import java.time.ZoneId;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -49,11 +50,12 @@ public class DataMapper {
                 .userRole(toUserPostRoleDto(userPost.getRole()))
                 .tomsId(userPost.getCustomer().getId())
                 .organization(userPost.getCustomer().getName())
-                .updateTime(userPost.getCustomer().getUpdateTime())
                 .dmpId(userPost.getDmpId())
                 .selected(userPost.isSelected())
                 .systemRoles(toExternalSystemRoleDtos(externalSystemRoles))
-                .updateTime(userPost.getCustomer().getUpdateTime())
+                .updateTime(userPost.getCustomer().getUpdateTime() != null ?
+                        userPost.getCustomer().getUpdateTime().atZone(ZoneId.systemDefault()).toLocalDateTime() :
+                        null)
                 .build();
     }
 

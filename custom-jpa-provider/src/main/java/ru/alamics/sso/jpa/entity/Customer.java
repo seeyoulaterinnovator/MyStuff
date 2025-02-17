@@ -1,16 +1,16 @@
 package ru.alamics.sso.jpa.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Data
@@ -27,5 +27,5 @@ public class Customer {
 
     @UpdateTimestamp
     @Column(name = "update_time")
-    private LocalDateTime updateTime;
+    private Instant updateTime;
 }

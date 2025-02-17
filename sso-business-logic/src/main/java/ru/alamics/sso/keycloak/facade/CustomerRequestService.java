@@ -16,6 +16,8 @@ import ru.alamics.sso.registration.tbapi.model.TbapiConnect;
 import ru.alamics.sso.registration.tbapi.model.TbapiConnectConfig;
 import ru.alamics.sso.registration.tbapi.port.TbapiRemoteService;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -53,33 +55,44 @@ public class CustomerRequestService {
 
     public String getCustomerName(String tomsId) {
         String name = getCache().get(tomsId);
+
         if (name != null) return name;
 
-        try {
-            name = requestCustomerName(tomsId);
-            if (!name.isBlank()) {
-                customerService.save(CustomerDto.builder()
+        CustomerDto customer = customerService.findById(tomsId);
+
+        if (customer == null) return "";
+
+        Instant now = Instant.now();
+        Duration expire = Duration.ofMillis(properties.getPropertyInt(CACHE_LIFESPAN_PROPERTY, 15 * 60 * 1000));
+
+        if(customer.getUpdateTime() == null
+                || now.isAfter(customer.getUpdateTime().plus(expire))
+                || customer.getName() == null
+                || customer.getName().isEmpty()) {
+            try {
+                name = requestCustomerName(tomsId);
+
+                customer = CustomerDto.builder()
                         .tomsId(tomsId)
                         .name(name)
-                        .build());
-            }
-        } catch (Exception e) {
-            CustomerDto customer = customerService.findById(tomsId);
-            if(customer != null) {
-                name = customer.getName();
-            }
-        }
+                        .updateTime(now)
+                        .build();
 
-        if (name == null) {
-            name = "";
+                if (!name.isEmpty()) {
+                    customerService.save(customer);
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                return "";
+            }
         }
 
         // SD-3530207: в случае неудачной попытки получения названия, не кэшировать пустое значение
-        if(!name.isEmpty()) {
+        if (!customer.getName().isEmpty()) {
             getCache().put(
                     tomsId,
-                    name,
-                    properties.getPropertyInt(CACHE_LIFESPAN_PROPERTY, 15 * 60 * 1000),
+                    customer.getName(),
+                    customer.getUpdateTime().plus(expire).toEpochMilli() - now.toEpochMilli(),
                     TimeUnit.MILLISECONDS
             );
         }

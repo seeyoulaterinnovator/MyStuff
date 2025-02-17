@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.entity.Customer;
 import ru.alamics.sso.jpa.repository.CustomerRepository;
 
+import java.time.Instant;
+
 @ApplicationScoped
 @Slf4j
 public class CustomerService {
@@ -27,6 +29,7 @@ public class CustomerService {
         return Customer.builder()
                 .id(customer.getTomsId())
                 .name(customer.getName())
+                .updateTime(customer.getUpdateTime() != null ? customer.getUpdateTime() : Instant.now())
                 .build();
     }
 
@@ -34,7 +37,7 @@ public class CustomerService {
         if (customer == null) {
             return null;
         }
-        return new CustomerDto(customer.getId(), customer.getName());
+        return new CustomerDto(customer.getId(), customer.getName(), customer.getUpdateTime());
     }
 
 
