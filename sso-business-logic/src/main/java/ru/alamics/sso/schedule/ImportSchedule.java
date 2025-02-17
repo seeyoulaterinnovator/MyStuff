@@ -13,6 +13,7 @@ import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
 import org.keycloak.timer.ScheduledTask;
 import org.keycloak.timer.TimerProvider;
 import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
+import ru.alamics.sso.lock.LockService;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.user.ImportReportService;
 import ru.alamics.sso.user.ImportService;
@@ -20,6 +21,7 @@ import ru.alamics.sso.user.model.ImportUsersReportModel;
 import ru.alamics.sso.user.model.RepeatNextTimeException;
 import ru.alamics.sso.util.E2EUtil;
 
+import java.time.Duration;
 import java.util.List;
 
 @ApplicationScoped
@@ -38,6 +40,8 @@ public class ImportSchedule implements ScheduledTask {
     ApplicationProperties properties;
     @Inject
     ImportService importService;
+    @Inject
+    LockService lockService;
 
     @Context
     KeycloakSession session;
@@ -84,7 +88,7 @@ public class ImportSchedule implements ScheduledTask {
             intervalDuration = DEFAULT_INTERVAL_DURATION;
         }
         if(lockDuration <= 0) {
-            lockDuration = intervalDuration * 100;
+            lockDuration = intervalDuration * 2;
         }
 
         timerProvider.cancelTask(TIMER_NAME);
@@ -103,20 +107,31 @@ public class ImportSchedule implements ScheduledTask {
 
     @Override
     public void run(KeycloakSession session) {
-        if(properties.isClusterTaskDisabled()) {
-            log.debug("Run skipped");
+        if (properties.isClusterTaskDisabled()) {
+            log.debug("Run skipped as cluster task is disabled");
             return;
         }
+        if (!lockService.tryLock(TIMER_NAME, Duration.ofMinutes(30))) {
+            log.debug("Run skipped as task is locked");
+            return;
+        }
+        try {
+            log.debug("Import task started");
 
-        long scheduleStart = System.currentTimeMillis();
+            long scheduleStart = System.currentTimeMillis();
 
-        List<ImportUsersReportModel> reportList = importReportService.getReportListByStatus(ImportUsersReportStatus.AWAITING);
+            List<ImportUsersReportModel> reportList = importReportService.getReportListByStatus(ImportUsersReportStatus.AWAITING);
 
-        for (ImportUsersReportModel reportModel : reportList) {
-            reportModel.setStatus(ImportUsersReportStatus.IN_PROGRESS);
-            importReportService.updateReport(reportModel);
-            importService.createImportUsers(reportModel, importReportService.getDataListAwaiting(reportModel.getId()), scheduleStart, null, null);
-            importReportService.updateReport(reportModel);
+            for (ImportUsersReportModel reportModel : reportList) {
+                reportModel.setStatus(ImportUsersReportStatus.IN_PROGRESS);
+                importReportService.updateReport(reportModel);
+                importService.createImportUsers(reportModel, importReportService.getDataListAwaiting(reportModel.getId()), scheduleStart, null, null);
+                importReportService.updateReport(reportModel);
+            }
+
+            log.debug("Import task completed");
+        } finally {
+            lockService.unlock(TIMER_NAME);
         }
     }
 }

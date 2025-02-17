@@ -228,4 +228,14 @@
             INSERT INTO APP_PROPERTIES (name, value) VALUES ('updateVerKC.datetime', '2024-11-18 06:00:00')
         </sql>
     </changeSet>
+    <changeSet id="15" author="korotaev.miu" dbms="mariadb">
+        <sql>
+            create table LOCKS(
+                id VARCHAR(255) NOT NULL PRIMARY KEY,
+                owner VARCHAR(255) NOT NULL,
+                acquire_date TIMESTAMP NOT NULL,
+                version BIGINT NOT NULL
+            );
+        </sql>
+    </changeSet>
 </databaseChangeLog>

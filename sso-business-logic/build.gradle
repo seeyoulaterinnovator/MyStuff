@@ -26,6 +26,7 @@ dependencies {
     implementation ("com.helger:ph-css:7.0.2") {
         exclude group: 'org.slf4j', module: 'slf4j-api'
     }
+    implementation "dev.failsafe:failsafe:3.3.2" // quarkus-smallrye-fault-tolerance
 
     implementation (
             project(":custom-jpa-provider"),
