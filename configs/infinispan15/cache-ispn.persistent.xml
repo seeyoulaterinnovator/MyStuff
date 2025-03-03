@@ -57,4 +57,13 @@
             <expiration lifespan="-1"/>
         </replicated-cache>
     </cache-container>
+    <cache-container name="custom_container">
+        <jmx enabled="true" />
+        <replicated-cache name="user_post_cache">
+            <expiration max-idle="100000" lifespan="500000"/>
+        </replicated-cache>
+        <replicated-cache name="customer_cache">
+            <expiration max-idle="100000" lifespan="500000"/>
+        </replicated-cache>
+    </cache-container>
 </infinispan>
