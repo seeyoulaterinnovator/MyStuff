@@ -169,6 +169,7 @@ public class CustomUserResource {
                     .build();
         } catch (NotFoundException | FoundUserPostException e) {
             log.error("Could not create user", e);
+            customerRequestService.getCustomerName(request.getTomsId());
             return JsonResponse.error(Response.Status.BAD_REQUEST)
                     .message(e.getMessage())
                     .build();
