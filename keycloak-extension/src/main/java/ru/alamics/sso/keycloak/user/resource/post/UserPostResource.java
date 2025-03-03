@@ -11,12 +11,14 @@ import org.keycloak.models.UserModel;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import ru.alamics.sso.auth.UserRole;
 import ru.alamics.sso.keycloak.facade.CachedUserPostFacade;
+import ru.alamics.sso.keycloak.facade.CustomerRequestService;
 import ru.alamics.sso.keycloak.facade.UserPostFacade;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.dto.ExternalSystemRoleRequest;
 import ru.alamics.sso.registration.dto.UserPostEditRequest;
 import ru.alamics.sso.registration.dto.UserPostRequest;
+import ru.alamics.sso.registration.dto.UserPostResponse;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.service.ValidateService;
 import ru.alamics.sso.util.Util;
@@ -31,6 +33,7 @@ public class UserPostResource {
     private final UserPostFacade userPostFacade;
     private final AdminPermissionEvaluator auth;
     private final ValidateService validateService;
+    private final CustomerRequestService customerRequestService;
 
     @Inject
     public UserPostResource(KeycloakSession session, AdminPermissionEvaluator auth) {
@@ -41,6 +44,7 @@ public class UserPostResource {
         this.cachedUserPostFacade = Lookup.lookup(CachedUserPostFacade.class, "CachedUserPostFacade");
         this.userPostFacade = Lookup.lookup(UserPostFacade.class, "UserPostFacade");
         this.validateService = Lookup.lookup(ValidateService.class);
+        this.customerRequestService = Lookup.lookup(CustomerRequestService.class);
     }
 
     @PUT
@@ -64,8 +68,10 @@ public class UserPostResource {
         auth.users().requireManage();
         validateService.validate(userPostRequest);
         try {
+            UserPostResponse response = cachedUserPostFacade.save(userPostRequest);
+            customerRequestService.getCustomerName(response.getTomsId());;
             return JsonResponse.success()
-                    .addResult("user_post", cachedUserPostFacade.save(userPostRequest))
+                    .addResult("user_post", response)
                     .build();
         } catch (Exception e) {
             return JsonResponse.fail()
@@ -82,8 +88,10 @@ public class UserPostResource {
         auth.users().requireManage();
         validateService.validate(userPostEditRequest);
         try {
+            UserPostResponse response = cachedUserPostFacade.edit(userPostEditRequest);
+            customerRequestService.getCustomerName(response.getTomsId());;
             return JsonResponse.success()
-                    .addResult("user_post", cachedUserPostFacade.edit(userPostEditRequest))
+                    .addResult("user_post", response)
                     .build();
         } catch (NotFoundException e) {
             return JsonResponse.fail()
@@ -203,8 +211,10 @@ public class UserPostResource {
         auth.users().requireManage();
         validateService.validate(externalSystemRoleRequest);
         try {
+            UserPostResponse response = cachedUserPostFacade.addSystemRole(externalSystemRoleRequest);
+            customerRequestService.getCustomerName(response.getTomsId());
             return JsonResponse.success()
-                    .addResult("user-post", cachedUserPostFacade.addSystemRole(externalSystemRoleRequest))
+                    .addResult("user-post", response)
                     .build();
         } catch (NotFoundException e) {
             return JsonResponse.fail()
