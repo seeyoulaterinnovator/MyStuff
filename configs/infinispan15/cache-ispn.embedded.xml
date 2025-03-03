@@ -72,14 +72,11 @@
     </cache-container>
     <cache-container name="custom_container">
         <jmx enabled="true" />
-        <transport lock-timeout="60000"/>
         <replicated-cache name="user_post_cache">
             <expiration max-idle="100000" lifespan="500000"/>
-            <state-transfer chunk-size="2048" timeout="120000"/>
         </replicated-cache>
         <replicated-cache name="customer_cache">
             <expiration max-idle="100000" lifespan="500000"/>
-            <state-transfer chunk-size="2048" timeout="120000"/>
         </replicated-cache>
     </cache-container>
 </infinispan>
