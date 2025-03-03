@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<infinispan xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:infinispan:config:15.0"
+            xsi:schemaLocation="urn:infinispan:config:15.0 https://www.infinispan.org/schemas/infinispan-config-15.0.xsd">
+    <!-- see quarkus/runtime/src/main/resources/cache-ispn.xml -->
+    <!-- see org.keycloak.connections.infinispan.DefaultInfinispanConnectionProviderFactory.initEmbedded -->
+    <!-- see org.keycloak.quarkus.runtime.storage.legacy.infinispan.CacheManagerFactory.startEmbeddedCacheManager -->
+    <cache-container name="keycloak" statistics="true">
+        <jmx enabled="true"/>
+        <local-cache-configuration name="default-local" simple-cache="true" statistics="true">
+            <encoding>
+                <key media-type="application/x-java-object"/>
+                <value media-type="application/x-java-object"/>
+            </encoding>
+            <memory max-count="10000"/>
+        </local-cache-configuration>
+        <local-cache name="realms" configuration="default-local"/>
+        <local-cache name="authorization" configuration="default-local"/>
+        <local-cache name="users" configuration="default-local"/>
+        <local-cache name="keys" configuration="default-local">
+            <memory max-count="1000" when-full="REMOVE"/>
+            <expiration max-idle="3600000"/>
+        </local-cache>
+        <distributed-cache-configuration name="default-distributed" owners="2" statistics="true">
+            <encoding>
+                <key media-type="application/x-java-object"/>
+                <value media-type="application/x-java-object"/>
+            </encoding>
+            <expiration lifespan="600000"/>
+        </distributed-cache-configuration>
+        <distributed-cache name="sessions" configuration="default-distributed">
+            <expiration lifespan="-1"/>
+            <memory max-count="10000"/>
+        </distributed-cache>
+        <distributed-cache name="offlineSessions" configuration="default-distributed">
+            <expiration lifespan="-1"/>
+            <memory max-count="10000"/>
+        </distributed-cache>
+        <distributed-cache name="clientSessions" configuration="default-distributed">
+            <expiration lifespan="-1"/>
+            <memory max-count="10000"/>
+        </distributed-cache>
+        <distributed-cache name="offlineClientSessions" configuration="default-distributed">
+            <expiration lifespan="-1"/>
+            <memory max-count="10000"/>
+        </distributed-cache>
+        <distributed-cache name="loginFailures" configuration="default-distributed">
+            <expiration lifespan="-1"/>
+        </distributed-cache>
+        <distributed-cache name="actionTokens" configuration="default-distributed">
+            <expiration max-idle="-1" lifespan="-1" interval="300000"/>
+            <memory max-count="-1"/>
+        </distributed-cache>
+        <distributed-cache name="authenticationSessions" configuration="default-distributed">
+            <expiration lifespan="-1"/>
+        </distributed-cache>
+        <replicated-cache name="work">
+            <expiration lifespan="-1"/>
+        </replicated-cache>
+    </cache-container>
+    <cache-container name="custom_container">
+        <jmx enabled="true" />
+        <replicated-cache name="user_post_cache">
+            <expiration max-idle="100000" lifespan="500000"/>
+        </replicated-cache>
+        <replicated-cache name="customer_cache">
+            <expiration max-idle="100000" lifespan="500000"/>
+        </replicated-cache>
+    </cache-container>
+</infinispan>
