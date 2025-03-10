@@ -16,5 +16,9 @@ spec:
       port: 7600
       targetPort: jgroups
       protocol: TCP
+    - name: http-management
+      port: 9000
+      targetPort: http-management
+      protocol: TCP
   selector:
     {{- include "sso.selectorLabels" . | nindent 4 }}
