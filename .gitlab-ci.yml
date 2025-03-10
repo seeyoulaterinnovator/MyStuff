@@ -231,6 +231,8 @@ domru:perm-k8s:
   environment:
     name: production-k8s-perm
     url: https://auth.dom.ru
+  variables:
+    DC_NAME: perm
 
 domru:voronezh-k8s:
   extends: .domru:prod:template
@@ -239,6 +241,8 @@ domru:voronezh-k8s:
   environment:
     name: production-k8s-voronezh
     url: https://auth.dom.ru
+  variables:
+    DC_NAME: voronezh
 
 infinispan:stage-k8s:
   extends: .infinispan:prod:template

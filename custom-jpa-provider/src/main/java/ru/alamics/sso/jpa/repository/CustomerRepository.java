@@ -6,8 +6,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import ru.alamics.sso.jpa.entity.Customer;
 
-import java.util.List;
-
 @ApplicationScoped
 public class CustomerRepository {
     @Inject
@@ -26,10 +24,6 @@ public class CustomerRepository {
         }
         em.flush();
         return customer;
-    }
-
-    public List<Customer> findAll() {
-        return em.createQuery("select c from Customer c ", Customer.class).getResultList();
     }
 
     public Customer findByTomsId(String tomsId) {

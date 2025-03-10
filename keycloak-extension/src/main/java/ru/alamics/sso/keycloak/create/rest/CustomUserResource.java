@@ -40,6 +40,7 @@ import org.keycloak.utils.ProfileHelper;
 import ru.alamics.sso.jpa.model.CustomUserAdapter;
 import ru.alamics.sso.keycloak.GeneralRealm;
 import ru.alamics.sso.keycloak.exception.UserNotFoundException;
+import ru.alamics.sso.keycloak.facade.CustomerRequestService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.keycloak.util.MiscUtil;
@@ -79,6 +80,7 @@ public class CustomUserResource {
     private final ValidateService validateService;
     private final RealmModel realm;
     protected KeycloakSession session;
+    private CustomerRequestService customerRequestService;
 
     public CustomUserResource(KeycloakSession session, AdminPermissionEvaluator auth) {
         this.session = session;
@@ -87,6 +89,7 @@ public class CustomUserResource {
         this.userService = new UserServiceImpl(session, auth.adminAuth());
         this.importReportService = Lookup.lookup(ImportReportService.class);
         this.validateService = Lookup.lookup(ValidateService.class);
+        this.customerRequestService = Lookup.lookup(CustomerRequestService.class);
         this.realm = session.getContext().getRealm();
     }
 
@@ -148,12 +151,14 @@ public class CustomUserResource {
     private Response getUserResponse(UserRequest request, boolean bss) {
         try {
             UserModel user = userService.createUser(request, bss);
+            customerRequestService.getCustomerName(request.getTomsId());
             return JsonResponse.success()
                     .httpStatus(Response.Status.CREATED)
                     .addResult("user_id", user.getId())
                     .build();
         } catch (ModelDuplicateException e) {
             log.error("Could not create user", e);
+            customerRequestService.getCustomerName(request.getTomsId());
             return JsonResponse.error(Response.Status.BAD_REQUEST)
                     .message("Уже существует УЗ с таким username или email или phone")
                     .build();
@@ -164,6 +169,7 @@ public class CustomUserResource {
                     .build();
         } catch (NotFoundException | FoundUserPostException e) {
             log.error("Could not create user", e);
+            customerRequestService.getCustomerName(request.getTomsId());
             return JsonResponse.error(Response.Status.BAD_REQUEST)
                     .message(e.getMessage())
                     .build();

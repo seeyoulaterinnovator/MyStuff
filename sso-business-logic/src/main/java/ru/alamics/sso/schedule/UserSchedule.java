@@ -31,6 +31,7 @@ import ru.alamics.sso.jpa.entity.AutoLockNotification;
 import ru.alamics.sso.jpa.entity.common.BlockType;
 import ru.alamics.sso.jpa.entity.common.NotificationType;
 import ru.alamics.sso.jpa.repository.*;
+import ru.alamics.sso.lock.LockService;
 import ru.alamics.sso.property.ApplicationProperties;
 import ru.alamics.sso.registration.mapper.DataMapper;
 import ru.alamics.sso.settings.SettingConstants;
@@ -40,6 +41,7 @@ import ru.alamics.sso.util.E2EUtil;
 import ru.alamics.sso.util.Util;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -71,6 +73,8 @@ public class UserSchedule implements ScheduledTask {
     SettingsService settingsService;
     @Inject
     ClientService clientService;
+    @Inject
+    LockService lockService;
     @Inject
     UserRepository userRepository;
 
@@ -131,20 +135,31 @@ public class UserSchedule implements ScheduledTask {
     @Override
     @ActivateRequestContext
     public void run(KeycloakSession session) {
-        if(properties.isClusterTaskDisabled()) {
-            log.debug("Run skipped");
+        if (properties.isClusterTaskDisabled()) {
+            log.debug("Run skipped as cluster task is disabled");
             return;
         }
-
-        findExpiredPassword();
-
-        for (RealmModel model : realmRepository.getAllRealms()) {
-            if (model.getAttribute("realmInSchedule", false)) {
-                block(model.getId());
-                notificationInactiveUsers(model.getId());
-            }
+        if (!lockService.tryLock(TIMER_NAME, Duration.ofMinutes(30))) {
+            log.debug("Run skipped as job is locked");
+            return;
         }
-        sendEmails();
+        try {
+            log.debug("User task started");
+
+            findExpiredPassword();
+
+            for (RealmModel model : realmRepository.getAllRealms()) {
+                if (model.getAttribute("realmInSchedule", false)) {
+                    block(model.getId());
+                    notificationInactiveUsers(model.getId());
+                }
+            }
+            sendEmails();
+
+            log.debug("User task completed");
+        } finally {
+            lockService.unlock(TIMER_NAME);
+        }
     }
 
     private void notificationInactiveUsers(String realm) {

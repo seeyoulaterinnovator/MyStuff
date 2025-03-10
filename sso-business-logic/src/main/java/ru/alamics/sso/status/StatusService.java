@@ -24,23 +24,19 @@ public class StatusService {
         return statusRepository.checkStatusDb(getNodeName());
     }
 
-    // TODO k8s
     public String getNodeName() {
-        String name = System.getProperty("jboss.node.name");
-        if(name == null) {
-            // i.e. k8s metadata.name
-            name = System.getenv("POD_NAME");
-        }
-        if(name == null) {
+        String dc = System.getenv("DC_NAME");
+        if (dc == null) dc = "";
+        String pod = System.getenv("POD_NAME"); // i.e. k8s metadata.name
+        if (pod == null) pod = System.getenv("HOSTNAME");
+        if(pod == null) {
             try {
-                name = InetAddress.getLocalHost().getHostName();
+                pod = InetAddress.getLocalHost().getHostName();
             } catch (UnknownHostException e) {
                 log.warn(e.getMessage(), e);
             }
         }
-        if(name == null) {
-            name = "";
-        }
-        return name;
+        if(pod == null) pod = "";
+        return dc + pod;
     }
 }
