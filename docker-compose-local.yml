@@ -13,6 +13,8 @@ services:
       TZ: Asia/Yekaterinburg
     healthcheck:
       test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
+      interval: 5s
+      retries: 36
     volumes:
       - ./volumes/mariadb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/:ro
 
