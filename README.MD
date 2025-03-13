@@ -104,13 +104,15 @@ export JAVA_OPTS="" && /opt/keycloak/bin/kc.sh export --file /tmp/realm-export.j
 Для отладки теста можно запускать его поверх контейнеров запущенных через *docker-compose-full-e2e* 
 (отключен кэш настроек) для этого можно временно убрать аннотацию *@TestsEnabled* и запустить тест индивидуально.
 
-## Заливка на стенд
+## Заливка стенда
 
 ```text
 TODO
 ```
 
-## Заливка на прод
+## Обновление продуктива
+
+> Есть замещение провайдера Liquibase для ProxySQL [./UpdatedMariaDBDatabase.java](./keycloak-extension/src/main/java/org/keycloak/connections/jpa/updater/liquibase/UpdatedMariaDBDatabase.java)
 
 ```text
 TODO
