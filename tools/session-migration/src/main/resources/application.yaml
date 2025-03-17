@@ -5,9 +5,3 @@ quarkus:
     username: ${KC_DB_USERNAME:sso}
     password: ${KC_DB_PASSWORD:sso}
     db-kind: mariadb
-  infinispan-client:
-    hosts: ${KC_CACHE_REMOTE_HOST:localhost}:${KC_CACHE_REMOTE_PORT:11222}
-    username: ${KC_CACHE_REMOTE_USERNAME:keycloak}
-    password: ${KC_CACHE_REMOTE_PASSWORD:keycloak}
-  devservices:
-    enabled: false
