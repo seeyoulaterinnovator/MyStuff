@@ -50,6 +50,7 @@ services:
       - "8787:8787"
     entrypoint: /bin/sh -c "/opt/keycloak/bin/kc-custom.sh"
     environment:
+      KC_FEATURES: persistent-user-sessions
       KC_DB: mariadb
       KC_DB_URL_HOST: mariadb
       KC_DB_URL_PORT: 3306
@@ -72,7 +73,8 @@ services:
       KEYCLOAK_STATISTICS: true
       KC_HOSTNAME_DEBUG: true
       KC_CACHE: ispn
-      KC_CACHE_CONFIG_FILE: cache-ispn.embedded.xml
+      KC_CACHE_STACK: tcp
+      KC_CACHE_CONFIG_FILE: cache-ispn.persistent.xml
       KC_ADMIN_VITE_ENABLED: ${KC_ADMIN_VITE_ENABLED}
       KC_SPI_USER_PROVIDER: customjpa
       KC_SPI_AUTHENTICATION_SESSIONS_PROVIDER: custom-embedded
@@ -92,7 +94,7 @@ services:
       ERTH_SSO_E2E_ENABLED: ${ERTH_SSO_E2E_ENABLED}
     volumes:
       - ./volumes/keycloak/opt/keycloak/bin/kc-custom.sh:/opt/keycloak/bin/kc-custom.sh:ro
-      - ./configs/infinispan15/cache-ispn.embedded.xml:/opt/keycloak/conf/cache-ispn.embedded.xml:ro
+      - ./configs/infinispan15/cache-ispn.persistent.xml:/opt/keycloak/conf/cache-ispn.persistent.xml:ro
       - ./build/keycloak-extension/libs/keycloak-extension-1.0.1-all.jar:/opt/keycloak/providers/keycloak-extension.jar:ro
       - ./keycloak-extension/src/main/resources/themes/keycloak.v2/admin:/opt/keycloak/themes-custom/keycloak.v2/admin:ro
       - ./keycloak-extension/src/main/resources/themes/domru/login:/opt/keycloak/themes-custom/domru/login:ro

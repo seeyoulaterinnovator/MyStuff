@@ -19,6 +19,7 @@ monitoring:
  authMetrics: true
 
 extraEnvs:
+  KC_FEATURES: "{{ envOrDefault  "KC_FEATURES" "" }}"
   KC_CACHE: "{{ envOrDefault  "KC_CACHE" "ispn" }}"
   KC_CACHE_CONFIG_FILE: "{{ envOrDefault  "KC_CACHE_CONFIG_FILE" "cache-ispn.embedded.xml" }}"
   KC_CACHE_STACK: "{{ envOrDefault "KC_CACHE_STACK" "tcp" }}"
