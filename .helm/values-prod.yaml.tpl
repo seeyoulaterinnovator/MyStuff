@@ -21,12 +21,16 @@ monitoring:
 extraEnvs:
   KC_FEATURES: "{{ envOrDefault  "KC_FEATURES" "" }}"
   KC_CACHE: "ispn"
-  KC_CACHE_CONFIG_FILE: "cache-ispn.remote.xml"
-  KC_CACHE_STACK: "tcp"
+  KC_CACHE_CONFIG_FILE: "{{ envOrDefault  "KC_CACHE_CONFIG_FILE" "cache-ispn.remote.xml" }}"
+  KC_CACHE_STACK: "{{ envOrDefault "KC_CACHE_STACK" "tcp" }}"
+  {{- if eq (env "KC_CACHE_STACK") "kubernetes" }}
+  JAVA_OPTS_APPEND: "-Djgroups.dns.query={{ env "CI_ENVIRONMENT_SLUG" }}-sso-headless"
+  {{- else }}
   KC_CACHE_REMOTE_HOST: "{{ env "INFINISPAN_HOST" }}"
   KC_CACHE_REMOTE_PORT: "{{ envOrDefault  "INFINISPAN_PORT" "11222" }}"
   KC_CACHE_REMOTE_TLS_ENABLED: "false"
   KC_SPI_AUTHENTICATION_SESSIONS_PROVIDER: "custom-remote"
+  {{- end }}
   KC_DB: "mariadb"
   KC_DB_URL_HOST: "{{ env "DB_HOST" }}"
   KC_DB_URL_PORT: "{{ env "DB_PORT" }}"
