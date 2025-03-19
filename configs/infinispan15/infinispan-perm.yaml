@@ -6,7 +6,7 @@ metadata:
   annotations:
     infinispan.org/monitoring: 'true' 
 spec:
-  replicas: 5
+  replicas: 0
   version: 15.0.10
   container:
     cpu: "2000m:500m"

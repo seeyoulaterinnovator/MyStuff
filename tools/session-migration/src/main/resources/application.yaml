@@ -1,0 +1,7 @@
+quarkus:
+  datasource:
+    jdbc:
+      url: jdbc:mariadb://${KC_DB_URL_HOST:localhost}:${KC_DB_URL_PORT:3306}/${KC_DB_URL_DATABASE:sso}
+    username: ${KC_DB_USERNAME:sso}
+    password: ${KC_DB_PASSWORD:sso}
+    db-kind: mariadb
