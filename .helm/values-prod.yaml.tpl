@@ -62,6 +62,7 @@ extraEnvs:
   # fix "java.io.EOFException: unexpected end of stream, read 0 bytes from 4 (socket was closed by server)"
   KC_DB_URL_PROPERTIES: "?usePipeLineAuth=false&disablePipeLine=true&useBatchMultiSend=false"
   DC_NAME: "{{ envOrDefault "DC_NAME" "voronezh" }}"
+  PROXY_ADDRESS_FORWARDING: "true"
 
 extraSensitiveEnvs:
   DB_USER: "{{ env "DB_USER" }}"
@@ -78,10 +79,6 @@ service:
   # The http Service port
   httpPort: 80
   extraPorts: []
-
-externalInfinispan:
-  server: "{{ env "INFINISPAN_HOST" }}"
-  port: "{{ env "INFINISPAN_PORT" }}"
 
 resources:
   limits:

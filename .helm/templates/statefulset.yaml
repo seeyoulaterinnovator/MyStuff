@@ -48,11 +48,6 @@ spec:
             - start
             - --proxy=edge
             - --verbose
-            # {{- if and .Values.externalInfinispan.server .Values.externalInfinispan.port }}
-            # - -kc=standalone-ha-infspn-ext.xml
-            # {{- else }}
-            # - -kc=standalone-ha-infspn-int.xml
-            # {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -60,21 +55,6 @@ spec:
           workingDir: {{ .Values.workingDir }}
           {{- end }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
-            - name: PROXY_ADDRESS_FORWARDING
-              value: "true"
-            - name: JGROUPS_DISCOVERY_PROTOCOL
-              value: "dns.DNS_PING"
-            - name: JGROUPS_DISCOVERY_PROPERTIES
-              value: "dns_query={{ include "sso.fullname" . }}-headless"
-            - name: JGROUPS_DISCOVERY_QUERY
-              value: "{{ include "sso.fullname" . }}-headless"
-            {{- if and .Values.externalInfinispan.server .Values.externalInfinispan.port }}
-            - name: INFINISPAN_HOST
-              value: "{{ .Values.externalInfinispan.server }}"
-            - name: INFINISPAN_PORT
-              value: "{{ .Values.externalInfinispan.port }}"
-            {{- end }}
           {{- if or .Values.extraEnvs .Values.extraSensitiveEnvs }}
           envFrom:
           {{- if .Values.extraEnvs }}
