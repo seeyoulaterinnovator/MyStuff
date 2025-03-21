@@ -9,11 +9,6 @@ stages:
   - docker
   - deploy
 
-.init_vars: &init-variables
-  before_script:
-  - cp ${ERTK_PEM} configs/ertk.pem
-  - envsubst < configs/sso.tmpl > configs/sso
-
 .domru:stage:template:
   stage: deploy
   image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
@@ -129,7 +124,6 @@ back:build:
 
 container-image:
   stage: docker
-  <<: *init-variables
   when: manual
   script:
     - docker build -t harbor.ertelecom.ru/sso-protected/sso:$CI_PIPELINE_ID .
