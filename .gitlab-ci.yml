@@ -1,6 +1,5 @@
 variables:
   GIT_STRATEGY: fetch
-  BASE_DIR: /opt/gitlab-ci
 
 stages:
   - compile
@@ -43,16 +42,6 @@ stages:
     NAMESPACE: 'sso'
     NODE_PORT: '30080'
     REPLICA_COUNT: '5'
-
-.infinispan:prod:template:
-  stage: deploy
-  image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
-  when: manual
-  script:
-    # Apply Infinispan installation manifest
-    - kubectl apply -f ./configs/infinispan15/infinispan-${DC}.yaml
-    # Apply Infinispan caches manifest
-    - kubectl apply -f ./configs/infinispan15/caches-${DC}.yaml
 
 .frontend:theme:build:
   stage: build
@@ -209,25 +198,6 @@ domru:stage5:
   only:
     - itres # т.к. пока еше не обновлен
 
-infinispan:stage5:
-  stage: deploy
-  image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
-  when: manual
-  variables:
-    NAMESPACE: 'sso'
-    INFINISPAN_REPLICA_COUNT: '3'
-  script:
-    - export DTD=$(date | sha256sum)
-    - consul-template -once -template "./configs/infinispan/.helm/values-dev.yaml.tpl:values.yaml"
-    - ln -s ${INFINISPAN_MGMT_USERS} ./configs/infinispan/.helm/configs/mgmt-users.properties
-    - ln -s ${INFINISPAN_MGMT_GROUPS} ./configs/infinispan/.helm/configs/mgmt-groups.properties
-    - helm upgrade -i infinispan --values values.yaml ./configs/infinispan/.helm -n ${NAMESPACE} --atomic --timeout 15m
-    - helm history -n ${NAMESPACE} infinispan --max 5
-  tags:
-    - sso-build-k8s
-  only:
-    - itres # т.к. пока еше не обновлен
-
 domru:perm-k8s:
   extends: .domru:prod:template
   tags:
@@ -253,30 +223,3 @@ domru:voronezh-k8s:
     KC_CACHE_STACK: 'kubernetes'
     KC_FEATURES: 'persistent-user-sessions'
     DC_NAME: voronezh
-
-infinispan:stage-k8s:
-  extends: .infinispan:prod:template
-  variables:
-    DC: "stage"
-  except:
-    - tags
-  tags:
-    - sso-build-k8s
-
-infinispan:perm-k8s:
-  extends: .infinispan:prod:template
-  variables:
-    DC: "perm"
-  only:
-    - tags
-  tags:
-    - sso-k8s-perm
-
-infinispan:voronezh-k8s:
-  extends: .infinispan:prod:template
-  variables:
-    DC: "voronezh"
-  only:
-    - tags
-  tags:
-    - sso-k8s-voronezh
