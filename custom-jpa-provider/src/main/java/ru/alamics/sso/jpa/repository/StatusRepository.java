@@ -6,7 +6,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.OptimisticLockException;
 import jakarta.transaction.Transactional;
-import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import ru.alamics.sso.jpa.entity.status.CheckTableEntity;
@@ -45,7 +44,6 @@ public class StatusRepository {
     }
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
-    @Synchronized
     public boolean checkStatusDb(String nodeName) {
         try {
             CheckTableEntity ent = em.find(CheckTableEntity.class, nodeName);
