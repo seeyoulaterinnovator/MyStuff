@@ -121,5 +121,5 @@
       <#assign usernameIdentityProviderContext = identityProviderContext.username!""/>
   </#if> 
 
-  ${kcSanitize(getParametrizedMsg(message))?no_esc}
+  ${kcSanitize(getParametrizedMsg(message!""))?no_esc}
 </#macro>
