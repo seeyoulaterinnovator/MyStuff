@@ -13,6 +13,9 @@ spec:
       port: http-management
       scheme: http
       scrapeTimeout: 10s
+      relabelings:
+        - action: labelmap
+          regex: __meta_kubernetes_pod_label_(.+)
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace }}
