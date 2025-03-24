@@ -59,6 +59,7 @@ extraEnvs:
   QUARKUS_HTTP_ACCESS_LOG_PATTERN: "long"
   DEV_HTTP_LOG_ALLOWED: "true"
   QUARKUS_LOG_CATEGORY__ORG_APACHE_HTTP__LEVEL: "DEBUG"
+  PROXY_ADDRESS_FORWARDING: "true"
 
 extraSensitiveEnvs:
   DB_USER: "{{ env "DB_USER" }}"
@@ -75,10 +76,6 @@ service:
   # The http Service port
   httpPort: 80
   extraPorts: []
-
-externalInfinispan:
-  server: "{{ env "INFINISPAN_HOST" }}"
-  port: "{{ env "INFINISPAN_PORT" }}"
 
 resources:
   limits:
