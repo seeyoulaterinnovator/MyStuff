@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="session-migration" type="JarApplication">
+    <option name="JAR_PATH" value="$PROJECT_DIR$/tools/session-migration/target/quarkus-app/quarkus-run.jar" />
+    <option name="ALTERNATIVE_JRE_PATH" />
+    <envs>
+      <env name="KC_CACHE_REMOTE_HOST" value="localhost" />
+      <env name="KC_CACHE_REMOTE_PORT" value="11222" />
+      <env name="KC_CACHE_REMOTE_USERNAME" value="keycloak" />
+      <env name="KC_CACHE_REMOTE_PASSWORD" value="keycloak" />
+    </envs>
+    <method v="2">
+      <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/tools/session-migration/pom.xml" goal="package" />
+    </method>
+  </configuration>
+</component>

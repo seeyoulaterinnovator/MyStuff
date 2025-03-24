@@ -15,6 +15,9 @@ preStopDelay:
   enabled: true
   delaySeconds: 15
 
+monitoring:
+ authMetrics: true
+
 extraEnvs:
   KC_FEATURES: "{{ envOrDefault  "KC_FEATURES" "" }}"
   KC_CACHE: "{{ envOrDefault  "KC_CACHE" "ispn" }}"

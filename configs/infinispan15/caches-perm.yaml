@@ -7,6 +7,8 @@ metadata:
 spec:
   clusterName: infinispan
   name: customer_cache
+  updates:
+    strategy: recreate
   #language=yaml
   template: |-
     replicatedCache: 
@@ -25,7 +27,7 @@ spec:
         maxIdle: "100000"
       stateTransfer: 
         timeout: "120000"
-        chunkSize: "2048"
+        chunkSize: "16"
 #      backups:
 #        voronezh:
 #          backup:
@@ -33,7 +35,7 @@ spec:
 #            timeout: "60500"
 #            failurePolicy: "FAIL"
 #            stateTransfer:
-#              chunkSize: "2048"
+#              chunkSize: "16"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -43,6 +45,8 @@ metadata:
 spec:
   clusterName: infinispan
   name: user_post_cache
+  updates:
+    strategy: recreate
   #language=yaml
   template: |-
     replicatedCache: 
@@ -61,7 +65,7 @@ spec:
         maxIdle: "100000"
       stateTransfer: 
         timeout: "120000"
-        chunkSize: "2048"
+        chunkSize: "16"
 #      backups:
 #        voronezh:
 #          backup:
@@ -69,7 +73,7 @@ spec:
 #            timeout: "60500"
 #            failurePolicy: "FAIL"
 #            stateTransfer:
-#              chunkSize: "2048"
+#              chunkSize: "16"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -79,6 +83,8 @@ metadata:
 spec:
   clusterName: infinispan
   name: work
+  updates:
+    strategy: recreate
   #language=yaml
   template: |-
     replicatedCache: 
@@ -94,7 +100,7 @@ spec:
         locking: "PESSIMISTIC"
       stateTransfer: 
         timeout: "120000"
-        chunkSize: "2048"
+        chunkSize: "16"
 #      backups:
 #        voronezh:
 #          backup:
@@ -102,7 +108,7 @@ spec:
 #            timeout: "60500"
 #            failurePolicy: "FAIL"
 #            stateTransfer:
-#              chunkSize: "2048"
+#              chunkSize: "16"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -112,6 +118,8 @@ metadata:
 spec:
   clusterName: infinispan
   name: authenticationSessions
+  updates:
+    strategy: recreate
   #language=yaml
   template: |-
     distributedCache:
@@ -128,7 +136,7 @@ spec:
         locking: "PESSIMISTIC" 
       stateTransfer:
         timeout: "120000"
-        chunkSize: "2048"
+        chunkSize: "16"
 #      backups:
 #        voronezh:
 #          backup:
@@ -136,7 +144,7 @@ spec:
 #            timeout: "60500"
 #            failurePolicy: "FAIL"
 #            stateTransfer:
-#              chunkSize: "2048"
+#              chunkSize: "16"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -146,6 +154,8 @@ metadata:
 spec:
   clusterName: infinispan
   name: sessions
+  updates:
+    strategy: recreate
   #language=yaml
   template: |-
     distributedCache:
@@ -164,7 +174,7 @@ spec:
         locking: "PESSIMISTIC" 
       stateTransfer:
         timeout: "120000"
-        chunkSize: "2048"
+        chunkSize: "16"
 #      backups:
 #        voronezh:
 #          backup:
@@ -172,7 +182,7 @@ spec:
 #            timeout: "60500"
 #            failurePolicy: "FAIL"
 #            stateTransfer:
-#              chunkSize: "2048"
+#              chunkSize: "16"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -182,6 +192,8 @@ metadata:
 spec:
   clusterName: infinispan
   name: clientSessions
+  updates:
+    strategy: recreate
   #language=yaml
   template: |-
     distributedCache:
@@ -198,7 +210,7 @@ spec:
         locking: "PESSIMISTIC" 
       stateTransfer:
         timeout: "120000"
-        chunkSize: "2048"
+        chunkSize: "16"
 #      backups:
 #        voronezh:
 #          backup:
@@ -206,7 +218,7 @@ spec:
 #            timeout: "60500"
 #            failurePolicy: "FAIL"
 #            stateTransfer:
-#              chunkSize: "2048"
+#              chunkSize: "16"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -216,6 +228,8 @@ metadata:
 spec:
   clusterName: infinispan
   name: offlineSessions
+  updates:
+    strategy: recreate
   #language=yaml
   template: |-
     distributedCache:
@@ -232,7 +246,7 @@ spec:
         locking: "PESSIMISTIC" 
       stateTransfer:
         timeout: "120000"
-        chunkSize: "2048"
+        chunkSize: "16"
 #      backups:
 #        voronezh:
 #          backup:
@@ -240,7 +254,7 @@ spec:
 #            timeout: "60500"
 #            failurePolicy: "FAIL"
 #            stateTransfer:
-#              chunkSize: "2048"
+#              chunkSize: "16"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -250,6 +264,8 @@ metadata:
 spec:
   clusterName: infinispan
   name: offlineClientSessions
+  updates:
+    strategy: recreate
   #language=yaml
   template: |-
     distributedCache:
@@ -266,7 +282,7 @@ spec:
         locking: "PESSIMISTIC" 
       stateTransfer:
         timeout: "120000"
-        chunkSize: "2048"
+        chunkSize: "16"
 #      backups:
 #        voronezh:
 #          backup:
@@ -274,7 +290,7 @@ spec:
 #            timeout: "60500"
 #            failurePolicy: "FAIL"
 #            stateTransfer:
-#              chunkSize: "2048"
+#              chunkSize: "16"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -284,6 +300,8 @@ metadata:
 spec:
   clusterName: infinispan
   name: loginFailures
+  updates:
+    strategy: recreate
   #language=yaml
   template: |-
     distributedCache:
@@ -300,7 +318,7 @@ spec:
         locking: "PESSIMISTIC" 
       stateTransfer:
         timeout: "120000"
-        chunkSize: "2048"
+        chunkSize: "16"
 #      backups:
 #        voronezh:
 #          backup:
@@ -308,7 +326,7 @@ spec:
 #            timeout: "60500"
 #            failurePolicy: "FAIL"
 #            stateTransfer:
-#              chunkSize: "2048"
+#              chunkSize: "16"
 ---
 apiVersion: infinispan.org/v2alpha1
 kind: Cache
@@ -318,6 +336,8 @@ metadata:
 spec:
   clusterName: infinispan
   name: actionTokens
+  updates:
+    strategy: recreate
   #language=yaml
   template: |-
     distributedCache:
@@ -334,7 +354,7 @@ spec:
         locking: "PESSIMISTIC" 
       stateTransfer:
         timeout: "120000"
-        chunkSize: "2048"
+        chunkSize: "16"
 #      backups:
 #        voronezh:
 #          backup:
@@ -342,4 +362,4 @@ spec:
 #            timeout: "60500"
 #            failurePolicy: "FAIL"
 #            stateTransfer:
-#              chunkSize: "2048"
+#              chunkSize: "16"

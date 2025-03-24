@@ -91,7 +91,7 @@ spec:
               containerPort: 8080
               protocol: TCP
             - name: http-management
-              containerPort: 9990
+              containerPort: 9000
               protocol: TCP
             - name: jgroups
               containerPort: 7600

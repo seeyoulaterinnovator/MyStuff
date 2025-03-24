@@ -1,0 +1,199 @@
+name: "sso-new-galera"
+
+configs:
+  mariadb_entrypoint_sh:
+    # language=bash
+    content: |
+      #!/usr/bin/env bash
+      /usr/local/bin/docker-entrypoint.sh \
+        --binlog_format=row \
+        --bind-address=0.0.0.0 \
+        --default_storage_engine=InnoDB \
+        --innodb_autoinc_lock_mode=2 \
+        --default-authentication-plugin=mysql_native_password \
+        --wsrep_on=on \
+        --wsrep_cluster_name=test \
+        --wsrep_provider=/usr/lib/galera/libgalera_smm.so \
+        --wsrep-new-cluster=$${WSREP_NEW_CLUSTER} \
+        --wsrep_cluster_address=$${WSREP_CLUSTER_ADDRESS} \
+        --wsrep_node_name=$${WSREP_NODE_NAME}
+  mariadb_healthcheck_sh:
+    # language=bash
+    content: |
+      #!/usr/bin/env bash
+      set -euxo pipefail
+      mysqladmin -u$${MARIADB_ROOT_USER} -p$${MARIADB_ROOT_PASSWORD} status && \
+      mysqladmin -u$${MARIADB_ROOT_USER} -p$${MARIADB_ROOT_PASSWORD} status
+  proxysql_cnf:
+    content: |
+      admin_variables = {
+        admin_credentials = "admin:admin"
+        mysql_ifaces = "0.0.0.0:6032"
+      }
+      mysql_variables = {
+        monitor_username = "root"
+        monitor_password = "root"
+        interfaces="0.0.0.0:6033"
+      }
+      mysql_servers = (
+        { address = "mariadb1.local" , port=3306, hostgroup_id = 1, max_connections=100 },
+        { address = "mariadb2.local" , port=3306, hostgroup_id = 1, max_connections=100 },
+        { address = "mariadb3.local" , port=3306, hostgroup_id = 1, max_connections=100 }
+      )
+      mysql_users = (
+         { username = "sso", password = "sso", default_hostgroup = 1, active = 1 }
+      )
+
+services:
+  mariadb1: &mariadb1
+    hostname: mariadb1.local
+    image: mariadb:10.11
+    environment: &mariadb1-env
+      MARIADB_ROOT_USER: root
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: sso
+      MARIADB_USER: sso
+      MARIADB_PASSWORD: sso
+      WSREP_NEW_CLUSTER: 1
+      WSREP_CLUSTER_ADDRESS: gcomm://
+      WSREP_NODE_NAME: node1
+    entrypoint: /entrypoint.sh
+    privileged: true
+    configs:
+      - source: mariadb_entrypoint_sh
+        target: /entrypoint.sh
+        mode: 777
+      - source: mariadb_healthcheck_sh
+        target: /healthcheck.sh
+        mode: 777
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./volumes/mariadb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/:ro
+    healthcheck:
+      test: [ "CMD", "/healthcheck.sh" ]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+    deploy:
+      resources:
+        limits:
+          cpus: 0.5
+          memory: 384m
+  mariadb2:
+    depends_on:
+      mariadb1:
+        condition: service_healthy
+    <<: *mariadb1
+    hostname: mariadb2.local
+    environment:
+      <<: *mariadb1-env
+      WSREP_NEW_CLUSTER: 0
+      WSREP_CLUSTER_ADDRESS: gcomm://mariadb1.local,mariadb2.local,mariadb3.local
+      WSREP_NODE_NAME: node2
+    ports:
+      - "3308:3306"
+    volumes: []
+  mariadb3:
+    depends_on:
+      mariadb1:
+        condition: service_healthy
+    <<: *mariadb1
+    hostname: mariadb3.local
+    environment:
+      <<: *mariadb1-env
+      WSREP_NEW_CLUSTER: 0
+      WSREP_CLUSTER_ADDRESS: gcomm://mariadb1.local,mariadb2.local,mariadb3.local
+      WSREP_NODE_NAME: node3
+    ports:
+      - "3309:3306"
+    volumes: [ ]
+  proxysql:
+    depends_on:
+      mariadb1:
+        condition: service_healthy
+      mariadb2:
+        condition: service_healthy
+      mariadb3:
+        condition: service_healthy
+    image: proxysql/proxysql:2.1.0
+    configs:
+      - source: proxysql_cnf
+        target: /etc/proxysql.cnf
+    ports:
+      - "6032:6032"
+      - "6033:6033"
+  mockserver:
+    image: mockserver/mockserver:5.15.0
+    ports:
+      - "1080:1080"
+    environment:
+      MOCKSERVER_INITIALIZATION_JSON_PATH: /initialization.json
+      MOCKSERVER_WATCH_INITIALIZATION_JSON: true
+    volumes:
+      - ./volumes/mockserver/initialization.json:/initialization.json:ro
+  smtp4dev:
+    image: rnwood/smtp4dev:v3
+    ports:
+      - "25:25"
+      - "8025:80"
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+  keycloak:
+    depends_on:
+      proxysql:
+        condition: service_started
+    image: quay.io/keycloak/keycloak:25.0.2
+    hostname: keycloak
+    ports:
+      - "8080:8080"
+      - "9990:9990"
+      - "8787:8787"
+    entrypoint: /bin/sh -c "/opt/keycloak/bin/kc-custom.sh"
+    environment:
+      KC_FEATURES: persistent-user-sessions
+      KC_DB: mariadb
+      KC_DB_URL_HOST: proxysql
+      KC_DB_URL_PORT: 6033
+      KC_DB_URL_DATABASE: sso
+      KC_DB_USERNAME: sso
+      KC_DB_PASSWORD: sso
+      KC_DB_URL_PROPERTIES: "?usePipeLineAuth=false&disablePipeLine=true&useBatchMultiSend=false"
+      KC_LOG_CONSOLE_COLOR: true
+      KC_HTTP_ENABLED: true
+      KC_HTTP_RELATIVE_PATH: /auth
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KEYCLOAK_HOSTNAME: "localhost"
+      KC_HOSTNAME: "localhost"
+      KC_CACHE: ispn
+      KC_CACHE_STACK: tcp
+      KC_CACHE_CONFIG_FILE: cache-ispn.persistent.xml
+      KC_SPI_USER_PROVIDER: customjpa
+      KC_SPI_AUTHENTICATION_SESSIONS_PROVIDER: custom-embedded
+      KC_SPI_PASSWORD_POLICY_BLACKLIST_PROVIDER: ssoPasswordBlacklist
+      KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_LEGACY_LOGOUT_REDIRECT_URI: true
+      KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_SUPPRESS_LOGOUT_CONFIRMATION_SCREEN: true
+      KC_SPI_HOSTNAME_PROVIDER: custom
+      KC_SPI_COOKIE_PROVIDER: custom
+      LIQUIBASE_COMMAND_CHANGE_EXEC_LISTENER_CLASS: ru.alamics.sso.keycloak.migration.CustomChangeExecListener
+      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:8787,server=y,suspend=n"
+      SITE: STAGE5
+    volumes:
+      - ./volumes/keycloak/opt/keycloak/bin/kc-custom.sh:/opt/keycloak/bin/kc-custom.sh:ro
+      - ./configs/infinispan15/cache-ispn.persistent.xml:/opt/keycloak/conf/cache-ispn.persistent.xml:ro
+      - ./build/keycloak-extension/libs/keycloak-extension-1.0.1-all.jar:/opt/keycloak/providers/keycloak-extension.jar:ro
+      - ./keycloak-extension/src/main/resources/themes/keycloak.v2/admin:/opt/keycloak/themes-custom/keycloak.v2/admin:ro
+      - ./keycloak-extension/src/main/resources/themes/domru/login:/opt/keycloak/themes-custom/domru/login:ro
+    healthcheck:
+      test: [
+        "CMD-SHELL",
+        'exec 3<>/dev/tcp/localhost/9000;
+         echo -e "GET /health/ready HTTP/1.1\nhost: localhost:9000\n" >&3;
+         timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP;
+         ERROR=$?; exec 3<&-; exec 3>&-; exit $ERROR'
+      ]
+      interval: 5s
+      retries: 36
