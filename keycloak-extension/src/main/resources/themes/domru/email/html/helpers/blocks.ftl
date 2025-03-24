@@ -4,8 +4,8 @@
 все параметры передаются с целью унификации 
 в теле каждого письма параметры будут доступны по соответствующему индексу  -->
 <#function getParametrizedMsg message="">
-    <#return msg(message,
-        homePageSystemLinkInMessage,
+    <#return msg(message!"",
+        homePageSystemLinkInMessage!"",
         login!"",
         phone!"",
         email!"",
@@ -121,5 +121,5 @@
       <#assign usernameIdentityProviderContext = identityProviderContext.username!""/>
   </#if> 
 
-  ${kcSanitize(getParametrizedMsg(message))?no_esc}
+  ${kcSanitize(getParametrizedMsg(message!""))?no_esc}
 </#macro>

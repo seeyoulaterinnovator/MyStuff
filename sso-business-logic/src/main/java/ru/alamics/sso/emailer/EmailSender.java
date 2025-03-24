@@ -118,14 +118,17 @@ public class EmailSender {
         try {
             String textBody;
             String subject = subjectKey;
-            if (locale != null) {
+            if(locale == null) {
+                locale = Locale.forLanguageTag("ru");
+            }
+            if (theme != null) {
                 attributes.put("locale", locale);
                 Properties rb = theme.getMessages(locale);
                 attributes.put("msg", new MessageFormatterMethod(locale, rb));
                 subject = new MessageFormat(rb.getProperty(subjectKey, subjectKey), locale).format(subjectAttributes.toArray());
-            }
-            if (theme != null) {
                 attributes.put("properties", theme.getProperties());
+            } else {
+                attributes.put("msg", new MessageFormatterMethod(locale, new Properties()));
             }
             attributes.put("phoneInMessage",settingsService.getSettingsStringValue(PHONE_IN_MESSAGE,realmName));
             attributes.put("footerInMassage",settingsService.getSettingsStringValue(FOOTER_IN_MESSAGE,realmName));

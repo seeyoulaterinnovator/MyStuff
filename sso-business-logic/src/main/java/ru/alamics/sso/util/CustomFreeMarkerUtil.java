@@ -5,10 +5,12 @@ import freemarker.core.HTMLOutputFormat;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.keycloak.theme.FreeMarkerException;
+import org.keycloak.theme.KeycloakSanitizerMethod;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Map;
 
 
 public class CustomFreeMarkerUtil {
@@ -31,6 +33,10 @@ public class CustomFreeMarkerUtil {
         try {
             Template template = getTemplate(templateName, realmName);
             Writer out = new StringWriter();
+            if (data instanceof Map) {
+                //noinspection unchecked,rawtypes
+                ((Map)data).put("kcSanitize", new KeycloakSanitizerMethod());
+            }
             template.process(data, out);
             return out.toString();
         } catch (Exception e) {

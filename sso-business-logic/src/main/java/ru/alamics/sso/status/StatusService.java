@@ -4,6 +4,7 @@ import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import ru.alamics.sso.jpa.repository.StatusRepository;
 
@@ -20,6 +21,7 @@ public class StatusService {
         statusRepository.tryInsertNodeName(getNodeName());
     }
 
+    @Synchronized
     public boolean checkStatusDb() {
         return statusRepository.checkStatusDb(getNodeName());
     }

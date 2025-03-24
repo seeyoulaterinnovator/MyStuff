@@ -1,4 +1,7 @@
+# Для тестирования сессий аутентификаций при переключении на Remote Infinispan режим
+
 name: "sso-new-cluster"
+
 services:
 
   mariadb:

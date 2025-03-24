@@ -1,6 +1,5 @@
 variables:
   GIT_STRATEGY: fetch
-  BASE_DIR: /opt/gitlab-ci
 
 stages:
   - compile
@@ -10,11 +9,6 @@ stages:
   - docker
   - deploy
 
-.init_vars: &init-variables
-  before_script:
-  - cp ${ERTK_PEM} configs/ertk.pem
-  - envsubst < configs/sso.tmpl > configs/sso
-
 .domru:stage:template:
   stage: deploy
   image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
@@ -22,7 +16,7 @@ stages:
   script:
     - export FQDN=`echo "${CI_ENVIRONMENT_URL}" | sed 's/^http\(\|s\):\/\///g'`
     - consul-template -once -template ".helm/values-dev.yaml.tpl:values.yaml"
-    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml ./.helm -n ${NAMESPACE} --atomic --timeout 15m
+    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml ./.helm -n ${NAMESPACE} --atomic --timeout 10m
     - helm history -n ${NAMESPACE} ${CI_ENVIRONMENT_SLUG} --max 5
   tags:
     - sso-build-k8s
@@ -37,22 +31,12 @@ stages:
     - export FQDN=`echo "${CI_ENVIRONMENT_URL}" | sed 's/^http\(\|s\):\/\///g'`
     - consul-template -once -template ".helm/values-prod.yaml.tpl:values.yaml"
     - cat values.yaml
-    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml ./.helm -n ${NAMESPACE} --atomic --timeout 15m
+    - helm upgrade -i ${CI_ENVIRONMENT_SLUG} --values values.yaml ./.helm -n ${NAMESPACE} --atomic --timeout 20m
     - helm history -n ${NAMESPACE} ${CI_ENVIRONMENT_SLUG} --max 5
   variables:
     NAMESPACE: 'sso'
     NODE_PORT: '30080'
     REPLICA_COUNT: '5'
-
-.infinispan:prod:template:
-  stage: deploy
-  image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
-  when: manual
-  script:
-    # Apply Infinispan installation manifest
-    - kubectl apply -f ./configs/infinispan15/infinispan-${DC}.yaml
-    # Apply Infinispan caches manifest
-    - kubectl apply -f ./configs/infinispan15/caches-${DC}.yaml
 
 .frontend:theme:build:
   stage: build
@@ -140,7 +124,6 @@ back:build:
 
 container-image:
   stage: docker
-  <<: *init-variables
   when: manual
   script:
     - docker build -t harbor.ertelecom.ru/sso-protected/sso:$CI_PIPELINE_ID .
@@ -209,25 +192,6 @@ domru:stage5:
   only:
     - itres # т.к. пока еше не обновлен
 
-infinispan:stage5:
-  stage: deploy
-  image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
-  when: manual
-  variables:
-    NAMESPACE: 'sso'
-    INFINISPAN_REPLICA_COUNT: '3'
-  script:
-    - export DTD=$(date | sha256sum)
-    - consul-template -once -template "./configs/infinispan/.helm/values-dev.yaml.tpl:values.yaml"
-    - ln -s ${INFINISPAN_MGMT_USERS} ./configs/infinispan/.helm/configs/mgmt-users.properties
-    - ln -s ${INFINISPAN_MGMT_GROUPS} ./configs/infinispan/.helm/configs/mgmt-groups.properties
-    - helm upgrade -i infinispan --values values.yaml ./configs/infinispan/.helm -n ${NAMESPACE} --atomic --timeout 15m
-    - helm history -n ${NAMESPACE} infinispan --max 5
-  tags:
-    - sso-build-k8s
-  only:
-    - itres # т.к. пока еше не обновлен
-
 domru:perm-k8s:
   extends: .domru:prod:template
   tags:
@@ -236,10 +200,10 @@ domru:perm-k8s:
     name: production-k8s-perm
     url: https://auth.dom.ru
   variables:
+    DC_NAME: perm
     KC_CACHE_CONFIG_FILE: 'cache-ispn.persistent.xml'
     KC_CACHE_STACK: 'kubernetes'
     KC_FEATURES: 'persistent-user-sessions'
-    DC_NAME: perm
 
 domru:voronezh-k8s:
   extends: .domru:prod:template
@@ -249,34 +213,7 @@ domru:voronezh-k8s:
     name: production-k8s-voronezh
     url: https://auth.dom.ru
   variables:
+    DC_NAME: voronezh
     KC_CACHE_CONFIG_FILE: 'cache-ispn.persistent.xml'
     KC_CACHE_STACK: 'kubernetes'
     KC_FEATURES: 'persistent-user-sessions'
-    DC_NAME: voronezh
-
-infinispan:stage-k8s:
-  extends: .infinispan:prod:template
-  variables:
-    DC: "stage"
-  except:
-    - tags
-  tags:
-    - sso-build-k8s
-
-infinispan:perm-k8s:
-  extends: .infinispan:prod:template
-  variables:
-    DC: "perm"
-  only:
-    - tags
-  tags:
-    - sso-k8s-perm
-
-infinispan:voronezh-k8s:
-  extends: .infinispan:prod:template
-  variables:
-    DC: "voronezh"
-  only:
-    - tags
-  tags:
-    - sso-k8s-voronezh
