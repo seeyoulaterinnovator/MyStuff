@@ -104,20 +104,6 @@ export JAVA_OPTS="" && /opt/keycloak/bin/kc.sh export --file /tmp/realm-export.j
 Для отладки теста можно запускать его поверх контейнеров запущенных через *docker-compose-full-e2e* 
 (отключен кэш настроек) для этого можно временно убрать аннотацию *@TestsEnabled* и запустить тест индивидуально.
 
-## Заливка стенда
-
-```text
-TODO
-```
-
-## Обновление продуктива
-
-> Есть замещение провайдера Liquibase для ProxySQL [./UpdatedMariaDBDatabase.java](./keycloak-extension/src/main/java/org/keycloak/connections/jpa/updater/liquibase/UpdatedMariaDBDatabase.java)
-
-```text
-TODO
-```
-
 ## Ключевые таблицы БД
 
 * *ADMIN_EVENT_ENTITY* - поможет отследить что делал менеджер в админке
@@ -142,3 +128,11 @@ TODO
 - **dev**: [https://smtp4dev-er-sso.dev.it-resource.team/](https://smtp4dev-er-sso.dev.it-resource.team/)
 
 - **local**: [http://localhost:8025](http://localhost:8025/)
+
+## Замечания
+
+* Есть замещение провайдера Liquibase для ProxySQL [./UpdatedMariaDBDatabase.java](./keycloak-extension/src/main/java/org/keycloak/connections/jpa/updater/liquibase/UpdatedMariaDBDatabase.java)
+  (при обновлении версии Keycloak следует перепроверить порядок загрузки классов)
+* При расширении работы Keycloak с БД необходимо учитывать, что на продуктивном стенде развернут кластер Galera, 
+  поэтому необходимо предотвращать по возможности обновления одних тех же строк в конкурирующих транзакциях
+  (пример развертывания кластера Galera [docker-compose-local-cluster.yml](./docker-compose-local-cluster.yml))
