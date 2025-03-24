@@ -1,3 +1,6 @@
+# Для тестирования ошибок конкурирующих транзакций
+# (см. ошибки типа "Deadlock found when trying to get lock; try restarting transaction")
+
 name: "sso-new-galera"
 
 configs:
