@@ -36,7 +36,6 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-
       affinity:
         {{- if .Values.podAntiAffinity }}
         podAntiAffinity:
@@ -91,6 +90,14 @@ spec:
               port: 8080
             initialDelaySeconds: 20
             periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 5
+          livenessProbe:
+            httpGet:
+              path: /auth
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 30
             timeoutSeconds: 10
             failureThreshold: 5
           resources:
