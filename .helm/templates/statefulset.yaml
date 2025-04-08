@@ -86,20 +86,20 @@ spec:
           {{- end }}
           readinessProbe:
             httpGet:
-              path: /auth
+              path: /auth/realms/master/status/health
               port: 8080
             initialDelaySeconds: 20
-            periodSeconds: 15
-            timeoutSeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
             failureThreshold: 3
           livenessProbe:
             httpGet:
-              path: /auth
+              path: /auth/realms/master/status/health
               port: 8080
             initialDelaySeconds: 60
             periodSeconds: 30
-            timeoutSeconds: 10
-            failureThreshold: 5
+            timeoutSeconds: 5
+            failureThreshold: 3
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
