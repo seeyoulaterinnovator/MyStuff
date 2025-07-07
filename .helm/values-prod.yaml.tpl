@@ -73,12 +73,68 @@ extraSensitiveEnvs:
   KC_CACHE_REMOTE_PASSWORD: "{{ env "INFINISPAN_PASSWORD" }}"
 
 service:
-  type: NodePort
+  type: ClusterIP
   loadBalancerIP: ""
-  httpNodePort: "{{ env "NODE_PORT" }}"
+  httpNodePort: ""
   # The http Service port
   httpPort: 80
   extraPorts: []
+
+ingress:
+- annotations:
+    kubernetes.io/ingress.class: "{{ env "INGRESS_CLASS" }}"
+    nginx.ingress.kubernetes.io/proxy-buffering: "on"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30m"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "10m"
+  hosts:
+    - host: "{{ env "FQDN" }}"
+- annotations:
+    kubernetes.io/ingress.class: "{{ env "INGRESS_CLASS" }}"
+    nginx.ingress.kubernetes.io/proxy-buffering: "on"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30m"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "10m"
+  hosts:
+    - host: "{{ env "FQDN2" }}"
+- annotations:
+    kubernetes.io/ingress.class: "{{ env "INGRESS_CLASS" }}"
+    nginx.ingress.kubernetes.io/proxy-buffering: "on"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30m"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "10m"
+  hosts:
+    - host: "{{ env "FQDN3" }}"
+- annotations:
+    kubernetes.io/ingress.class: "{{ env "INGRESS_CLASS" }}"
+    nginx.ingress.kubernetes.io/proxy-buffering: "on"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30m"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "10m"
+  hosts:
+    - host: "{{ env "FQDN4" }}"
+- annotations:
+    kubernetes.io/ingress.class: "{{ env "INGRESS_CLASS" }}"
+    nginx.ingress.kubernetes.io/proxy-buffering: "on"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30m"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "10m"
+  hosts:
+    - host: "{{ env "FQDN5" }}"
+- annotations:
+    kubernetes.io/ingress.class: "{{ env "INGRESS_CLASS" }}"
+    nginx.ingress.kubernetes.io/proxy-buffering: "on"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30m"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "10m"
+  hosts:
+    - host: "{{ env "FQDN6" }}"
 
 resources:
   limits:
