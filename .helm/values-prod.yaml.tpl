@@ -90,6 +90,7 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "10m"
   hosts:
     - host: "{{ env "FQDN" }}"
+  {{ env "VALUES_TLS" }}
 - annotations:
     kubernetes.io/ingress.class: "{{ env "INGRESS_CLASS" }}"
     nginx.ingress.kubernetes.io/proxy-buffering: "on"
@@ -99,6 +100,7 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "10m"
   hosts:
     - host: "{{ env "FQDN2" }}"
+  {{ env "VALUES_TLS2" }}
 - annotations:
     kubernetes.io/ingress.class: "{{ env "INGRESS_CLASS" }}"
     nginx.ingress.kubernetes.io/proxy-buffering: "on"
@@ -108,6 +110,7 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "10m"
   hosts:
     - host: "{{ env "FQDN3" }}"
+  {{ env "VALUES_TLS3" }}
 - annotations:
     kubernetes.io/ingress.class: "{{ env "INGRESS_CLASS" }}"
     nginx.ingress.kubernetes.io/proxy-buffering: "on"
@@ -117,6 +120,7 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "10m"
   hosts:
     - host: "{{ env "FQDN4" }}"
+  {{ env "VALUES_TLS4" }}
 - annotations:
     kubernetes.io/ingress.class: "{{ env "INGRESS_CLASS" }}"
     nginx.ingress.kubernetes.io/proxy-buffering: "on"
@@ -126,6 +130,7 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "10m"
   hosts:
     - host: "{{ env "FQDN5" }}"
+  {{ env "VALUES_TLS5" }}
 - annotations:
     kubernetes.io/ingress.class: "{{ env "INGRESS_CLASS" }}"
     nginx.ingress.kubernetes.io/proxy-buffering: "on"
@@ -135,6 +140,7 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "10m"
   hosts:
     - host: "{{ env "FQDN6" }}"
+  {{ env "VALUES_TLS6" }}
 
 resources:
   limits:

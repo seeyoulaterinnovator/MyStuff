@@ -202,13 +202,19 @@ domru:perm-k8s:
     KC_CACHE_CONFIG_FILE: 'cache-ispn.persistent.xml'
     KC_CACHE_STACK: 'kubernetes'
     KC_FEATURES: 'persistent-user-sessions'
-    INGRESS_CLASS: "nginx-waf"
+    INGRESS_CLASS: "nginx"
     FQDN: "auth.dom.ru"
+    VALUES_TLS: "tls: [{secretName: wildcard-dom-ru, hosts: [\"auth.dom.ru\"]}]"
     FQDN2: "auth.domru.ru"
+    VALUES_TLS2: "tls: [{secretName: wildcard-domru-ru, hosts: [\"auth.domru.ru\"]}]"
     FQDN3: "auth.ertelecom.ru"
+    VALUES_TLS3: "tls: [{secretName: wildcard-ertelecom-ru, hosts: [\"auth.ertelecom.ru\"]}]"
     FQDN4: "auth.tcenter.ru"
+    VALUES_TLS4: "tls: [{secretName: wildcard-tcenter-ru, hosts: [\"auth.tcenter.ru\"]}]"
     FQDN5: "auth.2090909.ru"
+    VALUES_TLS5: "tls: [{secretName: wildcard-2090909-ru, hosts: [\"auth.2090909.ru\"]}]"
     FQDN6: "auth.web.r-x.team"
+    VALUES_TLS6: "tls: [{secretName: wildcard-web-rx-team, hosts: [\"auth.web.r-x.team\"]}]"
 
 domru:voronezh-k8s:
   extends: .domru:prod:template
@@ -222,10 +228,16 @@ domru:voronezh-k8s:
     KC_CACHE_CONFIG_FILE: 'cache-ispn.persistent.xml'
     KC_CACHE_STACK: 'kubernetes'
     KC_FEATURES: 'persistent-user-sessions'
-    INGRESS_CLASS: "nginx-waf"
+    INGRESS_CLASS: "nginx"
     FQDN: "auth.dom.ru"
+    VALUES_TLS: "tls: [{secretName: wildcard-dom-ru, hosts: [\"auth.dom.ru\"]}]"
     FQDN2: "auth.domru.ru"
+    VALUES_TLS2: "tls: [{secretName: wildcard-domru-ru, hosts: [\"auth.domru.ru\"]}]"
     FQDN3: "auth.ertelecom.ru"
+    VALUES_TLS3: "tls: [{secretName: wildcard-ertelecom-ru, hosts: [\"auth.ertelecom.ru\"]}]"
     FQDN4: "auth.tcenter.ru"
+    VALUES_TLS4: "tls: [{secretName: wildcard-tcenter-ru, hosts: [\"auth.tcenter.ru\"]}]"
     FQDN5: "auth.2090909.ru"
+    VALUES_TLS5: "tls: [{secretName: wildcard-2090909-ru, hosts: [\"auth.2090909.ru\"]}]"
     FQDN6: "auth.web.r-x.team"
+    VALUES_TLS6: "tls: [{secretName: wildcard-web-rx-team, hosts: [\"auth.web.r-x.team\"]}]"
