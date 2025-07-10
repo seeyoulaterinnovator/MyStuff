@@ -1,7 +1,10 @@
 {{- if .Values.ingress }}
+{{- $ingressApiIsStable := eq (include "sso.ingress.isStable" .) "true" -}}
+{{- $ingressSupportsIngressClassName := eq (include "sso.ingress.supportsIngressClassName" .) "true" -}}
+{{- $ingressSupportsPathType := eq (include "sso.ingress.supportsPathType" .) "true" -}}
 {{- range $i, $s := .Values.ingress }}
 ---
-apiVersion: networking.k8s.io/v1
+apiVersion: {{ include "sso.ingress.apiVersion" $ }}
 kind: Ingress
 metadata:
   name: {{ $.Release.Name }}-{{ $i }}
@@ -15,7 +18,9 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
+  {{- if and $ingressSupportsIngressClassName $.Values.ingressClassName }}
   ingressClassName: {{ $.Values.ingressClassName }}
+  {{- end -}}
 {{- if $s.tls }}
   tls:
   {{- range $s.tls }}
@@ -32,12 +37,15 @@ spec:
       http:
         paths:
           - path: {{ .paths | quote }}
+            {{- if $ingressSupportsPathType }}
             {{- if $s.pathType}}
             pathType: {{ $s.pathType }}            
             {{- else }}
             pathType: ImplementationSpecific
             {{- end }}
+            {{- end }}
             backend:
+        {{- if $ingressApiIsStable }}
         {{- if $s.external_service }}
               service:
                 name: {{ $s.external_service.name }}
@@ -48,6 +56,15 @@ spec:
                 name: {{ include "sso.fullname" $ }}-http
                 port:
                   number: {{ $.Values.service.httpPort }}
+        {{- end }}
+        {{- else }}
+        {{- if $s.external_service }}
+              serviceName: {{ $s.external_service.name }}
+              servicePort: {{ $s.external_service.port }}
+        {{- else }}
+              serviceName: {{ $.Release.Name }}
+              servicePort: {{ $.Values.service.httpPort }}
+        {{- end }}
         {{- end }}
     {{- end }}
 {{- end }}
