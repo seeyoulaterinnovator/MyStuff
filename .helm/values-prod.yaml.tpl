@@ -16,7 +16,7 @@ preStopDelay:
   delaySeconds: 15
 
 monitoring:
- authMetrics: true
+ authMetrics: false
 
 extraEnvs:
   KC_FEATURES: "{{ envOrDefault  "KC_FEATURES" "" }}"
