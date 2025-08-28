@@ -14,5 +14,4 @@ public enum MessengerType {
     public String getType() {
         return type;
     }
-
 }
