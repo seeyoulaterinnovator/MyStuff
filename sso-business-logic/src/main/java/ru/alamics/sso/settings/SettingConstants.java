@@ -34,12 +34,10 @@ public enum SettingConstants {
 
     //Составные параметры переменных для шлюза
     SEND_URI(".uri"),
-    SMSC_NAME(".smscName"),
-    USERNAME_SENDER(".username"),
-    PASSWORD(".password"),
     SENDER_NAME(".senderName"),
     TIMEOUT(".timeout"),
-
+    AUTH_TOKEN(".authToken"),
+    SIMULATE(".simulate"),
 
     //Переменные страниц
 

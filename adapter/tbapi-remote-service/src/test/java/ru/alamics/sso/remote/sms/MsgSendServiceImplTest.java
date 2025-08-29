@@ -1,20 +1,20 @@
 package ru.alamics.sso.remote.sms;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.matching.StringValuePattern;
 import jakarta.ws.rs.core.UriBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import ru.alamics.sso.registration.phone.MsgConfig;
 import ru.alamics.sso.registration.phone.exception.SendMessageException;
 import ru.alamics.sso.registration.phone.model.MessageRequest;
 import ru.alamics.sso.registration.phone.model.MessengerType;
 import ru.alamics.sso.remote.message.SendMessageServiceImpl;
+import ru.alamics.sso.remote.message.SmsMessageSender;
+import ru.alamics.sso.remote.message.SmsRequest;
 
 import javax.net.ssl.SSLContext;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -23,49 +23,59 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class MsgSendServiceImplTest {
 
-    public static final String USERNAME = "kannel_user";
-    public static final String PASSWORD = "kannel_user";
-    public static final String SENDER_NAME = "kannel_user";
-    public static final String SMSC_NAME = "smsc_name";
+    public static final String AUTH_TOKEN = "kannel_user";
+    public static final String SIMULATE = "0";
+    public static final String SENDER_NAME = "Domru";
     public static final String PHONE = "89824699045";
     public static final String TEXT = "test";
     public static final String REALM_ID = "user";
     public static final MessengerType MESSENGER_TYPE = MessengerType.SMS;
-    public static final String PATH = "/cgi-bin/sendsms";
+    public static final String PATH = "/message";
+    private final static String VALID_RESPONSE = """
+            {
+              "requestId": "813cd8ec49548c764830bf72d16dad02"
+            }
+            """;
     private static WireMockServer server;
 
     private static SendMessageServiceImpl service;
+    private static SmsMessageSender smsMessageSender;
 
     @BeforeAll
     static void initWireMock() throws Exception {
         server = new WireMockServer(wireMockConfig().dynamicPort());
         server.start();
 
-        service = new SendMessageServiceImpl(SSLContext.getDefault(), (s, ss) -> true) {
+        smsMessageSender = new SmsMessageSender(SSLContext.getDefault(), (s, ss) -> true) {
             @Override
-            protected MsgConfig createMsgConfig(String realmId, String type) {
-                return MsgConfig.builder()
-                        .url(UriBuilder.newInstance()
-                                .scheme("http")
-                                .host("127.0.0.1")
-                                .port(server.port())
-                                .path(PATH)
-                                .build())
-                        .msgCenterName(SMSC_NAME)
-                        .username(USERNAME)
-                        .password(PASSWORD)
-                        .senderName(SENDER_NAME)
-                        .timeout(5)
-                        .priority(MsgConfig.Priority.HIGH)
-                        .reportsMask(MsgConfig.ReportsConfig.DELIVERED_TO_PHONE)
-                        .encoding(MsgConfig.Encoding.UCS2)
-                        .charset(StandardCharsets.UTF_8)
-                        .build();
+            protected String getSetting(String key, String realmId) {
+                String apiUrl = UriBuilder.newInstance()
+                        .scheme("http")
+                        .host("127.0.0.1")
+                        .port(server.port())
+                        .path(PATH)
+                        .build()
+                        .toString();
+
+                Map<String, String> properties = Map.of(
+                        "smsSender.uri", apiUrl,
+                        "smsSender.senderName", SENDER_NAME,
+                        "smsSender.simulate", SIMULATE,
+                        "smsSender.authToken", AUTH_TOKEN
+                );
+
+                return properties.get(key);
             }
 
             @Override
             protected boolean isSmsSenderMocked() {
                 return false;
+            }
+        };
+
+        service = new SendMessageServiceImpl() {
+            protected SmsMessageSender getSmsSender() {
+                return smsMessageSender;
             }
         };
     }
@@ -76,25 +86,17 @@ class MsgSendServiceImplTest {
     }
 
     @Test
-    void sensSms() {
+    void sensSms() throws JsonProcessingException {
 
-        Map<String, StringValuePattern> map = new HashMap<>();
-        map.put("smsc", equalTo(SMSC_NAME));
-        map.put("username", equalTo(USERNAME));
-        map.put("password", equalTo(PASSWORD));
-        map.put("from", equalTo(SENDER_NAME));
-        map.put("validity", equalTo(String.valueOf(5)));
-        map.put("priority", equalTo(String.valueOf(MsgConfig.Priority.HIGH.getPriorityAsInt())));
-        map.put("dlr-mask", equalTo(String.valueOf(MsgConfig.ReportsConfig.DELIVERED_TO_PHONE)));
-        map.put("coding", equalTo(String.valueOf(MsgConfig.Encoding.UCS2.getPriorityAsInt())));
-        map.put("charset", equalTo(StandardCharsets.UTF_8.name()));
+        SmsRequest sms = new SmsRequest(PHONE, TEXT, SENDER_NAME, SIMULATE.equals("1"));
+        String body = (new ObjectMapper()).writeValueAsString(sms);
 
         server.stubFor(post(urlPathEqualTo(PATH))
-                .withQueryParams(map)
+                .withRequestBody(equalTo(body))
                 .willReturn(aResponse()
                         .withStatus(202)
-                        .withHeader("Content-Type", "TEXT/PLAIN")
-                        .withBody("0: Accepted for delivery")
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(VALID_RESPONSE)
                 )
         );
         try {
@@ -107,7 +109,7 @@ class MsgSendServiceImplTest {
 
             String result = service.sendMessageByRequest(messageRequest);
 
-            assertThat(result.substring(0, 1)).isEqualTo("0");
+            assertThat(result).isEqualTo(VALID_RESPONSE);
 
         } catch (SendMessageException e) {
             System.out.println(e);
