@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <!-- Создаём таблицу BRAND -->
+    <changeSet id="11-09-2025-1-create-brand-table" author="vakilev.aa">
+        <createTable tableName="BRAND">
+            <column name="ID" type="CHAR(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="REALM" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CODE" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IS_DEFAULT" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="BRAND"
+                             columnNames="REALM,CODE"
+                             constraintName="UQ_BRAND_REALM_CODE"/>
+    </changeSet>
+
+    <!-- Добавляем бренд в историю логинов -->
+    <changeSet id="11-09-2025-2-add-brand-to-login-history" author="vakilev.aa">
+        <addColumn tableName="USER_LOGIN_HISTORY">
+            <column name="BRAND_ID" type="CHAR(36)"/>
+            <column name="BRAND_NAME" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- Начальные данные: дефолтные бренды "Дом.ру" -->
+    <changeSet id="11-09-2025-3-insert-default-brands" author="vakilev.aa" context="init-data">
+        <insert tableName="BRAND">
+            <column name="ID" value="550e8400-e29b-41d4-a716-446655440000"/>
+            <column name="REALM" value="e2e"/>
+            <column name="CODE" value="domru"/>
+            <column name="NAME" value="Дом.ру"/>
+            <column name="IS_DEFAULT" valueBoolean="true"/>
+        </insert>
+        <insert tableName="BRAND">
+            <column name="ID" value="550e8400-e29b-41d4-a716-446655440001"/>
+            <column name="REALM" value="ER-TELECOM"/>
+            <column name="CODE" value="domru"/>
+            <column name="NAME" value="Дом.ру"/>
+            <column name="IS_DEFAULT" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+
+    <!-- Массово проставляем markBrandId пользователям -->
+    <changeSet id="11-09-2025-4-assign-default-brand-dev" author="vakilev.aa" runOnChange="true">
+        <sql>
+            -- e2e
+            INSERT INTO USER_ATTRIBUTE (id, name, value, user_id)
+            SELECT UUID(), 'markBrandId', '550e8400-e29b-41d4-a716-446655440000', u.id
+            FROM USER_ENTITY u
+            WHERE u.realm_id = 'e2e'
+              AND NOT EXISTS (SELECT 1 FROM USER_ATTRIBUTE a WHERE a.user_id = u.id AND a.name = 'markBrandId');
+
+            -- ER-TELECOM
+            INSERT INTO USER_ATTRIBUTE (id, name, value, user_id)
+            SELECT UUID(), 'markBrandId', '550e8400-e29b-41d4-a716-446655440001', u.id
+            FROM USER_ENTITY u
+            WHERE u.realm_id = 'ER-TELECOM'
+              AND NOT EXISTS (SELECT 1 FROM USER_ATTRIBUTE a WHERE a.user_id = u.id AND a.name = 'markBrandId');
+        </sql>
+    </changeSet>
+</databaseChangeLog>

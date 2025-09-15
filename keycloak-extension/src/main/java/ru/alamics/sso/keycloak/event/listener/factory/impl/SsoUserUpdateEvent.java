@@ -1,5 +1,6 @@
 package ru.alamics.sso.keycloak.event.listener.factory.impl;
 
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
@@ -9,7 +10,6 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.RealmProvider;
 import org.keycloak.models.UserModel;
-import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
@@ -35,6 +35,9 @@ public class SsoUserUpdateEvent extends SsoEvent {
     private final AdminEvent event;
 
     private final SettingsService settingsService;
+
+    @Inject
+    KeycloakSession session;
 
     SsoUserUpdateEvent(AdminEvent event, KeycloakSession session) {
         super(session);
@@ -130,13 +133,21 @@ public class SsoUserUpdateEvent extends SsoEvent {
 
 
     private void recordLoginUser(final String userId) {
-        UserEntity entity = new UserEntity();
-        entity.setId(userId);
         LoginHistory loginHistoryService = Lookup.lookup(LoginHistory.class);
-
         Optional.ofNullable(loginHistoryService).ifPresent(loginHistory -> {
-            loginHistory.create(entity);
-        });
+           RealmModel realm = session.getContext().getRealm();
+           if (realm == null) {
+               log.warn("recordLoginUser: realm is null, cannot record login for user {}", userId);
+               return;
+           }
 
+           UserModel userModel = session.users().getUserById(realm, userId);
+           if (userModel == null) {
+               log.warn("recordLoginUser: user {} not found in realm {}", userId, realm.getName());
+               return;
+           }
+
+           loginHistory.create(userModel, realm.getName());
+        });
     }
 }
