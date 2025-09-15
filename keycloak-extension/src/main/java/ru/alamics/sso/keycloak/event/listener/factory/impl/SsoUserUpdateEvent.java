@@ -117,8 +117,7 @@ public class SsoUserUpdateEvent extends SsoEvent {
 
     private AdminEventEntity findAdminEvent(String userId) {
         EntityManager em = this.getSession().getProvider(JpaConnectionProvider.class).getEntityManager();
-        List<AdminEventEntity> adminEventEntities = em.createQuery("" +
-                "select ae " +
+        List<AdminEventEntity> adminEventEntities = em.createQuery("select ae " +
                 "from AdminEventEntity ae " +
                 "where ae.representation like concat('%', :userId, '%') " +
                 "and ae.operationType in ('CREATE', 'UPDATE') " +
