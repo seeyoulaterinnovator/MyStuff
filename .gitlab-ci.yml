@@ -77,7 +77,7 @@ frontend:novotelecom:build:
   extends: .frontend:theme:build
   variables:
     BUILD_THEME: novotelecom
-    
+
 frontend:admin:build:
   stage: build
   image: harbor.ertelecom.ru/b2bweb/openjdk:21-node20
@@ -143,6 +143,9 @@ domru:stage:
     NAMESPACE: 'sso'
     NODE_PORT: '30081'
     REPLICA_COUNT: '1'
+    KC_CACHE_CONFIG_FILE: 'cache-ispn.persistent.xml'
+    KC_CACHE_STACK: 'kubernetes'
+    KC_FEATURES: 'persistent-user-sessions'
 
 domru:stage2:
   extends: .domru:stage:template
