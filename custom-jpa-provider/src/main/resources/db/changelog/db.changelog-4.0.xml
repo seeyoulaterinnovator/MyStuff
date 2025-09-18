@@ -1,75 +1,347 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-    <!-- Создаём таблицу BRAND -->
-    <changeSet id="11-09-2025-1-create-brand-table" author="vakilev.aa">
+    <!-- 1. Создаём таблицу BRAND -->
+    <changeSet id="2025-09-17-1-create-brand" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="BRAND"/>
+            </not>
+        </preConditions>
         <createTable tableName="BRAND">
             <column name="ID" type="CHAR(36)">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="REALM" type="VARCHAR(64)">
-                <constraints nullable="false"/>
-            </column>
             <column name="CODE" type="VARCHAR(64)">
-                <constraints nullable="false"/>
+                <constraints nullable="false" unique="true"/>
             </column>
             <column name="NAME" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="IS_DEFAULT" type="BOOLEAN" defaultValueBoolean="false">
-                <constraints nullable="false"/>
-            </column>
         </createTable>
-
-        <addUniqueConstraint tableName="BRAND"
-                             columnNames="REALM,CODE"
-                             constraintName="UQ_BRAND_REALM_CODE"/>
     </changeSet>
 
-    <!-- Добавляем бренд в историю логинов -->
-    <changeSet id="11-09-2025-2-add-brand-to-login-history" author="vakilev.aa">
+    <!-- 2. Создаём таблицу REALM_BRAND -->
+    <changeSet id="2025-09-17-2-create-realm-brand" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="REALM_BRAND"/>
+            </not>
+        </preConditions>
+        <createTable tableName="REALM_BRAND">
+            <column name="ID" type="CHAR(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="REALM_ID" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="BRAND_ID" type="CHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IS_DEFAULT" type="BOOLEAN" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+    <!-- 2.1 Добавляем FK на BRAND -->
+    <changeSet id="2025-09-17-2a-fk-brand" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="BRAND"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK_REALM_BRAND_BRAND"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="REALM_BRAND"
+                                 baseColumnNames="BRAND_ID"
+                                 constraintName="FK_REALM_BRAND_BRAND"
+                                 referencedTableName="BRAND"
+                                 referencedColumnNames="ID"/>
+    </changeSet>
+
+    <!-- 2.2 Добавляем FK на REALM -->
+    <changeSet id="2025-09-17-2b-fk-realm" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="REALM"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK_REALM_BRAND_REALM"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="REALM_BRAND"
+                                 baseColumnNames="REALM_ID"
+                                 constraintName="FK_REALM_BRAND_REALM"
+                                 referencedTableName="REALM"
+                                 referencedColumnNames="ID"/>
+    </changeSet>
+
+    <!-- 3. Наполняем таблицу BRAND всеми брендами -->
+    <changeSet id="2025-09-17-3-insert-brands" author="vakilev.aa" context="init-data">
+        <preConditions onFail="MARK_RAN" onFailMessage="Не удалось наполнить таблицу BRAND">
+            <dbms type="mariadb"/>
+        </preConditions>
+        <insert tableName="BRAND">
+            <column name="ID" value="550e8400-e29b-41d4-a716-446655440001"/>
+            <column name="CODE" value="9154881443513193841"/>
+            <column name="NAME" value="ЭР-Телеком Холдинг"/>
+        </insert>
+        <insert tableName="BRAND">
+            <column name="ID" value="550e8400-e29b-41d4-a716-446655440002"/>
+            <column name="CODE" value="9161455007713625991"/>
+            <column name="NAME" value="ООО «ЭР-Телеком Москва»"/>
+        </insert>
+        <insert tableName="BRAND">
+            <column name="ID" value="550e8400-e29b-41d4-a716-446655440003"/>
+            <column name="CODE" value="9169483311299030194"/>
+            <column name="NAME" value="Дом.ру Бизнес / АКАДО"/>
+        </insert>
+        <insert tableName="BRAND">
+            <column name="ID" value="550e8400-e29b-41d4-a716-446655440004"/>
+            <column name="CODE" value="9170723516113770183"/>
+            <column name="NAME" value="Дом.ру Бизнес /Ринет"/>
+        </insert>
+        <insert tableName="BRAND">
+            <column name="ID" value="550e8400-e29b-41d4-a716-446655440005"/>
+            <column name="CODE" value="9171370895499846025"/>
+            <column name="NAME" value="Дом.ру Бизнес | Авантел"/>
+        </insert>
+        <insert tableName="BRAND">
+            <column name="ID" value="550e8400-e29b-41d4-a716-446655440006"/>
+            <column name="CODE" value="9171370898499846025"/>
+            <column name="NAME" value="ЭР-Телеком | Авантел"/>
+        </insert>
+        <insert tableName="BRAND">
+            <column name="ID" value="550e8400-e29b-41d4-a716-446655440007"/>
+            <column name="CODE" value="9154394142013178781"/>
+            <column name="NAME" value="Дом.ру Бизнес"/>
+        </insert>
+        <insert tableName="BRAND">
+            <column name="ID" value="550e8400-e29b-41d4-a716-446655440008"/>
+            <column name="CODE" value="9154394142013178782"/>
+            <column name="NAME" value="Энфорта"/>
+        </insert>
+        <insert tableName="BRAND">
+            <column name="ID" value="550e8400-e29b-41d4-a716-446655440009"/>
+            <column name="CODE" value="9154394142013178783"/>
+            <column name="NAME" value="ВестКолл"/>
+        </insert>
+        <insert tableName="BRAND">
+            <column name="ID" value="550e8400-e29b-41d4-a716-446655440010"/>
+            <column name="CODE" value="9154394142013178784"/>
+            <column name="NAME" value="Деловая сеть – Иркутск"/>
+        </insert>
+        <insert tableName="BRAND">
+            <column name="ID" value="550e8400-e29b-41d4-a716-446655440011"/>
+            <column name="CODE" value="9154897929413180446"/>
+            <column name="NAME" value="Электронный город Бизнес"/>
+        </insert>
+        <insert tableName="BRAND">
+            <column name="ID" value="550e8400-e29b-41d4-a716-446655440012"/>
+            <column name="CODE" value="9161141698913290787"/>
+            <column name="NAME" value="БИКС+"/>
+        </insert>
+    </changeSet>
+
+    <!-- 4. Настраиваем дефолтные бренды для реалмов -->
+    <changeSet id="2025-09-17-4-insert-realm-brand-ertelecom" author="vakilev.aa" context="init-data">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">SELECT COUNT(*)
+                                         FROM REALM
+                                         WHERE ID = 'ER-TELECOM'</sqlCheck>
+        </preConditions>
+        <insert tableName="REALM_BRAND">
+            <column name="ID" value="660e8400-e29b-41d4-a716-446655440001"/>
+            <column name="REALM_ID" value="ER-TELECOM"/>
+            <column name="BRAND_ID" value="550e8400-e29b-41d4-a716-446655440001"/>
+            <column name="IS_DEFAULT" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="2025-09-17-4b-insert-realm-brand-user" author="vakilev.aa" context="init-data">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">SELECT COUNT(*)
+                                         FROM REALM
+                                         WHERE ID = 'user'</sqlCheck>
+        </preConditions>
+        <insert tableName="REALM_BRAND">
+            <column name="ID" value="660e8400-e29b-41d4-a716-446655440002"/>
+            <column name="REALM_ID" value="user"/>
+            <column name="BRAND_ID" value="550e8400-e29b-41d4-a716-446655440007"/>
+            <column name="IS_DEFAULT" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="2025-09-17-4c-insert-realm-brand-stelecom" author="vakilev.aa" context="init-data">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">SELECT COUNT(*)
+                                         FROM REALM
+                                         WHERE ID = 'S-TELECOM'</sqlCheck>
+        </preConditions>
+        <insert tableName="REALM_BRAND">
+            <column name="ID" value="660e8400-e29b-41d4-a716-446655440003"/>
+            <column name="REALM_ID" value="S-TELECOM"/>
+            <column name="BRAND_ID" value="550e8400-e29b-41d4-a716-446655440011"/>
+            <column name="IS_DEFAULT" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="2025-09-17-4d-insert-realm-brand-novotelecom" author="vakilev.aa" context="init-data">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">SELECT COUNT(*)
+                                         FROM REALM
+                                         WHERE ID = 'novotelecom'</sqlCheck>
+        </preConditions>
+        <insert tableName="REALM_BRAND">
+            <column name="ID" value="660e8400-e29b-41d4-a716-446655440004"/>
+            <column name="REALM_ID" value="novotelecom"/>
+            <column name="BRAND_ID" value="550e8400-e29b-41d4-a716-446655440002"/>
+            <column name="IS_DEFAULT" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+
+    <!-- 5. Добавляем поля в USER_LOGIN_HISTORY -->
+    <changeSet id="2025-09-17-5-add-brand-to-login-history" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_LOGIN_HISTORY"/>
+            <or>
+                <not>
+                    <columnExists tableName="USER_LOGIN_HISTORY" columnName="BRAND_ID"/>
+                </not>
+                <not>
+                    <columnExists tableName="USER_LOGIN_HISTORY" columnName="BRAND_NAME"/>
+                </not>
+            </or>
+        </preConditions>
         <addColumn tableName="USER_LOGIN_HISTORY">
             <column name="BRAND_ID" type="CHAR(36)"/>
             <column name="BRAND_NAME" type="VARCHAR(255)"/>
         </addColumn>
     </changeSet>
 
-    <!-- Начальные данные: дефолтные бренды "Дом.ру" -->
-    <changeSet id="11-09-2025-3-insert-default-brands" author="vakilev.aa" context="init-data">
-        <insert tableName="BRAND">
-            <column name="ID" value="550e8400-e29b-41d4-a716-446655440000"/>
-            <column name="REALM" value="e2e"/>
-            <column name="CODE" value="domru"/>
-            <column name="NAME" value="Дом.ру"/>
-            <column name="IS_DEFAULT" valueBoolean="true"/>
-        </insert>
-        <insert tableName="BRAND">
-            <column name="ID" value="550e8400-e29b-41d4-a716-446655440001"/>
-            <column name="REALM" value="ER-TELECOM"/>
-            <column name="CODE" value="domru"/>
-            <column name="NAME" value="Дом.ру"/>
-            <column name="IS_DEFAULT" valueBoolean="true"/>
-        </insert>
-    </changeSet>
-
-    <!-- Массово проставляем markBrandId пользователям -->
-    <changeSet id="11-09-2025-4-assign-default-brand-dev" author="vakilev.aa" runOnChange="true">
+    <!-- 6. Проставляем markBrandId для всех пользователей без бренда -->
+    <changeSet id="2025-09-17-6-assign-brand-to-users" author="vakilev.aa">
         <sql>
-            -- e2e
             INSERT INTO USER_ATTRIBUTE (id, name, value, user_id)
-            SELECT UUID(), 'markBrandId', '550e8400-e29b-41d4-a716-446655440000', u.id
+            SELECT UUID(),
+                   'markBrandId',
+                   rb.BRAND_ID,
+                   u.id
             FROM USER_ENTITY u
-            WHERE u.realm_id = 'e2e'
-              AND NOT EXISTS (SELECT 1 FROM USER_ATTRIBUTE a WHERE a.user_id = u.id AND a.name = 'markBrandId');
-
-            -- ER-TELECOM
-            INSERT INTO USER_ATTRIBUTE (id, name, value, user_id)
-            SELECT UUID(), 'markBrandId', '550e8400-e29b-41d4-a716-446655440001', u.id
-            FROM USER_ENTITY u
-            WHERE u.realm_id = 'ER-TELECOM'
-              AND NOT EXISTS (SELECT 1 FROM USER_ATTRIBUTE a WHERE a.user_id = u.id AND a.name = 'markBrandId');
+                     JOIN REALM_BRAND rb ON rb.REALM_ID = u.REALM_ID AND rb.IS_DEFAULT = true
+            WHERE NOT EXISTS (SELECT 1
+                              FROM USER_ATTRIBUTE a
+                              WHERE a.user_id = u.id
+                                AND a.name = 'markBrandId');
         </sql>
     </changeSet>
+
+    <!-- 7. Добавляем поле MARK_BRAND_ID для USER_POST -->
+    <changeSet id="2025-09-17-7-add-markBrandId-to-user-post" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_POST"/>
+            <not>
+                <columnExists tableName="USER_POST" columnName="MARK_BRAND_ID"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="USER_POST">
+            <column name="MARK_BRAND_ID" type="CHAR(36)"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="USER_POST"
+                                 baseColumnNames="MARK_BRAND_ID"
+                                 constraintName="FK_USER_POST_BRAND"
+                                 referencedTableName="BRAND"
+                                 referencedColumnNames="ID"/>
+    </changeSet>
+
+    <!-- 8. Добавляем поле MARK_BRAND_ID для IMPORT_USERS_DATA -->
+    <changeSet id="2025-09-17-8-add-markBrandId-to-import-users-data" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="IMPORT_USERS_DATA"/>
+            <not>
+                <columnExists tableName="IMPORT_USERS_DATA" columnName="MARK_BRAND_ID"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="IMPORT_USERS_DATA">
+            <column name="MARK_BRAND_ID" type="CHAR(36)"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="IMPORT_USERS_DATA"
+                                 baseColumnNames="MARK_BRAND_ID"
+                                 constraintName="FK_IMPORT_USERS_DATA_BRAND"
+                                 referencedTableName="BRAND"
+                                 referencedColumnNames="ID"/>
+    </changeSet>
+
+    <!-- 9. Обновляем пользователей по списку от BSS -->
+    <changeSet id="2025-09-17-9-bss-tomsid-update" author="vakilev.aa" runOnChange="true">
+        <sqlFile path="sql/bss-tomsid-update.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+
+    <!-- 10. Заполняем поле MARK_BRAND_ID для USER_POST -->
+    <changeSet id="2025-09-17-10-userpost-brand-sync" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_POST"/>
+            <tableExists tableName="USER_ENTITY"/>
+            <tableExists tableName="REALM_BRAND"/>
+        </preConditions>
+        <sql>
+            UPDATE USER_POST up
+                JOIN USER_ENTITY ue
+            ON up.USER_ID = ue.ID
+                JOIN REALM_BRAND rb ON rb.REALM_ID = ue.REALM_ID AND rb.IS_DEFAULT = true
+                SET up.MARK_BRAND_ID = rb.BRAND_ID
+            WHERE up.MARK_BRAND_ID IS NULL;
+        </sql>
+    </changeSet>
+
+    <!-- 11. Проставляем MARK_BRAND_ID в IMPORT_USERS_DATA -->
+    <changeSet id="2025-09-18-11-import-users-data-brand-sync" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="IMPORT_USERS_DATA"/>
+            <tableExists tableName="USER_ENTITY"/>
+            <tableExists tableName="REALM_BRAND"/>
+        </preConditions>
+        <sql>
+            UPDATE IMPORT_USERS_DATA iud
+                JOIN USER_ENTITY ue
+            ON ue.ID = iud.USER_ID
+                JOIN REALM_BRAND rb ON rb.REALM_ID = ue.REALM_ID AND rb.IS_DEFAULT = true
+                SET iud.MARK_BRAND_ID = rb.BRAND_ID
+            WHERE iud.MARK_BRAND_ID IS NULL;
+        </sql>
+    </changeSet>
+
+    <!-- 12. Уникальная связка REALM↔BRAND -->
+    <changeSet id="2025-09-18-12-uniq-realm-brand" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="REALM_BRAND"/>
+            <not>
+                <indexExists tableName="REALM_BRAND" indexName="UK_REALM_BRAND_REALM_BRAND"/>
+            </not>
+        </preConditions>
+        <addUniqueConstraint tableName="REALM_BRAND"
+                             columnNames="REALM_ID, BRAND_ID"
+                             constraintName="UK_REALM_BRAND_REALM_BRAND"/>
+    </changeSet>
+
+    <!-- 13. Не более одного дефолтного бренда на REALM -->
+    <changeSet id="2025-09-18-13-one-default-per-realm" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mariadb"/>
+            <tableExists tableName="REALM_BRAND"/>
+            <not>
+                <columnExists tableName="REALM_BRAND" columnName="DEFAULT_REALM_UNIQ"/>
+            </not>
+        </preConditions>
+        <sql>
+            ALTER TABLE REALM_BRAND
+                ADD COLUMN DEFAULT_REALM_UNIQ VARCHAR(64)
+                    GENERATED ALWAYS AS (CASE WHEN IS_DEFAULT THEN REALM_ID ELSE NULL END) VIRTUAL,
+          ADD UNIQUE INDEX UK_REALM_BRAND_DEFAULT (DEFAULT_REALM_UNIQ);
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

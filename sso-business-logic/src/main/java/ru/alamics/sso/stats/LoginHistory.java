@@ -46,7 +46,6 @@ public class LoginHistory {
             return brandId;
         }
 
-        // fallback: дефолтный бренд реалма
         return brandRepository.findDefaultByRealm(realmName)
                 .map(def -> {
                     log.info("resolveBrandId: fallback DEFAULT brand for realm {} => {} ({})",

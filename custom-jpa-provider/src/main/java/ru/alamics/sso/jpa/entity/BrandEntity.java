@@ -20,15 +20,9 @@ public class BrandEntity {
     @Column(name = "ID", nullable = false, length = 36)
     private String id;
 
-    @Column(name = "REALM", nullable = false, length = 50)
-    private String realm;
-
     @Column(name = "CODE", nullable = false)
     private String code;
 
     @Column(name = "NAME", nullable = false, length = 50)
     private String name;
-
-    @Column(name = "IS_DEFAULT", nullable = false)
-    private Boolean isDefault;
 }

@@ -10,6 +10,7 @@ import ru.alamics.sso.jpa.entity.UserLoginHistory;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -105,13 +106,32 @@ public class UserHistoryLoginRepository {
         em.flush();
     }
 
-    public List<UserLoginHistory> findLastAuthSuccess(UserEntity user, String realm) {
-        return em.createQuery("select ul from UserLoginHistory ul where" +
-                " ul.user =:user and ul.isSuccess = true and ul.realm =:realm order by ul.loginedAt desc", UserLoginHistory.class)
+    /**
+     * Находит последнюю успешную авторизацию пользователя в заданном реалме.
+     * Если brandId не null → фильтруем по бренду, иначе ищем без фильтра.
+     */
+    public Optional<UserLoginHistory> findLastAuthSuccess(UserEntity user, String realmId, String brandId) {
+        String baseQuery = "select h from UserLoginHistory h " +
+                "where h.user = :user and h.realm = :realm and h.isSuccess = true ";
+
+        if (brandId != null) {
+            baseQuery += "and h.brandId = :brandId ";
+        }
+
+        var query = em.createQuery(baseQuery + "order by h.loginedAt desc", UserLoginHistory.class)
                 .setParameter("user", user)
-                .setParameter("realm", realm)
-                .setMaxResults(1)
-                .getResultList();
+                .setParameter("realm", realmId)
+                .setMaxResults(1);
+
+        if (brandId != null) {
+            query.setParameter("brandId", brandId);
+        }
+
+        return query.getResultStream().findFirst();
+    }
+
+    public Optional<UserLoginHistory> findLastAuthSuccess(UserEntity user, String realmId) {
+        return findLastAuthSuccess(user, realmId, null);
     }
 
 }

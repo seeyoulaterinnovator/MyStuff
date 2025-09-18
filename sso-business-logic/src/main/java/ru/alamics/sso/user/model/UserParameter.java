@@ -9,6 +9,7 @@ public enum UserParameter {
     PHONE("Телефон"),
     TOMS_ID("TOMS ID"),
     DMP_ID("DMP ID"),
+    MARK_BRAND_ID("MARK BRAND ID"),
     ROLE("Роль пользователя"),
     SYSTEM("Целевая система"),
     ENABLED("Активность");

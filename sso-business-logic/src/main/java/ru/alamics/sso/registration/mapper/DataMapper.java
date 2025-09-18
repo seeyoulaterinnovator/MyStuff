@@ -10,6 +10,7 @@ import ru.alamics.sso.user.model.ImportUsersReportModel;
 import ru.alamics.sso.user.web.UserSearch;
 
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -51,6 +52,7 @@ public class DataMapper {
                 .tomsId(userPost.getCustomer().getId())
                 .organization(userPost.getCustomer().getName())
                 .dmpId(userPost.getDmpId())
+                .markBrandId(userPost.getBrand() != null ? userPost.getBrand().getId() : null)
                 .selected(userPost.isSelected())
                 .systemRoles(toExternalSystemRoleDtos(externalSystemRoles))
                 .updateTime(userPost.getCustomer().getUpdateTime() != null ?
@@ -64,8 +66,7 @@ public class DataMapper {
             return null;
         }
         List<UserPostResponse> userPostDtos = new LinkedList<>();
-        userPostList
-                .forEach(o -> userPostDtos.add(toUserPostResponse(o)));
+        userPostList.forEach(o -> userPostDtos.add(toUserPostResponse(o)));
         return userPostDtos;
     }
 
@@ -163,7 +164,6 @@ public class DataMapper {
     }
 
     public static ImportUsersReportModel toReportModel(ImportUsersReportEntity entity) {
-
         ImportUsersReportModel model = new ImportUsersReportModel();
         model.setId(entity.getId());
         model.setName(entity.getName());
@@ -174,7 +174,6 @@ public class DataMapper {
         model.setCountClones(entity.getCountClones());
         model.setStatus(entity.getStatus());
         model.setFiletype(entity.getFiletype());
-
         return model;
     }
 
@@ -188,6 +187,7 @@ public class DataMapper {
         data.setPhone(entity.getPhone());
         data.setTomsId(entity.getTomsId());
         data.setDmpId(entity.getDmpId());
+        data.setMarkBrandId(entity.getMarkBrandId());
         data.setRole(entity.getRole());
         data.setSystems(entity.getSystems());
         data.setCreated(entity.isCreated());
@@ -226,6 +226,7 @@ public class DataMapper {
         entity.setPhone(data.getPhone());
         entity.setTomsId(data.getTomsId());
         entity.setDmpId(data.getDmpId());
+        entity.setMarkBrandId(data.getMarkBrandId());
         entity.setRole(data.getRole());
         entity.setSystems(data.getSystems());
         entity.setCreated(data.isCreated());

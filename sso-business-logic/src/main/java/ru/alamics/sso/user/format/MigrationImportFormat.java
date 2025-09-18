@@ -12,15 +12,17 @@ public class MigrationImportFormat implements ImportFormat {
 
 
     private static ImportUsersDataModel toUserImport(String[] row) {
-
         ImportUsersDataModel userImport = new ImportUsersDataModel();
-        if (row.length > 0) userImport.setDmpId(row[0]);
-        if (row.length > 1) userImport.setTomsId(row[1]);
-        if (row.length > 2) userImport.setEmail(row[2]);
-        if (row.length > 3) userImport.setFirstName(row[3]);
-        if (row.length > 4) userImport.setPhone(row[4]);
-        if (row.length > 5) userImport.setCleanPassword(StringUtils.isEmpty(row[5].trim()) ? null : row[5].trim());
-        if (row.length > 6) userImport.setPersonalAccountUser(row[6]);
+        if (row.length > 0) userImport.setMarkBrandId(row[0]);
+        if (row.length > 1) userImport.setDmpId(row[1]);
+        if (row.length > 2) userImport.setTomsId(row[2]);
+        if (row.length > 3) userImport.setEmail(row[3]);
+        if (row.length > 4) userImport.setFirstName(row[4]);
+        if (row.length > 5) userImport.setPhone(row[5]);
+        if (row.length > 6) userImport.setCleanPassword(
+                StringUtils.isEmpty(row[6].trim()) ? null : row[6].trim()
+        );
+        if (row.length > 7) userImport.setPersonalAccountUser(row[7]);
 
         userImport.setCreated(false);
         return userImport;

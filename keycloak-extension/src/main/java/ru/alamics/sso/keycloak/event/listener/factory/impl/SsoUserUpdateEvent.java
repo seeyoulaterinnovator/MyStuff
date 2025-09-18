@@ -146,7 +146,7 @@ public class SsoUserUpdateEvent extends SsoEvent {
                return;
            }
 
-           loginHistory.create(userModel, realm.getName());
+           loginHistory.createSuccessAuth(userModel, realm.getName());
         });
     }
 }
