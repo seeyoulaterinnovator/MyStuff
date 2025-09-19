@@ -1,5 +1,7 @@
 package ru.alamics.sso.keycloak.brand.resource;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.PersistenceException;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -43,15 +45,21 @@ public class BrandResource {
     @NoCache
     public Response list() {
         auth.users().requireView();
+
         List<RealmBrandEntity> links = brandRepository.findByRealm(realm());
-        var result = links.stream()
-                .map(rb -> new BrandDto(
+        List<BrandItemDto> items = links.stream()
+                .map(rb -> new BrandItemDto(
                         rb.getBrand().getId(),
                         rb.getBrand().getCode(),
                         rb.getBrand().getName(),
-                        Boolean.TRUE.equals(rb.getIsDefault())))
+                        Boolean.TRUE.equals(rb.getIsDefault())
+                ))
                 .toList();
-        return JsonResponse.success().addResult("brands", result).build();
+
+        return JsonResponse.success()
+                .addResult("realmId", realm())
+                .addResult("brands", items)
+                .build();
     }
 
     @GET
@@ -59,11 +67,18 @@ public class BrandResource {
     @NoCache
     public Response getDefault() {
         auth.users().requireView();
+
         return brandRepository.findDefaultByRealm(realm())
                 .map(b -> JsonResponse.success()
-                        .addResult("brand", new BrandDto(b.getId(), b.getCode(), b.getName(), true))
+                        .addResult("realmId", realm())
+                        .addResult("brand", new BrandItemDto(
+                                b.getId(), b.getCode(), b.getName(), true
+                        ))
                         .build())
-                .orElse(JsonResponse.success().addResult("brand", null).build());
+                .orElseGet(() -> JsonResponse.success()
+                        .addResult("realmId", realm())
+                        .addResult("brand", null)
+                        .build());
     }
 
     @POST
@@ -73,14 +88,14 @@ public class BrandResource {
                                   @QueryParam("default") @DefaultValue("false") boolean makeDefault) {
         auth.users().requireManage();
 
-        brandRepository.findById(brandId).orElseThrow(() -> new NotFoundException("Brand not found: " + brandId));
+        brandRepository.findById(brandId)
+                .orElseThrow(() -> new NotFoundException("Brand not found: " + brandId));
 
         if (brandRepository.isBrandInRealm(realm(), brandId)) {
-            if (makeDefault) {
-                brandRepository.setDefaultBrand(realm(), brandId);
-                return JsonResponse.success().message("Brand already attached; default brand updated").build();
-            }
-            return JsonResponse.success().message("Brand already attached to realm").build();
+            return JsonResponse.success()
+                    .addResult("realmId", realm())
+                    .message("Brand already attached to realm")
+                    .build();
         }
 
         try {
@@ -89,11 +104,15 @@ public class BrandResource {
                 brandRepository.setDefaultBrand(realm(), brandId);
             }
             return JsonResponse.success()
+                    .addResult("realmId", realm())
                     .message("Brand attached to realm" + (makeDefault ? " and set as default" : ""))
                     .build();
-        } catch (jakarta.persistence.PersistenceException e) {
-            if (isUk(e, UK_REALM_BRAND_REALM_BRAND)) {
-                return JsonResponse.success().message("Brand already attached to realm").build();
+        } catch (PersistenceException e) {
+            if (isUk(e)) {
+                return JsonResponse.success()
+                        .addResult("realmId", realm())
+                        .message("Brand already attached to realm")
+                        .build();
             }
             throw e;
         }
@@ -104,11 +123,16 @@ public class BrandResource {
     @NoCache
     public Response setDefault(@PathParam("brandId") String brandId) {
         auth.users().requireManage();
+
         if (!brandRepository.isBrandInRealm(realm(), brandId)) {
             throw new NotFoundException("Brand is not attached to realm");
         }
+
         brandRepository.setDefaultBrand(realm(), brandId);
-        return JsonResponse.success().message("Default brand set").build();
+        return JsonResponse.success()
+                .addResult("realmId", realm())
+                .message("Default brand set")
+                .build();
     }
 
     @DELETE
@@ -116,14 +140,22 @@ public class BrandResource {
     @NoCache
     public Response detach(@PathParam("brandId") String brandId) {
         auth.users().requireManage();
+
+        if (!brandRepository.isBrandInRealm(realm(), brandId)) {
+            throw new NotFoundException("Brand is not attached to realm");
+        }
+
         brandRepository.removeBrandFromRealm(realm(), brandId);
-        return JsonResponse.success().message("Brand detached from realm").build();
+        return JsonResponse.success()
+                .addResult("realmId", realm())
+                .message("Brand detached from realm")
+                .build();
     }
 
-    private boolean isUk(Throwable t, String ukName) {
+    private boolean isUk(Throwable t) {
         while (t != null) {
             if (t instanceof ConstraintViolationException cve) {
-                if (cve.getConstraintName() != null && cve.getConstraintName().equalsIgnoreCase(ukName)) {
+                if (cve.getConstraintName() != null && cve.getConstraintName().equalsIgnoreCase(BrandResource.UK_REALM_BRAND_REALM_BRAND)) {
                     return true;
                 }
             }
@@ -134,10 +166,16 @@ public class BrandResource {
 
     @Data
     @AllArgsConstructor
-    public static class BrandDto {
-        private String id;
+    public static class BrandItemDto {
+        @JsonProperty("brandId")
+        private String brandId;
+
         private String code;
-        private String name;
+
+        @JsonProperty("brandName")
+        private String brandName;
+
+        @JsonProperty("isDefault")
         private boolean isDefault;
     }
 }
