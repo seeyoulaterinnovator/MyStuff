@@ -1,6 +1,7 @@
 package ru.alamics.sso.keycloak.brand.resource;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -10,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.reactive.NoCache;
 import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.jpa.entity.RealmBrandEntity;
-import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.service.BrandService;
 
@@ -23,11 +23,12 @@ import java.util.List;
 public class PublicBrandResource {
 
     private final KeycloakSession session;
-    private final BrandService brandService;
+
+    @Inject
+    BrandService brandService;
 
     public PublicBrandResource(KeycloakSession session) {
         this.session = session;
-        this.brandService = Lookup.lookup(BrandService.class);
     }
 
     @GET

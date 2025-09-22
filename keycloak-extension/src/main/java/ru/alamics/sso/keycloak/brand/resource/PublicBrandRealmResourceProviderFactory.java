@@ -1,6 +1,8 @@
 package ru.alamics.sso.keycloak.brand.resource;
 
+import org.keycloak.Config.Scope;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.resource.RealmResourceProvider;
 import org.keycloak.services.resource.RealmResourceProviderFactory;
 
@@ -23,11 +25,11 @@ public class PublicBrandRealmResourceProviderFactory implements RealmResourcePro
     }
 
     @Override
-    public void init(org.keycloak.Config.Scope config) {
+    public void init(Scope config) {
     }
 
     @Override
-    public void postInit(org.keycloak.models.KeycloakSessionFactory factory) {
+    public void postInit(KeycloakSessionFactory factory) {
     }
 
     @Override

@@ -27,11 +27,11 @@ public class BrandService {
 
     @Transactional
     public void attachBrandToRealm(String realmId, String brandId, boolean makeDefault) {
-        BrandEntity brand = brandRepository.findById(brandId)
+        brandRepository.findById(brandId)
                 .orElseThrow(() -> new NotFoundException("Brand not found: " + brandId));
 
         if (brandRepository.isBrandInRealm(realmId, brandId)) {
-            return; // уже прикреплён — просто выходим
+            return;
         }
 
         brandRepository.addBrandToRealm(realmId, brandId, makeDefault);

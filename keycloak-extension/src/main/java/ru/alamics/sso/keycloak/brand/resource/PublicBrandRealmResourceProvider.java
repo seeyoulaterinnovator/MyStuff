@@ -1,13 +1,9 @@
 package ru.alamics.sso.keycloak.brand.resource;
 
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.services.resource.RealmResourceProvider;
+import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
 
-/**
- * Публичный провайдер для брендов.
- * Доступен без прав админа, только GET.
- */
-public class PublicBrandRealmResourceProvider implements RealmResourceProvider {
+public class PublicBrandRealmResourceProvider implements BaseResourceProvider<PublicBrandResource> {
 
     private final KeycloakSession session;
 
@@ -16,11 +12,8 @@ public class PublicBrandRealmResourceProvider implements RealmResourceProvider {
     }
 
     @Override
-    public Object getResource() {
+    public PublicBrandResource getResource() {
         return new PublicBrandResource(session);
     }
 
-    @Override
-    public void close() {
-    }
 }

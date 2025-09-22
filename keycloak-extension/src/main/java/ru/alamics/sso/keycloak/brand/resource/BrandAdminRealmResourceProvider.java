@@ -4,11 +4,11 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import ru.alamics.sso.keycloak.rest.BaseResourceProvider;
 
-public class BrandRealmResourceProvider implements BaseResourceProvider<BrandResource> {
+public class BrandAdminRealmResourceProvider implements BaseResourceProvider<BrandResource> {
 
     private final KeycloakSession session;
 
-    public BrandRealmResourceProvider(KeycloakSession session) {
+    public BrandAdminRealmResourceProvider(KeycloakSession session) {
         this.session = session;
     }
 
@@ -19,7 +19,4 @@ public class BrandRealmResourceProvider implements BaseResourceProvider<BrandRes
         return new BrandResource(session, auth);
     }
 
-    @Override
-    public void close() {
-    }
 }
