@@ -34,6 +34,7 @@ stages:
     - helm history -n ${NAMESPACE} ${CI_ENVIRONMENT_SLUG} --max 5
   variables:
     NAMESPACE: 'sso'
+    NODE_PORT: '30080'
     REPLICA_COUNT: '5'
 
 .frontend:theme:build:

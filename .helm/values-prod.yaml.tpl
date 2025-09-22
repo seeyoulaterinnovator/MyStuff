@@ -73,9 +73,9 @@ extraSensitiveEnvs:
   KC_CACHE_REMOTE_PASSWORD: "{{ env "INFINISPAN_PASSWORD" }}"
 
 service:
-  type: ClusterIP
+  type: NodePort
   loadBalancerIP: ""
-  httpNodePort: ""
+  httpNodePort: "{{ env "NODE_PORT" }}"
   # The http Service port
   httpPort: 80
   extraPorts: []
