@@ -19,3 +19,4 @@ ru.alamics.sso.keycloak.auth.form.new_auth.new_rest.CustomRestResourceProviderFa
 ru.alamics.sso.keycloak.config.custom.CustomConfigResourceProviderFactory
 ru.alamics.sso.keycloak.cache.CustomCacheResourceProviderFactory
 ru.alamics.sso.keycloak.brand.resource.BrandRealmResourceProviderFactory
+ru.alamics.sso.keycloak.brand.resource.PublicBrandRealmResourceProviderFactory
