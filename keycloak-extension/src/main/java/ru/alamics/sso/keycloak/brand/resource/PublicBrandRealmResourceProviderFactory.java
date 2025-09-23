@@ -8,7 +8,7 @@ import org.keycloak.services.resource.RealmResourceProviderFactory;
 
 /**
  * Фабрика публичного эндпоинта для брендов.
- * Регистрирует путь /realms/{realm}/brands
+ * Регистрирует путь /realms/{realm}/public/brands
  */
 public class PublicBrandRealmResourceProviderFactory implements RealmResourceProviderFactory {
 

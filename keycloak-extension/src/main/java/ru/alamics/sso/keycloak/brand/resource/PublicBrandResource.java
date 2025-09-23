@@ -19,7 +19,7 @@ import java.util.List;
 @Slf4j
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Path("/realms/{realm}/brands")
+@Path("/brands")
 public class PublicBrandResource {
 
     private final KeycloakSession session;
@@ -33,7 +33,8 @@ public class PublicBrandResource {
 
     @GET
     @NoCache
-    public Response list(@PathParam("realm") String realm) {
+    public Response list() {
+        String realm = getRealm();
         List<RealmBrandEntity> links = brandService.getBrandsForRealm(realm);
 
         List<BrandItemDto> items = links.stream()
@@ -54,7 +55,8 @@ public class PublicBrandResource {
     @GET
     @Path("/default")
     @NoCache
-    public Response getDefault(@PathParam("realm") String realm) {
+    public Response getDefault() {
+        String realm = getRealm();
         return brandService.getDefaultBrand(realm)
                 .map(b -> JsonResponse.success()
                         .addResult("id", realm)
@@ -64,6 +66,10 @@ public class PublicBrandResource {
                         .addResult("id", realm)
                         .addResult("brand", null)
                         .build());
+    }
+
+    private String getRealm() {
+        return session.getContext().getRealm().getName();
     }
 
     @Data
