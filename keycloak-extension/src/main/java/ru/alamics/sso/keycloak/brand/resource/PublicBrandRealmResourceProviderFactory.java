@@ -12,7 +12,7 @@ import org.keycloak.services.resource.RealmResourceProviderFactory;
  */
 public class PublicBrandRealmResourceProviderFactory implements RealmResourceProviderFactory {
 
-    private static final String PROVIDER_ID = "public-brands";
+    private static final String PROVIDER_ID = "public";
 
     @Override
     public String getId() {
