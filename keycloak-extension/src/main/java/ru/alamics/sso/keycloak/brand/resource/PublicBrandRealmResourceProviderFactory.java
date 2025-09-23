@@ -8,11 +8,11 @@ import org.keycloak.services.resource.RealmResourceProviderFactory;
 
 /**
  * Фабрика публичного эндпоинта для брендов.
- * Регистрирует путь /realms/{realm}/public/brands
+ * Регистрирует путь /realms/{realm}/brands
  */
 public class PublicBrandRealmResourceProviderFactory implements RealmResourceProviderFactory {
 
-    private static final String PROVIDER_ID = "public";
+    private static final String PROVIDER_ID = "brands";
 
     @Override
     public String getId() {
