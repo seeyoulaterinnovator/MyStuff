@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.reactive.NoCache;
 import org.keycloak.models.KeycloakSession;
+import ru.alamics.sso.jpa.entity.BrandEntity;
 import ru.alamics.sso.jpa.entity.RealmBrandEntity;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
@@ -28,6 +29,24 @@ public class PublicBrandResource {
     public PublicBrandResource(KeycloakSession session) {
         this.session = session;
         this.brandService = Lookup.lookup(BrandService.class);
+    }
+
+    @GET
+    @Path("/all")
+    @NoCache
+    public Response getAllBrands() {
+        List<BrandEntity> brands = brandService.getAllBrands();
+
+        List<BrandDto> items = brands.stream()
+                .map(b -> new BrandDto(
+                        b.getId(),
+                        b.getCode(),
+                        b.getName()
+                )).toList();
+
+        return JsonResponse.success()
+                .addResult("allBrands", items)
+                .build();
     }
 
     @GET
@@ -77,12 +96,19 @@ public class PublicBrandResource {
     public static class BrandItemDto {
         @JsonProperty("brandId")
         private String brandId;
-
         private String code;
-
         @JsonProperty("brandName")
         private String brandName;
-
         private boolean isDefault;
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class BrandDto {
+        @JsonProperty("brandId")
+        private String brandId;
+        private String code;
+        @JsonProperty("brandName")
+        private String name;
     }
 }

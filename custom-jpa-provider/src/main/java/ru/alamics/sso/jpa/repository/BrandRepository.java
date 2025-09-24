@@ -17,6 +17,13 @@ public class BrandRepository {
     EntityManager em;
 
     /**
+     * Список всех брендов
+     */
+    public List<BrandEntity> findAll() {
+        return em.createQuery("SELECT b FROM BrandEntity b", BrandEntity.class).getResultList();
+    }
+
+    /**
      * Все привязки брендов к реалму (с подгрузкой бренда).
      */
     public List<RealmBrandEntity> findByRealm(String realmId) {

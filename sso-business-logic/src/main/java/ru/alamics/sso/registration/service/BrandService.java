@@ -17,6 +17,10 @@ public class BrandService {
     @Inject
     BrandRepository brandRepository;
 
+    public List<BrandEntity> getAllBrands() {
+        return brandRepository.findAll();
+    }
+
     public List<RealmBrandEntity> getBrandsForRealm(String realmId) {
         return brandRepository.findByRealm(realmId);
     }
