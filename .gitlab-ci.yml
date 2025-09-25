@@ -195,6 +195,19 @@ domru:stage5:
   only:
     - itres # т.к. пока еше не обновлен
 
+domru:stage6:
+  extends: .domru:stage:template
+  environment:
+    name: stage6
+    url: https://tm.staging.bss.loc
+  variables:
+    NAMESPACE: 'sso'
+    NODE_PORT: '30086'
+    REPLICA_COUNT: '3'
+    KC_CACHE_CONFIG_FILE: 'cache-ispn.persistent.xml'
+    KC_CACHE_STACK: 'kubernetes'
+    KC_FEATURES: 'persistent-user-sessions'
+
 domru:perm-k8s:
   extends: .domru:prod:template
   tags:
