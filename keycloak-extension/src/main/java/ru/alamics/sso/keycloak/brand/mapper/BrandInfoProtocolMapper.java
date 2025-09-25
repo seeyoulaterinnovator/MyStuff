@@ -23,6 +23,8 @@ public class BrandInfoProtocolMapper extends AbstractOIDCProtocolMapper
     private static final List<ProviderConfigProperty> CONFIG = new ArrayList<>();
 
     static {
+        OIDCAttributeMapperHelper.addAttributeConfig(CONFIG, BrandInfoProtocolMapper.class);
+
         ProviderConfigProperty root = new ProviderConfigProperty();
         root.setName(CFG_ROOT);
         root.setLabel("Root claim (optional)");
