@@ -49,7 +49,6 @@ public class BrandResource {
     @NoCache
     public Response setDefault(@PathParam("brandId") String brandId) {
         auth.users().requireManage();
-
         brandService.setDefaultBrand(realm(), brandId);
 
         return JsonResponse.success().message("Default brand set").build();
@@ -60,7 +59,6 @@ public class BrandResource {
     @NoCache
     public Response detach(@PathParam("brandId") String brandId) {
         auth.users().requireManage();
-
         brandService.removeBrandFromRealm(realm(), brandId);
 
         return JsonResponse.success().message("Brand detached from realm").build();

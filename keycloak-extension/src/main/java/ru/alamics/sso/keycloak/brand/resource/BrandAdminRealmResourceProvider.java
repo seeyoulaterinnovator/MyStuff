@@ -15,7 +15,7 @@ public class BrandAdminRealmResourceProvider implements BaseResourceProvider<Bra
     @Override
     public BrandResource getResource() {
         AdminPermissionEvaluator auth = initAuthByWorkingRealm(this.session);
-        auth.users().requireView();
+        auth.users().requireManage();
         return new BrandResource(session, auth);
     }
 
