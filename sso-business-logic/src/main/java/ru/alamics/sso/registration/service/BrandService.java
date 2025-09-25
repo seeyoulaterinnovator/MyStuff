@@ -25,8 +25,16 @@ public class BrandService {
         return brandRepository.findByRealm(realmId);
     }
 
-    public Optional<BrandEntity> getDefaultBrand(String realmId) {
+    public Optional<BrandEntity> getDefaultBrandByRealm(String realmId) {
         return brandRepository.findDefaultByRealm(realmId);
+    }
+
+    public Optional<BrandEntity> getBrandById(String brandId) {
+        return brandRepository.findById(brandId);
+    }
+
+    public Optional<BrandEntity> getBrandByCode(String brandCode) {
+        return brandRepository.findByCode(brandCode);
     }
 
     @Transactional
@@ -47,7 +55,7 @@ public class BrandService {
 
     @Transactional
     public void setDefaultBrand(String realmId, String brandId) {
-        if (!brandRepository.isBrandInRealm(realmId, brandId)) {
+        if (!isBrandInRealm(realmId, brandId)) {
             throw new NotFoundException("Brand is not attached to realm");
         }
         brandRepository.setDefaultBrand(realmId, brandId);

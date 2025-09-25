@@ -16,6 +16,7 @@ import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.service.BrandService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Produces(MediaType.APPLICATION_JSON)
@@ -50,6 +51,34 @@ public class PublicBrandResource {
     }
 
     @GET
+    @Path("/{code}")
+    @NoCache
+    public Response getBrandByCode(@PathParam("code") String code) {
+        Optional<BrandEntity> brand = brandService.getBrandByCode(code);
+        return brand.map(brandEntity -> JsonResponse.success()
+                .addResult("brand", new BrandDto(
+                        brandEntity.getId(),
+                        brandEntity.getCode(),
+                        brandEntity.getName()
+                ))
+                .build()).orElse(null);
+    }
+
+    @GET
+    @Path("{/brandId}")
+    @NoCache
+    public Response getBrandById(@PathParam("brandId") String brandId) {
+        Optional<BrandEntity> brand = brandService.getBrandById(brandId);
+        return brand.map(brandEntity -> JsonResponse.success()
+                .addResult("brand", new BrandDto(
+                        brandEntity.getId(),
+                        brandEntity.getCode(),
+                        brandEntity.getName()
+                ))
+                .build()).orElse(null);
+    }
+
+    @GET
     @Path("")
     @NoCache
     public Response list() {
@@ -76,7 +105,7 @@ public class PublicBrandResource {
     @NoCache
     public Response getDefault() {
         String realm = getRealm();
-        return brandService.getDefaultBrand(realm)
+        return brandService.getDefaultBrandByRealm(realm)
                 .map(b -> JsonResponse.success()
                         .addResult("id", realm)
                         .addResult("brand", new BrandItemDto(b.getId(), b.getCode(), b.getName(), true))

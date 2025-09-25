@@ -43,6 +43,13 @@ public class BrandRepository {
     }
 
     /**
+     * Найти бренд по code.
+     */
+    public Optional<BrandEntity> findByCode(String code) {
+        return Optional.ofNullable(em.find(BrandEntity.class, code));
+    }
+
+    /**
      * Дефолтный бренд для реалма.
      */
     public Optional<BrandEntity> findDefaultByRealm(String realmId) {
