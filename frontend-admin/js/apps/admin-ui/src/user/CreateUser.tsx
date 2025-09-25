@@ -31,7 +31,11 @@ export default function CreateUser() {
   const { t } = useTranslation();
   const { addAlert, addError } = useAlerts();
   const navigate = useNavigate();
-  const { realm: realmName, realmRepresentation: realm } = useRealm();
+  const {
+    realm: realmName,
+    realmRepresentation: realm,
+    realmBrands,
+  } = useRealm();
   const form = useForm<UserFormFields>({ mode: "onChange" });
   const [addedGroups, setAddedGroups] = useState<GroupRepresentation[]>([]);
   const [userProfileMetadata, setUserProfileMetadata] =
@@ -114,6 +118,7 @@ export default function CreateUser() {
           form={form}
           realm={realm}
           searchRealm={searchRealm}
+          realmBrands={realmBrands}
           userProfileMetadata={userProfileMetadata}
           onGroupsUpdate={setAddedGroups}
           save={save}

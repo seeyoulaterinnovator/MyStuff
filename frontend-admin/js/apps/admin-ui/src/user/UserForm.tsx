@@ -8,6 +8,7 @@ import {
   HelpItem,
   SwitchControl,
   TextControl,
+  SelectControl,
   UserProfileFields,
 } from "@keycloak/keycloak-ui-shared";
 import {
@@ -41,6 +42,7 @@ import { UserFormFields, toUserFormFields } from "./form-state";
 import { toUsers } from "./routes/Users";
 import { RequiredActionMultiSelect } from "./user-credentials/RequiredActionMultiSelect";
 import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
+import { RealmBrandRepresentation } from "@keycloak/keycloak-admin-client/lib/defs/brandRepresentation";
 
 export type BruteForced = {
   isBruteForceProtected?: boolean;
@@ -51,6 +53,7 @@ export type UserFormProps = {
   form: UseFormReturn<UserFormFields>;
   realm: RealmRepresentation;
   searchRealm: RealmRepresentation;
+  realmBrands: RealmBrandRepresentation[];
   user?: UserRepresentation;
   bruteForce?: BruteForced;
   userProfileMetadata?: UserProfileMetadata;
@@ -62,6 +65,7 @@ export const UserForm = ({
   form,
   realm,
   searchRealm,
+  realmBrands,
   user,
   bruteForce: { isBruteForceProtected, isLocked } = {
     isBruteForceProtected: false,
@@ -279,6 +283,18 @@ export const UserForm = ({
             />
             <TextControl name="firstName" label={t("firstName")} />
             <TextControl name="lastName" label={t("lastName")} />
+            <SelectControl
+              name="markBrandId"
+              label={t("brand")}
+              controller={{
+                defaultValue:
+                  realmBrands.find((brand) => brand.default)?.brandId ?? "none",
+              }}
+              options={realmBrands.map((brand) => ({
+                key: brand.brandId,
+                value: brand.brandName,
+              }))}
+            />
           </>
         )}
         {isBruteForceProtected && (

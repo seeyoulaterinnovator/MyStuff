@@ -77,6 +77,7 @@ export default function EditUser() {
     realmRepresentation: realm,
     searchRealm: searchRealmName,
     searchRealmRepresentation: searchRealm,
+    realmBrands,
   } = useRealm();
   // Validation of form fields is performed on server, thus we need to clear all errors before submit
   const clearAllErrorsBeforeSubmit = async (values: UserFormFields) => ({
@@ -188,6 +189,30 @@ export default function EditUser() {
       }
 
       const { userProfileMetadata, ...user } = userData;
+
+      // Кастомизируем поле бренд
+      const markBrandId = (userProfileMetadata?.attributes ?? []).find(
+        (attribute) => attribute.name === "markBrandId",
+      );
+
+      if (markBrandId) {
+        markBrandId.annotations = markBrandId.annotations ?? {};
+        markBrandId.annotations.inputType = "select";
+
+        markBrandId.validators = markBrandId.validators ?? {};
+        markBrandId.validators.options = {
+          options: realmBrands.map((realmBrand) => realmBrand.brandId),
+        };
+
+        markBrandId.annotations.inputOptionLabels = realmBrands.reduce(
+          (acc, realmBrand) => {
+            acc[realmBrand.brandId] = realmBrand.brandName;
+            return acc;
+          },
+          {} as Record<string, string>,
+        );
+      }
+
       setUserProfileMetadata(userProfileMetadata);
       user.unmanagedAttributes = unmanagedAttributes;
       user.attributes = filterManagedAttributes(
@@ -442,6 +467,7 @@ export default function EditUser() {
                     form={form}
                     realm={realm!}
                     searchRealm={searchRealm || realm!}
+                    realmBrands={realmBrands}
                     user={user}
                     bruteForce={bruteForced}
                     userProfileMetadata={userProfileMetadata}
