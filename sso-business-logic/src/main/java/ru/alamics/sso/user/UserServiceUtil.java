@@ -53,6 +53,9 @@ public class UserServiceUtil {
                 case DMP_ID:
                     parameters.add(userDto.getDmpId());
                     break;
+                case MARK_BRAND_ID:
+                    parameters.add(userDto.getMarkBrandId());
+                    break;
                 default:
                     parameters.add("");
             }

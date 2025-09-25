@@ -20,6 +20,7 @@ public class UserSearchDto implements Serializable {
     private Boolean enabled;
     private String userPostId;
     private String tomsId;
+    private String markBrandId;
     private String dmpId;
     private String organization;
     private String roleId;

@@ -173,9 +173,11 @@ public class UserRepository {
                 "       ESR.NAME               as system_role,\n" +
                 "       ES.ID                  as system_id,\n" +
                 "       ES.NAME                as system_name,\n" +
-                "       ES.LABEL               as system_label\n" +
+                "       ES.LABEL               as system_label,\n" +
+                "       UAM.VALUE               as mark_brand_id\n" +
                 "from USER_ENTITY UE\n" +
                 "         left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone'\n" +
+                "         left join USER_ATTRIBUTE UAM on UE.ID = UAM.USER_ID and UAM.NAME = 'markBrandId'\n" +
                 "         left join USER_POST UP on UE.ID = UP.USER_ID\n" +
                 "         left join USER_POST_ROLE UPR on UP.ROLE_ID = UPR.ID\n" +
                 "         left join USERPOST_EXT_SYSTEM_ROLE UESR on UP.ID = UESR.USER_POST_ID\n" +
@@ -194,7 +196,7 @@ public class UserRepository {
                 "  AND (:searchToms is null or :searchToms = '' or UP.TOMS_ID = :searchToms)\n" +
                 getIdList(includeOnlyIDs) +
                 "GROUP by UE.ID, UE.USERNAME, UE.FIRST_NAME, UE.LAST_NAME, UE.EMAIL, UA.VALUE, UE.ENABLED, UP.id, UP.TOMS_ID, C.NAME,\n" +
-                "         UP.DMP_ID, UP.ROLE_ID, UPR.NAME, ESR.ID, ESR.NAME, ES.ID, ES.NAME, ES.LABEL" +
+                "         UP.DMP_ID, UP.ROLE_ID, UPR.NAME, ESR.ID, ESR.NAME, ES.ID, ES.NAME, ES.LABEL, UAM.VALUE" +
                 getNativeSort(sortField, sortAsc) +
                 getLimit(pageNum, pageSize);
 

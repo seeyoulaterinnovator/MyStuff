@@ -134,6 +134,7 @@ public class ImportService {
     }
 
     //@Asynchronous
+    @Transactional
     public List<UserEntity> createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart,
                                               AdminAuth auth, KeycloakSession session) {
 
