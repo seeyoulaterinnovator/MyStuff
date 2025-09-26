@@ -38,6 +38,7 @@ import org.keycloak.services.resources.account.AccountRestService;
 import org.keycloak.services.resources.admin.*;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.utils.ProfileHelper;
+import ru.alamics.sso.jpa.entity.BrandEntity;
 import ru.alamics.sso.jpa.model.CustomUserAdapter;
 import ru.alamics.sso.jpa.repository.BrandRepository;
 import ru.alamics.sso.keycloak.GeneralRealm;
@@ -156,6 +157,13 @@ public class CustomUserResource {
     private Response getUserResponse(UserRequest request, boolean bss) {
         try {
             UserModel user = userService.createUser(request, bss);
+            if (request.getMarkBrandId() != null) {
+                user.setSingleAttribute("markBrandId", request.getMarkBrandId());
+            } else {
+                brandRepository.findDefaultByRealm(realm.getId())
+                        .map(BrandEntity::getId)
+                        .ifPresent(defaultBrandId -> user.setSingleAttribute("markBrandId", defaultBrandId));
+            }
             customerRequestService.getCustomerName(request.getTomsId());
             return JsonResponse.success()
                     .httpStatus(Response.Status.CREATED)
