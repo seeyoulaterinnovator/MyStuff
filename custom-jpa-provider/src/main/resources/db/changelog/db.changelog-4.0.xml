@@ -46,22 +46,10 @@
         </createTable>
     </changeSet>
 
-    <!-- 2.0 Фикс: приведение REALM_ID к правильному типу (для stage5) -->
-    <changeSet id="2025-09-26-12-42-fix-realm-id-length" author="vakilev.aa" runOnChange="true">
-        <preConditions onFail="MARK_RAN">
-            <tableExists tableName="REALM_BRAND"/>
-        </preConditions>
-        <modifyDataType tableName="REALM_BRAND"
-                        columnName="REALM_ID"
-                        newDataType="VARCHAR(36)"/>
-        <sql>
-            ALTER TABLE REALM_BRAND CONVERT TO CHARACTER SET utf8mb4;
-        </sql>
-    </changeSet>
-
-    <!-- 2.1 Добавляем FK на BRAND -->
+    <!-- 2.1 FK на BRAND -->
     <changeSet id="2025-09-17-2a-fk-brand" author="vakilev.aa">
         <preConditions onFail="MARK_RAN">
+            <tableExists tableName="REALM_BRAND"/>
             <tableExists tableName="BRAND"/>
             <not>
                 <foreignKeyConstraintExists foreignKeyName="FK_REALM_BRAND_BRAND"/>
@@ -74,9 +62,10 @@
                                  referencedColumnNames="ID"/>
     </changeSet>
 
-    <!-- 2.2 Добавляем FK на REALM -->
-    <changeSet id="2025-09-26-2b-12-42-fix-fk-realm" author="vakilev.aa">
+    <!-- 2.2 FK на REALM -->
+    <changeSet id="2025-09-17-2b-fk-realm" author="vakilev.aa">
         <preConditions onFail="MARK_RAN">
+            <tableExists tableName="REALM_BRAND"/>
             <tableExists tableName="REALM"/>
             <not>
                 <foreignKeyConstraintExists foreignKeyName="FK_REALM_BRAND_REALM"/>
